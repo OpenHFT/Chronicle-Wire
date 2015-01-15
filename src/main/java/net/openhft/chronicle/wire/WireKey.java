@@ -15,19 +15,8 @@ public interface WireKey {
     }
 
     default Type type() {
-        return defaultValue().getClass();
-    }
-
-    default boolean skipIfDefault() {
-        return defaultValue() != null;
-    }
-
-    default boolean hasDefault() {
-        return defaultValue() != null;
-    }
-
-    default EncodeMode encodeMode() {
-        return EncodeMode.LITERAL;
+        Object o = defaultValue();
+        return o == null ? Void.class : o.getClass();
     }
 
     default Object defaultValue() {

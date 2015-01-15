@@ -27,19 +27,19 @@ public interface Wire {
     /*
      * read and write comments.
      */
-    void writeComment(CharSequence s);
+    Wire writeComment(CharSequence s);
 
-    void readComment(StringBuilder sb);
+    Wire readComment(StringBuilder sb);
 
     boolean hasMapping();
 
-    void writeDocumentStart();
+    Wire writeDocumentStart();
 
     void writeDocumentEnd();
 
     boolean hasDocument();
 
-    void readDocumentStart();
+    Wire readDocumentStart();
 
     void readDocumentEnd();
 

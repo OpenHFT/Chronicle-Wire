@@ -1,0 +1,334 @@
+package net.openhft.chronicle.wire;
+
+import java.io.StreamCorruptedException;
+import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Created by peter on 12/01/15.
+ */
+public class YamlExamples {
+    enum Keys implements WireKey {
+        list(List.class, Collections.emptyList()),
+        american(List.class, Collections.emptyList()),
+        national(List.class, Collections.emptyList()),
+        name(""),
+        time(LocalTime.MIN),
+        player(""),
+        action(""),
+        hr(0),
+        avg(0.0),
+        rbi(0L),
+        canonical(ZonedDateTime.of(0, 0, 0, 0, 0, 0, 0, ZoneId.systemDefault())),
+        date(LocalDate.MIN);
+
+        static {
+            WireKey.checkKeys(values());
+        }
+
+        private final Type type;
+        private final Object defaultValue;
+
+        Keys(Object defaultValue) {
+            this(defaultValue.getClass(), defaultValue);
+        }
+
+        Keys(Type type, Object defaultValue) {
+            this.type = type;
+            this.defaultValue = defaultValue;
+        }
+
+        @Override
+        public Type type() {
+            return type;
+        }
+
+        @Override
+        public Object defaultValue() {
+            return defaultValue;
+        }
+    }
+
+    public static void sequenceExample(Wire wire) {
+        /*
+         - Mark McGwire
+         - Sammy Sosa
+         - Ken Griffey
+         */
+        wire.write(Keys.list).sequenceStart();
+        for (String s : "Mark McGwire,Sammy Sosa,Ken Griffey".split(","))
+            wire.write().text(s);
+        wire.write().sequenceEnd();
+
+        // or
+        wire.write(Keys.list).sequence("Mark McGwire,Sammy Sosa,Ken Griffey".split(","));
+        // or
+        wire.write(Keys.list).sequence(Arrays.asList("Mark McGwire,Sammy Sosa,Ken Griffey".split(",")));
+
+        // to read this.
+        wire.read(Keys.list).sequence(ArrayList::new);
+    }
+
+    static class Stats {
+        StringBuilder name;
+        int hr;
+        double avg;
+        long rbi;
+
+        public StringBuilder name() {
+            return name;
+        }
+
+        public int hr() {
+            return hr;
+        }
+
+        public void hr(int hr) {
+            this.hr = hr;
+        }
+
+        public void avg(double avg) {
+            this.avg = avg;
+        }
+
+        public void rbi(long rbi) {
+            this.rbi = rbi;
+        }
+    }
+
+    public static void mapExample(Wire wire) {
+/*
+        name: Mark McGwire 
+        hr:   65    # Home runs
+        avg:  0.278 # Batting average
+        rbi:  147   # Runs Batted In
+*/
+        wire.write(Keys.name).text("Mark McGwire")
+                .write(Keys.hr).int32(65)
+                .write().comment("Home runs")
+                .write(Keys.avg).float64(0.278)
+                .write().comment("Batting average")
+                .write(Keys.rbi).int64(147)
+                .write().comment("Runs Batted In");
+
+        wire.flip();
+
+        Stats stats = new Stats();
+        wire.readDocumentStart()
+                .read(Keys.name).text(stats::name)
+                .read(Keys.hr).int32(stats::hr)
+                .read(Keys.avg).float64(stats::avg)
+                .read(Keys.rbi).int64(stats::rbi)
+                .readDocumentEnd();
+
+        wire.clear();
+        
+        /*
+        american:
+          - Boston Red Sox
+          - Detroit Tigers
+          - New York Yankees
+        national:
+          - New York Mets
+          - Chicago Cubs
+          - Atlanta Braves
+         */
+/*
+        wire.writeSequence(Keys.american, "Boston Red Sox", "Detroit Tigers", "New York Yankees");
+        wire.writeSequence(Keys.national, "New York Mets", "Chicago Cubs", "Atlanta Braves");
+
+        wire.readSequenceStart(Keys.american);
+        while (wire.hasNextSequenceItem())
+            wire.readText();
+        wire.readSequenceEnd();
+
+        List<String> team = new ArrayList<String>();
+        wire.readSequence(Keys.national, team, String.class);
+*/
+
+        /*
+        -
+          name: Mark McGwire
+          hr:   65
+          avg:  0.278
+        -
+          name: Sammy Sosa
+          hr:   63
+          avg:  0.288
+         */
+/*
+        wire.writeSequenceStart();
+        wire.writeMappingStart();
+        wire.writeText(Keys.name, "Mark McGwire");
+        wire.writeInt(Keys.hr, 65);
+        wire.writeDouble(Keys.avg, 0.278);
+        wire.writeMappingEnd();
+
+        wire.writeMappingStart();
+        wire.writeText(Keys.name, "Sammy Sosa");
+        wire.writeInt(Keys.hr, 63);
+        wire.writeDouble(Keys.avg, 0.288);
+        wire.writeMappingEnd();
+        wire.writeSequenceEnd();
+
+        wire.flip();
+
+        wire.readSequenceStart();
+        while (wire.hasNextSequenceItem()) {
+            wire.readMapStart();
+            String name = wire.readText(Keys.name);
+            int hr2 = wire.readInt(Keys.hr);
+            double avg2 = wire.readDouble(Keys.avg);
+            wire.readMapEnd();
+        }
+        wire.readSequenceEnd();
+
+*/
+        wire.clear();
+        /*
+        Mark McGwire: {hr: 65, avg: 0.278}
+        Sammy Sosa: {
+            hr: 63,
+            avg: 0.288
+          }
+         */
+/*
+        wire.write("Mark McGwire", Keys.name).mapStart()
+                .write(Keys.hr).int32(65)
+                .write(Keys.avg).float64(0.278)
+                .writeMappingEnd();
+
+
+        wire.write("Sammy Sosa", Keys.name).mapStart()
+                .write(Keys.hr).int32(63)
+                .write(Keys.avg).float64(0.288)
+                .writeMappingEnd();
+
+        wire.flip();
+
+
+        StringBuilder name = new StringBuilder();
+        while (wire.hasMapping()) {
+            wire.read(() -> name, Keys.name).mapStart()
+                    .read(Keys.hr).int32(stats::hr)
+                    .read(Keys.avg).float64(stats::avg)
+                    .readMapEnd();
+        }
+*/
+        wire.clear();
+
+        /*
+        ---
+        time: 20:03:20
+        player: Sammy Sosa
+        action: strike (miss)
+        ...
+        ---
+        time: 20:03:47
+        player: Sammy Sosa
+        action: grand slam
+        ...
+        */
+/*
+        wire.writeDocumentStart();
+        wire.writeTime(Keys.time, LocalTime.of(20, 3, 20));
+        wire.writeText(Keys.player, "Sammy Sosa");
+        wire.writeText(Keys.action, "strike (miss)");
+        wire.writeDocumentEnd();
+        wire.writeDocumentStart();
+        wire.writeTime(Keys.time, LocalTime.of(20, 3, 47));
+        wire.writeText(Keys.player, "Sammy Sosa");
+        wire.writeText(Keys.action, "grand slam");
+        wire.writeDocumentEnd();
+
+        wire.flip();
+        while (wire.hasDocument()) {
+            wire.readDocumentStart();
+            LocalTime time = wire.readTime(Keys.time);
+            String player = wire.readText(Keys.player);
+            String action = wire.readText(Keys.action);
+            wire.readDocumentEnd();
+        }
+*/
+        wire.clear();
+
+        /*
+        canonical: 2001-12-15T02:59:43.1Z
+        iso8601: 2001-12-14t21:59:43.10-05:00
+        spaced: 2001-12-14 21:59:43.10 -5
+        date: 2002-12-14
+        */
+
+/*
+        wire.writeZonedDateTime(Keys.canonical, ZonedDateTime.parse("2001-12-15T02:59:43.1Z"));
+        ZonedDateTime zdt = wire.readZonedDateTime(Keys.canonical);
+
+        wire.writeDate(Keys.date, LocalDate.of(2002, 12, 14));
+        LocalDate ld = wire.readDate();
+*/
+    }
+
+    public static void object(Wire wire) {
+        /*
+        !myType {
+            name: Hello World
+            date: 2015-01-12
+         }
+         */
+/*
+        MyType myType = new MyType();
+        wire.writeMarshallable(myType);
+        wire.flip();
+        wire.readMarshallable(myType);
+*/
+    }
+}
+
+class MyType implements Marshallable {
+    String name;
+    LocalDate date;
+
+    @Override
+    public void writeMarshallable(Wire wire) {
+//        wire.writeText(MyTypeKeys.name, name);
+//        wire.writeDate(MyTypeKeys.date, date);
+    }
+
+    @Override
+    public void readMarshallable(Wire wire) throws StreamCorruptedException {
+//        name = wire.readText(MyTypeKeys.name);
+//        date = wire.readDate(MyTypeKeys.date);
+    }
+
+    enum MyTypeKeys implements WireKey {
+        name(""), date(LocalDate.MIN);
+
+        private final Object defaultValue;
+
+        static {
+            WireKey.checkKeys(values());
+        }
+
+        MyTypeKeys(Object defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+
+        @Override
+        public int code() {
+            return ordinal();
+        }
+
+        @Override
+        public Object defaultValue() {
+            return defaultValue;
+        }
+    }
+}
+
