@@ -8,19 +8,19 @@ package net.openhft.chronicle.wire;
 public interface Wire {
     void copyTo(Wire wire);
 
-    WriteValue<Wire> write();
+    WriteValue write();
 
-    WriteValue<Wire> writeValue();
+    WriteValue write(WireKey key);
 
-    WriteValue<Wire> write(WireKey key);
+    WriteValue write(CharSequence name, WireKey template);
 
-    WriteValue<Wire> write(CharSequence name, WireKey template);
+    WriteValue writeValue();
 
-    ReadValue<Wire> read();
+    ReadValue read();
 
-    ReadValue<Wire> read(WireKey key);
+    ReadValue read(WireKey key);
 
-    ReadValue<Wire> read(StringBuilder name, WireKey template);
+    ReadValue read(StringBuilder name, WireKey template);
 
     boolean hasNextSequenceItem();
 

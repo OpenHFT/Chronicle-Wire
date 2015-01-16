@@ -14,7 +14,6 @@ import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.Collection;
 import java.util.function.*;
 
 import static net.openhft.chronicle.wire.WireType.stringForCode;
@@ -26,8 +25,8 @@ public class TextWire implements Wire {
     public static final String FIELD_SEP = "";
     private static final String END_FIELD = "\n";
     final AbstractBytes bytes;
-    final WriteValue<Wire> writeValue = new TextWriteValue();
-    final ReadValue<Wire> readValue = new TextReadValue();
+    final WriteValue writeValue = new TextWriteValue();
+    final ReadValue readValue = new TextReadValue();
     String sep = "";
 
     public TextWire(Bytes bytes) {
@@ -40,19 +39,19 @@ public class TextWire implements Wire {
     }
 
     @Override
-    public WriteValue<Wire> write() {
+    public WriteValue write() {
         bytes.append(sep).append("\"\": ");
         sep = "";
         return writeValue;
     }
 
     @Override
-    public WriteValue<Wire> writeValue() {
+    public WriteValue writeValue() {
         return writeValue;
     }
 
     @Override
-    public WriteValue<Wire> write(WireKey key) {
+    public WriteValue write(WireKey key) {
         String name = key.name();
         if (name == null) name = Integer.toString(key.code());
         bytes.append(sep).append(name).append(": ");
@@ -61,7 +60,7 @@ public class TextWire implements Wire {
     }
 
     @Override
-    public WriteValue<Wire> write(CharSequence name, WireKey template) {
+    public WriteValue write(CharSequence name, WireKey template) {
         if (name == null) {
             return write(template);
         }
@@ -71,7 +70,7 @@ public class TextWire implements Wire {
     }
 
     @Override
-    public ReadValue<Wire> read() {
+    public ReadValue read() {
         readField(Wires.acquireStringBuilder());
         return readValue;
     }
@@ -107,7 +106,7 @@ public class TextWire implements Wire {
     }
 
     @Override
-    public ReadValue<Wire> read(WireKey key) {
+    public ReadValue read(WireKey key) {
         StringBuilder sb = readField(Wires.acquireStringBuilder());
         if (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))
             return readValue;
@@ -115,7 +114,7 @@ public class TextWire implements Wire {
     }
 
     @Override
-    public ReadValue<Wire> read(StringBuilder name, WireKey template) {
+    public ReadValue read(StringBuilder name, WireKey template) {
         consumeWhiteSpace();
         readField(name);
         return readValue;
@@ -222,35 +221,15 @@ public class TextWire implements Wire {
     }
 
 
-    class TextWriteValue implements WriteValue<Wire> {
+    class TextWriteValue implements WriteValue {
         @Override
-        public Wire sequence(Object... array) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire sequence(Iterable array) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire sequenceStart() {
+        public WriteValue sequenceStart() {
             throw new UnsupportedOperationException();
         }
 
         @Override
         public Wire sequenceEnd() {
             throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public long startLength(int bytes) {
-            return 0;
-        }
-
-        @Override
-        public boolean endLength(long startPosition) {
-            return false;
         }
 
         @Override
@@ -383,14 +362,19 @@ public class TextWire implements Wire {
         }
     }
 
-    class TextReadValue implements ReadValue<Wire> {
+    class TextReadValue implements ReadValue {
         @Override
-        public Wire sequenceLength(IntConsumer length) {
+        public ReadValue sequenceStart() {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public Wire sequence(Supplier<Collection> collection) {
+        public Wire sequenceEnd() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean hasNext() {
             throw new UnsupportedOperationException();
         }
 

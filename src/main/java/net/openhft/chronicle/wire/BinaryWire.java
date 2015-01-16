@@ -1,9 +1,6 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.util.BooleanConsumer;
-import net.openhft.chronicle.util.ByteConsumer;
-import net.openhft.chronicle.util.FloatConsumer;
-import net.openhft.chronicle.util.ShortConsumer;
+import net.openhft.chronicle.util.*;
 import net.openhft.lang.io.AbstractBytes;
 import net.openhft.lang.io.Bytes;
 import net.openhft.lang.pool.StringInterner;
@@ -12,7 +9,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.Collection;
 import java.util.function.*;
 
 import static net.openhft.chronicle.wire.WireType.*;
@@ -22,9 +18,9 @@ import static net.openhft.chronicle.wire.WireType.*;
  */
 public class BinaryWire implements Wire {
     final AbstractBytes bytes;
-    final WriteValue<Wire> fixedWriteValue = new FixedBinaryWriteValue();
-    final WriteValue<Wire> writeValue;
-    final ReadValue<Wire> readValue = new BinaryReadValue();
+    final WriteValue fixedWriteValue = new FixedBinaryWriteValue();
+    final WriteValue writeValue;
+    final ReadValue readValue = new BinaryReadValue();
     private final boolean numericFields;
 
     public BinaryWire(Bytes bytes) {
@@ -276,18 +272,18 @@ public class BinaryWire implements Wire {
     }
 
     @Override
-    public WriteValue<Wire> write() {
+    public WriteValue write() {
         writeField("");
         return writeValue;
     }
 
     @Override
-    public WriteValue<Wire> writeValue() {
+    public WriteValue writeValue() {
         return writeValue;
     }
 
     @Override
-    public WriteValue<Wire> write(WireKey key) {
+    public WriteValue write(WireKey key) {
         if (numericFields)
             writeField(key.code());
         else
@@ -320,19 +316,19 @@ public class BinaryWire implements Wire {
     }
 
     @Override
-    public WriteValue<Wire> write(CharSequence name, WireKey template) {
+    public WriteValue write(CharSequence name, WireKey template) {
         writeField(name);
         return writeValue;
     }
 
     @Override
-    public ReadValue<Wire> read() {
+    public ReadValue read() {
         readField(Wires.acquireStringBuilder(), -1);
         return readValue;
     }
 
     @Override
-    public ReadValue<Wire> read(WireKey key) {
+    public ReadValue read(WireKey key) {
         StringBuilder sb = readField(Wires.acquireStringBuilder(), key.code());
         if (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))
             return readValue;
@@ -340,7 +336,7 @@ public class BinaryWire implements Wire {
     }
 
     @Override
-    public ReadValue<Wire> read(StringBuilder name, WireKey template) {
+    public ReadValue read(StringBuilder name, WireKey template) {
         readField(name, template.code());
         return readValue;
     }
@@ -471,36 +467,38 @@ public class BinaryWire implements Wire {
         throw new UnsupportedOperationException();
     }
 
+    static enum NestType {
+        SEQUENCE;
+    }
 
-    class FixedBinaryWriteValue implements WriteValue<Wire> {
-        @Override
-        public Wire sequence(Object... array) {
-            throw new UnsupportedOperationException();
-        }
+    static class WriteState {
+        NestType type;
+        long position;
+    }
+
+    class FixedBinaryWriteValue implements WriteValue {
+        final FastStack<WriteState> state = new FastStack<>(WriteState::new);
 
         @Override
-        public Wire sequence(Iterable array) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire sequenceStart() {
-            throw new UnsupportedOperationException();
+        public WriteValue sequenceStart() {
+            WriteState push = state.push();
+            push.type = NestType.SEQUENCE;
+            bytes.writeUnsignedByte(WireType.BYTES_LENGTH32.code);
+            push.position = bytes.position();
+            bytes.writeUnsignedInt(-1);
+            return this;
         }
 
         @Override
         public Wire sequenceEnd() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public long startLength(int bytes) {
-            return 0;
-        }
-
-        @Override
-        public boolean endLength(long startPosition) {
-            return false;
+            for (; ; ) {
+                WriteState ws = state.pop();
+                if (ws.type == NestType.SEQUENCE) {
+                    bytes.writeUnsignedInt(bytes.position() - ws.position - 4);
+                    break;
+                }
+            }
+            return BinaryWire.this;
         }
 
         @Override
@@ -746,15 +744,20 @@ public class BinaryWire implements Wire {
         }
     }
 
-    class BinaryReadValue implements ReadValue<Wire> {
+    class BinaryReadValue implements ReadValue {
         @Override
-        public Wire sequenceLength(IntConsumer length) {
+        public ReadValue sequenceStart() {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public Wire sequence(Supplier<Collection> collection) {
+        public Wire sequenceEnd() {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return false;
         }
 
         @Override

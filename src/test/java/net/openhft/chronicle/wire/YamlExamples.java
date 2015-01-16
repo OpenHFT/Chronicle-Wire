@@ -7,7 +7,6 @@ import java.io.StreamCorruptedException;
 import java.lang.reflect.Type;
 import java.time.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -70,12 +69,19 @@ public class YamlExamples {
         wire.write().sequenceEnd();
 
         // or
-        wire.write(Keys.list).sequence((Object[]) "Mark McGwire,Sammy Sosa,Ken Griffey".split(","));
-        // or
-        wire.write(Keys.list).sequence(Arrays.asList("Mark McGwire,Sammy Sosa,Ken Griffey".split(",")));
-
+        WriteValue writeValue = wire.write(Keys.list).sequenceStart();
+        for (String s : "Mark McGwire,Sammy Sosa,Ken Griffey".split(",")) {
+            writeValue.text(s);
+        }
+        writeValue.sequenceEnd();
+        
         // to read this.
-        wire.read(Keys.list).sequence(ArrayList::new);
+        ReadValue readValue = wire.read(Keys.list).sequenceStart();
+        List<String> names = new ArrayList<>();
+        while (readValue.hasNext()) {
+            names.add(readValue.text());
+        }
+        readValue.sequenceEnd();
     }
 
     static class Stats {
