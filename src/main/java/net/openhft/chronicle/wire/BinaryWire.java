@@ -63,13 +63,13 @@ public class BinaryWire implements Wire {
 
                 case FIELD0:
                 case FIELD1:
-                    StringBuilder fsb = readField(code, acquireStringBuilder());
+                    StringBuilder fsb = readField(code, Wires.acquireStringBuilder());
                     writeField(fsb);
                     break;
 
                 case STR0:
                 case STR1:
-                    StringBuilder sb = readText(code, acquireStringBuilder());
+                    StringBuilder sb = readText(code, Wires.acquireStringBuilder());
                     writeValue.text(sb);
                     break;
 
@@ -83,22 +83,22 @@ public class BinaryWire implements Wire {
                 break;
             case 0xB1: // COMMENT
             case 0xB2: // HINT(0xB2),
-                bytes.readUTFΔ(acquireStringBuilder());
+                bytes.readUTFΔ(Wires.acquireStringBuilder());
                 break;
             case 0xB3: // TIME(0xB3),
             case 0xB4: // ZONED_DATE_TIME(0xB4),
             case 0xB5: // DATE(0xB5),
                 throw new UnsupportedOperationException();
             case 0xB6: // TYPE(0xB6),
-                bytes.readUTFΔ(acquireStringBuilder());
-                writeValue.type(MyStringBuilder.get());
+                bytes.readUTFΔ(Wires.acquireStringBuilder());
+                writeValue.type(Wires.MyStringBuilder.get());
                 break;
             case 0xB7: // FIELD_NAME_ANY(0xB7),
-                StringBuilder fsb = readField(code, acquireStringBuilder());
+                StringBuilder fsb = readField(code, Wires.acquireStringBuilder());
                 writeField(fsb);
                 break;
             case 0xB8: // STRING_ANY(0xB8),
-                StringBuilder sb = readText(code, acquireStringBuilder());
+                StringBuilder sb = readText(code, Wires.acquireStringBuilder());
                 writeValue.text(sb);
                 break;
             // Boolean
@@ -161,13 +161,13 @@ public class BinaryWire implements Wire {
 
     @Override
     public ReadValue<Wire> read() {
-        readField(BinaryWire::acquireStringBuilder);
+        readField(Wires.acquireStringBuilder());
         return readValue;
     }
 
     @Override
     public ReadValue<Wire> read(WireKey key) {
-        StringBuilder sb = readField(BinaryWire::acquireStringBuilder);
+        StringBuilder sb = readField(Wires.acquireStringBuilder());
         if (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))
             return readValue;
         throw new UnsupportedOperationException("Unordered fields not supported yet.");
@@ -175,13 +175,13 @@ public class BinaryWire implements Wire {
 
     @Override
     public ReadValue<Wire> read(Supplier<StringBuilder> name, WireKey template) {
-        readField(name);
+        readField(name.get());
         return readValue;
     }
 
-    private StringBuilder readField(Supplier<StringBuilder> name) {
+    private StringBuilder readField(StringBuilder name) {
         int code = peekCode();
-        return readField(code, name.get());
+        return readField(code, name);
     }
 
     private StringBuilder readField(int code, StringBuilder sb) {
@@ -231,15 +231,6 @@ public class BinaryWire implements Wire {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
-        return sb;
-    }
-
-    static final ThreadLocal<StringBuilder> MyStringBuilder = new ThreadLocal<>();
-
-    private static StringBuilder acquireStringBuilder() {
-        StringBuilder sb = MyStringBuilder.get();
-        if (sb == null)
-            MyStringBuilder.set(sb = new StringBuilder());
         return sb;
     }
 
@@ -305,22 +296,22 @@ public class BinaryWire implements Wire {
     class BinaryWriteValue implements WriteValue<Wire> {
         @Override
         public Wire sequence(Object... array) {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public Wire sequence(Iterable array) {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public Wire sequenceStart() {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public Wire sequenceEnd() {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -398,7 +389,7 @@ public class BinaryWire implements Wire {
         @Override
         public Wire utf8(int codepoint) {
             bytes.writeUnsignedByte(UINT16.code);
-            StringBuilder sb = acquireStringBuilder();
+            StringBuilder sb = Wires.acquireStringBuilder();
             sb.appendCodePoint(codepoint);
             AbstractBytes.writeUTF0(bytes, sb, 1);
             return BinaryWire.this;
@@ -480,12 +471,12 @@ public class BinaryWire implements Wire {
     class BinaryReadValue implements ReadValue<Wire> {
         @Override
         public Wire sequenceLength(IntConsumer length) {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public Wire sequence(Supplier<Collection> collection) {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -626,37 +617,37 @@ public class BinaryWire implements Wire {
 
         @Override
         public Wire comment(Supplier<StringBuilder> s) {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public Wire mapStart() {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public Wire mapEnd() {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public Wire time(Consumer<LocalTime> localTime) {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public Wire zonedDateTime(Consumer<ZonedDateTime> zonedDateTime) {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public Wire date(Consumer<LocalDate> zonedDateTime) {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public Wire object(Supplier<Marshallable> type) {
-            return null;
+            throw new UnsupportedOperationException();
         }
     }
 }
