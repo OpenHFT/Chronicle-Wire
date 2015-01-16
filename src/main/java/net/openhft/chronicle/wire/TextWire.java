@@ -53,7 +53,9 @@ public class TextWire implements Wire {
 
     @Override
     public WriteValue<Wire> write(WireKey key) {
-        bytes.append(sep).append(key.name()).append(": ");
+        String name = key.name();
+        if (name == null) name = Integer.toString(key.code());
+        bytes.append(sep).append(name).append(": ");
         sep = "";
         return writeValue;
     }

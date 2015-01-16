@@ -25,12 +25,14 @@ public class BinaryWire implements Wire {
     final WriteValue<Wire> fixedWriteValue = new FixedBinaryWriteValue();
     final WriteValue<Wire> writeValue;
     final ReadValue<Wire> readValue = new BinaryReadValue();
+    private final boolean numericFields;
 
     public BinaryWire(Bytes bytes) {
-        this(bytes, false);
+        this(bytes, false, false);
     }
 
-    public BinaryWire(Bytes bytes, boolean fixed) {
+    public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields) {
+        this.numericFields = numericFields;
         this.bytes = (AbstractBytes) bytes;
         writeValue = fixed ? fixedWriteValue : new BinaryWriteValue();
     }
@@ -71,7 +73,7 @@ public class BinaryWire implements Wire {
                 case FIELD0:
                 case FIELD1:
                     bytes.skip(-1);
-                    StringBuilder fsb = readField(code, Wires.acquireStringBuilder());
+                    StringBuilder fsb = readField(code, -1, Wires.acquireStringBuilder());
                     wire.write(fsb, null);
                     break;
 
@@ -117,7 +119,7 @@ public class BinaryWire implements Wire {
             }
             case 0xB7: // FIELD_NAME_ANY(0xB7),
                 bytes.skip(-1);
-                StringBuilder fsb = readField(code, Wires.acquireStringBuilder());
+                StringBuilder fsb = readField(code, -1, Wires.acquireStringBuilder());
                 wire.write(fsb, null);
                 break;
             case 0xB8: // STRING_ANY(0xB8),
@@ -125,6 +127,22 @@ public class BinaryWire implements Wire {
                 StringBuilder sb = readText(code, Wires.acquireStringBuilder());
                 wire.writeValue().text(sb);
                 break;
+            case 0xB9: {
+                long code2 = bytes.readStopBit();
+                wire.write(new WireKey() {
+                    @Override
+                    public String name() {
+                        return null;
+                    }
+
+                    @Override
+                    public int code() {
+                        return (int) code2;
+                    }
+                });
+                break;
+            }
+
             // Boolean
             case 0xBD:
                 wire.writeValue().flag(null);
@@ -167,7 +185,7 @@ public class BinaryWire implements Wire {
         }
     }
 
-    private long readInt(int code) {
+    long readInt(int code) {
         if (code < 128)
             return code;
         switch (code >> 4) {
@@ -270,13 +288,28 @@ public class BinaryWire implements Wire {
 
     @Override
     public WriteValue<Wire> write(WireKey key) {
-        writeField(key.name());
+        if (numericFields)
+            writeField(key.code());
+        else
+            writeField(key.name());
         return writeValue;
+    }
+
+    private void writeField(int code) {
+        bytes.writeUnsignedByte(FIELD_NUMBER.code);
+        bytes.writeStopBit(code);
     }
 
     private void writeField(CharSequence name) {
         int len = name.length();
         if (len < 0x20) {
+            if (len > 0 && Character.isDigit(name.charAt(0))) {
+                try {
+                    writeField(Integer.parseInt(name.toString()));
+                    return;
+                } catch (NumberFormatException ignored) {
+                }
+            }
             long pos = bytes.position();
             bytes.writeUTFΔ(name);
             bytes.writeUnsignedByte(pos, FIELD_NAME0.code + len);
@@ -294,13 +327,13 @@ public class BinaryWire implements Wire {
 
     @Override
     public ReadValue<Wire> read() {
-        readField(Wires.acquireStringBuilder());
+        readField(Wires.acquireStringBuilder(), -1);
         return readValue;
     }
 
     @Override
     public ReadValue<Wire> read(WireKey key) {
-        StringBuilder sb = readField(Wires.acquireStringBuilder());
+        StringBuilder sb = readField(Wires.acquireStringBuilder(), key.code());
         if (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))
             return readValue;
         throw new UnsupportedOperationException("Unordered fields not supported yet.");
@@ -308,22 +341,31 @@ public class BinaryWire implements Wire {
 
     @Override
     public ReadValue<Wire> read(StringBuilder name, WireKey template) {
-        readField(name);
+        readField(name, template.code());
         return readValue;
     }
 
-    private StringBuilder readField(StringBuilder name) {
+    private StringBuilder readField(StringBuilder name, int codeMatch) {
         consumeSpecial();
         int code = peekCode();
-        return readField(code, name);
+        return readField(code, codeMatch, name);
     }
 
-    private StringBuilder readField(int code, StringBuilder sb) {
+    private StringBuilder readField(int code, int codeMatch, StringBuilder sb) {
         switch (code >> 4) {
             case SPECIAL:
                 if (code == FIELD_NAME_ANY.code) {
                     bytes.skip(1);
                     bytes.readUTFΔ(sb);
+                    return sb;
+                }
+                if (code == FIELD_NUMBER.code) {
+                    bytes.skip(1);
+                    long fieldId = bytes.readStopBit();
+                    if (codeMatch >= 0 && fieldId != codeMatch)
+                        throw new UnsupportedOperationException("Field was: " + fieldId + " expected " + codeMatch);
+                    if (codeMatch < 0)
+                        sb.append(fieldId);
                     return sb;
                 }
                 return null;

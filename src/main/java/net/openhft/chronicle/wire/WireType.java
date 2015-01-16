@@ -26,7 +26,6 @@ public enum WireType {
     FIXED6(0x97),
 
     // long number
-    FIELD_NUMBER(0xA0),
     UTF8(0xA1),
     INT8(0xA2),
     INT16(0xA3),
@@ -53,6 +52,7 @@ public enum WireType {
     TYPE(0xB6),
     FIELD_NAME_ANY(0xB7),
     STRING_ANY(0xB8),
+    FIELD_NUMBER(0xB9),
     // Boolean
     NULL(0xBD),
     FALSE(0xBE),
