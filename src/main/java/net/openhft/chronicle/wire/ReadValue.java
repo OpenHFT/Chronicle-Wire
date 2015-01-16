@@ -1,5 +1,9 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.util.BooleanConsumer;
+import net.openhft.chronicle.util.ByteConsumer;
+import net.openhft.chronicle.util.ShortConsumer;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -9,33 +13,47 @@ import java.util.function.*;
 /**
  * Created by peter on 14/01/15.
  */
-public interface ReadValue {
-    Wire sequenceLength(IntConsumer length);
+public interface ReadValue<W> {
+    W sequenceLength(IntConsumer length);
 
-    Wire sequence(Supplier<Collection> collection);
+    W sequence(Supplier<Collection> collection);
 
     /*
      * Text / Strings.
      */
-    Wire text(Supplier<StringBuilder> s);
+    W flag(BooleanConsumer flag);
 
-    Wire int32(IntConsumer i);
+    W text(Supplier<StringBuilder> s);
 
-    Wire float64(DoubleConsumer v);
+    W type(Supplier<StringBuilder> s);
 
-    Wire int64(LongConsumer i);
+    W int8(ByteConsumer i);
 
-    Wire comment(Supplier<StringBuilder> s);
+    W uint8(ShortConsumer i);
 
-    Wire mapStart();
+    W int16(ShortConsumer i);
 
-    Wire mapEnd();
+    W uint16(IntConsumer i);
 
-    Wire time(Consumer<LocalTime> localTime);
+    W int32(IntConsumer i);
 
-    Wire zonedDateTime(Consumer<ZonedDateTime> zonedDateTime);
+    W uint32(LongConsumer i);
 
-    Wire date(Consumer<LocalDate> zonedDateTime);
+    W float64(DoubleConsumer v);
 
-    Wire object(Supplier<Marshallable> type);
+    W int64(LongConsumer i);
+
+    W comment(Supplier<StringBuilder> s);
+
+    W mapStart();
+
+    W mapEnd();
+
+    W time(Consumer<LocalTime> localTime);
+
+    W zonedDateTime(Consumer<ZonedDateTime> zonedDateTime);
+
+    W date(Consumer<LocalDate> zonedDateTime);
+
+    W object(Supplier<Marshallable> type);
 }

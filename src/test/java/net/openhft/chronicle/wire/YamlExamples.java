@@ -1,15 +1,17 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.lang.io.DirectStore;
+import org.junit.Test;
+
 import java.io.StreamCorruptedException;
 import java.lang.reflect.Type;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by peter on 12/01/15.
@@ -26,7 +28,7 @@ public class YamlExamples {
         hr(0),
         avg(0.0),
         rbi(0L),
-        canonical(ZonedDateTime.of(0, 0, 0, 0, 0, 0, 0, ZoneId.systemDefault())),
+        canonical(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault())),
         date(LocalDate.MIN);
 
         static {
@@ -77,7 +79,7 @@ public class YamlExamples {
     }
 
     static class Stats {
-        StringBuilder name;
+        StringBuilder name = new StringBuilder();
         int hr;
         double avg;
         long rbi;
@@ -101,11 +103,23 @@ public class YamlExamples {
         public void rbi(long rbi) {
             this.rbi = rbi;
         }
+
+        @Override
+        public String toString() {
+            return "Stats{" +
+                    "name=" + name +
+                    ", hr=" + hr +
+                    ", avg=" + avg +
+                    ", rbi=" + rbi +
+                    '}';
+        }
     }
 
-    public static void mapExample(Wire wire) {
+    @Test
+    public void testMappedObject() {
+        Wire wire = new BinaryWire(DirectStore.allocate(128).bytes());
 /*
-        name: Mark McGwire 
+        name: Mark McGwire
         hr:   65    # Home runs
         avg:  0.278 # Batting average
         rbi:  147   # Runs Batted In
@@ -121,15 +135,18 @@ public class YamlExamples {
         wire.flip();
 
         Stats stats = new Stats();
-        wire.readDocumentStart()
-                .read(Keys.name).text(stats::name)
+        wire.read(Keys.name).text(stats::name)
                 .read(Keys.hr).int32(stats::hr)
                 .read(Keys.avg).float64(stats::avg)
                 .read(Keys.rbi).int64(stats::rbi)
-                .readDocumentEnd();
-
+                .consumeDocumentEnd();
         wire.clear();
-        
+
+        assertEquals("", stats.toString());
+
+    }
+
+    public static void mapExample(Wire wire) {
         /*
         american:
           - Boston Red Sox
@@ -254,7 +271,7 @@ public class YamlExamples {
             LocalTime time = wire.readTime(Keys.time);
             String player = wire.readText(Keys.player);
             String action = wire.readText(Keys.action);
-            wire.readDocumentEnd();
+            wire.consumeDocumentEnd();
         }
 */
         wire.clear();

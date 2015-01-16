@@ -8,17 +8,21 @@ import java.util.function.Supplier;
  * Created by peter on 12/01/15.
  */
 public interface Wire {
-    WriteValue write();
+    void copyTo(Wire wire);
 
-    WriteValue write(WireKey key);
+    WriteValue<Wire> write();
 
-    WriteValue write(CharSequence name, WireKey template);
+    WriteValue<Wire> writeValue();
 
-    ReadValue read();
+    WriteValue<Wire> write(WireKey key);
 
-    ReadValue read(WireKey key);
+    WriteValue<Wire> write(CharSequence name, WireKey template);
 
-    ReadValue read(Supplier<StringBuilder> name, WireKey template);
+    ReadValue<Wire> read();
+
+    ReadValue<Wire> read(WireKey key);
+
+    ReadValue<Wire> read(Supplier<StringBuilder> name, WireKey template);
 
     boolean hasNextSequenceItem();
 
@@ -39,9 +43,7 @@ public interface Wire {
 
     boolean hasDocument();
 
-    Wire readDocumentStart();
-
-    void readDocumentEnd();
+    void consumeDocumentEnd();
 
     void flip();
 

@@ -7,14 +7,14 @@ import java.time.ZonedDateTime;
 /**
  * Created by peter on 14/01/15.
  */
-public interface WriteValue {
-    Wire sequence(Object... array);
+public interface WriteValue<W> {
+    W sequence(Object... array);
 
-    Wire sequence(Iterable array);
+    W sequence(Iterable array);
 
-    Wire sequenceStart();
+    W sequenceStart();
 
-    Wire sequenceEnd();
+    W sequenceEnd();
 
     /*
      * length type.
@@ -26,39 +26,43 @@ public interface WriteValue {
     /*
      * data types
      */
-    Wire text(CharSequence s);
+    W flag(Boolean flag);
 
-    Wire int8(int i8);
+    W text(CharSequence s);
 
-    Wire uint8(int u8);
+    W int8(int i8);
 
-    Wire int16(int i16);
+    W uint8(int u8);
 
-    Wire uint16(int u16);
+    W int16(int i16);
 
-    Wire utf8(int codepoint);
+    W uint16(int u16);
 
-    Wire int32(int i32);
+    W utf8(int codepoint);
 
-    Wire uint32(long u32);
+    W int32(int i32);
 
-    Wire float32(float f);
+    W uint32(long u32);
 
-    Wire float64(double d);
+    W float32(float f);
 
-    Wire int64(long i64);
+    W float64(double d);
 
-    Wire comment(CharSequence s);
+    W int64(long i64);
 
-    Wire mapStart();
+    W comment(CharSequence s);
 
-    Wire mapEnd();
+    W mapStart();
 
-    Wire time(LocalTime localTime);
+    W mapEnd();
 
-    Wire zonedDateTime(ZonedDateTime zonedDateTime);
+    W time(LocalTime localTime);
 
-    Wire date(LocalDate zonedDateTime);
+    W zonedDateTime(ZonedDateTime zonedDateTime);
 
-    Wire object(Marshallable type);
+    W date(LocalDate zonedDateTime);
+
+    W object(Marshallable type);
+
+    W type(CharSequence typeName);
 }
