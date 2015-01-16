@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
+import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
 import net.openhft.lang.io.AbstractBytes;
 import net.openhft.lang.io.Bytes;
@@ -21,11 +22,17 @@ import static net.openhft.chronicle.wire.WireType.*;
  */
 public class BinaryWire implements Wire {
     final AbstractBytes bytes;
-    final WriteValue<Wire> writeValue = new BinaryWriteValue();
+    final WriteValue<Wire> fixedWriteValue = new FixedBinaryWriteValue();
+    final WriteValue<Wire> writeValue;
     final ReadValue<Wire> readValue = new BinaryReadValue();
 
     public BinaryWire(Bytes bytes) {
+        this(bytes, false);
+    }
+
+    public BinaryWire(Bytes bytes, boolean fixed) {
         this.bytes = (AbstractBytes) bytes;
+        writeValue = fixed ? fixedWriteValue : new BinaryWriteValue();
     }
 
     @Override
@@ -48,12 +55,12 @@ public class BinaryWire implements Wire {
                     break;
 
                 case FLOAT:
-                    double d = readFloat(code);
+                    double d = readFloat0(code);
                     wire.writeValue().float64(d);
                     break;
 
                 case INT:
-                    long l = readInt(code);
+                    long l = readInt0(code);
                     wire.writeValue().int64(l);
                     break;
 
@@ -87,7 +94,7 @@ public class BinaryWire implements Wire {
             {
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
-                wire.writeValue().comment(sb);
+                wire.writeComment(sb);
                 break;
             }
             case 0xB2: // HINT(0xB2),
@@ -133,7 +140,63 @@ public class BinaryWire implements Wire {
         }
     }
 
+    private void consumeSpecial() {
+        while (true) {
+            int code = peekCode();
+            switch (code) {
+                case 0xB0: // PADDING
+                    bytes.skip(1);
+                    break;
+                case 0xB1: // COMMENT
+                {
+                    bytes.skip(1);
+                    StringBuilder sb = Wires.acquireStringBuilder();
+                    bytes.readUTFΔ(sb);
+                    break;
+                }
+                case 0xB2: // HINT(0xB2),
+                {
+                    bytes.skip(1);
+                    StringBuilder sb = Wires.acquireStringBuilder();
+                    bytes.readUTFΔ(sb);
+                    break;
+                }
+                default:
+                    return;
+            }
+        }
+    }
+
     private long readInt(int code) {
+        if (code < 128)
+            return code;
+        switch (code >> 4) {
+            case FLOAT:
+                double d = readFloat0(code);
+                return (long) d;
+
+            case INT:
+                return readInt0(code);
+
+        }
+        throw new UnsupportedOperationException(WireType.stringForCode(code));
+    }
+
+    private double readFloat(int code) {
+        if (code < 128)
+            return code;
+        switch (code >> 4) {
+            case FLOAT:
+                return readFloat0(code);
+
+            case INT:
+                return readInt0(code);
+
+        }
+        throw new UnsupportedOperationException(WireType.stringForCode(code));
+    }
+
+    private long readInt0(int code) {
         switch (code) {
             case 0xA0: // FIELD_NUMBER(0xA0),
                 throw new UnsupportedOperationException();
@@ -172,7 +235,7 @@ public class BinaryWire implements Wire {
         throw new UnsupportedOperationException(WireType.stringForCode(code));
     }
 
-    private double readFloat(int code) {
+    private double readFloat0(int code) {
         switch (code) {
             case 0x90: // FLOAT32(0x90),
                 return bytes.readFloat();
@@ -244,12 +307,13 @@ public class BinaryWire implements Wire {
     }
 
     @Override
-    public ReadValue<Wire> read(Supplier<StringBuilder> name, WireKey template) {
-        readField(name.get());
+    public ReadValue<Wire> read(StringBuilder name, WireKey template) {
+        readField(name);
         return readValue;
     }
 
     private StringBuilder readField(StringBuilder name) {
+        consumeSpecial();
         int code = peekCode();
         return readField(code, name);
     }
@@ -315,16 +379,6 @@ public class BinaryWire implements Wire {
     }
 
     @Override
-    public Wire writeComment(CharSequence s) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Wire readComment(StringBuilder sb) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean hasMapping() {
         throw new UnsupportedOperationException();
     }
@@ -346,7 +400,7 @@ public class BinaryWire implements Wire {
 
     @Override
     public void consumeDocumentEnd() {
-        throw new UnsupportedOperationException();
+
     }
 
     @Override
@@ -363,7 +417,20 @@ public class BinaryWire implements Wire {
         return bytes.toDebugString(bytes.capacity());
     }
 
-    class BinaryWriteValue implements WriteValue<Wire> {
+    @Override
+    public Wire writeComment(CharSequence s) {
+        bytes.writeUnsignedByte(COMMENT.code);
+        bytes.writeUTFΔ(s);
+        return BinaryWire.this;
+    }
+
+    @Override
+    public Wire readComment(StringBuilder s) {
+        throw new UnsupportedOperationException();
+    }
+
+
+    class FixedBinaryWriteValue implements WriteValue<Wire> {
         @Override
         public Wire sequence(Object... array) {
             throw new UnsupportedOperationException();
@@ -501,13 +568,6 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public Wire comment(CharSequence s) {
-            bytes.writeUnsignedByte(COMMENT.code);
-            bytes.writeUTFΔ(s);
-            return BinaryWire.this;
-        }
-
-        @Override
         public Wire hint(CharSequence s) {
             bytes.writeUnsignedByte(HINT.code);
             bytes.writeUTFΔ(s);
@@ -545,6 +605,105 @@ public class BinaryWire implements Wire {
         }
     }
 
+    class BinaryWriteValue extends FixedBinaryWriteValue {
+        void writeInt(long l) {
+            if (l < Integer.MIN_VALUE) {
+                if (l == (float) l)
+                    super.float32(l);
+                else
+                    super.int64(l);
+            } else if (l < Short.MIN_VALUE) {
+                super.int32((int) l);
+            } else if (l < Byte.MIN_VALUE) {
+                super.int16((short) l);
+            } else if (l < 0) {
+                super.int8((byte) l);
+            } else if (l < 128) {
+                bytes.writeUnsignedByte((int) l);
+            } else if (l < 1 << 8) {
+                super.uint8((short) l);
+            } else if (l < 1 << 16) {
+                super.uint16((int) l);
+            } else if (l < 1L << 32) {
+                super.uint32(l);
+            } else {
+                if (l == (float) l)
+                    super.float32(l);
+                else
+                    super.int64(l);
+            }
+        }
+
+        void writeFloat(double d) {
+            if (d < 1L << 32 && d >= -1L << 32) {
+                long l = (long) d;
+                if (l == d) {
+                    writeInt(l);
+                    return;
+                }
+            }
+            float f = (float) d;
+            if (f == d)
+                super.float32(f);
+            else
+                super.float64(d);
+        }
+
+        @Override
+        public Wire int8(int i8) {
+            writeInt(i8);
+            return BinaryWire.this;
+        }
+
+        @Override
+        public Wire uint8(int u8) {
+            writeInt(u8);
+            return BinaryWire.this;
+        }
+
+        @Override
+        public Wire int16(int i16) {
+            writeInt(i16);
+            return BinaryWire.this;
+        }
+
+        @Override
+        public Wire uint16(int u16) {
+            writeInt(u16);
+            return BinaryWire.this;
+        }
+
+        @Override
+        public Wire int32(int i32) {
+            writeInt(i32);
+            return BinaryWire.this;
+        }
+
+        @Override
+        public Wire uint32(long u32) {
+            writeInt(u32);
+            return BinaryWire.this;
+        }
+
+        @Override
+        public Wire float32(float f) {
+            writeFloat(f);
+            return BinaryWire.this;
+        }
+
+        @Override
+        public Wire float64(double d) {
+            writeFloat(d);
+            return BinaryWire.this;
+        }
+
+        @Override
+        public Wire int64(long i64) {
+            writeInt(i64);
+            return BinaryWire.this;
+        }
+    }
+
     class BinaryReadValue implements ReadValue<Wire> {
         @Override
         public Wire sequenceLength(IntConsumer length) {
@@ -557,11 +716,11 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public Wire type(Supplier<StringBuilder> s) {
+        public Wire type(StringBuilder s) {
             int code = peekCode();
             if (code == TYPE.code) {
                 bytes.skip(1);
-                bytes.readUTFΔ(s.get());
+                bytes.readUTFΔ(s);
             } else {
                 throw new UnsupportedOperationException(stringForCode(code));
             }
@@ -569,9 +728,9 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public Wire text(Supplier<StringBuilder> s) {
+        public Wire text(StringBuilder s) {
             int code = peekCode();
-            StringBuilder text = readText(code, s.get());
+            StringBuilder text = readText(code, s);
             if (text == null)
                 throw new UnsupportedOperationException(stringForCode(code));
             return BinaryWire.this;
@@ -598,103 +757,56 @@ public class BinaryWire implements Wire {
 
         @Override
         public Wire int8(ByteConsumer i) {
-            int code = peekCode();
-            if (code == INT8.code) {
-                bytes.skip(1);
-                i.accept(bytes.readByte());
-            } else {
-                throw new UnsupportedOperationException(stringForCode(code));
-            }
+            i.accept((byte) readInt(bytes.readUnsignedByte()));
             return BinaryWire.this;
         }
 
         @Override
         public Wire uint8(ShortConsumer i) {
-            int code = peekCode();
-            if (code == UINT8.code) {
-                bytes.skip(1);
-                i.accept((short) bytes.readUnsignedByte());
-            } else {
-                throw new UnsupportedOperationException(stringForCode(code));
-            }
+            i.accept((short) readInt(bytes.readUnsignedByte()));
             return BinaryWire.this;
         }
 
         @Override
         public Wire int16(ShortConsumer i) {
-            int code = peekCode();
-            if (code == INT16.code) {
-                bytes.skip(1);
-                i.accept(bytes.readShort());
-            } else {
-                throw new UnsupportedOperationException(stringForCode(code));
-            }
+            i.accept((short) readInt(bytes.readUnsignedByte()));
             return BinaryWire.this;
         }
 
         @Override
         public Wire uint16(IntConsumer i) {
-            int code = peekCode();
-            if (code == UINT16.code) {
-                bytes.skip(1);
-                i.accept(bytes.readUnsignedShort());
-            } else {
-                throw new UnsupportedOperationException(stringForCode(code));
-            }
+            i.accept((int) readInt(bytes.readUnsignedByte()));
             return BinaryWire.this;
         }
 
         @Override
         public Wire uint32(LongConsumer i) {
-            int code = peekCode();
-            if (code == UINT32.code) {
-                bytes.skip(1);
-                i.accept(bytes.readUnsignedInt());
-            } else {
-                throw new UnsupportedOperationException(stringForCode(code));
-            }
+            i.accept(readInt(bytes.readUnsignedByte()));
             return BinaryWire.this;
         }
 
         @Override
         public Wire int32(IntConsumer i) {
-            int code = peekCode();
-            if (code == INT32.code) {
-                bytes.skip(1);
-                i.accept(bytes.readInt());
-            } else {
-                throw new UnsupportedOperationException(stringForCode(code));
-            }
+            i.accept((int) readInt(bytes.readUnsignedByte()));
+            return BinaryWire.this;
+        }
+
+        @Override
+        public Wire float32(FloatConsumer v) {
+            v.accept((float) readFloat(bytes.readUnsignedByte()));
             return BinaryWire.this;
         }
 
         @Override
         public Wire float64(DoubleConsumer v) {
-            int code = peekCode();
-            if (code == FLOAT64.code) {
-                bytes.skip(1);
-                v.accept(bytes.readDouble());
-            } else {
-                throw new UnsupportedOperationException(stringForCode(code));
-            }
+            v.accept(readFloat(bytes.readUnsignedByte()));
             return BinaryWire.this;
         }
 
         @Override
         public Wire int64(LongConsumer i) {
-            int code = peekCode();
-            if (code == INT64.code) {
-                bytes.skip(1);
-                i.accept(bytes.readLong());
-            } else {
-                throw new UnsupportedOperationException(stringForCode(code));
-            }
+            i.accept(readInt(bytes.readUnsignedByte()));
             return BinaryWire.this;
-        }
-
-        @Override
-        public Wire comment(Supplier<StringBuilder> s) {
-            throw new UnsupportedOperationException();
         }
 
         @Override

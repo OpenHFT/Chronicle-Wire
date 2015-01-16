@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
+import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
 
 import java.time.LocalDate;
@@ -23,9 +24,9 @@ public interface ReadValue<W> {
      */
     W flag(BooleanConsumer flag);
 
-    W text(Supplier<StringBuilder> s);
+    W text(StringBuilder s);
 
-    W type(Supplier<StringBuilder> s);
+    W type(StringBuilder s);
 
     W int8(ByteConsumer i);
 
@@ -39,11 +40,11 @@ public interface ReadValue<W> {
 
     W uint32(LongConsumer i);
 
-    W float64(DoubleConsumer v);
-
     W int64(LongConsumer i);
 
-    W comment(Supplier<StringBuilder> s);
+    W float32(FloatConsumer v);
+
+    W float64(DoubleConsumer v);
 
     W mapStart();
 

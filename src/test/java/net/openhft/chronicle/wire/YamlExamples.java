@@ -70,7 +70,7 @@ public class YamlExamples {
         wire.write().sequenceEnd();
 
         // or
-        wire.write(Keys.list).sequence("Mark McGwire,Sammy Sosa,Ken Griffey".split(","));
+        wire.write(Keys.list).sequence((Object[]) "Mark McGwire,Sammy Sosa,Ken Griffey".split(","));
         // or
         wire.write(Keys.list).sequence(Arrays.asList("Mark McGwire,Sammy Sosa,Ken Griffey".split(",")));
 
@@ -126,23 +126,23 @@ public class YamlExamples {
 */
         wire.write(Keys.name).text("Mark McGwire")
                 .write(Keys.hr).int32(65)
-                .write().comment("Home runs")
+                .writeComment("Home runs")
                 .write(Keys.avg).float64(0.278)
-                .write().comment("Batting average")
+                .writeComment("Batting average")
                 .write(Keys.rbi).int64(147)
-                .write().comment("Runs Batted In");
+                .writeComment("Runs Batted In");
 
         wire.flip();
 
         Stats stats = new Stats();
-        wire.read(Keys.name).text(stats::name)
+        wire.read(Keys.name).text(stats.name)
                 .read(Keys.hr).int32(stats::hr)
                 .read(Keys.avg).float64(stats::avg)
                 .read(Keys.rbi).int64(stats::rbi)
                 .consumeDocumentEnd();
         wire.clear();
 
-        assertEquals("", stats.toString());
+        assertEquals("Stats{name=Mark McGwire, hr=65, avg=0.278, rbi=147}", stats.toString());
 
     }
 
@@ -233,7 +233,7 @@ public class YamlExamples {
 
         StringBuilder name = new StringBuilder();
         while (wire.hasMapping()) {
-            wire.read(() -> name, Keys.name).mapStart()
+            wire.read(name, Keys.name).mapStart()
                     .read(Keys.hr).int32(stats::hr)
                     .read(Keys.avg).float64(stats::avg)
                     .readMapEnd();

@@ -50,8 +50,6 @@ public interface WriteValue<W> {
 
     W int64(long i64);
 
-    W comment(CharSequence s);
-
     W hint(CharSequence hint);
 
     W mapStart();

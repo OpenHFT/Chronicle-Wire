@@ -1,7 +1,5 @@
 package net.openhft.chronicle.wire;
 
-import java.util.function.Supplier;
-
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream.
  *
@@ -22,7 +20,7 @@ public interface Wire {
 
     ReadValue<Wire> read(WireKey key);
 
-    ReadValue<Wire> read(Supplier<StringBuilder> name, WireKey template);
+    ReadValue<Wire> read(StringBuilder name, WireKey template);
 
     boolean hasNextSequenceItem();
 

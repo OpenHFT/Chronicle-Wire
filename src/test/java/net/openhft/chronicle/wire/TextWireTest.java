@@ -55,7 +55,7 @@ public class TextWireTest {
         wire.write("World", BWKey.field2);
         wire.write("Long field name which is more than 32 characters, Bye", BWKey.field3);
         wire.flip();
-        assertEquals("Hello: World: Long field name which is more than 32 characters, Bye: ", wire.toString());
+        assertEquals("Hello: World: \"Long field name which is more than 32 characters, Bye\": ", wire.toString());
     }
 
     @Test
@@ -89,7 +89,7 @@ public class TextWireTest {
             wire.read(BWKey.field1);
             fail();
         } catch (UnsupportedOperationException expected) {
-            wire.read(StringBuilder::new, BWKey.field1);
+            wire.read(new StringBuilder(), BWKey.field1);
         }
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
@@ -107,13 +107,13 @@ public class TextWireTest {
 
         // ok as blank matches anything
         StringBuilder name = new StringBuilder();
-        wire.read(() -> name, BWKey.field1);
+        wire.read(name, BWKey.field1);
         assertEquals(0, name.length());
 
-        wire.read(() -> name, BWKey.field1);
+        wire.read(name, BWKey.field1);
         assertEquals(BWKey.field1.name(), name.toString());
 
-        wire.read(() -> name, BWKey.field1);
+        wire.read(name, BWKey.field1);
         assertEquals(name1, name.toString());
 
         assertEquals(0, bytes.remaining());
@@ -338,7 +338,7 @@ public class TextWireTest {
         StringBuilder sb = new StringBuilder();
         Stream.of("Hello", "world", name1).forEach(e -> {
             wire.read()
-                    .text(() -> sb);
+                    .text(sb);
             assertEquals(e, sb.toString());
         });
 
@@ -354,7 +354,7 @@ public class TextWireTest {
         wire.write(BWKey.field1).type("AlsoMyType");
         String name1 = "com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState";
         wire.write("Test", BWKey.field2).type(name1);
-        wire.writeValue().comment("");
+        wire.writeComment("");
         wire.flip();
         assertEquals("\"\": !MyType " +
                 "field1: !AlsoMyType " +
@@ -363,7 +363,7 @@ public class TextWireTest {
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
         Stream.of("MyType", "AlsoMyType", name1).forEach(e -> {
-            wire.read().type(() -> sb);
+            wire.read().type(sb);
             assertEquals(e, sb.toString());
         });
 

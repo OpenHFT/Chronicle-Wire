@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
+import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
 import net.openhft.lang.io.AbstractBytes;
 import net.openhft.lang.io.Bytes;
@@ -112,9 +113,9 @@ public class TextWire implements Wire {
     }
 
     @Override
-    public ReadValue<Wire> read(Supplier<StringBuilder> name, WireKey template) {
+    public ReadValue<Wire> read(StringBuilder name, WireKey template) {
         consumeWhiteSpace();
-        readField(name.get());
+        readField(name);
         return readValue;
     }
 
@@ -132,16 +133,6 @@ public class TextWire implements Wire {
 
     @Override
     public void readSequenceEnd() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Wire writeComment(CharSequence s) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Wire readComment(StringBuilder sb) {
         throw new UnsupportedOperationException();
     }
 
@@ -215,6 +206,19 @@ public class TextWire implements Wire {
                 return true;
         return false;
     }
+
+    @Override
+    public Wire writeComment(CharSequence s) {
+        bytes.append(sep).append("# ").append(s).append("\n");
+        sep = "";
+        return TextWire.this;
+    }
+
+    @Override
+    public Wire readComment(StringBuilder s) {
+        throw new UnsupportedOperationException();
+    }
+
 
     class TextWriteValue implements WriteValue<Wire> {
         @Override
@@ -340,13 +344,6 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public Wire comment(CharSequence s) {
-            bytes.append(sep).append("# ").append(s).append("\n");
-            sep = "";
-            return TextWire.this;
-        }
-
-        @Override
         public Wire hint(CharSequence s) {
             bytes.append(sep).append("##").append(s).append("\n");
             sep = "";
@@ -396,11 +393,11 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public Wire type(Supplier<StringBuilder> s) {
+        public Wire type(StringBuilder s) {
             int code = peekCode();
             if (code == '!') {
                 bytes.skip(1);
-                bytes.parseUTF(s.get(), StopCharTesters.SPACE_STOP);
+                bytes.parseUTF(s, StopCharTesters.SPACE_STOP);
             } else {
                 throw new UnsupportedOperationException(stringForCode(code));
             }
@@ -408,9 +405,9 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public Wire text(Supplier<StringBuilder> s) {
+        public Wire text(StringBuilder s) {
             int ch = peekCode();
-            StringBuilder sb = s.get();
+            StringBuilder sb = s;
             if (ch == '"') {
                 bytes.skip(1);
                 bytes.parseUTF(sb, EscapingStopCharTester.escaping(c -> c == '"'));
@@ -474,6 +471,12 @@ public class TextWire implements Wire {
         }
 
         @Override
+        public Wire float32(FloatConsumer v) {
+            v.accept((float) bytes.parseDouble());
+            return TextWire.this;
+        }
+
+        @Override
         public Wire float64(DoubleConsumer v) {
             v.accept(bytes.parseDouble());
             return TextWire.this;
@@ -483,11 +486,6 @@ public class TextWire implements Wire {
         public Wire int64(LongConsumer i) {
             i.accept(bytes.parseLong());
             return TextWire.this;
-        }
-
-        @Override
-        public Wire comment(Supplier<StringBuilder> s) {
-            throw new UnsupportedOperationException();
         }
 
         @Override
