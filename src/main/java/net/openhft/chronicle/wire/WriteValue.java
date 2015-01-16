@@ -52,6 +52,8 @@ public interface WriteValue<W> {
 
     W comment(CharSequence s);
 
+    W hint(CharSequence hint);
+
     W mapStart();
 
     W mapEnd();

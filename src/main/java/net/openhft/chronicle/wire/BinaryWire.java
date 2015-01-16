@@ -41,7 +41,7 @@ public class BinaryWire implements Wire {
                 case NUM5:
                 case NUM6:
                 case NUM7:
-                    writeValue.uint8(code);
+                    wire.writeValue().uint8(code);
                     break;
 
                 case CONTROL:
@@ -49,79 +49,149 @@ public class BinaryWire implements Wire {
 
                 case FLOAT:
                     double d = readFloat(code);
-                    writeValue.float64(d);
+                    wire.writeValue().float64(d);
                     break;
 
                 case INT:
                     long l = readInt(code);
-                    writeValue.int64(l);
+                    wire.writeValue().int64(l);
                     break;
 
                 case SPECIAL:
-                    copySpecial(code);
+                    copySpecial(wire, code);
                     break;
 
                 case FIELD0:
                 case FIELD1:
+                    bytes.skip(-1);
                     StringBuilder fsb = readField(code, Wires.acquireStringBuilder());
-                    writeField(fsb);
+                    wire.write(fsb, null);
                     break;
 
                 case STR0:
                 case STR1:
+                    bytes.skip(-1);
                     StringBuilder sb = readText(code, Wires.acquireStringBuilder());
-                    writeValue.text(sb);
+                    wire.writeValue().text(sb);
                     break;
 
             }
         }
     }
 
-    private void copySpecial(int code) {
+    private void copySpecial(Wire wire, int code) {
         switch (code) {
             case 0xB0: // PADDING
                 break;
             case 0xB1: // COMMENT
-            case 0xB2: // HINT(0xB2),
-                bytes.readUTFΔ(Wires.acquireStringBuilder());
+            {
+                StringBuilder sb = Wires.acquireStringBuilder();
+                bytes.readUTFΔ(sb);
+                wire.writeValue().comment(sb);
                 break;
+            }
+            case 0xB2: // HINT(0xB2),
+            {
+                StringBuilder sb = Wires.acquireStringBuilder();
+                bytes.readUTFΔ(sb);
+                wire.writeValue().hint(sb);
+                break;
+            }
             case 0xB3: // TIME(0xB3),
             case 0xB4: // ZONED_DATE_TIME(0xB4),
             case 0xB5: // DATE(0xB5),
                 throw new UnsupportedOperationException();
             case 0xB6: // TYPE(0xB6),
-                bytes.readUTFΔ(Wires.acquireStringBuilder());
-                writeValue.type(Wires.MyStringBuilder.get());
+            {
+                StringBuilder sb = Wires.acquireStringBuilder();
+                bytes.readUTFΔ(sb);
+                wire.writeValue().type(sb);
                 break;
+            }
             case 0xB7: // FIELD_NAME_ANY(0xB7),
+                bytes.skip(-1);
                 StringBuilder fsb = readField(code, Wires.acquireStringBuilder());
-                writeField(fsb);
+                wire.write(fsb, null);
                 break;
             case 0xB8: // STRING_ANY(0xB8),
+                bytes.skip(-1);
                 StringBuilder sb = readText(code, Wires.acquireStringBuilder());
-                writeValue.text(sb);
+                wire.writeValue().text(sb);
                 break;
             // Boolean
             case 0xBD:
-                writeValue.flag(null);
+                wire.writeValue().flag(null);
                 break;
             case 0xBE: // FALSE(0xBE),
-                writeValue.flag(false);
+                wire.writeValue().flag(false);
                 break;
             case 0xBF: // TRUE(0xBF),
-                writeValue.flag(true);
+                wire.writeValue().flag(true);
                 break;
             default:
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException(WireType.stringForCode(code));
         }
     }
 
     private long readInt(int code) {
-        return 0;
+        switch (code) {
+            case 0xA0: // FIELD_NUMBER(0xA0),
+                throw new UnsupportedOperationException();
+            case 0xA1: // UTF8(0xA1),
+                throw new UnsupportedOperationException();
+            case 0xA2: //INT8(0xA2),
+                return bytes.readByte();
+            case 0xA3: //INT16(0xA3),
+                return bytes.readShort();
+            case 0xA4: //INT32(0xA4),
+                return bytes.readInt();
+            case 0xA5: //INT64(0xA5),
+                return bytes.readLong();
+            case 0xA6: //UINT8(0xA6),
+                return bytes.readUnsignedByte();
+            case 0xA7: //UINT16(0xA7),
+                return bytes.readUnsignedShort();
+            case 0xA8: //UINT32(0xA8),
+                return bytes.readUnsignedInt();
+            case 0xA9: //FIXED_6(0xA9),
+                return bytes.readStopBit() * 1000000L;
+            case 0xAA: //FIXED_5(0xAA),
+                return bytes.readStopBit() * 100000L;
+            case 0xAB: //FIXED_4(0xAB),
+                return bytes.readStopBit() * 10000L;
+            case 0xAC: //FIXED_3(0xAC),
+                return bytes.readStopBit() * 1000L;
+            case 0xAD: //FIXED_2(0xAD),
+                return bytes.readStopBit() * 100L;
+            case 0xAE: //FIXED_1(0xAE),
+                return bytes.readStopBit() * 10L;
+            case 0xAF: //FIXED(0xAF),
+                return bytes.readStopBit();
+
+        }
+        throw new UnsupportedOperationException(WireType.stringForCode(code));
     }
 
     private double readFloat(int code) {
-        return 0;
+        switch (code) {
+            case 0x90: // FLOAT32(0x90),
+                return bytes.readFloat();
+            case 0x91: // FLOAT64(0x91),
+                return bytes.readDouble();
+            case 0x92: // FIXED1(0x92),
+                return bytes.readStopBit() / 1e1;
+            case 0x93: // FIXED2(0x93),
+                return bytes.readStopBit() / 1e2;
+            case 0x94: // FIXED3(0x94),
+                return bytes.readStopBit() / 1e3;
+            case 0x95: // FIXED4(0x95),
+                return bytes.readStopBit() / 1e4;
+            case 0x96: // FIXED5(0x96),
+                return bytes.readStopBit() / 1e5;
+            case 0x97: // FIXED6(0x97),
+                return bytes.readStopBit() / 1e6;
+        }
+        throw new UnsupportedOperationException(WireType.stringForCode(code));
     }
 
     @Override
@@ -433,6 +503,13 @@ public class BinaryWire implements Wire {
         @Override
         public Wire comment(CharSequence s) {
             bytes.writeUnsignedByte(COMMENT.code);
+            bytes.writeUTFΔ(s);
+            return BinaryWire.this;
+        }
+
+        @Override
+        public Wire hint(CharSequence s) {
+            bytes.writeUnsignedByte(HINT.code);
             bytes.writeUTFΔ(s);
             return BinaryWire.this;
         }

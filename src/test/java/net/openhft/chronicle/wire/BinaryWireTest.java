@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -23,6 +22,14 @@ public class BinaryWireTest {
         return new BinaryWire(bytes);
     }
 
+    private String asText(Wire wire) {
+        TextWire tw = new TextWire(new DirectStore(256).bytes());
+        wire.copyTo(tw);
+        tw.flip();
+        wire.flip();
+        return tw.toString();
+    } 
+
     enum BWKey implements WireKey {
         field1, field2, field3;
 
@@ -36,6 +43,7 @@ public class BinaryWireTest {
         wire.write();
         wire.flip();
         assertEquals("[pos: 0, lim: 3, cap: 256 ] ÀÀÀ", wire.toString());
+        assertEquals("\"\": \"\": \"\": ", asText(wire));
     }
 
     @Test
@@ -46,6 +54,7 @@ public class BinaryWireTest {
         wire.write(BWKey.field3);
         wire.flip();
         assertEquals("[pos: 0, lim: 21, cap: 256 ] Æfield1Æfield2Æfield3", wire.toString());
+        assertEquals("field1: field2: field3: ", asText(wire));
     }
 
     @Test
@@ -56,6 +65,7 @@ public class BinaryWireTest {
         wire.write("Long field name which is more than 32 characters, Bye", BWKey.field3);
         wire.flip();
         assertEquals("[pos: 0, lim: 67, cap: 256 ] ÅHelloÅWorld·5Long field name which is more than 32 characters, Bye", wire.toString());
+        assertEquals("Hello: World: \"Long field name which is more than 32 characters, Bye\": ", asText(wire));
     }
 
     @Test
@@ -65,6 +75,8 @@ public class BinaryWireTest {
         wire.write(BWKey.field1);
         wire.write("Test", BWKey.field2);
         wire.flip();
+        assertEquals("\"\": field1: Test: ", asText(wire));
+
         wire.read();
         wire.read();
         wire.read();
@@ -80,6 +92,7 @@ public class BinaryWireTest {
         wire.write(BWKey.field1);
         wire.write("Test", BWKey.field2);
         wire.flip();
+        assertEquals("\"\": field1: Test: ", asText(wire));
 
         // ok as blank matches anything
         wire.read(BWKey.field1);
@@ -129,6 +142,9 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).int8(3);
         wire.flip();
         assertEquals("[pos: 0, lim: 19, cap: 256 ] À¢⒈Æfield1¢⒉ÄTest¢⒊", wire.toString());
+        assertEquals("\"\": 1\n" +
+                "field1: 2\n" +
+                "Test: 3\n", asText(wire));
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -151,6 +167,9 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).int16(3);
         wire.flip();
         assertEquals("[pos: 0, lim: 22, cap: 256 ] À£⒈٠Æfield1£⒉٠ÄTest£⒊٠", wire.toString());
+        assertEquals("\"\": 1\n" +
+                "field1: 2\n" +
+                "Test: 3\n", asText(wire));
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -173,6 +192,9 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).uint8(3);
         wire.flip();
         assertEquals("[pos: 0, lim: 19, cap: 256 ] À¦⒈Æfield1¦⒉ÄTest¦⒊", wire.toString());
+        assertEquals("\"\": 1\n" +
+                "field1: 2\n" +
+                "Test: 3\n", asText(wire));
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -195,6 +217,9 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).uint16(3);
         wire.flip();
         assertEquals("[pos: 0, lim: 22, cap: 256 ] À§⒈٠Æfield1§⒉٠ÄTest§⒊٠", wire.toString());
+        assertEquals("\"\": 1\n" +
+                "field1: 2\n" +
+                "Test: 3\n", asText(wire));
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -217,6 +242,9 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).uint32(3);
         wire.flip();
         assertEquals("[pos: 0, lim: 28, cap: 256 ] À¨⒈٠٠٠Æfield1¨⒉٠٠٠ÄTest¨⒊٠٠٠", wire.toString());
+        assertEquals("\"\": 1\n" +
+                "field1: 2\n" +
+                "Test: 3\n", asText(wire));
 
         // ok as blank matches anything
         AtomicLong i = new AtomicLong();
@@ -239,6 +267,9 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).int32(3);
         wire.flip();
         assertEquals("[pos: 0, lim: 28, cap: 256 ] À¤⒈٠٠٠Æfield1¤⒉٠٠٠ÄTest¤⒊٠٠٠", wire.toString());
+        assertEquals("\"\": 1\n" +
+                "field1: 2\n" +
+                "Test: 3\n", asText(wire));
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -261,10 +292,12 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).int64(3);
         wire.flip();
         assertEquals("[pos: 0, lim: 40, cap: 256 ] À¥⒈٠٠٠٠٠٠٠Æfield1¥⒉٠٠٠٠٠٠٠ÄTest¥⒊٠٠٠٠٠٠٠", wire.toString());
+        assertEquals("\"\": 1\n" +
+                "field1: 2\n" +
+                "Test: 3\n", asText(wire));
 
         // ok as blank matches anything
         AtomicLong i = new AtomicLong();
-        IntConsumer ic = i::set;
         LongStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().int64(i::set);
             assertEquals(e, i.get());
@@ -284,6 +317,9 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).float64(3);
         wire.flip();
         assertEquals("[pos: 0, lim: 40, cap: 256 ] À\u0091٠٠٠٠٠٠ð?Æfield1\u0091٠٠٠٠٠٠٠@ÄTest\u0091٠٠٠٠٠٠⒏@", wire.toString());
+        assertEquals("\"\": 1\n" +
+                "field1: 2\n" +
+                "Test: 3\n", asText(wire));
 
         // ok as blank matches anything
         class Floater {
@@ -314,6 +350,9 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).text(name1);
         wire.flip();
         assertEquals("[pos: 0, lim: 80, cap: 256 ] ÀåHelloÆfield1åworldÄTest¸5" + name1, wire.toString());
+        assertEquals("\"\": Hello\n" +
+                "field1: world\n" +
+                "Test: \"Long field name which is more than 32 characters, Bye\"\n", asText(wire));
 
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
@@ -336,6 +375,7 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).type(name1);
         wire.flip();
         assertEquals("[pos: 0, lim: 158, cap: 256 ] À¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1, wire.toString());
+        assertEquals("\"\": !MyType field1: !AlsoMyType Test: !com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState", asText(wire));
 
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();

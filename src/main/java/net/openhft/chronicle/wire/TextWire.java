@@ -59,7 +59,10 @@ public class TextWire implements Wire {
 
     @Override
     public WriteValue<Wire> write(CharSequence name, WireKey template) {
-        bytes.append(sep).append(name).append(": ");
+        if (name == null) {
+            return write(template);
+        }
+        bytes.append(sep).append(name.length() == 0 ? "\"\"" : quotes(name)).append(": ");
         sep = "";
         return writeValue;
     }
@@ -181,6 +184,38 @@ public class TextWire implements Wire {
         return bytes.toString();
     }
 
+    CharSequence quotes(CharSequence s) {
+        if (!needsQuotes(s)) {
+            return s;
+        }
+        StringBuilder sb2 = Wires.acquireAnotherStringBuilder(s);
+        sb2.append('"');
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+            switch (ch) {
+                case '"':
+                case '\\':
+                    sb2.append('\\').append(ch);
+                    break;
+                case '\n':
+                    sb2.append("\\n");
+                    break;
+                default:
+                    sb2.append(ch);
+                    break;
+            }
+        }
+        sb2.append('"');
+        return sb2;
+    }
+
+    boolean needsQuotes(CharSequence s) {
+        for (int i = 0; i < s.length(); i++)
+            if ("\" ,\n\\".indexOf(s.charAt(i)) >= 0)
+                return true;
+        return false;
+    }
+
     class TextWriteValue implements WriteValue<Wire> {
         @Override
         public Wire sequence(Object... array) {
@@ -216,38 +251,6 @@ public class TextWire implements Wire {
         public Wire text(CharSequence s) {
             bytes.append(sep).append(s == null ? "!!null" : quotes(s)).append(END_FIELD);
             return TextWire.this;
-        }
-
-        CharSequence quotes(CharSequence s) {
-            if (!needsQuotes(s)) {
-                return s;
-            }
-            StringBuilder sb2 = Wires.acquireAnotherStringBuilder(s);
-            sb2.append('"');
-            for (int i = 0; i < s.length(); i++) {
-                char ch = s.charAt(i);
-                switch (ch) {
-                    case '"':
-                    case '\\':
-                        sb2.append('\\').append(ch);
-                        break;
-                    case '\n':
-                        sb2.append("\\n");
-                        break;
-                    default:
-                        sb2.append(ch);
-                        break;
-                }
-            }
-            sb2.append('"');
-            return sb2;
-        }
-
-        boolean needsQuotes(CharSequence s) {
-            for (int i = 0; i < s.length(); i++)
-                if ("\" ,\n\\".indexOf(s.charAt(i)) >= 0)
-                    return true;
-            return false;
         }
 
         @Override
@@ -339,6 +342,13 @@ public class TextWire implements Wire {
         @Override
         public Wire comment(CharSequence s) {
             bytes.append(sep).append("# ").append(s).append("\n");
+            sep = "";
+            return TextWire.this;
+        }
+
+        @Override
+        public Wire hint(CharSequence s) {
+            bytes.append(sep).append("##").append(s).append("\n");
             sep = "";
             return TextWire.this;
         }
