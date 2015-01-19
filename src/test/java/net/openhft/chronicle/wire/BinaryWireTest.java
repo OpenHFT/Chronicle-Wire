@@ -20,23 +20,35 @@ import static org.junit.Assert.fail;
 @RunWith(value = Parameterized.class)
 public class BinaryWireTest {
 
-    final Boolean fixed;
-    final Boolean numericField;
+    final int testId;
+    final boolean fixed;
+    final boolean numericField;
+    final boolean fieldLess;
 
-    public BinaryWireTest(Boolean fixed) {
-        numericField = this.fixed = fixed;
+    public BinaryWireTest(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
+        this.testId = testId;
+        this.fixed = fixed;
+        this.numericField = numericField;
+        this.fieldLess = fieldLess;
     }
 
     @Parameterized.Parameters
-    public static Collection<Object[]> fixed() {
-        return Arrays.asList(new Boolean[]{true}, new Boolean[]{false});
+    public static Collection<Object[]> combinations() {
+        return Arrays.asList(
+                new Object[]{0, false, false, false},
+                new Object[]{1, true, false, false},
+                new Object[]{2, false, true, false},
+                new Object[]{3, true, true, false},
+                new Object[]{4, false, false, true},
+                new Object[]{5, true, false, true}
+        );
     }
 
     Bytes bytes = new DirectStore(256).bytes();
 
     private BinaryWire createBytes() {
         bytes.clear();
-        return new BinaryWire(bytes, fixed, numericField);
+        return new BinaryWire(bytes, fixed, numericField, fieldLess);
     }
 
     private String asText(Wire wire) {
@@ -68,16 +80,18 @@ public class BinaryWireTest {
         wire.write();
         wire.write();
         wire.flip();
-        checkWire(wire, "[pos: 0, lim: 3, cap: 256 ] ÀÀÀ");
-        assertEquals("\"\": \"\": \"\": ", asText(wire));
+        checkWire(wire, "[pos: 0, lim: 3, cap: 256 ] ÀÀÀ",
+                "[pos: 0, lim: 3, cap: 256 ] ÀÀÀ",
+                "[pos: 0, lim: 3, cap: 256 ] ÀÀÀ",
+                "[pos: 0, lim: 3, cap: 256 ] ÀÀÀ",
+                "[pos: 0, lim: 0, cap: 256 ] ",
+                "[pos: 0, lim: 0, cap: 256 ] ");
+
+        assertEquals(fieldLess ? "" : "\"\": \"\": \"\": ", asText(wire));
     }
 
-    private void checkWire(Wire wire, String expectedFixed) {
-        checkWire(wire, expectedFixed, expectedFixed);
-    }
-
-    private void checkWire(Wire wire, String expectedVariable, String expectedFixed) {
-        assertEquals(fixed ? expectedFixed : expectedVariable, wire.toString());
+    private void checkWire(Wire wire, String... expected) {
+        assertEquals("id: " + testId, expected[testId], wire.toString());
     }
 
     @Test
@@ -88,8 +102,15 @@ public class BinaryWireTest {
         wire.write(BWKey.field3);
         wire.flip();
         checkWire(wire, "[pos: 0, lim: 21, cap: 256 ] Æfield1Æfield2Æfield3",
-                "[pos: 0, lim: 6, cap: 256 ] ¹⒈¹⒉¹⒊");
-        checkAsText(wire, "field1: field2: field3: ", "1: 2: 3: ");
+                "[pos: 0, lim: 21, cap: 256 ] Æfield1Æfield2Æfield3",
+                "[pos: 0, lim: 6, cap: 256 ] ¹⒈¹⒉¹⒊",
+                "[pos: 0, lim: 6, cap: 256 ] ¹⒈¹⒉¹⒊",
+                "[pos: 0, lim: 0, cap: 256 ] ",
+                "[pos: 0, lim: 0, cap: 256 ] ");
+        checkAsText(wire,
+                "field1: field2: field3: ",
+                "1: 2: 3: ",
+                "");
     }
 
     @Test
@@ -97,10 +118,16 @@ public class BinaryWireTest {
         Wire wire = createBytes();
         wire.write("Hello", BWKey.field1);
         wire.write("World", BWKey.field2);
-        wire.write("Long field name which is more than 32 characters, Bye", BWKey.field3);
+        String name = "Long field name which is more than 32 characters, Bye";
+        wire.write(name, BWKey.field3);
         wire.flip();
-        checkWire(wire, "[pos: 0, lim: 67, cap: 256 ] ÅHelloÅWorld·5Long field name which is more than 32 characters, Bye");
-        assertEquals("Hello: World: \"Long field name which is more than 32 characters, Bye\": ", asText(wire));
+        checkWire(wire, "[pos: 0, lim: 67, cap: 256 ] ÅHelloÅWorld·5" + name,
+                "[pos: 0, lim: 67, cap: 256 ] ÅHelloÅWorld·5" + name,
+                "[pos: 0, lim: 67, cap: 256 ] ÅHelloÅWorld·5" + name,
+                "[pos: 0, lim: 67, cap: 256 ] ÅHelloÅWorld·5" + name,
+                "[pos: 0, lim: 0, cap: 256 ] ",
+                "[pos: 0, lim: 0, cap: 256 ] ");
+        assertEquals(fieldLess ? "" : "Hello: World: \"" + name + "\": ", asText(wire));
     }
 
     @Test
@@ -110,7 +137,9 @@ public class BinaryWireTest {
         wire.write(BWKey.field1);
         wire.write("Test", BWKey.field2);
         wire.flip();
-        checkAsText(wire, "\"\": field1: Test: ", "\"\": 1: Test: ");
+        checkAsText(wire, "\"\": field1: Test: ",
+                "\"\": 1: Test: ",
+                "");
 
         wire.read();
         wire.read();
@@ -127,7 +156,9 @@ public class BinaryWireTest {
         wire.write(BWKey.field1);
         wire.write("Test", BWKey.field2);
         wire.flip();
-        checkAsText(wire, "\"\": field1: Test: ", "\"\": 1: Test: ");
+        checkAsText(wire, "\"\": field1: Test: ",
+                "\"\": 1: Test: ",
+                "");
 
         // ok as blank matches anything
         wire.read(BWKey.field1);
@@ -135,7 +166,7 @@ public class BinaryWireTest {
         // not a match
         try {
             wire.read(BWKey.field1);
-            fail();
+            if (!fieldLess) fail();
         } catch (UnsupportedOperationException expected) {
             wire.read(new StringBuilder(), BWKey.field1);
         }
@@ -159,10 +190,10 @@ public class BinaryWireTest {
         assertEquals(0, name.length());
 
         wire.read(name, BWKey.field1);
-        assertEquals(numericField ? "" : BWKey.field1.name(), name.toString());
+        assertEquals(numericField || fieldLess ? "" : BWKey.field1.name(), name.toString());
 
         wire.read(name, BWKey.field1);
-        assertEquals(name1, name.toString());
+        assertEquals(fieldLess ? "" : name1, name.toString());
 
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
@@ -177,7 +208,11 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).int8(3);
         wire.flip();
         checkWire(wire, "[pos: 0, lim: 16, cap: 256 ] À⒈Æfield1⒉ÄTest⒊",
-                "[pos: 0, lim: 14, cap: 256 ] À¢⒈¹⒈¢⒉ÄTest¢⒊");
+                "[pos: 0, lim: 19, cap: 256 ] À¢⒈Æfield1¢⒉ÄTest¢⒊",
+                "[pos: 0, lim: 11, cap: 256 ] À⒈¹⒈⒉ÄTest⒊",
+                "[pos: 0, lim: 14, cap: 256 ] À¢⒈¹⒈¢⒉ÄTest¢⒊",
+                "[pos: 0, lim: 3, cap: 256 ] ⒈⒉⒊",
+                "[pos: 0, lim: 6, cap: 256 ] ¢⒈¢⒉¢⒊");
         checkAsText123(wire);
 
         // ok as blank matches anything
@@ -201,7 +236,11 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).int16(3);
         wire.flip();
         checkWire(wire, "[pos: 0, lim: 16, cap: 256 ] À⒈Æfield1⒉ÄTest⒊",
-                "[pos: 0, lim: 17, cap: 256 ] À£⒈٠¹⒈£⒉٠ÄTest£⒊٠");
+                "[pos: 0, lim: 22, cap: 256 ] À£⒈٠Æfield1£⒉٠ÄTest£⒊٠",
+                "[pos: 0, lim: 11, cap: 256 ] À⒈¹⒈⒉ÄTest⒊",
+                "[pos: 0, lim: 17, cap: 256 ] À£⒈٠¹⒈£⒉٠ÄTest£⒊٠",
+                "[pos: 0, lim: 3, cap: 256 ] ⒈⒉⒊",
+                "[pos: 0, lim: 9, cap: 256 ] £⒈٠£⒉٠£⒊٠");
         checkAsText123(wire);
 
         // ok as blank matches anything
@@ -225,7 +264,11 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).uint8(3);
         wire.flip();
         checkWire(wire, "[pos: 0, lim: 16, cap: 256 ] À⒈Æfield1⒉ÄTest⒊",
-                "[pos: 0, lim: 14, cap: 256 ] À¦⒈¹⒈¦⒉ÄTest¦⒊");
+                "[pos: 0, lim: 19, cap: 256 ] À¦⒈Æfield1¦⒉ÄTest¦⒊",
+                "[pos: 0, lim: 11, cap: 256 ] À⒈¹⒈⒉ÄTest⒊",
+                "[pos: 0, lim: 14, cap: 256 ] À¦⒈¹⒈¦⒉ÄTest¦⒊",
+                "[pos: 0, lim: 3, cap: 256 ] ⒈⒉⒊",
+                "[pos: 0, lim: 6, cap: 256 ] ¦⒈¦⒉¦⒊");
         checkAsText123(wire);
 
         // ok as blank matches anything
@@ -249,7 +292,11 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).uint16(3);
         wire.flip();
         checkWire(wire, "[pos: 0, lim: 16, cap: 256 ] À⒈Æfield1⒉ÄTest⒊",
-                "[pos: 0, lim: 17, cap: 256 ] À§⒈٠¹⒈§⒉٠ÄTest§⒊٠");
+                "[pos: 0, lim: 22, cap: 256 ] À§⒈٠Æfield1§⒉٠ÄTest§⒊٠",
+                "[pos: 0, lim: 11, cap: 256 ] À⒈¹⒈⒉ÄTest⒊",
+                "[pos: 0, lim: 17, cap: 256 ] À§⒈٠¹⒈§⒉٠ÄTest§⒊٠",
+                "[pos: 0, lim: 3, cap: 256 ] ⒈⒉⒊",
+                "[pos: 0, lim: 9, cap: 256 ] §⒈٠§⒉٠§⒊٠");
         checkAsText123(wire);
 
         // ok as blank matches anything
@@ -268,17 +315,24 @@ public class BinaryWireTest {
     private void checkAsText123(Wire wire) {
         checkAsText(wire, "\"\": 1\n" +
                         "field1: 2\n" +
-                        "Test: 3\n", "\"\": 1\n" +
+                        "Test: 3\n",
+                "\"\": 1\n" +
                         "1: 2\n" +
-                        "Test: 3\n"
+                        "Test: 3\n",
+                "1\n" +
+                        "2\n" +
+                        "3\n"
         );
     }
 
-    private void checkAsText(Wire wire, String textFieldExcepted, String numberFieldExpected) {
-        if (numericField)
-            assertEquals(numberFieldExpected, asText(wire));
+    private void checkAsText(Wire wire, String textFieldExcepted, String numberFieldExpected, String fieldLessExpected) {
+        String text = asText(wire);
+        if (fieldLess)
+            assertEquals(fieldLessExpected, text);
+        else if (numericField)
+            assertEquals(numberFieldExpected, text);
         else
-            assertEquals(textFieldExcepted, asText(wire));
+            assertEquals(textFieldExcepted, text);
     }
 
     @Test
@@ -289,7 +343,11 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).uint32(3);
         wire.flip();
         checkWire(wire, "[pos: 0, lim: 16, cap: 256 ] À⒈Æfield1⒉ÄTest⒊",
-                "[pos: 0, lim: 23, cap: 256 ] À¨⒈٠٠٠¹⒈¨⒉٠٠٠ÄTest¨⒊٠٠٠");
+                "[pos: 0, lim: 28, cap: 256 ] À¨⒈٠٠٠Æfield1¨⒉٠٠٠ÄTest¨⒊٠٠٠",
+                "[pos: 0, lim: 11, cap: 256 ] À⒈¹⒈⒉ÄTest⒊",
+                "[pos: 0, lim: 23, cap: 256 ] À¨⒈٠٠٠¹⒈¨⒉٠٠٠ÄTest¨⒊٠٠٠",
+                "[pos: 0, lim: 3, cap: 256 ] ⒈⒉⒊",
+                "[pos: 0, lim: 15, cap: 256 ] ¨⒈٠٠٠¨⒉٠٠٠¨⒊٠٠٠");
         checkAsText123(wire);
 
         // ok as blank matches anything
@@ -313,7 +371,11 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).int32(3);
         wire.flip();
         checkWire(wire, "[pos: 0, lim: 16, cap: 256 ] À⒈Æfield1⒉ÄTest⒊",
-                "[pos: 0, lim: 23, cap: 256 ] À¤⒈٠٠٠¹⒈¤⒉٠٠٠ÄTest¤⒊٠٠٠");
+                "[pos: 0, lim: 28, cap: 256 ] À¤⒈٠٠٠Æfield1¤⒉٠٠٠ÄTest¤⒊٠٠٠",
+                "[pos: 0, lim: 11, cap: 256 ] À⒈¹⒈⒉ÄTest⒊",
+                "[pos: 0, lim: 23, cap: 256 ] À¤⒈٠٠٠¹⒈¤⒉٠٠٠ÄTest¤⒊٠٠٠",
+                "[pos: 0, lim: 3, cap: 256 ] ⒈⒉⒊",
+                "[pos: 0, lim: 15, cap: 256 ] ¤⒈٠٠٠¤⒉٠٠٠¤⒊٠٠٠");
         checkAsText123(wire);
 
         // ok as blank matches anything
@@ -337,7 +399,11 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).int64(3);
         wire.flip();
         checkWire(wire, "[pos: 0, lim: 16, cap: 256 ] À⒈Æfield1⒉ÄTest⒊",
-                "[pos: 0, lim: 35, cap: 256 ] À¥⒈٠٠٠٠٠٠٠¹⒈¥⒉٠٠٠٠٠٠٠ÄTest¥⒊٠٠٠٠٠٠٠");
+                "[pos: 0, lim: 40, cap: 256 ] À¥⒈٠٠٠٠٠٠٠Æfield1¥⒉٠٠٠٠٠٠٠ÄTest¥⒊٠٠٠٠٠٠٠",
+                "[pos: 0, lim: 11, cap: 256 ] À⒈¹⒈⒉ÄTest⒊",
+                "[pos: 0, lim: 35, cap: 256 ] À¥⒈٠٠٠٠٠٠٠¹⒈¥⒉٠٠٠٠٠٠٠ÄTest¥⒊٠٠٠٠٠٠٠",
+                "[pos: 0, lim: 3, cap: 256 ] ⒈⒉⒊",
+                "[pos: 0, lim: 27, cap: 256 ] ¥⒈٠٠٠٠٠٠٠¥⒉٠٠٠٠٠٠٠¥⒊٠٠٠٠٠٠٠");
         checkAsText123(wire);
 
         // ok as blank matches anything
@@ -361,7 +427,11 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).float64(3);
         wire.flip();
         checkWire(wire, "[pos: 0, lim: 16, cap: 256 ] À⒈Æfield1⒉ÄTest⒊",
-                "[pos: 0, lim: 35, cap: 256 ] À\u0091٠٠٠٠٠٠ð?¹⒈\u0091٠٠٠٠٠٠٠@ÄTest\u0091٠٠٠٠٠٠⒏@");
+                "[pos: 0, lim: 40, cap: 256 ] À\u0091٠٠٠٠٠٠ð?Æfield1\u0091٠٠٠٠٠٠٠@ÄTest\u0091٠٠٠٠٠٠⒏@",
+                "[pos: 0, lim: 11, cap: 256 ] À⒈¹⒈⒉ÄTest⒊",
+                "[pos: 0, lim: 35, cap: 256 ] À\u0091٠٠٠٠٠٠ð?¹⒈\u0091٠٠٠٠٠٠٠@ÄTest\u0091٠٠٠٠٠٠⒏@",
+                "[pos: 0, lim: 3, cap: 256 ] ⒈⒉⒊",
+                "[pos: 0, lim: 27, cap: 256 ] \u0091٠٠٠٠٠٠ð?\u0091٠٠٠٠٠٠٠@\u0091٠٠٠٠٠٠⒏@");
         checkAsText123(wire);
 
         // ok as blank matches anything
@@ -388,22 +458,29 @@ public class BinaryWireTest {
         Wire wire = createBytes();
         wire.write().text("Hello");
         wire.write(BWKey.field1).text("world");
-        String name1 = "Long field name which is more than 32 characters, Bye";
+        String name = "Long field name which is more than 32 characters, Bye";
 
-        wire.write("Test", BWKey.field2).text(name1);
+        wire.write("Test", BWKey.field2).text(name);
         wire.flip();
-        checkWire(wire, "[pos: 0, lim: 80, cap: 256 ] ÀåHelloÆfield1åworldÄTest¸5" + name1,
-                "[pos: 0, lim: 75, cap: 256 ] ÀåHello¹⒈åworldÄTest¸5" + name1);
+        checkWire(wire, "[pos: 0, lim: 80, cap: 256 ] ÀåHelloÆfield1åworldÄTest¸5" + name,
+                "[pos: 0, lim: 80, cap: 256 ] ÀåHelloÆfield1åworldÄTest¸5" + name,
+                "[pos: 0, lim: 75, cap: 256 ] ÀåHello¹⒈åworldÄTest¸5" + name,
+                "[pos: 0, lim: 75, cap: 256 ] ÀåHello¹⒈åworldÄTest¸5" + name,
+                "[pos: 0, lim: 67, cap: 256 ] åHelloåworld¸5" + name,
+                "[pos: 0, lim: 67, cap: 256 ] åHelloåworld¸5" + name);
         checkAsText(wire, "\"\": Hello\n" +
                         "field1: world\n" +
-                        "Test: \"" + name1 + "\"\n",
+                        "Test: \"" + name + "\"\n",
                 "\"\": Hello\n" +
                         "1: world\n" +
-                        "Test: \"" + name1 + "\"\n");
+                        "Test: \"" + name + "\"\n",
+                "Hello\n" +
+                        "world\n" +
+                        "\"" + name + "\"\n");
 
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
-        Stream.of("Hello", "world", name1).forEach(e -> {
+        Stream.of("Hello", "world", name).forEach(e -> {
             wire.read().text(sb);
             assertEquals(e, sb.toString());
         });
@@ -422,9 +499,14 @@ public class BinaryWireTest {
         wire.write("Test", BWKey.field2).type(name1);
         wire.flip();
         checkWire(wire, "[pos: 0, lim: 158, cap: 256 ] À¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1,
-                "[pos: 0, lim: 153, cap: 256 ] À¶⒍MyType¹⒈¶⒑AlsoMyTypeÄTest¶{" + name1);
+                "[pos: 0, lim: 158, cap: 256 ] À¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1,
+                "[pos: 0, lim: 153, cap: 256 ] À¶⒍MyType¹⒈¶⒑AlsoMyTypeÄTest¶{" + name1,
+                "[pos: 0, lim: 153, cap: 256 ] À¶⒍MyType¹⒈¶⒑AlsoMyTypeÄTest¶{" + name1,
+                "[pos: 0, lim: 145, cap: 256 ] ¶⒍MyType¶⒑AlsoMyType¶{" + name1,
+                "[pos: 0, lim: 145, cap: 256 ] ¶⒍MyType¶⒑AlsoMyType¶{" + name1);
         checkAsText(wire, "\"\": !MyType field1: !AlsoMyType Test: !" + name1,
-                "\"\": !MyType 1: !AlsoMyType Test: !" + name1);
+                "\"\": !MyType 1: !AlsoMyType Test: !" + name1,
+                "!MyType !AlsoMyType !" + name1);
 
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
@@ -438,7 +520,7 @@ public class BinaryWireTest {
         wire.read();
     }
 
-/*
+ /*
     @Test
     public void testHasNextSequenceItem() throws Exception {
 

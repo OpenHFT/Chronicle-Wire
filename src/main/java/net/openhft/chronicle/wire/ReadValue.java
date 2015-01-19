@@ -21,7 +21,7 @@ public interface ReadValue {
     /*
      * Text / Strings.
      */
-    Wire flag(BooleanConsumer flag);
+    Wire bool(BooleanConsumer flag);
 
     Wire text(StringBuilder s);
 

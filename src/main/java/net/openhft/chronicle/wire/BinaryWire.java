@@ -22,15 +22,22 @@ public class BinaryWire implements Wire {
     final WriteValue writeValue;
     final ReadValue readValue = new BinaryReadValue();
     private final boolean numericFields;
+    private final boolean fieldLess;
 
     public BinaryWire(Bytes bytes) {
-        this(bytes, false, false);
+        this(bytes, false, false, false);
     }
 
-    public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields) {
+    public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess) {
         this.numericFields = numericFields;
+        this.fieldLess = fieldLess;
         this.bytes = (AbstractBytes) bytes;
         writeValue = fixed ? fixedWriteValue : new BinaryWriteValue();
+    }
+
+    @Override
+    public Bytes bytes() {
+        return bytes;
     }
 
     @Override
@@ -141,13 +148,13 @@ public class BinaryWire implements Wire {
 
             // Boolean
             case 0xBD:
-                wire.writeValue().flag(null);
+                wire.writeValue().bool(null);
                 break;
             case 0xBE: // FALSE(0xBE),
-                wire.writeValue().flag(false);
+                wire.writeValue().bool(false);
                 break;
             case 0xBF: // TRUE(0xBF),
-                wire.writeValue().flag(true);
+                wire.writeValue().bool(true);
                 break;
             default:
                 throw new UnsupportedOperationException(WireType.stringForCode(code));
@@ -185,6 +192,14 @@ public class BinaryWire implements Wire {
         if (code < 128)
             return code;
         switch (code >> 4) {
+            case SPECIAL:
+                switch (code) {
+                    case 0xBE: // FALSE(0xBE),
+                        return 0;
+                    case 0xBF: // TRUE(0xBF),
+                        return 1;
+                }
+                break;
             case FLOAT:
                 double d = readFloat0(code);
                 return (long) d;
@@ -273,7 +288,9 @@ public class BinaryWire implements Wire {
 
     @Override
     public WriteValue write() {
-        writeField("");
+        if (!fieldLess) {
+            writeField("");
+        }
         return writeValue;
     }
 
@@ -284,10 +301,12 @@ public class BinaryWire implements Wire {
 
     @Override
     public WriteValue write(WireKey key) {
-        if (numericFields)
-            writeField(key.code());
-        else
-            writeField(key.name());
+        if (!fieldLess) {
+            if (numericFields)
+                writeField(key.code());
+            else
+                writeField(key.name());
+        }
         return writeValue;
     }
 
@@ -317,7 +336,9 @@ public class BinaryWire implements Wire {
 
     @Override
     public WriteValue write(CharSequence name, WireKey template) {
-        writeField(name);
+        if (!fieldLess) {
+            writeField(name);
+        }
         return writeValue;
     }
 
@@ -330,7 +351,7 @@ public class BinaryWire implements Wire {
     @Override
     public ReadValue read(WireKey key) {
         StringBuilder sb = readField(Wires.acquireStringBuilder(), key.code());
-        if (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))
+        if (fieldLess || (sb != null && (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))))
             return readValue;
         throw new UnsupportedOperationException("Unordered fields not supported yet.");
     }
@@ -369,6 +390,12 @@ public class BinaryWire implements Wire {
             case FIELD1:
                 return getStringBuilder(code, sb);
         }
+        // if field-less accept anything in order.
+        if (fieldLess) {
+            sb.setLength(0);
+            return sb;
+        }
+            
         return null;
     }
 
@@ -528,7 +555,7 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public Wire flag(Boolean flag) {
+        public Wire bool(Boolean flag) {
             bytes.writeUnsignedByte(flag == null
                     ? NULL.code
                     : flag ? TRUE.code : FALSE.code);
@@ -782,16 +809,20 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public Wire flag(BooleanConsumer flag) {
+        public Wire bool(BooleanConsumer flag) {
             int code = peekCode();
             switch (code) {
                 case 0xBD: // NULL
+                    bytes.skip(1);
+                    // todo take the default.
                     flag.accept(null);
                     break;
                 case 0xBE: // FALSE(0xBE),
+                    bytes.skip(1);
                     flag.accept(false);
                     break;
                 case 0xBF: // TRUE(0xBF),
+                    bytes.skip(1);
                     flag.accept(true);
                     break;
                 default:

@@ -15,7 +15,7 @@ public interface WriteValue {
     /*
      * data types
      */
-    Wire flag(Boolean flag);
+    Wire bool(Boolean flag);
 
     Wire text(CharSequence s);
 

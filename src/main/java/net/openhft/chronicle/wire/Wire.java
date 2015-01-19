@@ -1,5 +1,7 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.lang.io.Bytes;
+
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream.
  *
@@ -46,4 +48,6 @@ public interface Wire {
     void flip();
 
     void clear();
+
+    Bytes bytes();
 }

@@ -34,6 +34,11 @@ public class TextWire implements Wire {
     }
 
     @Override
+    public Bytes bytes() {
+        return bytes;
+    }
+
+    @Override
     public void copyTo(Wire wire) {
         throw new UnsupportedOperationException();
     }
@@ -246,7 +251,7 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public Wire flag(Boolean flag) {
+        public Wire bool(Boolean flag) {
             bytes.append(sep).append(flag == null ? "!!null" : flag ? "true" : "false").append(END_FIELD);
             sep = FIELD_SEP;
             return TextWire.this;
@@ -406,7 +411,7 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public Wire flag(BooleanConsumer flag) {
+        public Wire bool(BooleanConsumer flag) {
             StringBuilder sb = Wires.acquireStringBuilder();
             bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
             if (StringInterner.isEqual(sb, "true"))
