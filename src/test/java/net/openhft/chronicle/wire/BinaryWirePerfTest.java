@@ -265,11 +265,6 @@ public class BinaryWirePerfTest {
 
         @Override
         public void readMarshallable(Wire wire) throws StreamCorruptedException {
-            readMarshallable1(wire);
-            readMarshallable2(wire);
-        }
-
-        private void readMarshallable1(Wire wire) {
             wire.read(Fields.I).int32(this::i)
                     .read(Fields.J).int32(this::j)
                     .read(Fields.K).int32(this::k)
@@ -278,11 +273,7 @@ public class BinaryWirePerfTest {
                     .read(Fields.N).int32(this::n)
                     .read(Fields.O).int32(this::o)
                     .read(Fields.P).int32(this::p)
-            ;
-        }
-
-        private void readMarshallable2(Wire wire) {
-            wire.read(Fields.Q).int32(this::q)
+                    .read(Fields.Q).int32(this::q)
                     .read(Fields.R).int32(this::r)
                     .read(Fields.S).int32(this::s)
                     .read(Fields.T).int32(this::t)
