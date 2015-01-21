@@ -702,7 +702,7 @@ public class BinaryWire implements Wire {
         }
 
         void writeFloat(double d) {
-            if (d < 1L << 32 && d >= -1L << 32) {
+            if (d < 1L << 32 && d >= -1L << 31) {
                 long l = (long) d;
                 if (l == d) {
                     writeInt(l);

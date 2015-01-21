@@ -46,7 +46,7 @@ public class BinaryWireTest {
 
     Bytes bytes = new DirectStore(256).bytes();
 
-    private BinaryWire createBytes() {
+    private BinaryWire createWire() {
         bytes.clear();
         return new BinaryWire(bytes, fixed, numericField, fieldLess);
     }
@@ -75,7 +75,7 @@ public class BinaryWireTest {
 
     @Test
     public void testWrite() throws Exception {
-        Wire wire = createBytes();
+        Wire wire = createWire();
         wire.write();
         wire.write();
         wire.write();
@@ -96,7 +96,7 @@ public class BinaryWireTest {
 
     @Test
     public void testWrite1() throws Exception {
-        Wire wire = createBytes();
+        Wire wire = createWire();
         wire.write(BWKey.field1);
         wire.write(BWKey.field2);
         wire.write(BWKey.field3);
@@ -115,7 +115,7 @@ public class BinaryWireTest {
 
     @Test
     public void testWrite2() throws Exception {
-        Wire wire = createBytes();
+        Wire wire = createWire();
         wire.write("Hello", BWKey.field1);
         wire.write("World", BWKey.field2);
         String name = "Long field name which is more than 32 characters, Bye";
@@ -132,7 +132,7 @@ public class BinaryWireTest {
 
     @Test
     public void testRead() throws Exception {
-        Wire wire = createBytes();
+        Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
         wire.write("Test", BWKey.field2);
@@ -151,7 +151,7 @@ public class BinaryWireTest {
 
     @Test
     public void testRead1() throws Exception {
-        Wire wire = createBytes();
+        Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
         wire.write("Test", BWKey.field2);
@@ -177,7 +177,7 @@ public class BinaryWireTest {
 
     @Test
     public void testRead2() throws Exception {
-        Wire wire = createBytes();
+        Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
         String name1 = "Long field name which is more than 32 characters, Bye";
@@ -202,7 +202,7 @@ public class BinaryWireTest {
 
     @Test
     public void int8() {
-        Wire wire = createBytes();
+        Wire wire = createWire();
         wire.write().int8(1);
         wire.write(BWKey.field1).int8(2);
         wire.write("Test", BWKey.field2).int8(3);
@@ -230,7 +230,7 @@ public class BinaryWireTest {
 
     @Test
     public void int16() {
-        Wire wire = createBytes();
+        Wire wire = createWire();
         wire.write().int16(1);
         wire.write(BWKey.field1).int16(2);
         wire.write("Test", BWKey.field2).int16(3);
@@ -258,7 +258,7 @@ public class BinaryWireTest {
 
     @Test
     public void uint8() {
-        Wire wire = createBytes();
+        Wire wire = createWire();
         wire.write().uint8(1);
         wire.write(BWKey.field1).uint8(2);
         wire.write("Test", BWKey.field2).uint8(3);
@@ -286,7 +286,7 @@ public class BinaryWireTest {
 
     @Test
     public void uint16() {
-        Wire wire = createBytes();
+        Wire wire = createWire();
         wire.write().uint16(1);
         wire.write(BWKey.field1).uint16(2);
         wire.write("Test", BWKey.field2).uint16(3);
@@ -337,7 +337,7 @@ public class BinaryWireTest {
 
     @Test
     public void uint32() {
-        Wire wire = createBytes();
+        Wire wire = createWire();
         wire.write().uint32(1);
         wire.write(BWKey.field1).uint32(2);
         wire.write("Test", BWKey.field2).uint32(3);
@@ -365,7 +365,7 @@ public class BinaryWireTest {
 
     @Test
     public void int32() {
-        Wire wire = createBytes();
+        Wire wire = createWire();
         wire.write().int32(1);
         wire.write(BWKey.field1).int32(2);
         wire.write("Test", BWKey.field2).int32(3);
@@ -393,7 +393,7 @@ public class BinaryWireTest {
 
     @Test
     public void int64() {
-        Wire wire = createBytes();
+        Wire wire = createWire();
         wire.write().int64(1);
         wire.write(BWKey.field1).int64(2);
         wire.write("Test", BWKey.field2).int64(3);
@@ -421,7 +421,7 @@ public class BinaryWireTest {
 
     @Test
     public void float64() {
-        Wire wire = createBytes();
+        Wire wire = createWire();
         wire.write().float64(1);
         wire.write(BWKey.field1).float64(2);
         wire.write("Test", BWKey.field2).float64(3);
@@ -455,11 +455,11 @@ public class BinaryWireTest {
 
     @Test
     public void text() {
-        Wire wire = createBytes();
-        wire.write().text("Hello");
-        wire.write(BWKey.field1).text("world");
         String name = "Long field name which is more than 32 characters, Bye";
 
+        Wire wire = createWire();
+        wire.write().text("Hello");
+        wire.write(BWKey.field1).text("world");
         wire.write("Test", BWKey.field2).text(name);
         wire.flip();
         checkWire(wire, "[pos: 0, lim: 80, cap: 256 ] ÀåHelloÆfield1åworldÄTest¸5" + name,
@@ -492,7 +492,7 @@ public class BinaryWireTest {
 
     @Test
     public void type() {
-        Wire wire = createBytes();
+        Wire wire = createWire();
         wire.write().type("MyType");
         wire.write(BWKey.field1).type("AlsoMyType");
         String name1 = "com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState";
