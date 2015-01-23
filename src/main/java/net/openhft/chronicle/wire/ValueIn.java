@@ -16,14 +16,14 @@ import java.util.function.*;
 public interface ValueIn {
     ValueIn sequenceStart();
 
-    Wire sequenceEnd();
+    WireIn sequenceEnd();
 
     /*
      * Text / Strings.
      */
-    Wire bool(BooleanConsumer flag);
+    WireIn bool(BooleanConsumer flag);
 
-    Wire text(StringBuilder s);
+    WireIn text(StringBuilder s);
 
     default String text() {
         StringBuilder sb = Wires.acquireStringBuilder();
@@ -31,37 +31,37 @@ public interface ValueIn {
         return sb.toString();
     }
 
-    Wire type(StringBuilder s);
+    WireIn type(StringBuilder s);
 
-    Wire int8(ByteConsumer i);
+    WireIn int8(ByteConsumer i);
 
-    Wire uint8(ShortConsumer i);
+    WireIn uint8(ShortConsumer i);
 
-    Wire int16(ShortConsumer i);
+    WireIn int16(ShortConsumer i);
 
-    Wire uint16(IntConsumer i);
+    WireIn uint16(IntConsumer i);
 
-    Wire int32(IntConsumer i);
+    WireIn int32(IntConsumer i);
 
-    Wire uint32(LongConsumer i);
+    WireIn uint32(LongConsumer i);
 
-    Wire int64(LongConsumer i);
+    WireIn int64(LongConsumer i);
 
-    Wire float32(FloatConsumer v);
+    WireIn float32(FloatConsumer v);
 
-    Wire float64(DoubleConsumer v);
+    WireIn float64(DoubleConsumer v);
 
-    Wire mapStart();
+    WireIn mapStart();
 
-    Wire mapEnd();
+    WireIn mapEnd();
 
-    Wire time(Consumer<LocalTime> localTime);
+    WireIn time(Consumer<LocalTime> localTime);
 
-    Wire zonedDateTime(Consumer<ZonedDateTime> zonedDateTime);
+    WireIn zonedDateTime(Consumer<ZonedDateTime> zonedDateTime);
 
-    Wire date(Consumer<LocalDate> zonedDateTime);
+    WireIn date(Consumer<LocalDate> zonedDateTime);
 
-    Wire object(Supplier<Marshallable> type);
+    WireIn object(Supplier<Marshallable> type);
 
     boolean hasNext();
 }

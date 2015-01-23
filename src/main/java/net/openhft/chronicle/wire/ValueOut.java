@@ -10,48 +10,48 @@ import java.time.ZonedDateTime;
 public interface ValueOut {
     ValueOut sequenceStart();
 
-    Wire sequenceEnd();
+    WireOut sequenceEnd();
 
     /*
      * data types
      */
-    Wire bool(Boolean flag);
+    WireOut bool(Boolean flag);
 
-    Wire text(CharSequence s);
+    WireOut text(CharSequence s);
 
-    Wire int8(int i8);
+    WireOut int8(int i8);
 
-    Wire uint8(int u8);
+    WireOut uint8(int u8);
 
-    Wire int16(int i16);
+    WireOut int16(int i16);
 
-    Wire uint16(int u16);
+    WireOut uint16(int u16);
 
-    Wire utf8(int codepoint);
+    WireOut utf8(int codepoint);
 
-    Wire int32(int i32);
+    WireOut int32(int i32);
 
-    Wire uint32(long u32);
+    WireOut uint32(long u32);
 
-    Wire float32(float f);
+    WireOut float32(float f);
 
-    Wire float64(double d);
+    WireOut float64(double d);
 
-    Wire int64(long i64);
+    WireOut int64(long i64);
 
-    Wire hint(CharSequence hint);
+    WireOut hint(CharSequence hint);
 
-    Wire mapStart();
+    WireOut mapStart();
 
-    Wire mapEnd();
+    WireOut mapEnd();
 
-    Wire time(LocalTime localTime);
+    WireOut time(LocalTime localTime);
 
-    Wire zonedDateTime(ZonedDateTime zonedDateTime);
+    WireOut zonedDateTime(ZonedDateTime zonedDateTime);
 
-    Wire date(LocalDate zonedDateTime);
+    WireOut date(LocalDate zonedDateTime);
 
-    Wire object(Marshallable type);
+    WireOut object(Marshallable type);
 
-    Wire type(CharSequence typeName);
+    WireOut type(CharSequence typeName);
 }
