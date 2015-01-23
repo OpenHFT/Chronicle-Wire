@@ -18,15 +18,15 @@ import java.util.function.*;
 public class RawWire implements Wire {
     final AbstractBytes bytes;
 
-    final RawWriteValue writeValue = new RawWriteValue();
-    final RawReadValue readValue = new RawReadValue();
+    final RawValueOut writeValue = new RawValueOut();
+    final RawValueIn readValue = new RawValueIn();
 
     public RawWire(Bytes bytes) {
         this.bytes = (AbstractBytes) bytes;
     }
 
     @Override
-    public void copyTo(Wire wire) {
+    public void copyTo(WireOut wire) {
         if (wire instanceof RawWire) {
             wire.bytes().write(bytes);
         } else {
@@ -35,37 +35,37 @@ public class RawWire implements Wire {
     }
 
     @Override
-    public WriteValue write() {
+    public ValueOut write() {
         return writeValue;
     }
 
     @Override
-    public WriteValue write(WireKey key) {
+    public ValueOut write(WireKey key) {
         return writeValue;
     }
 
     @Override
-    public WriteValue write(CharSequence name, WireKey template) {
+    public ValueOut write(CharSequence name, WireKey template) {
         return writeValue;
     }
 
     @Override
-    public WriteValue writeValue() {
+    public ValueOut writeValue() {
         return writeValue;
     }
 
     @Override
-    public ReadValue read() {
+    public ValueIn read() {
         return readValue;
     }
 
     @Override
-    public ReadValue read(WireKey key) {
+    public ValueIn read(WireKey key) {
         return readValue;
     }
 
     @Override
-    public ReadValue read(StringBuilder name, WireKey template) {
+    public ValueIn read(StringBuilder name, WireKey template) {
         return readValue;
     }
 
@@ -129,11 +129,11 @@ public class RawWire implements Wire {
         return bytes;
     }
 
-    class RawWriteValue implements WriteValue {
+    class RawValueOut implements ValueOut {
 
 
         @Override
-        public WriteValue sequenceStart() {
+        public ValueOut sequenceStart() {
             return this;
         }
 
@@ -267,10 +267,10 @@ public class RawWire implements Wire {
         }
     }
 
-    class RawReadValue implements ReadValue {
+    class RawValueIn implements ValueIn {
 
         @Override
-        public ReadValue sequenceStart() {
+        public ValueIn sequenceStart() {
             if (true) throw new UnsupportedOperationException();
             return this;
         }

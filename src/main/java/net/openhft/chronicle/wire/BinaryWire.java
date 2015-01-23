@@ -18,9 +18,9 @@ import static net.openhft.chronicle.wire.WireType.*;
  */
 public class BinaryWire implements Wire {
     final AbstractBytes bytes;
-    final WriteValue fixedWriteValue = new FixedBinaryWriteValue();
-    final WriteValue writeValue;
-    final ReadValue readValue = new BinaryReadValue();
+    final ValueOut fixedValueOut = new FixedBinaryValueOut();
+    final ValueOut valueOut;
+    final ValueIn valueIn = new BinaryValueIn();
     private final boolean numericFields;
     private final boolean fieldLess;
 
@@ -32,7 +32,7 @@ public class BinaryWire implements Wire {
         this.numericFields = numericFields;
         this.fieldLess = fieldLess;
         this.bytes = (AbstractBytes) bytes;
-        writeValue = fixed ? fixedWriteValue : new BinaryWriteValue();
+        valueOut = fixed ? fixedValueOut : new BinaryValueOut();
     }
 
     @Override
@@ -41,7 +41,7 @@ public class BinaryWire implements Wire {
     }
 
     @Override
-    public void copyTo(Wire wire) {
+    public void copyTo(WireOut wire) {
         while (bytes.remaining() > 0) {
             int code = bytes.readUnsignedByte();
             switch (code >> 4) {
@@ -91,7 +91,7 @@ public class BinaryWire implements Wire {
         }
     }
 
-    private void copySpecial(Wire wire, int code) {
+    private void copySpecial(WireOut wire, int code) {
         switch (code) {
             case 0xB0: // PADDING
                 break;
@@ -287,27 +287,27 @@ public class BinaryWire implements Wire {
     }
 
     @Override
-    public WriteValue write() {
+    public ValueOut write() {
         if (!fieldLess) {
             writeField("");
         }
-        return writeValue;
+        return valueOut;
     }
 
     @Override
-    public WriteValue writeValue() {
-        return writeValue;
+    public ValueOut writeValue() {
+        return valueOut;
     }
 
     @Override
-    public WriteValue write(WireKey key) {
+    public ValueOut write(WireKey key) {
         if (!fieldLess) {
             if (numericFields)
                 writeField(key.code());
             else
                 writeField(key.name());
         }
-        return writeValue;
+        return valueOut;
     }
 
     private void writeField(int code) {
@@ -335,31 +335,31 @@ public class BinaryWire implements Wire {
     }
 
     @Override
-    public WriteValue write(CharSequence name, WireKey template) {
+    public ValueOut write(CharSequence name, WireKey template) {
         if (!fieldLess) {
             writeField(name);
         }
-        return writeValue;
+        return valueOut;
     }
 
     @Override
-    public ReadValue read() {
+    public ValueIn read() {
         readField(Wires.acquireStringBuilder(), -1);
-        return readValue;
+        return valueIn;
     }
 
     @Override
-    public ReadValue read(WireKey key) {
+    public ValueIn read(WireKey key) {
         StringBuilder sb = readField(Wires.acquireStringBuilder(), key.code());
         if (fieldLess || (sb != null && (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))))
-            return readValue;
+            return valueIn;
         throw new UnsupportedOperationException("Unordered fields not supported yet.");
     }
 
     @Override
-    public ReadValue read(StringBuilder name, WireKey template) {
+    public ValueIn read(StringBuilder name, WireKey template) {
         readField(name, template.code());
-        return readValue;
+        return valueIn;
     }
 
     private StringBuilder readField(StringBuilder name, int codeMatch) {
@@ -503,11 +503,11 @@ public class BinaryWire implements Wire {
         long position;
     }
 
-    class FixedBinaryWriteValue implements WriteValue {
+    class FixedBinaryValueOut implements ValueOut {
         final FastStack<WriteState> state = new FastStack<>(WriteState::new);
 
         @Override
-        public WriteValue sequenceStart() {
+        public ValueOut sequenceStart() {
             WriteState push = state.push();
             push.type = NestType.SEQUENCE;
             bytes.writeUnsignedByte(WireType.BYTES_LENGTH32.code);
@@ -672,7 +672,7 @@ public class BinaryWire implements Wire {
         }
     }
 
-    class BinaryWriteValue extends FixedBinaryWriteValue {
+    class BinaryValueOut extends FixedBinaryValueOut {
         void writeInt(long l) {
             if (l < Integer.MIN_VALUE) {
                 if (l == (float) l)
@@ -771,9 +771,9 @@ public class BinaryWire implements Wire {
         }
     }
 
-    class BinaryReadValue implements ReadValue {
+    class BinaryValueIn implements ValueIn {
         @Override
-        public ReadValue sequenceStart() {
+        public ValueIn sequenceStart() {
             throw new UnsupportedOperationException();
         }
 

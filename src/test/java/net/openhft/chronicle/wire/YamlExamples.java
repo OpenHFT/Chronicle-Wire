@@ -16,47 +16,6 @@ import static org.junit.Assert.assertEquals;
  * Created by peter on 12/01/15.
  */
 public class YamlExamples {
-    enum Keys implements WireKey {
-        list(List.class, Collections.emptyList()),
-        american(List.class, Collections.emptyList()),
-        national(List.class, Collections.emptyList()),
-        name(""),
-        time(LocalTime.MIN),
-        player(""),
-        action(""),
-        hr(0),
-        avg(0.0),
-        rbi(0L),
-        canonical(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault())),
-        date(LocalDate.MIN);
-
-        static {
-            WireKey.checkKeys(values());
-        }
-
-        private final Type type;
-        private final Object defaultValue;
-
-        Keys(Object defaultValue) {
-            this(defaultValue.getClass(), defaultValue);
-        }
-
-        Keys(Type type, Object defaultValue) {
-            this.type = type;
-            this.defaultValue = defaultValue;
-        }
-
-        @Override
-        public Type type() {
-            return type;
-        }
-
-        @Override
-        public Object defaultValue() {
-            return defaultValue;
-        }
-    }
-
     public static void sequenceExample(Wire wire) {
         /*
          - Mark McGwire
@@ -69,87 +28,19 @@ public class YamlExamples {
         wire.write().sequenceEnd();
 
         // or
-        WriteValue writeValue = wire.write(Keys.list).sequenceStart();
+        ValueOut valueOut = wire.write(Keys.list).sequenceStart();
         for (String s : "Mark McGwire,Sammy Sosa,Ken Griffey".split(",")) {
-            writeValue.text(s);
+            valueOut.text(s);
         }
-        writeValue.sequenceEnd();
-        
+        valueOut.sequenceEnd();
+
         // to read this.
-        ReadValue readValue = wire.read(Keys.list).sequenceStart();
+        ValueIn valueIn = wire.read(Keys.list).sequenceStart();
         List<String> names = new ArrayList<>();
-        while (readValue.hasNext()) {
-            names.add(readValue.text());
+        while (valueIn.hasNext()) {
+            names.add(valueIn.text());
         }
-        readValue.sequenceEnd();
-    }
-
-    static class Stats {
-        StringBuilder name = new StringBuilder();
-        int hr;
-        double avg;
-        long rbi;
-
-        public StringBuilder name() {
-            return name;
-        }
-
-        public int hr() {
-            return hr;
-        }
-
-        public void hr(int hr) {
-            this.hr = hr;
-        }
-
-        public void avg(double avg) {
-            this.avg = avg;
-        }
-
-        public void rbi(long rbi) {
-            this.rbi = rbi;
-        }
-
-        @Override
-        public String toString() {
-            return "Stats{" +
-                    "name=" + name +
-                    ", hr=" + hr +
-                    ", avg=" + avg +
-                    ", rbi=" + rbi +
-                    '}';
-        }
-    }
-
-    @Test
-    public void testMappedObject() {
-        Wire wire = new BinaryWire(DirectStore.allocate(128).bytes());
-/*
-        name: Mark McGwire
-        hr:   65    # Home runs
-        avg:  0.278 # Batting average
-        rbi:  147   # Runs Batted In
-*/
-        wire.write(Keys.name).text("Mark McGwire")
-                .write(Keys.hr).int32(65)
-                .writeComment("Home runs")
-                .write(Keys.avg).float64(0.278)
-                .writeComment("Batting average")
-                .write(Keys.rbi).int64(147)
-                .writeComment("Runs Batted In");
-
-        wire.flip();
-
-        Stats stats = new Stats();
-        wire.read(Keys.name).text(stats.name)
-                .read(Keys.hr).int32(stats::hr)
-                .read(Keys.avg).float64(stats::avg)
-                .read(Keys.rbi).int64(stats::rbi)
-                .consumeDocumentEnd();
-        wire.clear();
-
-        assertEquals("Stats{name=Mark McGwire, hr=65, avg=0.278, rbi=147}", stats.toString());
-
+        valueIn.sequenceEnd();
     }
 
     public static void mapExample(Wire wire) {
@@ -311,6 +202,115 @@ public class YamlExamples {
         wire.flip();
         wire.readMarshallable(myType);
 */
+    }
+
+    @Test
+    public void testMappedObject() {
+        Wire wire = new BinaryWire(DirectStore.allocate(128).bytes());
+/*
+        name: Mark McGwire
+        hr:   65    # Home runs
+        avg:  0.278 # Batting average
+        rbi:  147   # Runs Batted In
+*/
+        wire.write(Keys.name).text("Mark McGwire")
+                .write(Keys.hr).int32(65)
+                .writeComment("Home runs")
+                .write(Keys.avg).float64(0.278)
+                .writeComment("Batting average")
+                .write(Keys.rbi).int64(147)
+                .writeComment("Runs Batted In");
+
+        wire.flip();
+
+        Stats stats = new Stats();
+        wire.read(Keys.name).text(stats.name)
+                .read(Keys.hr).int32(stats::hr)
+                .read(Keys.avg).float64(stats::avg)
+                .read(Keys.rbi).int64(stats::rbi)
+                .consumeDocumentEnd();
+        wire.clear();
+
+        assertEquals("Stats{name=Mark McGwire, hr=65, avg=0.278, rbi=147}", stats.toString());
+
+    }
+
+    enum Keys implements WireKey {
+        list(List.class, Collections.emptyList()),
+        american(List.class, Collections.emptyList()),
+        national(List.class, Collections.emptyList()),
+        name(""),
+        time(LocalTime.MIN),
+        player(""),
+        action(""),
+        hr(0),
+        avg(0.0),
+        rbi(0L),
+        canonical(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault())),
+        date(LocalDate.MIN);
+
+        private final Type type;
+        private final Object defaultValue;
+
+        static {
+            WireKey.checkKeys(values());
+        }
+
+        Keys(Object defaultValue) {
+            this(defaultValue.getClass(), defaultValue);
+        }
+
+        Keys(Type type, Object defaultValue) {
+            this.type = type;
+            this.defaultValue = defaultValue;
+        }
+
+        @Override
+        public Type type() {
+            return type;
+        }
+
+        @Override
+        public Object defaultValue() {
+            return defaultValue;
+        }
+    }
+
+    static class Stats {
+        StringBuilder name = new StringBuilder();
+        int hr;
+        double avg;
+        long rbi;
+
+        public StringBuilder name() {
+            return name;
+        }
+
+        public int hr() {
+            return hr;
+        }
+
+        public void hr(int hr) {
+            this.hr = hr;
+        }
+
+        public void avg(double avg) {
+            this.avg = avg;
+        }
+
+        public void rbi(long rbi) {
+            this.rbi = rbi;
+        }
+
+        @Override
+        public String toString() {
+            return "Stats{" +
+                    "name=" + name +
+                    ", hr=" + hr +
+                    ", avg=" + avg +
+                    ", rbi=" + rbi +
+                    '}';
+        }
     }
 }
 

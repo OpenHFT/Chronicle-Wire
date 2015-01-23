@@ -13,8 +13,8 @@ import java.util.function.*;
 /**
  * Created by peter on 14/01/15.
  */
-public interface ReadValue {
-    ReadValue sequenceStart();
+public interface ValueIn {
+    ValueIn sequenceStart();
 
     Wire sequenceEnd();
 

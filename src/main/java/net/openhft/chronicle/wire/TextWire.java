@@ -25,8 +25,8 @@ public class TextWire implements Wire {
     public static final String FIELD_SEP = "";
     private static final String END_FIELD = "\n";
     final AbstractBytes bytes;
-    final WriteValue writeValue = new TextWriteValue();
-    final ReadValue readValue = new TextReadValue();
+    final ValueOut valueOut = new TextValueOut();
+    final ValueIn valueIn = new TextValueIn();
     String sep = "";
 
     public TextWire(Bytes bytes) {
@@ -39,45 +39,45 @@ public class TextWire implements Wire {
     }
 
     @Override
-    public void copyTo(Wire wire) {
+    public void copyTo(WireOut wire) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public WriteValue write() {
+    public ValueOut write() {
         bytes.append(sep).append("\"\": ");
         sep = "";
-        return writeValue;
+        return valueOut;
     }
 
     @Override
-    public WriteValue writeValue() {
-        return writeValue;
+    public ValueOut writeValue() {
+        return valueOut;
     }
 
     @Override
-    public WriteValue write(WireKey key) {
+    public ValueOut write(WireKey key) {
         String name = key.name();
         if (name == null) name = Integer.toString(key.code());
         bytes.append(sep).append(name).append(": ");
         sep = "";
-        return writeValue;
+        return valueOut;
     }
 
     @Override
-    public WriteValue write(CharSequence name, WireKey template) {
+    public ValueOut write(CharSequence name, WireKey template) {
         if (name == null) {
             return write(template);
         }
         bytes.append(sep).append(name.length() == 0 ? "\"\"" : quotes(name)).append(": ");
         sep = "";
-        return writeValue;
+        return valueOut;
     }
 
     @Override
-    public ReadValue read() {
+    public ValueIn read() {
         readField(Wires.acquireStringBuilder());
-        return readValue;
+        return valueIn;
     }
 
     private void consumeWhiteSpace() {
@@ -111,18 +111,18 @@ public class TextWire implements Wire {
     }
 
     @Override
-    public ReadValue read(WireKey key) {
+    public ValueIn read(WireKey key) {
         StringBuilder sb = readField(Wires.acquireStringBuilder());
         if (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))
-            return readValue;
+            return valueIn;
         throw new UnsupportedOperationException("Unordered fields not supported yet.");
     }
 
     @Override
-    public ReadValue read(StringBuilder name, WireKey template) {
+    public ValueIn read(StringBuilder name, WireKey template) {
         consumeWhiteSpace();
         readField(name);
-        return readValue;
+        return valueIn;
     }
 
     private int peekCode() {
@@ -225,10 +225,24 @@ public class TextWire implements Wire {
         throw new UnsupportedOperationException();
     }
 
+    private void unescape(StringBuilder sb) {
+        for (int i = 0; i < sb.length(); i++) {
+            char ch2 = sb.charAt(i);
+            if (ch2 == '\\') {
+                sb.deleteCharAt(i);
+                char ch3 = sb.charAt(i);
+                switch (ch3) {
+                    case 'n':
+                        sb.setCharAt(i, '\n');
+                        break;
+                }
+            }
+        }
+    }
 
-    class TextWriteValue implements WriteValue {
+    class TextValueOut implements ValueOut {
         @Override
-        public WriteValue sequenceStart() {
+        public ValueOut sequenceStart() {
             throw new UnsupportedOperationException();
         }
 
@@ -367,9 +381,9 @@ public class TextWire implements Wire {
         }
     }
 
-    class TextReadValue implements ReadValue {
+    class TextValueIn implements ValueIn {
         @Override
-        public ReadValue sequenceStart() {
+        public ValueIn sequenceStart() {
             throw new UnsupportedOperationException();
         }
 
@@ -507,21 +521,6 @@ public class TextWire implements Wire {
         @Override
         public Wire object(Supplier<Marshallable> type) {
             throw new UnsupportedOperationException();
-        }
-    }
-
-    private void unescape(StringBuilder sb) {
-        for (int i = 0; i < sb.length(); i++) {
-            char ch2 = sb.charAt(i);
-            if (ch2 == '\\') {
-                sb.deleteCharAt(i);
-                char ch3 = sb.charAt(i);
-                switch (ch3) {
-                    case 'n':
-                        sb.setCharAt(i, '\n');
-                        break;
-                }
-            }
         }
     }
 }

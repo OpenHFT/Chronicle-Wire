@@ -7,8 +7,8 @@ import java.time.ZonedDateTime;
 /**
  * Created by peter on 14/01/15.
  */
-public interface WriteValue {
-    WriteValue sequenceStart();
+public interface ValueOut {
+    ValueOut sequenceStart();
 
     Wire sequenceEnd();
 
