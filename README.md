@@ -37,7 +37,7 @@ Options for Binary format
 Wire is built on top of the Bytes library, however Bytes in turn can wrap
 
 * ByteBuffer - heap and direct
-* byte[] (via ByteBuffer)
+* byte\[\] (via ByteBuffer)
 
 # Uses
 
