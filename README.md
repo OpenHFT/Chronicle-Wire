@@ -6,6 +6,9 @@ Wire Format abstraction library
 Chronicle Wire allows the caller to describe the data to be stored and retrieved, 
 and the Wire handles the formatting options for a wide range of formats.
 
+# Support
+This library will require Java 8, future version may support C++ and C\#
+
 # Text Formats
 
 The text formats include
