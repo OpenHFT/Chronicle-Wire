@@ -125,13 +125,13 @@ The documentation looks well thought out, and it is worth emulating.
 | Feature	| Wire Text | Wire Binary | Protobuf	| Cap'n Proto |	SBE	| FlatBuffers |
 |------------|:-----------:|:---------------:|:-----------:|:---------------:|:------:|:---------------:|
 | Schema evolution |	yes | yes | yes | 	yes	| caveats |	yes |
-| Zero-copy |	yes | yes | no	| yes	 | yes	 | yes |
-|Random-access reads | 	yes | yes | no	 | yes	 | no | 	yes |
-|Random-access writes | 	yes | yes | no	 | ?	 | no | 	? |
+| Zero-copy | planned | yes | no	| yes	 | yes	 | yes |
+|Random-access reads | 	planned | yes | no	 | yes	 | no | 	yes |
+|Random-access writes | 	planned | yes | no	 | ?	 | no | 	? |
 |Safe against malicious input	| 	yes | yes	| yes		| yes		| yes		| opt-in 	| upfront |
 |Reflection / generic algorithms	| 	yes | yes	| yes		| yes		| yes		| yes |
 |Initialization order	| any | any	| any	| 	any		| preorder		| bottom-up |
-|Unknown field retention	| 	yes | yes	| yes		| yes		| no		| no |
+|Unknown field retention	| 	yes |  yes	| yes		| yes		| no		| no |
 |Object-capability RPC system	| 	yes | yes	| no		| yes		| no		| no |
 |Schema language	| no | no	| custom		| custom		| XML		| custom |
 |Usable as mutable state	| 	yes | yes	| yes	| 	no		| no		| no |
@@ -145,4 +145,6 @@ The documentation looks well thought out, and it is worth emulating.
 |Other languages	lots!	 | no | no | 6+ 	| others*		| no		| no |
 |Authors' preferred use case|	distributed  computing | financial / trading	| distributed  computing |	platforms /  sandboxing	| financial / trading	| games |
 
-Basede on https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html
+Based on https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html
+
+Note: It not clear what padding which doesn't take up space on the wire means.
