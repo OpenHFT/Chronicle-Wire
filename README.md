@@ -3,35 +3,55 @@ Wire Format abstraction library
 
 # Purpose
 
-Chronicle Wire allows the caller to describe the data to be stored and retrieved, 
-and the Wire handles the formatting options for a wide range of formats.
+Chronicle Wire supports a separation of describing what data you want to store and retrieve
+   and how it should be rendered/parsed.
+   Wire handles a variety of formatting options for a wide range of formats.
+
+A key aim of Wire is to support schema changes.  It should make reasonable 
+    attempts to handle
+* optional fields
+* fields in a different order.
+* fields the consumer doesn't expect. Optionally parsing them or ignoring them.
+* more or less data than expected (in field-less formats) 
+* reading a different type to the one written
+
+It should also be as efficient as possible in the case where any or all of these are true
+* fields are in the order expected.
+* fields are the type expected.
+* fields names/numbers are not used.
+* self describing types are not needed.
+* random access of data values is supported.
 
 # Support
-This library will require Java 8, future version may support C++ and C\#
+This library will require Java 8. Support for C++ and C\# planned.
 
 # Text Formats
 
 The text formats include
-* JSON
 * YAML (a subset of mapping structures included)
+* JSON
 * XML
 * possible FIX support
 
 Options include
-* field names or field numbers (as FIX does)
+* field names (e.g. JSON) or field numbers (e.g. FIX)
+* optional fields with a default value can be dropped.
 
 # Binary Formats
 
 The binary formats include
-* BSON (Binary JSon)
 * Binary YAML
 * typed data without fields.
-* raw data
+* raw untyped fieldless data
+* BSON (Binary JSon)
 
 Options for Binary format
 * field names or field numbers
-* fixed width with zero copy support.
+* fixed width data with zero copy support.
 * variable width
+* optional fields with a default value can be dropped.
+
+Note: Wire supports debug/transparent combinations like self describing data with zero copy support.
 
 # Compression Options
 
@@ -84,5 +104,8 @@ Message Pack is a packed binary wire format which also supports JSON for
     (and JSON) formats of this library.  c.f. Wire is designed to be human readable first, 
     based on YAML, and has a range of options to make it more efficient, 
     the most extreme being fixed position binary.
+    
+ Msgpack has support for embedded binary, whereas Wire has support for
+    comments and hints to improve rendering for human consumption.
     
 The documentation looks well thought out, and it is worth emulating.
