@@ -22,6 +22,12 @@ It should also be as efficient as possible in the case where any or all of these
 * self describing types are not needed.
 * random access of data values is supported.
 
+Wire is designed to make it easy to convert from one wire format to another. 
+  e.g. you can use fixed width binary data in memory for performance and variable width or text over the network.
+  Different TCP connection could use different formats.
+  
+Wire also support hybrid wire formats.  e.g. you can have one format embedded in another.
+
 # Support
 This library will require Java 8. Support for C++ and C\# planned.
 
@@ -135,8 +141,8 @@ The documentation looks well thought out, and it is worth emulating.
 |Object-capability RPC system	| 	yes | yes	| no		| yes		| no		| no |
 |Schema language	| no | no	| custom		| custom		| XML		| custom |
 |Usable as mutable state	| 	yes | yes	| yes	| 	no		| no		| no |
-|Padding takes space on wire?	| 	yes | yes	| no		| optional	| 	yes		| yes |
-|Unset fields take space on wire? | optional | optional		| no		| yes		| yes		| no |
+|Padding takes space on wire?	| 	optional | optional | no		| optional	| 	yes		| yes |
+|Unset fields take space on wire? | optional | optional	 | no		| yes		| yes		| no |
 |Pointers take space on wire? | no | no		| no		| yes		| no		| yes |
 |C++	| planned | planned	| yes	| 	yes (C++11)*		| yes		| yes |
 |Java	 | Java 8 | Java 8	| yes	| 	yes*		| yes		| yes |
