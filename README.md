@@ -154,3 +154,92 @@ The documentation looks well thought out, and it is worth emulating.
 Based on https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html
 
 Note: It not clear what padding which doesn't take up space on the wire means.
+
+# Design notes
+
+See https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html for a comparison to other encoders.
+
+## Schema evolution.
+
+Wire optionally supports;
+- field name changes
+- field order changes.
+- capturing or ignoring unexpected fields.
+- setting of fields to the default if not available.
+- raw messages can be longer or short than expected.
+
+The more flexibility, the large the overhead in term of CPU and memory.  
+WIre allows you to dynamically pick the optimal configuration and convert between these options.
+
+## Zero copy
+Wire supports zero copy random access to fields and direct copy from in memory to the network.
+It also support translation from one wire format to another e.g. switching between fixed length data and variable length data.
+
+
+## Random Access.
+You can access a random field in memory
+   e.g. in 2 TB file, page in/pull into CPU cache, only the data relating to you read or write.
+   
+| format | access style |
+|----------|------------------|
+| fixed length binary | random access without parsing first |
+| variable length binary | random access with partial parsing. i.e. you can skip large portions |
+| fixed length text | random access with parsing |
+| variable length text | no random access |
+
+Wire References are relative to the start of the data contained to allow loading in an arbitrary point in memory.
+
+## Safe against malicious input
+Wire has built in tiers of bounds checks to prevent accidental read/writing corrupting the data. 
+   It is not complete enough for a security review.
+   
+## Reflection / generic algorithms
+Wire support generic reading and writing of an arbitrary stream. This can be used in combination with predetermined fields.
+   e.g. you can read the fields you know about and asked it to provide the fields you didn't.
+   You can also give generic field names like keys to a map as YAML does.
+
+##  Initialization order
+ Wire can handle unknown information like lengths by using padding.  
+    It will go back and fill in any data which it wasn't aware of as it was writing the data.
+    e.g. when it writes an object it doesn't know how long it is going to be so it add padding at the start.  
+    Once the object has been written it goes back and overwrites the length. 
+    It can also hand cases where the length was more than needed known as packing.
+
+## Unknown field retention?
+Wire can handle reading data it didn't expect interspersed with data it did expect. 
+   Rather than specify the expected field name, a StringBuilder is provided.
+
+Note: there are times when you want to skip/copy an entire field or message without reading any more of it.  This is also supported.
+
+## Object-capacity RPC system.
+Wire supports references based on a name, number or UUID.  
+   This is useful when including a reference to an object the reader should lookup via another means.
+   
+A common case if when you have a proxy to a remote object and you want to pass or return this in an RPC call.
+
+## Schema language
+Wire's schema is not externalised from the code, however it is planned to use YAML in a format it can parse.
+
+## Usable as mutable state
+Wire supports storing an applications internal state. 
+    This will not allow it to grow or shrink. You can't free any of it without copying 
+    the pieces you need and discarding the original copy.
+    
+## Padding takes space on the wire.
+The Wire format chosen determines if there is any padding on the wire. 
+    If you copy the in memory data directly it's format doesn't change. 
+    If you want to drop padding you can copy the message to a wire format without padding.
+    You can decide whether the original padding is to be preserved or not if turned back into a format with padding.
+
+We could look at supporting Cap'n'Proto's zero byte removal compression.
+
+## Unset fields take space on the wire?
+Wire supports fields with and without optional fields and automatic means of removing them.  
+    It doesn't support automatically adding them back in as information has been lost.
+
+## Pointers take space on the wire.
+Wire doesn't have pointer but it does have content lengths which are 
+   a useful hint for random access and robustness, but these are optional.
+
+##  Platform support
+Wire is Java 8 only for now.  Future version may support Java 6, C++ and C\#
