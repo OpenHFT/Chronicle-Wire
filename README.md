@@ -122,27 +122,27 @@ The documentation looks well thought out, and it is worth emulating.
 ## Comparison with Cap'n'Proto
 
 
-| Feature	| Protobuf	| Cap'n Proto |	SBE	| FlatBuffers |
-|------------|:----------:|:---------------:|:------:|:-------------:|
-| Schema evolution |	yes | 	yes	| caveats |	yes |
-| Zero-copy |	no	| yes	 | yes	 | yes |
-|Random-access reads | 	no	 | yes	 | no | 	yes | 
-|Safe against malicious input		| yes		| yes		| yes		| opt-in 	| upfront | 
-|Reflection / generic algorithms		| yes		| yes		| yes		| yes | 
-|Initialization order		| any	| 	any		| preorder		| bottom-up | 
-|Unknown field retention		| yes		| yes		| no		| no | 
-|Object-capability RPC system		| no		| yes		| no		| no | 
-|Schema language		| custom		| custom		| XML		| custom | 
-|Usable as mutable state		| yes	| 	no		| no		| no | 
-|Padding takes space on wire?		| no		| optional	| 	yes		| yes | 
-|Unset fields take space on wire?		| no		| yes		| yes		| no | 
-|Pointers take space on wire?		| no		| yes		| no		| yes | 
-|C++		| yes	| 	yes (C++11)*		| yes		| yes | 
-|Java		| yes	| 	yes*		| yes		| yes | 
-|C#		| yes	| 	yes*	| 	yes		| yes* | 
-|Go		| yes	| 	yes		| no		| yes* | 
-|Other languages	lots!	| 6+ 	| others*		| no		| no | 
-|Authors' preferred use case|	distributed  computing |	platforms /  sandboxing	| financial / 
-trading	| games | 
+| Feature	| Wire Text | Wire Binary | Protobuf	| Cap'n Proto |	SBE	| FlatBuffers |
+|------------|:-----------:|:---------------:|:-----------:|:---------------:|:------:|:---------------:|
+| Schema evolution |	yes | yes | yes | 	yes	| caveats |	yes |
+| Zero-copy |	yes | yes | no	| yes	 | yes	 | yes |
+|Random-access reads | 	yes | yes | no	 | yes	 | no | 	yes |
+|Random-access writes | 	yes | yes | no	 | ?	 | no | 	? |
+|Safe against malicious input	| 	yes | yes	| yes		| yes		| yes		| opt-in 	| upfront |
+|Reflection / generic algorithms	| 	yes | yes	| yes		| yes		| yes		| yes |
+|Initialization order	| any | any	| any	| 	any		| preorder		| bottom-up |
+|Unknown field retention	| 	yes | yes	| yes		| yes		| no		| no |
+|Object-capability RPC system	| 	yes | yes	| no		| yes		| no		| no |
+|Schema language	| no | no	| custom		| custom		| XML		| custom |
+|Usable as mutable state	| 	yes | yes	| yes	| 	no		| no		| no |
+|Padding takes space on wire?	| 	yes | yes	| no		| optional	| 	yes		| yes |
+|Unset fields take space on wire? | optional | optional		| no		| yes		| yes		| no |
+|Pointers take space on wire? | no | no		| no		| yes		| no		| yes |
+|C++	| planned | planned	| yes	| 	yes (C++11)*		| yes		| yes |
+|Java	 | Java 8 | Java 8	| yes	| 	yes*		| yes		| yes |
+|C\#	 | planned | planned	| yes	| 	yes*	| 	yes		| yes* |
+|Go | no | no		| yes	| 	yes		| no		| yes* |
+|Other languages	lots!	 | no | no | 6+ 	| others*		| no		| no |
+|Authors' preferred use case|	distributed  computing | financial / trading	| distributed  computing |	platforms /  sandboxing	| financial / trading	| games |
 
 Basede on https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html
