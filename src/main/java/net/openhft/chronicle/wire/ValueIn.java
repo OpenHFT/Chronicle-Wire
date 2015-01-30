@@ -4,10 +4,12 @@ import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
 import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
+import net.openhft.lang.values.LongValue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.function.*;
 
 /**
@@ -24,6 +26,8 @@ public interface ValueIn {
     WireIn bool(BooleanConsumer flag);
 
     WireIn text(StringBuilder s);
+
+    WireIn text(Consumer<String> s);
 
     default String text() {
         StringBuilder sb = Wires.acquireStringBuilder();
@@ -64,4 +68,10 @@ public interface ValueIn {
     WireIn object(Supplier<Marshallable> type);
 
     boolean hasNext();
+
+    WireIn expectText(CharSequence s);
+
+    WireIn uuid(Consumer<UUID> uuid);
+
+    WireIn int64(LongValue value);
 }

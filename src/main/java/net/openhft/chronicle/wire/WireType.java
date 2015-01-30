@@ -26,6 +26,7 @@ public enum WireType {
     FIXED6(0x97),
 
     // long number
+    UUID(0xA0),
     UTF8(0xA1),
     INT8(0xA2),
     INT16(0xA3),

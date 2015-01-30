@@ -1,8 +1,11 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.lang.values.LongValue;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 /**
  * Created by peter on 14/01/15.
@@ -54,4 +57,10 @@ public interface ValueOut {
     WireOut object(Marshallable type);
 
     WireOut type(CharSequence typeName);
+
+    WireOut uuid(UUID uuid);
+
+    ValueOut cacheAlign();
+
+    WireOut int64(LongValue readReady);
 }

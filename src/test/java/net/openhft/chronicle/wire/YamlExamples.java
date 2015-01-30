@@ -319,13 +319,13 @@ class MyType implements Marshallable {
     LocalDate date;
 
     @Override
-    public void writeMarshallable(Wire wire) {
+    public void writeMarshallable(WireOut wire) {
 //        wire.writeText(MyTypeKeys.name, name);
 //        wire.writeDate(MyTypeKeys.date, date);
     }
 
     @Override
-    public void readMarshallable(Wire wire) throws StreamCorruptedException {
+    public void readMarshallable(WireIn wire) throws StreamCorruptedException {
 //        name = wire.readText(MyTypeKeys.name);
 //        date = wire.readDate(MyTypeKeys.date);
     }

@@ -11,7 +11,7 @@ public interface Marshallable {
      *
      * @param wire to write to.
      */
-    public void writeMarshallable(Wire wire);
+    public void writeMarshallable(WireOut wire);
 
     /**
      * Straight line ordered decoding.
@@ -19,5 +19,5 @@ public interface Marshallable {
      * @param wire to read from in an ordered manner.
      * @throws java.io.StreamCorruptedException the stream wasn't ordered or formatted as expected.
      */
-    public void readMarshallable(Wire wire) throws StreamCorruptedException;
+    public void readMarshallable(WireIn wire) throws StreamCorruptedException;
 }
