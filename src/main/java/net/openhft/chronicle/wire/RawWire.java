@@ -6,6 +6,7 @@ import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
 import net.openhft.lang.io.AbstractBytes;
 import net.openhft.lang.io.Bytes;
+import net.openhft.lang.values.IntValue;
 import net.openhft.lang.values.LongValue;
 
 import java.time.LocalDate;
@@ -137,8 +138,6 @@ public class RawWire implements Wire {
     }
 
     class RawValueOut implements ValueOut {
-
-
         @Override
         public ValueOut sequenceStart() {
             return this;
@@ -285,6 +284,11 @@ public class RawWire implements Wire {
 
         @Override
         public WireOut int64(LongValue readReady) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut int32(IntValue value) {
             throw new UnsupportedOperationException();
         }
     }
@@ -439,6 +443,11 @@ public class RawWire implements Wire {
 
         @Override
         public WireIn int64(LongValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn int32(IntValue value) {
             throw new UnsupportedOperationException();
         }
     }

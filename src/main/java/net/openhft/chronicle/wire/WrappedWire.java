@@ -5,6 +5,7 @@ import net.openhft.chronicle.util.ByteConsumer;
 import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
 import net.openhft.lang.io.Bytes;
+import net.openhft.lang.values.IntValue;
 import net.openhft.lang.values.LongValue;
 
 import java.time.LocalDate;
@@ -159,6 +160,11 @@ public abstract class WrappedWire {
         public WireOut int64(LongValue readReady) {
             valueOut.int64(readReady);
             return _this();
+        }
+
+        @Override
+        public WireOut int32(IntValue value) {
+            throw new UnsupportedOperationException();
         }
 
         public Wire bool(Boolean flag) {
@@ -383,6 +389,11 @@ public abstract class WrappedWire {
         public WireIn int64(LongValue value) {
             valueIn.int64(value);
             return _this();
+        }
+
+        @Override
+        public WireIn int32(IntValue value) {
+            throw new UnsupportedOperationException();
         }
     }
 }

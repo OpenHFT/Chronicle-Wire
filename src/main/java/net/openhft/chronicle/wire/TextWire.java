@@ -9,6 +9,7 @@ import net.openhft.lang.io.Bytes;
 import net.openhft.lang.io.EscapingStopCharTester;
 import net.openhft.lang.io.StopCharTesters;
 import net.openhft.lang.pool.StringInterner;
+import net.openhft.lang.values.IntValue;
 import net.openhft.lang.values.LongValue;
 
 import java.nio.BufferUnderflowException;
@@ -287,6 +288,11 @@ public class TextWire implements Wire {
         }
 
         @Override
+        public WireOut int32(IntValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public Wire bool(Boolean flag) {
             bytes.append(sep).append(flag == null ? "!!null" : flag ? "true" : "false").append(END_FIELD);
             sep = FIELD_SEP;
@@ -435,6 +441,11 @@ public class TextWire implements Wire {
         }
 
         @Override
+        public WireIn int32(IntValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public Wire type(StringBuilder s) {
             int code = peekCode();
             if (code == '!') {
@@ -463,6 +474,11 @@ public class TextWire implements Wire {
 
         @Override
         public WireIn text(Consumer<String> s) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String text() {
             throw new UnsupportedOperationException();
         }
 

@@ -4,6 +4,7 @@ import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
 import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
+import net.openhft.lang.values.IntValue;
 import net.openhft.lang.values.LongValue;
 
 import java.time.LocalDate;
@@ -74,4 +75,6 @@ public interface ValueIn {
     WireIn uuid(Consumer<UUID> uuid);
 
     WireIn int64(LongValue value);
+
+    WireIn int32(IntValue value);
 }

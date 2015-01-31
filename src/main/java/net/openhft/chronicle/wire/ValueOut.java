@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.lang.values.IntValue;
 import net.openhft.lang.values.LongValue;
 
 import java.time.LocalDate;
@@ -63,4 +64,6 @@ public interface ValueOut {
     ValueOut cacheAlign();
 
     WireOut int64(LongValue readReady);
+
+    WireOut int32(IntValue value);
 }

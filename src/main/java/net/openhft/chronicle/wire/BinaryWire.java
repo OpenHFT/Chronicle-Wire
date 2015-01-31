@@ -4,6 +4,7 @@ import net.openhft.chronicle.util.*;
 import net.openhft.lang.io.AbstractBytes;
 import net.openhft.lang.io.Bytes;
 import net.openhft.lang.pool.StringInterner;
+import net.openhft.lang.values.IntValue;
 import net.openhft.lang.values.LongValue;
 
 import java.io.IOException;
@@ -695,6 +696,11 @@ public class BinaryWire implements Wire {
             int64(longValue.getValue());
             return BinaryWire.this;
         }
+
+        @Override
+        public WireOut int32(IntValue value) {
+            throw new UnsupportedOperationException();
+        }
     }
 
     class BinaryValueOut extends FixedBinaryValueOut {
@@ -957,6 +963,11 @@ public class BinaryWire implements Wire {
 
         @Override
         public WireIn int64(LongValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn int32(IntValue value) {
             throw new UnsupportedOperationException();
         }
     }
