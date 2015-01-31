@@ -9,11 +9,14 @@ import net.openhft.lang.io.Bytes;
 import net.openhft.lang.io.EscapingStopCharTester;
 import net.openhft.lang.io.StopCharTesters;
 import net.openhft.lang.pool.StringInterner;
+import net.openhft.lang.values.IntValue;
+import net.openhft.lang.values.LongValue;
 
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.function.*;
 
 import static net.openhft.chronicle.wire.WireType.stringForCode;
@@ -36,6 +39,11 @@ public class TextWire implements Wire {
     @Override
     public Bytes bytes() {
         return bytes;
+    }
+
+    @Override
+    public void addPadding(int paddingToAdd) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -265,6 +273,26 @@ public class TextWire implements Wire {
         }
 
         @Override
+        public WireOut uuid(UUID uuid) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public ValueOut cacheAlign() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut int64(LongValue readReady) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut int32(IntValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public Wire bool(Boolean flag) {
             bytes.append(sep).append(flag == null ? "!!null" : flag ? "true" : "false").append(END_FIELD);
             sep = FIELD_SEP;
@@ -398,6 +426,26 @@ public class TextWire implements Wire {
         }
 
         @Override
+        public WireIn expectText(CharSequence s) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn uuid(Consumer<UUID> uuid) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn int64(LongValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn int32(IntValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public Wire type(StringBuilder s) {
             int code = peekCode();
             if (code == '!') {
@@ -422,6 +470,16 @@ public class TextWire implements Wire {
             }
             unescape(sb);
             return TextWire.this;
+        }
+
+        @Override
+        public WireIn text(Consumer<String> s) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String text() {
+            throw new UnsupportedOperationException();
         }
 
         @Override

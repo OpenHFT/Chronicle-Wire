@@ -4,11 +4,14 @@ import net.openhft.chronicle.util.*;
 import net.openhft.lang.io.AbstractBytes;
 import net.openhft.lang.io.Bytes;
 import net.openhft.lang.pool.StringInterner;
+import net.openhft.lang.values.IntValue;
+import net.openhft.lang.values.LongValue;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.function.*;
 
 import static net.openhft.chronicle.wire.WireType.*;
@@ -503,6 +506,11 @@ public class BinaryWire implements Wire {
         long position;
     }
 
+    @Override
+    public void addPadding(int paddingToAdd) {
+        throw new UnsupportedOperationException();
+    }
+
     class FixedBinaryValueOut implements ValueOut {
         final FastStack<WriteState> state = new FastStack<>(WriteState::new);
 
@@ -668,6 +676,29 @@ public class BinaryWire implements Wire {
 
         @Override
         public Wire object(Marshallable type) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut uuid(UUID uuid) {
+            bytes.writeUnsignedByte(UUID.code);
+            return BinaryWire.this;
+        }
+
+        @Override
+        public ValueOut cacheAlign() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut int64(LongValue longValue) {
+            // TODO add padding.
+            int64(longValue.getValue());
+            return BinaryWire.this;
+        }
+
+        @Override
+        public WireOut int32(IntValue value) {
             throw new UnsupportedOperationException();
         }
     }
@@ -912,6 +943,31 @@ public class BinaryWire implements Wire {
 
         @Override
         public Wire object(Supplier<Marshallable> type) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn text(Consumer<String> s) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn expectText(CharSequence s) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn uuid(Consumer<UUID> uuid) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn int64(LongValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn int32(IntValue value) {
             throw new UnsupportedOperationException();
         }
     }

@@ -36,4 +36,6 @@ public interface WireOut {
     void clear();
 
     Bytes bytes();
+
+    void addPadding(int paddingToAdd);
 }

@@ -6,10 +6,13 @@ import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
 import net.openhft.lang.io.AbstractBytes;
 import net.openhft.lang.io.Bytes;
+import net.openhft.lang.values.IntValue;
+import net.openhft.lang.values.LongValue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.function.*;
 
 /**
@@ -129,9 +132,12 @@ public class RawWire implements Wire {
         return bytes;
     }
 
+    @Override
+    public void addPadding(int paddingToAdd) {
+        throw new UnsupportedOperationException();
+    }
+
     class RawValueOut implements ValueOut {
-
-
         @Override
         public ValueOut sequenceStart() {
             return this;
@@ -265,6 +271,26 @@ public class RawWire implements Wire {
         public Wire type(CharSequence typeName) {
             return RawWire.this;
         }
+
+        @Override
+        public WireOut uuid(UUID uuid) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public ValueOut cacheAlign() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut int64(LongValue readReady) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut int32(IntValue value) {
+            throw new UnsupportedOperationException();
+        }
     }
 
     class RawValueIn implements ValueIn {
@@ -297,6 +323,11 @@ public class RawWire implements Wire {
         public Wire text(StringBuilder s) {
             bytes.readUTFΔ(s);
             return RawWire.this;
+        }
+
+        @Override
+        public WireIn text(Consumer<String> s) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -398,6 +429,26 @@ public class RawWire implements Wire {
         @Override
         public boolean hasNext() {
             return bytes.remaining() > 0;
+        }
+
+        @Override
+        public WireIn expectText(CharSequence s) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn uuid(Consumer<UUID> uuid) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn int64(LongValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn int32(IntValue value) {
+            throw new UnsupportedOperationException();
         }
     }
 }

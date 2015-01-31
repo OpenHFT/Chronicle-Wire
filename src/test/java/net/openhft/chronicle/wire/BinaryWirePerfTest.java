@@ -131,7 +131,7 @@ public class BinaryWirePerfTest {
         }
 
         @Override
-        public void writeMarshallable(Wire wire) {
+        public void writeMarshallable(WireOut wire) {
             wire.write(Fields.B_FLAG).bool(b)
                     .write(Fields.S_NUM).int16(s)
                     .write(Fields.D_NUM).float64(d)
@@ -141,7 +141,7 @@ public class BinaryWirePerfTest {
         }
 
         @Override
-        public void readMarshallable(Wire wire) throws StreamCorruptedException {
+        public void readMarshallable(WireIn wire) throws StreamCorruptedException {
             // TODO should use bool() instead of int8() when boolean is optimised in the JIT
             wire.read(Fields.B_FLAG).int8(this::b)
                     .read(Fields.S_NUM).int16(this::s)
@@ -231,7 +231,7 @@ public class BinaryWirePerfTest {
         }
 
         @Override
-        public void writeMarshallable(Wire wire) {
+        public void writeMarshallable(WireOut wire) {
             wire.write(Fields.I).int32(i)
                     .write(Fields.J).int32(j)
                     .write(Fields.K).int32(k)
@@ -253,7 +253,7 @@ public class BinaryWirePerfTest {
         }
 
         @Override
-        public void readMarshallable(Wire wire) throws StreamCorruptedException {
+        public void readMarshallable(WireIn wire) throws StreamCorruptedException {
             wire.read(Fields.I).int32(this::i)
                     .read(Fields.J).int32(this::j)
                     .read(Fields.K).int32(this::k)
