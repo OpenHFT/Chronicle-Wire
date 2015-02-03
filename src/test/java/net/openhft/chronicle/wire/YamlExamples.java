@@ -3,7 +3,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.lang.io.DirectStore;
 import org.junit.Test;
 
-import java.io.StreamCorruptedException;
 import java.lang.reflect.Type;
 import java.time.*;
 import java.util.ArrayList;
@@ -22,25 +21,27 @@ public class YamlExamples {
          - Sammy Sosa
          - Ken Griffey
          */
-        wire.write(Keys.list).sequenceStart();
-        for (String s : "Mark McGwire,Sammy Sosa,Ken Griffey".split(","))
-            wire.write().text(s);
-        wire.write().sequenceEnd();
+        wire.write(Keys.list).sequence(() -> {
+            for (String s : "Mark McGwire,Sammy Sosa,Ken Griffey".split(","))
+                wire.write().text(s);
+        });
 
         // or
+/*
         ValueOut valueOut = wire.write(Keys.list).sequenceStart();
         for (String s : "Mark McGwire,Sammy Sosa,Ken Griffey".split(",")) {
             valueOut.text(s);
         }
         valueOut.sequenceEnd();
+*/
 
         // to read this.
-        ValueIn valueIn = wire.read(Keys.list).sequenceStart();
         List<String> names = new ArrayList<>();
-        while (valueIn.hasNext()) {
-            names.add(valueIn.text());
-        }
-        valueIn.sequenceEnd();
+        wire.read(Keys.list).sequence(valueIn -> {
+            while (valueIn.hasNext()) {
+                names.add(valueIn.text());
+            }
+        });
     }
 
     public static void mapExample(Wire wire) {
@@ -55,8 +56,8 @@ public class YamlExamples {
           - Atlanta Braves
          */
 /*
-        wire.writeSequence(Keys.american, "Boston Red Sox", "Detroit Tigers", "New York Yankees");
-        wire.writeSequence(Keys.national, "New York Mets", "Chicago Cubs", "Atlanta Braves");
+        wire.sequence(Keys.american, "Boston Red Sox", "Detroit Tigers", "New York Yankees");
+        wire.sequence(Keys.national, "New York Mets", "Chicago Cubs", "Atlanta Braves");
 
         wire.readSequenceStart(Keys.american);
         while (wire.hasNextSequenceItem())
@@ -213,22 +214,22 @@ public class YamlExamples {
         avg:  0.278 # Batting average
         rbi:  147   # Runs Batted In
 */
-        wire.write(Keys.name).text("Mark McGwire")
+        wire.writeDocument(() -> wire
+                .write(Keys.name).text("Mark McGwire")
                 .write(Keys.hr).int32(65)
                 .writeComment("Home runs")
                 .write(Keys.avg).float64(0.278)
                 .writeComment("Batting average")
                 .write(Keys.rbi).int64(147)
-                .writeComment("Runs Batted In");
+                .writeComment("Runs Batted In"));
 
         wire.flip();
 
         Stats stats = new Stats();
-        wire.read(Keys.name).text(stats.name)
+        wire.readDocument(() -> wire.read(Keys.name).text(stats.name)
                 .read(Keys.hr).int32(stats::hr)
                 .read(Keys.avg).float64(stats::avg)
-                .read(Keys.rbi).int64(stats::rbi)
-                .consumeDocumentEnd();
+                .read(Keys.rbi).int64(stats::rbi), null);
         wire.clear();
 
         assertEquals("Stats{name=Mark McGwire, hr=65, avg=0.278, rbi=147}", stats.toString());
@@ -325,7 +326,7 @@ class MyType implements Marshallable {
     }
 
     @Override
-    public void readMarshallable(WireIn wire) throws StreamCorruptedException {
+    public void readMarshallable(WireIn wire) {
 //        name = wire.readText(MyTypeKeys.name);
 //        date = wire.readDate(MyTypeKeys.date);
     }

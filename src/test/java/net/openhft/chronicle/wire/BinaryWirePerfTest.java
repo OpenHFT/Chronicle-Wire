@@ -74,7 +74,7 @@ public class BinaryWirePerfTest {
     }
 
     @Test
-    public void wirePerfInts() throws StreamCorruptedException {
+    public void wirePerfInts() {
         System.out.println("TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
         Wire wire = createBytes();
         MyType2 a = new MyType2();
@@ -83,9 +83,9 @@ public class BinaryWirePerfTest {
         }
     }
 
-    private void wirePerf0(Wire wire, MyType2 a, MyType2 b, int t) throws StreamCorruptedException {
+    private void wirePerf0(Wire wire, MyType2 a, MyType2 b, int t) {
         long start = System.nanoTime();
-        int runs = 1000000;
+        int runs = 1500000;
         for (int i = 0; i < runs; i++) {
             wire.clear();
             a.i = i;
@@ -141,7 +141,7 @@ public class BinaryWirePerfTest {
         }
 
         @Override
-        public void readMarshallable(WireIn wire) throws StreamCorruptedException {
+        public void readMarshallable(WireIn wire) {
             // TODO should use bool() instead of int8() when boolean is optimised in the JIT
             wire.read(Fields.B_FLAG).int8(this::b)
                     .read(Fields.S_NUM).int16(this::s)
@@ -253,7 +253,7 @@ public class BinaryWirePerfTest {
         }
 
         @Override
-        public void readMarshallable(WireIn wire) throws StreamCorruptedException {
+        public void readMarshallable(WireIn wire) {
             wire.read(Fields.I).int32(this::i)
                     .read(Fields.J).int32(this::j)
                     .read(Fields.K).int32(this::k)

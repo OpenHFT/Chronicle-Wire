@@ -12,10 +12,6 @@ import java.util.UUID;
  * Created by peter on 14/01/15.
  */
 public interface ValueOut {
-    ValueOut sequenceStart();
-
-    WireOut sequenceEnd();
-
     /*
      * data types
      */
@@ -66,4 +62,8 @@ public interface ValueOut {
     WireOut int64(LongValue readReady);
 
     WireOut int32(IntValue value);
+
+    WireOut sequence(Runnable writer);
+
+    WireOut writeMarshallable(Marshallable object);
 }

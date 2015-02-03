@@ -98,13 +98,13 @@ public class RawWire implements Wire {
     }
 
     @Override
-    public Wire writeDocumentStart() {
-        return RawWire.this;
+    public void writeDocument(Runnable writer) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public void writeDocumentEnd() {
-
+    public void writeMetaData(Runnable writer) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -113,8 +113,8 @@ public class RawWire implements Wire {
     }
 
     @Override
-    public void consumeDocumentEnd() {
-
+    public <T> T readDocument(Supplier<T> reader, Runnable metaDataReader) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -133,22 +133,11 @@ public class RawWire implements Wire {
     }
 
     @Override
-    public void addPadding(int paddingToAdd) {
+    public WireOut addPadding(int paddingToAdd) {
         throw new UnsupportedOperationException();
     }
 
     class RawValueOut implements ValueOut {
-        @Override
-        public ValueOut sequenceStart() {
-            return this;
-        }
-
-        @Override
-        public Wire sequenceEnd() {
-            if (true) throw new UnsupportedOperationException();
-            return RawWire.this;
-        }
-
         @Override
         public Wire bool(Boolean flag) {
             if (flag == null)
@@ -291,21 +280,19 @@ public class RawWire implements Wire {
         public WireOut int32(IntValue value) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public WireOut sequence(Runnable writer) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut writeMarshallable(Marshallable object) {
+            throw new UnsupportedOperationException();
+        }
     }
 
     class RawValueIn implements ValueIn {
-
-        @Override
-        public ValueIn sequenceStart() {
-            if (true) throw new UnsupportedOperationException();
-            return this;
-        }
-
-        @Override
-        public Wire sequenceEnd() {
-            if (true) throw new UnsupportedOperationException();
-            return RawWire.this;
-        }
 
         @Override
         public Wire bool(BooleanConsumer flag) {
@@ -448,6 +435,16 @@ public class RawWire implements Wire {
 
         @Override
         public WireIn int32(IntValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn sequence(Consumer<ValueIn> reader) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn readMarshallable(Marshallable object) {
             throw new UnsupportedOperationException();
         }
     }

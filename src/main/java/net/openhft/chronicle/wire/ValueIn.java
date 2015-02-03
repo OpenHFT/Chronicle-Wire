@@ -17,10 +17,6 @@ import java.util.function.*;
  * Created by peter on 14/01/15.
  */
 public interface ValueIn {
-    ValueIn sequenceStart();
-
-    WireIn sequenceEnd();
-
     /*
      * Text / Strings.
      */
@@ -77,4 +73,8 @@ public interface ValueIn {
     WireIn int64(LongValue value);
 
     WireIn int32(IntValue value);
+
+    WireIn sequence(Consumer<ValueIn> reader);
+
+    WireIn readMarshallable(Marshallable object);
 }

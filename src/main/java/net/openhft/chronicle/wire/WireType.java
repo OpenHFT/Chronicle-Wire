@@ -4,14 +4,13 @@ package net.openhft.chronicle.wire;
  * Created by peter on 15/01/15.
  */
 public enum WireType {
-    // Mapping
-    MAP_START8(0x81),
-    MAP_START16(0x82),
-    MAP_START32(0x83),
     // Sequence
-    BYTES_LENGTH8(0x84),
-    BYTES_LENGTH16(0x85),
-    BYTES_LENGTH32(0x86),
+    BYTES_LENGTH8(0x80),
+    BYTES_LENGTH16(0x81),
+    BYTES_LENGTH32(0x82),
+
+    PADDING(0x8D),
+    PADDING32(0x8E),
     // EOF of bytes
     DOCUMENT_END(0x8F),
 
@@ -44,7 +43,6 @@ public enum WireType {
     FIXED(0xAF),
 
     // pseudo string types.
-    PADDING(0xB0),
     COMMENT(0xB1),
     HINT(0xB2),
     TIME(0xB3),

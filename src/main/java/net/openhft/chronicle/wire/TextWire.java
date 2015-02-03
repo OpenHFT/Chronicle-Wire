@@ -42,7 +42,7 @@ public class TextWire implements Wire {
     }
 
     @Override
-    public void addPadding(int paddingToAdd) {
+    public WireOut addPadding(int paddingToAdd) {
         throw new UnsupportedOperationException();
     }
 
@@ -133,6 +133,7 @@ public class TextWire implements Wire {
         return valueIn;
     }
 
+
     private int peekCode() {
         if (bytes.remaining() < 1)
             return -1;
@@ -156,22 +157,22 @@ public class TextWire implements Wire {
     }
 
     @Override
-    public Wire writeDocumentStart() {
+    public <T> T readDocument(Supplier<T> reader, Runnable metaDataReader) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void writeDocumentEnd() {
+    public void writeDocument(Runnable writer) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void writeMetaData(Runnable writer) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean hasDocument() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void consumeDocumentEnd() {
         throw new UnsupportedOperationException();
     }
 
@@ -250,16 +251,6 @@ public class TextWire implements Wire {
 
     class TextValueOut implements ValueOut {
         @Override
-        public ValueOut sequenceStart() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire sequenceEnd() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public Wire text(CharSequence s) {
             bytes.append(sep).append(s == null ? "!!null" : quotes(s)).append(END_FIELD);
             return TextWire.this;
@@ -289,6 +280,16 @@ public class TextWire implements Wire {
 
         @Override
         public WireOut int32(IntValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut sequence(Runnable writer) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut writeMarshallable(Marshallable object) {
             throw new UnsupportedOperationException();
         }
 
@@ -410,15 +411,6 @@ public class TextWire implements Wire {
     }
 
     class TextValueIn implements ValueIn {
-        @Override
-        public ValueIn sequenceStart() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire sequenceEnd() {
-            throw new UnsupportedOperationException();
-        }
 
         @Override
         public boolean hasNext() {
@@ -442,6 +434,16 @@ public class TextWire implements Wire {
 
         @Override
         public WireIn int32(IntValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn sequence(Consumer<ValueIn> reader) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn readMarshallable(Marshallable object) {
             throw new UnsupportedOperationException();
         }
 

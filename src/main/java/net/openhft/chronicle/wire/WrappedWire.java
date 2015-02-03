@@ -76,21 +76,20 @@ public abstract class WrappedWire {
         return wire.hasMapping();
     }
 
-    public Wire writeDocumentStart() {
-        wire.writeDocumentStart();
-        return _this();
+    public void writeDocument(Runnable writer) {
+        wire.writeDocument(writer);
     }
 
-    public void writeDocumentEnd() {
-        wire.writeDocumentEnd();
+    public <T> T readDocument(Supplier<T> reader, Runnable metaDataReader) {
+        return wire.readDocument(reader, metaDataReader);
+    }
+
+    public void writeMetaData(Runnable writer) {
+        wire.writeMetaData(writer);
     }
 
     public boolean hasDocument() {
         return wire.hasDocument();
-    }
-
-    public void consumeDocumentEnd() {
-        wire.consumeDocumentEnd();
     }
 
     public void flip() {
@@ -101,21 +100,25 @@ public abstract class WrappedWire {
         wire.clear();
     }
 
-    public Wire writeComment(CharSequence s) {
+    public WireOut writeComment(CharSequence s) {
         wire.writeComment(s);
-        return _this();
+        return thisWireOut();
     }
 
-    public Wire readComment(StringBuilder s) {
+    public WireIn readComment(StringBuilder s) {
         wire.readComment(s);
-        return _this();
+        return thisWireIn();
     }
 
-    protected abstract Wire _this();
+    protected abstract WireOut thisWireOut();
 
-    public void addPadding(int paddingToAdd) {
+    protected abstract WireIn thisWireIn();
+
+    public WireOut addPadding(int paddingToAdd) {
         wire.addPadding(paddingToAdd);
+        return thisWireOut();
     }
+
 
     class WrappedValueOut implements ValueOut {
         private final ValueOut valueOut;
@@ -124,30 +127,25 @@ public abstract class WrappedWire {
             this.valueOut = valueOut;
         }
 
-        public ValueOut sequenceStart() {
-            valueOut.sequenceStart();
-            return this;
+        @Override
+        public WireOut sequence(Runnable writer) {
+            throw new UnsupportedOperationException();
         }
 
-        public Wire sequenceEnd() {
-            valueOut.sequenceEnd();
-            return _this();
-        }
-
-        public Wire text(CharSequence s) {
+        public WireOut text(CharSequence s) {
             valueOut.text(s);
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire type(CharSequence typeName) {
+        public WireOut type(CharSequence typeName) {
             valueOut.type(typeName);
-            return _this();
+            return thisWireOut();
         }
 
         @Override
         public WireOut uuid(UUID uuid) {
             valueOut.uuid(uuid);
-            return _this();
+            return thisWireOut();
         }
 
         @Override
@@ -159,7 +157,7 @@ public abstract class WrappedWire {
         @Override
         public WireOut int64(LongValue readReady) {
             valueOut.int64(readReady);
-            return _this();
+            return thisWireOut();
         }
 
         @Override
@@ -167,233 +165,239 @@ public abstract class WrappedWire {
             throw new UnsupportedOperationException();
         }
 
-        public Wire bool(Boolean flag) {
+        public WireOut bool(Boolean flag) {
             valueOut.bool(flag);
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire utf8(int codepoint) {
+        public WireOut utf8(int codepoint) {
             valueOut.utf8(codepoint);
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire hint(CharSequence s) {
+        public WireOut hint(CharSequence s) {
             valueOut.hint(s);
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire mapStart() {
+        public WireOut mapStart() {
             valueOut.mapStart();
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire mapEnd() {
+        public WireOut mapEnd() {
             valueOut.mapEnd();
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire time(LocalTime localTime) {
+        public WireOut time(LocalTime localTime) {
             valueOut.time(localTime);
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire zonedDateTime(ZonedDateTime zonedDateTime) {
+        public WireOut zonedDateTime(ZonedDateTime zonedDateTime) {
             valueOut.zonedDateTime(zonedDateTime);
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire date(LocalDate zonedDateTime) {
+        public WireOut date(LocalDate zonedDateTime) {
             valueOut.date(zonedDateTime);
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire object(Marshallable type) {
+        public WireOut object(Marshallable type) {
             valueOut.object(type);
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire int8(int i8) {
+        public WireOut int8(int i8) {
             valueOut.int8(i8);
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire uint8(int u8) {
+        public WireOut uint8(int u8) {
             valueOut.uint8(u8);
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire int16(int i16) {
+        public WireOut int16(int i16) {
             valueOut.int16(i16);
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire uint16(int u16) {
+        public WireOut uint16(int u16) {
             valueOut.uint16(u16);
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire int32(int i32) {
+        public WireOut int32(int i32) {
             valueOut.int32(i32);
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire uint32(long u32) {
+        public WireOut uint32(long u32) {
             valueOut.uint32(u32);
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire float32(float f) {
+        public WireOut float32(float f) {
             valueOut.float32(f);
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire float64(double d) {
+        public WireOut float64(double d) {
             valueOut.float64(d);
-            return _this();
+            return thisWireOut();
         }
 
-        public Wire int64(long i64) {
+        public WireOut int64(long i64) {
             valueOut.int64(i64);
-            return _this();
+            return thisWireOut();
+        }
+
+        public WireOut writeMarshallable(Marshallable object) {
+            valueOut.writeMarshallable(object);
+            return thisWireOut();
         }
     }
 
     class WrappedValueIn implements ValueIn {
-
-
         private final ValueIn valueIn;
 
         WrappedValueIn(ValueIn valueIn) {
             this.valueIn = valueIn;
         }
 
-        public ValueIn sequenceStart() {
-            valueIn.sequenceStart();
-            return this;
-        }
-
-        public Wire sequenceEnd() {
-            valueIn.sequenceEnd();
-            return _this();
-        }
-
         public boolean hasNext() {
             return valueIn.hasNext();
         }
 
-        public Wire type(StringBuilder s) {
+        public WireIn type(StringBuilder s) {
             valueIn.type(s);
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire text(StringBuilder s) {
+        public WireIn text(StringBuilder s) {
             valueIn.text(s);
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire bool(BooleanConsumer flag) {
+        public WireIn bool(BooleanConsumer flag) {
             valueIn.bool(flag);
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire int8(ByteConsumer i) {
+        public WireIn int8(ByteConsumer i) {
             valueIn.int8(i);
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire uint8(ShortConsumer i) {
+        public WireIn uint8(ShortConsumer i) {
             valueIn.uint8(i);
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire int16(ShortConsumer i) {
+        public WireIn int16(ShortConsumer i) {
             valueIn.int16(i);
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire uint16(IntConsumer i) {
+        public WireIn uint16(IntConsumer i) {
             valueIn.uint16(i);
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire uint32(LongConsumer i) {
+        public WireIn uint32(LongConsumer i) {
             valueIn.uint32(i);
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire int32(IntConsumer i) {
+        public WireIn int32(IntConsumer i) {
             valueIn.int32(i);
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire float32(FloatConsumer v) {
+        public WireIn float32(FloatConsumer v) {
             valueIn.float32(v);
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire float64(DoubleConsumer v) {
+        public WireIn float64(DoubleConsumer v) {
             valueIn.float64(v);
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire int64(LongConsumer i) {
+        public WireIn int64(LongConsumer i) {
             valueIn.int64(i);
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire mapStart() {
+        public WireIn mapStart() {
             valueIn.mapStart();
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire mapEnd() {
+        public WireIn mapEnd() {
             valueIn.mapEnd();
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire time(Consumer<LocalTime> localTime) {
+        public WireIn time(Consumer<LocalTime> localTime) {
             valueIn.time(localTime);
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire zonedDateTime(Consumer<ZonedDateTime> zonedDateTime) {
+        public WireIn zonedDateTime(Consumer<ZonedDateTime> zonedDateTime) {
             valueIn.zonedDateTime(zonedDateTime);
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire date(Consumer<LocalDate> zonedDateTime) {
+        public WireIn date(Consumer<LocalDate> zonedDateTime) {
             valueIn.date(zonedDateTime);
-            return _this();
+            return thisWireIn();
         }
 
-        public Wire object(Supplier<Marshallable> type) {
+        public WireIn object(Supplier<Marshallable> type) {
             valueIn.object(type);
-            return _this();
+            return thisWireIn();
         }
 
         public WireIn text(Consumer<String> s) {
             valueIn.text(s);
-            return _this();
+            return thisWireIn();
         }
 
         public WireIn expectText(CharSequence s) {
             valueIn.expectText(s);
-            return _this();
+            return thisWireIn();
         }
 
         public WireIn uuid(Consumer<UUID> uuid) {
             valueIn.uuid(uuid);
-            return _this();
+            return thisWireIn();
         }
 
         public WireIn int64(LongValue value) {
             valueIn.int64(value);
-            return _this();
+            return thisWireIn();
         }
 
         @Override
         public WireIn int32(IntValue value) {
-            throw new UnsupportedOperationException();
+            valueIn.int32(value);
+            return thisWireIn();
+        }
+
+        @Override
+        public WireIn sequence(Consumer<ValueIn> reader) {
+            valueIn.sequence(reader);
+            return thisWireIn();
+        }
+
+        @Override
+        public WireIn readMarshallable(Marshallable object) {
+            valueIn.readMarshallable(object);
+            return thisWireIn();
         }
     }
 }

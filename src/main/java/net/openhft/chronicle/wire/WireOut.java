@@ -23,19 +23,13 @@ public interface WireOut {
 
     boolean hasMapping();
 
-    WireOut writeDocumentStart();
+    void writeDocument(Runnable writer);
 
-    void writeDocumentEnd();
+    void writeMetaData(Runnable writer);
 
     boolean hasDocument();
 
-    void consumeDocumentEnd();
-
-    void flip();
-
-    void clear();
-
     Bytes bytes();
 
-    void addPadding(int paddingToAdd);
+    WireOut addPadding(int paddingToAdd);
 }
