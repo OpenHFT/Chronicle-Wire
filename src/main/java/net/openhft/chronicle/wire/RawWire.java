@@ -78,11 +78,6 @@ public class RawWire implements Wire {
     }
 
     @Override
-    public void readSequenceEnd() {
-
-    }
-
-    @Override
     public Wire writeComment(CharSequence s) {
         return RawWire.this;
     }
@@ -113,7 +108,7 @@ public class RawWire implements Wire {
     }
 
     @Override
-    public <T> T readDocument(Supplier<T> reader, Runnable metaDataReader) {
+    public <T> T readDocument(Function<WireIn, T> reader, Consumer<WireIn> metaDataReader) {
         throw new UnsupportedOperationException();
     }
 
@@ -374,18 +369,6 @@ public class RawWire implements Wire {
         @Override
         public Wire float64(DoubleConsumer v) {
             v.accept(bytes.readDouble());
-            return RawWire.this;
-        }
-
-        @Override
-        public Wire mapStart() {
-            if (true) throw new UnsupportedOperationException();
-            return RawWire.this;
-        }
-
-        @Override
-        public Wire mapEnd() {
-            if (true) throw new UnsupportedOperationException();
             return RawWire.this;
         }
 

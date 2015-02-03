@@ -147,17 +147,12 @@ public class TextWire implements Wire {
     }
 
     @Override
-    public void readSequenceEnd() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean hasMapping() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> T readDocument(Supplier<T> reader, Runnable metaDataReader) {
+    public <T> T readDocument(Function<WireIn, T> reader, Consumer<WireIn> metaDataReader) {
         throw new UnsupportedOperationException();
     }
 
@@ -551,16 +546,6 @@ public class TextWire implements Wire {
         public Wire int64(LongConsumer i) {
             i.accept(bytes.parseLong());
             return TextWire.this;
-        }
-
-        @Override
-        public Wire mapStart() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire mapEnd() {
-            throw new UnsupportedOperationException();
         }
 
         @Override

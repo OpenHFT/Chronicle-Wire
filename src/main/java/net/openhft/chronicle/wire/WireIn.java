@@ -2,7 +2,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.lang.io.Bytes;
 
-import java.util.function.Supplier;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream. <p> Created by peter on
@@ -19,8 +20,6 @@ public interface WireIn {
 
     boolean hasNextSequenceItem();
 
-    void readSequenceEnd();
-
     /*
      * read and write comments.
      */
@@ -30,15 +29,15 @@ public interface WireIn {
 
     boolean hasDocument();
 
-    default <T> T readDocument(Supplier<T> reader) {
+    default <T> T readDocument(Function<WireIn, T> reader) {
         return readDocument(reader, null);
     }
 
-    default <T> T readMetaData(Runnable metaDataReader) {
+    default <T> T readMetaData(Consumer<WireIn> metaDataReader) {
         return readDocument(null, metaDataReader);
     }
 
-    <T> T readDocument(Supplier<T> reader, Runnable metaDataReader);
+    <T> T readDocument(Function<WireIn, T> reader, Consumer<WireIn> metaDataReader);
 
     void flip();
 

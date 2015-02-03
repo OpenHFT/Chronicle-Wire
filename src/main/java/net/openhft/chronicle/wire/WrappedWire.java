@@ -68,10 +68,6 @@ public abstract class WrappedWire {
         return wire.hasNextSequenceItem();
     }
 
-    public void readSequenceEnd() {
-        wire.readSequenceEnd();
-    }
-
     public boolean hasMapping() {
         return wire.hasMapping();
     }
@@ -80,7 +76,7 @@ public abstract class WrappedWire {
         wire.writeDocument(writer);
     }
 
-    public <T> T readDocument(Supplier<T> reader, Runnable metaDataReader) {
+    public <T> T readDocument(Function<WireIn, T> reader, Consumer<WireIn> metaDataReader) {
         return wire.readDocument(reader, metaDataReader);
     }
 
@@ -329,16 +325,6 @@ public abstract class WrappedWire {
 
         public WireIn int64(LongConsumer i) {
             valueIn.int64(i);
-            return thisWireIn();
-        }
-
-        public WireIn mapStart() {
-            valueIn.mapStart();
-            return thisWireIn();
-        }
-
-        public WireIn mapEnd() {
-            valueIn.mapEnd();
             return thisWireIn();
         }
 

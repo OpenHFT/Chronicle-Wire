@@ -8,11 +8,10 @@ public enum WireType {
     BYTES_LENGTH8(0x80),
     BYTES_LENGTH16(0x81),
     BYTES_LENGTH32(0x82),
+    BYTES_LENGTH64(0x83), // reserved
 
-    PADDING(0x8D),
     PADDING32(0x8E),
-    // EOF of bytes
-    DOCUMENT_END(0x8F),
+    PADDING(0x8F),
 
     // floating point
     FLOAT32(0x90),
@@ -66,7 +65,7 @@ public enum WireType {
     STRING0(0xE0),
     // ...
     STRING30(0xFF),
-    UNKNOWN(-1);
+    END_OF_BYTES(-1);
 
     static final int NUM0 = 0x0;
     static final int NUM1 = 0x1;

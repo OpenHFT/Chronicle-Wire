@@ -52,10 +52,6 @@ public interface ValueIn {
 
     WireIn float64(DoubleConsumer v);
 
-    WireIn mapStart();
-
-    WireIn mapEnd();
-
     WireIn time(Consumer<LocalTime> localTime);
 
     WireIn zonedDateTime(Consumer<ZonedDateTime> zonedDateTime);
