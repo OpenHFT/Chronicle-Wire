@@ -69,6 +69,7 @@ public class BinaryWire implements Wire {
                 case NUM5:
                 case NUM6:
                 case NUM7:
+                    bytes.skip(1);
                     wire.writeValue().uint8(peekCode);
                     break;
 
@@ -87,11 +88,13 @@ public class BinaryWire implements Wire {
                     throw new UnsupportedOperationException();
 
                 case FLOAT:
+                    bytes.skip(1);
                     double d = readFloat0(peekCode);
                     wire.writeValue().float64(d);
                     break;
 
                 case INT:
+                    bytes.skip(1);
                     long l = readInt0(peekCode);
                     wire.writeValue().int64(l);
                     break;
@@ -108,6 +111,7 @@ public class BinaryWire implements Wire {
 
                 case STR0:
                 case STR1:
+                    bytes.skip(1);
                     StringBuilder sb = readText(peekCode, Wires.acquireStringBuilder());
                     wire.writeValue().text(sb);
                     break;
@@ -147,7 +151,6 @@ public class BinaryWire implements Wire {
                 break;
             }
             case 0xB7: // FIELD_NAME_ANY(0xB7),
-                bytes.skip(1);
                 StringBuilder fsb = readField(peekCode, -1, Wires.acquireStringBuilder());
                 wire.write(fsb, null);
                 break;
@@ -436,17 +439,17 @@ public class BinaryWire implements Wire {
         return null;
     }
 
-    private StringBuilder readText(int peekCode, StringBuilder sb) {
-        switch (peekCode >> 4) {
+    private StringBuilder readText(int code, StringBuilder sb) {
+        switch (code >> 4) {
             case SPECIAL:
-                if (peekCode == STRING_ANY.code) {
+                if (code == STRING_ANY.code) {
                     bytes.readUTFΔ(sb);
                     return sb;
                 }
                 return null;
             case STR0:
             case STR1:
-                return getStringBuilder(peekCode, sb);
+                return getStringBuilder(code, sb);
             default:
                 throw new UnsupportedOperationException();
         }
@@ -942,7 +945,7 @@ public class BinaryWire implements Wire {
 
         @Override
         public Wire type(StringBuilder s) {
-            int code = bytes.readUnsignedByte();
+            int code = readCode();
             if (code == TYPE.code) {
                 bytes.readUTFΔ(s);
             } else {
@@ -953,7 +956,7 @@ public class BinaryWire implements Wire {
 
         @Override
         public Wire text(StringBuilder s) {
-            int code = bytes.readUnsignedByte();
+            int code = readCode();
             StringBuilder text = readText(code, s);
             if (text == null)
                 cantRead(code);
