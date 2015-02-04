@@ -59,8 +59,8 @@ public class BinaryWire implements Wire {
     @Override
     public void copyTo(WireOut wire) {
         while (bytes.remaining() > 0) {
-            int code = readCode();
-            switch (code >> 4) {
+            int peekCode = peekCode();
+            switch (peekCode >> 4) {
                 case NUM0:
                 case NUM1:
                 case NUM2:
@@ -69,45 +69,46 @@ public class BinaryWire implements Wire {
                 case NUM5:
                 case NUM6:
                 case NUM7:
-                    wire.writeValue().uint8(code);
+                    wire.writeValue().uint8(peekCode);
                     break;
 
                 case CONTROL:
                     // PADDING
-                    if (code == 0x8F)
+                    if (peekCode == 0x8F) {
+                        bytes.skip(1);
                         break;
+                    }
                     // PADDING32
-                    if (code == 0x8E) {
+                    if (peekCode == 0x8E) {
+                        bytes.skip(1);
                         bytes.skip(bytes.readUnsignedInt());
                         break;
                     }
                     throw new UnsupportedOperationException();
 
                 case FLOAT:
-                    double d = readFloat0(code);
+                    double d = readFloat0(peekCode);
                     wire.writeValue().float64(d);
                     break;
 
                 case INT:
-                    long l = readInt0(code);
+                    long l = readInt0(peekCode);
                     wire.writeValue().int64(l);
                     break;
 
                 case SPECIAL:
-                    copySpecial(wire, code);
+                    copySpecial(wire, peekCode);
                     break;
 
                 case FIELD0:
                 case FIELD1:
-                    bytes.skip(-1);
-                    StringBuilder fsb = readField(code, -1, Wires.acquireStringBuilder());
+                    StringBuilder fsb = readField(peekCode, -1, Wires.acquireStringBuilder());
                     wire.write(fsb, null);
                     break;
 
                 case STR0:
                 case STR1:
-                    bytes.skip(-1);
-                    StringBuilder sb = readText(code, Wires.acquireStringBuilder());
+                    StringBuilder sb = readText(peekCode, Wires.acquireStringBuilder());
                     wire.writeValue().text(sb);
                     break;
 
@@ -115,10 +116,11 @@ public class BinaryWire implements Wire {
         }
     }
 
-    private void copySpecial(WireOut wire, int code) {
-        switch (code) {
+    private void copySpecial(WireOut wire, int peekCode) {
+        switch (peekCode) {
             case 0xB1: // COMMENT
             {
+                bytes.skip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 wire.writeComment(sb);
@@ -126,6 +128,7 @@ public class BinaryWire implements Wire {
             }
             case 0xB2: // HINT(0xB2),
             {
+                bytes.skip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 wire.writeValue().hint(sb);
@@ -137,22 +140,24 @@ public class BinaryWire implements Wire {
                 throw new UnsupportedOperationException();
             case 0xB6: // TYPE(0xB6),
             {
+                bytes.skip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 wire.writeValue().type(sb);
                 break;
             }
             case 0xB7: // FIELD_NAME_ANY(0xB7),
-                bytes.skip(-1);
-                StringBuilder fsb = readField(code, -1, Wires.acquireStringBuilder());
+                bytes.skip(1);
+                StringBuilder fsb = readField(peekCode, -1, Wires.acquireStringBuilder());
                 wire.write(fsb, null);
                 break;
             case 0xB8: // STRING_ANY(0xB8),
-                bytes.skip(-1);
-                StringBuilder sb = readText(code, Wires.acquireStringBuilder());
+                bytes.skip(1);
+                StringBuilder sb = readText(peekCode, Wires.acquireStringBuilder());
                 wire.writeValue().text(sb);
                 break;
             case 0xB9: {
+                bytes.skip(1);
                 long code2 = bytes.readStopBit();
                 wire.write(new WireKey() {
                     @Override
@@ -170,16 +175,19 @@ public class BinaryWire implements Wire {
 
             // Boolean
             case 0xBD:
+                bytes.skip(1);
                 wire.writeValue().bool(null);
                 break;
             case 0xBE: // FALSE(0xBE),
+                bytes.skip(1);
                 wire.writeValue().bool(false);
                 break;
             case 0xBF: // TRUE(0xBF),
+                bytes.skip(1);
                 wire.writeValue().bool(true);
                 break;
             default:
-                throw new UnsupportedOperationException(WireType.stringForCode(code));
+                throw new UnsupportedOperationException(WireType.stringForCode(peekCode));
         }
     }
 
@@ -390,19 +398,19 @@ public class BinaryWire implements Wire {
 
     private StringBuilder readField(StringBuilder name, int codeMatch) {
         consumeSpecial();
-        int code = peekCode();
-        return readField(code, codeMatch, name);
+        int peekCode = peekCode();
+        return readField(peekCode, codeMatch, name);
     }
 
-    private StringBuilder readField(int code, int codeMatch, StringBuilder sb) {
-        switch (code >> 4) {
+    private StringBuilder readField(int peekCode, int codeMatch, StringBuilder sb) {
+        switch (peekCode >> 4) {
             case SPECIAL:
-                if (code == FIELD_NAME_ANY.code) {
+                if (peekCode == FIELD_NAME_ANY.code) {
                     bytes.skip(1);
                     bytes.readUTFΔ(sb);
                     return sb;
                 }
-                if (code == FIELD_NUMBER.code) {
+                if (peekCode == FIELD_NUMBER.code) {
                     bytes.skip(1);
                     long fieldId = bytes.readStopBit();
                     if (codeMatch >= 0 && fieldId != codeMatch)
@@ -415,7 +423,9 @@ public class BinaryWire implements Wire {
             case FIELD0:
             case FIELD1:
                 bytes.skip(1);
-                return getStringBuilder(code, sb);
+                return getStringBuilder(peekCode, sb);
+            default:
+                break;
         }
         // if field-less accept anything in order.
         if (fieldLess) {
@@ -426,19 +436,20 @@ public class BinaryWire implements Wire {
         return null;
     }
 
-    private StringBuilder readText(int code, StringBuilder sb) {
-        switch (code >> 4) {
+    private StringBuilder readText(int peekCode, StringBuilder sb) {
+        switch (peekCode >> 4) {
             case SPECIAL:
-                if (code == STRING_ANY.code) {
+                if (peekCode == STRING_ANY.code) {
                     bytes.readUTFΔ(sb);
                     return sb;
                 }
                 return null;
             case STR0:
             case STR1:
-                return getStringBuilder(code, sb);
+                return getStringBuilder(peekCode, sb);
+            default:
+                throw new UnsupportedOperationException();
         }
-        return null;
     }
 
     private int peekCode() {
