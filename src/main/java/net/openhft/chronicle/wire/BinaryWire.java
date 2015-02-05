@@ -544,15 +544,15 @@ public class BinaryWire implements Wire {
         return this;
     }
 
-    static boolean isReady(int len) {
+    public static boolean isReady(int len) {
         return (len & NOT_READY) == 0;
     }
 
-    static boolean isDocument(int len) {
+    public static boolean isDocument(int len) {
         return (len & META_DATA) == 0;
     }
 
-    static boolean isKnownLength(int len) {
+    public static boolean isKnownLength(int len) {
         return (len & LENGTH_MASK) != UNKNOWN_LENGTH;
     }
 
