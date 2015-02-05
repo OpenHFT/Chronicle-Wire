@@ -6,10 +6,13 @@ import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
 import net.openhft.lang.io.AbstractBytes;
 import net.openhft.lang.io.Bytes;
+import net.openhft.lang.values.IntValue;
+import net.openhft.lang.values.LongValue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.function.*;
 
 /**
@@ -75,11 +78,6 @@ public class RawWire implements Wire {
     }
 
     @Override
-    public void readSequenceEnd() {
-
-    }
-
-    @Override
     public Wire writeComment(CharSequence s) {
         return RawWire.this;
     }
@@ -95,13 +93,13 @@ public class RawWire implements Wire {
     }
 
     @Override
-    public Wire writeDocumentStart() {
-        return RawWire.this;
+    public void writeDocument(Runnable writer) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public void writeDocumentEnd() {
-
+    public void writeMetaData(Runnable writer) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -110,8 +108,8 @@ public class RawWire implements Wire {
     }
 
     @Override
-    public void consumeDocumentEnd() {
-
+    public <T> T readDocument(Function<WireIn, T> reader, Consumer<WireIn> metaDataReader) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -129,20 +127,12 @@ public class RawWire implements Wire {
         return bytes;
     }
 
+    @Override
+    public WireOut addPadding(int paddingToAdd) {
+        throw new UnsupportedOperationException();
+    }
+
     class RawValueOut implements ValueOut {
-
-
-        @Override
-        public ValueOut sequenceStart() {
-            return this;
-        }
-
-        @Override
-        public Wire sequenceEnd() {
-            if (true) throw new UnsupportedOperationException();
-            return RawWire.this;
-        }
-
         @Override
         public Wire bool(Boolean flag) {
             if (flag == null)
@@ -265,21 +255,39 @@ public class RawWire implements Wire {
         public Wire type(CharSequence typeName) {
             return RawWire.this;
         }
+
+        @Override
+        public WireOut uuid(UUID uuid) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public ValueOut cacheAlign() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut int64(LongValue readReady) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut int32(IntValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut sequence(Runnable writer) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut writeMarshallable(Marshallable object) {
+            throw new UnsupportedOperationException();
+        }
     }
 
     class RawValueIn implements ValueIn {
-
-        @Override
-        public ValueIn sequenceStart() {
-            if (true) throw new UnsupportedOperationException();
-            return this;
-        }
-
-        @Override
-        public Wire sequenceEnd() {
-            if (true) throw new UnsupportedOperationException();
-            return RawWire.this;
-        }
 
         @Override
         public Wire bool(BooleanConsumer flag) {
@@ -297,6 +305,11 @@ public class RawWire implements Wire {
         public Wire text(StringBuilder s) {
             bytes.readUTFΔ(s);
             return RawWire.this;
+        }
+
+        @Override
+        public WireIn text(Consumer<String> s) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -360,18 +373,6 @@ public class RawWire implements Wire {
         }
 
         @Override
-        public Wire mapStart() {
-            if (true) throw new UnsupportedOperationException();
-            return RawWire.this;
-        }
-
-        @Override
-        public Wire mapEnd() {
-            if (true) throw new UnsupportedOperationException();
-            return RawWire.this;
-        }
-
-        @Override
         public Wire time(Consumer<LocalTime> localTime) {
             if (true) throw new UnsupportedOperationException();
             return RawWire.this;
@@ -398,6 +399,36 @@ public class RawWire implements Wire {
         @Override
         public boolean hasNext() {
             return bytes.remaining() > 0;
+        }
+
+        @Override
+        public WireIn expectText(CharSequence s) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn uuid(Consumer<UUID> uuid) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn int64(LongValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn int32(IntValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn sequence(Consumer<ValueIn> reader) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn readMarshallable(Marshallable object) {
+            throw new UnsupportedOperationException();
         }
     }
 }

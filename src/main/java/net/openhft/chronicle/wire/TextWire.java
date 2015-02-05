@@ -9,11 +9,14 @@ import net.openhft.lang.io.Bytes;
 import net.openhft.lang.io.EscapingStopCharTester;
 import net.openhft.lang.io.StopCharTesters;
 import net.openhft.lang.pool.StringInterner;
+import net.openhft.lang.values.IntValue;
+import net.openhft.lang.values.LongValue;
 
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.function.*;
 
 import static net.openhft.chronicle.wire.WireType.stringForCode;
@@ -36,6 +39,11 @@ public class TextWire implements Wire {
     @Override
     public Bytes bytes() {
         return bytes;
+    }
+
+    @Override
+    public WireOut addPadding(int paddingToAdd) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -125,6 +133,7 @@ public class TextWire implements Wire {
         return valueIn;
     }
 
+
     private int peekCode() {
         if (bytes.remaining() < 1)
             return -1;
@@ -138,32 +147,27 @@ public class TextWire implements Wire {
     }
 
     @Override
-    public void readSequenceEnd() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean hasMapping() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Wire writeDocumentStart() {
+    public <T> T readDocument(Function<WireIn, T> reader, Consumer<WireIn> metaDataReader) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void writeDocumentEnd() {
+    public void writeDocument(Runnable writer) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void writeMetaData(Runnable writer) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean hasDocument() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void consumeDocumentEnd() {
         throw new UnsupportedOperationException();
     }
 
@@ -242,16 +246,6 @@ public class TextWire implements Wire {
 
     class TextValueOut implements ValueOut {
         @Override
-        public ValueOut sequenceStart() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire sequenceEnd() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public Wire text(CharSequence s) {
             bytes.append(sep).append(s == null ? "!!null" : quotes(s)).append(END_FIELD);
             return TextWire.this;
@@ -262,6 +256,36 @@ public class TextWire implements Wire {
             bytes.append(sep).append('!').append(typeName);
             sep = " ";
             return TextWire.this;
+        }
+
+        @Override
+        public WireOut uuid(UUID uuid) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public ValueOut cacheAlign() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut int64(LongValue readReady) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut int32(IntValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut sequence(Runnable writer) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut writeMarshallable(Marshallable object) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -382,18 +406,39 @@ public class TextWire implements Wire {
     }
 
     class TextValueIn implements ValueIn {
-        @Override
-        public ValueIn sequenceStart() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire sequenceEnd() {
-            throw new UnsupportedOperationException();
-        }
 
         @Override
         public boolean hasNext() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn expectText(CharSequence s) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn uuid(Consumer<UUID> uuid) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn int64(LongValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn int32(IntValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn sequence(Consumer<ValueIn> reader) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn readMarshallable(Marshallable object) {
             throw new UnsupportedOperationException();
         }
 
@@ -422,6 +467,16 @@ public class TextWire implements Wire {
             }
             unescape(sb);
             return TextWire.this;
+        }
+
+        @Override
+        public WireIn text(Consumer<String> s) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String text() {
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -491,16 +546,6 @@ public class TextWire implements Wire {
         public Wire int64(LongConsumer i) {
             i.accept(bytes.parseLong());
             return TextWire.this;
-        }
-
-        @Override
-        public Wire mapStart() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire mapEnd() {
-            throw new UnsupportedOperationException();
         }
 
         @Override
