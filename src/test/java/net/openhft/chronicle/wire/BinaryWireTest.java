@@ -51,14 +51,6 @@ public class BinaryWireTest {
         return new BinaryWire(bytes, fixed, numericField, fieldLess);
     }
 
-    private String asText(Wire wire) {
-        TextWire tw = new TextWire(new DirectStore(256).bytes());
-        wire.copyTo(tw);
-        tw.flip();
-        wire.flip();
-        return tw.toString();
-    }
-
     enum BWKey implements WireKey {
         field1(1), field2(2), field3(3);
         private final int code;
@@ -87,7 +79,7 @@ public class BinaryWireTest {
                 "[pos: 0, lim: 0, cap: 256 ] ",
                 "[pos: 0, lim: 0, cap: 256 ] ");
 
-        assertEquals(fieldLess ? "" : "\"\": \"\": \"\": ", asText(wire));
+        assertEquals(fieldLess ? "" : "\"\": \"\": \"\": ", TextWire.asText(wire));
     }
 
     private void checkWire(Wire wire, String... expected) {
@@ -127,7 +119,7 @@ public class BinaryWireTest {
                 "[pos: 0, lim: 67, cap: 256 ] ÅHelloÅWorld·5" + name,
                 "[pos: 0, lim: 0, cap: 256 ] ",
                 "[pos: 0, lim: 0, cap: 256 ] ");
-        assertEquals(fieldLess ? "" : "Hello: World: \"" + name + "\": ", asText(wire));
+        assertEquals(fieldLess ? "" : "Hello: World: \"" + name + "\": ", TextWire.asText(wire));
     }
 
     @Test
@@ -326,7 +318,7 @@ public class BinaryWireTest {
     }
 
     private void checkAsText(Wire wire, String textFieldExcepted, String numberFieldExpected, String fieldLessExpected) {
-        String text = asText(wire);
+        String text = TextWire.asText(wire);
         if (fieldLess)
             assertEquals(fieldLessExpected, text);
         else if (numericField)
