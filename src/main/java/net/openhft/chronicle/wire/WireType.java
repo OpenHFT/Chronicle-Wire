@@ -9,7 +9,12 @@ public enum WireType {
     BYTES_LENGTH16(0x81),
     BYTES_LENGTH32(0x82),
     BYTES_LENGTH64(0x83), // reserved
-
+    SNAPPY(0x84),
+    DEFLATER(0x85),
+    U8_ARRAY(0x8A),
+    U16_ARRAY(0x8B),
+    U32_ARRAY(0x8C),
+    U64_ARRAY(0x8D),
     PADDING32(0x8E),
     PADDING(0x8F),
 
@@ -22,7 +27,8 @@ public enum WireType {
     FIXED4(0x95),
     FIXED5(0x96),
     FIXED6(0x97),
-
+    // 0x9A - 0x9F
+    
     // long number
     UUID(0xA0),
     UTF8(0xA1),
@@ -42,6 +48,7 @@ public enum WireType {
     FIXED(0xAF),
 
     // pseudo string types.
+    // 0xB0
     COMMENT(0xB1),
     HINT(0xB2),
     TIME(0xB3),
@@ -51,6 +58,7 @@ public enum WireType {
     FIELD_NAME_ANY(0xB7),
     STRING_ANY(0xB8),
     FIELD_NUMBER(0xB9),
+    // 0xBA, BB, BC
     // Boolean
     NULL(0xBD),
     FALSE(0xBE),

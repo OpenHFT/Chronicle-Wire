@@ -145,12 +145,6 @@ public abstract class WrappedWire {
         }
 
         @Override
-        public ValueOut cacheAlign() {
-            valueOut.cacheAlign();
-            return this;
-        }
-
-        @Override
         public WireOut int64(LongValue readReady) {
             valueOut.int64(readReady);
             return thisWireOut();
@@ -171,21 +165,6 @@ public abstract class WrappedWire {
             return thisWireOut();
         }
 
-        public WireOut hint(CharSequence s) {
-            valueOut.hint(s);
-            return thisWireOut();
-        }
-
-        public WireOut mapStart() {
-            valueOut.mapStart();
-            return thisWireOut();
-        }
-
-        public WireOut mapEnd() {
-            valueOut.mapEnd();
-            return thisWireOut();
-        }
-
         public WireOut time(LocalTime localTime) {
             valueOut.time(localTime);
             return thisWireOut();
@@ -196,13 +175,8 @@ public abstract class WrappedWire {
             return thisWireOut();
         }
 
-        public WireOut date(LocalDate zonedDateTime) {
-            valueOut.date(zonedDateTime);
-            return thisWireOut();
-        }
-
-        public WireOut object(Marshallable type) {
-            valueOut.object(type);
+        public WireOut date(LocalDate localDate) {
+            valueOut.date(localDate);
             return thisWireOut();
         }
 
@@ -338,13 +312,8 @@ public abstract class WrappedWire {
             return thisWireIn();
         }
 
-        public WireIn date(Consumer<LocalDate> zonedDateTime) {
-            valueIn.date(zonedDateTime);
-            return thisWireIn();
-        }
-
-        public WireIn object(Supplier<Marshallable> type) {
-            valueIn.object(type);
+        public WireIn date(Consumer<LocalDate> localDate) {
+            valueIn.date(localDate);
             return thisWireIn();
         }
 

@@ -4,10 +4,7 @@ import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
 import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
-import net.openhft.lang.io.AbstractBytes;
-import net.openhft.lang.io.Bytes;
-import net.openhft.lang.io.EscapingStopCharTester;
-import net.openhft.lang.io.StopCharTesters;
+import net.openhft.lang.io.*;
 import net.openhft.lang.pool.StringInterner;
 import net.openhft.lang.values.IntValue;
 import net.openhft.lang.values.LongValue;
@@ -43,7 +40,9 @@ public class TextWire implements Wire {
 
     @Override
     public WireOut addPadding(int paddingToAdd) {
-        throw new UnsupportedOperationException();
+        for (int i = 0; i < paddingToAdd; i++)
+            bytes.append((bytes.position() & 63) == 0 ? '\n' : ' ');
+        return this;
     }
 
     @Override
@@ -158,7 +157,7 @@ public class TextWire implements Wire {
 
     @Override
     public void writeDocument(Runnable writer) {
-        throw new UnsupportedOperationException();
+        writer.run();
     }
 
     @Override
@@ -260,17 +259,15 @@ public class TextWire implements Wire {
 
         @Override
         public WireOut uuid(UUID uuid) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public ValueOut cacheAlign() {
-            throw new UnsupportedOperationException();
+            bytes.append(uuid.toString()).append('\n');
+            return TextWire.this;
         }
 
         @Override
         public WireOut int64(LongValue readReady) {
-            throw new UnsupportedOperationException();
+            // TODO support this better
+            bytes.append(readReady.getValue()).append('\n');
+            return TextWire.this;
         }
 
         @Override
@@ -285,7 +282,10 @@ public class TextWire implements Wire {
 
         @Override
         public WireOut writeMarshallable(Marshallable object) {
-            throw new UnsupportedOperationException();
+            bytes.append("{ ");
+            object.writeMarshallable(TextWire.this);
+            bytes.append("}");
+            return TextWire.this;
         }
 
         @Override
@@ -368,40 +368,21 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public Wire hint(CharSequence s) {
-            bytes.append(sep).append("##").append(s).append("\n");
-            sep = "";
+        public Wire time(LocalTime localTime) {
+            bytes.append(localTime.toString()).append('\n');
             return TextWire.this;
         }
 
         @Override
-        public Wire mapStart() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire mapEnd() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire time(LocalTime localTime) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public Wire zonedDateTime(ZonedDateTime zonedDateTime) {
-            throw new UnsupportedOperationException();
+            bytes.append(zonedDateTime.toString()).append('\n');
+            return TextWire.this;
         }
 
         @Override
-        public Wire date(LocalDate zonedDateTime) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire object(Marshallable type) {
-            throw new UnsupportedOperationException();
+        public Wire date(LocalDate localDate) {
+            bytes.append(localDate.toString()).append('\n');
+            return TextWire.this;
         }
     }
 
@@ -419,7 +400,10 @@ public class TextWire implements Wire {
 
         @Override
         public WireIn uuid(Consumer<UUID> uuid) {
-            throw new UnsupportedOperationException();
+            StringBuilder sb = Wires.acquireStringBuilder();
+            text(sb);
+            uuid.accept(UUID.fromString(sb.toString()));
+            return TextWire.this;
         }
 
         @Override
@@ -550,22 +534,35 @@ public class TextWire implements Wire {
 
         @Override
         public Wire time(Consumer<LocalTime> localTime) {
-            throw new UnsupportedOperationException();
+            StringBuilder sb = Wires.acquireStringBuilder();
+            text(sb);
+            localTime.accept(LocalTime.parse(sb.toString()));
+            return TextWire.this;
         }
 
         @Override
         public Wire zonedDateTime(Consumer<ZonedDateTime> zonedDateTime) {
-            throw new UnsupportedOperationException();
+            StringBuilder sb = Wires.acquireStringBuilder();
+            text(sb);
+            zonedDateTime.accept(ZonedDateTime.parse(sb.toString()));
+            return TextWire.this;
         }
 
         @Override
-        public Wire date(Consumer<LocalDate> zonedDateTime) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire object(Supplier<Marshallable> type) {
-            throw new UnsupportedOperationException();
+        public Wire date(Consumer<LocalDate> localDate) {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            text(sb);
+            localDate.accept(LocalDate.parse(sb.toString()));
+            return TextWire.this;
         }
     }
+
+    public static String asText(Wire wire) {
+        TextWire tw = new TextWire(new DirectStore(1024).bytes());
+        wire.copyTo(tw);
+        tw.flip();
+        wire.flip();
+        return tw.toString();
+    }
+
 }
