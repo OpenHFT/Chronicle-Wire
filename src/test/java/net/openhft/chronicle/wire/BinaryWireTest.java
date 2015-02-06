@@ -51,6 +51,7 @@ public class BinaryWireTest {
         return new BinaryWire(bytes, fixed, numericField, fieldLess);
     }
 
+
     enum BWKey implements WireKey {
         field1(1), field2(2), field3(3);
         private final int code;

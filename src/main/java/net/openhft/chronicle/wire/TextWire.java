@@ -264,11 +264,6 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public ValueOut cacheAlign() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public WireOut int64(LongValue readReady) {
             // TODO support this better
             bytes.append(readReady.getValue()).append('\n');
@@ -373,25 +368,9 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public Wire hint(CharSequence s) {
-            bytes.append(sep).append("##").append(s).append("\n");
-            sep = "";
-            return TextWire.this;
-        }
-
-        @Override
-        public Wire mapStart() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire mapEnd() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public Wire time(LocalTime localTime) {
-            throw new UnsupportedOperationException();
+            bytes.append(localTime.toString()).append('\n');
+            return TextWire.this;
         }
 
         @Override
@@ -401,13 +380,9 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public Wire date(LocalDate zonedDateTime) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire object(Marshallable type) {
-            throw new UnsupportedOperationException();
+        public Wire date(LocalDate localDate) {
+            bytes.append(localDate.toString()).append('\n');
+            return TextWire.this;
         }
     }
 
@@ -425,7 +400,10 @@ public class TextWire implements Wire {
 
         @Override
         public WireIn uuid(Consumer<UUID> uuid) {
-            throw new UnsupportedOperationException();
+            StringBuilder sb = Wires.acquireStringBuilder();
+            text(sb);
+            uuid.accept(UUID.fromString(sb.toString()));
+            return TextWire.this;
         }
 
         @Override
@@ -556,22 +534,26 @@ public class TextWire implements Wire {
 
         @Override
         public Wire time(Consumer<LocalTime> localTime) {
-            throw new UnsupportedOperationException();
+            StringBuilder sb = Wires.acquireStringBuilder();
+            text(sb);
+            localTime.accept(LocalTime.parse(sb.toString()));
+            return TextWire.this;
         }
 
         @Override
         public Wire zonedDateTime(Consumer<ZonedDateTime> zonedDateTime) {
-            throw new UnsupportedOperationException();
+            StringBuilder sb = Wires.acquireStringBuilder();
+            text(sb);
+            zonedDateTime.accept(ZonedDateTime.parse(sb.toString()));
+            return TextWire.this;
         }
 
         @Override
-        public Wire date(Consumer<LocalDate> zonedDateTime) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire object(Supplier<Marshallable> type) {
-            throw new UnsupportedOperationException();
+        public Wire date(Consumer<LocalDate> localDate) {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            text(sb);
+            localDate.accept(LocalDate.parse(sb.toString()));
+            return TextWire.this;
         }
     }
 

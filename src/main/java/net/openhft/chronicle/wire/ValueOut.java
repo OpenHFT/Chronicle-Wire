@@ -39,25 +39,15 @@ public interface ValueOut {
 
     WireOut int64(long i64);
 
-    WireOut hint(CharSequence hint);
-
-    WireOut mapStart();
-
-    WireOut mapEnd();
-
     WireOut time(LocalTime localTime);
 
     WireOut zonedDateTime(ZonedDateTime zonedDateTime);
 
-    WireOut date(LocalDate zonedDateTime);
-
-    WireOut object(Marshallable type);
+    WireOut date(LocalDate localDate);
 
     WireOut type(CharSequence typeName);
 
     WireOut uuid(UUID uuid);
-
-    ValueOut cacheAlign();
 
     WireOut int64(LongValue readReady);
 

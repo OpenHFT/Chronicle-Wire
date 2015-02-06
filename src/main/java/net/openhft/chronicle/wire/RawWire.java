@@ -38,6 +38,11 @@ public class RawWire implements Wire {
     }
 
     @Override
+    public String toString() {
+        return bytes.toString();
+    }
+
+    @Override
     public ValueOut write() {
         return writeValue;
     }
@@ -211,59 +216,35 @@ public class RawWire implements Wire {
         }
 
         @Override
-        public Wire hint(CharSequence hint) {
-            return RawWire.this;
-        }
-
-        @Override
-        public Wire mapStart() {
-            if (true) throw new UnsupportedOperationException();
-            return RawWire.this;
-        }
-
-        @Override
-        public Wire mapEnd() {
-            if (true) throw new UnsupportedOperationException();
-            return RawWire.this;
-        }
-
-        @Override
         public Wire time(LocalTime localTime) {
-            if (true) throw new UnsupportedOperationException();
+            long t = localTime.toNanoOfDay();
+            bytes.writeLong(t);
             return RawWire.this;
         }
 
         @Override
         public Wire zonedDateTime(ZonedDateTime zonedDateTime) {
-            if (true) throw new UnsupportedOperationException();
+            bytes.writeUTFΔ(zonedDateTime.toString());
             return RawWire.this;
         }
 
         @Override
-        public Wire date(LocalDate zonedDateTime) {
-            if (true) throw new UnsupportedOperationException();
-            return RawWire.this;
-        }
-
-        @Override
-        public Wire object(Marshallable type) {
-            if (true) throw new UnsupportedOperationException();
+        public Wire date(LocalDate localDate) {
+            bytes.writeStopBit(localDate.toEpochDay());
             return RawWire.this;
         }
 
         @Override
         public Wire type(CharSequence typeName) {
+            bytes.writeUTFΔ(typeName);
             return RawWire.this;
         }
 
         @Override
         public WireOut uuid(UUID uuid) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public ValueOut cacheAlign() {
-            throw new UnsupportedOperationException();
+            bytes.writeLong(uuid.getMostSignificantBits());
+            bytes.writeLong(uuid.getLeastSignificantBits());
+            return RawWire.this;
         }
 
         @Override
@@ -374,25 +355,19 @@ public class RawWire implements Wire {
 
         @Override
         public Wire time(Consumer<LocalTime> localTime) {
-            if (true) throw new UnsupportedOperationException();
+            localTime.accept(LocalTime.ofNanoOfDay(bytes.readLong()));
             return RawWire.this;
         }
 
         @Override
         public Wire zonedDateTime(Consumer<ZonedDateTime> zonedDateTime) {
-            if (true) throw new UnsupportedOperationException();
+            zonedDateTime.accept(ZonedDateTime.parse(bytes.readUTFΔ()));
             return RawWire.this;
         }
 
         @Override
-        public Wire date(Consumer<LocalDate> zonedDateTime) {
-            if (true) throw new UnsupportedOperationException();
-            return RawWire.this;
-        }
-
-        @Override
-        public Wire object(Supplier<Marshallable> type) {
-            if (true) throw new UnsupportedOperationException();
+        public Wire date(Consumer<LocalDate> localDate) {
+            localDate.accept(LocalDate.ofEpochDay(bytes.readStopBit()));
             return RawWire.this;
         }
 
@@ -408,7 +383,8 @@ public class RawWire implements Wire {
 
         @Override
         public WireIn uuid(Consumer<UUID> uuid) {
-            throw new UnsupportedOperationException();
+            uuid.accept(new UUID(bytes.readLong(), bytes.readLong()));
+            return RawWire.this;
         }
 
         @Override

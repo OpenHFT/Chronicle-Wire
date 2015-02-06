@@ -15,15 +15,14 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
-public class TextWireTest {
+public class RawWireTest {
 
-    Bytes bytes;
+    Bytes bytes = new DirectStore(256).bytes();
 
-    private TextWire createWire() {
-        bytes = new DirectStore(256).bytes();
-        return new TextWire(bytes);
+    private RawWire createWire() {
+        bytes.clear();
+        return new RawWire(bytes);
     }
 
     enum BWKey implements WireKey {
@@ -38,7 +37,7 @@ public class TextWireTest {
         wire.write();
         wire.write();
         wire.flip();
-        assertEquals("\"\": \"\": \"\": ", wire.toString());
+        assertEquals("", wire.toString());
     }
 
     @Test
@@ -48,7 +47,7 @@ public class TextWireTest {
         wire.write(BWKey.field2);
         wire.write(BWKey.field3);
         wire.flip();
-        assertEquals("field1: field2: field3: ", wire.toString());
+        assertEquals("", wire.toString());
     }
 
     @Test
@@ -58,7 +57,7 @@ public class TextWireTest {
         wire.write("World", BWKey.field2);
         wire.write("Long field name which is more than 32 characters, Bye", BWKey.field3);
         wire.flip();
-        assertEquals("Hello: World: \"Long field name which is more than 32 characters, Bye\": ", wire.toString());
+        assertEquals("", wire.toString());
     }
 
     @Test
@@ -87,13 +86,7 @@ public class TextWireTest {
         // ok as blank matches anything
         wire.read(BWKey.field1);
         wire.read(BWKey.field1);
-        // not a match
-        try {
-            wire.read(BWKey.field1);
-            fail();
-        } catch (UnsupportedOperationException expected) {
-            wire.read(new StringBuilder(), BWKey.field1);
-        }
+        wire.read(BWKey.field1);
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
@@ -114,10 +107,10 @@ public class TextWireTest {
         assertEquals(0, name.length());
 
         wire.read(name, BWKey.field1);
-        assertEquals(BWKey.field1.name(), name.toString());
+        assertEquals(0, name.length());
 
         wire.read(name, BWKey.field1);
-        assertEquals(name1, name.toString());
+        assertEquals(0, name.length());
 
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
@@ -131,9 +124,7 @@ public class TextWireTest {
         wire.write(BWKey.field1).int8(2);
         wire.write("Test", BWKey.field2).int8(3);
         wire.flip();
-        assertEquals("\"\": 1\n" +
-                "field1: 2\n" +
-                "Test: 3\n", wire.toString());
+        assertEquals("[pos: 0, lim: 3, cap: 256 ] ⒈⒉⒊", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -155,9 +146,7 @@ public class TextWireTest {
         wire.write(BWKey.field1).int16(2);
         wire.write("Test", BWKey.field2).int16(3);
         wire.flip();
-        assertEquals("\"\": 1\n" +
-                "field1: 2\n" +
-                "Test: 3\n", wire.toString());
+        assertEquals("[pos: 0, lim: 6, cap: 256 ] ⒈٠⒉٠⒊٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -179,9 +168,7 @@ public class TextWireTest {
         wire.write(BWKey.field1).uint8(2);
         wire.write("Test", BWKey.field2).uint8(3);
         wire.flip();
-        assertEquals("\"\": 1\n" +
-                "field1: 2\n" +
-                "Test: 3\n", wire.toString());
+        assertEquals("[pos: 0, lim: 3, cap: 256 ] ⒈⒉⒊", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -203,9 +190,7 @@ public class TextWireTest {
         wire.write(BWKey.field1).uint16(2);
         wire.write("Test", BWKey.field2).uint16(3);
         wire.flip();
-        assertEquals("\"\": 1\n" +
-                "field1: 2\n" +
-                "Test: 3\n", wire.toString());
+        assertEquals("[pos: 0, lim: 6, cap: 256 ] ⒈٠⒉٠⒊٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -227,9 +212,7 @@ public class TextWireTest {
         wire.write(BWKey.field1).uint32(2);
         wire.write("Test", BWKey.field2).uint32(3);
         wire.flip();
-        assertEquals("\"\": 1\n" +
-                "field1: 2\n" +
-                "Test: 3\n", wire.toString());
+        assertEquals("[pos: 0, lim: 12, cap: 256 ] ⒈٠٠٠⒉٠٠٠⒊٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicLong i = new AtomicLong();
@@ -251,9 +234,7 @@ public class TextWireTest {
         wire.write(BWKey.field1).int32(2);
         wire.write("Test", BWKey.field2).int32(3);
         wire.flip();
-        assertEquals("\"\": 1\n" +
-                "field1: 2\n" +
-                "Test: 3\n", wire.toString());
+        assertEquals("[pos: 0, lim: 12, cap: 256 ] ⒈٠٠٠⒉٠٠٠⒊٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -275,9 +256,7 @@ public class TextWireTest {
         wire.write(BWKey.field1).int64(2);
         wire.write("Test", BWKey.field2).int64(3);
         wire.flip();
-        assertEquals("\"\": 1\n" +
-                "field1: 2\n" +
-                "Test: 3\n", wire.toString());
+        assertEquals("[pos: 0, lim: 24, cap: 256 ] ⒈٠٠٠٠٠٠٠⒉٠٠٠٠٠٠٠⒊٠٠٠٠٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicLong i = new AtomicLong();
@@ -300,9 +279,7 @@ public class TextWireTest {
         wire.write(BWKey.field1).float64(2);
         wire.write("Test", BWKey.field2).float64(3);
         wire.flip();
-        assertEquals("\"\": 1\n" +
-                "field1: 2\n" +
-                "Test: 3\n", wire.toString());
+        assertEquals("[pos: 0, lim: 24, cap: 256 ] ٠٠٠٠٠٠ð?٠٠٠٠٠٠٠@٠٠٠٠٠٠⒏@", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         class Floater {
@@ -333,9 +310,7 @@ public class TextWireTest {
         wire.write("Test", BWKey.field2)
                 .text(name1);
         wire.flip();
-        assertEquals("\"\": Hello\n" +
-                "field1: world\n" +
-                "Test: \"Long field name which is more than 32 characters, \\\\ \\nBye\"\n", wire.toString());
+        assertEquals("[pos: 0, lim: 69, cap: 256 ] ⒌Hello⒌world8Long field name which is more than 32 characters, \\", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
@@ -359,9 +334,7 @@ public class TextWireTest {
         wire.write("Test", BWKey.field2).type(name1);
         wire.writeComment("");
         wire.flip();
-        assertEquals("\"\": !MyType " +
-                "field1: !AlsoMyType " +
-                "Test: !" + name1 + " # \n", wire.toString());
+        assertEquals("[pos: 0, lim: 142, cap: 256 ] ⒍MyType⒑AlsoMyType{" + name1, wire.bytes().toDebugString(200));
 
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
@@ -370,7 +343,7 @@ public class TextWireTest {
             assertEquals(e, sb.toString());
         });
 
-        assertEquals(3, bytes.remaining());
+        assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -397,7 +370,6 @@ public class TextWireTest {
                 .write().float32(Float.NEGATIVE_INFINITY)
                 .write().float32(123456.0f);
         wire.flip();
-        System.out.println(wire.bytes());
         wire.read().float32(t -> assertEquals(0.0F, t, 0.0F))
                 .read().float32(Float::isNaN)
                 .read().float32(t -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F))

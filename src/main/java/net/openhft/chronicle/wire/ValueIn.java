@@ -11,7 +11,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.UUID;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
 
 /**
  * Created by peter on 14/01/15.
@@ -56,9 +59,7 @@ public interface ValueIn {
 
     WireIn zonedDateTime(Consumer<ZonedDateTime> zonedDateTime);
 
-    WireIn date(Consumer<LocalDate> zonedDateTime);
-
-    WireIn object(Supplier<Marshallable> type);
+    WireIn date(Consumer<LocalDate> localDate);
 
     boolean hasNext();
 

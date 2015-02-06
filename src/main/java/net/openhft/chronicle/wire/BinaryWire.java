@@ -135,7 +135,6 @@ public class BinaryWire implements Wire {
                 bytes.skip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
-                wire.writeValue().hint(sb);
                 break;
             }
             case 0xB3: // TIME(0xB3),
@@ -767,25 +766,10 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public Wire hint(CharSequence s) {
-            bytes.writeUnsignedByte(HINT.code);
-            bytes.writeUTFΔ(s);
-            return BinaryWire.this;
-        }
-
-        @Override
-        public Wire mapStart() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire mapEnd() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public Wire time(LocalTime localTime) {
-            throw new UnsupportedOperationException();
+            bytes.writeUnsignedByte(TIME.code);
+            bytes.writeUTFΔ(localTime.toString());
+            return BinaryWire.this;
         }
 
         @Override
@@ -796,13 +780,10 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public Wire date(LocalDate zonedDateTime) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire object(Marshallable type) {
-            throw new UnsupportedOperationException();
+        public Wire date(LocalDate localDate) {
+            bytes.writeUnsignedByte(DATE.code);
+            bytes.writeUTFΔ(localDate.toString());
+            return BinaryWire.this;
         }
 
         @Override
@@ -811,11 +792,6 @@ public class BinaryWire implements Wire {
             bytes.writeLong(uuid.getMostSignificantBits());
             bytes.writeLong(uuid.getLeastSignificantBits());
             return BinaryWire.this;
-        }
-
-        @Override
-        public ValueOut cacheAlign() {
-            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -1050,7 +1026,16 @@ public class BinaryWire implements Wire {
 
         @Override
         public Wire time(Consumer<LocalTime> localTime) {
-            throw new UnsupportedOperationException();
+            consumeSpecial();
+            int code = readCode();
+            if (code == TIME.code) {
+                StringBuilder sb = SBP.acquireStringBuilder();
+                bytes.readUTFΔ(sb);
+                localTime.accept(LocalTime.parse(sb));
+            } else {
+                cantRead(code);
+            }
+            return BinaryWire.this;
         }
 
         @Override
@@ -1068,13 +1053,17 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public Wire date(Consumer<LocalDate> zonedDateTime) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Wire object(Supplier<Marshallable> type) {
-            throw new UnsupportedOperationException();
+        public Wire date(Consumer<LocalDate> localDate) {
+            consumeSpecial();
+            int code = readCode();
+            if (code == DATE.code) {
+                StringBuilder sb = SBP.acquireStringBuilder();
+                bytes.readUTFΔ(sb);
+                localDate.accept(LocalDate.parse(sb));
+            } else {
+                cantRead(code);
+            }
+            return BinaryWire.this;
         }
 
         @Override
