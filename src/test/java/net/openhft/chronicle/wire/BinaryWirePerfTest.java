@@ -1,7 +1,7 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.lang.io.Bytes;
-import net.openhft.lang.io.DirectStore;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.NativeStore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -16,7 +16,7 @@ public class BinaryWirePerfTest {
     final boolean fixed;
     final boolean numericField;
     final boolean fieldLess;
-    Bytes bytes = new DirectStore(256).bytes();
+    Bytes bytes = NativeStore.of(256).bytes();
 
     public BinaryWirePerfTest(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         this.testId = testId;

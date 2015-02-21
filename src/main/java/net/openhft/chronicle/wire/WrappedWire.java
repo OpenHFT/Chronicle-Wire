@@ -1,12 +1,12 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
 import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
-import net.openhft.lang.io.Bytes;
-import net.openhft.lang.values.IntValue;
-import net.openhft.lang.values.LongValue;
+import net.openhft.chronicle.values.IntValue;
+import net.openhft.chronicle.values.LongValue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -180,22 +180,22 @@ public abstract class WrappedWire {
             return thisWireOut();
         }
 
-        public WireOut int8(int i8) {
+        public WireOut int8(byte i8) {
             valueOut.int8(i8);
             return thisWireOut();
         }
 
-        public WireOut uint8(int u8) {
+        public WireOut uint8checked(int u8) {
             valueOut.uint8(u8);
             return thisWireOut();
         }
 
-        public WireOut int16(int i16) {
+        public WireOut int16(short i16) {
             valueOut.int16(i16);
             return thisWireOut();
         }
 
-        public WireOut uint16(int u16) {
+        public WireOut uint16checked(int u16) {
             valueOut.uint16(u16);
             return thisWireOut();
         }
@@ -205,7 +205,7 @@ public abstract class WrappedWire {
             return thisWireOut();
         }
 
-        public WireOut uint32(long u32) {
+        public WireOut uint32checked(long u32) {
             valueOut.uint32(u32);
             return thisWireOut();
         }

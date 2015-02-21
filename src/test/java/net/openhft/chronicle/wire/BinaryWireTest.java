@@ -1,7 +1,7 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.lang.io.Bytes;
-import net.openhft.lang.io.DirectStore;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.NativeStore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -44,7 +44,7 @@ public class BinaryWireTest {
         );
     }
 
-    Bytes bytes = new DirectStore(256).bytes();
+    Bytes bytes = NativeStore.of(256).bytes();
 
     private BinaryWire createWire() {
         bytes.clear();
@@ -196,9 +196,9 @@ public class BinaryWireTest {
     @Test
     public void int8() {
         Wire wire = createWire();
-        wire.write().int8(1);
-        wire.write(BWKey.field1).int8(2);
-        wire.write("Test", BWKey.field2).int8(3);
+        wire.write().int8((byte) 1);
+        wire.write(BWKey.field1).int8((byte) 2);
+        wire.write("Test", BWKey.field2).int8((byte) 3);
         wire.flip();
         checkWire(wire, "[pos: 0, lim: 16, cap: 256 ] À⒈Æfield1⒉ÄTest⒊",
                 "[pos: 0, lim: 19, cap: 256 ] À¢⒈Æfield1¢⒉ÄTest¢⒊",
@@ -224,9 +224,9 @@ public class BinaryWireTest {
     @Test
     public void int16() {
         Wire wire = createWire();
-        wire.write().int16(1);
-        wire.write(BWKey.field1).int16(2);
-        wire.write("Test", BWKey.field2).int16(3);
+        wire.write().int16((short) 1);
+        wire.write(BWKey.field1).int16((short) 2);
+        wire.write("Test", BWKey.field2).int16((short) 3);
         wire.flip();
         checkWire(wire, "[pos: 0, lim: 16, cap: 256 ] À⒈Æfield1⒉ÄTest⒊",
                 "[pos: 0, lim: 22, cap: 256 ] À£⒈٠Æfield1£⒉٠ÄTest£⒊٠",

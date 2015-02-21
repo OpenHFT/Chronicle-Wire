@@ -29,13 +29,12 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>chronicle-wire</artifactId>
-    <version>1.0.0-alpha-SNAPSHOT</version>
+    <version>1.0.1-alpha-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Wire</name>
     <description>Chronicle-Wire</description>
 
     <dependencyManagement>
         <dependencies>
-
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom</artifactId>
@@ -47,14 +46,12 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>lang</artifactId>
-                <version>6.5.2-SNAPSHOT</version>
+                <version>8.0.0-SNAPSHOT</version>
             </dependency>
-
         </dependencies>
 
     </dependencyManagement>
     <dependencies>
-
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>lang</artifactId>
@@ -78,12 +75,10 @@
             <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-publish-plugin</artifactId>
@@ -119,7 +114,6 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 

@@ -1,7 +1,7 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.lang.io.Bytes;
-import net.openhft.lang.io.DirectStore;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.NativeStore;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
  * Created by peter.lawrey on 06/02/15.
  */
 public class BinaryWire2Test {
-    Bytes bytes = new DirectStore(256).bytes();
+    Bytes bytes = NativeStore.of(256).bytes();
 
     private BinaryWire createWire() {
         bytes.clear();

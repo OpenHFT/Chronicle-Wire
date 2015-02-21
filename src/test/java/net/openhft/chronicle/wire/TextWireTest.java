@@ -1,7 +1,8 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.lang.io.Bytes;
-import net.openhft.lang.io.DirectStore;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.NativeStore;
+import net.openhft.chronicle.bytes.UnderflowMode;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -22,13 +23,12 @@ public class TextWireTest {
     Bytes bytes;
 
     private TextWire createWire() {
-        bytes = new DirectStore(256).bytes();
+        bytes = NativeStore.of(256).bytes(UnderflowMode.ZERO_EXTEND);
         return new TextWire(bytes);
     }
 
     enum BWKey implements WireKey {
-        field1, field2, field3;
-
+        field1, field2, field3
     }
 
     @Test
@@ -92,7 +92,9 @@ public class TextWireTest {
             wire.read(BWKey.field1);
             fail();
         } catch (UnsupportedOperationException expected) {
-            wire.read(new StringBuilder(), BWKey.field1);
+            StringBuilder name = new StringBuilder();
+            wire.read(name, BWKey.field1);
+            assertEquals("Test", name.toString());
         }
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.

@@ -1,6 +1,6 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.lang.io.DirectStore;
+import net.openhft.chronicle.bytes.NativeStore;
 import org.junit.Test;
 
 import java.lang.reflect.Type;
@@ -207,7 +207,7 @@ public class YamlExamples {
 
     @Test
     public void testMappedObject() {
-        Wire wire = new BinaryWire(DirectStore.allocate(128).bytes());
+        Wire wire = new BinaryWire(NativeStore.of(128).bytes());
 /*
         name: Mark McGwire
         hr:   65    # Home runs

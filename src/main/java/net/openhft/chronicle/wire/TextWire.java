@@ -1,13 +1,16 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.EscapingStopCharTester;
+import net.openhft.chronicle.bytes.NativeStore;
+import net.openhft.chronicle.bytes.StopCharTesters;
+import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
 import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
-import net.openhft.lang.io.*;
-import net.openhft.lang.pool.StringInterner;
-import net.openhft.lang.values.IntValue;
-import net.openhft.lang.values.LongValue;
+import net.openhft.chronicle.values.IntValue;
+import net.openhft.chronicle.values.LongValue;
 
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
@@ -24,13 +27,13 @@ import static net.openhft.chronicle.wire.WireType.stringForCode;
 public class TextWire implements Wire {
     public static final String FIELD_SEP = "";
     private static final String END_FIELD = "\n";
-    final AbstractBytes bytes;
+    final Bytes bytes;
     final ValueOut valueOut = new TextValueOut();
     final ValueIn valueIn = new TextValueIn();
     String sep = "";
 
     public TextWire(Bytes bytes) {
-        this.bytes = (AbstractBytes) bytes;
+        this.bytes = bytes;
     }
 
     @Override
@@ -97,8 +100,8 @@ public class TextWire implements Wire {
         try {
             int ch = peekCode();
             if (ch == '"') {
-                bytes.skip(1);
-                bytes.parseUTF(sb, EscapingStopCharTester.escaping(c -> c == '"'));
+                bytes.skip(1)
+                        .parseUTF(sb, EscapingStopCharTester.escaping(c -> c == '"'));
 
                 consumeWhiteSpace();
                 ch = peekCode();
@@ -119,9 +122,11 @@ public class TextWire implements Wire {
 
     @Override
     public ValueIn read(WireKey key) {
+        long position = bytes.position();
         StringBuilder sb = readField(Wires.acquireStringBuilder());
         if (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))
             return valueIn;
+        bytes.position(position);
         throw new UnsupportedOperationException("Unordered fields not supported yet.");
     }
 
@@ -296,28 +301,28 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public Wire int8(int i8) {
+        public Wire int8(byte i8) {
             bytes.append(sep).append(i8).append(END_FIELD);
             sep = FIELD_SEP;
             return TextWire.this;
         }
 
         @Override
-        public Wire uint8(int u8) {
+        public Wire uint8checked(int u8) {
             bytes.append(sep).append(u8).append(END_FIELD);
             sep = FIELD_SEP;
             return TextWire.this;
         }
 
         @Override
-        public Wire int16(int i16) {
+        public Wire int16(short i16) {
             bytes.append(sep).append(i16).append(END_FIELD);
             sep = FIELD_SEP;
             return TextWire.this;
         }
 
         @Override
-        public Wire uint16(int u16) {
+        public Wire uint16checked(int u16) {
             bytes.append(sep).append(u16).append(END_FIELD);
             sep = FIELD_SEP;
             return TextWire.this;
@@ -340,7 +345,7 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public Wire uint32(long u32) {
+        public Wire uint32checked(long u32) {
             bytes.append(sep).append(u32).append(END_FIELD);
             sep = FIELD_SEP;
             return TextWire.this;
@@ -558,7 +563,7 @@ public class TextWire implements Wire {
     }
 
     public static String asText(Wire wire) {
-        TextWire tw = new TextWire(new DirectStore(1024).bytes());
+        TextWire tw = new TextWire(NativeStore.of(1024).bytes());
         wire.copyTo(tw);
         tw.flip();
         wire.flip();

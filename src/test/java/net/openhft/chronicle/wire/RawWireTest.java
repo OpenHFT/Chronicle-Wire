@@ -1,7 +1,7 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.lang.io.Bytes;
-import net.openhft.lang.io.DirectStore;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.NativeStore;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 
 public class RawWireTest {
 
-    Bytes bytes = new DirectStore(256).bytes();
+    Bytes bytes = NativeStore.of(256).bytes();
 
     private RawWire createWire() {
         bytes.clear();
@@ -310,7 +310,8 @@ public class RawWireTest {
         wire.write("Test", BWKey.field2)
                 .text(name1);
         wire.flip();
-        assertEquals("[pos: 0, lim: 69, cap: 256 ] ⒌Hello⒌world8Long field name which is more than 32 characters, \\", wire.bytes().toDebugString());
+        String actual = wire.bytes().toDebugString();
+        assertEquals("[pos: 0, lim: 69, cap: 256 ] ⒌Hello⒌world8Long field name which is more than 32 characters, \\ ⒑Bye", actual);
 
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();

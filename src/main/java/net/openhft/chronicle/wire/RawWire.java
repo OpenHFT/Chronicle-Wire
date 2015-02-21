@@ -1,13 +1,13 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
 import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
-import net.openhft.lang.io.AbstractBytes;
-import net.openhft.lang.io.Bytes;
-import net.openhft.lang.values.IntValue;
-import net.openhft.lang.values.LongValue;
+import net.openhft.chronicle.values.IntValue;
+import net.openhft.chronicle.values.LongValue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,13 +19,13 @@ import java.util.function.*;
  * Created by peter on 19/01/15.
  */
 public class RawWire implements Wire {
-    final AbstractBytes bytes;
+    final Bytes bytes;
 
     final RawValueOut writeValue = new RawValueOut();
     final RawValueIn readValue = new RawValueIn();
 
     public RawWire(Bytes bytes) {
-        this.bytes = (AbstractBytes) bytes;
+        this.bytes = bytes;
     }
 
     @Override
@@ -154,34 +154,32 @@ public class RawWire implements Wire {
         }
 
         @Override
-        public Wire int8(int i8) {
+        public Wire int8(byte i8) {
             bytes.writeByte(i8);
             return RawWire.this;
         }
 
         @Override
-        public Wire uint8(int u8) {
+        public Wire uint8checked(int u8) {
             bytes.writeUnsignedByte(u8);
             return RawWire.this;
         }
 
         @Override
-        public Wire int16(int i16) {
+        public Wire int16(short i16) {
             bytes.writeShort(i16);
             return RawWire.this;
         }
 
         @Override
-        public Wire uint16(int u16) {
+        public Wire uint16checked(int u16) {
             bytes.writeUnsignedShort(u16);
             return RawWire.this;
         }
 
         @Override
         public Wire utf8(int codepoint) {
-            StringBuilder sb = Wires.acquireStringBuilder();
-            sb.appendCodePoint(codepoint);
-            AbstractBytes.writeUTF0(bytes, sb, 1);
+            BytesUtil.appendUTF(bytes, codepoint);
             return RawWire.this;
         }
 
@@ -192,7 +190,7 @@ public class RawWire implements Wire {
         }
 
         @Override
-        public Wire uint32(long u32) {
+        public Wire uint32checked(long u32) {
             bytes.writeUnsignedInt(u32);
             return RawWire.this;
         }
