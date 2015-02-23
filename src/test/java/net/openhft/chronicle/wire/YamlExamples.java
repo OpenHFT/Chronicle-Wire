@@ -315,44 +315,4 @@ public class YamlExamples {
     }
 }
 
-class MyType implements Marshallable {
-    String name;
-    LocalDate date;
-
-    @Override
-    public void writeMarshallable(WireOut wire) {
-//        wire.writeText(MyTypeKeys.name, name);
-//        wire.writeDate(MyTypeKeys.date, date);
-    }
-
-    @Override
-    public void readMarshallable(WireIn wire) {
-//        name = wire.readText(MyTypeKeys.name);
-//        date = wire.readDate(MyTypeKeys.date);
-    }
-
-    enum MyTypeKeys implements WireKey {
-        name(""), date(LocalDate.MIN);
-
-        private final Object defaultValue;
-
-        static {
-            WireKey.checkKeys(values());
-        }
-
-        MyTypeKeys(Object defaultValue) {
-            this.defaultValue = defaultValue;
-        }
-
-        @Override
-        public int code() {
-            return ordinal();
-        }
-
-        @Override
-        public Object defaultValue() {
-            return defaultValue;
-        }
-    }
-}
 
