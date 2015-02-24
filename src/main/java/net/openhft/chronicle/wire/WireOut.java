@@ -1,7 +1,7 @@
 package net.openhft.chronicle.wire;
 
 
-import net.openhft.bytes.Bytes;
+import net.openhft.chronicle.bytes.Bytes;
 
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream.

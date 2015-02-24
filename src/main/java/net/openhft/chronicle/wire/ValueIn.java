@@ -6,8 +6,6 @@ import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
 import net.openhft.chronicle.values.IntValue;
 import net.openhft.chronicle.values.LongValue;
-import net.openhft.lang.values.IntValue;
-import net.openhft.lang.values.LongValue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -76,4 +74,6 @@ public interface ValueIn {
     WireIn sequence(Consumer<ValueIn> reader);
 
     WireIn readMarshallable(Marshallable object);
+
+    long int64();
 }

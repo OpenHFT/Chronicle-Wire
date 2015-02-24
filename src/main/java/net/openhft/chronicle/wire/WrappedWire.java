@@ -302,6 +302,11 @@ public abstract class WrappedWire {
             return thisWireIn();
         }
 
+        @Override
+        public long int64() {
+            return valueIn.int64();
+        }
+
         public WireIn time(Consumer<LocalTime> localTime) {
             valueIn.time(localTime);
             return thisWireIn();
@@ -354,5 +359,7 @@ public abstract class WrappedWire {
             valueIn.readMarshallable(object);
             return thisWireIn();
         }
+
+
     }
 }

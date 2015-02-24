@@ -11,6 +11,7 @@ import net.openhft.chronicle.util.ShortConsumer;
 import net.openhft.chronicle.values.IntValue;
 import net.openhft.chronicle.values.LongValue;
 
+
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -411,6 +412,8 @@ public class TextWire implements Wire {
             return TextWire.this;
         }
 
+
+
         @Override
         public WireIn int64(LongValue value) {
             throw new UnsupportedOperationException();
@@ -429,6 +432,11 @@ public class TextWire implements Wire {
         @Override
         public WireIn readMarshallable(Marshallable object) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public long int64() {
+            return 0;
         }
 
         @Override

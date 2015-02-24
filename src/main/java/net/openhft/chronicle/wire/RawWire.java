@@ -340,6 +340,12 @@ public class RawWire implements Wire {
         }
 
         @Override
+        public long int64() {
+            return bytes.readLong();
+        }
+
+
+        @Override
         public Wire float32(FloatConsumer v) {
             v.accept(bytes.readFloat());
             return RawWire.this;
@@ -404,5 +410,7 @@ public class RawWire implements Wire {
         public WireIn readMarshallable(Marshallable object) {
             throw new UnsupportedOperationException();
         }
+
+
     }
 }

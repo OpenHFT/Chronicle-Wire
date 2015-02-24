@@ -1087,6 +1087,15 @@ public class BinaryWire implements Wire {
         }
 
         @Override
+        public long int64() {
+            consumeSpecial();
+            int code = readCode();
+            if (code != INT64.code)
+                cantRead(code);
+            return bytes.readLong();
+        }
+
+        @Override
         public WireIn int32(IntValue value) {
             throw new UnsupportedOperationException();
         }
