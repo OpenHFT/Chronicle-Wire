@@ -207,7 +207,7 @@ public class YamlExamples {
 
     @Test
     public void testMappedObject() {
-        Wire wire = new BinaryWire(NativeStore.of(128).bytes());
+        Wire wire = new BinaryWire(NativeStore.nativeStore(128).bytes());
 /*
         name: Mark McGwire
         hr:   65    # Home runs

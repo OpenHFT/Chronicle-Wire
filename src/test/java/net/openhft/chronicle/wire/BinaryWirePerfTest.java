@@ -16,7 +16,7 @@ public class BinaryWirePerfTest {
     final boolean fixed;
     final boolean numericField;
     final boolean fieldLess;
-    Bytes bytes = NativeStore.of(256).bytes();
+    Bytes bytes = NativeStore.nativeStore(256).bytes();
 
     public BinaryWirePerfTest(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         this.testId = testId;

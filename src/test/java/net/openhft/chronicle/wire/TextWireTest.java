@@ -23,7 +23,7 @@ public class TextWireTest {
     Bytes bytes;
 
     private TextWire createWire() {
-        bytes = NativeStore.of(256).bytes(UnderflowMode.ZERO_EXTEND);
+        bytes = NativeStore.nativeStore(256).bytes(UnderflowMode.ZERO_EXTEND);
         return new TextWire(bytes);
     }
 

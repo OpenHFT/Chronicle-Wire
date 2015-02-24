@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
  * Created by peter.lawrey on 06/02/15.
  */
 public class BinaryWire2Test {
-    Bytes bytes = NativeStore.of(256).bytes();
+    Bytes bytes = NativeStore.nativeStore(256).bytes();
 
     private BinaryWire createWire() {
         bytes.clear();

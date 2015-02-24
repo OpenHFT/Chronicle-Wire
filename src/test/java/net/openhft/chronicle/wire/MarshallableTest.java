@@ -9,7 +9,7 @@ public class MarshallableTest {
     public void testBytesMarshallable() {
         Marshallable m = new MyTypes();
 
-        Bytes bytes = NativeStore.of(1024).bytes();
+        Bytes bytes = NativeStore.nativeStore(1024).bytes();
         TextWire wire = new TextWire(bytes);
         m.writeMarshallable(wire);
         wire.flip();

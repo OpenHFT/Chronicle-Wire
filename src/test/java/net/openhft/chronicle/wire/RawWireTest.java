@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 
 public class RawWireTest {
 
-    Bytes bytes = NativeStore.of(256).bytes();
+    Bytes bytes = NativeStore.nativeStore(256).bytes();
 
     private RawWire createWire() {
         bytes.clear();

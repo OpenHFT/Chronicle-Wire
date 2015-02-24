@@ -44,7 +44,7 @@ public class BinaryWireTest {
         );
     }
 
-    Bytes bytes = NativeStore.of(256).bytes();
+    Bytes bytes = NativeStore.nativeStore(256).bytes();
 
     private BinaryWire createWire() {
         bytes.clear();
