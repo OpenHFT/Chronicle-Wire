@@ -3,7 +3,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.EscapingStopCharTester;
 import net.openhft.chronicle.bytes.StopCharTesters;
-import net.openhft.chronicle.core.pool.StringInterner;
+import net.openhft.core.pool.StringInterner;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
 import net.openhft.chronicle.util.FloatConsumer;
