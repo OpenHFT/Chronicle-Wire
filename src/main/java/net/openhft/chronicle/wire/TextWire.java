@@ -563,7 +563,7 @@ public class TextWire implements Wire {
     }
 
     public static String asText(Wire wire) {
-        TextWire tw = new TextWire(NativeStore.of(1024).bytes());
+        TextWire tw = new TextWire(NativeStore.nativeStore(1024).bytes());
         wire.copyTo(tw);
         tw.flip();
         wire.flip();
