@@ -71,11 +71,6 @@
         </dependency>
 
         <dependency>
-            <groupId>net.openhft</groupId>
-            <artifactId>lang</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.intellij</groupId>
             <artifactId>annotations</artifactId>
         </dependency>
