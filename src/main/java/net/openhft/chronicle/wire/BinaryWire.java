@@ -518,7 +518,7 @@ public class BinaryWire implements Wire {
     }
 
     public String toString() {
-        return bytes.toDebugString(bytes.capacity());
+        return bytes.toDebugString(bytes.maximumLimit());
     }
 
     @Override

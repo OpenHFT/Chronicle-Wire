@@ -1,6 +1,5 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.NativeStore;
 import org.junit.Test;
 
 import java.lang.reflect.Type;
@@ -9,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -207,7 +207,7 @@ public class YamlExamples {
 
     @Test
     public void testMappedObject() {
-        Wire wire = new BinaryWire(NativeStore.nativeStore(128).bytes());
+        Wire wire = new BinaryWire(nativeBytes());
 /*
         name: Mark McGwire
         hr:   65    # Home runs

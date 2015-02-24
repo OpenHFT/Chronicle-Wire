@@ -2,7 +2,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.EscapingStopCharTester;
-import net.openhft.chronicle.bytes.NativeStore;
 import net.openhft.chronicle.bytes.StopCharTesters;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.util.BooleanConsumer;
@@ -19,6 +18,7 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 import java.util.function.*;
 
+import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.WireType.stringForCode;
 
 /**
@@ -563,7 +563,7 @@ public class TextWire implements Wire {
     }
 
     public static String asText(Wire wire) {
-        TextWire tw = new TextWire(NativeStore.nativeStore(1024).bytes());
+        TextWire tw = new TextWire(nativeBytes());
         wire.copyTo(tw);
         tw.flip();
         wire.flip();

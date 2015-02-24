@@ -1,8 +1,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.NativeStore;
-import net.openhft.chronicle.bytes.UnderflowMode;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,6 +13,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -23,7 +22,7 @@ public class TextWireTest {
     Bytes bytes;
 
     private TextWire createWire() {
-        bytes = NativeStore.nativeStore(256).bytes(UnderflowMode.ZERO_EXTEND);
+        bytes = nativeBytes();
         return new TextWire(bytes);
     }
 

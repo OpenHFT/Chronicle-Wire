@@ -1,20 +1,20 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.NativeStore;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.time.*;
 import java.util.UUID;
 
+import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
 
 /**
  * Created by peter.lawrey on 06/02/15.
  */
 public class BinaryWire2Test {
-    Bytes bytes = NativeStore.nativeStore(256).bytes();
+    Bytes bytes = nativeBytes();
 
     private BinaryWire createWire() {
         bytes.clear();

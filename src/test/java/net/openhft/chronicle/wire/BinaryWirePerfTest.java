@@ -1,7 +1,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.NativeStore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -10,13 +9,15 @@ import java.io.StreamCorruptedException;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+
 @RunWith(value = Parameterized.class)
 public class BinaryWirePerfTest {
     final int testId;
     final boolean fixed;
     final boolean numericField;
     final boolean fieldLess;
-    Bytes bytes = NativeStore.nativeStore(256).bytes();
+    Bytes bytes = nativeBytes();
 
     public BinaryWirePerfTest(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         this.testId = testId;

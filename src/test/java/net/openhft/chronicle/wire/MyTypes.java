@@ -10,12 +10,8 @@ class MyTypes implements Marshallable {
     long l;
     int i;
 
-    void b(Boolean b) {
+    void b(boolean b) {
         this.b = b;
-    }
-
-    void b(byte b) {
-        this.b = b != 0;
     }
 
     void s(short s) {
@@ -46,8 +42,7 @@ class MyTypes implements Marshallable {
 
     @Override
     public void readMarshallable(WireIn wire) {
-        // TODO should use bool() instead of int8() when boolean is optimised in the JIT
-        wire.read(Fields.B_FLAG).int8(this::b)
+        wire.read(Fields.B_FLAG).bool(x -> b = x)
                 .read(Fields.S_NUM).int16(this::s)
                 .read(Fields.D_NUM).float64(this::d)
                 .read(Fields.L_NUM).int64(this::l)

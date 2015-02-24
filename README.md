@@ -211,7 +211,7 @@ Wire can handle reading data it didn't expect interspersed with data it did expe
 
 Note: there are times when you want to skip/copy an entire field or message without reading any more of it.  This is also supported.
 
-## Object-capacity RPC system.
+## Object-maximumLimit RPC system.
 Wire supports references based on a name, number or UUID.  
    This is useful when including a reference to an object the reader should lookup via another means.
    

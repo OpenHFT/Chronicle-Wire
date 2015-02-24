@@ -1,7 +1,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.NativeStore;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -14,11 +13,12 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
 
 public class RawWireTest {
 
-    Bytes bytes = NativeStore.nativeStore(256).bytes();
+    Bytes bytes = nativeBytes();
 
     private RawWire createWire() {
         bytes.clear();
@@ -124,7 +124,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).int8(2);
         wire.write("Test", BWKey.field2).int8(3);
         wire.flip();
-        assertEquals("[pos: 0, lim: 3, cap: 256 ] ⒈⒉⒊", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, lim: 3, cap: 1099511627776 ] ⒈⒉⒊", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -146,7 +146,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).int16(2);
         wire.write("Test", BWKey.field2).int16(3);
         wire.flip();
-        assertEquals("[pos: 0, lim: 6, cap: 256 ] ⒈٠⒉٠⒊٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, lim: 6, cap: 1099511627776 ] ⒈٠⒉٠⒊٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -168,7 +168,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).uint8(2);
         wire.write("Test", BWKey.field2).uint8(3);
         wire.flip();
-        assertEquals("[pos: 0, lim: 3, cap: 256 ] ⒈⒉⒊", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, lim: 3, cap: 1099511627776 ] ⒈⒉⒊", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -190,7 +190,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).uint16(2);
         wire.write("Test", BWKey.field2).uint16(3);
         wire.flip();
-        assertEquals("[pos: 0, lim: 6, cap: 256 ] ⒈٠⒉٠⒊٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, lim: 6, cap: 1099511627776 ] ⒈٠⒉٠⒊٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -212,7 +212,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).uint32(2);
         wire.write("Test", BWKey.field2).uint32(3);
         wire.flip();
-        assertEquals("[pos: 0, lim: 12, cap: 256 ] ⒈٠٠٠⒉٠٠٠⒊٠٠٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, lim: 12, cap: 1099511627776 ] ⒈٠٠٠⒉٠٠٠⒊٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicLong i = new AtomicLong();
@@ -234,7 +234,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).int32(2);
         wire.write("Test", BWKey.field2).int32(3);
         wire.flip();
-        assertEquals("[pos: 0, lim: 12, cap: 256 ] ⒈٠٠٠⒉٠٠٠⒊٠٠٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, lim: 12, cap: 1099511627776 ] ⒈٠٠٠⒉٠٠٠⒊٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -256,7 +256,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).int64(2);
         wire.write("Test", BWKey.field2).int64(3);
         wire.flip();
-        assertEquals("[pos: 0, lim: 24, cap: 256 ] ⒈٠٠٠٠٠٠٠⒉٠٠٠٠٠٠٠⒊٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, lim: 24, cap: 1099511627776 ] ⒈٠٠٠٠٠٠٠⒉٠٠٠٠٠٠٠⒊٠٠٠٠٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicLong i = new AtomicLong();
@@ -279,7 +279,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).float64(2);
         wire.write("Test", BWKey.field2).float64(3);
         wire.flip();
-        assertEquals("[pos: 0, lim: 24, cap: 256 ] ٠٠٠٠٠٠ð?٠٠٠٠٠٠٠@٠٠٠٠٠٠⒏@", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, lim: 24, cap: 1099511627776 ] ٠٠٠٠٠٠ð?٠٠٠٠٠٠٠@٠٠٠٠٠٠⒏@", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         class Floater {
@@ -311,7 +311,7 @@ public class RawWireTest {
                 .text(name1);
         wire.flip();
         String actual = wire.bytes().toDebugString();
-        assertEquals("[pos: 0, lim: 69, cap: 256 ] ⒌Hello⒌world8Long field name which is more than 32 characters, \\ ⒑Bye", actual);
+        assertEquals("[pos: 0, lim: 69, cap: 1099511627776 ] ⒌Hello⒌world8Long field name which is more than 32 characters, \\ ⒑Bye", actual);
 
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
@@ -335,7 +335,7 @@ public class RawWireTest {
         wire.write("Test", BWKey.field2).type(name1);
         wire.writeComment("");
         wire.flip();
-        assertEquals("[pos: 0, lim: 142, cap: 256 ] ⒍MyType⒑AlsoMyType{" + name1, wire.bytes().toDebugString(200));
+        assertEquals("[pos: 0, lim: 142, cap: 1099511627776 ] ⒍MyType⒑AlsoMyType{" + name1, wire.bytes().toDebugString(200));
 
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
