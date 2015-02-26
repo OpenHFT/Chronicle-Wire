@@ -626,7 +626,7 @@ public class BinaryWire implements Wire {
 
     class FixedBinaryValueOut implements ValueOut {
         @Override
-        public WireOut writeMarshallable(Marshallable object) {
+        public WireOut marshallable(Marshallable object) {
             writeCode(BYTES_LENGTH32);
             long position = bytes.position();
             bytes.writeInt(0);
@@ -1156,7 +1156,7 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public WireIn readMarshallable(Marshallable object) {
+        public WireIn marshallable(Marshallable object) {
             consumeSpecial();
             long length = readLength();
             if (length >= 0) {

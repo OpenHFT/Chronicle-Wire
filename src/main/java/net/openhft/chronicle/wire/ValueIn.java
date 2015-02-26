@@ -85,7 +85,7 @@ public interface ValueIn {
 
     WireIn sequence(Consumer<ValueIn> reader);
 
-    WireIn readMarshallable(Marshallable object);
+    WireIn marshallable(Marshallable object);
 
     long int64();
 }

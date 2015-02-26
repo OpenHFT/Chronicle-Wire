@@ -239,8 +239,8 @@ public abstract class WrappedWire {
             return thisWireOut();
         }
 
-        public WireOut writeMarshallable(Marshallable object) {
-            valueOut.writeMarshallable(object);
+        public WireOut marshallable(Marshallable object) {
+            valueOut.marshallable(object);
             return thisWireOut();
         }
     }
@@ -391,8 +391,8 @@ public abstract class WrappedWire {
         }
 
         @Override
-        public WireIn readMarshallable(Marshallable object) {
-            valueIn.readMarshallable(object);
+        public WireIn marshallable(Marshallable object) {
+            valueIn.marshallable(object);
             return thisWireIn();
         }
 

@@ -277,7 +277,7 @@ public class RawWire implements Wire {
         }
 
         @Override
-        public WireOut writeMarshallable(Marshallable object) {
+        public WireOut marshallable(Marshallable object) {
             throw new UnsupportedOperationException();
         }
     }
@@ -446,7 +446,7 @@ public class RawWire implements Wire {
         }
 
         @Override
-        public WireIn readMarshallable(Marshallable object) {
+        public WireIn marshallable(Marshallable object) {
             throw new UnsupportedOperationException();
         }
 

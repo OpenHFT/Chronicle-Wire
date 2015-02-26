@@ -279,10 +279,12 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public WireOut writeMarshallable(Marshallable object) {
+        public WireOut marshallable(Marshallable object) {
+            bytes.append(sep);
             bytes.append("{ ");
             object.writeMarshallable(TextWire.this);
             bytes.append("}");
+            sep = "\n";
             return TextWire.this;
         }
 
@@ -489,8 +491,11 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public WireIn readMarshallable(Marshallable object) {
-            throw new UnsupportedOperationException();
+        public WireIn marshallable(Marshallable object) {
+            bytes.append("{ ");
+            object.writeMarshallable(TextWire.this);
+            bytes.append("}");
+            return TextWire.this;
         }
 
         @Override
