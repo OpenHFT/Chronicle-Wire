@@ -97,10 +97,8 @@ public class TextWire implements Wire {
                         .parseUTF(sb, EscapingStopCharTester.escaping(c -> c == '"'));
 
                 consumeWhiteSpace();
-                ch = peekCode();
-                if (ch == ':')
-                    bytes.skip(1);
-                else
+                ch = readCode();
+                if (ch != ':')
                     throw new UnsupportedOperationException("Expected a : at " + bytes.toDebugString());
 
             } else {
@@ -136,6 +134,12 @@ public class TextWire implements Wire {
             return -1;
         long pos = bytes.position();
         return bytes.readUnsignedByte(pos);
+    }
+
+    private int readCode() {
+        if (bytes.remaining() < 1)
+            return -1;
+        return bytes.readUnsignedByte();
     }
 
     @Override
@@ -492,9 +496,15 @@ public class TextWire implements Wire {
 
         @Override
         public WireIn marshallable(Marshallable object) {
-            bytes.append("{ ");
-            object.writeMarshallable(TextWire.this);
-            bytes.append("}");
+            consumeWhiteSpace();
+            int code = readCode();
+            if (code != '{')
+                throw new IORuntimeException("Unsupported type " + (char) code);
+            object.readMarshallable(TextWire.this);
+            consumeWhiteSpace();
+            code = readCode();
+            if (code != '}')
+                throw new IORuntimeException("Unterminated { while reading marshallable " + object);
             return TextWire.this;
         }
 
@@ -505,13 +515,11 @@ public class TextWire implements Wire {
 
         @Override
         public Wire type(StringBuilder s) {
-            int code = peekCode();
-            if (code == '!') {
-                bytes.skip(1);
-                bytes.parseUTF(s, StopCharTesters.SPACE_STOP);
-            } else {
+            int code = readCode();
+            if (code != '!') {
                 throw new UnsupportedOperationException(stringForCode(code));
             }
+            bytes.parseUTF(s, StopCharTesters.SPACE_STOP);
             return TextWire.this;
         }
 
