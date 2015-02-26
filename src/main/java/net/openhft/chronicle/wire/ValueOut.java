@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.values.IntValue;
 import net.openhft.chronicle.values.LongValue;
@@ -25,6 +26,12 @@ public interface ValueOut {
     }
 
     WireOut int8(byte i8);
+
+    WireOut bytes(Bytes fromBytes);
+
+    ValueOut writeLength(long remaining);
+
+    WireOut bytes(byte[] fromBytes);
 
     default WireOut uint8(long x) {
         return uint8checked((byte) Maths.toUInt8(x));

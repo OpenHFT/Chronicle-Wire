@@ -67,7 +67,7 @@ public class BinaryWireTest {
     }
 
     @Test
-    public void testWrite() throws Exception {
+    public void testWrite() {
         Wire wire = createWire();
         wire.write();
         wire.write();
@@ -88,7 +88,7 @@ public class BinaryWireTest {
     }
 
     @Test
-    public void testWrite1() throws Exception {
+    public void testWrite1() {
         Wire wire = createWire();
         wire.write(BWKey.field1);
         wire.write(BWKey.field2);
@@ -107,7 +107,7 @@ public class BinaryWireTest {
     }
 
     @Test
-    public void testWrite2() throws Exception {
+    public void testWrite2() {
         Wire wire = createWire();
         wire.write("Hello", BWKey.field1);
         wire.write("World", BWKey.field2);
@@ -124,7 +124,7 @@ public class BinaryWireTest {
     }
 
     @Test
-    public void testRead() throws Exception {
+    public void testRead() {
         Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
@@ -143,7 +143,7 @@ public class BinaryWireTest {
     }
 
     @Test
-    public void testRead1() throws Exception {
+    public void testRead1() {
         Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
@@ -169,7 +169,7 @@ public class BinaryWireTest {
     }
 
     @Test
-    public void testRead2() throws Exception {
+    public void testRead2() {
         Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);

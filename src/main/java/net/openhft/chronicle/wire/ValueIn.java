@@ -1,5 +1,7 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
 import net.openhft.chronicle.util.FloatConsumer;
@@ -38,6 +40,26 @@ public interface ValueIn {
     WireIn type(StringBuilder s);
 
     WireIn int8(ByteConsumer i);
+
+    default WireIn bytes(Bytes toBytes) {
+        wireIn().bytes().withLength(readLength(), toBytes::write);
+        return wireIn();
+    }
+
+    default WireIn bytes(Consumer<byte[]> bytesConsumer) {
+        long length = readLength();
+        byte[] byteArray = new byte[Maths.toInt32(length)];
+        wireIn().bytes().read(byteArray);
+        bytesConsumer.accept(byteArray);
+        return wireIn();
+    }
+
+    WireIn wireIn();
+
+    /**
+     * the length of the field as bytes.
+     */
+    long readLength();
 
     WireIn uint8(ShortConsumer i);
 

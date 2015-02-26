@@ -31,7 +31,7 @@ public class RawWireTest {
     }
 
     @Test
-    public void testWrite() throws Exception {
+    public void testWrite() {
         Wire wire = createWire();
         wire.write();
         wire.write();
@@ -41,7 +41,7 @@ public class RawWireTest {
     }
 
     @Test
-    public void testWrite1() throws Exception {
+    public void testWrite1() {
         Wire wire = createWire();
         wire.write(BWKey.field1);
         wire.write(BWKey.field2);
@@ -51,7 +51,7 @@ public class RawWireTest {
     }
 
     @Test
-    public void testWrite2() throws Exception {
+    public void testWrite2() {
         Wire wire = createWire();
         wire.write("Hello", BWKey.field1);
         wire.write("World", BWKey.field2);
@@ -61,7 +61,7 @@ public class RawWireTest {
     }
 
     @Test
-    public void testRead() throws Exception {
+    public void testRead() {
         Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
@@ -76,7 +76,7 @@ public class RawWireTest {
     }
 
     @Test
-    public void testRead1() throws Exception {
+    public void testRead1() {
         Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
@@ -93,7 +93,7 @@ public class RawWireTest {
     }
 
     @Test
-    public void testRead2() throws Exception {
+    public void testRead2() {
         Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
@@ -351,7 +351,7 @@ public class RawWireTest {
 
 
     @Test
-    public void testBool() throws Exception {
+    public void testBool() {
         Wire wire = createWire();
         wire.write().bool(false)
                 .write().bool(true)
@@ -363,7 +363,7 @@ public class RawWireTest {
     }
 
     @Test
-    public void testFloat32() throws Exception {
+    public void testFloat32() {
         Wire wire = createWire();
         wire.write().float32(0.0F)
                 .write().float32(Float.NaN)
@@ -380,7 +380,7 @@ public class RawWireTest {
 
 
     @Test
-    public void testTime() throws Exception {
+    public void testTime() {
         Wire wire = createWire();
         LocalTime now = LocalTime.now();
         wire.write().time(now)
@@ -394,7 +394,7 @@ public class RawWireTest {
     }
 
     @Test
-    public void testZonedDateTime() throws Exception {
+    public void testZonedDateTime() {
         Wire wire = createWire();
         ZonedDateTime now = ZonedDateTime.now();
         wire.write().zonedDateTime(now)
@@ -407,7 +407,7 @@ public class RawWireTest {
     }
 
     @Test
-    public void testDate() throws Exception {
+    public void testDate() {
         Wire wire = createWire();
         LocalDate now = LocalDate.now();
         wire.write().date(now)
@@ -420,7 +420,7 @@ public class RawWireTest {
     }
 
     @Test
-    public void testUuid() throws Exception {
+    public void testUuid() {
         Wire wire = createWire();
         UUID uuid = UUID.randomUUID();
         wire.write().uuid(uuid)

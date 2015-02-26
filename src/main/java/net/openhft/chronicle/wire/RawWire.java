@@ -160,6 +160,26 @@ public class RawWire implements Wire {
         }
 
         @Override
+        public WireOut bytes(Bytes fromBytes) {
+            writeLength(fromBytes.remaining());
+            bytes.write(fromBytes);
+            return RawWire.this;
+        }
+
+        @Override
+        public ValueOut writeLength(long length) {
+            bytes.writeStopBit(length);
+            return this;
+        }
+
+        @Override
+        public WireOut bytes(byte[] fromBytes) {
+            writeLength(fromBytes.length);
+            bytes.write(fromBytes);
+            return RawWire.this;
+        }
+
+        @Override
         public Wire uint8checked(int u8) {
             bytes.writeUnsignedByte(u8);
             return RawWire.this;
@@ -267,7 +287,6 @@ public class RawWire implements Wire {
     }
 
     class RawValueIn implements ValueIn {
-
         @Override
         public Wire bool(BooleanConsumer flag) {
             int b = bytes.readUnsignedByte();
@@ -301,6 +320,16 @@ public class RawWire implements Wire {
         public Wire int8(ByteConsumer i) {
             i.accept(bytes.readByte());
             return RawWire.this;
+        }
+
+        @Override
+        public WireIn wireIn() {
+            return RawWire.this;
+        }
+
+        @Override
+        public long readLength() {
+            return bytes.readStopBit();
         }
 
         @Override

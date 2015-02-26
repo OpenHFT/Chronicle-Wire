@@ -2,7 +2,9 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.EscapingStopCharTester;
+import net.openhft.chronicle.bytes.IORuntimeException;
 import net.openhft.chronicle.bytes.StopCharTesters;
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
@@ -11,11 +13,11 @@ import net.openhft.chronicle.util.ShortConsumer;
 import net.openhft.chronicle.values.IntValue;
 import net.openhft.chronicle.values.LongValue;
 
-
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.Base64;
 import java.util.UUID;
 import java.util.function.*;
 
@@ -219,7 +221,7 @@ public class TextWire implements Wire {
         for (int i = 0; i < s.length(); i++)
             if ("\" ,\n\\".indexOf(s.charAt(i)) >= 0)
                 return true;
-        return false;
+        return s.length() == 0;
     }
 
     @Override
@@ -309,6 +311,39 @@ public class TextWire implements Wire {
         }
 
         @Override
+        public WireOut bytes(Bytes fromBytes) {
+            if (isText(fromBytes)) {
+                return text(fromBytes);
+            }
+            int length = Maths.toInt32(fromBytes.remaining());
+            byte[] byteArray = new byte[length];
+            fromBytes.read(byteArray);
+            return bytes(byteArray);
+        }
+
+        private boolean isText(Bytes fromBytes) {
+            for (long i = fromBytes.position(); i < fromBytes.limit(); i++) {
+                int ch = fromBytes.readUnsignedByte(i);
+                if ((ch < ' ' && ch != '\t') || ch >= 127)
+                    return false;
+            }
+            return true;
+        }
+
+        @Override
+        public ValueOut writeLength(long remaining) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut bytes(byte[] byteArray) {
+            bytes.append(sep).append("!!binary ").append(Base64.getEncoder().encodeToString(byteArray)).append(END_FIELD);
+            sep = FIELD_SEP;
+            return TextWire.this;
+        }
+
+
+        @Override
         public Wire uint8checked(int u8) {
             bytes.append(sep).append(u8).append(END_FIELD);
             sep = FIELD_SEP;
@@ -393,7 +428,6 @@ public class TextWire implements Wire {
     }
 
     class TextValueIn implements ValueIn {
-
         @Override
         public boolean hasNext() {
             throw new UnsupportedOperationException();
@@ -413,6 +447,41 @@ public class TextWire implements Wire {
         }
 
 
+        @Override
+        public WireIn bytes(Bytes toBytes) {
+            return bytes(toBytes::write);
+        }
+
+        public WireIn bytes(Consumer<byte[]> bytesConsumer) {
+            // TODO needs to be made much more efficient.
+            StringBuilder sb = Wires.acquireStringBuilder();
+            if (peekCode() == '!') {
+                bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                String str = sb.toString();
+                if (str.equals("!!binary")) {
+                    sb.setLength(0);
+                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                    byte[] decode = Base64.getDecoder().decode(sb.toString());
+                    bytesConsumer.accept(decode);
+                } else {
+                    throw new IORuntimeException("Unsupported type " + str);
+                }
+            } else {
+                text(sb);
+                bytesConsumer.accept(sb.toString().getBytes());
+            }
+            return TextWire.this;
+        }
+
+        @Override
+        public WireIn wireIn() {
+            return TextWire.this;
+        }
+
+        @Override
+        public long readLength() {
+            throw new UnsupportedOperationException();
+        }
 
         @Override
         public WireIn int64(LongValue value) {

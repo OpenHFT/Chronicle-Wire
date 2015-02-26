@@ -185,6 +185,24 @@ public abstract class WrappedWire {
             return thisWireOut();
         }
 
+        @Override
+        public WireOut bytes(Bytes fromBytes) {
+            valueOut.bytes(fromBytes);
+            return thisWireOut();
+        }
+
+        @Override
+        public ValueOut writeLength(long remaining) {
+            valueOut.writeLength(remaining);
+            return this;
+        }
+
+        @Override
+        public WireOut bytes(byte[] fromBytes) {
+            valueOut.bytes(fromBytes);
+            return thisWireOut();
+        }
+
         public WireOut uint8checked(int u8) {
             valueOut.uint8(u8);
             return thisWireOut();
@@ -260,6 +278,16 @@ public abstract class WrappedWire {
         public WireIn int8(ByteConsumer i) {
             valueIn.int8(i);
             return thisWireIn();
+        }
+
+        @Override
+        public WireIn wireIn() {
+            return thisWireIn();
+        }
+
+        @Override
+        public long readLength() {
+            return valueIn.readLength();
         }
 
         public WireIn uint8(ShortConsumer i) {

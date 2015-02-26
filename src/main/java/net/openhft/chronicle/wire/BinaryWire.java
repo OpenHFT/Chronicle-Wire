@@ -679,6 +679,22 @@ public class BinaryWire implements Wire {
         }
 
         @Override
+        public WireOut bytes(Bytes fromBytes) {
+            writeLength(Maths.toInt32(fromBytes.remaining() + 1));
+            writeCode(U8_ARRAY);
+            bytes.write(fromBytes);
+            return BinaryWire.this;
+        }
+
+        @Override
+        public WireOut bytes(byte[] fromBytes) {
+            writeLength(Maths.toInt32(fromBytes.length + 1));
+            writeCode(U8_ARRAY);
+            bytes.write(fromBytes);
+            return BinaryWire.this;
+        }
+
+        @Override
         public Wire uint8checked(int u8) {
             writeCode(UINT8).writeUnsignedByte(u8);
             return BinaryWire.this;
@@ -778,6 +794,23 @@ public class BinaryWire implements Wire {
         @Override
         public WireOut sequence(Runnable writer) {
             throw new UnsupportedOperationException();
+        }
+
+
+        public ValueOut writeLength(long length) {
+            if (length < 0) {
+                throw new IllegalArgumentException("Invalid length " + length);
+            } else if (length < 1 << 8) {
+                writeCode(BYTES_LENGTH8);
+                bytes.writeUnsignedByte((int) length);
+            } else if (length < 1 << 16) {
+                writeCode(BYTES_LENGTH16);
+                bytes.writeUnsignedShort((int) length);
+            } else {
+                writeCode(BYTES_LENGTH32);
+                bytes.writeUnsignedInt(length);
+            }
+            return this;
         }
     }
 
@@ -935,6 +968,11 @@ public class BinaryWire implements Wire {
         public Wire int8(ByteConsumer i) {
             consumeSpecial();
             i.accept((byte) readInt(bytes.readUnsignedByte()));
+            return BinaryWire.this;
+        }
+
+        @Override
+        public WireIn wireIn() {
             return BinaryWire.this;
         }
 
@@ -1125,8 +1163,10 @@ public class BinaryWire implements Wire {
             return BinaryWire.this;
         }
 
-        private long readLength() {
+        @Override
+        public long readLength() {
             int code = peekCode();
+            // TODO handle non length types as well.
             switch (code) {
                 case 0x80:
                     bytes.skip(1);
