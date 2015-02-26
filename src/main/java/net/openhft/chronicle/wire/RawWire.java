@@ -54,11 +54,6 @@ public class RawWire implements Wire {
     }
 
     @Override
-    public ValueOut write(CharSequence name, WireKey template) {
-        return writeValue;
-    }
-
-    @Override
     public ValueOut writeValue() {
         return writeValue;
     }
@@ -74,7 +69,7 @@ public class RawWire implements Wire {
     }
 
     @Override
-    public ValueIn read(StringBuilder name, WireKey template) {
+    public ValueIn read(StringBuilder name) {
         return readValue;
     }
 

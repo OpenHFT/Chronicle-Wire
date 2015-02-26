@@ -70,19 +70,9 @@ public class TextWire implements Wire {
 
     @Override
     public ValueOut write(WireKey key) {
-        String name = key.name();
+        CharSequence name = key.name();
         if (name == null) name = Integer.toString(key.code());
-        bytes.append(sep).append(name).append(": ");
-        sep = "";
-        return valueOut;
-    }
-
-    @Override
-    public ValueOut write(CharSequence name, WireKey template) {
-        if (name == null) {
-            return write(template);
-        }
-        bytes.append(sep).append(name.length() == 0 ? "\"\"" : quotes(name)).append(": ");
+        bytes.append(sep).append(quotes(name)).append(": ");
         sep = "";
         return valueOut;
     }
@@ -134,7 +124,7 @@ public class TextWire implements Wire {
     }
 
     @Override
-    public ValueIn read(StringBuilder name, WireKey template) {
+    public ValueIn read(StringBuilder name) {
         consumeWhiteSpace();
         readField(name);
         return valueIn;

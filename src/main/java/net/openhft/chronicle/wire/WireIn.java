@@ -17,7 +17,7 @@ public interface WireIn {
 
     ValueIn read(WireKey key);
 
-    ValueIn read(StringBuilder name, WireKey template);
+    ValueIn read(StringBuilder name);
 
     boolean hasNextSequenceItem();
 

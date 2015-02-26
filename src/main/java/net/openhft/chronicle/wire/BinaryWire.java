@@ -28,6 +28,7 @@ import static net.openhft.chronicle.wire.WireType.*;
 public class BinaryWire implements Wire {
     static final int NOT_READY = 1 << 31;
     static final int META_DATA = 1 << 30;
+    public static final int ANY_CODE_MATCH = -1;
     static final int UNKNOWN_LENGTH = -1 >>> 2;
     static final int LENGTH_MASK = -1 >>> 2;
     static final StringBuilderPool SBP = new StringBuilderPool();
@@ -122,8 +123,8 @@ public class BinaryWire implements Wire {
 
                 case FIELD0:
                 case FIELD1:
-                    StringBuilder fsb = readField(peekCode, -1, Wires.acquireStringBuilder());
-                    wire.write(fsb, null);
+                    StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, Wires.acquireStringBuilder());
+                    wire.write(() -> fsb);
                     break;
 
                 case STR0:
@@ -167,8 +168,8 @@ public class BinaryWire implements Wire {
                 break;
             }
             case 0xB7: // FIELD_NAME_ANY(0xB7),
-                StringBuilder fsb = readField(peekCode, -1, Wires.acquireStringBuilder());
-                wire.write(fsb, null);
+                StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, Wires.acquireStringBuilder());
+                wire.write(() -> fsb);
                 break;
             case 0xB8: // STRING_ANY(0xB8),
                 bytes.skip(1);
@@ -390,16 +391,8 @@ public class BinaryWire implements Wire {
     }
 
     @Override
-    public ValueOut write(CharSequence name, WireKey template) {
-        if (!fieldLess) {
-            writeField(name);
-        }
-        return valueOut;
-    }
-
-    @Override
     public ValueIn read() {
-        readField(Wires.acquireStringBuilder(), -1);
+        readField(Wires.acquireStringBuilder(), ANY_CODE_MATCH);
         return valueIn;
     }
 
@@ -412,8 +405,8 @@ public class BinaryWire implements Wire {
     }
 
     @Override
-    public ValueIn read(StringBuilder name, WireKey template) {
-        readField(name, template.code());
+    public ValueIn read(StringBuilder name) {
+        readField(name, ANY_CODE_MATCH);
         return valueIn;
     }
 
@@ -1197,7 +1190,7 @@ public class BinaryWire implements Wire {
                     bytes.skip(1);
                     return bytes.readUnsignedInt();
                 default:
-                    return -1;
+                    return ANY_CODE_MATCH;
             }
         }
     }

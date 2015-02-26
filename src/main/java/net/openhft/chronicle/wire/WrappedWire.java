@@ -48,10 +48,6 @@ public abstract class WrappedWire {
         return wire.write(key);
     }
 
-    public ValueOut write(CharSequence name, WireKey template) {
-        return wire.write(name, template);
-    }
-
     public ValueIn read() {
         return wire.read();
     }
@@ -61,7 +57,7 @@ public abstract class WrappedWire {
     }
 
     public ValueIn read(StringBuilder name, WireKey template) {
-        return wire.read(name, template);
+        return wire.read(name);
     }
 
     public boolean hasNextSequenceItem() {

@@ -56,9 +56,10 @@ public class RawWireTest {
     @Test
     public void testWrite2() {
         Wire wire = createWire();
-        wire.write("Hello", BWKey.field1);
-        wire.write("World", BWKey.field2);
-        wire.write("Long field name which is more than 32 characters, Bye", BWKey.field3);
+        wire.write(() -> "Hello");
+        wire.write(() -> "World");
+        wire.write(() -> "Long field name which is more than 32 characters, Bye");
+
         wire.flip();
         assertEquals("", wire.toString());
     }
@@ -68,7 +69,8 @@ public class RawWireTest {
         Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
-        wire.write("Test", BWKey.field2);
+        wire.write(() -> "Test");
+
         wire.flip();
         wire.read();
         wire.read();
@@ -83,7 +85,8 @@ public class RawWireTest {
         Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
-        wire.write("Test", BWKey.field2);
+        wire.write(() -> "Test");
+
         wire.flip();
 
         // ok as blank matches anything
@@ -101,18 +104,19 @@ public class RawWireTest {
         wire.write();
         wire.write(BWKey.field1);
         String name1 = "Long field name which is more than 32 characters, Bye";
-        wire.write(name1, BWKey.field3);
+        wire.write(() -> name1);
+
         wire.flip();
 
         // ok as blank matches anything
         StringBuilder name = new StringBuilder();
-        wire.read(name, BWKey.field1);
+        wire.read(name);
         assertEquals(0, name.length());
 
-        wire.read(name, BWKey.field1);
+        wire.read(name);
         assertEquals(0, name.length());
 
-        wire.read(name, BWKey.field1);
+        wire.read(name);
         assertEquals(0, name.length());
 
         assertEquals(0, bytes.remaining());
@@ -125,7 +129,8 @@ public class RawWireTest {
         Wire wire = createWire();
         wire.write().int8(1);
         wire.write(BWKey.field1).int8(2);
-        wire.write("Test", BWKey.field2).int8(3);
+
+        wire.write(() -> "Test").int8(3);
         wire.flip();
         assertEquals("[pos: 0, lim: 3, cap: 1099511627776 ] ⒈⒉⒊", wire.bytes().toDebugString());
 
@@ -147,7 +152,8 @@ public class RawWireTest {
         Wire wire = createWire();
         wire.write().int16(1);
         wire.write(BWKey.field1).int16(2);
-        wire.write("Test", BWKey.field2).int16(3);
+
+        wire.write(() -> "Test").int16(3);
         wire.flip();
         assertEquals("[pos: 0, lim: 6, cap: 1099511627776 ] ⒈٠⒉٠⒊٠", wire.bytes().toDebugString());
 
@@ -169,7 +175,8 @@ public class RawWireTest {
         Wire wire = createWire();
         wire.write().uint8(1);
         wire.write(BWKey.field1).uint8(2);
-        wire.write("Test", BWKey.field2).uint8(3);
+
+        wire.write(() -> "Test").uint8(3);
         wire.flip();
         assertEquals("[pos: 0, lim: 3, cap: 1099511627776 ] ⒈⒉⒊", wire.bytes().toDebugString());
 
@@ -191,7 +198,8 @@ public class RawWireTest {
         Wire wire = createWire();
         wire.write().uint16(1);
         wire.write(BWKey.field1).uint16(2);
-        wire.write("Test", BWKey.field2).uint16(3);
+
+        wire.write(() -> "Test").uint16(3);
         wire.flip();
         assertEquals("[pos: 0, lim: 6, cap: 1099511627776 ] ⒈٠⒉٠⒊٠", wire.bytes().toDebugString());
 
@@ -213,7 +221,8 @@ public class RawWireTest {
         Wire wire = createWire();
         wire.write().uint32(1);
         wire.write(BWKey.field1).uint32(2);
-        wire.write("Test", BWKey.field2).uint32(3);
+
+        wire.write(() -> "Test").uint32(3);
         wire.flip();
         assertEquals("[pos: 0, lim: 12, cap: 1099511627776 ] ⒈٠٠٠⒉٠٠٠⒊٠٠٠", wire.bytes().toDebugString());
 
@@ -235,7 +244,8 @@ public class RawWireTest {
         Wire wire = createWire();
         wire.write().int32(1);
         wire.write(BWKey.field1).int32(2);
-        wire.write("Test", BWKey.field2).int32(3);
+
+        wire.write(() -> "Test").int32(3);
         wire.flip();
         assertEquals("[pos: 0, lim: 12, cap: 1099511627776 ] ⒈٠٠٠⒉٠٠٠⒊٠٠٠", wire.bytes().toDebugString());
 
@@ -257,7 +267,8 @@ public class RawWireTest {
         Wire wire = createWire();
         wire.write().int64(1);
         wire.write(BWKey.field1).int64(2);
-        wire.write("Test", BWKey.field2).int64(3);
+
+        wire.write(() -> "Test").int64(3);
         wire.flip();
         assertEquals("[pos: 0, lim: 24, cap: 1099511627776 ] ⒈٠٠٠٠٠٠٠⒉٠٠٠٠٠٠٠⒊٠٠٠٠٠٠٠", wire.bytes().toDebugString());
 
@@ -280,7 +291,8 @@ public class RawWireTest {
         Wire wire = createWire();
         wire.write().float64(1);
         wire.write(BWKey.field1).float64(2);
-        wire.write("Test", BWKey.field2).float64(3);
+
+        wire.write(() -> "Test").float64(3);
         wire.flip();
         assertEquals("[pos: 0, lim: 24, cap: 1099511627776 ] ٠٠٠٠٠٠ð?٠٠٠٠٠٠٠@٠٠٠٠٠٠⒏@", wire.bytes().toDebugString());
 
@@ -310,7 +322,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).text("world");
         String name1 = "Long field name which is more than 32 characters, \\ \nBye";
 
-        wire.write("Test", BWKey.field2)
+        wire.write(() -> "Test")
                 .text(name1);
         wire.flip();
         String actual = wire.bytes().toDebugString();
@@ -335,7 +347,8 @@ public class RawWireTest {
         wire.write().type("MyType");
         wire.write(BWKey.field1).type("AlsoMyType");
         String name1 = "com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState";
-        wire.write("Test", BWKey.field2).type(name1);
+
+        wire.write(() -> "Test").type(name1);
         wire.writeComment("");
         wire.flip();
         assertEquals("[pos: 0, lim: 142, cap: 1099511627776 ] ⒍MyType⒑AlsoMyType{" + name1, wire.bytes().toDebugString(200));
