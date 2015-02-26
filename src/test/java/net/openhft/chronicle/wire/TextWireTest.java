@@ -469,18 +469,16 @@ public class TextWireTest {
             allBytes[i] = (byte) i;
         wire.write().bytes(NoBytesStore.NO_BYTES)
                 .write().bytes(Bytes.wrap("Hello".getBytes()))
+                .write().bytes(Bytes.wrap("quotable, text".getBytes()))
                 .write().bytes(allBytes);
         wire.flip();
         System.out.println(bytes.toString());
         NativeBytes allBytes2 = nativeBytes();
-        wire.read()
-                .bytes(b -> assertEquals(0, b.length))
-                .read()
-                .bytes(b -> assertArrayEquals("Hello".getBytes(), b))
-                .read()
-                .bytes(allBytes2);
+        wire.read().bytes(b -> assertEquals(0, b.length))
+                .read().bytes(b -> assertArrayEquals("Hello".getBytes(), b))
+                .read().bytes(b -> assertArrayEquals("quotable, text".getBytes(), b))
+                .read().bytes(allBytes2);
         allBytes2.flip();
         assertEquals(Bytes.wrap(allBytes), allBytes2);
-
     }
 }

@@ -1,7 +1,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
@@ -41,18 +40,9 @@ public interface ValueIn {
 
     WireIn int8(ByteConsumer i);
 
-    default WireIn bytes(Bytes toBytes) {
-        wireIn().bytes().withLength(readLength(), toBytes::write);
-        return wireIn();
-    }
+    WireIn bytes(Bytes toBytes);
 
-    default WireIn bytes(Consumer<byte[]> bytesConsumer) {
-        long length = readLength();
-        byte[] byteArray = new byte[Maths.toInt32(length)];
-        wireIn().bytes().read(byteArray);
-        bytesConsumer.accept(byteArray);
-        return wireIn();
-    }
+    WireIn bytes(Consumer<byte[]> bytesConsumer);
 
     WireIn wireIn();
 

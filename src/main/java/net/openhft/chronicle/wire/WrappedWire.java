@@ -281,6 +281,18 @@ public abstract class WrappedWire {
         }
 
         @Override
+        public WireIn bytes(Bytes toBytes) {
+            valueIn.bytes(toBytes);
+            return thisWireIn();
+        }
+
+        @Override
+        public WireIn bytes(Consumer<byte[]> bytesConsumer) {
+            valueIn.bytes(bytesConsumer);
+            return thisWireIn();
+        }
+
+        @Override
         public WireIn wireIn() {
             return thisWireIn();
         }

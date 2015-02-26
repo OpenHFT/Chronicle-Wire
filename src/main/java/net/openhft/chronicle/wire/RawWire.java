@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
@@ -287,6 +288,20 @@ public class RawWire implements Wire {
     }
 
     class RawValueIn implements ValueIn {
+
+        public WireIn bytes(Bytes toBytes) {
+            wireIn().bytes().withLength(readLength(), toBytes::write);
+            return wireIn();
+        }
+
+        public WireIn bytes(Consumer<byte[]> bytesConsumer) {
+            long length = readLength();
+            byte[] byteArray = new byte[Maths.toInt32(length)];
+            bytes.read(byteArray);
+            bytesConsumer.accept(byteArray);
+            return wireIn();
+        }
+        
         @Override
         public Wire bool(BooleanConsumer flag) {
             int b = bytes.readUnsignedByte();

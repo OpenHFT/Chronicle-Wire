@@ -1,6 +1,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.NativeBytes;
+import net.openhft.chronicle.bytes.NoBytesStore;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -14,6 +16,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class RawWireTest {
@@ -431,4 +434,27 @@ public class RawWireTest {
                 .read().uuid(t -> assertEquals(new UUID(0, 0), t))
                 .read().uuid(t -> assertEquals(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), t));
     }
+
+
+    @Test
+    public void testBytes() {
+        Wire wire = createWire();
+        byte[] allBytes = new byte[256];
+        for (int i = 0; i < 256; i++)
+            allBytes[i] = (byte) i;
+        wire.write().bytes(NoBytesStore.NO_BYTES)
+                .write().bytes(Bytes.wrap("Hello".getBytes()))
+                .write().bytes(Bytes.wrap("quotable, text".getBytes()))
+                .write().bytes(allBytes);
+        wire.flip();
+        System.out.println(bytes.toDebugString());
+        NativeBytes allBytes2 = nativeBytes();
+        wire.read().bytes(b -> assertEquals(0, b.length))
+                .read().bytes(b -> assertArrayEquals("Hello".getBytes(), b))
+                .read().bytes(b -> assertArrayEquals("quotable, text".getBytes(), b))
+                .read().bytes(allBytes2);
+        allBytes2.flip();
+        assertEquals(Bytes.wrap(allBytes), allBytes2);
+    }
+
 }
