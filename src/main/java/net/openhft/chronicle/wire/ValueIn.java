@@ -1,11 +1,12 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
 import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
-import net.openhft.lang.values.IntValue;
-import net.openhft.lang.values.LongValue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -38,6 +39,17 @@ public interface ValueIn {
     WireIn type(StringBuilder s);
 
     WireIn int8(ByteConsumer i);
+
+    WireIn bytes(Bytes toBytes);
+
+    WireIn bytes(Consumer<byte[]> bytesConsumer);
+
+    WireIn wireIn();
+
+    /**
+     * the length of the field as bytes.
+     */
+    long readLength();
 
     WireIn uint8(ShortConsumer i);
 
@@ -74,4 +86,6 @@ public interface ValueIn {
     WireIn sequence(Consumer<ValueIn> reader);
 
     WireIn readMarshallable(Marshallable object);
+
+    long int64();
 }

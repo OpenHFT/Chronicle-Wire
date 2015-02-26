@@ -1,6 +1,5 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.lang.io.DirectStore;
 import org.junit.Test;
 
 import java.lang.reflect.Type;
@@ -9,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -207,7 +207,7 @@ public class YamlExamples {
 
     @Test
     public void testMappedObject() {
-        Wire wire = new BinaryWire(DirectStore.allocate(128).bytes());
+        Wire wire = new BinaryWire(nativeBytes());
 /*
         name: Mark McGwire
         hr:   65    # Home runs
@@ -315,44 +315,4 @@ public class YamlExamples {
     }
 }
 
-class MyType implements Marshallable {
-    String name;
-    LocalDate date;
-
-    @Override
-    public void writeMarshallable(WireOut wire) {
-//        wire.writeText(MyTypeKeys.name, name);
-//        wire.writeDate(MyTypeKeys.date, date);
-    }
-
-    @Override
-    public void readMarshallable(WireIn wire) {
-//        name = wire.readText(MyTypeKeys.name);
-//        date = wire.readDate(MyTypeKeys.date);
-    }
-
-    enum MyTypeKeys implements WireKey {
-        name(""), date(LocalDate.MIN);
-
-        private final Object defaultValue;
-
-        static {
-            WireKey.checkKeys(values());
-        }
-
-        MyTypeKeys(Object defaultValue) {
-            this.defaultValue = defaultValue;
-        }
-
-        @Override
-        public int code() {
-            return ordinal();
-        }
-
-        @Override
-        public Object defaultValue() {
-            return defaultValue;
-        }
-    }
-}
 

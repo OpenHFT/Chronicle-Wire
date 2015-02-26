@@ -1,7 +1,9 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.lang.values.IntValue;
-import net.openhft.lang.values.LongValue;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongValue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,25 +21,55 @@ public interface ValueOut {
 
     WireOut text(CharSequence s);
 
-    WireOut int8(int i8);
+    default WireOut int8(long x) {
+        return int8(Maths.toInt8(x));
+    }
 
-    WireOut uint8(int u8);
+    WireOut int8(byte i8);
 
-    WireOut int16(int i16);
+    WireOut bytes(Bytes fromBytes);
 
-    WireOut uint16(int u16);
+    ValueOut writeLength(long remaining);
+
+    WireOut bytes(byte[] fromBytes);
+
+    default WireOut uint8(long x) {
+        return uint8checked((byte) Maths.toUInt8(x));
+    }
+
+    WireOut uint8checked(int u8);
+
+    default WireOut int16(long x) {
+        return int16(Maths.toInt16(x));
+    }
+
+    WireOut int16(short i16);
+
+    default WireOut uint16(long x) {
+        return uint16checked((short) Maths.toUInt16(x));
+    }
+
+    WireOut uint16checked(int u16);
 
     WireOut utf8(int codepoint);
 
+    default WireOut int32(long x) {
+        return int32(Maths.toInt32(x));
+    }
+
     WireOut int32(int i32);
 
-    WireOut uint32(long u32);
+    default WireOut uint32(long x) {
+        return uint32checked((int) Maths.toUInt32(x));
+    }
+
+    WireOut uint32checked(long u32);
+
+    WireOut int64(long i64);
 
     WireOut float32(float f);
 
     WireOut float64(double d);
-
-    WireOut int64(long i64);
 
     WireOut time(LocalTime localTime);
 
@@ -49,9 +81,9 @@ public interface ValueOut {
 
     WireOut uuid(UUID uuid);
 
-    WireOut int64(LongValue readReady);
-
     WireOut int32(IntValue value);
+
+    WireOut int64(LongValue readReady);
 
     WireOut sequence(Runnable writer);
 

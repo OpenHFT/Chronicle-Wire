@@ -1,13 +1,14 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
 import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
-import net.openhft.lang.io.AbstractBytes;
-import net.openhft.lang.io.Bytes;
-import net.openhft.lang.values.IntValue;
-import net.openhft.lang.values.LongValue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,13 +20,13 @@ import java.util.function.*;
  * Created by peter on 19/01/15.
  */
 public class RawWire implements Wire {
-    final AbstractBytes bytes;
+    final Bytes bytes;
 
     final RawValueOut writeValue = new RawValueOut();
     final RawValueIn readValue = new RawValueIn();
 
     public RawWire(Bytes bytes) {
-        this.bytes = (AbstractBytes) bytes;
+        this.bytes = bytes;
     }
 
     @Override
@@ -154,34 +155,52 @@ public class RawWire implements Wire {
         }
 
         @Override
-        public Wire int8(int i8) {
+        public Wire int8(byte i8) {
             bytes.writeByte(i8);
             return RawWire.this;
         }
 
         @Override
-        public Wire uint8(int u8) {
+        public WireOut bytes(Bytes fromBytes) {
+            writeLength(fromBytes.remaining());
+            bytes.write(fromBytes);
+            return RawWire.this;
+        }
+
+        @Override
+        public ValueOut writeLength(long length) {
+            bytes.writeStopBit(length);
+            return this;
+        }
+
+        @Override
+        public WireOut bytes(byte[] fromBytes) {
+            writeLength(fromBytes.length);
+            bytes.write(fromBytes);
+            return RawWire.this;
+        }
+
+        @Override
+        public Wire uint8checked(int u8) {
             bytes.writeUnsignedByte(u8);
             return RawWire.this;
         }
 
         @Override
-        public Wire int16(int i16) {
+        public Wire int16(short i16) {
             bytes.writeShort(i16);
             return RawWire.this;
         }
 
         @Override
-        public Wire uint16(int u16) {
+        public Wire uint16checked(int u16) {
             bytes.writeUnsignedShort(u16);
             return RawWire.this;
         }
 
         @Override
         public Wire utf8(int codepoint) {
-            StringBuilder sb = Wires.acquireStringBuilder();
-            sb.appendCodePoint(codepoint);
-            AbstractBytes.writeUTF0(bytes, sb, 1);
+            BytesUtil.appendUTF(bytes, codepoint);
             return RawWire.this;
         }
 
@@ -192,7 +211,7 @@ public class RawWire implements Wire {
         }
 
         @Override
-        public Wire uint32(long u32) {
+        public Wire uint32checked(long u32) {
             bytes.writeUnsignedInt(u32);
             return RawWire.this;
         }
@@ -270,6 +289,19 @@ public class RawWire implements Wire {
 
     class RawValueIn implements ValueIn {
 
+        public WireIn bytes(Bytes toBytes) {
+            wireIn().bytes().withLength(readLength(), toBytes::write);
+            return wireIn();
+        }
+
+        public WireIn bytes(Consumer<byte[]> bytesConsumer) {
+            long length = readLength();
+            byte[] byteArray = new byte[Maths.toInt32(length)];
+            bytes.read(byteArray);
+            bytesConsumer.accept(byteArray);
+            return wireIn();
+        }
+        
         @Override
         public Wire bool(BooleanConsumer flag) {
             int b = bytes.readUnsignedByte();
@@ -303,6 +335,16 @@ public class RawWire implements Wire {
         public Wire int8(ByteConsumer i) {
             i.accept(bytes.readByte());
             return RawWire.this;
+        }
+
+        @Override
+        public WireIn wireIn() {
+            return RawWire.this;
+        }
+
+        @Override
+        public long readLength() {
+            return bytes.readStopBit();
         }
 
         @Override
@@ -340,6 +382,12 @@ public class RawWire implements Wire {
             i.accept(bytes.readLong());
             return RawWire.this;
         }
+
+        @Override
+        public long int64() {
+            return bytes.readLong();
+        }
+
 
         @Override
         public Wire float32(FloatConsumer v) {
@@ -406,5 +454,7 @@ public class RawWire implements Wire {
         public WireIn readMarshallable(Marshallable object) {
             throw new UnsupportedOperationException();
         }
+
+
     }
 }

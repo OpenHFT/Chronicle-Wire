@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.lang.io.Bytes;
+
+import net.openhft.chronicle.bytes.Bytes;
 
 import java.util.function.Consumer;
 import java.util.function.Function;

@@ -1,20 +1,20 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.lang.io.Bytes;
-import net.openhft.lang.io.DirectStore;
+import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.time.*;
 import java.util.UUID;
 
+import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
 
 /**
  * Created by peter.lawrey on 06/02/15.
  */
 public class BinaryWire2Test {
-    Bytes bytes = new DirectStore(256).bytes();
+    Bytes bytes = nativeBytes();
 
     private BinaryWire createWire() {
         bytes.clear();
@@ -22,12 +22,12 @@ public class BinaryWire2Test {
     }
 
     @Test
-    public void testWriteMarshallable() throws Exception {
+    public void testWriteMarshallable() {
 
     }
 
     @Test
-    public void testBool() throws Exception {
+    public void testBool() {
         Wire wire = createWire();
         wire.write().bool(false)
                 .write().bool(true)
@@ -39,7 +39,7 @@ public class BinaryWire2Test {
     }
 
     @Test
-    public void testFloat32() throws Exception {
+    public void testFloat32() {
         Wire wire = createWire();
         wire.write().float32(0.0F)
                 .write().float32(Float.NaN)
@@ -52,7 +52,7 @@ public class BinaryWire2Test {
 
 
     @Test
-    public void testTime() throws Exception {
+    public void testTime() {
         Wire wire = createWire();
         LocalTime now = LocalTime.now();
         wire.write().time(now)
@@ -66,7 +66,7 @@ public class BinaryWire2Test {
     }
 
     @Test
-    public void testZonedDateTime() throws Exception {
+    public void testZonedDateTime() {
         Wire wire = createWire();
         ZonedDateTime now = ZonedDateTime.now();
         wire.write().zonedDateTime(now)
@@ -79,7 +79,7 @@ public class BinaryWire2Test {
     }
 
     @Test
-    public void testDate() throws Exception {
+    public void testDate() {
         Wire wire = createWire();
         LocalDate now = LocalDate.now();
         wire.write().date(now)
@@ -92,7 +92,7 @@ public class BinaryWire2Test {
     }
 
     @Test
-    public void testUuid() throws Exception {
+    public void testUuid() {
         Wire wire = createWire();
         UUID uuid = UUID.randomUUID();
         wire.write().uuid(uuid)
@@ -105,7 +105,7 @@ public class BinaryWire2Test {
     }
 
     @Test
-    public void testSequence() throws Exception {
+    public void testSequence() {
 
     }
 

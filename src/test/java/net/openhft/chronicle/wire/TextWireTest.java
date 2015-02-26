@@ -1,7 +1,8 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.lang.io.Bytes;
-import net.openhft.lang.io.DirectStore;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.NativeBytes;
+import net.openhft.chronicle.bytes.NoBytesStore;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -14,25 +15,24 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static org.junit.Assert.*;
 
 public class TextWireTest {
 
     Bytes bytes;
 
     private TextWire createWire() {
-        bytes = new DirectStore(256).bytes();
+        bytes = nativeBytes();
         return new TextWire(bytes);
     }
 
     enum BWKey implements WireKey {
-        field1, field2, field3;
-
+        field1, field2, field3
     }
 
     @Test
-    public void testWrite() throws Exception {
+    public void testWrite() {
         Wire wire = createWire();
         wire.write();
         wire.write();
@@ -42,7 +42,7 @@ public class TextWireTest {
     }
 
     @Test
-    public void testWrite1() throws Exception {
+    public void testWrite1() {
         Wire wire = createWire();
         wire.write(BWKey.field1);
         wire.write(BWKey.field2);
@@ -52,7 +52,7 @@ public class TextWireTest {
     }
 
     @Test
-    public void testWrite2() throws Exception {
+    public void testWrite2() {
         Wire wire = createWire();
         wire.write("Hello", BWKey.field1);
         wire.write("World", BWKey.field2);
@@ -62,7 +62,7 @@ public class TextWireTest {
     }
 
     @Test
-    public void testRead() throws Exception {
+    public void testRead() {
         Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
@@ -77,7 +77,7 @@ public class TextWireTest {
     }
 
     @Test
-    public void testRead1() throws Exception {
+    public void testRead1() {
         Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
@@ -92,7 +92,9 @@ public class TextWireTest {
             wire.read(BWKey.field1);
             fail();
         } catch (UnsupportedOperationException expected) {
-            wire.read(new StringBuilder(), BWKey.field1);
+            StringBuilder name = new StringBuilder();
+            wire.read(name, BWKey.field1);
+            assertEquals("Test", name.toString());
         }
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
@@ -100,7 +102,7 @@ public class TextWireTest {
     }
 
     @Test
-    public void testRead2() throws Exception {
+    public void testRead2() {
         Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
@@ -377,7 +379,7 @@ public class TextWireTest {
 
 
     @Test
-    public void testBool() throws Exception {
+    public void testBool() {
         Wire wire = createWire();
         wire.write().bool(false)
                 .write().bool(true)
@@ -389,7 +391,7 @@ public class TextWireTest {
     }
 
     @Test
-    public void testFloat32() throws Exception {
+    public void testFloat32() {
         Wire wire = createWire();
         wire.write().float32(0.0F)
                 .write().float32(Float.NaN)
@@ -407,7 +409,7 @@ public class TextWireTest {
 
 
     @Test
-    public void testTime() throws Exception {
+    public void testTime() {
         Wire wire = createWire();
         LocalTime now = LocalTime.now();
         wire.write().time(now)
@@ -421,7 +423,7 @@ public class TextWireTest {
     }
 
     @Test
-    public void testZonedDateTime() throws Exception {
+    public void testZonedDateTime() {
         Wire wire = createWire();
         ZonedDateTime now = ZonedDateTime.now();
         wire.write().zonedDateTime(now)
@@ -434,7 +436,7 @@ public class TextWireTest {
     }
 
     @Test
-    public void testDate() throws Exception {
+    public void testDate() {
         Wire wire = createWire();
         LocalDate now = LocalDate.now();
         wire.write().date(now)
@@ -447,7 +449,7 @@ public class TextWireTest {
     }
 
     @Test
-    public void testUuid() throws Exception {
+    public void testUuid() {
         Wire wire = createWire();
         UUID uuid = UUID.randomUUID();
         wire.write().uuid(uuid)
@@ -457,5 +459,26 @@ public class TextWireTest {
         wire.read().uuid(t -> assertEquals(uuid, t))
                 .read().uuid(t -> assertEquals(new UUID(0, 0), t))
                 .read().uuid(t -> assertEquals(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), t));
+    }
+
+    @Test
+    public void testBytes() {
+        Wire wire = createWire();
+        byte[] allBytes = new byte[256];
+        for (int i = 0; i < 256; i++)
+            allBytes[i] = (byte) i;
+        wire.write().bytes(NoBytesStore.NO_BYTES)
+                .write().bytes(Bytes.wrap("Hello".getBytes()))
+                .write().bytes(Bytes.wrap("quotable, text".getBytes()))
+                .write().bytes(allBytes);
+        wire.flip();
+        System.out.println(bytes.toString());
+        NativeBytes allBytes2 = nativeBytes();
+        wire.read().bytes(b -> assertEquals(0, b.length))
+                .read().bytes(b -> assertArrayEquals("Hello".getBytes(), b))
+                .read().bytes(b -> assertArrayEquals("quotable, text".getBytes(), b))
+                .read().bytes(allBytes2);
+        allBytes2.flip();
+        assertEquals(Bytes.wrap(allBytes), allBytes2);
     }
 }

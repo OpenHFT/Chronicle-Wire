@@ -1,21 +1,27 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.EscapingStopCharTester;
+import net.openhft.chronicle.bytes.IORuntimeException;
+import net.openhft.chronicle.bytes.StopCharTesters;
+import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.pool.StringInterner;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
 import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
-import net.openhft.lang.io.*;
-import net.openhft.lang.pool.StringInterner;
-import net.openhft.lang.values.IntValue;
-import net.openhft.lang.values.LongValue;
 
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.Base64;
 import java.util.UUID;
 import java.util.function.*;
 
+import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.WireType.stringForCode;
 
 /**
@@ -24,13 +30,13 @@ import static net.openhft.chronicle.wire.WireType.stringForCode;
 public class TextWire implements Wire {
     public static final String FIELD_SEP = "";
     private static final String END_FIELD = "\n";
-    final AbstractBytes bytes;
+    final Bytes bytes;
     final ValueOut valueOut = new TextValueOut();
     final ValueIn valueIn = new TextValueIn();
     String sep = "";
 
     public TextWire(Bytes bytes) {
-        this.bytes = (AbstractBytes) bytes;
+        this.bytes = bytes;
     }
 
     @Override
@@ -97,8 +103,8 @@ public class TextWire implements Wire {
         try {
             int ch = peekCode();
             if (ch == '"') {
-                bytes.skip(1);
-                bytes.parseUTF(sb, EscapingStopCharTester.escaping(c -> c == '"'));
+                bytes.skip(1)
+                        .parseUTF(sb, EscapingStopCharTester.escaping(c -> c == '"'));
 
                 consumeWhiteSpace();
                 ch = peekCode();
@@ -119,9 +125,11 @@ public class TextWire implements Wire {
 
     @Override
     public ValueIn read(WireKey key) {
+        long position = bytes.position();
         StringBuilder sb = readField(Wires.acquireStringBuilder());
         if (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))
             return valueIn;
+        bytes.position(position);
         throw new UnsupportedOperationException("Unordered fields not supported yet.");
     }
 
@@ -213,7 +221,7 @@ public class TextWire implements Wire {
         for (int i = 0; i < s.length(); i++)
             if ("\" ,\n\\".indexOf(s.charAt(i)) >= 0)
                 return true;
-        return false;
+        return s.length() == 0;
     }
 
     @Override
@@ -296,28 +304,61 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public Wire int8(int i8) {
+        public Wire int8(byte i8) {
             bytes.append(sep).append(i8).append(END_FIELD);
             sep = FIELD_SEP;
             return TextWire.this;
         }
 
         @Override
-        public Wire uint8(int u8) {
+        public WireOut bytes(Bytes fromBytes) {
+            if (isText(fromBytes)) {
+                return text(fromBytes);
+            }
+            int length = Maths.toInt32(fromBytes.remaining());
+            byte[] byteArray = new byte[length];
+            fromBytes.read(byteArray);
+            return bytes(byteArray);
+        }
+
+        private boolean isText(Bytes fromBytes) {
+            for (long i = fromBytes.position(); i < fromBytes.limit(); i++) {
+                int ch = fromBytes.readUnsignedByte(i);
+                if ((ch < ' ' && ch != '\t') || ch >= 127)
+                    return false;
+            }
+            return true;
+        }
+
+        @Override
+        public ValueOut writeLength(long remaining) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireOut bytes(byte[] byteArray) {
+            bytes.append(sep).append("!!binary ").append(Base64.getEncoder().encodeToString(byteArray)).append(END_FIELD);
+            sep = FIELD_SEP;
+            return TextWire.this;
+        }
+
+
+        @Override
+        public Wire uint8checked(int u8) {
             bytes.append(sep).append(u8).append(END_FIELD);
             sep = FIELD_SEP;
             return TextWire.this;
         }
 
         @Override
-        public Wire int16(int i16) {
+        public Wire int16(short i16) {
             bytes.append(sep).append(i16).append(END_FIELD);
             sep = FIELD_SEP;
             return TextWire.this;
         }
 
         @Override
-        public Wire uint16(int u16) {
+        public Wire uint16checked(int u16) {
             bytes.append(sep).append(u16).append(END_FIELD);
             sep = FIELD_SEP;
             return TextWire.this;
@@ -340,7 +381,7 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public Wire uint32(long u32) {
+        public Wire uint32checked(long u32) {
             bytes.append(sep).append(u32).append(END_FIELD);
             sep = FIELD_SEP;
             return TextWire.this;
@@ -387,7 +428,6 @@ public class TextWire implements Wire {
     }
 
     class TextValueIn implements ValueIn {
-
         @Override
         public boolean hasNext() {
             throw new UnsupportedOperationException();
@@ -404,6 +444,43 @@ public class TextWire implements Wire {
             text(sb);
             uuid.accept(UUID.fromString(sb.toString()));
             return TextWire.this;
+        }
+
+
+        @Override
+        public WireIn bytes(Bytes toBytes) {
+            return bytes(toBytes::write);
+        }
+
+        public WireIn bytes(Consumer<byte[]> bytesConsumer) {
+            // TODO needs to be made much more efficient.
+            StringBuilder sb = Wires.acquireStringBuilder();
+            if (peekCode() == '!') {
+                bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                String str = sb.toString();
+                if (str.equals("!!binary")) {
+                    sb.setLength(0);
+                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                    byte[] decode = Base64.getDecoder().decode(sb.toString());
+                    bytesConsumer.accept(decode);
+                } else {
+                    throw new IORuntimeException("Unsupported type " + str);
+                }
+            } else {
+                text(sb);
+                bytesConsumer.accept(sb.toString().getBytes());
+            }
+            return TextWire.this;
+        }
+
+        @Override
+        public WireIn wireIn() {
+            return TextWire.this;
+        }
+
+        @Override
+        public long readLength() {
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -424,6 +501,11 @@ public class TextWire implements Wire {
         @Override
         public WireIn readMarshallable(Marshallable object) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public long int64() {
+            return 0;
         }
 
         @Override
@@ -558,7 +640,7 @@ public class TextWire implements Wire {
     }
 
     public static String asText(Wire wire) {
-        TextWire tw = new TextWire(new DirectStore(1024).bytes());
+        TextWire tw = new TextWire(nativeBytes());
         wire.copyTo(tw);
         tw.flip();
         wire.flip();

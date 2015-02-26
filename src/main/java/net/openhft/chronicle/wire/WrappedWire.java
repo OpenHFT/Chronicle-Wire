@@ -1,12 +1,12 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
 import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
-import net.openhft.lang.io.Bytes;
-import net.openhft.lang.values.IntValue;
-import net.openhft.lang.values.LongValue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -180,22 +180,40 @@ public abstract class WrappedWire {
             return thisWireOut();
         }
 
-        public WireOut int8(int i8) {
+        public WireOut int8(byte i8) {
             valueOut.int8(i8);
             return thisWireOut();
         }
 
-        public WireOut uint8(int u8) {
+        @Override
+        public WireOut bytes(Bytes fromBytes) {
+            valueOut.bytes(fromBytes);
+            return thisWireOut();
+        }
+
+        @Override
+        public ValueOut writeLength(long remaining) {
+            valueOut.writeLength(remaining);
+            return this;
+        }
+
+        @Override
+        public WireOut bytes(byte[] fromBytes) {
+            valueOut.bytes(fromBytes);
+            return thisWireOut();
+        }
+
+        public WireOut uint8checked(int u8) {
             valueOut.uint8(u8);
             return thisWireOut();
         }
 
-        public WireOut int16(int i16) {
+        public WireOut int16(short i16) {
             valueOut.int16(i16);
             return thisWireOut();
         }
 
-        public WireOut uint16(int u16) {
+        public WireOut uint16checked(int u16) {
             valueOut.uint16(u16);
             return thisWireOut();
         }
@@ -205,7 +223,7 @@ public abstract class WrappedWire {
             return thisWireOut();
         }
 
-        public WireOut uint32(long u32) {
+        public WireOut uint32checked(long u32) {
             valueOut.uint32(u32);
             return thisWireOut();
         }
@@ -262,6 +280,28 @@ public abstract class WrappedWire {
             return thisWireIn();
         }
 
+        @Override
+        public WireIn bytes(Bytes toBytes) {
+            valueIn.bytes(toBytes);
+            return thisWireIn();
+        }
+
+        @Override
+        public WireIn bytes(Consumer<byte[]> bytesConsumer) {
+            valueIn.bytes(bytesConsumer);
+            return thisWireIn();
+        }
+
+        @Override
+        public WireIn wireIn() {
+            return thisWireIn();
+        }
+
+        @Override
+        public long readLength() {
+            return valueIn.readLength();
+        }
+
         public WireIn uint8(ShortConsumer i) {
             valueIn.uint8(i);
             return thisWireIn();
@@ -300,6 +340,11 @@ public abstract class WrappedWire {
         public WireIn int64(LongConsumer i) {
             valueIn.int64(i);
             return thisWireIn();
+        }
+
+        @Override
+        public long int64() {
+            return valueIn.int64();
         }
 
         public WireIn time(Consumer<LocalTime> localTime) {
@@ -354,5 +399,7 @@ public abstract class WrappedWire {
             valueIn.readMarshallable(object);
             return thisWireIn();
         }
+
+
     }
 }

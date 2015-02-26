@@ -1,20 +1,19 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Byteable;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.Threads;
+import net.openhft.chronicle.core.pool.StringBuilderPool;
+import net.openhft.chronicle.core.pool.StringInterner;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
 import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
-import net.openhft.lang.Jvm;
-import net.openhft.lang.Maths;
-import net.openhft.lang.io.AbstractBytes;
-import net.openhft.lang.io.Bytes;
-import net.openhft.lang.io.serialization.impl.StringBuilderPool;
-import net.openhft.lang.model.Byteable;
-import net.openhft.lang.pool.StringInterner;
-import net.openhft.lang.values.IntValue;
-import net.openhft.lang.values.LongValue;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -33,7 +32,7 @@ public class BinaryWire implements Wire {
     static final int LENGTH_MASK = -1 >>> 2;
     static final StringBuilderPool SBP = new StringBuilderPool();
 
-    final AbstractBytes bytes;
+    final Bytes bytes;
     final ValueOut fixedValueOut = new FixedBinaryValueOut();
     final ValueOut valueOut;
     final ValueIn valueIn = new BinaryValueIn();
@@ -47,8 +46,26 @@ public class BinaryWire implements Wire {
     public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess) {
         this.numericFields = numericFields;
         this.fieldLess = fieldLess;
-        this.bytes = (AbstractBytes) bytes;
+        this.bytes = bytes;
         valueOut = fixed ? fixedValueOut : new BinaryValueOut();
+    }
+
+    public static boolean isReady(int len) {
+        return (len & NOT_READY) == 0;
+    }
+
+    public static boolean isDocument(int len) {
+        return (len & META_DATA) == 0;
+    }
+
+    public static boolean isKnownLength(int len) {
+        return (len & LENGTH_MASK) != UNKNOWN_LENGTH;
+    }
+
+    public static int toIntU30(long l, String error) {
+        if (l < 0 || l >= UNKNOWN_LENGTH)
+            throw new IllegalStateException(String.format(error, l));
+        return (int) l;
     }
 
     @Override
@@ -347,7 +364,7 @@ public class BinaryWire implements Wire {
     }
 
     private void writeField(int code) {
-        bytes.writeUnsignedByte(FIELD_NUMBER.code);
+        writeCode(FIELD_NUMBER);
         bytes.writeStopBit(code);
     }
 
@@ -361,13 +378,15 @@ public class BinaryWire implements Wire {
                 } catch (NumberFormatException ignored) {
                 }
             }
-            long pos = bytes.position();
-            bytes.writeUTFΔ(name);
-            bytes.writeUnsignedByte(pos, FIELD_NAME0.code + len);
+            bytes.writeByte((byte) (FIELD_NAME0.code + len))
+                    .append(name);
         } else {
-            bytes.writeUnsignedByte(FIELD_NAME_ANY.code);
-            bytes.writeUTFΔ(name);
+            writeCode(FIELD_NAME_ANY).writeUTFΔ(name);
         }
+    }
+
+    private Bytes writeCode(WireType wireType) {
+        return bytes.writeByte((byte) wireType.code);
     }
 
     @Override
@@ -438,7 +457,7 @@ public class BinaryWire implements Wire {
         return null;
     }
 
-    private StringBuilder readText(int code, StringBuilder sb) {
+    StringBuilder readText(int code, StringBuilder sb) {
         switch (code >> 4) {
             case SPECIAL:
                 if (code == STRING_ANY.code) {
@@ -469,11 +488,7 @@ public class BinaryWire implements Wire {
 
     private StringBuilder getStringBuilder(int code, StringBuilder sb) {
         sb.setLength(0);
-        try {
-            AbstractBytes.readUTF0(bytes, sb, code & 0x1f);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
+        BytesUtil.parseUTF(bytes, sb, code & 0x1f);
         return sb;
     }
 
@@ -492,7 +507,6 @@ public class BinaryWire implements Wire {
         throw new UnsupportedOperationException();
     }
 
-
     @Override
     public void flip() {
         bytes.flip();
@@ -504,12 +518,12 @@ public class BinaryWire implements Wire {
     }
 
     public String toString() {
-        return bytes.toDebugString(bytes.capacity());
+        return bytes.toDebugString(bytes.maximumLimit());
     }
 
     @Override
     public Wire writeComment(CharSequence s) {
-        bytes.writeUnsignedByte(COMMENT.code);
+        writeCode(COMMENT);
         bytes.writeUTFΔ(s);
         return BinaryWire.this;
     }
@@ -519,47 +533,26 @@ public class BinaryWire implements Wire {
         throw new UnsupportedOperationException();
     }
 
-    static enum NestType {
-        SEQUENCE;
-    }
-
-    static class WriteState {
-        NestType type;
-        long position;
-    }
-
     @Override
     public WireOut addPadding(int paddingToAdd) {
         if (paddingToAdd < 0)
             throw new IllegalStateException("Cannot add " + paddingToAdd + " bytes of padding");
         if (paddingToAdd >= 5) {
-            bytes.writeUnsignedByte(PADDING32.code);
-            bytes.writeUnsignedInt(paddingToAdd - 5);
-            bytes.skip(paddingToAdd - 5);
+            writeCode(PADDING32)
+                    .writeUnsignedInt(paddingToAdd - 5)
+                    .skip(paddingToAdd - 5);
         } else {
             for (int i = 0; i < paddingToAdd; i++)
-                bytes.writeUnsignedByte(PADDING.code);
+                writeCode(PADDING);
         }
         return this;
-    }
-
-    public static boolean isReady(int len) {
-        return (len & NOT_READY) == 0;
-    }
-
-    public static boolean isDocument(int len) {
-        return (len & META_DATA) == 0;
-    }
-
-    public static boolean isKnownLength(int len) {
-        return (len & LENGTH_MASK) != UNKNOWN_LENGTH;
     }
 
     @Override
     public <T> T readDocument(Function<WireIn, T> reader, Consumer<WireIn> metaDataReader) {
         int length;
         for (; ; ) {
-            length = bytes.readVolatileInt(bytes.position());
+            length = bytes.peakVolatileInt();
             if (length == 0)
                 return null;
             if (isDocument(length)) {
@@ -586,7 +579,7 @@ public class BinaryWire implements Wire {
                     // try again.
                 }
             }
-            Jvm.checkInterrupted();
+            Threads.checkInterrupted();
         }
     }
 
@@ -629,12 +622,6 @@ public class BinaryWire implements Wire {
         bytes.writeOrderedInt(position, length);
     }
 
-    public static int toIntU30(long l, String error) {
-        if (l < 0 || l >= UNKNOWN_LENGTH)
-            throw new IllegalStateException(String.format(error, l));
-        return (int) l;
-    }
-
     @Override
     public void writeMetaData(Runnable writer) {
         long position = bytes.position();
@@ -647,27 +634,24 @@ public class BinaryWire implements Wire {
     class FixedBinaryValueOut implements ValueOut {
         @Override
         public WireOut writeMarshallable(Marshallable object) {
-            bytes.writeUnsignedByte(BYTES_LENGTH32.code);
+            writeCode(BYTES_LENGTH32);
             long position = bytes.position();
             bytes.writeInt(0);
             object.writeMarshallable(BinaryWire.this);
-            bytes.writeOrderedInt(position, Maths.toInt(bytes.position() - position, "Document length %,d out of 32-bit int range."));
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position, "Document length %,d out of 32-bit int range."));
             return BinaryWire.this;
         }
 
         @Override
-        public Wire text(CharSequence s) {
+        public WireOut text(CharSequence s) {
             if (s == null) {
-                bytes.writeUnsignedByte(NULL.code);
+                writeCode(NULL);
             } else {
                 int len = s.length();
                 if (len < 0x20) {
-                    long pos = bytes.position();
-                    bytes.writeUTFΔ(s);
-                    bytes.writeUnsignedByte(pos, STRING0.code + len);
+                    bytes.writeByte((byte) (STRING0.code + len)).append(s);
                 } else {
-                    bytes.writeUnsignedByte(STRING_ANY.code);
-                    bytes.writeUTFΔ(s);
+                    writeCode(STRING_ANY).writeUTFΔ(s);
                 }
             }
 
@@ -675,14 +659,13 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public Wire type(CharSequence typeName) {
-            bytes.writeUnsignedByte(TYPE.code);
-            bytes.writeUTFΔ(typeName);
+        public WireOut type(CharSequence typeName) {
+            writeCode(TYPE).writeUTFΔ(typeName);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire bool(Boolean flag) {
+        public WireOut bool(Boolean flag) {
             bytes.writeUnsignedByte(flag == null
                     ? NULL.code
                     : flag ? TRUE.code : FALSE.code);
@@ -690,107 +673,107 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public Wire int8(int i8) {
-            bytes.writeUnsignedByte(INT8.code);
-            bytes.writeByte(i8);
+        public WireOut int8(byte i8) {
+            writeCode(INT8).writeByte(i8);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire uint8(int u8) {
-            bytes.writeUnsignedByte(UINT8.code);
-            bytes.writeUnsignedByte(u8);
+        public WireOut bytes(Bytes fromBytes) {
+            writeLength(Maths.toInt32(fromBytes.remaining() + 1));
+            writeCode(U8_ARRAY);
+            bytes.write(fromBytes);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire int16(int i16) {
-            bytes.writeUnsignedByte(INT16.code);
-            bytes.writeShort(i16);
+        public WireOut bytes(byte[] fromBytes) {
+            writeLength(Maths.toInt32(fromBytes.length + 1));
+            writeCode(U8_ARRAY);
+            bytes.write(fromBytes);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire uint16(int u16) {
-            bytes.writeUnsignedByte(UINT16.code);
-            bytes.writeUnsignedShort(u16);
+        public WireOut uint8checked(int u8) {
+            writeCode(UINT8).writeUnsignedByte(u8);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire utf8(int codepoint) {
-            bytes.writeUnsignedByte(UINT16.code);
-            StringBuilder sb = Wires.acquireStringBuilder();
-            sb.appendCodePoint(codepoint);
-            AbstractBytes.writeUTF0(bytes, sb, 1);
+        public WireOut int16(short i16) {
+            writeCode(INT16).writeShort(i16);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire int32(int i32) {
-            bytes.writeUnsignedByte(INT32.code);
-            bytes.writeInt(i32);
+        public WireOut uint16checked(int u16) {
+            writeCode(UINT16).writeUnsignedShort(u16);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire uint32(long u32) {
-            bytes.writeUnsignedByte(UINT32.code);
-            bytes.writeUnsignedInt(u32);
+        public WireOut utf8(int codepoint) {
+            writeCode(UINT16);
+            BytesUtil.appendUTF(bytes, codepoint);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire float32(float f) {
-            bytes.writeUnsignedByte(FLOAT32.code);
-            bytes.writeFloat(f);
+        public WireOut int32(int i32) {
+            writeCode(INT32).writeInt(i32);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire float64(double d) {
-            bytes.writeUnsignedByte(FLOAT64.code);
-            bytes.writeDouble(d);
+        public WireOut uint32checked(long u32) {
+            writeCode(UINT32).writeUnsignedInt(u32);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire int64(long i64) {
+        public WireOut float32(float f) {
+            writeCode(FLOAT32).writeFloat(f);
+            return BinaryWire.this;
+        }
+
+        @Override
+        public WireOut float64(double d) {
+            writeCode(FLOAT64).writeDouble(d);
+            return BinaryWire.this;
+        }
+
+        @Override
+        public WireOut int64(long i64) {
             return fixedInt64(i64);
         }
 
-        private Wire fixedInt64(long i64) {
-            bytes.writeUnsignedByte(INT64.code);
-            bytes.writeLong(i64);
+        private WireOut fixedInt64(long i64) {
+            writeCode(INT64).writeLong(i64);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire time(LocalTime localTime) {
-            bytes.writeUnsignedByte(TIME.code);
-            bytes.writeUTFΔ(localTime.toString());
+        public WireOut time(LocalTime localTime) {
+            writeCode(TIME).writeUTFΔ(localTime.toString());
             return BinaryWire.this;
         }
 
         @Override
-        public Wire zonedDateTime(ZonedDateTime zonedDateTime) {
-            bytes.writeUnsignedByte(ZONED_DATE_TIME.code);
-            bytes.writeUTFΔ(zonedDateTime.toString());
+        public WireOut zonedDateTime(ZonedDateTime zonedDateTime) {
+            writeCode(ZONED_DATE_TIME).writeUTFΔ(zonedDateTime.toString());
             return BinaryWire.this;
         }
 
         @Override
-        public Wire date(LocalDate localDate) {
-            bytes.writeUnsignedByte(DATE.code);
-            bytes.writeUTFΔ(localDate.toString());
+        public WireOut date(LocalDate localDate) {
+            writeCode(DATE).writeUTFΔ(localDate.toString());
             return BinaryWire.this;
         }
 
         @Override
         public WireOut uuid(UUID uuid) {
-            bytes.writeUnsignedByte(UUID.code);
-            bytes.writeLong(uuid.getMostSignificantBits());
-            bytes.writeLong(uuid.getLeastSignificantBits());
+            writeCode(UUID).writeLong(uuid.getMostSignificantBits()).writeLong(uuid.getLeastSignificantBits());
             return BinaryWire.this;
         }
 
@@ -812,6 +795,23 @@ public class BinaryWire implements Wire {
         public WireOut sequence(Runnable writer) {
             throw new UnsupportedOperationException();
         }
+
+
+        public ValueOut writeLength(long length) {
+            if (length < 0) {
+                throw new IllegalArgumentException("Invalid length " + length);
+            } else if (length < 1 << 8) {
+                writeCode(BYTES_LENGTH8);
+                bytes.writeUnsignedByte((int) length);
+            } else if (length < 1 << 16) {
+                writeCode(BYTES_LENGTH16);
+                bytes.writeUnsignedShort((int) length);
+            } else {
+                writeCode(BYTES_LENGTH32);
+                bytes.writeUnsignedInt(length);
+            }
+            return this;
+        }
     }
 
     class BinaryValueOut extends FixedBinaryValueOut {
@@ -830,11 +830,11 @@ public class BinaryWire implements Wire {
             } else if (l < 128) {
                 bytes.writeUnsignedByte((int) l);
             } else if (l < 1 << 8) {
-                super.uint8((short) l);
+                super.uint8checked((short) l);
             } else if (l < 1 << 16) {
-                super.uint16((int) l);
+                super.uint16checked((int) l);
             } else if (l < 1L << 32) {
-                super.uint32(l);
+                super.uint32checked(l);
             } else {
                 if (l == (float) l)
                     super.float32(l);
@@ -859,55 +859,55 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public Wire int8(int i8) {
+        public WireOut int8(byte i8) {
             writeInt(i8);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire uint8(int u8) {
+        public WireOut uint8checked(int u8) {
             writeInt(u8);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire int16(int i16) {
+        public WireOut int16(short i16) {
             writeInt(i16);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire uint16(int u16) {
+        public WireOut uint16checked(int u16) {
             writeInt(u16);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire int32(int i32) {
+        public WireOut int32(int i32) {
             writeInt(i32);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire uint32(long u32) {
+        public WireOut uint32checked(long u32) {
             writeInt(u32);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire float32(float f) {
+        public WireOut float32(float f) {
             writeFloat(f);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire float64(double d) {
+        public WireOut float64(double d) {
             writeFloat(d);
             return BinaryWire.this;
         }
 
         @Override
-        public Wire int64(long i64) {
+        public WireOut int64(long i64) {
             writeInt(i64);
             return BinaryWire.this;
         }
@@ -919,8 +919,27 @@ public class BinaryWire implements Wire {
             return false;
         }
 
+        public WireIn bytes(Bytes toBytes) {
+            long length = readLength();
+            int code = readCode();
+            if (code != U8_ARRAY.code)
+                cantRead(code);
+            bytes.withLength(length - 1, toBytes::write);
+            return wireIn();
+        }
+
+        public WireIn bytes(Consumer<byte[]> bytesConsumer) {
+            long length = readLength();
+            int code = readCode();
+            if (code != U8_ARRAY.code)
+                cantRead(code);
+            byte[] byteArray = new byte[Maths.toInt32(length - 1)];
+            bytes.read(byteArray);
+            bytesConsumer.accept(byteArray);
+            return wireIn();
+        }
         @Override
-        public Wire type(StringBuilder s) {
+        public WireIn type(StringBuilder s) {
             int code = readCode();
             if (code == TYPE.code) {
                 bytes.readUTFΔ(s);
@@ -931,7 +950,7 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public Wire text(StringBuilder s) {
+        public WireIn text(StringBuilder s) {
             int code = readCode();
             StringBuilder text = readText(code, s);
             if (text == null)
@@ -940,7 +959,7 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public Wire bool(BooleanConsumer flag) {
+        public WireIn bool(BooleanConsumer flag) {
             consumeSpecial();
             int code = readCode();
             switch (code) {
@@ -960,72 +979,77 @@ public class BinaryWire implements Wire {
             return BinaryWire.this;
         }
 
-        private Wire cantRead(int code) {
+        private WireIn cantRead(int code) {
             throw new UnsupportedOperationException(stringForCode(code));
         }
 
         @Override
-        public Wire int8(ByteConsumer i) {
+        public WireIn int8(ByteConsumer i) {
             consumeSpecial();
             i.accept((byte) readInt(bytes.readUnsignedByte()));
             return BinaryWire.this;
         }
 
         @Override
-        public Wire uint8(ShortConsumer i) {
+        public WireIn wireIn() {
+            return BinaryWire.this;
+        }
+
+        @Override
+        public WireIn uint8(ShortConsumer i) {
             consumeSpecial();
             i.accept((short) readInt(readCode()));
             return BinaryWire.this;
         }
 
         @Override
-        public Wire int16(ShortConsumer i) {
+        public WireIn int16(ShortConsumer i) {
             i.accept((short) readInt(readCode()));
             return BinaryWire.this;
         }
 
         @Override
-        public Wire uint16(IntConsumer i) {
+        public WireIn uint16(IntConsumer i) {
             consumeSpecial();
             i.accept((int) readInt(readCode()));
             return BinaryWire.this;
         }
 
         @Override
-        public Wire uint32(LongConsumer i) {
+        public WireIn uint32(LongConsumer i) {
             consumeSpecial();
             i.accept(readInt(readCode()));
             return BinaryWire.this;
         }
 
         @Override
-        public Wire int32(IntConsumer i) {
+        public WireIn int32(IntConsumer i) {
             consumeSpecial();
             i.accept((int) readInt(readCode()));
             return BinaryWire.this;
         }
 
         @Override
-        public Wire float32(FloatConsumer v) {
+        public WireIn float32(FloatConsumer v) {
             consumeSpecial();
             v.accept((float) readFloat(readCode()));
             return BinaryWire.this;
         }
 
         @Override
-        public Wire float64(DoubleConsumer v) {
+        public WireIn float64(DoubleConsumer v) {
             v.accept(readFloat(readCode()));
             return BinaryWire.this;
         }
 
         @Override
-        public Wire int64(LongConsumer i) {
+        public WireIn int64(LongConsumer i) {
             i.accept(readInt(readCode()));
             return BinaryWire.this;
         }
 
         @Override
-        public Wire time(Consumer<LocalTime> localTime) {
+        public WireIn time(Consumer<LocalTime> localTime) {
             consumeSpecial();
             int code = readCode();
             if (code == TIME.code) {
@@ -1039,7 +1063,7 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public Wire zonedDateTime(Consumer<ZonedDateTime> zonedDateTime) {
+        public WireIn zonedDateTime(Consumer<ZonedDateTime> zonedDateTime) {
             consumeSpecial();
             int code = readCode();
             if (code == ZONED_DATE_TIME.code) {
@@ -1053,7 +1077,7 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public Wire date(Consumer<LocalDate> localDate) {
+        public WireIn date(Consumer<LocalDate> localDate) {
             consumeSpecial();
             int code = readCode();
             if (code == DATE.code) {
@@ -1080,11 +1104,8 @@ public class BinaryWire implements Wire {
                 default:
                     if (code >= STRING0.code && code <= STRING30.code) {
                         StringBuilder sb = SBP.acquireStringBuilder();
-                        try {
-                            AbstractBytes.readUTF0(bytes, sb, code & 0b11111);
-                        } catch (IOException e) {
-                            throw new IllegalStateException(e);
-                        }
+                        BytesUtil.parseUTF(bytes, sb, code & 0b11111);
+                        s.accept(sb.toString());
                     } else {
                         cantRead(code);
                     }
@@ -1116,9 +1137,19 @@ public class BinaryWire implements Wire {
             if (code != INT64.code)
                 cantRead(code);
             Byteable b = (Byteable) value;
-            b.bytes(bytes, bytes.position());
-            bytes.skip(b.maxSize());
+            long length = b.maxSize();
+            b.bytes(bytes, bytes.position(), length);
+            bytes.skip(length);
             return BinaryWire.this;
+        }
+
+        @Override
+        public long int64() {
+            consumeSpecial();
+            int code = readCode();
+            if (code != INT64.code)
+                cantRead(code);
+            return bytes.readLong();
         }
 
         @Override
@@ -1151,8 +1182,10 @@ public class BinaryWire implements Wire {
             return BinaryWire.this;
         }
 
-        private long readLength() {
+        @Override
+        public long readLength() {
             int code = peekCode();
+            // TODO handle non length types as well.
             switch (code) {
                 case 0x80:
                     bytes.skip(1);
