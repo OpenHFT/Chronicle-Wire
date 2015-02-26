@@ -278,7 +278,11 @@ public class RawWire implements Wire {
 
         @Override
         public WireOut marshallable(Marshallable object) {
-            throw new UnsupportedOperationException();
+            long position = bytes.position();
+            bytes.writeInt(0);
+            object.writeMarshallable(RawWire.this);
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
+            return RawWire.this;
         }
     }
 
@@ -296,7 +300,7 @@ public class RawWire implements Wire {
             bytesConsumer.accept(byteArray);
             return wireIn();
         }
-        
+
         @Override
         public Wire bool(BooleanConsumer flag) {
             int b = bytes.readUnsignedByte();
@@ -447,7 +451,21 @@ public class RawWire implements Wire {
 
         @Override
         public WireIn marshallable(Marshallable object) {
-            throw new UnsupportedOperationException();
+            long length = bytes.readUnsignedInt();
+            if (length >= 0) {
+                long limit = bytes.limit();
+                long limit2 = bytes.position() + length;
+                bytes.limit(limit2);
+                try {
+                    object.readMarshallable(RawWire.this);
+                } finally {
+                    bytes.limit(limit);
+                    bytes.position(limit2);
+                }
+            } else {
+                object.readMarshallable(RawWire.this);
+            }
+            return RawWire.this;
         }
 
 

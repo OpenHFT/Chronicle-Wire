@@ -470,4 +470,34 @@ public class RawWireTest {
         assertEquals(Bytes.wrap(allBytes), allBytes2);
     }
 
+    @Test
+    public void testWriteMarshallable() {
+        Wire wire = createWire();
+        MyTypes mtA = new MyTypes();
+        mtA.b(true);
+        mtA.d(123.456);
+        mtA.i(-12345789);
+        mtA.s((short) 12345);
+        mtA.text.append("Hello World");
+
+        wire.write(() -> "A").marshallable(mtA);
+
+        MyTypes mtB = new MyTypes();
+        mtB.b(false);
+        mtB.d(123.4567);
+        mtB.i(-123457890);
+        mtB.s((short) 1234);
+        mtB.text.append("Bye now");
+        wire.write(() -> "B").marshallable(mtB);
+
+        wire.flip();
+        assertEquals("[pos: 0, lim: 74, cap: 1099511627776 ] #٠٠٠¿90w¾\u009F\u001A/Ý^@٠٠٠٠٠٠٠٠C\u009ECÿ⒒Hello World\u001F٠٠٠٠Ò⒋S⒌£\u0092:Ý^@٠٠٠٠٠٠٠٠\u009E.¤ø⒎Bye now", wire.bytes().toDebugString(400));
+
+        MyTypes mt2 = new MyTypes();
+        wire.read(() -> "A").marshallable(mt2);
+        assertEquals(mt2, mtA);
+
+        wire.read(() -> "B").marshallable(mt2);
+        assertEquals(mt2, mtB);
+    }
 }

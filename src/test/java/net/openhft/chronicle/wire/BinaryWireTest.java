@@ -540,4 +540,41 @@ public class BinaryWireTest {
         assertEquals(Bytes.wrap(allBytes), allBytes2);
     }
 
+
+    @Test
+    public void testWriteMarshallable() {
+        Wire wire = createWire();
+        MyTypes mtA = new MyTypes();
+        mtA.b(true);
+        mtA.d(123.456);
+        mtA.i(-12345789);
+        mtA.s((short) 12345);
+        mtA.text.append("Hello World");
+
+        wire.write(() -> "A").marshallable(mtA);
+
+        MyTypes mtB = new MyTypes();
+        mtB.b(false);
+        mtB.d(123.4567);
+        mtB.i(-123457890);
+        mtB.s((short) 1234);
+        mtB.text.append("Bye now");
+        wire.write(() -> "B").marshallable(mtB);
+
+        wire.flip();
+//        System.out.println(wire.bytes().toDebugString(400));
+        checkWire(wire, "[pos: 0, lim: 144, cap: 1099511627776 ] ÁA\u0082C٠٠٠ÆB_FLAG¿ÅS_NUM§90ÅD_NUM\u0091w¾\u009F\u001A/Ý^@ÅL_NUM٠ÅI_NUM¤C\u009ECÿÄTEXTëHello WorldÁB\u0082?٠٠٠ÆB_FLAG¾ÅS_NUM§Ò⒋ÅD_NUM\u0091S⒌£\u0092:Ý^@ÅL_NUM٠ÅI_NUM¤\u009E.¤øÄTEXTçBye now",
+                "[pos: 0, lim: 160, cap: 1099511627776 ] ÁA\u0082K٠٠٠ÆB_FLAG¿ÅS_NUM£90ÅD_NUM\u0091w¾\u009F\u001A/Ý^@ÅL_NUM¥٠٠٠٠٠٠٠٠ÅI_NUM¤C\u009ECÿÄTEXTëHello WorldÁB\u0082G٠٠٠ÆB_FLAG¾ÅS_NUM£Ò⒋ÅD_NUM\u0091S⒌£\u0092:Ý^@ÅL_NUM¥٠٠٠٠٠٠٠٠ÅI_NUM¤\u009E.¤øÄTEXTçBye now",
+                "[pos: 0, lim: 96, cap: 1099511627776 ] ¹A\u0082+٠٠٠¹٠¿¹⒈§90¹⒉\u0091w¾\u009F\u001A/Ý^@¹⒊٠¹⒋¤C\u009ECÿ¹⒌ëHello World¹B\u0082'٠٠٠¹٠¾¹⒈§Ò⒋¹⒉\u0091S⒌£\u0092:Ý^@¹⒊٠¹⒋¤\u009E.¤ø¹⒌çBye now",
+                "[pos: 0, lim: 112, cap: 1099511627776 ] ¹A\u00823٠٠٠¹٠¿¹⒈£90¹⒉\u0091w¾\u009F\u001A/Ý^@¹⒊¥٠٠٠٠٠٠٠٠¹⒋¤C\u009ECÿ¹⒌ëHello World¹B\u0082/٠٠٠¹٠¾¹⒈£Ò⒋¹⒉\u0091S⒌£\u0092:Ý^@¹⒊¥٠٠٠٠٠٠٠٠¹⒋¤\u009E.¤ø¹⒌çBye now",
+                "[pos: 0, lim: 68, cap: 1099511627776 ] \u0082\u001F٠٠٠¿§90\u0091w¾\u009F\u001A/Ý^@٠¤C\u009ECÿëHello World\u0082\u001B٠٠٠¾§Ò⒋\u0091S⒌£\u0092:Ý^@٠¤\u009E.¤øçBye now",
+                "[pos: 0, lim: 84, cap: 1099511627776 ] \u0082'٠٠٠¿£90\u0091w¾\u009F\u001A/Ý^@¥٠٠٠٠٠٠٠٠¤C\u009ECÿëHello World\u0082#٠٠٠¾£Ò⒋\u0091S⒌£\u0092:Ý^@¥٠٠٠٠٠٠٠٠¤\u009E.¤øçBye now");
+        MyTypes mt2 = new MyTypes();
+        wire.read(() -> "A").marshallable(mt2);
+        assertEquals(mt2, mtA);
+
+        wire.read(() -> "B").marshallable(mt2);
+        assertEquals(mt2, mtB);
+    }
+
 }

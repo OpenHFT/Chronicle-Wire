@@ -631,7 +631,7 @@ public class BinaryWire implements Wire {
             long position = bytes.position();
             bytes.writeInt(0);
             object.writeMarshallable(BinaryWire.this);
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position, "Document length %,d out of 32-bit int range."));
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
             return BinaryWire.this;
         }
 
@@ -1166,8 +1166,8 @@ public class BinaryWire implements Wire {
                 try {
                     object.readMarshallable(BinaryWire.this);
                 } finally {
-                    bytes.position(limit2);
                     bytes.limit(limit);
+                    bytes.position(limit2);
                 }
             } else {
                 object.readMarshallable(BinaryWire.this);
