@@ -7,12 +7,12 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Threads;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
 import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
-import net.openhft.chronicle.values.IntValue;
-import net.openhft.chronicle.values.LongValue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

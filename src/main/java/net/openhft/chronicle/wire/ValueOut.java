@@ -2,8 +2,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.values.IntValue;
-import net.openhft.chronicle.values.LongValue;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongValue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
