@@ -30,17 +30,17 @@ import static net.openhft.chronicle.wire.WireType.stringForCode;
 public class TextWire implements Wire {
     public static final String FIELD_SEP = "";
     private static final String END_FIELD = "\n";
-    final Bytes bytes;
+    final Bytes<?> bytes;
     final ValueOut valueOut = new TextValueOut();
     final ValueIn valueIn = new TextValueIn();
     String sep = "";
 
-    public TextWire(Bytes bytes) {
+    public TextWire(Bytes<?> bytes) {
         this.bytes = bytes;
     }
 
     @Override
-    public Bytes bytes() {
+    public Bytes<?> bytes() {
         return bytes;
     }
 
@@ -93,8 +93,8 @@ public class TextWire implements Wire {
         try {
             int ch = peekCode();
             if (ch == '"') {
-                bytes.skip(1)
-                        .parseUTF(sb, EscapingStopCharTester.escaping(c -> c == '"'));
+                bytes.skip(1);
+                bytes.parseUTF(sb, EscapingStopCharTester.escaping(c -> c == '"'));
 
                 consumeWhiteSpace();
                 ch = readCode();
@@ -318,7 +318,7 @@ public class TextWire implements Wire {
         }
 
         private boolean isText(Bytes fromBytes) {
-            for (long i = fromBytes.position(); i < fromBytes.limit(); i++) {
+            for (long i = fromBytes.position(); i < fromBytes.readLimit(); i++) {
                 int ch = fromBytes.readUnsignedByte(i);
                 if ((ch < ' ' && ch != '\t') || ch >= 127)
                     return false;

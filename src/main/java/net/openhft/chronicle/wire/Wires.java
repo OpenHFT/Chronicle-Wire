@@ -8,15 +8,15 @@ import net.openhft.chronicle.core.pool.StringBuilderPool;
 public enum Wires {
     ;
     static final StringBuilderPool SBP = new StringBuilderPool();
+    static final StringBuilderPool ASBP = new StringBuilderPool();
 
     public static StringBuilder acquireStringBuilder() {
         return SBP.acquireStringBuilder();
     }
 
     public static StringBuilder acquireAnotherStringBuilder(CharSequence cs) {
-        StringBuilder sb = SBP.acquireStringBuilder();
-        if (sb == cs)
-            return new StringBuilder();
-        return acquireStringBuilder();
+        StringBuilder sb = ASBP.acquireStringBuilder();
+        assert sb != cs;
+        return sb;
     }
 }

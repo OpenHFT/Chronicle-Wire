@@ -41,7 +41,7 @@ public interface ValueIn {
 
     WireIn int8(ByteConsumer i);
 
-    WireIn bytes(Bytes toBytes);
+    WireIn bytes(Bytes<?> toBytes);
 
     WireIn bytes(Consumer<byte[]> bytesConsumer);
 

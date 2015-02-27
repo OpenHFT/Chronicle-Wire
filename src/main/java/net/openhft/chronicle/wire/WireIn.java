@@ -44,5 +44,5 @@ public interface WireIn {
 
     void clear();
 
-    Bytes bytes();
+    Bytes<?> bytes();
 }

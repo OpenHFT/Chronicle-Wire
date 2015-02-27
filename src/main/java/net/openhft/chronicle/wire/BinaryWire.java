@@ -31,18 +31,18 @@ public class BinaryWire implements Wire {
     static final int UNKNOWN_LENGTH = -1 >>> 2;
     static final int LENGTH_MASK = -1 >>> 2;
 
-    final Bytes bytes;
+    final Bytes<?> bytes;
     final ValueOut fixedValueOut = new FixedBinaryValueOut();
     final ValueOut valueOut;
     final ValueIn valueIn = new BinaryValueIn();
     private final boolean numericFields;
     private final boolean fieldLess;
 
-    public BinaryWire(Bytes bytes) {
+    public BinaryWire(Bytes<?> bytes) {
         this(bytes, false, false, false);
     }
 
-    public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess) {
+    public BinaryWire(Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess) {
         this.numericFields = numericFields;
         this.fieldLess = fieldLess;
         this.bytes = bytes;
@@ -68,7 +68,7 @@ public class BinaryWire implements Wire {
     }
 
     @Override
-    public Bytes bytes() {
+    public Bytes<?> bytes() {
         return bytes;
     }
 
@@ -577,7 +577,7 @@ public class BinaryWire implements Wire {
     private <T> T readDocument(Function<WireIn, T> reader, int length) {
         // consume the length
         bytes.readInt();
-        long limit = bytes.limit();
+        long limit = bytes.readLimit();
         bytes.limit(bytes.position() + length30(length));
         try {
             return reader.apply(this);
@@ -589,7 +589,7 @@ public class BinaryWire implements Wire {
     private void readMetaData(Consumer<WireIn> metaDataReader, int length) {
         // consume the length
         bytes.readInt();
-        long limit = bytes.limit();
+        long limit = bytes.readLimit();
         long limit2 = bytes.position() + length30(length);
         bytes.limit(limit2);
         try {
@@ -1158,7 +1158,7 @@ public class BinaryWire implements Wire {
             consumeSpecial();
             long length = readLength();
             if (length >= 0) {
-                long limit = bytes.limit();
+                long limit = bytes.readLimit();
                 long limit2 = bytes.position() + length;
                 bytes.limit(limit2);
                 try {

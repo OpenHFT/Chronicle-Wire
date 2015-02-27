@@ -452,7 +452,7 @@ public class RawWire implements Wire {
         public WireIn marshallable(Marshallable object) {
             long length = bytes.readUnsignedInt();
             if (length >= 0) {
-                long limit = bytes.limit();
+                long limit = bytes.readLimit();
                 long limit2 = bytes.position() + length;
                 bytes.limit(limit2);
                 try {
