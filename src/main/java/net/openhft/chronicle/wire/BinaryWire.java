@@ -5,7 +5,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Threads;
-import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongValue;
@@ -28,22 +27,22 @@ import static net.openhft.chronicle.wire.WireType.*;
 public class BinaryWire implements Wire {
     static final int NOT_READY = 1 << 31;
     static final int META_DATA = 1 << 30;
+    public static final int ANY_CODE_MATCH = -1;
     static final int UNKNOWN_LENGTH = -1 >>> 2;
     static final int LENGTH_MASK = -1 >>> 2;
-    static final StringBuilderPool SBP = new StringBuilderPool();
 
-    final Bytes bytes;
+    final Bytes<?> bytes;
     final ValueOut fixedValueOut = new FixedBinaryValueOut();
     final ValueOut valueOut;
     final ValueIn valueIn = new BinaryValueIn();
     private final boolean numericFields;
     private final boolean fieldLess;
 
-    public BinaryWire(Bytes bytes) {
+    public BinaryWire(Bytes<?> bytes) {
         this(bytes, false, false, false);
     }
 
-    public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess) {
+    public BinaryWire(Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess) {
         this.numericFields = numericFields;
         this.fieldLess = fieldLess;
         this.bytes = bytes;
@@ -69,7 +68,7 @@ public class BinaryWire implements Wire {
     }
 
     @Override
-    public Bytes bytes() {
+    public Bytes<?> bytes() {
         return bytes;
     }
 
@@ -122,8 +121,8 @@ public class BinaryWire implements Wire {
 
                 case FIELD0:
                 case FIELD1:
-                    StringBuilder fsb = readField(peekCode, -1, Wires.acquireStringBuilder());
-                    wire.write(fsb, null);
+                    StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, Wires.acquireStringBuilder());
+                    wire.write(() -> fsb);
                     break;
 
                 case STR0:
@@ -167,8 +166,8 @@ public class BinaryWire implements Wire {
                 break;
             }
             case 0xB7: // FIELD_NAME_ANY(0xB7),
-                StringBuilder fsb = readField(peekCode, -1, Wires.acquireStringBuilder());
-                wire.write(fsb, null);
+                StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, Wires.acquireStringBuilder());
+                wire.write(() -> fsb);
                 break;
             case 0xB8: // STRING_ANY(0xB8),
                 bytes.skip(1);
@@ -390,16 +389,8 @@ public class BinaryWire implements Wire {
     }
 
     @Override
-    public ValueOut write(CharSequence name, WireKey template) {
-        if (!fieldLess) {
-            writeField(name);
-        }
-        return valueOut;
-    }
-
-    @Override
     public ValueIn read() {
-        readField(Wires.acquireStringBuilder(), -1);
+        readField(Wires.acquireStringBuilder(), ANY_CODE_MATCH);
         return valueIn;
     }
 
@@ -412,8 +403,8 @@ public class BinaryWire implements Wire {
     }
 
     @Override
-    public ValueIn read(StringBuilder name, WireKey template) {
-        readField(name, template.code());
+    public ValueIn read(StringBuilder name) {
+        readField(name, ANY_CODE_MATCH);
         return valueIn;
     }
 
@@ -518,7 +509,7 @@ public class BinaryWire implements Wire {
     }
 
     public String toString() {
-        return bytes.toDebugString(bytes.maximumLimit());
+        return bytes.toDebugString(bytes.capacity());
     }
 
     @Override
@@ -586,7 +577,7 @@ public class BinaryWire implements Wire {
     private <T> T readDocument(Function<WireIn, T> reader, int length) {
         // consume the length
         bytes.readInt();
-        long limit = bytes.limit();
+        long limit = bytes.readLimit();
         bytes.limit(bytes.position() + length30(length));
         try {
             return reader.apply(this);
@@ -598,7 +589,7 @@ public class BinaryWire implements Wire {
     private void readMetaData(Consumer<WireIn> metaDataReader, int length) {
         // consume the length
         bytes.readInt();
-        long limit = bytes.limit();
+        long limit = bytes.readLimit();
         long limit2 = bytes.position() + length30(length);
         bytes.limit(limit2);
         try {
@@ -633,12 +624,12 @@ public class BinaryWire implements Wire {
 
     class FixedBinaryValueOut implements ValueOut {
         @Override
-        public WireOut writeMarshallable(Marshallable object) {
+        public WireOut marshallable(Marshallable object) {
             writeCode(BYTES_LENGTH32);
             long position = bytes.position();
             bytes.writeInt(0);
             object.writeMarshallable(BinaryWire.this);
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position, "Document length %,d out of 32-bit int range."));
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
             return BinaryWire.this;
         }
 
@@ -1053,7 +1044,7 @@ public class BinaryWire implements Wire {
             consumeSpecial();
             int code = readCode();
             if (code == TIME.code) {
-                StringBuilder sb = SBP.acquireStringBuilder();
+                StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 localTime.accept(LocalTime.parse(sb));
             } else {
@@ -1067,7 +1058,7 @@ public class BinaryWire implements Wire {
             consumeSpecial();
             int code = readCode();
             if (code == ZONED_DATE_TIME.code) {
-                StringBuilder sb = SBP.acquireStringBuilder();
+                StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 zonedDateTime.accept(ZonedDateTime.parse(sb));
             } else {
@@ -1081,7 +1072,7 @@ public class BinaryWire implements Wire {
             consumeSpecial();
             int code = readCode();
             if (code == DATE.code) {
-                StringBuilder sb = SBP.acquireStringBuilder();
+                StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 localDate.accept(LocalDate.parse(sb));
             } else {
@@ -1103,7 +1094,7 @@ public class BinaryWire implements Wire {
                     break;
                 default:
                     if (code >= STRING0.code && code <= STRING30.code) {
-                        StringBuilder sb = SBP.acquireStringBuilder();
+                        StringBuilder sb = Wires.acquireStringBuilder();
                         BytesUtil.parseUTF(bytes, sb, code & 0b11111);
                         s.accept(sb.toString());
                     } else {
@@ -1163,18 +1154,18 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public WireIn readMarshallable(Marshallable object) {
+        public WireIn marshallable(Marshallable object) {
             consumeSpecial();
             long length = readLength();
             if (length >= 0) {
-                long limit = bytes.limit();
+                long limit = bytes.readLimit();
                 long limit2 = bytes.position() + length;
                 bytes.limit(limit2);
                 try {
                     object.readMarshallable(BinaryWire.this);
                 } finally {
-                    bytes.position(limit2);
                     bytes.limit(limit);
+                    bytes.position(limit2);
                 }
             } else {
                 object.readMarshallable(BinaryWire.this);
@@ -1187,17 +1178,17 @@ public class BinaryWire implements Wire {
             int code = peekCode();
             // TODO handle non length types as well.
             switch (code) {
-                case 0x80:
+                case 0x80: //BYTES_LENGTH8
                     bytes.skip(1);
                     return bytes.readUnsignedByte();
-                case 0x81:
+                case 0x81: //BYTES_LENGTH16
                     bytes.skip(1);
                     return bytes.readUnsignedShort();
-                case 0x82:
+                case 0x82: //BYTES_LENGTH32
                     bytes.skip(1);
                     return bytes.readUnsignedInt();
                 default:
-                    return -1;
+                    return ANY_CODE_MATCH;
             }
         }
     }

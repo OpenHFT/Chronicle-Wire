@@ -54,9 +54,9 @@ public class TextWireTest {
     @Test
     public void testWrite2() {
         Wire wire = createWire();
-        wire.write("Hello", BWKey.field1);
-        wire.write("World", BWKey.field2);
-        wire.write("Long field name which is more than 32 characters, Bye", BWKey.field3);
+        wire.write(() -> "Hello");
+        wire.write(() -> "World");
+        wire.write(() -> "Long field name which is more than 32 characters, Bye");
         wire.flip();
         assertEquals("Hello: World: \"Long field name which is more than 32 characters, Bye\": ", wire.toString());
     }
@@ -66,7 +66,7 @@ public class TextWireTest {
         Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
-        wire.write("Test", BWKey.field2);
+        wire.write(() -> "Test");
         wire.flip();
         wire.read();
         wire.read();
@@ -81,7 +81,7 @@ public class TextWireTest {
         Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
-        wire.write("Test", BWKey.field2);
+        wire.write(() -> "Test");
         wire.flip();
 
         // ok as blank matches anything
@@ -93,7 +93,7 @@ public class TextWireTest {
             fail();
         } catch (UnsupportedOperationException expected) {
             StringBuilder name = new StringBuilder();
-            wire.read(name, BWKey.field1);
+            wire.read(name);
             assertEquals("Test", name.toString());
         }
         assertEquals(0, bytes.remaining());
@@ -107,18 +107,18 @@ public class TextWireTest {
         wire.write();
         wire.write(BWKey.field1);
         String name1 = "Long field name which is more than 32 characters, Bye";
-        wire.write(name1, BWKey.field3);
+        wire.write(() -> name1);
         wire.flip();
 
         // ok as blank matches anything
         StringBuilder name = new StringBuilder();
-        wire.read(name, BWKey.field1);
+        wire.read(name);
         assertEquals(0, name.length());
 
-        wire.read(name, BWKey.field1);
+        wire.read(name);
         assertEquals(BWKey.field1.name(), name.toString());
 
-        wire.read(name, BWKey.field1);
+        wire.read(name);
         assertEquals(name1, name.toString());
 
         assertEquals(0, bytes.remaining());
@@ -131,7 +131,7 @@ public class TextWireTest {
         Wire wire = createWire();
         wire.write().int8(1);
         wire.write(BWKey.field1).int8(2);
-        wire.write("Test", BWKey.field2).int8(3);
+        wire.write(() -> "Test").int8(3);
         wire.flip();
         assertEquals("\"\": 1\n" +
                 "field1: 2\n" +
@@ -155,7 +155,7 @@ public class TextWireTest {
         Wire wire = createWire();
         wire.write().int16(1);
         wire.write(BWKey.field1).int16(2);
-        wire.write("Test", BWKey.field2).int16(3);
+        wire.write(() -> "Test").int16(3);
         wire.flip();
         assertEquals("\"\": 1\n" +
                 "field1: 2\n" +
@@ -179,7 +179,7 @@ public class TextWireTest {
         Wire wire = createWire();
         wire.write().uint8(1);
         wire.write(BWKey.field1).uint8(2);
-        wire.write("Test", BWKey.field2).uint8(3);
+        wire.write(() -> "Test").uint8(3);
         wire.flip();
         assertEquals("\"\": 1\n" +
                 "field1: 2\n" +
@@ -203,7 +203,7 @@ public class TextWireTest {
         Wire wire = createWire();
         wire.write().uint16(1);
         wire.write(BWKey.field1).uint16(2);
-        wire.write("Test", BWKey.field2).uint16(3);
+        wire.write(() -> "Test").uint16(3);
         wire.flip();
         assertEquals("\"\": 1\n" +
                 "field1: 2\n" +
@@ -227,7 +227,7 @@ public class TextWireTest {
         Wire wire = createWire();
         wire.write().uint32(1);
         wire.write(BWKey.field1).uint32(2);
-        wire.write("Test", BWKey.field2).uint32(3);
+        wire.write(() -> "Test").uint32(3);
         wire.flip();
         assertEquals("\"\": 1\n" +
                 "field1: 2\n" +
@@ -251,7 +251,7 @@ public class TextWireTest {
         Wire wire = createWire();
         wire.write().int32(1);
         wire.write(BWKey.field1).int32(2);
-        wire.write("Test", BWKey.field2).int32(3);
+        wire.write(() -> "Test").int32(3);
         wire.flip();
         assertEquals("\"\": 1\n" +
                 "field1: 2\n" +
@@ -275,7 +275,7 @@ public class TextWireTest {
         Wire wire = createWire();
         wire.write().int64(1);
         wire.write(BWKey.field1).int64(2);
-        wire.write("Test", BWKey.field2).int64(3);
+        wire.write(() -> "Test").int64(3);
         wire.flip();
         assertEquals("\"\": 1\n" +
                 "field1: 2\n" +
@@ -300,7 +300,7 @@ public class TextWireTest {
         Wire wire = createWire();
         wire.write().float64(1);
         wire.write(BWKey.field1).float64(2);
-        wire.write("Test", BWKey.field2).float64(3);
+        wire.write(() -> "Test").float64(3);
         wire.flip();
         assertEquals("\"\": 1\n" +
                 "field1: 2\n" +
@@ -332,7 +332,7 @@ public class TextWireTest {
         wire.write(BWKey.field1).text("world");
         String name1 = "Long field name which is more than 32 characters, \\ \nBye";
 
-        wire.write("Test", BWKey.field2)
+        wire.write(() -> "Test")
                 .text(name1);
         wire.flip();
         assertEquals("\"\": Hello\n" +
@@ -358,7 +358,7 @@ public class TextWireTest {
         wire.write().type("MyType");
         wire.write(BWKey.field1).type("AlsoMyType");
         String name1 = "com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState";
-        wire.write("Test", BWKey.field2).type(name1);
+        wire.write(() -> "Test").type(name1);
         wire.writeComment("");
         wire.flip();
         assertEquals("\"\": !MyType " +
@@ -480,5 +480,35 @@ public class TextWireTest {
                 .read().bytes(allBytes2);
         allBytes2.flip();
         assertEquals(Bytes.wrap(allBytes), allBytes2);
+    }
+
+    @Test
+    public void testWriteMarshallable() {
+        Wire wire = createWire();
+        MyTypes mtA = new MyTypes();
+        mtA.b(true);
+        mtA.d(123.456);
+        mtA.i(-12345789);
+        mtA.s((short) 12345);
+        mtA.text.append("Hello World");
+
+        wire.write(() -> "A").marshallable(mtA);
+
+        MyTypes mtB = new MyTypes();
+        mtB.b(false);
+        mtB.d(123.4567);
+        mtB.i(-123457890);
+        mtB.s((short) 1234);
+        mtB.text.append("Bye now");
+        wire.write(() -> "B").marshallable(mtB);
+
+        wire.flip();
+        System.out.println(wire.bytes());
+        MyTypes mt2 = new MyTypes();
+        wire.read(() -> "A").marshallable(mt2);
+        assertEquals(mt2, mtA);
+
+        wire.read(() -> "B").marshallable(mt2);
+        assertEquals(mt2, mtB);
     }
 }

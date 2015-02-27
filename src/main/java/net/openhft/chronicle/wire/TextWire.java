@@ -30,17 +30,17 @@ import static net.openhft.chronicle.wire.WireType.stringForCode;
 public class TextWire implements Wire {
     public static final String FIELD_SEP = "";
     private static final String END_FIELD = "\n";
-    final Bytes bytes;
+    final Bytes<?> bytes;
     final ValueOut valueOut = new TextValueOut();
     final ValueIn valueIn = new TextValueIn();
     String sep = "";
 
-    public TextWire(Bytes bytes) {
+    public TextWire(Bytes<?> bytes) {
         this.bytes = bytes;
     }
 
     @Override
-    public Bytes bytes() {
+    public Bytes<?> bytes() {
         return bytes;
     }
 
@@ -70,19 +70,9 @@ public class TextWire implements Wire {
 
     @Override
     public ValueOut write(WireKey key) {
-        String name = key.name();
+        CharSequence name = key.name();
         if (name == null) name = Integer.toString(key.code());
-        bytes.append(sep).append(name).append(": ");
-        sep = "";
-        return valueOut;
-    }
-
-    @Override
-    public ValueOut write(CharSequence name, WireKey template) {
-        if (name == null) {
-            return write(template);
-        }
-        bytes.append(sep).append(name.length() == 0 ? "\"\"" : quotes(name)).append(": ");
+        bytes.append(sep).append(quotes(name)).append(": ");
         sep = "";
         return valueOut;
     }
@@ -103,14 +93,12 @@ public class TextWire implements Wire {
         try {
             int ch = peekCode();
             if (ch == '"') {
-                bytes.skip(1)
-                        .parseUTF(sb, EscapingStopCharTester.escaping(c -> c == '"'));
+                bytes.skip(1);
+                bytes.parseUTF(sb, EscapingStopCharTester.escaping(c -> c == '"'));
 
                 consumeWhiteSpace();
-                ch = peekCode();
-                if (ch == ':')
-                    bytes.skip(1);
-                else
+                ch = readCode();
+                if (ch != ':')
                     throw new UnsupportedOperationException("Expected a : at " + bytes.toDebugString());
 
             } else {
@@ -134,7 +122,7 @@ public class TextWire implements Wire {
     }
 
     @Override
-    public ValueIn read(StringBuilder name, WireKey template) {
+    public ValueIn read(StringBuilder name) {
         consumeWhiteSpace();
         readField(name);
         return valueIn;
@@ -146,6 +134,12 @@ public class TextWire implements Wire {
             return -1;
         long pos = bytes.position();
         return bytes.readUnsignedByte(pos);
+    }
+
+    private int readCode() {
+        if (bytes.remaining() < 1)
+            return -1;
+        return bytes.readUnsignedByte();
     }
 
     @Override
@@ -289,10 +283,12 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public WireOut writeMarshallable(Marshallable object) {
+        public WireOut marshallable(Marshallable object) {
+            bytes.append(sep);
             bytes.append("{ ");
             object.writeMarshallable(TextWire.this);
             bytes.append("}");
+            sep = "\n";
             return TextWire.this;
         }
 
@@ -322,7 +318,7 @@ public class TextWire implements Wire {
         }
 
         private boolean isText(Bytes fromBytes) {
-            for (long i = fromBytes.position(); i < fromBytes.limit(); i++) {
+            for (long i = fromBytes.position(); i < fromBytes.readLimit(); i++) {
                 int ch = fromBytes.readUnsignedByte(i);
                 if ((ch < ' ' && ch != '\t') || ch >= 127)
                     return false;
@@ -499,24 +495,52 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public WireIn readMarshallable(Marshallable object) {
-            throw new UnsupportedOperationException();
+        public WireIn marshallable(Marshallable object) {
+            consumeWhiteSpace();
+            int code = readCode();
+            if (code != '{')
+                throw new IORuntimeException("Unsupported type " + (char) code);
+            object.readMarshallable(TextWire.this);
+            consumeWhiteSpace();
+            code = readCode();
+            if (code != '}')
+                throw new IORuntimeException("Unterminated { while reading marshallable " + object);
+            return TextWire.this;
         }
 
         @Override
         public long int64() {
-            return 0;
+            return bytes.parseLong();
+        }
+
+        public byte int8() {
+            long l = int64();
+            if (l > Byte.MAX_VALUE || l < Byte.MIN_VALUE)
+                throw new IllegalStateException("value=" + l + ", is greater or less than Byte.MAX_VALUE/MIN_VALUE");
+            return (byte) l;
+        }
+
+        public short int16() {
+            long l = int64();
+            if (l > Short.MAX_VALUE || l < Short.MIN_VALUE)
+                throw new IllegalStateException("value=" + l + ", is greater or less than Short.MAX_VALUE/MIN_VALUE");
+            return (short) l;
+        }
+
+        public int int32() {
+            long l = int64();
+            if (l > Integer.MAX_VALUE || l < Integer.MIN_VALUE)
+                throw new IllegalStateException("value=" + l + ", is greater or less than Integer.MAX_VALUE/MIN_VALUE");
+            return (int) l;
         }
 
         @Override
         public Wire type(StringBuilder s) {
-            int code = peekCode();
-            if (code == '!') {
-                bytes.skip(1);
-                bytes.parseUTF(s, StopCharTesters.SPACE_STOP);
-            } else {
+            int code = readCode();
+            if (code != '!') {
                 throw new UnsupportedOperationException(stringForCode(code));
             }
+            bytes.parseUTF(s, StopCharTesters.SPACE_STOP);
             return TextWire.this;
         }
 

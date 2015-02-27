@@ -87,5 +87,10 @@ public interface ValueOut {
 
     WireOut sequence(Runnable writer);
 
-    WireOut writeMarshallable(Marshallable object);
+    WireOut marshallable(Marshallable object);
+
+    default WireOut typedMarshallable(Marshallable object) {
+        type(object.getClass().getName());
+        return marshallable(object);
+    }
 }

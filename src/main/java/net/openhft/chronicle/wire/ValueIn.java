@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.IORuntimeException;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
@@ -40,7 +41,7 @@ public interface ValueIn {
 
     WireIn int8(ByteConsumer i);
 
-    WireIn bytes(Bytes toBytes);
+    WireIn bytes(Bytes<?> toBytes);
 
     WireIn bytes(Consumer<byte[]> bytesConsumer);
 
@@ -85,7 +86,19 @@ public interface ValueIn {
 
     WireIn sequence(Consumer<ValueIn> reader);
 
-    WireIn readMarshallable(Marshallable object);
+    WireIn marshallable(Marshallable object);
+
+    default Marshallable typedMarshallable() {
+        try {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            type(sb);
+            Marshallable m = Class.forName(sb.toString()).asSubclass(Marshallable.class).newInstance();
+            marshallable(m);
+            return m;
+        } catch (Exception e) {
+            throw new IORuntimeException(e);
+        }
+    }
 
     long int64();
 }

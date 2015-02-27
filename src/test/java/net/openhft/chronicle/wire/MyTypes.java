@@ -2,6 +2,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.BytesMarshaller;
 
+import static net.openhft.chronicle.core.pool.StringInterner.isEqual;
+
 class MyTypes implements Marshallable {
     final StringBuilder text = new StringBuilder();
     boolean b;
@@ -49,6 +51,35 @@ class MyTypes implements Marshallable {
                 .read(Fields.I_NUM).int32(this::i)
                 .read(Fields.TEXT).text(text)
         ;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MyTypes myTypes = (MyTypes) o;
+
+        if (b != myTypes.b) return false;
+        if (Double.compare(myTypes.d, d) != 0) return false;
+        if (i != myTypes.i) return false;
+        if (l != myTypes.l) return false;
+        if (s != myTypes.s) return false;
+        if (!isEqual(text, myTypes.text)) return false;
+
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "MyTypes{" +
+                "text=" + text +
+                ", b=" + b +
+                ", s=" + s +
+                ", d=" + d +
+                ", l=" + l +
+                ", i=" + i +
+                '}';
     }
 
     enum Fields implements WireKey {

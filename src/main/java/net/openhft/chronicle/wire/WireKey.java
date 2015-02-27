@@ -8,10 +8,10 @@ import java.util.Map;
  * Created by peter on 1/10/15.
  */
 public interface WireKey {
-    String name();
+    CharSequence name();
 
     default int code() {
-        return name().hashCode();
+        return name().toString().hashCode();
     }
 
     default Type type() {

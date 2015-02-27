@@ -13,8 +13,9 @@ public interface WireOut {
 
     ValueOut write(WireKey key);
 
-    ValueOut write(CharSequence name, WireKey template);
-
+    /**
+     * write a field less value.
+     */
     ValueOut writeValue();
 
     /*

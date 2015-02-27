@@ -1,24 +1,22 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.pool.StringBuilderPool;
+
 /**
  * Created by peter on 16/01/15.
  */
 public enum Wires {
     ;
-    static final ThreadLocal<StringBuilder> MyStringBuilder = new ThreadLocal<>();
+    static final StringBuilderPool SBP = new StringBuilderPool();
+    static final StringBuilderPool ASBP = new StringBuilderPool();
 
     public static StringBuilder acquireStringBuilder() {
-        StringBuilder sb = MyStringBuilder.get();
-        if (sb == null)
-            MyStringBuilder.set(sb = new StringBuilder());
-        sb.setLength(0);
-        return sb;
+        return SBP.acquireStringBuilder();
     }
 
     public static StringBuilder acquireAnotherStringBuilder(CharSequence cs) {
-        StringBuilder sb = MyStringBuilder.get();
-        if (sb == cs)
-            return new StringBuilder();
-        return acquireStringBuilder();
+        StringBuilder sb = ASBP.acquireStringBuilder();
+        assert sb != cs;
+        return sb;
     }
 }
