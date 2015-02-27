@@ -387,7 +387,6 @@ public class RawWire implements Wire {
             return bytes.readLong();
         }
 
-
         @Override
         public Wire float32(FloatConsumer v) {
             v.accept(bytes.readFloat());

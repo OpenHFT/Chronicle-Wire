@@ -510,7 +510,28 @@ public class TextWire implements Wire {
 
         @Override
         public long int64() {
-            return 0;
+            return bytes.parseLong();
+        }
+
+        public byte int8() {
+            long l = int64();
+            if (l > Byte.MAX_VALUE || l < Byte.MIN_VALUE)
+                throw new IllegalStateException("value=" + l + ", is greater or less than Byte.MAX_VALUE/MIN_VALUE");
+            return (byte) l;
+        }
+
+        public short int16() {
+            long l = int64();
+            if (l > Short.MAX_VALUE || l < Short.MIN_VALUE)
+                throw new IllegalStateException("value=" + l + ", is greater or less than Short.MAX_VALUE/MIN_VALUE");
+            return (short) l;
+        }
+
+        public int int32() {
+            long l = int64();
+            if (l > Integer.MAX_VALUE || l < Integer.MIN_VALUE)
+                throw new IllegalStateException("value=" + l + ", is greater or less than Integer.MAX_VALUE/MIN_VALUE");
+            return (int) l;
         }
 
         @Override

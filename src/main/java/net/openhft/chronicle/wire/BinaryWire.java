@@ -1180,13 +1180,13 @@ public class BinaryWire implements Wire {
             int code = peekCode();
             // TODO handle non length types as well.
             switch (code) {
-                case 0x80:
+                case 0x80: //BYTES_LENGTH8
                     bytes.skip(1);
                     return bytes.readUnsignedByte();
-                case 0x81:
+                case 0x81: //BYTES_LENGTH16
                     bytes.skip(1);
                     return bytes.readUnsignedShort();
-                case 0x82:
+                case 0x82: //BYTES_LENGTH32
                     bytes.skip(1);
                     return bytes.readUnsignedInt();
                 default:
