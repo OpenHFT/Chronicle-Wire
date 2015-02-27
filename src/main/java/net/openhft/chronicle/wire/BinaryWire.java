@@ -5,7 +5,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Threads;
-import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongValue;
@@ -31,7 +30,6 @@ public class BinaryWire implements Wire {
     public static final int ANY_CODE_MATCH = -1;
     static final int UNKNOWN_LENGTH = -1 >>> 2;
     static final int LENGTH_MASK = -1 >>> 2;
-    static final StringBuilderPool SBP = new StringBuilderPool();
 
     final Bytes bytes;
     final ValueOut fixedValueOut = new FixedBinaryValueOut();
@@ -1046,7 +1044,7 @@ public class BinaryWire implements Wire {
             consumeSpecial();
             int code = readCode();
             if (code == TIME.code) {
-                StringBuilder sb = SBP.acquireStringBuilder();
+                StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 localTime.accept(LocalTime.parse(sb));
             } else {
@@ -1060,7 +1058,7 @@ public class BinaryWire implements Wire {
             consumeSpecial();
             int code = readCode();
             if (code == ZONED_DATE_TIME.code) {
-                StringBuilder sb = SBP.acquireStringBuilder();
+                StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 zonedDateTime.accept(ZonedDateTime.parse(sb));
             } else {
@@ -1074,7 +1072,7 @@ public class BinaryWire implements Wire {
             consumeSpecial();
             int code = readCode();
             if (code == DATE.code) {
-                StringBuilder sb = SBP.acquireStringBuilder();
+                StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 localDate.accept(LocalDate.parse(sb));
             } else {
@@ -1096,7 +1094,7 @@ public class BinaryWire implements Wire {
                     break;
                 default:
                     if (code >= STRING0.code && code <= STRING30.code) {
-                        StringBuilder sb = SBP.acquireStringBuilder();
+                        StringBuilder sb = Wires.acquireStringBuilder();
                         BytesUtil.parseUTF(bytes, sb, code & 0b11111);
                         s.accept(sb.toString());
                     } else {
