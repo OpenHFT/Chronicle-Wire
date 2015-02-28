@@ -513,6 +513,11 @@ public class TextWire implements Wire {
             return bytes.parseLong();
         }
 
+        @Override
+        public boolean bool() {
+            return bytes.readBoolean();
+        }
+
         public byte int8() {
             long l = int64();
             if (l > Byte.MAX_VALUE || l < Byte.MIN_VALUE)

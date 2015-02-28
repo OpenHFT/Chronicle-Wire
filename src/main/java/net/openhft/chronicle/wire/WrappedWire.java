@@ -339,6 +339,26 @@ public abstract class WrappedWire {
         }
 
         @Override
+        public boolean bool() {
+            return valueIn.bool();
+        }
+
+        @Override
+        public byte int8() {
+            return valueIn.int8();
+        }
+
+        @Override
+        public short int16() {
+            return valueIn.int16();
+        }
+
+        @Override
+        public int int32() {
+            return valueIn.int32();
+        }
+
+        @Override
         public long int64() {
             return valueIn.int64();
         }

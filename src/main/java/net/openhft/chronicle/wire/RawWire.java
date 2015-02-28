@@ -383,6 +383,25 @@ public class RawWire implements Wire {
         }
 
         @Override
+        public boolean bool() {
+            return bytes.readBoolean();
+        }
+
+        @Override
+        public byte int8() {
+            return bytes.readByte();
+        }
+        @Override
+        public short int16() {
+            return bytes.readShort();
+        }
+
+        @Override
+        public int int32() {
+            return bytes.readInt();
+        }
+
+        @Override
         public long int64() {
             return bytes.readLong();
         }

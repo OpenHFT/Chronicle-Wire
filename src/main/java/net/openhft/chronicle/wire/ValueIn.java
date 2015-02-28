@@ -100,5 +100,14 @@ public interface ValueIn {
         }
     }
 
+    boolean bool();
+
+    byte int8();
+
+    short int16();
+
+    int int32();
+
     long int64();
+
 }
