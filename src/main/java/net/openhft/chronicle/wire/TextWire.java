@@ -317,6 +317,7 @@ public class TextWire implements Wire {
             return bytes(byteArray);
         }
 
+
         private boolean isText(Bytes fromBytes) {
             for (long i = fromBytes.position(); i < fromBytes.readLimit(); i++) {
                 int ch = fromBytes.readUnsignedByte(i);
@@ -510,7 +511,8 @@ public class TextWire implements Wire {
 
         @Override
         public long int64() {
-            return bytes.parseLong();
+            long l = bytes.parseLong();
+            return l;
         }
 
         @Override
@@ -566,12 +568,17 @@ public class TextWire implements Wire {
 
         @Override
         public WireIn text(Consumer<String> s) {
-            throw new UnsupportedOperationException();
+            final StringBuilder builder = new StringBuilder();
+            text(builder);
+            s.accept(builder.toString());
+            return TextWire.this;
         }
 
         @Override
         public String text() {
-            throw new UnsupportedOperationException();
+            final StringBuilder builder = new StringBuilder();
+            text(builder);
+            return builder.toString();
         }
 
         @Override
