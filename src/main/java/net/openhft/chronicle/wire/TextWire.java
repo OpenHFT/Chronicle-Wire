@@ -571,7 +571,8 @@ public class TextWire implements Wire {
 
         @Override
         public String text() {
-            throw new UnsupportedOperationException();
+            StringBuilder sb = new StringBuilder();
+            return text(sb).toString();
         }
 
         @Override
