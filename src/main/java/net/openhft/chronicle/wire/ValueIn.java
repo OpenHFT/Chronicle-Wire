@@ -19,7 +19,7 @@ import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;
 
 /**
- * Created by peter on 14/01/15.
+ * Created by peter.lawrey on 14/01/15.
  */
 public interface ValueIn {
     /*

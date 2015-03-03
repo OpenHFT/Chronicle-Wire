@@ -22,7 +22,7 @@ import java.util.function.*;
 import static net.openhft.chronicle.wire.WireType.*;
 
 /**
- * Created by peter on 15/01/15.
+ * Created by peter.lawrey on 15/01/15.
  */
 public class BinaryWire implements Wire {
     static final int NOT_READY = 1 << 31;

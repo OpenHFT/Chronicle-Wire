@@ -25,7 +25,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.WireType.stringForCode;
 
 /**
- * Created by peter on 15/01/15.
+ * Created by peter.lawrey on 15/01/15.
  */
 public class TextWire implements Wire {
     public static final String FIELD_SEP = "";
