@@ -42,6 +42,17 @@ public class TextWireTest {
     }
 
     @Test
+    public void testSimpleBool() {
+        Wire wire = createWire();
+
+        wire.write(() -> "F").bool(false);
+        wire.write(() -> "T").bool(true);
+        wire.flip();
+        assertEquals(false, wire.read(() -> "F").bool());
+        assertEquals(true, wire.read(() -> "T").bool());
+    }
+
+    @Test
     public void testInt64() {
         Wire wire = createWire();
         int expected = 12345;
@@ -74,7 +85,7 @@ public class TextWireTest {
         wire.write(() -> "VALUE").int64(expected);
         wire.write(() -> "VALUE2").int64(expected);
         wire.flip();
-        System.out.println("out"+Bytes.toHex(wire.bytes()));
+        System.out.println("out" + Bytes.toHex(wire.bytes()));
         assertEquals(expected, wire.read(() -> "VALUE").int16());
         assertEquals(expected, wire.read(() -> "VALUE2").int16());
     }

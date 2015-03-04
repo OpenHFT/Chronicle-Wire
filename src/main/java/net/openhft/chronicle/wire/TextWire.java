@@ -118,7 +118,7 @@ public class TextWire implements Wire {
         if (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))
             return valueIn;
         bytes.position(position);
-        throw new UnsupportedOperationException("Unordered fields not supported yet.");
+        throw new UnsupportedOperationException("Unordered fields not supported yet. key=" + key.name());
     }
 
     @Override
@@ -513,10 +513,6 @@ public class TextWire implements Wire {
             return bytes.parseLong();
         }
 
-        @Override
-        public boolean bool() {
-            return bytes.readBoolean();
-        }
 
         public byte int8() {
             long l = int64();
@@ -589,6 +585,22 @@ public class TextWire implements Wire {
                 throw new UnsupportedOperationException();
             return TextWire.this;
         }
+
+        @Override
+        public boolean bool() {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+            if (StringInterner.isEqual(sb, "true"))
+                return true;
+            else if (StringInterner.isEqual(sb, "false"))
+                return false;
+            else if (StringInterner.isEqual(sb, "!!null"))
+                throw new NullPointerException("value is null");
+            else
+                throw new UnsupportedOperationException();
+
+        }
+
 
         @Override
         public Wire int8(ByteConsumer i) {
