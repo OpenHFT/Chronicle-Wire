@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * The defines the stand interface for writing and reading sequentially to/from a Bytes stream. <p> Created by peter on
+ * The defines the stand interface for writing and reading sequentially to/from a Bytes stream. <p> Created by peter.lawrey on
  * 12/01/15.
  */
 public interface WireIn {

@@ -1,7 +1,7 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Created by peter on 15/01/15.
+ * Created by peter.lawrey on 15/01/15.
  */
 public enum WireType {
     // Sequence

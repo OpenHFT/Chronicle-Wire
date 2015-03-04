@@ -1,7 +1,7 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Created by peter on 1/10/15.
+ * Created by peter.lawrey on 1/10/15.
  */
 public interface Marshallable {
     /**

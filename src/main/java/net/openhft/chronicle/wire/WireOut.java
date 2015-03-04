@@ -6,7 +6,7 @@ import net.openhft.chronicle.bytes.Bytes;
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream.
  * <p>
- * Created by peter on 12/01/15.
+ * Created by peter.lawrey on 12/01/15.
  */
 public interface WireOut {
     ValueOut write();

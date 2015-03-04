@@ -25,7 +25,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.WireType.stringForCode;
 
 /**
- * Created by peter on 15/01/15.
+ * Created by peter.lawrey on 15/01/15.
  */
 public class TextWire implements Wire {
     public static final String FIELD_SEP = "";
@@ -535,7 +535,6 @@ public class TextWire implements Wire {
             return bytes.parseLong();
         }
 
-
         public byte int8() {
             long l = int64();
             if (l > Byte.MAX_VALUE || l < Byte.MIN_VALUE)
@@ -584,13 +583,17 @@ public class TextWire implements Wire {
 
         @Override
         public WireIn text(Consumer<String> s) {
-            throw new UnsupportedOperationException();
+            final StringBuilder builder = new StringBuilder();
+            text(builder);
+            s.accept(builder.toString());
+            return TextWire.this;
         }
 
         @Override
         public String text() {
-            StringBuilder sb = new StringBuilder();
-            return text(sb).toString();
+            final StringBuilder builder = new StringBuilder();
+            text(builder);
+            return builder.toString();
         }
 
         @Override

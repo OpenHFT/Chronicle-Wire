@@ -12,7 +12,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Created by peter on 12/01/15.
+ * Created by peter.lawrey on 12/01/15.
  */
 public class YamlExamples {
     public static void sequenceExample(Wire wire) {

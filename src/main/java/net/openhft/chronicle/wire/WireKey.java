@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by peter on 1/10/15.
+ * Created by peter.lawrey on 1/10/15.
  */
 public interface WireKey {
     CharSequence name();

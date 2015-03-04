@@ -17,7 +17,7 @@ import java.util.UUID;
 import java.util.function.*;
 
 /**
- * Created by peter on 19/01/15.
+ * Created by peter.lawrey on 19/01/15.
  */
 public class RawWire implements Wire {
     final Bytes bytes;

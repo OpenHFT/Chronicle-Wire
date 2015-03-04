@@ -3,7 +3,7 @@ package net.openhft.chronicle.wire;
 import org.junit.Test;
 
 /**
- * Created by peter on 19/01/15.
+ * Created by peter.lawrey on 19/01/15.
  */
 public class RawWirePerfTest {
     @Test
