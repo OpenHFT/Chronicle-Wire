@@ -289,6 +289,11 @@ public abstract class WrappedWire {
         }
 
         @Override
+        public byte[] bytes() {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
         public WireIn wireIn() {
             return thisWireIn();
         }

@@ -469,6 +469,28 @@ public class TextWire implements Wire {
             return TextWire.this;
         }
 
+
+        public byte[] bytes() {
+            // TODO needs to be made much more efficient.
+            StringBuilder sb = Wires.acquireStringBuilder();
+            if (peekCode() == '!') {
+                bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                String str = sb.toString();
+                if (str.equals("!!binary")) {
+                    sb.setLength(0);
+                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                    byte[] decode = Base64.getDecoder().decode(sb.toString());
+                    return decode ;
+                } else {
+                    throw new IORuntimeException("Unsupported type " + str);
+                }
+            } else {
+                text(sb);
+               return sb.toString().getBytes();
+            }
+
+        }
+
         @Override
         public WireIn wireIn() {
             return TextWire.this;
