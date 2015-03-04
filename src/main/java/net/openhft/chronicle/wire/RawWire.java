@@ -17,7 +17,7 @@ import java.util.UUID;
 import java.util.function.*;
 
 /**
- * Created by peter on 19/01/15.
+ * Created by peter.lawrey on 19/01/15.
  */
 public class RawWire implements Wire {
     final Bytes bytes;
@@ -380,6 +380,25 @@ public class RawWire implements Wire {
         public Wire int64(LongConsumer i) {
             i.accept(bytes.readLong());
             return RawWire.this;
+        }
+
+        @Override
+        public boolean bool() {
+            return bytes.readBoolean();
+        }
+
+        @Override
+        public byte int8() {
+            return bytes.readByte();
+        }
+        @Override
+        public short int16() {
+            return bytes.readShort();
+        }
+
+        @Override
+        public int int32() {
+            return bytes.readInt();
         }
 
         @Override

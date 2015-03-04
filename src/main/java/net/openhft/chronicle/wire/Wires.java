@@ -3,7 +3,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 
 /**
- * Created by peter on 16/01/15.
+ * Created by peter.lawrey on 16/01/15.
  */
 public enum Wires {
     ;

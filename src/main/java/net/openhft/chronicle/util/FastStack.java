@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * Created by peter on 16/01/15.
+ * Created by peter.lawrey on 16/01/15.
  */
 public class FastStack<T> {
     private final Supplier<T> tSupplier;

@@ -1,7 +1,7 @@
 package net.openhft.chronicle.util;
 
 /**
- * Created by peter on 16/01/15.
+ * Created by peter.lawrey on 16/01/15.
  */
 
 import java.util.Objects;

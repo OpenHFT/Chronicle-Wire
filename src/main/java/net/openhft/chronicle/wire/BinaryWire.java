@@ -22,7 +22,7 @@ import java.util.function.*;
 import static net.openhft.chronicle.wire.WireType.*;
 
 /**
- * Created by peter on 15/01/15.
+ * Created by peter.lawrey on 15/01/15.
  */
 public class BinaryWire implements Wire {
     static final int NOT_READY = 1 << 31;
@@ -1134,6 +1134,49 @@ public class BinaryWire implements Wire {
             return BinaryWire.this;
         }
 
+
+        @Override
+        public boolean bool() {
+            consumeSpecial();
+            int code = readCode();
+            if (code != UINT8.code)
+                cantRead(code);
+
+            switch (bytes.readUnsignedByte()) {
+                case 0xBF: // TRUE(0xBF)
+                    return true;
+                case 0xBE: // FALSE(0xBE)
+                    return false;
+            }
+            throw new IllegalStateException();
+        }
+
+        @Override
+        public byte int8() {
+            consumeSpecial();
+            int code = readCode();
+            if (code != INT8.code)
+                cantRead(code);
+            return bytes.readByte();
+        }
+
+        @Override
+        public short int16() {
+            consumeSpecial();
+            int code = readCode();
+            if (code != INT16.code)
+                cantRead(code);
+            return bytes.readShort();
+        }
+
+        @Override
+        public int int32() {
+            consumeSpecial();
+            int code = readCode();
+            if (code != INT32.code)
+                cantRead(code);
+            return bytes.readInt();
+        }
         @Override
         public long int64() {
             consumeSpecial();
