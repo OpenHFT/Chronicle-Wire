@@ -70,10 +70,13 @@ public class TextWireTest {
     @Test
     public void testInt32() {
         Wire wire = createWire();
-        int expected = 12345;
+        int expected = 1;
         wire.write(() -> "VALUE").int64(expected);
+        wire.write(() -> "VALUE2").int64(expected);
         wire.flip();
+        System.out.println("out"+Bytes.toHex(wire.bytes()));
         assertEquals(expected, wire.read(() -> "VALUE").int16());
+        assertEquals(expected, wire.read(() -> "VALUE2").int16());
     }
 
     @Test(expected = IllegalStateException.class)
