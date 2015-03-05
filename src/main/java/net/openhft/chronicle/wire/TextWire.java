@@ -111,6 +111,7 @@ public class TextWire implements Wire {
         return sb;
     }
 
+
     @Override
     public ValueIn read(WireKey key) {
         long position = bytes.position();
@@ -498,7 +499,39 @@ public class TextWire implements Wire {
 
         @Override
         public long readLength() {
-            throw new UnsupportedOperationException();
+
+            long start = bytes.position();
+            try {
+                consumeWhiteSpace();
+
+                int code = readCode();
+
+                switch (code) {
+                    case '{':
+
+                        int count = 1;
+
+                        for (; ; ) {
+
+                            byte b = bytes.readByte();
+                            if (b == '{')
+                                count += 1;
+                            else if (b == '}') {
+                                count -= 1;
+                                if (count == 0)
+                                    return bytes.position() - start;
+                            }
+                            // do nothing
+                        }
+
+                    default:
+                        // TODO needs to be made much more efficient.
+                        bytes();
+                        return bytes.position() - start;
+                }
+            } finally {
+                bytes.position(start);
+            }
         }
 
         @Override
@@ -570,6 +603,11 @@ public class TextWire implements Wire {
         public Wire text(StringBuilder s) {
             int ch = peekCode();
             StringBuilder sb = s;
+            if (ch == '{') {
+                sb.append(Bytes.toDebugString(bytes, bytes.position(), readLength()));
+                return TextWire.this;
+            }
+
             if (ch == '"') {
                 bytes.skip(1);
                 bytes.parseUTF(sb, EscapingStopCharTester.escaping(c -> c == '"'));
@@ -583,17 +621,17 @@ public class TextWire implements Wire {
 
         @Override
         public WireIn text(Consumer<String> s) {
-            final StringBuilder builder = new StringBuilder();
-            text(builder);
-            s.accept(builder.toString());
+            StringBuilder sb = Wires.acquireStringBuilder();
+            text(sb);
+            s.accept(sb.toString());
             return TextWire.this;
         }
 
         @Override
         public String text() {
-            final StringBuilder builder = new StringBuilder();
-            text(builder);
-            return builder.toString();
+            StringBuilder sb = Wires.acquireStringBuilder();
+            text(sb);
+            return sb.toString();
         }
 
         @Override

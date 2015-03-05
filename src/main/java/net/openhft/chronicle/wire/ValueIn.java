@@ -50,7 +50,7 @@ public interface ValueIn {
     WireIn wireIn();
 
     /**
-     * the length of the field as bytes.
+     * the length of the field as bytes including any encoding and header character
      */
     long readLength();
 
