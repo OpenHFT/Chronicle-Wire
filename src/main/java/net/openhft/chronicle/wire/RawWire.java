@@ -302,6 +302,11 @@ public class RawWire implements Wire {
         }
 
         @Override
+        public byte[] bytes() {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
         public Wire bool(BooleanConsumer flag) {
             int b = bytes.readUnsignedByte();
             if (b == WireType.NULL.code)

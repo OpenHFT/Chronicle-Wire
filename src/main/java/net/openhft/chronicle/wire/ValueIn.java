@@ -45,6 +45,8 @@ public interface ValueIn {
 
     WireIn bytes(Consumer<byte[]> bytesConsumer);
 
+    byte[] bytes();
+
     WireIn wireIn();
 
     /**

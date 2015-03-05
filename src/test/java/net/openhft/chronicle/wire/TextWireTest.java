@@ -42,6 +42,63 @@ public class TextWireTest {
     }
 
     @Test
+    public void testSimpleBool() {
+        Wire wire = createWire();
+
+        wire.write(() -> "F").bool(false);
+        wire.write(() -> "T").bool(true);
+        wire.flip();
+        assertEquals(false, wire.read(() -> "F").bool());
+        assertEquals(true, wire.read(() -> "T").bool());
+    }
+
+    @Test
+    public void testInt64() {
+        Wire wire = createWire();
+        int expected = 12345;
+        wire.write(() -> "VALUE").int64(expected);
+        wire.flip();
+        assertEquals(expected, wire.read(() -> "VALUE").int64());
+    }
+
+    @Test
+    public void testInt16() {
+        Wire wire = createWire();
+        short expected = 12345;
+        wire.write(() -> "VALUE").int64(expected);
+        wire.flip();
+        assertEquals(expected, wire.read(() -> "VALUE").int16());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testInt16TooLarge() {
+        Wire wire = createWire();
+        wire.write(() -> "VALUE").int64(Long.MAX_VALUE);
+        wire.flip();
+        wire.read(() -> "VALUE").int16();
+    }
+
+    @Test
+    public void testInt32() {
+        Wire wire = createWire();
+        int expected = 1;
+        wire.write(() -> "VALUE").int64(expected);
+        wire.write(() -> "VALUE2").int64(expected);
+        wire.flip();
+        System.out.println("out" + Bytes.toHex(wire.bytes()));
+        assertEquals(expected, wire.read(() -> "VALUE").int16());
+        assertEquals(expected, wire.read(() -> "VALUE2").int16());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testInt32TooLarge() {
+        Wire wire = createWire();
+        wire.write(() -> "VALUE").int64(Integer.MAX_VALUE);
+        wire.flip();
+        wire.read(() -> "VALUE").int16();
+    }
+
+    @Test
     public void testWrite1() {
         Wire wire = createWire();
         wire.write(BWKey.field1);
@@ -50,6 +107,7 @@ public class TextWireTest {
         wire.flip();
         assertEquals("field1: field2: field3: ", wire.toString());
     }
+
 
     @Test
     public void testWrite2() {

@@ -929,6 +929,12 @@ public class BinaryWire implements Wire {
             bytesConsumer.accept(byteArray);
             return wireIn();
         }
+
+        @Override
+        public byte[] bytes() {
+            throw new UnsupportedOperationException("todo");
+        }
+
         @Override
         public WireIn type(StringBuilder s) {
             int code = readCode();

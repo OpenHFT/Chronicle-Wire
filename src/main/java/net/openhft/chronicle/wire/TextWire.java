@@ -118,7 +118,7 @@ public class TextWire implements Wire {
         if (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))
             return valueIn;
         bytes.position(position);
-        throw new UnsupportedOperationException("Unordered fields not supported yet.");
+        throw new UnsupportedOperationException("Unordered fields not supported yet. key=" + key.name());
     }
 
     @Override
@@ -317,7 +317,6 @@ public class TextWire implements Wire {
             return bytes(byteArray);
         }
 
-
         private boolean isText(Bytes fromBytes) {
             for (long i = fromBytes.position(); i < fromBytes.readLimit(); i++) {
                 int ch = fromBytes.readUnsignedByte(i);
@@ -470,6 +469,28 @@ public class TextWire implements Wire {
             return TextWire.this;
         }
 
+
+        public byte[] bytes() {
+            // TODO needs to be made much more efficient.
+            StringBuilder sb = Wires.acquireStringBuilder();
+            if (peekCode() == '!') {
+                bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                String str = sb.toString();
+                if (str.equals("!!binary")) {
+                    sb.setLength(0);
+                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                    byte[] decode = Base64.getDecoder().decode(sb.toString());
+                    return decode ;
+                } else {
+                    throw new IORuntimeException("Unsupported type " + str);
+                }
+            } else {
+                text(sb);
+               return sb.toString().getBytes();
+            }
+
+        }
+
         @Override
         public WireIn wireIn() {
             return TextWire.this;
@@ -511,13 +532,7 @@ public class TextWire implements Wire {
 
         @Override
         public long int64() {
-            long l = bytes.parseLong();
-            return l;
-        }
-
-        @Override
-        public boolean bool() {
-            return bytes.readBoolean();
+            return bytes.parseLong();
         }
 
         public byte int8() {
@@ -595,6 +610,22 @@ public class TextWire implements Wire {
                 throw new UnsupportedOperationException();
             return TextWire.this;
         }
+
+        @Override
+        public boolean bool() {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+            if (StringInterner.isEqual(sb, "true"))
+                return true;
+            else if (StringInterner.isEqual(sb, "false"))
+                return false;
+            else if (StringInterner.isEqual(sb, "!!null"))
+                throw new NullPointerException("value is null");
+            else
+                throw new UnsupportedOperationException();
+
+        }
+
 
         @Override
         public Wire int8(ByteConsumer i) {
