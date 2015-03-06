@@ -569,4 +569,28 @@ public class TextWireTest {
         wire.read(() -> "B").marshallable(mt2);
         assertEquals(mt2, mtB);
     }
+
+
+    @Test
+    public void testWriteMarshallableAndFieldLenghth() {
+        Wire wire = createWire();
+        MyTypes mtA = new MyTypes();
+        mtA.b(true);
+        mtA.d(123.456);
+        mtA.i(-12345789);
+        mtA.s((short) 12345);
+
+        ValueOut write = wire.write(() -> "A");
+
+        long start = wire.bytes().position();
+        write.marshallable(mtA);
+        long fieldLen = wire.bytes().position() - start;
+
+        wire.flip();
+
+        ValueIn read = wire.read(() -> "A");
+        long len = read.readLength();
+
+        assertEquals(fieldLen, len);
+    }
 }
