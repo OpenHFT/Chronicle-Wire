@@ -568,6 +568,16 @@ public class TextWire implements Wire {
             return bytes.parseLong();
         }
 
+        @Override
+        public double float64() {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
+        public float float32() {
+            throw new UnsupportedOperationException("todo");
+        }
+
         public byte int8() {
             long l = int64();
             if (l > Byte.MAX_VALUE || l < Byte.MIN_VALUE)

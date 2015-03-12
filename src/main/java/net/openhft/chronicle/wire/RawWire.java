@@ -412,6 +412,16 @@ public class RawWire implements Wire {
         }
 
         @Override
+        public double float64() {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
+        public float float32() {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
         public Wire float32(FloatConsumer v) {
             v.accept(bytes.readFloat());
             return RawWire.this;

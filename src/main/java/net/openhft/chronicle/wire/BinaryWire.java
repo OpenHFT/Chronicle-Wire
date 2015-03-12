@@ -1193,6 +1193,16 @@ public class BinaryWire implements Wire {
         }
 
         @Override
+        public double float64() {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
+        public float float32() {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
         public WireIn int32(IntValue value) {
             throw new UnsupportedOperationException();
         }

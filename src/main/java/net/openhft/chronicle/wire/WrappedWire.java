@@ -368,6 +368,16 @@ public abstract class WrappedWire {
             return valueIn.int64();
         }
 
+        @Override
+        public double float64() {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
+        public float float32() {
+            throw new UnsupportedOperationException("todo");
+        }
+
         public WireIn time(Consumer<LocalTime> localTime) {
             valueIn.time(localTime);
             return thisWireIn();

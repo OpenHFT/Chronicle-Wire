@@ -112,4 +112,7 @@ public interface ValueIn {
 
     long int64();
 
+    double float64();
+
+    float float32();
 }
