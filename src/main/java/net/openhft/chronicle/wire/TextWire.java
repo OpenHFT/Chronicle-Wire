@@ -671,7 +671,6 @@ public class TextWire implements Wire {
                 throw new NullPointerException("value is null");
             else
                 throw new UnsupportedOperationException();
-
         }
 
 
