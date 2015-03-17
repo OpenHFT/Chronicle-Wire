@@ -4,6 +4,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import org.junit.Test;
 
+import static net.openhft.chronicle.wire.RFCExamplesTest.Fields.*;
 import static org.junit.Assert.assertEquals;
 
 /* Based on
@@ -21,26 +22,22 @@ public class RFCExamplesTest {
     public void testPuts() {
         Bytes bytes = NativeBytes.nativeBytes();
 /*
-%TAG !meta-data!
----
+--- !!meta-data
 csp:///service-lookup
 tid: 1426502826520
 ...
-%TAG !data!
----
+--- !!data
 lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
 ...
  */
         Wire text = new TextWire(bytes);
         writeMessageOne(text);
         bytes.flip();
-        assertEquals("%TAG !meta-data!\n" +
-                "---\n" +
+        assertEquals("--- !!meta-data\n" +
                 "csp:///service-lookup\n" +
                 "tid: 149873598325\n" +
                 "...\n" +
-                "%TAG !data!\n" +
-                "---\n" +
+                "--- !!data\n" +
                 "lookup: { relativeUri: test, view: !Map types: [ !Integer !String ] }\n" +
                 "...\n", Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("[pos: 0, lim: 117, cap: 1TiB ] " +
@@ -63,45 +60,37 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
                 "\u001A٠٠@⒘///service-lookupu\u009F)å\"٠٠٠-٠٠٠" +
                 "⒍lookup\"٠٠٠⒋test⒊Map⒌types⒖٠٠٠⒎Integer⒍String", bytes.toDebugString());
 /*
-%TAG !meta-data!
----
+--- !!meta-data
 cid: 1
 # or
 csp://server1/test
 tid: 1426502826525
 ...
-%TAG !data!
----
+--- !!data
 put: [ 1, hello ]
 ...
-%TAG !data!
----
+--- !!data
 put: [ 2, world ]
 ...
-%TAG !data!
----
+--- !!data
 put: [ 3, bye ]
 ...
 */
         bytes.clear();
         writeMessageTwo(text);
         bytes.flip();
-        assertEquals("%TAG !meta-data!\n" +
-                "---\n" +
+        assertEquals("--- !!meta-data\n" +
                 "\n" +
                 "csp://server1/test\n" +
                 "cid: 1\n" +
                 "...\n" +
-                "%TAG !data!\n" +
-                "---\n" +
+                "--- !!data\n" +
                 "put: [ 1, hello ]\n" +
                 "...\n" +
-                "%TAG !data!\n" +
-                "---\n" +
+                "--- !!data\n" +
                 "put: [ 2, world ]\n" +
                 "...\n" +
-                "%TAG !data!\n" +
-                "---\n" +
+                "--- !!data\n" +
                 "put: [ 3, bye ]\n" +
                 "...\n", Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("[pos: 0, lim: 92, cap: 1TiB ] " +
@@ -129,15 +118,19 @@ put: [ 3, bye ]
                 "٠٠٠⒊put⒓٠٠٠⒊٠٠٠٠٠٠٠⒊bye", bytes.toDebugString());
     }
 
+    enum Fields implements WireKey {
+        csp, tid, lookup, relativeUri, view, types
+    }
+
     public void writeMessageOne(Wire wire) {
         Wires.writeData(wire, true, out ->
-                out.write(() -> "csp").text("///service-lookup")
-                        .write(() -> "tid").int64(149873598325L));
+                out.write(csp).text("///service-lookup")
+                        .write(tid).int64(149873598325L));
         Wires.writeData(wire, false, out ->
-                out.write(() -> "lookup").marshallable(out2 ->
-                        out2.write(() -> "relativeUri").text("test")
-                                .write(() -> "view").type("Map")
-                                .write(() -> "types").sequence(vo -> {
+                out.write(lookup).marshallable(out2 ->
+                        out2.write(relativeUri).text("test")
+                                .write(view).type("Map")
+                                .write(types).sequence(vo -> {
                             vo.type("Integer");
                             vo.type("String");
                         })));

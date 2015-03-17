@@ -66,10 +66,10 @@ public enum Wires {
         while (bytes.remaining() >= 4) {
             long length = bytes.readUnsignedInt();
             int len = (int) (length & Wire.LENGTH_MASK);
-            String type = (length & META_DATA) != 0 ? "!meta-data!" : "!data!";
-            String ready = (length & NOT_READY) != 0 ? " # not ready" : "";
-            sb.append("%TAG ").append(type).append(ready).append("\n")
-                    .append("---\n");
+            String type = (length & META_DATA) != 0
+                    ? (length & NOT_READY) != 0 ? "!!not-ready-meta-data!" : "!!meta-data"
+                    : (length & NOT_READY) != 0 ? "!!not-ready-data!" : "!!data";
+            sb.append("--- ").append(type).append("\n");
             for (int i = 0; i < len; i++)
                 sb.append((char) bytes.readUnsignedByte());
             if (sb.charAt(sb.length() - 1) != '\n')
