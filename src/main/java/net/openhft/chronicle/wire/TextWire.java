@@ -264,7 +264,12 @@ public class TextWire implements Wire {
         @Override
         public Wire text(CharSequence s) {
             bytes.append(sep).append(s == null ? "!!null" : quotes(s));
-            sep = isNested() ? ", " : END_FIELD;
+            if (isNested()) {
+                sep = ", ";
+            } else {
+                bytes.append(END_FIELD);
+                sep = "";
+            }
             return TextWire.this;
         }
 
