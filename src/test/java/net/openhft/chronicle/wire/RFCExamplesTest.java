@@ -118,6 +118,15 @@ put: [ 3, bye ]
                 "⒗٠٠٠Ãput\u0082⒎٠٠٠⒈åhello" +
                 "⒗٠٠٠Ãput\u0082⒎٠٠٠⒉åworld" +
                 "⒕٠٠٠Ãput\u0082⒌٠٠٠⒊ãbye", bytes.toDebugString());
+
+        bytes.clear();
+        writeMessageTwo(raw);
+        bytes.flip();
+        assertEquals("[pos: 0, lim: 103, cap: 1TiB ] " +
+                "\u0017٠٠@⒕//server1/test⒈٠٠٠٠٠٠٠\u0016" +
+                "٠٠٠⒊put⒕٠٠٠⒈٠٠٠٠٠٠٠⒌hello\u0016" +
+                "٠٠٠⒊put⒕٠٠٠⒉٠٠٠٠٠٠٠⒌world⒛" +
+                "٠٠٠⒊put⒓٠٠٠⒊٠٠٠٠٠٠٠⒊bye", bytes.toDebugString());
     }
 
     public void writeMessageOne(Wire wire) {
