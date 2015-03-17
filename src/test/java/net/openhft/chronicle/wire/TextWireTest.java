@@ -105,7 +105,7 @@ public class TextWireTest {
         wire.write(BWKey.field2);
         wire.write(BWKey.field3);
         wire.flip();
-        assertEquals("field1: field2: field3: ", wire.toString());
+        assertEquals("field1: field2: field3:", wire.toString());
     }
 
 
@@ -116,7 +116,7 @@ public class TextWireTest {
         wire.write(() -> "World");
         wire.write(() -> "Long field name which is more than 32 characters, Bye");
         wire.flip();
-        assertEquals("Hello: World: \"Long field name which is more than 32 characters, Bye\": ", wire.toString());
+        assertEquals("Hello: World: \"Long field name which is more than 32 characters, Bye\":", wire.toString());
     }
 
     @Test
@@ -582,7 +582,7 @@ public class TextWireTest {
 
         ValueOut write = wire.write(() -> "A");
 
-        long start = wire.bytes().position();
+        long start = wire.bytes().position() + 1; // including one space for "sep".
         write.marshallable(mtA);
         long fieldLen = wire.bytes().position() - start;
 

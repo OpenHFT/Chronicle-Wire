@@ -80,8 +80,8 @@ public class TextWire implements Wire {
     public ValueOut write(WireKey key) {
         CharSequence name = key.name();
         if (name == null) name = Integer.toString(key.code());
-        bytes.append(sep).append(quotes(name)).append(": ");
-        sep = "";
+        bytes.append(sep).append(quotes(name)).append(":");
+        sep = " ";
         return valueOut;
     }
 
@@ -263,6 +263,8 @@ public class TextWire implements Wire {
 
         @Override
         public Wire text(CharSequence s) {
+            if (" ".equals(sep) && startsWith(s, "//"))
+                sep = "";
             bytes.append(sep).append(s == null ? "!!null" : quotes(s));
             if (isNested()) {
                 sep = ", ";
@@ -271,6 +273,15 @@ public class TextWire implements Wire {
                 sep = "";
             }
             return TextWire.this;
+        }
+
+        private boolean startsWith(CharSequence s, String starts) {
+            if (s.length() < starts.length())
+                return false;
+            for (int i = 0; i < starts.length(); i++)
+                if (s.charAt(i) != starts.charAt(i))
+                    return false;
+            return true;
         }
 
         @Override
@@ -299,14 +310,27 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public WireOut sequence(Runnable writer) {
-            throw new UnsupportedOperationException();
+        public WireOut sequence(Consumer<ValueOut> writer) {
+            boolean nested = isNested();
+            nested(true);
+            try {
+                bytes.append(sep);
+                sep = "";
+                bytes.append("[ ");
+                writer.accept(this);
+                bytes.append(" ]");
+
+            } finally {
+                nested(nested);
+            }
+            return TextWire.this;
         }
 
         @Override
         public WireOut marshallable(WriteMarshallable object) {
             bytes.append(sep);
             bytes.append("{ ");
+            sep = "";
             boolean nested = isNested();
             try {
                 nested(true);

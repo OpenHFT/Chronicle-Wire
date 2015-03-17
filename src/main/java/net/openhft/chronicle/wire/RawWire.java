@@ -280,7 +280,7 @@ public class RawWire implements Wire {
         }
 
         @Override
-        public WireOut sequence(Runnable writer) {
+        public WireOut sequence(Consumer<ValueOut> writer) {
             throw new UnsupportedOperationException();
         }
 

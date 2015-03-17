@@ -131,8 +131,9 @@ public abstract class WrappedWire {
         }
 
         @Override
-        public WireOut sequence(Runnable writer) {
-            throw new UnsupportedOperationException();
+        public WireOut sequence(Consumer<ValueOut> writer) {
+            valueOut.sequence(writer);
+            return thisWireOut();
         }
 
         public WireOut text(CharSequence s) {

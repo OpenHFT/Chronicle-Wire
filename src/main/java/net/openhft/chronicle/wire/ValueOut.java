@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * Created by peter.lawrey on 14/01/15.
@@ -85,7 +86,7 @@ public interface ValueOut {
 
     WireOut int64(LongValue readReady);
 
-    WireOut sequence(Runnable writer);
+    WireOut sequence(Consumer<ValueOut> writer);
 
     WireOut marshallable(WriteMarshallable object);
 

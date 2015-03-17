@@ -61,6 +61,7 @@ public enum Wires {
     }
 
     public static String fromSizePrefixedBlobs(Bytes bytes) {
+        long position = bytes.position();
         StringBuilder sb = new StringBuilder();
         while (bytes.remaining() >= 4) {
             long length = bytes.readUnsignedInt();
@@ -75,6 +76,7 @@ public enum Wires {
                 sb.append('\n');
             sb.append("...\n");
         }
+        bytes.position(position);
         return sb.toString();
     }
 }

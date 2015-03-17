@@ -21,9 +21,9 @@ public class YamlExamples {
          - Sammy Sosa
          - Ken Griffey
          */
-        wire.write(Keys.list).sequence(() -> {
+        wire.write(Keys.list).sequence(vo -> {
             for (String s : "Mark McGwire,Sammy Sosa,Ken Griffey".split(","))
-                wire.write().text(s);
+                vo.text(s);
         });
 
         // or

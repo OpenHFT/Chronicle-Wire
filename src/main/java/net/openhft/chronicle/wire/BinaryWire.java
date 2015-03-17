@@ -785,12 +785,24 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public WireOut int32(IntValue value) {
-            throw new UnsupportedOperationException();
+        public WireOut sequence(Consumer<ValueOut> writer) {
+            writeCode(BYTES_LENGTH32);
+            long position = bytes.position();
+            bytes.writeInt(0);
+            boolean nested = isNested();
+            try {
+                nested(true);
+                writer.accept(this);
+            } finally {
+                nested(nested);
+            }
+
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
+            return BinaryWire.this;
         }
 
         @Override
-        public WireOut sequence(Runnable writer) {
+        public WireOut int32(IntValue value) {
             throw new UnsupportedOperationException();
         }
 
