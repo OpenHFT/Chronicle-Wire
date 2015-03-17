@@ -266,13 +266,17 @@ public class TextWire implements Wire {
             if (" ".equals(sep) && startsWith(s, "//"))
                 sep = "";
             bytes.append(sep).append(s == null ? "!!null" : quotes(s));
+            separator();
+            return TextWire.this;
+        }
+
+        public void separator() {
             if (isNested()) {
                 sep = ", ";
             } else {
                 bytes.append(END_FIELD);
                 sep = "";
             }
-            return TextWire.this;
         }
 
         private boolean startsWith(CharSequence s, String starts) {
@@ -319,6 +323,7 @@ public class TextWire implements Wire {
                 bytes.append("[ ");
                 writer.accept(this);
                 bytes.append(" ]");
+                sep = "";
 
             } finally {
                 nested(nested);
@@ -346,15 +351,15 @@ public class TextWire implements Wire {
 
         @Override
         public Wire bool(Boolean flag) {
-            bytes.append(sep).append(flag == null ? "!!null" : flag ? "true" : "false").append(END_FIELD);
-            sep = FIELD_SEP;
+            bytes.append(sep).append(flag == null ? "!!null" : flag ? "true" : "false");
+            separator();
             return TextWire.this;
         }
 
         @Override
         public Wire int8(byte i8) {
-            bytes.append(sep).append(i8).append(END_FIELD);
-            sep = FIELD_SEP;
+            bytes.append(sep).append(i8);
+            separator();
             return TextWire.this;
         }
 
@@ -393,22 +398,25 @@ public class TextWire implements Wire {
 
         @Override
         public Wire uint8checked(int u8) {
-            bytes.append(sep).append(u8).append(END_FIELD);
-            sep = FIELD_SEP;
+            bytes.append(sep).append(u8);
+            separator();
+
             return TextWire.this;
         }
 
         @Override
         public Wire int16(short i16) {
-            bytes.append(sep).append(i16).append(END_FIELD);
-            sep = FIELD_SEP;
+            bytes.append(sep).append(i16);
+            separator();
+
             return TextWire.this;
         }
 
         @Override
         public Wire uint16checked(int u16) {
-            bytes.append(sep).append(u16).append(END_FIELD);
-            sep = FIELD_SEP;
+            bytes.append(sep).append(u16);
+            separator();
+
             return TextWire.this;
         }
 
@@ -423,54 +431,65 @@ public class TextWire implements Wire {
 
         @Override
         public Wire int32(int i32) {
-            bytes.append(sep).append(i32).append(END_FIELD);
-            sep = FIELD_SEP;
+            bytes.append(sep).append(i32);
+            separator();
+
             return TextWire.this;
         }
 
         @Override
         public Wire uint32checked(long u32) {
-            bytes.append(sep).append(u32).append(END_FIELD);
-            sep = FIELD_SEP;
+            bytes.append(sep).append(u32);
+            separator();
+
             return TextWire.this;
         }
 
         @Override
         public Wire float32(float f) {
-            bytes.append(sep).append(f).append(END_FIELD);
-            sep = FIELD_SEP;
+            bytes.append(sep).append(f);
+            separator();
+
             return TextWire.this;
         }
 
         @Override
         public Wire float64(double d) {
-            bytes.append(sep).append(d).append(END_FIELD);
-            sep = FIELD_SEP;
+            bytes.append(sep).append(d);
+            separator();
+
             return TextWire.this;
         }
 
         @Override
         public Wire int64(long i64) {
-            bytes.append(sep).append(i64).append(END_FIELD);
-            sep = FIELD_SEP;
+            bytes.append(sep).append(i64);
+            separator();
+
             return TextWire.this;
         }
 
         @Override
         public Wire time(LocalTime localTime) {
-            bytes.append(localTime.toString()).append('\n');
+            bytes.append(localTime.toString());
+            separator();
+
             return TextWire.this;
         }
 
         @Override
         public Wire zonedDateTime(ZonedDateTime zonedDateTime) {
-            bytes.append(zonedDateTime.toString()).append('\n');
+            bytes.append(zonedDateTime.toString());
+            separator();
+
             return TextWire.this;
         }
 
         @Override
         public Wire date(LocalDate localDate) {
-            bytes.append(localDate.toString()).append('\n');
+            bytes.append(localDate.toString());
+            separator();
+
             return TextWire.this;
         }
     }
