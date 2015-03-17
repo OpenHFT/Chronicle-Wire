@@ -39,6 +39,14 @@ public class TextWire implements Wire {
         this.bytes = bytes;
     }
 
+    public static String asText(Wire wire) {
+        TextWire tw = new TextWire(nativeBytes());
+        wire.copyTo(tw);
+        tw.flip();
+        wire.flip();
+        return tw.toString();
+    }
+
     @Override
     public Bytes<?> bytes() {
         return bytes;
@@ -111,7 +119,6 @@ public class TextWire implements Wire {
         return sb;
     }
 
-
     @Override
     public ValueIn read(WireKey key) {
         long position = bytes.position();
@@ -128,7 +135,6 @@ public class TextWire implements Wire {
         readField(name);
         return valueIn;
     }
-
 
     private int peekCode() {
         if (bytes.remaining() < 1)
@@ -159,13 +165,8 @@ public class TextWire implements Wire {
     }
 
     @Override
-    public void writeDocument(Runnable writer) {
-        writer.run();
-    }
-
-    @Override
-    public void writeMetaData(Runnable writer) {
-        throw new UnsupportedOperationException();
+    public void writeDocument(Consumer<WireOut> writer) {
+        writer.accept(this);
     }
 
     @Override
@@ -247,9 +248,23 @@ public class TextWire implements Wire {
     }
 
     class TextValueOut implements ValueOut {
+        boolean nested = false;
+
+        @Override
+        public boolean isNested() {
+            return nested;
+        }
+
+        @Override
+        public WireOut nested(boolean nested) {
+            this.nested = nested;
+            return TextWire.this;
+        }
+
         @Override
         public Wire text(CharSequence s) {
-            bytes.append(sep).append(s == null ? "!!null" : quotes(s)).append(END_FIELD);
+            bytes.append(sep).append(s == null ? "!!null" : quotes(s));
+            sep = isNested() ? ", " : END_FIELD;
             return TextWire.this;
         }
 
@@ -284,12 +299,19 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public WireOut marshallable(Marshallable object) {
+        public WireOut marshallable(WriteMarshallable object) {
             bytes.append(sep);
             bytes.append("{ ");
-            object.writeMarshallable(TextWire.this);
-            bytes.append("}");
-            sep = "\n";
+            boolean nested = isNested();
+            try {
+                nested(true);
+                object.writeMarshallable(TextWire.this);
+            } finally {
+                nested(nested);
+            }
+            bytes.append(' ');
+            bytes.append('}');
+            sep = nested ? ", " : END_FIELD;
             return TextWire.this;
         }
 
@@ -481,13 +503,13 @@ public class TextWire implements Wire {
                     sb.setLength(0);
                     bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                     byte[] decode = Base64.getDecoder().decode(sb.toString());
-                    return decode ;
+                    return decode;
                 } else {
                     throw new IORuntimeException("Unsupported type " + str);
                 }
             } else {
                 text(sb);
-               return sb.toString().getBytes();
+                return sb.toString().getBytes();
             }
 
         }
@@ -550,7 +572,7 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public WireIn marshallable(Marshallable object) {
+        public WireIn marshallable(ReadMarshallable object) {
             consumeWhiteSpace();
             int code = readCode();
             if (code != '{')
@@ -751,14 +773,6 @@ public class TextWire implements Wire {
             localDate.accept(LocalDate.parse(sb.toString()));
             return TextWire.this;
         }
-    }
-
-    public static String asText(Wire wire) {
-        TextWire tw = new TextWire(nativeBytes());
-        wire.copyTo(tw);
-        tw.flip();
-        wire.flip();
-        return tw.toString();
     }
 
 }

@@ -68,7 +68,7 @@ public abstract class WrappedWire {
         return wire.hasMapping();
     }
 
-    public void writeDocument(Runnable writer) {
+    public void writeDocument(Consumer<WireOut> writer) {
         wire.writeDocument(writer);
     }
 
@@ -76,8 +76,8 @@ public abstract class WrappedWire {
         return wire.readDocument(reader, metaDataReader);
     }
 
-    public void writeMetaData(Runnable writer) {
-        wire.writeMetaData(writer);
+    public void writeMetaData(Consumer<WireOut> writer) {
+        Wires.writeData(wire, true, writer);
     }
 
     public boolean hasDocument() {
@@ -117,6 +117,17 @@ public abstract class WrappedWire {
 
         WrappedValueOut(ValueOut valueOut) {
             this.valueOut = valueOut;
+        }
+
+        @Override
+        public boolean isNested() {
+            return valueOut.isNested();
+        }
+
+        @Override
+        public WireOut nested(boolean nested) {
+            valueOut.nested(nested);
+            return thisWireOut();
         }
 
         @Override
@@ -239,7 +250,7 @@ public abstract class WrappedWire {
             return thisWireOut();
         }
 
-        public WireOut marshallable(Marshallable object) {
+        public WireOut marshallable(WriteMarshallable object) {
             valueOut.marshallable(object);
             return thisWireOut();
         }
@@ -426,7 +437,7 @@ public abstract class WrappedWire {
         }
 
         @Override
-        public WireIn marshallable(Marshallable object) {
+        public WireIn marshallable(ReadMarshallable object) {
             valueIn.marshallable(object);
             return thisWireIn();
         }

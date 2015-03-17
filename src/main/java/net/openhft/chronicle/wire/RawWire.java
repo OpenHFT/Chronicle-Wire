@@ -94,22 +94,17 @@ public class RawWire implements Wire {
     }
 
     @Override
-    public void writeDocument(Runnable writer) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void writeMetaData(Runnable writer) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean hasDocument() {
         return false;
     }
 
     @Override
     public <T> T readDocument(Function<WireIn, T> reader, Consumer<WireIn> metaDataReader) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void writeDocument(Consumer<WireOut> writer) {
         throw new UnsupportedOperationException();
     }
 
@@ -134,6 +129,19 @@ public class RawWire implements Wire {
     }
 
     class RawValueOut implements ValueOut {
+        boolean nested = false;
+
+        @Override
+        public boolean isNested() {
+            return nested;
+        }
+
+        @Override
+        public WireOut nested(boolean nested) {
+            this.nested = nested;
+            return RawWire.this;
+        }
+
         @Override
         public Wire bool(Boolean flag) {
             if (flag == null)
@@ -277,10 +285,17 @@ public class RawWire implements Wire {
         }
 
         @Override
-        public WireOut marshallable(Marshallable object) {
+        public WireOut marshallable(WriteMarshallable object) {
             long position = bytes.position();
             bytes.writeInt(0);
-            object.writeMarshallable(RawWire.this);
+            boolean nested = isNested();
+            try {
+                nested(true);
+                object.writeMarshallable(RawWire.this);
+            } finally {
+                nested(nested);
+            }
+
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
             return RawWire.this;
         }
@@ -396,6 +411,7 @@ public class RawWire implements Wire {
         public byte int8() {
             return bytes.readByte();
         }
+
         @Override
         public short int16() {
             return bytes.readShort();
@@ -483,7 +499,7 @@ public class RawWire implements Wire {
         }
 
         @Override
-        public WireIn marshallable(Marshallable object) {
+        public WireIn marshallable(ReadMarshallable object) {
             long length = bytes.readUnsignedInt();
             if (length >= 0) {
                 long limit = bytes.readLimit();

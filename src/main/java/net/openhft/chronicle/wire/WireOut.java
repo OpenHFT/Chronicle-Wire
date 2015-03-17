@@ -3,6 +3,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 
+import java.util.function.Consumer;
+
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream.
  * <p>
@@ -25,9 +27,7 @@ public interface WireOut {
 
     boolean hasMapping();
 
-    void writeDocument(Runnable writer);
-
-    void writeMetaData(Runnable writer);
+    void writeDocument(Consumer<WireOut> writer);
 
     boolean hasDocument();
 

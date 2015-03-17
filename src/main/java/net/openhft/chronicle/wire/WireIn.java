@@ -30,14 +30,6 @@ public interface WireIn {
 
     boolean hasDocument();
 
-    default <T> T readDocument(Function<WireIn, T> reader) {
-        return readDocument(reader, null);
-    }
-
-    default <T> T readMetaData(Consumer<WireIn> metaDataReader) {
-        return readDocument(null, metaDataReader);
-    }
-
     <T> T readDocument(Function<WireIn, T> reader, Consumer<WireIn> metaDataReader);
 
     void flip();

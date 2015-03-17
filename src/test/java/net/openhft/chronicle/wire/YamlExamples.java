@@ -214,7 +214,7 @@ public class YamlExamples {
         avg:  0.278 # Batting average
         rbi:  147   # Runs Batted In
 */
-        wire.writeDocument(() -> wire
+        wire.writeDocument(w -> w
                 .write(Keys.name).text("Mark McGwire")
                 .write(Keys.hr).int32(65)
                 .writeComment("Home runs")

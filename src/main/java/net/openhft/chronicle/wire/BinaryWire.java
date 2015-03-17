@@ -26,11 +26,7 @@ import static net.openhft.chronicle.wire.WireType.stringForCode;
  * Created by peter.lawrey on 15/01/15.
  */
 public class BinaryWire implements Wire {
-    static final int NOT_READY = 1 << 31;
-    static final int META_DATA = 1 << 30;
     public static final int ANY_CODE_MATCH = -1;
-    static final int UNKNOWN_LENGTH = -1 >>> 2;
-    static final int LENGTH_MASK = -1 >>> 2;
 
     final Bytes<?> bytes;
     final ValueOut fixedValueOut = new FixedBinaryValueOut();
@@ -62,8 +58,8 @@ public class BinaryWire implements Wire {
         return (len & LENGTH_MASK) != UNKNOWN_LENGTH;
     }
 
-    public static int toIntU30(long l, String error) {
-        if (l < 0 || l >= UNKNOWN_LENGTH)
+    static int toIntU30(long l, String error) {
+        if (l < 0 || l > LENGTH_MASK)
             throw new IllegalStateException(String.format(error, l));
         return (int) l;
     }
@@ -606,30 +602,40 @@ public class BinaryWire implements Wire {
     }
 
     @Override
-    public void writeDocument(Runnable writer) {
+    public void writeDocument(Consumer<WireOut> writer) {
         long position = bytes.position();
         bytes.writeInt(NOT_READY | UNKNOWN_LENGTH);
-        writer.run();
+        writer.accept(this);
         int length = toIntU30(bytes.position() - position - 4, "Document length %,d out of 30-bit int range.");
         bytes.writeOrderedInt(position, length);
     }
 
-    @Override
-    public void writeMetaData(Runnable writer) {
-        long position = bytes.position();
-        bytes.writeInt(NOT_READY | META_DATA | UNKNOWN_LENGTH);
-        writer.run();
-        int length = META_DATA | toIntU30(bytes.position() - position - 4, "Document length %,d out of 30-bit int range.");
-        bytes.writeOrderedInt(position, length);
-    }
-
     class FixedBinaryValueOut implements ValueOut {
+        boolean nested = false;
         @Override
-        public WireOut marshallable(Marshallable object) {
+        public boolean isNested() {
+            return nested;
+        }
+
+        @Override
+        public WireOut nested(boolean nested) {
+            this.nested = nested;
+            return BinaryWire.this;
+        }
+
+        @Override
+        public WireOut marshallable(WriteMarshallable object) {
             writeCode(BYTES_LENGTH32);
             long position = bytes.position();
             bytes.writeInt(0);
-            object.writeMarshallable(BinaryWire.this);
+            boolean nested = isNested();
+            try {
+                nested(true);
+                object.writeMarshallable(BinaryWire.this);
+            } finally {
+                nested(nested);
+            }
+
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
             return BinaryWire.this;
         }
@@ -1214,7 +1220,7 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public WireIn marshallable(Marshallable object) {
+        public WireIn marshallable(ReadMarshallable object) {
             consumeSpecial();
             long length = readLength();
             if (length >= 0) {

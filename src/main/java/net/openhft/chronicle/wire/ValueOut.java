@@ -87,7 +87,11 @@ public interface ValueOut {
 
     WireOut sequence(Runnable writer);
 
-    WireOut marshallable(Marshallable object);
+    WireOut marshallable(WriteMarshallable object);
+
+    boolean isNested();
+
+    WireOut nested(boolean nested);
 
     default WireOut typedMarshallable(Marshallable object) {
         type(object.getClass().getName());

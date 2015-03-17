@@ -88,7 +88,7 @@ public interface ValueIn {
 
     WireIn sequence(Consumer<ValueIn> reader);
 
-    WireIn marshallable(Marshallable object);
+    WireIn marshallable(ReadMarshallable object);
 
     default Marshallable typedMarshallable() {
         try {
