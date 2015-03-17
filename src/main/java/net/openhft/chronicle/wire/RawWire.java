@@ -21,9 +21,10 @@ import java.util.function.*;
  */
 public class RawWire implements Wire {
     final Bytes bytes;
-
     final RawValueOut writeValue = new RawValueOut();
     final RawValueIn readValue = new RawValueIn();
+    String lastField = "";
+    StringBuilder lastSB;
 
     public RawWire(Bytes bytes) {
         this.bytes = bytes;
@@ -45,31 +46,37 @@ public class RawWire implements Wire {
 
     @Override
     public ValueOut write() {
+        lastField = "";
         return writeValue;
     }
 
     @Override
     public ValueOut write(WireKey key) {
+        lastField = key.name().toString();
         return writeValue;
     }
 
     @Override
     public ValueOut writeValue() {
+        lastField = "";
         return writeValue;
     }
 
     @Override
     public ValueIn read() {
+        lastSB = null;
         return readValue;
     }
 
     @Override
     public ValueIn read(WireKey key) {
+        lastSB = null;
         return readValue;
     }
 
     @Override
     public ValueIn read(StringBuilder name) {
+        lastSB = name;
         return readValue;
     }
 
@@ -281,11 +288,24 @@ public class RawWire implements Wire {
 
         @Override
         public WireOut sequence(Consumer<ValueOut> writer) {
-            throw new UnsupportedOperationException();
+            text(lastField);
+            long position = bytes.position();
+            bytes.writeInt(0);
+            boolean nested = isNested();
+            try {
+                nested(true);
+                writer.accept(this);
+            } finally {
+                nested(nested);
+            }
+
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
+            return RawWire.this;
         }
 
         @Override
         public WireOut marshallable(WriteMarshallable object) {
+            text(lastField);
             long position = bytes.position();
             bytes.writeInt(0);
             boolean nested = isNested();
@@ -495,11 +515,15 @@ public class RawWire implements Wire {
 
         @Override
         public WireIn sequence(Consumer<ValueIn> reader) {
+            text(lastSB);
+
             throw new UnsupportedOperationException();
         }
 
         @Override
         public WireIn marshallable(ReadMarshallable object) {
+            text(lastSB);
+
             long length = bytes.readUnsignedInt();
             if (length >= 0) {
                 long limit = bytes.readLimit();

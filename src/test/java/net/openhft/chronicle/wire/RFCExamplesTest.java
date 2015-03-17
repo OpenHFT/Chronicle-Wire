@@ -54,6 +54,14 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         assertEquals("[pos: 0, lim: 106, cap: 1TiB ] " +
                 "\u001F٠٠@Ãcspñ///service-lookupÃtid\u0090¦\u0094⒒RC" +
                 "٠٠٠Ælookup\u00827٠٠٠ËrelativeUriätestÄview¶⒊MapÅtypes\u0082⒘٠٠٠¶⒎Integer¶⒍String", bytes.toDebugString());
+
+        Wire raw = new RawWire(bytes);
+        bytes.clear();
+        writeMessageOne(raw);
+        bytes.flip();
+        assertEquals("[pos: 0, lim: 79, cap: 1TiB ] " +
+                "\u001A٠٠@⒘///service-lookupu\u009F)å\"٠٠٠-٠٠٠" +
+                "⒍lookup\"٠٠٠⒋test⒊Map⒌types⒖٠٠٠⒎Integer⒍String", bytes.toDebugString());
 /*
 %TAG !meta-data!
 ---
