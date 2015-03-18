@@ -4,7 +4,6 @@ import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.Threads;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongValue;
@@ -17,10 +16,14 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.UUID;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
 
 import static net.openhft.chronicle.wire.WireType.Codes.*;
 import static net.openhft.chronicle.wire.WireType.stringForCode;
+import static net.openhft.chronicle.wire.Wires.newDirectReference;
 
 /**
  * Created by peter.lawrey on 15/01/15.
@@ -46,20 +49,8 @@ public class BinaryWire implements Wire {
         valueOut = fixed ? fixedValueOut : new BinaryValueOut();
     }
 
-    public static boolean isReady(int len) {
-        return (len & NOT_READY) == 0;
-    }
-
-    public static boolean isDocument(int len) {
-        return (len & META_DATA) == 0;
-    }
-
-    public static boolean isKnownLength(int len) {
-        return (len & LENGTH_MASK) != UNKNOWN_LENGTH;
-    }
-
     static int toIntU30(long l, String error) {
-        if (l < 0 || l > LENGTH_MASK)
+        if (l < 0 || l > Wires.LENGTH_MASK)
             throw new IllegalStateException(String.format(error, l));
         return (int) l;
     }
@@ -135,16 +126,14 @@ public class BinaryWire implements Wire {
 
     private void copySpecial(WireOut wire, int peekCode) {
         switch (peekCode) {
-            case COMMENT:
-            {
+            case COMMENT: {
                 bytes.skip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 wire.writeComment(sb);
                 break;
             }
-            case HINT:
-            {
+            case HINT: {
                 bytes.skip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
@@ -154,8 +143,7 @@ public class BinaryWire implements Wire {
             case ZONED_DATE_TIME:
             case DATE:
                 throw new UnsupportedOperationException();
-            case TYPE:
-            {
+            case TYPE: {
                 bytes.skip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
@@ -217,15 +205,13 @@ public class BinaryWire implements Wire {
                     bytes.skip(1);
                     bytes.skip(bytes.readUnsignedInt());
                     break;
-                case COMMENT:
-                {
+                case COMMENT: {
                     bytes.skip(1);
                     StringBuilder sb = Wires.acquireStringBuilder();
                     bytes.readUTFΔ(sb);
                     break;
                 }
-                case HINT:
-                {
+                case HINT: {
                     bytes.skip(1);
                     StringBuilder sb = Wires.acquireStringBuilder();
                     bytes.readUTFΔ(sb);
@@ -536,82 +522,9 @@ public class BinaryWire implements Wire {
         return this;
     }
 
-    @Override
-    public <T> T readDocument(Function<WireIn, T> reader, Consumer<WireIn> metaDataReader) {
-        int length;
-        for (; ; ) {
-            length = bytes.peakVolatileInt();
-            if (length == 0)
-                return null;
-            if (isDocument(length)) {
-                if (reader == null)
-                    throw new IllegalStateException("Expected meta data but found a document of length " + length30(length));
-                if (isReady(length))
-                    return readDocument(reader, length);
-                // try again.
-            } else {
-                if (metaDataReader == null) {
-                    // no need to wait for meta data
-                    if (isKnownLength(length)) {
-                        int length2 = length30(length) + 4;
-                        if (bytes.remaining() < length2)
-                            throw new IllegalStateException();
-                        bytes.skip(length2);
-                    }
-                    // try again.
-                } else if (isReady(length)) {
-                    readMetaData(metaDataReader, length);
-                    // if we are only looking for meta data, stop after one.
-                    if (reader == null)
-                        return null;
-                    // try again.
-                }
-            }
-            Threads.checkInterrupted();
-        }
-    }
-
-    private <T> T readDocument(Function<WireIn, T> reader, int length) {
-        // consume the length
-        bytes.readInt();
-        long limit = bytes.readLimit();
-        bytes.limit(bytes.position() + length30(length));
-        try {
-            return reader.apply(this);
-        } finally {
-            bytes.limit(limit);
-        }
-    }
-
-    private void readMetaData(Consumer<WireIn> metaDataReader, int length) {
-        // consume the length
-        bytes.readInt();
-        long limit = bytes.readLimit();
-        long limit2 = bytes.position() + length30(length);
-        bytes.limit(limit2);
-        try {
-            metaDataReader.accept(this);
-        } finally {
-            bytes.position(limit2);
-            bytes.limit(limit);
-        }
-    }
-
-    private int length30(int length) {
-        return length & LENGTH_MASK;
-    }
-
-    @Override
-    public void writeDocument(Consumer<WireOut> writer) {
-        long position = bytes.position();
-        bytes.writeInt(NOT_READY | UNKNOWN_LENGTH);
-        writer.accept(this);
-        int length = toIntU30(bytes.position() - position - 4, "Document length %,d out of 30-bit int range.");
-        bytes.writeOrderedInt(position, length);
-    }
-
     class FixedBinaryValueOut implements ValueOut {
         boolean nested = false;
+
         @Override
         public boolean isNested() {
             return nested;
@@ -1147,11 +1060,14 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public WireIn int64(LongValue value) {
+        public WireIn int64(LongValue value, Consumer<LongValue> setter) {
             consumeSpecial();
             int code = readCode();
             if (code != INT64)
                 cantRead(code);
+            if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
+                setter.accept(value = newDirectReference(LongValue.class));
+            }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytes(bytes, bytes.position(), length);
@@ -1159,6 +1075,21 @@ public class BinaryWire implements Wire {
             return BinaryWire.this;
         }
 
+        @Override
+        public WireIn int32(IntValue value, Consumer<IntValue> setter) {
+            consumeSpecial();
+            int code = readCode();
+            if (code != INT32)
+                cantRead(code);
+            if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 4) {
+                setter.accept(value = newDirectReference(IntValue.class));
+            }
+            Byteable b = (Byteable) value;
+            long length = b.maxSize();
+            b.bytes(bytes, bytes.position(), length);
+            bytes.skip(length);
+            return BinaryWire.this;
+        }
 
         @Override
         public boolean bool() {
@@ -1202,6 +1133,7 @@ public class BinaryWire implements Wire {
                 cantRead(code);
             return bytes.readInt();
         }
+
         @Override
         public long int64() {
             consumeSpecial();
@@ -1219,11 +1151,6 @@ public class BinaryWire implements Wire {
         @Override
         public float float32() {
             throw new UnsupportedOperationException("todo");
-        }
-
-        @Override
-        public WireIn int32(IntValue value) {
-            throw new UnsupportedOperationException();
         }
 
         @Override

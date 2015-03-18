@@ -123,10 +123,10 @@ put: [ 3, bye ]
     }
 
     public void writeMessageOne(Wire wire) {
-        Wires.writeData(wire, true, out ->
+        wire.writeDocument(true, out ->
                 out.write(csp).text("///service-lookup")
                         .write(tid).int64(149873598325L));
-        Wires.writeData(wire, false, out ->
+        wire.writeDocument(false, out ->
                 out.write(lookup).marshallable(out2 ->
                         out2.write(relativeUri).text("test")
                                 .write(view).type("Map")
@@ -158,13 +158,13 @@ put: [ 3, bye ]
     ...
     */
     private void writeMessageTwo(Wire wire) {
-        Wires.writeData(wire, true, out ->
+        wire.writeDocument(true, out ->
                 out.write(() -> "csp").text("//server1/test")
                         .write(() -> "cid").int64(1));
         String[] words = ",hello,world,bye".split(",");
         for (int i = 1; i < words.length; i++) {
             int n = i;
-            Wires.writeData(wire, false, out ->
+            wire.writeDocument(false, out ->
                     out.write(() -> "put").sequence(vo -> {
                         vo.int64(n);
                         vo.text(words[n]);

@@ -82,9 +82,9 @@ public interface ValueIn {
 
     WireIn uuid(Consumer<UUID> uuid);
 
-    WireIn int64(LongValue value);
+    WireIn int64(LongValue value, Consumer<LongValue> setter);
 
-    WireIn int32(IntValue value);
+    WireIn int32(IntValue value, Consumer<IntValue> setter);
 
     WireIn sequence(Consumer<ValueIn> reader);
 

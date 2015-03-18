@@ -12,7 +12,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.UUID;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
 
 /**
  * Created by peter.lawrey on 30/01/15.
@@ -56,7 +59,7 @@ public abstract class WrappedWire {
         return wire.read(key);
     }
 
-    public ValueIn read(StringBuilder name, WireKey template) {
+    public ValueIn read(StringBuilder name) {
         return wire.read(name);
     }
 
@@ -66,18 +69,6 @@ public abstract class WrappedWire {
 
     public boolean hasMapping() {
         return wire.hasMapping();
-    }
-
-    public void writeDocument(Consumer<WireOut> writer) {
-        wire.writeDocument(writer);
-    }
-
-    public <T> T readDocument(Function<WireIn, T> reader, Consumer<WireIn> metaDataReader) {
-        return wire.readDocument(reader, metaDataReader);
-    }
-
-    public void writeMetaData(Consumer<WireOut> writer) {
-        Wires.writeData(wire, true, writer);
     }
 
     public boolean hasDocument() {
@@ -420,14 +411,15 @@ public abstract class WrappedWire {
             return thisWireIn();
         }
 
-        public WireIn int64(LongValue value) {
-            valueIn.int64(value);
+        @Override
+        public WireIn int64(LongValue value, Consumer<LongValue> setter) {
+            valueIn.int64(value, setter);
             return thisWireIn();
         }
 
         @Override
-        public WireIn int32(IntValue value) {
-            valueIn.int32(value);
+        public WireIn int32(IntValue value, Consumer<IntValue> setter) {
+            valueIn.int32(value, setter);
             return thisWireIn();
         }
 
@@ -442,7 +434,5 @@ public abstract class WrappedWire {
             valueIn.marshallable(object);
             return thisWireIn();
         }
-
-
     }
 }

@@ -6,14 +6,17 @@ import net.openhft.chronicle.core.pool.StringBuilderPool;
 import java.util.function.Consumer;
 
 import static net.openhft.chronicle.wire.BinaryWire.toIntU30;
-import static net.openhft.chronicle.wire.Wire.META_DATA;
-import static net.openhft.chronicle.wire.Wire.NOT_READY;
 
 /**
  * Created by peter.lawrey on 16/01/15.
  */
 public enum Wires {
     ;
+    public static final int NOT_READY = 1 << 31;
+    public static final int META_DATA = 1 << 30;
+    public static final int UNKNOWN_LENGTH = 0x0;
+    public static final int LENGTH_MASK = -1 >>> 2;
+
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
 
@@ -30,8 +33,8 @@ public enum Wires {
     public static void writeData(WireOut wireOut, boolean metaData, Consumer<WireOut> writer) {
         Bytes bytes = wireOut.bytes();
         long position = bytes.position();
-        int metaDataBit = metaData ? Wire.META_DATA : 0;
-        bytes.writeInt(metaDataBit | Wire.NOT_READY | Wire.UNKNOWN_LENGTH);
+        int metaDataBit = metaData ? META_DATA : 0;
+        bytes.writeInt(metaDataBit | NOT_READY | UNKNOWN_LENGTH);
         writer.accept(wireOut);
         int length = metaDataBit | toIntU30(bytes.position() - position - 4, "Document length %,d out of 30-bit int range.");
         bytes.writeOrderedInt(position, length);
@@ -42,12 +45,12 @@ public enum Wires {
         boolean read = false;
         while (bytes.remaining() >= 4) {
             long position = bytes.position();
-            int length = bytes.readVolatileInt(position);
-            if (length == Wire.UNKNOWN_LENGTH || (length & NOT_READY) != 0)
+            int header = bytes.readVolatileInt(position);
+            if (!isKnownLength(header))
                 return read;
             bytes.skip(4);
-            int len = length & Wire.LENGTH_MASK;
-            if ((length & META_DATA) == 0) {
+            int len = lengthOf(header);
+            if (isData(header)) {
                 if (metaDataConsumer != null) {
                     wireIn.bytes().withLength(len, b -> metaDataConsumer.accept(wireIn));
                     read = true;
@@ -60,15 +63,20 @@ public enum Wires {
         return read;
     }
 
+    static <T> T newDirectReference(Class<T> tClass) {
+        throw new UnsupportedOperationException();
+    }
+
+
     public static String fromSizePrefixedBlobs(Bytes bytes) {
         long position = bytes.position();
         StringBuilder sb = new StringBuilder();
         while (bytes.remaining() >= 4) {
-            long length = bytes.readUnsignedInt();
-            int len = (int) (length & Wire.LENGTH_MASK);
-            String type = (length & META_DATA) != 0
-                    ? (length & NOT_READY) != 0 ? "!!not-ready-meta-data!" : "!!meta-data"
-                    : (length & NOT_READY) != 0 ? "!!not-ready-data!" : "!!data";
+            long header = bytes.readUnsignedInt();
+            int len = lengthOf(header);
+            String type = isData(header)
+                    ? isReady(header) ? "!!data" : "!!not-ready-data!"
+                    : isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
             sb.append("--- ").append(type).append("\n");
             for (int i = 0; i < len; i++)
                 sb.append((char) bytes.readUnsignedByte());
@@ -78,5 +86,21 @@ public enum Wires {
         }
         bytes.position(position);
         return sb.toString();
+    }
+
+    public static int lengthOf(long len) {
+        return (int) (len & LENGTH_MASK);
+    }
+
+    public static boolean isReady(long len) {
+        return (len & NOT_READY) == 0;
+    }
+
+    public static boolean isData(long len) {
+        return (len & META_DATA) == 0;
+    }
+
+    public static boolean isKnownLength(long len) {
+        return (len & (META_DATA | LENGTH_MASK)) != UNKNOWN_LENGTH;
     }
 }

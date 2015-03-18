@@ -1,9 +1,6 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.EscapingStopCharTester;
-import net.openhft.chronicle.bytes.IORuntimeException;
-import net.openhft.chronicle.bytes.StopCharTesters;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.values.IntValue;
@@ -19,7 +16,10 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.UUID;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.WireType.stringForCode;
@@ -160,16 +160,6 @@ public class TextWire implements Wire {
     }
 
     @Override
-    public <T> T readDocument(Function<WireIn, T> reader, Consumer<WireIn> metaDataReader) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void writeDocument(Consumer<WireOut> writer) {
-        writer.accept(this);
-    }
-
-    @Override
     public boolean hasDocument() {
         throw new UnsupportedOperationException();
     }
@@ -297,20 +287,23 @@ public class TextWire implements Wire {
 
         @Override
         public WireOut uuid(UUID uuid) {
-            bytes.append(uuid.toString()).append('\n');
+            bytes.append(sep).append(uuid.toString());
+            separator();
             return TextWire.this;
         }
 
         @Override
         public WireOut int64(LongValue readReady) {
-            // TODO support this better
-            bytes.append(readReady.getValue()).append('\n');
+            bytes.append(sep).write(LongTextReference.template);
+            separator();
             return TextWire.this;
         }
 
         @Override
         public WireOut int32(IntValue value) {
-            throw new UnsupportedOperationException();
+            bytes.append(sep).write(IntTextReference.template);
+            separator();
+            return TextWire.this;
         }
 
         @Override
@@ -569,20 +562,14 @@ public class TextWire implements Wire {
 
         @Override
         public long readLength() {
-
             long start = bytes.position();
             try {
                 consumeWhiteSpace();
-
                 int code = readCode();
-
                 switch (code) {
                     case '{':
-
                         int count = 1;
-
                         for (; ; ) {
-
                             byte b = bytes.readByte();
                             if (b == '{')
                                 count += 1;
@@ -605,13 +592,27 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public WireIn int64(LongValue value) {
-            throw new UnsupportedOperationException();
+        public WireIn int64(LongValue value, Consumer<LongValue> setter) {
+            if (!(value instanceof LongTextReference)) {
+                setter.accept(value = new LongTextReference());
+            }
+            Byteable b = (Byteable) value;
+            long length = b.maxSize();
+            b.bytes(bytes, bytes.position(), length);
+            bytes.skip(length);
+            return TextWire.this;
         }
 
         @Override
-        public WireIn int32(IntValue value) {
-            throw new UnsupportedOperationException();
+        public WireIn int32(IntValue value, Consumer<IntValue> setter) {
+            if (!(value instanceof IntTextReference)) {
+                setter.accept(value = new IntTextReference());
+            }
+            Byteable b = (Byteable) value;
+            long length = b.maxSize();
+            b.bytes(bytes, bytes.position(), length);
+            bytes.skip(length);
+            return TextWire.this;
         }
 
         @Override

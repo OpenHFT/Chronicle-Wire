@@ -27,11 +27,13 @@ public interface WireOut {
 
     boolean hasMapping();
 
-    void writeDocument(Consumer<WireOut> writer);
-
     boolean hasDocument();
 
     Bytes bytes();
 
     WireOut addPadding(int paddingToAdd);
+
+    default void writeDocument(boolean metaData, Consumer<WireOut> writer) {
+        Wires.writeData(this, metaData, writer);
+    }
 }

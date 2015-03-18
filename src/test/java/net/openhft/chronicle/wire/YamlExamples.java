@@ -214,22 +214,21 @@ public class YamlExamples {
         avg:  0.278 # Batting average
         rbi:  147   # Runs Batted In
 */
-        wire.writeDocument(w -> w
-                .write(Keys.name).text("Mark McGwire")
+        wire.write(Keys.name).text("Mark McGwire")
                 .write(Keys.hr).int32(65)
                 .writeComment("Home runs")
                 .write(Keys.avg).float64(0.278)
                 .writeComment("Batting average")
                 .write(Keys.rbi).int64(147)
-                .writeComment("Runs Batted In"));
+                .writeComment("Runs Batted In");
 
         wire.flip();
 
         Stats stats = new Stats();
-        wire.readDocument(w -> w.read(Keys.name).text(stats.name)
+        wire.read(Keys.name).text(stats.name)
                 .read(Keys.hr).int32(stats::hr)
                 .read(Keys.avg).float64(stats::avg)
-                .read(Keys.rbi).int64(stats::rbi), null);
+                .read(Keys.rbi).int64(stats::rbi);
         wire.clear();
 
         assertEquals("Stats{name=Mark McGwire, hr=65, avg=0.278, rbi=147}", stats.toString());
