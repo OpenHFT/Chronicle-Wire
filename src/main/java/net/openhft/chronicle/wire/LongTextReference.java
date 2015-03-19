@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.NativeStore;
 import net.openhft.chronicle.core.values.LongValue;
 
 import java.util.function.Supplier;
@@ -14,6 +15,13 @@ public class LongTextReference implements LongValue, Byteable {
     static final int VALUE = 33;
     private Bytes bytes;
     private long offset;
+
+    {
+        // todo improve later - better size this and support the offset changing
+        bytes = NativeStore.nativeStore(offset + VALUE+30).bytes();
+        bytes.writeOrderedInt(offset + LOCKED, FALSE);
+    }
+
 
     <T> T withLock(Supplier<T> call) {
         long valueOffset = offset + LOCKED;

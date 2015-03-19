@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -40,7 +41,8 @@ public enum Wires {
         bytes.writeOrderedInt(position, length);
     }
 
-    public static boolean readData(WireIn wireIn, Consumer<WireIn> metaDataConsumer, Consumer<WireIn> dataConsumer) {
+    public static boolean readData(WireIn wireIn, Consumer<WireIn> metaDataConsumer, @NotNull
+    Consumer<WireIn> dataConsumer) {
         Bytes bytes = wireIn.bytes();
         boolean read = false;
         while (bytes.remaining() >= 4) {
