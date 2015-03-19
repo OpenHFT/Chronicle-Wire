@@ -8,7 +8,7 @@ import static net.openhft.chronicle.wire.RFCExamplesTest.Fields.*;
 import static org.junit.Assert.assertEquals;
 
 /* Based on
-https://github.com/OpenHFT/RFC/blob/master/Chronicle/Engine/Chronicle-Engine-0.1.md
+https://github.com/OpenHFT/RFC/blob/master/Chronicle/Engine/Remote/Chronicle-Engine-0.1.md
  */
 public class RFCExamplesTest {
     /*
@@ -25,10 +25,8 @@ public class RFCExamplesTest {
 --- !!meta-data
 csp:///service-lookup
 tid: 1426502826520
-...
 --- !!data
 lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
-...
  */
         Wire text = new TextWire(bytes);
         writeMessageOne(text);
@@ -36,10 +34,9 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         assertEquals("--- !!meta-data\n" +
                 "csp:///service-lookup\n" +
                 "tid: 149873598325\n" +
-                "...\n" +
                 "--- !!data\n" +
-                "lookup: { relativeUri: test, view: !Map types: [ !Integer !String ] }\n" +
-                "...\n", Wires.fromSizePrefixedBlobs(bytes));
+                        "lookup: { relativeUri: test, view: !Map types: [ !Integer !String ] }\n",
+                Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("[pos: 0, lim: 117, cap: 1TiB ] " +
                 "(٠٠@csp:///service-lookup⒑tid: 149873598325⒑" +
                 "E٠٠٠lookup: { relativeUri: test, view: !Map types: [ !Integer !String ] }", bytes.toDebugString());
@@ -65,16 +62,12 @@ cid: 1
 # or
 csp://server1/test
 tid: 1426502826525
-...
 --- !!data
 put: [ 1, hello ]
-...
 --- !!data
 put: [ 2, world ]
-...
 --- !!data
 put: [ 3, bye ]
-...
 */
         bytes.clear();
         writeMessageTwo(text);
@@ -83,16 +76,13 @@ put: [ 3, bye ]
                 "\n" +
                 "csp://server1/test\n" +
                 "cid: 1\n" +
-                "...\n" +
                 "--- !!data\n" +
                 "put: [ 1, hello ]\n" +
-                "...\n" +
                 "--- !!data\n" +
                 "put: [ 2, world ]\n" +
-                "...\n" +
                 "--- !!data\n" +
-                "put: [ 3, bye ]\n" +
-                "...\n", Wires.fromSizePrefixedBlobs(bytes));
+                        "put: [ 3, bye ]\n",
+                Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("[pos: 0, lim: 92, cap: 1TiB ] " +
                 "\u001B٠٠@⒑csp://server1/test⒑cid: 1⒑" +
                 "⒘٠٠٠put: [ 1, hello ]" +
@@ -136,27 +126,6 @@ put: [ 3, bye ]
                         })));
     }
 
-
-    /*
-    %TAG !meta-data!
-    ---
-    cid: 1
-    # or
-    csp://server1/test
-    ...
-    %TAG !data!
-    ---
-    put: [ 1, hello ]
-    ...
-    %TAG !data!
-    ---
-    put: [ 2, world ]
-    ...
-    %TAG !data!
-    ---
-    put: [ 3, bye ]
-    ...
-    */
     private void writeMessageTwo(Wire wire) {
         wire.writeDocument(true, out ->
                 out.write(() -> "csp").text("//server1/test")

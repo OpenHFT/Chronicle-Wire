@@ -82,7 +82,6 @@ public enum Wires {
                 sb.append((char) bytes.readUnsignedByte());
             if (sb.charAt(sb.length() - 1) != '\n')
                 sb.append('\n');
-            sb.append("...\n");
         }
         bytes.position(position);
         return sb.toString();
