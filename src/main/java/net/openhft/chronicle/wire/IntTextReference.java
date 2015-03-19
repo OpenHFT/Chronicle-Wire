@@ -75,6 +75,26 @@ public class IntTextReference implements IntValue, Byteable {
     }
 
     @Override
+    public boolean tryLockValue() {
+        return false;
+    }
+
+    @Override
+    public boolean tryLockNanosValue(long nanos) {
+        return false;
+    }
+
+    @Override
+    public void busyLockValue() throws InterruptedException, IllegalStateException {
+        throw new UnsupportedOperationException("todo");
+    }
+
+    @Override
+    public void unlockValue() throws IllegalMonitorStateException {
+        throw new UnsupportedOperationException("todo");
+    }
+
+    @Override
     public void bytes(Bytes bytes, long offset, long length) {
         if (length != template.length) throw new IllegalArgumentException();
         this.bytes = bytes;
