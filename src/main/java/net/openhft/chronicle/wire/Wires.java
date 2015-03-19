@@ -65,11 +65,6 @@ public enum Wires {
         return read;
     }
 
-    static <T> T newDirectReference(Class<T> tClass) {
-        throw new UnsupportedOperationException();
-    }
-
-
     public static String fromSizePrefixedBlobs(Bytes bytes) {
         long position = bytes.position();
         StringBuilder sb = new StringBuilder();

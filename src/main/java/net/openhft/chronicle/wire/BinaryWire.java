@@ -23,7 +23,6 @@ import java.util.function.LongConsumer;
 
 import static net.openhft.chronicle.wire.WireType.Codes.*;
 import static net.openhft.chronicle.wire.WireType.stringForCode;
-import static net.openhft.chronicle.wire.Wires.newDirectReference;
 
 /**
  * Created by peter.lawrey on 15/01/15.
@@ -1066,7 +1065,7 @@ public class BinaryWire implements Wire {
             if (code != INT64)
                 cantRead(code);
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
-                setter.accept(value = newDirectReference(LongValue.class));
+                setter.accept(value = new LongDirectReference());
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
@@ -1082,7 +1081,7 @@ public class BinaryWire implements Wire {
             if (code != INT32)
                 cantRead(code);
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 4) {
-                setter.accept(value = newDirectReference(IntValue.class));
+                setter.accept(value = new IntDirectReference());
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
