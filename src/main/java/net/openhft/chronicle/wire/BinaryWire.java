@@ -381,7 +381,8 @@ public class BinaryWire implements Wire {
         StringBuilder sb = readField(Wires.acquireStringBuilder(), key.code());
         if (fieldLess || (sb != null && (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))))
             return valueIn;
-        throw new UnsupportedOperationException("Unordered fields not supported yet.");
+        throw new UnsupportedOperationException("Unordered fields not supported yet, key" +
+                ".name=" + key.name());
     }
 
     @Override
