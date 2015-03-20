@@ -108,4 +108,9 @@ public class LongValueInstance implements LongValue, Byteable, Closeable {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public String toString() {
+        return "value=" + getValue();
+    }
 }

@@ -1065,9 +1065,19 @@ public class BinaryWire implements Wire {
             int code = readCode();
             if (code != INT64)
                 cantRead(code);
+
+            // if the value is null, then we will create a LongDirectReference to write the data
+            // into and then call setter.accept(), this will then unpdate the value
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
-                setter.accept(value = new LongDirectReference());
+                value = new LongDirectReference();
+                Byteable b = (Byteable) value;
+                long length = b.maxSize();
+                b.bytes(bytes, bytes.position(), length);
+                setter.accept(value);
+                bytes.skip(length);
+                return BinaryWire.this;
             }
+
             Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytes(bytes, bytes.position(), length);
