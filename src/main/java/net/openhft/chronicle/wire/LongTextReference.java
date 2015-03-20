@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.ByteStringAppender;
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeStore;
@@ -39,12 +40,20 @@ public class LongTextReference implements LongValue, Byteable {
 
     @Override
     public long getValue() {
-        return withLock(() -> bytes.parseLong(offset + VALUE));
+        return withLock(() -> {
+            return bytes.parseLong(offset + VALUE);
+        });
     }
 
     @Override
     public void setValue(long value) {
-        withLock(() -> bytes.append(offset + VALUE, value, 20));
+        ByteStringAppender byteStringAppender = withLock(() -> {
+            ByteStringAppender append = bytes.append(offset + VALUE, value);
+
+            System.out.println(Bytes.toDebugString(bytes, offset + VALUE, 20));
+            return append;
+
+        });
     }
 
     @Override
@@ -61,7 +70,7 @@ public class LongTextReference implements LongValue, Byteable {
     public long addValue(long delta) {
         return withLock(() -> {
             long value = bytes.parseLong(offset + VALUE) + delta;
-            bytes.append(offset + VALUE, value, 20);
+            bytes.append(offset + VALUE, value);
             return value;
         });
     }
@@ -75,7 +84,7 @@ public class LongTextReference implements LongValue, Byteable {
     public boolean compareAndSwapValue(long expected, long value) {
         return withLock(() -> {
             if (bytes.parseLong(offset + VALUE) == expected) {
-                bytes.append(offset + VALUE, value, 20);
+                bytes.append(offset + VALUE, value);
                 return true;
             }
             return false;

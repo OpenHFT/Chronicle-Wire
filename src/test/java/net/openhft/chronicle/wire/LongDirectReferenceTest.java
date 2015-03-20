@@ -18,31 +18,11 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.values.LongValue;
-import org.junit.Assert;
-import org.junit.Test;
+import junit.framework.TestCase;
 
-public class LongTextReferenceTest {
+public class LongDirectReferenceTest extends TestCase {
 
-    @Test
-    public void testSetValue() throws Exception {
-        final LongTextReference value = new LongTextReference();
+    public void testBytes() throws Exception {
 
-
-
-        int expected = 10;
-        value.setValue(expected);
-
-     Bytes bytes = value.bytes();
-
-        bytes.append(expected);
-       bytes.flip();
-      long l = bytes.parseLong();
-      System.out.println(l);
-
-//        System.out.println(Bytes.toHex(bytes,33, bytes.limit() - 33));
-
-        Assert.assertEquals(expected, value.getValue());
     }
 }

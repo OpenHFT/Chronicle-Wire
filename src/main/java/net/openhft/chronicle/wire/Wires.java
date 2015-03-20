@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
@@ -41,8 +42,9 @@ public enum Wires {
         bytes.writeOrderedInt(position, length);
     }
 
-    public static boolean readData(WireIn wireIn, Consumer<WireIn> metaDataConsumer, @NotNull
-    Consumer<WireIn> dataConsumer) {
+    public static boolean readData(@NotNull WireIn wireIn,
+                                   @Nullable Consumer<WireIn> metaDataConsumer,
+                                   @NotNull Consumer<WireIn> dataConsumer) {
         Bytes bytes = wireIn.bytes();
         boolean read = false;
         while (bytes.remaining() >= 4) {
@@ -52,7 +54,7 @@ public enum Wires {
                 return read;
             bytes.skip(4);
             int len = lengthOf(header);
-            if (isData(header)) {
+            if (!isData(header)) {
                 if (metaDataConsumer != null) {
                     wireIn.bytes().withLength(len, b -> metaDataConsumer.accept(wireIn));
                     read = true;
@@ -64,11 +66,6 @@ public enum Wires {
         }
         return read;
     }
-
-    static <T> T newDirectReference(Class<T> tClass) {
-        throw new UnsupportedOperationException();
-    }
-
 
     public static String fromSizePrefixedBlobs(Bytes bytes) {
         long position = bytes.position();

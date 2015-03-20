@@ -36,7 +36,7 @@ public class IntTextReference implements IntValue, Byteable {
 
     @Override
     public void setValue(int value) {
-        withLock(() -> bytes.append(offset + VALUE, value, 10));
+        withLock(() -> bytes.append(offset + VALUE, value));
     }
 
     @Override
@@ -53,7 +53,7 @@ public class IntTextReference implements IntValue, Byteable {
     public int addValue(int delta) {
         return withLock(() -> {
             long value = bytes.parseLong(offset + VALUE) + delta;
-            bytes.append(offset + VALUE, value, 10);
+            bytes.append(offset + VALUE, value);
             return (int) value;
         });
     }
@@ -67,7 +67,7 @@ public class IntTextReference implements IntValue, Byteable {
     public boolean compareAndSwapValue(int expected, int value) {
         return withLock(() -> {
             if (bytes.parseLong(offset + VALUE) == expected) {
-                bytes.append(offset + VALUE, value, 10);
+                bytes.append(offset + VALUE, value);
                 return true;
             }
             return false;

@@ -1,6 +1,5 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Maths;
@@ -20,7 +19,7 @@ import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;
 
-import static net.openhft.chronicle.wire.Wires.newDirectReference;
+
 
 /**
  * Created by peter.lawrey on 19/01/15.
@@ -501,18 +500,27 @@ public class RawWire implements Wire {
 
         @Override
         public WireIn int64(LongValue value, Consumer<LongValue> setter) {
-            if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
+
+            // todo commenting out until we have a newDirectReference ( as current code will not
+            // todo  even compile
+            throw new UnsupportedOperationException();
+            /*if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
                 setter.accept(value = newDirectReference(LongValue.class));
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytes(bytes, bytes.position(), length);
             bytes.skip(length);
-            return RawWire.this;
+            return RawWire.this;*/
         }
 
         @Override
         public WireIn int32(IntValue value, Consumer<IntValue> setter) {
+
+            // todo commenting out until we have a newDirectReference ( as current code will not
+            // todo  even compile
+            throw new UnsupportedOperationException();
+            /*
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
                 setter.accept(value = newDirectReference(IntValue.class));
             }
@@ -521,6 +529,7 @@ public class RawWire implements Wire {
             b.bytes(bytes, bytes.position(), length);
             bytes.skip(length);
             return RawWire.this;
+            */
         }
 
         @Override
