@@ -20,8 +20,6 @@ import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;
 
-import static net.openhft.chronicle.wire.Wires.newDirectReference;
-
 /**
  * Created by peter.lawrey on 19/01/15.
  */
@@ -63,6 +61,13 @@ public class RawWire implements Wire {
     }
 
     @Override
+    public ValueOut writeLabel(WireKey key) {
+        lastField = "";
+        bytes.writeUTFΔ(key.name());
+        return writeValue;
+    }
+
+    @Override
     public ValueOut writeValue() {
         lastField = "";
         return writeValue;
@@ -83,6 +88,13 @@ public class RawWire implements Wire {
     @Override
     public ValueIn read(StringBuilder name) {
         lastSB = name;
+        return readValue;
+    }
+
+    @Override
+    public ValueIn readLabel(StringBuilder name) {
+        bytes.readUTFΔ(name);
+        lastSB = null;
         return readValue;
     }
 
@@ -502,7 +514,7 @@ public class RawWire implements Wire {
         @Override
         public WireIn int64(LongValue value, Consumer<LongValue> setter) {
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
-                setter.accept(value = newDirectReference(LongValue.class));
+                setter.accept(value = new LongDirectReference());
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
@@ -514,7 +526,7 @@ public class RawWire implements Wire {
         @Override
         public WireIn int32(IntValue value, Consumer<IntValue> setter) {
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
-                setter.accept(value = newDirectReference(IntValue.class));
+                setter.accept(value = new IntDirectReference());
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
