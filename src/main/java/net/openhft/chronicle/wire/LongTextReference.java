@@ -16,6 +16,7 @@ public class LongTextReference implements LongValue, Byteable {
     static final long UNINITIALIZED = 0x0L;
     static final int LOCKED = 19;
     static final int VALUE = 33;
+    private static final int DIGITS = 20;
     private BytesStore bytes;
     private long offset;
 
@@ -40,7 +41,7 @@ public class LongTextReference implements LongValue, Byteable {
 
     @Override
     public void setValue(long value) {
-        withLock(() -> bytes.append(offset + VALUE, value));
+        withLock(() -> bytes.append(offset + VALUE, value, DIGITS));
     }
 
     @Override
@@ -57,7 +58,7 @@ public class LongTextReference implements LongValue, Byteable {
     public long addValue(long delta) {
         return withLock(() -> {
             long value = bytes.parseLong(offset + VALUE) + delta;
-            bytes.append(offset + VALUE, value);
+            bytes.append(offset + VALUE, value, DIGITS);
             return value;
         });
     }
@@ -71,7 +72,7 @@ public class LongTextReference implements LongValue, Byteable {
     public boolean compareAndSwapValue(long expected, long value) {
         return withLock(() -> {
             if (bytes.parseLong(offset + VALUE) == expected) {
-                bytes.append(offset + VALUE, value);
+                bytes.append(offset + VALUE, value, DIGITS);
                 return true;
             }
             return false;

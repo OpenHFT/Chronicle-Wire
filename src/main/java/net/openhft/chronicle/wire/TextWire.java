@@ -109,6 +109,9 @@ public class TextWire implements Wire {
                 if (ch != ':')
                     throw new UnsupportedOperationException("Expected a : at " + bytes.toDebugString());
 
+            } else if (ch < 0) {
+                sb.setLength(0);
+                return sb;
             } else {
                 bytes.parseUTF(sb, EscapingStopCharTester.escaping(c -> c < ' ' || c == ':'));
             }
@@ -718,7 +721,7 @@ public class TextWire implements Wire {
         @Override
         public Wire bool(BooleanConsumer flag) {
             StringBuilder sb = Wires.acquireStringBuilder();
-            bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+            bytes.parseUTF(sb, StopCharTesters.COMMA_STOP);
             if (StringInterner.isEqual(sb, "true"))
                 flag.accept(true);
             else if (StringInterner.isEqual(sb, "false"))
@@ -733,7 +736,7 @@ public class TextWire implements Wire {
         @Override
         public boolean bool() {
             StringBuilder sb = Wires.acquireStringBuilder();
-            bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+            bytes.parseUTF(sb, StopCharTesters.COMMA_STOP);
             if (StringInterner.isEqual(sb, "true"))
                 return true;
             else if (StringInterner.isEqual(sb, "false"))

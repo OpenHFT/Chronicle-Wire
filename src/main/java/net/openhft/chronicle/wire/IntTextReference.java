@@ -12,6 +12,7 @@ public class IntTextReference implements IntValue, Byteable {
     public static final int TRUE = (' ' << 24) | ('t' << 16) | ('r' << 8) | 'u';
     static final int LOCKED = 19;
     static final int VALUE = 33;
+    private static final int DIGITS = 10;
     private BytesStore bytes;
     private long offset;
 
@@ -36,7 +37,7 @@ public class IntTextReference implements IntValue, Byteable {
 
     @Override
     public void setValue(int value) {
-        withLock(() -> bytes.append(offset + VALUE, value));
+        withLock(() -> bytes.append(offset + VALUE, value, DIGITS));
     }
 
     @Override
@@ -53,7 +54,7 @@ public class IntTextReference implements IntValue, Byteable {
     public int addValue(int delta) {
         return withLock(() -> {
             long value = bytes.parseLong(offset + VALUE) + delta;
-            bytes.append(offset + VALUE, value);
+            bytes.append(offset + VALUE, value, DIGITS);
             return (int) value;
         });
     }
@@ -67,7 +68,7 @@ public class IntTextReference implements IntValue, Byteable {
     public boolean compareAndSwapValue(int expected, int value) {
         return withLock(() -> {
             if (bytes.parseLong(offset + VALUE) == expected) {
-                bytes.append(offset + VALUE, value);
+                bytes.append(offset + VALUE, value, DIGITS);
                 return true;
             }
             return false;
