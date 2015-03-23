@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Byteable;
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.IntValue;
 
@@ -96,4 +97,12 @@ public class IntTextReference implements IntValue, Byteable {
     public long maxSize() {
         return template.length;
     }
+
+    public static void write(Bytes bytes, int value) {
+        long position = bytes.position();
+        bytes.write(template);
+        bytes.append(position+VALUE, value, DIGITS);
+    }
+
+    public String toString() { return "value: "+getValue(); }
 }

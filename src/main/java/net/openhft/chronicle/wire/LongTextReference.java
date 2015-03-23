@@ -107,4 +107,13 @@ public class LongTextReference implements LongValue, Byteable {
         ByteBuffer bb = ByteBuffer.wrap(str.getBytes(StandardCharsets.ISO_8859_1)).order(ByteOrder.nativeOrder());
         return bb.getInt();
     }
+
+    public static void write(Bytes bytes, long value) {
+        long position = bytes.position();
+        bytes.write(template);
+        bytes.append(position+VALUE, value, DIGITS);
+    }
+
+    public String toString() { return "value: "+getValue(); }
+
 }

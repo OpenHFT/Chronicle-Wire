@@ -82,9 +82,9 @@ public interface ValueOut {
 
     WireOut uuid(UUID uuid);
 
-    WireOut int32(IntValue value);
+    WireOut int32forBinding(int value);
 
-    WireOut int64(LongValue readReady);
+    WireOut int64forBinding(long readReady);
 
     WireOut sequence(Consumer<ValueOut> writer);
 

@@ -296,15 +296,17 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public WireOut int64(LongValue readReady) {
-            bytes.append(sep).write(LongTextReference.template);
+        public WireOut int64forBinding(long value) {
+            bytes.append(sep);
+            LongTextReference.write(bytes, value);
             separator();
             return TextWire.this;
         }
 
         @Override
-        public WireOut int32(IntValue value) {
-            bytes.append(sep).write(IntTextReference.template);
+        public WireOut int32forBinding(int value) {
+            bytes.append(sep);
+            IntTextReference.write(bytes, value);
             separator();
             return TextWire.this;
         }

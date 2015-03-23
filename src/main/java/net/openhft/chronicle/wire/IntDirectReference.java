@@ -65,4 +65,6 @@ public class IntDirectReference implements IntValue, Byteable {
     public long maxSize() {
         return 4;
     }
+
+    public String toString() { return "value: "+getValue(); }
 }

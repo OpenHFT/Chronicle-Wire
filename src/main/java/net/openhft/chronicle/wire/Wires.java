@@ -44,7 +44,7 @@ public enum Wires {
 
     public static boolean readData(@NotNull WireIn wireIn,
                                    @Nullable Consumer<WireIn> metaDataConsumer,
-                                   @NotNull Consumer<WireIn> dataConsumer) {
+                                   @Nullable Consumer<WireIn> dataConsumer) {
         Bytes bytes = wireIn.bytes();
         boolean read = false;
         while (bytes.remaining() >= 4) {
@@ -54,14 +54,20 @@ public enum Wires {
                 return read;
             bytes.skip(4);
             int len = lengthOf(header);
-            if (!isData(header)) {
-                if (metaDataConsumer != null) {
-                    wireIn.bytes().withLength(len, b -> metaDataConsumer.accept(wireIn));
-                    read = true;
+            if (isData(header)) {
+                if (dataConsumer == null) {
+                    return false;
+                } else {
+                    wireIn.bytes().withLength(len, b -> dataConsumer.accept(wireIn));
+                    return true;
                 }
             } else {
-                wireIn.bytes().withLength(len, b -> dataConsumer.accept(wireIn));
-                return true;
+                if (metaDataConsumer != null) {
+                    wireIn.bytes().withLength(len, b -> metaDataConsumer.accept(wireIn));
+                    if (dataConsumer == null)
+                        return true;
+                    read = true;
+                }
             }
         }
         return read;

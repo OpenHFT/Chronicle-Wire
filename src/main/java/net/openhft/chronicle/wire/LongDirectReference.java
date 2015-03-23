@@ -65,4 +65,6 @@ public class LongDirectReference implements LongValue, Byteable {
     public long maxSize() {
         return 8;
     }
+
+    public String toString() { return "value: "+getValue(); }
 }

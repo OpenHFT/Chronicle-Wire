@@ -381,8 +381,8 @@ public class BinaryWire implements Wire {
         StringBuilder sb = readField(Wires.acquireStringBuilder(), key.code());
         if (fieldLess || (sb != null && (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))))
             return valueIn;
-        throw new UnsupportedOperationException("Unordered fields not supported yet, key" +
-                ".name=" + key.name());
+        throw new UnsupportedOperationException("Unordered fields not supported yet, " +
+                "Expected=" + key.name()+" was: "+sb);
     }
 
     @Override
@@ -689,11 +689,11 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public WireOut int64(LongValue longValue) {
+        public WireOut int64forBinding(long value) {
             int fromEndOfCacheLine = (int) ((-bytes.position()) & 63);
             if (fromEndOfCacheLine < 9)
                 addPadding(fromEndOfCacheLine - 1);
-            fixedInt64(longValue.getValue());
+            fixedInt64(value);
             return BinaryWire.this;
         }
 
@@ -715,8 +715,12 @@ public class BinaryWire implements Wire {
         }
 
         @Override
-        public WireOut int32(IntValue value) {
-            throw new UnsupportedOperationException();
+        public WireOut int32forBinding(int value) {
+            int fromEndOfCacheLine = (int) ((-bytes.position()) & 63);
+            if (fromEndOfCacheLine < 5)
+                addPadding(fromEndOfCacheLine - 1);
+            fixedInt64(value);
+            return BinaryWire.this;
         }
 
 
