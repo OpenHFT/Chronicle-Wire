@@ -19,7 +19,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.bytes.NativeBytesStore;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,21 +28,17 @@ public class LongTextReferenceTest {
     @Test
     public void testSetValue() throws Exception {
         final LongTextReference value = new LongTextReference();
+        try (NativeBytesStore bytesStore = NativeBytesStore.nativeStore(value.maxSize())) {
+            value.bytes(bytesStore, 0, value.maxSize());
+            int expected = 10;
+            value.setValue(expected);
 
-
-
-        int expected = 10;
-        value.setValue(expected);
-
-     Bytes bytes = value.bytes();
-
-        bytes.append(expected);
-       bytes.flip();
-      long l = bytes.parseLong();
-      System.out.println(l);
+            long l = bytesStore.parseLong(LongTextReference.VALUE);
+            System.out.println(l);
 
 //        System.out.println(Bytes.toHex(bytes,33, bytes.limit() - 33));
 
-        Assert.assertEquals(expected, value.getValue());
+            Assert.assertEquals(expected, value.getValue());
+        }
     }
 }

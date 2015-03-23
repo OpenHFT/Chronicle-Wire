@@ -1,7 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Byteable;
-import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.IntValue;
 
 import java.util.function.Supplier;
@@ -12,7 +12,7 @@ public class IntTextReference implements IntValue, Byteable {
     public static final int TRUE = (' ' << 24) | ('t' << 16) | ('r' << 8) | 'u';
     static final int LOCKED = 19;
     static final int VALUE = 33;
-    private Bytes bytes;
+    private BytesStore bytes;
     private long offset;
 
     <T> T withLock(Supplier<T> call) {
@@ -75,14 +75,14 @@ public class IntTextReference implements IntValue, Byteable {
     }
 
     @Override
-    public void bytes(Bytes bytes, long offset, long length) {
+    public void bytes(BytesStore bytes, long offset, long length) {
         if (length != template.length) throw new IllegalArgumentException();
         this.bytes = bytes;
         this.offset = offset;
     }
 
     @Override
-    public Bytes bytes() {
+    public BytesStore bytes() {
         return bytes;
     }
 
