@@ -20,7 +20,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.NativeStore;
+import net.openhft.chronicle.bytes.NativeBytesStore;
 import net.openhft.chronicle.core.values.LongValue;
 
 import java.io.Closeable;
@@ -28,14 +28,14 @@ import java.io.IOException;
 
 public class LongValueInstance implements LongValue, Byteable, Closeable {
 
-    private final NativeStore<Void> bytesStore;
+    private final NativeBytesStore<Void> bytesStore;
     private final Bytes<Void> bytes;
     LongDirectReference directReference;
 
     public LongValueInstance() {
         directReference = new LongDirectReference();
         long len = 8;
-        bytesStore = NativeStore.nativeStore(len);
+        bytesStore = NativeBytesStore.nativeStore(len);
         bytes = bytesStore.bytes();
         directReference.bytes(bytes, 0, len);
     }
