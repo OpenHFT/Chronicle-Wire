@@ -381,7 +381,8 @@ public class BinaryWire implements Wire {
         StringBuilder sb = readField(Wires.acquireStringBuilder(), key.code());
         if (fieldLess || (sb != null && (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))))
             return valueIn;
-        throw new UnsupportedOperationException("Unordered fields not supported yet.");
+        throw new UnsupportedOperationException("Unordered fields not supported yet, key" +
+                ".name=" + key.name());
     }
 
     @Override
@@ -1064,9 +1065,19 @@ public class BinaryWire implements Wire {
             int code = readCode();
             if (code != INT64)
                 cantRead(code);
+
+            // if the value is null, then we will create a LongDirectReference to write the data
+            // into and then call setter.accept(), this will then unpdate the value
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
-                setter.accept(value = new LongDirectReference());
+                value = new LongDirectReference();
+                Byteable b = (Byteable) value;
+                long length = b.maxSize();
+                b.bytes(bytes, bytes.position(), length);
+                setter.accept(value);
+                bytes.skip(length);
+                return BinaryWire.this;
             }
+
             Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytes(bytes, bytes.position(), length);
