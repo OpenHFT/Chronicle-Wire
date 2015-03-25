@@ -22,9 +22,9 @@ public interface WireOut {
     ValueOut write(WireKey key);
 
     /**
-     * Always write a key.  For RAW types, this label with be in text.  To read this, use readLabel()
+     * Always write a key.  For RAW types, this label with be in text.  To read this, use readEventName()
      */
-    default ValueOut writeLabel(WireKey key) {
+    default ValueOut writeEventName(WireKey key) {
         return write(key);
     }
 

@@ -126,7 +126,8 @@ public enum WireType {
         static final int FIELD_NAME_ANY = 0xB7;
         static final int STRING_ANY = 0xB8;
         static final int FIELD_NUMBER = 0xB9;
-        // 0xBA, BB, BC
+        static final int EVENT_NAME = 0xBA;
+        // 0xBB, BC
         static final int NULL = 0xBD;
         static final int FALSE = 0xBE;
         static final int TRUE = 0xBF;

@@ -62,7 +62,7 @@ public class RawWire implements Wire {
     }
 
     @Override
-    public ValueOut writeLabel(WireKey key) {
+    public ValueOut writeEventName(WireKey key) {
         lastField = "";
         bytes.writeUTFΔ(key.name());
         return writeValue;
@@ -93,7 +93,7 @@ public class RawWire implements Wire {
     }
 
     @Override
-    public ValueIn readLabel(StringBuilder name) {
+    public ValueIn readEventName(StringBuilder name) {
         bytes.readUTFΔ(name);
         lastSB = null;
         return readValue;

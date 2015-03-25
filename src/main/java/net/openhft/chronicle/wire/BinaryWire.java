@@ -345,6 +345,12 @@ public class BinaryWire implements Wire {
         return valueOut;
     }
 
+    @Override
+    public ValueOut writeEventName(WireKey key) {
+        writeCode(EVENT_NAME).writeUTFΔ(key.name());
+        return valueOut;
+    }
+
     private void writeField(int code) {
         writeCode(FIELD_NUMBER);
         bytes.writeStopBit(code);
@@ -392,6 +398,12 @@ public class BinaryWire implements Wire {
         return valueIn;
     }
 
+    @Override
+    public ValueIn readEventName(StringBuilder name) {
+        readField(name, ANY_CODE_MATCH);
+        return valueIn;
+    }
+
     private StringBuilder readField(StringBuilder name, int codeMatch) {
         consumeSpecial();
         int peekCode = peekCode();
@@ -401,7 +413,7 @@ public class BinaryWire implements Wire {
     private StringBuilder readField(int peekCode, int codeMatch, StringBuilder sb) {
         switch (peekCode >> 4) {
             case SPECIAL:
-                if (peekCode == FIELD_NAME_ANY) {
+                if (peekCode == FIELD_NAME_ANY || peekCode == EVENT_NAME) {
                     bytes.skip(1);
                     bytes.readUTFΔ(sb);
                     return sb;

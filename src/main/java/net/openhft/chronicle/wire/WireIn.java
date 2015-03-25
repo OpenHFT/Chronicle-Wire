@@ -30,7 +30,7 @@ public interface WireIn {
     /**
      * Read a field, or string which is always written, even for formats which might drop the field.
      */
-    default ValueIn readLabel(StringBuilder name) {
+    default ValueIn readEventName(StringBuilder name) {
         return read(name);
     }
 
