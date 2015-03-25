@@ -1,6 +1,8 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.Byteable;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -80,7 +82,7 @@ public class LongTextReference implements LongValue, Byteable {
     }
 
     @Override
-    public void bytes(BytesStore bytes, long offset, long length) {
+    public void bytesStore(BytesStore bytes, long offset, long length) {
         if (length != template.length) throw new IllegalArgumentException();
         this.bytes = bytes;
         this.offset = offset;
@@ -89,7 +91,7 @@ public class LongTextReference implements LongValue, Byteable {
     }
 
     @Override
-    public BytesStore bytes() {
+    public BytesStore bytesStore() {
         return bytes;
     }
 

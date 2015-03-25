@@ -1076,7 +1076,7 @@ public class BinaryWire implements Wire {
                 value = new LongDirectReference();
                 Byteable b = (Byteable) value;
                 long length = b.maxSize();
-                b.bytes(bytes, bytes.position(), length);
+                b.bytesStore(bytes, bytes.position(), length);
                 setter.accept(value);
                 bytes.skip(length);
                 return BinaryWire.this;
@@ -1084,7 +1084,7 @@ public class BinaryWire implements Wire {
 
             Byteable b = (Byteable) value;
             long length = b.maxSize();
-            b.bytes(bytes, bytes.position(), length);
+            b.bytesStore(bytes, bytes.position(), length);
             bytes.skip(length);
             return BinaryWire.this;
         }
@@ -1100,7 +1100,7 @@ public class BinaryWire implements Wire {
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
-            b.bytes(bytes, bytes.position(), length);
+            b.bytesStore(bytes, bytes.position(), length);
             bytes.skip(length);
             return BinaryWire.this;
         }

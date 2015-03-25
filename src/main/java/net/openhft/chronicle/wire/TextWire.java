@@ -603,7 +603,7 @@ public class TextWire implements Wire {
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
-            b.bytes(bytes, bytes.position(), length);
+            b.bytesStore(bytes, bytes.position(), length);
             bytes.skip(length);
             return TextWire.this;
         }
@@ -615,7 +615,7 @@ public class TextWire implements Wire {
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
-            b.bytes(bytes, bytes.position(), length);
+            b.bytesStore(bytes, bytes.position(), length);
             bytes.skip(length);
             return TextWire.this;
         }

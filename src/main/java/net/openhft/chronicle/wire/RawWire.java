@@ -518,7 +518,7 @@ public class RawWire implements Wire {
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
-            b.bytes(bytes, bytes.position(), length);
+            b.bytesStore(bytes, bytes.position(), length);
             bytes.skip(length);
             return RawWire.this;
         }
@@ -530,7 +530,7 @@ public class RawWire implements Wire {
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
-            b.bytes(bytes, bytes.position(), length);
+            b.bytesStore(bytes, bytes.position(), length);
             bytes.skip(length);
             return RawWire.this;
         }

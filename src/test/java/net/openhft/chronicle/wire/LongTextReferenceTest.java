@@ -18,7 +18,6 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytesStore;
 import org.junit.Assert;
 import org.junit.Test;
@@ -29,7 +28,7 @@ public class LongTextReferenceTest {
     public void testSetValue() throws Exception {
         final LongTextReference value = new LongTextReference();
         try (NativeBytesStore bytesStore = NativeBytesStore.nativeStore(value.maxSize())) {
-            value.bytes(bytesStore, 0, value.maxSize());
+            value.bytesStore(bytesStore, 0, value.maxSize());
             int expected = 10;
             value.setValue(expected);
 

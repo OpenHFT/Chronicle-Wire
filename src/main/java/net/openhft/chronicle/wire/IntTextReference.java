@@ -77,14 +77,14 @@ public class IntTextReference implements IntValue, Byteable {
     }
 
     @Override
-    public void bytes(BytesStore bytes, long offset, long length) {
+    public void bytesStore(BytesStore bytes, long offset, long length) {
         if (length != template.length) throw new IllegalArgumentException();
         this.bytes = bytes;
         this.offset = offset;
     }
 
     @Override
-    public BytesStore bytes() {
+    public BytesStore bytesStore() {
         return bytes;
     }
 
