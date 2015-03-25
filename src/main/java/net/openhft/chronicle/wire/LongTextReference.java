@@ -3,18 +3,15 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.values.LongValue;
-import org.jetbrains.annotations.NotNull;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
 public class LongTextReference implements LongValue, Byteable {
     public static final byte[] template = "!!atomic { locked: false, value: 00000000000000000000 }".getBytes();
-    public static final int FALSE = asInt("fals");
-    public static final int TRUE = asInt(" tru");
+    public static final int FALSE = BytesUtil.asInt("fals");
+    public static final int TRUE = BytesUtil.asInt(" tru");
     static final long UNINITIALIZED = 0x0L;
     static final int LOCKED = 19;
     static final int VALUE = 33;
@@ -103,11 +100,6 @@ public class LongTextReference implements LongValue, Byteable {
     @Override
     public long maxSize() {
         return template.length;
-    }
-
-    private static int asInt(@NotNull String str) {
-        ByteBuffer bb = ByteBuffer.wrap(str.getBytes(StandardCharsets.ISO_8859_1)).order(ByteOrder.nativeOrder());
-        return bb.getInt();
     }
 
     public static void write(Bytes bytes, long value) {
