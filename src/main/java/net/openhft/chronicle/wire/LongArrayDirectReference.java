@@ -40,7 +40,7 @@ public class LongArrayDirectReference implements LongArrayValues, Byteable {
     @Override
     public void bytesStore(BytesStore bytes, long offset, long length) {
         if (length != peakLength(bytes, offset))
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(length + " != " + peakLength(bytes, offset));
         this.bytes = bytes;
         this.offset = offset;
         this.length = length;

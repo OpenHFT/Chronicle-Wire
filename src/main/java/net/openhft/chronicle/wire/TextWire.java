@@ -470,7 +470,8 @@ public class TextWire implements Wire {
 
         @Override
         public WireOut int64array(long capacity) {
-            throw new UnsupportedOperationException();
+            LongArrayTextReference.write(bytes, capacity);
+            return TextWire.this;
         }
 
         @Override
@@ -518,15 +519,10 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public WireIn int64array(LongArrayValues values, Consumer<LongArrayValues> setter) {
-            throw new UnsupportedOperationException();
-        }
-
-
-        @Override
         public WireIn bytes(Bytes toBytes) {
             return bytes(toBytes::write);
         }
+
 
         public WireIn bytes(Consumer<byte[]> bytesConsumer) {
             // TODO needs to be made much more efficient.
@@ -549,7 +545,6 @@ public class TextWire implements Wire {
             return TextWire.this;
         }
 
-
         public byte[] bytes() {
             // TODO needs to be made much more efficient.
             StringBuilder sb = Wires.acquireStringBuilder();
@@ -570,6 +565,7 @@ public class TextWire implements Wire {
             }
 
         }
+
 
         @Override
         public WireIn wireIn() {
@@ -614,6 +610,18 @@ public class TextWire implements Wire {
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
+            b.bytesStore(bytes, bytes.position(), length);
+            bytes.skip(length);
+            return TextWire.this;
+        }
+
+        @Override
+        public WireIn int64array(LongArrayValues values, Consumer<LongArrayValues> setter) {
+            if (!(values instanceof LongTextReference)) {
+                setter.accept(values = new LongArrayTextReference());
+            }
+            Byteable b = (Byteable) values;
+            long length = LongArrayTextReference.peakLength(bytes, bytes.position());
             b.bytesStore(bytes, bytes.position(), length);
             bytes.skip(length);
             return TextWire.this;
