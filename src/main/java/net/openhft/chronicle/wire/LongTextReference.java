@@ -1,28 +1,24 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.ByteStringAppender;
-import net.openhft.chronicle.bytes.Byteable;
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.NativeStore;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.values.LongValue;
+import org.jetbrains.annotations.NotNull;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
 public class LongTextReference implements LongValue, Byteable {
     public static final byte[] template = "!!atomic { locked: false, value: 00000000000000000000 }".getBytes();
-    public static final int FALSE = ('f' << 24) | ('a' << 16) | ('l' << 8) | 's';
-    public static final int TRUE = (' ' << 24) | ('t' << 16) | ('r' << 8) | 'u';
+    public static final int FALSE = asInt("fals");
+    public static final int TRUE = asInt(" tru");
+    static final long UNINITIALIZED = 0x0L;
     static final int LOCKED = 19;
     static final int VALUE = 33;
-    private Bytes bytes;
+    private static final int DIGITS = 20;
+    private BytesStore bytes;
     private long offset;
-
-    {
-        // todo improve later - better size this and support the offset changing
-        bytes = NativeStore.nativeStore(offset + VALUE+30).bytes();
-        bytes.writeOrderedInt(offset + LOCKED, FALSE);
-    }
-
 
     <T> T withLock(Supplier<T> call) {
         long valueOffset = offset + LOCKED;
@@ -40,20 +36,12 @@ public class LongTextReference implements LongValue, Byteable {
 
     @Override
     public long getValue() {
-        return withLock(() -> {
-            return bytes.parseLong(offset + VALUE);
-        });
+        return withLock(() -> bytes.parseLong(offset + VALUE));
     }
 
     @Override
     public void setValue(long value) {
-        ByteStringAppender byteStringAppender = withLock(() -> {
-            ByteStringAppender append = bytes.append(offset + VALUE, value);
-
-            System.out.println(Bytes.toDebugString(bytes, offset + VALUE, 20));
-            return append;
-
-        });
+        withLock(() -> bytes.append(offset + VALUE, value, DIGITS));
     }
 
     @Override
@@ -70,7 +58,7 @@ public class LongTextReference implements LongValue, Byteable {
     public long addValue(long delta) {
         return withLock(() -> {
             long value = bytes.parseLong(offset + VALUE) + delta;
-            bytes.append(offset + VALUE, value);
+            bytes.append(offset + VALUE, value, DIGITS);
             return value;
         });
     }
@@ -84,7 +72,7 @@ public class LongTextReference implements LongValue, Byteable {
     public boolean compareAndSwapValue(long expected, long value) {
         return withLock(() -> {
             if (bytes.parseLong(offset + VALUE) == expected) {
-                bytes.append(offset + VALUE, value);
+                bytes.append(offset + VALUE, value, DIGITS);
                 return true;
             }
             return false;
@@ -92,14 +80,16 @@ public class LongTextReference implements LongValue, Byteable {
     }
 
     @Override
-    public void bytes(Bytes bytes, long offset, long length) {
+    public void bytes(BytesStore bytes, long offset, long length) {
         if (length != template.length) throw new IllegalArgumentException();
         this.bytes = bytes;
         this.offset = offset;
+        if (bytes.readLong(offset) == UNINITIALIZED)
+            bytes.write(offset, template);
     }
 
     @Override
-    public Bytes bytes() {
+    public BytesStore bytes() {
         return bytes;
     }
 
@@ -112,4 +102,18 @@ public class LongTextReference implements LongValue, Byteable {
     public long maxSize() {
         return template.length;
     }
+
+    private static int asInt(@NotNull String str) {
+        ByteBuffer bb = ByteBuffer.wrap(str.getBytes(StandardCharsets.ISO_8859_1)).order(ByteOrder.nativeOrder());
+        return bb.getInt();
+    }
+
+    public static void write(Bytes bytes, long value) {
+        long position = bytes.position();
+        bytes.write(template);
+        bytes.append(position+VALUE, value, DIGITS);
+    }
+
+    public String toString() { return "value: "+getValue(); }
+
 }

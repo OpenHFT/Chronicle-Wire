@@ -284,12 +284,12 @@ public class RawWire implements Wire {
         }
 
         @Override
-        public WireOut int64(LongValue readReady) {
+        public WireOut int64forBinding(long value) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public WireOut int32(IntValue value) {
+        public WireOut int32forBinding(int value) {
             throw new UnsupportedOperationException();
         }
 

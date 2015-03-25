@@ -144,14 +144,15 @@ public abstract class WrappedWire {
         }
 
         @Override
-        public WireOut int64(LongValue readReady) {
-            valueOut.int64(readReady);
+        public WireOut int64forBinding(long value) {
+            valueOut.int64forBinding(value);
             return thisWireOut();
         }
 
         @Override
-        public WireOut int32(IntValue value) {
-            throw new UnsupportedOperationException();
+        public WireOut int32forBinding(int value) {
+            valueOut.int32forBinding(value);
+            return thisWireOut();
         }
 
         public WireOut bool(Boolean flag) {
