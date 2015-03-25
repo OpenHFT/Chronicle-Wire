@@ -28,7 +28,7 @@ public interface WireIn {
     ValueIn read(StringBuilder name);
 
     /**
-     * Read a field, or string which is always written, even for formats which might drop the field.
+     * Read a field, or string which is always written, even for formats which might drop the field such as RAW.
      */
     default ValueIn readEventName(StringBuilder name) {
         return read(name);
