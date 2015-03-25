@@ -4,6 +4,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
@@ -468,6 +469,11 @@ public class TextWire implements Wire {
         }
 
         @Override
+        public WireOut int64array(long capacity) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public Wire time(LocalTime localTime) {
             bytes.append(localTime.toString());
             separator();
@@ -509,6 +515,11 @@ public class TextWire implements Wire {
             text(sb);
             uuid.accept(UUID.fromString(sb.toString()));
             return TextWire.this;
+        }
+
+        @Override
+        public WireIn int64array(LongArrayValues values, Consumer<LongArrayValues> setter) {
+            throw new UnsupportedOperationException();
         }
 
 

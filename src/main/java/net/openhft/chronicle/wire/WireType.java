@@ -16,8 +16,8 @@ public enum WireType {
     DEFLATER(Codes.DEFLATER),
     U8_ARRAY(Codes.U8_ARRAY),
     U16_ARRAY(Codes.U16_ARRAY),
-    U32_ARRAY(Codes.U32_ARRAY),
-    U64_ARRAY(Codes.U64_ARRAY),
+    I32_ARRAY(Codes.I32_ARRAY),
+    I64_ARRAY(Codes.I64_ARRAY),
     PADDING32(Codes.PADDING32),
     PADDING(Codes.PADDING),
 
@@ -84,8 +84,8 @@ public enum WireType {
         static final int DEFLATER = 0x85;
         static final int U8_ARRAY = 0x8A;
         static final int U16_ARRAY = 0x8B;
-        static final int U32_ARRAY = 0x8C;
-        static final int U64_ARRAY = 0x8D;
+        static final int I32_ARRAY = 0x8C;
+        static final int I64_ARRAY = 0x8D;
         static final int PADDING32 = 0x8E;
         static final int PADDING = 0x8F;
 

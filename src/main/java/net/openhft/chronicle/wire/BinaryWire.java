@@ -6,6 +6,7 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
@@ -382,7 +383,7 @@ public class BinaryWire implements Wire {
         if (fieldLess || (sb != null && (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))))
             return valueIn;
         throw new UnsupportedOperationException("Unordered fields not supported yet, " +
-                "Expected=" + key.name()+" was: "+sb);
+                "Expected=" + key.name() + " was: " + sb);
     }
 
     @Override
@@ -723,6 +724,12 @@ public class BinaryWire implements Wire {
             return BinaryWire.this;
         }
 
+        @Override
+        public WireOut int64array(long capacity) {
+            writeCode(I64_ARRAY);
+            LongArrayDirectReference.lazyWrite(bytes, capacity);
+            return BinaryWire.this;
+        }
 
         public ValueOut writeLength(long length) {
             if (length < 0) {
@@ -1064,6 +1071,23 @@ public class BinaryWire implements Wire {
         }
 
         @Override
+        public WireIn int64array(LongArrayValues values, Consumer<LongArrayValues> setter) {
+            consumeSpecial();
+            int code = readCode();
+            if (code == I64_ARRAY) {
+                if (!(values instanceof LongArrayDirectReference))
+                    setter.accept(values = new LongArrayDirectReference());
+                Byteable b = (Byteable) values;
+                long length = LongArrayDirectReference.peakLength(bytes, bytes.position());
+                b.bytesStore(bytes, bytes.position(), length);
+                bytes.skip(length);
+            } else {
+                cantRead(code);
+            }
+            return BinaryWire.this;
+        }
+
+        @Override
         public WireIn int64(LongValue value, Consumer<LongValue> setter) {
             consumeSpecial();
             int code = readCode();
@@ -1072,14 +1096,8 @@ public class BinaryWire implements Wire {
 
             // if the value is null, then we will create a LongDirectReference to write the data
             // into and then call setter.accept(), this will then unpdate the value
-            if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
-                value = new LongDirectReference();
-                Byteable b = (Byteable) value;
-                long length = b.maxSize();
-                b.bytesStore(bytes, bytes.position(), length);
-                setter.accept(value);
-                bytes.skip(length);
-                return BinaryWire.this;
+            if (!(value instanceof LongDirectReference)) {
+                setter.accept(value = new LongDirectReference());
             }
 
             Byteable b = (Byteable) value;

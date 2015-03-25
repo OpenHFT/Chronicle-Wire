@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
@@ -243,6 +244,12 @@ public abstract class WrappedWire {
             return thisWireOut();
         }
 
+        @Override
+        public WireOut int64array(long capacity) {
+            valueOut.int64array(capacity);
+            return thisWireOut();
+        }
+
         public WireOut marshallable(WriteMarshallable object) {
             valueOut.marshallable(object);
             return thisWireOut();
@@ -409,6 +416,12 @@ public abstract class WrappedWire {
 
         public WireIn uuid(Consumer<UUID> uuid) {
             valueIn.uuid(uuid);
+            return thisWireIn();
+        }
+
+        @Override
+        public WireIn int64array(LongArrayValues values, Consumer<LongArrayValues> setter) {
+            valueIn.int64array(values, setter);
             return thisWireIn();
         }
 

@@ -5,6 +5,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
@@ -249,6 +250,12 @@ public class RawWire implements Wire {
         @Override
         public Wire int64(long i64) {
             bytes.writeLong(i64);
+            return RawWire.this;
+        }
+
+        @Override
+        public WireOut int64array(long capacity) {
+            LongArrayDirectReference.lazyWrite(bytes, capacity);
             return RawWire.this;
         }
 
@@ -517,6 +524,18 @@ public class RawWire implements Wire {
                 setter.accept(value = new LongDirectReference());
             }
             Byteable b = (Byteable) value;
+            long length = b.maxSize();
+            b.bytesStore(bytes, bytes.position(), length);
+            bytes.skip(length);
+            return RawWire.this;
+        }
+
+        @Override
+        public WireIn int64array(LongArrayValues values, Consumer<LongArrayValues> setter) {
+            if (!(values instanceof Byteable)) {
+                setter.accept(values = new LongArrayDirectReference());
+            }
+            Byteable b = (Byteable) values;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.position(), length);
             bytes.skip(length);
