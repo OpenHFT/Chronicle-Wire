@@ -2,8 +2,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.values.IntValue;
-import net.openhft.chronicle.core.values.LongValue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -68,6 +66,8 @@ public interface ValueOut {
 
     WireOut int64(long i64);
 
+    WireOut int64array(long capacity);
+
     WireOut float32(float f);
 
     WireOut float64(double d);
@@ -82,9 +82,9 @@ public interface ValueOut {
 
     WireOut uuid(UUID uuid);
 
-    WireOut int32(IntValue value);
+    WireOut int32forBinding(int value);
 
-    WireOut int64(LongValue readReady);
+    WireOut int64forBinding(long readReady);
 
     WireOut sequence(Consumer<ValueOut> writer);
 

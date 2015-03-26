@@ -1,9 +1,11 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
@@ -18,8 +20,6 @@ import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;
-
-
 
 /**
  * Created by peter.lawrey on 19/01/15.
@@ -62,6 +62,13 @@ public class RawWire implements Wire {
     }
 
     @Override
+    public ValueOut writeEventName(WireKey key) {
+        lastField = "";
+        bytes.writeUTFΔ(key.name());
+        return writeValue;
+    }
+
+    @Override
     public ValueOut writeValue() {
         lastField = "";
         return writeValue;
@@ -82,6 +89,13 @@ public class RawWire implements Wire {
     @Override
     public ValueIn read(StringBuilder name) {
         lastSB = name;
+        return readValue;
+    }
+
+    @Override
+    public ValueIn readEventName(StringBuilder name) {
+        bytes.readUTFΔ(name);
+        lastSB = null;
         return readValue;
     }
 
@@ -240,6 +254,12 @@ public class RawWire implements Wire {
         }
 
         @Override
+        public WireOut int64array(long capacity) {
+            LongArrayDirectReference.lazyWrite(bytes, capacity);
+            return RawWire.this;
+        }
+
+        @Override
         public Wire time(LocalTime localTime) {
             long t = localTime.toNanoOfDay();
             bytes.writeLong(t);
@@ -272,12 +292,12 @@ public class RawWire implements Wire {
         }
 
         @Override
-        public WireOut int64(LongValue readReady) {
+        public WireOut int64forBinding(long value) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public WireOut int32(IntValue value) {
+        public WireOut int32forBinding(int value) {
             throw new UnsupportedOperationException();
         }
 
@@ -500,36 +520,38 @@ public class RawWire implements Wire {
 
         @Override
         public WireIn int64(LongValue value, Consumer<LongValue> setter) {
-
-            // todo commenting out until we have a newDirectReference ( as current code will not
-            // todo  even compile
-            throw new UnsupportedOperationException();
-            /*if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
-                setter.accept(value = newDirectReference(LongValue.class));
+            if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
+                setter.accept(value = new LongDirectReference());
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
-            b.bytes(bytes, bytes.position(), length);
+            b.bytesStore(bytes, bytes.position(), length);
             bytes.skip(length);
-            return RawWire.this;*/
+            return RawWire.this;
+        }
+
+        @Override
+        public WireIn int64array(LongArrayValues values, Consumer<LongArrayValues> setter) {
+            if (!(values instanceof Byteable)) {
+                setter.accept(values = new LongArrayDirectReference());
+            }
+            Byteable b = (Byteable) values;
+            long length = b.maxSize();
+            b.bytesStore(bytes, bytes.position(), length);
+            bytes.skip(length);
+            return RawWire.this;
         }
 
         @Override
         public WireIn int32(IntValue value, Consumer<IntValue> setter) {
-
-            // todo commenting out until we have a newDirectReference ( as current code will not
-            // todo  even compile
-            throw new UnsupportedOperationException();
-            /*
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
-                setter.accept(value = newDirectReference(IntValue.class));
+                setter.accept(value = new IntDirectReference());
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
-            b.bytes(bytes, bytes.position(), length);
+            b.bytesStore(bytes, bytes.position(), length);
             bytes.skip(length);
             return RawWire.this;
-            */
         }
 
         @Override

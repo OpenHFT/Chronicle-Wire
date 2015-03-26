@@ -4,6 +4,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
@@ -109,6 +110,9 @@ public class TextWire implements Wire {
                 if (ch != ':')
                     throw new UnsupportedOperationException("Expected a : at " + bytes.toDebugString());
 
+            } else if (ch < 0) {
+                sb.setLength(0);
+                return sb;
             } else {
                 bytes.parseUTF(sb, EscapingStopCharTester.escaping(c -> c < ' ' || c == ':'));
             }
@@ -293,15 +297,17 @@ public class TextWire implements Wire {
         }
 
         @Override
-        public WireOut int64(LongValue readReady) {
-            bytes.append(sep).write(LongTextReference.template);
+        public WireOut int64forBinding(long value) {
+            bytes.append(sep);
+            LongTextReference.write(bytes, value);
             separator();
             return TextWire.this;
         }
 
         @Override
-        public WireOut int32(IntValue value) {
-            bytes.append(sep).write(IntTextReference.template);
+        public WireOut int32forBinding(int value) {
+            bytes.append(sep);
+            IntTextReference.write(bytes, value);
             separator();
             return TextWire.this;
         }
@@ -463,6 +469,12 @@ public class TextWire implements Wire {
         }
 
         @Override
+        public WireOut int64array(long capacity) {
+            LongArrayTextReference.write(bytes, capacity);
+            return TextWire.this;
+        }
+
+        @Override
         public Wire time(LocalTime localTime) {
             bytes.append(localTime.toString());
             separator();
@@ -506,11 +518,11 @@ public class TextWire implements Wire {
             return TextWire.this;
         }
 
-
         @Override
         public WireIn bytes(Bytes toBytes) {
             return bytes(toBytes::write);
         }
+
 
         public WireIn bytes(Consumer<byte[]> bytesConsumer) {
             // TODO needs to be made much more efficient.
@@ -533,7 +545,6 @@ public class TextWire implements Wire {
             return TextWire.this;
         }
 
-
         public byte[] bytes() {
             // TODO needs to be made much more efficient.
             StringBuilder sb = Wires.acquireStringBuilder();
@@ -554,6 +565,7 @@ public class TextWire implements Wire {
             }
 
         }
+
 
         @Override
         public WireIn wireIn() {
@@ -598,7 +610,19 @@ public class TextWire implements Wire {
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
-            b.bytes(bytes, bytes.position(), length);
+            b.bytesStore(bytes, bytes.position(), length);
+            bytes.skip(length);
+            return TextWire.this;
+        }
+
+        @Override
+        public WireIn int64array(LongArrayValues values, Consumer<LongArrayValues> setter) {
+            if (!(values instanceof LongTextReference)) {
+                setter.accept(values = new LongArrayTextReference());
+            }
+            Byteable b = (Byteable) values;
+            long length = LongArrayTextReference.peakLength(bytes, bytes.position());
+            b.bytesStore(bytes, bytes.position(), length);
             bytes.skip(length);
             return TextWire.this;
         }
@@ -610,7 +634,7 @@ public class TextWire implements Wire {
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
-            b.bytes(bytes, bytes.position(), length);
+            b.bytesStore(bytes, bytes.position(), length);
             bytes.skip(length);
             return TextWire.this;
         }
@@ -718,7 +742,7 @@ public class TextWire implements Wire {
         @Override
         public Wire bool(BooleanConsumer flag) {
             StringBuilder sb = Wires.acquireStringBuilder();
-            bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+            bytes.parseUTF(sb, StopCharTesters.COMMA_STOP);
             if (StringInterner.isEqual(sb, "true"))
                 flag.accept(true);
             else if (StringInterner.isEqual(sb, "false"))
@@ -733,7 +757,7 @@ public class TextWire implements Wire {
         @Override
         public boolean bool() {
             StringBuilder sb = Wires.acquireStringBuilder();
-            bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+            bytes.parseUTF(sb, StopCharTesters.COMMA_STOP);
             if (StringInterner.isEqual(sb, "true"))
                 return true;
             else if (StringInterner.isEqual(sb, "false"))

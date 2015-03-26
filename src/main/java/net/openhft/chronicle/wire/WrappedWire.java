@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
@@ -144,14 +145,15 @@ public abstract class WrappedWire {
         }
 
         @Override
-        public WireOut int64(LongValue readReady) {
-            valueOut.int64(readReady);
+        public WireOut int64forBinding(long value) {
+            valueOut.int64forBinding(value);
             return thisWireOut();
         }
 
         @Override
-        public WireOut int32(IntValue value) {
-            throw new UnsupportedOperationException();
+        public WireOut int32forBinding(int value) {
+            valueOut.int32forBinding(value);
+            return thisWireOut();
         }
 
         public WireOut bool(Boolean flag) {
@@ -239,6 +241,12 @@ public abstract class WrappedWire {
 
         public WireOut int64(long i64) {
             valueOut.int64(i64);
+            return thisWireOut();
+        }
+
+        @Override
+        public WireOut int64array(long capacity) {
+            valueOut.int64array(capacity);
             return thisWireOut();
         }
 
@@ -408,6 +416,12 @@ public abstract class WrappedWire {
 
         public WireIn uuid(Consumer<UUID> uuid) {
             valueIn.uuid(uuid);
+            return thisWireIn();
+        }
+
+        @Override
+        public WireIn int64array(LongArrayValues values, Consumer<LongArrayValues> setter) {
+            valueIn.int64array(values, setter);
             return thisWireIn();
         }
 

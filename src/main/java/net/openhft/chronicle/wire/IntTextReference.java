@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.IntValue;
 
 import java.util.function.Supplier;
@@ -12,7 +13,8 @@ public class IntTextReference implements IntValue, Byteable {
     public static final int TRUE = (' ' << 24) | ('t' << 16) | ('r' << 8) | 'u';
     static final int LOCKED = 19;
     static final int VALUE = 33;
-    private Bytes bytes;
+    private static final int DIGITS = 10;
+    private BytesStore bytes;
     private long offset;
 
     <T> T withLock(Supplier<T> call) {
@@ -36,7 +38,7 @@ public class IntTextReference implements IntValue, Byteable {
 
     @Override
     public void setValue(int value) {
-        withLock(() -> bytes.append(offset + VALUE, value));
+        withLock(() -> bytes.append(offset + VALUE, value, DIGITS));
     }
 
     @Override
@@ -53,7 +55,7 @@ public class IntTextReference implements IntValue, Byteable {
     public int addValue(int delta) {
         return withLock(() -> {
             long value = bytes.parseLong(offset + VALUE) + delta;
-            bytes.append(offset + VALUE, value);
+            bytes.append(offset + VALUE, value, DIGITS);
             return (int) value;
         });
     }
@@ -67,7 +69,7 @@ public class IntTextReference implements IntValue, Byteable {
     public boolean compareAndSwapValue(int expected, int value) {
         return withLock(() -> {
             if (bytes.parseLong(offset + VALUE) == expected) {
-                bytes.append(offset + VALUE, value);
+                bytes.append(offset + VALUE, value, DIGITS);
                 return true;
             }
             return false;
@@ -75,34 +77,14 @@ public class IntTextReference implements IntValue, Byteable {
     }
 
     @Override
-    public boolean tryLockValue() {
-        return false;
-    }
-
-    @Override
-    public boolean tryLockNanosValue(long nanos) {
-        return false;
-    }
-
-    @Override
-    public void busyLockValue() throws InterruptedException, IllegalStateException {
-        throw new UnsupportedOperationException("todo");
-    }
-
-    @Override
-    public void unlockValue() throws IllegalMonitorStateException {
-        throw new UnsupportedOperationException("todo");
-    }
-
-    @Override
-    public void bytes(Bytes bytes, long offset, long length) {
+    public void bytesStore(BytesStore bytes, long offset, long length) {
         if (length != template.length) throw new IllegalArgumentException();
         this.bytes = bytes;
         this.offset = offset;
     }
 
     @Override
-    public Bytes bytes() {
+    public BytesStore bytesStore() {
         return bytes;
     }
 
@@ -115,4 +97,12 @@ public class IntTextReference implements IntValue, Byteable {
     public long maxSize() {
         return template.length;
     }
+
+    public static void write(Bytes bytes, int value) {
+        long position = bytes.position();
+        bytes.write(template);
+        bytes.append(position+VALUE, value, DIGITS);
+    }
+
+    public String toString() { return "value: "+getValue(); }
 }

@@ -12,11 +12,27 @@ import java.util.function.Consumer;
 public interface WireIn {
     void copyTo(WireOut wire);
 
+    /**
+     * Read the field if present, or empty string if not present.
+     */
     ValueIn read();
 
+    /**
+     * Read the field if present which must match the WireKey.
+     */
     ValueIn read(WireKey key);
 
+    /**
+     * Read the field if present, or empty string if not present.
+     */
     ValueIn read(StringBuilder name);
+
+    /**
+     * Read a field, or string which is always written, even for formats which might drop the field such as RAW.
+     */
+    default ValueIn readEventName(StringBuilder name) {
+        return read(name);
+    }
 
     boolean hasNextSequenceItem();
 

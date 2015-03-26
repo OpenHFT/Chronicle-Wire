@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.IORuntimeException;
 import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
@@ -81,6 +82,8 @@ public interface ValueIn {
     WireIn expectText(CharSequence s);
 
     WireIn uuid(Consumer<UUID> uuid);
+
+    WireIn int64array(LongArrayValues values, Consumer<LongArrayValues> setter);
 
     WireIn int64(LongValue value, Consumer<LongValue> setter);
 

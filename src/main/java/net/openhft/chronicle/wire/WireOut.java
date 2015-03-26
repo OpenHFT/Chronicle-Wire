@@ -11,9 +11,22 @@ import java.util.function.Consumer;
  * Created by peter.lawrey on 12/01/15.
  */
 public interface WireOut {
+    /**
+     * Write an empty filed marker
+     */
     ValueOut write();
 
+    /**
+     * Write a key for wires that support fields.
+     */
     ValueOut write(WireKey key);
+
+    /**
+     * Always write a key.  For RAW types, this label with be in text.  To read this, use readEventName()
+     */
+    default ValueOut writeEventName(WireKey key) {
+        return write(key);
+    }
 
     /**
      * write a field less value.

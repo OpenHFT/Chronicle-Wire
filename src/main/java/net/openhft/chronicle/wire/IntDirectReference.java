@@ -1,11 +1,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Byteable;
-import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.IntValue;
 
 public class IntDirectReference implements IntValue, Byteable {
-    private Bytes bytes;
+    private BytesStore bytes;
     private long offset;
 
     @Override
@@ -44,14 +44,14 @@ public class IntDirectReference implements IntValue, Byteable {
     }
 
     @Override
-    public void bytes(Bytes bytes, long offset, long length) {
+    public void bytesStore(BytesStore bytes, long offset, long length) {
         if (length != maxSize()) throw new IllegalArgumentException();
         this.bytes = bytes;
         this.offset = offset;
     }
 
     @Override
-    public Bytes bytes() {
+    public BytesStore bytesStore() {
         return bytes;
     }
 
@@ -64,4 +64,6 @@ public class IntDirectReference implements IntValue, Byteable {
     public long maxSize() {
         return 4;
     }
+
+    public String toString() { return "value: "+getValue(); }
 }
