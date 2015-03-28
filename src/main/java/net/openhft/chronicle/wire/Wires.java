@@ -32,6 +32,14 @@ public enum Wires {
         return sb;
     }
 
+
+    private static Consumer<WireIn> emptyMetaDataConsumer = new Consumer<WireIn>() {
+        @Override
+        public void accept(WireIn wireIn) {
+            // skip the meta data
+        }
+    };
+
     public static void writeData(WireOut wireOut, boolean metaData, Consumer<WireOut> writer) {
         Bytes bytes = wireOut.bytes();
         long position = bytes.position();
@@ -45,6 +53,10 @@ public enum Wires {
     public static boolean readData(@NotNull WireIn wireIn,
                                    @Nullable Consumer<WireIn> metaDataConsumer,
                                    @Nullable Consumer<WireIn> dataConsumer) {
+
+        // if metaDataConsumer == null we are choosing not to read the header, but it still has to be skipped
+        final Consumer<WireIn> metaDataConsumer0 = metaDataConsumer == null ? emptyMetaDataConsumer : metaDataConsumer;
+
         Bytes bytes = wireIn.bytes();
         boolean read = false;
         while (bytes.remaining() >= 4) {
@@ -62,12 +74,10 @@ public enum Wires {
                     return true;
                 }
             } else {
-                if (metaDataConsumer != null) {
-                    wireIn.bytes().withLength(len, b -> metaDataConsumer.accept(wireIn));
-                    if (dataConsumer == null)
-                        return true;
-                    read = true;
-                }
+                wireIn.bytes().withLength(len, b -> metaDataConsumer0.accept(wireIn));
+                if (dataConsumer == null)
+                    return true;
+                read = true;
             }
         }
         return read;

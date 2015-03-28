@@ -8,6 +8,7 @@ import net.openhft.chronicle.util.BooleanConsumer;
 import net.openhft.chronicle.util.ByteConsumer;
 import net.openhft.chronicle.util.FloatConsumer;
 import net.openhft.chronicle.util.ShortConsumer;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -24,7 +25,7 @@ import java.util.function.LongConsumer;
 public abstract class WrappedWire {
     private Wire wire;
 
-    public WrappedWire(Wire wire) {
+    public WrappedWire(@Nullable Wire wire) {
         this.wire = wire;
     }
 
