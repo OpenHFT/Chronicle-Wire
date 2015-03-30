@@ -54,10 +54,7 @@ public enum Wires {
                                    @Nullable Consumer<WireIn> metaDataConsumer,
                                    @Nullable Consumer<WireIn> dataConsumer) {
 
-        // if metaDataConsumer == null we are choosing not to read the header, but it still has to be skipped
-        final Consumer<WireIn> metaDataConsumer0 = metaDataConsumer == null ? emptyMetaDataConsumer : metaDataConsumer;
-
-        Bytes bytes = wireIn.bytes();
+        final Bytes bytes = wireIn.bytes();
         boolean read = false;
         while (bytes.remaining() >= 4) {
             long position = bytes.position();
@@ -65,7 +62,7 @@ public enum Wires {
             if (!isKnownLength(header))
                 return read;
             bytes.skip(4);
-            int len = lengthOf(header);
+            final int len = lengthOf(header);
             if (isData(header)) {
                 if (dataConsumer == null) {
                     return false;
@@ -74,7 +71,13 @@ public enum Wires {
                     return true;
                 }
             } else {
-                wireIn.bytes().withLength(len, b -> metaDataConsumer0.accept(wireIn));
+
+                if (metaDataConsumer == null)
+                    // skip the header
+                    wireIn.bytes().skip(len);
+                else
+                    wireIn.bytes().withLength(len, b -> metaDataConsumer.accept(wireIn));
+
                 if (dataConsumer == null)
                     return true;
                 read = true;
