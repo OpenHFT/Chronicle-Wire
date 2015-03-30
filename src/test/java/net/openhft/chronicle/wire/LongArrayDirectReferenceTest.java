@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 public class LongArrayDirectReferenceTest {
 
     @Test
-    public void getSetValues() throws IOException {
+    public void getSetValues() throws Exception {
         int length = 1024 + 8;
         try (NativeBytes bytes = NativeBytes.nativeBytes(length + 8)) {
             LongArrayDirectReference.write(bytes, 128);

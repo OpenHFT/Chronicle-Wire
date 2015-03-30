@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 public class LongArrayTextReferenceTest {
     @Test
-    public void getSetValues() throws IOException {
+    public void getSetValues() throws Exception {
         int length = 128 * 22 + 47;
         try (NativeBytes bytes = NativeBytes.nativeBytes(length)) {
             LongArrayTextReference.write(bytes, 128);
