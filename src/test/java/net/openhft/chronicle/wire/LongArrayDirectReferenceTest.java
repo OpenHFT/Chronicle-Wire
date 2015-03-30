@@ -1,18 +1,20 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.NativeBytes;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
 public class LongArrayDirectReferenceTest {
 
-    @Ignore("todo fix : failing with - IllegalArgumentException: start: 16, end: 1040")
     @Test
-    public void getSetValues() {
+    public void getSetValues() throws IOException {
         int length = 1024 + 8;
-        try (NativeBytes bytes = NativeBytes.nativeBytes(length)) {
+        try (NativeBytes bytes = NativeBytes.nativeBytes(length + 8)) {
             LongArrayDirectReference.write(bytes, 128);
 
             LongArrayDirectReference array = new LongArrayDirectReference();
