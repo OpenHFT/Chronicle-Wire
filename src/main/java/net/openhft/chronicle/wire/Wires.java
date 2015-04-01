@@ -32,6 +32,14 @@ public enum Wires {
         return sb;
     }
 
+
+    private static Consumer<WireIn> emptyMetaDataConsumer = new Consumer<WireIn>() {
+        @Override
+        public void accept(WireIn wireIn) {
+            // skip the meta data
+        }
+    };
+
     public static void writeData(WireOut wireOut, boolean metaData, Consumer<WireOut> writer) {
         Bytes bytes = wireOut.bytes();
         long position = bytes.position();
@@ -45,7 +53,8 @@ public enum Wires {
     public static boolean readData(@NotNull WireIn wireIn,
                                    @Nullable Consumer<WireIn> metaDataConsumer,
                                    @Nullable Consumer<WireIn> dataConsumer) {
-        Bytes bytes = wireIn.bytes();
+
+        final Bytes bytes = wireIn.bytes();
         boolean read = false;
         while (bytes.remaining() >= 4) {
             long position = bytes.position();
@@ -53,7 +62,7 @@ public enum Wires {
             if (!isKnownLength(header))
                 return read;
             bytes.skip(4);
-            int len = lengthOf(header);
+            final int len = lengthOf(header);
             if (isData(header)) {
                 if (dataConsumer == null) {
                     return false;
@@ -62,12 +71,16 @@ public enum Wires {
                     return true;
                 }
             } else {
-                if (metaDataConsumer != null) {
+
+                if (metaDataConsumer == null)
+                    // skip the header
+                    wireIn.bytes().skip(len);
+                else
                     wireIn.bytes().withLength(len, b -> metaDataConsumer.accept(wireIn));
-                    if (dataConsumer == null)
-                        return true;
-                    read = true;
-                }
+
+                if (dataConsumer == null)
+                    return true;
+                read = true;
             }
         }
         return read;

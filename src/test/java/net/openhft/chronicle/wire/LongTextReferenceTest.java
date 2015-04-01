@@ -27,7 +27,7 @@ public class LongTextReferenceTest {
     @Test
     public void testSetValue() throws Exception {
         final LongTextReference value = new LongTextReference();
-        try (NativeBytesStore bytesStore = NativeBytesStore.nativeStore(value.maxSize())) {
+        try (NativeBytesStore bytesStore = NativeBytesStore.nativeStoreWithFixedCapacity(value.maxSize())) {
             value.bytesStore(bytesStore, 0, value.maxSize());
             int expected = 10;
             value.setValue(expected);
