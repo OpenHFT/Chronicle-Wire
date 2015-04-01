@@ -2,17 +2,13 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.NativeBytes;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
 public class LongArrayDirectReferenceTest {
 
     @Test
-    public void getSetValues() throws Exception {
+    public void getSetValues() {
         int length = 1024 + 8;
         try (NativeBytes bytes = NativeBytes.nativeBytes(length + 8)) {
             LongArrayDirectReference.write(bytes, 128);
