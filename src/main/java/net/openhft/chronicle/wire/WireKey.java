@@ -7,6 +7,7 @@ import java.util.Map;
 /**
  * Created by peter.lawrey on 1/10/15.
  */
+@FunctionalInterface
 public interface WireKey {
     CharSequence name();
 

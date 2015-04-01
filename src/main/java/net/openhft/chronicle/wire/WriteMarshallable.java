@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+@FunctionalInterface
 public interface WriteMarshallable {
     /**
      * Write data to the wire

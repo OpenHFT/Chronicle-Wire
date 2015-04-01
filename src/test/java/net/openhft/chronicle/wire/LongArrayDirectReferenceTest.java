@@ -24,5 +24,4 @@ public class LongArrayDirectReferenceTest {
                 assertEquals(i + 1, array.getValueAt(i));
         }
     }
-
 }

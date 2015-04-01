@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+@FunctionalInterface
 public interface ReadMarshallable {
     /**
      * Straight line ordered decoding.
