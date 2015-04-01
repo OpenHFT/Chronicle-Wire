@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.NativeBytes;
+import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -8,6 +9,7 @@ import org.junit.Test;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
 
 
 public class TextHeaderTest {
@@ -24,7 +26,7 @@ public class TextHeaderTest {
     }
 
     private static class Header implements Marshallable {
-        private static final long PADDED_SIZE = 512;
+        public static final long PADDED_SIZE = 512;
 
         private UUID uuid;
         private ZonedDateTime created;
@@ -38,27 +40,49 @@ public class TextHeaderTest {
 
         @Override
         public void writeMarshallable(@NotNull WireOut out) {
-            out.write(Field.writeByte).int64forBinding(PADDED_SIZE)
-                    .write(Field.created).zonedDateTime(created);
+            out.write(Field.uuid).uuid(uuid);
+            out.write(Field.writeByte).int64forBinding(PADDED_SIZE);
+            out.write(Field.created).zonedDateTime(created);
         }
 
         @Override
         public void readMarshallable(@NotNull WireIn in) {
-            in.read(Field.writeByte).int64(writeByte, x -> writeByte = x)
-                    .read(Field.created).zonedDateTime(c -> created = c);
+            in.read(Field.uuid).uuid(u -> uuid = u);
+            System.out.println(in.bytes().toString());
+
+            in.read(Field.writeByte).int64(writeByte, x -> writeByte = x);
+            System.out.println(in.bytes().toString());
+
+            in.read(Field.created).zonedDateTime(c -> created = c);
         }
     }
 
     @Test
     public void testHeader() {
         Wire wire = new TextWire(NativeBytes.nativeBytes());
-        Header header = new Header();
+        Header wheader = new Header();
+        Header rheader = new Header();
 
-        wire.writeDocument(true, w -> w.write(() -> "header").marshallable(header));
+        wire.writeDocument(true, w -> w.write(() -> "header").marshallable(wheader));
         wire.flip();
+        wire.readDocument(w -> w.read(() -> "header").marshallable(rheader), null);
+    }
 
-        System.out.println(wire.bytes().toString());
 
-        wire.readDocument(w -> w.read(() -> "header").marshallable(header), null);
+    LongValue writeByte = null;
+    ZonedDateTime gdt;
+
+    @Test
+    public void testHeader2() {
+        ZonedDateTime dt = ZonedDateTime.now();
+        Wire wire = new TextWire(NativeBytes.nativeBytes());
+        wire.write(Field.writeByte).int64forBinding(512);
+        wire.write(Field.created).zonedDateTime(dt);
+        wire.flip();
+        wire.read(Field.writeByte).int64(writeByte, x -> writeByte = x);
+        wire.read(Field.created).zonedDateTime(x -> gdt = x);
+
+        assertEquals(512, writeByte.getValue());
+        assertEquals(dt, gdt);
     }
 }
