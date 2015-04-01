@@ -47,12 +47,13 @@ public class TextHeaderTest {
 
         @Override
         public void readMarshallable(@NotNull WireIn in) {
+            System.out.println(in.bytes().toString());
             in.read(Field.uuid).uuid(u -> uuid = u);
-            System.out.println(in.bytes().toString());
 
+            System.out.println(in.bytes().toString());
             in.read(Field.writeByte).int64(writeByte, x -> writeByte = x);
-            System.out.println(in.bytes().toString());
 
+            System.out.println(in.bytes().toString());
             in.read(Field.created).zonedDateTime(c -> created = c);
         }
     }
@@ -66,23 +67,5 @@ public class TextHeaderTest {
         wire.writeDocument(true, w -> w.write(() -> "header").marshallable(wheader));
         wire.flip();
         wire.readDocument(w -> w.read(() -> "header").marshallable(rheader), null);
-    }
-
-
-    LongValue writeByte = null;
-    ZonedDateTime gdt;
-
-    @Test
-    public void testHeader2() {
-        ZonedDateTime dt = ZonedDateTime.now();
-        Wire wire = new TextWire(NativeBytes.nativeBytes());
-        wire.write(Field.writeByte).int64forBinding(512);
-        wire.write(Field.created).zonedDateTime(dt);
-        wire.flip();
-        wire.read(Field.writeByte).int64(writeByte, x -> writeByte = x);
-        wire.read(Field.created).zonedDateTime(x -> gdt = x);
-
-        assertEquals(512, writeByte.getValue());
-        assertEquals(dt, gdt);
     }
 }
