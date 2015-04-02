@@ -1,3 +1,20 @@
+/*
+ * Copyright 2015 Higher Frequency Trading
+ *
+ * http://www.higherfrequencytrading.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
@@ -9,6 +26,7 @@ import java.util.UUID;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by peter.lawrey on 06/02/15.
@@ -46,7 +64,7 @@ public class BinaryWire2Test {
                 .write().float32(Float.POSITIVE_INFINITY);
         wire.flip();
         wire.read().float32(t -> assertEquals(0.0F, t, 0.0F))
-                .read().float32(Float::isNaN)
+                .read().float32(t -> assertTrue(Float.isNaN(t)))
                 .read().float32(t -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F));
     }
 
