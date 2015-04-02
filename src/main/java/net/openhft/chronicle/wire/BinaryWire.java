@@ -1107,7 +1107,7 @@ public class BinaryWire implements Wire {
                 cantRead(code);
 
             // if the value is null, then we will create a LongDirectReference to write the data
-            // into and then call setter.accept(), this will then unpdate the value
+            // into and then call setter.accept(), this will then update the value
             if (!(value instanceof LongDirectReference)) {
                 setter.accept(value = new LongDirectReference());
             }
