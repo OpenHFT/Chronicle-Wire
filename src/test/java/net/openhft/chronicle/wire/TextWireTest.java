@@ -459,7 +459,7 @@ public class TextWireTest {
         wire.flip();
         System.out.println(wire.bytes());
         wire.read().float32(t -> assertEquals(0.0F, t, 0.0F))
-                .read().float32(Float::isNaN)
+                .read().float32(t-> assertTrue(Float.isNaN(t)))
                 .read().float32(t -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F))
                 .read().float32(t -> assertEquals(Float.NEGATIVE_INFINITY, t, 0.0F))
                 .read().float32(t -> assertEquals(123456.0f, t, 0.0F));

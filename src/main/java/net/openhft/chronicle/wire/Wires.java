@@ -88,21 +88,36 @@ public enum Wires {
 
     public static String fromSizePrefixedBlobs(Bytes bytes) {
         long position = bytes.position();
+        return fromSizePrefixedBlobs(bytes, position, bytes.remaining());
+    }
+
+    @NotNull
+    public static String fromSizePrefixedBlobs(Bytes bytes, long position, long length) {
         StringBuilder sb = new StringBuilder();
-        while (bytes.remaining() >= 4) {
-            long header = bytes.readUnsignedInt();
-            int len = lengthOf(header);
-            String type = isData(header)
-                    ? isReady(header) ? "!!data" : "!!not-ready-data!"
-                    : isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
-            sb.append("--- ").append(type).append("\n");
-            for (int i = 0; i < len; i++)
-                sb.append((char) bytes.readUnsignedByte());
-            if (sb.charAt(sb.length() - 1) != '\n')
-                sb.append('\n');
+
+        final long limit0 = bytes.limit();
+        final long position0 = bytes.position();
+        try {
+            bytes.position(position);
+            bytes.limit(position + length);
+            while (bytes.remaining() >= 4) {
+                long header = bytes.readUnsignedInt();
+                int len = lengthOf(header);
+                String type = isData(header)
+                        ? isReady(header) ? "!!data" : "!!not-ready-data!"
+                        : isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
+                sb.append("--- ").append(type).append("\n");
+                for (int i = 0; i < len; i++)
+                    sb.append((char) bytes.readUnsignedByte());
+                if (sb.charAt(sb.length() - 1) != '\n')
+                    sb.append('\n');
+            }
+
+            return sb.toString();
+        } finally {
+            bytes.limit(limit0);
+            bytes.position(position0);
         }
-        bytes.position(position);
-        return sb.toString();
     }
 
     public static int lengthOf(long len) {

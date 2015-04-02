@@ -502,7 +502,7 @@ public class TextWire implements Wire {
     class TextValueIn implements ValueIn {
         @Override
         public boolean hasNext() {
-            throw new UnsupportedOperationException();
+            return bytes.remaining() > 0;
         }
 
         @Override
@@ -593,6 +593,20 @@ public class TextWire implements Wire {
                             // do nothing
                         }
 
+                    case '[':
+                        int countSeq = 1;
+                        for (; ; ) {
+                            byte b = bytes.readByte();
+                            if (b == '[')
+                                countSeq += 1;
+                            else if (b == ']') {
+                                countSeq -= 1;
+                                if (countSeq == 0)
+                                    return bytes.position() - start;
+                            }
+                            // do nothing
+                        }
+
                     default:
                         // TODO needs to be made much more efficient.
                         bytes();
@@ -647,14 +661,34 @@ public class TextWire implements Wire {
         @Override
         public WireIn marshallable(ReadMarshallable object) {
             consumeWhiteSpace();
-            int code = readCode();
+            int code = peekCode();
             if (code != '{')
                 throw new IORuntimeException("Unsupported type " + (char) code);
-            object.readMarshallable(TextWire.this);
+
+            final long len = readLength() - 1;
+
+
+            final long limit = bytes.limit();
+            final long position = bytes.position();
+
+
+            try {
+                // ensure that you can read past the end of this marshable object
+                final long newLimit = position - 1 + len;
+                bytes.limit(newLimit);
+                bytes.skip(1); // skip the {
+                consumeWhiteSpace();
+                object.readMarshallable(TextWire.this);
+            } finally {
+                bytes.limit(limit);
+            }
+
             consumeWhiteSpace();
             code = readCode();
             if (code != '}')
-                throw new IORuntimeException("Unterminated { while reading marshallable " + object);
+                throw new IORuntimeException("Unterminated { while reading marshallable " +
+                        object + "bytes=" + Bytes.toDebugString(bytes)
+                );
             return TextWire.this;
         }
 
@@ -709,7 +743,13 @@ public class TextWire implements Wire {
             int ch = peekCode();
             StringBuilder sb = s;
             if (ch == '{') {
-                sb.append(Bytes.toDebugString(bytes, bytes.position(), readLength()));
+                final long len = readLength();
+                sb.append(Bytes.toDebugString(bytes, bytes.position(), len));
+                bytes.skip(len);
+
+                // read the next comma
+                bytes.skipTo(StopCharTesters.COMMA_STOP);
+
                 return TextWire.this;
             }
 
