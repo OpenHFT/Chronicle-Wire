@@ -17,9 +17,16 @@
  */
 package net.openhft.chronicle.wire;
 
-/**
- * Created by peter.lawrey on 1/10/15.
- */
-public interface Marshallable extends WriteMarshallable, ReadMarshallable {
+import java.util.function.Consumer;
 
+public interface WireParser {
+    static WireParser wireParser() {
+        return new VanillaWireParser();
+    }
+
+    void register(WireKey key, Consumer<ValueIn> valueInConsumer);
+
+    Consumer<ValueIn> lookup(CharSequence name);
+
+    Consumer<ValueIn> lookup(int number);
 }
