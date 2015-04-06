@@ -490,6 +490,11 @@ public class RawWire implements Wire {
         }
 
         @Override
+        public boolean isNull() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public Wire float32(FloatConsumer v) {
             v.accept(bytes.readFloat());
             return RawWire.this;

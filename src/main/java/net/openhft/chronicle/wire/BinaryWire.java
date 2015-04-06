@@ -1215,6 +1215,11 @@ public class BinaryWire implements Wire {
         }
 
         @Override
+        public boolean isNull() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public WireIn sequence(Consumer<ValueIn> reader) {
             throw new UnsupportedOperationException();
         }

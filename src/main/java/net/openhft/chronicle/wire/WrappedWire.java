@@ -407,6 +407,11 @@ public abstract class WrappedWire {
             throw new UnsupportedOperationException("todo");
         }
 
+        @Override
+        public boolean isNull() {
+            throw new UnsupportedOperationException();
+        }
+
         public WireIn time(Consumer<LocalTime> localTime) {
             valueIn.time(localTime);
             return thisWireIn();

@@ -274,7 +274,7 @@ public class TextWire implements Wire {
 
         @Override
         public Wire text(CharSequence s) {
-            if (" ".equals(sep) && startsWith(s, "//"))
+            if (s != null && " ".equals(sep) && startsWith(s, "//"))
                 sep = "";
             bytes.append(sep).append(s == null ? "!!null" : quotes(s));
             separator();
@@ -722,6 +722,24 @@ public class TextWire implements Wire {
         @Override
         public float float32() {
             throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
+        public boolean isNull() {
+
+            final long position = bytes.position();
+
+            long pos = position;
+
+            for (byte b : "!!null".getBytes()) {
+                if (bytes.readByte(pos++) != b)
+                    return false;
+            }
+
+
+            bytes.skipTo(StopCharTesters.COMMA_STOP);
+            System.out.printf("bytes-'+"+Bytes.toDebugString(bytes, 0, bytes.position())+"'");
+            return true;
         }
 
         public byte int8() {

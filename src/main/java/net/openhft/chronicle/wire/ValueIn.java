@@ -135,4 +135,6 @@ public interface ValueIn {
     double float64();
 
     float float32();
+
+    boolean isNull();
 }
