@@ -724,21 +724,20 @@ public class TextWire implements Wire {
             throw new UnsupportedOperationException("todo");
         }
 
+
+        /**
+         * returns
+         * @return true if !!null, if {@code true} reads the !!null up to the next STOP, if
+         * {@code false} no  data is read  ( data is only peaked if {@code false} )
+         */
         @Override
         public boolean isNull() {
-
-            final long position = bytes.position();
-
-            long pos = position;
-
+            long pos = bytes.position();
             for (byte b : "!!null".getBytes()) {
                 if (bytes.readByte(pos++) != b)
                     return false;
             }
-
-
             bytes.skipTo(StopCharTesters.COMMA_STOP);
-            System.out.printf("bytes-'+"+Bytes.toDebugString(bytes, 0, bytes.position())+"'");
             return true;
         }
 
