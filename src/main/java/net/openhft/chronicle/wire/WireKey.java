@@ -51,5 +51,7 @@ public interface WireKey {
         return true;
     }
 
-
+    default boolean contentEquals(CharSequence c){
+        return this.toString().contentEquals(c);
+    }
 }
