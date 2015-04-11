@@ -26,6 +26,7 @@ import java.util.Map;
  */
 @FunctionalInterface
 public interface WireKey {
+
     CharSequence name();
 
     default int code() {
