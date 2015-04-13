@@ -110,8 +110,17 @@ public class TextWire implements Wire {
     }
 
     private void consumeWhiteSpace() {
-        while (bytes.remaining() > 0 && Character.isWhitespace(bytes.readUnsignedByte(bytes.position())))
-            bytes.skip(1);
+        int byteValue;
+        while(bytes.remaining() > 0) {
+            byteValue = bytes.readUnsignedByte(bytes.position());
+
+            // white-space, comma (ascii=44)
+            if(Character.isWhitespace(byteValue) || (byteValue == 44)) {
+                bytes.skip(1);
+            } else {
+                break;
+            }
+        }
     }
 
     private StringBuilder readField(StringBuilder sb) {

@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.ZonedDateTime;
@@ -33,38 +32,39 @@ public class TextDocumentTest {
     enum Keys implements WireKey {
         uuid,
         created,
-        writeByte
+        writeByte,
+        readByte
     }
 
     private static class Header implements Marshallable {
-        public static final long PADDED_SIZE = 512;
+        public static final long WRITE_BYTE = 512;
+        public static final long READ_BYTE = 1024;
 
         UUID uuid;
         ZonedDateTime created;
         LongValue writeByte;
+        LongValue readByte;
 
         public Header(){
             this.uuid = UUID.randomUUID();
             this.writeByte = null;
+            this.readByte = null;
             this.created = ZonedDateTime.now();
         }
 
         @Override
         public void writeMarshallable(@NotNull WireOut out) {
             out.write(Keys.uuid).uuid(uuid);
-            out.write(Keys.writeByte).int64forBinding(PADDED_SIZE);
+            out.write(Keys.writeByte).int64forBinding(WRITE_BYTE);
+            out.write(Keys.readByte).int64forBinding(READ_BYTE);
             out.write(Keys.created).zonedDateTime(created);
         }
 
         @Override
         public void readMarshallable(@NotNull WireIn in) {
-            System.out.println("Before reading uuid: \n" + in.bytes().toString());
             in.read(Keys.uuid).uuid(u -> uuid = u);
-
-            System.out.println("Before reading writeByte: \n" + in.bytes().toString());
             in.read(Keys.writeByte).int64(writeByte, x -> writeByte = x);
-
-            System.out.println("Before reading created: \n" + in.bytes().toString());
+            in.read(Keys.readByte).int64(readByte, x -> readByte = x);
             in.read(Keys.created).zonedDateTime(c -> created = c);
         }
     }
@@ -90,19 +90,19 @@ public class TextDocumentTest {
          at net.openhft.chronicle.wire.WireIn.readDocument(WireIn.java:53)
          at net.openhft.chronicle.wire.TextDocumentTest.testDocument(TextDocumentTest.java:62)
      */
-    @Ignore
     @Test
     public void testDocument() {
-        Wire wire = new TextWire(NativeBytes.nativeBytes());
-        Header wheader = new Header();
-        Header rheader = new Header();
+        final Wire wire = new TextWire(NativeBytes.nativeBytes());
+        final Header wheader = new Header();
+        final Header rheader = new Header();
 
         wire.writeDocument(true, w -> w.write(() -> "header").marshallable(wheader));
         wire.flip();
         wire.readDocument(w -> w.read(() -> "header").marshallable(rheader), null);
 
         assertEquals(wheader.uuid, rheader.uuid);
-        assertEquals(wheader.writeByte.getValue(), rheader.writeByte.getValue());
+        assertEquals(Header.WRITE_BYTE, rheader.writeByte.getValue());
+        assertEquals(Header.READ_BYTE, rheader.readByte.getValue());
         assertEquals(wheader.created, rheader.created);
     }
 }
