@@ -144,7 +144,7 @@
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Export-Package>
                             net.openhft.chronicle.wire.*,
-                            net.openhft.chronicle.util.*
+                            net.openhft.chronicle.wire.util.*
                         </Export-Package>
                     </instructions>
                 </configuration>

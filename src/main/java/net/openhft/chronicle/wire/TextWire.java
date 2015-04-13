@@ -23,10 +23,10 @@ import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.util.BooleanConsumer;
-import net.openhft.chronicle.util.ByteConsumer;
-import net.openhft.chronicle.util.FloatConsumer;
-import net.openhft.chronicle.util.ShortConsumer;
+import net.openhft.chronicle.wire.util.BooleanConsumer;
+import net.openhft.chronicle.wire.util.ByteConsumer;
+import net.openhft.chronicle.wire.util.FloatConsumer;
+import net.openhft.chronicle.wire.util.ShortConsumer;
 
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
