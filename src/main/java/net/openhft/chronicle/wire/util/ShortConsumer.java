@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.openhft.chronicle.util;
+package net.openhft.chronicle.wire.util;
 
 /**
  * Created by peter.lawrey on 16/01/15.
@@ -29,20 +29,20 @@ import java.util.Objects;
  * interfaces, {@code IntConsumer} is expected to operate via side-effects.
  *
  * <p>This is a <a href="package-summary.html">functional interface</a> whose functional method is {@link
- * #accept(float)}.
+ * #accept(short)}.
  *
  * @see java.util.function.Consumer
  * @since 1.8
  */
 @FunctionalInterface
-public interface FloatConsumer {
+public interface ShortConsumer {
 
     /**
      * Performs this operation on the given argument.
      *
      * @param value the input argument
      */
-    void accept(float value);
+    void accept(short value);
 
     /**
      * Returns a composed {@code IntConsumer} that performs, in sequence, this operation followed by the {@code after}
@@ -54,9 +54,9 @@ public interface FloatConsumer {
      * operation
      * @throws NullPointerException if {@code after} is null
      */
-    default FloatConsumer andThen(FloatConsumer after) {
+    default ShortConsumer andThen(ShortConsumer after) {
         Objects.requireNonNull(after);
-        return (float t) -> {
+        return (short t) -> {
             accept(t);
             after.accept(t);
         };

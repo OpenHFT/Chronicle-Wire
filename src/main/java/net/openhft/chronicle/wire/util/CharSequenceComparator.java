@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.openhft.chronicle.util;
+package net.openhft.chronicle.wire.util;
 
 import java.util.Comparator;
 

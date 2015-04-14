@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.openhft.chronicle.util;
+package net.openhft.chronicle.wire.util;
 
 /**
  * Created by peter.lawrey on 16/01/15.
@@ -29,20 +29,20 @@ import java.util.Objects;
  * interfaces, {@code IntConsumer} is expected to operate via side-effects.
  *
  * <p>This is a <a href="package-summary.html">functional interface</a> whose functional method is {@link
- * #accept(char)}.
+ * #accept(Boolean)}.
  *
  * @see java.util.function.Consumer
  * @since 1.8
  */
 @FunctionalInterface
-public interface CharConsumer {
+public interface BooleanConsumer {
 
     /**
      * Performs this operation on the given argument.
      *
      * @param value the input argument
      */
-    void accept(char value);
+    void accept(Boolean value);
 
     /**
      * Returns a composed {@code IntConsumer} that performs, in sequence, this operation followed by the {@code after}
@@ -54,9 +54,9 @@ public interface CharConsumer {
      * operation
      * @throws NullPointerException if {@code after} is null
      */
-    default CharConsumer andThen(CharConsumer after) {
+    default BooleanConsumer andThen(BooleanConsumer after) {
         Objects.requireNonNull(after);
-        return (char t) -> {
+        return (Boolean t) -> {
             accept(t);
             after.accept(t);
         };

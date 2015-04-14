@@ -23,10 +23,10 @@ import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.util.BooleanConsumer;
-import net.openhft.chronicle.util.ByteConsumer;
-import net.openhft.chronicle.util.FloatConsumer;
-import net.openhft.chronicle.util.ShortConsumer;
+import net.openhft.chronicle.wire.util.BooleanConsumer;
+import net.openhft.chronicle.wire.util.ByteConsumer;
+import net.openhft.chronicle.wire.util.FloatConsumer;
+import net.openhft.chronicle.wire.util.ShortConsumer;
 
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
@@ -110,8 +110,17 @@ public class TextWire implements Wire {
     }
 
     private void consumeWhiteSpace() {
-        while (bytes.remaining() > 0 && Character.isWhitespace(bytes.readUnsignedByte(bytes.position())))
-            bytes.skip(1);
+        int byteValue;
+        while(bytes.remaining() > 0) {
+            byteValue = bytes.readUnsignedByte(bytes.position());
+
+            // white-space, comma (ascii=44)
+            if(Character.isWhitespace(byteValue) || (byteValue == 44)) {
+                bytes.skip(1);
+            } else {
+                break;
+            }
+        }
     }
 
     private StringBuilder readField(StringBuilder sb) {
