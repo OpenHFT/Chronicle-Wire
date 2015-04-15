@@ -69,4 +69,8 @@ public interface WireIn {
     default boolean readDocument(Consumer<WireIn> metaDataConsumer, Consumer<WireIn> dataConsumer) {
         return Wires.readData(this, metaDataConsumer, dataConsumer);
     }
+
+    default boolean readDocument(long position, Consumer<WireIn> metaDataConsumer, Consumer<WireIn> dataConsumer) {
+        return Wires.readData(position, this, metaDataConsumer, dataConsumer);
+    }
 }

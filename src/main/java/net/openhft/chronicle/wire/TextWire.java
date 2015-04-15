@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringInterner;
@@ -156,7 +157,8 @@ public class TextWire implements Wire {
         if (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))
             return valueIn;
         bytes.position(position);
-        throw new UnsupportedOperationException("Unordered fields not supported yet. key=" + key.name());
+        throw new UnsupportedOperationException("Unordered fields not supported yet. key=" + key
+                .name() + ", data='" + sb + "'");
     }
 
     @Override

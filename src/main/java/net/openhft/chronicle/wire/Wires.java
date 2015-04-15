@@ -67,6 +67,27 @@ public enum Wires {
         bytes.writeOrderedInt(position, length);
     }
 
+    public static boolean readData(long offset,
+                                   @NotNull WireIn wireIn,
+                                   @Nullable Consumer<WireIn> metaDataConsumer,
+                                   @Nullable Consumer<WireIn> dataConsumer) {
+
+
+        final Bytes bytes = wireIn.bytes();
+
+        long position = bytes.position();
+        long limit = bytes.limit();
+        try {
+            bytes.limit( bytes.isElastic() ? bytes.capacity() : bytes.realCapacity());
+            bytes.position(offset);
+            return readData(wireIn, metaDataConsumer, dataConsumer);
+        } finally {
+            bytes.limit(limit);
+            bytes.position(position);
+        }
+    }
+
+
     public static boolean readData(@NotNull WireIn wireIn,
                                    @Nullable Consumer<WireIn> metaDataConsumer,
                                    @Nullable Consumer<WireIn> dataConsumer) {

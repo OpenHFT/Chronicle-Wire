@@ -17,12 +17,10 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.core.values.LongArrayValues;
 
-public class LongArrayDirectReference implements LongArrayValues, Byteable {
+public class LongArrayDirectReference implements ByteableLongArrayValues {
     private static final long CAPACITY = 0;
     private static final long VALUES = 8;
     private BytesStore bytes;
@@ -64,7 +62,9 @@ public class LongArrayDirectReference implements LongArrayValues, Byteable {
     }
 
     public static long peakLength(BytesStore bytes, long offset) {
-        return (bytes.readLong(offset + CAPACITY) << 3) + VALUES;
+        final long capacity = bytes.readLong(offset );
+        assert capacity > 0 : "capacity too small";
+        return (capacity << 3) + 8;
     }
 
     @Override
@@ -94,7 +94,14 @@ public class LongArrayDirectReference implements LongArrayValues, Byteable {
     }
 
     public static void lazyWrite(Bytes bytes, long capacity) {
+        System.out.println("capacity location =" + bytes.position());
         bytes.writeLong(capacity);
         bytes.skip(capacity << 3);
+    }
+
+    @Override
+    public long sizeInBytes(long capacity) {
+
+        return (capacity << 3) + VALUES;
     }
 }

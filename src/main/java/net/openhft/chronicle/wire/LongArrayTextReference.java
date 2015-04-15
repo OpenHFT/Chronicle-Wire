@@ -17,18 +17,16 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.values.LongArrayValues;
 
 /*
 The format for a long array in text is
 { capacity: 12345678901234567890, values: [ 12345678901234567890, ... ] }
  */
 
-public class LongArrayTextReference implements LongArrayValues, Byteable {
+public class LongArrayTextReference implements ByteableLongArrayValues {
     static final byte[] SECTION1 = "{ capacity: ".getBytes();
     static final byte[] SECTION2 = ", values: [ ".getBytes();
     static final byte[] SECTION3 = " ] }\n".getBytes();
@@ -80,7 +78,9 @@ public class LongArrayTextReference implements LongArrayValues, Byteable {
         this.length = length;
     }
 
+
     public static long peakLength(BytesStore bytes, long offset) {
+        //todo check this, I think there could be a bug here
         return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;
     }
 
@@ -100,6 +100,15 @@ public class LongArrayTextReference implements LongArrayValues, Byteable {
     }
 
     public String toString() {
+
+        if (bytes == null) {
+            return "LongArrayTextReference{" +
+                    "bytes=" + bytes +
+                    ", offset=" + offset +
+                    ", length=" + length +
+                    '}';
+        }
+
         return "value: " + getValueAt(0) + " ...";
     }
 
@@ -114,5 +123,11 @@ public class LongArrayTextReference implements LongArrayValues, Byteable {
         }
         bytes.write(SECTION3);
     }
+
+    @Override
+    public long sizeInBytes(long capacity) {
+        return (capacity * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;
+    }
+
 
 }
