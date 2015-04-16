@@ -48,10 +48,11 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         Wire text = new TextWire(bytes);
         writeMessageOne(text);
         bytes.flip();
+        System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("--- !!meta-data\n" +
-                "csp:///service-lookup\n" +
-                "tid: 149873598325\n" +
-                "--- !!data\n" +
+                        "csp:///service-lookup\n" +
+                        "tid: 149873598325\n" +
+                        "--- !!data\n" +
                         "lookup: { relativeUri: test, view: !Map types: [ !Integer !String ] }\n",
                 Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("[pos: 0, lim: 117, cap: 1TiB ] " +
@@ -62,6 +63,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         bytes.clear();
         writeMessageOne(bin);
         bytes.flip();
+        System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("[pos: 0, lim: 106, cap: 1TiB ] " +
                 "\u001F٠٠@Ãcspñ///service-lookupÃtid\u0090¦\u0094⒒RC" +
                 "٠٠٠Ælookup\u00827٠٠٠ËrelativeUriätestÄview¶⒊MapÅtypes\u0082⒘٠٠٠¶⒎Integer¶⒍String", bytes.toDebugString());
@@ -90,14 +92,14 @@ put: [ 3, bye ]
         writeMessageTwo(text);
         bytes.flip();
         assertEquals("--- !!meta-data\n" +
-                "\n" +
-                "csp://server1/test\n" +
-                "cid: 1\n" +
-                "--- !!data\n" +
-                "put: [ 1, hello ]\n" +
-                "--- !!data\n" +
-                "put: [ 2, world ]\n" +
-                "--- !!data\n" +
+                        "\n" +
+                        "csp://server1/test\n" +
+                        "cid: 1\n" +
+                        "--- !!data\n" +
+                        "put: [ 1, hello ]\n" +
+                        "--- !!data\n" +
+                        "put: [ 2, world ]\n" +
+                        "--- !!data\n" +
                         "put: [ 3, bye ]\n",
                 Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("[pos: 0, lim: 92, cap: 1TiB ] " +
@@ -108,7 +110,9 @@ put: [ 3, bye ]
 
         bytes.clear();
         writeMessageTwo(bin);
+
         bytes.flip();
+        System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("[pos: 0, lim: 86, cap: 1TiB ] " +
                 "\u0018٠٠@Ãcspî//server1/testÃcid⒈" +
                 "⒗٠٠٠Ãput\u0082⒎٠٠٠⒈åhello" +

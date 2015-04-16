@@ -683,7 +683,36 @@ public class TextWire implements Wire {
 
         @Override
         public WireIn sequence(Consumer<ValueIn> reader) {
-            throw new UnsupportedOperationException();
+            consumeWhiteSpace();
+            int code = peekCode();
+            if (code != '[')
+                throw new IORuntimeException("Unsupported type " + (char) code);
+
+            final long len = readLength() - 1;
+
+
+            final long limit = bytes.limit();
+            final long position = bytes.position();
+
+
+            try {
+                // ensure that you can read past the end of this sequence object
+                final long newLimit = position - 1 + len;
+                bytes.limit(newLimit);
+                bytes.skip(1); // skip the [
+                consumeWhiteSpace();
+                reader.accept(TextWire.this.valueIn);
+            } finally {
+                bytes.limit(limit);
+            }
+
+            consumeWhiteSpace();
+            code = readCode();
+            if (code != ']')
+                throw new IORuntimeException("Unterminated { while reading sequence " +
+                       "bytes=" + Bytes.toDebugString(bytes)
+                );
+            return TextWire.this;
         }
 
         @Override
