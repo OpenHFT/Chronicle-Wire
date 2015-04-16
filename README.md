@@ -82,8 +82,8 @@ While serialized data can be updated by replacing a whole record, this might not
    // thread safe across processes on the same machine.
    long id = counter.getAndAdd(1);
    
-   Other types such as 32 bit integer values and an array of 64-bit integer values are supported.
 ``` 
+Other types such as 32 bit integer values and an array of 64-bit integer values are supported.
     
 # Compression Options
 
