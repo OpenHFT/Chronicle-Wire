@@ -72,6 +72,7 @@ To support wire format discovery, the first bytes should have the top bit set.
 
 While serialized data can be updated by replacing a whole record, this might not be the most efficient option, nor thread safe. Wire offers the ability to bind a reference to a fixed value of a field and perform atomic operations on that field such as volatile read/write and compare-and-swap.
 
+``` java
    // field to cache the location and object used to reference a field.
    private LongValueReference counter = null;
     
@@ -82,7 +83,7 @@ While serialized data can be updated by replacing a whole record, this might not
    long id = counter.getAndAdd(1);
    
    Other types such as 32 bit integer values and an array of 64-bit integer values are supported.
-   
+``` 
     
 # Compression Options
 
