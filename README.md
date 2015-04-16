@@ -14,6 +14,7 @@ A key aim of Wire is to support schema changes.  It should make reasonable
 * fields the consumer doesn't expect. Optionally parsing them or ignoring them.
 * more or less data than expected (in field-less formats) 
 * reading a different type to the one written
+* updating fixed length fields, atomically where possible via a "bound" data structure..
 
 It should also be as efficient as possible in the case where any or all of these are true
 * fields are in the order expected.
@@ -67,6 +68,22 @@ Note: Wire supports debug/transparent combinations like self describing data wit
 
 To support wire format discovery, the first bytes should have the top bit set.
 
+# Binding to a field value
+
+While serialized data can be updated by replacing a whole record, this might not be the most efficient option, nor thread safe. Wire offers the ability to bind a reference to a fixed value of a field and perform atomic operations on that field such as volatile read/write and compare-and-swap.
+
+   // field to cache the location and object used to reference a field.
+   private LongValueReference counter = null;
+    
+   // find the field and bind an approritae wrapper for the wire format.
+   wire.read(COUNTER).int64(counter, x -> counter = x);
+    
+   // thread safe across processes on the same machine.
+   long id = counter.getAndAdd(1);
+   
+   Other types such as 32 bit integer values and an array of 64-bit integer values are supported.
+   
+    
 # Compression Options
 
 * no compression
