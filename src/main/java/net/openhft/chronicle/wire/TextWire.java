@@ -347,9 +347,8 @@ public class TextWire implements Wire {
             try {
                 bytes.append(sep);
                 sep = "";
-                bytes.append("[ ");
+                bytes.append("\n  - ");
                 writer.accept(this);
-                bytes.append(" ]");
                 sep = "";
 
             } finally {
@@ -607,7 +606,7 @@ public class TextWire implements Wire {
                 consumeWhiteSpace();
                 int code = readCode();
                 switch (code) {
-                    case '{':
+                    case '{': {
                         int count = 1;
                         for (; ; ) {
                             byte b = bytes.readByte();
@@ -620,21 +619,19 @@ public class TextWire implements Wire {
                             }
                             // do nothing
                         }
+                    }
 
-                    case '[':
-                        int countSeq = 1;
+                    case '-': {
                         for (; ; ) {
                             byte b = bytes.readByte();
-                            if (b == '[')
-                                countSeq += 1;
-                            else if (b == ']') {
-                                countSeq -= 1;
-                                if (countSeq == 0)
-                                    return bytes.position() - start;
+                            if (b == '\n') {
+                                return (bytes.position() - start) + 1;
                             }
+                            if (bytes.remaining() == 0)
+                                return bytes.limit() - start;
                             // do nothing
                         }
-
+                    }
                     default:
                         // TODO needs to be made much more efficient.
                         bytes();
@@ -685,10 +682,10 @@ public class TextWire implements Wire {
         public WireIn sequence(Consumer<ValueIn> reader) {
             consumeWhiteSpace();
             int code = peekCode();
-            if (code != '[')
+            if (code != '-')
                 throw new IORuntimeException("Unsupported type " + (char) code);
 
-            final long len = readLength() - 1;
+            final long len = readLength();
 
 
             final long limit = bytes.limit();
@@ -697,7 +694,7 @@ public class TextWire implements Wire {
 
             try {
                 // ensure that you can read past the end of this sequence object
-                final long newLimit = position - 1 + len;
+                final long newLimit = position + len;
                 bytes.limit(newLimit);
                 bytes.skip(1); // skip the [
                 consumeWhiteSpace();
@@ -707,11 +704,6 @@ public class TextWire implements Wire {
             }
 
             consumeWhiteSpace();
-            code = readCode();
-            if (code != ']')
-                throw new IORuntimeException("Unterminated { while reading sequence " +
-                       "bytes=" + Bytes.toDebugString(bytes)
-                );
             return TextWire.this;
         }
 
