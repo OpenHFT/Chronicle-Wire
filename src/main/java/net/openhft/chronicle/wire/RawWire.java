@@ -33,23 +33,31 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.DoubleConsumer;
-import java.util.function.IntConsumer;
-import java.util.function.LongConsumer;
+import java.util.function.*;
 
 /**
  * Created by peter.lawrey on 19/01/15.
  */
-public class RawWire implements Wire {
+public class RawWire implements Wire, InternalWireIn {
     final Bytes bytes;
-    final RawValueOut writeValue = new RawValueOut();
-    final RawValueIn readValue = new RawValueIn();
+    final RawValueOut valueOut = new RawValueOut();
+    final RawValueIn valueIn = new RawValueIn();
     String lastField = "";
     StringBuilder lastSB;
+    boolean ready;
 
     public RawWire(Bytes bytes) {
         this.bytes = bytes;
+    }
+
+    @Override
+    public boolean isReady() {
+        return ready;
+    }
+
+    @Override
+    public void setReady(boolean ready) {
+        this.ready = ready;
     }
 
     @Override
@@ -62,68 +70,38 @@ public class RawWire implements Wire {
     }
 
     @Override
-    public String toString() {
-        return bytes.toString();
-    }
-
-    @Override
-    public ValueOut write() {
-        lastField = "";
-        return writeValue;
-    }
-
-    @Override
-    public ValueOut write(WireKey key) {
-        lastField = key.name().toString();
-        return writeValue;
-    }
-
-    @Override
-    public ValueOut writeEventName(WireKey key) {
-        lastField = "";
-        bytes.writeUTFΔ(key.name());
-        return writeValue;
-    }
-
-    @Override
-    public ValueOut writeValue() {
-        lastField = "";
-        return writeValue;
-    }
-
-    @Override
     public ValueIn read() {
         lastSB = null;
-        return readValue;
+        return valueIn;
     }
 
     @Override
     public ValueIn read(WireKey key) {
         lastSB = null;
-        return readValue;
+        return valueIn;
     }
 
     @Override
     public ValueIn read(StringBuilder name) {
         lastSB = name;
-        return readValue;
+        return valueIn;
     }
 
     @Override
     public ValueIn readEventName(StringBuilder name) {
         bytes.readUTFΔ(name);
         lastSB = null;
-        return readValue;
+        return valueIn;
+    }
+
+    @Override
+    public ValueIn getValueIn() {
+        return valueIn;
     }
 
     @Override
     public boolean hasNextSequenceItem() {
         return false;
-    }
-
-    @Override
-    public Wire writeComment(CharSequence s) {
-        return RawWire.this;
     }
 
     @Override
@@ -133,11 +111,6 @@ public class RawWire implements Wire {
 
     @Override
     public boolean hasMapping() {
-        return false;
-    }
-
-    @Override
-    public boolean hasDocument() {
         return false;
     }
 
@@ -157,23 +130,57 @@ public class RawWire implements Wire {
     }
 
     @Override
+    public String toString() {
+        return bytes.toString();
+    }
+
+    @Override
+    public ValueOut write() {
+        lastField = "";
+        return valueOut;
+    }
+
+    @Override
+    public ValueOut write(WireKey key) {
+        lastField = key.name().toString();
+        return valueOut;
+    }
+
+    @Override
+    public ValueOut writeEventName(WireKey key) {
+        lastField = "";
+        bytes.writeUTFΔ(key.name());
+        return valueOut;
+    }
+
+    @Override
+    public ValueOut writeValue() {
+        lastField = "";
+        return valueOut;
+    }
+
+    @Override
+    public ValueOut getValueOut() {
+        return valueOut;
+    }
+
+    @Override
+    public Wire writeComment(CharSequence s) {
+        return RawWire.this;
+    }
+
+    @Override
+    public boolean hasDocument() {
+        return false;
+    }
+
+    @Override
     public WireOut addPadding(int paddingToAdd) {
         throw new UnsupportedOperationException();
     }
 
     class RawValueOut implements ValueOut {
         boolean nested = false;
-
-        @Override
-        public boolean isNested() {
-            return nested;
-        }
-
-        @Override
-        public WireOut nested(boolean nested) {
-            this.nested = nested;
-            return RawWire.this;
-        }
 
         @Override
         public Wire bool(Boolean flag) {
@@ -253,6 +260,18 @@ public class RawWire implements Wire {
         }
 
         @Override
+        public Wire int64(long i64) {
+            bytes.writeLong(i64);
+            return RawWire.this;
+        }
+
+        @Override
+        public WireOut int64array(long capacity) {
+            BinaryLongArrayReference.lazyWrite(bytes, capacity);
+            return RawWire.this;
+        }
+
+        @Override
         public Wire float32(float f) {
             bytes.writeFloat(f);
             return RawWire.this;
@@ -261,18 +280,6 @@ public class RawWire implements Wire {
         @Override
         public Wire float64(double d) {
             bytes.writeDouble(d);
-            return RawWire.this;
-        }
-
-        @Override
-        public Wire int64(long i64) {
-            bytes.writeLong(i64);
-            return RawWire.this;
-        }
-
-        @Override
-        public WireOut int64array(long capacity) {
-            LongArrayDirectReference.lazyWrite(bytes, capacity);
             return RawWire.this;
         }
 
@@ -309,12 +316,12 @@ public class RawWire implements Wire {
         }
 
         @Override
-        public WireOut int64forBinding(long value) {
+        public WireOut int32forBinding(int value) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public WireOut int32forBinding(int value) {
+        public WireOut int64forBinding(long value) {
             throw new UnsupportedOperationException();
         }
 
@@ -351,27 +358,20 @@ public class RawWire implements Wire {
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
             return RawWire.this;
         }
-    }
 
-    class RawValueIn implements ValueIn {
-
-        public WireIn bytes(Bytes toBytes) {
-            wireIn().bytes().withLength(readLength(), toBytes::write);
-            return wireIn();
-        }
-
-        public WireIn bytes(Consumer<byte[]> bytesConsumer) {
-            long length = readLength();
-            byte[] byteArray = new byte[Maths.toInt32(length)];
-            bytes.read(byteArray);
-            bytesConsumer.accept(byteArray);
-            return wireIn();
+        @Override
+        public boolean isNested() {
+            return nested;
         }
 
         @Override
-        public byte[] bytes() {
-            throw new UnsupportedOperationException("todo");
+        public WireOut nested(boolean nested) {
+            this.nested = nested;
+            return RawWire.this;
         }
+    }
+
+    class RawValueIn implements ValueIn {
 
         @Override
         public Wire bool(BooleanConsumer flag) {
@@ -406,6 +406,24 @@ public class RawWire implements Wire {
         public Wire int8(ByteConsumer i) {
             i.accept(bytes.readByte());
             return RawWire.this;
+        }
+
+        public WireIn bytes(Bytes toBytes) {
+            wireIn().bytes().withLength(readLength(), toBytes::write);
+            return wireIn();
+        }
+
+        public WireIn bytes(Consumer<byte[]> bytesConsumer) {
+            long length = readLength();
+            byte[] byteArray = new byte[Maths.toInt32(length)];
+            bytes.read(byteArray);
+            bytesConsumer.accept(byteArray);
+            return wireIn();
+        }
+
+        @Override
+        public byte[] bytes() {
+            throw new UnsupportedOperationException("todo");
         }
 
         @Override
@@ -455,46 +473,6 @@ public class RawWire implements Wire {
         }
 
         @Override
-        public boolean bool() {
-            return bytes.readBoolean();
-        }
-
-        @Override
-        public byte int8() {
-            return bytes.readByte();
-        }
-
-        @Override
-        public short int16() {
-            return bytes.readShort();
-        }
-
-        @Override
-        public int int32() {
-            return bytes.readInt();
-        }
-
-        @Override
-        public long int64() {
-            return bytes.readLong();
-        }
-
-        @Override
-        public double float64() {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @Override
-        public float float32() {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @Override
-        public boolean isNull() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public Wire float32(FloatConsumer v) {
             v.accept(bytes.readFloat());
             return RawWire.this;
@@ -541,21 +519,9 @@ public class RawWire implements Wire {
         }
 
         @Override
-        public WireIn int64(LongValue value, Consumer<LongValue> setter) {
-            if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
-                setter.accept(value = new LongDirectReference());
-            }
-            Byteable b = (Byteable) value;
-            long length = b.maxSize();
-            b.bytesStore(bytes, bytes.position(), length);
-            bytes.skip(length);
-            return RawWire.this;
-        }
-
-        @Override
         public WireIn int64array(LongArrayValues values, Consumer<LongArrayValues> setter) {
             if (!(values instanceof Byteable)) {
-                setter.accept(values = new LongArrayDirectReference());
+                setter.accept(values = new BinaryLongArrayReference());
             }
             Byteable b = (Byteable) values;
             long length = b.maxSize();
@@ -565,9 +531,21 @@ public class RawWire implements Wire {
         }
 
         @Override
+        public WireIn int64(LongValue value, Consumer<LongValue> setter) {
+            if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
+                setter.accept(value = new BinaryLongReference());
+            }
+            Byteable b = (Byteable) value;
+            long length = b.maxSize();
+            b.bytesStore(bytes, bytes.position(), length);
+            bytes.skip(length);
+            return RawWire.this;
+        }
+
+        @Override
         public WireIn int32(IntValue value, Consumer<IntValue> setter) {
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
-                setter.accept(value = new IntDirectReference());
+                setter.accept(value = new IntBinaryReference());
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
@@ -604,6 +582,64 @@ public class RawWire implements Wire {
             return RawWire.this;
         }
 
+        @Override
+        public <T> T applyToMarshallable(Function<WireIn, T> marshallableReader) {
+            text(lastSB);
 
+            long length = bytes.readUnsignedInt();
+            if (length >= 0) {
+                long limit = bytes.readLimit();
+                long limit2 = bytes.position() + length;
+                bytes.limit(limit2);
+                try {
+                    return marshallableReader.apply(RawWire.this);
+                } finally {
+                    bytes.limit(limit);
+                    bytes.position(limit2);
+                }
+            } else {
+                return marshallableReader.apply(RawWire.this);
+            }
+        }
+
+        @Override
+        public boolean bool() {
+            return bytes.readBoolean();
+        }
+
+        @Override
+        public byte int8() {
+            return bytes.readByte();
+        }
+
+        @Override
+        public short int16() {
+            return bytes.readShort();
+        }
+
+        @Override
+        public int int32() {
+            return bytes.readInt();
+        }
+
+        @Override
+        public long int64() {
+            return bytes.readLong();
+        }
+
+        @Override
+        public double float64() {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
+        public float float32() {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
+        public boolean isNull() {
+            throw new UnsupportedOperationException();
+        }
     }
 }

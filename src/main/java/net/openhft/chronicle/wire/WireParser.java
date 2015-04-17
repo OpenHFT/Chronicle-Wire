@@ -20,13 +20,30 @@ package net.openhft.chronicle.wire;
 import java.util.function.Consumer;
 
 public interface WireParser {
+    WireKey DEFAULT = () -> ":default:";
+
     static WireParser wireParser() {
         return new VanillaWireParser();
     }
 
-    void register(WireKey key, Consumer<ValueIn> valueInConsumer);
+    default void parse(WireIn wireIn) {
+        StringBuilder sb = Wires.SBP.acquireStringBuilder();
+        ValueIn valueIn = wireIn.read(sb);
+        Consumer<ValueIn> consumer = lookup(sb);
+        if (consumer == null)
+            consumer = lookup(DEFAULT.name());
+        if (consumer == null)
+            throw new IllegalArgumentException("Unhandled event type " + sb);
+        consumer.accept(valueIn);
+    }
 
     Consumer<ValueIn> lookup(CharSequence name);
+
+    default void setDefault(Consumer<ValueIn> valueInConsumer) {
+        register(DEFAULT, valueInConsumer);
+    }
+
+    void register(WireKey key, Consumer<ValueIn> valueInConsumer);
 
     Consumer<ValueIn> lookup(int number);
 }

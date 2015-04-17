@@ -27,6 +27,8 @@ import java.util.function.Consumer;
  * 12/01/15.
  */
 public interface WireIn {
+    boolean isReady();
+    
     void copyTo(WireOut wire);
 
     /**
@@ -40,16 +42,21 @@ public interface WireIn {
     ValueIn read(WireKey key);
 
     /**
-     * Read the field if present, or empty string if not present.
-     */
-    ValueIn read(StringBuilder name);
-
-    /**
      * Read a field, or string which is always written, even for formats which might drop the field such as RAW.
      */
     default ValueIn readEventName(StringBuilder name) {
         return read(name);
     }
+
+    /**
+     * Read the field if present, or empty string if not present.
+     */
+    ValueIn read(StringBuilder name);
+
+    /**
+     * Obtain the value in (for internal use)
+     */
+    ValueIn getValueIn();
 
     boolean hasNextSequenceItem();
 

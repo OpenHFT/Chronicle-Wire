@@ -22,14 +22,14 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class LongArrayTextReferenceTest {
+public class TextLongArrayReferenceTest {
     @Test
     public void getSetValues() throws Exception {
         int length = 128 * 22 + 47;
         try (NativeBytes bytes = NativeBytes.nativeBytes(length)) {
-            LongArrayTextReference.write(bytes, 128);
+            TextLongArrayReference.write(bytes, 128);
             bytes.flip();
-            LongArrayTextReference array = new LongArrayTextReference();
+            TextLongArrayReference array = new TextLongArrayReference();
             array.bytesStore(bytes, 0, length);
 
             assertEquals(128, array.getCapacity());

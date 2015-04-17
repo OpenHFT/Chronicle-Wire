@@ -31,10 +31,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.DoubleConsumer;
-import java.util.function.IntConsumer;
-import java.util.function.LongConsumer;
+import java.util.function.*;
 
 /**
  * Created by peter.lawrey on 14/01/15.
@@ -45,8 +42,6 @@ public interface ValueIn {
      */
     WireIn bool(BooleanConsumer flag);
 
-    WireIn text(StringBuilder s);
-
     WireIn text(Consumer<String> s);
 
     default String text() {
@@ -55,7 +50,7 @@ public interface ValueIn {
         return sb.toString();
     }
 
-    WireIn type(StringBuilder s);
+    WireIn text(StringBuilder s);
 
     WireIn int8(ByteConsumer i);
 
@@ -108,7 +103,7 @@ public interface ValueIn {
 
     WireIn sequence(Consumer<ValueIn> reader);
 
-    WireIn marshallable(ReadMarshallable object);
+    <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
 
     default Marshallable typedMarshallable() {
         try {
@@ -121,6 +116,10 @@ public interface ValueIn {
             throw new IORuntimeException(e);
         }
     }
+
+    WireIn type(StringBuilder s);
+
+    WireIn marshallable(ReadMarshallable object);
 
     boolean bool();
 

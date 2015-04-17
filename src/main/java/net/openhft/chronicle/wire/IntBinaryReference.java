@@ -21,9 +21,35 @@ import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.IntValue;
 
-public class IntDirectReference implements IntValue, Byteable {
+public class IntBinaryReference implements IntValue, Byteable {
     private BytesStore bytes;
     private long offset;
+
+    @Override
+    public void bytesStore(BytesStore bytes, long offset, long length) {
+        if (length != maxSize()) throw new IllegalArgumentException();
+        this.bytes = bytes;
+        this.offset = offset;
+    }
+
+    @Override
+    public BytesStore bytesStore() {
+        return bytes;
+    }
+
+    @Override
+    public long offset() {
+        return offset;
+    }
+
+    @Override
+    public long maxSize() {
+        return 4;
+    }
+
+    public String toString() {
+        return "value: " + getValue();
+    }
 
     @Override
     public int getValue() {
@@ -59,28 +85,4 @@ public class IntDirectReference implements IntValue, Byteable {
     public boolean compareAndSwapValue(int expected, int value) {
         return bytes.compareAndSwapLong(offset, expected, value);
     }
-
-    @Override
-    public void bytesStore(BytesStore bytes, long offset, long length) {
-        if (length != maxSize()) throw new IllegalArgumentException();
-        this.bytes = bytes;
-        this.offset = offset;
-    }
-
-    @Override
-    public BytesStore bytesStore() {
-        return bytes;
-    }
-
-    @Override
-    public long offset() {
-        return offset;
-    }
-
-    @Override
-    public long maxSize() {
-        return 4;
-    }
-
-    public String toString() { return "value: "+getValue(); }
 }

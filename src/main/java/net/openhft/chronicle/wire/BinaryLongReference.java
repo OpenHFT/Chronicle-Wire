@@ -21,9 +21,35 @@ import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.LongValue;
 
-public class LongDirectReference implements LongValue, Byteable {
+public class BinaryLongReference implements LongValue, Byteable {
     private BytesStore bytes;
     private long offset;
+
+    @Override
+    public void bytesStore(BytesStore bytes, long offset, long length) {
+        if (length != maxSize()) throw new IllegalArgumentException();
+        this.bytes = bytes;
+        this.offset = offset;
+    }
+
+    @Override
+    public BytesStore bytesStore() {
+        return bytes;
+    }
+
+    @Override
+    public long offset() {
+        return offset;
+    }
+
+    @Override
+    public long maxSize() {
+        return 8;
+    }
+
+    public String toString() {
+        return "value: " + getValue();
+    }
 
     @Override
     public long getValue() {
@@ -59,28 +85,4 @@ public class LongDirectReference implements LongValue, Byteable {
     public boolean compareAndSwapValue(long expected, long value) {
         return bytes.compareAndSwapLong(offset, expected, value);
     }
-
-    @Override
-    public void bytesStore(BytesStore bytes, long offset, long length) {
-        if (length != maxSize()) throw new IllegalArgumentException();
-        this.bytes = bytes;
-        this.offset = offset;
-    }
-
-    @Override
-    public BytesStore bytesStore() {
-        return bytes;
-    }
-
-    @Override
-    public long offset() {
-        return offset;
-    }
-
-    @Override
-    public long maxSize() {
-        return 8;
-    }
-
-    public String toString() { return "value: "+getValue(); }
 }

@@ -25,7 +25,7 @@ import net.openhft.chronicle.core.values.LongValue;
 
 import java.util.function.Supplier;
 
-public class LongTextReference implements LongValue, Byteable {
+public class TextLongReference implements LongValue, Byteable {
     public static final byte[] template = "!!atomic { locked: false, value: 00000000000000000000 }".getBytes();
     public static final int FALSE = BytesUtil.asInt("fals");
     public static final int TRUE = BytesUtil.asInt(" tru");
@@ -35,6 +35,12 @@ public class LongTextReference implements LongValue, Byteable {
     private static final int DIGITS = 20;
     private BytesStore bytes;
     private long offset;
+
+    public static void write(Bytes bytes, long value) {
+        long position = bytes.position();
+        bytes.write(template);
+        bytes.append(position + VALUE, value, DIGITS);
+    }
 
     <T> T withLock(Supplier<T> call) {
         long valueOffset = offset + LOCKED;
@@ -51,8 +57,22 @@ public class LongTextReference implements LongValue, Byteable {
     }
 
     @Override
+    public void bytesStore(BytesStore bytes, long offset, long length) {
+        if (length != template.length) throw new IllegalArgumentException();
+        this.bytes = bytes;
+        this.offset = offset;
+        if (bytes.readLong(offset) == UNINITIALIZED)
+            bytes.write(offset, template);
+    }
+
+    @Override
     public long getValue() {
         return withLock(() -> bytes.parseLong(offset + VALUE));
+    }
+
+    @Override
+    public BytesStore bytesStore() {
+        return bytes;
     }
 
     @Override
@@ -61,13 +81,27 @@ public class LongTextReference implements LongValue, Byteable {
     }
 
     @Override
+    public long offset() {
+        return offset;
+    }
+
+    @Override
     public long getVolatileValue() {
         return getValue();
     }
 
     @Override
+    public long maxSize() {
+        return template.length;
+    }
+
+    @Override
     public void setOrderedValue(long value) {
         setValue(value);
+    }
+
+    public String toString() {
+        return "value: " + getValue();
     }
 
     @Override
@@ -95,36 +129,5 @@ public class LongTextReference implements LongValue, Byteable {
         });
     }
 
-    @Override
-    public void bytesStore(BytesStore bytes, long offset, long length) {
-        if (length != template.length) throw new IllegalArgumentException();
-        this.bytes = bytes;
-        this.offset = offset;
-        if (bytes.readLong(offset) == UNINITIALIZED)
-            bytes.write(offset, template);
-    }
-
-    @Override
-    public BytesStore bytesStore() {
-        return bytes;
-    }
-
-    @Override
-    public long offset() {
-        return offset;
-    }
-
-    @Override
-    public long maxSize() {
-        return template.length;
-    }
-
-    public static void write(Bytes bytes, long value) {
-        long position = bytes.position();
-        bytes.write(template);
-        bytes.append(position+VALUE, value, DIGITS);
-    }
-
-    public String toString() { return "value: "+getValue(); }
 
 }

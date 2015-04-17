@@ -49,19 +49,11 @@ public enum Wires {
         return sb;
     }
 
-
-    private static Consumer<WireIn> emptyMetaDataConsumer = new Consumer<WireIn>() {
-        @Override
-        public void accept(WireIn wireIn) {
-            // skip the meta data
-        }
-    };
-
     public static void writeData(WireOut wireOut, boolean metaData, Consumer<WireOut> writer) {
         Bytes bytes = wireOut.bytes();
         long position = bytes.position();
         int metaDataBit = metaData ? META_DATA : 0;
-        bytes.writeInt(metaDataBit | NOT_READY | UNKNOWN_LENGTH);
+        bytes.writeOrderedInt(metaDataBit | NOT_READY | UNKNOWN_LENGTH);
         writer.accept(wireOut);
         int length = metaDataBit | toIntU30(bytes.position() - position - 4, "Document length %,d out of 30-bit int range.");
         bytes.writeOrderedInt(position, length);
@@ -100,11 +92,13 @@ public enum Wires {
             if (!isKnownLength(header))
                 return read;
             bytes.skip(4);
+            final boolean ready = isReady(header);
             final int len = lengthOf(header);
             if (isData(header)) {
                 if (dataConsumer == null) {
                     return false;
                 } else {
+                    ((InternalWireIn) wireIn).setReady(ready);
                     wireIn.bytes().withLength(len, b -> dataConsumer.accept(wireIn));
                     return true;
                 }
@@ -168,6 +162,35 @@ public enum Wires {
 
     public static boolean isData(long len) {
         return (len & META_DATA) == 0;
+    }
+
+    @NotNull
+    public static String fromSizePrefixedBlobs(Bytes bytes, long position, long length) {
+        StringBuilder sb = new StringBuilder();
+
+        final long limit0 = bytes.limit();
+        final long position0 = bytes.position();
+        try {
+            bytes.position(position);
+            bytes.limit(position + length);
+            while (bytes.remaining() >= 4) {
+                long header = bytes.readUnsignedInt();
+                int len = lengthOf(header);
+                String type = isData(header)
+                        ? isReady(header) ? "!!data" : "!!not-ready-data!"
+                        : isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
+                sb.append("--- ").append(type).append("\n");
+                for (int i = 0; i < len; i++)
+                    sb.append((char) bytes.readUnsignedByte());
+                if (sb.charAt(sb.length() - 1) != '\n')
+                    sb.append('\n');
+            }
+
+            return sb.toString();
+        } finally {
+            bytes.limit(limit0);
+            bytes.position(position0);
+        }
     }
 
     public static boolean isKnownLength(long len) {

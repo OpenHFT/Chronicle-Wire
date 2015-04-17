@@ -22,15 +22,15 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class LongArrayDirectReferenceTest {
+public class BinaryLongArrayReferenceTest {
 
     @Test
     public void getSetValues() {
         int length = 1024 + 8;
         try (NativeBytes bytes = NativeBytes.nativeBytes(length + 8)) {
-            LongArrayDirectReference.write(bytes, 128);
+            BinaryLongArrayReference.write(bytes, 128);
 
-            LongArrayDirectReference array = new LongArrayDirectReference();
+            BinaryLongArrayReference array = new BinaryLongArrayReference();
             array.bytesStore(bytes, 0, length);
 
             assertEquals(128, array.getCapacity());

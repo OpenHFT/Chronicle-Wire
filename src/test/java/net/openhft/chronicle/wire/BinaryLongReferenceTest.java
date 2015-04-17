@@ -19,7 +19,7 @@ package net.openhft.chronicle.wire;
 
 import junit.framework.TestCase;
 
-public class LongDirectReferenceTest extends TestCase {
+public class BinaryLongReferenceTest extends TestCase {
 
     public void testBytes() throws Exception {
 

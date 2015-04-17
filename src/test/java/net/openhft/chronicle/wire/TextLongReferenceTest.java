@@ -21,17 +21,17 @@ import net.openhft.chronicle.bytes.NativeBytesStore;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class LongTextReferenceTest {
+public class TextLongReferenceTest {
 
     @Test
     public void testSetValue() throws Exception {
-        final LongTextReference value = new LongTextReference();
+        final TextLongReference value = new TextLongReference();
         try (NativeBytesStore bytesStore = NativeBytesStore.nativeStoreWithFixedCapacity(value.maxSize())) {
             value.bytesStore(bytesStore, 0, value.maxSize());
             int expected = 10;
             value.setValue(expected);
 
-            long l = bytesStore.parseLong(LongTextReference.VALUE);
+            long l = bytesStore.parseLong(TextLongReference.VALUE);
             System.out.println(l);
 
 //        System.out.println(Bytes.toHex(bytes,33, bytes.limit() - 33));

@@ -34,11 +34,6 @@ public interface WireOut {
     ValueOut write();
 
     /**
-     * Write a key for wires that support fields.
-     */
-    ValueOut write(WireKey key);
-
-    /**
      * Always write a key.  For RAW types, this label with be in text.  To read this, use readEventName()
      */
     default ValueOut writeEventName(WireKey key) {
@@ -46,9 +41,19 @@ public interface WireOut {
     }
 
     /**
+     * Write a key for wires that support fields.
+     */
+    ValueOut write(WireKey key);
+
+    /**
      * write a field less value.
      */
     ValueOut writeValue();
+
+    /**
+     * Obtain the value out (for internal use)
+     */
+    ValueOut getValueOut();
 
     /*
      * read and write comments.
