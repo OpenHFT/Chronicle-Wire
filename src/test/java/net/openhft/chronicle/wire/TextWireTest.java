@@ -39,15 +39,6 @@ public class TextWireTest {
 
     Bytes bytes;
 
-    private TextWire createWire() {
-        bytes = nativeBytes();
-        return new TextWire(bytes);
-    }
-
-    enum BWKey implements WireKey {
-        field1, field2, field3
-    }
-
     @Test
     public void testWrite() {
         Wire wire = createWire();
@@ -56,6 +47,11 @@ public class TextWireTest {
         wire.write();
         wire.flip();
         assertEquals("\"\": \"\": \"\": ", wire.toString());
+    }
+
+    private TextWire createWire() {
+        bytes = nativeBytes();
+        return new TextWire(bytes);
     }
 
     @Test
@@ -124,7 +120,6 @@ public class TextWireTest {
         wire.flip();
         assertEquals("field1: field2: field3:", wire.toString());
     }
-
 
     @Test
     public void testWrite2() {
@@ -452,7 +447,6 @@ public class TextWireTest {
         wire.read();
     }
 
-
     @Test
     public void testBool() {
         Wire wire = createWire();
@@ -481,7 +475,6 @@ public class TextWireTest {
                 .read().float32(t -> assertEquals(Float.NEGATIVE_INFINITY, t, 0.0F))
                 .read().float32(t -> assertEquals(123456.0f, t, 0.0F));
     }
-
 
     @Test
     public void testTime() {
@@ -549,9 +542,9 @@ public class TextWireTest {
         wire.flip();
         System.out.println(bytes.toString());
         NativeBytes allBytes2 = nativeBytes();
-        wire.read().bytes(b -> assertEquals(0, b.length))
-                .read().bytes(b -> assertArrayEquals("Hello".getBytes(), b))
-                .read().bytes(b -> assertArrayEquals("quotable, text".getBytes(), b))
+        wire.read().bytes(wi -> assertEquals(0, wi.bytes().remaining()))
+                .read().bytes(wi -> assertEquals("Hello", wi.bytes().toString()))
+                .read().bytes(wi -> assertEquals("quotable, text", wi.bytes().toString()))
                 .read().bytes(allBytes2);
         allBytes2.flip();
         assertEquals(Bytes.wrap(allBytes), allBytes2);
@@ -587,7 +580,6 @@ public class TextWireTest {
         assertEquals(mt2, mtB);
     }
 
-
     @Test
     public void testWriteMarshallableAndFieldLenghth() {
         Wire wire = createWire();
@@ -609,5 +601,10 @@ public class TextWireTest {
         long len = read.readLength();
 
         assertEquals(fieldLen, len);
+    }
+
+
+    enum BWKey implements WireKey {
+        field1, field2, field3
     }
 }

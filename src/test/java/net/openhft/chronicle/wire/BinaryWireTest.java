@@ -34,7 +34,8 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 @RunWith(value = Parameterized.class)
 public class BinaryWireTest {
@@ -43,6 +44,7 @@ public class BinaryWireTest {
     final boolean fixed;
     final boolean numericField;
     final boolean fieldLess;
+    Bytes bytes = nativeBytes();
 
     public BinaryWireTest(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         this.testId = testId;
@@ -63,28 +65,6 @@ public class BinaryWireTest {
         );
     }
 
-    Bytes bytes =  nativeBytes();
-
-    private BinaryWire createWire() {
-        bytes.clear();
-        return new BinaryWire(bytes, fixed, numericField, fieldLess);
-    }
-
-
-    enum BWKey implements WireKey {
-        field1(1), field2(2), field3(3);
-        private final int code;
-
-        BWKey(int code) {
-            this.code = code;
-        }
-
-        @Override
-        public int code() {
-            return code;
-        }
-    }
-
     @Test
     public void testWrite() {
         Wire wire = createWire();
@@ -100,6 +80,11 @@ public class BinaryWireTest {
                 "[pos: 0, lim: 0, cap: 1TiB ] ");
 
         assertEquals(fieldLess ? "" : "\"\": \"\": \"\":", TextWire.asText(wire));
+    }
+
+    private BinaryWire createWire() {
+        bytes.clear();
+        return new BinaryWire(bytes, fixed, numericField, fieldLess);
     }
 
     private void checkWire(Wire wire, String... expected) {
@@ -123,6 +108,16 @@ public class BinaryWireTest {
                 "field1: field2: field3:",
                 "1: 2: 3:",
                 "");
+    }
+
+    private void checkAsText(Wire wire, String textFieldExcepted, String numberFieldExpected, String fieldLessExpected) {
+        String text = TextWire.asText(wire);
+        if (fieldLess)
+            assertEquals(fieldLessExpected, text);
+        else if (numericField)
+            assertEquals(numberFieldExpected, text);
+        else
+            assertEquals(textFieldExcepted, text);
     }
 
     @Test
@@ -243,6 +238,19 @@ public class BinaryWireTest {
 
     }
 
+    private void checkAsText123(Wire wire) {
+        checkAsText(wire, "\"\": 1\n" +
+                        "field1: 2\n" +
+                        "Test: 3\n",
+                "\"\": 1\n" +
+                        "1: 2\n" +
+                        "2603186: 3\n",
+                "1\n" +
+                        "2\n" +
+                        "3\n"
+        );
+    }
+
     @Test
     public void int16() {
         Wire wire = createWire();
@@ -325,29 +333,6 @@ public class BinaryWireTest {
         // check it's safe to read too much.
         wire.read();
 
-    }
-
-    private void checkAsText123(Wire wire) {
-        checkAsText(wire, "\"\": 1\n" +
-                        "field1: 2\n" +
-                        "Test: 3\n",
-                "\"\": 1\n" +
-                        "1: 2\n" +
-                        "2603186: 3\n",
-                "1\n" +
-                        "2\n" +
-                        "3\n"
-        );
-    }
-
-    private void checkAsText(Wire wire, String textFieldExcepted, String numberFieldExpected, String fieldLessExpected) {
-        String text = TextWire.asText(wire);
-        if (fieldLess)
-            assertEquals(fieldLessExpected, text);
-        else if (numericField)
-            assertEquals(numberFieldExpected, text);
-        else
-            assertEquals(textFieldExcepted, text);
     }
 
     @Test
@@ -535,8 +520,6 @@ public class BinaryWireTest {
         wire.read();
     }
 
-
-
     @Ignore("todo fix :currently using NoBytesStore so will fail with UnsupportedOperationException")
     @Test
     public void testBytes() {
@@ -551,15 +534,13 @@ public class BinaryWireTest {
         wire.flip();
         System.out.println(bytes.toDebugString());
         NativeBytes allBytes2 = nativeBytes();
-        wire.read()
-                .bytes(b -> assertEquals(0, b.length))
-                .read().bytes(b -> assertArrayEquals("Hello".getBytes(), b))
-                .read().bytes(b -> assertArrayEquals("quotable, text".getBytes(), b))
+        wire.read().bytes(wi -> assertEquals(0, wi.bytes().remaining()))
+                .read().bytes(wi -> assertEquals("Hello", wi.bytes().toString()))
+                .read().bytes(wi -> assertEquals("quotable, text", wi.bytes().toString()))
                 .read().bytes(allBytes2);
         allBytes2.flip();
         assertEquals(Bytes.wrap(allBytes), allBytes2);
     }
-
 
     @Test
     public void testWriteMarshallable() {
@@ -595,6 +576,21 @@ public class BinaryWireTest {
 
         wire.read(() -> "B").marshallable(mt2);
         assertEquals(mt2, mtB);
+    }
+
+
+    enum BWKey implements WireKey {
+        field1(1), field2(2), field3(3);
+        private final int code;
+
+        BWKey(int code) {
+            this.code = code;
+        }
+
+        @Override
+        public int code() {
+            return code;
+        }
     }
 
 }

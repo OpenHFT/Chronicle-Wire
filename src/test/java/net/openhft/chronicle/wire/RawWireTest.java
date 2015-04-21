@@ -34,23 +34,12 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class RawWireTest {
 
     Bytes bytes = nativeBytes();
-
-    private RawWire createWire() {
-        bytes.clear();
-        return new RawWire(bytes);
-    }
-
-    enum BWKey implements WireKey {
-        field1, field2, field3;
-
-    }
 
     @Test
     public void testWrite() {
@@ -60,6 +49,11 @@ public class RawWireTest {
         wire.write();
         wire.flip();
         assertEquals("", wire.toString());
+    }
+
+    private RawWire createWire() {
+        bytes.clear();
+        return new RawWire(bytes);
     }
 
     @Test
@@ -384,7 +378,6 @@ public class RawWireTest {
         wire.read();
     }
 
-
     @Test
     public void testBool() {
         Wire wire = createWire();
@@ -412,7 +405,6 @@ public class RawWireTest {
                 .read().float32(t -> assertEquals(Float.NEGATIVE_INFINITY, t, 0.0F))
                 .read().float32(t -> assertEquals(123456.0f, t, 0.0F));
     }
-
 
     @Test
     public void testTime() {
@@ -481,9 +473,9 @@ public class RawWireTest {
         wire.flip();
         System.out.println(bytes.toDebugString());
         NativeBytes allBytes2 = nativeBytes();
-        wire.read().bytes(b -> assertEquals(0, b.length))
-                .read().bytes(b -> assertArrayEquals("Hello".getBytes(), b))
-                .read().bytes(b -> assertArrayEquals("quotable, text".getBytes(), b))
+        wire.read().bytes(wi -> assertEquals(0, wi.bytes().remaining()))
+                .read().bytes(wi -> assertEquals("Hello", wi.bytes().toString()))
+                .read().bytes(wi -> assertEquals("quotable, text", wi.bytes().toString()))
                 .read().bytes(allBytes2);
         allBytes2.flip();
         assertEquals(Bytes.wrap(allBytes), allBytes2);
@@ -519,5 +511,10 @@ public class RawWireTest {
 
         wire.read(() -> "B").marshallable(mt2);
         assertEquals(mt2, mtB);
+    }
+
+    enum BWKey implements WireKey {
+        field1, field2, field3;
+
     }
 }

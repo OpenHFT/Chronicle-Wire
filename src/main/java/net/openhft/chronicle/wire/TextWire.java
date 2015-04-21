@@ -472,15 +472,6 @@ public class TextWire implements Wire, InternalWireIn {
             return TextWire.this;
         }
 
-        public void separator() {
-            if (isNested()) {
-                sep = ", ";
-            } else {
-                bytes.append(END_FIELD);
-                sep = "";
-            }
-        }
-
         @Override
         public WireOut int32forBinding(int value) {
             bytes.append(sep);
@@ -542,6 +533,15 @@ public class TextWire implements Wire, InternalWireIn {
             this.nested = nested;
             return TextWire.this;
         }
+
+        public void separator() {
+            if (isNested()) {
+                sep = ", ";
+            } else {
+                bytes.append(END_FIELD);
+                sep = "";
+            }
+        }
     }
 
     class TextValueIn implements ValueIn {
@@ -558,6 +558,21 @@ public class TextWire implements Wire, InternalWireIn {
             else
                 throw new UnsupportedOperationException();
             return TextWire.this;
+        }
+
+        @Override
+        public WireIn text(Consumer<String> s) {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            text(sb);
+            s.accept(sb.toString());
+            return TextWire.this;
+        }
+
+        @Override
+        public String text() {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            text(sb);
+            return sb.toString();
         }
 
         @Override
@@ -587,31 +602,6 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireIn text(Consumer<String> s) {
-            StringBuilder sb = Wires.acquireStringBuilder();
-            text(sb);
-            s.accept(sb.toString());
-            return TextWire.this;
-        }
-
-        @Override
-        public String text() {
-            StringBuilder sb = Wires.acquireStringBuilder();
-            text(sb);
-            return sb.toString();
-        }
-
-        @Override
-        public Wire type(StringBuilder s) {
-            int code = readCode();
-            if (code != '!') {
-                throw new UnsupportedOperationException(stringForCode(code));
-            }
-            bytes.parseUTF(s, StopCharTesters.SPACE_STOP);
-            return TextWire.this;
-        }
-
-        @Override
         public Wire int8(ByteConsumer i) {
             i.accept((byte) bytes.parseLong());
             return TextWire.this;
@@ -619,10 +609,10 @@ public class TextWire implements Wire, InternalWireIn {
 
         @Override
         public WireIn bytes(Bytes toBytes) {
-            return bytes(toBytes::write);
+            return bytes(wi -> toBytes.write(wi.bytes()));
         }
 
-        public WireIn bytes(Consumer<byte[]> bytesConsumer) {
+        public WireIn bytes(Consumer<WireIn> bytesConsumer) {
             // TODO needs to be made much more efficient.
             StringBuilder sb = Wires.acquireStringBuilder();
             if (peekCode() == '!') {
@@ -632,13 +622,13 @@ public class TextWire implements Wire, InternalWireIn {
                     sb.setLength(0);
                     bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                     byte[] decode = Base64.getDecoder().decode(sb.toString());
-                    bytesConsumer.accept(decode);
+                    bytesConsumer.accept(new TextWire(Bytes.wrap(decode)));
                 } else {
                     throw new IORuntimeException("Unsupported type " + str);
                 }
             } else {
                 text(sb);
-                bytesConsumer.accept(sb.toString().getBytes());
+                bytesConsumer.accept(new TextWire(Bytes.wrap(sb.toString().getBytes())));
             }
             return TextWire.this;
         }
@@ -868,6 +858,49 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         @Override
+        public <T> T applyToMarshallable(Function<WireIn, T> marshallableReader) {
+            consumeWhiteSpace();
+            int code = peekCode();
+            if (code != '{')
+                throw new IORuntimeException("Unsupported type " + (char) code);
+
+            final long len = readLength() - 1;
+
+
+            final long limit = bytes.limit();
+            final long position = bytes.position();
+
+
+            try {
+                // ensure that you can read past the end of this marshable object
+                final long newLimit = position - 1 + len;
+                bytes.limit(newLimit);
+                bytes.skip(1); // skip the {
+                consumeWhiteSpace();
+                return marshallableReader.apply(TextWire.this);
+            } finally {
+                bytes.limit(limit);
+
+                consumeWhiteSpace();
+                code = readCode();
+                if (code != '}')
+                    throw new IORuntimeException("Unterminated { while reading marshallable "
+                            + "bytes=" + Bytes.toDebugString(bytes)
+                    );
+            }
+        }
+
+        @Override
+        public Wire type(StringBuilder s) {
+            int code = readCode();
+            if (code != '!') {
+                throw new UnsupportedOperationException(stringForCode(code));
+            }
+            bytes.parseUTF(s, StopCharTesters.SPACE_STOP);
+            return TextWire.this;
+        }
+
+        @Override
         public WireIn marshallable(ReadMarshallable object) {
             consumeWhiteSpace();
             int code = peekCode();
@@ -899,39 +932,6 @@ public class TextWire implements Wire, InternalWireIn {
                         object + "bytes=" + Bytes.toDebugString(bytes)
                 );
             return TextWire.this;
-        }
-
-        @Override
-        public <T> T applyToMarshallable(Function<WireIn, T> marshallableReader) {
-            consumeWhiteSpace();
-            int code = peekCode();
-            if (code != '{')
-                throw new IORuntimeException("Unsupported type " + (char) code);
-
-            final long len = readLength() - 1;
-
-
-            final long limit = bytes.limit();
-            final long position = bytes.position();
-
-
-            try {
-                // ensure that you can read past the end of this marshable object
-                final long newLimit = position - 1 + len;
-                bytes.limit(newLimit);
-                bytes.skip(1); // skip the {
-                consumeWhiteSpace();
-                return marshallableReader.apply(TextWire.this);
-            } finally {
-                bytes.limit(limit);
-
-                consumeWhiteSpace();
-                code = readCode();
-                if (code != '}')
-                    throw new IORuntimeException("Unterminated { while reading marshallable "
-                            + "bytes=" + Bytes.toDebugString(bytes)
-                    );
-            }
         }
 
         @Override
