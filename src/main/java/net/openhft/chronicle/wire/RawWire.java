@@ -29,6 +29,7 @@ import net.openhft.chronicle.wire.util.ByteConsumer;
 import net.openhft.chronicle.wire.util.FloatConsumer;
 import net.openhft.chronicle.wire.util.ShortConsumer;
 
+import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -82,15 +83,15 @@ public class RawWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public ValueIn read(StringBuilder name) {
-        lastSB = name;
+    public ValueIn readEventName(StringBuilder name) {
+        bytes.readUTFΔ(name);
+        lastSB = null;
         return valueIn;
     }
 
     @Override
-    public ValueIn readEventName(StringBuilder name) {
-        bytes.readUTFΔ(name);
-        lastSB = null;
+    public ValueIn read(StringBuilder name) {
+        lastSB = name;
         return valueIn;
     }
 
@@ -141,15 +142,15 @@ public class RawWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public ValueOut write(WireKey key) {
-        lastField = key.name().toString();
+    public ValueOut writeEventName(WireKey key) {
+        lastField = "";
+        bytes.writeUTFΔ(key.name());
         return valueOut;
     }
 
     @Override
-    public ValueOut writeEventName(WireKey key) {
-        lastField = "";
-        bytes.writeUTFΔ(key.name());
+    public ValueOut write(WireKey key) {
+        lastField = key.name().toString();
         return valueOut;
     }
 
@@ -386,18 +387,12 @@ public class RawWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire text(StringBuilder s) {
-            bytes.readUTFΔ(s);
-            return RawWire.this;
-        }
-
-        @Override
         public WireIn text(Consumer<String> s) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public Wire type(StringBuilder s) {
+        public Wire text(StringBuilder s) {
             bytes.readUTFΔ(s);
             return RawWire.this;
         }
@@ -413,11 +408,20 @@ public class RawWire implements Wire, InternalWireIn {
             return wireIn();
         }
 
-        public WireIn bytes(Consumer<byte[]> bytesConsumer) {
+        public WireIn bytes(Consumer<WireIn> bytesConsumer) {
             long length = readLength();
-            byte[] byteArray = new byte[Maths.toInt32(length)];
-            bytes.read(byteArray);
-            bytesConsumer.accept(byteArray);
+
+            if (length > bytes.remaining())
+                throw new BufferUnderflowException();
+            long limit0 = bytes.limit();
+            long limit = bytes.position() + length;
+            try {
+                bytes.limit(limit);
+                bytesConsumer.accept(wireIn());
+            } finally {
+                bytes.limit(limit0);
+                bytes.position(limit);
+            }
             return wireIn();
         }
 
@@ -562,6 +566,32 @@ public class RawWire implements Wire, InternalWireIn {
         }
 
         @Override
+        public <T> T applyToMarshallable(Function<WireIn, T> marshallableReader) {
+            text(lastSB);
+
+            long length = bytes.readUnsignedInt();
+            if (length >= 0) {
+                long limit = bytes.readLimit();
+                long limit2 = bytes.position() + length;
+                bytes.limit(limit2);
+                try {
+                    return marshallableReader.apply(RawWire.this);
+                } finally {
+                    bytes.limit(limit);
+                    bytes.position(limit2);
+                }
+            } else {
+                return marshallableReader.apply(RawWire.this);
+            }
+        }
+
+        @Override
+        public Wire type(StringBuilder s) {
+            bytes.readUTFΔ(s);
+            return RawWire.this;
+        }
+
+        @Override
         public WireIn marshallable(ReadMarshallable object) {
             text(lastSB);
 
@@ -580,26 +610,6 @@ public class RawWire implements Wire, InternalWireIn {
                 object.readMarshallable(RawWire.this);
             }
             return RawWire.this;
-        }
-
-        @Override
-        public <T> T applyToMarshallable(Function<WireIn, T> marshallableReader) {
-            text(lastSB);
-
-            long length = bytes.readUnsignedInt();
-            if (length >= 0) {
-                long limit = bytes.readLimit();
-                long limit2 = bytes.position() + length;
-                bytes.limit(limit2);
-                try {
-                    return marshallableReader.apply(RawWire.this);
-                } finally {
-                    bytes.limit(limit);
-                    bytes.position(limit2);
-                }
-            } else {
-                return marshallableReader.apply(RawWire.this);
-            }
         }
 
         @Override

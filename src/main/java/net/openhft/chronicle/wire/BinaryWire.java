@@ -30,6 +30,7 @@ import net.openhft.chronicle.wire.util.ByteConsumer;
 import net.openhft.chronicle.wire.util.FloatConsumer;
 import net.openhft.chronicle.wire.util.ShortConsumer;
 
+import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -161,13 +162,13 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public ValueIn read(StringBuilder name) {
+    public ValueIn readEventName(StringBuilder name) {
         readField(name, ANY_CODE_MATCH);
         return valueIn;
     }
 
     @Override
-    public ValueIn readEventName(StringBuilder name) {
+    public ValueIn read(StringBuilder name) {
         readField(name, ANY_CODE_MATCH);
         return valueIn;
     }
@@ -862,6 +863,12 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @Override
+        public WireOut int64(long i64) {
+            writeInt(i64);
+            return BinaryWire.this;
+        }
+
+        @Override
         public WireOut float32(float f) {
             writeFloat(f);
             return BinaryWire.this;
@@ -885,12 +892,6 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public WireOut float64(double d) {
             writeFloat(d);
-            return BinaryWire.this;
-        }
-
-        @Override
-        public WireOut int64(long i64) {
-            writeInt(i64);
             return BinaryWire.this;
         }
     }
@@ -965,14 +966,23 @@ public class BinaryWire implements Wire, InternalWireIn {
             return wireIn();
         }
 
-        public WireIn bytes(Consumer<byte[]> bytesConsumer) {
+        public WireIn bytes(Consumer<WireIn> bytesConsumer) {
             long length = readLength();
             int code = readCode();
             if (code != U8_ARRAY)
                 cantRead(code);
-            byte[] byteArray = new byte[Maths.toInt32(length - 1)];
-            bytes.read(byteArray);
-            bytesConsumer.accept(byteArray);
+
+            if (length > bytes.remaining())
+                throw new BufferUnderflowException();
+            long limit0 = bytes.limit();
+            long limit = bytes.position() + length;
+            try {
+                bytes.limit(limit);
+                bytesConsumer.accept(wireIn());
+            } finally {
+                bytes.limit(limit0);
+                bytes.position(limit);
+            }
             return wireIn();
         }
 
