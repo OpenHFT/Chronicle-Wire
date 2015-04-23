@@ -30,6 +30,7 @@ import net.openhft.chronicle.wire.util.ShortConsumer;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
 
@@ -136,4 +137,6 @@ public interface ValueIn {
     float float32();
 
     boolean isNull();
+
+    void map(Consumer<Map> map);
 }

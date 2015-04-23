@@ -34,6 +34,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Base64;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
 
@@ -524,6 +525,11 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         @Override
+        public WireOut map(Map map) {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
         public boolean isNested() {
             return nested;
         }
@@ -934,6 +940,29 @@ public class TextWire implements Wire, InternalWireIn {
             return TextWire.this;
         }
 
+
+        @Override
+        public void map(Consumer<Map> map) {
+
+            // TODO needs to be made much more efficient.
+            StringBuilder sb = Wires.acquireStringBuilder();
+            if (peekCode() == '!') {
+                bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                String str = sb.toString();
+                if (str.equals("!!map")) {
+                    sb.setLength(0);
+                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                  // // byte[] decode = Base64.getDecoder().decode(sb.toString());
+                  //  return decode;
+                } else {
+                    throw new IORuntimeException("Unsupported type " + str);
+                }
+            }
+        }
+
+
+
+
         @Override
         public boolean bool() {
             StringBuilder sb = Wires.acquireStringBuilder();
@@ -1000,6 +1029,8 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.skipTo(StopCharTesters.COMMA_STOP);
             return true;
         }
+
+
     }
 
 }

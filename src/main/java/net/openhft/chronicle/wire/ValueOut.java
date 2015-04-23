@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.Maths;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -106,6 +107,16 @@ public interface ValueOut {
     WireOut sequence(Consumer<ValueOut> writer);
 
     WireOut marshallable(WriteMarshallable object);
+
+    /**
+     * wites the contents of the map to wire
+     *
+     * @param map a java map with, the key and value type of the map must be either Marshallable,
+     *            String or Autoboxed primitives.
+     * @return throws IllegalArgumentException  If the type of the map is not one of those listed
+     * above
+     */
+    WireOut map(Map map);
 
     boolean isNested();
 

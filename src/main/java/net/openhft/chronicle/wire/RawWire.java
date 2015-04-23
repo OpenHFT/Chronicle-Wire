@@ -33,6 +33,7 @@ import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
 
@@ -361,6 +362,12 @@ public class RawWire implements Wire, InternalWireIn {
         }
 
         @Override
+        public WireOut map(Map map) {
+            throw new UnsupportedOperationException("todo");
+        }
+
+
+        @Override
         public boolean isNested() {
             return nested;
         }
@@ -650,6 +657,11 @@ public class RawWire implements Wire, InternalWireIn {
         @Override
         public boolean isNull() {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void map(Consumer<Map> map) {
+            throw new UnsupportedOperationException("todo");
         }
     }
 }
