@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.IORuntimeException;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -131,7 +132,17 @@ public interface ValueIn {
         try {
             StringBuilder sb = Wires.acquireStringBuilder();
             type(sb);
-            Marshallable m = Class.forName(sb.toString()).asSubclass(Marshallable.class).newInstance();
+
+            // its possible that the object that you are allocating may not have a
+            // default constructor
+            final Class clazz = (Class) Class.forName(sb.toString());
+
+            if (!Marshallable.class.isAssignableFrom(clazz))
+                throw new IllegalStateException("its not possible to Marshallable and object that" +
+                        " is not of type Marshallable, type=" + sb);
+
+            final Marshallable m = UnsafeMemory.MEMORY.allocateInstance((Class<Marshallable>) clazz);
+
             marshallable(m);
             return m;
         } catch (Exception e) {
@@ -151,6 +162,9 @@ public interface ValueIn {
     default void map(@NotNull Map<String, String> usingMap) {
         map(String.class, String.class, usingMap);
     }
+
+    void typedMap(@NotNull final Map<Marshallable, Marshallable> usingMap);
+
 
     /**
      * reads the map from the wire

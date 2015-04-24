@@ -552,6 +552,16 @@ public class TextWire implements Wire, InternalWireIn {
             return TextWire.this;
         }
 
+        @Override
+        public WireOut typedMap(@NotNull final Map<Marshallable, Marshallable> map) {
+            nested = true;
+            type("!map");
+            map.forEach((k, v) -> sequence(w -> w.marshallable(m -> m
+                    .write(() -> "key").typedMarshallable(k)
+                    .write(() -> "value").typedMarshallable(v))));
+            return TextWire.this;
+        }
+
 
         @Override
         public boolean isNested() {
@@ -994,6 +1004,36 @@ public class TextWire implements Wire, InternalWireIn {
                             try {
                                 final K k = r.read(() -> "key").object(kClazz);
                                 final V v = r.read(() -> "value").object(vClass);
+                                usingMap.put(k, v);
+                            } catch (Exception e) {
+                                LOG.error("", e);
+                            }
+                        }));
+                    }
+                } else {
+                    throw new IORuntimeException("Unsupported type " + str);
+                }
+            }
+        }
+
+
+        @Override
+        public void typedMap(@NotNull final Map<Marshallable, Marshallable> usingMap) {
+
+            usingMap.clear();
+
+            StringBuilder sb = Wires.acquireStringBuilder();
+            if (peekCode() == '!') {
+                bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                String str = sb.toString();
+                if ("!!map".contentEquals(sb)) {
+                    while (hasNext()) {
+
+                        sequence(s -> s.marshallable(r -> {
+                            try {
+
+                                final Marshallable k = r.read(() -> "key").typedMarshallable();
+                                final Marshallable v = r.read(() -> "value").typedMarshallable();
                                 usingMap.put(k, v);
                             } catch (Exception e) {
                                 LOG.error("", e);

@@ -793,6 +793,11 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @Override
+        public WireOut typedMap(@NotNull Map<Marshallable, Marshallable> map) {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
         public boolean isNested() {
             return nested;
         }
@@ -1277,6 +1282,11 @@ public class BinaryWire implements Wire, InternalWireIn {
                 object.readMarshallable(BinaryWire.this);
             }
             return BinaryWire.this;
+        }
+
+        @Override
+        public void typedMap(@NotNull Map<Marshallable, Marshallable> usingMap) {
+            throw new UnsupportedOperationException("todo");
         }
 
         @Override

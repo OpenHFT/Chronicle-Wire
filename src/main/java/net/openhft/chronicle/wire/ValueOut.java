@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Maths;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -117,6 +118,8 @@ public interface ValueOut {
      * above
      */
     WireOut map(Map map);
+
+    WireOut typedMap(@NotNull Map<Marshallable, Marshallable> map);
 
     boolean isNested();
 

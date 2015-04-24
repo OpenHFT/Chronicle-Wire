@@ -657,9 +657,6 @@ public class TextWireTest {
 
         String someData;
 
-        public MyMarshallable() {
-        }
-
         public MyMarshallable(String someData) {
             this.someData = someData;
         }
@@ -728,6 +725,32 @@ public class TextWireTest {
         assertEquals(actual, expected);
     }
 
+
+
+    @Test
+    public void testMapReadAndWriteTypedMarshable() {
+
+        final Bytes bytes = nativeBytes();
+        final Wire wire = new TextWire(bytes);
+
+        final Map<Marshallable, Marshallable> expected = new HashMap<>();
+
+        expected.put(new MyMarshallable("aKey"), new MyMarshallable("aValue"));
+        expected.put(new MyMarshallable("aKey2"), new MyMarshallable("aValue2"));
+
+        wire.writeDocument(false, o -> {
+            o.write(() -> "example").typedMap(expected);
+        });
+
+        wire.flip();
+
+        System.out.println(Wires.fromSizePrefixedBlobs(bytes));
+        final Map<Marshallable, Marshallable> actual = new HashMap<>();
+
+        wire.readDocument(null, c -> c.read(() -> "example").typedMap(actual));
+
+        assertEquals(actual, expected);
+    }
 
     enum BWKey implements WireKey {
         field1, field2, field3

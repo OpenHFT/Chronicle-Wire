@@ -368,6 +368,11 @@ public class RawWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException("todo");
         }
 
+        @Override
+        public WireOut typedMap(@NotNull Map<Marshallable, Marshallable> map)  {
+            throw new UnsupportedOperationException("todo");
+        }
+
 
         @Override
         public boolean isNested() {
@@ -644,6 +649,11 @@ public class RawWire implements Wire, InternalWireIn {
                 object.readMarshallable(RawWire.this);
             }
             return RawWire.this;
+        }
+
+        @Override
+        public void typedMap(@NotNull Map<Marshallable, Marshallable> usingMap)  {
+            throw new UnsupportedOperationException("todo");
         }
 
         @Override
