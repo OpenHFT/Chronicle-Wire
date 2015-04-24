@@ -126,4 +126,31 @@ public interface ValueOut {
         type(object.getClass().getName());
         return marshallable(object);
     }
+
+
+    default WireOut object(Object value) {
+
+        if (value instanceof Byte)
+            return int8((Byte) value);
+        else if (value instanceof Character)
+            return text(value.toString());
+        else if (value instanceof Short)
+            return int16((Short) value);
+        else if (value instanceof Integer)
+            return int32((Integer) value);
+        else if (value instanceof Long)
+            return int64((Long) value);
+        else if (value instanceof CharSequence) {
+            return text((CharSequence) value);
+        } else if (value instanceof Marshallable) {
+            return marshallable((Marshallable) value);
+        } else {
+            throw new IllegalStateException("type=" + value.getClass() +
+                    " is unsupported, it must either be of type Marshallable, String or " +
+                    "AutoBoxed primitive Object");
+        }
+
+    }
+
+
 }

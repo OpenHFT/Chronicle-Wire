@@ -29,6 +29,7 @@ import net.openhft.chronicle.wire.util.BooleanConsumer;
 import net.openhft.chronicle.wire.util.ByteConsumer;
 import net.openhft.chronicle.wire.util.FloatConsumer;
 import net.openhft.chronicle.wire.util.ShortConsumer;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
@@ -801,6 +802,13 @@ public class BinaryWire implements Wire, InternalWireIn {
             this.nested = nested;
             return BinaryWire.this;
         }
+
+        @Override
+        public WireOut object(Object o) {
+            throw new UnsupportedOperationException("todo");
+        }
+
+
     }
 
     class BinaryValueOut extends FixedBinaryValueOut {
@@ -900,11 +908,17 @@ public class BinaryWire implements Wire, InternalWireIn {
             writeFloat(d);
             return BinaryWire.this;
         }
+
+        @Override
+        public WireOut object(Object o) {
+            throw new UnsupportedOperationException("todo");
+        }
     }
 
     class BinaryValueIn implements ValueIn {
+        @NotNull
         @Override
-        public WireIn bool(BooleanConsumer flag) {
+        public WireIn bool(@NotNull BooleanConsumer flag) {
             consumeSpecial();
             int code = readCode();
             switch (code) {
@@ -924,8 +938,9 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn text(Consumer<String> s) {
+        public WireIn text(@NotNull Consumer<String> s) {
             consumeSpecial();
             int code = readCode();
             switch (code) {
@@ -947,8 +962,9 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn text(StringBuilder s) {
+        public WireIn text(@NotNull StringBuilder s) {
             int code = readCode();
             StringBuilder text = readText(code, s);
             if (text == null)
@@ -956,14 +972,16 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn int8(ByteConsumer i) {
+        public WireIn int8(@NotNull ByteConsumer i) {
             consumeSpecial();
             i.accept((byte) readInt(bytes.readUnsignedByte()));
             return BinaryWire.this;
         }
 
-        public WireIn bytes(Bytes toBytes) {
+        @NotNull
+        public WireIn bytes(@NotNull Bytes toBytes) {
             long length = readLength();
             int code = readCode();
             if (code != U8_ARRAY)
@@ -972,7 +990,8 @@ public class BinaryWire implements Wire, InternalWireIn {
             return wireIn();
         }
 
-        public WireIn bytes(Consumer<WireIn> bytesConsumer) {
+        @NotNull
+        public WireIn bytes(@NotNull Consumer<WireIn> bytesConsumer) {
             long length = readLength();
             int code = readCode();
             if (code != U8_ARRAY)
@@ -997,6 +1016,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException("todo");
         }
 
+        @NotNull
         @Override
         public WireIn wireIn() {
             return BinaryWire.this;
@@ -1021,61 +1041,70 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
         }
 
+        @NotNull
         @Override
-        public WireIn uint8(ShortConsumer i) {
+        public WireIn uint8(@NotNull ShortConsumer i) {
             consumeSpecial();
             i.accept((short) readInt(readCode()));
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn int16(ShortConsumer i) {
+        public WireIn int16(@NotNull ShortConsumer i) {
             i.accept((short) readInt(readCode()));
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn uint16(IntConsumer i) {
+        public WireIn uint16(@NotNull IntConsumer i) {
             consumeSpecial();
             i.accept((int) readInt(readCode()));
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn int32(IntConsumer i) {
+        public WireIn int32(@NotNull IntConsumer i) {
             consumeSpecial();
             i.accept((int) readInt(readCode()));
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn uint32(LongConsumer i) {
+        public WireIn uint32(@NotNull LongConsumer i) {
             consumeSpecial();
             i.accept(readInt(readCode()));
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn int64(LongConsumer i) {
+        public WireIn int64(@NotNull LongConsumer i) {
             i.accept(readInt(readCode()));
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn float32(FloatConsumer v) {
+        public WireIn float32(@NotNull FloatConsumer v) {
             consumeSpecial();
             v.accept((float) readFloat(readCode()));
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn float64(DoubleConsumer v) {
+        public WireIn float64(@NotNull DoubleConsumer v) {
             v.accept(readFloat(readCode()));
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn time(Consumer<LocalTime> localTime) {
+        public WireIn time(@NotNull Consumer<LocalTime> localTime) {
             consumeSpecial();
             int code = readCode();
             if (code == TIME) {
@@ -1088,8 +1117,9 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn zonedDateTime(Consumer<ZonedDateTime> zonedDateTime) {
+        public WireIn zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime) {
             consumeSpecial();
             int code = readCode();
             if (code == ZONED_DATE_TIME) {
@@ -1102,8 +1132,9 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn date(Consumer<LocalDate> localDate) {
+        public WireIn date(@NotNull Consumer<LocalDate> localDate) {
             consumeSpecial();
             int code = readCode();
             if (code == DATE) {
@@ -1122,12 +1153,12 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireIn expectText(CharSequence s) {
+        public WireIn expectText(@NotNull CharSequence s) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public WireIn uuid(Consumer<UUID> uuid) {
+        public WireIn uuid(@NotNull Consumer<UUID> uuid) {
             consumeSpecial();
             int code = readCode();
             if (code == UUID) {
@@ -1139,7 +1170,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireIn int64array(LongArrayValues values, Consumer<LongArrayValues> setter) {
+        public WireIn int64array(LongArrayValues values, @NotNull Consumer<LongArrayValues> setter) {
             consumeSpecial();
             int code = readCode();
             if (code == I64_ARRAY) {
@@ -1156,7 +1187,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireIn int64(LongValue value, Consumer<LongValue> setter) {
+        public WireIn int64(LongValue value, @NotNull Consumer<LongValue> setter) {
             consumeSpecial();
             int code = readCode();
             if (code != INT64)
@@ -1176,7 +1207,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireIn int32(IntValue value, Consumer<IntValue> setter) {
+        public WireIn int32(IntValue value, @NotNull Consumer<IntValue> setter) {
             consumeSpecial();
             int code = readCode();
             if (code != INT32)
@@ -1192,7 +1223,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireIn sequence(Consumer<ValueIn> reader) {
+        public WireIn sequence(@NotNull Consumer<ValueIn> reader) {
             throw new UnsupportedOperationException();
         }
 
@@ -1215,8 +1246,9 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
         }
 
+        @NotNull
         @Override
-        public WireIn type(StringBuilder s) {
+        public WireIn type(@NotNull StringBuilder s) {
             int code = readCode();
             if (code == TYPE) {
                 bytes.readUTFΔ(s);
@@ -1226,8 +1258,9 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn marshallable(ReadMarshallable object) {
+        public WireIn marshallable(@NotNull ReadMarshallable object) {
             consumeSpecial();
             long length = readLength();
             if (length >= 0) {
@@ -1244,6 +1277,11 @@ public class BinaryWire implements Wire, InternalWireIn {
                 object.readMarshallable(BinaryWire.this);
             }
             return BinaryWire.this;
+        }
+
+        @Override
+        public <K, V> void map(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap) {
+            throw new UnsupportedOperationException("todo");
         }
 
         @Override
@@ -1313,10 +1351,6 @@ public class BinaryWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException();
         }
 
-        @Override
-        public void map(Consumer<Map> map) {
-                throw new UnsupportedOperationException("todo");
-        }
 
         private WireIn cantRead(int code) {
             throw new UnsupportedOperationException(stringForCode(code));

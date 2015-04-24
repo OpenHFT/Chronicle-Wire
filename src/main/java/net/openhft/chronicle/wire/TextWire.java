@@ -28,6 +28,10 @@ import net.openhft.chronicle.wire.util.BooleanConsumer;
 import net.openhft.chronicle.wire.util.ByteConsumer;
 import net.openhft.chronicle.wire.util.FloatConsumer;
 import net.openhft.chronicle.wire.util.ShortConsumer;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
@@ -45,6 +49,10 @@ import static net.openhft.chronicle.wire.WireType.stringForCode;
  * Created by peter.lawrey on 15/01/15.
  */
 public class TextWire implements Wire, InternalWireIn {
+
+    private static final Logger LOG =
+            LoggerFactory.getLogger(TextWire.class);
+
     public static final String FIELD_SEP = "";
     private static final String END_FIELD = "\n";
     final Bytes<?> bytes;
@@ -292,6 +300,16 @@ public class TextWire implements Wire, InternalWireIn {
     class TextValueOut implements ValueOut {
         boolean nested = false;
 
+
+        public void separator() {
+            if (isNested()) {
+                sep = ", ";
+            } else {
+                bytes.append(END_FIELD);
+                sep = "";
+            }
+        }
+
         @Override
         public Wire bool(Boolean flag) {
             bytes.append(sep).append(flag == null ? "!!null" : flag ? "true" : "false");
@@ -525,9 +543,15 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireOut map(Map map) {
-            throw new UnsupportedOperationException("todo");
+        public WireOut map(@NotNull final Map map) {
+            nested = true;
+            type("!map");
+            map.forEach((k, v) -> sequence(w -> w.marshallable(m -> m
+                    .write(() -> "key").object(k)
+                    .write(() -> "value").object(v))));
+            return TextWire.this;
         }
+
 
         @Override
         public boolean isNested() {
@@ -540,19 +564,13 @@ public class TextWire implements Wire, InternalWireIn {
             return TextWire.this;
         }
 
-        public void separator() {
-            if (isNested()) {
-                sep = ", ";
-            } else {
-                bytes.append(END_FIELD);
-                sep = "";
-            }
-        }
+
     }
 
     class TextValueIn implements ValueIn {
+        @NotNull
         @Override
-        public Wire bool(BooleanConsumer flag) {
+        public Wire bool(@NotNull BooleanConsumer flag) {
             StringBuilder sb = Wires.acquireStringBuilder();
             bytes.parseUTF(sb, StopCharTesters.COMMA_STOP);
             if (StringInterner.isEqual(sb, "true"))
@@ -566,8 +584,9 @@ public class TextWire implements Wire, InternalWireIn {
             return TextWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn text(Consumer<String> s) {
+        public WireIn text(@NotNull Consumer<String> s) {
             StringBuilder sb = Wires.acquireStringBuilder();
             text(sb);
             s.accept(sb.toString());
@@ -581,8 +600,9 @@ public class TextWire implements Wire, InternalWireIn {
             return sb.toString();
         }
 
+        @NotNull
         @Override
-        public Wire text(StringBuilder s) {
+        public Wire text(@NotNull StringBuilder s) {
             int ch = peekCode();
             StringBuilder sb = s;
             if (ch == '{') {
@@ -607,18 +627,21 @@ public class TextWire implements Wire, InternalWireIn {
             return TextWire.this;
         }
 
+        @NotNull
         @Override
-        public Wire int8(ByteConsumer i) {
+        public Wire int8(@NotNull ByteConsumer i) {
             i.accept((byte) bytes.parseLong());
             return TextWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn bytes(Bytes toBytes) {
+        public WireIn bytes(@NotNull Bytes toBytes) {
             return bytes(wi -> toBytes.write(wi.bytes()));
         }
 
-        public WireIn bytes(Consumer<WireIn> bytesConsumer) {
+        @NotNull
+        public WireIn bytes(@NotNull Consumer<WireIn> bytesConsumer) {
             // TODO needs to be made much more efficient.
             StringBuilder sb = Wires.acquireStringBuilder();
             if (peekCode() == '!') {
@@ -660,6 +683,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         }
 
+        @NotNull
         @Override
         public WireIn wireIn() {
             return TextWire.this;
@@ -708,72 +732,83 @@ public class TextWire implements Wire, InternalWireIn {
             }
         }
 
+        @NotNull
         @Override
-        public Wire uint8(ShortConsumer i) {
+        public Wire uint8(@NotNull ShortConsumer i) {
             i.accept((short) bytes.parseLong());
             return TextWire.this;
         }
 
+        @NotNull
         @Override
-        public Wire int16(ShortConsumer i) {
+        public Wire int16(@NotNull ShortConsumer i) {
             i.accept((short) bytes.parseLong());
             return TextWire.this;
         }
 
+        @NotNull
         @Override
-        public Wire uint16(IntConsumer i) {
+        public Wire uint16(@NotNull IntConsumer i) {
             i.accept((int) bytes.parseLong());
             return TextWire.this;
         }
 
+        @NotNull
         @Override
-        public Wire int32(IntConsumer i) {
+        public Wire int32(@NotNull IntConsumer i) {
             i.accept((int) bytes.parseLong());
             return TextWire.this;
         }
 
+        @NotNull
         @Override
-        public Wire uint32(LongConsumer i) {
+        public Wire uint32(@NotNull LongConsumer i) {
             i.accept(bytes.parseLong());
             return TextWire.this;
         }
 
+        @NotNull
         @Override
-        public Wire int64(LongConsumer i) {
+        public Wire int64(@NotNull LongConsumer i) {
             i.accept(bytes.parseLong());
             return TextWire.this;
         }
 
+        @NotNull
         @Override
-        public Wire float32(FloatConsumer v) {
+        public Wire float32(@NotNull FloatConsumer v) {
             v.accept((float) bytes.parseDouble());
             return TextWire.this;
         }
 
+        @NotNull
         @Override
-        public Wire float64(DoubleConsumer v) {
+        public Wire float64(@NotNull DoubleConsumer v) {
             v.accept(bytes.parseDouble());
             return TextWire.this;
         }
 
+        @NotNull
         @Override
-        public Wire time(Consumer<LocalTime> localTime) {
+        public Wire time(@NotNull Consumer<LocalTime> localTime) {
             StringBuilder sb = Wires.acquireStringBuilder();
             text(sb);
             localTime.accept(LocalTime.parse(sb.toString()));
             return TextWire.this;
         }
 
+        @NotNull
         @Override
-        public Wire zonedDateTime(Consumer<ZonedDateTime> zonedDateTime) {
+        public Wire zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime) {
             StringBuilder sb = Wires.acquireStringBuilder();
             text(sb);
             zonedDateTime.accept(ZonedDateTime.parse(sb.toString()));
             return TextWire.this;
         }
 
+        @NotNull
         @Override
-        public Wire date(Consumer<LocalDate> localDate) {
+        public Wire date(@NotNull Consumer<LocalDate> localDate) {
             StringBuilder sb = Wires.acquireStringBuilder();
             text(sb);
             localDate.accept(LocalDate.parse(sb.toString()));
@@ -786,12 +821,12 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireIn expectText(CharSequence s) {
+        public WireIn expectText(@NotNull CharSequence s) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public WireIn uuid(Consumer<UUID> uuid) {
+        public WireIn uuid(@NotNull Consumer<UUID> uuid) {
             StringBuilder sb = Wires.acquireStringBuilder();
             text(sb);
             uuid.accept(UUID.fromString(sb.toString()));
@@ -799,7 +834,7 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireIn int64array(LongArrayValues values, Consumer<LongArrayValues> setter) {
+        public WireIn int64array(LongArrayValues values, @NotNull Consumer<LongArrayValues> setter) {
             if (!(values instanceof TextLongReference)) {
                 setter.accept(values = new TextLongArrayReference());
             }
@@ -811,7 +846,7 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireIn int64(LongValue value, Consumer<LongValue> setter) {
+        public WireIn int64(LongValue value, @NotNull Consumer<LongValue> setter) {
             if (!(value instanceof TextLongReference)) {
                 setter.accept(value = new TextLongReference());
             }
@@ -823,7 +858,7 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireIn int32(IntValue value, Consumer<IntValue> setter) {
+        public WireIn int32(IntValue value, @NotNull Consumer<IntValue> setter) {
             if (!(value instanceof IntTextReference)) {
                 setter.accept(value = new IntTextReference());
             }
@@ -835,7 +870,7 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireIn sequence(Consumer<ValueIn> reader) {
+        public WireIn sequence(@NotNull Consumer<ValueIn> reader) {
             consumeWhiteSpace();
             int code = peekCode();
             if (code != '-')
@@ -896,8 +931,9 @@ public class TextWire implements Wire, InternalWireIn {
             }
         }
 
+        @NotNull
         @Override
-        public Wire type(StringBuilder s) {
+        public Wire type(@NotNull StringBuilder s) {
             int code = readCode();
             if (code != '!') {
                 throw new UnsupportedOperationException(stringForCode(code));
@@ -906,8 +942,9 @@ public class TextWire implements Wire, InternalWireIn {
             return TextWire.this;
         }
 
+        @NotNull
         @Override
-        public WireIn marshallable(ReadMarshallable object) {
+        public WireIn marshallable(@NotNull ReadMarshallable object) {
             consumeWhiteSpace();
             int code = peekCode();
             if (code != '{')
@@ -942,25 +979,32 @@ public class TextWire implements Wire, InternalWireIn {
 
 
         @Override
-        public void map(Consumer<Map> map) {
+        public <K, V> void map(@NotNull final Class<K> kClazz, @NotNull final Class<V> vClass, @NotNull final Map<K, V> usingMap) {
 
-            // TODO needs to be made much more efficient.
+            usingMap.clear();
+
             StringBuilder sb = Wires.acquireStringBuilder();
             if (peekCode() == '!') {
                 bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                 String str = sb.toString();
-                if (str.equals("!!map")) {
-                    sb.setLength(0);
-                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
-                  // // byte[] decode = Base64.getDecoder().decode(sb.toString());
-                  //  return decode;
+                if ("!!map".contentEquals(sb)) {
+                    while (hasNext()) {
+
+                        sequence(s -> s.marshallable(r -> {
+                            try {
+                                final K k = r.read(() -> "key").object(kClazz);
+                                final V v = r.read(() -> "value").object(vClass);
+                                usingMap.put(k, v);
+                            } catch (Exception e) {
+                                LOG.error("", e);
+                            }
+                        }));
+                    }
                 } else {
                     throw new IORuntimeException("Unsupported type " + str);
                 }
             }
         }
-
-
 
 
         @Override
@@ -1028,6 +1072,74 @@ public class TextWire implements Wire, InternalWireIn {
             }
             bytes.skipTo(StopCharTesters.COMMA_STOP);
             return true;
+        }
+
+
+        @Override
+        @Nullable
+        public <E> E object(@Nullable E using,
+                            @NotNull Class<E> clazz) {
+
+            if (Marshallable.class.isAssignableFrom(clazz)) {
+
+                final E v;
+                if (using == null)
+                    try {
+                        v = clazz.newInstance();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                else
+                    v = using;
+
+                valueIn.marshallable((Marshallable) v);
+                return v;
+
+            } else if (StringBuilder.class.isAssignableFrom(clazz)) {
+                StringBuilder builder = (using == null)
+                        ? Wires.acquireStringBuilder()
+                        : (StringBuilder) using;
+                valueIn.text(builder);
+                return using;
+
+            } else if (CharSequence.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                return (E) valueIn.text();
+
+            } else if (Long.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                return (E) (Long) valueIn.int64();
+            } else if (Double.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                return (E) (Double) valueIn.float64();
+
+            } else if (Integer.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                return (E) (Integer) valueIn.int32();
+
+            } else if (Float.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                return (E) (Float) valueIn.float32();
+
+            } else if (Short.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                return (E) (Short) valueIn.int16();
+
+            } else if (Character.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                final String text = valueIn.text();
+                if (text == null || text.length() == 0)
+                    return null;
+                return (E) (Character) text.charAt(0);
+
+            } else if (Byte.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                return (E) (Byte) valueIn.int8();
+
+
+            } else {
+                throw new IllegalStateException("unsupported type");
+            }
         }
 
 
