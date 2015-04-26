@@ -830,10 +830,7 @@ public class TextWire implements Wire, InternalWireIn {
             return bytes.remaining() > 0;
         }
 
-        @Override
-        public WireIn expectText(@NotNull CharSequence s) {
-            throw new UnsupportedOperationException();
-        }
+
 
         @Override
         public WireIn uuid(@NotNull Consumer<UUID> uuid) {
@@ -844,7 +841,7 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireIn int64array(@Nullable LongArrayValues values, @Nullable Consumer<LongArrayValues> setter) {
+        public WireIn int64array(@Nullable LongArrayValues values, @NotNull Consumer<LongArrayValues> setter) {
             if (!(values instanceof TextLongReference)) {
                 setter.accept(values = new TextLongArrayReference());
             }

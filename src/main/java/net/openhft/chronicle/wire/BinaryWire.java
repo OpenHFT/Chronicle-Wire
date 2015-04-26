@@ -1159,11 +1159,6 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireIn expectText(@NotNull CharSequence s) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public WireIn uuid(@NotNull Consumer<UUID> uuid) {
             consumeSpecial();
             int code = readCode();
@@ -1176,7 +1171,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireIn int64array(@Nullable LongArrayValues values, @Nullable Consumer<LongArrayValues> setter) {
+        public WireIn int64array(@Nullable LongArrayValues values, @NotNull Consumer<LongArrayValues> setter) {
             consumeSpecial();
             int code = readCode();
             if (code == I64_ARRAY) {
