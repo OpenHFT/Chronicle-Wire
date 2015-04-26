@@ -30,6 +30,7 @@ import net.openhft.chronicle.wire.util.ByteConsumer;
 import net.openhft.chronicle.wire.util.FloatConsumer;
 import net.openhft.chronicle.wire.util.ShortConsumer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
@@ -1175,7 +1176,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireIn int64array(LongArrayValues values, @NotNull Consumer<LongArrayValues> setter) {
+        public WireIn int64array(@Nullable LongArrayValues values, @Nullable Consumer<LongArrayValues> setter) {
             consumeSpecial();
             int code = readCode();
             if (code == I64_ARRAY) {

@@ -560,7 +560,7 @@ public class RawWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireIn int64array(LongArrayValues values, @NotNull Consumer<LongArrayValues> setter) {
+        public WireIn int64array(@Nullable LongArrayValues values, @Nullable Consumer<LongArrayValues> setter) {
             if (!(values instanceof Byteable)) {
                 setter.accept(values = new BinaryLongArrayReference());
             }

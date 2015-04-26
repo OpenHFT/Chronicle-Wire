@@ -117,11 +117,11 @@ public interface ValueIn {
 
     WireIn uuid(@NotNull Consumer<UUID> uuid);
 
-    WireIn int64array(@Nullable LongArrayValues values, @NotNull Consumer<LongArrayValues> setter);
+    WireIn int64array(@Nullable LongArrayValues values, @Nullable Consumer<LongArrayValues> setter);
 
-    WireIn int64(@Nullable LongValue value, @NotNull Consumer<LongValue> setter);
+    WireIn int64(@Nullable LongValue value, @Nullable Consumer<LongValue> setter);
 
-    WireIn int32(@Nullable IntValue value, @NotNull Consumer<IntValue> setter);
+    WireIn int32(@Nullable IntValue value, @Nullable Consumer<IntValue> setter);
 
     WireIn sequence(@NotNull Consumer<ValueIn> reader);
 
