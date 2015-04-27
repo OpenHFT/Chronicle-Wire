@@ -696,7 +696,6 @@ public class TextWireTest {
     }
 
 
-    @Ignore("fix")
     @Test
     public void testMapReadAndWriteMarshable() {
 

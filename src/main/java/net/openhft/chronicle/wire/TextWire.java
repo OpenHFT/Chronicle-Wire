@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -1122,7 +1123,7 @@ public class TextWire implements Wire, InternalWireIn {
                 final E v;
                 if (using == null)
                     try {
-                        v = clazz.newInstance();
+                        v = UnsafeMemory.MEMORY.allocateInstance(clazz);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
