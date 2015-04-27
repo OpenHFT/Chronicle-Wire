@@ -133,6 +133,8 @@ public interface ValueOut {
 
     default WireOut object(Object value) {
 
+        if (value instanceof Map)
+            return map((Map) value);
         if (value instanceof Byte)
             return int8((Byte) value);
         else if (value instanceof Character)

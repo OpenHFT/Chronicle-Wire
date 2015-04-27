@@ -86,7 +86,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public void copyTo(WireOut wire) {
+    public void copyTo(@NotNull WireOut wire) {
         while (bytes.remaining() > 0) {
             int peekCode = peekCode();
             outerSwitch:
@@ -156,7 +156,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public ValueIn read(WireKey key) {
+    public ValueIn read(@NotNull WireKey key) {
         StringBuilder sb = readField(Wires.acquireStringBuilder(), key.code());
         if (fieldLess || (sb != null && (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))))
             return valueIn;
@@ -165,13 +165,13 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public ValueIn readEventName(StringBuilder name) {
+    public ValueIn readEventName(@NotNull StringBuilder name) {
         readField(name, ANY_CODE_MATCH);
         return valueIn;
     }
 
     @Override
-    public ValueIn read(StringBuilder name) {
+    public ValueIn read(@NotNull StringBuilder name) {
         readField(name, ANY_CODE_MATCH);
         return valueIn;
     }
@@ -182,19 +182,10 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public boolean hasNextSequenceItem() {
+    public Wire readComment(@NotNull StringBuilder s) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public Wire readComment(StringBuilder s) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean hasMapping() {
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     public void flip() {

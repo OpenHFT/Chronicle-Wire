@@ -19,6 +19,8 @@ package net.openhft.chronicle.wire;
 
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
@@ -29,7 +31,7 @@ import java.util.function.Consumer;
 public interface WireIn {
     boolean isReady();
     
-    void copyTo(WireOut wire);
+    void copyTo(@NotNull WireOut wire);
 
     /**
      * Read the field if present, or empty string if not present.
@@ -39,33 +41,30 @@ public interface WireIn {
     /**
      * Read the field if present which must match the WireKey.
      */
-    ValueIn read(WireKey key);
+    ValueIn read(@NotNull WireKey key);
 
     /**
      * Read a field, or string which is always written, even for formats which might drop the field such as RAW.
      */
-    default ValueIn readEventName(StringBuilder name) {
+    default ValueIn readEventName(@NotNull StringBuilder name) {
         return read(name);
     }
 
     /**
      * Read the field if present, or empty string if not present.
      */
-    ValueIn read(StringBuilder name);
+    ValueIn read(@NotNull StringBuilder name);
 
     /**
      * Obtain the value in (for internal use)
      */
     ValueIn getValueIn();
 
-    boolean hasNextSequenceItem();
-
     /*
      * read and write comments.
      */
-    WireIn readComment(StringBuilder sb);
+    Wire readComment(@NotNull StringBuilder sb);
 
-    boolean hasMapping();
 
     void flip();
 
@@ -73,11 +72,14 @@ public interface WireIn {
 
     Bytes<?> bytes();
 
-    default boolean readDocument(Consumer<WireIn> metaDataConsumer, Consumer<WireIn> dataConsumer) {
+    default boolean readDocument(@Nullable Consumer<WireIn> metaDataConsumer,
+                                 @Nullable Consumer<WireIn> dataConsumer) {
         return Wires.readData(this, metaDataConsumer, dataConsumer);
     }
 
-    default boolean readDocument(long position, Consumer<WireIn> metaDataConsumer, Consumer<WireIn> dataConsumer) {
+    default boolean readDocument(long position,
+                                 @Nullable Consumer<WireIn> metaDataConsumer,
+                                 @Nullable Consumer<WireIn> dataConsumer) {
         return Wires.readData(position, this, metaDataConsumer, dataConsumer);
     }
 }

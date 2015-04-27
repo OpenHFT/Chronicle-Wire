@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
@@ -254,6 +255,12 @@ public interface ValueIn {
             //noinspection unchecked
             return (E) (Byte) int8();
 
+        } else if (Map.class.isAssignableFrom(clazz)) {
+            //noinspection unchecked
+
+            final HashMap result = new HashMap();
+            map(result);
+            return (E) result;
 
         } else {
             throw new IllegalStateException("unsupported type");

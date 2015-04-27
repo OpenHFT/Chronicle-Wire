@@ -39,11 +39,13 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.bytes.StopCharTesters.NEW_LINE_STOP;
 import static net.openhft.chronicle.wire.WireType.stringForCode;
 
 /**
@@ -56,6 +58,7 @@ public class TextWire implements Wire, InternalWireIn {
 
     public static final String FIELD_SEP = "";
     private static final String END_FIELD = "\n";
+    public static final String SEQUENCE_L1 = "  - ";
     final Bytes<?> bytes;
     final ValueOut valueOut = new TextValueOut();
     final ValueIn valueIn = new TextValueIn();
@@ -90,7 +93,7 @@ public class TextWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public void copyTo(WireOut wire) {
+    public void copyTo(@NotNull WireOut wire) {
         throw new UnsupportedOperationException();
     }
 
@@ -147,6 +150,34 @@ public class TextWire implements Wire, InternalWireIn {
         return bytes.readUnsignedByte(pos);
     }
 
+    /**
+     * returns true if the next string is {@code str}
+     *
+     * @param source string
+     * @return true if the strings are the same
+     */
+    private boolean peekStringIgnoreCase(@NotNull final String source) {
+
+        if (source.isEmpty())
+            return true;
+
+        if (bytes.remaining() < 1)
+            return false;
+
+        long pos = bytes.position();
+
+        try {
+            for (int i = 0; i < source.length(); i++) {
+                if (Character.toLowerCase(source.charAt(i)) != Character.toLowerCase(bytes.readByte()))
+                    return false;
+            }
+        } finally {
+            bytes.position(pos);
+        }
+
+        return true;
+    }
+
     private int readCode() {
         if (bytes.remaining() < 1)
             return -1;
@@ -169,7 +200,7 @@ public class TextWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public ValueIn read(WireKey key) {
+    public ValueIn read(@NotNull WireKey key) {
         long position = bytes.position();
         StringBuilder sb = readField(Wires.acquireStringBuilder());
         if (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))
@@ -180,7 +211,7 @@ public class TextWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public ValueIn read(StringBuilder name) {
+    public ValueIn read(@NotNull StringBuilder name) {
         consumeWhiteSpace();
         readField(name);
         return valueIn;
@@ -192,19 +223,11 @@ public class TextWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public boolean hasNextSequenceItem() {
+    public Wire readComment(@NotNull StringBuilder s) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public Wire readComment(StringBuilder s) {
-        throw new UnsupportedOperationException();
-    }
 
-    @Override
-    public boolean hasMapping() {
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     public void flip() {
@@ -684,9 +707,13 @@ public class TextWire implements Wire, InternalWireIn {
                     bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                     byte[] decode = Base64.getDecoder().decode(sb.toString());
                     return decode;
+                } else if (str.equals("!!map")) {
+                    sb.append(bytes.toString());
+                    return sb.toString().getBytes();
                 } else {
-                    throw new IORuntimeException("Unsupported type " + str);
+                    throw new IllegalStateException("unsupported type");
                 }
+
             } else {
                 text(sb);
                 return sb.toString().getBytes();
@@ -742,6 +769,68 @@ public class TextWire implements Wire, InternalWireIn {
                 bytes.position(start);
             }
         }
+
+        private long readSequenceLength() {
+            long start = bytes.position();
+            try {
+                consumeWhiteSpace();
+                int code = readCode();
+                switch (code) {
+
+                    case '-': {
+                        for (; ; ) {
+                            byte b = bytes.readByte();
+                            if (b == '\n') {
+                                return (bytes.position() - start) + 1;
+                            }
+                            if (bytes.remaining() == 0)
+                                return bytes.limit() - start;
+                            // do nothing
+                        }
+                    }
+                    default:
+                        // TODO needs to be made much more efficient.
+                        bytes();
+                        return bytes.position() - start;
+                }
+            } finally {
+                bytes.position(start);
+            }
+        }
+
+
+        private long readLengthMarshable() {
+            long start = bytes.position();
+            try {
+                consumeWhiteSpace();
+                int code = readCode();
+                switch (code) {
+                    case '{': {
+                        int count = 1;
+                        for (; ; ) {
+                            byte b = bytes.readByte();
+                            if (b == '{')
+                                count += 1;
+                            else if (b == '}') {
+                                count -= 1;
+                                if (count == 0)
+                                    return bytes.position() - start;
+                            }
+                            // do nothing
+                        }
+                    }
+
+
+                    default:
+                        // TODO needs to be made much more efficient.
+                        bytes();
+                        return bytes.position() - start;
+                }
+            } finally {
+                bytes.position(start);
+            }
+        }
+
 
         @NotNull
         @Override
@@ -832,6 +921,21 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
 
+        private boolean hasNextSequenceItem() {
+
+            long pos = bytes.position();
+            try {
+                if (peekStringIgnoreCase(SEQUENCE_L1))
+                    return true;
+
+                bytes.skipTo(NEW_LINE_STOP);
+                return peekStringIgnoreCase(SEQUENCE_L1);
+
+            } finally {
+                bytes.position(pos);
+            }
+        }
+
 
         @Override
         public WireIn uuid(@NotNull Consumer<UUID> uuid) {
@@ -882,14 +986,12 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             int code = peekCode();
             if (code != '-')
-                throw new IORuntimeException("Unsupported type " + (char) code);
+                throw new IORuntimeException("Unsupported type " + (char) code + "(" + code + ")");
 
-            final long len = readLength();
-
+            final long len = readSequenceLength();
 
             final long limit = bytes.limit();
             final long position = bytes.position();
-
 
             try {
                 // ensure that you can read past the end of this sequence object
@@ -902,7 +1004,8 @@ public class TextWire implements Wire, InternalWireIn {
                 bytes.limit(limit);
             }
 
-            consumeWhiteSpace();
+            bytes.skipTo(NEW_LINE_STOP);
+            //  consumeWhiteSpace();
             return TextWire.this;
         }
 
@@ -913,7 +1016,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (code != '{')
                 throw new IORuntimeException("Unsupported type " + (char) code);
 
-            final long len = readLength() - 1;
+            final long len = readLengthMarshable() - 1;
 
 
             final long limit = bytes.limit();
@@ -958,29 +1061,31 @@ public class TextWire implements Wire, InternalWireIn {
             if (code != '{')
                 throw new IORuntimeException("Unsupported type " + (char) code);
 
-            final long len = readLength() - 1;
+            final long len = readLengthMarshable() - 1;
 
 
             final long limit = bytes.limit();
             final long position = bytes.position();
 
-
+            final long newLimit = position - 1 + len;
             try {
                 // ensure that you can read past the end of this marshable object
-                final long newLimit = position - 1 + len;
+
                 bytes.limit(newLimit);
                 bytes.skip(1); // skip the {
                 consumeWhiteSpace();
                 object.readMarshallable(TextWire.this);
+
             } finally {
                 bytes.limit(limit);
+                bytes.position(newLimit);
             }
 
             consumeWhiteSpace();
             code = readCode();
             if (code != '}')
                 throw new IORuntimeException("Unterminated { while reading marshallable " +
-                        object + "bytes=" + Bytes.toDebugString(bytes)
+                        object + ",code='" + (char) code + "', bytes=" + Bytes.toDebugString(bytes)
                 );
             return TextWire.this;
         }
@@ -991,15 +1096,19 @@ public class TextWire implements Wire, InternalWireIn {
 
             usingMap.clear();
 
+
             StringBuilder sb = Wires.acquireStringBuilder();
             if (peekCode() == '!') {
+
+
                 bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                 String str = sb.toString();
                 if ("!!map".contentEquals(sb)) {
-                    while (hasNext()) {
+                    while (hasNextSequenceItem()) {
 
                         sequence(s -> s.marshallable(r -> {
                             try {
+                                System.out.println("bytes=" + bytes.toString());
                                 final K k = r.read(() -> "key").object(kClazz);
                                 final V v = r.read(() -> "value").object(vClass);
                                 usingMap.put(k, v);
@@ -1173,6 +1282,12 @@ public class TextWire implements Wire, InternalWireIn {
             } else if (Byte.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
                 return (E) (Byte) valueIn.int8();
+
+            } else if (Map.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                final HashMap result = new HashMap();
+                valueIn.map(result);
+                return (E) result;
 
 
             } else {

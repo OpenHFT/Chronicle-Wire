@@ -65,7 +65,7 @@ public class RawWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public void copyTo(WireOut wire) {
+    public void copyTo(@NotNull WireOut wire) {
         if (wire instanceof RawWire) {
             wire.bytes().write(bytes);
         } else {
@@ -80,20 +80,20 @@ public class RawWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public ValueIn read(WireKey key) {
+    public ValueIn read(@NotNull WireKey key) {
         lastSB = null;
         return valueIn;
     }
 
     @Override
-    public ValueIn readEventName(StringBuilder name) {
+    public ValueIn readEventName(@NotNull StringBuilder name) {
         bytes.readUTFΔ(name);
         lastSB = null;
         return valueIn;
     }
 
     @Override
-    public ValueIn read(StringBuilder name) {
+    public ValueIn read(@NotNull StringBuilder name) {
         lastSB = name;
         return valueIn;
     }
@@ -104,18 +104,8 @@ public class RawWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public boolean hasNextSequenceItem() {
-        return false;
-    }
-
-    @Override
-    public Wire readComment(StringBuilder sb) {
+    public Wire readComment(@NotNull StringBuilder sb) {
         return RawWire.this;
-    }
-
-    @Override
-    public boolean hasMapping() {
-        return false;
     }
 
     @Override
