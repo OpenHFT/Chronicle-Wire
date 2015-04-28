@@ -19,10 +19,12 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Maths;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -107,6 +109,18 @@ public interface ValueOut {
 
     WireOut marshallable(WriteMarshallable object);
 
+    /**
+     * wites the contents of the map to wire
+     *
+     * @param map a java map with, the key and value type of the map must be either Marshallable,
+     *            String or Autoboxed primitives.
+     * @return throws IllegalArgumentException  If the type of the map is not one of those listed
+     * above
+     */
+    WireOut map(Map map);
+
+    WireOut typedMap(@NotNull Map<Marshallable, Marshallable> map);
+
     boolean isNested();
 
     WireOut nested(boolean nested);
@@ -115,4 +129,33 @@ public interface ValueOut {
         type(object.getClass().getName());
         return marshallable(object);
     }
+
+
+    default WireOut object(Object value) {
+
+        if (value instanceof Map)
+            return map((Map) value);
+        if (value instanceof Byte)
+            return int8((Byte) value);
+        else if (value instanceof Character)
+            return text(value.toString());
+        else if (value instanceof Short)
+            return int16((Short) value);
+        else if (value instanceof Integer)
+            return int32((Integer) value);
+        else if (value instanceof Long)
+            return int64((Long) value);
+        else if (value instanceof CharSequence) {
+            return text((CharSequence) value);
+        } else if (value instanceof Marshallable) {
+            return marshallable((Marshallable) value);
+        } else {
+            throw new IllegalStateException("type=" + value.getClass() +
+                    " is unsupported, it must either be of type Marshallable, String or " +
+                    "AutoBoxed primitive Object");
+        }
+
+    }
+
+
 }

@@ -21,9 +21,12 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -581,7 +584,7 @@ public class TextWireTest {
     }
 
     @Test
-    public void testWriteMarshallableAndFieldLenghth() {
+    public void testWriteMarshallableAndFieldLength() {
         Wire wire = createWire();
         MyTypes mtA = new MyTypes();
         mtA.b(true);
@@ -603,6 +606,150 @@ public class TextWireTest {
         assertEquals(fieldLen, len);
     }
 
+
+    @Test
+    public void testMapReadAndWriteStrings() {
+        final Bytes bytes = nativeBytes();
+        final Wire wire = new TextWire(bytes);
+
+        final Map<String, String> expected = new HashMap<>();
+
+        expected.put("hello", "world");
+        expected.put("hello1", "world1");
+        expected.put("hello2", "world2");
+
+        wire.writeDocument(false, o -> {
+            o.write(() -> "example").map(expected);
+        });
+        wire.flip();
+
+        System.out.println(Wires.fromSizePrefixedBlobs(bytes));
+        final Map<String, String> actual = new HashMap<>();
+        wire.readDocument(null, c -> c.read(() -> "example").map(actual));
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testMapReadAndWriteIntegers() {
+        final Bytes bytes = nativeBytes();
+        final Wire wire = new TextWire(bytes);
+
+        final Map<Integer, Integer> expected = new HashMap<>();
+
+        expected.put(1, 2);
+        expected.put(2, 2);
+        expected.put(3, 3);
+
+        wire.writeDocument(false, o -> {
+            o.write(() -> "example").map(expected);
+        });
+
+        wire.flip();
+
+        System.out.println(Wires.fromSizePrefixedBlobs(bytes));
+        final Map<Integer, Integer> actual = new HashMap<>();
+        wire.readDocument(null, c -> c.read(() -> "example").map(Integer.class, Integer.class, actual));
+        assertEquals(actual, expected);
+    }
+
+
+    class MyMarshallable implements Marshallable {
+
+        String someData;
+
+        public MyMarshallable(String someData) {
+            this.someData = someData;
+        }
+
+        @Override
+        public void writeMarshallable(WireOut wire) {
+            wire.write(() -> "MyField").text(someData);
+        }
+
+        @Override
+        public void readMarshallable(WireIn wire) throws IllegalStateException {
+            someData = wire.read(() -> "MyField").text();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            MyMarshallable that = (MyMarshallable) o;
+
+            if (someData != null ? !someData.equals(that.someData) : that.someData != null)
+                return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return someData != null ? someData.hashCode() : 0;
+        }
+
+        @Override
+        public String toString() {
+            return "MyMarshable{" + "someData='" + someData + '\'' + '}';
+        }
+    }
+
+
+    @Test
+    public void testMapReadAndWriteMarshable() {
+
+        final Bytes bytes = nativeBytes();
+        final Wire wire = new TextWire(bytes);
+
+        final Map<Marshallable, Marshallable> expected = new HashMap<>();
+
+        expected.put(new MyMarshallable("aKey"), new MyMarshallable("aValue"));
+        expected.put(new MyMarshallable("aKey2"), new MyMarshallable("aValue2"));
+
+        wire.writeDocument(false, o -> {
+            o.write(() -> "example").map(expected);
+        });
+
+        wire.flip();
+
+        System.out.println(Wires.fromSizePrefixedBlobs(bytes));
+        final Map<MyMarshallable, MyMarshallable> actual = new HashMap<>();
+
+        wire.readDocument(null, c -> c.read(() -> "example").map(
+                MyMarshallable.class,
+                MyMarshallable.class,
+                actual));
+
+        assertEquals(actual, expected);
+    }
+
+
+
+    @Test
+    public void testMapReadAndWriteTypedMarshable() {
+
+        final Bytes bytes = nativeBytes();
+        final Wire wire = new TextWire(bytes);
+
+        final Map<Marshallable, Marshallable> expected = new HashMap<>();
+
+        expected.put(new MyMarshallable("aKey"), new MyMarshallable("aValue"));
+        expected.put(new MyMarshallable("aKey2"), new MyMarshallable("aValue2"));
+
+        wire.writeDocument(false, o -> {
+            o.write(() -> "example").typedMap(expected);
+        });
+
+        wire.flip();
+
+        System.out.println(Wires.fromSizePrefixedBlobs(bytes));
+        final Map<Marshallable, Marshallable> actual = new HashMap<>();
+
+        wire.readDocument(null, c -> c.read(() -> "example").typedMap(actual));
+
+        assertEquals(actual, expected);
+    }
 
     enum BWKey implements WireKey {
         field1, field2, field3

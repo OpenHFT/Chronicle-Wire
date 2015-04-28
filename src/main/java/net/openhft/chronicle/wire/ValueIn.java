@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.IORuntimeException;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -26,10 +27,14 @@ import net.openhft.chronicle.wire.util.BooleanConsumer;
 import net.openhft.chronicle.wire.util.ByteConsumer;
 import net.openhft.chronicle.wire.util.FloatConsumer;
 import net.openhft.chronicle.wire.util.ShortConsumer;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
 
@@ -40,9 +45,11 @@ public interface ValueIn {
     /*
      * Text / Strings.
      */
-    WireIn bool(BooleanConsumer flag);
+    @NotNull
+    WireIn bool(@NotNull BooleanConsumer flag);
 
-    WireIn text(Consumer<String> s);
+    @NotNull
+    WireIn text(@NotNull Consumer<String> s);
 
     default String text() {
         StringBuilder sb = Wires.acquireStringBuilder();
@@ -50,16 +57,21 @@ public interface ValueIn {
         return sb.toString();
     }
 
-    WireIn text(StringBuilder s);
+    @NotNull
+    WireIn text(@NotNull StringBuilder s);
 
-    WireIn int8(ByteConsumer i);
+    @NotNull
+    WireIn int8(@NotNull ByteConsumer i);
 
-    WireIn bytes(Bytes<?> toBytes);
+    @NotNull
+    WireIn bytes(@NotNull Bytes<?> toBytes);
 
-    WireIn bytes(Consumer<WireIn> wireInConsumer);
+    @NotNull
+    WireIn bytes(@NotNull Consumer<WireIn> wireInConsumer);
 
     byte[] bytes();
 
+    @NotNull
     WireIn wireIn();
 
     /**
@@ -67,49 +79,70 @@ public interface ValueIn {
      */
     long readLength();
 
-    WireIn uint8(ShortConsumer i);
+    @NotNull
+    WireIn uint8(@NotNull ShortConsumer i);
 
-    WireIn int16(ShortConsumer i);
+    @NotNull
+    WireIn int16(@NotNull ShortConsumer i);
 
-    WireIn uint16(IntConsumer i);
+    @NotNull
+    WireIn uint16(@NotNull IntConsumer i);
 
-    WireIn int32(IntConsumer i);
+    @NotNull
+    WireIn int32(@NotNull IntConsumer i);
 
-    WireIn uint32(LongConsumer i);
+    @NotNull
+    WireIn uint32(@NotNull LongConsumer i);
 
-    WireIn int64(LongConsumer i);
+    @NotNull
+    WireIn int64(@NotNull LongConsumer i);
 
-    WireIn float32(FloatConsumer v);
+    @NotNull
+    WireIn float32(@NotNull FloatConsumer v);
 
-    WireIn float64(DoubleConsumer v);
+    @NotNull
+    WireIn float64(@NotNull DoubleConsumer v);
 
-    WireIn time(Consumer<LocalTime> localTime);
+    @NotNull
+    WireIn time(@NotNull Consumer<LocalTime> localTime);
 
-    WireIn zonedDateTime(Consumer<ZonedDateTime> zonedDateTime);
+    @NotNull
+    WireIn zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime);
 
-    WireIn date(Consumer<LocalDate> localDate);
+    @NotNull
+    WireIn date(@NotNull Consumer<LocalDate> localDate);
 
     boolean hasNext();
 
-    WireIn expectText(CharSequence s);
 
-    WireIn uuid(Consumer<UUID> uuid);
+    WireIn uuid(@NotNull Consumer<UUID> uuid);
 
-    WireIn int64array(LongArrayValues values, Consumer<LongArrayValues> setter);
+    WireIn int64array(@Nullable LongArrayValues values, @NotNull Consumer<LongArrayValues> setter);
 
-    WireIn int64(LongValue value, Consumer<LongValue> setter);
+    WireIn int64(@Nullable LongValue value, @NotNull Consumer<LongValue> setter);
 
-    WireIn int32(IntValue value, Consumer<IntValue> setter);
+    WireIn int32(@Nullable IntValue value, @NotNull Consumer<IntValue> setter);
 
-    WireIn sequence(Consumer<ValueIn> reader);
+    WireIn sequence(@NotNull Consumer<ValueIn> reader);
 
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
 
+    @NotNull
     default Marshallable typedMarshallable() {
         try {
             StringBuilder sb = Wires.acquireStringBuilder();
             type(sb);
-            Marshallable m = Class.forName(sb.toString()).asSubclass(Marshallable.class).newInstance();
+
+            // its possible that the object that you are allocating may not have a
+            // default constructor
+            final Class clazz = (Class) Class.forName(sb.toString());
+
+            if (!Marshallable.class.isAssignableFrom(clazz))
+                throw new IllegalStateException("its not possible to Marshallable and object that" +
+                        " is not of type Marshallable, type=" + sb);
+
+            final Marshallable m = UnsafeMemory.MEMORY.allocateInstance((Class<Marshallable>) clazz);
+
             marshallable(m);
             return m;
         } catch (Exception e) {
@@ -117,9 +150,28 @@ public interface ValueIn {
         }
     }
 
-    WireIn type(StringBuilder s);
+    @NotNull
+    WireIn type(@NotNull StringBuilder s);
 
-    WireIn marshallable(ReadMarshallable object);
+    @NotNull
+    WireIn marshallable(@NotNull ReadMarshallable object);
+
+    /**
+     * reads the map from the wire
+     */
+    default void map(@NotNull Map<String, String> usingMap) {
+        map(String.class, String.class, usingMap);
+    }
+
+    void typedMap(@NotNull final Map<Marshallable, Marshallable> usingMap);
+
+
+    /**
+     * reads the map from the wire
+     */
+    <K, V> void map(@NotNull Class<K> kClazz,
+                    @NotNull Class<V> vClass,
+                    @NotNull Map<K, V> usingMap);
 
     boolean bool();
 
@@ -136,4 +188,85 @@ public interface ValueIn {
     float float32();
 
     boolean isNull();
+
+
+    @Nullable
+    default <E> E object(@NotNull Class<E> clazz) {
+        return object(null, clazz);
+    }
+
+
+    default <E> E object(@Nullable E using,
+                         @NotNull Class<E> clazz) {
+
+        if (Marshallable.class.isAssignableFrom(clazz)) {
+
+            final E v;
+            if (using == null)
+                try {
+                    v = clazz.newInstance();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            else
+                v = using;
+
+            marshallable((Marshallable) v);
+            return v;
+
+        } else if (StringBuilder.class.isAssignableFrom(clazz)) {
+            StringBuilder builder = (using == null)
+                    ? Wires.acquireStringBuilder()
+                    : (StringBuilder) using;
+            text(builder);
+            return using;
+
+        } else if (CharSequence.class.isAssignableFrom(clazz)) {
+            //noinspection unchecked
+            return (E) text();
+
+        } else if (Long.class.isAssignableFrom(clazz)) {
+            //noinspection unchecked
+            return (E) (Long) int64();
+        } else if (Double.class.isAssignableFrom(clazz)) {
+            //noinspection unchecked
+            return (E) (Double) float64();
+
+        } else if (Integer.class.isAssignableFrom(clazz)) {
+            //noinspection unchecked
+            return (E) (Integer) int32();
+
+        } else if (Float.class.isAssignableFrom(clazz)) {
+            //noinspection unchecked
+            return (E) (Float) float32();
+
+        } else if (Short.class.isAssignableFrom(clazz)) {
+            //noinspection unchecked
+            return (E) (Short) int16();
+
+        } else if (Character.class.isAssignableFrom(clazz)) {
+            //noinspection unchecked
+            final String text = text();
+            if (text == null || text.length() == 0)
+                return null;
+            return (E) (Character) text.charAt(0);
+
+        } else if (Byte.class.isAssignableFrom(clazz)) {
+            //noinspection unchecked
+            return (E) (Byte) int8();
+
+        } else if (Map.class.isAssignableFrom(clazz)) {
+            //noinspection unchecked
+
+            final HashMap result = new HashMap();
+            map(result);
+            return (E) result;
+
+        } else {
+            throw new IllegalStateException("unsupported type");
+        }
+    }
+
+
+
 }

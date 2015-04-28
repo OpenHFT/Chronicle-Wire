@@ -60,8 +60,6 @@ public interface WireOut {
      */
     WireOut writeComment(CharSequence s);
 
-    boolean hasMapping();
-
     boolean hasDocument();
 
     Bytes bytes();
