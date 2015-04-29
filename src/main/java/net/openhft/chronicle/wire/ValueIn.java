@@ -170,9 +170,9 @@ public interface ValueIn {
     /**
      * reads the map from the wire
      */
-    <K, V> void map(@NotNull Class<K> kClazz,
-                    @NotNull Class<V> vClass,
-                    @NotNull Map<K, V> usingMap);
+    <K, V> Map<K, V> map(@NotNull Class<K> kClazz,
+                         @NotNull Class<V> vClass,
+                         @NotNull Map<K, V> usingMap);
 
     boolean bool();
 

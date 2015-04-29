@@ -648,7 +648,7 @@ public class RawWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public <K, V> void map(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap) {
+        public <K, V> Map<K, V> map(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap) {
             throw new UnsupportedOperationException("todo");
         }
 

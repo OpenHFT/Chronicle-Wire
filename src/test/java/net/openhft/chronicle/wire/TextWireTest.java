@@ -648,8 +648,11 @@ public class TextWireTest {
 
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         final Map<Integer, Integer> actual = new HashMap<>();
-        wire.readDocument(null, c -> c.read(() -> "example").map(Integer.class, Integer.class, actual));
-        assertEquals(actual, expected);
+        wire.readDocument(null, c -> {
+            Map m = c.read(() -> "example").map(Integer.class, Integer.class, actual);
+            assertEquals(m, expected);
+        });
+
     }
 
 

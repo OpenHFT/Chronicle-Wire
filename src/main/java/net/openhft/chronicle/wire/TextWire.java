@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -46,6 +45,7 @@ import java.util.function.*;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.bytes.StopCharTesters.NEW_LINE_STOP;
+import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.wire.WireType.stringForCode;
 
 /**
@@ -227,7 +227,6 @@ public class TextWire implements Wire, InternalWireIn {
     public Wire readComment(@NotNull StringBuilder s) {
         throw new UnsupportedOperationException();
     }
-
 
 
     @Override
@@ -1116,7 +1115,9 @@ public class TextWire implements Wire, InternalWireIn {
 
 
         @Override
-        public <K, V> void map(@NotNull final Class<K> kClazz, @NotNull final Class<V> vClass, @NotNull final Map<K, V> usingMap) {
+        public <K, V> Map<K, V> map(@NotNull final Class<K> kClazz,
+                                    @NotNull final Class<V> vClass,
+                                    @NotNull final Map<K, V> usingMap) {
             consumeWhiteSpace();
             usingMap.clear();
 
@@ -1126,7 +1127,10 @@ public class TextWire implements Wire, InternalWireIn {
 
                 bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                 String str = sb.toString();
-                if ("!!map".contentEquals(sb)) {
+
+                if ("!!null".contentEquals(sb)) {
+                    return null;
+                } else if ("!!map".contentEquals(sb)) {
                     while (hasNextSequenceItem()) {
 
                         sequence(s -> s.marshallable(r -> {
@@ -1140,10 +1144,12 @@ public class TextWire implements Wire, InternalWireIn {
                             }
                         }));
                     }
+                    return usingMap;
                 } else {
                     throw new IORuntimeException("Unsupported type " + str);
                 }
             }
+            return usingMap;
         }
 
 
@@ -1263,12 +1269,17 @@ public class TextWire implements Wire, InternalWireIn {
 
             consumeWhiteSpace();
 
+            if (peekStringIgnoreCase("!!null\n")) {
+                bytes.skip("!!null\n".length());
+                return null;
+            }
+
             if (Marshallable.class.isAssignableFrom(clazz)) {
 
                 final E v;
                 if (using == null)
                     try {
-                        v = UnsafeMemory.MEMORY.allocateInstance(clazz);
+                        v = MEMORY.allocateInstance(clazz);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -1321,7 +1332,7 @@ public class TextWire implements Wire, InternalWireIn {
 
             } else if (Map.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
-                final HashMap result = new HashMap();
+                final Map result = new HashMap();
                 valueIn.map(result);
                 return (E) result;
 
