@@ -1146,7 +1146,12 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @Override
         public boolean hasNext() {
-            return false;
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
+        public boolean hasNextSequenceItem() {
+            throw new UnsupportedOperationException("todo");
         }
 
         @Override
@@ -1313,6 +1318,11 @@ public class BinaryWire implements Wire, InternalWireIn {
             if (code != INT16)
                 cantRead(code);
             return bytes.readShort();
+        }
+
+        @Override
+        public int uint16() {
+            return 0;
         }
 
         @Override

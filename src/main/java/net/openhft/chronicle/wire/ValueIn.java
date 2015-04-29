@@ -114,6 +114,7 @@ public interface ValueIn {
 
     boolean hasNext();
 
+    boolean hasNextSequenceItem();
 
     WireIn uuid(@NotNull Consumer<UUID> uuid);
 
@@ -179,6 +180,8 @@ public interface ValueIn {
 
     short int16();
 
+    int uint16();
+
     int int32();
 
     long int64();
@@ -198,6 +201,7 @@ public interface ValueIn {
 
     default <E> E object(@Nullable E using,
                          @NotNull Class<E> clazz) {
+
 
         if (Marshallable.class.isAssignableFrom(clazz)) {
 

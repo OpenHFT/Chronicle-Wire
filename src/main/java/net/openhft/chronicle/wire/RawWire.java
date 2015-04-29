@@ -538,6 +538,11 @@ public class RawWire implements Wire, InternalWireIn {
             return bytes.remaining() > 0;
         }
 
+        @Override
+        public boolean hasNextSequenceItem() {
+            throw new UnsupportedOperationException("todo");
+        }
+
 
         @Override
         public WireIn uuid(@NotNull Consumer<UUID> uuid) {
@@ -660,6 +665,11 @@ public class RawWire implements Wire, InternalWireIn {
         @Override
         public short int16() {
             return bytes.readShort();
+        }
+
+        @Override
+        public int uint16() {
+            throw new UnsupportedOperationException("todo");
         }
 
         @Override
