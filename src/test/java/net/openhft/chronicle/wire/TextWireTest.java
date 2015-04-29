@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.*;
@@ -601,6 +600,7 @@ public class TextWireTest {
         wire.flip();
 
         ValueIn read = wire.read(() -> "A");
+
         long len = read.readLength();
 
         assertEquals(fieldLen, len);

@@ -667,6 +667,7 @@ public class TextWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public Wire int8(@NotNull ByteConsumer i) {
+            consumeWhiteSpace();
             i.accept((byte) bytes.parseLong());
             return TextWire.this;
         }
@@ -679,6 +680,9 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         public WireIn bytes(@NotNull Consumer<WireIn> bytesConsumer) {
+
+            consumeWhiteSpace();
+
             // TODO needs to be made much more efficient.
             StringBuilder sb = Wires.acquireStringBuilder();
             if (peekCode() == '!') {
@@ -700,6 +704,7 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         public byte[] bytes() {
+            consumeWhiteSpace();
             // TODO needs to be made much more efficient.
             StringBuilder sb = Wires.acquireStringBuilder();
             if (peekCode() == '!') {
@@ -732,6 +737,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @Override
         public long readLength() {
+            consumeWhiteSpace();
             long start = bytes.position();
             try {
                 consumeWhiteSpace();
