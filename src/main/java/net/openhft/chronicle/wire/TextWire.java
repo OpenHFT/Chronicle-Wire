@@ -612,7 +612,7 @@ public class TextWire implements Wire, InternalWireIn {
                 flag.accept(true);
             else if (StringInterner.isEqual(sb, "false"))
                 flag.accept(false);
-            else if (StringInterner.isEqual(sb, "!!null"))
+            else if (isNull())
                 flag.accept(null);
             else
                 throw new UnsupportedOperationException();
@@ -1124,7 +1124,6 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             if (peekCode() == '!') {
 
-
                 bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                 String str = sb.toString();
 
@@ -1191,7 +1190,7 @@ public class TextWire implements Wire, InternalWireIn {
                 return true;
             else if (StringInterner.isEqual(sb, "false"))
                 return false;
-            else if (StringInterner.isEqual(sb, "!!null"))
+            if (isNull())
                 throw new NullPointerException("value is null");
             else
                 throw new UnsupportedOperationException();
@@ -1251,13 +1250,13 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public boolean isNull() {
             consumeWhiteSpace();
-            long pos = bytes.position();
-            for (byte b : "!!null".getBytes()) {
-                if (bytes.readByte(pos++) != b)
-                    return false;
+
+            if (peekStringIgnoreCase("!!null\n")) {
+                bytes.skip("!!null\n".length());
+                return true;
             }
-            bytes.skipTo(StopCharTesters.COMMA_STOP);
-            return true;
+
+            return false;
         }
 
 
@@ -1268,10 +1267,8 @@ public class TextWire implements Wire, InternalWireIn {
 
             consumeWhiteSpace();
 
-            if (peekStringIgnoreCase("!!null\n")) {
-                bytes.skip("!!null\n".length());
+            if (isNull())
                 return null;
-            }
 
             if (Marshallable.class.isAssignableFrom(clazz)) {
 
