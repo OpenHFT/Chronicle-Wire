@@ -1135,7 +1135,6 @@ public class TextWire implements Wire, InternalWireIn {
 
                         sequence(s -> s.marshallable(r -> {
                             try {
-                                System.out.println("bytes=" + bytes.toString());
                                 final K k = r.read(() -> "key").object(kClazz);
                                 final V v = r.read(() -> "value").object(vClass);
                                 usingMap.put(k, v);
