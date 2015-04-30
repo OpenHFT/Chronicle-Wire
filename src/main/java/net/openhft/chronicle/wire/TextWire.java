@@ -606,14 +606,19 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public Wire bool(@NotNull BooleanConsumer flag) {
             consumeWhiteSpace();
+
+
+            if (isNull()) {
+                flag.accept(null);
+                return TextWire.this;
+            }
+
             StringBuilder sb = Wires.acquireStringBuilder();
             bytes.parseUTF(sb, StopCharTesters.COMMA_STOP);
             if (StringInterner.isEqual(sb, "true"))
                 flag.accept(true);
             else if (StringInterner.isEqual(sb, "false"))
                 flag.accept(false);
-            else if (isNull())
-                flag.accept(null);
             else
                 throw new UnsupportedOperationException();
             return TextWire.this;
@@ -1255,6 +1260,7 @@ public class TextWire implements Wire, InternalWireIn {
                 bytes.skip("!!null\n".length());
                 return true;
             }
+
 
             return false;
         }
