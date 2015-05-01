@@ -18,19 +18,21 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.wire.Wire;
-
 import java.io.StreamCorruptedException;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 /**
  * @param <O> the collection type
  */
-public interface MapWireHandler<O> {
+public interface MapWireHandler<O, K, V> {
 
     void process(Wire in,
                  Wire out,
-                 O o,
-                 CharSequence csp) throws StreamCorruptedException;
-
+                 O set,
+                 CharSequence csp,
+                 BiConsumer<ValueOut, V> vToWire,
+                 Function<ValueIn, K> kFromWire,
+                 Function<ValueIn, V> vFromWire) throws StreamCorruptedException;
 
 }

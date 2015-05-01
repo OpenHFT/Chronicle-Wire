@@ -157,6 +157,9 @@ public interface ValueIn {
     @NotNull
     WireIn marshallable(@NotNull ReadMarshallable object);
 
+
+    <R> R applyMarshallable(@NotNull Function<WireIn, R> object);
+
     /**
      * reads the map from the wire
      */
