@@ -126,6 +126,13 @@ public class SetWireHandlerProcessor<U> implements SetWireHandler<Set<U>, U>, Co
                         return;
                     }
 
+
+                    if (SetEventId.contains.contentEquals(eventName)) {
+                        outWire.write(CoreFields.reply).bool(
+                                underlyingSet.contains(fromWire.apply(valueIn)));
+                        return;
+                    }
+
                     throw new IllegalStateException("unsupported event=" + eventName);
                 });
 

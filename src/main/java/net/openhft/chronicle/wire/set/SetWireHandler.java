@@ -57,7 +57,7 @@ public interface SetWireHandler<O, E> {
         clear,
         remove(key),
         numberOfSegments,
-        contains,
+        contains(key),
         iterator(segment);
 
         private final WireKey[] params;
