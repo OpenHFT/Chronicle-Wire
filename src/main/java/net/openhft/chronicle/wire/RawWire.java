@@ -205,6 +205,11 @@ public class RawWire implements Wire, InternalWireIn {
         }
 
         @Override
+        public WireOut rawBytes(byte[] value) {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
         public ValueOut writeLength(long length) {
             bytes.writeStopBit(length);
             return this;

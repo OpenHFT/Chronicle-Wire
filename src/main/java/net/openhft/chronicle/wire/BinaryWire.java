@@ -607,6 +607,11 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
+        @Override
+        public WireOut rawBytes(byte[] value) {
+            throw new UnsupportedOperationException("todo");
+        }
+
         public ValueOut writeLength(long length) {
             if (length < 0) {
                 throw new IllegalArgumentException("Invalid length " + length);

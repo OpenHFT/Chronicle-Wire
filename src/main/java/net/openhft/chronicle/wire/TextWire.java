@@ -368,6 +368,12 @@ public class TextWire implements Wire, InternalWireIn {
             return bytes(byteArray);
         }
 
+        @Override
+        public WireOut rawBytes(byte[] value) {
+            bytes.write(value);
+            return TextWire.this;
+        }
+
         private boolean isText(Bytes fromBytes) {
             for (long i = fromBytes.position(); i < fromBytes.readLimit(); i++) {
                 int ch = fromBytes.readUnsignedByte(i);
@@ -635,6 +641,8 @@ public class TextWire implements Wire, InternalWireIn {
 
         @Override
         public String text() {
+            if (isNull())
+                return null;
             StringBuilder sb = Wires.acquireStringBuilder();
             text(sb);
             return sb.toString();
@@ -1261,6 +1269,10 @@ public class TextWire implements Wire, InternalWireIn {
                 return true;
             }
 
+            if (peekStringIgnoreCase("!!null")) {
+                bytes.skip("!!null".length());
+                return true;
+            }
 
             return false;
         }

@@ -202,8 +202,10 @@ public interface ValueIn {
     default <E> E object(@Nullable E using,
                          @NotNull Class<E> clazz) {
 
+        if (byte[].class.isAssignableFrom(clazz))
+            return (E) bytes();
 
-        if (Marshallable.class.isAssignableFrom(clazz)) {
+        else if (Marshallable.class.isAssignableFrom(clazz)) {
 
             final E v;
             if (using == null)
