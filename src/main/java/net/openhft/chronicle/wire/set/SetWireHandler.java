@@ -41,6 +41,7 @@ public interface SetWireHandler<O, E> {
                  Function<ValueIn, E> fromWire) throws StreamCorruptedException;
 
 
+
     enum Params implements WireKey {
         key,
         segment,
