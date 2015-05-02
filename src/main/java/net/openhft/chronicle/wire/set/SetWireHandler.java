@@ -29,18 +29,16 @@ import static net.openhft.chronicle.wire.set.SetWireHandler.Params.key;
 import static net.openhft.chronicle.wire.set.SetWireHandler.Params.segment;
 
 /**
- * @param <O> the collection type
  * @param <E> the type of each element in that collection
  */
-public interface SetWireHandler< E> {
+public interface SetWireHandler<E> {
 
     void process(Wire in,
                  Wire out,
                  Set<E> set,
                  CharSequence csp,
-                 BiConsumer< ValueOut,E> toWire,
+                 BiConsumer<ValueOut, E> toWire,
                  Function<ValueIn, E> fromWire) throws StreamCorruptedException;
-
 
 
     enum Params implements WireKey {
