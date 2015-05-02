@@ -21,6 +21,7 @@ package net.openhft.chronicle.wire.set;
 import net.openhft.chronicle.wire.*;
 
 import java.io.StreamCorruptedException;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -31,11 +32,11 @@ import static net.openhft.chronicle.wire.set.SetWireHandler.Params.segment;
  * @param <O> the collection type
  * @param <E> the type of each element in that collection
  */
-public interface SetWireHandler<O, E> {
+public interface SetWireHandler< E> {
 
     void process(Wire in,
                  Wire out,
-                 O set,
+                 Set<E> set,
                  CharSequence csp,
                  BiConsumer< ValueOut,E> toWire,
                  Function<ValueIn, E> fromWire) throws StreamCorruptedException;

@@ -40,7 +40,7 @@ import static net.openhft.chronicle.wire.Wires.acquireStringBuilder;
 /**
  * @author Rob Austin.
  */
-public class SetWireHandlerProcessor<U> implements SetWireHandler<Set<U>, U>, Consumer<WireHandlers> {
+public class SetWireHandlerProcessor<U> implements SetWireHandler<U>, Consumer<WireHandlers> {
 
     private Function<ValueIn, U> fromWire;
     private BiConsumer<ValueOut, U> toWire;
