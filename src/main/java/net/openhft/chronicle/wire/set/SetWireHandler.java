@@ -37,7 +37,7 @@ public interface SetWireHandler<O, E> {
                  Wire out,
                  O set,
                  CharSequence csp,
-                 BiConsumer<E, ValueOut> toWire,
+                 BiConsumer< ValueOut,E> toWire,
                  Function<ValueIn, E> fromWire) throws StreamCorruptedException;
 
 

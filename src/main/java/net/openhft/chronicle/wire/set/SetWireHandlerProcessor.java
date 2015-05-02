@@ -43,7 +43,7 @@ import static net.openhft.chronicle.wire.Wires.acquireStringBuilder;
 public class SetWireHandlerProcessor<U> implements SetWireHandler<Set<U>, U>, Consumer<WireHandlers> {
 
     private Function<ValueIn, U> fromWire;
-    private BiConsumer<U, ValueOut> toWire;
+    private BiConsumer<ValueOut, U> toWire;
 
     private static final Logger LOG = LoggerFactory.getLogger(SetWireHandlerProcessor.class);
 
@@ -99,8 +99,9 @@ public class SetWireHandlerProcessor<U> implements SetWireHandler<Set<U>, U>, Co
                     // note :  remove on the key-set returns a boolean and on the map returns the
                     // old value
                     if (SetEventId.iterator.contentEquals(eventName)) {
-                        final ValueOut valueOut = outWire.writeEventName(CoreFields.reply);
-                        underlyingSet.forEach(e -> valueOut.sequence(v -> toWire.accept(e, v)));
+
+                        underlyingSet.forEach(e -> outWire.writeEventName(CoreFields.reply)
+                                .sequence(v -> toWire.accept(v, e)));
                         return;
                     }
 
@@ -163,11 +164,13 @@ public class SetWireHandlerProcessor<U> implements SetWireHandler<Set<U>, U>, Co
 
 
     @Override
-    public void process(@NotNull final Wire in,
-                        @NotNull final Wire out,
-                        @NotNull final Set<U> set,
-                        @NotNull final CharSequence csp, BiConsumer<U, ValueOut> toWire,
-                        @NotNull final Function<ValueIn, U> fromWire) throws StreamCorruptedException {
+    public void process(Wire in,
+                        Wire out,
+                        Set<U> set,
+                        CharSequence csp,
+                        BiConsumer<ValueOut, U> toWire,
+                        Function<ValueIn, U> fromWire) throws StreamCorruptedException {
+
 
         this.fromWire = fromWire;
         this.toWire = toWire;
