@@ -19,17 +19,14 @@
 package net.openhft.chronicle.wire;
 
 import java.io.StreamCorruptedException;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-/**
- * @param <O> the collection type
- */
-public interface MapWireHandler<O, K, V> {
+public interface MapWireHandler {
 
-    void process(Wire in,
-                 Wire out,
-                 O set,
+    <K, V> void process(Wire in,
+                 Wire out, Map<K, V> map,
                  CharSequence csp,
                  BiConsumer<ValueOut, V> vToWire,
                  Function<ValueIn, K> kFromWire,
