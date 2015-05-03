@@ -10,4 +10,5 @@ public enum CoreFields implements WireKey {
     csp,
     cid,
     reply,
+    exception
 }

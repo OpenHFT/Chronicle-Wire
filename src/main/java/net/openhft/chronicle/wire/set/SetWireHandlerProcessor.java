@@ -100,8 +100,8 @@ public class SetWireHandlerProcessor<U> implements SetWireHandler<U>, Consumer<W
                     // old value
                     if (SetEventId.iterator.contentEquals(eventName)) {
 
-                        underlyingSet.forEach(e -> outWire.writeEventName(CoreFields.reply)
-                                .sequence(v -> toWire.accept(v, e)));
+                        final ValueOut valueOut = outWire.writeEventName(CoreFields.reply);
+                        underlyingSet.forEach(e -> valueOut.sequence(v -> toWire.accept(v, e)));
                         return;
                     }
 

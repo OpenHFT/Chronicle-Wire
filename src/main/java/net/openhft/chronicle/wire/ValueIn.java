@@ -128,6 +128,7 @@ public interface ValueIn {
 
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
 
+
     @NotNull
     default Marshallable typedMarshallable() {
         try {
@@ -158,7 +159,6 @@ public interface ValueIn {
     WireIn marshallable(@NotNull ReadMarshallable object);
 
 
-    <R> R applyMarshallable(@NotNull Function<WireIn, R> object);
 
     /**
      * reads the map from the wire

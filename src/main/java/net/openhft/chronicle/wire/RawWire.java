@@ -648,11 +648,6 @@ public class RawWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public <R> R applyMarshallable(@NotNull Function<WireIn, R> object) {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @Override
         public void typedMap(@NotNull Map<Marshallable, Marshallable> usingMap)  {
             throw new UnsupportedOperationException("todo");
         }

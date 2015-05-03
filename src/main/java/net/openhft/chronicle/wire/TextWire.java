@@ -1128,48 +1128,6 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
 
-
-        @Override
-        public <R> R applyMarshallable(@NotNull Function<WireIn, R> object) {
-            consumeWhiteSpace();
-            int code = peekCode();
-            if (code != '{')
-                throw new IORuntimeException("Unsupported type " + (char) code);
-
-            final long len = readLengthMarshable() - 1;
-
-
-            final long limit = bytes.limit();
-            final long position = bytes.position();
-
-            final long newLimit = position - 1 + len;
-
-            final R result;
-            try {
-                // ensure that you can read past the end of this marshable object
-
-                bytes.limit(newLimit);
-                bytes.skip(1); // skip the {
-                consumeWhiteSpace();
-                result = object.apply(TextWire.this);
-
-            } finally {
-                bytes.limit(limit);
-                bytes.position(newLimit);
-            }
-
-            consumeWhiteSpace();
-            code = readCode();
-            if (code != '}')
-                throw new IORuntimeException("Unterminated { while reading marshallable " +
-                        object + ",code='" + (char) code + "', bytes=" + Bytes.toDebugString(bytes)
-                );
-
-            return result;
-
-        }
-
-
         @Override
         public <K, V> Map<K, V> map(@NotNull final Class<K> kClazz,
                                     @NotNull final Class<V> vClass,

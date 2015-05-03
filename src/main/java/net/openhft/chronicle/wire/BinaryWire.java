@@ -1281,10 +1281,6 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
-        @Override
-        public <R> R applyMarshallable(@NotNull Function<WireIn, R> object) {
-            throw new UnsupportedOperationException("todo");
-        }
 
 
 
