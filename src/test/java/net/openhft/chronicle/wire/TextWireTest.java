@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.*;
@@ -601,6 +600,7 @@ public class TextWireTest {
         wire.flip();
 
         ValueIn read = wire.read(() -> "A");
+
         long len = read.readLength();
 
         assertEquals(fieldLen, len);
@@ -648,8 +648,11 @@ public class TextWireTest {
 
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         final Map<Integer, Integer> actual = new HashMap<>();
-        wire.readDocument(null, c -> c.read(() -> "example").map(Integer.class, Integer.class, actual));
-        assertEquals(actual, expected);
+        wire.readDocument(null, c -> {
+            Map m = c.read(() -> "example").map(Integer.class, Integer.class, actual);
+            assertEquals(m, expected);
+        });
+
     }
 
 

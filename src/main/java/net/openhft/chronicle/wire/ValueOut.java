@@ -47,6 +47,8 @@ public interface ValueOut {
 
     WireOut bytes(Bytes fromBytes);
 
+    WireOut rawBytes(byte[] value);
+
     ValueOut writeLength(long remaining);
 
     WireOut bytes(byte[] fromBytes);
@@ -132,7 +134,10 @@ public interface ValueOut {
 
 
     default WireOut object(Object value) {
-
+        if (value instanceof byte[])
+            return rawBytes((byte[])value);
+        if (value == null)
+            return text(null);
         if (value instanceof Map)
             return map((Map) value);
         if (value instanceof Byte)

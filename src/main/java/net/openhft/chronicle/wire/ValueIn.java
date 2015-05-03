@@ -114,6 +114,7 @@ public interface ValueIn {
 
     boolean hasNext();
 
+    boolean hasNextSequenceItem();
 
     WireIn uuid(@NotNull Consumer<UUID> uuid);
 
@@ -126,6 +127,7 @@ public interface ValueIn {
     WireIn sequence(@NotNull Consumer<ValueIn> reader);
 
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
+
 
     @NotNull
     default Marshallable typedMarshallable() {
@@ -156,6 +158,8 @@ public interface ValueIn {
     @NotNull
     WireIn marshallable(@NotNull ReadMarshallable object);
 
+
+
     /**
      * reads the map from the wire
      */
@@ -169,15 +173,17 @@ public interface ValueIn {
     /**
      * reads the map from the wire
      */
-    <K, V> void map(@NotNull Class<K> kClazz,
-                    @NotNull Class<V> vClass,
-                    @NotNull Map<K, V> usingMap);
+    <K, V> Map<K, V> map(@NotNull Class<K> kClazz,
+                         @NotNull Class<V> vClass,
+                         @NotNull Map<K, V> usingMap);
 
     boolean bool();
 
     byte int8();
 
     short int16();
+
+    int uint16();
 
     int int32();
 
@@ -199,7 +205,10 @@ public interface ValueIn {
     default <E> E object(@Nullable E using,
                          @NotNull Class<E> clazz) {
 
-        if (Marshallable.class.isAssignableFrom(clazz)) {
+        if (byte[].class.isAssignableFrom(clazz))
+            return (E) bytes();
+
+        else if (Marshallable.class.isAssignableFrom(clazz)) {
 
             final E v;
             if (using == null)

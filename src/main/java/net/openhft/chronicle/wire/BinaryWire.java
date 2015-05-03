@@ -607,6 +607,11 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
+        @Override
+        public WireOut rawBytes(byte[] value) {
+            throw new UnsupportedOperationException("todo");
+        }
+
         public ValueOut writeLength(long length) {
             if (length < 0) {
                 throw new IllegalArgumentException("Invalid length " + length);
@@ -1146,7 +1151,12 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @Override
         public boolean hasNext() {
-            return false;
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
+        public boolean hasNextSequenceItem() {
+            throw new UnsupportedOperationException("todo");
         }
 
         @Override
@@ -1271,13 +1281,16 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
+
+
+
         @Override
         public void typedMap(@NotNull Map<Marshallable, Marshallable> usingMap) {
             throw new UnsupportedOperationException("todo");
         }
 
         @Override
-        public <K, V> void map(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap) {
+        public <K, V> Map<K, V> map(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap) {
             throw new UnsupportedOperationException("todo");
         }
 
@@ -1313,6 +1326,11 @@ public class BinaryWire implements Wire, InternalWireIn {
             if (code != INT16)
                 cantRead(code);
             return bytes.readShort();
+        }
+
+        @Override
+        public int uint16() {
+            return 0;
         }
 
         @Override
