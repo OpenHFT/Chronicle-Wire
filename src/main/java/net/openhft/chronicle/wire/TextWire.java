@@ -982,7 +982,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireIn int64array(@Nullable LongArrayValues values, @NotNull Consumer<LongArrayValues> setter) {
             consumeWhiteSpace();
-            if (!(values instanceof TextLongReference)) {
+            if (!(values instanceof TextLongArrayReference)) {
                 setter.accept(values = new TextLongArrayReference());
             }
             Byteable b = (Byteable) values;
