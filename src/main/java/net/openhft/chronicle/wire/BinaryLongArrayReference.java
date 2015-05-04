@@ -35,7 +35,7 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     }
 
     public static void lazyWrite(Bytes bytes, long capacity) {
-        System.out.println("capacity location =" + bytes.position());
+        //System.out.println("capacity location =" + bytes.position());
         bytes.writeLong(capacity);
         bytes.skip(capacity << 3);
     }
