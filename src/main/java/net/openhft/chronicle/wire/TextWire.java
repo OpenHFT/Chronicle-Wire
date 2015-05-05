@@ -329,7 +329,8 @@ public class TextWire implements Wire, InternalWireIn {
             if (isNested()) {
                 sep = ", ";
             } else {
-                bytes.append(END_FIELD);
+                if (!sequence)
+                    bytes.append(END_FIELD);
                 sep = "";
             }
         }
@@ -370,6 +371,7 @@ public class TextWire implements Wire, InternalWireIn {
         public WireOut rawBytes(byte[] value) {
             bytes.append(sep);
             bytes.write(value);
+            separator();
             return TextWire.this;
         }
 
@@ -538,18 +540,21 @@ public class TextWire implements Wire, InternalWireIn {
 
         @Override
         public WireOut sequence(Consumer<ValueOut> writer) {
-            boolean nested = isNested();
-            nested(true);
+
+            bytes.append("\n  - ");
+
+            final boolean nested = isNested();
             try {
-                bytes.append(sep);
-                sep = "";
-                bytes.append("\n  - ");
+                nested(false);
+                sequence(true);
                 writer.accept(this);
-                sep = "";
 
             } finally {
                 nested(nested);
+                sequence(false);
             }
+
+
             return TextWire.this;
         }
 
@@ -567,7 +572,7 @@ public class TextWire implements Wire, InternalWireIn {
             }
             bytes.append(' ');
             bytes.append('}');
-            sep = nested ? ", " : END_FIELD;
+            sep = nested ? ", " : (isSequence()) ? "" : END_FIELD;
             return TextWire.this;
         }
 
@@ -597,9 +602,22 @@ public class TextWire implements Wire, InternalWireIn {
             return nested;
         }
 
+        private boolean sequence;
+
+        @Override
+        public boolean isSequence() {
+            return sequence;
+        }
+
         @Override
         public WireOut nested(boolean nested) {
             this.nested = nested;
+            return TextWire.this;
+        }
+
+        @Override
+        public WireOut sequence(boolean sequence) {
+            this.sequence = sequence;
             return TextWire.this;
         }
 
@@ -1256,8 +1274,8 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         /**
-         * @return true if !!null, if {@code true} reads the !!null up to the next STOP, if {@code false} no  data is
-         * read  ( data is only peaked if {@code false} )
+         * @return true if !!null, if {@code true} reads the !!null up to the next STOP, if {@code
+         * false} no  data is read  ( data is only peaked if {@code false} )
          */
         @Override
         public boolean isNull() {
@@ -1288,7 +1306,7 @@ public class TextWire implements Wire, InternalWireIn {
                 return null;
 
             if (byte[].class.isAssignableFrom(clazz))
-                return (E)bytes();
+                return (E) bytes();
 
             if (Marshallable.class.isAssignableFrom(clazz)) {
 
@@ -1354,7 +1372,7 @@ public class TextWire implements Wire, InternalWireIn {
 
 
             } else {
-                throw new IllegalStateException("unsupported type="+clazz);
+                throw new IllegalStateException("unsupported type=" + clazz);
             }
         }
 

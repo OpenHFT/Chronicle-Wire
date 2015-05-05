@@ -800,9 +800,19 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @Override
+        public boolean isSequence() {
+            return false;
+        }
+
+        @Override
         public WireOut nested(boolean nested) {
             this.nested = nested;
             return BinaryWire.this;
+        }
+
+        @Override
+        public WireOut sequence(boolean sequence) {
+            return null;
         }
 
         @Override

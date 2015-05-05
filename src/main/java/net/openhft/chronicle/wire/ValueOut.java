@@ -125,7 +125,10 @@ public interface ValueOut {
 
     boolean isNested();
 
+    boolean isSequence();
+
     WireOut nested(boolean nested);
+    WireOut sequence(boolean sequence);
 
     default WireOut typedMarshallable(Marshallable object) {
         type(object.getClass().getName());
