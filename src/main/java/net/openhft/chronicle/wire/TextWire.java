@@ -343,8 +343,6 @@ public class TextWire implements Wire, InternalWireIn {
 
         @Override
         public Wire text(CharSequence s) {
-            if (s != null && " ".equals(sep) && startsWith(s, "//"))
-                sep = "";
             bytes.append(sep).append(s == null ? "!!null" : quotes(s));
             separator();
             return TextWire.this;
