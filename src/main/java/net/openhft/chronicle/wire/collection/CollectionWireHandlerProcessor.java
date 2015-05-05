@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package net.openhft.chronicle.wire.set;
+package net.openhft.chronicle.wire.collection;
 
 /**
  * Created by Rob Austin
@@ -29,10 +29,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.StreamCorruptedException;
-import java.util.Set;
+import java.util.Collection;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static net.openhft.chronicle.wire.Wires.acquireStringBuilder;
 
@@ -40,21 +41,24 @@ import static net.openhft.chronicle.wire.Wires.acquireStringBuilder;
 /**
  * @author Rob Austin.
  */
-public class SetWireHandlerProcessor<U> implements SetWireHandler<U>, Consumer<WireHandlers> {
+public class CollectionWireHandlerProcessor<U, C extends Collection<U>> implements
+        CollectionWireHandler<U, C>,
+        Consumer<WireHandlers> {
 
     private Function<ValueIn, U> fromWire;
     private BiConsumer<ValueOut, U> toWire;
 
-    private static final Logger LOG = LoggerFactory.getLogger(SetWireHandlerProcessor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CollectionWireHandlerProcessor.class);
 
     public static final int SIZE_OF_SIZE = 2;
 
     private Wire inWire = null;
     private Wire outWire = null;
 
-    private Set<U> underlyingSet;
+    private C underlyingCollection;
     public long tid;
 
+    private Supplier<C> factory;
     private final Consumer<WireIn> metaDataConsumer = new Consumer<WireIn>() {
 
         @Override
@@ -92,19 +96,17 @@ public class SetWireHandlerProcessor<U> implements SetWireHandler<U>, Consumer<W
                     // note :  remove on the key-set returns a boolean and on the map returns the
                     // old value
                     if (SetEventId.remove.contentEquals(eventName)) {
-                        outWire.write(CoreFields.reply).bool(underlyingSet.remove(fromWire.apply(valueIn)));
+                        outWire.write(CoreFields.reply).bool(underlyingCollection.remove(fromWire.apply(valueIn)));
                         return;
                     }
 
                     // note :  remove on the key-set returns a boolean and on the map returns the
                     // old value
                     if (SetEventId.iterator.contentEquals(eventName)) {
-
                         final ValueOut valueOut = outWire.writeEventName(CoreFields.reply);
-                        underlyingSet.forEach(e -> valueOut.sequence(v -> toWire.accept(v, e)));
+                        underlyingCollection.forEach(e -> valueOut.sequence(v -> toWire.accept(v, e)));
                         return;
                     }
-
 
                     if (SetEventId.numberOfSegments.contentEquals(eventName)) {
                         outWire.write(CoreFields.reply).int32(1);
@@ -112,29 +114,68 @@ public class SetWireHandlerProcessor<U> implements SetWireHandler<U>, Consumer<W
                     }
 
                     if (SetEventId.isEmpty.contentEquals(eventName)) {
-                        outWire.write(CoreFields.reply).bool(underlyingSet.isEmpty());
+                        outWire.write(CoreFields.reply).bool(underlyingCollection.isEmpty());
                         return;
                     }
 
                     if (SetEventId.size.contentEquals(eventName)) {
-                        outWire.write(CoreFields.reply).int32(underlyingSet.size());
+                        outWire.write(CoreFields.reply).int32(underlyingCollection.size());
                         return;
                     }
 
-
                     if (SetEventId.clear.contentEquals(eventName)) {
-                        underlyingSet.clear();
+                        underlyingCollection.clear();
                         return;
                     }
 
 
                     if (SetEventId.contains.contentEquals(eventName)) {
                         outWire.write(CoreFields.reply).bool(
-                                underlyingSet.contains(fromWire.apply(valueIn)));
+                                underlyingCollection.contains(fromWire.apply(valueIn)));
+                        return;
+                    }
+
+
+                    if (SetEventId.add.contentEquals(eventName)) {
+                        outWire.write(CoreFields.reply).bool(
+                                underlyingCollection.add(fromWire.apply(valueIn)));
+                        return;
+                    }
+
+
+                    if (SetEventId.remove.contentEquals(eventName)) {
+                        outWire.write(CoreFields.reply).bool(
+                                underlyingCollection.remove(fromWire.apply(valueIn)));
+                        return;
+                    }
+
+                    if (SetEventId.containsAll.contentEquals(eventName)) {
+                        outWire.write(CoreFields.reply).bool(
+                                underlyingCollection.remove(collectionFromWire()));
+                        return;
+                    }
+
+                    if (SetEventId.addAll.contentEquals(eventName)) {
+                        outWire.write(CoreFields.reply).bool(
+                                underlyingCollection.addAll(collectionFromWire()));
+                        return;
+                    }
+
+
+                    if (SetEventId.removeAll.contentEquals(eventName)) {
+                        outWire.write(CoreFields.reply).bool(
+                                underlyingCollection.removeAll(collectionFromWire()));
+                        return;
+                    }
+
+                    if (SetEventId.retainAll.contentEquals(eventName)) {
+                        outWire.write(CoreFields.reply).bool(
+                                underlyingCollection.retainAll(collectionFromWire()));
                         return;
                     }
 
                     throw new IllegalStateException("unsupported event=" + eventName);
+
                 });
 
 
@@ -163,18 +204,33 @@ public class SetWireHandlerProcessor<U> implements SetWireHandler<U>, Consumer<W
     };
 
 
+    private C collectionFromWire() {
+
+        C c = factory.get();
+        final ValueIn valueIn = outWire.getValueIn();
+        while (valueIn.hasNextSequenceItem()) {
+            c.add(fromWire.apply(valueIn));
+        }
+        return c;
+
+    }
+
     @Override
     public void process(Wire in,
                         Wire out,
-                        Set<U> set,
+                        C collection,
                         CharSequence csp,
                         BiConsumer<ValueOut, U> toWire,
-                        Function<ValueIn, U> fromWire) throws StreamCorruptedException {
+                        Function<ValueIn, U> fromWire,
+                        Supplier<C> factory) throws StreamCorruptedException {
+
+
 
 
         this.fromWire = fromWire;
         this.toWire = toWire;
-        this.underlyingSet = set;
+        this.underlyingCollection = collection;
+        this.factory = factory;
 
         try {
             this.inWire = in;

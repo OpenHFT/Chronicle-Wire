@@ -16,29 +16,31 @@
  * limitations under the License.
  */
 
-package net.openhft.chronicle.wire.set;
+package net.openhft.chronicle.wire.collection;
 
 import net.openhft.chronicle.wire.*;
 
 import java.io.StreamCorruptedException;
-import java.util.Set;
+import java.util.Collection;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
-import static net.openhft.chronicle.wire.set.SetWireHandler.Params.key;
-import static net.openhft.chronicle.wire.set.SetWireHandler.Params.segment;
+import static net.openhft.chronicle.wire.collection.CollectionWireHandler.Params.key;
+import static net.openhft.chronicle.wire.collection.CollectionWireHandler.Params.segment;
 
 /**
- * @param <E> the type of each element in that collection
+ * @param <U> the type of each element in that collection
  */
-public interface SetWireHandler<E> {
+public interface CollectionWireHandler<U, C extends Collection<U>> {
 
     void process(Wire in,
                  Wire out,
-                 Set<E> set,
+                 C set,
                  CharSequence csp,
-                 BiConsumer<ValueOut, E> toWire,
-                 Function<ValueIn, E> fromWire) throws StreamCorruptedException;
+                 BiConsumer<ValueOut, U> toWire,
+                 Function<ValueIn, U> fromWire,
+                 Supplier<C> factory) throws StreamCorruptedException;
 
 
     enum Params implements WireKey {
