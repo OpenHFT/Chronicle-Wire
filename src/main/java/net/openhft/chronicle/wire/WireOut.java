@@ -28,6 +28,7 @@ import java.util.function.Consumer;
  * Created by peter.lawrey on 12/01/15.
  */
 public interface WireOut {
+
     /**
      * Write an empty filed marker
      */
@@ -69,4 +70,8 @@ public interface WireOut {
     default void writeDocument(boolean metaData, Consumer<WireOut> writer) {
         Wires.writeData(this, metaData, writer);
     }
+
+    WriteMarshallable EMPTY = wire -> {
+        // nothing
+    };
 }
