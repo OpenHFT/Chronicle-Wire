@@ -36,7 +36,7 @@ public interface CollectionWireHandler<U, C extends Collection<U>> {
 
     void process(Wire in,
                  Wire out,
-                 C set,
+                 C collection,
                  CharSequence csp,
                  BiConsumer<ValueOut, U> toWire,
                  Function<ValueIn, U> fromWire,
