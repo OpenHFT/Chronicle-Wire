@@ -24,6 +24,7 @@ package net.openhft.chronicle.wire.map;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.wire.util.ExceptionMarshaller;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -235,9 +236,13 @@ public class MapWireHandlerProcessor<K, V> implements
 
                             final Params[] params = putIfAbsent.params();
                             final K key = wireToK.apply(wire.read(params[0]));
-                            final V value = wireToV.apply(wire.read(params[1]));
-                            final V v = map.putIfAbsent(key, value);
-                            vToWire.accept(outWire.writeEventName(reply), v);
+                            final V newValue = wireToV.apply(wire.read(params[1]));
+                            final V result = map.putIfAbsent(key, newValue);
+
+                            nullCheck(key);
+                            nullCheck(newValue);
+
+                            vToWire.accept(outWire.writeEventName(reply), result);
 
                         });
 
@@ -264,19 +269,24 @@ public class MapWireHandlerProcessor<K, V> implements
 
 
                     if (containsKey.contentEquals(eventName)) {
+                        final K key = wireToK.apply(valueIn);
+                        nullCheck(key);
                         outWire.writeEventName(reply)
-                                .bool(map.containsKey(wireToK.apply(valueIn)));
+                                .bool(map.containsKey(key));
                         return;
                     }
 
                     if (containsValue.contentEquals(eventName)) {
+                        final V value = wireToV.apply(valueIn);
+                        nullCheck(value);
                         outWire.writeEventName(reply).bool(
-                                map.containsValue(wireToV.apply(valueIn)));
+                                map.containsValue(value));
                         return;
                     }
 
                     if (get.contentEquals(eventName)) {
                         final K key = wireToK.apply(valueIn);
+                        nullCheck(key);
                         vToWire.accept(outWire.writeEventName(reply),
                                 map.get(key));
                         return;
@@ -290,9 +300,11 @@ public class MapWireHandlerProcessor<K, V> implements
                             final K key = wireToK.apply(wire.read(params[0]));
                             final V value = wireToV.apply(wire.read(params[1]));
 
+                            nullCheck(key);
+                            nullCheck(value);
+
                             vToWire.accept(outWire.writeEventName(reply),
                                     map.put(key, value));
-
                         });
 
                         return;
@@ -300,6 +312,7 @@ public class MapWireHandlerProcessor<K, V> implements
 
                     if (remove.contentEquals(eventName)) {
                         final K key = wireToK.apply(valueIn);
+                        nullCheck(key);
                         vToWire.accept(outWire.writeEventName(reply), map.remove(key));
                         return;
                     }
@@ -310,6 +323,9 @@ public class MapWireHandlerProcessor<K, V> implements
                             final Params[] params = replace.params();
                             final K key = wireToK.apply(wire.read(params[0]));
                             final V value = wireToV.apply(wire.read(params[1]));
+
+                            nullCheck(key);
+                            nullCheck(value);
 
                             vToWire.accept(outWire.writeEventName(reply),
                                     map.replace(key, value));
@@ -326,6 +342,9 @@ public class MapWireHandlerProcessor<K, V> implements
                             final K key = wireToK.apply(wire.read(params[0]));
                             final V oldValue = wireToV.apply(wire.read(params[1]));
                             final V newValue = wireToV.apply(wire.read(params[2]));
+                            nullCheck(key);
+                            nullCheck(oldValue);
+                            nullCheck(newValue);
                             outWire.writeEventName(reply).bool(map.replace(key, oldValue, newValue));
 
                         });
@@ -337,6 +356,8 @@ public class MapWireHandlerProcessor<K, V> implements
                             final Params[] params = putIfAbsent.params();
                             final K key = wireToK.apply(wire.read(params[0]));
                             final V value = wireToV.apply(wire.read(params[1]));
+                            nullCheck(key);
+                            nullCheck(value);
                             vToWire.accept(outWire.writeEventName(reply),
                                     map.putIfAbsent(key, value));
 
@@ -350,6 +371,8 @@ public class MapWireHandlerProcessor<K, V> implements
                             final Params[] params = removeWithValue.params();
                             final K key = wireToK.apply(wire.read(params[0]));
                             final V value = wireToV.apply(wire.read(params[1]));
+                            nullCheck(key);
+                            nullCheck(value);
                             outWire.writeEventName(reply).bool(map.remove(key, value));
                         });
                     }
@@ -389,6 +412,11 @@ public class MapWireHandlerProcessor<K, V> implements
         }
     };
 
+    private void nullCheck(Object o) {
+        if (o == null)
+            throw new NullPointerException();
+    }
+
     private void createProxy(final String type) {
         outWire.writeEventName(reply).type("set-proxy").writeValue()
 
@@ -419,8 +447,10 @@ public class MapWireHandlerProcessor<K, V> implements
 
             } catch (Exception exception) {
                 outWire.bytes().position(position);
-                outWire.writeEventName(() -> "exception").marshallable(
-                        new net.openhft.chronicle.wire.util.ExceptionMarshaller(exception));
+                outWire.writeEventName(() -> "exception");
+
+                final WriteMarshallable exceptionMarshaller = new ExceptionMarshaller(exception);
+                exceptionMarshaller.writeMarshallable(outWire);
             }
 
             // write 'reply : {} ' if no data was sent

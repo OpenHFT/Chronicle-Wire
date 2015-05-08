@@ -55,17 +55,23 @@ public class ExceptionMarshaller implements Marshallable {
 
         wireIn.getValueIn().marshallable(m -> {
 
-            try {
-
-                final String message = m.read(() -> "message").text();
-                if (message != null) {
-                    Field messageField = Exception.class.getDeclaredField("detailMessage");
+            final String message = m.read(() -> "message").text();
+            if (message != null) {
+                Field messageField = null;
+                try {
+                    messageField = Exception.class.getDeclaredField("detailMessage");
                     messageField.set(exception, message);
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    LOG.error("", e);
                 }
 
+            }
+        });
 
-                final ValueIn stackTrace = m.read(() -> "stackTrace");
 
+        try {
+
+            final ValueIn stackTrace = wireIn.getValueIn();
                 final List<StackTraceElement> stes = new ArrayList<>();
 
                 while (stackTrace.hasNextSequenceItem()) {
@@ -100,9 +106,6 @@ public class ExceptionMarshaller implements Marshallable {
                 Jvm.rethrow(e);
             }
 
-        });
-
-
     }
 
 
@@ -111,18 +114,13 @@ public class ExceptionMarshaller implements Marshallable {
 
         final ValueOut valueOut0 = wireOut.getValueOut();
         valueOut0.type(exception.getClass().getName());
+        valueOut0.marshallable(w -> w.write(() -> "message").text(exception.getMessage()));
 
-        valueOut0.marshallable(w -> {
-            w.write(() -> "message").text(exception.getMessage());
-            final ValueOut valueOut = w.write(() -> "stackTrace");
-
-            try {
-                writeStackTraceElement(exception, valueOut);
-            } catch (Exception ignore) {
-                LOG.error("", ignore);
-            }
-
-        });
+        try {
+            writeStackTraceElement(exception, valueOut0);
+        } catch (Exception ignore) {
+            LOG.error("", ignore);
+        }
 
     }
 

@@ -58,7 +58,9 @@ public class TextWire implements Wire, InternalWireIn {
 
     public static final String FIELD_SEP = "";
     private static final String END_FIELD = "\n";
-    public static final String SEQUENCE_L1 = "  - ";
+    public static final String SEQUENCE_L1 = "- ";
+    public static final String MAP = "!!map";
+
     final Bytes<?> bytes;
     final ValueOut valueOut = new TextValueOut();
     final ValueIn valueIn = new TextValueIn();
@@ -541,7 +543,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut sequence(Consumer<ValueOut> writer) {
 
-            bytes.append("\n  - ");
+            bytes.append("\n" + SEQUENCE_L1);
             sep = "";
             final boolean nested = isNested();
             try {
@@ -578,8 +580,10 @@ public class TextWire implements Wire, InternalWireIn {
 
         @Override
         public WireOut map(@NotNull final Map map) {
+
+            type("!map ");
             nested = true;
-            type("!map");
+
             map.forEach((k, v) -> sequence(w -> w.marshallable(m -> m
                     .write(() -> "key").object(k)
                     .write(() -> "value").object(v))));
@@ -744,7 +748,7 @@ public class TextWire implements Wire, InternalWireIn {
                     bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                     byte[] decode = Base64.getDecoder().decode(sb.toString());
                     return decode;
-                } else if (str.equals("!!map")) {
+                } else if (str.equals(MAP)) {
                     sb.append(bytes.toString());
                     return sb.toString().getBytes();
                 } else {
@@ -1044,7 +1048,6 @@ public class TextWire implements Wire, InternalWireIn {
                 // ensure that you can read past the end of this sequence object
                 final long newLimit = position + len;
                 bytes.limit(newLimit);
-
                 reader.accept(TextWire.this.valueIn);
             } finally {
                 bytes.limit(limit);
@@ -1153,7 +1156,7 @@ public class TextWire implements Wire, InternalWireIn {
 
                 if ("!!null".contentEquals(sb)) {
                     return null;
-                } else if ("!!map".contentEquals(sb)) {
+                } else if (MAP.contentEquals(sb)) {
                     while (hasNextSequenceItem()) {
 
                         sequence(s -> s.marshallable(r -> {
@@ -1168,7 +1171,7 @@ public class TextWire implements Wire, InternalWireIn {
                     }
                     return usingMap;
                 } else {
-                    throw new IORuntimeException("Unsupported type " + str);
+                    throw new IORuntimeException("Unsupported type :" + str);
                 }
             }
             return usingMap;
@@ -1184,7 +1187,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (peekCode() == '!') {
                 bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                 String str = sb.toString();
-                if ("!!map".contentEquals(sb)) {
+                if (MAP.contentEquals(sb)) {
                     while (hasNext()) {
 
                         sequence(s -> s.marshallable(r -> {
@@ -1275,13 +1278,10 @@ public class TextWire implements Wire, InternalWireIn {
         public boolean isNull() {
             consumeWhiteSpace();
 
-            if (peekStringIgnoreCase("!!null\n")) {
-                bytes.skip("!!null\n".length());
-                return true;
-            }
-
             if (peekStringIgnoreCase("!!null")) {
                 bytes.skip("!!null".length());
+                if (bytes.remaining() > 0 && bytes.readByte(bytes.position()) == '\n')
+                    bytes.skip(1);
                 return true;
             }
 
