@@ -50,7 +50,7 @@ public class WireUtil {
         } else if (RawWire.class.isAssignableFrom(wireType)) {
             return RawWire::new;
         } else {
-            throw new UnsupportedOperationException("todo");
+            throw new UnsupportedOperationException("todo (byteToWireFor)");
         }
     }
 

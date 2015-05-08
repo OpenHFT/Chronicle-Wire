@@ -542,7 +542,7 @@ public class TextWire implements Wire, InternalWireIn {
         public WireOut sequence(Consumer<ValueOut> writer) {
 
             bytes.append("\n  - ");
-
+            sep = "";
             final boolean nested = isNested();
             try {
                 nested(false);
@@ -811,26 +811,19 @@ public class TextWire implements Wire, InternalWireIn {
         private long readSequenceLength() {
             long start = bytes.position();
             try {
-                consumeWhiteSpace();
-                int code = readCode();
-                switch (code) {
 
-                    case '-': {
-                        for (; ; ) {
-                            byte b = bytes.readByte();
-                            if (b == '\n') {
-                                return (bytes.position() - start) + 1;
-                            }
-                            if (bytes.remaining() == 0)
-                                return bytes.limit() - start;
-                            // do nothing
-                        }
-                    }
-                    default:
-                        // TODO needs to be made much more efficient.
-                        bytes();
-                        return bytes.position() - start;
+                for (; ; ) {
+
+                    byte b = bytes.readByte();
+                    if (b == '\n')
+                        return (bytes.position() - start) - 1;
+
+                    if (bytes.remaining() == 0)
+                        return bytes.limit() - start;
+
                 }
+
+
             } finally {
                 bytes.position(start);
             }
@@ -1040,6 +1033,8 @@ public class TextWire implements Wire, InternalWireIn {
             if (code != '-')
                 throw new IORuntimeException("Unsupported type " + (char) code + "(" + code + ")");
 
+            bytes.skip(1); // skip the '-'
+            consumeWhiteSpace();
             final long len = readSequenceLength();
 
             final long limit = bytes.limit();
@@ -1049,8 +1044,7 @@ public class TextWire implements Wire, InternalWireIn {
                 // ensure that you can read past the end of this sequence object
                 final long newLimit = position + len;
                 bytes.limit(newLimit);
-                bytes.skip(1); // skip the [
-                consumeWhiteSpace();
+
                 reader.accept(TextWire.this.valueIn);
             } finally {
                 bytes.limit(limit);

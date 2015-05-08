@@ -249,48 +249,13 @@ public class MapWireHandlerProcessor<K, V> implements
                         return;
                     }
 
-                    if (keySet.contentEquals(eventName)) {
-                        outWire.writeEventName(reply).type("set-proxy").writeValue()
-
-                                .marshallable(w -> {
-                                    CharSequence root = csp.subSequence(0, csp
-                                            .length() - "#map".length());
-
-                                    final StringBuilder csp = acquireStringBuilder()
-                                            .append(root)
-                                            .append("#keySet");
-
-                                    w.write(CoreFields.csp).text(csp);
-                                    w.write(CoreFields.cid).int64(createCid(csp));
-                                });
-
-
+                    if (keySet.contentEquals(eventName) ||
+                            values.contentEquals(eventName) ||
+                            entrySet.contentEquals(eventName)) {
+                        createProxy(eventName.toString());
                         return;
                     }
 
-                    if (values.contentEquals(eventName)) {
-                        throw new UnsupportedOperationException("todo");
-                    }
-
-
-                    if (entrySet.contentEquals(eventName)) {
-                        outWire.writeEventName(reply).type("set-proxy").writeValue()
-
-                                .marshallable(w -> {
-                                    CharSequence root = csp.subSequence(0, csp
-                                            .length() - "#map".length());
-
-                                    final StringBuilder csp = acquireStringBuilder()
-                                            .append(root)
-                                            .append("#entrySet");
-
-                                    w.write(CoreFields.csp).text(csp);
-                                    w.write(CoreFields.cid).int64(createCid(csp));
-                                });
-
-
-                        return;
-                    }
 
                     if (size.contentEquals(eventName)) {
                         outWire.writeEventName(reply).int64(map.size());
@@ -381,7 +346,12 @@ public class MapWireHandlerProcessor<K, V> implements
                     }
 
                     if (removeWithValue.contentEquals(eventName)) {
-                        throw new UnsupportedOperationException("todo");
+                        valueIn.marshallable(wire -> {
+                            final Params[] params = removeWithValue.params();
+                            final K key = wireToK.apply(wire.read(params[0]));
+                            final V value = wireToV.apply(wire.read(params[1]));
+                            outWire.writeEventName(reply).bool(map.remove(key, value));
+                        });
                     }
 
 
@@ -418,6 +388,21 @@ public class MapWireHandlerProcessor<K, V> implements
 
         }
     };
+
+    private void createProxy(final String type) {
+        outWire.writeEventName(reply).type("set-proxy").writeValue()
+
+                .marshallable(w -> {
+                    CharSequence root = csp.subSequence(0, csp
+                            .length() - "#map".length());
+
+                    final StringBuilder csp = acquireStringBuilder()
+                            .append(root).append("#").append(type);
+
+                    w.write(CoreFields.csp).text(csp);
+                    w.write(CoreFields.cid).int64(createCid(csp));
+                });
+    }
 
 
     /**
