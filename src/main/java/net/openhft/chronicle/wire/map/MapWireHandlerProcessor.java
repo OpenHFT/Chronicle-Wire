@@ -52,10 +52,8 @@ public class MapWireHandlerProcessor<K, V> implements
         MapWireHandler<K, V>,
         Consumer<WireHandlers> {
 
-
     public static boolean IS_DEBUG = java.lang.management.ManagementFactory.getRuntimeMXBean().
-            getInputArguments().toString().indexOf("jdwp") >= 0;
-
+            getInputArguments().toString().contains("jdwp");
 
     private CharSequence csp;
     private BiConsumer<ValueOut, V> vToWire;
@@ -64,7 +62,11 @@ public class MapWireHandlerProcessor<K, V> implements
 
 
     @Override
-    public void process(Wire in, Wire out, Map<K, V> map, CharSequence csp, BiConsumer<ValueOut, V> vToWire, Function<ValueIn, K> kFromWire, Function<ValueIn, V> vFromWire) throws StreamCorruptedException {
+    public void process(@NotNull final Wire in,
+                        @NotNull final Wire out, Map<K, V> map,
+                        @NotNull final CharSequence csp, BiConsumer<ValueOut, V> vToWire,
+                        @NotNull final Function<ValueIn, K> kFromWire,
+                        @NotNull final Function<ValueIn, V> vFromWire) throws StreamCorruptedException {
 
         this.vToWire = vToWire;
         this.wireToK = kFromWire;
@@ -80,7 +82,6 @@ public class MapWireHandlerProcessor<K, V> implements
             LOG.error("", e);
         }
     }
-
 
     enum Params implements WireKey {
         key,
@@ -137,9 +138,9 @@ public class MapWireHandlerProcessor<K, V> implements
 
     public static final int SIZE_OF_SIZE = 2;
 
-    private final Map<Long, CharSequence> cidToCsp;
+    private final Map<Long, String> cidToCsp;
     @NotNull
-    private final Map<CharSequence, Long> cspToCid = new HashMap<>();
+    private final Map<String, Long> cspToCid = new HashMap<>();
 
     private Wire inWire = null;
     private Wire outWire = null;
@@ -165,7 +166,7 @@ public class MapWireHandlerProcessor<K, V> implements
 
     private Map<K, V> map;
 
-    public MapWireHandlerProcessor(@NotNull final Map<Long, CharSequence> cidToCsp) throws IOException {
+    public MapWireHandlerProcessor(@NotNull final Map<Long, String> cidToCsp) throws IOException {
         this.cidToCsp = cidToCsp;
     }
 
@@ -186,12 +187,13 @@ public class MapWireHandlerProcessor<K, V> implements
     private long createCid(CharSequence csp) {
 
         final long newCid = cid.incrementAndGet();
-        final Long oldCid = cspToCid.putIfAbsent(csp, newCid);
+        String cspStr = csp.toString();
+        final Long aLong = cspToCid.putIfAbsent(cspStr, newCid);
 
-        if (oldCid != null)
-            return oldCid;
+        if (aLong != null)
+            return aLong;
 
-        cidToCsp.put(newCid, csp.toString());
+        cidToCsp.put(newCid, cspStr);
         return newCid;
 
     }
