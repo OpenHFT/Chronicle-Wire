@@ -186,10 +186,10 @@ public class MapWireHandlerProcessor<K, V> implements
     private long createCid(CharSequence csp) {
 
         final long newCid = cid.incrementAndGet();
-        final Long aLong = cspToCid.putIfAbsent(csp, newCid);
+        final Long oldCid = cspToCid.putIfAbsent(csp, newCid);
 
-        if (aLong != null)
-            return aLong;
+        if (oldCid != null)
+            return oldCid;
 
         cidToCsp.put(newCid, csp.toString());
         return newCid;
