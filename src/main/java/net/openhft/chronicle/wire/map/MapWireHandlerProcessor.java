@@ -424,10 +424,10 @@ public class MapWireHandlerProcessor<K, V> implements
 
                 .marshallable(w -> {
                     CharSequence root = csp.subSequence(0, csp
-                            .length() - "#map".length());
+                            .length() - "map".length());
 
                     final StringBuilder csp = acquireStringBuilder()
-                            .append(root).append("#").append(type);
+                            .append(root).append(type);
 
                     w.write(CoreFields.csp).text(csp);
                     w.write(CoreFields.cid).int64(createCid(csp));
