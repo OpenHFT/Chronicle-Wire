@@ -393,7 +393,7 @@ public class MapWireHandlerProcessor<K, V> implements
 
             {
 
-                if (IS_DEBUG) {
+                if (IS_DEBUG && YamlLogging.showServerWrites) {
 
                     long len = outBytes.position() - SIZE_OF_SIZE;
                     if (len == 0) {
