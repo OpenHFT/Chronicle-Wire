@@ -183,21 +183,21 @@ public class CollectionWireHandlerProcessor<U, C extends Collection<U>> implemen
                 LOG.error("", e);
             } finally {
 
+                if (YamlLogging.showServerWrites) {
+                    long len = outBytes.position() - SIZE_OF_SIZE;
+                    if (len == 0) {
+                        System.out.println(
+                                "\n\nserver writes:\n\n<EMPTY>");
+                    } else {
 
-                long len = outBytes.position() - SIZE_OF_SIZE;
-                if (len == 0) {
-                    System.out.println("--------------------------------------------\n" +
-                            "server writes:\n\n<EMPTY>");
-                } else {
 
+                        System.out.println(
+                                "server writes:\n\n" +
+                                        //      Bytes.toDebugString(outBytes, SIZE_OF_SIZE, len));
+                                        Wires.fromSizePrefixedBlobs(outBytes, SIZE_OF_SIZE, len));
 
-                    System.out.println("--------------------------------------------\n" +
-                            "server writes:\n\n" +
-                            //      Bytes.toDebugString(outBytes, SIZE_OF_SIZE, len));
-                            Wires.fromSizePrefixedBlobs(outBytes, SIZE_OF_SIZE, len));
-
+                    }
                 }
-
             }
 
         }

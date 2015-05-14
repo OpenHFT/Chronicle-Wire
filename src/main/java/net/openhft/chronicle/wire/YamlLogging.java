@@ -7,11 +7,11 @@ public class YamlLogging {
 
 
     public static final boolean showServerWrites = false;
-    public static boolean clientWrites = false;
-    public static String title = "";
-    public static String writeMessage = "";
-    public static boolean clientReads = false;
-    public static boolean showServerReads = false;
+    public static volatile boolean clientWrites = false;
+    public static volatile String title = "";
+    public static volatile String writeMessage = "";
+    public static volatile boolean clientReads = false;
+    public static volatile boolean showServerReads = false;
 
     public static String readMessage = "";
 }
