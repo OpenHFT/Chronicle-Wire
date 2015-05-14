@@ -24,6 +24,7 @@ package net.openhft.chronicle.wire.map;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.wire.collection.CollectionWireHandlerProcessor;
 import net.openhft.chronicle.wire.util.ExceptionMarshaller;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -135,8 +136,6 @@ public class MapWireHandlerProcessor<K, V> implements
 
 
     private static final Logger LOG = LoggerFactory.getLogger(MapWireHandlerProcessor.class);
-
-    public static final int SIZE_OF_SIZE = 2;
 
     private final Map<Long, String> cidToCsp;
     @NotNull
@@ -395,7 +394,7 @@ public class MapWireHandlerProcessor<K, V> implements
 
                 if (IS_DEBUG && YamlLogging.showServerWrites) {
 
-                    long len = outBytes.position() - SIZE_OF_SIZE;
+                    long len = outBytes.position() - CollectionWireHandlerProcessor.SIZE_OF_SIZE;
                     if (len == 0) {
                         System.out.println("--------------------------------------------\n" +
                                 "server writes:\n\n<EMPTY>");
@@ -404,7 +403,7 @@ public class MapWireHandlerProcessor<K, V> implements
 
                         System.out.println("--------------------------------------------\n" +
                                 "server writes:\n\n" +
-                                Wires.fromSizePrefixedBlobs(outBytes, SIZE_OF_SIZE, len));
+                                Wires.fromSizePrefixedBlobs(outBytes, CollectionWireHandlerProcessor.SIZE_OF_SIZE, len));
 
                     }
                 }

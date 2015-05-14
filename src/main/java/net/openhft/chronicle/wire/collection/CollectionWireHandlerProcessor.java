@@ -50,7 +50,7 @@ public class CollectionWireHandlerProcessor<U, C extends Collection<U>> implemen
 
     private static final Logger LOG = LoggerFactory.getLogger(CollectionWireHandlerProcessor.class);
 
-    public static final int SIZE_OF_SIZE = 2;
+    public static final int SIZE_OF_SIZE = 4;
 
     private Wire inWire = null;
     private Wire outWire = null;
