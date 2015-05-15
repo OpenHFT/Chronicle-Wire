@@ -227,7 +227,7 @@ public interface ValueIn {
                     ? Wires.acquireStringBuilder()
                     : (StringBuilder) using;
             text(builder);
-            return using;
+            return (E) builder;
 
         } else if (CharSequence.class.isAssignableFrom(clazz)) {
             //noinspection unchecked
