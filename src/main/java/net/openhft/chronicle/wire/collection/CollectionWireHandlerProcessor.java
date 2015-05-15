@@ -56,27 +56,9 @@ public class CollectionWireHandlerProcessor<U, C extends Collection<U>> implemen
     private Wire outWire = null;
 
     private C underlyingCollection;
-    public long tid;
+    private long tid;
 
     private Supplier<C> factory;
-    private final Consumer<WireIn> metaDataConsumer = new Consumer<WireIn>() {
-
-        @Override
-        public void accept(WireIn wireIn) {
-
-            StringBuilder sb = Wires.acquireStringBuilder();
-
-            for (; ; ) {
-                final ValueIn read = inWire.read(sb);
-                if (CoreFields.tid.contentEquals(sb)) {
-                    tid = read.int64();
-                    break;
-                }
-            }
-
-
-        }
-    };
 
     private final Consumer<WireIn> dataConsumer = new Consumer<WireIn>() {
 
@@ -89,7 +71,8 @@ public class CollectionWireHandlerProcessor<U, C extends Collection<U>> implemen
                 final StringBuilder eventName = acquireStringBuilder();
                 final ValueIn valueIn = inWire.readEventName(eventName);
 
-                outWire.writeDocument(true, wire -> outWire.write(CoreFields.tid).int64(tid));
+                outWire.writeDocument(true, wire -> outWire.write(CoreFields.tid).int64
+                        (CollectionWireHandlerProcessor.this.tid));
 
                 outWire.writeDocument(false, out -> {
 
@@ -128,20 +111,17 @@ public class CollectionWireHandlerProcessor<U, C extends Collection<U>> implemen
                         return;
                     }
 
-
                     if (SetEventId.contains.contentEquals(eventName)) {
                         outWire.write(CoreFields.reply).bool(
                                 underlyingCollection.contains(fromWire.apply(valueIn)));
                         return;
                     }
 
-
                     if (SetEventId.add.contentEquals(eventName)) {
                         outWire.write(CoreFields.reply).bool(
                                 underlyingCollection.add(fromWire.apply(valueIn)));
                         return;
                     }
-
 
                     if (SetEventId.remove.contentEquals(eventName)) {
                         outWire.write(CoreFields.reply).bool(
@@ -160,7 +140,6 @@ public class CollectionWireHandlerProcessor<U, C extends Collection<U>> implemen
                                 underlyingCollection.addAll(collectionFromWire()));
                         return;
                     }
-
 
                     if (SetEventId.removeAll.contentEquals(eventName)) {
                         outWire.write(CoreFields.reply).bool(
@@ -216,15 +195,14 @@ public class CollectionWireHandlerProcessor<U, C extends Collection<U>> implemen
     }
 
     @Override
-    public void process(Wire in,
-                        Wire out,
-                        C collection,
-                        CharSequence csp,
-                        BiConsumer<ValueOut, U> toWire,
-                        Function<ValueIn, U> fromWire,
-                        Supplier<C> factory) throws StreamCorruptedException {
-
-
+    public void process(@NotNull Wire in,
+                        @NotNull Wire out,
+                        @NotNull C collection,
+                        @NotNull CharSequence csp,
+                        @NotNull BiConsumer<ValueOut, U> toWire,
+                        @NotNull Function<ValueIn, U> fromWire,
+                        @NotNull Supplier<C> factory,
+                        long tid) throws StreamCorruptedException {
 
 
         this.fromWire = fromWire;
@@ -235,8 +213,8 @@ public class CollectionWireHandlerProcessor<U, C extends Collection<U>> implemen
         try {
             this.inWire = in;
             this.outWire = out;
-
-            inWire.readDocument(metaDataConsumer, dataConsumer);
+            this.tid = tid;
+            dataConsumer.accept(in);
         } catch (Exception e) {
             LOG.error("", e);
         }

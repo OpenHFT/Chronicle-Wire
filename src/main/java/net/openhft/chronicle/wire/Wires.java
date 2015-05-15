@@ -127,6 +127,7 @@ public enum Wires {
         return (int) (len & LENGTH_MASK);
     }
 
+
     public static boolean isReady(long len) {
         return (len & NOT_READY) == 0;
     }
@@ -134,6 +135,21 @@ public enum Wires {
     public static boolean isData(long len) {
         return (len & META_DATA) == 0;
     }
+
+    public static boolean isData(@NotNull WireIn wireIn) {
+        final Bytes bytes = wireIn.bytes();
+
+        if (bytes.remaining() < 4)
+            throw new IllegalStateException();
+
+        long position = bytes.position();
+        int header = bytes.readVolatileInt(position);
+        if (!isKnownLength(header))
+            throw new IllegalStateException("unknown len, header=" + header);
+
+        return isData(header);
+    }
+
 
     @NotNull
     public static String fromSizePrefixedBlobs(Bytes bytes, long position, long length) {

@@ -21,6 +21,7 @@ package net.openhft.chronicle.wire.map;
 import net.openhft.chronicle.wire.ValueIn;
 import net.openhft.chronicle.wire.ValueOut;
 import net.openhft.chronicle.wire.Wire;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.StreamCorruptedException;
 import java.util.Map;
@@ -30,12 +31,13 @@ import java.util.function.Function;
 
 public interface MapWireHandler<K, V> {
 
-    void process(Wire in,
-                 Wire out,
-                 Map<K, V> map,
-                 CharSequence csp,
-                 BiConsumer<ValueOut, V> vToWire,
-                 Function<ValueIn, K> kFromWire,
-                 Function<ValueIn, V> vFromWire) throws StreamCorruptedException;
+    void process(@NotNull Wire in,
+                 @NotNull Wire out,
+                 @NotNull Map<K, V> map,
+                 @NotNull CharSequence csp,
+                 long tid,
+                 @NotNull BiConsumer<ValueOut, V> vToWire,
+                 @NotNull Function<ValueIn, K> kFromWire,
+                 @NotNull Function<ValueIn, V> vFromWire) throws StreamCorruptedException;
 
 }

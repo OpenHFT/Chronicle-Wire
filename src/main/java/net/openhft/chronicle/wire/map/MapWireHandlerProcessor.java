@@ -64,8 +64,8 @@ public class MapWireHandlerProcessor<K, V> implements
 
     @Override
     public void process(@NotNull final Wire in,
-                        @NotNull final Wire out, Map<K, V> map,
-                        @NotNull final CharSequence csp, BiConsumer<ValueOut, V> vToWire,
+                        @NotNull final Wire out, @NotNull Map<K, V> map,
+                        @NotNull final CharSequence csp, long tid, @NotNull BiConsumer<ValueOut, V> vToWire,
                         @NotNull final Function<ValueIn, K> kFromWire,
                         @NotNull final Function<ValueIn, V> vFromWire) throws StreamCorruptedException {
 
@@ -78,10 +78,12 @@ public class MapWireHandlerProcessor<K, V> implements
             this.outWire = out;
             this.map = map;
             this.csp = csp;
-            inWire.readDocument(metaDataConsumer, dataConsumer);
+            this.tid = tid;
+            dataConsumer.accept(in);
         } catch (Exception e) {
             LOG.error("", e);
         }
+
     }
 
     enum Params implements WireKey {
@@ -144,25 +146,6 @@ public class MapWireHandlerProcessor<K, V> implements
     private Wire inWire = null;
     private Wire outWire = null;
 
-
-    private final Consumer<WireIn> metaDataConsumer = new Consumer<WireIn>() {
-
-        @Override
-        public void accept(WireIn wireIn) {
-
-            StringBuilder sb = Wires.acquireStringBuilder();
-
-            for (; ; ) {
-                final ValueIn read = inWire.read(sb);
-                if (CoreFields.tid.contentEquals(sb)) {
-                    tid = read.int64();
-                    break;
-                }
-            }
-
-        }
-    };
-
     private Map<K, V> map;
 
     public MapWireHandlerProcessor(@NotNull final Map<Long, String> cidToCsp) throws IOException {
@@ -174,7 +157,7 @@ public class MapWireHandlerProcessor<K, V> implements
 
     }
 
-    public long tid;
+    private long tid;
     private final AtomicLong cid = new AtomicLong();
 
     /**
@@ -203,7 +186,7 @@ public class MapWireHandlerProcessor<K, V> implements
 
         @Override
         public void accept(WireIn wireIn) {
-            final Bytes<?> outBytes = outWire.bytes();
+
             try {
 
                 final ValueIn valueIn = inWire.readEventName(eventName);
@@ -214,7 +197,6 @@ public class MapWireHandlerProcessor<K, V> implements
 
                     if (clear.contentEquals(eventName)) {
                         map.clear();
-
                         return;
                     }
 
@@ -393,7 +375,7 @@ public class MapWireHandlerProcessor<K, V> implements
             {
 
                 if (IS_DEBUG && YamlLogging.showServerWrites) {
-
+                    final Bytes<?> outBytes = outWire.bytes();
                     long len = outBytes.position() - CollectionWireHandlerProcessor.SIZE_OF_SIZE;
                     if (len == 0) {
                         System.out.println("--------------------------------------------\n" +

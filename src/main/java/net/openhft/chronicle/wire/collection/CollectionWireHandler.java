@@ -40,7 +40,8 @@ public interface CollectionWireHandler<U, C extends Collection<U>> {
                  CharSequence csp,
                  BiConsumer<ValueOut, U> toWire,
                  Function<ValueIn, U> fromWire,
-                 Supplier<C> factory) throws StreamCorruptedException;
+                 Supplier<C> factory,
+                 long tid) throws StreamCorruptedException;
 
 
     enum Params implements WireKey {
