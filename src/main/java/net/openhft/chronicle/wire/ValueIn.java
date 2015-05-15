@@ -130,7 +130,7 @@ public interface ValueIn {
 
 
     @NotNull
-    default Marshallable typedMarshallable() {
+    default ReadMarshallable typedMarshallable() {
         try {
             StringBuilder sb = Wires.acquireStringBuilder();
             type(sb);
@@ -143,7 +143,7 @@ public interface ValueIn {
                 throw new IllegalStateException("its not possible to Marshallable and object that" +
                         " is not of type Marshallable, type=" + sb);
 
-            final Marshallable m = UnsafeMemory.MEMORY.allocateInstance((Class<Marshallable>) clazz);
+            final ReadMarshallable m = UnsafeMemory.MEMORY.allocateInstance((Class<ReadMarshallable>) clazz);
 
             marshallable(m);
             return m;
@@ -159,7 +159,6 @@ public interface ValueIn {
     WireIn marshallable(@NotNull ReadMarshallable object);
 
 
-
     /**
      * reads the map from the wire
      */
@@ -167,8 +166,8 @@ public interface ValueIn {
         map(String.class, String.class, usingMap);
     }
 
-    void typedMap(@NotNull final Map<Marshallable, Marshallable> usingMap);
-
+    <K extends ReadMarshallable, V extends ReadMarshallable>
+    void typedMap(@NotNull final Map<K, V> usingMap);
 
     /**
      * reads the map from the wire
@@ -275,7 +274,6 @@ public interface ValueIn {
             throw new IllegalStateException("unsupported type");
         }
     }
-
 
 
 }

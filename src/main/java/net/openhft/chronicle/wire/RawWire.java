@@ -174,7 +174,10 @@ public class RawWire implements Wire, InternalWireIn {
     }
 
     class RawValueOut implements ValueOut {
-        boolean nested = false;
+        @Override
+        public ValueOut leaf() {
+            return this;
+        }
 
         @Override
         public Wire bool(Boolean flag) {
@@ -329,13 +332,8 @@ public class RawWire implements Wire, InternalWireIn {
             text(lastField);
             long position = bytes.position();
             bytes.writeInt(0);
-            boolean nested = isNested();
-            try {
-                nested(true);
+
                 writer.accept(this);
-            } finally {
-                nested(nested);
-            }
 
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
             return RawWire.this;
@@ -346,13 +344,8 @@ public class RawWire implements Wire, InternalWireIn {
             text(lastField);
             long position = bytes.position();
             bytes.writeInt(0);
-            boolean nested = isNested();
-            try {
-                nested(true);
+
                 object.writeMarshallable(RawWire.this);
-            } finally {
-                nested(nested);
-            }
 
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
             return RawWire.this;
@@ -364,35 +357,19 @@ public class RawWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireOut typedMap(@NotNull Map<Marshallable, Marshallable> map)  {
+        public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map)  {
             throw new UnsupportedOperationException("todo");
         }
 
-
-        @Override
-        public boolean isNested() {
-            return nested;
-        }
-
-        @Override
-        public boolean isSequence() {
-            return false;
-        }
-
-        @Override
-        public WireOut nested(boolean nested) {
-            this.nested = nested;
-            return RawWire.this;
-        }
-
-        @Override
-        public WireOut sequence(boolean sequence) {
-            return null;
-        }
 
         @Override
         public WireOut object(Object o) {
             throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
+        public WireOut wireOut() {
+            return RawWire.this;
         }
     }
 
@@ -658,7 +635,7 @@ public class RawWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public void typedMap(@NotNull Map<Marshallable, Marshallable> usingMap)  {
+        public <K extends ReadMarshallable, V extends ReadMarshallable> void typedMap(@NotNull Map<K, V> usingMap) {
             throw new UnsupportedOperationException("todo");
         }
 

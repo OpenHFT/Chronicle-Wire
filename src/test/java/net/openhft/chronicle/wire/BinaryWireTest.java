@@ -79,7 +79,7 @@ public class BinaryWireTest {
                 "[pos: 0, lim: 0, cap: 1TiB ] ",
                 "[pos: 0, lim: 0, cap: 1TiB ] ");
 
-        assertEquals(fieldLess ? "" : "\"\": \"\": \"\":", TextWire.asText(wire));
+        assertEquals(fieldLess ? "" : "\"\": \"\": \"\": ", TextWire.asText(wire));
     }
 
     private BinaryWire createWire() {
@@ -105,8 +105,8 @@ public class BinaryWireTest {
                 "[pos: 0, lim: 0, cap: 1TiB ] ",
                 "[pos: 0, lim: 0, cap: 1TiB ] ");
         checkAsText(wire,
-                "field1: field2: field3:",
-                "1: 2: 3:",
+                "field1: field2: field3: ",
+                "1: 2: 3: ",
                 "");
     }
 
@@ -134,8 +134,8 @@ public class BinaryWireTest {
                 "[pos: 0, lim: 17, cap: 1TiB ] ¹²Ñ\u0098!¹òÖø'¹´Íýå\u0083٠",
                 "[pos: 0, lim: 0, cap: 1TiB ] ",
                 "[pos: 0, lim: 0, cap: 1TiB ] ");
-        assertEquals(numericField ? "69609650: 83766130: -1019176629:" :
-                fieldLess ? "" : "Hello: World: \"" + name + "\":", TextWire.asText(wire));
+        assertEquals(numericField ? "69609650: 83766130: -1019176629: " :
+                fieldLess ? "" : "Hello: World: \"" + name + "\": ", TextWire.asText(wire));
     }
 
     @Test
@@ -145,8 +145,8 @@ public class BinaryWireTest {
         wire.write(BWKey.field1);
         wire.write(() -> "Test");
         wire.flip();
-        checkAsText(wire, "\"\": field1: Test:",
-                "\"\": 1: 2603186:",
+        checkAsText(wire, "\"\": field1: Test: ",
+                "\"\": 1: 2603186: ",
                 "");
 
         wire.read();
@@ -164,8 +164,8 @@ public class BinaryWireTest {
         wire.write(BWKey.field1);
         wire.write(() -> "Test");
         wire.flip();
-        checkAsText(wire, "\"\": field1: Test:",
-                "\"\": 1: 2603186:",
+        checkAsText(wire, "\"\": field1: Test: ",
+                "\"\": 1: 2603186: ",
                 "");
 
         // ok as blank matches anything

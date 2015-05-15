@@ -98,6 +98,13 @@ public class TextDocumentTest {
 
         wire.writeDocument(true, w -> w.write(() -> "header").marshallable(wheader));
         wire.flip();
+        assertEquals("--- !!meta-data\n" +
+                "header: {\n" +
+                "  uuid: "+wheader.uuid+",\n" +
+                "  writeByte: !!atomic { locked: false, value: 00000000000000000512 },\n" +
+                "  readByte: !!atomic { locked: false, value: 00000000000000001024 },\n" +
+                "  created: " + wheader.created+"\n" +
+                "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
         wire.readDocument(w -> w.read(() -> "header").marshallable(rheader), null);
 
         assertEquals(wheader.uuid, rheader.uuid);

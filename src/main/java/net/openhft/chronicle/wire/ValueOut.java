@@ -121,20 +121,19 @@ public interface ValueOut {
      */
     WireOut map(Map map);
 
-    WireOut typedMap(@NotNull Map<Marshallable, Marshallable> map);
+    WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map);
 
-    boolean isNested();
+    ValueOut leaf();
 
-    boolean isSequence();
-
-    WireOut nested(boolean nested);
-    WireOut sequence(boolean sequence);
-
-    default WireOut typedMarshallable(Marshallable object) {
+    default WireOut typedMarshallable(WriteMarshallable object) {
         type(object.getClass().getName());
         return marshallable(object);
     }
 
+    default WireOut typedMarshallable(CharSequence typeName, WriteMarshallable object) {
+        type(typeName);
+        return marshallable(object);
+    }
 
     default WireOut object(Object value) {
         if (value instanceof byte[])
@@ -157,13 +156,30 @@ public interface ValueOut {
             return text((CharSequence) value);
         } else if (value instanceof Marshallable) {
             return marshallable((Marshallable) value);
+        }else if (value instanceof Throwable) {
+                return throwable((Throwable) value);
         } else {
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +
                     "AutoBoxed primitive Object");
         }
-
     }
 
 
+    default WireOut throwable(Throwable t) {
+        typedMarshallable(t.getClass().getName(), (WireOut w) ->
+                w.write(() -> "message").text(t.getMessage())
+                        .write(() -> "stackTrace").sequence(w3 -> {
+                    for (StackTraceElement ste : t.getStackTrace()) {
+                        w3.leaf().marshallable(w4 ->
+                                w4.write(() -> "className").text(ste.getClassName())
+                                        .write(() -> "methodName").text(ste.getMethodName())
+                                        .write(() -> "fileName").text(ste.getFileName())
+                                        .write(() -> "lineNumber").int32(ste.getLineNumber()));
+                    }
+                }));
+        return wireOut();
+    }
+
+    WireOut wireOut();
 }

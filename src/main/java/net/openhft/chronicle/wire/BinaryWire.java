@@ -570,6 +570,11 @@ public class BinaryWire implements Wire, InternalWireIn {
         boolean nested = false;
 
         @Override
+        public ValueOut leaf() {
+            return this;
+        }
+
+        @Override
         public WireOut bool(Boolean flag) {
             bytes.writeUnsignedByte(flag == null
                     ? NULL
@@ -755,13 +760,8 @@ public class BinaryWire implements Wire, InternalWireIn {
             writeCode(BYTES_LENGTH32);
             long position = bytes.position();
             bytes.writeInt(0);
-            boolean nested = isNested();
-            try {
-                nested(true);
+
                 writer.accept(this);
-            } finally {
-                nested(nested);
-            }
 
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
             return BinaryWire.this;
@@ -772,13 +772,8 @@ public class BinaryWire implements Wire, InternalWireIn {
             writeCode(BYTES_LENGTH32);
             long position = bytes.position();
             bytes.writeInt(0);
-            boolean nested = isNested();
-            try {
-                nested(true);
+
                 object.writeMarshallable(BinaryWire.this);
-            } finally {
-                nested(nested);
-            }
 
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
             return BinaryWire.this;
@@ -790,29 +785,8 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireOut typedMap(@NotNull Map<Marshallable, Marshallable> map) {
+        public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map) {
             throw new UnsupportedOperationException("todo");
-        }
-
-        @Override
-        public boolean isNested() {
-            return nested;
-        }
-
-        @Override
-        public boolean isSequence() {
-            return false;
-        }
-
-        @Override
-        public WireOut nested(boolean nested) {
-            this.nested = nested;
-            return BinaryWire.this;
-        }
-
-        @Override
-        public WireOut sequence(boolean sequence) {
-            return null;
         }
 
         @Override
@@ -820,7 +794,10 @@ public class BinaryWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException("todo");
         }
 
-
+        @Override
+        public WireOut wireOut() {
+            return BinaryWire.this;
+        }
     }
 
     class BinaryValueOut extends FixedBinaryValueOut {
@@ -1295,7 +1272,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
 
         @Override
-        public void typedMap(@NotNull Map<Marshallable, Marshallable> usingMap) {
+        public <K extends ReadMarshallable, V extends ReadMarshallable> void typedMap(@NotNull Map<K, V> usingMap) {
             throw new UnsupportedOperationException("todo");
         }
 
