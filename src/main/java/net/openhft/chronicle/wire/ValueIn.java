@@ -19,7 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.IORuntimeException;
-import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -143,7 +143,7 @@ public interface ValueIn {
                 throw new IllegalStateException("its not possible to Marshallable and object that" +
                         " is not of type Marshallable, type=" + sb);
 
-            final ReadMarshallable m = UnsafeMemory.MEMORY.allocateInstance((Class<ReadMarshallable>) clazz);
+            final ReadMarshallable m = OS.memory().allocateInstance((Class<ReadMarshallable>) clazz);
 
             marshallable(m);
             return m;

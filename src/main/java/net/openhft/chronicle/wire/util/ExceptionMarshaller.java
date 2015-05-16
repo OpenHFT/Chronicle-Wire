@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire.util;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.wire.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,8 +10,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 /**
  * Created by Rob Austin
@@ -45,13 +44,7 @@ public class ExceptionMarshaller implements Marshallable {
             throw new RuntimeException("unable to load an class of class=" + type.toString());
         }
 
-        final Throwable exception;
-        try {
-            exception = MEMORY.allocateInstance(aClass);
-        } catch (InstantiationException e) {
-            throw new RuntimeException("unable to allocated a class=" + aClass);
-        }
-
+        final Throwable exception = OS.memory().allocateInstance(aClass);
 
         wireIn.getValueIn().marshallable(m -> {
 

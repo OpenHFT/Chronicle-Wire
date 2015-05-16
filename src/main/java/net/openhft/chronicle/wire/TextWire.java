@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -45,7 +46,6 @@ import java.util.function.*;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.bytes.StopCharTesters.NEW_LINE_STOP;
-import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.wire.WireType.stringForCode;
 
 /**
@@ -1377,11 +1377,7 @@ public class TextWire implements Wire, InternalWireIn {
 
                 final E v;
                 if (using == null)
-                    try {
-                        v = MEMORY.allocateInstance(clazz);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
+                    v = OS.memory().allocateInstance(clazz);
                 else
                     v = using;
 
