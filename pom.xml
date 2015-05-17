@@ -63,6 +63,11 @@
             <artifactId>annotations</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>chronicle-map</artifactId>
+        </dependency>
+
         <!-- test dependencies -->
 
         <dependency>
