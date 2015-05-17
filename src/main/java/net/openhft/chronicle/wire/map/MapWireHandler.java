@@ -60,21 +60,18 @@ public class MapWireHandler<K, V> implements Consumer<WireHandlers> {
     private Function<ValueIn, K> wireToK;
     private Function<ValueIn, V> wireToV;
     private V usingValue;
-    private K usingKey;
+
 
     public void process(@NotNull final Wire in,
-                        @NotNull final Wire out, @NotNull Map<K, V> map,
+                        @NotNull final Wire out, @NotNull Map map,
                         @NotNull final CharSequence csp, long tid,
-                        @NotNull BiConsumer<ValueOut, V> vToWire,
-                        @NotNull final Function<ValueIn, K> kFromWire,
-                        @NotNull final Function<ValueIn, V> vFromWire,
-                        V usingValue) throws StreamCorruptedException {
+                        @NotNull final MapHandlerFunction mapHandler) throws StreamCorruptedException {
 
-        this.vToWire = vToWire;
-        this.wireToK = kFromWire;
-        this.wireToV = vFromWire;
-        this.usingValue = usingValue;
-        this.usingKey = usingKey;
+        this.vToWire = mapHandler.getValueToWire();
+        this.wireToK = mapHandler.getWireToKey();
+        this.wireToV = mapHandler.getWireToValue();
+        this.usingValue = mapHandler.usingValue();
+
 
         try {
             this.inWire = in;
