@@ -301,6 +301,16 @@ public class MapWireHandlerProcessor<K, V> implements
                         return;
                     }
 
+                    if (removeWithoutAcc.contentEquals(eventName)) {
+                        final K key = wireToK.apply(valueIn);
+                        nullCheck(key);
+                        map.remove(key);
+                        vToWire.accept(outWire.writeEventName(reply),null);
+                        return;
+                    }
+
+
+
                     if (replace.contentEquals(eventName)) {
                         valueIn.marshallable(wire -> {
                             final Params[] params = replace.params();
