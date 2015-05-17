@@ -83,7 +83,6 @@ public class MapWireHandlerProcessor<K, V> implements
         } catch (Exception e) {
             LOG.error("", e);
         }
-
     }
 
     enum Params implements WireKey {
@@ -136,7 +135,6 @@ public class MapWireHandlerProcessor<K, V> implements
         }
     }
 
-
     private static final Logger LOG = LoggerFactory.getLogger(MapWireHandlerProcessor.class);
 
     private final Map<Long, String> cidToCsp;
@@ -154,7 +152,6 @@ public class MapWireHandlerProcessor<K, V> implements
 
     @Override
     public void accept(@NotNull final WireHandlers wireHandlers) {
-
     }
 
     private long tid;
@@ -167,7 +164,6 @@ public class MapWireHandlerProcessor<K, V> implements
      * @return the cid for this csp
      */
     private long createCid(CharSequence csp) {
-
         final long newCid = cid.incrementAndGet();
         String cspStr = csp.toString();
         final Long aLong = cspToCid.putIfAbsent(cspStr, newCid);
@@ -177,16 +173,13 @@ public class MapWireHandlerProcessor<K, V> implements
 
         cidToCsp.put(newCid, cspStr);
         return newCid;
-
     }
 
     final StringBuilder eventName = new StringBuilder();
 
     private final Consumer<WireIn> dataConsumer = new Consumer<WireIn>() {
-
         @Override
         public void accept(WireIn wireIn) {
-
             try {
 
                 final ValueIn valueIn = inWire.readEventName(eventName);
@@ -194,7 +187,6 @@ public class MapWireHandlerProcessor<K, V> implements
                 outWire.writeDocument(true, wire -> outWire.write(CoreFields.tid).int64(tid));
 
                 writeData(out -> {
-
                     if (clear.contentEquals(eventName)) {
                         map.clear();
                         return;
@@ -214,9 +206,7 @@ public class MapWireHandlerProcessor<K, V> implements
                     }
 
                     if (EventId.putIfAbsent.contentEquals(eventName)) {
-
                         valueIn.marshallable(wire -> {
-
                             final Params[] params = putIfAbsent.params();
                             final K key = wireToK.apply(wire.read(params[0]));
                             final V newValue = wireToV.apply(wire.read(params[1]));
@@ -226,9 +216,7 @@ public class MapWireHandlerProcessor<K, V> implements
                             nullCheck(newValue);
 
                             vToWire.accept(outWire.writeEventName(reply), result);
-
                         });
-
                         return;
                     }
 
@@ -244,12 +232,10 @@ public class MapWireHandlerProcessor<K, V> implements
                         return;
                     }
 
-
                     if (size.contentEquals(eventName)) {
                         outWire.writeEventName(reply).int64(map.size());
                         return;
                     }
-
 
                     if (containsKey.contentEquals(eventName)) {
                         final K key = wireToK.apply(valueIn);
@@ -289,7 +275,22 @@ public class MapWireHandlerProcessor<K, V> implements
                             vToWire.accept(outWire.writeEventName(reply),
                                     map.put(key, value));
                         });
+                        return;
+                    }
 
+                    if (put.contentEquals(eventName)) {
+
+                        valueIn.marshallable(wire -> {
+
+                            final Params[] params = getAndPut.params();
+                            final K key = wireToK.apply(wire.read(params[0]));
+                            final V value = wireToV.apply(wire.read(params[1]));
+
+                            nullCheck(key);
+                            nullCheck(value);
+                            map.put(key, value);
+                            vToWire.accept(outWire.writeEventName(reply), null);
+                        });
                         return;
                     }
 
@@ -299,7 +300,6 @@ public class MapWireHandlerProcessor<K, V> implements
                         vToWire.accept(outWire.writeEventName(reply), map.remove(key));
                         return;
                     }
-
 
                     if (replace.contentEquals(eventName)) {
                         valueIn.marshallable(wire -> {
@@ -314,8 +314,6 @@ public class MapWireHandlerProcessor<K, V> implements
                                     map.replace(key, value));
 
                         });
-
-
                         return;
                     }
 
@@ -329,7 +327,6 @@ public class MapWireHandlerProcessor<K, V> implements
                             nullCheck(oldValue);
                             nullCheck(newValue);
                             outWire.writeEventName(reply).bool(map.replace(key, oldValue, newValue));
-
                         });
                         return;
                     }
@@ -370,10 +367,7 @@ public class MapWireHandlerProcessor<K, V> implements
                 });
             } catch (Exception e) {
                 LOG.error("", e);
-            } finally
-
-            {
-
+            } finally {
                 if (IS_DEBUG && YamlLogging.showServerWrites) {
                     final Bytes<?> outBytes = outWire.bytes();
                     long len = outBytes.position() - CollectionWireHandlerProcessor.SIZE_OF_SIZE;
@@ -386,12 +380,9 @@ public class MapWireHandlerProcessor<K, V> implements
                         System.out.println("--------------------------------------------\n" +
                                 "server writes:\n\n" +
                                 Wires.fromSizePrefixedBlobs(outBytes, CollectionWireHandlerProcessor.SIZE_OF_SIZE, len));
-
                     }
                 }
             }
-
-
         }
     };
 
@@ -402,7 +393,6 @@ public class MapWireHandlerProcessor<K, V> implements
 
     private void createProxy(final String type) {
         outWire.writeEventName(reply).type("set-proxy").writeValue()
-
                 .marshallable(w -> {
                     CharSequence root = csp.subSequence(0, csp
                             .length() - "map".length());
@@ -415,13 +405,10 @@ public class MapWireHandlerProcessor<K, V> implements
                 });
     }
 
-
     /**
      * write and exceptions and rolls back if no data was written
      */
-    private void writeData(@NotNull Consumer<WireOut> c) {
-
-
+    void writeData(@NotNull Consumer<WireOut> c) {
         outWire.writeDocument(false, out -> {
 
             final long position = outWire.bytes().position();
@@ -440,12 +427,7 @@ public class MapWireHandlerProcessor<K, V> implements
             if (position == outWire.bytes().position()) {
                 outWire.writeEventName(reply).marshallable(EMPTY);
             }
-
         });
-
-
     }
-
-
 }
 
