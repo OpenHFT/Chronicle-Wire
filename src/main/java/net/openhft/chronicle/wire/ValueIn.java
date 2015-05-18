@@ -58,7 +58,7 @@ public interface ValueIn {
     }
 
     @NotNull
-    WireIn text(@NotNull StringBuilder s);
+    <ACS extends Appendable & CharSequence> WireIn text(@NotNull ACS s);
 
     @NotNull
     WireIn int8(@NotNull ByteConsumer i);

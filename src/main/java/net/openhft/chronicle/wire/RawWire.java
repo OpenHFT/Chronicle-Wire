@@ -396,7 +396,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire text(@NotNull StringBuilder s) {
+        public <ACS extends Appendable & CharSequence> WireIn text(@NotNull ACS s) {
             bytes.readUTFΔ(s);
             return RawWire.this;
         }

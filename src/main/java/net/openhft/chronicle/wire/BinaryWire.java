@@ -278,8 +278,8 @@ public class BinaryWire implements Wire, InternalWireIn {
         return null;
     }
 
-    private StringBuilder getStringBuilder(int code, StringBuilder sb) {
-        sb.setLength(0);
+    private <ACS extends Appendable & CharSequence> ACS getStringBuilder(int code, ACS sb) {
+        BytesUtil.setLength(sb, 0);
         BytesUtil.parseUTF(bytes, sb, code & 0x1f);
         return sb;
     }
@@ -542,7 +542,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         return bytes.writeByte((byte) code);
     }
 
-    StringBuilder readText(int code, StringBuilder sb) {
+    <ACS extends Appendable & CharSequence> ACS readText(int code, ACS sb) {
         switch (code >> 4) {
             case BinaryWireHighCode.SPECIAL:
                 if (code == STRING_ANY) {
@@ -955,9 +955,9 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn text(@NotNull StringBuilder s) {
+        public <ACS extends Appendable & CharSequence> WireIn text(@NotNull ACS s) {
             int code = readCode();
-            StringBuilder text = readText(code, s);
+            ACS text = readText(code, s);
             if (text == null)
                 cantRead(code);
             return BinaryWire.this;

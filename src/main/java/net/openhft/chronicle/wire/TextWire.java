@@ -34,6 +34,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -175,7 +176,7 @@ public class TextWire implements Wire, InternalWireIn {
         return bytes.readUnsignedByte();
     }
 
-    public static void unescape(StringBuilder sb) {
+    public static <ACS extends Appendable & CharSequence> void unescape(ACS sb) {
         int end = 0;
         for (int i = 0; i < sb.length(); i++) {
             char ch = sb.charAt(i);
@@ -187,9 +188,9 @@ public class TextWire implements Wire, InternalWireIn {
                         break;
                 }
             }
-            sb.setCharAt(end++, ch);
+            BytesUtil.setCharAt(sb, end++, ch);
         }
-        sb.setLength(end);
+        BytesUtil.setLength(sb, end);
     }
 
     @Override
@@ -305,6 +306,7 @@ public class TextWire implements Wire, InternalWireIn {
         for (char ch : "\",\n\\#:".toCharArray())
             QUOTE_CHARS.set(ch);
     }
+
     boolean needsQuotes(CharSequence s) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
@@ -732,13 +734,17 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire text(@NotNull StringBuilder sb) {
+        public <ACS extends Appendable & CharSequence> WireIn text(@NotNull ACS a) {
             consumeWhiteSpace();
             int ch = peekCode();
 
             if (ch == '{') {
                 final long len = readLength();
-                sb.append(Bytes.toDebugString(bytes, bytes.position(), len));
+                try {
+                    a.append(Bytes.toDebugString(bytes, bytes.position(), len));
+                } catch (IOException e) {
+                    throw new AssertionError(e);
+                }
                 bytes.skip(len);
 
                 // read the next comma
@@ -749,17 +755,20 @@ public class TextWire implements Wire, InternalWireIn {
 
             if (ch == '"') {
                 bytes.skip(1);
-                bytes.parseUTF(sb, StopCharTesters.QUOTES.escaping());
+                bytes.parseUTF(a, StopCharTesters.QUOTES.escaping());
             } else {
-                bytes.parseUTF(sb, TextStopCharsTesters.END_OF_TEXT.escaping());
+                if (bytes.remaining() > 0)
+                    bytes.parseUTF(a, TextStopCharsTesters.END_OF_TEXT.escaping());
+                else
+                    BytesUtil.setLength(a, 0);
                 // trim trailing spaces.
-                while (sb.length() > 0)
-                    if (Character.isWhitespace(sb.charAt(sb.length() - 1)))
-                        sb.setLength(sb.length() - 1);
+                while (a.length() > 0)
+                    if (Character.isWhitespace(a.charAt(a.length() - 1)))
+                        BytesUtil.setLength(a, a.length() - 1);
                     else
                         break;
             }
-            unescape(sb);
+            unescape(a);
             int prev = rewindAndRead();
             if (prev == ':')
                 bytes.skip(-1);
@@ -795,7 +804,7 @@ public class TextWire implements Wire, InternalWireIn {
                 bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                 String str = sb.toString();
                 if (str.equals("!!binary")) {
-                    sb.setLength(0);
+                    BytesUtil.setLength(sb, 0);
                     bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                     byte[] decode = Base64.getDecoder().decode(sb.toString());
                     bytesConsumer.accept(new TextWire(Bytes.wrap(decode)));
@@ -817,7 +826,7 @@ public class TextWire implements Wire, InternalWireIn {
                 bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                 String str = sb.toString();
                 if (str.equals("!!binary")) {
-                    sb.setLength(0);
+                    BytesUtil.setLength(sb, 0);
                     bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                     byte[] decode = Base64.getDecoder().decode(sb.toString());
                     return decode;
