@@ -301,7 +301,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
             case TIME:
             case ZONED_DATE_TIME:
-            case DATE:
+            case DATE_TIME:
                 throw new UnsupportedOperationException();
             case TYPE: {
                 bytes.skip(1);
@@ -401,10 +401,10 @@ public class BinaryWire implements Wire, InternalWireIn {
 
     private long readInt0(int code) {
         switch (code) {
-            case UUID: //TODO !!! was FIELD_NUMBER(0xA0), FIELD_NUMBER = 0xB9, UUID = 0xA0
-                throw new UnsupportedOperationException();
-            case UTF8:
-                throw new UnsupportedOperationException();
+//            case UUID:
+//                throw new UnsupportedOperationException();
+//            case UTF8:
+//                throw new UnsupportedOperationException();
             case INT8:
                 return bytes.readByte();
             case INT16:
@@ -419,6 +419,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 return bytes.readUnsignedShort();
             case UINT32:
                 return bytes.readUnsignedInt();
+/*
             case FIXED_6:
                 return bytes.readStopBit() * 1000000L;
             case FIXED_5:
@@ -433,6 +434,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 return bytes.readStopBit() * 10L;
             case FIXED:
                 return bytes.readStopBit();
+*/
 
         }
         throw new UnsupportedOperationException(stringForCode(code));
@@ -721,7 +723,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @Override
         public WireOut date(LocalDate localDate) {
-            writeCode(DATE).writeUTFΔ(localDate.toString());
+            writeCode(DATE_TIME).writeUTFΔ(localDate.toString());
             return BinaryWire.this;
         }
 
@@ -761,7 +763,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             long position = bytes.position();
             bytes.writeInt(0);
 
-                writer.accept(this);
+            writer.accept(this);
 
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
             return BinaryWire.this;
@@ -773,7 +775,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             long position = bytes.position();
             bytes.writeInt(0);
 
-                object.writeMarshallable(BinaryWire.this);
+            object.writeMarshallable(BinaryWire.this);
 
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
             return BinaryWire.this;
@@ -1128,7 +1130,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         public WireIn date(@NotNull Consumer<LocalDate> localDate) {
             consumeSpecial();
             int code = readCode();
-            if (code == DATE) {
+            if (code == DATE_TIME) {
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 localDate.accept(LocalDate.parse(sb));
@@ -1269,8 +1271,6 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
             return BinaryWire.this;
         }
-
-
 
 
         @Override
