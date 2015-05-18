@@ -140,8 +140,13 @@ public class BinaryWire2Test {
                 .write(() -> "csp").text("//path/service")
                 .write(() -> "tid").int64(123456789));
         wire.writeDocument(false, w -> w
-                .write(() -> "put").marshallable(m -> m
-                        .write(() -> "key").text("key-1")
-                        .write(() -> "value").text("value-1")));
+                .write(() -> "entrySet").sequence(s -> {
+                    s.marshallable(m -> m
+                            .write(() -> "key").text("key-1")
+                            .write(() -> "value").text("value-1"));
+                    s.marshallable(m -> m
+                            .write(() -> "key").text("key-2")
+                            .write(() -> "value").text("value-2"));
+                }));
     }
 }
