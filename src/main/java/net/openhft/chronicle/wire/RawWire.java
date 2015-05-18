@@ -182,9 +182,9 @@ public class RawWire implements Wire, InternalWireIn {
         @Override
         public Wire bool(Boolean flag) {
             if (flag == null)
-                bytes.writeUnsignedByte(WireType.NULL.code);
+                bytes.writeUnsignedByte(BinaryWireCode.NULL);
             else
-                bytes.writeUnsignedByte(flag ? WireType.TRUE.code : 0);
+                bytes.writeUnsignedByte(flag ? BinaryWireCode.TRUE : 0);
             return RawWire.this;
         }
 
@@ -379,9 +379,9 @@ public class RawWire implements Wire, InternalWireIn {
         @Override
         public Wire bool(@NotNull BooleanConsumer flag) {
             int b = bytes.readUnsignedByte();
-            if (b == WireType.NULL.code)
+            if (b == BinaryWireCode.NULL)
                 flag.accept(null);
-            else if (b == 0 || b == WireType.FALSE.code)
+            else if (b == 0 || b == BinaryWireCode.FALSE)
                 flag.accept(false);
             else
                 flag.accept(true);

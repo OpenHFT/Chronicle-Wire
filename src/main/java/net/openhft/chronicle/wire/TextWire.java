@@ -42,7 +42,7 @@ import java.util.*;
 import java.util.function.*;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
-import static net.openhft.chronicle.wire.WireType.stringForCode;
+import static net.openhft.chronicle.wire.BinaryWireCode.stringForCode;
 
 /**
  * Created by peter.lawrey on 15/01/15.
@@ -54,9 +54,7 @@ public class TextWire implements Wire, InternalWireIn {
 
     public static final String FIELD_SEP = "";
     private static final String END_FIELD = "\n";
-    public static final String SEQUENCE_L1 = "- ";
     public static final String SEQ_MAP = "!seqmap";
-    private static final char INVALID_CHAR = '\uFFFF';
 
     final Bytes<?> bytes;
     final TextValueOut valueOut = new TextValueOut();

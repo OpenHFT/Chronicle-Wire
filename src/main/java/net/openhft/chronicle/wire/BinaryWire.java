@@ -40,14 +40,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
 
-import static net.openhft.chronicle.wire.WireType.Codes.*;
-import static net.openhft.chronicle.wire.WireType.stringForCode;
+import static net.openhft.chronicle.wire.BinaryWireCode.*;
 
 /**
  * Created by peter.lawrey on 15/01/15.
  */
 public class BinaryWire implements Wire, InternalWireIn {
     public static final int ANY_CODE_MATCH = -1;
+    static final int END_OF_BYTES = -1;
 
     final Bytes<?> bytes;
     final ValueOut fixedValueOut = new FixedBinaryValueOut();
@@ -91,19 +91,19 @@ public class BinaryWire implements Wire, InternalWireIn {
             int peekCode = peekCode();
             outerSwitch:
             switch (peekCode >> 4) {
-                case NUM0:
-                case NUM1:
-                case NUM2:
-                case NUM3:
-                case NUM4:
-                case NUM5:
-                case NUM6:
-                case NUM7:
+                case BinaryWireHighCode.NUM0:
+                case BinaryWireHighCode.NUM1:
+                case BinaryWireHighCode.NUM2:
+                case BinaryWireHighCode.NUM3:
+                case BinaryWireHighCode.NUM4:
+                case BinaryWireHighCode.NUM5:
+                case BinaryWireHighCode.NUM6:
+                case BinaryWireHighCode.NUM7:
                     bytes.skip(1);
                     wire.writeValue().uint8(peekCode);
                     break;
 
-                case CONTROL:
+                case BinaryWireHighCode.CONTROL:
                     switch (peekCode) {
                         case PADDING:
                             bytes.skip(1);
@@ -116,30 +116,30 @@ public class BinaryWire implements Wire, InternalWireIn {
                             throw new UnsupportedOperationException();
                     }
 
-                case FLOAT:
+                case BinaryWireHighCode.FLOAT:
                     bytes.skip(1);
                     double d = readFloat0(peekCode);
                     wire.writeValue().float64(d);
                     break;
 
-                case INT:
+                case BinaryWireHighCode.INT:
                     bytes.skip(1);
                     long l = readInt0(peekCode);
                     wire.writeValue().int64(l);
                     break;
 
-                case SPECIAL:
+                case BinaryWireHighCode.SPECIAL:
                     copySpecial(wire, peekCode);
                     break;
 
-                case FIELD0:
-                case FIELD1:
+                case BinaryWireHighCode.FIELD0:
+                case BinaryWireHighCode.FIELD1:
                     StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, Wires.acquireStringBuilder());
                     wire.write(() -> fsb);
                     break;
 
-                case STR0:
-                case STR1:
+                case BinaryWireHighCode.STR0:
+                case BinaryWireHighCode.STR1:
                     bytes.skip(1);
                     StringBuilder sb = readText(peekCode, Wires.acquireStringBuilder());
                     wire.writeValue().text(sb);
@@ -246,7 +246,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
     private StringBuilder readField(int peekCode, int codeMatch, StringBuilder sb) {
         switch (peekCode >> 4) {
-            case SPECIAL:
+            case BinaryWireHighCode.SPECIAL:
                 if (peekCode == FIELD_NAME_ANY || peekCode == EVENT_NAME) {
                     bytes.skip(1);
                     bytes.readUTFΔ(sb);
@@ -262,8 +262,8 @@ public class BinaryWire implements Wire, InternalWireIn {
                     return sb;
                 }
                 return null;
-            case FIELD0:
-            case FIELD1:
+            case BinaryWireHighCode.FIELD0:
+            case BinaryWireHighCode.FIELD1:
                 bytes.skip(1);
                 return getStringBuilder(peekCode, sb);
             default:
@@ -350,7 +350,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 wire.writeValue().bool(true);
                 break;
             default:
-                throw new UnsupportedOperationException(WireType.stringForCode(peekCode));
+                throw new UnsupportedOperationException(stringForCode(peekCode));
         }
     }
 
@@ -358,7 +358,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         if (code < 128)
             return code;
         switch (code >> 4) {
-            case SPECIAL:
+            case BinaryWireHighCode.SPECIAL:
                 switch (code) {
                     case FALSE:
                         return 0;
@@ -366,15 +366,15 @@ public class BinaryWire implements Wire, InternalWireIn {
                         return 1;
                 }
                 break;
-            case FLOAT:
+            case BinaryWireHighCode.FLOAT:
                 double d = readFloat0(code);
                 return (long) d;
 
-            case INT:
+            case BinaryWireHighCode.INT:
                 return readInt0(code);
 
         }
-        throw new UnsupportedOperationException(WireType.stringForCode(code));
+        throw new UnsupportedOperationException(stringForCode(code));
     }
 
     private double readFloat0(int code) {
@@ -383,7 +383,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 return bytes.readFloat();
             case FLOAT64:
                 return bytes.readDouble();
-            case FIXED1:
+/*            case FIXED1:
                 return bytes.readStopBit() / 1e1;
             case FIXED2:
                 return bytes.readStopBit() / 1e2;
@@ -394,9 +394,9 @@ public class BinaryWire implements Wire, InternalWireIn {
             case FIXED5:
                 return bytes.readStopBit() / 1e5;
             case FIXED6:
-                return bytes.readStopBit() / 1e6;
+                return bytes.readStopBit() / 1e6;*/
         }
-        throw new UnsupportedOperationException(WireType.stringForCode(code));
+        throw new UnsupportedOperationException(stringForCode(code));
     }
 
     private long readInt0(int code) {
@@ -435,21 +435,21 @@ public class BinaryWire implements Wire, InternalWireIn {
                 return bytes.readStopBit();
 
         }
-        throw new UnsupportedOperationException(WireType.stringForCode(code));
+        throw new UnsupportedOperationException(stringForCode(code));
     }
 
     private double readFloat(int code) {
         if (code < 128)
             return code;
         switch (code >> 4) {
-            case FLOAT:
+            case BinaryWireHighCode.FLOAT:
                 return readFloat0(code);
 
-            case INT:
+            case BinaryWireHighCode.INT:
                 return readInt0(code);
 
         }
-        throw new UnsupportedOperationException(WireType.stringForCode(code));
+        throw new UnsupportedOperationException(stringForCode(code));
     }
 
     @Override
@@ -542,14 +542,14 @@ public class BinaryWire implements Wire, InternalWireIn {
 
     StringBuilder readText(int code, StringBuilder sb) {
         switch (code >> 4) {
-            case SPECIAL:
+            case BinaryWireHighCode.SPECIAL:
                 if (code == STRING_ANY) {
                     bytes.readUTFΔ(sb);
                     return sb;
                 }
                 return null;
-            case STR0:
-            case STR1:
+            case BinaryWireHighCode.STR0:
+            case BinaryWireHighCode.STR1:
                 return getStringBuilder(code, sb);
             default:
                 throw new UnsupportedOperationException();
@@ -589,7 +589,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             } else {
                 int len = s.length();
                 if (len < 0x20) {
-                    bytes.writeByte((byte) (STRING0 + len)).append(s);
+                    bytes.writeByte((byte) (STRING_0 + len)).append(s);
                 } else {
                     writeCode(STRING_ANY).writeUTFΔ(s);
                 }
@@ -620,13 +620,13 @@ public class BinaryWire implements Wire, InternalWireIn {
         public ValueOut writeLength(long length) {
             if (length < 0) {
                 throw new IllegalArgumentException("Invalid length " + length);
-            } else if (length < 1 << 8) {
+            } /*else if (length < 1 << 8) {
                 writeCode(BYTES_LENGTH8);
                 bytes.writeUnsignedByte((int) length);
             } else if (length < 1 << 16) {
                 writeCode(BYTES_LENGTH16);
                 bytes.writeUnsignedShort((int) length);
-            } else {
+            } */ else {
                 writeCode(BYTES_LENGTH32);
                 bytes.writeUnsignedInt(length);
             }
@@ -940,7 +940,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                     s.accept(bytes.readUTFΔ());
                     break;
                 default:
-                    if (code >= STRING0 && code <= STRING30) {
+                    if (code >= STRING_0 && code <= STRING_31) {
                         StringBuilder sb = Wires.acquireStringBuilder();
                         BytesUtil.parseUTF(bytes, sb, code & 0b11111);
                         s.accept(sb.toString());
@@ -1016,12 +1016,14 @@ public class BinaryWire implements Wire, InternalWireIn {
             int code = peekCode();
             // TODO handle non length types as well.
             switch (code) {
+/*
                 case BYTES_LENGTH8:
                     bytes.skip(1);
                     return bytes.readUnsignedByte();
                 case BYTES_LENGTH16:
                     bytes.skip(1);
                     return bytes.readUnsignedShort();
+*/
                 case BYTES_LENGTH32:
                     bytes.skip(1);
                     return bytes.readUnsignedInt();
