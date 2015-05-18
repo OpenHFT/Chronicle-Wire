@@ -126,7 +126,7 @@ public class TextWire2Test {
         wire.write(() -> "VALUE2").int64(expected);
         wire.flip();
         expectWithSnakeYaml("{VALUE=1, VALUE2=1}", wire);
-//        System.out.println("out" + Bytes.toHex(wire.bytes()));
+//        System.out.println("out" + Bytes.toHexString(wire.bytes()));
         assertEquals(expected, wire.read(() -> "VALUE").int16());
         assertEquals(expected, wire.read(() -> "VALUE2").int16());
     }

@@ -124,7 +124,24 @@ public class BinaryWire2Test {
 
     @Test
     public void testSequence() {
+        Wire wire = createWire();
+        writeMessage(wire);
+        wire.flip();
+        System.out.println(wire.bytes().toHexString());
 
+        Wire twire = new TextWire(Bytes.elasticByteBuffer());
+        writeMessage(twire);
+        twire.flip();
+        System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
     }
 
+    private void writeMessage(Wire wire) {
+        wire.writeDocument(true, w -> w
+                .write(() -> "csp").text("//path/service")
+                .write(() -> "tid").int64(123456789));
+        wire.writeDocument(false, w -> w
+                .write(() -> "put").marshallable(m -> m
+                        .write(() -> "key").text("key-1")
+                        .write(() -> "value").text("value-1")));
+    }
 }
