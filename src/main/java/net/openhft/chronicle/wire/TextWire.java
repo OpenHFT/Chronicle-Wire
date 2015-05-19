@@ -756,11 +756,16 @@ public class TextWire implements Wire, InternalWireIn {
             if (ch == '"') {
                 bytes.skip(1);
                 bytes.parseUTF(a, StopCharTesters.QUOTES.escaping());
+                unescape(a);
             } else {
-                if (bytes.remaining() > 0)
-                    bytes.parseUTF(a, TextStopCharsTesters.END_OF_TEXT.escaping());
-                else
+                if (bytes.remaining() > 0) {
+                    if (a instanceof Bytes)
+                        bytes.parse8bit(a, TextStopCharsTesters.END_OF_TEXT);
+                    else
+                        bytes.parseUTF(a, TextStopCharsTesters.END_OF_TEXT);
+                } else {
                     BytesUtil.setLength(a, 0);
+                }
                 // trim trailing spaces.
                 while (a.length() > 0)
                     if (Character.isWhitespace(a.charAt(a.length() - 1)))
@@ -768,7 +773,6 @@ public class TextWire implements Wire, InternalWireIn {
                     else
                         break;
             }
-            unescape(a);
             int prev = rewindAndRead();
             if (prev == ':')
                 bytes.skip(-1);
