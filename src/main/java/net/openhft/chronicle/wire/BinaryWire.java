@@ -53,9 +53,10 @@ public class BinaryWire implements Wire, InternalWireIn {
     final ValueOut fixedValueOut = new FixedBinaryValueOut();
     final ValueOut valueOut;
     final ValueIn valueIn = new BinaryValueIn();
-    private final boolean numericFields;
-    private final boolean fieldLess;
 
+    private final boolean numericFields;
+
+    private final boolean fieldLess;
     boolean ready;
 
     public BinaryWire(Bytes<?> bytes) {
@@ -792,11 +793,6 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireOut object(Object o) {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @Override
         public WireOut wireOut() {
             return BinaryWire.this;
         }
@@ -898,11 +894,6 @@ public class BinaryWire implements Wire, InternalWireIn {
         public WireOut float64(double d) {
             writeFloat(d);
             return BinaryWire.this;
-        }
-
-        @Override
-        public WireOut object(Object o) {
-            throw new UnsupportedOperationException("todo");
         }
     }
 
