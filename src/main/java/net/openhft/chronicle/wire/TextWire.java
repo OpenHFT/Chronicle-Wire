@@ -303,7 +303,7 @@ public class TextWire implements Wire, InternalWireIn {
     static final BitSet QUOTE_CHARS = new BitSet();
 
     static {
-        for (char ch : "\",\n\\#:".toCharArray())
+        for (char ch : "\",\n\\#:{}[]".toCharArray())
             QUOTE_CHARS.set(ch);
     }
 
