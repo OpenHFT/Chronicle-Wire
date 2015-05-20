@@ -27,7 +27,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>chronicle-wire</artifactId>
-    <version>1.0.8-alpha-SNAPSHOT</version>
+    <version>1.0.8-alpha</version>
     <name>OpenHFT/Chronicle-Wire</name>
     <description>Chronicle-Wire</description>
     <packaging>bundle</packaging>
@@ -176,7 +176,7 @@
         <url>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</url>
         <connection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</connection>
         <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</developerConnection>
-        <tag>master</tag>
+        <tag>chronicle-wire-1.0.8-alpha</tag>
     </scm>
 
 </project>
