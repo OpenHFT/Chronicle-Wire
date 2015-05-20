@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.StringReader;
+import java.security.InvalidAlgorithmParameterException;
 import java.time.*;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -821,11 +822,12 @@ bytes.position(0);
 
     @Test
     public void testException() {
-        Exception e = new NullPointerException("Reference cannot be null") {
+        Exception e = new InvalidAlgorithmParameterException("Reference cannot be null") {
             @Override
             public StackTraceElement[] getStackTrace() {
                 StackTraceElement[] stack = {
                         new StackTraceElement("net.openhft.chronicle.wire.TextWire2Test", "testException", "TextWire2Test.java", 783),
+                        new StackTraceElement("net.openhft.chronicle.wire.TextWire2Test", "runTestException", "TextWire2Test.java", 73),
                         new StackTraceElement("sun.reflect.NativeMethodAccessorImpl", "invoke0", "NativeMethodAccessorImpl.java", -2)
                 };
                 return stack;
@@ -845,9 +847,14 @@ bytes.position(0);
                 "exception: !" + e.getClass().getName() + " {\n" +
                 "  message: Reference cannot be null,\n" +
                 "  stackTrace: [\n" +
-                "    { className: net.openhft.chronicle.wire.TextWire2Test, methodName: testException, fileName: TextWire2Test.java, lineNumber: 783 },\n" +
-                "    { className: sun.reflect.NativeMethodAccessorImpl, methodName: invoke0, fileName: NativeMethodAccessorImpl.java, lineNumber: -2 }\n" +
+                "    { class: net.openhft.chronicle.wire.TextWire2Test, method: testException, file: TextWire2Test.java, line: 783 },\n" +
+                "    { class: net.openhft.chronicle.wire.TextWire2Test, method: runTestException, file: TextWire2Test.java, line: 73 }\n" +
                 "  ]\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(bytes));
+
+        wire.readDocument(null, r -> {
+            Throwable t = r.read(() -> "exception").throwable(true);
+            assertTrue(t instanceof InvalidAlgorithmParameterException);
+        });
     }
 }

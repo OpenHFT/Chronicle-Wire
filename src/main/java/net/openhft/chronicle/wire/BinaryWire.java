@@ -1325,10 +1325,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public long int64() {
             consumeSpecial();
-            int code = readCode();
-            if (code != INT64)
-                cantRead(code);
-            return bytes.readLong();
+            return readInt(readCode());
         }
 
         @Override
