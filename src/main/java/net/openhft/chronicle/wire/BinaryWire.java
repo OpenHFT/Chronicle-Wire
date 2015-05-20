@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
 
+import static net.openhft.chronicle.bytes.BytesUtil.append;
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
 
 /**
@@ -373,7 +374,6 @@ public class BinaryWire implements Wire, InternalWireIn {
 
             case BinaryWireHighCode.INT:
                 return readInt0(code);
-
         }
         throw new UnsupportedOperationException(stringForCode(code));
     }
@@ -544,13 +544,40 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     <ACS extends Appendable & CharSequence> ACS readText(int code, ACS sb) {
+        if (code <= 127) {
+            append(sb, code);
+            return sb;
+        }
         switch (code >> 4) {
             case BinaryWireHighCode.SPECIAL:
-                if (code == STRING_ANY) {
-                    bytes.readUTFΔ(sb);
-                    return sb;
+                switch (code) {
+                    case NULL:
+                        append(sb, "null");
+                        return sb;
+                    case TRUE:
+                        append(sb, "true");
+                        return sb;
+                    case FALSE:
+                        append(sb, "false");
+                        return sb;
+                    case TIME:
+                    case DATE:
+                    case DATE_TIME:
+                    case ZONED_DATE_TIME:
+                    case TYPE:
+                    case STRING_ANY:
+                        bytes.readUTFΔ(sb);
+                        return sb;
+                    default:
+                        return null;
                 }
-                return null;
+
+            case BinaryWireHighCode.FLOAT:
+                append(sb, readFloat(code));
+                return sb;
+            case BinaryWireHighCode.INT:
+                append(sb, readInt(code));
+                return sb;
             case BinaryWireHighCode.STR0:
             case BinaryWireHighCode.STR1:
                 return getStringBuilder(code, sb);
@@ -1092,13 +1119,17 @@ public class BinaryWire implements Wire, InternalWireIn {
             consumeSpecial();
             int code = readCode();
             if (code == TIME) {
-                StringBuilder sb = Wires.acquireStringBuilder();
-                bytes.readUTFΔ(sb);
-                localTime.accept(LocalTime.parse(sb));
+                localTime.accept(readLocalTime());
             } else {
                 cantRead(code);
             }
             return BinaryWire.this;
+        }
+
+        private LocalTime readLocalTime() {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            bytes.readUTFΔ(sb);
+            return LocalTime.parse(sb);
         }
 
         @NotNull
