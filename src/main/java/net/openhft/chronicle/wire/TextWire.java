@@ -1344,7 +1344,6 @@ public class TextWire implements Wire, InternalWireIn {
             return false;
         }
 
-
         @Override
         @Nullable
         public <E> E object(@Nullable E using,

@@ -33,7 +33,6 @@ import org.jetbrains.annotations.Nullable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
@@ -194,86 +193,18 @@ public interface ValueIn {
 
     boolean isNull();
 
+    default Throwable throwable(boolean appendCurrentStack) {
+        return Wires.throwable(this, appendCurrentStack);
+    }
 
     @Nullable
     default <E> E object(@NotNull Class<E> clazz) {
         return object(null, clazz);
     }
 
-
     default <E> E object(@Nullable E using,
                          @NotNull Class<E> clazz) {
 
-        if (byte[].class.isAssignableFrom(clazz))
-            return (E) bytes();
-
-        else if (Marshallable.class.isAssignableFrom(clazz)) {
-
-            final E v;
-            if (using == null)
-                try {
-                    v = clazz.newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            else
-                v = using;
-
-            marshallable((Marshallable) v);
-            return v;
-
-        } else if (StringBuilder.class.isAssignableFrom(clazz)) {
-            StringBuilder builder = (using == null)
-                    ? Wires.acquireStringBuilder()
-                    : (StringBuilder) using;
-            text(builder);
-            return (E) builder;
-
-        } else if (CharSequence.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-            return (E) text();
-
-        } else if (Long.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-            return (E) (Long) int64();
-        } else if (Double.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-            return (E) (Double) float64();
-
-        } else if (Integer.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-            return (E) (Integer) int32();
-
-        } else if (Float.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-            return (E) (Float) float32();
-
-        } else if (Short.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-            return (E) (Short) int16();
-
-        } else if (Character.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-            final String text = text();
-            if (text == null || text.length() == 0)
-                return null;
-            return (E) (Character) text.charAt(0);
-
-        } else if (Byte.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-            return (E) (Byte) int8();
-
-        } else if (Map.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-
-            final HashMap result = new HashMap();
-            map(result);
-            return (E) result;
-
-        } else {
-            throw new IllegalStateException("unsupported type");
-        }
+        return Wires.readObject(this, using, clazz);
     }
-
-
 }

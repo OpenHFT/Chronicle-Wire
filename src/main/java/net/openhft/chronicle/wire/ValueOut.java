@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import org.jetbrains.annotations.NotNull;
 
@@ -170,12 +171,15 @@ public interface ValueOut {
         typedMarshallable(t.getClass().getName(), (WireOut w) ->
                 w.write(() -> "message").text(t.getMessage())
                         .write(() -> "stackTrace").sequence(w3 -> {
-                    for (StackTraceElement ste : t.getStackTrace()) {
+                    StackTraceElement[] stes = t.getStackTrace();
+                    int last = Jvm.trimLast(0, stes);
+                    for (int i = 0; i < last; i++) {
+                        StackTraceElement ste = stes[i];
                         w3.leaf().marshallable(w4 ->
-                                w4.write(() -> "className").text(ste.getClassName())
-                                        .write(() -> "methodName").text(ste.getMethodName())
-                                        .write(() -> "fileName").text(ste.getFileName())
-                                        .write(() -> "lineNumber").int32(ste.getLineNumber()));
+                                w4.write(() -> "class").text(ste.getClassName())
+                                        .write(() -> "method").text(ste.getMethodName())
+                                        .write(() -> "file").text(ste.getFileName())
+                                        .write(() -> "line").int32(ste.getLineNumber()));
                     }
                 }));
         return wireOut();

@@ -1346,7 +1346,6 @@ public class BinaryWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException();
         }
 
-
         private WireIn cantRead(int code) {
             throw new UnsupportedOperationException(stringForCode(code));
         }
