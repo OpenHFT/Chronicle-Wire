@@ -51,6 +51,10 @@ public interface ValueIn {
     WireIn text(@NotNull Consumer<String> s);
 
     default String text() {
+
+        if (isNull())
+            return null;
+
         StringBuilder sb = Wires.acquireStringBuilder();
         text(sb);
         return sb.toString();

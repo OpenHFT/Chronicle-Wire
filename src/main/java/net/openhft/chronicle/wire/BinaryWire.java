@@ -56,7 +56,6 @@ public class BinaryWire implements Wire, InternalWireIn {
     final ValueIn valueIn = new BinaryValueIn();
 
     private final boolean numericFields;
-
     private final boolean fieldLess;
     boolean ready;
 
@@ -168,6 +167,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
     @Override
     public ValueIn readEventName(@NotNull StringBuilder name) {
+
         readField(name, ANY_CODE_MATCH);
         return valueIn;
     }
@@ -582,7 +582,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             case BinaryWireHighCode.STR1:
                 return getStringBuilder(code, sb);
             default:
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("code=0x" + String.format("%02X ", code).trim());
         }
     }
 
@@ -853,10 +853,10 @@ public class BinaryWire implements Wire, InternalWireIn {
             } else if (l < 1L << 32) {
                 super.uint32checked(l);
             } else {
-                if (l == (float) l)
-                    super.float32(l);
-                else
-                    super.int64(l);
+                //  if (l == (float) l)
+                //      super.float32(l);
+                //  else
+                super.int64(l);
             }
         }
 
@@ -1309,10 +1309,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         public boolean bool() {
             consumeSpecial();
             int code = readCode();
-            if (code != UINT8)
-                cantRead(code);
-
-            switch (bytes.readUnsignedByte()) {
+            switch (code) {
                 case TRUE:
                     return true;
                 case FALSE:
@@ -1369,9 +1366,13 @@ public class BinaryWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException("todo");
         }
 
+
         @Override
         public boolean isNull() {
-            throw new UnsupportedOperationException();
+            int code = peekCode();
+            if (code <= 127)
+                return false;
+            return code >> 4 == BinaryWireHighCode.SPECIAL && code == NULL;
         }
 
         private WireIn cantRead(int code) {
