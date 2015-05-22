@@ -316,6 +316,8 @@ public class TextWire implements Wire, InternalWireIn {
         return s.length() == 0;
     }
 
+    public static final String NULL = "!null \"\"";
+
     class TextValueOut implements ValueOut {
         int indentation = 0;
         String sep = "";
@@ -356,7 +358,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public Wire bool(Boolean flag) {
             prependSeparator();
-            bytes.append(flag == null ? "!!null" : flag ? "true" : "false");
+            bytes.append(flag == null ? "!" + NULL : flag ? "true" : "false");
             elementSeparator();
             return TextWire.this;
         }
@@ -364,7 +366,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public Wire text(CharSequence s) {
             prependSeparator();
-            bytes.append(s == null ? "!!null" : quotes(s));
+            bytes.append(s == null ? "!" + NULL : quotes(s));
             elementSeparator();
             return TextWire.this;
         }
@@ -656,7 +658,7 @@ public class TextWire implements Wire, InternalWireIn {
             else if (v instanceof WriteMarshallable)
                 typedMarshallable((WriteMarshallable) v);
             else if (v == null)
-                bytes.append("!!null");
+                bytes.append("!" + NULL);
             else
                 text(String.valueOf(v));
         }
@@ -1209,7 +1211,7 @@ public class TextWire implements Wire, InternalWireIn {
                 bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                 String str = sb.toString();
 
-                if ("!!null".contentEquals(sb)) {
+                if (("!" + NULL).contentEquals(sb)) {
                     return null;
                 } else if (("!" + SEQ_MAP).contentEquals(sb)) {
                     consumeWhiteSpace();
@@ -1334,10 +1336,10 @@ public class TextWire implements Wire, InternalWireIn {
         public boolean isNull() {
             consumeWhiteSpace();
 
-            if (peekStringIgnoreCase("!!null")) {
-                bytes.skip("!!null".length());
-                if (bytes.remaining() > 0 && bytes.readByte(bytes.position()) == '\n')
-                    bytes.skip(1);
+            if (peekStringIgnoreCase("!!null ")) {
+                bytes.skip("!!null ".length());
+                // discard the text after it.
+                text(Wires.acquireStringBuilder());
                 return true;
             }
 
