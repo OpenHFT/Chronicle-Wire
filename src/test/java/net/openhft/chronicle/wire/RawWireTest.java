@@ -157,7 +157,6 @@ public class RawWireTest {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -180,7 +179,6 @@ public class RawWireTest {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -203,7 +201,6 @@ public class RawWireTest {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -226,7 +223,6 @@ public class RawWireTest {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -249,7 +245,6 @@ public class RawWireTest {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -272,7 +267,6 @@ public class RawWireTest {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -296,7 +290,6 @@ public class RawWireTest {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -417,7 +410,6 @@ public class RawWireTest {
         wire.read().time(t -> assertEquals(now, t))
                 .read().time(t -> assertEquals(LocalTime.MAX, t))
                 .read().time(t -> assertEquals(LocalTime.MIN, t));
-
     }
 
     @Test
@@ -515,6 +507,5 @@ public class RawWireTest {
 
     enum BWKey implements WireKey {
         field1, field2, field3;
-
     }
 }

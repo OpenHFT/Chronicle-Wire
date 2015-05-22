@@ -68,6 +68,7 @@ public class RawWire implements Wire, InternalWireIn {
     public void copyTo(@NotNull WireOut wire) {
         if (wire instanceof RawWire) {
             wire.bytes().write(bytes);
+
         } else {
             throw new UnsupportedOperationException("Can only copy Raw Wire format to the same format.");
         }
@@ -361,7 +362,6 @@ public class RawWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException("todo");
         }
 
-
         @Override
         public WireOut object(Object o) {
             throw new UnsupportedOperationException("todo");
@@ -534,7 +534,6 @@ public class RawWire implements Wire, InternalWireIn {
         public boolean hasNextSequenceItem() {
             throw new UnsupportedOperationException("todo");
         }
-
 
         @Override
         public WireIn uuid(@NotNull Consumer<UUID> uuid) {

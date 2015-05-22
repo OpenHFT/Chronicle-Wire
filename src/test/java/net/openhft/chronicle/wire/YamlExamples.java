@@ -137,14 +137,12 @@ public class YamlExamples {
                 .write(Keys.avg).float64(0.278)
                 .writeMappingEnd();
 
-
         wire.write("Sammy Sosa", Keys.name).mapStart()
                 .write(Keys.hr).int32(63)
                 .write(Keys.avg).float64(0.288)
                 .writeMappingEnd();
 
         wire.flip();
-
 
         StringBuilder name = new StringBuilder();
         while (wire.hasMapping()) {
@@ -249,7 +247,6 @@ public class YamlExamples {
         wire.clear();
 
         assertEquals("Stats{name=Mark McGwire, hr=65, avg=0.278, rbi=147}", stats.toString());
-
     }
 
     enum Keys implements WireKey {
@@ -330,5 +327,4 @@ public class YamlExamples {
         }
     }
 }
-
 

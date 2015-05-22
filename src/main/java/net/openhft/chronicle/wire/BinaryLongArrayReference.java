@@ -101,7 +101,6 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
 
     @Override
     public long sizeInBytes(long capacity) {
-
         return (capacity << 3) + VALUES;
     }
 }

@@ -128,6 +128,4 @@ public class TextLongReference implements LongValue, Byteable {
             return false;
         });
     }
-
-
 }

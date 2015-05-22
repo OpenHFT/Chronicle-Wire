@@ -98,7 +98,6 @@ public class TextWire2Test {
         wire.flip();
         expectWithSnakeYaml("{VALUE=1234567890123456789}", wire);
         assertEquals(expected, wire.read(() -> "VALUE").int64());
-
     }
 
     @Test
@@ -247,7 +246,6 @@ public class TextWire2Test {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -272,7 +270,6 @@ public class TextWire2Test {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -297,7 +294,6 @@ public class TextWire2Test {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -322,7 +318,6 @@ public class TextWire2Test {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -347,7 +342,6 @@ public class TextWire2Test {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -372,7 +366,6 @@ public class TextWire2Test {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -398,7 +391,6 @@ public class TextWire2Test {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -532,7 +524,6 @@ public class TextWire2Test {
         wire.read().time(t -> assertEquals(now, t))
                 .read().time(t -> assertEquals(LocalTime.MAX, t))
                 .read().time(t -> assertEquals(LocalTime.MIN, t));
-
     }
 
     @Test
@@ -668,7 +659,6 @@ public class TextWire2Test {
         assertEquals(fieldLen, len, 1);
     }
 
-
     @Test
     public void testMapReadAndWriteStrings() {
         final Bytes bytes = nativeBytes();
@@ -736,9 +726,7 @@ bytes.position(0);
             Map m = c.read(() -> "example").map(Integer.class, Integer.class, actual);
             assertEquals(m, expected);
         });
-
     }
-
 
     class MyMarshallable implements Marshallable {
 
@@ -782,10 +770,8 @@ bytes.position(0);
         }
     }
 
-
     @Test
     public void testMapReadAndWriteMarshable() {
-
         final Bytes bytes = nativeBytes();
         final Wire wire = new TextWire(bytes);
 

@@ -51,7 +51,6 @@ public interface ValueIn {
     WireIn text(@NotNull Consumer<String> s);
 
     default String text() {
-
         if (isNull())
             return null;
 
@@ -131,7 +130,6 @@ public interface ValueIn {
 
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
 
-
     @NotNull
     default ReadMarshallable typedMarshallable() {
         try {
@@ -160,7 +158,6 @@ public interface ValueIn {
 
     @NotNull
     WireIn marshallable(@NotNull ReadMarshallable object);
-
 
     /**
      * reads the map from the wire
@@ -208,7 +205,6 @@ public interface ValueIn {
 
     default <E> E object(@Nullable E using,
                          @NotNull Class<E> clazz) {
-
         return Wires.readObject(this, using, clazz);
     }
 }

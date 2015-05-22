@@ -155,17 +155,18 @@ public interface ValueOut {
             return int64((Long) value);
         else if (value instanceof CharSequence) {
             return text((CharSequence) value);
+
         } else if (value instanceof Marshallable) {
             return marshallable((Marshallable) value);
         }else if (value instanceof Throwable) {
                 return throwable((Throwable) value);
+
         } else {
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +
                     "AutoBoxed primitive Object");
         }
     }
-
 
     default WireOut throwable(Throwable t) {
         typedMarshallable(t.getClass().getName(), (WireOut w) ->

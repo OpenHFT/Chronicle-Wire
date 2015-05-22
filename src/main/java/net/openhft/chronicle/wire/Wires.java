@@ -55,7 +55,6 @@ public enum Wires {
             DETAILED_MESSAGE.setAccessible(true);
             STACK_TRACE = Throwable.class.getDeclaredField("stackTrace");
             STACK_TRACE.setAccessible(true);
-
         } catch (NoSuchFieldException e) {
             throw new AssertionError(e);
         }
@@ -85,8 +84,6 @@ public enum Wires {
                                    @NotNull WireIn wireIn,
                                    @Nullable Consumer<WireIn> metaDataConsumer,
                                    @Nullable Consumer<WireIn> dataConsumer) {
-
-
         final Bytes bytes = wireIn.bytes();
 
         long position = bytes.position();
@@ -104,7 +101,6 @@ public enum Wires {
     public static boolean readData(@NotNull WireIn wireIn,
                                    @Nullable Consumer<WireIn> metaDataConsumer,
                                    @Nullable Consumer<WireIn> dataConsumer) {
-
         final Bytes bytes = wireIn.bytes();
         boolean read = false;
         while (bytes.remaining() >= 4) {
@@ -118,6 +114,7 @@ public enum Wires {
             if (isData(header)) {
                 if (dataConsumer == null) {
                     return false;
+
                 } else {
                     ((InternalWireIn) wireIn).setReady(ready);
                     wireIn.bytes().withLength(len, b -> dataConsumer.accept(wireIn));
@@ -208,7 +205,6 @@ public enum Wires {
             return (E) in.bytes();
 
         else if (Marshallable.class.isAssignableFrom(clazz)) {
-
             final E v;
             if (using == null)
                 try {
@@ -236,6 +232,7 @@ public enum Wires {
         } else if (Long.class.isAssignableFrom(clazz)) {
             //noinspection unchecked
             return (E) (Long) in.int64();
+
         } else if (Double.class.isAssignableFrom(clazz)) {
             //noinspection unchecked
             return (E) (Double) in.float64();

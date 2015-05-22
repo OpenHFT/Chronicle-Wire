@@ -235,7 +235,6 @@ public class BinaryWireTest {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     private void checkAsText123(Wire wire) {
@@ -276,7 +275,6 @@ public class BinaryWireTest {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -304,7 +302,6 @@ public class BinaryWireTest {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -332,7 +329,6 @@ public class BinaryWireTest {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -360,7 +356,6 @@ public class BinaryWireTest {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -388,7 +383,6 @@ public class BinaryWireTest {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -416,7 +410,6 @@ public class BinaryWireTest {
         assertEquals(0, bytes.remaining());
         // check it's safe to read too much.
         wire.read();
-
     }
 
     @Test
@@ -578,7 +571,6 @@ public class BinaryWireTest {
         assertEquals(mt2, mtB);
     }
 
-
     enum BWKey implements WireKey {
         field1(1), field2(2), field3(3);
         private final int code;
@@ -592,5 +584,4 @@ public class BinaryWireTest {
             return code;
         }
     }
-
 }

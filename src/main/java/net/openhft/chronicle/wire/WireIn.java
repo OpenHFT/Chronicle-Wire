@@ -17,7 +17,6 @@
  */
 package net.openhft.chronicle.wire;
 
-
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -64,7 +63,6 @@ public interface WireIn {
      * read and write comments.
      */
     Wire readComment(@NotNull StringBuilder sb);
-
 
     void flip();
 

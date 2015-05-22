@@ -41,7 +41,6 @@ public class BinaryWire2Test {
 
     @Test
     public void testWriteMarshallable() {
-
     }
 
     @Test
@@ -68,7 +67,6 @@ public class BinaryWire2Test {
                 .read().float32(t -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F));
     }
 
-
     @Test
     public void testTime() {
         Wire wire = createWire();
@@ -80,7 +78,6 @@ public class BinaryWire2Test {
         wire.read().time(t -> assertEquals(now, t))
                 .read().time(t -> assertEquals(LocalTime.MAX, t))
                 .read().time(t -> assertEquals(LocalTime.MIN, t));
-
     }
 
     @Test

@@ -12,7 +12,6 @@ public enum CoreFields implements WireKey {
     reply,
     exception;
 
-
     private static StringBuilder eventName = new StringBuilder();
 
     private static long longEvent(@NotNull final WireKey expecting, @NotNull final WireIn wire) {

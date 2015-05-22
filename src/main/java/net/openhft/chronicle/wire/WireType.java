@@ -22,5 +22,4 @@ package net.openhft.chronicle.wire;
  */
 public enum WireType {
     ;
-
 }

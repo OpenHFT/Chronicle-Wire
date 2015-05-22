@@ -108,7 +108,6 @@ class MyTypes implements Marshallable {
         }
     }
 
-
     public static void main(String... ignored) {
         BytesMarshaller<MyTypes> bytesMarshaller = MarshallableBytesMarshaller.of(TextWire::new, MyTypes::new);
     }

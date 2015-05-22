@@ -145,7 +145,6 @@ public class BinaryWire implements Wire, InternalWireIn {
                     StringBuilder sb = readText(peekCode, Wires.acquireStringBuilder());
                     wire.writeValue().text(sb);
                     break;
-
             }
         }
     }
@@ -167,7 +166,6 @@ public class BinaryWire implements Wire, InternalWireIn {
 
     @Override
     public ValueIn readEventName(@NotNull StringBuilder name) {
-
         readField(name, ANY_CODE_MATCH);
         return valueIn;
     }
@@ -187,7 +185,6 @@ public class BinaryWire implements Wire, InternalWireIn {
     public Wire readComment(@NotNull StringBuilder s) {
         throw new UnsupportedOperationException();
     }
-
 
     @Override
     public void flip() {
@@ -217,22 +214,26 @@ public class BinaryWire implements Wire, InternalWireIn {
                 case PADDING:
                     bytes.skip(1);
                     break;
+
                 case PADDING32:
                     bytes.skip(1);
                     bytes.skip(bytes.readUnsignedInt());
                     break;
+
                 case COMMENT: {
                     bytes.skip(1);
                     StringBuilder sb = Wires.acquireStringBuilder();
                     bytes.readUTFΔ(sb);
                     break;
                 }
+
                 case HINT: {
                     bytes.skip(1);
                     StringBuilder sb = Wires.acquireStringBuilder();
                     bytes.readUTFΔ(sb);
                     break;
                 }
+
                 default:
                     return;
             }
@@ -295,12 +296,14 @@ public class BinaryWire implements Wire, InternalWireIn {
                 wire.writeComment(sb);
                 break;
             }
+
             case HINT: {
                 bytes.skip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 break;
             }
+
             case TIME:
             case ZONED_DATE_TIME:
             case DATE_TIME:
@@ -312,15 +315,18 @@ public class BinaryWire implements Wire, InternalWireIn {
                 wire.writeValue().type(sb);
                 break;
             }
+
             case FIELD_NAME_ANY:
                 StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, Wires.acquireStringBuilder());
                 wire.write(() -> fsb);
                 break;
+
             case STRING_ANY:
                 bytes.skip(1);
                 StringBuilder sb = readText(peekCode, Wires.acquireStringBuilder());
                 wire.writeValue().text(sb);
                 break;
+
             case FIELD_NUMBER: {
                 bytes.skip(1);
                 long code2 = bytes.readStopBit();
@@ -343,10 +349,12 @@ public class BinaryWire implements Wire, InternalWireIn {
                 bytes.skip(1);
                 wire.writeValue().bool(null);
                 break;
+
             case FALSE:
                 bytes.skip(1);
                 wire.writeValue().bool(false);
                 break;
+
             case TRUE:
                 bytes.skip(1);
                 wire.writeValue().bool(true);
@@ -368,6 +376,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                         return 1;
                 }
                 break;
+
             case BinaryWireHighCode.FLOAT:
                 double d = readFloat0(code);
                 return (long) d;
@@ -468,7 +477,6 @@ public class BinaryWire implements Wire, InternalWireIn {
 
             case BinaryWireHighCode.INT:
                 return readInt0(code);
-
         }
         throw new UnsupportedOperationException(stringForCode(code));
     }
@@ -528,6 +536,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             writeCode(PADDING32)
                     .writeUnsignedInt(paddingToAdd - 5)
                     .skip(paddingToAdd - 5);
+
         } else {
             for (int i = 0; i < paddingToAdd; i++)
                 writeCode(PADDING);
@@ -547,6 +556,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
             bytes.writeByte((byte) (FIELD_NAME0 + len))
                     .append(name);
+
         } else {
             writeCode(FIELD_NAME_ANY).writeUTFΔ(name);
         }
@@ -634,10 +644,12 @@ public class BinaryWire implements Wire, InternalWireIn {
         public WireOut text(CharSequence s) {
             if (s == null) {
                 writeCode(NULL);
+
             } else {
                 int len = s.length();
                 if (len < 0x20) {
                     bytes.writeByte((byte) (STRING_0 + len)).append(s);
+
                 } else {
                     writeCode(STRING_ANY).writeUTFΔ(s);
                 }
@@ -671,6 +683,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             } /*else if (length < 1 << 8) {
                 writeCode(BYTES_LENGTH8);
                 bytes.writeUnsignedByte((int) length);
+
             } else if (length < 1 << 16) {
                 writeCode(BYTES_LENGTH16);
                 bytes.writeUnsignedShort((int) length);
@@ -852,24 +865,37 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         void writeInt(long l) {
+            if (l < Integer.MIN_VALUE) {
+                if (l == (float) l)
+                    super.float32(l);
+                else
+                    super.int64(l);
 
-            if (l >= 0) {
+            } else if (l < Short.MIN_VALUE) {
+                super.int32((int) l);
 
-                if (l < 1 << 9) {
-                    super.uint8checked((short) l);
-                    return;
-                }
+            } else if (l < Byte.MIN_VALUE) {
+                super.int16((short) l);
 
-                if (l < 1 << 17) {
-                    super.uint16checked((int) l);
-                    return;
-                }
+            } else if (l < 0) {
+                super.int8((byte) l);
 
-                if (l < 1L << 33L) {
-                    super.uint32checked(l);
-                    return;
-                }
+            } else if (l < 128) {
+                bytes.writeUnsignedByte((int) l);
 
+            } else if (l < 1 << 8) {
+                super.uint8checked((short) l);
+
+            } else if (l < 1 << 16) {
+                super.uint16checked((int) l);
+
+            } else if (l < 1L << 32) {
+                super.uint32checked(l);
+
+            } else {
+                //  if (l == (float) l)
+                //      super.float32(l);
+                //  else
                 super.int64(l);
                 return;
             }
@@ -969,9 +995,11 @@ public class BinaryWire implements Wire, InternalWireIn {
                     // todo take the default.
                     flag.accept(null);
                     break;
+
                 case FALSE:
                     flag.accept(false);
                     break;
+
                 case TRUE:
                     flag.accept(true);
                     break;
@@ -990,6 +1018,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 case NULL:
                     s.accept(null);
                     break;
+
                 case STRING_ANY:
                     s.accept(bytes.readUTFΔ());
                     break;
@@ -998,6 +1027,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                         StringBuilder sb = Wires.acquireStringBuilder();
                         BytesUtil.parseUTF(bytes, sb, code & 0b11111);
                         s.accept(sb.toString());
+
                     } else {
                         cantRead(code);
                     }
@@ -1197,6 +1227,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             int code = readCode();
             if (code == TIME) {
                 localTime.accept(readLocalTime());
+
             } else {
                 cantRead(code);
             }
@@ -1218,6 +1249,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 zonedDateTime.accept(ZonedDateTime.parse(sb));
+
             } else {
                 cantRead(code);
             }
@@ -1233,6 +1265,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 localDate.accept(LocalDate.parse(sb));
+
             } else {
                 cantRead(code);
             }
@@ -1255,6 +1288,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             int code = readCode();
             if (code == UUID) {
                 uuid.accept(new UUID(bytes.readLong(), bytes.readLong()));
+
             } else {
                 cantRead(code);
             }
@@ -1272,6 +1306,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 long length = BinaryLongArrayReference.peakLength(bytes, bytes.position());
                 b.bytesStore(bytes, bytes.position(), length);
                 bytes.skip(length);
+
             } else {
                 cantRead(code);
             }
@@ -1359,6 +1394,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             int code = readCode();
             if (code == TYPE) {
                 bytes.readUTFΔ(s);
+
             } else {
                 cantRead(code);
             }
@@ -1385,7 +1421,6 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
             return BinaryWire.this;
         }
-
 
         @Override
         public <K extends ReadMarshallable, V extends ReadMarshallable> void typedMap(@NotNull Map<K, V> usingMap) {
@@ -1510,7 +1545,6 @@ public class BinaryWire implements Wire, InternalWireIn {
         public float float32() {
             throw new UnsupportedOperationException("todo");
         }
-
 
         @Override
         public boolean isNull() {
