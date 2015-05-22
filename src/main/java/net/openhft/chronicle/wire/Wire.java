@@ -37,5 +37,4 @@ public interface Wire extends WireIn, WireOut {
         else
             throw new UnsupportedOperationException("type " + wireClass.getSimpleName() + " is not currently supported.");
     }
-
 }

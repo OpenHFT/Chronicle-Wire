@@ -119,7 +119,6 @@ public class BinaryWirePerfTest {
     static class MyType2 implements Marshallable {
         int i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x;
 
-
         void i(int i) {
             this.i = i;
         }

@@ -17,7 +17,6 @@
  */
 package net.openhft.chronicle.wire;
 
-
 import net.openhft.chronicle.bytes.Bytes;
 
 import java.util.function.Consumer;

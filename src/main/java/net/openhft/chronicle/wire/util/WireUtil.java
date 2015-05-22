@@ -30,11 +30,12 @@ public class WireUtil {
 
     public static ThreadLocal<ByteableLongArrayValues> newLongArrayValuesPool(
             @NotNull Class<? extends Wire> wireType) {
-
         if (TextWire.class.isAssignableFrom(wireType)) {
             return withInitial(TextLongArrayReference::new);
+
         } else if (BinaryWire.class.isAssignableFrom(wireType)) {
             return withInitial(BinaryLongArrayReference::new);
+
         } else {
             throw new IllegalStateException("todo, unsupported type=" + wireType);
         }
@@ -42,13 +43,15 @@ public class WireUtil {
 
     public static Function<Bytes, Wire> byteToWireFor(
             @NotNull Class<? extends Wire> wireType) {
-
         if (TextWire.class.isAssignableFrom(wireType)) {
             return TextWire::new;
+
         } else if (BinaryWire.class.isAssignableFrom(wireType)) {
             return BinaryWire::new;
+
         } else if (RawWire.class.isAssignableFrom(wireType)) {
             return RawWire::new;
+
         } else {
             throw new UnsupportedOperationException("todo (byteToWireFor)");
         }

@@ -27,7 +27,6 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 
-
 public class TextDocumentTest {
     enum Keys implements WireKey {
         uuid,

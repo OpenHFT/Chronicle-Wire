@@ -5,7 +5,6 @@ package net.openhft.chronicle.wire;
  */
 public class YamlLogging {
 
-
     public static final boolean showServerWrites = false;
     public static volatile boolean clientWrites = false;
     public static volatile String title = "";

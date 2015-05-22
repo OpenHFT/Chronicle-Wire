@@ -111,7 +111,6 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
     }
 
     public String toString() {
-
         if (bytes == null) {
             return "LongArrayTextReference{" +
                     "bytes=" + bytes +
@@ -127,6 +126,4 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
     public long sizeInBytes(long capacity) {
         return (capacity * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;
     }
-
-
 }
