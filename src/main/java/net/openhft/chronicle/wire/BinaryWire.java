@@ -901,7 +901,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
 
             if (l >= Byte.MIN_VALUE && l <= Byte.MAX_VALUE) {
-                super.int8((short) l);
+                super.int8((byte) l);
                 return;
             }
 
