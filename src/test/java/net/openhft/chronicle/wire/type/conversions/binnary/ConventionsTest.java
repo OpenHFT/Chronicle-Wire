@@ -35,6 +35,27 @@ public class ConventionsTest {
 
 
     @Test
+    public void testTypeConversions2() throws Exception {
+
+        for (Class type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
+                .class}) {
+            Object extected;
+            if (Number.class.isAssignableFrom(type)) {
+                System.out.println("" + type + "");
+                final Field max_value = type.getField("MAX_VALUE");
+                extected = max_value.get(type);
+            } else {
+                extected = 123;
+            }
+            System.out.println("testing ((" + (extected.getClass().getSimpleName()) + ")" +
+                    extected + ") to a " + type.getSimpleName() + " and back to a " + extected.getClass()
+                    .getSimpleName());
+            Assert.assertEquals("type=" + type, extected, test(extected, type));
+        }
+    }
+
+
+    @Test
     public void testTypeConversionsMaxUnsigned() throws Exception {
 
         for (long shift : new long[]{8, 16, 32}) {
@@ -79,6 +100,28 @@ public class ConventionsTest {
                 return actual.charAt(0);
         }
 
+
+        if (String.class.isAssignableFrom(destinationType)) {
+            long actual = wire.getValueIn().int64();
+
+            if (source instanceof Long)
+                return actual;
+            else if (source instanceof Integer)
+                return (int)actual;
+            else if (source instanceof Short)
+                return (short)actual;
+            else if (source instanceof Byte)
+                return (int)actual;
+            else if (source instanceof Float)
+                return (int)actual;
+            else if (source instanceof Double)
+                return (int)actual;
+            else if (source instanceof CharSequence)
+                return (char)actual;
+            else if (source instanceof Bytes)
+                return (char)actual;
+        }
+
         if (Long.class.isAssignableFrom(destinationType))
             return wire.getValueIn().int64();
 
@@ -93,7 +136,6 @@ public class ConventionsTest {
 
         if (Float.class.isAssignableFrom(destinationType))
             return wire.getValueIn().float32();
-
 
         if (Double.class.isAssignableFrom(destinationType))
             return wire.getValueIn().float64();

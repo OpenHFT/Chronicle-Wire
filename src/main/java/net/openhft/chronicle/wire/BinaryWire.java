@@ -866,7 +866,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 }
 
                 if (l < 1L << 33L) {
-                    super.uint32checked((int) l);
+                    super.uint32checked(l);
                     return;
                 }
 
