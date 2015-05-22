@@ -54,7 +54,7 @@ public interface ValueOut {
 
     WireOut bytes(byte[] fromBytes);
 
-    default WireOut uint8(long x) {
+    default WireOut uint8(int x) {
         return uint8checked((byte) Maths.toUInt8(x));
     }
 

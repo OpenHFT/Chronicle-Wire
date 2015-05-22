@@ -400,7 +400,13 @@ public class BinaryWire implements Wire, InternalWireIn {
         throw new UnsupportedOperationException(stringForCode(code));
     }
 
+
     private long readInt0(int code) {
+
+
+        if (isSmallInt(code))
+            return code;
+
         switch (code) {
 //            case UUID:
 //                throw new UnsupportedOperationException();
@@ -408,18 +414,22 @@ public class BinaryWire implements Wire, InternalWireIn {
 //                throw new UnsupportedOperationException();
             case INT8:
                 return bytes.readByte();
-            case INT16:
-                return bytes.readShort();
-            case INT32:
-                return bytes.readInt();
-            case INT64:
-                return bytes.readLong();
             case UINT8:
                 return bytes.readUnsignedByte();
+            case INT16:
+                return bytes.readShort();
             case UINT16:
                 return bytes.readUnsignedShort();
+            case INT32:
+                return bytes.readInt();
             case UINT32:
                 return bytes.readUnsignedInt();
+            case INT64:
+                return bytes.readLong();
+
+
+
+
 /*
             case FIXED_6:
                 return bytes.readStopBit() * 1000000L;
@@ -439,6 +449,14 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         }
         throw new UnsupportedOperationException(stringForCode(code));
+    }
+
+    private boolean isSmallInt(int code) {
+        return false;
+    }
+
+    private boolean isText(int code) {
+        return false;
     }
 
     private double readFloat(int code) {
@@ -702,6 +720,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
+
         @Override
         public WireOut uint32checked(long u32) {
             writeCode(UINT32).writeUnsignedInt(u32);
@@ -833,31 +852,46 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         void writeInt(long l) {
-            if (l < Integer.MIN_VALUE) {
-                if (l == (float) l)
-                    super.float32(l);
-                else
-                    super.int64(l);
-            } else if (l < Short.MIN_VALUE) {
-                super.int32((int) l);
-            } else if (l < Byte.MIN_VALUE) {
-                super.int16((short) l);
-            } else if (l < 0) {
-                super.int8((byte) l);
-            } else if (l < 128) {
-                bytes.writeUnsignedByte((int) l);
-            } else if (l < 1 << 8) {
-                super.uint8checked((short) l);
-            } else if (l < 1 << 16) {
-                super.uint16checked((int) l);
-            } else if (l < 1L << 32) {
-                super.uint32checked(l);
-            } else {
-                //  if (l == (float) l)
-                //      super.float32(l);
-                //  else
+
+            if (l >= 0) {
+
+                if (l < 1 << 9) {
+                    super.uint8checked((short) l);
+                    return;
+                }
+
+                if (l < 1 << 17) {
+                    super.uint16checked((int) l);
+                    return;
+                }
+
+                if (l < 1L << 33L) {
+                    super.uint32checked((int) l);
+                    return;
+                }
+
                 super.int64(l);
+                return;
             }
+
+            if (l >= Byte.MIN_VALUE && l <= Byte.MAX_VALUE) {
+                super.int8((short) l);
+                return;
+            }
+
+            if (l >= Short.MAX_VALUE && l <= Short.MAX_VALUE) {
+                super.int16((short) l);
+                return;
+            }
+
+            if (l >= Integer.MAX_VALUE && l <= Integer.MAX_VALUE) {
+                super.int32((int) l);
+                return;
+            }
+
+
+            super.int64(l);
+
         }
 
         @Override
@@ -971,9 +1005,15 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
+        private boolean isText(int code) {
+            return code == STRING_ANY ||
+                    (code >= STRING_0 && code <= STRING_31);
+        }
+
         @NotNull
         @Override
         public <ACS extends Appendable & CharSequence> WireIn text(@NotNull ACS s) {
+
             int code = readCode();
             ACS text = readText(code, s);
             if (text == null)
@@ -985,7 +1025,14 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public WireIn int8(@NotNull ByteConsumer i) {
             consumeSpecial();
-            i.accept((byte) readInt(bytes.readUnsignedByte()));
+
+            final int code = bytes.readUnsignedByte();
+
+            if (isText(code))
+                i.accept(Byte.valueOf(text()));
+            else
+                i.accept((byte) readInt(code));
+
             return BinaryWire.this;
         }
 
@@ -1056,14 +1103,23 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public WireIn uint8(@NotNull ShortConsumer i) {
             consumeSpecial();
-            i.accept((short) readInt(readCode()));
+
+            final int code = readCode();
+            if (isText(code))
+                i.accept(Short.valueOf(text()));
+            else
+                i.accept((short) readInt(code));
             return BinaryWire.this;
         }
 
         @NotNull
         @Override
         public WireIn int16(@NotNull ShortConsumer i) {
-            i.accept((short) readInt(readCode()));
+            final int code = readCode();
+            if (isText(code))
+                i.accept(Short.valueOf(text()));
+            else
+                i.accept((short) readInt(code));
             return BinaryWire.this;
         }
 
@@ -1071,7 +1127,11 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public WireIn uint16(@NotNull IntConsumer i) {
             consumeSpecial();
-            i.accept((int) readInt(readCode()));
+            final int code = readCode();
+            if (isText(code))
+                i.accept(Integer.valueOf(text()));
+            else
+                i.accept((int) readInt(code));
             return BinaryWire.this;
         }
 
@@ -1079,7 +1139,11 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public WireIn int32(@NotNull IntConsumer i) {
             consumeSpecial();
-            i.accept((int) readInt(readCode()));
+            final int code = readCode();
+            if (isText(code))
+                i.accept(Integer.valueOf(text()));
+            else
+                i.accept((int) readInt(code));
             return BinaryWire.this;
         }
 
@@ -1087,14 +1151,22 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public WireIn uint32(@NotNull LongConsumer i) {
             consumeSpecial();
-            i.accept(readInt(readCode()));
+            final int code = readCode();
+            if (isText(code))
+                i.accept(Long.valueOf(text()));
+            else
+                i.accept(readInt(code));
             return BinaryWire.this;
         }
 
         @NotNull
         @Override
         public WireIn int64(@NotNull LongConsumer i) {
-            i.accept(readInt(readCode()));
+            final int code = readCode();
+            if (isText(code))
+                i.accept(Long.valueOf(text()));
+            else
+                i.accept(readInt(code));
             return BinaryWire.this;
         }
 
@@ -1102,14 +1174,19 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public WireIn float32(@NotNull FloatConsumer v) {
             consumeSpecial();
-            v.accept((float) readFloat(readCode()));
+            final int code = readCode();
+            if (isText(code))
+                v.accept(Float.valueOf(text()));
+            else
+                v.accept((float) readFloat(code));
             return BinaryWire.this;
         }
 
         @NotNull
         @Override
         public WireIn float64(@NotNull DoubleConsumer v) {
-            v.accept(readFloat(readCode()));
+            final int code = readCode();
+            v.accept(readFloat(code));
             return BinaryWire.this;
         }
 
@@ -1169,7 +1246,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @Override
         public boolean hasNextSequenceItem() {
-            throw new UnsupportedOperationException("todo");
+            return bytes.remaining() > 0;
         }
 
         @Override
@@ -1239,7 +1316,22 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @Override
         public WireIn sequence(@NotNull Consumer<ValueIn> reader) {
-            throw new UnsupportedOperationException();
+            consumeSpecial();
+            int code = readCode();
+            if (code != BYTES_LENGTH32)
+                cantRead(code);
+            final int length = bytes.readInt();
+            long limit = bytes.readLimit();
+            long limit2 = bytes.position() + length;
+            bytes.limit(limit2);
+            bytes.limit(limit2);
+            try {
+                reader.accept(this);
+            } finally {
+                bytes.limit(limit);
+                bytes.position(limit2);
+            }
+            return BinaryWire.this;
         }
 
         @Override
@@ -1309,6 +1401,9 @@ public class BinaryWire implements Wire, InternalWireIn {
         public boolean bool() {
             consumeSpecial();
             int code = readCode();
+            if (isText(code))
+                return Boolean.valueOf(text());
+
             switch (code) {
                 case TRUE:
                     return true;
@@ -1321,39 +1416,89 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public byte int8() {
             consumeSpecial();
+
             int code = readCode();
-            if (code != INT8)
-                cantRead(code);
-            return bytes.readByte();
+
+            if (isText(code))
+                return Byte.valueOf(text());
+
+            long value = readInt0(code);
+
+            if (value > Byte.MAX_VALUE || value < Byte.MIN_VALUE)
+                throw new IllegalStateException();
+            return (byte) value;
+
         }
 
         @Override
         public short int16() {
             consumeSpecial();
             int code = readCode();
-            if (code != INT16)
-                cantRead(code);
-            return bytes.readShort();
+
+            if (isText(code))
+                return Short.valueOf(text());
+
+            long value = readInt0(code);
+
+            if (value > Short.MAX_VALUE || value < Short.MIN_VALUE)
+                throw new IllegalStateException();
+            return (short) value;
+
+
         }
 
         @Override
         public int uint16() {
-            return 0;
+            consumeSpecial();
+            int code = readCode();
+
+            if (isText(code))
+                return Integer.valueOf(text());
+
+            long value = readInt0(code);
+
+            if (value > Integer.MAX_VALUE || value < Integer.MIN_VALUE)
+                throw new IllegalStateException();
+            return (int) value;
+
         }
 
+
+        private boolean isSmallInt(int code) {
+            return (code & 128) == 0;
+        }
         @Override
         public int int32() {
             consumeSpecial();
             int code = readCode();
-            if (code != INT32)
-                cantRead(code);
-            return bytes.readInt();
+
+            if (isText(code))
+                return Integer.valueOf(text());
+
+            long value = readInt0(code);
+
+            if (value > Integer.MAX_VALUE || value < Integer.MIN_VALUE)
+                throw new IllegalStateException();
+            return (int) value;
+
+
+
         }
 
         @Override
         public long int64() {
             consumeSpecial();
-            return readInt(readCode());
+            int code = readCode();
+
+            if (isText(code))
+                return Integer.valueOf(text());
+
+            if (isSmallInt(code))
+                return code;
+
+            return readInt0(code);
+
+
         }
 
         @Override
