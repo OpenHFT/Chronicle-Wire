@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire.type.conversions.binnary;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.BinaryWire;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -24,17 +25,36 @@ public class ConventionsTest {
                 final Field max_value = type.getField("MAX_VALUE");
                 extected = max_value.get(type);
             } else {
-                extected = 123;
+                extected = "123";
             }
-            System.out.println("testing ((" + (extected.getClass().getSimpleName()) + ")" +
-                    extected + ") to a " + type.getSimpleName() + " and back to a " + extected.getClass()
-                    .getSimpleName());
+
             Assert.assertEquals("type=" + type, extected, test(extected, type));
         }
     }
 
-
+    @Ignore("todo fix")
     @Test
+    public void testTypeConversionsConvertViaString() throws Exception {
+
+        for (Class type : new Class[]{Integer.class, Long.class, Short.class, Byte
+                .class}) {
+            Object extected;
+            if (Number.class.isAssignableFrom(type)) {
+                final Field max_value = type.getField("MAX_VALUE");
+                extected = max_value.get(type);
+            } else {
+                extected = 123;
+            }
+
+            final Object value = test(extected, String.class);
+            final Object actual = test(value, extected.getClass());
+
+            Assert.assertEquals("type=" + type, extected, actual);
+        }
+    }
+
+
+    @Test(timeout = 10000)
     public void testTypeConversions2() throws Exception {
 
         for (Class type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
@@ -45,11 +65,8 @@ public class ConventionsTest {
                 final Field max_value = type.getField("MAX_VALUE");
                 extected = max_value.get(type);
             } else {
-                extected = 123;
+                extected = "123";
             }
-            System.out.println("testing ((" + (extected.getClass().getSimpleName()) + ")" +
-                    extected + ") to a " + type.getSimpleName() + " and back to a " + extected.getClass()
-                    .getSimpleName());
             Assert.assertEquals("type=" + type, extected, test(extected, type));
         }
     }
@@ -62,15 +79,43 @@ public class ConventionsTest {
 
             long extected = (1L << shift) - 1L;
 
-            Assert.assertEquals(extected, test(extected, Long.class));
+            Assert.assertEquals(extected, (long) test(extected, Long.class));
         }
     }
 
-    public Object test(Object source, Class destinationType) {
+    @Test
+    public void testLargeLongToString() throws Exception {
+        long extected = Long.MAX_VALUE;
+        Assert.assertEquals(extected, (long) Long.valueOf(test(extected, String.class)));
+    }
+
+    @Test
+    public void testSmallLongToString() throws Exception {
+        long extected = Long.MIN_VALUE;
+        Assert.assertEquals(extected, Long.parseLong(test(extected, String.class)));
+    }
+
+    @Test
+    public void testStringWithNumber() throws Exception {
+        String extected = Long.toString(Long.MAX_VALUE);
+        Assert.assertEquals(extected, String.valueOf(test(extected, String.class)));
+    }
+
+
+    @Test
+    public void testString() throws Exception {
+        String extected = "some text";
+        Assert.assertEquals(extected, test(extected, String.class));
+    }
+
+
+    public <T> T test(Object source, Class<T> destinationType) {
 
         final BinaryWire wire = new BinaryWire(Bytes.elasticByteBuffer());
 
-        if (source instanceof Long)
+        if (source instanceof String)
+            wire.writeValue().text((String) source);
+        else if (source instanceof Long)
             wire.writeValue().int64((Long) source);
         else if (source instanceof Integer)
             wire.writeValue().int32((Integer) source);
@@ -83,62 +128,27 @@ public class ConventionsTest {
 
         if (String.class.isAssignableFrom(destinationType)) {
             final String actual = wire.getValueIn().text();
-
-            if (source instanceof Long)
-                return Long.valueOf(actual);
-            else if (source instanceof Integer)
-                return Integer.valueOf(actual);
-            else if (source instanceof Short)
-                return Short.valueOf(actual);
-            else if (source instanceof Byte)
-                return Byte.valueOf(actual);
-            else if (source instanceof Float)
-                return Float.valueOf(actual);
-            else if (source instanceof Double)
-                return Double.valueOf(actual);
-            else if (source instanceof CharSequence)
-                return actual.charAt(0);
+            return (T) (String) actual;
         }
 
-
-        if (String.class.isAssignableFrom(destinationType)) {
-            long actual = wire.getValueIn().int64();
-
-            if (source instanceof Long)
-                return actual;
-            else if (source instanceof Integer)
-                return (int)actual;
-            else if (source instanceof Short)
-                return (short)actual;
-            else if (source instanceof Byte)
-                return (int)actual;
-            else if (source instanceof Float)
-                return (int)actual;
-            else if (source instanceof Double)
-                return (int)actual;
-            else if (source instanceof CharSequence)
-                return (char)actual;
-            else if (source instanceof Bytes)
-                return (char)actual;
-        }
 
         if (Long.class.isAssignableFrom(destinationType))
-            return wire.getValueIn().int64();
+            return (T) (Long) wire.getValueIn().int64();
 
         if (Integer.class.isAssignableFrom(destinationType))
-            return wire.getValueIn().int32();
+            return (T) (Integer) wire.getValueIn().int32();
 
         if (Short.class.isAssignableFrom(destinationType))
-            return wire.getValueIn().int16();
+            return (T) (Short) wire.getValueIn().int16();
 
         if (Byte.class.isAssignableFrom(destinationType))
-            return wire.getValueIn().int8();
+            return (T) (Byte) wire.getValueIn().int8();
 
         if (Float.class.isAssignableFrom(destinationType))
-            return wire.getValueIn().float32();
+            return (T) (Float) wire.getValueIn().float32();
 
         if (Double.class.isAssignableFrom(destinationType))
-            return wire.getValueIn().float64();
+            return (T) (Double) wire.getValueIn().float64();
 
         throw new UnsupportedOperationException("");
     }
