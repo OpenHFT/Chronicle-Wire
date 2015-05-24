@@ -55,10 +55,14 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         bytes.flip();
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("--- !!meta-data\n" +
-                        "csp:///service-lookup\n" +
+                        "csp: ///service-lookup\n" +
                         "tid: 149873598325\n" +
                         "--- !!data\n" +
-                        "lookup: { relativeUri: test, view: !Map types: { keyType: !Integer valueType: !String } }\n",
+                        "lookup: {\n" +
+                        "  relativeUri: test,\n" +
+                        "  view: !Map types: {\n" +
+                        "    keyType: !Integer valueType: !String }\n" +
+                        "}",
                 Wires.fromSizePrefixedBlobs(bytes));
 
         Wire bin = new BinaryWire(bytes);

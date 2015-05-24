@@ -648,8 +648,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             } else {
                 int len = s.length();
                 if (len < 0x20) {
-                    bytes.writeByte((byte) (STRING_0 + len)).append(s);
-
+                    bytes.writeUnsignedByte(STRING_0 + len).append(s);
                 } else {
                     writeCode(STRING_ANY).writeUTFΔ(s);
                 }
@@ -860,43 +859,42 @@ public class BinaryWire implements Wire, InternalWireIn {
     class BinaryValueOut extends FixedBinaryValueOut {
         @Override
         public WireOut int8(byte i8) {
-            writeInt(i8);
+            writeNumber(i8);
             return BinaryWire.this;
         }
 
-        void writeInt(long l) {
-            if (l < Integer.MIN_VALUE) {
-                if (l == (float) l)
-                    super.float32(l);
-                else
-                    super.int64(l);
+        void writeNumber(double l) {
 
-            } else if (l < Short.MIN_VALUE) {
-                super.int32((int) l);
+            boolean isFloatingPoint = (long) l != l;
 
-            } else if (l < Byte.MIN_VALUE) {
-                super.int16((short) l);
+            if (isFloatingPoint) {
+                if (((float) l) == l) {
+                    super.float32((float) l);
+                    return;
+                }
 
-            } else if (l < 0) {
-                super.int8((byte) l);
+                super.float64(l);
+                return;
+            }
 
-            } else if (l < 128) {
-                bytes.writeUnsignedByte((int) l);
+            if (l >= 0) {
 
-            } else if (l < 1 << 8) {
-                super.uint8checked((short) l);
+                if (l < 1 << 8) {
+                    super.uint8checked((short) l);
+                    return;
+                }
 
-            } else if (l < 1 << 16) {
-                super.uint16checked((int) l);
+                if (l < 1 << 16) {
+                    super.uint16checked((int) l);
+                    return;
+                }
 
-            } else if (l < 1L << 32) {
-                super.uint32checked(l);
+                if (l < 1L << 32L) {
+                    super.uint32checked((long)l);
+                    return;
+                }
 
-            } else {
-                //  if (l == (float) l)
-                //      super.float32(l);
-                //  else
-                super.int64(l);
+                super.int64((long)l);
                 return;
             }
 
@@ -916,43 +914,45 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
 
 
-            super.int64(l);
+            super.int64((long)l);
+
+
 
         }
 
         @Override
         public WireOut uint8checked(int u8) {
-            writeInt(u8);
+            writeNumber(u8);
             return BinaryWire.this;
         }
 
         @Override
         public WireOut int16(short i16) {
-            writeInt(i16);
+            writeNumber(i16);
             return BinaryWire.this;
         }
 
         @Override
         public WireOut uint16checked(int u16) {
-            writeInt(u16);
+            writeNumber(u16);
             return BinaryWire.this;
         }
 
         @Override
         public WireOut int32(int i32) {
-            writeInt(i32);
+            writeNumber(i32);
             return BinaryWire.this;
         }
 
         @Override
         public WireOut uint32checked(long u32) {
-            writeInt(u32);
+            writeNumber(u32);
             return BinaryWire.this;
         }
 
         @Override
         public WireOut int64(long i64) {
-            writeInt(i64);
+            writeNumber(i64);
             return BinaryWire.this;
         }
 
@@ -966,7 +966,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             if (d < 1L << 32 && d >= -1L << 31) {
                 long l = (long) d;
                 if (l == d) {
-                    writeInt(l);
+                    writeNumber(l);
                     return;
                 }
             }
@@ -1043,7 +1043,6 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public <ACS extends Appendable & CharSequence> WireIn text(@NotNull ACS s) {
-
             int code = readCode();
             ACS text = readText(code, s);
             if (text == null)
@@ -1432,6 +1431,16 @@ public class BinaryWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException("todo");
         }
 
+
+        private long readTextAsInt() {
+            bytes.skip(-1);
+            final String text = text();
+            if (text == null)
+                throw new NullPointerException();
+
+            return Long.parseLong(text);
+        }
+
         @Override
         public boolean bool() {
             consumeSpecial();
@@ -1451,13 +1460,8 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public byte int8() {
             consumeSpecial();
-
             int code = readCode();
-
-            if (isText(code))
-                return Byte.valueOf(text());
-
-            long value = readInt0(code);
+            final long value = isText(code) ? readTextAsInt() : readInt0(code);
 
             if (value > Byte.MAX_VALUE || value < Byte.MIN_VALUE)
                 throw new IllegalStateException();
@@ -1469,17 +1473,10 @@ public class BinaryWire implements Wire, InternalWireIn {
         public short int16() {
             consumeSpecial();
             int code = readCode();
-
-            if (isText(code))
-                return Short.valueOf(text());
-
-            long value = readInt0(code);
-
+            final long value = isText(code) ? readTextAsInt() : readInt0(code);
             if (value > Short.MAX_VALUE || value < Short.MIN_VALUE)
                 throw new IllegalStateException();
             return (short) value;
-
-
         }
 
         @Override
@@ -1487,53 +1484,32 @@ public class BinaryWire implements Wire, InternalWireIn {
             consumeSpecial();
             int code = readCode();
 
-            if (isText(code))
-                return Integer.valueOf(text());
+            final long value = isText(code) ? readTextAsInt() : readInt0(code);
 
-            long value = readInt0(code);
-
-            if (value > Integer.MAX_VALUE || value < Integer.MIN_VALUE)
+            if (value > (1L << 32L) || value < 0)
                 throw new IllegalStateException();
+
             return (int) value;
 
         }
 
-
-        private boolean isSmallInt(int code) {
-            return (code & 128) == 0;
-        }
         @Override
         public int int32() {
             consumeSpecial();
             int code = readCode();
-
-            if (isText(code))
-                return Integer.valueOf(text());
-
-            long value = readInt0(code);
+            final long value = isText(code) ? readTextAsInt() : readInt0(code);
 
             if (value > Integer.MAX_VALUE || value < Integer.MIN_VALUE)
                 throw new IllegalStateException();
+
             return (int) value;
-
-
-
         }
 
         @Override
         public long int64() {
             consumeSpecial();
             int code = readCode();
-
-            if (isText(code))
-                return Integer.valueOf(text());
-
-            if (isSmallInt(code))
-                return code;
-
-            return readInt0(code);
-
-
+            return isText(code) ? readTextAsInt() : readInt0(code);
         }
 
         @Override

@@ -56,7 +56,6 @@ public class BinaryWire2Test {
                 .read().bool(Assert::assertNull);
     }
 
-    @Ignore("todo fix")
     @Test
     public void testFloat32() {
         Wire wire = createWire();

@@ -13,9 +13,9 @@ import java.lang.reflect.Field;
  */
 public class ConventionsTest {
 
-    @Ignore("todo fix")
+
     @Test
-    public void testTypeConversions() throws Exception {
+    public void testTypeConversionsMaxValue() throws Exception {
 
         for (Class type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
                 .class}) {
@@ -32,7 +32,24 @@ public class ConventionsTest {
         }
     }
 
-    @Ignore("todo fix")
+    @Test
+    public void testTypeConversionsMinValue() throws Exception {
+
+        for (Class type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
+                .class}) {
+            Object extected;
+            if (Number.class.isAssignableFrom(type)) {
+                System.out.println("" + type + "");
+                final Field value = type.getField("MIN_VALUE");
+                extected = value.get(type);
+            } else {
+                extected = "123";
+            }
+
+            Assert.assertEquals("type=" + type, extected, test(extected, type));
+        }
+    }
+
     @Test
     public void testTypeConversionsConvertViaString() throws Exception {
 
@@ -53,7 +70,7 @@ public class ConventionsTest {
         }
     }
 
-    @Ignore("todo fix")
+
     @Test(timeout = 10000)
     public void testTypeConversions2() throws Exception {
 
@@ -89,11 +106,11 @@ public class ConventionsTest {
         Assert.assertEquals(extected, (long) Long.valueOf(test(extected, String.class)));
     }
 
-    @Ignore("todo fix")
     @Test
     public void testSmallLongToString() throws Exception {
         long extected = Long.MIN_VALUE;
-        Assert.assertEquals(extected, Long.parseLong(test(extected, String.class)));
+        final String test = test(extected, String.class);
+        Assert.assertEquals(extected, Long.parseLong(test));
     }
 
     @Test

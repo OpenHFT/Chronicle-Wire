@@ -221,7 +221,7 @@ public class YamlExamples {
 */
     }
 
-    @Ignore("todo fix")
+
     @Test
     public void testMappedObject() {
         Wire wire = new BinaryWire(nativeBytes());
