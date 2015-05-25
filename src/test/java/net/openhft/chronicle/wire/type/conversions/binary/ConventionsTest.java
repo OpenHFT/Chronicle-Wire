@@ -1,9 +1,8 @@
-package net.openhft.chronicle.wire.type.conversions.binnary;
+package net.openhft.chronicle.wire.type.conversions.binary;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.BinaryWire;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -17,15 +16,16 @@ public class ConventionsTest {
     @Test
     public void testTypeConversionsMaxValue() throws Exception {
 
-        for (Class type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
-                .class}) {
+        for (Class type : new Class[]{String.class, Integer.class, Long.class, Short
+                .class, Byte
+                .class, Float.class, Double.class}) {
             Object extected;
             if (Number.class.isAssignableFrom(type)) {
                 System.out.println("" + type + "");
                 final Field max_value = type.getField("MAX_VALUE");
                 extected = max_value.get(type);
             } else {
-                extected = "123";
+                extected = "123"; // small number
             }
 
             Assert.assertEquals("type=" + type, extected, test(extected, type));
@@ -36,7 +36,7 @@ public class ConventionsTest {
     public void testTypeConversionsMinValue() throws Exception {
 
         for (Class type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
-                .class}) {
+                .class, Float.class, Double.class}) {
             Object extected;
             if (Number.class.isAssignableFrom(type)) {
                 System.out.println("" + type + "");
@@ -49,6 +49,22 @@ public class ConventionsTest {
             Assert.assertEquals("type=" + type, extected, test(extected, type));
         }
     }
+
+    @Test
+    public void testTypeConversionsSmallNumber() throws Exception {
+
+        for (Class type : new Class[]{String.class, Integer.class, Long.class, Short
+                .class, Byte.class}) {
+
+            Object extected = "123"; // small number
+            Assert.assertEquals("type=" + type, extected, String.valueOf(test(extected, type)));
+        }
+
+        Assert.assertEquals(123.0, (double) (Double) test("123", Double.class), 0);
+        Assert.assertEquals(123.0, (double) (Float) test("123", Float.class), 0);
+
+    }
+
 
     @Test
     public void testTypeConversionsConvertViaString() throws Exception {
@@ -71,59 +87,15 @@ public class ConventionsTest {
     }
 
 
-    @Test(timeout = 10000)
-    public void testTypeConversions2() throws Exception {
-
-        for (Class type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
-                .class}) {
-            Object extected;
-            if (Number.class.isAssignableFrom(type)) {
-                System.out.println("" + type + "");
-                final Field max_value = type.getField("MAX_VALUE");
-                extected = max_value.get(type);
-            } else {
-                extected = "123";
-            }
-            Assert.assertEquals("type=" + type, extected, test(extected, type));
-        }
-    }
 
 
     @Test
     public void testTypeConversionsMaxUnsigned() throws Exception {
 
-        for (long shift : new long[]{8, 16, 32}) {
-
-            long extected = (1L << shift) - 1L;
-
+        for (long shift : new long[]{8}) {
+            long extected = 1L << shift;
             Assert.assertEquals(extected, (long) test(extected, Long.class));
         }
-    }
-
-    @Test
-    public void testLargeLongToString() throws Exception {
-        long extected = Long.MAX_VALUE;
-        Assert.assertEquals(extected, (long) Long.valueOf(test(extected, String.class)));
-    }
-
-    @Test
-    public void testSmallLongToString() throws Exception {
-        long extected = Long.MIN_VALUE;
-        final String test = test(extected, String.class);
-        Assert.assertEquals(extected, Long.parseLong(test));
-    }
-
-    @Test
-    public void testStringWithNumber() throws Exception {
-        String extected = Long.toString(Long.MAX_VALUE);
-        Assert.assertEquals(extected, String.valueOf(test(extected, String.class)));
-    }
-
-
-    @Test
-    public void testString() throws Exception {
-        String extected = "some text";
-        Assert.assertEquals(extected, test(extected, String.class));
     }
 
 
@@ -141,14 +113,15 @@ public class ConventionsTest {
             wire.writeValue().int16((Short) source);
         else if (source instanceof Byte)
             wire.writeValue().int8((Byte) source);
+        else if (source instanceof Float)
+            wire.writeValue().float32((Float) source);
+        else if (source instanceof Double)
+            wire.writeValue().float64((Double) source);
 
         wire.bytes().flip();
 
-        if (String.class.isAssignableFrom(destinationType)) {
-            final String actual = wire.getValueIn().text();
-            return (T) (String) actual;
-        }
-
+        if (String.class.isAssignableFrom(destinationType))
+            return (T) wire.getValueIn().text();
 
         if (Long.class.isAssignableFrom(destinationType))
             return (T) (Long) wire.getValueIn().int64();

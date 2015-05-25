@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -881,17 +880,17 @@ public class BinaryWire implements Wire, InternalWireIn {
 
             if (l >= 0) {
 
-                if (l <= 1 << 8) {
+                if (l <= (1 << 8) - 1) {
                     super.uint8checked((short) l);
                     return;
                 }
 
-                if (l <= 1 << 16) {
+                if (l <= (1 << 16) - 1) {
                     super.uint16checked((int) l);
                     return;
                 }
 
-                if (l <= 1L << 32L) {
+                if (l <= (1L << 32L) - 1L) {
                     super.uint32checked((long)l);
                     return;
                 }
@@ -1434,13 +1433,22 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
 
-        private long readTextAsInt() {
+        private long readTextAsLong() {
             bytes.skip(-1);
             final String text = text();
             if (text == null)
                 throw new NullPointerException();
 
             return Long.parseLong(text);
+        }
+
+        private double readTextAsDouble() {
+            bytes.skip(-1);
+            final String text = text();
+            if (text == null)
+                throw new NullPointerException();
+
+            return Double.parseDouble(text);
         }
 
         @Override
@@ -1463,7 +1471,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         public byte int8() {
             consumeSpecial();
             int code = readCode();
-            final long value = isText(code) ? readTextAsInt() : readInt0(code);
+            final long value = isText(code) ? readTextAsLong() : readInt0(code);
 
             if (value > Byte.MAX_VALUE || value < Byte.MIN_VALUE)
                 throw new IllegalStateException();
@@ -1475,7 +1483,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         public short int16() {
             consumeSpecial();
             int code = readCode();
-            final long value = isText(code) ? readTextAsInt() : readInt0(code);
+            final long value = isText(code) ? readTextAsLong() : readInt0(code);
             if (value > Short.MAX_VALUE || value < Short.MIN_VALUE)
                 throw new IllegalStateException();
             return (short) value;
@@ -1486,7 +1494,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             consumeSpecial();
             int code = readCode();
 
-            final long value = isText(code) ? readTextAsInt() : readInt0(code);
+            final long value = isText(code) ? readTextAsLong() : readInt0(code);
 
             if (value > (1L << 32L) || value < 0)
                 throw new IllegalStateException();
@@ -1499,7 +1507,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         public int int32() {
             consumeSpecial();
             int code = readCode();
-            final long value = isText(code) ? readTextAsInt() : readInt0(code);
+            final long value = isText(code) ? readTextAsLong() : readInt0(code);
 
             if (value > Integer.MAX_VALUE || value < Integer.MIN_VALUE)
                 throw new IllegalStateException();
@@ -1511,17 +1519,30 @@ public class BinaryWire implements Wire, InternalWireIn {
         public long int64() {
             consumeSpecial();
             int code = readCode();
-            return isText(code) ? readTextAsInt() : readInt0(code);
+            return isText(code) ? readTextAsLong() : readInt0(code);
         }
 
         @Override
         public double float64() {
-            throw new UnsupportedOperationException("todo");
+            int code = readCode();
+            final double value = isText(code) ? readTextAsLong() : readFloat0(code);
+
+            if (value > Double.MAX_VALUE || value < Double.MIN_VALUE)
+                throw new IllegalStateException();
+
+            return value;
         }
 
         @Override
         public float float32() {
-            throw new UnsupportedOperationException("todo");
+            consumeSpecial();
+            int code = readCode();
+            final double value = isText(code) ? readTextAsLong() : readFloat0(code);
+
+            if (value > Float.MAX_VALUE || value < Float.MIN_VALUE)
+                throw new IllegalStateException();
+
+            return (float) value;
         }
 
         @Override
