@@ -879,17 +879,17 @@ public class BinaryWire implements Wire, InternalWireIn {
 
             if (l >= 0) {
 
-                if (l < 1 << 8) {
+                if (l <= 1 << 8) {
                     super.uint8checked((short) l);
                     return;
                 }
 
-                if (l < 1 << 16) {
+                if (l <= 1 << 16) {
                     super.uint16checked((int) l);
                     return;
                 }
 
-                if (l < 1L << 32L) {
+                if (l <= 1L << 32L) {
                     super.uint32checked((long)l);
                     return;
                 }
