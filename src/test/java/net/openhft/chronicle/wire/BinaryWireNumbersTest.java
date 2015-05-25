@@ -21,12 +21,15 @@ public class BinaryWireNumbersTest {
     private final int len;
     private final Consumer<ValueOut> expected;
     private final Consumer<ValueOut> perform;
+    private static final float VAL1 = 12345678901234567.0f;
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() throws IOException {
         return Arrays.asList(new Object[][]{
                 {2 + 8, (Consumer<ValueOut>) w -> w.int64(Long.MIN_VALUE), (Consumer<ValueOut>) w -> w.int64(Long.MIN_VALUE)},
                 {2 + 4, (Consumer<ValueOut>) w -> w.float32(-(1L << 48)), (Consumer<ValueOut>) w -> w.int64(-(1L << 48))},
+                {2 + 4, (Consumer<ValueOut>) w -> w.float32(-VAL1), (Consumer<ValueOut>) w -> w.int64((long) -VAL1)},
+                {2 + 4, (Consumer<ValueOut>) w -> w.float32(VAL1), (Consumer<ValueOut>) w -> w.int64((long) VAL1)},
                 {2 + 4, (Consumer<ValueOut>) w -> w.int32(Integer.MIN_VALUE), (Consumer<ValueOut>) w -> w.int64(Integer.MIN_VALUE)},
                 {2 + 2, (Consumer<ValueOut>) w -> w.int16(Short.MIN_VALUE), (Consumer<ValueOut>) w -> w.int64(Short.MIN_VALUE)},
                 {2 + 1, (Consumer<ValueOut>) w -> w.int8(Byte.MIN_VALUE), (Consumer<ValueOut>) w -> w.int64(Byte.MIN_VALUE)},
@@ -86,7 +89,7 @@ public class BinaryWireNumbersTest {
         bytes2.flip();
 
         assertEquals("Lengths for variable length expected " + bytes1
-                + " and actual " + bytes2 + " don't match for " + TextWire.asText(wire1),
+                        + " and actual " + bytes2 + " don't match for " + TextWire.asText(wire1),
                 bytes1.remaining(), bytes2.remaining());
         if (!bytes1.toString().equals(bytes2.toString()))
             System.out.println("Format doesn't match for " + TextWire.asText(wire2));
