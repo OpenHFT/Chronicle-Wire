@@ -41,6 +41,7 @@ import java.util.UUID;
 import java.util.function.*;
 
 import static net.openhft.chronicle.bytes.BytesUtil.append;
+import static net.openhft.chronicle.bytes.BytesUtil.setLength;
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
 
 /**
@@ -59,11 +60,11 @@ public class BinaryWire implements Wire, InternalWireIn {
     private final boolean fieldLess;
     boolean ready;
 
-    public BinaryWire(Bytes<?> bytes) {
+    public BinaryWire(Bytes bytes) {
         this(bytes, false, false, false);
     }
 
-    public BinaryWire(Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess) {
+    public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess) {
         this.numericFields = numericFields;
         this.fieldLess = fieldLess;
         this.bytes = bytes;
@@ -250,6 +251,10 @@ public class BinaryWire implements Wire, InternalWireIn {
 
     private StringBuilder readField(int peekCode, int codeMatch, StringBuilder sb) {
         switch (peekCode >> 4) {
+            case BinaryWireHighCode.END_OF_STREAM:
+                sb.setLength(0);
+                break;
+
             case BinaryWireHighCode.SPECIAL:
                 if (peekCode == FIELD_NAME_ANY || peekCode == EVENT_NAME) {
                     bytes.skip(1);
@@ -271,7 +276,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 bytes.skip(1);
                 return getStringBuilder(peekCode, sb);
             default:
-                break;
+                throw new UnsupportedOperationException("Invalid type to convert to a field " + stringForCode(peekCode));
         }
         // if field-less accept anything in order.
         if (fieldLess) {
@@ -411,9 +416,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
 
-    private long readInt0(int code) {
-
-
+    long readInt0(int code) {
         if (isSmallInt(code))
             return code;
 
@@ -436,10 +439,6 @@ public class BinaryWire implements Wire, InternalWireIn {
                 return bytes.readUnsignedInt();
             case INT64:
                 return bytes.readLong();
-
-
-
-
 /*
             case FIXED_6:
                 return bytes.readStopBit() * 1000000L;
@@ -456,7 +455,6 @@ public class BinaryWire implements Wire, InternalWireIn {
             case FIXED:
                 return bytes.readStopBit();
 */
-
         }
         throw new UnsupportedOperationException(stringForCode(code));
     }
@@ -898,27 +896,6 @@ public class BinaryWire implements Wire, InternalWireIn {
                 super.int64((long)l);
                 return;
             }
-
-            if (l >= Byte.MIN_VALUE && l <= Byte.MAX_VALUE) {
-                super.int8((byte) l);
-                return;
-            }
-
-            if (l >= Short.MAX_VALUE && l <= Short.MAX_VALUE) {
-                super.int16((short) l);
-                return;
-            }
-
-            if (l >= Integer.MAX_VALUE && l <= Integer.MAX_VALUE) {
-                super.int32((int) l);
-                return;
-            }
-
-
-            super.int64((long)l);
-
-
-
         }
 
         @Override
@@ -1043,12 +1020,19 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public <ACS extends Appendable & CharSequence> WireIn text(@NotNull ACS s) {
+        public <ACS extends Appendable & CharSequence> ACS text(@NotNull ACS s) {
             int code = readCode();
-            ACS text = readText(code, s);
-            if (text == null)
-                cantRead(code);
-            return BinaryWire.this;
+            boolean wasNull = code == NULL;
+            if (wasNull) {
+                setLength(s, 0);
+                return null;
+
+            } else {
+                ACS text = readText(code, s);
+                if (text == null)
+                    cantRead(code);
+                return s;
+            }
         }
 
         @NotNull
@@ -1511,7 +1495,6 @@ public class BinaryWire implements Wire, InternalWireIn {
 
             if (value > Integer.MAX_VALUE || value < Integer.MIN_VALUE)
                 throw new IllegalStateException();
-
             return (int) value;
         }
 
@@ -1519,6 +1502,9 @@ public class BinaryWire implements Wire, InternalWireIn {
         public long int64() {
             consumeSpecial();
             int code = readCode();
+
+            if (code >> 4 == BinaryWireHighCode.FLOAT)
+                return (long) readFloat0(code);
             return isText(code) ? readTextAsLong() : readInt0(code);
         }
 
@@ -1543,14 +1529,6 @@ public class BinaryWire implements Wire, InternalWireIn {
                 throw new IllegalStateException();
 
             return (float) value;
-        }
-
-        @Override
-        public boolean isNull() {
-            int code = peekCode();
-            if (code <= 127)
-                return false;
-            return code >> 4 == BinaryWireHighCode.SPECIAL && code == NULL;
         }
 
         private WireIn cantRead(int code) {

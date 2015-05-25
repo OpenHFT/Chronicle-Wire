@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
  */
 public enum BinaryWireHighCode {
     ;
+    static final int END_OF_STREAM = -1;
     static final int NUM0 = 0x0;
     static final int NUM1 = 0x1;
     static final int NUM2 = 0x2;

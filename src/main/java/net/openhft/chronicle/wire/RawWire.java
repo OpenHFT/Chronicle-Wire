@@ -394,11 +394,15 @@ public class RawWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException();
         }
 
+        @Override
+        public String text() {
+            throw new UnsupportedOperationException("todo");
+        }
+
         @NotNull
         @Override
-        public <ACS extends Appendable & CharSequence> WireIn text(@NotNull ACS s) {
-            bytes.readUTFΔ(s);
-            return RawWire.this;
+        public <ACS extends Appendable & CharSequence> ACS text(@NotNull ACS s) {
+            return bytes.readUTFΔ(s) ? s : null;
         }
 
         @NotNull
@@ -681,11 +685,6 @@ public class RawWire implements Wire, InternalWireIn {
         @Override
         public float float32() {
             throw new UnsupportedOperationException("todo");
-        }
-
-        @Override
-        public boolean isNull() {
-            throw new UnsupportedOperationException();
         }
 
         @Nullable

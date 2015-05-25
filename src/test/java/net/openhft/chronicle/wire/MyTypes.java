@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.BytesMarshaller;
 import net.openhft.chronicle.core.util.StringUtils;
 
-
 class MyTypes implements Marshallable {
     final StringBuilder text = new StringBuilder();
     boolean b;

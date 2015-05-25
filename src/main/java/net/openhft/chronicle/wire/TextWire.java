@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -63,7 +62,7 @@ public class TextWire implements Wire, InternalWireIn {
 
     boolean ready;
 
-    public TextWire(Bytes<?> bytes) {
+    public TextWire(Bytes bytes) {
         this.bytes = bytes;
     }
 
@@ -700,19 +699,13 @@ public class TextWire implements Wire, InternalWireIn {
         public Wire bool(@NotNull BooleanConsumer flag) {
             consumeWhiteSpace();
 
-            if (isNull()) {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            if (text(sb) == null) {
                 flag.accept(null);
                 return TextWire.this;
             }
 
-            StringBuilder sb = Wires.acquireStringBuilder();
-            bytes.parseUTF(sb, StopCharTesters.COMMA_STOP);
-            if (StringUtils.isEqual(sb, "true"))
-                flag.accept(true);
-            else if (StringUtils.isEqual(sb, "false"))
-                flag.accept(false);
-            else
-                throw new UnsupportedOperationException();
+            flag.accept(StringUtils.isEqual(sb, "true"));
             return TextWire.this;
         }
 
@@ -727,16 +720,12 @@ public class TextWire implements Wire, InternalWireIn {
 
         @Override
         public String text() {
-            if (isNull())
-                return null;
-            StringBuilder sb = Wires.acquireStringBuilder();
-            text(sb);
-            return sb.toString();
+            return StringUtils.toString(text(Wires.acquireStringBuilder()));
         }
 
-        @NotNull
+        @Nullable
         @Override
-        public <ACS extends Appendable & CharSequence> WireIn text(@NotNull ACS a) {
+        public <ACS extends Appendable & CharSequence> ACS text(@NotNull ACS a) {
             consumeWhiteSpace();
             int ch = peekCode();
 
@@ -752,13 +741,29 @@ public class TextWire implements Wire, InternalWireIn {
                 // read the next comma
                 bytes.skipTo(StopCharTesters.COMMA_STOP);
 
-                return TextWire.this;
-            }
+                return a;
 
-            if (ch == '"') {
+            } else if (ch == '"') {
                 bytes.skip(1);
                 bytes.parseUTF(a, StopCharTesters.QUOTES.escaping());
                 unescape(a);
+
+            } else if (ch == '!') {
+                bytes.skip(1);
+                ch = peekCode();
+                if (ch == '!') {
+                    bytes.skip(1);
+                    StringBuilder sb = Wires.acquireStringBuilder();
+                    text(sb);
+                    if (StringUtils.isEqual(sb, "null")) {
+                        text(sb);
+                        return null;
+                    }
+                } else {
+                    StringBuilder sb = Wires.acquireStringBuilder();
+                    text(sb);
+                    // ignore the type.
+                }
 
             } else {
                 if (bytes.remaining() > 0) {
@@ -777,10 +782,11 @@ public class TextWire implements Wire, InternalWireIn {
                     else
                         break;
             }
+
             int prev = rewindAndRead();
             if (prev == ':')
                 bytes.skip(-1);
-            return TextWire.this;
+            return a;
         }
 
         private int rewindAndRead() {
@@ -1267,15 +1273,10 @@ public class TextWire implements Wire, InternalWireIn {
         public boolean bool() {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
-            bytes.parseUTF(sb, StopCharTesters.COMMA_STOP);
-            if (StringUtils.isEqual(sb, "true"))
-                return true;
-            else if (StringUtils.isEqual(sb, "false"))
-                return false;
-            if (isNull())
+            if (text(sb) == null)
                 throw new NullPointerException("value is null");
-            else
-                throw new UnsupportedOperationException();
+
+            return StringUtils.isEqual(sb, "true");
         }
 
         public byte int8() {
@@ -1327,7 +1328,6 @@ public class TextWire implements Wire, InternalWireIn {
          * @return true if !!null, if {@code true} reads the !!null up to the next STOP, if {@code
          * false} no  data is read  ( data is only peaked if {@code false} )
          */
-        @Override
         public boolean isNull() {
             consumeWhiteSpace();
 
