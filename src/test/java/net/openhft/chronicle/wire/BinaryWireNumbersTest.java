@@ -43,8 +43,8 @@ public class BinaryWireNumbersTest {
                 // floating point tests
                 {2 + 8, (Consumer<ValueOut>) w -> w.float64(Double.MIN_VALUE), (Consumer<ValueOut>) w -> w.float64(Double.MIN_VALUE)},
                 {2 + 8, (Consumer<ValueOut>) w -> w.float64(Double.MAX_VALUE), (Consumer<ValueOut>) w -> w.float64(Double.MAX_VALUE)},
-                {2 + 8, (Consumer<ValueOut>) w -> w.float32(Float.MIN_VALUE), (Consumer<ValueOut>) w -> w.float64(Float.MIN_VALUE)},
-                {2 + 8, (Consumer<ValueOut>) w -> w.float32(Float.MAX_VALUE), (Consumer<ValueOut>) w -> w.float64(Float.MAX_VALUE)},
+                {2 + 4, (Consumer<ValueOut>) w -> w.float32(Float.MIN_VALUE), (Consumer<ValueOut>) w -> w.float64(Float.MIN_VALUE)},
+                {2 + 4, (Consumer<ValueOut>) w -> w.float32(Float.MAX_VALUE), (Consumer<ValueOut>) w -> w.float64(Float.MAX_VALUE)},
                 {2 + 4, (Consumer<ValueOut>) w -> w.float32(-(1L << 48)), (Consumer<ValueOut>) w -> w.float64(-(1L << 48))},
                 {2 + 4, (Consumer<ValueOut>) w -> w.int32(Integer.MIN_VALUE), (Consumer<ValueOut>) w -> w.float64(Integer.MIN_VALUE)},
                 {2 + 2, (Consumer<ValueOut>) w -> w.int16(Short.MIN_VALUE), (Consumer<ValueOut>) w -> w.float64(Short.MIN_VALUE)},
