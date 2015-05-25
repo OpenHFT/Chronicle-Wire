@@ -18,8 +18,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.BytesMarshaller;
+import net.openhft.chronicle.core.util.StringUtils;
 
-import static net.openhft.chronicle.core.pool.StringInterner.isEqual;
 
 class MyTypes implements Marshallable {
     final StringBuilder text = new StringBuilder();
@@ -82,7 +82,7 @@ class MyTypes implements Marshallable {
         if (i != myTypes.i) return false;
         if (l != myTypes.l) return false;
         if (s != myTypes.s) return false;
-        if (!isEqual(text, myTypes.text)) return false;
+        if (!StringUtils.isEqual(text, myTypes.text)) return false;
 
         return true;
     }

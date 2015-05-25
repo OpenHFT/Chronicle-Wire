@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringInterner;
+import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -158,7 +159,8 @@ public class BinaryWire implements Wire, InternalWireIn {
     @Override
     public ValueIn read(@NotNull WireKey key) {
         StringBuilder sb = readField(Wires.acquireStringBuilder(), key.code());
-        if (fieldLess || (sb != null && (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))))
+
+        if (fieldLess || (sb != null && (sb.length() == 0 || StringUtils.isEqual(sb,key.name()))))
             return valueIn;
         throw new UnsupportedOperationException("Unordered fields not supported yet, " +
                 "Expected=" + key.name() + " was: " + sb);

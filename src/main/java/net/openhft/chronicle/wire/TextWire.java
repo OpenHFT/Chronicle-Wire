@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.StringInterner;
+import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -196,7 +197,7 @@ public class TextWire implements Wire, InternalWireIn {
     public ValueIn read(@NotNull WireKey key) {
         long position = bytes.position();
         StringBuilder sb = readField(Wires.acquireStringBuilder());
-        if (sb.length() == 0 || StringInterner.isEqual(sb, key.name()))
+        if (sb.length() == 0 ||  StringUtils.isEqual(sb, key.name()))
             return valueIn;
         bytes.position(position);
         throw new UnsupportedOperationException("Unordered fields not supported yet. key=" + key
@@ -706,9 +707,9 @@ public class TextWire implements Wire, InternalWireIn {
 
             StringBuilder sb = Wires.acquireStringBuilder();
             bytes.parseUTF(sb, StopCharTesters.COMMA_STOP);
-            if (StringInterner.isEqual(sb, "true"))
+            if (StringUtils.isEqual(sb, "true"))
                 flag.accept(true);
-            else if (StringInterner.isEqual(sb, "false"))
+            else if (StringUtils.isEqual(sb, "false"))
                 flag.accept(false);
             else
                 throw new UnsupportedOperationException();
@@ -1267,9 +1268,9 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
             bytes.parseUTF(sb, StopCharTesters.COMMA_STOP);
-            if (StringInterner.isEqual(sb, "true"))
+            if (StringUtils.isEqual(sb, "true"))
                 return true;
-            else if (StringInterner.isEqual(sb, "false"))
+            else if (StringUtils.isEqual(sb, "false"))
                 return false;
             if (isNull())
                 throw new NullPointerException("value is null");
