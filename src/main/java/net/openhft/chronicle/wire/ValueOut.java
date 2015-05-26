@@ -55,7 +55,7 @@ public interface ValueOut {
     WireOut bytes(byte[] fromBytes);
 
     default WireOut uint8(int x) {
-        return uint8checked((byte) Maths.toUInt8(x));
+        return uint8checked((int) Maths.toUInt8(x));
     }
 
     WireOut uint8checked(int u8);
@@ -67,7 +67,7 @@ public interface ValueOut {
     WireOut int16(short i16);
 
     default WireOut uint16(long x) {
-        return uint16checked((short) Maths.toUInt16(x));
+        return uint16checked((int) x);
     }
 
     WireOut uint16checked(int u16);
@@ -81,7 +81,7 @@ public interface ValueOut {
     WireOut int32(int i32);
 
     default WireOut uint32(long x) {
-        return uint32checked((int) Maths.toUInt32(x));
+        return uint32checked(x);
     }
 
     WireOut uint32checked(long u32);
@@ -138,7 +138,7 @@ public interface ValueOut {
 
     default WireOut object(Object value) {
         if (value instanceof byte[])
-            return rawBytes((byte[])value);
+            return rawBytes((byte[]) value);
         if (value == null)
             return text(null);
         if (value instanceof Map)
@@ -158,8 +158,8 @@ public interface ValueOut {
 
         } else if (value instanceof Marshallable) {
             return marshallable((Marshallable) value);
-        }else if (value instanceof Throwable) {
-                return throwable((Throwable) value);
+        } else if (value instanceof Throwable) {
+            return throwable((Throwable) value);
 
         } else {
             throw new IllegalStateException("type=" + value.getClass() +
