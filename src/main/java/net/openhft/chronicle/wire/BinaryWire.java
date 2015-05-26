@@ -1490,8 +1490,11 @@ public class BinaryWire implements Wire, InternalWireIn {
             final String text = text();
             if (text == null)
                 throw new NullPointerException();
-
-            return Long.parseLong(text);
+            try {
+                return Long.parseLong(text);
+            } catch (NumberFormatException e) {
+                return (long) Math.round(Double.parseDouble(text));
+            }
         }
 
         private double readTextAsDouble() {
