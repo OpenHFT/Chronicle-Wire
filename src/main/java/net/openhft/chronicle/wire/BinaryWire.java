@@ -1577,12 +1577,9 @@ public class BinaryWire implements Wire, InternalWireIn {
             consumeSpecial();
             int code = readCode();
 
-            if (isText(code))
-                return Integer.valueOf(text());
-
-            return readInt0(code);
-
-
+            if (code >> 4 == BinaryWireHighCode.FLOAT)
+                return (long) readFloat0(code);
+            return isText(code) ? readTextAsLong() : readInt0(code);
         }
 
         @Override
