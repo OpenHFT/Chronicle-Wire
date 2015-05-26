@@ -276,7 +276,8 @@ public class BinaryWire implements Wire, InternalWireIn {
                 bytes.skip(1);
                 return getStringBuilder(peekCode, sb);
             default:
-                throw new UnsupportedOperationException("Invalid type to convert to a field " + stringForCode(peekCode));
+                // if it's not a field, perhaps none was written.
+                break;
         }
         // if field-less accept anything in order.
         if (fieldLess) {
