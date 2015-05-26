@@ -443,8 +443,7 @@ public class TextWire2Test {
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
         Stream.of("Hello", "world", name1).forEach(e -> {
-            wire.read()
-                    .text(sb);
+            assertNotNull(wire.read().text(sb));
             assertEquals(e, sb.toString());
         });
 
@@ -677,7 +676,7 @@ public class TextWire2Test {
         wire.flip();
         bytes.position(4);
 //        expectWithSnakeYaml("{example={hello=world, hello1=world1, hello2=world2}}", wire);
-bytes.position(0);
+        bytes.position(0);
         assertEquals("--- !!data\n" +
                         "example: !!seqmap [\n" +
                         "  { key: hello,\n" +
@@ -795,7 +794,7 @@ bytes.position(0);
 
         wire.readDocument(null, c -> c.read(() -> "example")
                 .map(
-                MyMarshallable.class,
+                        MyMarshallable.class,
                         MyMarshallable.class,
                         actual));
 

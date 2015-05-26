@@ -51,16 +51,12 @@ public interface ValueIn {
     WireIn text(@NotNull Consumer<String> s);
 
     default String text() {
-        if (isNull())
-            return null;
-
         StringBuilder sb = Wires.acquireStringBuilder();
-        text(sb);
-        return sb.toString();
+        return text(sb) == null ? null : sb.toString();
     }
 
-    @NotNull
-    <ACS extends Appendable & CharSequence> WireIn text(@NotNull ACS s);
+    @Nullable
+    <ACS extends Appendable & CharSequence> ACS text(@NotNull ACS s);
 
     @NotNull
     WireIn int8(@NotNull ByteConsumer i);
@@ -191,8 +187,6 @@ public interface ValueIn {
     double float64();
 
     float float32();
-
-    boolean isNull();
 
     default Throwable throwable(boolean appendCurrentStack) {
         return Wires.throwable(this, appendCurrentStack);
