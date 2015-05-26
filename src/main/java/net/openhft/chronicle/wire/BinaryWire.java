@@ -1018,7 +1018,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                     (code >= STRING_0 && code <= STRING_31);
         }
 
-        @NotNull
+        @Nullable
         @Override
         public <ACS extends Appendable & CharSequence> ACS text(@NotNull ACS s) {
             int code = readCode();

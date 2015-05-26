@@ -26,4 +26,7 @@ public interface ReadMarshallable {
      * @throws IllegalStateException the stream wasn't ordered or formatted as expected.
      */
     void readMarshallable(WireIn wire) throws IllegalStateException;
+
+    static final ReadMarshallable DISCARD = w -> {
+    };
 }

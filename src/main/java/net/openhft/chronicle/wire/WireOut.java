@@ -70,7 +70,4 @@ public interface WireOut {
         Wires.writeData(this, metaData, writer);
     }
 
-    WriteMarshallable EMPTY = wire -> {
-        // nothing
-    };
 }

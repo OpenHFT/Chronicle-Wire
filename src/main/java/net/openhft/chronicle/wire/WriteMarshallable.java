@@ -19,6 +19,10 @@ package net.openhft.chronicle.wire;
 
 @FunctionalInterface
 public interface WriteMarshallable {
+    WriteMarshallable EMPTY = wire -> {
+        // nothing
+    };
+
     /**
      * Write data to the wire
      *
