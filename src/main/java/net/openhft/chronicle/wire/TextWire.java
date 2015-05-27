@@ -754,7 +754,7 @@ public class TextWire implements Wire, InternalWireIn {
                 if (ch == '!') {
                     bytes.skip(1);
                     StringBuilder sb = Wires.acquireStringBuilder();
-                    text(sb);
+                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                     if (StringUtils.isEqual(sb, "null")) {
                         text(sb);
                         return null;
@@ -1214,7 +1214,8 @@ public class TextWire implements Wire, InternalWireIn {
                 bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                 String str = sb.toString();
 
-                if (("!" + NULL).contentEquals(sb)) {
+                if (("!!null").contentEquals(sb)) {
+                    text();
                     return null;
 
                 } else if (("!" + SEQ_MAP).contentEquals(sb)) {
@@ -1325,16 +1326,16 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         /**
-         * @return true if !!null, if {@code true} reads the !!null up to the next STOP, if {@code
+         * @return true if !!null "", if {@code true} reads the !!null "" up to the next STOP, if {@code
          * false} no  data is read  ( data is only peaked if {@code false} )
          */
         public boolean isNull() {
             consumeWhiteSpace();
 
-            if (peekStringIgnoreCase("!!null ")) {
-                bytes.skip("!!null ".length());
+            if (peekStringIgnoreCase("!!null \"\"")) {
+                bytes.skip("!!null \"\"".length());
                 // discard the text after it.
-                text(Wires.acquireStringBuilder());
+              //  text(Wires.acquireStringBuilder());
                 return true;
             }
 
