@@ -42,7 +42,6 @@ import java.util.UUID;
 import java.util.function.*;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
-import static net.openhft.chronicle.wire.BinaryWireCode.stringForCode;
 
 /**
  * Created by peter.lawrey on 15/01/15.
@@ -96,7 +95,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
     private StringBuilder readField(StringBuilder sb) {
         consumeWhiteSpace();
-        bytes.parseUTF(sb, WireStopCharTesters.QUERY_FIELD_NAME);
+        bytes.parseUTF(sb, QueryStopCharTesters.QUERY_FIELD_NAME);
         if (rewindAndRead() == '&')
             bytes.skip(-1);
         return sb;
@@ -583,7 +582,7 @@ public class QueryWire implements Wire, InternalWireIn {
         @Override
         public <ACS extends Appendable & CharSequence> ACS text(@NotNull ACS a) {
             consumeWhiteSpace();
-            bytes.parseUTF(a, WireStopCharTesters.QUERY_VALUE);
+            bytes.parseUTF(a, QueryStopCharTesters.QUERY_VALUE);
             return a;
         }
 
@@ -810,11 +809,7 @@ public class QueryWire implements Wire, InternalWireIn {
         @Override
         public WireIn type(@NotNull StringBuilder s) {
             consumeWhiteSpace();
-            int code = readCode();
-            if (code != '!') {
-                throw new UnsupportedOperationException(stringForCode(code));
-            }
-            bytes.parseUTF(s, StopCharTesters.SPACE_STOP);
+            bytes.parseUTF(s, QueryStopCharTesters.QUERY_VALUE);
             return QueryWire.this;
         }
 
@@ -992,7 +987,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
     }
 
-    enum WireStopCharTesters implements StopCharTester {
+    enum QueryStopCharTesters implements StopCharTester {
         QUERY_FIELD_NAME {
             @Override
             public boolean isStopChar(int ch) throws IllegalStateException {
