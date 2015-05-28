@@ -18,7 +18,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
@@ -33,12 +32,13 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.*;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
@@ -47,14 +47,9 @@ import static net.openhft.chronicle.wire.BinaryWireCode.stringForCode;
 /**
  * Created by peter.lawrey on 15/01/15.
  */
-public class TextWire implements Wire, InternalWireIn {
-
+public class QueryWire implements Wire, InternalWireIn {
     private static final Logger LOG =
-            LoggerFactory.getLogger(TextWire.class);
-
-    public static final String FIELD_SEP = "";
-    private static final String END_FIELD = "\n";
-    public static final String SEQ_MAP = "!seqmap";
+            LoggerFactory.getLogger(QueryWire.class);
 
     final Bytes<?> bytes;
     final TextValueOut valueOut = new TextValueOut();
@@ -62,12 +57,12 @@ public class TextWire implements Wire, InternalWireIn {
 
     boolean ready;
 
-    public TextWire(Bytes bytes) {
+    public QueryWire(Bytes bytes) {
         this.bytes = bytes;
     }
 
     public static String asText(Wire wire) {
-        TextWire tw = new TextWire(nativeBytes());
+        QueryWire tw = new QueryWire(nativeBytes());
         wire.copyTo(tw);
         tw.flip();
         wire.flip();
@@ -101,32 +96,9 @@ public class TextWire implements Wire, InternalWireIn {
 
     private StringBuilder readField(StringBuilder sb) {
         consumeWhiteSpace();
-        if (peekCode() == ',') {
-            bytes.skip(1);
-            consumeWhiteSpace();
-        }
-        try {
-            int ch = peekCode();
-            if (ch == '"') {
-                bytes.skip(1);
-                bytes.parseUTF(sb, StopCharTesters.QUOTES.escaping());
-
-                consumeWhiteSpace();
-                ch = readCode();
-                if (ch != ':')
-                    throw new UnsupportedOperationException("Expected a : at " + bytes.toDebugString());
-
-            } else if (ch < 0) {
-                sb.setLength(0);
-                return sb;
-
-            } else {
-                bytes.parseUTF(sb, TextStopCharsTesters.END_OF_TEXT.escaping());
-            }
-            unescape(sb);
-        } catch (BufferUnderflowException ignored) {
-        }
-        //      consumeWhiteSpace();
+        bytes.parseUTF(sb, WireStopCharTesters.QUERY_FIELD_NAME);
+        if (rewindAndRead() == '&')
+            bytes.skip(-1);
         return sb;
     }
 
@@ -179,13 +151,10 @@ public class TextWire implements Wire, InternalWireIn {
         int end = 0;
         for (int i = 0; i < sb.length(); i++) {
             char ch = sb.charAt(i);
-            if (ch == '\\' && i < sb.length() - 1) {
+            if (ch == '%' && i < sb.length() - 1) {
                 char ch3 = sb.charAt(++i);
-                switch (ch3) {
-                    case 'n':
-                        ch = '\n';
-                        break;
-                }
+                char ch4 = sb.charAt(++i);
+                ch = (char) Integer.parseInt("" + ch3 + ch4, 16);
             }
             BytesUtil.setCharAt(sb, end++, ch);
         }
@@ -196,7 +165,7 @@ public class TextWire implements Wire, InternalWireIn {
     public ValueIn read(@NotNull WireKey key) {
         long position = bytes.position();
         StringBuilder sb = readField(Wires.acquireStringBuilder());
-        if (sb.length() == 0 ||  StringUtils.isEqual(sb, key.name()))
+        if (sb.length() == 0 || StringUtils.isEqual(sb, key.name()))
             return valueIn;
         bytes.position(position);
         throw new UnsupportedOperationException("Unordered fields not supported yet. key=" + key
@@ -237,7 +206,7 @@ public class TextWire implements Wire, InternalWireIn {
 
     @Override
     public ValueOut write() {
-        return valueOut.write();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -257,113 +226,63 @@ public class TextWire implements Wire, InternalWireIn {
 
     @Override
     public Wire writeComment(CharSequence s) {
-        valueOut.writeComment(s);
         return this;
     }
 
     @Override
     public WireOut addPadding(int paddingToAdd) {
-        for (int i = 0; i < paddingToAdd; i++)
-            bytes.append((bytes.position() & 63) == 0 ? '\n' : ' ');
         return this;
     }
 
-    CharSequence quotes(CharSequence s) {
-        if (!needsQuotes(s)) {
-            return s;
-        }
-        StringBuilder sb2 = Wires.acquireAnotherStringBuilder(s);
-        sb2.append('"');
-        for (int i = 0; i < s.length(); i++) {
-            char ch = s.charAt(i);
-            switch (ch) {
-                case '"':
-                case '\\':
-                    sb2.append('\\').append(ch);
-                    break;
-
-                case '\n':
-                    sb2.append("\\n");
-                    break;
-                default:
-                    sb2.append(ch);
-                    break;
-            }
-        }
-        sb2.append('"');
-        return sb2;
+    int rewindAndRead() {
+        return bytes.readUnsignedByte(bytes.position() - 1);
     }
-
-    static final BitSet QUOTE_CHARS = new BitSet();
-
-    static {
-        for (char ch : "\",\n\\#:{}[]".toCharArray())
-            QUOTE_CHARS.set(ch);
-    }
-
-    boolean needsQuotes(CharSequence s) {
-        for (int i = 0; i < s.length(); i++) {
-            char ch = s.charAt(i);
-            if (QUOTE_CHARS.get(ch))
-                return true;
-        }
-        return s.length() == 0;
-    }
-
-    public static final String NULL = "!null \"\"";
 
     class TextValueOut implements ValueOut {
-        int indentation = 0;
         String sep = "";
-        boolean leaf = false;
+        CharSequence fieldName = null;
 
         void prependSeparator() {
             bytes.append(sep);
-            if (sep.endsWith("\n"))
-                indent();
             sep = "";
+            if (fieldName != null) {
+                bytes.append(fieldName).append("=");
+                fieldName = null;
+            }
         }
 
         @Override
         public ValueOut leaf() {
-            leaf = true;
             return this;
         }
 
         @Override
         public WireOut wireOut() {
-            return TextWire.this;
-        }
-
-        private void indent() {
-            for (int i = 0; i < indentation; i++)
-                bytes.append("  ");
+            return QueryWire.this;
         }
 
         public void elementSeparator() {
-            if (indentation == 0) {
-                sep = "";
-                bytes.append("\n");
-
-            } else {
-                sep = leaf ? ", " : ",\n";
-            }
+            sep = "&";
         }
 
         @Override
         public Wire bool(Boolean flag) {
-            prependSeparator();
-            bytes.append(flag == null ? "!" + NULL : flag ? "true" : "false");
-            elementSeparator();
-            return TextWire.this;
+            if (flag != null) {
+                prependSeparator();
+                bytes.append(flag ? "true" : "false");
+                elementSeparator();
+            }
+            return QueryWire.this;
         }
 
         @Override
         public Wire text(CharSequence s) {
-            prependSeparator();
-            bytes.append(s == null ? "!" + NULL : quotes(s));
-            elementSeparator();
-            return TextWire.this;
+            if (s != null) {
+                prependSeparator();
+                bytes.append(s);
+                elementSeparator();
+            }
+            return QueryWire.this;
         }
 
         @Override
@@ -371,32 +290,28 @@ public class TextWire implements Wire, InternalWireIn {
             prependSeparator();
             bytes.append(i8);
             elementSeparator();
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
         public WireOut bytes(Bytes fromBytes) {
-            if (isText(fromBytes)) {
-                return text(fromBytes);
-            }
-            int length = Maths.toInt32(fromBytes.remaining());
-            byte[] byteArray = new byte[length];
-            fromBytes.read(byteArray);
-            return bytes(byteArray);
+            throw new UnsupportedOperationException("todo");
         }
 
         @Override
         public WireOut rawBytes(byte[] value) {
-            prependSeparator();
-            bytes.write(value);
-            elementSeparator();
-            return TextWire.this;
+            if (value != null) {
+                prependSeparator();
+                bytes.write(value);
+                elementSeparator();
+            }
+            return QueryWire.this;
         }
 
         private boolean isText(Bytes fromBytes) {
             for (long i = fromBytes.position(); i < fromBytes.readLimit(); i++) {
                 int ch = fromBytes.readUnsignedByte(i);
-                if ((ch < ' ' && ch != '\t') || ch >= 127)
+                if ((ch < ' ' && ch != '\t') || ch == '&' || ch >= 127)
                     return false;
             }
             return true;
@@ -410,10 +325,10 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut bytes(byte[] byteArray) {
             prependSeparator();
-            bytes.append("!!binary ").append(Base64.getEncoder().encodeToString(byteArray)).append(END_FIELD);
+            bytes.append(Base64.getEncoder().encodeToString(byteArray));
             elementSeparator();
 
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -422,7 +337,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(u8);
             elementSeparator();
 
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -431,7 +346,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(i16);
             elementSeparator();
 
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -440,7 +355,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(u16);
             elementSeparator();
 
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -449,8 +364,7 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             sb.appendCodePoint(codepoint);
             text(sb);
-            sep = FIELD_SEP;
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -459,7 +373,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(i32);
             elementSeparator();
 
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -468,7 +382,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(u32);
             elementSeparator();
 
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -477,13 +391,13 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(i64);
             elementSeparator();
 
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
         public WireOut int64array(long capacity) {
             TextLongArrayReference.write(bytes, capacity);
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -492,7 +406,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(f);
             elementSeparator();
 
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -501,7 +415,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(d);
             elementSeparator();
 
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -510,7 +424,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(localTime.toString());
             elementSeparator();
 
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -519,7 +433,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(zonedDateTime.toString());
             elementSeparator();
 
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -528,15 +442,15 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(localDate.toString());
             elementSeparator();
 
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
         public Wire type(CharSequence typeName) {
             prependSeparator();
-            bytes.append('!').append(typeName);
+            bytes.append(typeName);
             sep = " ";
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -544,7 +458,7 @@ public class TextWire implements Wire, InternalWireIn {
             prependSeparator();
             bytes.append(sep).append(uuid.toString());
             elementSeparator();
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -552,7 +466,7 @@ public class TextWire implements Wire, InternalWireIn {
             prependSeparator();
             IntTextReference.write(bytes, value);
             elementSeparator();
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -560,111 +474,57 @@ public class TextWire implements Wire, InternalWireIn {
             prependSeparator();
             TextLongReference.write(bytes, value);
             elementSeparator();
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
         public WireOut sequence(Consumer<ValueOut> writer) {
+            prependSeparator();
             pushState();
             bytes.append("[");
-            sep = "\n";
+            sep = ",";
             long pos = bytes.position();
             writer.accept(this);
             if (pos != bytes.position())
-                bytes.append("\n");
+                bytes.append(",");
 
             popState();
-            indent();
             bytes.append("]");
-            sep = END_FIELD;
-            return TextWire.this;
+            elementSeparator();
+            return QueryWire.this;
         }
 
         private void popState() {
-            indentation--;
-            leaf = false;
         }
 
         private void pushState() {
-            indentation++;
         }
 
         @Override
         public WireOut marshallable(WriteMarshallable object) {
-            if (!leaf)
-                pushState();
+            pushState();
 
             prependSeparator();
             bytes.append("{");
-            sep = leaf ? " " : END_FIELD;
+            sep = ",";
 
-            object.writeMarshallable(TextWire.this);
+            object.writeMarshallable(QueryWire.this);
 
-            if (!leaf)
-                popState();
-            else
-                leaf = false;
-            if (sep.startsWith(","))
-                bytes.append(sep.substring(1));
-            else
-                prependSeparator();
+            popState();
+
             bytes.append('}');
-
-            if (indentation == 0) {
-                sep = "";
-                bytes.append("\n");
-
-            } else {
-                sep = ",\n";
-            }
-            return TextWire.this;
+            elementSeparator();
+            return QueryWire.this;
         }
 
         @Override
         public WireOut map(@NotNull final Map map) {
-            type(SEQ_MAP);
-            bytes.append(" [");
-            pushState();
-            sep = END_FIELD;
-            map.forEach((k, v) -> {
-                prependSeparator();
-                bytes.append("{ key: ");
-                leaf();
-                object2(k);
-                sep = ",\n";
-                prependSeparator();
-                bytes.append("  value: ");
-                leaf();
-                object2(v);
-                bytes.append(" }");
-                sep = ",\n";
-            });
-            popState();
-            sep = END_FIELD;
-            prependSeparator();
-            bytes.append("]");
-            sep = END_FIELD;
-            return TextWire.this;
-        }
-
-        private void object2(Object v) {
-            if (v instanceof CharSequence)
-                text((CharSequence) v);
-            else if (v instanceof WriteMarshallable)
-                typedMarshallable((WriteMarshallable) v);
-            else if (v == null)
-                bytes.append("!" + NULL);
-            else
-                text(String.valueOf(v));
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map) {
-            type(SEQ_MAP);
-            map.forEach((k, v) -> sequence(w -> w.marshallable(m -> m
-                    .write(() -> "key").typedMarshallable(k)
-                    .write(() -> "value").typedMarshallable(v))));
-            return TextWire.this;
+            throw new UnsupportedOperationException();
         }
 
         public ValueOut write() {
@@ -674,17 +534,8 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         public ValueOut write(WireKey key) {
-            CharSequence name = key.name();
-            if (name == null) name = Integer.toString(key.code());
-            prependSeparator();
-            bytes.append(quotes(name)).append(": ");
+            fieldName = key.name();
             return this;
-        }
-
-        public void writeComment(CharSequence s) {
-            prependSeparator();
-            bytes.append(sep).append("# ").append(s).append("\n");
-            sep = "";
         }
     }
 
@@ -697,11 +548,11 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             if (text(sb) == null) {
                 flag.accept(null);
-                return TextWire.this;
+                return QueryWire.this;
             }
 
             flag.accept(StringUtils.isEqual(sb, "true"));
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @NotNull
@@ -710,7 +561,7 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             text(sb);
             s.accept(sb.toString());
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -722,70 +573,8 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public <ACS extends Appendable & CharSequence> ACS text(@NotNull ACS a) {
             consumeWhiteSpace();
-            int ch = peekCode();
-
-            if (ch == '{') {
-                final long len = readLength();
-                try {
-                    a.append(Bytes.toDebugString(bytes, bytes.position(), len));
-                } catch (IOException e) {
-                    throw new AssertionError(e);
-                }
-                bytes.skip(len);
-
-                // read the next comma
-                bytes.skipTo(StopCharTesters.COMMA_STOP);
-
-                return a;
-
-            } else if (ch == '"') {
-                bytes.skip(1);
-                bytes.parseUTF(a, StopCharTesters.QUOTES.escaping());
-                unescape(a);
-
-            } else if (ch == '!') {
-                bytes.skip(1);
-                ch = peekCode();
-                if (ch == '!') {
-                    bytes.skip(1);
-                    StringBuilder sb = Wires.acquireStringBuilder();
-                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
-                    if (StringUtils.isEqual(sb, "null")) {
-                        text(sb);
-                        return null;
-                    }
-                } else {
-                    StringBuilder sb = Wires.acquireStringBuilder();
-                    text(sb);
-                    // ignore the type.
-                }
-
-            } else {
-                if (bytes.remaining() > 0) {
-                    if (a instanceof Bytes)
-                        bytes.parse8bit(a, TextStopCharsTesters.END_OF_TEXT);
-                    else
-                        bytes.parseUTF(a, TextStopCharsTesters.END_OF_TEXT);
-
-                } else {
-                    BytesUtil.setLength(a, 0);
-                }
-                // trim trailing spaces.
-                while (a.length() > 0)
-                    if (Character.isWhitespace(a.charAt(a.length() - 1)))
-                        BytesUtil.setLength(a, a.length() - 1);
-                    else
-                        break;
-            }
-
-            int prev = rewindAndRead();
-            if (prev == ':')
-                bytes.skip(-1);
+            bytes.parseUTF(a, WireStopCharTesters.QUERY_VALUE);
             return a;
-        }
-
-        private int rewindAndRead() {
-            return bytes.readUnsignedByte(bytes.position() - 1);
         }
 
         @NotNull
@@ -793,7 +582,7 @@ public class TextWire implements Wire, InternalWireIn {
         public Wire int8(@NotNull ByteConsumer i) {
             consumeWhiteSpace();
             i.accept((byte) bytes.parseLong());
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @NotNull
@@ -804,137 +593,22 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         public WireIn bytes(@NotNull Consumer<WireIn> bytesConsumer) {
-            consumeWhiteSpace();
-
-            // TODO needs to be made much more efficient.
-            StringBuilder sb = Wires.acquireStringBuilder();
-            if (peekCode() == '!') {
-                bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
-                String str = sb.toString();
-                if (str.equals("!!binary")) {
-                    BytesUtil.setLength(sb, 0);
-                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
-                    byte[] decode = Base64.getDecoder().decode(sb.toString());
-                    bytesConsumer.accept(new TextWire(Bytes.wrap(decode)));
-
-                } else {
-                    throw new IORuntimeException("Unsupported type " + str);
-                }
-            } else {
-                text(sb);
-                bytesConsumer.accept(new TextWire(Bytes.wrap(sb.toString().getBytes())));
-            }
-            return TextWire.this;
+            throw new UnsupportedOperationException("todo");
         }
 
         public byte[] bytes() {
-            consumeWhiteSpace();
-            // TODO needs to be made much more efficient.
-            StringBuilder sb = Wires.acquireStringBuilder();
-            if (peekCode() == '!') {
-                bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
-                String str = sb.toString();
-                if (str.equals("!!binary")) {
-                    BytesUtil.setLength(sb, 0);
-                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
-                    byte[] decode = Base64.getDecoder().decode(sb.toString());
-                    return decode;
-
-                } else if (str.equals("!" + SEQ_MAP)) {
-                    sb.append(bytes.toString());
-                    return sb.toString().getBytes();
-
-                } else {
-                    throw new IllegalStateException("unsupported type");
-                }
-
-            } else {
-                text(sb);
-                return sb.toString().getBytes();
-            }
-
+            throw new UnsupportedOperationException("todo");
         }
 
         @NotNull
         @Override
         public WireIn wireIn() {
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
         public long readLength() {
-            consumeWhiteSpace();
-            long start = bytes.position();
-            try {
-                consumeWhiteSpace();
-                int code = readCode();
-                switch (code) {
-                    case '{': {
-                        int count = 1;
-                        for (; ; ) {
-                            byte b = bytes.readByte();
-                            if (b == '{')
-                                count += 1;
-                            else if (b == '}') {
-                                count -= 1;
-                                if (count == 0)
-                                    return bytes.position() - start;
-                            }
-                            // do nothing
-                        }
-                    }
-
-                    case '-': {
-                        for (; ; ) {
-                            byte b = bytes.readByte();
-                            if (b == '\n') {
-                                return (bytes.position() - start) + 1;
-                            }
-                            if (bytes.remaining() == 0)
-                                return bytes.limit() - start;
-                            // do nothing
-                        }
-                    }
-
-                    default:
-                        // TODO needs to be made much more efficient.
-                        bytes();
-                        return bytes.position() - start;
-                }
-            } finally {
-                bytes.position(start);
-            }
-        }
-
-        private long readLengthMarshable() {
-            long start = bytes.position();
-            try {
-                consumeWhiteSpace();
-                int code = readCode();
-                switch (code) {
-                    case '{': {
-                        int count = 1;
-                        for (; ; ) {
-                            byte b = bytes.readByte();
-                            if (b == '{')
-                                count += 1;
-                            else if (b == '}') {
-                                count -= 1;
-                                if (count == 0)
-                                    return bytes.position() - start;
-                            }
-                            // do nothing
-                        }
-                    }
-
-                    default:
-                        // TODO needs to be made much more efficient.
-                        bytes();
-                        return bytes.position() - start;
-                }
-            } finally {
-                bytes.position(start);
-            }
+            throw new UnsupportedOperationException("todo");
         }
 
         @NotNull
@@ -942,7 +616,7 @@ public class TextWire implements Wire, InternalWireIn {
         public Wire uint8(@NotNull ShortConsumer i) {
             consumeWhiteSpace();
             i.accept((short) bytes.parseLong());
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @NotNull
@@ -950,7 +624,7 @@ public class TextWire implements Wire, InternalWireIn {
         public Wire int16(@NotNull ShortConsumer i) {
             consumeWhiteSpace();
             i.accept((short) bytes.parseLong());
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @NotNull
@@ -958,7 +632,7 @@ public class TextWire implements Wire, InternalWireIn {
         public Wire uint16(@NotNull IntConsumer i) {
             consumeWhiteSpace();
             i.accept((int) bytes.parseLong());
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @NotNull
@@ -966,7 +640,7 @@ public class TextWire implements Wire, InternalWireIn {
         public Wire int32(@NotNull IntConsumer i) {
             consumeWhiteSpace();
             i.accept((int) bytes.parseLong());
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @NotNull
@@ -974,7 +648,7 @@ public class TextWire implements Wire, InternalWireIn {
         public Wire uint32(@NotNull LongConsumer i) {
             consumeWhiteSpace();
             i.accept(bytes.parseLong());
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @NotNull
@@ -982,7 +656,7 @@ public class TextWire implements Wire, InternalWireIn {
         public Wire int64(@NotNull LongConsumer i) {
             consumeWhiteSpace();
             i.accept(bytes.parseLong());
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @NotNull
@@ -990,7 +664,7 @@ public class TextWire implements Wire, InternalWireIn {
         public Wire float32(@NotNull FloatConsumer v) {
             consumeWhiteSpace();
             v.accept((float) bytes.parseDouble());
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @NotNull
@@ -998,7 +672,7 @@ public class TextWire implements Wire, InternalWireIn {
         public Wire float64(@NotNull DoubleConsumer v) {
             consumeWhiteSpace();
             v.accept(bytes.parseDouble());
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @NotNull
@@ -1008,7 +682,7 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             text(sb);
             localTime.accept(LocalTime.parse(sb.toString()));
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @NotNull
@@ -1018,7 +692,7 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             text(sb);
             zonedDateTime.accept(ZonedDateTime.parse(sb.toString()));
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @NotNull
@@ -1028,7 +702,7 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             text(sb);
             localDate.accept(LocalDate.parse(sb.toString()));
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -1053,7 +727,7 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             text(sb);
             uuid.accept(UUID.fromString(sb.toString()));
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -1066,7 +740,7 @@ public class TextWire implements Wire, InternalWireIn {
             long length = TextLongArrayReference.peakLength(bytes, bytes.position());
             b.bytesStore(bytes, bytes.position(), length);
             bytes.skip(length);
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -1082,7 +756,7 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             if (peekCode() == ',')
                 bytes.skip(1);
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -1097,7 +771,7 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             if (peekCode() == ',')
                 bytes.skip(1);
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
@@ -1107,45 +781,19 @@ public class TextWire implements Wire, InternalWireIn {
             if (code != '[')
                 throw new IORuntimeException("Unsupported type " + (char) code + " (" + code + ")");
 
-            reader.accept(TextWire.this.valueIn);
+            reader.accept(QueryWire.this.valueIn);
 
             consumeWhiteSpace();
             code = peekCode();
             if (code != ']')
                 throw new IORuntimeException("Expected a ] but got " + (char) code + " (" + code + ")");
 
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @Override
         public <T> T applyToMarshallable(Function<WireIn, T> marshallableReader) {
-            consumeWhiteSpace();
-            int code = peekCode();
-            if (code != '{')
-                throw new IORuntimeException("Unsupported type " + (char) code);
-
-            final long len = readLengthMarshable() - 1;
-
-            final long limit = bytes.limit();
-            final long position = bytes.position();
-
-            try {
-                // ensure that you can read past the end of this marshable object
-                final long newLimit = position - 1 + len;
-                bytes.limit(newLimit);
-                bytes.skip(1); // skip the {
-                consumeWhiteSpace();
-                return marshallableReader.apply(TextWire.this);
-            } finally {
-                bytes.limit(limit);
-
-                consumeWhiteSpace();
-                code = readCode();
-                if (code != '}')
-                    throw new IORuntimeException("Unterminated { while reading marshallable "
-                            + "bytes=" + Bytes.toDebugString(bytes)
-                    );
-            }
+            throw new UnsupportedOperationException("todo");
         }
 
         @NotNull
@@ -1157,112 +805,25 @@ public class TextWire implements Wire, InternalWireIn {
                 throw new UnsupportedOperationException(stringForCode(code));
             }
             bytes.parseUTF(s, StopCharTesters.SPACE_STOP);
-            return TextWire.this;
+            return QueryWire.this;
         }
 
         @NotNull
         @Override
         public WireIn marshallable(@NotNull ReadMarshallable object) {
-            consumeWhiteSpace();
-            int code = peekCode();
-            if (code == '!')
-                type(Wires.acquireStringBuilder());
-            else if (code != '{')
-                throw new IORuntimeException("Unsupported type " + (char) code);
-
-            final long len = readLengthMarshable() - 1;
-
-            final long limit = bytes.limit();
-            final long position = bytes.position();
-
-            final long newLimit = position - 1 + len;
-            try {
-                // ensure that you can read past the end of this marshable object
-
-                bytes.limit(newLimit);
-                bytes.skip(1); // skip the {
-                consumeWhiteSpace();
-                object.readMarshallable(TextWire.this);
-            } finally {
-                bytes.limit(limit);
-                bytes.position(newLimit);
-            }
-
-            consumeWhiteSpace();
-            code = readCode();
-            if (code != '}')
-                throw new IORuntimeException("Unterminated { while reading marshallable " +
-                        object + ",code='" + (char) code + "', bytes=" + Bytes.toDebugString(bytes)
-                );
-            return TextWire.this;
+            throw new UnsupportedOperationException("todo");
         }
 
         @Override
         public <K, V> Map<K, V> map(@NotNull final Class<K> kClazz,
                                     @NotNull final Class<V> vClass,
                                     @NotNull final Map<K, V> usingMap) {
-            consumeWhiteSpace();
-            usingMap.clear();
-
-            StringBuilder sb = Wires.acquireStringBuilder();
-            if (peekCode() == '!') {
-                bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
-                String str = sb.toString();
-
-                if (("!!null").contentEquals(sb)) {
-                    text();
-                    return null;
-
-                } else if (("!" + SEQ_MAP).contentEquals(sb)) {
-                    consumeWhiteSpace();
-                    int start = readCode();
-                    if (start != '[')
-                        throw new IORuntimeException("Unsupported start of sequence : " + (char) start);
-                    do {
-                        marshallable(r -> {
-                            final K k = r.read(() -> "key")
-                                    .object(kClazz);
-                            final V v = r.read(() -> "value")
-                                    .object(vClass);
-                            usingMap.put(k, v);
-                        });
-                    } while (hasNextSequenceItem());
-                    return usingMap;
-
-                } else {
-                    throw new IORuntimeException("Unsupported type :" + str);
-                }
-            }
-            return usingMap;
+            throw new UnsupportedOperationException("todo");
         }
 
         @Override
         public <K extends ReadMarshallable, V extends ReadMarshallable> void typedMap(@NotNull Map<K, V> usingMap) {
-            consumeWhiteSpace();
-            usingMap.clear();
-
-            StringBuilder sb = Wires.acquireStringBuilder();
-            if (peekCode() == '!') {
-                bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
-                String str = sb.toString();
-                if (SEQ_MAP.contentEquals(sb)) {
-                    while (hasNext()) {
-                        sequence(s -> s.marshallable(r -> {
-                            try {
-                                @SuppressWarnings("unchecked")
-                                final K k = (K) r.read(() -> "key").typedMarshallable();
-                                @SuppressWarnings("unchecked")
-                                final V v = (V) r.read(() -> "value").typedMarshallable();
-                                usingMap.put(k, v);
-                            } catch (Exception e) {
-                                LOG.error("", e);
-                            }
-                        }));
-                    }
-                } else {
-                    throw new IORuntimeException("Unsupported type " + str);
-                }
-            }
+            throw new UnsupportedOperationException("todo");
         }
 
         @Override
@@ -1321,16 +882,16 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         /**
-         * @return true if !!null "", if {@code true} reads the !!null "" up to the next STOP, if {@code
+         * @return true if !!null, if {@code true} reads the !!null up to the next STOP, if {@code
          * false} no  data is read  ( data is only peaked if {@code false} )
          */
         public boolean isNull() {
             consumeWhiteSpace();
 
-            if (peekStringIgnoreCase("!!null \"\"")) {
-                bytes.skip("!!null \"\"".length());
+            if (peekStringIgnoreCase("!!null ")) {
+                bytes.skip("!!null ".length());
                 // discard the text after it.
-              //  text(Wires.acquireStringBuilder());
+                text(Wires.acquireStringBuilder());
                 return true;
             }
 
@@ -1413,14 +974,17 @@ public class TextWire implements Wire, InternalWireIn {
         }
     }
 
-    enum TextStopCharsTesters implements StopCharsTester {
-        END_OF_TEXT {
+    enum WireStopCharTesters implements StopCharTester {
+        QUERY_FIELD_NAME {
             @Override
-            public boolean isStopChar(int ch, int ch2) throws IllegalStateException {
-                // one character stop.
-                if (ch == '"' || ch == '#' || ch == '\n') return true;
-                // two character stop.
-                return (ch == ':' || ch == ',') && ch2 <= ' ';
+            public boolean isStopChar(int ch) throws IllegalStateException {
+                return ch == '&' || ch == '=' || ch < 0;
+            }
+        },
+        QUERY_VALUE {
+            @Override
+            public boolean isStopChar(int ch) throws IllegalStateException {
+                return ch == '&' || ch < 0;
             }
         }
     }

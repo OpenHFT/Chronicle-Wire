@@ -165,11 +165,6 @@ public class RawWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public boolean hasDocument() {
-        return false;
-    }
-
-    @Override
     public WireOut addPadding(int paddingToAdd) {
         throw new UnsupportedOperationException();
     }

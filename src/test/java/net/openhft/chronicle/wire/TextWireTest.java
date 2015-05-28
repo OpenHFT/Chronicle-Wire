@@ -42,7 +42,7 @@ import java.util.stream.Stream;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
-public class TextWire2Test {
+public class TextWireTest {
 
     Bytes bytes;
 
@@ -785,10 +785,10 @@ public class TextWire2Test {
 
         assertEquals("--- !!data\n" +
                 "example: !!seqmap [\n" +
-                "  { key: !net.openhft.chronicle.wire.TextWire2Test$MyMarshallable { MyField: aKey },\n" +
-                "    value: !net.openhft.chronicle.wire.TextWire2Test$MyMarshallable { MyField: aValue } },\n" +
-                "  { key: !net.openhft.chronicle.wire.TextWire2Test$MyMarshallable { MyField: aKey2 },\n" +
-                "    value: !net.openhft.chronicle.wire.TextWire2Test$MyMarshallable { MyField: aValue2 } }\n" +
+                "  { key: !net.openhft.chronicle.wire.TextWireTest$MyMarshallable { MyField: aKey },\n" +
+                "    value: !net.openhft.chronicle.wire.TextWireTest$MyMarshallable { MyField: aValue } },\n" +
+                "  { key: !net.openhft.chronicle.wire.TextWireTest$MyMarshallable { MyField: aKey2 },\n" +
+                "    value: !net.openhft.chronicle.wire.TextWireTest$MyMarshallable { MyField: aValue2 } }\n" +
                 "]\n", Wires.fromSizePrefixedBlobs(bytes));
         final Map<MyMarshallable, MyMarshallable> actual = new LinkedHashMap<>();
 
@@ -811,8 +811,8 @@ public class TextWire2Test {
             @Override
             public StackTraceElement[] getStackTrace() {
                 StackTraceElement[] stack = {
-                        new StackTraceElement("net.openhft.chronicle.wire.TextWire2Test", "testException", "TextWire2Test.java", 783),
-                        new StackTraceElement("net.openhft.chronicle.wire.TextWire2Test", "runTestException", "TextWire2Test.java", 73),
+                        new StackTraceElement("net.openhft.chronicle.wire.TextWireTest", "testException", "TextWireTest.java", 783),
+                        new StackTraceElement("net.openhft.chronicle.wire.TextWireTest", "runTestException", "TextWireTest.java", 73),
                         new StackTraceElement("sun.reflect.NativeMethodAccessorImpl", "invoke0", "NativeMethodAccessorImpl.java", -2)
                 };
                 return stack;
@@ -832,8 +832,8 @@ public class TextWire2Test {
                 "exception: !" + e.getClass().getName() + " {\n" +
                 "  message: Reference cannot be null,\n" +
                 "  stackTrace: [\n" +
-                "    { class: net.openhft.chronicle.wire.TextWire2Test, method: testException, file: TextWire2Test.java, line: 783 },\n" +
-                "    { class: net.openhft.chronicle.wire.TextWire2Test, method: runTestException, file: TextWire2Test.java, line: 73 }\n" +
+                "    { class: net.openhft.chronicle.wire.TextWireTest, method: testException, file: TextWireTest.java, line: 783 },\n" +
+                "    { class: net.openhft.chronicle.wire.TextWireTest, method: runTestException, file: TextWireTest.java, line: 73 }\n" +
                 "  ]\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(bytes));
 

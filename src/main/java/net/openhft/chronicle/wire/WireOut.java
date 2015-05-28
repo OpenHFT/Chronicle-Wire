@@ -60,8 +60,6 @@ public interface WireOut {
      */
     WireOut writeComment(CharSequence s);
 
-    boolean hasDocument();
-
     Bytes bytes();
 
     WireOut addPadding(int paddingToAdd);

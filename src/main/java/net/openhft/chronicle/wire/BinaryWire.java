@@ -521,11 +521,6 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public boolean hasDocument() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public WireOut addPadding(int paddingToAdd) {
         if (paddingToAdd < 0)
             throw new IllegalStateException("Cannot add " + paddingToAdd + " bytes of padding");
