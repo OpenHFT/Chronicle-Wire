@@ -266,7 +266,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire bool(Boolean flag) {
+        public WireOut bool(Boolean flag) {
             if (flag != null) {
                 prependSeparator();
                 bytes.append(flag ? "true" : "false");
@@ -276,7 +276,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire text(CharSequence s) {
+        public WireOut text(CharSequence s) {
             if (s != null) {
                 prependSeparator();
                 bytes.append(s);
@@ -286,7 +286,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire int8(byte i8) {
+        public WireOut int8(byte i8) {
             prependSeparator();
             bytes.append(i8);
             elementSeparator();
@@ -332,7 +332,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire uint8checked(int u8) {
+        public WireOut uint8checked(int u8) {
             prependSeparator();
             bytes.append(u8);
             elementSeparator();
@@ -341,7 +341,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire int16(short i16) {
+        public WireOut int16(short i16) {
             prependSeparator();
             bytes.append(i16);
             elementSeparator();
@@ -350,7 +350,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire uint16checked(int u16) {
+        public WireOut uint16checked(int u16) {
             prependSeparator();
             bytes.append(u16);
             elementSeparator();
@@ -359,7 +359,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire utf8(int codepoint) {
+        public WireOut utf8(int codepoint) {
             prependSeparator();
             StringBuilder sb = Wires.acquireStringBuilder();
             sb.appendCodePoint(codepoint);
@@ -368,7 +368,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire int32(int i32) {
+        public WireOut int32(int i32) {
             prependSeparator();
             bytes.append(i32);
             elementSeparator();
@@ -377,7 +377,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire uint32checked(long u32) {
+        public WireOut uint32checked(long u32) {
             prependSeparator();
             bytes.append(u32);
             elementSeparator();
@@ -386,7 +386,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire int64(long i64) {
+        public WireOut int64(long i64) {
             prependSeparator();
             bytes.append(i64);
             elementSeparator();
@@ -401,7 +401,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire float32(float f) {
+        public WireOut float32(float f) {
             prependSeparator();
             bytes.append(f);
             elementSeparator();
@@ -410,7 +410,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire float64(double d) {
+        public WireOut float64(double d) {
             prependSeparator();
             bytes.append(d);
             elementSeparator();
@@ -419,7 +419,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire time(LocalTime localTime) {
+        public WireOut time(LocalTime localTime) {
             prependSeparator();
             bytes.append(localTime.toString());
             elementSeparator();
@@ -428,7 +428,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire zonedDateTime(ZonedDateTime zonedDateTime) {
+        public WireOut zonedDateTime(ZonedDateTime zonedDateTime) {
             prependSeparator();
             bytes.append(zonedDateTime.toString());
             elementSeparator();
@@ -437,7 +437,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire date(LocalDate localDate) {
+        public WireOut date(LocalDate localDate) {
             prependSeparator();
             bytes.append(localDate.toString());
             elementSeparator();
@@ -446,11 +446,21 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Wire type(CharSequence typeName) {
+        public WireOut type(CharSequence typeName) {
             prependSeparator();
             bytes.append(typeName);
             sep = " ";
             return QueryWire.this;
+        }
+
+        @Override
+        public WireOut typeLiteral(@NotNull CharSequence type) {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @NotNull Class type) {
+            throw new UnsupportedOperationException("todo");
         }
 
         @Override
@@ -542,7 +552,7 @@ public class QueryWire implements Wire, InternalWireIn {
     class TextValueIn implements ValueIn {
         @NotNull
         @Override
-        public Wire bool(@NotNull BooleanConsumer flag) {
+        public WireIn bool(@NotNull BooleanConsumer flag) {
             consumeWhiteSpace();
 
             StringBuilder sb = Wires.acquireStringBuilder();
@@ -579,7 +589,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire int8(@NotNull ByteConsumer i) {
+        public WireIn int8(@NotNull ByteConsumer i) {
             consumeWhiteSpace();
             i.accept((byte) bytes.parseLong());
             return QueryWire.this;
@@ -613,7 +623,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire uint8(@NotNull ShortConsumer i) {
+        public WireIn uint8(@NotNull ShortConsumer i) {
             consumeWhiteSpace();
             i.accept((short) bytes.parseLong());
             return QueryWire.this;
@@ -621,7 +631,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire int16(@NotNull ShortConsumer i) {
+        public WireIn int16(@NotNull ShortConsumer i) {
             consumeWhiteSpace();
             i.accept((short) bytes.parseLong());
             return QueryWire.this;
@@ -629,7 +639,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire uint16(@NotNull IntConsumer i) {
+        public WireIn uint16(@NotNull IntConsumer i) {
             consumeWhiteSpace();
             i.accept((int) bytes.parseLong());
             return QueryWire.this;
@@ -637,7 +647,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire int32(@NotNull IntConsumer i) {
+        public WireIn int32(@NotNull IntConsumer i) {
             consumeWhiteSpace();
             i.accept((int) bytes.parseLong());
             return QueryWire.this;
@@ -645,7 +655,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire uint32(@NotNull LongConsumer i) {
+        public WireIn uint32(@NotNull LongConsumer i) {
             consumeWhiteSpace();
             i.accept(bytes.parseLong());
             return QueryWire.this;
@@ -653,7 +663,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire int64(@NotNull LongConsumer i) {
+        public WireIn int64(@NotNull LongConsumer i) {
             consumeWhiteSpace();
             i.accept(bytes.parseLong());
             return QueryWire.this;
@@ -661,7 +671,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire float32(@NotNull FloatConsumer v) {
+        public WireIn float32(@NotNull FloatConsumer v) {
             consumeWhiteSpace();
             v.accept((float) bytes.parseDouble());
             return QueryWire.this;
@@ -669,7 +679,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire float64(@NotNull DoubleConsumer v) {
+        public WireIn float64(@NotNull DoubleConsumer v) {
             consumeWhiteSpace();
             v.accept(bytes.parseDouble());
             return QueryWire.this;
@@ -677,7 +687,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire time(@NotNull Consumer<LocalTime> localTime) {
+        public WireIn time(@NotNull Consumer<LocalTime> localTime) {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
             text(sb);
@@ -687,7 +697,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime) {
+        public WireIn zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime) {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
             text(sb);
@@ -697,7 +707,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire date(@NotNull Consumer<LocalDate> localDate) {
+        public WireIn date(@NotNull Consumer<LocalDate> localDate) {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
             text(sb);
@@ -798,13 +808,21 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire type(@NotNull StringBuilder s) {
+        public WireIn type(@NotNull StringBuilder s) {
             consumeWhiteSpace();
             int code = readCode();
             if (code != '!') {
                 throw new UnsupportedOperationException(stringForCode(code));
             }
             bytes.parseUTF(s, StopCharTesters.SPACE_STOP);
+            return QueryWire.this;
+        }
+
+        @Override
+        public WireIn typeLiteral(@NotNull Consumer<CharSequence> classNameConsumer) {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            type(sb);
+            classNameConsumer.accept(sb);
             return QueryWire.this;
         }
 

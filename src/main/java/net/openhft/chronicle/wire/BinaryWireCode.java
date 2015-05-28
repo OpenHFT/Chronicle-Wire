@@ -56,12 +56,13 @@ enum BinaryWireCode {
     static final int DATE = 0xB3;
     static final int DATE_TIME = 0xB4;
     static final int ZONED_DATE_TIME = 0xB5;
-    static final int TYPE = 0xB6;
+    static final int TYPE_PREFIX = 0xB6;
     static final int FIELD_NAME_ANY = 0xB7;
     static final int STRING_ANY = 0xB8;
     static final int EVENT_NAME = 0xB9;
     static final int FIELD_NUMBER = 0xBA;
     static final int NULL = 0xBB;
+    static final int TYPE_LITERAL = 0xBC;
     static final int COMMENT = 0xBE;
     static final int HINT = 0xBF;
 

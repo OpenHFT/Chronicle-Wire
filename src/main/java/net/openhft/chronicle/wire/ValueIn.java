@@ -152,6 +152,12 @@ public interface ValueIn {
     @NotNull
     WireIn type(@NotNull StringBuilder s);
 
+    WireIn typeLiteral(@NotNull Consumer<CharSequence> classNameConsumer);
+
+    default WireIn typeLiteral(@NotNull Function<CharSequence, Class> typeLookup, @NotNull Consumer<Class> classConsumer) {
+        return typeLiteral(sb -> classConsumer.accept(typeLookup.apply(sb)));
+    }
+
     @NotNull
     WireIn marshallable(@NotNull ReadMarshallable object);
 

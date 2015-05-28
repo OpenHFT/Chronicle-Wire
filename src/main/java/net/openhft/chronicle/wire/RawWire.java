@@ -307,6 +307,20 @@ public class RawWire implements Wire, InternalWireIn {
         }
 
         @Override
+        public WireOut typeLiteral(@NotNull CharSequence type) {
+            return type(type);
+        }
+
+        @Override
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @NotNull Class type) {
+            long position = bytes.position();
+            bytes.skip(1);
+            typeTranslator.accept(type, bytes);
+            bytes.writeUnsignedByte(position, Maths.toInt8(bytes.position() - position - 1));
+            return RawWire.this;
+        }
+
+        @Override
         public WireOut uuid(UUID uuid) {
             bytes.writeLong(uuid.getMostSignificantBits());
             bytes.writeLong(uuid.getLeastSignificantBits());
@@ -607,6 +621,14 @@ public class RawWire implements Wire, InternalWireIn {
         @Override
         public Wire type(@NotNull StringBuilder s) {
             bytes.readUTFΔ(s);
+            return RawWire.this;
+        }
+
+        @Override
+        public WireIn typeLiteral(@NotNull Consumer<CharSequence> classNameConsumer) {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            type(sb);
+            classNameConsumer.accept(sb);
             return RawWire.this;
         }
 

@@ -27,6 +27,7 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -101,6 +102,10 @@ public interface ValueOut {
     WireOut date(LocalDate localDate);
 
     WireOut type(CharSequence typeName);
+
+    WireOut typeLiteral(@NotNull CharSequence type);
+
+    WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @NotNull Class type);
 
     WireOut uuid(UUID uuid);
 

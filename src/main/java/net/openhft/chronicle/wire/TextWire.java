@@ -540,6 +540,24 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         @Override
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, Class type) {
+            prependSeparator();
+            bytes.append("!type ");
+            typeTranslator.accept(type, bytes);
+            elementSeparator();
+            return TextWire.this;
+        }
+
+        @Override
+        public WireOut typeLiteral(@NotNull CharSequence type) {
+            prependSeparator();
+            bytes.append("!type ");
+            text(type);
+            elementSeparator();
+            return TextWire.this;
+        }
+
+        @Override
         public WireOut uuid(UUID uuid) {
             prependSeparator();
             bytes.append(sep).append(uuid.toString());
@@ -1157,6 +1175,19 @@ public class TextWire implements Wire, InternalWireIn {
                 throw new UnsupportedOperationException(stringForCode(code));
             }
             bytes.parseUTF(s, StopCharTesters.SPACE_STOP);
+            return TextWire.this;
+        }
+
+        @Override
+        public WireIn typeLiteral(@NotNull Consumer<CharSequence> classNameConsumer) {
+            consumeWhiteSpace();
+            int code = readCode();
+            if (!peekStringIgnoreCase("type "))
+                throw new UnsupportedOperationException(stringForCode(code));
+            bytes.skip("type ".length());
+            StringBuilder sb = Wires.acquireStringBuilder();
+            bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+            classNameConsumer.accept(sb);
             return TextWire.this;
         }
 

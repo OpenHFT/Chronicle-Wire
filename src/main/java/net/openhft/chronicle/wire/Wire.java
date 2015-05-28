@@ -17,11 +17,6 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.function.Function;
-
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream.
  *
@@ -29,12 +24,4 @@ import java.util.function.Function;
  */
 public interface Wire extends WireIn, WireOut {
 
-    static Function<Bytes, Wire> bytesToWire(@NotNull Class<? extends Wire> wireClass) {
-        if (TextWire.class.isAssignableFrom(wireClass))
-            return TextWire::new;
-        else if (BinaryWire.class.isAssignableFrom(wireClass))
-            return BinaryWire::new;
-        else
-            throw new UnsupportedOperationException("type " + wireClass.getSimpleName() + " is not currently supported.");
-    }
 }

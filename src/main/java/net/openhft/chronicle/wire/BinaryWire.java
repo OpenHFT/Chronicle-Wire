@@ -315,11 +315,20 @@ public class BinaryWire implements Wire, InternalWireIn {
             case ZONED_DATE_TIME:
             case DATE_TIME:
                 throw new UnsupportedOperationException();
-            case TYPE: {
+
+            case TYPE_PREFIX: {
                 bytes.skip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 wire.writeValue().type(sb);
+                break;
+            }
+
+            case TYPE_LITERAL: {
+                bytes.skip(1);
+                StringBuilder sb = Wires.acquireStringBuilder();
+                bytes.readUTFΔ(sb);
+                wire.writeValue().typeLiteral(sb);
                 break;
             }
 
@@ -584,7 +593,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                     case DATE:
                     case DATE_TIME:
                     case ZONED_DATE_TIME:
-                    case TYPE:
+                    case TYPE_LITERAL:
                     case STRING_ANY:
                         bytes.readUTFΔ(sb);
                         return sb;
@@ -780,8 +789,19 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @Override
         public WireOut type(CharSequence typeName) {
-            writeCode(TYPE).writeUTFΔ(typeName);
+            writeCode(TYPE_PREFIX).writeUTFΔ(typeName);
             return BinaryWire.this;
+        }
+
+        @Override
+        public WireOut typeLiteral(@NotNull CharSequence type) {
+            writeCode(TYPE_LITERAL).writeUTFΔ(type);
+            return BinaryWire.this;
+        }
+
+        @Override
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @NotNull Class type) {
+            throw new UnsupportedOperationException("todo");
         }
 
         @Override
@@ -1440,8 +1460,22 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public WireIn type(@NotNull StringBuilder s) {
             int code = readCode();
-            if (code == TYPE) {
+            if (code == TYPE_PREFIX) {
                 bytes.readUTFΔ(s);
+
+            } else {
+                cantRead(code);
+            }
+            return BinaryWire.this;
+        }
+
+        @Override
+        public WireIn typeLiteral(@NotNull Consumer<CharSequence> classNameConsumer) {
+            int code = readCode();
+            if (code == TYPE_LITERAL) {
+                StringBuilder sb = Wires.acquireStringBuilder();
+                bytes.readUTFΔ(sb);
+                classNameConsumer.accept(sb);
 
             } else {
                 cantRead(code);
