@@ -41,9 +41,10 @@ import java.util.function.*;
  * Created by peter.lawrey on 14/01/15.
  */
 public interface ValueIn {
+
     /*
-     * Text / Strings.
-     */
+         * Text / Strings.
+         */
     @NotNull
     WireIn bool(@NotNull BooleanConsumer flag);
 
@@ -207,4 +208,7 @@ public interface ValueIn {
                          @NotNull Class<E> clazz) {
         return Wires.readObject(this, using, clazz);
     }
+
+    Consumer<ValueIn> DISCARD = v -> {
+    };
 }
