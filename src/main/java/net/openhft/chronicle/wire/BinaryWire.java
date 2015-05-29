@@ -898,7 +898,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 }
 
                 if (l <= (1L << 32L) - 1L) {
-                    super.uint32checked((long) l);
+                    super.uint32checked(l);
                     return;
                 }
 
@@ -907,7 +907,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                     return;
                 }
 
-                super.int64((long) l);
+                super.int64(l);
                 return;
 
             }
