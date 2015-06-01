@@ -988,7 +988,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
 
             if (l >= Integer.MIN_VALUE && l <= Integer.MAX_VALUE && !canOnlyBeRepresentedAsFloatingPoint) {
-                super.uint32checked((int) l);
+                super.int32((int) l);
                 return;
             }
 
