@@ -410,7 +410,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public <ACS extends Appendable & CharSequence> ACS text(@NotNull ACS s) {
+        public <ACS extends Appendable & CharSequence> ACS textTo(@NotNull ACS s) {
             return bytes.readUTFΔ(s) ? s : null;
         }
 
@@ -592,14 +592,14 @@ public class RawWire implements Wire, InternalWireIn {
 
         @Override
         public WireIn sequence(@NotNull Consumer<ValueIn> reader) {
-            text(lastSB);
+            textTo(lastSB);
 
             throw new UnsupportedOperationException();
         }
 
         @Override
         public <T> T applyToMarshallable(Function<WireIn, T> marshallableReader) {
-            text(lastSB);
+            textTo(lastSB);
 
             long length = bytes.readUnsignedInt();
             if (length >= 0) {
@@ -635,7 +635,7 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireIn marshallable(@NotNull ReadMarshallable object) {
-            text(lastSB);
+            textTo(lastSB);
 
             long length = bytes.readUnsignedInt();
             if (length >= 0) {

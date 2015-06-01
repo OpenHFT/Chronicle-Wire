@@ -713,7 +713,7 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
 
             StringBuilder sb = Wires.acquireStringBuilder();
-            if (text(sb) == null) {
+            if (textTo(sb) == null) {
                 flag.accept(null);
                 return TextWire.this;
             }
@@ -726,19 +726,19 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireIn text(@NotNull Consumer<String> s) {
             StringBuilder sb = Wires.acquireStringBuilder();
-            text(sb);
+            textTo(sb);
             s.accept(sb.toString());
             return TextWire.this;
         }
 
         @Override
         public String text() {
-            return StringUtils.toString(text(Wires.acquireStringBuilder()));
+            return StringUtils.toString(textTo(Wires.acquireStringBuilder()));
         }
 
         @Nullable
         @Override
-        public <ACS extends Appendable & CharSequence> ACS text(@NotNull ACS a) {
+        public <ACS extends Appendable & CharSequence> ACS textTo(@NotNull ACS a) {
             consumeWhiteSpace();
             int ch = peekCode();
 
@@ -769,12 +769,12 @@ public class TextWire implements Wire, InternalWireIn {
                     StringBuilder sb = Wires.acquireStringBuilder();
                     bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                     if (StringUtils.isEqual(sb, "null")) {
-                        text(sb);
+                        textTo(sb);
                         return null;
                     }
                 } else {
                     StringBuilder sb = Wires.acquireStringBuilder();
-                    text(sb);
+                    textTo(sb);
                     // ignore the type.
                 }
 
@@ -839,7 +839,7 @@ public class TextWire implements Wire, InternalWireIn {
                     throw new IORuntimeException("Unsupported type " + str);
                 }
             } else {
-                text(sb);
+                textTo(sb);
                 bytesConsumer.accept(new TextWire(Bytes.wrap(sb.toString().getBytes())));
             }
             return TextWire.this;
@@ -867,7 +867,7 @@ public class TextWire implements Wire, InternalWireIn {
                 }
 
             } else {
-                text(sb);
+                textTo(sb);
                 return sb.toString().getBytes();
             }
 
@@ -1024,7 +1024,7 @@ public class TextWire implements Wire, InternalWireIn {
         public Wire time(@NotNull Consumer<LocalTime> localTime) {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
-            text(sb);
+            textTo(sb);
             localTime.accept(LocalTime.parse(sb.toString()));
             return TextWire.this;
         }
@@ -1034,7 +1034,7 @@ public class TextWire implements Wire, InternalWireIn {
         public Wire zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime) {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
-            text(sb);
+            textTo(sb);
             zonedDateTime.accept(ZonedDateTime.parse(sb.toString()));
             return TextWire.this;
         }
@@ -1044,7 +1044,7 @@ public class TextWire implements Wire, InternalWireIn {
         public Wire date(@NotNull Consumer<LocalDate> localDate) {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
-            text(sb);
+            textTo(sb);
             localDate.accept(LocalDate.parse(sb.toString()));
             return TextWire.this;
         }
@@ -1069,7 +1069,7 @@ public class TextWire implements Wire, InternalWireIn {
         public WireIn uuid(@NotNull Consumer<UUID> uuid) {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
-            text(sb);
+            textTo(sb);
             uuid.accept(UUID.fromString(sb.toString()));
             return TextWire.this;
         }
@@ -1300,7 +1300,7 @@ public class TextWire implements Wire, InternalWireIn {
         public boolean bool() {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
-            if (text(sb) == null)
+            if (textTo(sb) == null)
                 throw new NullPointerException("value is null");
 
             return StringUtils.isEqual(sb, "true");
@@ -1394,7 +1394,7 @@ public class TextWire implements Wire, InternalWireIn {
                 StringBuilder builder = (using == null)
                         ? Wires.acquireStringBuilder()
                         : (StringBuilder) using;
-                valueIn.text(builder);
+                valueIn.textTo(builder);
                 return using;
 
             } else if (CharSequence.class.isAssignableFrom(clazz)) {

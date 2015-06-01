@@ -443,7 +443,7 @@ public class TextWireTest {
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
         Stream.of("Hello", "world", name1).forEach(e -> {
-            assertNotNull(wire.read().text(sb));
+            assertNotNull(wire.read().textTo(sb));
             assertEquals(e, sb.toString());
         });
 

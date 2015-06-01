@@ -65,7 +65,7 @@ class MyTypes implements Marshallable {
                 .read(Fields.D_NUM).float64(this::d)
                 .read(Fields.L_NUM).int64(this::l)
                 .read(Fields.I_NUM).int32(this::i)
-                .read(Fields.TEXT).text(text)
+                .read(Fields.TEXT).textTo(text)
         ;
     }
 

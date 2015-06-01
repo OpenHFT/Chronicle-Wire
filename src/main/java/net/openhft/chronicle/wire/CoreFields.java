@@ -25,7 +25,7 @@ public enum CoreFields implements WireKey {
     private static StringBuilder stringEvent(@NotNull final WireKey expecting, StringBuilder using, @NotNull final WireIn wire) {
         final ValueIn valueIn = wire.readEventName(eventName);
         if (expecting.contentEquals(eventName)) {
-            valueIn.text(using);
+            valueIn.textTo(using);
             return using;
         }
 

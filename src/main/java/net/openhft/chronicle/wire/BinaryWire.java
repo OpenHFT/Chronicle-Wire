@@ -1104,7 +1104,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @Nullable
         @Override
-        public <ACS extends Appendable & CharSequence> ACS text(@NotNull ACS s) {
+        public <ACS extends Appendable & CharSequence> ACS textTo(@NotNull ACS s) {
             int code = readCode();
             boolean wasNull = code == NULL;
             if (wasNull) {

@@ -241,7 +241,7 @@ public class YamlExamples {
         wire.flip();
 
         Stats stats = new Stats();
-        wire.read(Keys.name).text(stats.name);
+        wire.read(Keys.name).textTo(stats.name);
         wire.read(Keys.hr).int32(stats::hr)
                 .read(Keys.avg).float64(stats::avg)
                 .read(Keys.rbi).int64(stats::rbi);

@@ -338,7 +338,7 @@ public class RawWireTest {
         StringBuilder sb = new StringBuilder();
         Stream.of("Hello", "world", name1).forEach(e -> {
             wire.read()
-                    .text(sb);
+                    .textTo(sb);
             assertEquals(e, sb.toString());
         });
 

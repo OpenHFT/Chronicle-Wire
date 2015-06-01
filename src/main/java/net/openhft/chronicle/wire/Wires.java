@@ -222,7 +222,7 @@ public enum Wires {
             StringBuilder builder = (using == null)
                     ? acquireStringBuilder()
                     : (StringBuilder) using;
-            in.text(builder);
+            in.textTo(builder);
             return (E) builder;
 
         } else if (CharSequence.class.isAssignableFrom(clazz)) {

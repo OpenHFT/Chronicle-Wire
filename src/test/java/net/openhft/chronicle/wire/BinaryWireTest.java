@@ -483,7 +483,7 @@ public class BinaryWireTest {
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
         Stream.of("Hello", "world", name).forEach(e -> {
-            wire.read().text(sb);
+            wire.read().textTo(sb);
             assertEquals(e, sb.toString());
         });
 

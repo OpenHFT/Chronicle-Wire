@@ -53,11 +53,11 @@ public interface ValueIn {
 
     default String text() {
         StringBuilder sb = Wires.acquireStringBuilder();
-        return text(sb) == null ? null : sb.toString();
+        return textTo(sb) == null ? null : sb.toString();
     }
 
     @Nullable
-    <ACS extends Appendable & CharSequence> ACS text(@NotNull ACS s);
+    <ACS extends Appendable & CharSequence> ACS textTo(@NotNull ACS s);
 
     @NotNull
     WireIn int8(@NotNull ByteConsumer i);
