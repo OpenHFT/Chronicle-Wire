@@ -43,8 +43,8 @@ import java.util.function.*;
 public interface ValueIn {
 
     /*
-         * Text / Strings.
-         */
+     * Text / Strings.
+     */
     @NotNull
     WireIn bool(@NotNull BooleanConsumer flag);
 
