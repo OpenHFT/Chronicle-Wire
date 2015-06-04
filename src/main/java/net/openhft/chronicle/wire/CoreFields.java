@@ -22,7 +22,8 @@ public enum CoreFields implements WireKey {
         throw new IllegalArgumentException("expecting a " + expecting);
     }
 
-    private static StringBuilder stringEvent(@NotNull final WireKey expecting, StringBuilder using, @NotNull final WireIn wire) {
+    public static StringBuilder stringEvent(@NotNull final WireKey expecting, StringBuilder using,
+                                            @NotNull final WireIn wire) {
         final ValueIn valueIn = wire.readEventName(eventName);
         if (expecting.contentEquals(eventName)) {
             valueIn.textTo(using);
