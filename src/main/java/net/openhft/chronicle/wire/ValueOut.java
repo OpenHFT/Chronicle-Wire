@@ -158,15 +158,18 @@ public interface ValueOut {
             return int32((Integer) value);
         else if (value instanceof Long)
             return int64((Long) value);
-        else if (value instanceof CharSequence) {
+        else if (value instanceof CharSequence)
             return text((CharSequence) value);
-
-        } else if (value instanceof Marshallable) {
+        else if (value instanceof Double)
+            return float64((Double) value);
+        else if (value instanceof Float)
+            return float32((Float) value);
+        else if (value instanceof Marshallable)
             return marshallable((Marshallable) value);
-        } else if (value instanceof Throwable) {
+        else if (value instanceof Throwable)
             return throwable((Throwable) value);
 
-        } else {
+        else {
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +
                     "AutoBoxed primitive Object");

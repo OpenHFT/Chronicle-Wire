@@ -1343,12 +1343,18 @@ public class TextWire implements Wire, InternalWireIn {
 
         @Override
         public double float64() {
-            throw new UnsupportedOperationException("todo");
+            consumeWhiteSpace();
+            return bytes.parseDouble();
         }
 
         @Override
         public float float32() {
-            throw new UnsupportedOperationException("todo");
+
+            double d = float64();
+            if ((double) (((float) d)) != d)
+                throw new IllegalStateException("value=" + d + " can not be represented as a float");
+
+            return (float) d;
         }
 
         /**
