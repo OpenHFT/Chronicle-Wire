@@ -1618,12 +1618,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public double float64() {
             int code = readCode();
-            final double value = isText(code) ? readTextAsLong() : readFloat0(code);
-
-            if (value > Double.MAX_VALUE || value < Double.MIN_VALUE)
-                throw new IllegalStateException();
-
-            return value;
+            return isText(code) ? readTextAsLong() : readFloat0(code);
         }
 
         @Override
