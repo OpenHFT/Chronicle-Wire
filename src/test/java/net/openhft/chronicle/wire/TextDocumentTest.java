@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.time.ZonedDateTime;
@@ -41,7 +42,9 @@ public class TextDocumentTest {
 
         UUID uuid;
         ZonedDateTime created;
+        @Nullable
         LongValue writeByte;
+        @Nullable
         LongValue readByte;
 
         public Header(){

@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +46,7 @@ public class BinaryWireTest {
     final boolean fixed;
     final boolean numericField;
     final boolean fieldLess;
+    @NotNull
     Bytes bytes = nativeBytes();
 
     public BinaryWireTest(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
@@ -83,12 +85,13 @@ public class BinaryWireTest {
         assertEquals(fieldLess ? "" : "\"\": \"\": \"\": ", TextWire.asText(wire));
     }
 
+    @NotNull
     private BinaryWire createWire() {
         bytes.clear();
         return new BinaryWire(bytes, fixed, numericField, fieldLess);
     }
 
-    private void checkWire(Wire wire, String... expected) {
+    private void checkWire(@NotNull Wire wire, String... expected) {
         assertEquals("id: " + testId, expected[testId], wire.toString());
     }
 
@@ -111,7 +114,7 @@ public class BinaryWireTest {
                 "");
     }
 
-    private void checkAsText(Wire wire, String textFieldExcepted, String numberFieldExpected, String fieldLessExpected) {
+    private void checkAsText(@NotNull Wire wire, String textFieldExcepted, String numberFieldExpected, String fieldLessExpected) {
         String text = TextWire.asText(wire);
         if (fieldLess)
             assertEquals(fieldLessExpected, text);
@@ -239,7 +242,7 @@ public class BinaryWireTest {
         wire.read();
     }
 
-    private void checkAsText123(Wire wire) {
+    private void checkAsText123(@NotNull Wire wire) {
         checkAsText(wire, "\"\": 1\n" +
                         "field1: 2\n" +
                         "Test: 3\n",

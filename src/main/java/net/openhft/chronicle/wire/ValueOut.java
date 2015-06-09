@@ -37,84 +37,118 @@ public interface ValueOut {
     /*
      * data types
      */
+    @NotNull
     WireOut bool(Boolean flag);
 
+    @NotNull
     WireOut text(CharSequence s);
 
+    @NotNull
     default WireOut int8(long x) {
         return int8(Maths.toInt8(x));
     }
 
+    @NotNull
     WireOut int8(byte i8);
 
+    @NotNull
     WireOut bytes(Bytes fromBytes);
 
+    @NotNull
     WireOut rawBytes(byte[] value);
 
+    @NotNull
     ValueOut writeLength(long remaining);
 
+    @NotNull
     WireOut bytes(byte[] fromBytes);
 
+    @NotNull
     default WireOut uint8(int x) {
         return uint8checked((int) Maths.toUInt8(x));
     }
 
+    @NotNull
     WireOut uint8checked(int u8);
 
+    @NotNull
     default WireOut int16(long x) {
         return int16(Maths.toInt16(x));
     }
 
+    @NotNull
     WireOut int16(short i16);
 
+    @NotNull
     default WireOut uint16(long x) {
         return uint16checked((int) x);
     }
 
+    @NotNull
     WireOut uint16checked(int u16);
 
+    @NotNull
     WireOut utf8(int codepoint);
 
+    @NotNull
     default WireOut int32(long x) {
         return int32(Maths.toInt32(x));
     }
 
+    @NotNull
     WireOut int32(int i32);
 
+    @NotNull
     default WireOut uint32(long x) {
         return uint32checked(x);
     }
 
+    @NotNull
     WireOut uint32checked(long u32);
 
+    @NotNull
     WireOut int64(long i64);
 
+    @NotNull
     WireOut int64array(long capacity);
 
+    @NotNull
     WireOut float32(float f);
 
+    @NotNull
     WireOut float64(double d);
 
+    @NotNull
     WireOut time(LocalTime localTime);
 
+    @NotNull
     WireOut zonedDateTime(ZonedDateTime zonedDateTime);
 
+    @NotNull
     WireOut date(LocalDate localDate);
 
+    @NotNull
     WireOut type(CharSequence typeName);
 
+    @NotNull
     WireOut typeLiteral(@NotNull CharSequence type);
 
+    @NotNull
     WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @NotNull Class type);
 
+    @NotNull
     WireOut uuid(UUID uuid);
 
+    @NotNull
     WireOut int32forBinding(int value);
 
+    @NotNull
     WireOut int64forBinding(long readReady);
 
+    @NotNull
     WireOut sequence(Consumer<ValueOut> writer);
 
+    @NotNull
     WireOut marshallable(WriteMarshallable object);
 
     /**
@@ -125,22 +159,28 @@ public interface ValueOut {
      * @return throws IllegalArgumentException  If the type of the map is not one of those listed
      * above
      */
+    @NotNull
     WireOut map(Map map);
 
+    @NotNull
     WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map);
 
+    @NotNull
     ValueOut leaf();
 
-    default WireOut typedMarshallable(WriteMarshallable object) {
+    @NotNull
+    default WireOut typedMarshallable(@NotNull WriteMarshallable object) {
         type(object.getClass().getName());
         return marshallable(object);
     }
 
+    @NotNull
     default WireOut typedMarshallable(CharSequence typeName, WriteMarshallable object) {
         type(typeName);
         return marshallable(object);
     }
 
+    @NotNull
     default WireOut object(Object value) {
         if (value instanceof byte[])
             return rawBytes((byte[]) value);
@@ -176,7 +216,8 @@ public interface ValueOut {
         }
     }
 
-    default WireOut throwable(Throwable t) {
+    @NotNull
+    default WireOut throwable(@NotNull Throwable t) {
         typedMarshallable(t.getClass().getName(), (WireOut w) ->
                 w.write(() -> "message").text(t.getMessage())
                         .write(() -> "stackTrace").sequence(w3 -> {
@@ -194,5 +235,6 @@ public interface ValueOut {
         return wireOut();
     }
 
+    @NotNull
     WireOut wireOut();
 }

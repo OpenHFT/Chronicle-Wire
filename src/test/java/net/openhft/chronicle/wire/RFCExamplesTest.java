@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -137,7 +138,7 @@ put: [ 3, bye ]
                 "٠٠٠⒊put⒓٠٠٠⒊٠٠٠٠٠٠٠⒊bye", bytes.toDebugString());
     }
 
-    public void writeMessageOne(Wire wire) {
+    public void writeMessageOne(@NotNull Wire wire) {
         wire.writeDocument(true, out ->
                 out.write(csp).text("///service-lookup")
                         .write(tid).int64(149873598325L));
@@ -150,7 +151,7 @@ put: [ 3, bye ]
                                         .write(() -> "valueType").type("String"))));
     }
 
-    private void writeMessageTwo(Wire wire) {
+    private void writeMessageTwo(@NotNull Wire wire) {
         wire.writeDocument(true, out ->
                 out.write(() -> "csp").text("//server1/test")
                         .write(() -> "cid").int64(1));

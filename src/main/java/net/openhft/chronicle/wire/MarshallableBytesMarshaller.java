@@ -19,6 +19,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshaller;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -32,17 +34,19 @@ public class MarshallableBytesMarshaller<M extends Marshallable> implements Byte
         this.mSupplier = mSupplier;
     }
 
+    @NotNull
     public static <M extends Marshallable> MarshallableBytesMarshaller<M> of(Function<Bytes, Wire> wireFactory, Supplier<M> mSupplier) {
         return new MarshallableBytesMarshaller<>(wireFactory, mSupplier);
     }
 
     @Override
-    public void write(Bytes bytes, M m) {
+    public void write(Bytes bytes, @NotNull M m) {
         m.writeMarshallable(wireFactory.apply(bytes));
     }
 
+    @Nullable
     @Override
-    public M read(Bytes bytes, M m) {
+    public M read(Bytes bytes, @Nullable M m) {
         if (m == null)
             m = mSupplier.get();
         m.readMarshallable(wireFactory.apply(bytes));

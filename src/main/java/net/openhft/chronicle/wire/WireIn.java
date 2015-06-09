@@ -35,16 +35,19 @@ public interface WireIn {
     /**
      * Read the field if present, or empty string if not present.
      */
+    @NotNull
     ValueIn read();
 
     /**
      * Read the field if present which must match the WireKey.
      */
+    @NotNull
     ValueIn read(@NotNull WireKey key);
 
     /**
      * Read a field, or string which is always written, even for formats which might drop the field such as RAW.
      */
+    @NotNull
     default ValueIn readEventName(@NotNull StringBuilder name) {
         return read(name);
     }
@@ -52,16 +55,19 @@ public interface WireIn {
     /**
      * Read the field if present, or empty string if not present.
      */
+    @NotNull
     ValueIn read(@NotNull StringBuilder name);
 
     /**
      * Obtain the value in (for internal use)
      */
+    @NotNull
     ValueIn getValueIn();
 
     /*
      * read and write comments.
      */
+    @NotNull
     Wire readComment(@NotNull StringBuilder sb);
 
     void flip();

@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.OS;
+import org.jetbrains.annotations.NotNull;
 
 /*
 The format for a long array in text is
@@ -42,7 +43,7 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
     private long offset;
     private long length = VALUES;
 
-    public static void write(Bytes bytes, long capacity) {
+    public static void write(@NotNull Bytes bytes, long capacity) {
         bytes.write(SECTION1);
         bytes.append(capacity, 20);
         bytes.write(SECTION2);
@@ -82,7 +83,7 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
     }
 
     @Override
-    public void bytesStore(BytesStore bytes, long offset, long length) {
+    public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
         if (length != peakLength(bytes, offset))
             throw new IllegalArgumentException(length + " != " + peakLength(bytes, offset));
         this.bytes = bytes;
@@ -90,7 +91,7 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
         this.length = length;
     }
 
-    public static long peakLength(BytesStore bytes, long offset) {
+    public static long peakLength(@NotNull BytesStore bytes, long offset) {
         //todo check this, I think there could be a bug here
         return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;
     }
@@ -110,6 +111,7 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
         return length;
     }
 
+    @NotNull
     public String toString() {
         if (bytes == null) {
             return "LongArrayTextReference{" +

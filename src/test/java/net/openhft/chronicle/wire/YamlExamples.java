@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.lang.reflect.Type;
@@ -32,7 +33,7 @@ import static org.junit.Assert.assertEquals;
  * Created by peter.lawrey on 12/01/15.
  */
 public class YamlExamples {
-    public static void sequenceExample(Wire wire) {
+    public static void sequenceExample(@NotNull Wire wire) {
         /*
          - Mark McGwire
          - Sammy Sosa
@@ -61,7 +62,7 @@ public class YamlExamples {
         });
     }
 
-    public static void mapExample(Wire wire) {
+    public static void mapExample(@NotNull Wire wire) {
         /*
         american:
           - Boston Red Sox
@@ -271,7 +272,7 @@ public class YamlExamples {
             WireKey.checkKeys(values());
         }
 
-        Keys(Object defaultValue) {
+        Keys(@NotNull Object defaultValue) {
             this(defaultValue.getClass(), defaultValue);
         }
 
@@ -292,11 +293,13 @@ public class YamlExamples {
     }
 
     static class Stats {
+        @NotNull
         StringBuilder name = new StringBuilder();
         int hr;
         double avg;
         long rbi;
 
+        @NotNull
         public StringBuilder name() {
             return name;
         }
@@ -317,6 +320,7 @@ public class YamlExamples {
             this.rbi = rbi;
         }
 
+        @NotNull
         @Override
         public String toString() {
             return "Stats{" +

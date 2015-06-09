@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -81,7 +82,7 @@ public class BinaryWireNumbersTest {
         test(expected, perform);
     }
 
-    public void test(Consumer<ValueOut> expected, Consumer<ValueOut> perform) {
+    public void test(@NotNull Consumer<ValueOut> expected, @NotNull Consumer<ValueOut> perform) {
         Bytes bytes1 = nativeBytes();
         Wire wire1 = new BinaryWire(bytes1, true, false, false);
         expected.accept(wire1.write());

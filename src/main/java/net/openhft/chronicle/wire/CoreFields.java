@@ -12,6 +12,7 @@ public enum CoreFields implements WireKey {
     reply,
     exception;
 
+    @NotNull
     private static StringBuilder eventName = new StringBuilder();
 
     private static long longEvent(@NotNull final WireKey expecting, @NotNull final WireIn wire) {
@@ -22,7 +23,8 @@ public enum CoreFields implements WireKey {
         throw new IllegalArgumentException("expecting a " + expecting);
     }
 
-    public static StringBuilder stringEvent(@NotNull final WireKey expecting, StringBuilder using,
+    @NotNull
+    public static StringBuilder stringEvent(@NotNull final WireKey expecting, @NotNull StringBuilder using,
                                             @NotNull final WireIn wire) {
         final ValueIn valueIn = wire.readEventName(eventName);
         if (expecting.contentEquals(eventName)) {
@@ -43,6 +45,7 @@ public enum CoreFields implements WireKey {
 
     private final static StringBuilder cpsBuilder = new StringBuilder();
 
+    @NotNull
     public static StringBuilder csp(@NotNull final WireIn wire) {
         return stringEvent(CoreFields.csp, cpsBuilder, wire);
     }

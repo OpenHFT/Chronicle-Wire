@@ -70,7 +70,7 @@ public enum Wires {
         return sb;
     }
 
-    public static void writeData(WireOut wireOut, boolean metaData, Consumer<WireOut> writer) {
+    public static void writeData(@NotNull WireOut wireOut, boolean metaData, @NotNull Consumer<WireOut> writer) {
         Bytes bytes = wireOut.bytes();
         long position = bytes.position();
         int metaDataBit = metaData ? META_DATA : 0;
@@ -136,7 +136,7 @@ public enum Wires {
         return read;
     }
 
-    public static String fromSizePrefixedBlobs(Bytes bytes) {
+    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes) {
         long position = bytes.position();
         return fromSizePrefixedBlobs(bytes, position, bytes.remaining());
     }
@@ -168,7 +168,7 @@ public enum Wires {
     }
 
     @NotNull
-    public static String fromSizePrefixedBlobs(Bytes bytes, long position, long length) {
+    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position, long length) {
         StringBuilder sb = new StringBuilder();
 
         final long limit0 = bytes.limit();
@@ -200,7 +200,7 @@ public enum Wires {
         return (len & (META_DATA | LENGTH_MASK)) != UNKNOWN_LENGTH;
     }
 
-    public static <E> E readObject(ValueIn in, E using, Class<E> clazz) {
+    public static <E> E readObject(@NotNull ValueIn in, @Nullable E using, @NotNull Class<E> clazz) {
         if (byte[].class.isAssignableFrom(clazz))
             return (E) in.bytes();
 
@@ -272,7 +272,7 @@ public enum Wires {
         }
     }
 
-    public static Throwable throwable(ValueIn valueIn, boolean appendCurrentStack) {
+    public static Throwable throwable(@NotNull ValueIn valueIn, boolean appendCurrentStack) {
         StringBuilder type = Wires.acquireStringBuilder();
         valueIn.type(type);
         String preMessage = null;
@@ -331,7 +331,8 @@ public enum Wires {
         return throwable;
     }
 
-    static String merge(String a, String b) {
+    @Nullable
+    static String merge(@Nullable String a, @Nullable String b) {
         return a == null ? b : b == null ? a : a + " " + b;
     }
 }

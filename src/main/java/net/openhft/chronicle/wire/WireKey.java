@@ -17,6 +17,9 @@
  */
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +30,7 @@ import java.util.Map;
 @FunctionalInterface
 public interface WireKey {
 
+    @Nullable
     CharSequence name();
 
     default int code() {
@@ -38,11 +42,12 @@ public interface WireKey {
         return o == null ? Void.class : o.getClass();
     }
 
+    @Nullable
     default Object defaultValue() {
         return null;
     }
 
-    static boolean checkKeys(WireKey[] keys) {
+    static boolean checkKeys(@NotNull WireKey[] keys) {
         Map<Integer, WireKey> codes = new HashMap<>();
         for (WireKey key : keys) {
             WireKey pkey = codes.put(key.code(), key);
@@ -52,7 +57,7 @@ public interface WireKey {
         return true;
     }
 
-    default boolean contentEquals(CharSequence c){
+    default boolean contentEquals(@NotNull CharSequence c){
         return this.toString().contentEquals(c);
     }
 }

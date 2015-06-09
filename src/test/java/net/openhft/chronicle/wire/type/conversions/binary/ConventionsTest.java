@@ -2,6 +2,8 @@ package net.openhft.chronicle.wire.type.conversions.binary;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.BinaryWire;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -99,7 +101,8 @@ public class ConventionsTest {
     }
 
 
-    public <T> T test(Object source, Class<T> destinationType) {
+    @Nullable
+    public <T> T test(Object source, @NotNull Class<T> destinationType) {
 
         final BinaryWire wire = new BinaryWire(Bytes.elasticByteBuffer());
 

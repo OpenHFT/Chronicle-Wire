@@ -17,13 +17,15 @@
  */
 package net.openhft.chronicle.wire.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Comparator;
 
 public enum CharSequenceComparator implements Comparator<CharSequence> {
     INSTANCE;
 
     @Override
-    public int compare(CharSequence o1, CharSequence o2) {
+    public int compare(@NotNull CharSequence o1, @NotNull CharSequence o2) {
         int cmp = Integer.compare(o1.length(), o2.length());
         if (cmp != 0)
             return cmp;

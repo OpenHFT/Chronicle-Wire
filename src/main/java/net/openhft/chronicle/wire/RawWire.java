@@ -46,7 +46,9 @@ public class RawWire implements Wire, InternalWireIn {
     final Bytes bytes;
     final RawValueOut valueOut = new RawValueOut();
     final RawValueIn valueIn = new RawValueIn();
+    @NotNull
     String lastField = "";
+    @Nullable
     StringBuilder lastSB;
     boolean ready;
 
@@ -74,18 +76,21 @@ public class RawWire implements Wire, InternalWireIn {
         }
     }
 
+    @NotNull
     @Override
     public ValueIn read() {
         lastSB = null;
         return valueIn;
     }
 
+    @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
         lastSB = null;
         return valueIn;
     }
 
+    @NotNull
     @Override
     public ValueIn readEventName(@NotNull StringBuilder name) {
         bytes.readUTFΔ(name);
@@ -93,17 +98,20 @@ public class RawWire implements Wire, InternalWireIn {
         return valueIn;
     }
 
+    @NotNull
     @Override
     public ValueIn read(@NotNull StringBuilder name) {
         lastSB = name;
         return valueIn;
     }
 
+    @NotNull
     @Override
     public ValueIn getValueIn() {
         return valueIn;
     }
 
+    @NotNull
     @Override
     public Wire readComment(@NotNull StringBuilder sb) {
         return RawWire.this;
@@ -129,54 +137,63 @@ public class RawWire implements Wire, InternalWireIn {
         return bytes.toString();
     }
 
+    @NotNull
     @Override
     public ValueOut write() {
         lastField = "";
         return valueOut;
     }
 
+    @NotNull
     @Override
-    public ValueOut writeEventName(WireKey key) {
+    public ValueOut writeEventName(@NotNull WireKey key) {
         lastField = "";
         bytes.writeUTFΔ(key.name());
         return valueOut;
     }
 
+    @NotNull
     @Override
-    public ValueOut write(WireKey key) {
+    public ValueOut write(@NotNull WireKey key) {
         lastField = key.name().toString();
         return valueOut;
     }
 
+    @NotNull
     @Override
     public ValueOut writeValue() {
         lastField = "";
         return valueOut;
     }
 
+    @NotNull
     @Override
     public ValueOut getValueOut() {
         return valueOut;
     }
 
+    @NotNull
     @Override
     public Wire writeComment(CharSequence s) {
         return RawWire.this;
     }
 
+    @NotNull
     @Override
     public WireOut addPadding(int paddingToAdd) {
         throw new UnsupportedOperationException();
     }
 
     class RawValueOut implements ValueOut {
+        @NotNull
         @Override
         public ValueOut leaf() {
             return this;
         }
 
+        @NotNull
         @Override
-        public Wire bool(Boolean flag) {
+        public Wire bool(@Nullable Boolean flag) {
             if (flag == null)
                 bytes.writeUnsignedByte(BinaryWireCode.NULL);
             else
@@ -184,133 +201,155 @@ public class RawWire implements Wire, InternalWireIn {
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public Wire text(CharSequence s) {
             bytes.writeUTFΔ(s);
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public Wire int8(byte i8) {
             bytes.writeByte(i8);
             return RawWire.this;
         }
 
+        @NotNull
         @Override
-        public WireOut bytes(Bytes fromBytes) {
+        public WireOut bytes(@NotNull Bytes fromBytes) {
             writeLength(fromBytes.remaining());
             bytes.write(fromBytes);
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public WireOut rawBytes(byte[] value) {
             throw new UnsupportedOperationException("todo");
         }
 
+        @NotNull
         @Override
         public ValueOut writeLength(long length) {
             bytes.writeStopBit(length);
             return this;
         }
 
+        @NotNull
         @Override
-        public WireOut bytes(byte[] fromBytes) {
+        public WireOut bytes(@NotNull byte[] fromBytes) {
             writeLength(fromBytes.length);
             bytes.write(fromBytes);
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public Wire uint8checked(int u8) {
             bytes.writeUnsignedByte(u8);
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public Wire int16(short i16) {
             bytes.writeShort(i16);
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public Wire uint16checked(int u16) {
             bytes.writeUnsignedShort(u16);
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public Wire utf8(int codepoint) {
             BytesUtil.appendUTF(bytes, codepoint);
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public Wire int32(int i32) {
             bytes.writeInt(i32);
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public Wire uint32checked(long u32) {
             bytes.writeUnsignedInt(u32);
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public Wire int64(long i64) {
             bytes.writeLong(i64);
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public WireOut int64array(long capacity) {
             BinaryLongArrayReference.lazyWrite(bytes, capacity);
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public Wire float32(float f) {
             bytes.writeFloat(f);
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public Wire float64(double d) {
             bytes.writeDouble(d);
             return RawWire.this;
         }
 
+        @NotNull
         @Override
-        public Wire time(LocalTime localTime) {
+        public Wire time(@NotNull LocalTime localTime) {
             long t = localTime.toNanoOfDay();
             bytes.writeLong(t);
             return RawWire.this;
         }
 
+        @NotNull
         @Override
-        public Wire zonedDateTime(ZonedDateTime zonedDateTime) {
+        public Wire zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
             bytes.writeUTFΔ(zonedDateTime.toString());
             return RawWire.this;
         }
 
+        @NotNull
         @Override
-        public Wire date(LocalDate localDate) {
+        public Wire date(@NotNull LocalDate localDate) {
             bytes.writeStopBit(localDate.toEpochDay());
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public Wire type(CharSequence typeName) {
             bytes.writeUTFΔ(typeName);
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public WireOut typeLiteral(@NotNull CharSequence type) {
             return type(type);
         }
 
+        @NotNull
         @Override
         public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @NotNull Class type) {
             long position = bytes.position();
@@ -320,25 +359,29 @@ public class RawWire implements Wire, InternalWireIn {
             return RawWire.this;
         }
 
+        @NotNull
         @Override
-        public WireOut uuid(UUID uuid) {
+        public WireOut uuid(@NotNull UUID uuid) {
             bytes.writeLong(uuid.getMostSignificantBits());
             bytes.writeLong(uuid.getLeastSignificantBits());
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public WireOut int32forBinding(int value) {
             throw new UnsupportedOperationException();
         }
 
+        @NotNull
         @Override
         public WireOut int64forBinding(long value) {
             throw new UnsupportedOperationException();
         }
 
+        @NotNull
         @Override
-        public WireOut sequence(Consumer<ValueOut> writer) {
+        public WireOut sequence(@NotNull Consumer<ValueOut> writer) {
             text(lastField);
             long position = bytes.position();
             bytes.writeInt(0);
@@ -349,8 +392,9 @@ public class RawWire implements Wire, InternalWireIn {
             return RawWire.this;
         }
 
+        @NotNull
         @Override
-        public WireOut marshallable(WriteMarshallable object) {
+        public WireOut marshallable(@NotNull WriteMarshallable object) {
             text(lastField);
             long position = bytes.position();
             bytes.writeInt(0);
@@ -361,21 +405,25 @@ public class RawWire implements Wire, InternalWireIn {
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public WireOut map(Map map) {
             throw new UnsupportedOperationException("todo");
         }
 
+        @NotNull
         @Override
         public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map)  {
             throw new UnsupportedOperationException("todo");
         }
 
+        @NotNull
         @Override
         public WireOut object(Object o) {
             throw new UnsupportedOperationException("todo");
         }
 
+        @NotNull
         @Override
         public WireOut wireOut() {
             return RawWire.this;
@@ -403,6 +451,7 @@ public class RawWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException();
         }
 
+        @NotNull
         @Override
         public String text() {
             throw new UnsupportedOperationException("todo");
@@ -445,6 +494,7 @@ public class RawWire implements Wire, InternalWireIn {
             return wireIn();
         }
 
+        @NotNull
         @Override
         public byte[] bytes() {
             throw new UnsupportedOperationException("todo");
@@ -548,12 +598,14 @@ public class RawWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException("todo");
         }
 
+        @NotNull
         @Override
         public WireIn uuid(@NotNull Consumer<UUID> uuid) {
             uuid.accept(new UUID(bytes.readLong(), bytes.readLong()));
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public WireIn int64array(@Nullable LongArrayValues values, @NotNull Consumer<LongArrayValues> setter) {
             if (!(values instanceof Byteable)) {
@@ -566,6 +618,7 @@ public class RawWire implements Wire, InternalWireIn {
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public WireIn int64(LongValue value, @NotNull Consumer<LongValue> setter) {
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
@@ -578,6 +631,7 @@ public class RawWire implements Wire, InternalWireIn {
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public WireIn int32(IntValue value, @NotNull Consumer<IntValue> setter) {
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
@@ -590,6 +644,7 @@ public class RawWire implements Wire, InternalWireIn {
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public WireIn sequence(@NotNull Consumer<ValueIn> reader) {
             textTo(lastSB);
@@ -598,7 +653,7 @@ public class RawWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public <T> T applyToMarshallable(Function<WireIn, T> marshallableReader) {
+        public <T> T applyToMarshallable(@NotNull Function<WireIn, T> marshallableReader) {
             textTo(lastSB);
 
             long length = bytes.readUnsignedInt();
@@ -624,6 +679,7 @@ public class RawWire implements Wire, InternalWireIn {
             return RawWire.this;
         }
 
+        @NotNull
         @Override
         public WireIn typeLiteral(@NotNull Consumer<CharSequence> classNameConsumer) {
             StringBuilder sb = Wires.acquireStringBuilder();
@@ -659,6 +715,7 @@ public class RawWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException("todo");
         }
 
+        @NotNull
         @Override
         public <K, V> Map<K, V> map(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap) {
             throw new UnsupportedOperationException("todo");

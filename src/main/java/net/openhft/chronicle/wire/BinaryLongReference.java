@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.LongValue;
+import org.jetbrains.annotations.NotNull;
 
 public class BinaryLongReference implements LongValue, Byteable {
     private BytesStore bytes;
@@ -47,6 +48,7 @@ public class BinaryLongReference implements LongValue, Byteable {
         return 8;
     }
 
+    @NotNull
     public String toString() {
         return "value: " + getValue();
     }

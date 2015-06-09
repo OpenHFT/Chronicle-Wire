@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.values.LongValue;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
@@ -36,13 +37,13 @@ public class TextLongReference implements LongValue, Byteable {
     private BytesStore bytes;
     private long offset;
 
-    public static void write(Bytes bytes, long value) {
+    public static void write(@NotNull Bytes bytes, long value) {
         long position = bytes.position();
         bytes.write(template);
         bytes.append(position + VALUE, value, DIGITS);
     }
 
-    <T> T withLock(Supplier<T> call) {
+    <T> T withLock(@NotNull Supplier<T> call) {
         long valueOffset = offset + LOCKED;
         int value = bytes.readVolatileInt(valueOffset);
         if (value != FALSE && value != TRUE)
@@ -57,7 +58,7 @@ public class TextLongReference implements LongValue, Byteable {
     }
 
     @Override
-    public void bytesStore(BytesStore bytes, long offset, long length) {
+    public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
         if (length != template.length) throw new IllegalArgumentException();
         this.bytes = bytes;
         this.offset = offset;
@@ -100,6 +101,7 @@ public class TextLongReference implements LongValue, Byteable {
         setValue(value);
     }
 
+    @NotNull
     public String toString() {
         return "value: " + getValue();
     }

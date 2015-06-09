@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.NativeBytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 public class QueryWireTest {
     private NativeBytes<Void> bytes;
 
+    @NotNull
     private QueryWire createWire() {
         bytes = nativeBytes();
         return new QueryWire(bytes);

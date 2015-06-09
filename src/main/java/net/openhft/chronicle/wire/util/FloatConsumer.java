@@ -21,6 +21,8 @@ package net.openhft.chronicle.wire.util;
  * Created by peter.lawrey on 16/01/15.
  */
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Objects;
 
 /**
@@ -54,7 +56,8 @@ public interface FloatConsumer {
      * operation
      * @throws NullPointerException if {@code after} is null
      */
-    default FloatConsumer andThen(FloatConsumer after) {
+    @NotNull
+    default FloatConsumer andThen(@NotNull FloatConsumer after) {
         Objects.requireNonNull(after);
         return (float t) -> {
             accept(t);

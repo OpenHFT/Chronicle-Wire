@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.wire.util.CharSequenceComparator;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class VanillaWireParser implements WireParser {
     final Map<Integer, Consumer<ValueIn>> numberedConsumer = new HashMap<>();
 
     @Override
-    public void register(WireKey key, Consumer<ValueIn> valueInConsumer) {
+    public void register(@NotNull WireKey key, Consumer<ValueIn> valueInConsumer) {
         namedConsumer.put(key.name(), valueInConsumer);
         numberedConsumer.put(key.code(), valueInConsumer);
     }

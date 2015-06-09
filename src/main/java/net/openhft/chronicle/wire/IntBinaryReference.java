@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.IntValue;
+import org.jetbrains.annotations.NotNull;
 
 public class IntBinaryReference implements IntValue, Byteable {
     private BytesStore bytes;
@@ -47,6 +48,7 @@ public class IntBinaryReference implements IntValue, Byteable {
         return 4;
     }
 
+    @NotNull
     public String toString() {
         return "value: " + getValue();
     }

@@ -20,6 +20,8 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -56,6 +58,7 @@ public class TextWireTest {
         assertEquals("\"\": \"\": \"\": ", wire.toString());
     }
 
+    @NotNull
     private TextWire createWire() {
         bytes = nativeBytes();
         return new TextWire(bytes);
@@ -77,7 +80,7 @@ public class TextWireTest {
         assertEquals(true, wire.read(() -> "T").bool());
     }
 
-    private void expectWithSnakeYaml(String expected, Wire wire) {
+    private void expectWithSnakeYaml(String expected, @NotNull Wire wire) {
         String s = wire.toString();
         Object load = null;
         try {
@@ -729,6 +732,7 @@ public class TextWireTest {
 
     class MyMarshallable implements Marshallable {
 
+        @Nullable
         String someData;
 
         public MyMarshallable(String someData) {
@@ -736,17 +740,17 @@ public class TextWireTest {
         }
 
         @Override
-        public void writeMarshallable(WireOut wire) {
+        public void writeMarshallable(@NotNull WireOut wire) {
             wire.write(() -> "MyField").text(someData);
         }
 
         @Override
-        public void readMarshallable(WireIn wire) throws IllegalStateException {
+        public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
             someData = wire.read(() -> "MyField").text();
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
@@ -763,6 +767,7 @@ public class TextWireTest {
             return someData != null ? someData.hashCode() : 0;
         }
 
+        @NotNull
         @Override
         public String toString() {
             return "MyMarshable{" + "someData='" + someData + '\'' + '}';
@@ -808,6 +813,7 @@ public class TextWireTest {
     @Test
     public void testException() {
         Exception e = new InvalidAlgorithmParameterException("Reference cannot be null") {
+            @NotNull
             @Override
             public StackTraceElement[] getStackTrace() {
                 StackTraceElement[] stack = {

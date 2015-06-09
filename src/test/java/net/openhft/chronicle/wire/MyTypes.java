@@ -19,6 +19,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.BytesMarshaller;
 import net.openhft.chronicle.core.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 class MyTypes implements Marshallable {
     final StringBuilder text = new StringBuilder();
@@ -49,7 +51,7 @@ class MyTypes implements Marshallable {
     }
 
     @Override
-    public void writeMarshallable(WireOut wire) {
+    public void writeMarshallable(@NotNull WireOut wire) {
         wire.write(Fields.B_FLAG).bool(b)
                 .write(Fields.S_NUM).int16(s)
                 .write(Fields.D_NUM).float64(d)
@@ -59,7 +61,7 @@ class MyTypes implements Marshallable {
     }
 
     @Override
-    public void readMarshallable(WireIn wire) {
+    public void readMarshallable(@NotNull WireIn wire) {
         wire.read(Fields.B_FLAG).bool(x -> b = x)
                 .read(Fields.S_NUM).int16(this::s)
                 .read(Fields.D_NUM).float64(this::d)
@@ -70,7 +72,7 @@ class MyTypes implements Marshallable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -86,6 +88,7 @@ class MyTypes implements Marshallable {
         return true;
     }
 
+    @NotNull
     @Override
     public String toString() {
         return "MyTypes{" +

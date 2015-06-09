@@ -21,6 +21,8 @@ package net.openhft.chronicle.wire.util;
  * Created by peter.lawrey on 16/01/15.
  */
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Objects;
 
 /**
@@ -54,7 +56,8 @@ public interface BooleanConsumer {
      * operation
      * @throws NullPointerException if {@code after} is null
      */
-    default BooleanConsumer andThen(BooleanConsumer after) {
+    @NotNull
+    default BooleanConsumer andThen(@NotNull BooleanConsumer after) {
         Objects.requireNonNull(after);
         return (Boolean t) -> {
             accept(t);

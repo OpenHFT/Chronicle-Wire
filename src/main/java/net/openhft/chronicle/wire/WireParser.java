@@ -17,16 +17,19 @@
  */
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.function.Consumer;
 
 public interface WireParser {
     WireKey DEFAULT = () -> ":default:";
 
+    @NotNull
     static WireParser wireParser() {
         return new VanillaWireParser();
     }
 
-    default void parse(WireIn wireIn) {
+    default void parse(@NotNull WireIn wireIn) {
         StringBuilder sb = Wires.SBP.acquireStringBuilder();
         ValueIn valueIn = wireIn.read(sb);
         Consumer<ValueIn> consumer = lookup(sb);

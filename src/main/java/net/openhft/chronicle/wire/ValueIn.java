@@ -51,6 +51,7 @@ public interface ValueIn {
     @NotNull
     WireIn text(@NotNull Consumer<String> s);
 
+    @Nullable
     default String text() {
         StringBuilder sb = Wires.acquireStringBuilder();
         return textTo(sb) == null ? null : sb.toString();
@@ -115,14 +116,19 @@ public interface ValueIn {
 
     boolean hasNextSequenceItem();
 
+    @NotNull
     WireIn uuid(@NotNull Consumer<UUID> uuid);
 
+    @NotNull
     WireIn int64array(@Nullable LongArrayValues values, @NotNull Consumer<LongArrayValues> setter);
 
+    @NotNull
     WireIn int64(@Nullable LongValue value, @NotNull Consumer<LongValue> setter);
 
+    @NotNull
     WireIn int32(@Nullable IntValue value, @NotNull Consumer<IntValue> setter);
 
+    @NotNull
     WireIn sequence(@NotNull Consumer<ValueIn> reader);
 
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
@@ -153,8 +159,10 @@ public interface ValueIn {
     @NotNull
     WireIn type(@NotNull StringBuilder s);
 
+    @NotNull
     WireIn typeLiteral(@NotNull Consumer<CharSequence> classNameConsumer);
 
+    @NotNull
     default WireIn typeLiteral(@NotNull Function<CharSequence, Class> typeLookup, @NotNull Consumer<Class> classConsumer) {
         return typeLiteral(sb -> classConsumer.accept(typeLookup.apply(sb)));
     }
@@ -175,6 +183,7 @@ public interface ValueIn {
     /**
      * reads the map from the wire
      */
+    @Nullable
     <K, V> Map<K, V> map(@NotNull Class<K> kClazz,
                          @NotNull Class<V> vClass,
                          @NotNull Map<K, V> usingMap);
@@ -204,6 +213,7 @@ public interface ValueIn {
         return object(null, clazz);
     }
 
+    @Nullable
     default <E> E object(@Nullable E using,
                          @NotNull Class<E> clazz) {
         return Wires.readObject(this, using, clazz);

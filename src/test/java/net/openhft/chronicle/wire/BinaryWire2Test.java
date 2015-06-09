@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -32,8 +33,10 @@ import static org.junit.Assert.assertTrue;
  * Created by peter.lawrey on 06/02/15.
  */
 public class BinaryWire2Test {
+    @NotNull
     Bytes bytes = nativeBytes();
 
+    @NotNull
     private BinaryWire createWire() {
         bytes.clear();
         return new BinaryWire(bytes);
@@ -132,7 +135,7 @@ public class BinaryWire2Test {
         System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
     }
 
-    private void writeMessage(Wire wire) {
+    private void writeMessage(@NotNull Wire wire) {
         wire.writeDocument(true, w -> w
                 .write(() -> "csp").text("//path/service")
                 .write(() -> "tid").int64(123456789));

@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +36,7 @@ public class BinaryWirePerfTest {
     final boolean fixed;
     final boolean numericField;
     final boolean fieldLess;
+    @NotNull
     Bytes bytes = nativeBytes();
 
     public BinaryWirePerfTest(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
@@ -56,6 +58,7 @@ public class BinaryWirePerfTest {
         );
     }
 
+    @NotNull
     private Wire createBytes() {
         bytes.clear();
         if (testId == -1)
@@ -76,7 +79,7 @@ public class BinaryWirePerfTest {
         }
     }
 
-    private void wirePerf0(Wire wire, MyTypes a, MyTypes b, int t) throws StreamCorruptedException {
+    private void wirePerf0(@NotNull Wire wire, @NotNull MyTypes a, @NotNull MyTypes b, int t) throws StreamCorruptedException {
         long start = System.nanoTime();
         int runs = 500000;
         for (int i = 0; i < runs; i++) {
@@ -104,7 +107,7 @@ public class BinaryWirePerfTest {
         }
     }
 
-    private void wirePerf0(Wire wire, MyType2 a, MyType2 b, int t) {
+    private void wirePerf0(@NotNull Wire wire, @NotNull MyType2 a, @NotNull MyType2 b, int t) {
         long start = System.nanoTime();
         int runs = 1500000;
         for (int i = 0; i < runs; i++) {
@@ -187,7 +190,7 @@ public class BinaryWirePerfTest {
         }
 
         @Override
-        public void writeMarshallable(WireOut wire) {
+        public void writeMarshallable(@NotNull WireOut wire) {
             wire.write(Fields.I).int32(i)
                     .write(Fields.J).int32(j)
                     .write(Fields.K).int32(k)
@@ -209,7 +212,7 @@ public class BinaryWirePerfTest {
         }
 
         @Override
-        public void readMarshallable(WireIn wire) {
+        public void readMarshallable(@NotNull WireIn wire) {
             wire.read(Fields.I).int32(this::i)
                     .read(Fields.J).int32(this::j)
                     .read(Fields.K).int32(this::k)

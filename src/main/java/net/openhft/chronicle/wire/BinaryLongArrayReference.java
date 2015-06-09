@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import org.jetbrains.annotations.NotNull;
 
 public class BinaryLongArrayReference implements ByteableLongArrayValues {
     private static final long CAPACITY = 0;
@@ -27,14 +28,14 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     private long offset;
     private long length = VALUES;
 
-    public static void write(Bytes bytes, long capacity) {
+    public static void write(@NotNull Bytes bytes, long capacity) {
         bytes.writeLong(capacity);
         long start = bytes.position() + VALUES;
         bytes.zeroOut(start, start + (capacity << 3));
         bytes.skip(capacity << 3);
     }
 
-    public static void lazyWrite(Bytes bytes, long capacity) {
+    public static void lazyWrite(@NotNull Bytes bytes, long capacity) {
         //System.out.println("capacity location =" + bytes.position());
         bytes.writeLong(capacity);
         bytes.skip(capacity << 3);
@@ -66,7 +67,7 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     }
 
     @Override
-    public void bytesStore(BytesStore bytes, long offset, long length) {
+    public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
         if (length != peakLength(bytes, offset))
             throw new IllegalArgumentException(length + " != " + peakLength(bytes, offset));
         this.bytes = bytes;
@@ -74,7 +75,7 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
         this.length = length;
     }
 
-    public static long peakLength(BytesStore bytes, long offset) {
+    public static long peakLength(@NotNull BytesStore bytes, long offset) {
         final long capacity = bytes.readLong(offset );
         assert capacity > 0 : "capacity too small";
         return (capacity << 3) + 8;
@@ -95,6 +96,7 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
         return length;
     }
 
+    @NotNull
     public String toString() {
         return "value: " + getValueAt(0) + " ...";
     }

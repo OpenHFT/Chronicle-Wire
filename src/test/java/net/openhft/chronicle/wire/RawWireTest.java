@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -39,6 +40,7 @@ import static org.junit.Assert.assertTrue;
 
 public class RawWireTest {
 
+    @NotNull
     Bytes bytes = nativeBytes();
 
     @Test
@@ -51,6 +53,7 @@ public class RawWireTest {
         assertEquals("", wire.toString());
     }
 
+    @NotNull
     private RawWire createWire() {
         bytes.clear();
         return new RawWire(bytes);

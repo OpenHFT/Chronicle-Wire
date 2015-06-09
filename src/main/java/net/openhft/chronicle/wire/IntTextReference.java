@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.IntValue;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
@@ -34,7 +35,7 @@ public class IntTextReference implements IntValue, Byteable {
     private BytesStore bytes;
     private long offset;
 
-    <T> T withLock(Supplier<T> call) {
+    <T> T withLock(@NotNull Supplier<T> call) {
         long valueOffset = offset + LOCKED;
         int value = bytes.readVolatileInt(valueOffset);
         if (value != FALSE && value != TRUE)
@@ -115,11 +116,12 @@ public class IntTextReference implements IntValue, Byteable {
         return template.length;
     }
 
-    public static void write(Bytes bytes, int value) {
+    public static void write(@NotNull Bytes bytes, int value) {
         long position = bytes.position();
         bytes.write(template);
         bytes.append(position+VALUE, value, DIGITS);
     }
 
+    @NotNull
     public String toString() { return "value: "+getValue(); }
 }
