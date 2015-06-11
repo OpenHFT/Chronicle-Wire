@@ -25,8 +25,6 @@ public class BinaryWireNumbersTest {
     private final Consumer<ValueOut> perform;
     private static final float VAL1 = 12345678901234567.0f;
 
-
-
     @Parameterized.Parameters
     public static Collection<Object[]> data() throws IOException {
         return Arrays.asList(new Object[][]{
@@ -101,5 +99,4 @@ public class BinaryWireNumbersTest {
         if (!bytes1.toString().equals(bytes2.toString()))
             System.out.println("Format doesn't match for " + TextWire.asText(wire2));
     }
-
 }

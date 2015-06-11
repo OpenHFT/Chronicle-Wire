@@ -75,5 +75,4 @@ public interface WireOut {
     default void writeDocument(boolean metaData, @NotNull Consumer<WireOut> writer) {
         Wires.writeData(this, metaData, writer);
     }
-
 }

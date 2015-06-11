@@ -14,7 +14,6 @@ import java.lang.reflect.Field;
  */
 public class ConventionsTest {
 
-
     @Test
     public void testTypeConversionsMaxValue() throws Exception {
 
@@ -67,7 +66,6 @@ public class ConventionsTest {
 
     }
 
-
     @Test
     public void testTypeConversionsConvertViaString() throws Exception {
 
@@ -88,9 +86,6 @@ public class ConventionsTest {
         }
     }
 
-
-
-
     @Test
     public void testTypeConversionsMaxUnsigned() throws Exception {
 
@@ -99,7 +94,6 @@ public class ConventionsTest {
             Assert.assertEquals(extected, (long) test(extected, Long.class));
         }
     }
-
 
     @Nullable
     public <T> T test(Object source, @NotNull Class<T> destinationType) {
@@ -146,6 +140,4 @@ public class ConventionsTest {
 
         throw new UnsupportedOperationException("");
     }
-
-
 }

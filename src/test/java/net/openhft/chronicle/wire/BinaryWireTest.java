@@ -38,7 +38,6 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-
 @RunWith(value = Parameterized.class)
 public class BinaryWireTest {
 

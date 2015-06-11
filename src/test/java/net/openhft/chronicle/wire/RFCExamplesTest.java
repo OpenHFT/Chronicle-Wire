@@ -162,9 +162,7 @@ put: [ 3, bye ]
                     out.write(() -> "put").marshallable(m -> m.write(() -> "key").int64(n)
                             .write(() -> "value").text(words[n])));
         }
-
     }
-
     enum Fields implements WireKey {
         csp, tid, lookup, relativeUri, view, types
     }

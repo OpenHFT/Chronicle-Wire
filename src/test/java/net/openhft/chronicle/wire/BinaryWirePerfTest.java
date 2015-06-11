@@ -19,7 +19,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -66,7 +65,6 @@ public class BinaryWirePerfTest {
         return new BinaryWire(bytes, fixed, numericField, fieldLess);
     }
 
-
     @Test
     public void wirePerf() throws StreamCorruptedException {
         System.out.println("TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
@@ -95,7 +93,6 @@ public class BinaryWirePerfTest {
         long rate = (System.nanoTime() - start) / runs;
         System.out.printf("(vars) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().position());
     }
-
 
     @Test
     public void wirePerfInts() {

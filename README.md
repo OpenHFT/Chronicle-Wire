@@ -145,7 +145,6 @@ The documentation looks well thought out, and it is worth emulating.
 
 ## Comparison with Cap'n'Proto
 
-
 | Feature	| Wire Text | Wire Binary | Protobuf	| Cap'n Proto |	SBE	| FlatBuffers |
 |------------|:-----------:|:---------------:|:-----------:|:---------------:|:------:|:---------------:|
 | Schema evolution |	yes | yes | yes | 	yes	| caveats |	yes |
@@ -192,7 +191,6 @@ WIre allows you to dynamically pick the optimal configuration and convert betwee
 ## Zero copy
 Wire supports zero copy random access to fields and direct copy from in memory to the network.
 It also support translation from one wire format to another e.g. switching between fixed length data and variable length data.
-
 
 ## Random Access.
 You can access a random field in memory
@@ -261,7 +259,4 @@ Wire doesn't have pointer but it does have content lengths which are
 
 ##  Platform support
 Wire is Java 8 only for now.  Future version may support Java 6, C++ and C\#
-
-
-
 

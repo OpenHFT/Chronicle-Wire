@@ -221,7 +221,6 @@ public class YamlExamples {
 */
     }
 
-
     @Test
     public void testMappedObject() {
         Wire wire = new BinaryWire(nativeBytes());

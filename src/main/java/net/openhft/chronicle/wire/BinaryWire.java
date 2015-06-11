@@ -435,7 +435,6 @@ public class BinaryWire implements Wire, InternalWireIn {
         throw new UnsupportedOperationException(stringForCode(code));
     }
 
-
     long readInt0(int code) {
         if (isSmallInt(code))
             return code;
@@ -482,7 +481,6 @@ public class BinaryWire implements Wire, InternalWireIn {
     private boolean isSmallInt(int code) {
         return (code & 128) == 0;
     }
-
 
     private double readFloat(int code) {
         if (code < 128)
@@ -764,7 +762,6 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
-
         @NotNull
         @Override
         public WireOut uint32checked(long u32) {
@@ -927,7 +924,6 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
-
         void writeNumber(long l) {
 
             if (l >= 0 && l <= 127) {
@@ -935,7 +931,6 @@ public class BinaryWire implements Wire, InternalWireIn {
                 bytes.writeUnsignedByte((int) l);
                 return;
             }
-
 
             if (l >= 0) {
 
@@ -986,7 +981,6 @@ public class BinaryWire implements Wire, InternalWireIn {
 
             super.int64(l);
         }
-
 
         void writeNumber(double l) {
 
@@ -1096,7 +1090,6 @@ public class BinaryWire implements Wire, InternalWireIn {
             writeNumber(f);
             return BinaryWire.this;
         }
-
 
         @NotNull
         @Override
@@ -1582,7 +1575,6 @@ public class BinaryWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException("todo");
         }
 
-
         private long readTextAsLong() {
             bytes.skip(-1);
             final String text = text();
@@ -1655,7 +1647,6 @@ public class BinaryWire implements Wire, InternalWireIn {
             return (int) value;
 
         }
-
 
         private boolean isSmallInt(int code) {
             return (code & 128) == 0;

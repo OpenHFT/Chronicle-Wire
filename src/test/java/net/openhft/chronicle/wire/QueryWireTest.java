@@ -49,5 +49,4 @@ public class QueryWireTest {
             wp.parse(wire);
         assertEquals(new ArrayList<>(Arrays.asList(true, 12345L, "Hello World", 12.345)), results);
     }
-
 }
