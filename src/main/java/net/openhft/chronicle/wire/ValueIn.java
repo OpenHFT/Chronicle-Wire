@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.IORuntimeException;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -141,7 +142,7 @@ public interface ValueIn {
 
             // its possible that the object that you are allocating may not have a
             // default constructor
-            final Class clazz = (Class) Class.forName(sb.toString());
+            final Class clazz = ClassAliasPool.CLASS_ALIASES.forName(sb);
 
             if (!Marshallable.class.isAssignableFrom(clazz))
                 throw new IllegalStateException("its not possible to Marshallable and object that" +

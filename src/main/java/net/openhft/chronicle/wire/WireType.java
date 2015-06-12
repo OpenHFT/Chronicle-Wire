@@ -1,25 +1,24 @@
-/*
- * Copyright 2015 Higher Frequency Trading
- *
- * http://www.higherfrequencytrading.com
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package net.openhft.chronicle.wire;
 
-/**
- * Created by peter.lawrey on 15/01/15.
- */
-public enum WireType {
-    ;
+import net.openhft.chronicle.bytes.Bytes;
+
+import java.util.function.Function;
+
+public enum WireType implements Function<Bytes, Wire> {
+    TEXT {
+        @Override
+        public Wire apply(Bytes bytes) {
+            return new TextWire(bytes);
+        }
+    }, BINARY {
+        @Override
+        public Wire apply(Bytes bytes) {
+            return new BinaryWire(bytes);
+        }
+    }, RAW {
+        @Override
+        public Wire apply(Bytes bytes) {
+            return new RawWire(bytes);
+        }
+    };
 }
