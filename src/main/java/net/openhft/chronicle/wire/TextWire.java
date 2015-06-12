@@ -66,6 +66,10 @@ public class TextWire implements Wire, InternalWireIn {
         this.bytes = bytes;
     }
 
+    public static TextWire from(String text) {
+        return new TextWire(Bytes.from(text));
+    }
+
     public static String asText(@NotNull Wire wire) {
         TextWire tw = new TextWire(nativeBytes());
         wire.copyTo(tw);
@@ -133,10 +137,16 @@ public class TextWire implements Wire, InternalWireIn {
     }
 
     void consumeWhiteSpace() {
-        int codePoint = peekCode();
-        while (Character.isWhitespace(codePoint)) {
-            bytes.skip(1);
-            codePoint = peekCode();
+        for (; ; ) {
+            int codePoint = peekCode();
+            if (codePoint == '#') {
+                //noinspection StatementWithEmptyBody
+                while (readCode() >= ' ') ;
+            } else if (Character.isWhitespace(codePoint)) {
+                bytes.skip(1);
+            } else {
+                break;
+            }
         }
     }
 
@@ -1171,14 +1181,14 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireIn sequence(@NotNull Consumer<ValueIn> reader) {
             consumeWhiteSpace();
-            int code = readCode();
+            char code = (char) readCode();
             if (code != '[')
                 throw new IORuntimeException("Unsupported type " + (char) code + " (" + code + ")");
 
             reader.accept(TextWire.this.valueIn);
 
             consumeWhiteSpace();
-            code = peekCode();
+            code = (char) peekCode();
             if (code != ']')
                 throw new IORuntimeException("Expected a ] but got " + (char) code + " (" + code + ")");
 
@@ -1218,13 +1228,13 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire type(@NotNull StringBuilder s) {
+        public Wire type(@NotNull StringBuilder sb) {
             consumeWhiteSpace();
             int code = readCode();
             if (code != '!') {
                 throw new UnsupportedOperationException(stringForCode(code));
             }
-            bytes.parseUTF(s, StopCharTesters.SPACE_STOP);
+            bytes.parseUTF(sb, TextStopCharTesters.END_OF_TYPE);
             return TextWire.this;
         }
 
@@ -1237,7 +1247,7 @@ public class TextWire implements Wire, InternalWireIn {
                 throw new UnsupportedOperationException(stringForCode(code));
             bytes.skip("type ".length());
             StringBuilder sb = Wires.acquireStringBuilder();
-            bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+            bytes.parseUTF(sb, TextStopCharTesters.END_OF_TYPE);
             classNameConsumer.accept(sb);
             return TextWire.this;
         }
@@ -1510,6 +1520,15 @@ public class TextWire implements Wire, InternalWireIn {
                 if (ch == '"' || ch == '#' || ch == '\n') return true;
                 // two character stop.
                 return (ch == ':' || ch == ',') && ch2 <= ' ';
+            }
+        },
+    }
+
+    enum TextStopCharTesters implements StopCharTester {
+        END_OF_TYPE {
+            @Override
+            public boolean isStopChar(int ch) throws IllegalStateException {
+                return ch == '"' || ch == '#' || ch == '\n' || ch == ':' || ch == ',' || ch == ' ';
             }
         }
     }

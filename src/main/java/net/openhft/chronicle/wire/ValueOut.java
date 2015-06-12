@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
@@ -170,7 +171,7 @@ public interface ValueOut {
 
     @NotNull
     default WireOut typedMarshallable(@NotNull WriteMarshallable object) {
-        type(object.getClass().getName());
+        type(ClassAliasPool.CLASS_ALIASES.nameFor(object.getClass()));
         return marshallable(object);
     }
 
