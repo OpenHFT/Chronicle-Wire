@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -170,7 +171,9 @@ public interface ValueOut {
     ValueOut leaf();
 
     @NotNull
-    default WireOut typedMarshallable(@NotNull WriteMarshallable object) {
+    default WireOut typedMarshallable(@Nullable WriteMarshallable object) {
+        if (object == null)
+            return text(null);
         type(ClassAliasPool.CLASS_ALIASES.nameFor(object.getClass()));
         return marshallable(object);
     }
@@ -206,7 +209,7 @@ public interface ValueOut {
         else if (value instanceof Float)
             return float32((Float) value);
         else if (value instanceof Marshallable)
-            return marshallable((Marshallable) value);
+            return typedMarshallable((Marshallable) value);
         else if (value instanceof Throwable)
             return throwable((Throwable) value);
 

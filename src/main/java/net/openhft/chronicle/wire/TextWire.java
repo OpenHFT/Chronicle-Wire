@@ -42,7 +42,6 @@ import java.util.*;
 import java.util.function.*;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
-import static net.openhft.chronicle.wire.BinaryWireCode.stringForCode;
 
 /**
  * Created by peter.lawrey on 15/01/15.
@@ -783,8 +782,8 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireIn text(@NotNull Consumer<String> s) {
             StringBuilder sb = Wires.acquireStringBuilder();
-            textTo(sb);
-            s.accept(sb.toString());
+            Object acs = textTo(sb);
+            s.accept(acs == null ? null : acs.toString());
             return TextWire.this;
         }
 
@@ -1238,6 +1237,10 @@ public class TextWire implements Wire, InternalWireIn {
             return TextWire.this;
         }
 
+        String stringForCode(int code) {
+            return "'" + (char) code + "'";
+        }
+
         @NotNull
         @Override
         public WireIn typeLiteral(@NotNull Consumer<CharSequence> classNameConsumer) {
@@ -1505,6 +1508,10 @@ public class TextWire implements Wire, InternalWireIn {
                 final Map result = new HashMap();
                 valueIn.map(result);
                 return (E) result;
+
+            } else if (Object.class == clazz) {
+                // TODO assume for now it is a string.
+                return peekCode() == '!' ? (E) valueIn.typedMarshallable() : (E) valueIn.text();
 
             } else {
                 throw new IllegalStateException("unsupported type=" + clazz);

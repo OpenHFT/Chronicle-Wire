@@ -70,14 +70,14 @@ public enum Wires {
         return sb;
     }
 
-    public static void writeData(@NotNull WireOut wireOut, boolean metaData, @NotNull Consumer<WireOut> writer) {
+    public static void writeData(@NotNull WireOut wireOut, boolean metaData, boolean notReady, @NotNull Consumer<WireOut> writer) {
         Bytes bytes = wireOut.bytes();
         long position = bytes.position();
         int metaDataBit = metaData ? META_DATA : 0;
         bytes.writeOrderedInt(metaDataBit | NOT_READY | UNKNOWN_LENGTH);
         writer.accept(wireOut);
         int length = metaDataBit | toIntU30(bytes.position() - position - 4, "Document length %,d out of 30-bit int range.");
-        bytes.writeOrderedInt(position, length);
+        bytes.writeOrderedInt(position, length | (notReady ? NOT_READY : 0));
     }
 
     public static boolean readData(long offset,

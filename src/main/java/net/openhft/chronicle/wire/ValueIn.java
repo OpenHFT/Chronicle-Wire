@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.IORuntimeException;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -134,11 +135,15 @@ public interface ValueIn {
 
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
 
-    @NotNull
+    @Nullable
     default ReadMarshallable typedMarshallable() {
         try {
             StringBuilder sb = Wires.acquireStringBuilder();
             type(sb);
+            if (StringUtils.isEqual(sb, "!null")) {
+                text();
+                return null;
+            }
 
             // its possible that the object that you are allocating may not have a
             // default constructor

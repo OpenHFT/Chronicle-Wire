@@ -73,6 +73,10 @@ public interface WireOut {
     WireOut addPadding(int paddingToAdd);
 
     default void writeDocument(boolean metaData, @NotNull Consumer<WireOut> writer) {
-        Wires.writeData(this, metaData, writer);
+        Wires.writeData(this, metaData, false, writer);
+    }
+
+    default void writeNotReadyDocument(boolean metaData, @NotNull Consumer<WireOut> writer) {
+        Wires.writeData(this, metaData, true, writer);
     }
 }
