@@ -72,6 +72,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         valueOut = fixed ? fixedValueOut : new BinaryValueOut();
     }
 
+
     static int toIntU30(long l, @NotNull String error) {
         if (l < 0 || l > Wires.LENGTH_MASK)
             throw new IllegalStateException(String.format(error, l));
