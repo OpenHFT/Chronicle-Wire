@@ -927,6 +927,7 @@ public class TextWire implements Wire, InternalWireIn {
                 return sb.toString().getBytes();
             }
         }
+
         @NotNull
         @Override
         public WireIn wireIn() {

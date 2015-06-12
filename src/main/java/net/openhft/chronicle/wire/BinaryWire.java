@@ -17,9 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Byteable;
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
@@ -36,6 +34,7 @@ import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
@@ -1199,6 +1198,17 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @NotNull
+        public BytesStore bytesStore() {
+            long length = readLength() - 1;
+            int code = readCode();
+            if (code != U8_ARRAY)
+                cantRead(code);
+            BytesStore toBytes = NativeBytesStore.nativeStore(length);
+            toBytes.write(0, bytes);
+            return toBytes;
+        }
+
+        @NotNull
         public WireIn bytes(@NotNull Consumer<WireIn> bytesConsumer) {
             long length = readLength();
             int code = readCode();
@@ -1697,5 +1707,89 @@ public class BinaryWire implements Wire, InternalWireIn {
         private WireIn cantRead(int code) {
             throw new UnsupportedOperationException(stringForCode(code));
         }
+
+        @Nullable
+        @Override
+        public <E> E object(@Nullable E using, @NotNull Class<E> clazz) {
+            if (byte[].class.isAssignableFrom(clazz))
+                return (E) bytes();
+
+            else if (Marshallable.class.isAssignableFrom(clazz)) {
+                final E v;
+                if (using == null)
+                    try {
+                        v = clazz.newInstance();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                else
+                    v = using;
+
+                marshallable((Marshallable) v);
+                return v;
+
+            } else if (StringBuilder.class.isAssignableFrom(clazz)) {
+                StringBuilder builder = (using == null)
+                        ? Wires.acquireStringBuilder()
+                        : (StringBuilder) using;
+                textTo(builder);
+                return (E) builder;
+
+            } else if (CharSequence.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                return (E) text();
+
+            } else if (Long.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                return (E) (Long) int64();
+
+            } else if (Double.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                return (E) (Double) float64();
+
+            } else if (Integer.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                return (E) (Integer) int32();
+
+            } else if (Float.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                return (E) (Float) float32();
+
+            } else if (Short.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                return (E) (Short) int16();
+
+            } else if (Character.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                final String text = text();
+                if (text == null || text.length() == 0)
+                    return null;
+                return (E) (Character) text.charAt(0);
+
+            } else if (Byte.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                return (E) (Byte) int8();
+
+            } else if (Map.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+
+                final HashMap result = new HashMap();
+                map(result);
+                return (E) result;
+
+            } else if (Object.class.isAssignableFrom(clazz)) {
+                int code = peekCode();
+                if (code == TYPE_PREFIX)
+                    return (E) typedMarshallable();
+                if (code == BYTES_LENGTH32)
+                    return (E) bytesStore();
+                // assume it a String
+                return (E) text();
+
+            } else {
+                throw new IllegalStateException("unsupported " + clazz);
+            }
+        }
     }
-}
+    }
+

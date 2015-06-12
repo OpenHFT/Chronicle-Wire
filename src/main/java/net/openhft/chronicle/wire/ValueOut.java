@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -212,7 +213,8 @@ public interface ValueOut {
             return typedMarshallable((Marshallable) value);
         else if (value instanceof Throwable)
             return throwable((Throwable) value);
-
+        else if (value instanceof BytesStore)
+            return bytes(((BytesStore) value).bytes());
         else {
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +

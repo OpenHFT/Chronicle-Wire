@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.IORuntimeException;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -72,6 +73,10 @@ public interface ValueIn {
     WireIn bytes(@NotNull Consumer<WireIn> wireInConsumer);
 
     byte[] bytes();
+
+    default BytesStore bytesStore() {
+        return BytesStore.wrap(bytes());
+    }
 
     @NotNull
     WireIn wireIn();
@@ -142,6 +147,11 @@ public interface ValueIn {
             type(sb);
             if (StringUtils.isEqual(sb, "!null")) {
                 text();
+                return null;
+            }
+
+            if (StringUtils.isEqual(sb, "!binary")) {
+                bytesStore();
                 return null;
             }
 
@@ -220,10 +230,7 @@ public interface ValueIn {
     }
 
     @Nullable
-    default <E> E object(@Nullable E using,
-                         @NotNull Class<E> clazz) {
-        return Wires.readObject(this, using, clazz);
-    }
+    <E> E object(@Nullable E using, @NotNull Class<E> clazz);
 
     Consumer<ValueIn> DISCARD = v -> {
     };
