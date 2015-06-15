@@ -234,4 +234,11 @@ public interface ValueIn {
 
     Consumer<ValueIn> DISCARD = v -> {
     };
+
+    default Class typeLiteral(){
+        Class[] clazz = {null};
+        typeLiteral(
+        ClassAliasPool.CLASS_ALIASES::forName,c->clazz[0]=c);
+        return clazz[0];
+    }
 }
