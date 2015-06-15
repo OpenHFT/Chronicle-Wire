@@ -141,7 +141,7 @@ public interface ValueIn {
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
 
     @Nullable
-    default ReadMarshallable typedMarshallable() {
+    default <T extends ReadMarshallable> T typedMarshallable() {
         try {
             StringBuilder sb = Wires.acquireStringBuilder();
             type(sb);
@@ -166,7 +166,7 @@ public interface ValueIn {
             final ReadMarshallable m = OS.memory().allocateInstance((Class<ReadMarshallable>) clazz);
 
             marshallable(m);
-            return m;
+            return (T) m;
         } catch (Exception e) {
             throw new IORuntimeException(e);
         }
