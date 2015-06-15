@@ -48,17 +48,24 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  */
 public class TextWire implements Wire, InternalWireIn {
 
+    public static final String FIELD_SEP = "";
+    public static final String SEQ_MAP = "!seqmap";
+    public static final String NULL = "!null \"\"";
+
     private static final Logger LOG =
             LoggerFactory.getLogger(TextWire.class);
 
-    public static final String FIELD_SEP = "";
     private static final String END_FIELD = "\n";
-    public static final String SEQ_MAP = "!seqmap";
+
+    static final BitSet QUOTE_CHARS = new BitSet();
+    static {
+        for (char ch : "\",\n\\#:{}[]".toCharArray())
+            QUOTE_CHARS.set(ch);
+    }
 
     final Bytes<?> bytes;
     final TextValueOut valueOut = new TextValueOut();
     final ValueIn valueIn = new TextValueIn();
-
     boolean ready;
 
     public TextWire(Bytes bytes) {
@@ -75,6 +82,23 @@ public class TextWire implements Wire, InternalWireIn {
         tw.flip();
         wire.flip();
         return tw.toString();
+    }
+
+    public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb) {
+        int end = 0;
+        for (int i = 0; i < sb.length(); i++) {
+            char ch = sb.charAt(i);
+            if (ch == '\\' && i < sb.length() - 1) {
+                char ch3 = sb.charAt(++i);
+                switch (ch3) {
+                    case 'n':
+                        ch = '\n';
+                        break;
+                }
+            }
+            BytesUtil.setCharAt(sb, end++, ch);
+        }
+        BytesUtil.setLength(sb, end);
     }
 
     public String toString() {
@@ -186,29 +210,12 @@ public class TextWire implements Wire, InternalWireIn {
         return bytes.readUnsignedByte();
     }
 
-    public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb) {
-        int end = 0;
-        for (int i = 0; i < sb.length(); i++) {
-            char ch = sb.charAt(i);
-            if (ch == '\\' && i < sb.length() - 1) {
-                char ch3 = sb.charAt(++i);
-                switch (ch3) {
-                    case 'n':
-                        ch = '\n';
-                        break;
-                }
-            }
-            BytesUtil.setCharAt(sb, end++, ch);
-        }
-        BytesUtil.setLength(sb, end);
-    }
-
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
         long position = bytes.position();
         StringBuilder sb = readField(Wires.acquireStringBuilder());
-        if (sb.length() == 0 ||  StringUtils.isEqual(sb, key.name()))
+        if (sb.length() == 0 || StringUtils.isEqual(sb, key.name()))
             return valueIn;
         bytes.position(position);
         throw new UnsupportedOperationException("Unordered fields not supported yet. key=" + key
@@ -315,13 +322,6 @@ public class TextWire implements Wire, InternalWireIn {
         return sb2;
     }
 
-    static final BitSet QUOTE_CHARS = new BitSet();
-
-    static {
-        for (char ch : "\",\n\\#:{}[]".toCharArray())
-            QUOTE_CHARS.set(ch);
-    }
-
     boolean needsQuotes(@NotNull CharSequence s) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
@@ -331,7 +331,26 @@ public class TextWire implements Wire, InternalWireIn {
         return s.length() == 0;
     }
 
-    public static final String NULL = "!null \"\"";
+    enum TextStopCharsTesters implements StopCharsTester {
+        END_OF_TEXT {
+            @Override
+            public boolean isStopChar(int ch, int ch2) throws IllegalStateException {
+                // one character stop.
+                if (ch == '"' || ch == '#' || ch == '\n') return true;
+                // two character stop.
+                return (ch == ':' || ch == ',') && ch2 <= ' ';
+            }
+        },
+    }
+
+    enum TextStopCharTesters implements StopCharTester {
+        END_OF_TYPE {
+            @Override
+            public boolean isStopChar(int ch) throws IllegalStateException {
+                return ch == '"' || ch == '#' || ch == '\n' || ch == ':' || ch == ',' || ch == ' ';
+            }
+        }
+    }
 
     class TextValueOut implements ValueOut {
         int indentation = 0;
@@ -1239,7 +1258,7 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         String stringForCode(int code) {
-            return "'" + (char) code + "'";
+            return code < 0 ? "Unexpected end of input" : "'" + (char) code + "'";
         }
 
         @NotNull
@@ -1433,7 +1452,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (peekStringIgnoreCase("!!null \"\"")) {
                 bytes.skip("!!null \"\"".length());
                 // discard the text after it.
-              //  text(Wires.acquireStringBuilder());
+                //  text(Wires.acquireStringBuilder());
                 return true;
             }
 
@@ -1516,27 +1535,6 @@ public class TextWire implements Wire, InternalWireIn {
 
             } else {
                 throw new IllegalStateException("unsupported type=" + clazz);
-            }
-        }
-    }
-
-    enum TextStopCharsTesters implements StopCharsTester {
-        END_OF_TEXT {
-            @Override
-            public boolean isStopChar(int ch, int ch2) throws IllegalStateException {
-                // one character stop.
-                if (ch == '"' || ch == '#' || ch == '\n') return true;
-                // two character stop.
-                return (ch == ':' || ch == ',') && ch2 <= ' ';
-            }
-        },
-    }
-
-    enum TextStopCharTesters implements StopCharTester {
-        END_OF_TYPE {
-            @Override
-            public boolean isStopChar(int ch) throws IllegalStateException {
-                return ch == '"' || ch == '#' || ch == '\n' || ch == ':' || ch == ',' || ch == ' ';
             }
         }
     }
