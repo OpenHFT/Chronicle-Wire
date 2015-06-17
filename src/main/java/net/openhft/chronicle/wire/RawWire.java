@@ -133,6 +133,11 @@ public class RawWire implements Wire, InternalWireIn {
     }
 
     @Override
+    public boolean hasMore() {
+        return bytes.remaining() > 0;
+    }
+
+    @Override
     public String toString() {
         return bytes.toString();
     }
@@ -681,7 +686,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn typeLiteral(@NotNull Consumer<CharSequence> classNameConsumer) {
+        public WireIn typeLiteralAsText(@NotNull Consumer<CharSequence> classNameConsumer) {
             StringBuilder sb = Wires.acquireStringBuilder();
             type(sb);
             classNameConsumer.accept(sb);

@@ -257,6 +257,12 @@ public class TextWire implements Wire, InternalWireIn {
         return bytes;
     }
 
+    @Override
+    public boolean hasMore() {
+        consumeWhiteSpace();
+        return bytes.remaining() > 0;
+    }
+
     @NotNull
     @Override
     public ValueOut write() {
@@ -1263,7 +1269,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn typeLiteral(@NotNull Consumer<CharSequence> classNameConsumer) {
+        public WireIn typeLiteralAsText(@NotNull Consumer<CharSequence> classNameConsumer) {
             consumeWhiteSpace();
             int code = readCode();
             if (!peekStringIgnoreCase("type "))

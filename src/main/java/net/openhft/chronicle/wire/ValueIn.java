@@ -176,11 +176,16 @@ public interface ValueIn {
     WireIn type(@NotNull StringBuilder s);
 
     @NotNull
-    WireIn typeLiteral(@NotNull Consumer<CharSequence> classNameConsumer);
+    WireIn typeLiteralAsText(@NotNull Consumer<CharSequence> classNameConsumer);
 
     @NotNull
     default WireIn typeLiteral(@NotNull Function<CharSequence, Class> typeLookup, @NotNull Consumer<Class> classConsumer) {
-        return typeLiteral(sb -> classConsumer.accept(typeLookup.apply(sb)));
+        return typeLiteralAsText(sb -> classConsumer.accept(typeLookup.apply(sb)));
+    }
+
+    @NotNull
+    default WireIn typeLiteral(@NotNull Consumer<Class> classConsumer) {
+        return typeLiteral(ClassAliasPool.CLASS_ALIASES::forName, classConsumer);
     }
 
     @NotNull

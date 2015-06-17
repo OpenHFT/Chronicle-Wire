@@ -210,6 +210,12 @@ public class BinaryWire implements Wire, InternalWireIn {
         return bytes;
     }
 
+    @Override
+    public boolean hasMore() {
+        consumeSpecial();
+        return bytes.remaining() > 0;
+    }
+
     @Nullable
     private StringBuilder readField(@NotNull StringBuilder name, int codeMatch) {
         consumeSpecial();
@@ -1541,7 +1547,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn typeLiteral(@NotNull Consumer<CharSequence> classNameConsumer) {
+        public WireIn typeLiteralAsText(@NotNull Consumer<CharSequence> classNameConsumer) {
             int code = readCode();
             if (code == TYPE_LITERAL) {
                 StringBuilder sb = Wires.acquireStringBuilder();

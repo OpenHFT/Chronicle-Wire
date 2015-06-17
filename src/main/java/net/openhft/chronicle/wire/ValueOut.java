@@ -134,6 +134,11 @@ public interface ValueOut {
     WireOut type(CharSequence typeName);
 
     @NotNull
+    default WireOut typeLiteral(@NotNull Class type) {
+        return typeLiteral((t, b) -> b.append(ClassAliasPool.CLASS_ALIASES.nameFor(t)), type);
+    }
+
+    @NotNull
     WireOut typeLiteral(@NotNull CharSequence type);
 
     @NotNull

@@ -76,6 +76,8 @@ public interface WireIn {
 
     Bytes<?> bytes();
 
+    boolean hasMore();
+
     default boolean readDocument(@Nullable Consumer<WireIn> metaDataConsumer,
                                  @Nullable Consumer<WireIn> dataConsumer) {
         return Wires.readData(this, metaDataConsumer, dataConsumer);

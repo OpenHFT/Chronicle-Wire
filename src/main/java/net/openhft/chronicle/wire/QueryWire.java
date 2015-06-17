@@ -68,6 +68,20 @@ public class QueryWire implements Wire, InternalWireIn {
         return tw.toString();
     }
 
+    public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb) {
+        int end = 0;
+        for (int i = 0; i < sb.length(); i++) {
+            char ch = sb.charAt(i);
+            if (ch == '%' && i < sb.length() - 1) {
+                char ch3 = sb.charAt(++i);
+                char ch4 = sb.charAt(++i);
+                ch = (char) Integer.parseInt("" + ch3 + ch4, 16);
+            }
+            BytesUtil.setCharAt(sb, end++, ch);
+        }
+        BytesUtil.setLength(sb, end);
+    }
+
     public String toString() {
         return bytes.toString();
     }
@@ -148,20 +162,6 @@ public class QueryWire implements Wire, InternalWireIn {
         return bytes.readUnsignedByte();
     }
 
-    public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb) {
-        int end = 0;
-        for (int i = 0; i < sb.length(); i++) {
-            char ch = sb.charAt(i);
-            if (ch == '%' && i < sb.length() - 1) {
-                char ch3 = sb.charAt(++i);
-                char ch4 = sb.charAt(++i);
-                ch = (char) Integer.parseInt("" + ch3 + ch4, 16);
-            }
-            BytesUtil.setCharAt(sb, end++, ch);
-        }
-        BytesUtil.setLength(sb, end);
-    }
-
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
@@ -209,6 +209,11 @@ public class QueryWire implements Wire, InternalWireIn {
         return bytes;
     }
 
+    @Override
+    public boolean hasMore() {
+        return bytes.remaining() > 0;
+    }
+
     @NotNull
     @Override
     public ValueOut write() {
@@ -247,6 +252,21 @@ public class QueryWire implements Wire, InternalWireIn {
 
     int rewindAndRead() {
         return bytes.readUnsignedByte(bytes.position() - 1);
+    }
+
+    enum QueryStopCharTesters implements StopCharTester {
+        QUERY_FIELD_NAME {
+            @Override
+            public boolean isStopChar(int ch) throws IllegalStateException {
+                return ch == '&' || ch == '=' || ch < 0;
+            }
+        },
+        QUERY_VALUE {
+            @Override
+            public boolean isStopChar(int ch) throws IllegalStateException {
+                return ch == '&' || ch < 0;
+            }
+        }
     }
 
     class TextValueOut implements ValueOut {
@@ -870,7 +890,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn typeLiteral(@NotNull Consumer<CharSequence> classNameConsumer) {
+        public WireIn typeLiteralAsText(@NotNull Consumer<CharSequence> classNameConsumer) {
             StringBuilder sb = Wires.acquireStringBuilder();
             type(sb);
             classNameConsumer.accept(sb);
@@ -1040,21 +1060,6 @@ public class QueryWire implements Wire, InternalWireIn {
 
             } else {
                 throw new IllegalStateException("unsupported type=" + clazz);
-            }
-        }
-    }
-
-    enum QueryStopCharTesters implements StopCharTester {
-        QUERY_FIELD_NAME {
-            @Override
-            public boolean isStopChar(int ch) throws IllegalStateException {
-                return ch == '&' || ch == '=' || ch < 0;
-            }
-        },
-        QUERY_VALUE {
-            @Override
-            public boolean isStopChar(int ch) throws IllegalStateException {
-                return ch == '&' || ch < 0;
             }
         }
     }
