@@ -76,6 +76,9 @@ public interface WireIn {
 
     Bytes<?> bytes();
 
+    /**
+     * @return if there is more data to be read in this document.
+     */
     boolean hasMore();
 
     default boolean readDocument(@Nullable Consumer<WireIn> metaDataConsumer,
