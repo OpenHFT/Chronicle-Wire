@@ -252,6 +252,7 @@ public class TextWire implements Wire, InternalWireIn {
         bytes.clear();
     }
 
+    @NotNull
     @Override
     public Bytes<?> bytes() {
         return bytes;

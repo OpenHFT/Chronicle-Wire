@@ -29,7 +29,7 @@ import java.util.function.Consumer;
  */
 public interface WireIn {
     boolean isReady();
-    
+
     void copyTo(@NotNull WireOut wire);
 
     /**
@@ -74,6 +74,7 @@ public interface WireIn {
 
     void clear();
 
+    @NotNull
     Bytes<?> bytes();
 
     /**
