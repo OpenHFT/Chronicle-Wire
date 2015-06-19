@@ -1254,11 +1254,13 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public Wire type(@NotNull StringBuilder sb) {
             consumeWhiteSpace();
-            int code = readCode();
+            int code = peekCode();
             if (code != '!') {
-                throw new UnsupportedOperationException(stringForCode(code));
+                sb.append("java.lang.String");
+            } else {
+                readCode();
+                bytes.parseUTF(sb, TextStopCharTesters.END_OF_TYPE);
             }
-            bytes.parseUTF(sb, TextStopCharTesters.END_OF_TYPE);
             return TextWire.this;
         }
 
