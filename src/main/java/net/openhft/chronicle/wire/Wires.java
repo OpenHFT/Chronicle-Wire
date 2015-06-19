@@ -19,6 +19,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
+import net.openhft.chronicle.core.pool.StringInterner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,6 +41,7 @@ public enum Wires {
     public static final int META_DATA = 1 << 30;
     public static final int UNKNOWN_LENGTH = 0x0;
     public static final int LENGTH_MASK = -1 >>> 2;
+    public static final StringInterner INTERNER = new StringInterner(128);
 
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
@@ -277,7 +279,7 @@ public enum Wires {
         Throwable throwable;
         try {
             //noinspection unchecked
-            throwable = OS.memory().allocateInstance((Class<Throwable>) Class.forName(type.toString()));
+            throwable = OS.memory().allocateInstance((Class<Throwable>) Class.forName(INTERNER.intern(type)));
         } catch (ClassNotFoundException e) {
             preMessage = type.toString();
             throwable = new RuntimeException();

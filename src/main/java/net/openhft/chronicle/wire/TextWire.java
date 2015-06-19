@@ -908,7 +908,7 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             if (peekCode() == '!') {
                 bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
-                String str = sb.toString();
+                String str = Wires.INTERNER.intern(sb);
                 if (str.equals("!!binary")) {
                     BytesUtil.setLength(sb, 0);
                     bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
@@ -931,16 +931,17 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             if (peekCode() == '!') {
                 bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
-                String str = sb.toString();
+                String str = Wires.INTERNER.intern(sb);
                 if (str.equals("!!binary")) {
                     BytesUtil.setLength(sb, 0);
                     bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
-                    byte[] decode = Base64.getDecoder().decode(sb.toString());
+                    byte[] decode = Base64.getDecoder().decode(Wires.INTERNER.intern(sb));
                     return decode;
 
                 } else if (str.equals("!" + SEQ_MAP)) {
                     sb.append(bytes.toString());
-                    return sb.toString().getBytes();
+                    // todo fix this.
+                    return Wires.INTERNER.intern(sb).getBytes();
 
                 } else {
                     throw new IllegalStateException("unsupported type");
@@ -948,6 +949,7 @@ public class TextWire implements Wire, InternalWireIn {
 
             } else {
                 textTo(sb);
+                // todo fix this.
                 return sb.toString().getBytes();
             }
         }
@@ -1104,7 +1106,7 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
             textTo(sb);
-            localTime.accept(LocalTime.parse(sb.toString()));
+            localTime.accept(LocalTime.parse(Wires.INTERNER.intern(sb)));
             return TextWire.this;
         }
 
@@ -1114,7 +1116,7 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
             textTo(sb);
-            zonedDateTime.accept(ZonedDateTime.parse(sb.toString()));
+            zonedDateTime.accept(ZonedDateTime.parse(Wires.INTERNER.intern(sb)));
             return TextWire.this;
         }
 
@@ -1124,7 +1126,7 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
             textTo(sb);
-            localDate.accept(LocalDate.parse(sb.toString()));
+            localDate.accept(LocalDate.parse(Wires.INTERNER.intern(sb)));
             return TextWire.this;
         }
 
@@ -1150,7 +1152,7 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
             textTo(sb);
-            uuid.accept(UUID.fromString(sb.toString()));
+            uuid.accept(UUID.fromString(Wires.INTERNER.intern(sb)));
             return TextWire.this;
         }
 
@@ -1330,7 +1332,7 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             if (peekCode() == '!') {
                 bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
-                String str = sb.toString();
+                String str = Wires.INTERNER.intern(sb);
 
                 if (("!!null").contentEquals(sb)) {
                     text();
@@ -1367,7 +1369,7 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             if (peekCode() == '!') {
                 bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
-                String str = sb.toString();
+                String str = Wires.INTERNER.intern(sb);
                 if (SEQ_MAP.contentEquals(sb)) {
                     while (hasNext()) {
                         sequence(s -> s.marshallable(r -> {

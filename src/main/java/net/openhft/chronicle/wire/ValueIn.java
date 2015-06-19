@@ -42,7 +42,6 @@ import java.util.function.*;
  * Created by peter.lawrey on 14/01/15.
  */
 public interface ValueIn {
-
     /*
      * Text / Strings.
      */
@@ -55,7 +54,7 @@ public interface ValueIn {
     @Nullable
     default String text() {
         StringBuilder sb = Wires.acquireStringBuilder();
-        return textTo(sb) == null ? null : sb.toString();
+        return textTo(sb) == null ? null : Wires.INTERNER.intern(sb);
     }
 
     @Nullable

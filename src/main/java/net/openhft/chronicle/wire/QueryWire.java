@@ -636,7 +636,7 @@ public class QueryWire implements Wire, InternalWireIn {
         public WireIn text(@NotNull Consumer<String> s) {
             StringBuilder sb = Wires.acquireStringBuilder();
             textTo(sb);
-            s.accept(sb.toString());
+            s.accept(Wires.INTERNER.intern(sb));
             return QueryWire.this;
         }
 
@@ -758,7 +758,7 @@ public class QueryWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
             textTo(sb);
-            localTime.accept(LocalTime.parse(sb.toString()));
+            localTime.accept(LocalTime.parse(Wires.INTERNER.intern(sb)));
             return QueryWire.this;
         }
 
@@ -768,7 +768,7 @@ public class QueryWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
             textTo(sb);
-            zonedDateTime.accept(ZonedDateTime.parse(sb.toString()));
+            zonedDateTime.accept(ZonedDateTime.parse(Wires.INTERNER.intern(sb)));
             return QueryWire.this;
         }
 
@@ -778,7 +778,7 @@ public class QueryWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
             textTo(sb);
-            localDate.accept(LocalDate.parse(sb.toString()));
+            localDate.accept(LocalDate.parse(Wires.INTERNER.intern(sb)));
             return QueryWire.this;
         }
 
@@ -804,7 +804,7 @@ public class QueryWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
             textTo(sb);
-            uuid.accept(UUID.fromString(sb.toString()));
+            uuid.accept(UUID.fromString(Wires.INTERNER.intern(sb)));
             return QueryWire.this;
         }
 

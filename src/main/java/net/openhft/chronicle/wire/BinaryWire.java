@@ -1146,7 +1146,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                     if (code >= STRING_0 && code <= STRING_31) {
                         StringBuilder sb = Wires.acquireStringBuilder();
                         BytesUtil.parseUTF(bytes, sb, code & 0b11111);
-                        s.accept(sb.toString());
+                        s.accept(Wires.INTERNER.intern(sb));
 
                     } else {
                         cantRead(code);
