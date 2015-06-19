@@ -21,6 +21,7 @@ import java.io.StreamCorruptedException;
 /**
  * Created by Rob Austin
  */
+@FunctionalInterface
 public interface WireHandler {
     void process(Wire in, Wire out) throws StreamCorruptedException;
 }

@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 /**
  * Created by Rob Austin
  */
+@FunctionalInterface
 public interface WireHandlers {
     void add(WireHandler handler);
 }
