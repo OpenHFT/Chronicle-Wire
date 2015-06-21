@@ -33,6 +33,12 @@ public class IntTextReference implements IntValue, Byteable {
     private BytesStore bytes;
     private long offset;
 
+    public static void write(@NotNull Bytes bytes, int value) {
+        long position = bytes.position();
+        bytes.write(template);
+        bytes.append(position + VALUE, value, DIGITS);
+    }
+
     <T> T withLock(@NotNull Supplier<T> call) {
         long valueOffset = offset + LOCKED;
         int value = bytes.readVolatileInt(valueOffset);
@@ -100,24 +106,8 @@ public class IntTextReference implements IntValue, Byteable {
     }
 
     @Override
-    public BytesStore bytesStore() {
-        return bytes;
-    }
-
-    @Override
-    public long offset() {
-        return offset;
-    }
-
-    @Override
     public long maxSize() {
         return template.length;
-    }
-
-    public static void write(@NotNull Bytes bytes, int value) {
-        long position = bytes.position();
-        bytes.write(template);
-        bytes.append(position+VALUE, value, DIGITS);
     }
 
     @NotNull

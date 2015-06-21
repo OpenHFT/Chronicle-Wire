@@ -39,6 +39,12 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
         bytes.skip(capacity << 3);
     }
 
+    public static long peakLength(@NotNull BytesStore bytes, long offset) {
+        final long capacity = bytes.readLong(offset);
+        assert capacity > 0 : "capacity too small";
+        return (capacity << 3) + 8;
+    }
+
     @Override
     public long getCapacity() {
         return (length - VALUES) >>> 3;
@@ -71,22 +77,6 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
         this.bytes = bytes;
         this.offset = offset;
         this.length = length;
-    }
-
-    public static long peakLength(@NotNull BytesStore bytes, long offset) {
-        final long capacity = bytes.readLong(offset );
-        assert capacity > 0 : "capacity too small";
-        return (capacity << 3) + 8;
-    }
-
-    @Override
-    public BytesStore bytesStore() {
-        return bytes;
-    }
-
-    @Override
-    public long offset() {
-        return offset;
     }
 
     @Override

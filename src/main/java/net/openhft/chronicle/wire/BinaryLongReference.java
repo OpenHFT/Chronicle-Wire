@@ -32,16 +32,6 @@ public class BinaryLongReference implements LongValue, Byteable {
     }
 
     @Override
-    public BytesStore bytesStore() {
-        return bytes;
-    }
-
-    @Override
-    public long offset() {
-        return offset;
-    }
-
-    @Override
     public long maxSize() {
         return 8;
     }

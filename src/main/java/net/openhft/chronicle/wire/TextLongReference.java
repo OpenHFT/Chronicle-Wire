@@ -70,18 +70,8 @@ public class TextLongReference implements LongValue, Byteable {
     }
 
     @Override
-    public BytesStore bytesStore() {
-        return bytes;
-    }
-
-    @Override
     public void setValue(long value) {
         withLock(() -> bytes.append(offset + VALUE, value, DIGITS));
-    }
-
-    @Override
-    public long offset() {
-        return offset;
     }
 
     @Override

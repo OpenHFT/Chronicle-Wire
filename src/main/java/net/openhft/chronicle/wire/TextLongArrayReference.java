@@ -53,6 +53,11 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
         bytes.write(SECTION3);
     }
 
+    public static long peakLength(@NotNull BytesStore bytes, long offset) {
+        //todo check this, I think there could be a bug here
+        return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;
+    }
+
     @Override
     public long getCapacity() {
         return (length - VALUES) / VALUE_SIZE;
@@ -87,21 +92,6 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
         this.bytes = bytes;
         this.offset = offset;
         this.length = length;
-    }
-
-    public static long peakLength(@NotNull BytesStore bytes, long offset) {
-        //todo check this, I think there could be a bug here
-        return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;
-    }
-
-    @Override
-    public BytesStore bytesStore() {
-        return bytes;
-    }
-
-    @Override
-    public long offset() {
-        return offset;
     }
 
     @Override

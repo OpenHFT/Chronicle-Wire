@@ -15,7 +15,6 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.BytesMarshaller;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -105,9 +104,5 @@ class MyTypes implements Marshallable {
         public int code() {
             return ordinal();
         }
-    }
-
-    public static void main(String... ignored) {
-        BytesMarshaller<MyTypes> bytesMarshaller = MarshallableBytesMarshaller.of(TextWire::new, MyTypes::new);
     }
 }
