@@ -17,6 +17,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -1533,6 +1535,35 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
         }
 
+        @Nullable
+        public <T extends ReadMarshallable> T typedMarshallable() {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            int code = readCode();
+            switch (code) {
+                case TYPE_PREFIX:
+                    bytes.readUTFΔ(sb);
+                    // its possible that the object that you are allocating may not have a
+                    // default constructor
+                    final Class clazz = ClassAliasPool.CLASS_ALIASES.forName(sb);
+
+                    if (!Marshallable.class.isAssignableFrom(clazz))
+                        throw new IllegalStateException("its not possible to Marshallable and object that" +
+                                " is not of type Marshallable, type=" + sb);
+
+                    final ReadMarshallable m = OS.memory().allocateInstance((Class<ReadMarshallable>) clazz);
+
+                    marshallable(m);
+                    return (T) m;
+
+                case NULL:
+                    return null;
+
+                default:
+                    cantRead(code);
+                    return null; // only if the throw doesn't work.
+            }
+        }
+
         @NotNull
         @Override
         public WireIn type(@NotNull StringBuilder s) {
@@ -1540,6 +1571,9 @@ public class BinaryWire implements Wire, InternalWireIn {
             if (code == TYPE_PREFIX) {
                 bytes.readUTFΔ(s);
 
+            } else if (code == NULL) {
+                s.setLength(0);
+                s.append("!null");
             } else {
                 cantRead(code);
             }
