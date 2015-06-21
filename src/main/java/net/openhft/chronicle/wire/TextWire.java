@@ -825,7 +825,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (ch == '{') {
                 final long len = readLength();
                 try {
-                    a.append(Bytes.toDebugString(bytes, bytes.position(), len));
+                    a.append(Bytes.toString(bytes, bytes.position(), len));
                 } catch (IOException e) {
                     throw new AssertionError(e);
                 }
@@ -1209,14 +1209,14 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             char code = (char) readCode();
             if (code != '[')
-                throw new IORuntimeException("Unsupported type " + (char) code + " (" + code + ")");
+                throw new IORuntimeException("Unsupported type " + code + " (" + code + ")");
 
             reader.accept(TextWire.this.valueIn);
 
             consumeWhiteSpace();
             code = (char) peekCode();
             if (code != ']')
-                throw new IORuntimeException("Expected a ] but got " + (char) code + " (" + code + ")");
+                throw new IORuntimeException("Expected a ] but got " + code + " (" + code + ")");
 
             return TextWire.this;
         }
@@ -1247,7 +1247,7 @@ public class TextWire implements Wire, InternalWireIn {
                 code = readCode();
                 if (code != '}')
                     throw new IORuntimeException("Unterminated { while reading marshallable "
-                            + "bytes=" + Bytes.toDebugString(bytes)
+                            + "bytes=" + Bytes.toString(bytes)
                     );
             }
         }
@@ -1316,7 +1316,7 @@ public class TextWire implements Wire, InternalWireIn {
             code = readCode();
             if (code != '}')
                 throw new IORuntimeException("Unterminated { while reading marshallable " +
-                        object + ",code='" + (char) code + "', bytes=" + Bytes.toDebugString(bytes)
+                        object + ",code='" + (char) code + "', bytes=" + Bytes.toString(bytes)
                 );
             return TextWire.this;
         }
@@ -1375,9 +1375,9 @@ public class TextWire implements Wire, InternalWireIn {
                         sequence(s -> s.marshallable(r -> {
                             try {
                                 @SuppressWarnings("unchecked")
-                                final K k = (K) r.read(() -> "key").typedMarshallable();
+                                final K k = r.read(() -> "key").typedMarshallable();
                                 @SuppressWarnings("unchecked")
-                                final V v = (V) r.read(() -> "value").typedMarshallable();
+                                final V v = r.read(() -> "value").typedMarshallable();
                                 usingMap.put(k, v);
                             } catch (Exception e) {
                                 LOG.error("", e);

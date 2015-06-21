@@ -81,9 +81,8 @@ class MyTypes implements Marshallable {
         if (i != myTypes.i) return false;
         if (l != myTypes.l) return false;
         if (s != myTypes.s) return false;
-        if (!StringUtils.isEqual(text, myTypes.text)) return false;
+        return StringUtils.isEqual(text, myTypes.text);
 
-        return true;
     }
 
     @NotNull

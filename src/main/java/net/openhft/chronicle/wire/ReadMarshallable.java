@@ -25,6 +25,6 @@ public interface ReadMarshallable {
      */
     void readMarshallable(WireIn wire) throws IllegalStateException;
 
-    static final ReadMarshallable DISCARD = w -> {
+    ReadMarshallable DISCARD = w -> {
     };
 }

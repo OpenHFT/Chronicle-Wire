@@ -692,9 +692,11 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut bytes(@NotNull Bytes fromBytes) {
-            writeLength(Maths.toInt32(fromBytes.remaining() + 1));
+            long remaining = fromBytes.remaining();
+            writeLength(Maths.toInt32(remaining + 1));
             writeCode(U8_ARRAY);
-            bytes.write(fromBytes);
+            if (remaining > 0)
+                bytes.write(fromBytes);
             return BinaryWire.this;
         }
 
@@ -1215,7 +1217,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         public WireIn bytes(@NotNull Consumer<WireIn> bytesConsumer) {
-            long length = readLength();
+            long length = readLength() - 1;
             int code = readCode();
             if (code != U8_ARRAY)
                 cantRead(code);
@@ -1599,7 +1601,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             try {
                 return Long.parseLong(text);
             } catch (NumberFormatException e) {
-                return (long) Math.round(Double.parseDouble(text));
+                return Math.round(Double.parseDouble(text));
             }
         }
 

@@ -52,7 +52,7 @@ public class QueryWireTest {
         assertEquals("bool=true&int=12345&text=Hello World&float=12.345", bytes.toString());
         wire.read(() -> "bool").bool(b -> assertTrue(b))
                 .read(() -> "int").int64(i -> assertEquals(12345, i))
-                .read(() -> "text").text((Consumer<String>) s -> assertEquals("Hello World", s))
+                .read(() -> "text").text(s -> assertEquals("Hello World", s))
                 .read(() -> "float").float64(f -> assertEquals(12.345, f, 0.0));
         WireParser wp = WireParser.wireParser();
         List<Object> results = new ArrayList<>();

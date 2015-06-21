@@ -522,7 +522,7 @@ public class BinaryWireTest {
         wire.read();
     }
 
-    @Ignore("todo fix :currently using NoBytesStore so will fail with UnsupportedOperationException")
+    //    @Ignore("todo fix :currently using NoBytesStore so will fail with UnsupportedOperationException")
     @Test
     public void testBytes() {
         Wire wire = createWire();
@@ -532,7 +532,8 @@ public class BinaryWireTest {
         wire.write().bytes(NoBytesStore.NO_BYTES)
                 .write().bytes(Bytes.wrap("Hello".getBytes()))
                 .write().bytes(Bytes.wrap("quotable, text".getBytes()))
-                .write().bytes(allBytes);
+                .write()
+                .bytes(allBytes);
         wire.flip();
         System.out.println(bytes.toDebugString());
         NativeBytes allBytes2 = nativeBytes();

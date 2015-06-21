@@ -36,5 +36,5 @@ public enum WireType implements Function<Bytes, Wire> {
         public Wire apply(Bytes bytes) {
             return new RawWire(bytes);
         }
-    };
+    }
 }

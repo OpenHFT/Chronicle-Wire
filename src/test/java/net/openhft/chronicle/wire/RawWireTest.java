@@ -507,6 +507,6 @@ public class RawWireTest {
     }
 
     enum BWKey implements WireKey {
-        field1, field2, field3;
+        field1, field2, field3
     }
 }

@@ -754,10 +754,8 @@ public class TextWireTest {
 
             MyMarshallable that = (MyMarshallable) o;
 
-            if (someData != null ? !someData.equals(that.someData) : that.someData != null)
-                return false;
+            return !(someData != null ? !someData.equals(that.someData) : that.someData != null);
 
-            return true;
         }
 
         @Override

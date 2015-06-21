@@ -77,7 +77,7 @@ public class ConventionsTest {
             Assert.assertEquals("type=" + type, extected, String.valueOf(test(extected, type)));
         }
 
-        Assert.assertEquals(123.0, (double) (Double) test("123", Double.class), 0);
+        Assert.assertEquals(123.0, test("123", Double.class), 0);
         Assert.assertEquals(123.0, (double) (Float) test("123", Float.class), 0);
 
     }
