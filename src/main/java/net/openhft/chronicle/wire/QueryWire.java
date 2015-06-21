@@ -61,8 +61,7 @@ public class QueryWire implements Wire, InternalWireIn {
     public static String asText(@NotNull Wire wire) {
         QueryWire tw = new QueryWire(nativeBytes());
         wire.copyTo(tw);
-        tw.flip();
-        wire.flip();
+
         return tw.toString();
     }
 
@@ -111,14 +110,14 @@ public class QueryWire implements Wire, InternalWireIn {
         consumeWhiteSpace();
         bytes.parseUTF(sb, QueryStopCharTesters.QUERY_FIELD_NAME);
         if (rewindAndRead() == '&')
-            bytes.skip(-1);
+            bytes.readSkip(-1);
         return sb;
     }
 
     void consumeWhiteSpace() {
         int codePoint = peekCode();
         while (Character.isWhitespace(codePoint)) {
-            bytes.skip(1);
+            bytes.readSkip(1);
             codePoint = peekCode();
         }
     }
@@ -137,10 +136,10 @@ public class QueryWire implements Wire, InternalWireIn {
         if (source.isEmpty())
             return true;
 
-        if (bytes.remaining() < 1)
+        if (bytes.readRemaining() < 1)
             return false;
 
-        long pos = bytes.position();
+        long pos = bytes.readPosition();
 
         try {
             for (int i = 0; i < source.length(); i++) {
@@ -148,14 +147,14 @@ public class QueryWire implements Wire, InternalWireIn {
                     return false;
             }
         } finally {
-            bytes.position(pos);
+            bytes.readPosition(pos);
         }
 
         return true;
     }
 
     private int readCode() {
-        if (bytes.remaining() < 1)
+        if (bytes.readRemaining() < 1)
             return -1;
         return bytes.readUnsignedByte();
     }
@@ -163,11 +162,11 @@ public class QueryWire implements Wire, InternalWireIn {
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
-        long position = bytes.position();
+        long position = bytes.readPosition();
         StringBuilder sb = readField(Wires.acquireStringBuilder());
         if (sb.length() == 0 || StringUtils.isEqual(sb, key.name()))
             return valueIn;
-        bytes.position(position);
+        bytes.readPosition(position);
         throw new UnsupportedOperationException("Unordered fields not supported yet. key=" + key
                 .name() + ", was=" + sb + ", data='" + sb + "'");
     }
@@ -193,11 +192,6 @@ public class QueryWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public void flip() {
-        bytes.flip();
-    }
-
-    @Override
     public void clear() {
         bytes.clear();
     }
@@ -210,7 +204,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
     @Override
     public boolean hasMore() {
-        return bytes.remaining() > 0;
+        return bytes.readRemaining() > 0;
     }
 
     @NotNull
@@ -250,7 +244,7 @@ public class QueryWire implements Wire, InternalWireIn {
     }
 
     int rewindAndRead() {
-        return bytes.readUnsignedByte(bytes.position() - 1);
+        return bytes.readUnsignedByte(bytes.readPosition() - 1);
     }
 
     enum QueryStopCharTesters implements StopCharTester {
@@ -348,7 +342,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         private boolean isText(@NotNull Bytes fromBytes) {
-            for (long i = fromBytes.position(); i < fromBytes.readLimit(); i++) {
+            for (long i = fromBytes.readPosition(); i < fromBytes.readLimit(); i++) {
                 int ch = fromBytes.readUnsignedByte(i);
                 if ((ch < ' ' && ch != '\t') || ch == '&' || ch >= 127)
                     return false;
@@ -554,9 +548,9 @@ public class QueryWire implements Wire, InternalWireIn {
             pushState();
             bytes.append("[");
             sep = ",";
-            long pos = bytes.position();
+            long pos = bytes.writePosition();
             writer.accept(this);
-            if (pos != bytes.position())
+            if (pos != bytes.writePosition())
                 bytes.append(",");
 
             popState();
@@ -784,7 +778,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @Override
         public boolean hasNext() {
-            return bytes.remaining() > 0;
+            return bytes.readRemaining() > 0;
         }
 
         @Override
@@ -792,7 +786,7 @@ public class QueryWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             int ch = peekCode();
             if (ch == ',') {
-                bytes.skip(1);
+                bytes.readSkip(1);
                 return true;
             }
             return ch != ']';
@@ -816,9 +810,9 @@ public class QueryWire implements Wire, InternalWireIn {
                 setter.accept(values = new TextLongArrayReference());
             }
             Byteable b = (Byteable) values;
-            long length = TextLongArrayReference.peakLength(bytes, bytes.position());
-            b.bytesStore(bytes, bytes.position(), length);
-            bytes.skip(length);
+            long length = TextLongArrayReference.peakLength(bytes, bytes.readPosition());
+            b.bytesStore(bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
             return QueryWire.this;
         }
 
@@ -831,11 +825,11 @@ public class QueryWire implements Wire, InternalWireIn {
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
-            b.bytesStore(bytes, bytes.position(), length);
-            bytes.skip(length);
+            b.bytesStore(bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
             consumeWhiteSpace();
             if (peekCode() == ',')
-                bytes.skip(1);
+                bytes.readSkip(1);
             return QueryWire.this;
         }
 
@@ -847,11 +841,11 @@ public class QueryWire implements Wire, InternalWireIn {
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
-            b.bytesStore(bytes, bytes.position(), length);
-            bytes.skip(length);
+            b.bytesStore(bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
             consumeWhiteSpace();
             if (peekCode() == ',')
-                bytes.skip(1);
+                bytes.readSkip(1);
             return QueryWire.this;
         }
 
@@ -978,7 +972,7 @@ public class QueryWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
 
             if (peekStringIgnoreCase("!!null ")) {
-                bytes.skip("!!null ".length());
+                bytes.readSkip("!!null ".length());
                 // discard the text after it.
                 textTo(Wires.acquireStringBuilder());
                 return true;

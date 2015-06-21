@@ -90,7 +90,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
     @Override
     public void copyTo(@NotNull WireOut wire) {
-        while (bytes.remaining() > 0) {
+        while (bytes.readRemaining() > 0) {
             int peekCode = peekCode();
             outerSwitch:
             switch (peekCode >> 4) {
@@ -102,31 +102,31 @@ public class BinaryWire implements Wire, InternalWireIn {
                 case BinaryWireHighCode.NUM5:
                 case BinaryWireHighCode.NUM6:
                 case BinaryWireHighCode.NUM7:
-                    bytes.skip(1);
+                    bytes.readSkip(1);
                     wire.writeValue().uint8(peekCode);
                     break;
 
                 case BinaryWireHighCode.CONTROL:
                     switch (peekCode) {
                         case PADDING:
-                            bytes.skip(1);
+                            bytes.readSkip(1);
                             break outerSwitch;
                         case PADDING32:
-                            bytes.skip(1);
-                            bytes.skip(bytes.readUnsignedInt());
+                            bytes.readSkip(1);
+                            bytes.readSkip(bytes.readUnsignedInt());
                             break outerSwitch;
                         default:
                             throw new UnsupportedOperationException();
                     }
 
                 case BinaryWireHighCode.FLOAT:
-                    bytes.skip(1);
+                    bytes.readSkip(1);
                     double d = readFloat0(peekCode);
                     wire.writeValue().float64(d);
                     break;
 
                 case BinaryWireHighCode.INT:
-                    bytes.skip(1);
+                    bytes.readSkip(1);
                     long l = readInt0(peekCode);
                     wire.writeValue().int64(l);
                     break;
@@ -143,7 +143,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
                 case BinaryWireHighCode.STR0:
                 case BinaryWireHighCode.STR1:
-                    bytes.skip(1);
+                    bytes.readSkip(1);
                     StringBuilder sb = readText(peekCode, Wires.acquireStringBuilder());
                     wire.writeValue().text(sb);
                     break;
@@ -196,11 +196,6 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public void flip() {
-        bytes.flip();
-    }
-
-    @Override
     public void clear() {
         bytes.clear();
     }
@@ -214,7 +209,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     @Override
     public boolean hasMore() {
         consumeSpecial();
-        return bytes.remaining() > 0;
+        return bytes.readRemaining() > 0;
     }
 
     @Nullable
@@ -229,23 +224,23 @@ public class BinaryWire implements Wire, InternalWireIn {
             int code = peekCode();
             switch (code) {
                 case PADDING:
-                    bytes.skip(1);
+                    bytes.readSkip(1);
                     break;
 
                 case PADDING32:
-                    bytes.skip(1);
-                    bytes.skip(bytes.readUnsignedInt());
+                    bytes.readSkip(1);
+                    bytes.readSkip(bytes.readUnsignedInt());
                     break;
 
                 case COMMENT: {
-                    bytes.skip(1);
+                    bytes.readSkip(1);
                     StringBuilder sb = Wires.acquireStringBuilder();
                     bytes.readUTFΔ(sb);
                     break;
                 }
 
                 case HINT: {
-                    bytes.skip(1);
+                    bytes.readSkip(1);
                     StringBuilder sb = Wires.acquireStringBuilder();
                     bytes.readUTFΔ(sb);
                     break;
@@ -258,9 +253,9 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     private int peekCode() {
-        if (bytes.remaining() < 1)
+        if (bytes.readRemaining() < 1)
             return END_OF_BYTES;
-        long pos = bytes.position();
+        long pos = bytes.readPosition();
         return bytes.readUnsignedByte(pos);
     }
 
@@ -272,12 +267,12 @@ public class BinaryWire implements Wire, InternalWireIn {
 
             case BinaryWireHighCode.SPECIAL:
                 if (peekCode == FIELD_NAME_ANY || peekCode == EVENT_NAME) {
-                    bytes.skip(1);
+                    bytes.readSkip(1);
                     bytes.readUTFΔ(sb);
                     return sb;
                 }
                 if (peekCode == FIELD_NUMBER) {
-                    bytes.skip(1);
+                    bytes.readSkip(1);
                     long fieldId = bytes.readStopBit();
                     if (codeMatch >= 0 && fieldId != codeMatch)
                         throw new UnsupportedOperationException("Field was: " + fieldId + " expected " + codeMatch);
@@ -288,7 +283,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 return null;
             case BinaryWireHighCode.FIELD0:
             case BinaryWireHighCode.FIELD1:
-                bytes.skip(1);
+                bytes.readSkip(1);
                 return getStringBuilder(peekCode, sb);
             default:
                 // if it's not a field, perhaps none was written.
@@ -313,7 +308,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     private void copySpecial(@NotNull WireOut wire, int peekCode) {
         switch (peekCode) {
             case COMMENT: {
-                bytes.skip(1);
+                bytes.readSkip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 wire.writeComment(sb);
@@ -321,7 +316,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
 
             case HINT: {
-                bytes.skip(1);
+                bytes.readSkip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 break;
@@ -333,7 +328,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 throw new UnsupportedOperationException();
 
             case TYPE_PREFIX: {
-                bytes.skip(1);
+                bytes.readSkip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 wire.writeValue().type(sb);
@@ -341,7 +336,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
 
             case TYPE_LITERAL: {
-                bytes.skip(1);
+                bytes.readSkip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
                 wire.writeValue().typeLiteral(sb);
@@ -354,13 +349,13 @@ public class BinaryWire implements Wire, InternalWireIn {
                 break;
 
             case STRING_ANY:
-                bytes.skip(1);
+                bytes.readSkip(1);
                 StringBuilder sb = readText(peekCode, Wires.acquireStringBuilder());
                 wire.writeValue().text(sb);
                 break;
 
             case FIELD_NUMBER: {
-                bytes.skip(1);
+                bytes.readSkip(1);
                 long code2 = bytes.readStopBit();
                 wire.write(new WireKey() {
                     @Nullable
@@ -379,17 +374,17 @@ public class BinaryWire implements Wire, InternalWireIn {
 
             // Boolean
             case NULL:
-                bytes.skip(1);
+                bytes.readSkip(1);
                 wire.writeValue().bool(null);
                 break;
 
             case FALSE:
-                bytes.skip(1);
+                bytes.readSkip(1);
                 wire.writeValue().bool(false);
                 break;
 
             case TRUE:
-                bytes.skip(1);
+                bytes.readSkip(1);
                 wire.writeValue().bool(true);
                 break;
             default:
@@ -558,7 +553,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         if (paddingToAdd >= 5) {
             writeCode(PADDING32)
                     .writeUnsignedInt(paddingToAdd - 5)
-                    .skip(paddingToAdd - 5);
+                    .writeSkip(paddingToAdd - 5);
 
         } else {
             for (int i = 0; i < paddingToAdd; i++)
@@ -639,7 +634,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     private int readCode() {
-        if (bytes.remaining() < 1)
+        if (bytes.readRemaining() < 1)
             return END_OF_BYTES;
         return bytes.readUnsignedByte();
     }
@@ -694,7 +689,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut bytes(@NotNull Bytes fromBytes) {
-            long remaining = fromBytes.remaining();
+            long remaining = fromBytes.readRemaining();
             writeLength(Maths.toInt32(remaining + 1));
             writeCode(U8_ARRAY);
             if (remaining > 0)
@@ -863,7 +858,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut int32forBinding(int value) {
-            int fromEndOfCacheLine = (int) ((-bytes.position()) & 63);
+            int fromEndOfCacheLine = (int) ((-bytes.readPosition()) & 63);
             if (fromEndOfCacheLine < 5)
                 addPadding(fromEndOfCacheLine - 1);
             fixedInt64(value);
@@ -873,7 +868,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut int64forBinding(long value) {
-            int fromEndOfCacheLine = (int) ((-bytes.position()) & 63);
+            int fromEndOfCacheLine = (int) ((-bytes.readPosition()) & 63);
             if (fromEndOfCacheLine < 9)
                 addPadding(fromEndOfCacheLine - 1);
             fixedInt64(value);
@@ -884,12 +879,12 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public WireOut sequence(@NotNull Consumer<ValueOut> writer) {
             writeCode(BYTES_LENGTH32);
-            long position = bytes.position();
+            long position = bytes.writePosition();
             bytes.writeInt(0);
 
             writer.accept(this);
 
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
             return BinaryWire.this;
         }
 
@@ -897,12 +892,12 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public WireOut marshallable(@NotNull WriteMarshallable object) {
             writeCode(BYTES_LENGTH32);
-            long position = bytes.position();
+            long position = bytes.writePosition();
             bytes.writeInt(0);
 
             object.writeMarshallable(BinaryWire.this);
 
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
             return BinaryWire.this;
         }
 
@@ -1202,7 +1197,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             int code = readCode();
             if (code != U8_ARRAY)
                 cantRead(code);
-            bytes.withLength(length - 1, toBytes::write);
+            bytes.readWithLength(length - 1, b -> toBytes.write(b));
             return wireIn();
         }
 
@@ -1224,16 +1219,16 @@ public class BinaryWire implements Wire, InternalWireIn {
             if (code != U8_ARRAY)
                 cantRead(code);
 
-            if (length > bytes.remaining())
+            if (length > bytes.readRemaining())
                 throw new BufferUnderflowException();
-            long limit0 = bytes.limit();
-            long limit = bytes.position() + length;
+            long limit0 = bytes.readLimit();
+            long limit = bytes.readPosition() + length;
             try {
-                bytes.limit(limit);
+                bytes.readLimit(limit);
                 bytesConsumer.accept(wireIn());
             } finally {
-                bytes.limit(limit0);
-                bytes.position(limit);
+                bytes.readLimit(limit0);
+                bytes.readPosition(limit);
             }
             return wireIn();
         }
@@ -1257,14 +1252,14 @@ public class BinaryWire implements Wire, InternalWireIn {
             switch (code) {
 /*
                 case BYTES_LENGTH8:
-                    bytes.skip(1);
+                    bytes.readSkip(1);
                     return bytes.readUnsignedByte();
                 case BYTES_LENGTH16:
-                    bytes.skip(1);
+                    bytes.readSkip(1);
                     return bytes.readUnsignedShort();
 */
                 case BYTES_LENGTH32:
-                    bytes.skip(1);
+                    bytes.readSkip(1);
                     return bytes.readUnsignedInt();
                 default:
                     return ANY_CODE_MATCH;
@@ -1421,7 +1416,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @Override
         public boolean hasNextSequenceItem() {
-            return bytes.remaining() > 0;
+            return bytes.readRemaining() > 0;
         }
 
         @NotNull
@@ -1447,9 +1442,9 @@ public class BinaryWire implements Wire, InternalWireIn {
                 if (!(values instanceof BinaryLongArrayReference))
                     setter.accept(values = new BinaryLongArrayReference());
                 Byteable b = (Byteable) values;
-                long length = BinaryLongArrayReference.peakLength(bytes, bytes.position());
-                b.bytesStore(bytes, bytes.position(), length);
-                bytes.skip(length);
+                long length = BinaryLongArrayReference.peakLength(bytes, bytes.readPosition());
+                b.bytesStore(bytes, bytes.readPosition(), length);
+                bytes.readSkip(length);
 
             } else {
                 cantRead(code);
@@ -1473,8 +1468,8 @@ public class BinaryWire implements Wire, InternalWireIn {
 
             Byteable b = (Byteable) value;
             long length = b.maxSize();
-            b.bytesStore(bytes, bytes.position(), length);
-            bytes.skip(length);
+            b.bytesStore(bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
             return BinaryWire.this;
         }
 
@@ -1490,8 +1485,8 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
-            b.bytesStore(bytes, bytes.position(), length);
-            bytes.skip(length);
+            b.bytesStore(bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
             return BinaryWire.this;
         }
 
@@ -1504,14 +1499,13 @@ public class BinaryWire implements Wire, InternalWireIn {
                 cantRead(code);
             final int length = bytes.readInt();
             long limit = bytes.readLimit();
-            long limit2 = bytes.position() + length;
-            bytes.limit(limit2);
-            bytes.limit(limit2);
+            long limit2 = bytes.readPosition() + length;
+            bytes.readLimit(limit2);
             try {
                 reader.accept(this);
             } finally {
-                bytes.limit(limit);
-                bytes.position(limit2);
+                bytes.readLimit(limit);
+                bytes.readPosition(limit2);
             }
             return BinaryWire.this;
         }
@@ -1522,13 +1516,13 @@ public class BinaryWire implements Wire, InternalWireIn {
             long length = readLength();
             if (length >= 0) {
                 long limit = bytes.readLimit();
-                long limit2 = bytes.position() + length;
-                bytes.limit(limit2);
+                long limit2 = bytes.readPosition() + length;
+                bytes.readLimit(limit2);
                 try {
                     return marshallableReader.apply(BinaryWire.this);
                 } finally {
-                    bytes.limit(limit);
-                    bytes.position(limit2);
+                    bytes.readLimit(limit);
+                    bytes.readPosition(limit2);
                 }
             } else {
                 return marshallableReader.apply(BinaryWire.this);
@@ -1602,13 +1596,13 @@ public class BinaryWire implements Wire, InternalWireIn {
             long length = readLength();
             if (length >= 0) {
                 long limit = bytes.readLimit();
-                long limit2 = bytes.position() + length;
-                bytes.limit(limit2);
+                long limit2 = bytes.readPosition() + length;
+                bytes.readLimit(limit2);
                 try {
                     object.readMarshallable(BinaryWire.this);
                 } finally {
-                    bytes.limit(limit);
-                    bytes.position(limit2);
+                    bytes.readLimit(limit);
+                    bytes.readPosition(limit2);
                 }
             } else {
                 object.readMarshallable(BinaryWire.this);
@@ -1628,7 +1622,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         private long readTextAsLong() {
-            bytes.skip(-1);
+            bytes.readSkip(-1);
             final String text = text();
             if (text == null)
                 throw new NullPointerException();
@@ -1637,15 +1631,6 @@ public class BinaryWire implements Wire, InternalWireIn {
             } catch (NumberFormatException e) {
                 return Math.round(Double.parseDouble(text));
             }
-        }
-
-        private double readTextAsDouble() {
-            bytes.skip(-1);
-            final String text = text();
-            if (text == null)
-                throw new NullPointerException();
-
-            return Double.parseDouble(text);
         }
 
         @Override

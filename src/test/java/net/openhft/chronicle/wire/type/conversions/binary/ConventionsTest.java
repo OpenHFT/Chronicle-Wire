@@ -131,8 +131,6 @@ public class ConventionsTest {
         else if (source instanceof Double)
             wire.writeValue().float64((Double) source);
 
-        wire.bytes().flip();
-
         if (String.class.isAssignableFrom(destinationType))
             return (T) wire.getValueIn().text();
 

@@ -28,15 +28,15 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
 
     public static void write(@NotNull Bytes bytes, long capacity) {
         bytes.writeLong(capacity);
-        long start = bytes.position() + VALUES;
+        long start = bytes.writePosition() + VALUES;
         bytes.zeroOut(start, start + (capacity << 3));
-        bytes.skip(capacity << 3);
+        bytes.writeSkip(capacity << 3);
     }
 
     public static void lazyWrite(@NotNull Bytes bytes, long capacity) {
         //System.out.println("capacity location =" + bytes.position());
         bytes.writeLong(capacity);
-        bytes.skip(capacity << 3);
+        bytes.writeSkip(capacity << 3);
     }
 
     public static long peakLength(@NotNull BytesStore bytes, long offset) {
@@ -52,22 +52,22 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
 
     @Override
     public long getValueAt(long index) {
-        return bytes.readLong(VALUES + offset + index << 3);
+        return bytes.readLong(VALUES + offset + (index << 3));
     }
 
     @Override
     public void setValueAt(long index, long value) {
-        bytes.writeLong(VALUES + offset + index << 3, value);
+        bytes.writeLong(VALUES + offset + (index << 3), value);
     }
 
     @Override
     public long getVolatileValueAt(long index) {
-        return bytes.readVolatileLong(VALUES + offset + index << 3);
+        return bytes.readVolatileLong(VALUES + offset + (index << 3));
     }
 
     @Override
     public void setOrderedValueAt(long index, long value) {
-        bytes.writeOrderedLong(VALUES + offset + index << 3, value);
+        bytes.writeOrderedLong(VALUES + offset + (index << 3), value);
     }
 
     @Override

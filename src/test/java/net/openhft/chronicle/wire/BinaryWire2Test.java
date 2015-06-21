@@ -50,7 +50,7 @@ public class BinaryWire2Test {
         wire.write().bool(false)
                 .write().bool(true)
                 .write().bool(null);
-        wire.flip();
+
         wire.read().bool(Assert::assertFalse)
                 .read().bool(Assert::assertTrue)
                 .read().bool(Assert::assertNull);
@@ -62,7 +62,7 @@ public class BinaryWire2Test {
         wire.write().float32(0.0F)
                 .write().float32(Float.NaN)
                 .write().float32(Float.POSITIVE_INFINITY);
-        wire.flip();
+
         wire.read().float32(t -> assertEquals(0.0F, t, 0.0F))
                 .read().float32(t -> assertTrue(Float.isNaN(t)))
                 .read().float32(t -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F));
@@ -75,7 +75,7 @@ public class BinaryWire2Test {
         wire.write().time(now)
                 .write().time(LocalTime.MAX)
                 .write().time(LocalTime.MIN);
-        wire.flip();
+
         wire.read().time(t -> assertEquals(now, t))
                 .read().time(t -> assertEquals(LocalTime.MAX, t))
                 .read().time(t -> assertEquals(LocalTime.MIN, t));
@@ -88,7 +88,7 @@ public class BinaryWire2Test {
         wire.write().zonedDateTime(now)
                 .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()))
                 .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()));
-        wire.flip();
+
         wire.read().zonedDateTime(t -> assertEquals(now, t))
                 .read().zonedDateTime(t -> assertEquals(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()), t))
                 .read().zonedDateTime(t -> assertEquals(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), t));
@@ -101,7 +101,7 @@ public class BinaryWire2Test {
         wire.write().date(now)
                 .write().date(LocalDate.MAX)
                 .write().date(LocalDate.MIN);
-        wire.flip();
+
         wire.read().date(t -> assertEquals(now, t))
                 .read().date(t -> assertEquals(LocalDate.MAX, t))
                 .read().date(t -> assertEquals(LocalDate.MIN, t));
@@ -114,7 +114,7 @@ public class BinaryWire2Test {
         wire.write().uuid(uuid)
                 .write().uuid(new UUID(0, 0))
                 .write().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE));
-        wire.flip();
+
         wire.read().uuid(t -> assertEquals(uuid, t))
                 .read().uuid(t -> assertEquals(new UUID(0, 0), t))
                 .read().uuid(t -> assertEquals(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), t));
@@ -124,12 +124,12 @@ public class BinaryWire2Test {
     public void testSequence() {
         Wire wire = createWire();
         writeMessage(wire);
-        wire.flip();
+
         System.out.println(wire.bytes().toHexString());
 
         Wire twire = new TextWire(Bytes.elasticByteBuffer());
         writeMessage(twire);
-        twire.flip();
+
         System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
     }
 

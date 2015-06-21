@@ -236,8 +236,6 @@ public class YamlExamples {
                 .write(Keys.rbi).int64(147)
                 .writeComment("Runs Batted In");
 
-        wire.flip();
-
         Stats stats = new Stats();
         wire.read(Keys.name).textTo(stats.name);
         wire.read(Keys.hr).int32(stats::hr)
@@ -262,12 +260,12 @@ public class YamlExamples {
         canonical(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault())),
         date(LocalDate.MIN);
 
-        private final Type type;
-        private final Object defaultValue;
-
         static {
             WireKey.checkKeys(values());
         }
+
+        private final Type type;
+        private final Object defaultValue;
 
         Keys(@NotNull Object defaultValue) {
             this(defaultValue.getClass(), defaultValue);

@@ -72,11 +72,11 @@ public enum Wires {
 
     public static void writeData(@NotNull WireOut wireOut, boolean metaData, boolean notReady, @NotNull Consumer<WireOut> writer) {
         Bytes bytes = wireOut.bytes();
-        long position = bytes.position();
+        long position = bytes.writePosition();
         int metaDataBit = metaData ? META_DATA : 0;
         bytes.writeOrderedInt(metaDataBit | NOT_READY | UNKNOWN_LENGTH);
         writer.accept(wireOut);
-        int length = metaDataBit | toIntU30(bytes.position() - position - 4, "Document length %,d out of 30-bit int range.");
+        int length = metaDataBit | toIntU30(bytes.writePosition() - position - 4, "Document length %,d out of 30-bit int range.");
         bytes.writeOrderedInt(position, length | (notReady ? NOT_READY : 0));
     }
 
@@ -86,15 +86,15 @@ public enum Wires {
                                    @Nullable Consumer<WireIn> dataConsumer) {
         final Bytes bytes = wireIn.bytes();
 
-        long position = bytes.position();
-        long limit = bytes.limit();
+        long position = bytes.readPosition();
+        long limit = bytes.readLimit();
         try {
-            bytes.limit(bytes.isElastic() ? bytes.capacity() : bytes.realCapacity());
-            bytes.position(offset);
+            bytes.readLimit(bytes.isElastic() ? bytes.capacity() : bytes.realCapacity());
+            bytes.readPosition(offset);
             return readData(wireIn, metaDataConsumer, dataConsumer);
         } finally {
-            bytes.limit(limit);
-            bytes.position(position);
+            bytes.readLimit(limit);
+            bytes.readPosition(position);
         }
     }
 
@@ -103,12 +103,12 @@ public enum Wires {
                                    @Nullable Consumer<WireIn> dataConsumer) {
         final Bytes bytes = wireIn.bytes();
         boolean read = false;
-        while (bytes.remaining() >= 4) {
-            long position = bytes.position();
+        while (bytes.readRemaining() >= 4) {
+            long position = bytes.readPosition();
             int header = bytes.readVolatileInt(position);
             if (!isKnownLength(header))
                 return read;
-            bytes.skip(4);
+            bytes.readSkip(4);
             final boolean ready = isReady(header);
             final int len = lengthOf(header);
             if (isData(header)) {
@@ -117,16 +117,16 @@ public enum Wires {
 
                 } else {
                     ((InternalWireIn) wireIn).setReady(ready);
-                    wireIn.bytes().withLength(len, b -> dataConsumer.accept(wireIn));
+                    wireIn.bytes().readWithLength(len, b -> dataConsumer.accept(wireIn));
                     return true;
                 }
             } else {
 
                 if (metaDataConsumer == null)
                     // skip the header
-                    wireIn.bytes().skip(len);
+                    wireIn.bytes().readSkip(len);
                 else
-                    wireIn.bytes().withLength(len, b -> metaDataConsumer.accept(wireIn));
+                    wireIn.bytes().readWithLength(len, b -> metaDataConsumer.accept(wireIn));
 
                 if (dataConsumer == null)
                     return true;
@@ -137,8 +137,8 @@ public enum Wires {
     }
 
     public static String fromSizePrefixedBlobs(@NotNull Bytes bytes) {
-        long position = bytes.position();
-        return fromSizePrefixedBlobs(bytes, position, bytes.remaining());
+        long position = bytes.readPosition();
+        return fromSizePrefixedBlobs(bytes, position, bytes.readRemaining());
     }
 
     public static int lengthOf(long len) {
@@ -156,10 +156,10 @@ public enum Wires {
     public static boolean isData(@NotNull WireIn wireIn) {
         final Bytes bytes = wireIn.bytes();
 
-        if (bytes.remaining() < 4)
+        if (bytes.readRemaining() < 4)
             throw new IllegalStateException();
 
-        long position = bytes.position();
+        long position = bytes.readPosition();
         int header = bytes.readVolatileInt(position);
         if (!isKnownLength(header))
             throw new IllegalStateException("unknown len, header=" + header);
@@ -171,12 +171,12 @@ public enum Wires {
     public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position, long length) {
         StringBuilder sb = new StringBuilder();
 
-        final long limit0 = bytes.limit();
-        final long position0 = bytes.position();
+        final long limit0 = bytes.readLimit();
+        final long position0 = bytes.readPosition();
         try {
-            bytes.position(position);
-            bytes.limit(position + length);
-            while (bytes.remaining() >= 4) {
+            bytes.readPosition(position);
+            bytes.readLimit(position + length);
+            while (bytes.readRemaining() >= 4) {
                 long header = bytes.readUnsignedInt();
                 int len = lengthOf(header);
                 String type = isData(header)
@@ -191,8 +191,8 @@ public enum Wires {
 
             return sb.toString();
         } finally {
-            bytes.limit(limit0);
-            bytes.position(position0);
+            bytes.readLimit(limit0);
+            bytes.readPosition(position0);
         }
     }
 

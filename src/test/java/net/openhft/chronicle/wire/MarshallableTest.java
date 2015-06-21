@@ -30,7 +30,7 @@ public class MarshallableTest {
         assertTrue(bytes.isElastic());
         TextWire wire = new TextWire(bytes);
         m.writeMarshallable(wire);
-        wire.flip();
+
         m.readMarshallable(wire);
     }
 }

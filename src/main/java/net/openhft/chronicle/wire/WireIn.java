@@ -68,8 +68,6 @@ public interface WireIn {
     @NotNull
     Wire readComment(@NotNull StringBuilder sb);
 
-    void flip();
-
     void clear();
 
     @NotNull

@@ -26,7 +26,7 @@ public class TextLongArrayReferenceTest {
         int length = 128 * 22 + 47;
         try (NativeBytes bytes = NativeBytes.nativeBytes(length)) {
             TextLongArrayReference.write(bytes, 128);
-            bytes.flip();
+
             TextLongArrayReference array = new TextLongArrayReference();
             array.bytesStore(bytes, 0, length);
 

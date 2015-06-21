@@ -116,11 +116,6 @@ public class RawWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public void flip() {
-        bytes.flip();
-    }
-
-    @Override
     public void clear() {
         bytes.clear();
     }
@@ -133,7 +128,7 @@ public class RawWire implements Wire, InternalWireIn {
 
     @Override
     public boolean hasMore() {
-        return bytes.remaining() > 0;
+        return bytes.readRemaining() > 0;
     }
 
     @Override
@@ -222,7 +217,7 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut bytes(@NotNull Bytes fromBytes) {
-            writeLength(fromBytes.remaining());
+            writeLength(fromBytes.writeRemaining());
             bytes.write(fromBytes);
             return RawWire.this;
         }
@@ -356,10 +351,10 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @NotNull Class type) {
-            long position = bytes.position();
-            bytes.skip(1);
+            long position = bytes.writePosition();
+            bytes.writeSkip(1);
             typeTranslator.accept(type, bytes);
-            bytes.writeUnsignedByte(position, Maths.toInt8(bytes.position() - position - 1));
+            bytes.writeUnsignedByte(position, Maths.toInt8(bytes.writePosition() - position - 1));
             return RawWire.this;
         }
 
@@ -387,12 +382,12 @@ public class RawWire implements Wire, InternalWireIn {
         @Override
         public WireOut sequence(@NotNull Consumer<ValueOut> writer) {
             text(lastField);
-            long position = bytes.position();
+            long position = bytes.writePosition();
             bytes.writeInt(0);
 
                 writer.accept(this);
 
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
             return RawWire.this;
         }
 
@@ -400,12 +395,12 @@ public class RawWire implements Wire, InternalWireIn {
         @Override
         public WireOut marshallable(@NotNull WriteMarshallable object) {
             text(lastField);
-            long position = bytes.position();
+            long position = bytes.writePosition();
             bytes.writeInt(0);
 
                 object.writeMarshallable(RawWire.this);
 
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.position() - position - 4, "Document length %,d out of 32-bit int range."));
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
             return RawWire.this;
         }
 
@@ -476,7 +471,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         public WireIn bytes(@NotNull Bytes toBytes) {
-            wireIn().bytes().withLength(readLength(), toBytes::write);
+            wireIn().bytes().readWithLength(readLength(), b -> toBytes.write(b));
             return wireIn();
         }
 
@@ -484,16 +479,16 @@ public class RawWire implements Wire, InternalWireIn {
         public WireIn bytes(@NotNull Consumer<WireIn> bytesConsumer) {
             long length = readLength();
 
-            if (length > bytes.remaining())
+            if (length > bytes.readRemaining())
                 throw new BufferUnderflowException();
-            long limit0 = bytes.limit();
-            long limit = bytes.position() + length;
+            long limit0 = bytes.readLimit();
+            long limit = bytes.readPosition() + length;
             try {
-                bytes.limit(limit);
+                bytes.readLimit(limit);
                 bytesConsumer.accept(wireIn());
             } finally {
-                bytes.limit(limit0);
-                bytes.position(limit);
+                bytes.readLimit(limit0);
+                bytes.readPosition(limit);
             }
             return wireIn();
         }
@@ -594,7 +589,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @Override
         public boolean hasNext() {
-            return bytes.remaining() > 0;
+            return bytes.readRemaining() > 0;
         }
 
         @Override
@@ -617,8 +612,8 @@ public class RawWire implements Wire, InternalWireIn {
             }
             Byteable b = (Byteable) values;
             long length = b.maxSize();
-            b.bytesStore(bytes, bytes.position(), length);
-            bytes.skip(length);
+            b.bytesStore(bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
             return RawWire.this;
         }
 
@@ -630,8 +625,8 @@ public class RawWire implements Wire, InternalWireIn {
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
-            b.bytesStore(bytes, bytes.position(), length);
-            bytes.skip(length);
+            b.bytesStore(bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
             return RawWire.this;
         }
 
@@ -643,8 +638,8 @@ public class RawWire implements Wire, InternalWireIn {
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
-            b.bytesStore(bytes, bytes.position(), length);
-            bytes.skip(length);
+            b.bytesStore(bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
             return RawWire.this;
         }
 
@@ -663,13 +658,13 @@ public class RawWire implements Wire, InternalWireIn {
             long length = bytes.readUnsignedInt();
             if (length >= 0) {
                 long limit = bytes.readLimit();
-                long limit2 = bytes.position() + length;
-                bytes.limit(limit2);
+                long limit2 = bytes.readPosition() + length;
+                bytes.readLimit(limit2);
                 try {
                     return marshallableReader.apply(RawWire.this);
                 } finally {
-                    bytes.limit(limit);
-                    bytes.position(limit2);
+                    bytes.readLimit(limit);
+                    bytes.readPosition(limit2);
                 }
             } else {
                 return marshallableReader.apply(RawWire.this);
@@ -700,13 +695,13 @@ public class RawWire implements Wire, InternalWireIn {
             long length = bytes.readUnsignedInt();
             if (length >= 0) {
                 long limit = bytes.readLimit();
-                long limit2 = bytes.position() + length;
-                bytes.limit(limit2);
+                long limit2 = bytes.readPosition() + length;
+                bytes.readLimit(limit2);
                 try {
                     object.readMarshallable(RawWire.this);
                 } finally {
-                    bytes.limit(limit);
-                    bytes.position(limit2);
+                    bytes.readLimit(limit);
+                    bytes.readPosition(limit2);
                 }
             } else {
                 object.readMarshallable(RawWire.this);

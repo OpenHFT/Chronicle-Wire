@@ -36,10 +36,16 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(value = Parameterized.class)
 public class BinaryWireNumbersTest {
+    private static final float VAL1 = 12345678901234567.0f;
     private final int len;
     private final Consumer<ValueOut> expected;
     private final Consumer<ValueOut> perform;
-    private static final float VAL1 = 12345678901234567.0f;
+
+    public BinaryWireNumbersTest(int len, Consumer<ValueOut> expected, Consumer<ValueOut> perform) {
+        this.len = len;
+        this.expected = expected;
+        this.perform = perform;
+    }
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() throws IOException {
@@ -85,12 +91,6 @@ public class BinaryWireNumbersTest {
         });
     }
 
-    public BinaryWireNumbersTest(int len, Consumer<ValueOut> expected, Consumer<ValueOut> perform) {
-        this.len = len;
-        this.expected = expected;
-        this.perform = perform;
-    }
-
     @Test
     public void doTest() {
         test(expected, perform);
@@ -100,18 +100,16 @@ public class BinaryWireNumbersTest {
         Bytes bytes1 = nativeBytes();
         Wire wire1 = new BinaryWire(bytes1, true, false, false);
         expected.accept(wire1.write());
-        bytes1.flip();
 
-        assertEquals("Length for fixed length doesn't match for " + TextWire.asText(wire1), len, bytes1.remaining());
+        assertEquals("Length for fixed length doesn't match for " + TextWire.asText(wire1), len, bytes1.readRemaining());
 
         Bytes bytes2 = nativeBytes();
         Wire wire2 = new BinaryWire(bytes2);
         perform.accept(wire2.write());
-        bytes2.flip();
 
         assertEquals("Lengths for variable length expected " + bytes1
                         + " and actual " + bytes2 + " don't match for " + TextWire.asText(wire1),
-                bytes1.remaining(), bytes2.remaining());
+                bytes1.readRemaining(), bytes2.readRemaining());
         if (!bytes1.toString().equals(bytes2.toString()))
             System.out.println("Format doesn't match for " + TextWire.asText(wire2));
     }

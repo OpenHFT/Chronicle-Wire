@@ -47,7 +47,6 @@ public class RawWireTest {
         wire.write();
         wire.write();
         wire.write();
-        wire.flip();
         assertEquals("", wire.toString());
     }
 
@@ -63,7 +62,6 @@ public class RawWireTest {
         wire.write(BWKey.field1);
         wire.write(BWKey.field2);
         wire.write(BWKey.field3);
-        wire.flip();
         assertEquals("", wire.toString());
     }
 
@@ -74,7 +72,6 @@ public class RawWireTest {
         wire.write(() -> "World");
         wire.write(() -> "Long field name which is more than 32 characters, Bye");
 
-        wire.flip();
         assertEquals("", wire.toString());
     }
 
@@ -85,11 +82,10 @@ public class RawWireTest {
         wire.write(BWKey.field1);
         wire.write(() -> "Test");
 
-        wire.flip();
         wire.read();
         wire.read();
         wire.read();
-        assertEquals(0, bytes.remaining());
+        assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -101,13 +97,11 @@ public class RawWireTest {
         wire.write(BWKey.field1);
         wire.write(() -> "Test");
 
-        wire.flip();
-
         // ok as blank matches anything
         wire.read(BWKey.field1);
         wire.read(BWKey.field1);
         wire.read(BWKey.field1);
-        assertEquals(0, bytes.remaining());
+        assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -120,8 +114,6 @@ public class RawWireTest {
         String name1 = "Long field name which is more than 32 characters, Bye";
         wire.write(() -> name1);
 
-        wire.flip();
-
         // ok as blank matches anything
         StringBuilder name = new StringBuilder();
         wire.read(name);
@@ -133,7 +125,7 @@ public class RawWireTest {
         wire.read(name);
         assertEquals(0, name.length());
 
-        assertEquals(0, bytes.remaining());
+        assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -145,8 +137,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).int8(2);
 
         wire.write(() -> "Test").int8(3);
-        wire.flip();
-        assertEquals("[pos: 0, lim: 3, cap: 1TiB ] ⒈⒉⒊", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 3, wlim: 1TiB, cap: 1TiB ] ⒈⒉⒊", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -155,7 +146,7 @@ public class RawWireTest {
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, bytes.remaining());
+        assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -167,8 +158,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).int16(2);
 
         wire.write(() -> "Test").int16(3);
-        wire.flip();
-        assertEquals("[pos: 0, lim: 6, cap: 1TiB ] ⒈٠⒉٠⒊٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 6, wlim: 1TiB, cap: 1TiB ] ⒈٠⒉٠⒊٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -177,7 +167,7 @@ public class RawWireTest {
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, bytes.remaining());
+        assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -189,8 +179,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).uint8(2);
 
         wire.write(() -> "Test").uint8(3);
-        wire.flip();
-        assertEquals("[pos: 0, lim: 3, cap: 1TiB ] ⒈⒉⒊", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 3, wlim: 1TiB, cap: 1TiB ] ⒈⒉⒊", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -199,7 +188,7 @@ public class RawWireTest {
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, bytes.remaining());
+        assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -211,8 +200,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).uint16(2);
 
         wire.write(() -> "Test").uint16(3);
-        wire.flip();
-        assertEquals("[pos: 0, lim: 6, cap: 1TiB ] ⒈٠⒉٠⒊٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 6, wlim: 1TiB, cap: 1TiB ] ⒈٠⒉٠⒊٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -221,7 +209,7 @@ public class RawWireTest {
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, bytes.remaining());
+        assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -233,8 +221,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).uint32(2);
 
         wire.write(() -> "Test").uint32(3);
-        wire.flip();
-        assertEquals("[pos: 0, lim: 12, cap: 1TiB ] ⒈٠٠٠⒉٠٠٠⒊٠٠٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 12, wlim: 1TiB, cap: 1TiB ] ⒈٠٠٠⒉٠٠٠⒊٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicLong i = new AtomicLong();
@@ -243,7 +230,7 @@ public class RawWireTest {
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, bytes.remaining());
+        assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -255,8 +242,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).int32(2);
 
         wire.write(() -> "Test").int32(3);
-        wire.flip();
-        assertEquals("[pos: 0, lim: 12, cap: 1TiB ] ⒈٠٠٠⒉٠٠٠⒊٠٠٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 12, wlim: 1TiB, cap: 1TiB ] ⒈٠٠٠⒉٠٠٠⒊٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -265,7 +251,7 @@ public class RawWireTest {
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, bytes.remaining());
+        assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -277,8 +263,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).int64(2);
 
         wire.write(() -> "Test").int64(3);
-        wire.flip();
-        assertEquals("[pos: 0, lim: 24, cap: 1TiB ] ⒈٠٠٠٠٠٠٠⒉٠٠٠٠٠٠٠⒊٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 24, wlim: 1TiB, cap: 1TiB ] ⒈٠٠٠٠٠٠٠⒉٠٠٠٠٠٠٠⒊٠٠٠٠٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicLong i = new AtomicLong();
@@ -288,7 +273,7 @@ public class RawWireTest {
             assertEquals(e, i.get());
         });
 
-        assertEquals(0, bytes.remaining());
+        assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -300,8 +285,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).float64(2);
 
         wire.write(() -> "Test").float64(3);
-        wire.flip();
-        assertEquals("[pos: 0, lim: 24, cap: 1TiB ] ٠٠٠٠٠٠ð?٠٠٠٠٠٠٠@٠٠٠٠٠٠⒏@", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 24, wlim: 1TiB, cap: 1TiB ] ٠٠٠٠٠٠ð?٠٠٠٠٠٠٠@٠٠٠٠٠٠⒏@", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         class Floater {
@@ -317,7 +301,7 @@ public class RawWireTest {
             assertEquals(e, n.f, 0.0);
         });
 
-        assertEquals(0, bytes.remaining());
+        assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -331,9 +315,8 @@ public class RawWireTest {
 
         wire.write(() -> "Test")
                 .text(name1);
-        wire.flip();
         String actual = wire.bytes().toDebugString();
-        assertEquals("[pos: 0, lim: 69, cap: 1TiB ] ⒌Hello⒌world8Long field name which is more than 32 characters, \\ ⒑Bye", actual);
+        assertEquals("[pos: 0, rlim: 69, wlim: 1TiB, cap: 1TiB ] ⒌Hello⒌world8Long field name which is more than 32 characters, \\ ⒑Bye", actual);
 
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
@@ -343,7 +326,7 @@ public class RawWireTest {
             assertEquals(e, sb.toString());
         });
 
-        assertEquals(0, bytes.remaining());
+        assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -357,8 +340,7 @@ public class RawWireTest {
 
         wire.write(() -> "Test").type(name1);
         wire.writeComment("");
-        wire.flip();
-        assertEquals("[pos: 0, lim: 142, cap: 1TiB ] ⒍MyType⒑AlsoMyType{" + name1, wire.bytes().toDebugString(200));
+        assertEquals("[pos: 0, rlim: 142, wlim: 1TiB, cap: 1TiB ] ⒍MyType⒑AlsoMyType{" + name1, wire.bytes().toDebugString(200));
 
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
@@ -367,7 +349,7 @@ public class RawWireTest {
             assertEquals(e, sb.toString());
         });
 
-        assertEquals(0, bytes.remaining());
+        assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -378,7 +360,6 @@ public class RawWireTest {
         wire.write().bool(false)
                 .write().bool(true)
                 .write().bool(null);
-        wire.flip();
         wire.read().bool(Assert::assertFalse)
                 .read().bool(Assert::assertTrue)
                 .read().bool(Assert::assertNull);
@@ -392,7 +373,6 @@ public class RawWireTest {
                 .write().float32(Float.POSITIVE_INFINITY)
                 .write().float32(Float.NEGATIVE_INFINITY)
                 .write().float32(123456.0f);
-        wire.flip();
         wire.read().float32(t -> assertEquals(0.0F, t, 0.0F))
                 .read().float32(t -> assertTrue(Float.isNaN(t)))
                 .read().float32(t -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F))
@@ -407,7 +387,6 @@ public class RawWireTest {
         wire.write().time(now)
                 .write().time(LocalTime.MAX)
                 .write().time(LocalTime.MIN);
-        wire.flip();
         wire.read().time(t -> assertEquals(now, t))
                 .read().time(t -> assertEquals(LocalTime.MAX, t))
                 .read().time(t -> assertEquals(LocalTime.MIN, t));
@@ -420,7 +399,6 @@ public class RawWireTest {
         wire.write().zonedDateTime(now)
                 .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()))
                 .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()));
-        wire.flip();
         wire.read().zonedDateTime(t -> assertEquals(now, t))
                 .read().zonedDateTime(t -> assertEquals(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()), t))
                 .read().zonedDateTime(t -> assertEquals(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), t));
@@ -433,7 +411,6 @@ public class RawWireTest {
         wire.write().date(now)
                 .write().date(LocalDate.MAX)
                 .write().date(LocalDate.MIN);
-        wire.flip();
         wire.read().date(t -> assertEquals(now, t))
                 .read().date(t -> assertEquals(LocalDate.MAX, t))
                 .read().date(t -> assertEquals(LocalDate.MIN, t));
@@ -446,7 +423,6 @@ public class RawWireTest {
         wire.write().uuid(uuid)
                 .write().uuid(new UUID(0, 0))
                 .write().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE));
-        wire.flip();
         wire.read().uuid(t -> assertEquals(uuid, t))
                 .read().uuid(t -> assertEquals(new UUID(0, 0), t))
                 .read().uuid(t -> assertEquals(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), t));
@@ -463,14 +439,12 @@ public class RawWireTest {
                 .write().bytes(Bytes.wrap("Hello".getBytes()))
                 .write().bytes(Bytes.wrap("quotable, text".getBytes()))
                 .write().bytes(allBytes);
-        wire.flip();
         System.out.println(bytes.toDebugString());
         NativeBytes allBytes2 = nativeBytes();
-        wire.read().bytes(wi -> assertEquals(0, wi.bytes().remaining()))
+        wire.read().bytes(wi -> assertEquals(0, wi.bytes().readRemaining()))
                 .read().bytes(wi -> assertEquals("Hello", wi.bytes().toString()))
                 .read().bytes(wi -> assertEquals("quotable, text", wi.bytes().toString()))
                 .read().bytes(allBytes2);
-        allBytes2.flip();
         assertEquals(Bytes.wrap(allBytes), allBytes2);
     }
 
@@ -495,8 +469,7 @@ public class RawWireTest {
         mtB.text.append("Bye now");
         wire.write(() -> "B").marshallable(mtB);
 
-        wire.flip();
-//        assertEquals("[pos: 0, lim: 74, cap: 1TiB ] #٠٠٠¿90w¾\u009F\u001A/Ý^@٠٠٠٠٠٠٠٠C\u009ECÿ⒒Hello World\u001F٠٠٠٠Ò⒋S⒌£\u0092:Ý^@٠٠٠٠٠٠٠٠\u009E.¤ø⒎Bye now", wire.bytes().toDebugString(400));
+        //        assertEquals("[pos: 0, rlim: 74, wlim: 1TiB, cap: 1TiB ] #٠٠٠¿90w¾\u009F\u001A/Ý^@٠٠٠٠٠٠٠٠C\u009ECÿ⒒Hello World\u001F٠٠٠٠Ò⒋S⒌£\u0092:Ý^@٠٠٠٠٠٠٠٠\u009E.¤ø⒎Bye now", wire.bytes().toDebugString(400));
 
         MyTypes mt2 = new MyTypes();
         wire.read(() -> "A").marshallable(mt2);

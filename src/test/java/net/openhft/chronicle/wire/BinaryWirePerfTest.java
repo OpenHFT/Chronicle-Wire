@@ -85,11 +85,11 @@ public class BinaryWirePerfTest {
             a.i = i;
             a.l = i;
             a.writeMarshallable(wire);
-            wire.flip();
+
             b.readMarshallable(wire);
         }
         long rate = (System.nanoTime() - start) / runs;
-        System.out.printf("(vars) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().position());
+        System.out.printf("(vars) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());
     }
 
     @Test
@@ -110,11 +110,11 @@ public class BinaryWirePerfTest {
             a.i = i;
             a.l = i;
             a.writeMarshallable(wire);
-            wire.flip();
+
             b.readMarshallable(wire);
         }
         long rate = (System.nanoTime() - start) / runs;
-        System.out.printf("(ints) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().position());
+        System.out.printf("(ints) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());
     }
 
     static class MyType2 implements Marshallable {

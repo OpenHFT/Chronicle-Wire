@@ -51,7 +51,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
                 "F\0\0\0lookup: { relativeUri: test, view: !Map types: [ !Integer, !String ] }");
         Wire text = new TextWire(bytes);
         writeMessageOne(text);
-        bytes.flip();
+
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("--- !!meta-data\n" +
                         "csp: ///service-lookup\n" +
@@ -67,7 +67,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         Wire bin = new BinaryWire(bytes);
         bytes.clear();
         writeMessageOne(bin);
-        bytes.flip();
+
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("[pos: 0, lim: 124, cap: 1TiB ] \u001F٠٠@Ãcspñ///service-lookup" +
                 "Ãtid\u0090¦\u0094⒒RU" +
@@ -76,7 +76,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         Wire raw = new RawWire(bytes);
         bytes.clear();
         writeMessageOne(raw);
-        bytes.flip();
+
         assertEquals("[pos: 0, lim: 79, cap: 1TiB ] " +
                 "\u001A٠٠@⒘///service-lookupu\u009F)å\"٠٠٠-٠٠٠" +
                 "⒍lookup\"٠٠٠⒋test⒊Map⒌types⒖٠٠٠⒎Integer⒍String", bytes.toDebugString());
@@ -95,7 +95,6 @@ put: [ 3, bye ]
 */
         bytes.clear();
         writeMessageTwo(text);
-        bytes.flip();
         assertEquals("--- !!meta-data\n" +
                         "\n" +
                         "csp://server1/test\n" +
@@ -118,7 +117,6 @@ put: [ 3, bye ]
         bytes.clear();
         writeMessageTwo(bin);
 
-        bytes.flip();
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("[pos: 0, lim: 86, cap: 1TiB ] " +
                 "\u0018٠٠@Ãcspî//server1/testÃcid⒈" +
@@ -128,7 +126,6 @@ put: [ 3, bye ]
 
         bytes.clear();
         writeMessageTwo(raw);
-        bytes.flip();
         assertEquals("[pos: 0, lim: 103, cap: 1TiB ] " +
                 "\u0017٠٠@⒕//server1/test⒈٠٠٠٠٠٠٠\u0016" +
                 "٠٠٠⒊put⒕٠٠٠⒈٠٠٠٠٠٠٠⒌hello\u0016" +

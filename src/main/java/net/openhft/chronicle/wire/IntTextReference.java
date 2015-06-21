@@ -34,7 +34,7 @@ public class IntTextReference implements IntValue, Byteable {
     private long offset;
 
     public static void write(@NotNull Bytes bytes, int value) {
-        long position = bytes.position();
+        long position = bytes.writePosition();
         bytes.write(template);
         bytes.append(position + VALUE, value, DIGITS);
     }

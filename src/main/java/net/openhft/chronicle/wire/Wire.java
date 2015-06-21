@@ -21,5 +21,4 @@ package net.openhft.chronicle.wire;
  * Created by peter.lawrey on 12/01/15.
  */
 public interface Wire extends WireIn, WireOut {
-
 }

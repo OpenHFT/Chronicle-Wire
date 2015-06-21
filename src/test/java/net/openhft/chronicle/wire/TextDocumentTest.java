@@ -27,48 +27,6 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 
 public class TextDocumentTest {
-    enum Keys implements WireKey {
-        uuid,
-        created,
-        writeByte,
-        readByte
-    }
-
-    private static class Header implements Marshallable {
-        public static final long WRITE_BYTE = 512;
-        public static final long READ_BYTE = 1024;
-
-        UUID uuid;
-        ZonedDateTime created;
-        @Nullable
-        LongValue writeByte;
-        @Nullable
-        LongValue readByte;
-
-        public Header(){
-            this.uuid = UUID.randomUUID();
-            this.writeByte = null;
-            this.readByte = null;
-            this.created = ZonedDateTime.now();
-        }
-
-        @Override
-        public void writeMarshallable(@NotNull WireOut out) {
-            out.write(Keys.uuid).uuid(uuid);
-            out.write(Keys.writeByte).int64forBinding(WRITE_BYTE);
-            out.write(Keys.readByte).int64forBinding(READ_BYTE);
-            out.write(Keys.created).zonedDateTime(created);
-        }
-
-        @Override
-        public void readMarshallable(@NotNull WireIn in) {
-            in.read(Keys.uuid).uuid(u -> uuid = u);
-            in.read(Keys.writeByte).int64(writeByte, x -> writeByte = x);
-            in.read(Keys.readByte).int64(readByte, x -> readByte = x);
-            in.read(Keys.created).zonedDateTime(c -> created = c);
-        }
-    }
-
     /*
      Before reading uuid:
          uuid: 11d0c0c2-657d-4745-8be6-cc781cfc8279, writeByte: !!atomic { locked: false, value: 00000000000000000512 }, created:2015-04-02T09:30:15.134+02:00[Europe/Rome] }
@@ -97,7 +55,7 @@ public class TextDocumentTest {
         final Header rheader = new Header();
 
         wire.writeDocument(true, w -> w.write(() -> "header").marshallable(wheader));
-        wire.flip();
+
         assertEquals("--- !!meta-data\n" +
                 "header: {\n" +
                 "  uuid: "+wheader.uuid+",\n" +
@@ -111,5 +69,47 @@ public class TextDocumentTest {
         assertEquals(Header.WRITE_BYTE, rheader.writeByte.getValue());
         assertEquals(Header.READ_BYTE, rheader.readByte.getValue());
         assertEquals(wheader.created, rheader.created);
+    }
+
+    enum Keys implements WireKey {
+        uuid,
+        created,
+        writeByte,
+        readByte
+    }
+
+    private static class Header implements Marshallable {
+        public static final long WRITE_BYTE = 512;
+        public static final long READ_BYTE = 1024;
+
+        UUID uuid;
+        ZonedDateTime created;
+        @Nullable
+        LongValue writeByte;
+        @Nullable
+        LongValue readByte;
+
+        public Header() {
+            this.uuid = UUID.randomUUID();
+            this.writeByte = null;
+            this.readByte = null;
+            this.created = ZonedDateTime.now();
+        }
+
+        @Override
+        public void writeMarshallable(@NotNull WireOut out) {
+            out.write(Keys.uuid).uuid(uuid);
+            out.write(Keys.writeByte).int64forBinding(WRITE_BYTE);
+            out.write(Keys.readByte).int64forBinding(READ_BYTE);
+            out.write(Keys.created).zonedDateTime(created);
+        }
+
+        @Override
+        public void readMarshallable(@NotNull WireIn in) {
+            in.read(Keys.uuid).uuid(u -> uuid = u);
+            in.read(Keys.writeByte).int64(writeByte, x -> writeByte = x);
+            in.read(Keys.readByte).int64(readByte, x -> readByte = x);
+            in.read(Keys.created).zonedDateTime(c -> created = c);
+        }
     }
 }
