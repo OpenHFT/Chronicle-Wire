@@ -23,7 +23,6 @@ public class UsingTestMarshallable {
         TextWire textWire = new TextWire(byteBufferBytes);
 
         textWire.writeDocument(false, d -> d.write(() -> "any-key").marshallable(testMarshallable));
-        textWire.bytes().flip();
 
         String value = Wires.fromSizePrefixedBlobs(textWire.bytes());
 

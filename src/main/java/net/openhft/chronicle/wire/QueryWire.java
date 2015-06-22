@@ -326,7 +326,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut bytes(Bytes fromBytes) {
+        public WireOut bytes(BytesStore fromBytes) {
             throw new UnsupportedOperationException("todo");
         }
 
@@ -870,6 +870,12 @@ public class QueryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public <T> T applyToMarshallable(Function<WireIn, T> marshallableReader) {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Nullable
+        @Override
+        public <T extends ReadMarshallable> T typedMarshallable() {
             throw new UnsupportedOperationException("todo");
         }
 

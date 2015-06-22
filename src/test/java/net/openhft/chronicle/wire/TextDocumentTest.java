@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
@@ -50,19 +51,21 @@ public class TextDocumentTest {
      */
     @Test
     public void testDocument() {
-        final Wire wire = new TextWire(NativeBytes.nativeBytes());
+        NativeBytes<Void> bytes1 = NativeBytes.nativeBytes();
+        final Wire wire = new TextWire(bytes1);
         final Header wheader = new Header();
         final Header rheader = new Header();
 
         wire.writeDocument(true, w -> w.write(() -> "header").marshallable(wheader));
 
+        Bytes<?> bytes = wire.bytes();
         assertEquals("--- !!meta-data\n" +
                 "header: {\n" +
                 "  uuid: "+wheader.uuid+",\n" +
                 "  writeByte: !!atomic { locked: false, value: 00000000000000000512 },\n" +
                 "  readByte: !!atomic { locked: false, value: 00000000000000001024 },\n" +
                 "  created: " + wheader.created+"\n" +
-                "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
+                "}\n", Wires.fromSizePrefixedBlobs(bytes));
         wire.readDocument(w -> w.read(() -> "header").marshallable(rheader), null);
 
         assertEquals(wheader.uuid, rheader.uuid);

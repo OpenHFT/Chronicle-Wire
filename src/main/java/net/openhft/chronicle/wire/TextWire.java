@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -421,13 +422,13 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut bytes(@NotNull Bytes fromBytes) {
+        public WireOut bytes(@NotNull BytesStore fromBytes) {
             if (isText(fromBytes)) {
                 return text(fromBytes);
             }
             int length = Maths.toInt32(fromBytes.writeRemaining());
             byte[] byteArray = new byte[length];
-            fromBytes.read(byteArray);
+            fromBytes.copyTo(byteArray);
             return bytes(byteArray);
         }
 
@@ -440,7 +441,7 @@ public class TextWire implements Wire, InternalWireIn {
             return TextWire.this;
         }
 
-        private boolean isText(@NotNull Bytes fromBytes) {
+        private boolean isText(@NotNull BytesStore fromBytes) {
             for (long i = fromBytes.readPosition(); i < fromBytes.readLimit(); i++) {
                 int ch = fromBytes.readUnsignedByte(i);
                 if ((ch < ' ' && ch != '\t') || ch >= 127)
@@ -877,7 +878,7 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         private int rewindAndRead() {
-            return bytes.readUnsignedByte(bytes.readPosition() - 1);
+            return bytes.readPosition() > 0 ? bytes.readUnsignedByte(bytes.readPosition() - 1) : -1;
         }
 
         @NotNull
@@ -1137,7 +1138,7 @@ public class TextWire implements Wire, InternalWireIn {
                 bytes.readSkip(1);
                 return true;
             }
-            return ch != ']';
+            return ch > 0 && ch != ']';
         }
 
         @NotNull
@@ -1251,7 +1252,9 @@ public class TextWire implements Wire, InternalWireIn {
         public Wire type(@NotNull StringBuilder sb) {
             consumeWhiteSpace();
             int code = peekCode();
-            if (code != '!') {
+            if (code == -1) {
+                sb.append("java.lang.Void");
+            } else if (code != '!') {
                 sb.append("java.lang.String");
             } else {
                 readCode();
@@ -1313,6 +1316,46 @@ public class TextWire implements Wire, InternalWireIn {
                         object + ",code='" + (char) code + "', bytes=" + Bytes.toString(bytes)
                 );
             return TextWire.this;
+        }
+
+        @Nullable
+        public <T extends ReadMarshallable> T typedMarshallable() {
+            try {
+                consumeWhiteSpace();
+                int code = peekCode();
+                if (code < 0)
+                    throw new IllegalStateException("Cannot read nothing as a Marshallable " + bytes.toDebugString());
+                StringBuilder sb = Wires.acquireStringBuilder();
+                if (code != '!')
+                    throw new ClassCastException("Cannot convert to Marshallable. " + bytes.toDebugString());
+
+                readCode();
+                bytes.parseUTF(sb, TextStopCharTesters.END_OF_TYPE);
+
+                if (StringUtils.isEqual(sb, "!null")) {
+                    text();
+                    return null;
+                }
+
+                if (StringUtils.isEqual(sb, "!binary")) {
+                    bytesStore();
+                    return null;
+                }
+
+                // its possible that the object that you are allocating may not have a
+                // default constructor
+                final Class clazz = ClassAliasPool.CLASS_ALIASES.forName(sb);
+
+                if (!Marshallable.class.isAssignableFrom(clazz))
+                    throw new ClassCastException("Cannot convert " + sb + " to Marshallable.");
+
+                final ReadMarshallable m = OS.memory().allocateInstance((Class<ReadMarshallable>) clazz);
+
+                marshallable(m);
+                return (T) m;
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         @Nullable

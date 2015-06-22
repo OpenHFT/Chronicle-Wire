@@ -53,7 +53,7 @@ public interface ValueOut {
     WireOut int8(byte i8);
 
     @NotNull
-    WireOut bytes(Bytes fromBytes);
+    WireOut bytes(BytesStore fromBytes);
 
     @NotNull
     WireOut rawBytes(byte[] value);
@@ -206,8 +206,6 @@ public interface ValueOut {
             return int32((Integer) value);
         else if (value instanceof Long)
             return int64((Long) value);
-        else if (value instanceof CharSequence)
-            return text((CharSequence) value);
         else if (value instanceof Double)
             return float64((Double) value);
         else if (value instanceof Float)
@@ -216,8 +214,10 @@ public interface ValueOut {
             return typedMarshallable((Marshallable) value);
         else if (value instanceof Throwable)
             return throwable((Throwable) value);
+        else if (value instanceof CharSequence)
+            return text((CharSequence) value);
         else if (value instanceof BytesStore)
-            return bytes(((BytesStore) value).bytes());
+            return bytes((BytesStore) value);
         else {
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +

@@ -17,6 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.values.IntValue;
@@ -216,7 +217,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut bytes(@NotNull Bytes fromBytes) {
+        public WireOut bytes(@NotNull BytesStore fromBytes) {
             writeLength(fromBytes.writeRemaining());
             bytes.write(fromBytes);
             return RawWire.this;
@@ -669,6 +670,12 @@ public class RawWire implements Wire, InternalWireIn {
             } else {
                 return marshallableReader.apply(RawWire.this);
             }
+        }
+
+        @Nullable
+        @Override
+        public <T extends ReadMarshallable> T typedMarshallable() {
+            throw new UnsupportedOperationException("todo");
         }
 
         @NotNull

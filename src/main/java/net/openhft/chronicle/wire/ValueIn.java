@@ -17,10 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.IORuntimeException;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -42,6 +39,9 @@ import java.util.function.*;
  * Created by peter.lawrey on 14/01/15.
  */
 public interface ValueIn {
+    Consumer<ValueIn> DISCARD = v -> {
+    };
+
     /*
      * Text / Strings.
      */
@@ -138,36 +138,7 @@ public interface ValueIn {
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
 
     @Nullable
-    default <T extends ReadMarshallable> T typedMarshallable() {
-        try {
-            StringBuilder sb = Wires.acquireStringBuilder();
-            type(sb);
-            if (StringUtils.isEqual(sb, "!null")) {
-                text();
-                return null;
-            }
-
-            if (StringUtils.isEqual(sb, "!binary")) {
-                bytesStore();
-                return null;
-            }
-
-            // its possible that the object that you are allocating may not have a
-            // default constructor
-            final Class clazz = ClassAliasPool.CLASS_ALIASES.forName(sb);
-
-            if (!Marshallable.class.isAssignableFrom(clazz))
-                throw new IllegalStateException("its not possible to Marshallable and object that" +
-                        " is not of type Marshallable, type=" + sb);
-
-            final ReadMarshallable m = OS.memory().allocateInstance((Class<ReadMarshallable>) clazz);
-
-            marshallable(m);
-            return (T) m;
-        } catch (Exception e) {
-            throw new IORuntimeException(e);
-        }
-    }
+    <T extends ReadMarshallable> T typedMarshallable();
 
     @NotNull
     WireIn type(@NotNull StringBuilder s);
@@ -233,9 +204,6 @@ public interface ValueIn {
 
     @Nullable
     <E> E object(@Nullable E using, @NotNull Class<E> clazz);
-
-    Consumer<ValueIn> DISCARD = v -> {
-    };
 
     default Class typeLiteral(){
         Class[] clazz = {null};

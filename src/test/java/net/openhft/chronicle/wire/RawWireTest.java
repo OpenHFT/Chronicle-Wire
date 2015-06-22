@@ -137,7 +137,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).int8(2);
 
         wire.write(() -> "Test").int8(3);
-        assertEquals("[pos: 0, rlim: 3, wlim: 1TiB, cap: 1TiB ] ⒈⒉⒊", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -158,7 +158,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).int16(2);
 
         wire.write(() -> "Test").int16(3);
-        assertEquals("[pos: 0, rlim: 6, wlim: 1TiB, cap: 1TiB ] ⒈٠⒉٠⒊٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] ⒈٠⒉٠⒊٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -179,7 +179,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).uint8(2);
 
         wire.write(() -> "Test").uint8(3);
-        assertEquals("[pos: 0, rlim: 3, wlim: 1TiB, cap: 1TiB ] ⒈⒉⒊", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -200,7 +200,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).uint16(2);
 
         wire.write(() -> "Test").uint16(3);
-        assertEquals("[pos: 0, rlim: 6, wlim: 1TiB, cap: 1TiB ] ⒈٠⒉٠⒊٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] ⒈٠⒉٠⒊٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -221,7 +221,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).uint32(2);
 
         wire.write(() -> "Test").uint32(3);
-        assertEquals("[pos: 0, rlim: 12, wlim: 1TiB, cap: 1TiB ] ⒈٠٠٠⒉٠٠٠⒊٠٠٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 12, wlim: 8EiB, cap: 8EiB ] ⒈٠٠٠⒉٠٠٠⒊٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicLong i = new AtomicLong();
@@ -242,7 +242,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).int32(2);
 
         wire.write(() -> "Test").int32(3);
-        assertEquals("[pos: 0, rlim: 12, wlim: 1TiB, cap: 1TiB ] ⒈٠٠٠⒉٠٠٠⒊٠٠٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 12, wlim: 8EiB, cap: 8EiB ] ⒈٠٠٠⒉٠٠٠⒊٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -263,7 +263,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).int64(2);
 
         wire.write(() -> "Test").int64(3);
-        assertEquals("[pos: 0, rlim: 24, wlim: 1TiB, cap: 1TiB ] ⒈٠٠٠٠٠٠٠⒉٠٠٠٠٠٠٠⒊٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 24, wlim: 8EiB, cap: 8EiB ] ⒈٠٠٠٠٠٠٠⒉٠٠٠٠٠٠٠⒊٠٠٠٠٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         AtomicLong i = new AtomicLong();
@@ -285,7 +285,7 @@ public class RawWireTest {
         wire.write(BWKey.field1).float64(2);
 
         wire.write(() -> "Test").float64(3);
-        assertEquals("[pos: 0, rlim: 24, wlim: 1TiB, cap: 1TiB ] ٠٠٠٠٠٠ð?٠٠٠٠٠٠٠@٠٠٠٠٠٠⒏@", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 24, wlim: 8EiB, cap: 8EiB ] ٠٠٠٠٠٠ð?٠٠٠٠٠٠٠@٠٠٠٠٠٠⒏@", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         class Floater {
@@ -316,7 +316,7 @@ public class RawWireTest {
         wire.write(() -> "Test")
                 .text(name1);
         String actual = wire.bytes().toDebugString();
-        assertEquals("[pos: 0, rlim: 69, wlim: 1TiB, cap: 1TiB ] ⒌Hello⒌world8Long field name which is more than 32 characters, \\ ⒑Bye", actual);
+        assertEquals("[pos: 0, rlim: 69, wlim: 8EiB, cap: 8EiB ] ⒌Hello⒌world8Long field name which is more than 32 characters, \\ ⒑Bye", actual);
 
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
@@ -340,7 +340,7 @@ public class RawWireTest {
 
         wire.write(() -> "Test").type(name1);
         wire.writeComment("");
-        assertEquals("[pos: 0, rlim: 142, wlim: 1TiB, cap: 1TiB ] ⒍MyType⒑AlsoMyType{" + name1, wire.bytes().toDebugString(200));
+        assertEquals("[pos: 0, rlim: 142, wlim: 8EiB, cap: 8EiB ] ⒍MyType⒑AlsoMyType{" + name1, wire.bytes().toDebugString());
 
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
@@ -469,7 +469,7 @@ public class RawWireTest {
         mtB.text.append("Bye now");
         wire.write(() -> "B").marshallable(mtB);
 
-        //        assertEquals("[pos: 0, rlim: 74, wlim: 1TiB, cap: 1TiB ] #٠٠٠¿90w¾\u009F\u001A/Ý^@٠٠٠٠٠٠٠٠C\u009ECÿ⒒Hello World\u001F٠٠٠٠Ò⒋S⒌£\u0092:Ý^@٠٠٠٠٠٠٠٠\u009E.¤ø⒎Bye now", wire.bytes().toDebugString(400));
+        //        assertEquals("[pos: 0, rlim: 74, wlim: 8EiB, cap: 8EiB ] #٠٠٠¿90w¾\u009F\u001A/Ý^@٠٠٠٠٠٠٠٠C\u009ECÿ⒒Hello World\u001F٠٠٠٠Ò⒋S⒌£\u0092:Ý^@٠٠٠٠٠٠٠٠\u009E.¤ø⒎Bye now", wire.bytes().toDebugString(400));
 
         MyTypes mt2 = new MyTypes();
         wire.read(() -> "A").marshallable(mt2);

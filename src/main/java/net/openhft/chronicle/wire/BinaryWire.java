@@ -640,7 +640,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     public String toString() {
-        return bytes.toDebugString(bytes.capacity());
+        return bytes.toDebugString();
     }
 
     class FixedBinaryValueOut implements ValueOut {
@@ -688,7 +688,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut bytes(@NotNull Bytes fromBytes) {
+        public WireOut bytes(@NotNull BytesStore fromBytes) {
             long remaining = fromBytes.readRemaining();
             writeLength(Maths.toInt32(remaining + 1));
             writeCode(U8_ARRAY);

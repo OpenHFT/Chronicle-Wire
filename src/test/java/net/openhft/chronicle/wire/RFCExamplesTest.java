@@ -69,7 +69,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         writeMessageOne(bin);
 
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));
-        assertEquals("[pos: 0, lim: 124, cap: 1TiB ] \u001F٠٠@Ãcspñ///service-lookup" +
+        assertEquals("[pos: 0, lim: 124, cap: 8EiB ] \u001F٠٠@Ãcspñ///service-lookup" +
                 "Ãtid\u0090¦\u0094⒒RU" +
                 "٠٠٠Ælookup\u0082I٠٠٠ËrelativeUriätestÄview¶⒊MapÅtypes\u0082#٠٠٠ÇkeyType¶⒎IntegerÉvalueType¶⒍String", bytes.toDebugString());
 
@@ -77,7 +77,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         bytes.clear();
         writeMessageOne(raw);
 
-        assertEquals("[pos: 0, lim: 79, cap: 1TiB ] " +
+        assertEquals("[pos: 0, lim: 79, cap: 8EiB ] " +
                 "\u001A٠٠@⒘///service-lookupu\u009F)å\"٠٠٠-٠٠٠" +
                 "⒍lookup\"٠٠٠⒋test⒊Map⒌types⒖٠٠٠⒎Integer⒍String", bytes.toDebugString());
 /*
@@ -108,7 +108,7 @@ put: [ 3, bye ]
                         "\n" +
                         "put: { key: 3, value: bye\n",
                 Wires.fromSizePrefixedBlobs(bytes));
-        assertEquals("[pos: 0, lim: 130, cap: 1TiB ] " +
+        assertEquals("[pos: 0, lim: 130, cap: 8EiB ] " +
                 "\u001B٠٠@⒑csp://server1/test⒑cid: 1⒑" +
                 "\u001D٠٠٠put: { key: 1, value: hello }" +
                 "\u001E٠٠٠⒑put: { key: 2, value: world }" +
@@ -118,7 +118,7 @@ put: [ 3, bye ]
         writeMessageTwo(bin);
 
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));
-        assertEquals("[pos: 0, lim: 86, cap: 1TiB ] " +
+        assertEquals("[pos: 0, lim: 86, cap: 8EiB ] " +
                 "\u0018٠٠@Ãcspî//server1/testÃcid⒈" +
                 "⒗٠٠٠Ãput\u0082⒎٠٠٠⒈åhello" +
                 "⒗٠٠٠Ãput\u0082⒎٠٠٠⒉åworld" +
@@ -126,7 +126,7 @@ put: [ 3, bye ]
 
         bytes.clear();
         writeMessageTwo(raw);
-        assertEquals("[pos: 0, lim: 103, cap: 1TiB ] " +
+        assertEquals("[pos: 0, lim: 103, cap: 8EiB ] " +
                 "\u0017٠٠@⒕//server1/test⒈٠٠٠٠٠٠٠\u0016" +
                 "٠٠٠⒊put⒕٠٠٠⒈٠٠٠٠٠٠٠⒌hello\u0016" +
                 "٠٠٠⒊put⒕٠٠٠⒉٠٠٠٠٠٠٠⒌world⒛" +
