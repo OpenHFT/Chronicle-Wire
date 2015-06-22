@@ -27,6 +27,5 @@ public class YamlLogging {
     public static volatile String writeMessage = "";
     public static volatile boolean clientReads = false;
     public static volatile boolean showServerReads = false;
-    public static String readMessage = "";
 }
 

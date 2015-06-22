@@ -51,20 +51,6 @@ public class QueryWire implements Wire, InternalWireIn {
         this.bytes = bytes;
     }
 
-    public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb) {
-        int end = 0;
-        for (int i = 0; i < sb.length(); i++) {
-            char ch = sb.charAt(i);
-            if (ch == '%' && i < sb.length() - 1) {
-                char ch3 = sb.charAt(++i);
-                char ch4 = sb.charAt(++i);
-                ch = (char) Integer.parseInt("" + ch3 + ch4, 16);
-            }
-            BytesUtil.setCharAt(sb, end++, ch);
-        }
-        BytesUtil.setLength(sb, end);
-    }
-
     public String toString() {
         return bytes.toString();
     }
