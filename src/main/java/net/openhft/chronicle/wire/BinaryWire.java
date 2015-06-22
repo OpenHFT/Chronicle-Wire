@@ -644,8 +644,6 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     class FixedBinaryValueOut implements ValueOut {
-        boolean nested = false;
-
         @NotNull
         @Override
         public ValueOut leaf() {
@@ -1683,10 +1681,6 @@ public class BinaryWire implements Wire, InternalWireIn {
 
             return (int) value;
 
-        }
-
-        private boolean isSmallInt(int code) {
-            return (code & 128) == 0;
         }
 
         @Override

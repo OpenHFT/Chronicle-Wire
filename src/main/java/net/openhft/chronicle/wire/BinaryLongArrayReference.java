@@ -20,7 +20,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import org.jetbrains.annotations.NotNull;
 
 public class BinaryLongArrayReference implements ByteableLongArrayValues {
-    private static final long CAPACITY = 0;
+    //    private static final long CAPACITY = 0;
     private static final long VALUES = 8;
     private BytesStore bytes;
     private long offset;
@@ -87,10 +87,5 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     @NotNull
     public String toString() {
         return "value: " + getValueAt(0) + " ...";
-    }
-
-    @Override
-    public long sizeInBytes(long capacity) {
-        return (capacity << 3) + VALUES;
     }
 }

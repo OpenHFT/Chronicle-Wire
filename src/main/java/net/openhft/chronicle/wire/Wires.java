@@ -25,9 +25,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import static net.openhft.chronicle.wire.BinaryWire.toIntU30;
@@ -153,20 +151,6 @@ public enum Wires {
         return (len & META_DATA) == 0;
     }
 
-    public static boolean isData(@NotNull WireIn wireIn) {
-        final Bytes bytes = wireIn.bytes();
-
-        if (bytes.readRemaining() < 4)
-            throw new IllegalStateException();
-
-        long position = bytes.readPosition();
-        int header = bytes.readVolatileInt(position);
-        if (!isKnownLength(header))
-            throw new IllegalStateException("unknown len, header=" + header);
-
-        return isData(header);
-    }
-
     @NotNull
     public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position, long length) {
         StringBuilder sb = new StringBuilder();
@@ -198,78 +182,6 @@ public enum Wires {
 
     public static boolean isKnownLength(long len) {
         return (len & (META_DATA | LENGTH_MASK)) != UNKNOWN_LENGTH;
-    }
-
-    public static <E> E readObject(@NotNull ValueIn in, @Nullable E using, @NotNull Class<E> clazz) {
-        if (byte[].class.isAssignableFrom(clazz))
-            return (E) in.bytes();
-
-        else if (Marshallable.class.isAssignableFrom(clazz)) {
-            final E v;
-            if (using == null)
-                try {
-                    v = clazz.newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            else
-                v = using;
-
-            in.marshallable((Marshallable) v);
-            return v;
-
-        } else if (StringBuilder.class.isAssignableFrom(clazz)) {
-            StringBuilder builder = (using == null)
-                    ? acquireStringBuilder()
-                    : (StringBuilder) using;
-            in.textTo(builder);
-            return (E) builder;
-
-        } else if (CharSequence.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-            return (E) in.text();
-
-        } else if (Long.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-            return (E) (Long) in.int64();
-
-        } else if (Double.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-            return (E) (Double) in.float64();
-
-        } else if (Integer.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-            return (E) (Integer) in.int32();
-
-        } else if (Float.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-            return (E) (Float) in.float32();
-
-        } else if (Short.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-            return (E) (Short) in.int16();
-
-        } else if (Character.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-            final String text = in.text();
-            if (text == null || text.length() == 0)
-                return null;
-            return (E) (Character) text.charAt(0);
-
-        } else if (Byte.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-            return (E) (Byte) in.int8();
-
-        } else if (Map.class.isAssignableFrom(clazz)) {
-            //noinspection unchecked
-
-            final HashMap result = new HashMap();
-            in.map(result);
-            return (E) result;
-
-        } else {
-            throw new IllegalStateException("unsupported type");
-        }
     }
 
     public static Throwable throwable(@NotNull ValueIn valueIn, boolean appendCurrentStack) {

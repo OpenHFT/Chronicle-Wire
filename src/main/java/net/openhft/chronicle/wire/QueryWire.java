@@ -27,8 +27,6 @@ import net.openhft.chronicle.wire.util.FloatConsumer;
 import net.openhft.chronicle.wire.util.ShortConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -39,15 +37,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
 
-import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
-
 /**
  * Created by peter.lawrey on 15/01/15.
  */
 public class QueryWire implements Wire, InternalWireIn {
-    private static final Logger LOG =
-            LoggerFactory.getLogger(QueryWire.class);
-
     final Bytes<?> bytes;
     final TextValueOut valueOut = new TextValueOut();
     final ValueIn valueIn = new TextValueIn();
@@ -56,13 +49,6 @@ public class QueryWire implements Wire, InternalWireIn {
 
     public QueryWire(Bytes bytes) {
         this.bytes = bytes;
-    }
-
-    public static String asText(@NotNull Wire wire) {
-        QueryWire tw = new QueryWire(nativeBytes());
-        wire.copyTo(tw);
-
-        return tw.toString();
     }
 
     public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb) {
