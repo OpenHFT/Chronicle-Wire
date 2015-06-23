@@ -140,10 +140,10 @@ put: [ 3, bye ]
         wire.writeDocument(false, out ->
                 out.write(lookup).marshallable(out2 ->
                         out2.write(relativeUri).text("test")
-                                .write(view).type("Map")
+                                .write(view).typeLiteral("Map")
                                 .write(types).marshallable(m ->
-                                m.write(() -> "keyType").type("Integer")
-                                        .write(() -> "valueType").type("String"))));
+                                m.write(() -> "keyType").typeLiteral("Integer")
+                                        .write(() -> "valueType").typeLiteral("String"))));
     }
 
     private void writeMessageTwo(@NotNull Wire wire) {

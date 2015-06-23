@@ -566,4 +566,5 @@ public class BinaryWireTest {
             return code;
         }
     }
+
 }

@@ -193,7 +193,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire bool(@Nullable Boolean flag) {
+        public WireOut bool(@Nullable Boolean flag) {
             if (flag == null)
                 bytes.writeUnsignedByte(BinaryWireCode.NULL);
             else
@@ -203,14 +203,14 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire text(CharSequence s) {
+        public WireOut text(CharSequence s) {
             bytes.writeUTFΔ(s);
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire int8(byte i8) {
+        public WireOut int8(byte i8) {
             bytes.writeByte(i8);
             return RawWire.this;
         }
@@ -246,49 +246,49 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire uint8checked(int u8) {
+        public WireOut uint8checked(int u8) {
             bytes.writeUnsignedByte(u8);
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire int16(short i16) {
+        public WireOut int16(short i16) {
             bytes.writeShort(i16);
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire uint16checked(int u16) {
+        public WireOut uint16checked(int u16) {
             bytes.writeUnsignedShort(u16);
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire utf8(int codepoint) {
+        public WireOut utf8(int codepoint) {
             BytesUtil.appendUTF(bytes, codepoint);
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire int32(int i32) {
+        public WireOut int32(int i32) {
             bytes.writeInt(i32);
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire uint32checked(long u32) {
+        public WireOut uint32checked(long u32) {
             bytes.writeUnsignedInt(u32);
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire int64(long i64) {
+        public WireOut int64(long i64) {
             bytes.writeLong(i64);
             return RawWire.this;
         }
@@ -302,21 +302,21 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire float32(float f) {
+        public WireOut float32(float f) {
             bytes.writeFloat(f);
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire float64(double d) {
+        public WireOut float64(double d) {
             bytes.writeDouble(d);
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire time(@NotNull LocalTime localTime) {
+        public WireOut time(@NotNull LocalTime localTime) {
             long t = localTime.toNanoOfDay();
             bytes.writeLong(t);
             return RawWire.this;
@@ -324,29 +324,30 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
+        public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
             bytes.writeUTFΔ(zonedDateTime.toString());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire date(@NotNull LocalDate localDate) {
+        public WireOut date(@NotNull LocalDate localDate) {
             bytes.writeStopBit(localDate.toEpochDay());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire type(CharSequence typeName) {
+        public ValueOut type(CharSequence typeName) {
             bytes.writeUTFΔ(typeName);
-            return RawWire.this;
+            return this;
         }
 
         @NotNull
         @Override
         public WireOut typeLiteral(@NotNull CharSequence type) {
-            return type(type);
+            bytes.writeUTFΔ(type);
+            return RawWire.this;
         }
 
         @NotNull
@@ -434,7 +435,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire bool(@NotNull BooleanConsumer flag) {
+        public WireIn bool(@NotNull BooleanConsumer flag) {
             int b = bytes.readUnsignedByte();
             if (b == BinaryWireCode.NULL)
                 flag.accept(null);
@@ -465,7 +466,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire int8(@NotNull ByteConsumer i) {
+        public WireIn int8(@NotNull ByteConsumer i) {
             i.accept(bytes.readByte());
             return RawWire.this;
         }
@@ -513,77 +514,77 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire uint8(@NotNull ShortConsumer i) {
+        public WireIn uint8(@NotNull ShortConsumer i) {
             i.accept((short) bytes.readUnsignedByte());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire int16(@NotNull ShortConsumer i) {
+        public WireIn int16(@NotNull ShortConsumer i) {
             i.accept(bytes.readShort());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire uint16(@NotNull IntConsumer i) {
+        public WireIn uint16(@NotNull IntConsumer i) {
             i.accept(bytes.readUnsignedShort());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire int32(@NotNull IntConsumer i) {
+        public WireIn int32(@NotNull IntConsumer i) {
             i.accept(bytes.readInt());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire uint32(@NotNull LongConsumer i) {
+        public WireIn uint32(@NotNull LongConsumer i) {
             i.accept(bytes.readUnsignedInt());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire int64(@NotNull LongConsumer i) {
+        public WireIn int64(@NotNull LongConsumer i) {
             i.accept(bytes.readLong());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire float32(@NotNull FloatConsumer v) {
+        public WireIn float32(@NotNull FloatConsumer v) {
             v.accept(bytes.readFloat());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire float64(@NotNull DoubleConsumer v) {
+        public WireIn float64(@NotNull DoubleConsumer v) {
             v.accept(bytes.readDouble());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire time(@NotNull Consumer<LocalTime> localTime) {
+        public WireIn time(@NotNull Consumer<LocalTime> localTime) {
             localTime.accept(LocalTime.ofNanoOfDay(bytes.readLong()));
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime) {
+        public WireIn zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime) {
             zonedDateTime.accept(ZonedDateTime.parse(bytes.readUTFΔ()));
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public Wire date(@NotNull Consumer<LocalDate> localDate) {
+        public WireIn date(@NotNull Consumer<LocalDate> localDate) {
             localDate.accept(LocalDate.ofEpochDay(bytes.readStopBit()));
             return RawWire.this;
         }
@@ -680,7 +681,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire type(@NotNull StringBuilder s) {
+        public WireIn type(@NotNull StringBuilder s) {
             bytes.readUTFΔ(s);
             return RawWire.this;
         }

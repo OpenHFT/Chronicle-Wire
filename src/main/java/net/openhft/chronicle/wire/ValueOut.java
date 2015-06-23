@@ -129,7 +129,7 @@ public interface ValueOut {
     WireOut date(LocalDate localDate);
 
     @NotNull
-    WireOut type(CharSequence typeName);
+    ValueOut type(CharSequence typeName);
 
     @NotNull
     default WireOut typeLiteral(@NotNull Class type) {
@@ -214,15 +214,26 @@ public interface ValueOut {
             return typedMarshallable((Marshallable) value);
         else if (value instanceof Throwable)
             return throwable((Throwable) value);
-        else if (value instanceof CharSequence)
-            return text((CharSequence) value);
         else if (value instanceof BytesStore)
             return bytes((BytesStore) value);
-        else {
+        else if (value instanceof CharSequence)
+            return text((CharSequence) value);
+        else if (value instanceof Enum)
+            return typedScalar(value);
+        else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
+            WireSerializedLambda.write(value, this);
+            return wireOut();
+        } else {
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +
                     "AutoBoxed primitive Object");
         }
+    }
+
+    default WireOut typedScalar(Object value) {
+        type(ClassAliasPool.CLASS_ALIASES.nameFor(value.getClass()));
+        text(value.toString());
+        return wireOut();
     }
 
     @NotNull

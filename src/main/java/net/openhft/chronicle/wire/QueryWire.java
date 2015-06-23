@@ -467,11 +467,11 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut type(@NotNull CharSequence typeName) {
+        public ValueOut type(@NotNull CharSequence typeName) {
             prependSeparator();
             bytes.append(typeName);
             sep = " ";
-            return QueryWire.this;
+            return this;
         }
 
         @NotNull

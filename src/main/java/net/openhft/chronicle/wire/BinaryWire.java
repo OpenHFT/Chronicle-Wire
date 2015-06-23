@@ -19,6 +19,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -41,6 +42,7 @@ import java.util.function.*;
 
 import static net.openhft.chronicle.bytes.BytesUtil.append;
 import static net.openhft.chronicle.bytes.BytesUtil.setLength;
+import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
 
 /**
@@ -828,9 +830,9 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut type(CharSequence typeName) {
+        public ValueOut type(CharSequence typeName) {
             writeCode(TYPE_PREFIX).writeUTFΔ(typeName);
-            return BinaryWire.this;
+            return this;
         }
 
         @NotNull
@@ -1545,7 +1547,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                     final ReadMarshallable m = OS.memory().allocateInstance((Class<ReadMarshallable>) clazz);
 
                     marshallable(m);
-                    return (T) m;
+                    return readResolve(m);
 
                 case NULL:
                     return null;
@@ -1731,10 +1733,14 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Nullable
         @Override
         public <E> E object(@Nullable E using, @NotNull Class<E> clazz) {
+            return ObjectUtils.convertTo(clazz, object0(using, clazz));
+        }
+
+        <E> E object0(@Nullable E using, @NotNull Class<E> clazz) {
             if (byte[].class.isAssignableFrom(clazz))
                 return (E) bytes();
 
-            else if (Marshallable.class.isAssignableFrom(clazz)) {
+            else if (ReadMarshallable.class.isAssignableFrom(clazz)) {
                 final E v;
                 if (using == null)
                     try {
@@ -1745,8 +1751,8 @@ public class BinaryWire implements Wire, InternalWireIn {
                 else
                     v = using;
 
-                marshallable((Marshallable) v);
-                return v;
+                marshallable((ReadMarshallable) v);
+                return readResolve(v);
 
             } else if (StringBuilder.class.isAssignableFrom(clazz)) {
                 StringBuilder builder = (using == null)
@@ -1797,19 +1803,21 @@ public class BinaryWire implements Wire, InternalWireIn {
                 map(result);
                 return (E) result;
 
-            } else if (Object.class.isAssignableFrom(clazz)) {
+            } else {
                 int code = peekCode();
-                if (code == TYPE_PREFIX)
-                    return (E) typedMarshallable();
+                if (code == TYPE_PREFIX) {
+                    readCode();
+                    StringBuilder sb = Wires.acquireStringBuilder();
+                    bytes.readUTFΔ(sb);
+                    final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                    return (E) object(null, clazz2);
+                }
                 if (code == BYTES_LENGTH32)
                     return (E) bytesStore();
                 // assume it a String
                 return (E) text();
-
-            } else {
-                throw new IllegalStateException("unsupported " + clazz);
             }
         }
     }
-    }
+}
 

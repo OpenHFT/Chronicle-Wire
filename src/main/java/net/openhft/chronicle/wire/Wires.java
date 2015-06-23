@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
 import org.jetbrains.annotations.NotNull;
@@ -48,6 +49,8 @@ public enum Wires {
     private static final Field STACK_TRACE;
 
     static {
+        ClassAliasPool.CLASS_ALIASES.addAlias(WireSerializedLambda.class, "SerializedLambda");
+        ClassAliasPool.CLASS_ALIASES.addAlias(WireType.class);
         try {
             DETAILED_MESSAGE = Throwable.class.getDeclaredField("detailMessage");
             DETAILED_MESSAGE.setAccessible(true);
@@ -247,5 +250,4 @@ public enum Wires {
     static String merge(@Nullable String a, @Nullable String b) {
         return a == null ? b : b == null ? a : a + " " + b;
     }
-
 }

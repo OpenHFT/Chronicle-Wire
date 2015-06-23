@@ -19,6 +19,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -41,6 +42,7 @@ import java.util.*;
 import java.util.function.*;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 
 /**
  * Created by peter.lawrey on 15/01/15.
@@ -395,7 +397,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire bool(@Nullable Boolean flag) {
+        public WireOut bool(@Nullable Boolean flag) {
             prependSeparator();
             bytes.append(flag == null ? "!" + NULL : flag ? "true" : "false");
             elementSeparator();
@@ -404,7 +406,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire text(@Nullable CharSequence s) {
+        public WireOut text(@Nullable CharSequence s) {
             prependSeparator();
             bytes.append(s == null ? "!" + NULL : quotes(s));
             elementSeparator();
@@ -413,7 +415,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire int8(byte i8) {
+        public WireOut int8(byte i8) {
             prependSeparator();
             bytes.append(i8);
             elementSeparator();
@@ -468,7 +470,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire uint8checked(int u8) {
+        public WireOut uint8checked(int u8) {
             prependSeparator();
             bytes.append(u8);
             elementSeparator();
@@ -478,7 +480,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire int16(short i16) {
+        public WireOut int16(short i16) {
             prependSeparator();
             bytes.append(i16);
             elementSeparator();
@@ -488,7 +490,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire uint16checked(int u16) {
+        public WireOut uint16checked(int u16) {
             prependSeparator();
             bytes.append(u16);
             elementSeparator();
@@ -498,7 +500,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire utf8(int codepoint) {
+        public WireOut utf8(int codepoint) {
             prependSeparator();
             StringBuilder sb = Wires.acquireStringBuilder();
             sb.appendCodePoint(codepoint);
@@ -509,7 +511,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire int32(int i32) {
+        public WireOut int32(int i32) {
             prependSeparator();
             bytes.append(i32);
             elementSeparator();
@@ -519,7 +521,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire uint32checked(long u32) {
+        public WireOut uint32checked(long u32) {
             prependSeparator();
             bytes.append(u32);
             elementSeparator();
@@ -529,7 +531,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire int64(long i64) {
+        public WireOut int64(long i64) {
             prependSeparator();
             bytes.append(i64);
             elementSeparator();
@@ -546,7 +548,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire float32(float f) {
+        public WireOut float32(float f) {
             prependSeparator();
             bytes.append(f);
             elementSeparator();
@@ -556,7 +558,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire float64(double d) {
+        public WireOut float64(double d) {
             prependSeparator();
             bytes.append(d);
             elementSeparator();
@@ -566,7 +568,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire time(@NotNull LocalTime localTime) {
+        public WireOut time(@NotNull LocalTime localTime) {
             prependSeparator();
             bytes.append(localTime.toString());
             elementSeparator();
@@ -576,7 +578,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
+        public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
             prependSeparator();
             bytes.append(zonedDateTime.toString());
             elementSeparator();
@@ -586,7 +588,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire date(@NotNull LocalDate localDate) {
+        public WireOut date(@NotNull LocalDate localDate) {
             prependSeparator();
             bytes.append(localDate.toString());
             elementSeparator();
@@ -596,11 +598,11 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire type(@NotNull CharSequence typeName) {
+        public ValueOut type(@NotNull CharSequence typeName) {
             prependSeparator();
             bytes.append('!').append(typeName);
             sep = " ";
-            return TextWire.this;
+            return this;
         }
 
         @NotNull
@@ -784,7 +786,7 @@ public class TextWire implements Wire, InternalWireIn {
     class TextValueIn implements ValueIn {
         @NotNull
         @Override
-        public Wire bool(@NotNull BooleanConsumer flag) {
+        public WireIn bool(@NotNull BooleanConsumer flag) {
             consumeWhiteSpace();
 
             StringBuilder sb = Wires.acquireStringBuilder();
@@ -883,7 +885,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire int8(@NotNull ByteConsumer i) {
+        public WireIn int8(@NotNull ByteConsumer i) {
             consumeWhiteSpace();
             i.accept((byte) bytes.parseLong());
             return TextWire.this;
@@ -1033,7 +1035,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire uint8(@NotNull ShortConsumer i) {
+        public WireIn uint8(@NotNull ShortConsumer i) {
             consumeWhiteSpace();
             i.accept((short) bytes.parseLong());
             return TextWire.this;
@@ -1041,7 +1043,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire int16(@NotNull ShortConsumer i) {
+        public WireIn int16(@NotNull ShortConsumer i) {
             consumeWhiteSpace();
             i.accept((short) bytes.parseLong());
             return TextWire.this;
@@ -1049,7 +1051,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire uint16(@NotNull IntConsumer i) {
+        public WireIn uint16(@NotNull IntConsumer i) {
             consumeWhiteSpace();
             i.accept((int) bytes.parseLong());
             return TextWire.this;
@@ -1057,7 +1059,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire int32(@NotNull IntConsumer i) {
+        public WireIn int32(@NotNull IntConsumer i) {
             consumeWhiteSpace();
             i.accept((int) bytes.parseLong());
             return TextWire.this;
@@ -1065,7 +1067,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire uint32(@NotNull LongConsumer i) {
+        public WireIn uint32(@NotNull LongConsumer i) {
             consumeWhiteSpace();
             i.accept(bytes.parseLong());
             return TextWire.this;
@@ -1073,7 +1075,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire int64(@NotNull LongConsumer i) {
+        public WireIn int64(@NotNull LongConsumer i) {
             consumeWhiteSpace();
             i.accept(bytes.parseLong());
             return TextWire.this;
@@ -1081,7 +1083,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire float32(@NotNull FloatConsumer v) {
+        public WireIn float32(@NotNull FloatConsumer v) {
             consumeWhiteSpace();
             v.accept((float) bytes.parseDouble());
             return TextWire.this;
@@ -1089,7 +1091,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire float64(@NotNull DoubleConsumer v) {
+        public WireIn float64(@NotNull DoubleConsumer v) {
             consumeWhiteSpace();
             v.accept(bytes.parseDouble());
             return TextWire.this;
@@ -1097,7 +1099,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire time(@NotNull Consumer<LocalTime> localTime) {
+        public WireIn time(@NotNull Consumer<LocalTime> localTime) {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
             textTo(sb);
@@ -1107,7 +1109,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime) {
+        public WireIn zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime) {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
             textTo(sb);
@@ -1117,7 +1119,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire date(@NotNull Consumer<LocalDate> localDate) {
+        public WireIn date(@NotNull Consumer<LocalDate> localDate) {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
             textTo(sb);
@@ -1249,7 +1251,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public Wire type(@NotNull StringBuilder sb) {
+        public WireIn type(@NotNull StringBuilder sb) {
             consumeWhiteSpace();
             int code = peekCode();
             if (code == -1) {
@@ -1352,7 +1354,7 @@ public class TextWire implements Wire, InternalWireIn {
                 final ReadMarshallable m = OS.memory().allocateInstance((Class<ReadMarshallable>) clazz);
 
                 marshallable(m);
-                return (T) m;
+                return readResolve(m);
             } catch (Exception e) {
                 throw new IORuntimeException(e);
             }
@@ -1509,6 +1511,10 @@ public class TextWire implements Wire, InternalWireIn {
         @Nullable
         public <E> E object(@Nullable E using,
                             @NotNull Class<E> clazz) {
+            return ObjectUtils.convertTo(clazz, object0(using, clazz));
+        }
+
+        <E> E object0(@Nullable E using, @NotNull Class<E> clazz) {
             consumeWhiteSpace();
 
             if (isNull())
@@ -1517,15 +1523,15 @@ public class TextWire implements Wire, InternalWireIn {
             if (byte[].class.isAssignableFrom(clazz))
                 return (E) bytes();
 
-            if (Marshallable.class.isAssignableFrom(clazz)) {
+            if (ReadMarshallable.class.isAssignableFrom(clazz)) {
                 final E v;
                 if (using == null)
                     v = OS.memory().allocateInstance(clazz);
                 else
                     v = using;
 
-                valueIn.marshallable((Marshallable) v);
-                return v;
+                valueIn.marshallable((ReadMarshallable) v);
+                return readResolve(v);
 
             } else if (StringBuilder.class.isAssignableFrom(clazz)) {
                 StringBuilder builder = (using == null)
@@ -1575,12 +1581,16 @@ public class TextWire implements Wire, InternalWireIn {
                 valueIn.map(result);
                 return (E) result;
 
-            } else if (Object.class == clazz) {
-                // TODO assume for now it is a string.
-                return peekCode() == '!' ? (E) valueIn.typedMarshallable() : (E) valueIn.text();
-
             } else {
-                throw new IllegalStateException("unsupported type=" + clazz);
+                // TODO assume for now it is a string.
+                if (peekCode() == '!') {
+                    readCode();
+                    StringBuilder sb = Wires.acquireStringBuilder();
+                    bytes.parseUTF(sb, TextStopCharTesters.END_OF_TYPE);
+                    final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                    return (E) object(null, clazz2);
+                }
+                return (E) valueIn.text();
             }
         }
     }

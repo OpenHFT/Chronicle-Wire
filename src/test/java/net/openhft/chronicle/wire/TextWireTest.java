@@ -741,11 +741,6 @@ public class TextWireTest {
         final Bytes bytes = nativeBytes();
         final Wire wire = new TextWire(bytes);
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception").object(e));
-        System.out.println(Wires.fromSizePrefixedBlobs(bytes));
-//        bytes.position(4);
-        // SnakeYaml doesn't support single ! types.
-//        expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
-//        bytes.position(0);
 
         // TODO figure out where the newline before ] went.
         assertEquals("--- !!data\n" +
@@ -763,6 +758,21 @@ public class TextWireTest {
         });
     }
 
+    @Test
+    public void testEnum() {
+        Wire wire = createWire();
+        wire.write().object(WireType.BINARY)
+                .write().object(WireType.TEXT)
+                .write().object(WireType.RAW);
+
+        assertEquals("\"\": !WireType BINARY\n" +
+                "\"\": !WireType TEXT\n" +
+                "\"\": !WireType RAW\n", bytes.toString());
+
+        assertEquals(WireType.BINARY, wire.read().object(Object.class));
+        assertEquals(WireType.TEXT, wire.read().object(Object.class));
+        assertEquals(WireType.RAW, wire.read().object(Object.class));
+    }
     enum BWKey implements WireKey {
         field1, field2, field3
     }
