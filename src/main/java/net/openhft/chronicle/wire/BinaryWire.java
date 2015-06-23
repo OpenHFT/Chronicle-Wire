@@ -844,8 +844,17 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
+        public WireOut typeLiteral(@NotNull Class type) {
+            writeCode(TYPE_LITERAL).writeUTFΔ(ClassAliasPool.CLASS_ALIASES.nameFor(type));
+            return BinaryWire.this;
+        }
+
+        @NotNull
+        @Override
         public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @NotNull Class type) {
-            throw new UnsupportedOperationException("todo");
+            writeCode(TYPE_LITERAL);
+            typeTranslator.accept(type, bytes);
+            return BinaryWire.this;
         }
 
         @NotNull
