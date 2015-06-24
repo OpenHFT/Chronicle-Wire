@@ -1224,7 +1224,8 @@ public class BinaryWire implements Wire, InternalWireIn {
             if (code != U8_ARRAY)
                 cantRead(code);
             BytesStore toBytes = NativeBytesStore.nativeStore(length);
-            toBytes.write(0, bytes);
+            toBytes.write(0, bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
             return toBytes;
         }
 
