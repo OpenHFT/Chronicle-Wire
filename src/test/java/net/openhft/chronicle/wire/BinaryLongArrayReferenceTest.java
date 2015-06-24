@@ -21,7 +21,6 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class BinaryLongArrayReferenceTest {
-
     @Test
     public void getSetValues() {
         int length = 1024 + 8;
