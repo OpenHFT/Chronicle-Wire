@@ -163,10 +163,17 @@ public class BinaryWire implements Wire, InternalWireIn {
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
+        long position = bytes.readPosition();
         StringBuilder sb = readField(Wires.acquireStringBuilder(), key.code());
 
         if (fieldLess || (sb != null && (sb.length() == 0 || StringUtils.isEqual(sb, key.name()))))
             return valueIn;
+        return unorderedField(key, position, sb);
+    }
+
+    private ValueIn unorderedField(WireKey key, long position, StringBuilder sb) {
+        bytes.readPosition(position);
+        readEventName(sb);
         throw new UnsupportedOperationException("Unordered fields not supported yet, " +
                 "Expected=" + key.name() + " was: " + sb);
     }
