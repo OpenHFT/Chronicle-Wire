@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
+import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
@@ -34,12 +35,15 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiConsumer;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
 public class TextWireTest {
@@ -773,6 +777,47 @@ public class TextWireTest {
         assertEquals(WireType.TEXT, wire.read().object(Object.class));
         assertEquals(WireType.RAW, wire.read().object(Object.class));
     }
+
+    @Test
+    public void testNestedDecode() {
+        String s = "cluster: {\n" +
+                "  host1: {\n" +
+                "     hostId: 1,\n" +
+//                "     name: one,\n" +
+                "  },\n" +
+                "  host2: {\n" +
+                "     hostId: 2,\n" +
+                "  },\n" +
+                "#  host3: {\n" +
+                "#     hostId: 3,\n" +
+                "#  },\n" +
+                "  host4: {\n" +
+                "     hostId: 4,\n" +
+                "  },\n" +
+                "}" +
+                "cluster2: {\n" +
+                "    host21: {\n" +
+                "       hostId: 21\n" +
+                "    }\n" +
+                "}\n";
+        BiConsumer<String, Integer> results = EasyMock.createMock(BiConsumer.class);
+        results.accept("host1", 1);
+        results.accept("host2", 2);
+        results.accept("host4", 4);
+        replay(results);
+        TextWire wire = TextWire.from(s);
+        wire.read(() -> "cluster").marshallable(v -> {
+                    StringBuilder sb = new StringBuilder();
+                    while (wire.hasMore()) {
+                        wire.readEventName(sb).marshallable(m -> {
+                            m.read(() -> "hostId").int32(i -> results.accept(sb.toString(), i));
+                        });
+                    }
+                }
+        );
+        verify(results);
+    }
+
     enum BWKey implements WireKey {
         field1, field2, field3
     }
@@ -818,4 +863,6 @@ public class TextWireTest {
             return "MyMarshable{" + "someData='" + someData + '\'' + '}';
         }
     }
+
+
 }

@@ -165,7 +165,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (codePoint == '#') {
                 //noinspection StatementWithEmptyBody
                 while (readCode() >= ' ') ;
-            } else if (Character.isWhitespace(codePoint)) {
+            } else if (Character.isWhitespace(codePoint) || codePoint == ',') {
                 bytes.readSkip(1);
             } else {
                 break;
@@ -256,6 +256,7 @@ public class TextWire implements Wire, InternalWireIn {
     @Override
     public boolean hasMore() {
         consumeWhiteSpace();
+
         return bytes.readRemaining() > 0;
     }
 
@@ -1291,7 +1292,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (code == '!')
                 type(Wires.acquireStringBuilder());
             else if (code != '{')
-                throw new IORuntimeException("Unsupported type " + (char) code);
+                throw new IORuntimeException("Unsupported type " + stringForCode(code));
 
             final long len = readLengthMarshable() - 1;
 
