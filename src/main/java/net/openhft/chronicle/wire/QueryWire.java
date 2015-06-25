@@ -17,6 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -86,6 +87,7 @@ public class QueryWire implements Wire, InternalWireIn {
         return sb;
     }
 
+    @ForceInline
     void consumeWhiteSpace() {
         int codePoint = peekCode();
         while (Character.isWhitespace(codePoint)) {
@@ -94,6 +96,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
     }
 
+    @ForceInline
     int peekCode() {
         return bytes.peekUnsignedByte();
     }

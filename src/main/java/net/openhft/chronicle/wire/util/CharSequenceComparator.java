@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.wire.util;
 
+import net.openhft.chronicle.core.annotation.ForceInline;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
@@ -23,15 +24,14 @@ public enum CharSequenceComparator implements Comparator<CharSequence> {
     INSTANCE;
 
     @Override
+    @ForceInline
     public int compare(@NotNull CharSequence o1, @NotNull CharSequence o2) {
-        int cmp = Integer.compare(o1.length(), o2.length());
-        if (cmp != 0)
-            return cmp;
-        for (int i = 0, len = o1.length(); i < len; i++) {
-            cmp = Character.compare(o1.charAt(i), o2.charAt(i));
+        int len = Math.min(o1.length(), o2.length());
+        for (int i = 0; i < len; i++) {
+            int cmp = Character.compare(o1.charAt(i), o2.charAt(i));
             if (cmp != 0)
                 return cmp;
         }
-        return cmp;
+        return Integer.compare(o1.length(), o2.length());
     }
 }
