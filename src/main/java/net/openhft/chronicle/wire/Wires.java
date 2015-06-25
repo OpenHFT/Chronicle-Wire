@@ -45,20 +45,12 @@ public enum Wires {
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
     static final StackTraceElement[] NO_STE = {};
-    private static final Field DETAILED_MESSAGE;
-    private static final Field STACK_TRACE;
+    private static final Field DETAILED_MESSAGE = Jvm.getField(Throwable.class, "detailMessage");
+    private static final Field STACK_TRACE = Jvm.getField(Throwable.class, "stackTrace");
 
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(WireSerializedLambda.class, "SerializedLambda");
         ClassAliasPool.CLASS_ALIASES.addAlias(WireType.class);
-        try {
-            DETAILED_MESSAGE = Throwable.class.getDeclaredField("detailMessage");
-            DETAILED_MESSAGE.setAccessible(true);
-            STACK_TRACE = Throwable.class.getDeclaredField("stackTrace");
-            STACK_TRACE.setAccessible(true);
-        } catch (NoSuchFieldException e) {
-            throw new AssertionError(e);
-        }
     }
 
     public static StringBuilder acquireStringBuilder() {
