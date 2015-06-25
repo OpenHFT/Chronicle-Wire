@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
+
 import net.openhft.chronicle.core.annotation.ForceInline;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
