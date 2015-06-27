@@ -425,6 +425,12 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     private double readFloat0(int code) {
+        // TODO: in some places we have already called this before invoking the function,
+        // so we should review them and optimize the calls to do the check only once
+        if (code < 128 && code >= 0) {
+            return code;
+        }
+
         switch (code) {
             case FLOAT32:
                 return bytes.readFloat();

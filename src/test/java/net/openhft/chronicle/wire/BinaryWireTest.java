@@ -412,6 +412,7 @@ public class BinaryWireTest {
                 "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊",
                 "[pos: 0, rlim: 27, wlim: 8EiB, cap: 8EiB ] \\u0091٠٠٠٠٠٠ð?\\u0091٠٠٠٠٠٠٠@\\u0091٠٠٠٠٠٠⒏@");
         checkAsText123(wire);
+        wire.write().float64(0);
 
         // ok as blank matches anything
         class Floater {
@@ -426,6 +427,7 @@ public class BinaryWireTest {
             wire.read().float64(n::set);
             assertEquals(e, n.f, 0.0);
         });
+        assertEquals(0.0, wire.read().float64(), 0.0);
 
         assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
