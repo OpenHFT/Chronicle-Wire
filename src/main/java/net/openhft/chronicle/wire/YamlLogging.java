@@ -21,6 +21,7 @@ package net.openhft.chronicle.wire;
  */
 public class YamlLogging {
 
+    // TODO Doesn't show all writes. Use clientReads
     public static volatile boolean showServerWrites = false;
     public static volatile boolean clientWrites = false;
     public static volatile String title = "";

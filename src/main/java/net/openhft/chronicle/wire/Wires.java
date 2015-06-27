@@ -16,6 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.RandomDataInput;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -161,9 +162,15 @@ public enum Wires {
                 String type = isData(header)
                         ? isReady(header) ? "!!data" : "!!not-ready-data!"
                         : isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
-                sb.append("--- ").append(type).append("\n");
-                for (int i = 0; i < len; i++)
-                    sb.append((char) bytes.readUnsignedByte());
+                boolean binary = bytes.readByte(bytes.readPosition()) < ' ';
+                sb.append("--- ").append(type).append(binary ? " #binary\n" : "\n");
+                for (int i = 0; i < len; i++) {
+                    int ch = bytes.readUnsignedByte();
+                    if (binary)
+                        sb.append(RandomDataInput.charToString[ch]);
+                    else
+                        sb.append((char) ch);
+                }
                 if (sb.charAt(sb.length() - 1) != '\n')
                     sb.append('\n');
             }

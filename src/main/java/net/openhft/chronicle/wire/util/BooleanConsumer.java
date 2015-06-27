@@ -32,7 +32,6 @@ import java.util.Objects;
  * #accept(Boolean)}.
  *
  * @see java.util.function.Consumer
- * @since 1.8
  */
 @FunctionalInterface
 public interface BooleanConsumer {
