@@ -51,6 +51,7 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
 public class BinaryWire implements Wire, InternalWireIn {
     public static final int ANY_CODE_MATCH = -1;
     static final int END_OF_BYTES = -1;
+    static final UTF8StringInterner UTF8_INTERNER = new UTF8StringInterner(128);
 
     final Bytes<?> bytes;
     final ValueOut fixedValueOut = new FixedBinaryValueOut();
@@ -1195,6 +1196,37 @@ public class BinaryWire implements Wire, InternalWireIn {
                 if (text == null)
                     cantRead(code);
                 return s;
+            }
+        }
+
+        @Nullable
+        @Override
+        public String text() {
+            int code = readCode();
+            boolean wasNull = code == NULL;
+            if (wasNull) {
+                return null;
+
+            } else if (code == STRING_ANY) {
+                long len0 = BytesUtil.readStopBit(bytes);
+                if (len0 == -1L) {
+                    return null;
+
+                }
+                int len = Maths.toUInt31(len0);
+                long limit = bytes.readLimit();
+                try {
+                    bytes.readLimit(bytes.readPosition() + len);
+                    return UTF8_INTERNER.intern(bytes);
+                } finally {
+                    bytes.readLimit(limit);
+                }
+
+            } else {
+                StringBuilder text = readText(code, Wires.acquireStringBuilder());
+                if (text == null)
+                    cantRead(code);
+                return Wires.INTERNER.intern(text);
             }
         }
 

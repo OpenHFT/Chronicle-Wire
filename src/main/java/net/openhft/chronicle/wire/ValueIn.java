@@ -52,10 +52,7 @@ public interface ValueIn {
     WireIn text(@NotNull Consumer<String> s);
 
     @Nullable
-    default String text() {
-        StringBuilder sb = Wires.acquireStringBuilder();
-        return textTo(sb) == null ? null : Wires.INTERNER.intern(sb);
-    }
+    String text();
 
     @Nullable
     <ACS extends Appendable & CharSequence> ACS textTo(@NotNull ACS s);
