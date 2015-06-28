@@ -19,7 +19,7 @@ import junit.framework.TestCase;
 
 public class BinaryLongReferenceTest extends TestCase {
 
-    public void testBytes() throws Exception {
+    public void testBytes() {
 
     }
 }

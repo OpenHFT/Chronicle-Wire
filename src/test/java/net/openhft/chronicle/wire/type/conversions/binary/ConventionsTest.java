@@ -31,7 +31,7 @@ import java.lang.reflect.Field;
 public class ConventionsTest {
 
     @Test
-    public void testTypeConversionsMaxValue() throws Exception {
+    public void testTypeConversionsMaxValue() throws NoSuchFieldException, IllegalAccessException {
 
         for (Class type : new Class[]{String.class, Integer.class, Long.class, Short
                 .class, Byte
@@ -50,7 +50,7 @@ public class ConventionsTest {
     }
 
     @Test
-    public void testTypeConversionsMinValue() throws Exception {
+    public void testTypeConversionsMinValue() throws IllegalAccessException, NoSuchFieldException {
 
         for (Class type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
                 .class, Float.class, Double.class}) {
@@ -68,7 +68,7 @@ public class ConventionsTest {
     }
 
     @Test
-    public void testTypeConversionsSmallNumber() throws Exception {
+    public void testTypeConversionsSmallNumber() {
 
         for (Class type : new Class[]{String.class, Integer.class, Long.class, Short
                 .class, Byte.class}) {
@@ -83,7 +83,7 @@ public class ConventionsTest {
     }
 
     @Test
-    public void testTypeConversionsConvertViaString() throws Exception {
+    public void testTypeConversionsConvertViaString() throws NoSuchFieldException, IllegalAccessException {
 
         for (Class type : new Class[]{Integer.class, Long.class, Short.class, Byte
                 .class}) {
@@ -103,7 +103,7 @@ public class ConventionsTest {
     }
 
     @Test
-    public void testTypeConversionsMaxUnsigned() throws Exception {
+    public void testTypeConversionsMaxUnsigned() {
 
         for (long shift : new long[]{8}) {
             long extected = 1L << shift;

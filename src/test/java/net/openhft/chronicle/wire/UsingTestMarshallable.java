@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
 public class UsingTestMarshallable {
 
     @Test
-    public void testConverMarshallableToTextName() throws Exception {
+    public void testConverMarshallableToTextName() {
 
         TestMarshallable testMarshallable = new TestMarshallable();
         StringBuilder name = new StringBuilder("hello world");

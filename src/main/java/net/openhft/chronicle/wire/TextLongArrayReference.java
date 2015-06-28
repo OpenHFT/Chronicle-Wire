@@ -86,6 +86,11 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
     }
 
     @Override
+    public boolean compareAndSet(long index, long expected, long value) {
+        throw new UnsupportedOperationException("todo");
+    }
+
+    @Override
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
         if (length != peakLength(bytes, offset))
             throw new IllegalArgumentException(length + " != " + peakLength(bytes, offset));

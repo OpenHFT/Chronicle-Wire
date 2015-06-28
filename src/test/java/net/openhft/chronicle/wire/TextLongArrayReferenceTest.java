@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 
 public class TextLongArrayReferenceTest {
     @Test
-    public void getSetValues() throws Exception {
+    public void getSetValues() {
         int length = 128 * 22 + 47;
         try (NativeBytes bytes = NativeBytes.nativeBytes(length)) {
             TextLongArrayReference.write(bytes, 128);

@@ -22,7 +22,7 @@ import org.junit.Test;
 public class TextLongReferenceTest {
 
     @Test
-    public void testSetValue() throws Exception {
+    public void testSetValue() {
         final TextLongReference value = new TextLongReference();
         try (NativeBytesStore bytesStore = NativeBytesStore.nativeStoreWithFixedCapacity(value.maxSize())) {
             value.bytesStore(bytesStore, 0, value.maxSize());
