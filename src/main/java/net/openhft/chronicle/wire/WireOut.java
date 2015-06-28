@@ -70,6 +70,13 @@ public interface WireOut {
     @NotNull
     WireOut addPadding(int paddingToAdd);
 
+    default WireOut alignTo(int alignment) {
+        long mod = bytes().writePosition() % alignment;
+        if (mod != 0)
+            addPadding((int) (alignment - mod));
+        return this;
+    }
+
     default void writeDocument(boolean metaData, @NotNull Consumer<WireOut> writer) {
         Wires.writeData(this, metaData, false, writer);
     }

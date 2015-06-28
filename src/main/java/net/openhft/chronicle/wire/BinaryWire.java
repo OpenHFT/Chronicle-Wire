@@ -16,6 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
