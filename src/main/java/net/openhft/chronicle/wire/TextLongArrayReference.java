@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
 /*
@@ -71,6 +72,11 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
     @Override
     public void setValueAt(long index, long value) {
         bytes.append(VALUES + offset + index * VALUE_SIZE, value, DIGITS);
+    }
+
+    @Override
+    public void bindValueAt(int index, LongValue value) {
+        throw new UnsupportedOperationException("todo");
     }
 
     @Override

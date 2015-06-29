@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-public class IntTextReference implements IntValue, Byteable {
+public class TextIntReference implements IntValue, Byteable {
     public static final byte[] template = "!!atomic { locked: false, value: 0000000000 }".getBytes();
     public static final int FALSE = ('f' << 24) | ('a' << 16) | ('l' << 8) | 's';
     public static final int TRUE = (' ' << 24) | ('t' << 16) | ('r' << 8) | 'u';

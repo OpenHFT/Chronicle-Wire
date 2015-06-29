@@ -334,6 +334,11 @@ public class TextWire implements Wire, InternalWireIn {
         return s.length() == 0;
     }
 
+    @Override
+    public LongValue newLongReference() {
+        return new TextLongReference();
+    }
+
     enum TextStopCharsTesters implements StopCharsTester {
         END_OF_TEXT {
             @Override
@@ -639,9 +644,15 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut int32forBinding(int value) {
             prependSeparator();
-            IntTextReference.write(bytes, value);
+            TextIntReference.write(bytes, value);
             elementSeparator();
             return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut int32forBinding(int value, IntValue intValue) {
+            throw new UnsupportedOperationException("todo");
         }
 
         @NotNull
@@ -651,6 +662,12 @@ public class TextWire implements Wire, InternalWireIn {
             TextLongReference.write(bytes, value);
             elementSeparator();
             return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut int64forBinding(long value, LongValue longValue) {
+            throw new UnsupportedOperationException("todo");
         }
 
         @NotNull
@@ -890,6 +907,12 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             i.accept((byte) bytes.parseLong());
             return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer) {
+            throw new UnsupportedOperationException("todo");
         }
 
         @NotNull
@@ -1170,11 +1193,8 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn int64(LongValue value, @NotNull Consumer<LongValue> setter) {
+        public WireIn int64(@Nullable LongValue value) {
             consumeWhiteSpace();
-            if (!(value instanceof TextLongReference)) {
-                setter.accept(value = new TextLongReference());
-            }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
@@ -1187,9 +1207,18 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
+        public WireIn int64(LongValue value, @NotNull Consumer<LongValue> setter) {
+            if (!(value instanceof TextLongReference)) {
+                setter.accept(value = new TextLongReference());
+            }
+            return int64(value);
+        }
+
+        @NotNull
+        @Override
         public WireIn int32(IntValue value, @NotNull Consumer<IntValue> setter) {
-            if (!(value instanceof IntTextReference)) {
-                setter.accept(value = new IntTextReference());
+            if (!(value instanceof TextIntReference)) {
+                setter.accept(value = new TextIntReference());
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
@@ -1513,6 +1542,13 @@ public class TextWire implements Wire, InternalWireIn {
         public <E> E object(@Nullable E using,
                             @NotNull Class<E> clazz) {
             return ObjectUtils.convertTo(clazz, object0(using, clazz));
+        }
+
+        @Nullable
+        @Override
+        public <E> WireIn object(@NotNull Class<E> clazz, Consumer<E> e) {
+            e.accept(ObjectUtils.convertTo(clazz, object0(null, clazz)));
+            return TextWire.this;
         }
 
         <E> E object0(@Nullable E using, @NotNull Class<E> clazz) {

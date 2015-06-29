@@ -15,7 +15,10 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.IORuntimeException;
+import net.openhft.chronicle.bytes.StopCharTester;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -220,6 +223,11 @@ public class QueryWire implements Wire, InternalWireIn {
 
     int rewindAndRead() {
         return bytes.readUnsignedByte(bytes.readPosition() - 1);
+    }
+
+    @Override
+    public LongValue newLongReference() {
+        throw new UnsupportedOperationException();
     }
 
     enum QueryStopCharTesters implements StopCharTester {
@@ -501,19 +509,25 @@ public class QueryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut int32forBinding(int value) {
-            prependSeparator();
-            IntTextReference.write(bytes, value);
-            elementSeparator();
-            return QueryWire.this;
+            throw new UnsupportedOperationException();
+        }
+
+        @NotNull
+        @Override
+        public WireOut int32forBinding(int value, IntValue intValue) {
+            throw new UnsupportedOperationException();
         }
 
         @NotNull
         @Override
         public WireOut int64forBinding(long value) {
-            prependSeparator();
-            TextLongReference.write(bytes, value);
-            elementSeparator();
-            return QueryWire.this;
+            throw new UnsupportedOperationException();
+        }
+
+        @NotNull
+        @Override
+        public WireOut int64forBinding(long value, LongValue longValue) {
+            throw new UnsupportedOperationException();
         }
 
         @NotNull
@@ -628,6 +642,12 @@ public class QueryWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             i.accept((byte) bytes.parseLong());
             return QueryWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer) {
+            throw new UnsupportedOperationException("todo");
         }
 
         @NotNull
@@ -780,48 +800,25 @@ public class QueryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireIn int64array(@Nullable LongArrayValues values, @NotNull Consumer<LongArrayValues> setter) {
-            consumeWhiteSpace();
-            if (!(values instanceof TextLongArrayReference)) {
-                setter.accept(values = new TextLongArrayReference());
-            }
-            Byteable b = (Byteable) values;
-            long length = TextLongArrayReference.peakLength(bytes, bytes.readPosition());
-            b.bytesStore(bytes, bytes.readPosition(), length);
-            bytes.readSkip(length);
-            return QueryWire.this;
+            throw new UnsupportedOperationException();
+        }
+
+        @NotNull
+        @Override
+        public WireIn int64(@Nullable LongValue value) {
+            throw new UnsupportedOperationException();
         }
 
         @NotNull
         @Override
         public WireIn int64(LongValue value, @NotNull Consumer<LongValue> setter) {
-            consumeWhiteSpace();
-            if (!(value instanceof TextLongReference)) {
-                setter.accept(value = new TextLongReference());
-            }
-            Byteable b = (Byteable) value;
-            long length = b.maxSize();
-            b.bytesStore(bytes, bytes.readPosition(), length);
-            bytes.readSkip(length);
-            consumeWhiteSpace();
-            if (peekCode() == ',')
-                bytes.readSkip(1);
-            return QueryWire.this;
+            throw new UnsupportedOperationException();
         }
 
         @NotNull
         @Override
         public WireIn int32(IntValue value, @NotNull Consumer<IntValue> setter) {
-            if (!(value instanceof IntTextReference)) {
-                setter.accept(value = new IntTextReference());
-            }
-            Byteable b = (Byteable) value;
-            long length = b.maxSize();
-            b.bytesStore(bytes, bytes.readPosition(), length);
-            bytes.readSkip(length);
-            consumeWhiteSpace();
-            if (peekCode() == ',')
-                bytes.readSkip(1);
-            return QueryWire.this;
+            throw new UnsupportedOperationException();
         }
 
         @NotNull
@@ -874,7 +871,13 @@ public class QueryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireIn marshallable(@NotNull ReadMarshallable object) {
-            throw new UnsupportedOperationException("todo");
+            throw new UnsupportedOperationException();
+        }
+
+        @Nullable
+        @Override
+        public <E> WireIn object(@NotNull Class<E> clazz, Consumer<E> e) {
+            throw new UnsupportedOperationException();
         }
 
         @NotNull

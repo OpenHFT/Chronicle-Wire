@@ -20,14 +20,14 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 
-public class IntBinaryReference implements IntValue, Byteable {
+public class BinaryIntReference implements IntValue, Byteable {
     private BytesStore bytes;
     private long offset;
 
     @Override
     public void bytesStore(BytesStore bytes, long offset, long length) {
         if (length != maxSize()) throw new IllegalArgumentException();
-        this.bytes = bytes;
+        this.bytes = bytes.bytesStore();
         this.offset = offset;
     }
 

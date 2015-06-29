@@ -17,6 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
 public class BinaryLongArrayReference implements ByteableLongArrayValues {
@@ -63,6 +64,11 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     @Override
     public long getVolatileValueAt(long index) {
         return bytes.readVolatileLong(VALUES + offset + (index << 3));
+    }
+
+    @Override
+    public void bindValueAt(int index, LongValue value) {
+        ((BinaryLongReference) value).bytesStore(bytes, VALUES + offset + (index << 3), 8);
     }
 
     @Override

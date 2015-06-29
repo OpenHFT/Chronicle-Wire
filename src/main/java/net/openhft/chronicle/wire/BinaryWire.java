@@ -175,9 +175,11 @@ public class BinaryWire implements Wire, InternalWireIn {
 
     private ValueIn unorderedField(WireKey key, long position, StringBuilder sb) {
         bytes.readPosition(position);
+        if (sb == null)
+            sb = Wires.acquireStringBuilder();
         readEventName(sb);
         throw new UnsupportedOperationException("Unordered fields not supported yet, " +
-                "Expected=" + key.name() + " was: " + sb);
+                "Expected=" + key.name() + " was: '" + sb + "'");
     }
 
     @NotNull
@@ -660,6 +662,11 @@ public class BinaryWire implements Wire, InternalWireIn {
         return bytes.toDebugString();
     }
 
+    @Override
+    public LongValue newLongReference() {
+        return new BinaryLongReference();
+    }
+
     class FixedBinaryValueOut implements ValueOut {
         @NotNull
         @Override
@@ -892,10 +899,26 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut int64forBinding(long value) {
-            int fromEndOfCacheLine = (int) ((-bytes.readPosition()-1) & 63);
+            int fromEndOfCacheLine = (int) ((-bytes.readPosition() - 1) & 63);
             if (fromEndOfCacheLine < 8)
                 addPadding(fromEndOfCacheLine);
             fixedInt64(value);
+            return BinaryWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut int32forBinding(int value, IntValue intValue) {
+            int32forBinding(value);
+            ((BinaryIntReference) intValue).bytesStore(bytes, bytes.writePosition() - 4, 4);
+            return BinaryWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut int64forBinding(long value, LongValue longValue) {
+            int64forBinding(value);
+            ((BinaryLongReference) longValue).bytesStore(bytes, bytes.writePosition() - 8, 8);
             return BinaryWire.this;
         }
 
@@ -1252,8 +1275,27 @@ public class BinaryWire implements Wire, InternalWireIn {
             int code = readCode();
             if (code != U8_ARRAY)
                 cantRead(code);
+            toBytes.clear();
             bytes.readWithLength(length - 1, b -> toBytes.write(b));
             return wireIn();
+        }
+
+        @NotNull
+        @Override
+        public WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer) {
+            long length = readLength();
+            int code = readCode();
+            if (code != U8_ARRAY)
+                cantRead(code);
+            length--;
+            if (compareBytes.readRemaining() == length) {
+                consumer.accept(bytes.equalBytes(compareBytes, length));
+            } else {
+                consumer.accept(false);
+            }
+            bytes.readSkip(length);
+            return wireIn();
+
         }
 
         @NotNull
@@ -1510,17 +1552,11 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn int64(LongValue value, @NotNull Consumer<LongValue> setter) {
+        public WireIn int64(LongValue value) {
             consumeSpecial();
             int code = readCode();
             if (code != INT64)
                 cantRead(code);
-
-            // if the value is null, then we will create a LongDirectReference to write the data
-            // into and then call setter.accept(), this will then update the value
-            if (!(value instanceof BinaryLongReference)) {
-                setter.accept(value = new BinaryLongReference());
-            }
 
             Byteable b = (Byteable) value;
             long length = b.maxSize();
@@ -1531,13 +1567,24 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
+        public WireIn int64(LongValue value, @NotNull Consumer<LongValue> setter) {
+            // if the value is null, then we will create a LongDirectReference to write the data
+            // into and then call setter.accept(), this will then update the value
+            if (!(value instanceof BinaryLongReference)) {
+                setter.accept(value = new BinaryLongReference());
+            }
+            return int64(value);
+        }
+
+        @NotNull
+        @Override
         public WireIn int32(IntValue value, @NotNull Consumer<IntValue> setter) {
             consumeSpecial();
             int code = readCode();
             if (code != INT32)
                 cantRead(code);
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 4) {
-                setter.accept(value = new IntBinaryReference());
+                setter.accept(value = new BinaryIntReference());
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
@@ -1790,6 +1837,13 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public <E> E object(@Nullable E using, @NotNull Class<E> clazz) {
             return ObjectUtils.convertTo(clazz, object0(using, clazz));
+        }
+
+        @Nullable
+        @Override
+        public <E> WireIn object(@NotNull Class<E> clazz, Consumer<E> e) {
+            e.accept(ObjectUtils.convertTo(clazz, object0(null, clazz)));
+            return BinaryWire.this;
         }
 
         <E> E object0(@Nullable E using, @NotNull Class<E> clazz) {

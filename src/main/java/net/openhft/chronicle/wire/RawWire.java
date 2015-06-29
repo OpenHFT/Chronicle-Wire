@@ -184,6 +184,11 @@ public class RawWire implements Wire, InternalWireIn {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public LongValue newLongReference() {
+        return new BinaryLongReference();
+    }
+
     class RawValueOut implements ValueOut {
         @NotNull
         @Override
@@ -384,12 +389,28 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
+        public WireOut int32forBinding(int value, IntValue intValue) {
+            int32forBinding(value);
+            ((BinaryIntReference) intValue).bytesStore(bytes, bytes.writePosition() - 4, 4);
+            return RawWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut int64forBinding(long value, LongValue longValue) {
+            int64forBinding(value);
+            ((BinaryLongReference) longValue).bytesStore(bytes, bytes.writePosition() - 8, 8);
+            return RawWire.this;
+        }
+
+        @NotNull
+        @Override
         public WireOut sequence(@NotNull Consumer<ValueOut> writer) {
             text(lastField);
             long position = bytes.writePosition();
             bytes.writeInt(0);
 
-                writer.accept(this);
+            writer.accept(this);
 
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
             return RawWire.this;
@@ -402,7 +423,7 @@ public class RawWire implements Wire, InternalWireIn {
             long position = bytes.writePosition();
             bytes.writeInt(0);
 
-                object.writeMarshallable(RawWire.this);
+            object.writeMarshallable(RawWire.this);
 
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
             return RawWire.this;
@@ -416,7 +437,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map)  {
+        public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map) {
             throw new UnsupportedOperationException("todo");
         }
 
@@ -480,16 +501,25 @@ public class RawWire implements Wire, InternalWireIn {
             long length = readLength();
             Bytes<?> bytes = wireIn().bytes();
 
-            long limit0 = bytes.readLimit();
-            long limit = bytes.readPosition() + length;
-            try {
-                bytes.readLimit(limit);
-                toBytes.write(bytes);
-            } finally {
-                bytes.readLimit(limit0);
-                bytes.readPosition(limit);
-            }
+            toBytes.write(bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
             return wireIn();
+        }
+
+        @NotNull
+        @Override
+        public WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer) {
+            long length = readLength();
+            Bytes<?> bytes = wireIn().bytes();
+
+            if (length == compareBytes.readRemaining()) {
+                consumer.accept(bytes.equalBytes(compareBytes, length));
+            } else {
+                consumer.accept(false);
+            }
+            bytes.readSkip(length);
+            return wireIn();
+
         }
 
         @NotNull
@@ -640,6 +670,12 @@ public class RawWire implements Wire, InternalWireIn {
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
                 setter.accept(value = new BinaryLongReference());
             }
+            return int64(value);
+        }
+
+        @NotNull
+        @Override
+        public WireIn int64(@Nullable LongValue value) {
             Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
@@ -651,7 +687,7 @@ public class RawWire implements Wire, InternalWireIn {
         @Override
         public WireIn int32(IntValue value, @NotNull Consumer<IntValue> setter) {
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
-                setter.accept(value = new IntBinaryReference());
+                setter.accept(value = new BinaryIntReference());
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
@@ -786,6 +822,12 @@ public class RawWire implements Wire, InternalWireIn {
         @Nullable
         @Override
         public <E> E object(@Nullable E using, @NotNull Class<E> clazz) {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Nullable
+        @Override
+        public <E> WireIn object(@NotNull Class<E> clazz, Consumer<E> e) {
             throw new UnsupportedOperationException("todo");
         }
     }

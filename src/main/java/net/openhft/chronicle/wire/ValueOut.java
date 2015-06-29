@@ -20,6 +20,8 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -149,7 +151,13 @@ public interface ValueOut {
     WireOut int32forBinding(int value);
 
     @NotNull
-    WireOut int64forBinding(long readReady);
+    WireOut int32forBinding(int value, IntValue intValue);
+
+    @NotNull
+    WireOut int64forBinding(long value);
+
+    @NotNull
+    WireOut int64forBinding(long value, LongValue longValue);
 
     @NotNull
     WireOut sequence(Consumer<ValueOut> writer);

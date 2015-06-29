@@ -64,6 +64,9 @@ public interface ValueIn {
     WireIn bytes(@NotNull Bytes<?> toBytes);
 
     @NotNull
+    WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer);
+
+    @NotNull
     WireIn bytes(@NotNull Consumer<WireIn> wireInConsumer);
 
     byte[] bytes();
@@ -122,6 +125,9 @@ public interface ValueIn {
 
     @NotNull
     WireIn int64array(@Nullable LongArrayValues values, @NotNull Consumer<LongArrayValues> setter);
+
+    @NotNull
+    WireIn int64(@Nullable LongValue value);
 
     @NotNull
     WireIn int64(@Nullable LongValue value, @NotNull Consumer<LongValue> setter);
@@ -201,6 +207,9 @@ public interface ValueIn {
 
     @Nullable
     <E> E object(@Nullable E using, @NotNull Class<E> clazz);
+
+    @Nullable
+    <E> WireIn object(@NotNull Class<E> clazz, Consumer<E> e);
 
     default Class typeLiteral(){
         Class[] clazz = {null};
