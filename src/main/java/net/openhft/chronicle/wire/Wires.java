@@ -144,6 +144,22 @@ public enum Wires {
         return read;
     }
 
+    public static void rawReadData( WireIn wireIn, Consumer<WireIn> dataConsumer ) {
+        final Bytes<?> bytes = wireIn.bytes();
+        int header = bytes.readInt();
+        assert  isReady(header) && isData(header);
+        final int len = lengthOf(header);
+
+        long limit0 = bytes.readLimit();
+        long limit = bytes.readPosition() + (long) len;
+        try {
+            bytes.readLimit(limit);
+            dataConsumer.accept(wireIn);
+        } finally {
+            bytes.readLimit(limit0);
+        }
+    }
+
     public static String fromSizePrefixedBlobs(@NotNull Bytes bytes) {
         long position = bytes.readPosition();
         return fromSizePrefixedBlobs(bytes, position, bytes.readRemaining());
