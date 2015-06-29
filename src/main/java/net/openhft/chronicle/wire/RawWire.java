@@ -218,7 +218,7 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut bytes(@NotNull BytesStore fromBytes) {
-            writeLength(fromBytes.writeRemaining());
+            writeLength(fromBytes.readRemaining());
             bytes.write(fromBytes);
             return RawWire.this;
         }
@@ -371,13 +371,15 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut int32forBinding(int value) {
-            throw new UnsupportedOperationException();
+            bytes.writeInt(value);
+            return RawWire.this;
         }
 
         @NotNull
         @Override
         public WireOut int64forBinding(long value) {
-            throw new UnsupportedOperationException();
+            bytes.writeLong(value);
+            return RawWire.this;
         }
 
         @NotNull
@@ -473,7 +475,20 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         public WireIn bytes(@NotNull Bytes toBytes) {
-            wireIn().bytes().readWithLength(readLength(), b -> toBytes.write(b));
+            toBytes.clear();
+
+            long length = readLength();
+            Bytes<?> bytes = wireIn().bytes();
+
+            long limit0 = bytes.readLimit();
+            long limit = bytes.readPosition() + length;
+            try {
+                bytes.readLimit(limit);
+                toBytes.write(bytes);
+            } finally {
+                bytes.readLimit(limit0);
+                bytes.readPosition(limit);
+            }
             return wireIn();
         }
 

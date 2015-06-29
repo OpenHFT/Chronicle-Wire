@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
+import java.nio.BufferUnderflowException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -95,7 +96,7 @@ public enum Wires {
     public static boolean readData(@NotNull WireIn wireIn,
                                    @Nullable Consumer<WireIn> metaDataConsumer,
                                    @Nullable Consumer<WireIn> dataConsumer) {
-        final Bytes bytes = wireIn.bytes();
+        final Bytes<?> bytes = wireIn.bytes();
         boolean read = false;
         while (bytes.readRemaining() >= 4) {
             long position = bytes.readPosition();
@@ -111,16 +112,29 @@ public enum Wires {
 
                 } else {
                     ((InternalWireIn) wireIn).setReady(ready);
-                    wireIn.bytes().readWithLength(len, b -> dataConsumer.accept(wireIn));
+                    bytes.readWithLength(len, b -> dataConsumer.accept(wireIn));
                     return true;
                 }
             } else {
 
-                if (metaDataConsumer == null)
+                if (metaDataConsumer == null) {
                     // skip the header
-                    wireIn.bytes().readSkip(len);
-                else
-                    wireIn.bytes().readWithLength(len, b -> metaDataConsumer.accept(wireIn));
+                    bytes.readSkip(len);
+                } else {
+                    // bytes.readWithLength(len, b -> metaDataConsumer.accept(wireIn));
+                    // inlined to avoid garbage
+                    if ((long) len > bytes.readRemaining())
+                        throw new BufferUnderflowException();
+                    long limit0 = bytes.readLimit();
+                    long limit = bytes.readPosition() + (long) len;
+                    try {
+                        bytes.readLimit(limit);
+                        metaDataConsumer.accept(wireIn);
+                    } finally {
+                        bytes.readLimit(limit0);
+                        bytes.readPosition(limit);
+                    }
+                }
 
                 if (dataConsumer == null)
                     return true;

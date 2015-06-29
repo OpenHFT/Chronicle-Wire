@@ -892,9 +892,9 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut int64forBinding(long value) {
-            int fromEndOfCacheLine = (int) ((-bytes.readPosition()) & 63);
-            if (fromEndOfCacheLine < 9)
-                addPadding(fromEndOfCacheLine - 1);
+            int fromEndOfCacheLine = (int) ((-bytes.readPosition()-1) & 63);
+            if (fromEndOfCacheLine < 8)
+                addPadding(fromEndOfCacheLine);
             fixedInt64(value);
             return BinaryWire.this;
         }
