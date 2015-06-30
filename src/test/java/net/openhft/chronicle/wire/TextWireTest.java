@@ -548,8 +548,8 @@ public class TextWireTest {
         for (int i = 0; i < 256; i++)
             allBytes[i] = (byte) i;
         wire.write().bytes(NoBytesStore.NO_BYTES)
-                .write().bytes(Bytes.wrap("Hello".getBytes()))
-                .write().bytes(Bytes.wrap("quotable, text".getBytes()))
+                .write().bytes(Bytes.wrapForRead("Hello".getBytes()))
+                .write().bytes(Bytes.wrapForRead("quotable, text".getBytes()))
                 .write().bytes(allBytes);
         System.out.println(bytes.toString());
         NativeBytes allBytes2 = nativeBytes();
@@ -557,7 +557,7 @@ public class TextWireTest {
                 .read().bytes(wi -> assertEquals("Hello", wi.bytes().toString()))
                 .read().bytes(wi -> assertEquals("quotable, text", wi.bytes().toString()))
                 .read().bytes(allBytes2);
-        assertEquals(Bytes.wrap(allBytes), allBytes2);
+        assertEquals(Bytes.wrapForRead(allBytes), allBytes2);
     }
 
     @Test

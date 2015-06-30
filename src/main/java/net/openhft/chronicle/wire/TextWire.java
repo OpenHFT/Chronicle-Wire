@@ -934,14 +934,14 @@ public class TextWire implements Wire, InternalWireIn {
                     BytesUtil.setLength(sb, 0);
                     bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                     byte[] decode = Base64.getDecoder().decode(sb.toString());
-                    bytesConsumer.accept(new TextWire(Bytes.wrap(decode)));
+                    bytesConsumer.accept(new TextWire(Bytes.wrapForRead(decode)));
 
                 } else {
                     throw new IORuntimeException("Unsupported type " + str);
                 }
             } else {
                 textTo(sb);
-                bytesConsumer.accept(new TextWire(Bytes.wrap(sb.toString().getBytes())));
+                bytesConsumer.accept(new TextWire(Bytes.wrapForRead(sb.toString().getBytes())));
             }
             return TextWire.this;
         }
