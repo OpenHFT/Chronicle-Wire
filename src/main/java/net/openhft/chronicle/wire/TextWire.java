@@ -339,6 +339,17 @@ public class TextWire implements Wire, InternalWireIn {
         return new TextLongReference();
     }
 
+
+    @Override
+    public IntValue newValueReference() {
+        return new TextIntReference();
+    }
+
+    @Override
+    public ByteableLongArrayValues newLongArrayReference() {
+        return new TextLongArrayReference();
+    }
+
     enum TextStopCharsTesters implements StopCharsTester {
         END_OF_TEXT {
             @Override
@@ -549,6 +560,14 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut int64array(long capacity) {
             TextLongArrayReference.write(bytes, capacity);
+            return TextWire.this;
+        }
+
+        @Override
+        public WireOut int64array(long capacity, LongArrayValues values) {
+            long pos = bytes.writePosition();
+            TextLongArrayReference.write(bytes, capacity);
+            ((ByteableLongArrayValues) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
             return TextWire.this;
         }
 

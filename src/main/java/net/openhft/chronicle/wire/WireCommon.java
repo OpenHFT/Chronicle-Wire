@@ -13,10 +13,35 @@
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongValue;
+
 /**
- * Created by peter.lawrey on 1/10/15.
+ * Created by peter on 30/06/15.
  */
-public interface Marshallable extends WriteMarshallable, ReadMarshallable {
+public interface WireCommon {
+
+    /**
+     * @return the underlying Bytes
+     */
+    Bytes<?> bytes();
+
+    /**
+     * @return an IntValue which appropriate for this wire.
+     */
+    IntValue newValueReference();
+
+    /**
+     * @return a LongValue which appropriate for this wire.
+     */
+    LongValue newLongReference();
+
+    /**
+     * @return a LongArrayValue which appropriate for this wire.
+     */
+    ByteableLongArrayValues newLongArrayReference();
 }

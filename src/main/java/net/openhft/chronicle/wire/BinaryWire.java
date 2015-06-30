@@ -667,6 +667,16 @@ public class BinaryWire implements Wire, InternalWireIn {
         return new BinaryLongReference();
     }
 
+    @Override
+    public IntValue newValueReference() {
+        return new BinaryIntReference();
+    }
+
+    @Override
+    public BinaryLongArrayReference newLongArrayReference() {
+        return new BinaryLongArrayReference();
+    }
+
     class FixedBinaryValueOut implements ValueOut {
         @NotNull
         @Override
@@ -812,6 +822,15 @@ public class BinaryWire implements Wire, InternalWireIn {
         public WireOut int64array(long capacity) {
             writeCode(I64_ARRAY);
             BinaryLongArrayReference.lazyWrite(bytes, capacity);
+            return BinaryWire.this;
+        }
+
+        @Override
+        public WireOut int64array(long capacity, LongArrayValues values) {
+            writeCode(I64_ARRAY);
+            long pos = bytes.writePosition();
+            BinaryLongArrayReference.lazyWrite(bytes, capacity);
+            ((ByteableLongArrayValues) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
             return BinaryWire.this;
         }
 

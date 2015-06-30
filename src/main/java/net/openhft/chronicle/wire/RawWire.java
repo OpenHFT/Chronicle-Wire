@@ -189,6 +189,16 @@ public class RawWire implements Wire, InternalWireIn {
         return new BinaryLongReference();
     }
 
+    @Override
+    public IntValue newValueReference() {
+        return new BinaryIntReference();
+    }
+
+    @Override
+    public BinaryLongArrayReference newLongArrayReference() {
+        return new BinaryLongArrayReference();
+    }
+
     class RawValueOut implements ValueOut {
         @NotNull
         @Override
@@ -304,6 +314,16 @@ public class RawWire implements Wire, InternalWireIn {
             BinaryLongArrayReference.lazyWrite(bytes, capacity);
             return RawWire.this;
         }
+
+
+        @Override
+        public WireOut int64array(long capacity, LongArrayValues values) {
+            long pos = bytes.writePosition();
+            BinaryLongArrayReference.lazyWrite(bytes, capacity);
+            ((ByteableLongArrayValues) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
+            return RawWire.this;
+        }
+
 
         @NotNull
         @Override
