@@ -444,7 +444,8 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut object(Object o) {
-            throw new UnsupportedOperationException("todo");
+            bytes.writeUTFΔ(o == null ? null : o.toString());
+            return RawWire.this;
         }
 
         @NotNull
