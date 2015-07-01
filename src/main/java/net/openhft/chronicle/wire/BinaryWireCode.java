@@ -92,6 +92,12 @@ enum BinaryWireCode {
 
     static final String[] STRING_FOR_CODE = new String[256];
 
+    public static boolean isFieldCode(int code) {
+        return code == FIELD_NAME_ANY ||
+                code == FIELD_NUMBER ||
+                (code >= FIELD_NAME0 && code <= FIELD_NAME31);
+    }
+
     static {
         try {
             for (Field field : BinaryWireCode.class.getDeclaredFields()) {
