@@ -46,8 +46,8 @@ import java.util.function.*;
  */
 public class QueryWire implements Wire, InternalWireIn {
     final Bytes<?> bytes;
-    final TextValueOut valueOut = new TextValueOut();
-    final ValueIn valueIn = new TextValueIn();
+    final QueryValueOut valueOut = new QueryValueOut();
+    final ValueIn valueIn = new QueryValueIn();
 
     boolean ready;
 
@@ -230,6 +230,16 @@ public class QueryWire implements Wire, InternalWireIn {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public IntValue newValueReference() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public BinaryLongArrayReference newLongArrayReference() {
+        throw new UnsupportedOperationException();
+    }
+
     enum QueryStopCharTesters implements StopCharTester {
         QUERY_FIELD_NAME {
             @Override
@@ -245,7 +255,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
     }
 
-    class TextValueOut implements ValueOut {
+    class QueryValueOut implements ValueOut {
         @NotNull
         String sep = "";
         @Nullable
@@ -426,6 +436,11 @@ public class QueryWire implements Wire, InternalWireIn {
             return QueryWire.this;
         }
 
+        @Override
+        public WireOut int64array(long capacity, LongArrayValues values) {
+            throw new UnsupportedOperationException("todo");
+        }
+
         @NotNull
         @Override
         public WireOut float32(float f) {
@@ -598,7 +613,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
     }
 
-    class TextValueIn implements ValueIn {
+    class QueryValueIn implements ValueIn {
         @NotNull
         @Override
         public WireIn bool(@NotNull BooleanConsumer flag) {

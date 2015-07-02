@@ -15,7 +15,6 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -25,7 +24,7 @@ import java.util.function.Consumer;
  * <p>
  * Created by peter.lawrey on 12/01/15.
  */
-public interface WireOut {
+public interface WireOut extends WireCommon {
 
     /**
      * Write an empty filed marker
@@ -64,8 +63,6 @@ public interface WireOut {
      */
     @NotNull
     WireOut writeComment(CharSequence s);
-
-    Bytes bytes();
 
     @NotNull
     WireOut addPadding(int paddingToAdd);

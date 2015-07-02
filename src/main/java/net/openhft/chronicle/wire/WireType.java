@@ -41,5 +41,15 @@ public enum WireType implements Function<Bytes, Wire> {
         public Wire apply(Bytes bytes) {
             return new RawWire(bytes);
         }
+    }, READ_ANY {
+        @Override
+        public Wire apply(Bytes bytes) {
+            int code = bytes.readByte(0);
+            if (code >= ' ' && code < 127)
+                return TEXT.apply(bytes);
+            if (BinaryWireCode.isFieldCode(code))
+                return FIELDLESS_BINARY.apply(bytes);
+            return BINARY.apply(bytes);
+        }
     }
 }

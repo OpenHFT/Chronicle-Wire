@@ -15,7 +15,6 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,7 +24,7 @@ import java.util.function.Consumer;
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream. <p> Created by peter.lawrey on
  * 12/01/15.
  */
-public interface WireIn {
+public interface WireIn extends WireCommon {
     boolean isReady();
 
     void copyTo(@NotNull WireOut wire);
@@ -69,9 +68,6 @@ public interface WireIn {
     Wire readComment(@NotNull StringBuilder sb);
 
     void clear();
-
-    @NotNull
-    Bytes<?> bytes();
 
     /**
      * @return if there is more data to be read in this document.
