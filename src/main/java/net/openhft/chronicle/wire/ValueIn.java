@@ -72,7 +72,8 @@ public interface ValueIn {
     byte[] bytes();
 
     default BytesStore bytesStore() {
-        return BytesStore.wrap(bytes());
+        byte[] bytes = bytes();
+        return bytes == null ? null : BytesStore.wrap(bytes);
     }
 
     @NotNull
