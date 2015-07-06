@@ -74,6 +74,10 @@ public interface WireIn extends WireCommon {
      */
     boolean hasMore();
 
+    default WireIn readAlignTo(int alignment) {
+        return this;
+    }
+
     default boolean readDocument(@Nullable Consumer<WireIn> metaDataConsumer,
                                  @Nullable Consumer<WireIn> dataConsumer) {
         return Wires.readData(this, metaDataConsumer, dataConsumer);

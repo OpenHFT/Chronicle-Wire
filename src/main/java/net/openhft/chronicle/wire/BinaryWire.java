@@ -668,7 +668,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public IntValue newValueReference() {
+    public IntValue newIntReference() {
         return new BinaryIntReference();
     }
 
@@ -794,6 +794,11 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut int32(int i32) {
+            return fixedInt32(i32);
+        }
+
+        @NotNull
+        public WireOut fixedInt32(int i32) {
             writeCode(INT32).writeInt(i32);
             return BinaryWire.this;
         }
@@ -908,10 +913,10 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut int32forBinding(int value) {
-            int fromEndOfCacheLine = (int) ((-bytes.readPosition()) & 63);
-            if (fromEndOfCacheLine < 5)
+            int fromEndOfCacheLine = (int) ((-bytes.readPosition() - 1) & 63);
+            if (fromEndOfCacheLine < 4)
                 addPadding(fromEndOfCacheLine - 1);
-            fixedInt64(value);
+            fixedInt32(value);
             return BinaryWire.this;
         }
 

@@ -231,7 +231,7 @@ public class QueryWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public IntValue newValueReference() {
+    public IntValue newIntReference() {
         throw new UnsupportedOperationException();
     }
 

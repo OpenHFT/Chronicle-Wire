@@ -133,6 +133,13 @@ public class RawWire implements Wire, InternalWireIn {
     }
 
     @Override
+    public WireIn readAlignTo(int alignment) {
+        long mod = bytes.readPosition() % alignment;
+        bytes.readSkip(mod);
+        return this;
+    }
+
+    @Override
     public String toString() {
         return bytes.toString();
     }
@@ -190,7 +197,7 @@ public class RawWire implements Wire, InternalWireIn {
     }
 
     @Override
-    public IntValue newValueReference() {
+    public IntValue newIntReference() {
         return new BinaryIntReference();
     }
 

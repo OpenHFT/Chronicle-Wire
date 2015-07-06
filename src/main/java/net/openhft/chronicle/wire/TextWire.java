@@ -341,7 +341,7 @@ public class TextWire implements Wire, InternalWireIn {
 
 
     @Override
-    public IntValue newValueReference() {
+    public IntValue newIntReference() {
         return new TextIntReference();
     }
 

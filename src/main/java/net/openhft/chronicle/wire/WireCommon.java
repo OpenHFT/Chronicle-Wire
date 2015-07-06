@@ -33,7 +33,7 @@ public interface WireCommon {
     /**
      * @return an IntValue which appropriate for this wire.
      */
-    IntValue newValueReference();
+    IntValue newIntReference();
 
     /**
      * @return a LongValue which appropriate for this wire.

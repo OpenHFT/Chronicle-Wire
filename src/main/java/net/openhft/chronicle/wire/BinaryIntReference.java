@@ -73,6 +73,6 @@ public class BinaryIntReference implements IntValue, Byteable {
 
     @Override
     public boolean compareAndSwapValue(int expected, int value) {
-        return bytes.compareAndSwapLong(offset, expected, value);
+        return bytes.compareAndSwapInt(offset, expected, value);
     }
 }
