@@ -441,10 +441,11 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut bytes(@NotNull BytesStore fromBytes) {
-            if (isText(fromBytes)) {
+        public WireOut bytes(@Nullable BytesStore fromBytes) {
+
+            if (isText(fromBytes))
                 return text(fromBytes);
-            }
+
             int length = Maths.toInt32(fromBytes.writeRemaining());
             byte[] byteArray = new byte[length];
             fromBytes.copyTo(byteArray);
@@ -460,7 +461,10 @@ public class TextWire implements Wire, InternalWireIn {
             return TextWire.this;
         }
 
-        private boolean isText(@NotNull BytesStore fromBytes) {
+        private boolean isText(@Nullable BytesStore fromBytes) {
+
+            if (fromBytes == null)
+                return true;
             for (long i = fromBytes.readPosition(); i < fromBytes.readLimit(); i++) {
                 int ch = fromBytes.readUnsignedByte(i);
                 if ((ch < ' ' && ch != '\t') || ch >= 127)
@@ -955,8 +959,11 @@ public class TextWire implements Wire, InternalWireIn {
                     byte[] decode = Base64.getDecoder().decode(sb.toString());
                     bytesConsumer.accept(new TextWire(Bytes.wrapForRead(decode)));
 
+                } else if (str.equals("!!null")) {
+                    bytesConsumer.accept(null);
+                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                 } else {
-                    throw new IORuntimeException("Unsupported type " + str);
+                    throw new IORuntimeException("Unsupported type=" + str);
                 }
             } else {
                 textTo(sb);
@@ -978,13 +985,16 @@ public class TextWire implements Wire, InternalWireIn {
                     byte[] decode = Base64.getDecoder().decode(Wires.INTERNER.intern(sb));
                     return decode;
 
+                } else if (str.equals("!!null")) {
+                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                    return null;
                 } else if (str.equals("!" + SEQ_MAP)) {
                     sb.append(bytes.toString());
                     // todo fix this.
                     return Wires.INTERNER.intern(sb).getBytes();
 
                 } else {
-                    throw new IllegalStateException("unsupported type");
+                    throw new IllegalStateException("unsupported type=" + str);
                 }
 
             } else {
@@ -1540,8 +1550,8 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         /**
-         * @return true if !!null "", if {@code true} reads the !!null "" up to the next STOP, if {@code
-         * false} no  data is read  ( data is only peaked if {@code false} )
+         * @return true if !!null "", if {@code true} reads the !!null "" up to the next STOP, if
+         * {@code false} no  data is read  ( data is only peaked if {@code false} )
          */
         public boolean isNull() {
             consumeWhiteSpace();

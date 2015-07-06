@@ -720,7 +720,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut bytes(@NotNull BytesStore fromBytes) {
+        public WireOut bytes(@Nullable BytesStore fromBytes) {
             long remaining = fromBytes.readRemaining();
             writeLength(Maths.toInt32(remaining + 1));
             writeCode(U8_ARRAY);

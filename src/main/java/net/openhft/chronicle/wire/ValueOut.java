@@ -45,7 +45,7 @@ public interface ValueOut {
     WireOut bool(Boolean flag);
 
     @NotNull
-    WireOut text(CharSequence s);
+    WireOut text(@Nullable CharSequence s);
 
     @NotNull
     default WireOut int8(long x) {
@@ -56,7 +56,7 @@ public interface ValueOut {
     WireOut int8(byte i8);
 
     @NotNull
-    WireOut bytes(BytesStore fromBytes);
+    WireOut bytes(@Nullable BytesStore fromBytes);
 
     @NotNull
     WireOut rawBytes(byte[] value);

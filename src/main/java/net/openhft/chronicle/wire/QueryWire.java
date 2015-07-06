@@ -319,7 +319,7 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut bytes(BytesStore fromBytes) {
+        public WireOut bytes(@Nullable BytesStore fromBytes) {
             throw new UnsupportedOperationException("todo");
         }
 

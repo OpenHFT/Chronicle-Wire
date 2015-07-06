@@ -225,7 +225,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut text(CharSequence s) {
+        public WireOut text(@Nullable CharSequence s) {
             bytes.writeUTFΔ(s);
             return RawWire.this;
         }
@@ -239,7 +239,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut bytes(@NotNull BytesStore fromBytes) {
+        public WireOut bytes(@Nullable BytesStore fromBytes) {
             writeLength(fromBytes.readRemaining());
             bytes.write(fromBytes);
             return RawWire.this;
