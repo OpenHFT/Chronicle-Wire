@@ -1580,17 +1580,17 @@ public class TextWire implements Wire, InternalWireIn {
             return TextWire.this;
         }
 
-        <E> E object0(@Nullable E using, @NotNull Class<E> clazz) {
+        Object object0(@Nullable Object using, @NotNull Class clazz) {
             consumeWhiteSpace();
 
             if (isNull())
                 return null;
 
             if (byte[].class.isAssignableFrom(clazz))
-                return (E) bytes();
+                return bytes();
 
             if (ReadMarshallable.class.isAssignableFrom(clazz)) {
-                final E v;
+                final Object v;
                 if (using == null)
                     v = OS.memory().allocateInstance(clazz);
                 else
@@ -1608,44 +1608,44 @@ public class TextWire implements Wire, InternalWireIn {
 
             } else if (CharSequence.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
-                return (E) valueIn.text();
+                return valueIn.text();
 
             } else if (Long.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
-                return (E) (Long) valueIn.int64();
+                return valueIn.int64();
 
             } else if (Double.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
-                return (E) (Double) valueIn.float64();
+                return valueIn.float64();
 
             } else if (Integer.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
-                return (E) (Integer) valueIn.int32();
+                return valueIn.int32();
 
             } else if (Float.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
-                return (E) (Float) valueIn.float32();
+                return valueIn.float32();
 
             } else if (Short.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
-                return (E) (Short) valueIn.int16();
+                return valueIn.int16();
 
             } else if (Character.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
                 final String text = valueIn.text();
                 if (text == null || text.length() == 0)
                     return null;
-                return (E) (Character) text.charAt(0);
+                return text.charAt(0);
 
             } else if (Byte.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
-                return (E) (Byte) valueIn.int8();
+                return valueIn.int8();
 
             } else if (Map.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
                 final Map result = new HashMap();
                 valueIn.map(result);
-                return (E) result;
+                return result;
 
             } else {
                 // TODO assume for now it is a string.
@@ -1654,9 +1654,14 @@ public class TextWire implements Wire, InternalWireIn {
                     StringBuilder sb = Wires.acquireStringBuilder();
                     bytes.parseUTF(sb, TextStopCharTesters.END_OF_TYPE);
                     final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
-                    return (E) object(null, clazz2);
+                    return object(null, clazz2);
                 }
-                return (E) valueIn.text();
+                if (Enum.class.isAssignableFrom(Enum.class)) {
+                    StringBuilder sb = Wires.acquireStringBuilder();
+                    bytes.parseUTF(sb, TextStopCharTesters.END_OF_TYPE);
+                    return Wires.INTERNER.intern(sb);
+                }
+                return valueIn.text();
             }
         }
     }

@@ -1870,18 +1870,14 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
-        <E> E object0(@Nullable E using, @NotNull Class<E> clazz) {
+        Object object0(@Nullable Object using, @NotNull Class clazz) {
             if (byte[].class.isAssignableFrom(clazz))
-                return (E) bytes();
+                return bytes();
 
             else if (ReadMarshallable.class.isAssignableFrom(clazz)) {
-                final E v;
+                final Object v;
                 if (using == null)
-                    try {
-                        v = clazz.newInstance();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
+                    v = OS.memory().allocateInstance(clazz);
                 else
                     v = using;
 
@@ -1893,63 +1889,87 @@ public class BinaryWire implements Wire, InternalWireIn {
                         ? Wires.acquireStringBuilder()
                         : (StringBuilder) using;
                 textTo(builder);
-                return (E) builder;
+                return builder;
 
             } else if (CharSequence.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
-                return (E) text();
+                return text();
 
             } else if (Long.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
-                return (E) (Long) int64();
+                return int64();
 
             } else if (Double.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
-                return (E) (Double) float64();
+                return float64();
 
             } else if (Integer.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
-                return (E) (Integer) int32();
+                return int32();
 
             } else if (Float.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
-                return (E) (Float) float32();
+                return float32();
 
             } else if (Short.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
-                return (E) (Short) int16();
+                return int16();
 
             } else if (Character.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
                 final String text = text();
                 if (text == null || text.length() == 0)
                     return null;
-                return (E) (Character) text.charAt(0);
+                return text.charAt(0);
 
             } else if (Byte.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
-                return (E) (Byte) int8();
+                return int8();
 
             } else if (Map.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
 
                 final HashMap result = new HashMap();
                 map(result);
-                return (E) result;
+                return result;
 
             } else {
                 int code = peekCode();
-                if (code == TYPE_PREFIX) {
-                    readCode();
-                    StringBuilder sb = Wires.acquireStringBuilder();
-                    bytes.readUTFΔ(sb);
-                    final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
-                    return (E) object(null, clazz2);
+                switch (code >> 4) {
+                    case BinaryWireHighCode.CONTROL:
+                        switch (code) {
+                            case BYTES_LENGTH32:
+                                return bytesStore();
+                        }
+                        break;
+                    case BinaryWireHighCode.SPECIAL:
+                        switch (code) {
+                            case FALSE:
+                                return Boolean.FALSE;
+                            case TRUE:
+                                return Boolean.TRUE;
+                            case NULL:
+                                return null;
+                            case STRING_ANY:
+                                return text();
+                            case TYPE_PREFIX: {
+                                readCode();
+                                StringBuilder sb = Wires.acquireStringBuilder();
+                                bytes.readUTFΔ(sb);
+                                final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                                return object(null, clazz2);
+                            }
+                        }
+                        break;
+
+                    case BinaryWireHighCode.FLOAT:
+                        return readFloat0(code);
+
+                    case BinaryWireHighCode.INT:
+                        return readInt0(code);
                 }
-                if (code == BYTES_LENGTH32)
-                    return (E) bytesStore();
                 // assume it a String
-                return (E) text();
+                return text();
             }
         }
     }

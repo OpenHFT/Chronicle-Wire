@@ -209,6 +209,8 @@ public interface ValueOut {
             return map((Map) value);
         if (value instanceof Byte)
             return int8((Byte) value);
+        else if (value instanceof Boolean)
+            return bool((Boolean) value);
         else if (value instanceof Character)
             return text(value.toString());
         else if (value instanceof Short)
