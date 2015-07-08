@@ -94,6 +94,11 @@ public class TextWire implements Wire, InternalWireIn {
                     case 'n':
                         ch = '\n';
                         break;
+                    case 't':
+                        ch = '\t';
+                        break;
+                    default:
+                        ch = ch3;
                 }
             }
             BytesUtil.setCharAt(sb, end++, ch);
