@@ -58,7 +58,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     final ValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     final ValueOut valueOut;
-    final ValueIn valueIn = new BinaryValueIn();
+    final BinaryValueIn valueIn = new BinaryValueIn();
 
     private final boolean numericFields;
     private final boolean fieldLess;
@@ -615,6 +615,17 @@ public class BinaryWire implements Wire, InternalWireIn {
             return sb;
         }
         switch (code >> 4) {
+            case BinaryWireHighCode.CONTROL:
+                switch (code) {
+                    case BYTES_LENGTH32:
+                        if (sb instanceof StringBuilder) {
+                            bytes.readSkip(-1);
+                            valueIn.bytesStore((StringBuilder) sb);
+                        } else {
+                            throw new AssertionError();
+                        }
+                        return sb;
+                }
             case BinaryWireHighCode.SPECIAL:
                 switch (code) {
                     case NULL:
@@ -632,8 +643,9 @@ public class BinaryWire implements Wire, InternalWireIn {
                     case ZONED_DATE_TIME:
                     case TYPE_LITERAL:
                     case STRING_ANY:
-                        bytes.readUTFΔ(sb);
-                        return sb;
+                        if (bytes.readUTFΔ(sb))
+                            return sb;
+                        return null;
                     default:
                         return null;
                 }
@@ -1334,6 +1346,27 @@ public class BinaryWire implements Wire, InternalWireIn {
             return toBytes;
         }
 
+        public void bytesStore(StringBuilder sb) {
+            sb.setLength(0);
+            long length = readLength() - 1;
+            int code = readCode();
+            if (code != U8_ARRAY)
+                cantRead(code);
+            for (long i = 0; i < length; i++)
+                sb.append((char) bytes.readUnsignedByte());
+        }
+
+        public void bytesStore(Bytes toBytes) {
+            toBytes.clear();
+            long length = readLength() - 1;
+            int code = readCode();
+            if (code != U8_ARRAY)
+                cantRead(code);
+            toBytes.write(0, bytes, bytes.readPosition(), length);
+            toBytes.readLimit(length);
+            bytes.readSkip(length);
+        }
+
         @NotNull
         public WireIn bytes(@NotNull Consumer<WireIn> bytesConsumer) {
             long length = readLength() - 1;
@@ -1939,7 +1972,15 @@ public class BinaryWire implements Wire, InternalWireIn {
                     case BinaryWireHighCode.CONTROL:
                         switch (code) {
                             case BYTES_LENGTH32:
-                                return bytesStore();
+                                if (using instanceof StringBuilder) {
+                                    bytesStore((StringBuilder) using);
+                                    return using;
+                                } else if (using instanceof Bytes) {
+                                    bytesStore((Bytes) using);
+                                    return using;
+                                } else {
+                                    return bytesStore();
+                                }
                         }
                         break;
                     case BinaryWireHighCode.SPECIAL:

@@ -57,6 +57,17 @@ public class BinaryWire2Test {
     }
 
     @Test
+    public void testBytesStore() {
+        Wire wire = createWire();
+        wire.write().object(Bytes.from("Hello"));
+
+        Bytes b = Bytes.elasticByteBuffer();
+        wire.read().object(b, Object.class);
+        assertEquals("Hello", b.toString());
+
+    }
+
+    @Test
     public void testFloat32() {
         Wire wire = createWire();
         wire.write().float32(0.0F)
