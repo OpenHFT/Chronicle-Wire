@@ -1661,7 +1661,7 @@ public class TextWire implements Wire, InternalWireIn {
                     final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
                     return object(null, clazz2);
                 }
-                if (Enum.class.isAssignableFrom(Enum.class)) {
+                if (Enum.class.isAssignableFrom(clazz)) {
                     StringBuilder sb = Wires.acquireStringBuilder();
                     bytes.parseUTF(sb, TextStopCharTesters.END_OF_TYPE);
                     return Wires.INTERNER.intern(sb);
