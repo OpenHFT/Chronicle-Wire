@@ -185,7 +185,9 @@ public enum Wires {
         final long position0 = bytes.readPosition();
         try {
             bytes.readPosition(position);
-            bytes.readLimit(position + length);
+            long limit2 = Math.min(limit0, position + length);
+            bytes.readLimit(limit2);
+            long missing = position + length - limit2;
             while (bytes.readRemaining() >= 4) {
                 long header = bytes.readUnsignedInt();
                 int len = lengthOf(header);
@@ -193,13 +195,23 @@ public enum Wires {
                         ? isReady(header) ? "!!data" : "!!not-ready-data!"
                         : isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
                 boolean binary = bytes.readByte(bytes.readPosition()) < ' ';
-                sb.append("--- ").append(type).append(binary ? " #binary\n" : "\n");
-                for (int i = 0; i < len; i++) {
-                    int ch = bytes.readUnsignedByte();
-                    if (binary)
-                        sb.append(RandomDataInput.charToString[ch]);
-                    else
-                        sb.append((char) ch);
+
+                sb.append("--- ").append(type).append(binary ? " #binary" : "");
+                if (missing > 0)
+                    sb.append(" # missing: ").append(missing);
+                if (len > bytes.readRemaining())
+                    sb.append(" # len: ").append(len).append(", remaining: ").append(bytes.readRemaining());
+                sb.append("\n");
+                try {
+                    for (int i = 0; i < len; i++) {
+                        int ch = bytes.readUnsignedByte();
+                        if (binary)
+                            sb.append(RandomDataInput.charToString[ch]);
+                        else
+                            sb.append((char) ch);
+                    }
+                } catch (Exception e) {
+                    sb.append(" ").append(e);
                 }
                 if (sb.charAt(sb.length() - 1) != '\n')
                     sb.append('\n');
