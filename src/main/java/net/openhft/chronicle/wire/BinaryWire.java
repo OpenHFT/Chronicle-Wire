@@ -2011,8 +2011,10 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Nullable
         private Object object(@Nullable Object using) {
             int code = peekCode();
-            if ((code & 0x80) == 0)
+            if ((code & 0x80) == 0) {
+                bytes.readSkip(1);
                 return code;
+            }
             switch (code >> 4) {
                 case BinaryWireHighCode.CONTROL:
                     switch (code) {
