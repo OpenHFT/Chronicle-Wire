@@ -41,10 +41,6 @@ public class BinaryWire2Test {
     }
 
     @Test
-    public void testWriteMarshallable() {
-    }
-
-    @Test
     public void testBool() {
         Wire wire = createWire();
         wire.write().bool(false)
