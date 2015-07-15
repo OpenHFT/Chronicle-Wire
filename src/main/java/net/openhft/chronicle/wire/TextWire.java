@@ -86,9 +86,10 @@ public class TextWire implements Wire, InternalWireIn {
 
     public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb) {
         int end = 0;
-        for (int i = 0; i < sb.length(); i++) {
+        int length = sb.length();
+        for (int i = 0; i < length; i++) {
             char ch = sb.charAt(i);
-            if (ch == '\\' && i < sb.length() - 1) {
+            if (ch == '\\' && i < length - 1) {
                 char ch3 = sb.charAt(++i);
                 switch (ch3) {
                     case 'n':
@@ -103,6 +104,8 @@ public class TextWire implements Wire, InternalWireIn {
             }
             BytesUtil.setCharAt(sb, end++, ch);
         }
+        if (length != sb.length())
+            throw new IllegalStateException("Length changed from " + length + " to " + sb.length() + " for " + sb);
         BytesUtil.setLength(sb, end);
     }
 
