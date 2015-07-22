@@ -54,10 +54,12 @@ public class WireSerializedLambdaTest {
     public void testTextWire() {
         Wire wire = new TextWire(Bytes.elasticByteBuffer());
         SerializableFunction<String, String> fun = String::toUpperCase;
+
         wire.write(() -> "one").object(fun)
                 .write(() -> "two").object(Fun.ADD_A)
                 .write(() -> "three").object(Updat.INCR);
 
+        // System.out.println(wire.bytes().toString());
 
         assertEquals("one: !SerializedLambda {\n" +
                 "  cc: !type net.openhft.chronicle.wire.WireSerializedLambdaTest,\n" +
@@ -120,4 +122,5 @@ public class WireSerializedLambdaTest {
         updater.accept(aLong);
         assertEquals(-1, aLong.get());
     }
+
 }
