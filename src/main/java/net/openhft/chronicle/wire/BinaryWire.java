@@ -119,6 +119,20 @@ public class BinaryWire implements Wire, InternalWireIn {
                             bytes.readSkip(1);
                             bytes.readSkip(bytes.readUnsignedInt());
                             break outerSwitch;
+                        case BYTES_LENGTH32:
+                            bytes.readSkip(1);
+                            int len = bytes.readInt();
+                            long lim = bytes.readLimit();
+                            try {
+                                bytes.readLimit(bytes.readPosition()+len);
+                                wire.writeValue().marshallable(w -> {
+                                    copyTo(w);
+                                });
+                            } finally {
+                                bytes.readLimit(lim);
+                            }
+                            break;
+
                         default:
                             throw new UnsupportedOperationException();
                     }
@@ -361,6 +375,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 wire.write(() -> fsb);
                 break;
 
+            case EVENT_NAME:
             case STRING_ANY:
                 bytes.readSkip(1);
                 StringBuilder sb = readText(peekCode, Wires.acquireStringBuilder());
@@ -395,6 +410,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 bytes.readSkip(1);
                 wire.writeValue().bool(false);
                 break;
+
 
             case TRUE:
                 bytes.readSkip(1);
