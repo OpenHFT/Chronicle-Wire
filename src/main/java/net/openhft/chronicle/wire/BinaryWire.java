@@ -125,17 +125,23 @@ public class BinaryWire implements Wire, InternalWireIn {
                             long lim = bytes.readLimit();
                             try {
                                 bytes.readLimit(bytes.readPosition()+len);
-                                wire.writeValue().marshallable(w -> {
-                                    copyTo(w);
-                                });
+                                wire.writeValue().marshallable(w -> copyTo(w));
                             } finally {
                                 bytes.readLimit(lim);
                             }
+                            break outerSwitch;
+
+                        case U8_ARRAY:
+                            bytes.readSkip(1);
+                            wire.writeValue().bytes(bytes);
+                            break outerSwitch;
+
+                        case I64_ARRAY:
+                            // no supported.
                             break;
 
-                        default:
-                            throw new UnsupportedOperationException();
                     }
+                    throw new UnsupportedOperationException("peekCode=" + stringForCode(peekCode));
 
                 case BinaryWireHighCode.FLOAT:
                     bytes.readSkip(1);
@@ -370,17 +376,19 @@ public class BinaryWire implements Wire, InternalWireIn {
                 break;
             }
 
+            case EVENT_NAME:
             case FIELD_NAME_ANY:
                 StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, Wires.acquireStringBuilder());
                 wire.write(() -> fsb);
                 break;
 
-            case EVENT_NAME:
-            case STRING_ANY:
+            case STRING_ANY: {
                 bytes.readSkip(1);
-                StringBuilder sb = readText(peekCode, Wires.acquireStringBuilder());
-                wire.writeValue().text(sb);
+                StringBuilder sb1 = Wires.acquireStringBuilder();
+                bytes.readUTFΔ(sb1);
+                wire.writeValue().text(sb1);
                 break;
+            }
 
             case FIELD_NUMBER: {
                 bytes.readSkip(1);

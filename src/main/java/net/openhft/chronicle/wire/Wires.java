@@ -269,14 +269,14 @@ public enum Wires {
                         bytes.readLimit(readLimit);
                     }
                     textBytes = bytes2;
-
+                    len = (int) textBytes.readRemaining();
                 }
                 try {
                     for (int i = 0; i < len; i++) {
                         int ch = textBytes.readUnsignedByte();
-                        if (binary)
-                            sb.append(RandomDataInput.charToString[ch]);
-                        else
+//                        if (binary)
+//                            sb.append(RandomDataInput.charToString[ch]);
+//                        else
                             sb.append((char) ch);
                     }
                 } catch (Exception e) {

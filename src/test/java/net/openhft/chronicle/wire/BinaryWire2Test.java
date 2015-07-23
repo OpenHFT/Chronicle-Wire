@@ -137,7 +137,7 @@ public class BinaryWire2Test {
         Wire twire = new TextWire(Bytes.elasticByteBuffer());
         writeMessage(twire);
 
-        System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
+        System.out.println(Wires.fromSizePrefixedBinaryToText(twire.bytes()));
     }
 
     private void writeMessage(@NotNull Wire wire) {
