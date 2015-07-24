@@ -25,7 +25,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>chronicle-wire</artifactId>
-    <version>1.0.20-beta-SNAPSHOT</version>
+    <version>1.0.21-beta-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Wire</name>
     <description>Chronicle-Wire</description>
     <packaging>bundle</packaging>
