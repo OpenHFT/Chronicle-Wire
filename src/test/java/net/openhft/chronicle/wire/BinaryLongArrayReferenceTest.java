@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import org.junit.Test;
 
@@ -24,7 +25,7 @@ public class BinaryLongArrayReferenceTest {
     @Test
     public void getSetValues() {
         int length = 1024 + 8;
-        try (NativeBytes bytes = NativeBytes.nativeBytes(length + 8)) {
+        try (NativeBytes bytes = Bytes.allocateElasticDirect(length + 8)) {
             BinaryLongArrayReference.write(bytes, 128);
 
             BinaryLongArrayReference array = new BinaryLongArrayReference();

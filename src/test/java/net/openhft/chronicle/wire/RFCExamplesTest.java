@@ -16,7 +16,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.NativeBytes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -38,7 +37,7 @@ public class RFCExamplesTest {
     @Test
     @Ignore
     public void testPuts() {
-        Bytes bytes = NativeBytes.nativeBytes();
+        Bytes bytes = Bytes.allocateElasticDirect();
 /*
 --- !!meta-data
 csp:///service-lookup

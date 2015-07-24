@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import org.junit.Test;
 
@@ -24,7 +25,7 @@ public class TextLongArrayReferenceTest {
     @Test
     public void getSetValues() {
         int length = 128 * 22 + 47;
-        try (NativeBytes bytes = NativeBytes.nativeBytes(length)) {
+        try (NativeBytes bytes = Bytes.allocateElasticDirect(length)) {
             TextLongArrayReference.write(bytes, 128);
 
             TextLongArrayReference array = new TextLongArrayReference();

@@ -16,7 +16,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,7 +50,7 @@ public class TextDocumentTest {
      */
     @Test
     public void testDocument() {
-        NativeBytes<Void> bytes1 = NativeBytes.nativeBytes();
+        Bytes<Void> bytes1 = Bytes.allocateElasticDirect();
         final Wire wire = new TextWire(bytes1);
         final Header wheader = new Header();
         final Header rheader = new Header();

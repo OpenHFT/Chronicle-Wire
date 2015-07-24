@@ -17,7 +17,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 
 import java.time.ZonedDateTime;
@@ -30,7 +29,7 @@ public class StreamMain {
     public static void main(String[] args) {
         ClassAliasPool.CLASS_ALIASES.addAlias(FileFormat.class);
         for (WireType wt : WireType.values()) {
-            Bytes b = NativeBytes.nativeBytes();
+            Bytes b = Bytes.allocateElasticDirect();
             Wire w = wt.apply(b);
             w.writeDocument(true, w2 -> w2.write(() -> "header")
                     .typedMarshallable(new FileFormat()));
