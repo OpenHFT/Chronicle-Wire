@@ -193,7 +193,8 @@ public class BinaryWire implements Wire, InternalWireIn {
         return unorderedField(key, position, sb);
     }
 
-    private ValueIn unorderedField(WireKey key, long position, StringBuilder sb) {
+    @NotNull
+    private ValueIn unorderedField(@NotNull WireKey key, long position, @Nullable StringBuilder sb) {
         bytes.readPosition(position);
         if (sb == null)
             sb = Wires.acquireStringBuilder();
@@ -769,16 +770,19 @@ public class BinaryWire implements Wire, InternalWireIn {
         return bytes.toDebugString();
     }
 
+    @NotNull
     @Override
     public LongValue newLongReference() {
         return new BinaryLongReference();
     }
 
+    @NotNull
     @Override
     public IntValue newIntReference() {
         return new BinaryIntReference();
     }
 
+    @NotNull
     @Override
     public BinaryLongArrayReference newLongArrayReference() {
         return new BinaryLongArrayReference();
@@ -937,8 +941,9 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
-        public WireOut int64array(long capacity, LongArrayValues values) {
+        public WireOut int64array(long capacity, @NotNull LongArrayValues values) {
             writeCode(I64_ARRAY);
             long pos = bytes.writePosition();
             BinaryLongArrayReference.lazyWrite(bytes, capacity);
@@ -1039,7 +1044,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut int32forBinding(int value, IntValue intValue) {
+        public WireOut int32forBinding(int value, @NotNull IntValue intValue) {
             int32forBinding(value);
             ((BinaryIntReference) intValue).bytesStore(bytes, bytes.writePosition() - 4, 4);
             return BinaryWire.this;
@@ -1047,7 +1052,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut int64forBinding(long value, LongValue longValue) {
+        public WireOut int64forBinding(long value, @NotNull LongValue longValue) {
             int64forBinding(value);
             ((BinaryLongReference) longValue).bytesStore(bytes, bytes.writePosition() - 8, 8);
             return BinaryWire.this;
@@ -1413,7 +1418,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer) {
+        public WireIn bytesMatch(@NotNull BytesStore compareBytes, @NotNull BooleanConsumer consumer) {
             long length = readLength();
             int code = readCode();
             if (code != U8_ARRAY)
@@ -1441,7 +1446,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             return toBytes;
         }
 
-        public void bytesStore(StringBuilder sb) {
+        public void bytesStore(@NotNull StringBuilder sb) {
             sb.setLength(0);
             long length = readLength() - 1;
             int code = readCode();
@@ -1451,7 +1456,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 sb.append((char) bytes.readUnsignedByte());
         }
 
-        public void bytesStore(Bytes toBytes) {
+        public void bytesStore(@NotNull Bytes toBytes) {
             toBytes.clear();
             long length = readLength() - 1;
             int code = readCode();
@@ -1993,11 +1998,12 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @Nullable
         @Override
-        public <E> WireIn object(@NotNull Class<E> clazz, Consumer<E> e) {
+        public <E> WireIn object(@NotNull Class<E> clazz, @NotNull Consumer<E> e) {
             e.accept(ObjectUtils.convertTo(clazz, object0(null, clazz)));
             return BinaryWire.this;
         }
 
+        @Nullable
         Object object0(@Nullable Object using, @NotNull Class clazz) {
             if (ReadMarshallable.class.isAssignableFrom(clazz)) {
                 final Object v;

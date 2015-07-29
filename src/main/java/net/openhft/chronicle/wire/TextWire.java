@@ -71,7 +71,8 @@ public class TextWire implements Wire, InternalWireIn {
         this.bytes = bytes;
     }
 
-    public static TextWire from(String text) {
+    @NotNull
+    public static TextWire from(@NotNull String text) {
         return new TextWire(Bytes.from(text));
     }
 
@@ -342,17 +343,20 @@ public class TextWire implements Wire, InternalWireIn {
         return s.length() == 0;
     }
 
+    @NotNull
     @Override
     public LongValue newLongReference() {
         return new TextLongReference();
     }
 
 
+    @NotNull
     @Override
     public IntValue newIntReference() {
         return new TextIntReference();
     }
 
+    @NotNull
     @Override
     public ByteableLongArrayValues newLongArrayReference() {
         return new TextLongArrayReference();
@@ -575,8 +579,9 @@ public class TextWire implements Wire, InternalWireIn {
             return TextWire.this;
         }
 
+        @NotNull
         @Override
-        public WireOut int64array(long capacity, LongArrayValues values) {
+        public WireOut int64array(long capacity, @NotNull LongArrayValues values) {
             long pos = bytes.writePosition();
             TextLongArrayReference.write(bytes, capacity);
             ((ByteableLongArrayValues) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
@@ -980,6 +985,7 @@ public class TextWire implements Wire, InternalWireIn {
             return TextWire.this;
         }
 
+        @Nullable
         public byte[] bytes() {
             consumeWhiteSpace();
             // TODO needs to be made much more efficient.
@@ -1332,6 +1338,7 @@ public class TextWire implements Wire, InternalWireIn {
             return TextWire.this;
         }
 
+        @NotNull
         String stringForCode(int code) {
             return code < 0 ? "Unexpected end of input" : "'" + (char) code + "'";
         }
@@ -1583,11 +1590,12 @@ public class TextWire implements Wire, InternalWireIn {
 
         @Nullable
         @Override
-        public <E> WireIn object(@NotNull Class<E> clazz, Consumer<E> e) {
+        public <E> WireIn object(@NotNull Class<E> clazz, @NotNull Consumer<E> e) {
             e.accept(ObjectUtils.convertTo(clazz, object0(null, clazz)));
             return TextWire.this;
         }
 
+        @Nullable
         Object object0(@Nullable Object using, @NotNull Class clazz) {
             consumeWhiteSpace();
 

@@ -144,7 +144,7 @@ public enum Wires {
         return read;
     }
 
-    public static void rawReadData(WireIn wireIn, Consumer<WireIn> dataConsumer) {
+    public static void rawReadData(@NotNull WireIn wireIn, @NotNull Consumer<WireIn> dataConsumer) {
         final Bytes<?> bytes = wireIn.bytes();
         int header = bytes.readInt();
         assert isReady(header) && isData(header);

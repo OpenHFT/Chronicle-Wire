@@ -17,33 +17,38 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
 public enum WireType implements Function<Bytes, Wire> {
     TEXT {
+        @NotNull
         @Override
         public Wire apply(Bytes bytes) {
             return new TextWire(bytes);
         }
     }, BINARY {
+        @NotNull
         @Override
         public Wire apply(Bytes bytes) {
             return new BinaryWire(bytes);
         }
     }, FIELDLESS_BINARY {
+        @NotNull
         @Override
         public Wire apply(Bytes bytes) {
             return new BinaryWire(bytes, false, false, true);
         }
     }, RAW {
+        @NotNull
         @Override
         public Wire apply(Bytes bytes) {
             return new RawWire(bytes);
         }
     }, READ_ANY {
         @Override
-        public Wire apply(Bytes bytes) {
+        public Wire apply(@NotNull Bytes bytes) {
             int code = bytes.readByte(0);
             if (code >= ' ' && code < 127)
                 return TEXT.apply(bytes);

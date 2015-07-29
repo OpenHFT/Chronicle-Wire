@@ -67,7 +67,7 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     }
 
     @Override
-    public void bindValueAt(int index, LongValue value) {
+    public void bindValueAt(int index, @NotNull LongValue value) {
         ((BinaryLongReference) value).bytesStore(bytes, VALUES + offset + (index << 3), 8);
     }
 

@@ -225,16 +225,19 @@ public class QueryWire implements Wire, InternalWireIn {
         return bytes.readUnsignedByte(bytes.readPosition() - 1);
     }
 
+    @NotNull
     @Override
     public LongValue newLongReference() {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public IntValue newIntReference() {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public BinaryLongArrayReference newLongArrayReference() {
         throw new UnsupportedOperationException();
@@ -436,6 +439,7 @@ public class QueryWire implements Wire, InternalWireIn {
             return QueryWire.this;
         }
 
+        @NotNull
         @Override
         public WireOut int64array(long capacity, LongArrayValues values) {
             throw new UnsupportedOperationException("todo");
