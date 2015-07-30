@@ -132,6 +132,7 @@ public class RawWire implements Wire, InternalWireIn {
         return bytes.readRemaining() > 0;
     }
 
+    @NotNull
     @Override
     public WireIn readAlignTo(int alignment) {
         long mod = bytes.readPosition() % alignment;
@@ -191,16 +192,19 @@ public class RawWire implements Wire, InternalWireIn {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public LongValue newLongReference() {
         return new BinaryLongReference();
     }
 
+    @NotNull
     @Override
     public IntValue newIntReference() {
         return new BinaryIntReference();
     }
 
+    @NotNull
     @Override
     public BinaryLongArrayReference newLongArrayReference() {
         return new BinaryLongArrayReference();
@@ -323,8 +327,9 @@ public class RawWire implements Wire, InternalWireIn {
         }
 
 
+        @NotNull
         @Override
-        public WireOut int64array(long capacity, LongArrayValues values) {
+        public WireOut int64array(long capacity, @NotNull LongArrayValues values) {
             long pos = bytes.writePosition();
             BinaryLongArrayReference.lazyWrite(bytes, capacity);
             ((ByteableLongArrayValues) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
@@ -416,7 +421,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut int32forBinding(int value, IntValue intValue) {
+        public WireOut int32forBinding(int value, @NotNull IntValue intValue) {
             int32forBinding(value);
             ((BinaryIntReference) intValue).bytesStore(bytes, bytes.writePosition() - 4, 4);
             return RawWire.this;
@@ -424,7 +429,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut int64forBinding(long value, LongValue longValue) {
+        public WireOut int64forBinding(long value, @NotNull LongValue longValue) {
             int64forBinding(value);
             ((BinaryLongReference) longValue).bytesStore(bytes, bytes.writePosition() - 8, 8);
             return RawWire.this;
@@ -470,7 +475,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut object(Object o) {
+        public WireOut object(@Nullable Object o) {
             bytes.writeUTFΔ(o == null ? null : o.toString());
             return RawWire.this;
         }
@@ -536,7 +541,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer) {
+        public WireIn bytesMatch(@NotNull BytesStore compareBytes, @NotNull BooleanConsumer consumer) {
             long length = readLength();
             Bytes<?> bytes = wireIn().bytes();
 

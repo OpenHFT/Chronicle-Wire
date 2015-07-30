@@ -243,7 +243,8 @@ public interface ValueOut {
         }
     }
 
-    default WireOut typedScalar(Object value) {
+    @NotNull
+    default WireOut typedScalar(@NotNull Object value) {
         type(ClassAliasPool.CLASS_ALIASES.nameFor(value.getClass()));
         text(value.toString());
         return wireOut();

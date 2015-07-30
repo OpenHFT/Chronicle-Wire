@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.util.ReadResolvable;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.lang.invoke.SerializedLambda;
@@ -38,13 +39,14 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
     private String implMethodSignature;
     private int implMethodKind;
     private String instantiatedMethodType;
+    @NotNull
     private List<Object> capturedArgs = new ArrayList<>();
 
-    public static boolean isSerializableLambda(Class clazz) {
+    public static boolean isSerializableLambda(@NotNull Class clazz) {
         return Serializable.class.isAssignableFrom(clazz) && clazz.getName().contains("$Lambda$");
     }
 
-    public static <Lambda> void write(Lambda lambda, ValueOut valueOut) {
+    public static <Lambda> void write(@NotNull Lambda lambda, @NotNull ValueOut valueOut) {
         try {
             Method writeReplace = lambda.getClass().getDeclaredMethod("writeReplace");
             writeReplace.setAccessible(true);
@@ -83,7 +85,7 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
     }
 
     @Override
-    public void readMarshallable(WireIn wire) throws IllegalStateException {
+    public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
         capturedArgs = new ArrayList<>();
 
         wire.read(() -> "cc").typeLiteral(t -> capturingClass = t)

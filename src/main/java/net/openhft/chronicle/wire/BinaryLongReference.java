@@ -25,7 +25,7 @@ public class BinaryLongReference implements LongValue, Byteable {
     private long offset;
 
     @Override
-    public void bytesStore(BytesStore bytes, long offset, long length) {
+    public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
         if (length != maxSize()) throw new IllegalArgumentException();
         this.bytes = bytes.bytesStore();
         this.offset = offset;

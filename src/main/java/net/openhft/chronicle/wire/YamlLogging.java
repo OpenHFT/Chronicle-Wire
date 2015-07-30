@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Created by Rob Austin
  */
@@ -24,7 +26,9 @@ public enum YamlLogging {
     // TODO Doesn't show all writes. Use clientReads
     public static volatile boolean showServerWrites = false;
     public static volatile boolean clientWrites = false;
+    @NotNull
     public static volatile String title = "";
+    @NotNull
     public static volatile String writeMessage = "";
     public static volatile boolean clientReads = false;
     public static volatile boolean showServerReads = false;
