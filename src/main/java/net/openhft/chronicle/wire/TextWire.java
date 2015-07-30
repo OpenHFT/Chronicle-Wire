@@ -454,7 +454,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (isText(fromBytes))
                 return text(fromBytes);
 
-            int length = Maths.toInt32(fromBytes.writeRemaining());
+            int length = Maths.toInt32(fromBytes.readRemaining());
             byte[] byteArray = new byte[length];
             fromBytes.copyTo(byteArray);
             return bytes(byteArray);
@@ -1596,6 +1596,11 @@ public class TextWire implements Wire, InternalWireIn {
 
             if (byte[].class.isAssignableFrom(clazz))
                 return bytes();
+
+            if (BytesStore.class.isAssignableFrom(clazz)) {
+                Bytes<byte[]> bytes = Bytes.wrapForRead(bytes());
+                return bytes;
+            }
 
             if (ReadMarshallable.class.isAssignableFrom(clazz)) {
                 final Object v;
