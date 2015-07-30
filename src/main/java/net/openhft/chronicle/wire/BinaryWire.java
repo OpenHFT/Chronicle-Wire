@@ -124,7 +124,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                             int len = bytes.readInt();
                             long lim = bytes.readLimit();
                             try {
-                                bytes.readLimit(bytes.readPosition()+len);
+                                bytes.readLimit(bytes.readPosition() + len);
                                 wire.writeValue().marshallable(w -> copyTo(w));
                             } finally {
                                 bytes.readLimit(lim);
@@ -1893,6 +1893,14 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
         }
 
+        private double readTextAsDouble() {
+            bytes.readSkip(-1);
+            final String text = text();
+            if (text == null || text.length() == 0)
+                return Double.NaN;
+            return Double.parseDouble(text);
+        }
+
         @Override
         public boolean bool() {
             consumeSpecial();
@@ -1970,17 +1978,19 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public double float64() {
             int code = readCode();
-            return isText(code) ? readTextAsLong() : readFloat0(code);
+            if (code >> 4 == BinaryWireHighCode.FLOAT)
+                return readFloat0(code);
+            return isText(code) ? readTextAsDouble() : readInt0(code);
         }
 
         @Override
         public float float32() {
             consumeSpecial();
             int code = readCode();
-            final double value = isText(code) ? readTextAsLong() : readFloat0(code);
+            final double value = isText(code) ? readTextAsDouble() : readFloat0(code);
 
-            if (value > Float.MAX_VALUE || value < Float.MIN_VALUE)
-                throw new IllegalStateException();
+            if (Double.isFinite(value) && (value > Float.MAX_VALUE || value < Float.MIN_VALUE))
+                throw new IllegalStateException("Cannot convert " + value + " to float");
 
             return (float) value;
         }
