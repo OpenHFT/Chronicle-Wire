@@ -38,9 +38,9 @@ import static net.openhft.chronicle.wire.BinaryWire.toIntU30;
  */
 public enum Wires {
     ;
-    public static final int NOT_READY = 1 << 31;
-    public static final int META_DATA = 1 << 30;
-    public static final int UNKNOWN_LENGTH = 0x0;
+    private static final int NOT_READY = 1 << 31;
+    private static final int META_DATA = 1 << 30;
+    private static final int UNKNOWN_LENGTH = 0x0;
     public static final int LENGTH_MASK = -1 >>> 2;
     public static final StringInterner INTERNER = new StringInterner(128);
 
@@ -183,7 +183,7 @@ public enum Wires {
     }
 
     @NotNull
-    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position, long length) {
+    private static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position, long length) {
         StringBuilder sb = new StringBuilder();
 
         final long limit0 = bytes.readLimit();
@@ -230,7 +230,7 @@ public enum Wires {
     }
 
     @NotNull
-    public static String fromSizePrefixedBinaryToText(@NotNull Bytes bytes, long position, long length) {
+    private static String fromSizePrefixedBinaryToText(@NotNull Bytes bytes, long position, long length) {
         StringBuilder sb = new StringBuilder();
 
         final long limit0 = bytes.readLimit();
@@ -293,7 +293,7 @@ public enum Wires {
         }
     }
 
-    public static boolean isKnownLength(long len) {
+    private static boolean isKnownLength(long len) {
         return (len & (META_DATA | LENGTH_MASK)) != UNKNOWN_LENGTH;
     }
 

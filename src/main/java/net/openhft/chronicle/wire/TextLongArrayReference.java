@@ -27,11 +27,11 @@ The format for a long array in text is
  */
 
 public class TextLongArrayReference implements ByteableLongArrayValues {
-    static final byte[] SECTION1 = "{ capacity: ".getBytes();
-    static final byte[] SECTION2 = ", values: [ ".getBytes();
-    static final byte[] SECTION3 = " ] }\n".getBytes();
-    static final byte[] ZERO = "00000000000000000000".getBytes();
-    static final byte[] SEP = ", ".getBytes();
+    private static final byte[] SECTION1 = "{ capacity: ".getBytes();
+    private static final byte[] SECTION2 = ", values: [ ".getBytes();
+    private static final byte[] SECTION3 = " ] }\n".getBytes();
+    private static final byte[] ZERO = "00000000000000000000".getBytes();
+    private static final byte[] SEP = ", ".getBytes();
 
     private static final int DIGITS = ZERO.length;
     private static final int CAPACITY = SECTION1.length;

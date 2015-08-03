@@ -23,12 +23,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-public class TextIntReference implements IntValue, Byteable {
-    public static final byte[] template = "!!atomic { locked: false, value: 0000000000 }".getBytes();
-    public static final int FALSE = ('f' << 24) | ('a' << 16) | ('l' << 8) | 's';
-    public static final int TRUE = (' ' << 24) | ('t' << 16) | ('r' << 8) | 'u';
-    static final int LOCKED = 19;
-    static final int VALUE = 33;
+class TextIntReference implements IntValue, Byteable {
+    private static final byte[] template = "!!atomic { locked: false, value: 0000000000 }".getBytes();
+    private static final int FALSE = ('f' << 24) | ('a' << 16) | ('l' << 8) | 's';
+    private static final int TRUE = (' ' << 24) | ('t' << 16) | ('r' << 8) | 'u';
+    private static final int LOCKED = 19;
+    private static final int VALUE = 33;
     private static final int DIGITS = 10;
     private BytesStore bytes;
     private long offset;
@@ -39,7 +39,7 @@ public class TextIntReference implements IntValue, Byteable {
         bytes.append(position + VALUE, value, DIGITS);
     }
 
-    <T> T withLock(@NotNull Supplier<T> call) {
+    private <T> T withLock(@NotNull Supplier<T> call) {
         long valueOffset = offset + LOCKED;
         int value = bytes.readVolatileInt(valueOffset);
         if (value != FALSE && value != TRUE)

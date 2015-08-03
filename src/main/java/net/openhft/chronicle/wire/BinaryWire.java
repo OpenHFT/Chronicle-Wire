@@ -50,19 +50,19 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
  * Created by peter.lawrey on 15/01/15.
  */
 public class BinaryWire implements Wire, InternalWireIn {
-    public static final int ANY_CODE_MATCH = -1;
-    static final int END_OF_BYTES = -1;
-    static final UTF8StringInterner UTF8_INTERNER = new UTF8StringInterner(128);
+    private static final int ANY_CODE_MATCH = -1;
+    private static final int END_OF_BYTES = -1;
+    private static final UTF8StringInterner UTF8_INTERNER = new UTF8StringInterner(128);
 
-    final Bytes<?> bytes;
-    final ValueOut fixedValueOut = new FixedBinaryValueOut();
+    private final Bytes<?> bytes;
+    private final ValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
-    final ValueOut valueOut;
-    final BinaryValueIn valueIn = new BinaryValueIn();
+    private final ValueOut valueOut;
+    private final BinaryValueIn valueIn = new BinaryValueIn();
 
     private final boolean numericFields;
     private final boolean fieldLess;
-    boolean ready;
+    private boolean ready;
 
     public BinaryWire(Bytes bytes) {
         this(bytes, false, false, false);
@@ -430,7 +430,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
     }
 
-    long readInt(int code) {
+    private long readInt(int code) {
         if (code < 128)
             return code;
         switch (code >> 4) {
@@ -509,7 +509,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         throw new UnsupportedOperationException(stringForCode(code));
     }
 
-    long readInt0(int code) {
+    private long readInt0(int code) {
         if (isSmallInt(code))
             return code;
 
@@ -552,7 +552,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         throw new UnsupportedOperationException(stringForCode(code));
     }
 
-    Number readInt0object(int code) {
+    private Number readInt0object(int code) {
         if (isSmallInt(code))
             return code;
 
@@ -705,7 +705,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     @Nullable
-    <ACS extends Appendable & CharSequence> ACS readText(int code, @NotNull ACS sb) {
+    private <ACS extends Appendable & CharSequence> ACS readText(int code, @NotNull ACS sb) {
         if (code <= 127) {
             append(sb, code);
             return sb;

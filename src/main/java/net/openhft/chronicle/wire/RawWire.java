@@ -42,14 +42,16 @@ import java.util.function.*;
  * Created by peter.lawrey on 19/01/15.
  */
 public class RawWire implements Wire, InternalWireIn {
-    final Bytes bytes;
-    final RawValueOut valueOut = new RawValueOut();
-    final RawValueIn valueIn = new RawValueIn();
+    private final Bytes bytes;
+    private final RawValueOut valueOut = new RawValueOut();
+    private final RawValueIn valueIn = new RawValueIn();
     @NotNull
+    private
     String lastField = "";
     @Nullable
+    private
     StringBuilder lastSB;
-    boolean ready;
+    private boolean ready;
 
     public RawWire(Bytes bytes) {
         this.bytes = bytes;

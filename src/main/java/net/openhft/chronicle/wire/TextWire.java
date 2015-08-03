@@ -49,10 +49,10 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
  */
 public class TextWire implements Wire, InternalWireIn {
 
-    public static final String FIELD_SEP = "";
-    public static final String SEQ_MAP = "!seqmap";
-    public static final String NULL = "!null \"\"";
-    static final BitSet QUOTE_CHARS = new BitSet();
+    private static final String FIELD_SEP = "";
+    private static final String SEQ_MAP = "!seqmap";
+    private static final String NULL = "!null \"\"";
+    private static final BitSet QUOTE_CHARS = new BitSet();
     private static final Logger LOG =
             LoggerFactory.getLogger(TextWire.class);
     private static final String END_FIELD = "\n";
@@ -62,10 +62,10 @@ public class TextWire implements Wire, InternalWireIn {
             QUOTE_CHARS.set(ch);
     }
 
-    final Bytes<?> bytes;
-    final TextValueOut valueOut = new TextValueOut();
-    final ValueIn valueIn = new TextValueIn();
-    boolean ready;
+    private final Bytes<?> bytes;
+    private final TextValueOut valueOut = new TextValueOut();
+    private final ValueIn valueIn = new TextValueIn();
+    private boolean ready;
 
     public TextWire(Bytes bytes) {
         this.bytes = bytes;

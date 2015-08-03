@@ -25,11 +25,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Supplier;
 
 public class TextLongReference implements LongValue, Byteable {
-    public static final byte[] template = "!!atomic { locked: false, value: 00000000000000000000 }".getBytes();
-    public static final int FALSE = BytesUtil.asInt("fals");
-    public static final int TRUE = BytesUtil.asInt(" tru");
-    static final long UNINITIALIZED = 0x0L;
-    static final int LOCKED = 19;
+    private static final byte[] template = "!!atomic { locked: false, value: 00000000000000000000 }".getBytes();
+    private static final int FALSE = BytesUtil.asInt("fals");
+    private static final int TRUE = BytesUtil.asInt(" tru");
+    private static final long UNINITIALIZED = 0x0L;
+    private static final int LOCKED = 19;
     static final int VALUE = 33;
     private static final int DIGITS = 20;
     private BytesStore bytes;
@@ -41,7 +41,7 @@ public class TextLongReference implements LongValue, Byteable {
         bytes.append(position + VALUE, value, DIGITS);
     }
 
-    <T> T withLock(@NotNull Supplier<T> call) {
+    private <T> T withLock(@NotNull Supplier<T> call) {
         long valueOffset = offset + LOCKED;
         int value = bytes.readVolatileInt(valueOffset);
         if (value != FALSE && value != TRUE)

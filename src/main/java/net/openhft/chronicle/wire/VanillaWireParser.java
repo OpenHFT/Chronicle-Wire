@@ -24,8 +24,8 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 
 public class VanillaWireParser implements WireParser {
-    final Map<CharSequence, Consumer<ValueIn>> namedConsumer = new TreeMap<>(CharSequenceComparator.INSTANCE);
-    final Map<Integer, Consumer<ValueIn>> numberedConsumer = new HashMap<>();
+    private final Map<CharSequence, Consumer<ValueIn>> namedConsumer = new TreeMap<>(CharSequenceComparator.INSTANCE);
+    private final Map<Integer, Consumer<ValueIn>> numberedConsumer = new HashMap<>();
 
     @Override
     public void register(@NotNull WireKey key, Consumer<ValueIn> valueInConsumer) {
