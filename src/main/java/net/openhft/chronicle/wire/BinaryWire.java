@@ -766,6 +766,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         return bytes.readUnsignedByte();
     }
 
+    @NotNull
     public String toString() {
         return bytes.toDebugString();
     }

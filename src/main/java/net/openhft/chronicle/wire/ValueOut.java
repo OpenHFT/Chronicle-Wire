@@ -116,6 +116,7 @@ public interface ValueOut {
     @NotNull
     WireOut int64array(long capacity);
 
+    @NotNull
     WireOut int64array(long capacity, LongArrayValues values);
 
     @NotNull

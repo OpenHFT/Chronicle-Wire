@@ -74,6 +74,7 @@ public interface WireIn extends WireCommon {
      */
     boolean hasMore();
 
+    @NotNull
     default WireIn readAlignTo(int alignment) {
         return this;
     }

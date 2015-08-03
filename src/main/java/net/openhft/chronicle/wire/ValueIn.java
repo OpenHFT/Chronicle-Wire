@@ -69,6 +69,7 @@ public interface ValueIn {
     @NotNull
     WireIn bytes(@NotNull Consumer<WireIn> wireInConsumer);
 
+    @Nullable
     byte[] bytes();
 
     @Nullable
