@@ -795,8 +795,8 @@ public class TextWireTest {
         System.out.println(wire.toString());
         Object[] object2 = (Object[]) wire.read()
                 .object(Object.class);
-        assertEquals(3, object.length);
-        assertEquals("", Arrays.toString(object2));
+        assertEquals(3, object2.length);
+        assertEquals("[abc, def, ghi]", Arrays.toString(object2));
         // Add tests for String[]
     }
 
