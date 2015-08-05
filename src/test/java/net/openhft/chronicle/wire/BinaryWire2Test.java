@@ -140,7 +140,7 @@ public class BinaryWire2Test {
         System.out.println(Wires.fromSizePrefixedBinaryToText(twire.bytes()));
     }
 
-    private void writeMessage(@NotNull Wire wire) {
+    private void writeMessage(@NotNull WireOut wire) {
         wire.writeDocument(true, w -> w
                 .write(() -> "csp").text("//path/service")
                 .write(() -> "tid").int64(123456789));
@@ -152,6 +152,28 @@ public class BinaryWire2Test {
                     s.marshallable(m -> m
                             .write(() -> "key").text("key-2")
                             .write(() -> "value").text("value-2"));
+                }));
+    }
+
+    StringBuilder csp = new StringBuilder();
+    StringBuilder key1 = new StringBuilder();
+    StringBuilder key2 = new StringBuilder();
+    StringBuilder value1 = new StringBuilder();
+    StringBuilder value2 = new StringBuilder();
+    long tid;
+
+    private void readMessage(WireIn wire) {
+        wire.readDocument(in ->
+                        in.read(() -> "csp").text(csp)
+                                .read(() -> "tid").int64(t -> tid = t),
+                in ->
+                        in.read(() -> "entrySet").sequence(s -> {
+                            s.marshallable(m ->
+                                    m.read(() -> "key").text(key1)
+                                            .read(() -> "value").text(value1));
+                            s.marshallable(m ->
+                                    m.read(() -> "key").text(key2)
+                                            .read(() -> "value").text(value2));
                 }));
     }
 

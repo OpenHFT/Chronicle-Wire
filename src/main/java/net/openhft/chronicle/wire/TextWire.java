@@ -714,7 +714,7 @@ public class TextWire implements Wire, InternalWireIn {
             sep = "\n";
             long pos = bytes.readPosition();
             writer.accept(this);
-            if (pos != bytes.readPosition())
+            if (bytes.writePosition() > pos + 1)
                 bytes.append("\n");
 
             popState();
@@ -1670,12 +1670,24 @@ public class TextWire implements Wire, InternalWireIn {
 
             } else {
                 // TODO assume for now it is a string.
-                if (peekCode() == '!') {
+                int code = peekCode();
+                if (code == '!') {
                     readCode();
                     StringBuilder sb = Wires.acquireStringBuilder();
                     bytes.parseUTF(sb, TextStopCharTesters.END_OF_TYPE);
                     final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
                     return object(null, clazz2);
+                }
+                if (code == '[') {
+                    List<Object> list = new ArrayList<>();
+                    sequence(v -> {
+                        while (v.hasNextSequenceItem()) {
+                            list.add(v.object(Object.class));
+                        }
+                    });
+                    if (clazz == Object.class)
+                        return list.toArray();
+                    return list;
                 }
                 if (Enum.class.isAssignableFrom(clazz)) {
                     StringBuilder sb = Wires.acquireStringBuilder();

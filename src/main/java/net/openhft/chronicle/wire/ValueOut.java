@@ -237,11 +237,21 @@ public interface ValueOut {
         else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
             WireSerializedLambda.write(value, this);
             return wireOut();
+        } else if (Object[].class.isAssignableFrom(value.getClass())) {
+            return array((Object[]) value);
         } else {
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +
                     "AutoBoxed primitive Object");
         }
+    }
+
+    default WireOut array(Object[] value) {
+        sequence(v -> {
+            for (Object o : value)
+                object(o);
+        });
+        return wireOut();
     }
 
     @NotNull
