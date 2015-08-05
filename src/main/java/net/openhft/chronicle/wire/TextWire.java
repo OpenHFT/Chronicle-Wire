@@ -1631,7 +1631,7 @@ public class TextWire implements Wire, InternalWireIn {
                 //noinspection unchecked
                 return valueIn.text();
 
-            } else if (Long.class.isAssignableFrom(clazz)) {
+            }else if (Long.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
                 return valueIn.int64();
 
@@ -1679,21 +1679,34 @@ public class TextWire implements Wire, InternalWireIn {
                     return object(null, clazz2);
                 }
                 if (code == '[') {
-                    List<Object> list = new ArrayList<>();
-                    sequence(v -> {
-                        while (v.hasNextSequenceItem()) {
-                            list.add(v.object(Object.class));
-                        }
-                    });
-                    if (clazz == Object.class)
+                    if (clazz == Object[].class) {
+                        List<Object> list = new ArrayList<>();
+                        sequence(v -> {
+                            while (v.hasNextSequenceItem()) {
+                                list.add(v.object(Object.class));
+                            }
+                        });
                         return list.toArray();
-                    return list;
+                    }
+                    else if (clazz == String[].class){
+                        List<String> list = new ArrayList<>();
+                        sequence(v -> {
+                            while (v.hasNextSequenceItem()) {
+                                list.add(v.text());
+                            }
+                        });
+                        return list.toArray(new String[0]);
+                    }else{
+                        throw new UnsupportedOperationException("Arrays of type "
+                                + clazz + " not supported.");
+                    }
                 }
                 if (Enum.class.isAssignableFrom(clazz)) {
                     StringBuilder sb = Wires.acquireStringBuilder();
                     bytes.parseUTF(sb, TextStopCharTesters.END_OF_TYPE);
                     return Wires.INTERNER.intern(sb);
                 }
+
                 return valueIn.text();
             }
         }

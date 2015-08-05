@@ -776,14 +776,13 @@ public class TextWireTest {
     }
 
     @Test
-    @Ignore
     public void testArrays() {
         Wire wire = createWire();
 
         Object[] noObjects = {};
         wire.write().object(noObjects);
 
-        Object[] object = (Object[]) wire.read().object(Object.class);
+        Object[] object = wire.read().object(Object[].class);
         assertEquals(0, object.length);
 
         // TODO we shouldn't need to create a new wire.
@@ -792,12 +791,32 @@ public class TextWireTest {
         Object[] threeObjects = {"abc", "def", "ghi"};
         wire.write().object(threeObjects);
 
-//        System.out.println(wire.toString());
-        Object[] object2 = (Object[]) wire.read()
-                .object(Object.class);
+        Object[] object2 = wire.read()
+                .object(Object[].class);
         assertEquals(3, object2.length);
         assertEquals("[abc, def, ghi]", Arrays.toString(object2));
-        // Add tests for String[]
+    }
+
+    @Test
+    public void testStringArrays() {
+        Wire wire = createWire();
+
+        String[] noObjects = {};
+        wire.write().object(noObjects);
+
+        String[] object = wire.read().object(String[].class);
+        assertEquals(0, object.length);
+
+        // TODO we shouldn't need to create a new wire.
+        wire = createWire();
+
+        String[] threeObjects = {"abc", "def", "ghi"};
+        wire.write().object(threeObjects);
+
+        String[] object2 = wire.read()
+                .object(String[].class);
+        assertEquals(3, object2.length);
+        assertEquals("[abc, def, ghi]", Arrays.toString(object2));
     }
 
     // Add tests for , List<String>, Set<String>, Map<String, String>

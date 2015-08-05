@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * Created by peter.lawrey on 14/01/15.
@@ -234,6 +235,8 @@ public interface ValueOut {
             return text((CharSequence) value);
         else if (value instanceof Enum)
             return typedScalar(value);
+        else if (value instanceof String[])
+            return sequence(v -> Stream.of((String[]) value).forEach(v::text));
         else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
             WireSerializedLambda.write(value, this);
             return wireOut();
