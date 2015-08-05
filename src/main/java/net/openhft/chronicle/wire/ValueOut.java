@@ -29,8 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -237,6 +236,15 @@ public interface ValueOut {
             return typedScalar(value);
         else if (value instanceof String[])
             return sequence(v -> Stream.of((String[]) value).forEach(v::text));
+        else if (value instanceof Collection) {
+            if(((Collection)value).size()==0)return sequence(v->{});
+
+            Class listType = ((Collection)value).iterator().next().getClass();
+            if (listType == String.class)
+                return sequence(v -> ((Collection<String>) value).stream().forEach(v::text));
+            else
+                throw new UnsupportedOperationException("Collection of type " + listType + " not supported");
+        }
         else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
             WireSerializedLambda.write(value, this);
             return wireOut();

@@ -819,7 +819,73 @@ public class TextWireTest {
         assertEquals("[abc, def, ghi]", Arrays.toString(object2));
     }
 
-    // Add tests for , List<String>, Set<String>, Map<String, String>
+    @Test
+    public void testStringList() {
+        Wire wire = createWire();
+
+        List<String> noObjects = new ArrayList();
+        wire.write().object(noObjects);
+
+        List<String> list = wire.read().object(List.class);
+        assertEquals(0, list.size());
+
+        // TODO we shouldn't need to create a new wire.
+        wire = createWire();
+
+        List<String> threeObjects = Arrays.asList(new String[]{"abc", "def", "ghi"});
+        wire.write().object(threeObjects);
+
+        List<String> list2 = wire.read()
+                .object(List.class);
+        assertEquals(3, list2.size());
+        assertEquals("[abc, def, ghi]", list2.toString());
+    }
+
+    @Test
+    public void testStringSet() {
+        Wire wire = createWire();
+
+        Set<String> noObjects = new HashSet();
+        wire.write().object(noObjects);
+
+        Set<String> list = wire.read().object(Set.class);
+        assertEquals(0, list.size());
+
+        // TODO we shouldn't need to create a new wire.
+        wire = createWire();
+
+        Set<String> threeObjects = new HashSet(Arrays.asList(new String[]{"abc", "def", "ghi"}));
+        wire.write().object(threeObjects);
+
+        Set<String> list2 = wire.read()
+                .object(Set.class);
+        assertEquals(3, list2.size());
+        assertEquals("[abc, def, ghi]", list2.toString());
+    }
+
+    @Test
+    @Ignore
+    public void testStringMap() {
+        Wire wire = createWire();
+
+        Map<String,String> noObjects = new HashMap();
+        wire.write().object(noObjects);
+
+        Map<String,String> map = wire.read().object(Map.class);
+        assertEquals(0, map.size());
+
+//        // TODO we shouldn't need to create a new wire.
+//        wire = createWire();
+//
+//        Set<String> threeObjects = new HashSet(Arrays.asList(new String[]{"abc", "def", "ghi"}));
+//        wire.write().object(threeObjects);
+//
+//        Set<String> list2 = wire.read()
+//                .object(Set.class);
+//        assertEquals(3, list2.size());
+//        assertEquals("[abc, def, ghi]", list2.toString());
+    }
+
 
     @Test
     public void testNestedDecode() {

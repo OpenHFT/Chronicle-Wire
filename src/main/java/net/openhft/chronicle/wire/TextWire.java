@@ -1679,7 +1679,7 @@ public class TextWire implements Wire, InternalWireIn {
                     return object(null, clazz2);
                 }
                 if (code == '[') {
-                    if (clazz == Object[].class) {
+                    if (clazz == Object[].class || clazz == Object.class) {
                         List<Object> list = new ArrayList<>();
                         sequence(v -> {
                             while (v.hasNextSequenceItem()) {
@@ -1687,8 +1687,7 @@ public class TextWire implements Wire, InternalWireIn {
                             }
                         });
                         return list.toArray();
-                    }
-                    else if (clazz == String[].class){
+                    }else if (clazz == String[].class){
                         List<String> list = new ArrayList<>();
                         sequence(v -> {
                             while (v.hasNextSequenceItem()) {
@@ -1696,7 +1695,24 @@ public class TextWire implements Wire, InternalWireIn {
                             }
                         });
                         return list.toArray(new String[0]);
-                    }else{
+                    }else if (clazz == List.class){
+                        List<String> list = new ArrayList<>();
+                        sequence(v -> {
+                            while (v.hasNextSequenceItem()) {
+                                list.add(v.text());
+                            }
+                        });
+                        return list;
+                    }else if (clazz == Set.class){
+                        Set<String> list = new HashSet<>();
+                        sequence(v -> {
+                            while (v.hasNextSequenceItem()) {
+                                list.add(v.text());
+                            }
+                        });
+                        return list;
+                    }
+                    else{
                         throw new UnsupportedOperationException("Arrays of type "
                                 + clazz + " not supported.");
                     }
