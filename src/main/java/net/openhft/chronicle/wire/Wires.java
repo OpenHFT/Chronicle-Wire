@@ -208,7 +208,7 @@ public enum Wires {
                     sb.append(" # len: ").append(len).append(", remaining: ").append(bytes.readRemaining());
                 sb.append("\n");
                 try {
-                    for (int i = 0; i < len; i++) {
+                    while (bytes.readRemaining() > 0) {
                         int ch = bytes.readUnsignedByte();
                         if (binary)
                             sb.append(RandomDataInput.charToString[ch]);
@@ -272,7 +272,7 @@ public enum Wires {
                     len = (int) textBytes.readRemaining();
                 }
                 try {
-                    for (int i = 0; i < len; i++) {
+                    while (bytes.readRemaining() > 0) {
                         int ch = textBytes.readUnsignedByte();
 //                        if (binary)
 //                            sb.append(RandomDataInput.charToString[ch]);
