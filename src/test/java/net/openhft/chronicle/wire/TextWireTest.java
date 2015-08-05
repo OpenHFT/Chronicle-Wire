@@ -792,7 +792,7 @@ public class TextWireTest {
         Object[] threeObjects = {"abc", "def", "ghi"};
         wire.write().object(threeObjects);
 
-        System.out.println(wire.toString());
+//        System.out.println(wire.toString());
         Object[] object2 = (Object[]) wire.read()
                 .object(Object.class);
         assertEquals(3, object2.length);
