@@ -19,13 +19,13 @@
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
-        <version>1.1.2</version>
+        <version>1.1.6</version>
         <relativePath />
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>chronicle-wire</artifactId>
-    <version>1.0.23-beta-SNAPSHOT</version>
+    <version>1.0.24-beta-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Wire</name>
     <description>Chronicle-Wire</description>
     <packaging>bundle</packaging>
@@ -43,7 +43,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>1.6.8-SNAPSHOT</version>
+                <version>1.6.8</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
