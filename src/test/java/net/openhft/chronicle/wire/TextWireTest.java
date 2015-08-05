@@ -29,10 +29,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.StringReader;
 import java.security.InvalidAlgorithmParameterException;
 import java.time.*;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
@@ -752,7 +749,7 @@ public class TextWireTest {
                 "  message: Reference cannot be null,\n" +
                 "  stackTrace: [\n" +
                 "    { class: net.openhft.chronicle.wire.TextWireTest, method: testException, file: TextWireTest.java, line: 783 },\n" +
-                "    { class: net.openhft.chronicle.wire.TextWireTest, method: runTestException, file: TextWireTest.java, line: 73 }" +
+                "    { class: net.openhft.chronicle.wire.TextWireTest, method: runTestException, file: TextWireTest.java, line: 73 }\n" +
                 "  ]\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(bytes));
 
@@ -777,6 +774,33 @@ public class TextWireTest {
         assertEquals(WireType.TEXT, wire.read().object(Object.class));
         assertEquals(WireType.RAW, wire.read().object(Object.class));
     }
+
+    @Test
+    @Ignore
+    public void testArrays() {
+        Wire wire = createWire();
+
+        Object[] noObjects = {};
+        wire.write().object(noObjects);
+
+        Object[] object = (Object[]) wire.read().object(Object.class);
+        assertEquals(0, object.length);
+
+        // TODO we shouldn't need to create a new wire.
+        wire = createWire();
+
+        Object[] threeObjects = {"abc", "def", "ghi"};
+        wire.write().object(threeObjects);
+
+        System.out.println(wire.toString());
+        Object[] object2 = (Object[]) wire.read()
+                .object(Object.class);
+        assertEquals(3, object.length);
+        assertEquals("", Arrays.toString(object2));
+        // Add tests for String[]
+    }
+
+    // Add tests for , List<String>, Set<String>, Map<String, String>
 
     @Test
     public void testNestedDecode() {
@@ -820,6 +844,7 @@ public class TextWireTest {
 
     enum BWKey implements WireKey {
         field1, field2, field3
+
     }
 
     class MyMarshallable implements Marshallable {
@@ -862,7 +887,7 @@ public class TextWireTest {
         public String toString() {
             return "MyMarshable{" + "someData='" + someData + '\'' + '}';
         }
-    }
 
+    }
 
 }

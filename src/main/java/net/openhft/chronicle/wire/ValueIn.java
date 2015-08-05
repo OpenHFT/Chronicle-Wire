@@ -51,6 +51,12 @@ public interface ValueIn {
     @NotNull
     WireIn text(@NotNull Consumer<String> s);
 
+    default WireIn text(@NotNull StringBuilder sb) {
+        if (textTo(sb) == null)
+            sb.setLength(0);
+        return wireIn();
+    }
+
     @Nullable
     String text();
 
