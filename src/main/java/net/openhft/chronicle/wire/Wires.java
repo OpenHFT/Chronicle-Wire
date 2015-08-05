@@ -272,7 +272,7 @@ public enum Wires {
                     len = (int) textBytes.readRemaining();
                 }
                 try {
-                    while (bytes.readRemaining() > 0) {
+                    for (int i = 0; i < len; i++) {
                         int ch = textBytes.readUnsignedByte();
 //                        if (binary)
 //                            sb.append(RandomDataInput.charToString[ch]);
