@@ -7,7 +7,7 @@ import org.junit.Test;
 /**
  * @author Rob Austin.
  */
-public class BinaryToTest {
+public class BinaryToTextTest {
 
     @Ignore("JIRA https://higherfrequencytrading.atlassian.net/browse/WIRE-30")
     @Test
