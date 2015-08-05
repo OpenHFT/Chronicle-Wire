@@ -24,8 +24,10 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.xerial.snappy.Snappy;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.security.InvalidAlgorithmParameterException;
 import java.time.*;
@@ -795,6 +797,32 @@ public class TextWireTest {
                 .object(Object[].class);
         assertEquals(3, object2.length);
         assertEquals("[abc, def, ghi]", Arrays.toString(object2));
+    }
+
+    @Test
+    public void testSnappyCompression() throws IOException{
+        Wire wire = createWire();
+        String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+
+
+        byte[] compressedBytes = Snappy.compress(str.getBytes());
+        wire.write().snappy(compressedBytes);
+
+        byte[] returnBytes = wire.read().snappy();
+        assertArrayEquals(compressedBytes, returnBytes);
+    }
+
+    @Test
+    public void testSnappyCompressionAsText() throws IOException{
+        Wire wire = createWire();
+        String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+
+
+        byte[] compressedBytes = Snappy.compress(str.getBytes());
+        wire.write().snappy(compressedBytes);
+
+        String returnString = wire.read().text();
+        assertEquals(str, returnString);
     }
 
     @Test

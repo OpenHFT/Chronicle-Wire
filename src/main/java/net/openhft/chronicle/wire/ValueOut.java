@@ -293,4 +293,8 @@ public interface ValueOut {
 
     @NotNull
     WireOut wireOut();
+
+    default WireOut snappy(byte[] compressedBytes){
+        throw new UnsupportedOperationException();
+    }
 }

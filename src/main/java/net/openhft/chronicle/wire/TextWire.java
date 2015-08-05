@@ -32,6 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xerial.snappy.Snappy;
 
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
@@ -501,6 +502,15 @@ public class TextWire implements Wire, InternalWireIn {
             return TextWire.this;
         }
 
+        @Override
+        public WireOut snappy(byte[] compressedBytes) {
+            prependSeparator();
+            bytes.append("!!snappy ").append(Base64.getEncoder().encodeToString(compressedBytes)).append(END_FIELD);
+            elementSeparator();
+
+            return TextWire.this;
+        }
+
         @NotNull
         @Override
         public WireOut uint8checked(int u8) {
@@ -902,6 +912,16 @@ public class TextWire implements Wire, InternalWireIn {
                     if (StringUtils.isEqual(sb, "null")) {
                         textTo(sb);
                         return null;
+                    } else if(StringUtils.isEqual(sb, "snappy")){
+                        textTo(sb);
+                        try {
+                            //todo needs to be made efficient
+                            byte[] decodedBytes = Base64.getDecoder().decode(sb.toString().getBytes());
+                            String csq = Snappy.uncompressString(decodedBytes);
+                            return (ACS)Wires.acquireStringBuilder().append(csq);
+                        } catch (IOException e) {
+                            throw new AssertionError(e);
+                        }
                     }
                 } else {
                     StringBuilder sb = Wires.acquireStringBuilder();
@@ -1017,6 +1037,30 @@ public class TextWire implements Wire, InternalWireIn {
                 return sb.toString().getBytes();
             }
         }
+
+        @Nullable
+        @Override
+        public byte[] snappy() {
+            consumeWhiteSpace();
+            // TODO needs to be made much more efficient.
+            StringBuilder sb = Wires.acquireStringBuilder();
+            if (peekCode() == '!') {
+                bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                String str = Wires.INTERNER.intern(sb);
+                if (str.equals("!!snappy")) {
+                    BytesUtil.setLength(sb, 0);
+                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                    byte[] decode = Base64.getDecoder().decode(Wires.INTERNER.intern(sb));
+                    return decode;
+                }
+                throw new AssertionError("Incorrect format for snappy");
+            } else {
+                textTo(sb);
+                // todo fix this.
+                return sb.toString().getBytes();
+            }
+        }
+
 
         @NotNull
         @Override

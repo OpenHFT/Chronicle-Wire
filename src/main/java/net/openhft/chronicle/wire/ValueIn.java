@@ -226,4 +226,8 @@ public interface ValueIn {
         ClassAliasPool.CLASS_ALIASES::forName,c->clazz[0]=c);
         return clazz[0];
     }
+
+    default byte[] snappy(){
+        throw new UnsupportedOperationException();
+    }
 }
