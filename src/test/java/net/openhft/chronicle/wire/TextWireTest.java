@@ -826,6 +826,17 @@ public class TextWireTest {
     }
 
     @Test
+    public void testSnappyCompressWithSnappy() throws IOException{
+        Wire wire = createWire();
+        String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+
+        wire.write().compressWithSnappy(str);
+
+        String returnString = wire.read().text();
+        assertEquals(str, returnString);
+    }
+
+    @Test
     public void testStringArrays() {
         Wire wire = createWire();
 

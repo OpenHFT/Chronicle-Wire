@@ -25,7 +25,9 @@ import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.xerial.snappy.Snappy;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -296,5 +298,13 @@ public interface ValueOut {
 
     default WireOut snappy(byte[] compressedBytes){
         throw new UnsupportedOperationException();
+    }
+
+    default WireOut compressWithSnappy(String str){
+        try {
+            return snappy(Snappy.compress(str));
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
     }
 }
