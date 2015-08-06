@@ -1,69 +1,72 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * @author Rob Austin.
  */
+@RunWith(value = Parameterized.class)
 public class PrimitiveTypeWrappers {
 
-    @Test
-    public void testInteger() throws Exception {
+    private boolean isTextWire;
 
-        final Bytes bytes = Bytes.allocateElasticDirect();
-        final TextWire textWire = new TextWire(bytes);
-        textWire.write().object(1);
-
-
-        final Object object = textWire.read().object(Integer.class);
-        Assert.assertTrue(object instanceof Integer);
-        Assert.assertEquals((Integer) 1, object);
-
+    public PrimitiveTypeWrappers(Object isTextWire) {
+        this.isTextWire = (Boolean) isTextWire;
     }
 
-    @Test
-    public void testFloat() throws Exception {
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() throws IOException {
+        return Arrays.asList(
+                new Object[]{Boolean.FALSE}
+                , new Object[]{Boolean.TRUE}
 
-        final Bytes bytes = Bytes.allocateElasticDirect();
-        final TextWire textWire = new TextWire(bytes);
-        textWire.write().object(1);
-
-
-        final Object object = textWire.read().object(Float.class);
-        Assert.assertTrue(object instanceof Float);
-        Assert.assertEquals((float) 1.0, (float) object, 0);
-
+        );
     }
 
+
     @Test
-    public void testShort() throws Exception {
+    public void testNumbers() throws Exception {
 
-        final Bytes bytes = Bytes.allocateElasticDirect();
-        final TextWire textWire = new TextWire(bytes);
-        textWire.write().object(1);
+        final Class[] types = new Class[]{Byte.class,
+                Short.class, Float.class,
+                Integer.class, Long.class, Double.class};
 
+        for (Class type : types) {
+            final Wire wire = before();
 
-        final Object object = textWire.read().object(Short.class);
-        Assert.assertTrue(object instanceof Short);
-        Assert.assertEquals((short) 1.0, (short) object);
+            wire.write().object(1);
+            final Object object = wire.read().object(type);
+            Assert.assertTrue(type.isAssignableFrom(object.getClass()));
+            Assert.assertEquals(1, ((Number) object).intValue());
+        }
 
     }
 
 
     @Test
-    public void testLong() throws Exception {
-
-        final Bytes bytes = Bytes.allocateElasticDirect();
-        final TextWire textWire = new TextWire(bytes);
-        textWire.write().object(1);
-
-
-        final Object object = textWire.read().object(Long.class);
-        Assert.assertTrue(object instanceof Long);
-        Assert.assertEquals((long) 1, (long) object);
-
+    public void testCharacter() throws Exception {
+        final Wire wire = before();
+        wire.write().object('1');
+        final Object object = wire.read().object(Character.class);
+        Assert.assertTrue(object instanceof Character);
+        Assert.assertEquals('1', object);
     }
+
+
+    @NotNull
+    private Wire before() {
+        final Bytes bytes = Bytes.allocateElasticDirect();
+        return (isTextWire) ? new TextWire(bytes) : new BinaryWire(bytes);
+    }
+
+
 }
