@@ -59,7 +59,7 @@ public class TextWire implements Wire, InternalWireIn {
     private static final String END_FIELD = "\n";
 
     static {
-        for (char ch : "\",\n\\#:{}[] ".toCharArray())
+        for (char ch : "\",\n\\#:{}[]".toCharArray())
             QUOTE_CHARS.set(ch);
     }
 

@@ -79,6 +79,14 @@ public class TextWireTest {
         assertEquals(true, wire.read(() -> "T").bool());
     }
 
+    @Test
+    @Ignore ("WIRE-32")
+    public void testLeadingSpace(){
+        Wire wire = createWire();
+        wire.write().text(" leadingspace");
+        assertEquals(" leadingspace", wire.read().text());
+    }
+
     private void expectWithSnakeYaml(String expected, @NotNull Wire wire) {
         String s = wire.toString();
         Object load = null;
