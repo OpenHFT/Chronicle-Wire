@@ -169,6 +169,11 @@ public interface ValueOut {
     WireOut sequence(Consumer<ValueOut> writer);
 
     @NotNull
+    default WireOut array(Consumer<ValueOut> writer, Class arrayType){
+        throw new UnsupportedOperationException();
+    }
+
+    @NotNull
     WireOut marshallable(WriteMarshallable object);
 
     /**
@@ -237,7 +242,7 @@ public interface ValueOut {
         else if (value instanceof Enum)
             return typedScalar(value);
         else if (value instanceof String[])
-            return sequence(v -> Stream.of((String[]) value).forEach(v::text));
+            return array(v -> Stream.of((String[]) value).forEach(v::text), String[].class);
         else if (value instanceof Collection) {
             if(((Collection)value).size()==0)return sequence(v->{});
 
@@ -251,20 +256,12 @@ public interface ValueOut {
             WireSerializedLambda.write(value, this);
             return wireOut();
         } else if (Object[].class.isAssignableFrom(value.getClass())) {
-            return array((Object[]) value);
+            return array(v -> Stream.of((Object[]) value).forEach(v::object),Object[].class);
         } else {
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +
                     "AutoBoxed primitive Object");
         }
-    }
-
-    default WireOut array(Object[] value) {
-        sequence(v -> {
-            for (Object o : value)
-                object(o);
-        });
-        return wireOut();
     }
 
     @NotNull
