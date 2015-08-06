@@ -734,6 +734,17 @@ public class TextWire implements Wire, InternalWireIn {
             return TextWire.this;
         }
 
+        @Override
+        public WireOut array(@NotNull Consumer<ValueOut> writer, Class arrayType){
+            if(arrayType==String[].class)bytes.append("!String[] ");
+            else{
+                bytes.append("!");
+                bytes.append(arrayType.getName());
+                bytes.append(" ");
+            };
+            return sequence(writer);
+        }
+
         private void popState() {
             indentation--;
             leaf = false;
@@ -1682,7 +1693,6 @@ public class TextWire implements Wire, InternalWireIn {
             } else if (Double.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
                 return valueIn.float64();
-
             } else if (Integer.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
                 return valueIn.int32();
@@ -1724,6 +1734,7 @@ public class TextWire implements Wire, InternalWireIn {
                 }
                 if (code == '[') {
                     if (clazz == Object[].class || clazz == Object.class) {
+                        //todo should this use reflection so that all array types can be handled
                         List<Object> list = new ArrayList<>();
                         sequence(v -> {
                             while (v.hasNextSequenceItem()) {
