@@ -48,9 +48,7 @@ public class PrimitiveTypeWrappers {
             Assert.assertTrue(type.isAssignableFrom(object.getClass()));
             Assert.assertEquals(1, ((Number) object).intValue());
         }
-
     }
-
 
     @Test
     public void testCharacter() throws Exception {
