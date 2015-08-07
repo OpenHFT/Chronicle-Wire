@@ -784,9 +784,11 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireIn marshallable(@NotNull ReadMarshallable object) {
-            textTo(lastSB);
-
             long length = bytes.readUnsignedInt();
+            if (length > bytes.readRemaining()) {
+                throw new IllegalStateException("Length was " + length
+                        + " greater than remaining " + bytes.readRemaining());
+            }
             if (length >= 0) {
                 long limit = bytes.readLimit();
                 long limit2 = bytes.readPosition() + length;
