@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Created by peter on 23/06/15.
  */
-public enum Updat implements SerializableUpdater<AtomicLong> {
+public enum Update implements SerializableUpdater<AtomicLong> {
     INCR {
         @Override
         public void accept(AtomicLong aLong) {
