@@ -36,7 +36,7 @@ import static org.junit.Assert.*;
 public class WireSerializedLambdaTest {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(Fun.class);
-        ClassAliasPool.CLASS_ALIASES.addAlias(Update.class);
+        ClassAliasPool.CLASS_ALIASES.addAlias(Updat.class);
     }
     @Test
     public void testIsLambda() {
@@ -57,7 +57,7 @@ public class WireSerializedLambdaTest {
 
         wire.write(() -> "one").object(fun)
                 .write(() -> "two").object(Fun.ADD_A)
-                .write(() -> "three").object(Update.INCR);
+                .write(() -> "three").object(Updat.INCR);
 
         // System.out.println(wire.bytes().toString());
 
@@ -95,7 +95,7 @@ public class WireSerializedLambdaTest {
         SerializableFunction<String, String> fun = String::toUpperCase;
         wire.write(() -> "one").object(fun)
                 .write(() -> "two").object(Fun.ADD_A)
-                .write(() -> "three").object(Update.DECR);
+                .write(() -> "three").object(Updat.DECR);
 
         assertEquals("[pos: 0, rlim: 348, wlim: 8EiB, cap: 8EiB ] " +
                 "Ãone¶⒗SerializedLambda\\u0082 ⒈٠٠" +
