@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -80,8 +81,8 @@ public class TextWireTest {
     }
 
     @Test
-    @Ignore ("WIRE-32")
-    public void testLeadingSpace(){
+    @Ignore("WIRE-32")
+    public void testLeadingSpace() {
         Wire wire = createWire();
         wire.write().text(" leadingspace");
         assertEquals(" leadingspace", wire.read().text());
@@ -771,6 +772,8 @@ public class TextWireTest {
 
     @Test
     public void testEnum() {
+        ClassAliasPool.CLASS_ALIASES.addAlias(WireType.class, "WireType");
+
         Wire wire = createWire();
         wire.write().object(WireType.BINARY)
                 .write().object(WireType.TEXT)
@@ -808,7 +811,7 @@ public class TextWireTest {
     }
 
     @Test
-    public void testSnappyCompression() throws IOException{
+    public void testSnappyCompression() throws IOException {
         Wire wire = createWire();
         String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
@@ -821,7 +824,7 @@ public class TextWireTest {
     }
 
     @Test
-    public void testSnappyCompressionAsText() throws IOException{
+    public void testSnappyCompressionAsText() throws IOException {
         Wire wire = createWire();
         String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
@@ -834,7 +837,7 @@ public class TextWireTest {
     }
 
     @Test
-    public void testSnappyCompressWithSnappy() throws IOException{
+    public void testSnappyCompressWithSnappy() throws IOException {
         Wire wire = createWire();
         String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
@@ -915,10 +918,10 @@ public class TextWireTest {
     public void testStringMap() {
         Wire wire = createWire();
 
-        Map<String,String> noObjects = new HashMap();
+        Map<String, String> noObjects = new HashMap();
         wire.write().object(noObjects);
 
-        Map<String,String> map = wire.read().object(Map.class);
+        Map<String, String> map = wire.read().object(Map.class);
         assertEquals(0, map.size());
 
 //        // TODO we shouldn't need to create a new wire.
