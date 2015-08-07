@@ -81,7 +81,6 @@ public class TextWireTest {
     }
 
     @Test
-    @Ignore("WIRE-32")
     public void testLeadingSpace() {
         Wire wire = createWire();
         wire.write().text(" leadingspace");
