@@ -347,7 +347,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (QUOTE_CHARS.get(ch))
                 return true;
         }
-        return s.length() == 0;
+        return false;
     }
 
     @NotNull
