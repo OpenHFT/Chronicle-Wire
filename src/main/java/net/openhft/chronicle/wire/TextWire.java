@@ -340,7 +340,7 @@ public class TextWire implements Wire, InternalWireIn {
         if (s.length() == 0)
             return true;
 
-        if (s.charAt(0) == ' ' || s.charAt(s.length() - 1) == ' ')
+        if (s.charAt(0) == ' ' || s.charAt(0) == '!' || s.charAt(s.length() - 1) == ' ')
             return true;
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
