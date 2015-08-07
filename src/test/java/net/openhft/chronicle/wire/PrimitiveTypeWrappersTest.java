@@ -32,7 +32,6 @@ public class PrimitiveTypeWrappersTest {
         );
     }
 
-
     @Test
     public void testNumbers() throws Exception {
 
@@ -50,12 +49,47 @@ public class PrimitiveTypeWrappersTest {
         }
     }
 
+    @Test
+    public void testCharacter() throws Exception {
+        final Wire wire = before();
+        wire.write().object('1');
+        final Object object = wire.read().object(Character.class);
+        Assert.assertTrue(object instanceof Character);
+        Assert.assertEquals('1', object);
+    }
+
+    @Test
+    public void testCharacterWritenAsString() throws Exception {
+        final Wire wire = before();
+        wire.write().object("1");
+        final Object object = wire.read().object(Character.class);
+        Assert.assertTrue(object instanceof Character);
+        Assert.assertEquals('1', object);
+    }
+
+    @Test
+    public void testCharReadAsString() throws Exception {
+        final Wire wire = before();
+        wire.write().object('1');
+        final Object object = wire.read().object(String.class);
+        Assert.assertTrue(object instanceof String);
+        Assert.assertEquals("1", object);
+    }
+
+
+    @Test
+    public void testStoreStringReadAsChar() throws Exception {
+        final Wire wire = before();
+        wire.write().object("LONG STRING");
+        final Object object = wire.read().object(Character.class);
+        Assert.assertTrue(object instanceof Character);
+        Assert.assertEquals('L', object);
+    }
 
     @NotNull
     private Wire before() {
         final Bytes bytes = Bytes.allocateElasticDirect();
         return (isTextWire) ? new TextWire(bytes) : new BinaryWire(bytes);
     }
-
 
 }
