@@ -40,7 +40,7 @@ public class PrimitiveTypeWrappersTest {
                 Integer.class, Long.class, Double.class};
 
         for (Class type : types) {
-            final Wire wire = before();
+            final Wire wire = wireFactory();
 
             wire.write().object(1);
             final Object object = wire.read().object(type);
@@ -51,7 +51,7 @@ public class PrimitiveTypeWrappersTest {
 
     @Test
     public void testCharacter() throws Exception {
-        final Wire wire = before();
+        final Wire wire = wireFactory();
         wire.write().object('1');
         final Object object = wire.read().object(Character.class);
         Assert.assertTrue(object instanceof Character);
@@ -60,7 +60,7 @@ public class PrimitiveTypeWrappersTest {
 
     @Test
     public void testCharacterWritenAsString() throws Exception {
-        final Wire wire = before();
+        final Wire wire = wireFactory();
         wire.write().object("1");
         final Object object = wire.read().object(Character.class);
         Assert.assertTrue(object instanceof Character);
@@ -69,7 +69,7 @@ public class PrimitiveTypeWrappersTest {
 
     @Test
     public void testCharReadAsString() throws Exception {
-        final Wire wire = before();
+        final Wire wire = wireFactory();
         wire.write().object('1');
         final Object object = wire.read().object(String.class);
         Assert.assertTrue(object instanceof String);
@@ -79,7 +79,7 @@ public class PrimitiveTypeWrappersTest {
 
     @Test
     public void testStoreStringReadAsChar() throws Exception {
-        final Wire wire = before();
+        final Wire wire = wireFactory();
         wire.write().object("LONG STRING");
         final Object object = wire.read().object(Character.class);
         Assert.assertTrue(object instanceof Character);
@@ -87,7 +87,7 @@ public class PrimitiveTypeWrappersTest {
     }
 
     @NotNull
-    private Wire before() {
+    private Wire wireFactory() {
         final Bytes bytes = Bytes.allocateElasticDirect();
         return (isTextWire) ? new TextWire(bytes) : new BinaryWire(bytes);
     }

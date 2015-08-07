@@ -336,6 +336,12 @@ public class TextWire implements Wire, InternalWireIn {
     }
 
     boolean needsQuotes(@NotNull CharSequence s) {
+
+        if (s.length() == 0)
+            return false;
+
+        if (s.charAt(0) == ' ' || s.charAt(s.length() - 1) == ' ')
+            return true;
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             if (QUOTE_CHARS.get(ch))
@@ -735,13 +741,14 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public WireOut array(@NotNull Consumer<ValueOut> writer, Class arrayType){
-            if(arrayType==String[].class)bytes.append("!String[] ");
-            else{
+        public WireOut array(@NotNull Consumer<ValueOut> writer, Class arrayType) {
+            if (arrayType == String[].class) bytes.append("!String[] ");
+            else {
                 bytes.append("!");
                 bytes.append(arrayType.getName());
                 bytes.append(" ");
-            };
+            }
+            ;
             return sequence(writer);
         }
 
@@ -923,13 +930,13 @@ public class TextWire implements Wire, InternalWireIn {
                     if (StringUtils.isEqual(sb, "null")) {
                         textTo(sb);
                         return null;
-                    } else if(StringUtils.isEqual(sb, "snappy")){
+                    } else if (StringUtils.isEqual(sb, "snappy")) {
                         textTo(sb);
                         try {
                             //todo needs to be made efficient
                             byte[] decodedBytes = Base64.getDecoder().decode(sb.toString().getBytes());
                             String csq = Snappy.uncompressString(decodedBytes);
-                            return (ACS)Wires.acquireStringBuilder().append(csq);
+                            return (ACS) Wires.acquireStringBuilder().append(csq);
                         } catch (IOException e) {
                             throw new AssertionError(e);
                         }
@@ -1686,7 +1693,7 @@ public class TextWire implements Wire, InternalWireIn {
                 //noinspection unchecked
                 return valueIn.text();
 
-            }else if (Long.class.isAssignableFrom(clazz)) {
+            } else if (Long.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
                 return valueIn.int64();
 
@@ -1742,7 +1749,7 @@ public class TextWire implements Wire, InternalWireIn {
                             }
                         });
                         return list.toArray();
-                    }else if (clazz == String[].class){
+                    } else if (clazz == String[].class) {
                         List<String> list = new ArrayList<>();
                         sequence(v -> {
                             while (v.hasNextSequenceItem()) {
@@ -1750,7 +1757,7 @@ public class TextWire implements Wire, InternalWireIn {
                             }
                         });
                         return list.toArray(new String[0]);
-                    }else if (clazz == List.class){
+                    } else if (clazz == List.class) {
                         List<String> list = new ArrayList<>();
                         sequence(v -> {
                             while (v.hasNextSequenceItem()) {
@@ -1758,7 +1765,7 @@ public class TextWire implements Wire, InternalWireIn {
                             }
                         });
                         return list;
-                    }else if (clazz == Set.class){
+                    } else if (clazz == Set.class) {
                         Set<String> list = new HashSet<>();
                         sequence(v -> {
                             while (v.hasNextSequenceItem()) {
@@ -1766,8 +1773,7 @@ public class TextWire implements Wire, InternalWireIn {
                             }
                         });
                         return list;
-                    }
-                    else{
+                    } else {
                         throw new UnsupportedOperationException("Arrays of type "
                                 + clazz + " not supported.");
                     }
