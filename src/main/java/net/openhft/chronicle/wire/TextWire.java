@@ -338,7 +338,7 @@ public class TextWire implements Wire, InternalWireIn {
     boolean needsQuotes(@NotNull CharSequence s) {
 
         if (s.length() == 0)
-            return false;
+            return true;
 
         if (s.charAt(0) == ' ' || s.charAt(s.length() - 1) == ' ')
             return true;
