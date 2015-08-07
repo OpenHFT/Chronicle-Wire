@@ -15,11 +15,11 @@ import java.util.Collection;
  * @author Rob Austin.
  */
 @RunWith(value = Parameterized.class)
-public class PrimitiveTypeWrappers {
+public class PrimitiveTypeWrappersTest {
 
     private boolean isTextWire;
 
-    public PrimitiveTypeWrappers(Object isTextWire) {
+    public PrimitiveTypeWrappersTest(Object isTextWire) {
         this.isTextWire = (Boolean) isTextWire;
     }
 
@@ -48,15 +48,6 @@ public class PrimitiveTypeWrappers {
             Assert.assertTrue(type.isAssignableFrom(object.getClass()));
             Assert.assertEquals(1, ((Number) object).intValue());
         }
-    }
-
-    @Test
-    public void testCharacter() throws Exception {
-        final Wire wire = before();
-        wire.write().object('1');
-        final Object object = wire.read().object(Character.class);
-        Assert.assertTrue(object instanceof Character);
-        Assert.assertEquals('1', object);
     }
 
 
