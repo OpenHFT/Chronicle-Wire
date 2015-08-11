@@ -9,12 +9,11 @@ import org.junit.Test;
  */
 public class BinaryToTextTest {
 
-    @Ignore("JIRA https://higherfrequencytrading.atlassian.net/browse/WIRE-30")
     @Test
     public void test() throws Exception {
         Bytes tbytes = Bytes.elasticByteBuffer();
         Wire tw = new BinaryWire(tbytes);
-        tw.write(() -> "key").text("hello");
+        tw.writeDocument(false, w->w.write(() -> "key").text("hello"));
         System.out.println(Wires.fromSizePrefixedBinaryToText(tbytes));
     }
 
