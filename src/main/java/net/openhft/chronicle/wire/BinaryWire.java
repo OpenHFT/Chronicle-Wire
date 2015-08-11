@@ -306,9 +306,9 @@ public class BinaryWire implements Wire, InternalWireIn {
             case BinaryWireHighCode.FIELD1:
                 bytes.readSkip(1);
                 if (bytes.bytesStore() instanceof NativeBytesStore) {
-                    BytesUtil.parseUTF_SB1(bytes, sb, peekCode & 0x1f);
+                    BytesUtil.parse8bit_SB1(bytes, sb, peekCode & 0x1f);
                 } else {
-                    BytesUtil.parseUTF1(bytes, sb, peekCode & 0x1f);
+                    BytesUtil.parse8bit(bytes, sb, peekCode & 0x1f);
                 }
                 return sb;
             default:
@@ -698,10 +698,10 @@ public class BinaryWire implements Wire, InternalWireIn {
                 }
             }
             bytes.writeByte((byte) (FIELD_NAME0 + len))
-                    .append(name);
+                    .append8bit(name);
 
         } else {
-            writeCode(FIELD_NAME_ANY).writeUTFΔ(name);
+            writeCode(FIELD_NAME_ANY).write8bit(name);
         }
     }
 
@@ -715,7 +715,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     @Nullable
-    private <ACS extends Appendable & CharSequence> ACS readText(int code, @NotNull ACS sb) {
+    <ACS extends Appendable & CharSequence> ACS readText(int code, @NotNull ACS sb) {
         if (code <= 127) {
             append(sb, code);
             return sb;

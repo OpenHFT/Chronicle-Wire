@@ -34,9 +34,23 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;
+
+enum Side {
+    Buy, Sell;
+}
+
+enum DataFields implements WireKey {
+    unknown, smallInt, longInt, price, flag, text, side;
+
+    @Override
+    public int code() {
+        return ordinal();
+    }
+}
 
 /**
  * Created by peter on 11/08/15.
@@ -44,46 +58,18 @@ import java.util.function.LongConsumer;
 @State(Scope.Thread)
 public class Main {
     final Bytes bytes = Bytes.allocateDirect(1024).unchecked(true);
-    final Wire twire = new TextWire(bytes);
+    final Wire twireUTF = new TextWire(bytes, false);
+    final Wire twire8bit = new TextWire(bytes, true);
     final Wire bwireFFF = new BinaryWire(bytes, false, false, false);
-    final Wire bwireTFF = new BinaryWire(bytes, false, false, false);
+    final Wire bwireTFF = new BinaryWire(bytes, true, false, false);
     final Wire bwireFTF = new BinaryWire(bytes, false, true, false);
-    final Wire bwireTTF = new BinaryWire(bytes, false, true, false);
+    final Wire bwireTTF = new BinaryWire(bytes, true, true, false);
     final Wire bwireFTT = new BinaryWire(bytes, false, true, true);
-    final Wire rwire = new RawWire(bytes);
-    int i = 0;
-    long j = 0;
-    double d = 0;
-    boolean b = false;
-    StringBuilder sb = new StringBuilder();
-    IntConsumer xi = x -> i = x;
+    final Wire rwireUTF = new RawWire(bytes, false);
+    final Wire rwire8bit = new RawWire(bytes, true);
 
-    /*
-        @Benchmark
-        public Bytes readDocument() {
-            bytes.clear();
-            wire.writeDocument(false, w -> w.write(Fields.hello).int32(123));
-            wire.readDocument(null, w -> w.read(Fields.hello).int32(intConsumer));
-            return bytes;
-        }
-
-        @Benchmark
-        public Bytes rawReadData() {
-            bytes.clear();
-            wire.writeDocument(false, w -> w.write(Fields.hello).int32(123));
-            Wires.rawReadData(wire, w -> w.read(Fields.hello).int32(intConsumer));
-            return bytes;
-        }
-    */
-    LongConsumer xj = x -> j = x;
-    DoubleConsumer xd = x -> d = x;
-    BooleanConsumer xb = x -> b = x;
-    ReadMarshallable wireInConsumer = w -> w
-            .read(Fields.one).int32(xi)
-            .read(Fields.two).int64(xj)
-            .read(Fields.three).text(sb)
-            .read(Fields.four).float64(xd)
-            .read(Fields.five).bool(xb);
+    final Data data = new Data(123, 1234567890L, 1234, true, "Hello World", Side.Sell);
+    final Data data2 = new Data();
 
     public static void main(String... args) throws RunnerException, InvocationTargetException, IllegalAccessException {
         Affinity.setAffinity(2);
@@ -96,8 +82,9 @@ public class Main {
         } else {
             Options opt = new OptionsBuilder()
                     .include(Main.class.getSimpleName())
-                    .forks(3)
+                    .forks(1)
                     .mode(Mode.SampleTime)
+                    .measurementIterations(100)
                     .timeUnit(TimeUnit.NANOSECONDS)
                     .build();
 
@@ -106,8 +93,13 @@ public class Main {
     }
 
     @Benchmark
-    public Bytes twire() {
-        return writeReadTest(twire);
+    public Bytes twireUTF() {
+        return writeReadTest(twireUTF);
+    }
+
+    @Benchmark
+    public Bytes twire8bit() {
+        return writeReadTest(twire8bit);
     }
 
     @Benchmark
@@ -136,30 +128,67 @@ public class Main {
     }
 
     @Benchmark
-    public Bytes rwire() {
-        return writeReadTest(rwire);
+    public Bytes rwire8bit() {
+        return writeReadTest(rwire8bit);
+    }
+
+    @Benchmark
+    public Bytes rwireUTF() {
+        return writeReadTest(rwireUTF);
     }
 
     @NotNull
     public Bytes writeReadTest(Wire wire) {
         bytes.clear();
-        wire.writeDocument(false, w -> w
-                .write(Fields.one).int32(123)
-                .write(Fields.two).int64(1234567890L)
-                .write(Fields.three).text("Hello World")
-                .write(Fields.four).float64(1e6)
-                .write(Fields.five).bool(true));
-        Wires.rawReadData(wire, wireInConsumer);
+        wire.writeDocument(false, data);
+        Wires.rawReadData(wire, data2);
         return bytes;
     }
+}
 
-    enum Fields implements WireKey {
-        unknown,
-        one, two, three, four, five;
+class Data implements Marshallable {
+    int smallInt = 0;
+    long longInt = 0;
+    double price = 0;
+    boolean flag = false;
+    StringBuilder text = new StringBuilder();
+    Side side;
+    private IntConsumer setSmallInt = x -> smallInt = x;
+    private LongConsumer setLongInt = x -> longInt = x;
+    private DoubleConsumer setPrice = x -> price = x;
+    private BooleanConsumer setFlag = x -> flag = x;
+    private Consumer<Side> setSide = x -> side = x;
 
-        @Override
-        public int code() {
-            return ordinal();
-        }
+    public Data(int smallInt, long longInt, double price, boolean flag, CharSequence text, Side side) {
+        this.smallInt = smallInt;
+        this.longInt = longInt;
+        this.price = price;
+        this.flag = flag;
+        this.side = side;
+        this.text.append(text);
+    }
+
+    public Data() {
+
+    }
+
+    @Override
+    public void readMarshallable(WireIn wire) throws IllegalStateException {
+        wire.read(DataFields.smallInt).int32(setSmallInt)
+                .read(DataFields.longInt).int64(setLongInt)
+                .read(DataFields.price).float64(setPrice)
+                .read(DataFields.flag).bool(setFlag)
+                .read(DataFields.text).text(text)
+                .read(DataFields.side).asEnum(Side.class, setSide);
+    }
+
+    @Override
+    public void writeMarshallable(WireOut wire) {
+        wire.write(DataFields.smallInt).int32(smallInt)
+                .write(DataFields.longInt).int64(longInt)
+                .write(DataFields.price).float64(price)
+                .write(DataFields.flag).bool(flag)
+                .write(DataFields.text).text(text)
+                .write(DataFields.side).asEnum(side);
     }
 }

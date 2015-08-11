@@ -32,6 +32,11 @@
     <dependencies>
         <dependency>
             <groupId>net.openhft</groupId>
+            <artifactId>chronicle-core</artifactId>
+            <version>1.0.17-beta-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>net.openhft</groupId>
             <artifactId>chronicle-bytes</artifactId>
             <version>1.0.20-beta-SNAPSHOT</version>
         </dependency>

@@ -69,11 +69,17 @@ public class TextWire implements Wire, InternalWireIn {
     private final Bytes<?> bytes;
     private final TextValueOut valueOut = new TextValueOut();
     private final ValueIn valueIn = new TextValueIn();
+    private final boolean use8bit;
     private boolean ready;
     private StopCharTester escapedQuotes;
 
-    public TextWire(Bytes bytes) {
+    public TextWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
+        this.use8bit = use8bit;
+    }
+
+    public TextWire(Bytes bytes) {
+        this(bytes, false);
     }
 
     @NotNull
@@ -152,7 +158,8 @@ public class TextWire implements Wire, InternalWireIn {
             int ch = peekCode();
             if (ch == '"') {
                 bytes.readSkip(1);
-                bytes.parseUTF(sb, getEscapingQuotes());
+
+                parseUntil(sb, getEscapingQuotes());
 
                 consumeWhiteSpace();
                 ch = readCode();
@@ -164,7 +171,7 @@ public class TextWire implements Wire, InternalWireIn {
                 return sb;
 
             } else {
-                bytes.parseUTF(sb, getEscapingEndOfText());
+                parseUntil(sb, getEscapingEndOfText());
             }
             unescape(sb);
         } catch (BufferUnderflowException ignored) {
@@ -388,6 +395,31 @@ public class TextWire implements Wire, InternalWireIn {
         return new TextLongArrayReference();
     }
 
+    public void parseWord(StringBuilder sb) {
+        parseUntil(sb, StopCharTesters.SPACE_STOP);
+    }
+
+    public void parseUntil(StringBuilder sb, StopCharTester testers) {
+        if (use8bit)
+            bytes.parse8bit(sb, testers);
+        else
+            bytes.parseUTF(sb, testers);
+    }
+
+    public void parseUntil(StringBuilder sb, StopCharsTester testers) {
+        if (use8bit)
+            bytes.parse8bit(sb, testers);
+        else
+            bytes.parseUTF(sb, testers);
+    }
+
+    public void append(CharSequence cs) {
+        if (use8bit)
+            bytes.append8bit(cs);
+        else
+            bytes.append(cs);
+    }
+
     enum TextStopCharsTesters implements StopCharsTester {
         END_OF_TEXT {
             @Override
@@ -416,7 +448,7 @@ public class TextWire implements Wire, InternalWireIn {
         boolean leaf = false;
 
         void prependSeparator() {
-            bytes.append(sep);
+            append(sep);
             if (sep.endsWith("\n"))
                 indent();
             sep = "";
@@ -437,13 +469,13 @@ public class TextWire implements Wire, InternalWireIn {
 
         private void indent() {
             for (int i = 0; i < indentation; i++)
-                bytes.append("  ");
+                append("  ");
         }
 
         public void elementSeparator() {
             if (indentation == 0) {
                 sep = "";
-                bytes.append("\n");
+                append("\n");
 
             } else {
                 sep = leaf ? ", " : ",\n";
@@ -454,7 +486,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut bool(@Nullable Boolean flag) {
             prependSeparator();
-            bytes.append(flag == null ? "!" + NULL : flag ? "true" : "false");
+            append(flag == null ? "!" + NULL : flag ? "true" : "false");
             elementSeparator();
             return TextWire.this;
         }
@@ -463,7 +495,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut text(@Nullable CharSequence s) {
             prependSeparator();
-            bytes.append(s == null ? "!" + NULL : quotes(s));
+            append(s == null ? "!" + NULL : quotes(s));
             elementSeparator();
             return TextWire.this;
         }
@@ -521,7 +553,9 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut bytes(byte[] byteArray) {
             prependSeparator();
-            bytes.append("!!binary ").append(Base64.getEncoder().encodeToString(byteArray)).append(END_FIELD);
+            append("!!binary ");
+            append(Base64.getEncoder().encodeToString(byteArray));
+            append(END_FIELD);
             elementSeparator();
 
             return TextWire.this;
@@ -530,7 +564,9 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut snappy(byte[] compressedBytes) {
             prependSeparator();
-            bytes.append("!!snappy ").append(Base64.getEncoder().encodeToString(compressedBytes)).append(END_FIELD);
+            append("!!snappy ");
+            append(Base64.getEncoder().encodeToString(compressedBytes));
+            append(END_FIELD);
             elementSeparator();
 
             return TextWire.this;
@@ -647,7 +683,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut time(@NotNull LocalTime localTime) {
             prependSeparator();
-            bytes.append(localTime.toString());
+            append(localTime.toString());
             elementSeparator();
 
             return TextWire.this;
@@ -657,7 +693,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
             prependSeparator();
-            bytes.append(zonedDateTime.toString());
+            append(zonedDateTime.toString());
             elementSeparator();
 
             return TextWire.this;
@@ -667,7 +703,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut date(@NotNull LocalDate localDate) {
             prependSeparator();
-            bytes.append(localDate.toString());
+            append(localDate.toString());
             elementSeparator();
 
             return TextWire.this;
@@ -677,7 +713,8 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public ValueOut type(@NotNull CharSequence typeName) {
             prependSeparator();
-            bytes.append('!').append(typeName);
+            bytes.append('!');
+            append(typeName);
             sep = " ";
             return this;
         }
@@ -686,7 +723,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, Class type) {
             prependSeparator();
-            bytes.append("!type ");
+            append("!type ");
             typeTranslator.accept(type, bytes);
             elementSeparator();
             return TextWire.this;
@@ -696,7 +733,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut typeLiteral(@NotNull CharSequence type) {
             prependSeparator();
-            bytes.append("!type ");
+            append("!type ");
             text(type);
             elementSeparator();
             return TextWire.this;
@@ -706,7 +743,8 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut uuid(@NotNull UUID uuid) {
             prependSeparator();
-            bytes.append(sep).append(uuid.toString());
+            append(sep);
+            append(uuid.toString());
             elementSeparator();
             return TextWire.this;
         }
@@ -745,27 +783,27 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut sequence(@NotNull Consumer<ValueOut> writer) {
             pushState();
-            bytes.append("[");
+            append("[");
             sep = "\n";
             long pos = bytes.readPosition();
             writer.accept(this);
             if (bytes.writePosition() > pos + 1)
-                bytes.append("\n");
+                append("\n");
 
             popState();
             indent();
-            bytes.append("]");
+            append("]");
             sep = END_FIELD;
             return TextWire.this;
         }
 
         @Override
         public WireOut array(@NotNull Consumer<ValueOut> writer, Class arrayType) {
-            if (arrayType == String[].class) bytes.append("!String[] ");
+            if (arrayType == String[].class) append("!String[] ");
             else {
-                bytes.append("!");
-                bytes.append(arrayType.getName());
-                bytes.append(" ");
+                append("!");
+                append(arrayType.getName());
+                append(" ");
             }
             ;
             return sequence(writer);
@@ -787,7 +825,7 @@ public class TextWire implements Wire, InternalWireIn {
                 pushState();
 
             prependSeparator();
-            bytes.append("{");
+            append("{");
             sep = leaf ? " " : END_FIELD;
 
             object.writeMarshallable(TextWire.this);
@@ -797,14 +835,14 @@ public class TextWire implements Wire, InternalWireIn {
             else
                 leaf = false;
             if (sep.startsWith(","))
-                bytes.append(sep.substring(1));
+                append(sep.substring(1));
             else
                 prependSeparator();
             bytes.append('}');
 
             if (indentation == 0) {
                 sep = "";
-                bytes.append("\n");
+                append("\n");
 
             } else {
                 sep = ",\n";
@@ -816,26 +854,26 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut map(@NotNull final Map map) {
             type(SEQ_MAP);
-            bytes.append(" [");
+            append(" [");
             pushState();
             sep = END_FIELD;
             map.forEach((k, v) -> {
                 prependSeparator();
-                bytes.append("{ key: ");
+                append("{ key: ");
                 leaf();
                 object2(k);
                 sep = ",\n";
                 prependSeparator();
-                bytes.append("  value: ");
+                append("  value: ");
                 leaf();
                 object2(v);
-                bytes.append(" }");
+                append(" }");
                 sep = ",\n";
             });
             popState();
             sep = END_FIELD;
             prependSeparator();
-            bytes.append("]");
+            bytes.append(']');
             sep = END_FIELD;
             return TextWire.this;
         }
@@ -846,7 +884,7 @@ public class TextWire implements Wire, InternalWireIn {
             else if (v instanceof WriteMarshallable)
                 typedMarshallable((WriteMarshallable) v);
             else if (v == null)
-                bytes.append("!" + NULL);
+                append("!" + NULL);
             else
                 text(String.valueOf(v));
         }
@@ -863,7 +901,8 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         public ValueOut write() {
-            bytes.append(sep).append("\"\": ");
+            append(sep);
+            append("\"\": ");
             sep = "";
             return this;
         }
@@ -873,13 +912,17 @@ public class TextWire implements Wire, InternalWireIn {
             CharSequence name = key.name();
             if (name == null) name = Integer.toString(key.code());
             prependSeparator();
-            bytes.append(quotes(name)).append(": ");
+            append(quotes(name));
+            append(": ");
             return this;
         }
 
         public void writeComment(@NotNull CharSequence s) {
             prependSeparator();
-            bytes.append(sep).append("# ").append(s).append("\n");
+            append(sep);
+            append("# ");
+            append(s);
+            bytes.append('\n');
             sep = "";
         }
     }
@@ -936,7 +979,10 @@ public class TextWire implements Wire, InternalWireIn {
 
             } else if (ch == '"') {
                 bytes.readSkip(1);
-                bytes.parseUTF(a, getEscapingQuotes());
+                if (use8bit)
+                    bytes.parse8bit(a, getEscapingQuotes());
+                else
+                    bytes.parseUTF(a, getEscapingQuotes());
                 unescape(a);
 
             } else if (ch == '!') {
@@ -945,7 +991,7 @@ public class TextWire implements Wire, InternalWireIn {
                 if (ch == '!') {
                     bytes.readSkip(1);
                     StringBuilder sb = Wires.acquireStringBuilder();
-                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                    parseWord(sb);
                     if (StringUtils.isEqual(sb, "null")) {
                         textTo(sb);
                         return null;
@@ -968,7 +1014,7 @@ public class TextWire implements Wire, InternalWireIn {
 
             } else {
                 if (bytes.readRemaining() > 0) {
-                    if (a instanceof Bytes)
+                    if (a instanceof Bytes || use8bit)
                         bytes.parse8bit(a, getEscapingEndOfText());
                     else
                         bytes.parseUTF(a, getEscapingEndOfText());
@@ -1021,17 +1067,17 @@ public class TextWire implements Wire, InternalWireIn {
             // TODO needs to be made much more efficient.
             StringBuilder sb = Wires.acquireStringBuilder();
             if (peekCode() == '!') {
-                bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                parseWord(sb);
                 String str = Wires.INTERNER.intern(sb);
                 if (str.equals("!!binary")) {
                     BytesUtil.setLength(sb, 0);
-                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                    parseWord(sb);
                     byte[] decode = Base64.getDecoder().decode(sb.toString());
                     bytesConsumer.readMarshallable(new TextWire(Bytes.wrapForRead(decode)));
 
                 } else if (str.equals("!!null")) {
                     bytesConsumer.readMarshallable(null);
-                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                    parseWord(sb);
                 } else {
                     throw new IORuntimeException("Unsupported type=" + str);
                 }
@@ -1048,16 +1094,16 @@ public class TextWire implements Wire, InternalWireIn {
             // TODO needs to be made much more efficient.
             StringBuilder sb = Wires.acquireStringBuilder();
             if (peekCode() == '!') {
-                bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                parseWord(sb);
                 String str = Wires.INTERNER.intern(sb);
                 if (str.equals("!!binary")) {
                     BytesUtil.setLength(sb, 0);
-                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                    parseWord(sb);
                     byte[] decode = Base64.getDecoder().decode(Wires.INTERNER.intern(sb));
                     return decode;
 
                 } else if (str.equals("!!null")) {
-                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                    parseWord(sb);
                     return null;
                 } else if (str.equals("!" + SEQ_MAP)) {
                     sb.append(bytes.toString());
@@ -1082,11 +1128,11 @@ public class TextWire implements Wire, InternalWireIn {
             // TODO needs to be made much more efficient.
             StringBuilder sb = Wires.acquireStringBuilder();
             if (peekCode() == '!') {
-                bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                parseWord(sb);
                 String str = Wires.INTERNER.intern(sb);
                 if (str.equals("!!snappy")) {
                     BytesUtil.setLength(sb, 0);
-                    bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                    parseWord(sb);
                     byte[] decode = Base64.getDecoder().decode(Wires.INTERNER.intern(sb));
                     return decode;
                 }
@@ -1414,7 +1460,8 @@ public class TextWire implements Wire, InternalWireIn {
                 sb.append("java.lang.String");
             } else {
                 readCode();
-                bytes.parseUTF(sb, TextStopCharTesters.END_OF_TYPE);
+
+                parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             }
             return TextWire.this;
         }
@@ -1433,7 +1480,7 @@ public class TextWire implements Wire, InternalWireIn {
                 throw new UnsupportedOperationException(stringForCode(code));
             bytes.readSkip("type ".length());
             StringBuilder sb = Wires.acquireStringBuilder();
-            bytes.parseUTF(sb, TextStopCharTesters.END_OF_TYPE);
+            parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             classNameConsumer.accept(sb);
             return TextWire.this;
         }
@@ -1487,7 +1534,7 @@ public class TextWire implements Wire, InternalWireIn {
                     throw new ClassCastException("Cannot convert to Marshallable. " + bytes.toDebugString());
 
                 readCode();
-                bytes.parseUTF(sb, TextStopCharTesters.END_OF_TYPE);
+                parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
 
                 if (StringUtils.isEqual(sb, "!null")) {
                     text();
@@ -1525,7 +1572,7 @@ public class TextWire implements Wire, InternalWireIn {
 
             StringBuilder sb = Wires.acquireStringBuilder();
             if (peekCode() == '!') {
-                bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                parseUntil(sb, StopCharTesters.SPACE_STOP);
                 String str = Wires.INTERNER.intern(sb);
 
                 if (("!!null").contentEquals(sb)) {
@@ -1562,7 +1609,7 @@ public class TextWire implements Wire, InternalWireIn {
 
             StringBuilder sb = Wires.acquireStringBuilder();
             if (peekCode() == '!') {
-                bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
+                parseUntil(sb, StopCharTesters.SPACE_STOP);
                 String str = Wires.INTERNER.intern(sb);
                 if (SEQ_MAP.contentEquals(sb)) {
                     while (hasNext()) {
@@ -1754,7 +1801,7 @@ public class TextWire implements Wire, InternalWireIn {
                 if (code == '!') {
                     readCode();
                     StringBuilder sb = Wires.acquireStringBuilder();
-                    bytes.parseUTF(sb, TextStopCharTesters.END_OF_TYPE);
+                    parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
                     final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
                     return object(null, clazz2);
                 }
@@ -1799,7 +1846,7 @@ public class TextWire implements Wire, InternalWireIn {
                 }
                 if (Enum.class.isAssignableFrom(clazz)) {
                     StringBuilder sb = Wires.acquireStringBuilder();
-                    bytes.parseUTF(sb, TextStopCharTesters.END_OF_TYPE);
+                    parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
                     return Wires.INTERNER.intern(sb);
                 }
 

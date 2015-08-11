@@ -49,7 +49,10 @@ public interface ValueIn {
     WireIn bool(@NotNull BooleanConsumer flag);
 
     @NotNull
-    WireIn text(@NotNull Consumer<String> s);
+    default WireIn text(@NotNull Consumer<String> s) {
+        s.accept(text());
+        return wireIn();
+    }
 
     default WireIn text(@NotNull StringBuilder sb) {
         if (textTo(sb) == null)
@@ -207,6 +210,17 @@ public interface ValueIn {
 
     default Throwable throwable(boolean appendCurrentStack) {
         return Wires.throwable(this, appendCurrentStack);
+    }
+
+    default <E extends Enum<E>> E asEnum(Class<E> eClass) {
+        StringBuilder sb = Wires.acquireStringBuilder();
+        text(sb);
+        return sb.length() == 0 ? null : Wires.internEnum(eClass, sb);
+    }
+
+    default <E extends Enum<E>> WireIn asEnum(Class<E> eClass, Consumer<E> eConsumer) {
+        eConsumer.accept(asEnum(eClass));
+        return wireIn();
     }
 
     @Nullable
