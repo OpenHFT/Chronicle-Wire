@@ -47,7 +47,7 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
 
 /**
- * Created by peter.lawrey on 15/01/15.
+ * This Wire is a binary translation of TextWire which is a sub set of YAML.
  */
 public class BinaryWire implements Wire, InternalWireIn {
     private static final int ANY_CODE_MATCH = -1;
@@ -948,7 +948,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             writeCode(I64_ARRAY);
             long pos = bytes.writePosition();
             BinaryLongArrayReference.lazyWrite(bytes, capacity);
-            ((ByteableLongArrayValues) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
+            ((Byteable) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
             return BinaryWire.this;
         }
 

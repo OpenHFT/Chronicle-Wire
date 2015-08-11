@@ -19,7 +19,7 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Created by Rob Austin
+ * Class to control whether to log Yaml messages for debugging or documentation.
  */
 public enum YamlLogging {
     ;

@@ -39,7 +39,7 @@ import java.util.UUID;
 import java.util.function.*;
 
 /**
- * Created by peter.lawrey on 19/01/15.
+ * This format writes just the data, without meta data.
  */
 public class RawWire implements Wire, InternalWireIn {
     private final Bytes bytes;
@@ -334,7 +334,7 @@ public class RawWire implements Wire, InternalWireIn {
         public WireOut int64array(long capacity, @NotNull LongArrayValues values) {
             long pos = bytes.writePosition();
             BinaryLongArrayReference.lazyWrite(bytes, capacity);
-            ((ByteableLongArrayValues) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
+            ((Byteable) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
             return RawWire.this;
         }
 

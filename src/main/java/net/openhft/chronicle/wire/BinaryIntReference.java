@@ -20,6 +20,9 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * This class acts as a Binary 32-bit in values. c.f. TextIntReference
+ */
 public class BinaryIntReference implements IntValue, Byteable {
     private BytesStore bytes;
     private long offset;

@@ -37,7 +37,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
- * Created by peter.lawrey on 14/01/15.
+ * Write out data after writing a field.
  */
 public interface ValueOut {
     /*

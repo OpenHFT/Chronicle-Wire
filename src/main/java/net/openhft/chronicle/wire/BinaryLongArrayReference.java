@@ -15,12 +15,17 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
-public class BinaryLongArrayReference implements ByteableLongArrayValues {
+/**
+ * This class acts a Binary array of 64-bit values. c.f. TextLongArrayReference
+ */
+public class BinaryLongArrayReference implements Byteable, LongArrayValues {
     //    private static final long CAPACITY = 0;
     private static final long VALUES = 8;
     private BytesStore bytes;

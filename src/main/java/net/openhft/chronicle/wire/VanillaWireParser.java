@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 
+/**
+ * A simple parser to associate actions based on events/field names received.
+ */
 public class VanillaWireParser implements WireParser {
     private final Map<CharSequence, Consumer<ValueIn>> namedConsumer = new TreeMap<>(CharSequenceComparator.INSTANCE);
     private final Map<Integer, Consumer<ValueIn>> numberedConsumer = new HashMap<>();

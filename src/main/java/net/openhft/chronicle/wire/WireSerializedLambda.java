@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by peter on 23/06/15.
+ * Helper calls to support serialization of lambdas in Wire formats.
  */
 public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
 

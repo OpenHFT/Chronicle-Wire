@@ -36,7 +36,7 @@ import java.util.UUID;
 import java.util.function.*;
 
 /**
- * Created by peter.lawrey on 14/01/15.
+ * Read in data after reading a field.
  */
 public interface ValueIn {
     Consumer<ValueIn> DISCARD = v -> {

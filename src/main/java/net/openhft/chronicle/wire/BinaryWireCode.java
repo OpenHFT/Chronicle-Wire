@@ -19,7 +19,7 @@ package net.openhft.chronicle.wire;
 import java.lang.reflect.Field;
 
 /**
- * Created by peter on 18/05/15.
+ * These are the predefined bytes codes for the Binary YAML wire format.
  */
 enum BinaryWireCode {
     ;

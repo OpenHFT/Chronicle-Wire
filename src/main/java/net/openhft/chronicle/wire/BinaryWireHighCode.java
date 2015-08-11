@@ -17,7 +17,7 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Created by peter on 18/05/15.
+ * These are the ranges of values to help decode the protocol.
  */
 public enum BinaryWireHighCode {
     ;

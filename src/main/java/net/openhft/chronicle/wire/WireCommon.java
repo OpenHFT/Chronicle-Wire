@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -48,5 +49,5 @@ public interface WireCommon {
      * @return a LongArrayValue which appropriate for this wire.
      */
     @NotNull
-    ByteableLongArrayValues newLongArrayReference();
+    LongArrayValues newLongArrayReference();
 }

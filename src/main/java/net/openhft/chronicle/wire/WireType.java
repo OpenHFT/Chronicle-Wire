@@ -21,6 +21,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
+/**
+ * A selection of prebuilt wire types.
+ */
 public enum WireType implements Function<Bytes, Wire> {
     TEXT {
         @NotNull

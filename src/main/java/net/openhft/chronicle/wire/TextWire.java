@@ -365,7 +365,7 @@ public class TextWire implements Wire, InternalWireIn {
 
     @NotNull
     @Override
-    public ByteableLongArrayValues newLongArrayReference() {
+    public LongArrayValues newLongArrayReference() {
         return new TextLongArrayReference();
     }
 
@@ -600,7 +600,7 @@ public class TextWire implements Wire, InternalWireIn {
         public WireOut int64array(long capacity, @NotNull LongArrayValues values) {
             long pos = bytes.writePosition();
             TextLongArrayReference.write(bytes, capacity);
-            ((ByteableLongArrayValues) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
+            ((Byteable) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
             return TextWire.this;
         }
 

@@ -19,7 +19,7 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Created by Rob Austin
+ * This WireKey expects paramaters to follow in a marshallable.
  */
 public interface ParameterizeWireKey extends WireKey {
     @NotNull
