@@ -23,6 +23,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
+/**
+ * Implementation of a reference to a 32-bit in in text wire format.
+ */
 class TextIntReference implements IntValue, Byteable {
     private static final byte[] template = "!!atomic { locked: false, value: 0000000000 }".getBytes();
     private static final int FALSE = ('f' << 24) | ('a' << 16) | ('l' << 8) | 's';

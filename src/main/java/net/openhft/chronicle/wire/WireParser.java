@@ -19,6 +19,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
+/**
+ * Interface to parse arbitrary field-value data.
+ */
 public interface WireParser {
     WireKey DEFAULT = () -> ":default:";
 

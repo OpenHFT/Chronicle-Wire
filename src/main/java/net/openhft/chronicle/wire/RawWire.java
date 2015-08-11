@@ -39,12 +39,13 @@ import java.util.UUID;
 import java.util.function.*;
 
 /**
- * Created by peter.lawrey on 19/01/15.
+ * This format writes just the data, without meta data.
  */
 public class RawWire implements Wire, InternalWireIn {
     private final Bytes bytes;
     private final RawValueOut valueOut = new RawValueOut();
     private final RawValueIn valueIn = new RawValueIn();
+    boolean use8bit;
     @NotNull
     private
     String lastField = "";
@@ -54,7 +55,12 @@ public class RawWire implements Wire, InternalWireIn {
     private boolean ready;
 
     public RawWire(Bytes bytes) {
+        this(bytes, true);
+    }
+
+    public RawWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
+        this.use8bit = use8bit;
     }
 
     @Override
@@ -94,7 +100,10 @@ public class RawWire implements Wire, InternalWireIn {
     @NotNull
     @Override
     public ValueIn readEventName(@NotNull StringBuilder name) {
-        bytes.readUTFΔ(name);
+        if (use8bit)
+            bytes.read8bit(name);
+        else
+            bytes.readUTFΔ(name);
         lastSB = null;
         return valueIn;
     }
@@ -158,7 +167,10 @@ public class RawWire implements Wire, InternalWireIn {
     @Override
     public ValueOut writeEventName(@NotNull WireKey key) {
         lastField = "";
-        bytes.writeUTFΔ(key.name());
+        if (use8bit)
+            bytes.write8bit(key.name());
+        else
+            bytes.writeUTFΔ(key.name());
         return valueOut;
     }
 
@@ -232,7 +244,10 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut text(@Nullable CharSequence s) {
-            bytes.writeUTFΔ(s);
+            if (use8bit)
+                bytes.write8bit(s);
+            else
+                bytes.writeUTFΔ(s);
             return RawWire.this;
         }
 
@@ -334,7 +349,7 @@ public class RawWire implements Wire, InternalWireIn {
         public WireOut int64array(long capacity, @NotNull LongArrayValues values) {
             long pos = bytes.writePosition();
             BinaryLongArrayReference.lazyWrite(bytes, capacity);
-            ((ByteableLongArrayValues) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
+            ((Byteable) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
             return RawWire.this;
         }
 
@@ -364,7 +379,10 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
-            bytes.writeUTFΔ(zonedDateTime.toString());
+            if (use8bit)
+                bytes.write8bit(zonedDateTime.toString());
+            else
+                bytes.writeUTFΔ(zonedDateTime.toString());
             return RawWire.this;
         }
 
@@ -506,20 +524,17 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn text(@NotNull Consumer<String> s) {
-            throw new UnsupportedOperationException();
-        }
-
-        @NotNull
-        @Override
         public String text() {
-            throw new UnsupportedOperationException("todo");
+            return use8bit ? bytes.readUTFΔ() : bytes.read8bit();
         }
 
         @NotNull
         @Override
         public <ACS extends Appendable & CharSequence> ACS textTo(@NotNull ACS s) {
-            return bytes.readUTFΔ(s) ? s : null;
+            if (use8bit)
+                return bytes.read8bit(s) ? s : null;
+            else
+                return bytes.readUTFΔ(s) ? s : null;
         }
 
         @NotNull
@@ -558,7 +573,7 @@ public class RawWire implements Wire, InternalWireIn {
         }
 
         @NotNull
-        public WireIn bytes(@NotNull Consumer<WireIn> bytesConsumer) {
+        public WireIn bytes(@NotNull ReadMarshallable bytesConsumer) {
             long length = readLength();
 
             if (length > bytes.readRemaining())
@@ -567,7 +582,7 @@ public class RawWire implements Wire, InternalWireIn {
             long limit = bytes.readPosition() + length;
             try {
                 bytes.readLimit(limit);
-                bytesConsumer.accept(wireIn());
+                bytesConsumer.readMarshallable(wireIn());
             } finally {
                 bytes.readLimit(limit0);
                 bytes.readPosition(limit);

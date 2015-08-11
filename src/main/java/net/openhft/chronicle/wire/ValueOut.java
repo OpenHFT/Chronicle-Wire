@@ -31,13 +31,15 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
- * Created by peter.lawrey on 14/01/15.
+ * Write out data after writing a field.
  */
 public interface ValueOut {
     /*
@@ -207,6 +209,9 @@ public interface ValueOut {
         return marshallable(object);
     }
 
+    default <E extends Enum<E>> WireOut asEnum(E e) {
+        return text(e == null ? null : e.name());
+    }
     @NotNull
     default WireOut object(Object value) {
         if (value instanceof byte[])

@@ -42,7 +42,7 @@ import java.util.UUID;
 import java.util.function.*;
 
 /**
- * Created by peter.lawrey on 15/01/15.
+ * THis wire decodes URL query strings.
  */
 public class QueryWire implements Wire, InternalWireIn {
     final Bytes<?> bytes;
@@ -676,7 +676,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @NotNull
-        public WireIn bytes(@NotNull Consumer<WireIn> bytesConsumer) {
+        public WireIn bytes(@NotNull ReadMarshallable bytesConsumer) {
             throw new UnsupportedOperationException("todo");
         }
 

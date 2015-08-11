@@ -47,7 +47,7 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
 
 /**
- * Created by peter.lawrey on 15/01/15.
+ * This Wire is a binary translation of TextWire which is a sub set of YAML.
  */
 public class BinaryWire implements Wire, InternalWireIn {
     private static final int ANY_CODE_MATCH = -1;
@@ -294,41 +294,51 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     private StringBuilder readField(int peekCode, int codeMatch, @NotNull StringBuilder sb) {
+        sb.setLength(0);
         switch (peekCode >> 4) {
             case BinaryWireHighCode.END_OF_STREAM:
-                sb.setLength(0);
                 break;
 
             case BinaryWireHighCode.SPECIAL:
-                if (peekCode == FIELD_NAME_ANY || peekCode == EVENT_NAME) {
-                    bytes.readSkip(1);
-                    bytes.readUTFΔ(sb);
-                    return sb;
-                }
-                if (peekCode == FIELD_NUMBER) {
-                    bytes.readSkip(1);
-                    long fieldId = bytes.readStopBit();
-                    if (codeMatch >= 0 && fieldId != codeMatch)
-                        throw new UnsupportedOperationException("Field was: " + fieldId + " expected " + codeMatch);
-                    if (codeMatch < 0)
-                        sb.append(fieldId);
-                    return sb;
-                }
-                return null;
+                return readSpecialField(peekCode, codeMatch, sb);
+
             case BinaryWireHighCode.FIELD0:
             case BinaryWireHighCode.FIELD1:
                 bytes.readSkip(1);
-                return getStringBuilder(peekCode, sb);
+                if (bytes.bytesStore() instanceof NativeBytesStore) {
+                    BytesUtil.parse8bit_SB1(bytes, sb, peekCode & 0x1f);
+                } else {
+                    BytesUtil.parse8bit(bytes, sb, peekCode & 0x1f);
+                }
+                return sb;
             default:
                 // if it's not a field, perhaps none was written.
                 break;
         }
         // if field-less accept anything in order.
         if (fieldLess) {
-            sb.setLength(0);
             return sb;
         }
 
+        return null;
+    }
+
+    @Nullable
+    private StringBuilder readSpecialField(int peekCode, int codeMatch, @NotNull StringBuilder sb) {
+        if (peekCode == FIELD_NUMBER) {
+            bytes.readSkip(1);
+            long fieldId = bytes.readStopBit();
+            if (codeMatch >= 0 && fieldId != codeMatch)
+                throw new UnsupportedOperationException("Field was: " + fieldId + " expected " + codeMatch);
+            if (codeMatch < 0)
+                sb.append(fieldId);
+            return sb;
+        }
+        if (peekCode == FIELD_NAME_ANY || peekCode == EVENT_NAME) {
+            bytes.readSkip(1);
+            bytes.readUTFΔ(sb);
+            return sb;
+        }
         return null;
     }
 
@@ -688,10 +698,10 @@ public class BinaryWire implements Wire, InternalWireIn {
                 }
             }
             bytes.writeByte((byte) (FIELD_NAME0 + len))
-                    .append(name);
+                    .append8bit(name);
 
         } else {
-            writeCode(FIELD_NAME_ANY).writeUTFΔ(name);
+            writeCode(FIELD_NAME_ANY).write8bit(name);
         }
     }
 
@@ -705,7 +715,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     @Nullable
-    private <ACS extends Appendable & CharSequence> ACS readText(int code, @NotNull ACS sb) {
+    <ACS extends Appendable & CharSequence> ACS readText(int code, @NotNull ACS sb) {
         if (code <= 127) {
             append(sb, code);
             return sb;
@@ -948,7 +958,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             writeCode(I64_ARRAY);
             long pos = bytes.writePosition();
             BinaryLongArrayReference.lazyWrite(bytes, capacity);
-            ((ByteableLongArrayValues) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
+            ((Byteable) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
             return BinaryWire.this;
         }
 
@@ -1469,7 +1479,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @NotNull
-        public WireIn bytes(@NotNull Consumer<WireIn> bytesConsumer) {
+        public WireIn bytes(@NotNull ReadMarshallable bytesConsumer) {
             long length = readLength() - 1;
             int code = readCode();
             if (code != U8_ARRAY)
@@ -1481,7 +1491,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             long limit = bytes.readPosition() + length;
             try {
                 bytes.readLimit(limit);
-                bytesConsumer.accept(wireIn());
+                bytesConsumer.readMarshallable(wireIn());
             } finally {
                 bytes.readLimit(limit0);
                 bytes.readPosition(limit);

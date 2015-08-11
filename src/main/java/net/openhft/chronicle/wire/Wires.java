@@ -17,9 +17,11 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.RandomDataInput;
+import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +31,6 @@ import java.lang.reflect.Field;
 import java.nio.BufferUnderflowException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static net.openhft.chronicle.wire.BinaryWire.toIntU30;
 
@@ -38,21 +39,25 @@ import static net.openhft.chronicle.wire.BinaryWire.toIntU30;
  */
 public enum Wires {
     ;
-    private static final int NOT_READY = 1 << 31;
-    private static final int META_DATA = 1 << 30;
-    private static final int UNKNOWN_LENGTH = 0x0;
     public static final int LENGTH_MASK = -1 >>> 2;
     public static final StringInterner INTERNER = new StringInterner(128);
-
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
     static final StackTraceElement[] NO_STE = {};
+    static final ClassLocal<EnumInterner> ENUM_INTERNER = ClassLocal.withInitial(c -> new EnumInterner<>(c));
+    private static final int NOT_READY = 1 << 31;
+    private static final int META_DATA = 1 << 30;
+    private static final int UNKNOWN_LENGTH = 0x0;
     private static final Field DETAILED_MESSAGE = Jvm.getField(Throwable.class, "detailMessage");
     private static final Field STACK_TRACE = Jvm.getField(Throwable.class, "stackTrace");
 
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(WireSerializedLambda.class, "SerializedLambda");
         ClassAliasPool.CLASS_ALIASES.addAlias(WireType.class);
+    }
+
+    public static <E extends Enum<E>> E internEnum(Class<E> eClass, CharSequence cs) {
+        return (E) ENUM_INTERNER.get(eClass).intern(cs);
     }
 
     public static StringBuilder acquireStringBuilder() {
@@ -65,20 +70,20 @@ public enum Wires {
         return sb;
     }
 
-    public static void writeData(@NotNull WireOut wireOut, boolean metaData, boolean notReady, @NotNull Consumer<WireOut> writer) {
+    public static void writeData(@NotNull WireOut wireOut, boolean metaData, boolean notReady, @NotNull WriteMarshallable writer) {
         Bytes bytes = wireOut.bytes();
         long position = bytes.writePosition();
         int metaDataBit = metaData ? META_DATA : 0;
         bytes.writeOrderedInt(metaDataBit | NOT_READY | UNKNOWN_LENGTH);
-        writer.accept(wireOut);
+        writer.writeMarshallable(wireOut);
         int length = metaDataBit | toIntU30(bytes.writePosition() - position - 4, "Document length %,d out of 30-bit int range.");
         bytes.writeOrderedInt(position, length | (notReady ? NOT_READY : 0));
     }
 
     public static boolean readData(long offset,
                                    @NotNull WireIn wireIn,
-                                   @Nullable Consumer<WireIn> metaDataConsumer,
-                                   @Nullable Consumer<WireIn> dataConsumer) {
+                                   @Nullable ReadMarshallable metaDataConsumer,
+                                   @Nullable ReadMarshallable dataConsumer) {
         final Bytes bytes = wireIn.bytes();
 
         long position = bytes.readPosition();
@@ -94,8 +99,8 @@ public enum Wires {
     }
 
     public static boolean readData(@NotNull WireIn wireIn,
-                                   @Nullable Consumer<WireIn> metaDataConsumer,
-                                   @Nullable Consumer<WireIn> dataConsumer) {
+                                   @Nullable ReadMarshallable metaDataConsumer,
+                                   @Nullable ReadMarshallable dataConsumer) {
         final Bytes<?> bytes = wireIn.bytes();
         boolean read = false;
         while (bytes.readRemaining() >= 4) {
@@ -112,7 +117,7 @@ public enum Wires {
 
                 } else {
                     ((InternalWireIn) wireIn).setReady(ready);
-                    bytes.readWithLength(len, b -> dataConsumer.accept(wireIn));
+                    bytes.readWithLength(len, b -> dataConsumer.readMarshallable(wireIn));
                     return true;
                 }
             } else {
@@ -129,7 +134,7 @@ public enum Wires {
                     long limit = bytes.readPosition() + (long) len;
                     try {
                         bytes.readLimit(limit);
-                        metaDataConsumer.accept(wireIn);
+                        metaDataConsumer.readMarshallable(wireIn);
                     } finally {
                         bytes.readLimit(limit0);
                         bytes.readPosition(limit);
@@ -144,7 +149,7 @@ public enum Wires {
         return read;
     }
 
-    public static void rawReadData(@NotNull WireIn wireIn, @NotNull Consumer<WireIn> dataConsumer) {
+    public static void rawReadData(@NotNull WireIn wireIn, @NotNull ReadMarshallable dataConsumer) {
         final Bytes<?> bytes = wireIn.bytes();
         int header = bytes.readInt();
         assert isReady(header) && isData(header);
@@ -154,7 +159,7 @@ public enum Wires {
         long limit = bytes.readPosition() + (long) len;
         try {
             bytes.readLimit(limit);
-            dataConsumer.accept(wireIn);
+            dataConsumer.readMarshallable(wireIn);
         } finally {
             bytes.readLimit(limit0);
         }
@@ -208,7 +213,7 @@ public enum Wires {
                     sb.append(" # len: ").append(len).append(", remaining: ").append(bytes.readRemaining());
                 sb.append("\n");
                 try {
-                    while (bytes.readRemaining() > 0) {
+                    for (int i = 0; i < len; i++) {
                         int ch = bytes.readUnsignedByte();
                         if (binary)
                             sb.append(RandomDataInput.charToString[ch]);

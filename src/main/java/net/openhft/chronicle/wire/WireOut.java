@@ -17,8 +17,6 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Consumer;
-
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream.
  * <p>
@@ -75,11 +73,11 @@ public interface WireOut extends WireCommon {
         return this;
     }
 
-    default void writeDocument(boolean metaData, @NotNull Consumer<WireOut> writer) {
+    default void writeDocument(boolean metaData, @NotNull WriteMarshallable writer) {
         Wires.writeData(this, metaData, false, writer);
     }
 
-    default void writeNotReadyDocument(boolean metaData, @NotNull Consumer<WireOut> writer) {
+    default void writeNotReadyDocument(boolean metaData, @NotNull WriteMarshallable writer) {
         Wires.writeData(this, metaData, true, writer);
     }
 }
