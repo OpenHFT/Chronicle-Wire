@@ -294,41 +294,51 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     private StringBuilder readField(int peekCode, int codeMatch, @NotNull StringBuilder sb) {
+        sb.setLength(0);
         switch (peekCode >> 4) {
             case BinaryWireHighCode.END_OF_STREAM:
-                sb.setLength(0);
                 break;
 
             case BinaryWireHighCode.SPECIAL:
-                if (peekCode == FIELD_NAME_ANY || peekCode == EVENT_NAME) {
-                    bytes.readSkip(1);
-                    bytes.readUTFΔ(sb);
-                    return sb;
-                }
-                if (peekCode == FIELD_NUMBER) {
-                    bytes.readSkip(1);
-                    long fieldId = bytes.readStopBit();
-                    if (codeMatch >= 0 && fieldId != codeMatch)
-                        throw new UnsupportedOperationException("Field was: " + fieldId + " expected " + codeMatch);
-                    if (codeMatch < 0)
-                        sb.append(fieldId);
-                    return sb;
-                }
-                return null;
+                return readSpecialField(peekCode, codeMatch, sb);
+
             case BinaryWireHighCode.FIELD0:
             case BinaryWireHighCode.FIELD1:
                 bytes.readSkip(1);
-                return getStringBuilder(peekCode, sb);
+                if (bytes.bytesStore() instanceof NativeBytesStore) {
+                    BytesUtil.parseUTF_SB1(bytes, sb, peekCode & 0x1f);
+                } else {
+                    BytesUtil.parseUTF1(bytes, sb, peekCode & 0x1f);
+                }
+                return sb;
             default:
                 // if it's not a field, perhaps none was written.
                 break;
         }
         // if field-less accept anything in order.
         if (fieldLess) {
-            sb.setLength(0);
             return sb;
         }
 
+        return null;
+    }
+
+    @Nullable
+    private StringBuilder readSpecialField(int peekCode, int codeMatch, @NotNull StringBuilder sb) {
+        if (peekCode == FIELD_NUMBER) {
+            bytes.readSkip(1);
+            long fieldId = bytes.readStopBit();
+            if (codeMatch >= 0 && fieldId != codeMatch)
+                throw new UnsupportedOperationException("Field was: " + fieldId + " expected " + codeMatch);
+            if (codeMatch < 0)
+                sb.append(fieldId);
+            return sb;
+        }
+        if (peekCode == FIELD_NAME_ANY || peekCode == EVENT_NAME) {
+            bytes.readSkip(1);
+            bytes.readUTFΔ(sb);
+            return sb;
+        }
         return null;
     }
 
@@ -1469,7 +1479,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @NotNull
-        public WireIn bytes(@NotNull Consumer<WireIn> bytesConsumer) {
+        public WireIn bytes(@NotNull ReadMarshallable bytesConsumer) {
             long length = readLength() - 1;
             int code = readCode();
             if (code != U8_ARRAY)
@@ -1481,7 +1491,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             long limit = bytes.readPosition() + length;
             try {
                 bytes.readLimit(limit);
-                bytesConsumer.accept(wireIn());
+                bytesConsumer.readMarshallable(wireIn());
             } finally {
                 bytes.readLimit(limit0);
                 bytes.readPosition(limit);

@@ -18,8 +18,6 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Consumer;
-
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream. <p> Created by peter.lawrey on
  * 12/01/15.
@@ -79,14 +77,14 @@ public interface WireIn extends WireCommon {
         return this;
     }
 
-    default boolean readDocument(@Nullable Consumer<WireIn> metaDataConsumer,
-                                 @Nullable Consumer<WireIn> dataConsumer) {
+    default boolean readDocument(@Nullable ReadMarshallable metaDataConsumer,
+                                 @Nullable ReadMarshallable dataConsumer) {
         return Wires.readData(this, metaDataConsumer, dataConsumer);
     }
 
     default boolean readDocument(long position,
-                                 @Nullable Consumer<WireIn> metaDataConsumer,
-                                 @Nullable Consumer<WireIn> dataConsumer) {
+                                 @Nullable ReadMarshallable metaDataConsumer,
+                                 @Nullable ReadMarshallable dataConsumer) {
         return Wires.readData(position, this, metaDataConsumer, dataConsumer);
     }
 }

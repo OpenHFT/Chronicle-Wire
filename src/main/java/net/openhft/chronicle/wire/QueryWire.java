@@ -676,7 +676,7 @@ public class QueryWire implements Wire, InternalWireIn {
         }
 
         @NotNull
-        public WireIn bytes(@NotNull Consumer<WireIn> bytesConsumer) {
+        public WireIn bytes(@NotNull ReadMarshallable bytesConsumer) {
             throw new UnsupportedOperationException("todo");
         }
 

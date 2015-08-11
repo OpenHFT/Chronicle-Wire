@@ -58,6 +58,9 @@ public class TextWire implements Wire, InternalWireIn {
             LoggerFactory.getLogger(TextWire.class);
     private static final String END_FIELD = "\n";
 
+    private static final ThreadLocal<StopCharTester> ESCAPED_QUOTES = ThreadLocal.withInitial(() -> StopCharTesters.QUOTES.escaping());
+    private static final ThreadLocal<StopCharsTester> ESCAPED_END_OF_TEXT = ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
+
     static {
         for (char ch : "\",\n\\#:{}[]".toCharArray())
             QUOTE_CHARS.set(ch);
@@ -67,6 +70,7 @@ public class TextWire implements Wire, InternalWireIn {
     private final TextValueOut valueOut = new TextValueOut();
     private final ValueIn valueIn = new TextValueIn();
     private boolean ready;
+    private StopCharTester escapedQuotes;
 
     public TextWire(Bytes bytes) {
         this.bytes = bytes;
@@ -148,7 +152,7 @@ public class TextWire implements Wire, InternalWireIn {
             int ch = peekCode();
             if (ch == '"') {
                 bytes.readSkip(1);
-                bytes.parseUTF(sb, StopCharTesters.QUOTES.escaping());
+                bytes.parseUTF(sb, getEscapingQuotes());
 
                 consumeWhiteSpace();
                 ch = readCode();
@@ -160,13 +164,28 @@ public class TextWire implements Wire, InternalWireIn {
                 return sb;
 
             } else {
-                bytes.parseUTF(sb, TextStopCharsTesters.END_OF_TEXT.escaping());
+                bytes.parseUTF(sb, getEscapingEndOfText());
             }
             unescape(sb);
         } catch (BufferUnderflowException ignored) {
         }
         //      consumeWhiteSpace();
         return sb;
+    }
+
+    @NotNull
+    private StopCharsTester getEscapingEndOfText() {
+        StopCharsTester escaping = ESCAPED_END_OF_TEXT.get();
+        // reset it.
+        escaping.isStopChar(' ', ' ');
+        return escaping;
+    }
+
+    private StopCharTester getEscapingQuotes() {
+        StopCharTester sct = ESCAPED_QUOTES.get();
+        // reset it.
+        sct.isStopChar(' ');
+        return sct;
     }
 
     void consumeWhiteSpace() {
@@ -917,7 +936,7 @@ public class TextWire implements Wire, InternalWireIn {
 
             } else if (ch == '"') {
                 bytes.readSkip(1);
-                bytes.parseUTF(a, StopCharTesters.QUOTES.escaping());
+                bytes.parseUTF(a, getEscapingQuotes());
                 unescape(a);
 
             } else if (ch == '!') {
@@ -950,9 +969,9 @@ public class TextWire implements Wire, InternalWireIn {
             } else {
                 if (bytes.readRemaining() > 0) {
                     if (a instanceof Bytes)
-                        bytes.parse8bit(a, TextStopCharsTesters.END_OF_TEXT);
+                        bytes.parse8bit(a, getEscapingEndOfText());
                     else
-                        bytes.parseUTF(a, TextStopCharsTesters.END_OF_TEXT);
+                        bytes.parseUTF(a, getEscapingEndOfText());
 
                 } else {
                     BytesUtil.setLength(a, 0);
@@ -996,7 +1015,7 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         @NotNull
-        public WireIn bytes(@NotNull Consumer<WireIn> bytesConsumer) {
+        public WireIn bytes(@NotNull ReadMarshallable bytesConsumer) {
             consumeWhiteSpace();
 
             // TODO needs to be made much more efficient.
@@ -1008,17 +1027,17 @@ public class TextWire implements Wire, InternalWireIn {
                     BytesUtil.setLength(sb, 0);
                     bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                     byte[] decode = Base64.getDecoder().decode(sb.toString());
-                    bytesConsumer.accept(new TextWire(Bytes.wrapForRead(decode)));
+                    bytesConsumer.readMarshallable(new TextWire(Bytes.wrapForRead(decode)));
 
                 } else if (str.equals("!!null")) {
-                    bytesConsumer.accept(null);
+                    bytesConsumer.readMarshallable(null);
                     bytes.parseUTF(sb, StopCharTesters.SPACE_STOP);
                 } else {
                     throw new IORuntimeException("Unsupported type=" + str);
                 }
             } else {
                 textTo(sb);
-                bytesConsumer.accept(new TextWire(Bytes.wrapForRead(sb.toString().getBytes())));
+                bytesConsumer.readMarshallable(new TextWire(Bytes.wrapForRead(sb.toString().getBytes())));
             }
             return TextWire.this;
         }

@@ -73,7 +73,7 @@ public interface ValueIn {
     WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer);
 
     @NotNull
-    WireIn bytes(@NotNull Consumer<WireIn> wireInConsumer);
+    WireIn bytes(@NotNull ReadMarshallable wireInConsumer);
 
     @Nullable
     byte[] bytes();

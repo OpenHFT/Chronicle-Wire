@@ -558,7 +558,7 @@ public class RawWire implements Wire, InternalWireIn {
         }
 
         @NotNull
-        public WireIn bytes(@NotNull Consumer<WireIn> bytesConsumer) {
+        public WireIn bytes(@NotNull ReadMarshallable bytesConsumer) {
             long length = readLength();
 
             if (length > bytes.readRemaining())
@@ -567,7 +567,7 @@ public class RawWire implements Wire, InternalWireIn {
             long limit = bytes.readPosition() + length;
             try {
                 bytes.readLimit(limit);
-                bytesConsumer.accept(wireIn());
+                bytesConsumer.readMarshallable(wireIn());
             } finally {
                 bytes.readLimit(limit0);
                 bytes.readPosition(limit);
