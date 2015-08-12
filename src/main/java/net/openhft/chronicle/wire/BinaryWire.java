@@ -125,7 +125,10 @@ public class BinaryWire implements Wire, InternalWireIn {
                             long lim = bytes.readLimit();
                             try {
                                 bytes.readLimit(bytes.readPosition() + len);
-                                wire.writeValue().marshallable(w -> copyTo(w));
+                                if (isFieldNext())
+                                    wire.writeValue().marshallable(w -> copyTo(w));
+                                else
+                                    wire.writeValue().sequence(v -> copyTo(v.wireOut()));
                             } finally {
                                 bytes.readLimit(lim);
                             }
@@ -173,6 +176,11 @@ public class BinaryWire implements Wire, InternalWireIn {
                     break;
             }
         }
+    }
+
+    private boolean isFieldNext() {
+        int peekCode = peekCode();
+        return peekCode == FIELD_NAME_ANY || (peekCode >= FIELD_NAME0 && peekCode <= FIELD_NAME31);
     }
 
     @NotNull
@@ -253,7 +261,11 @@ public class BinaryWire implements Wire, InternalWireIn {
         return readField(peekCode, codeMatch, name);
     }
 
-    private void consumeSpecial() {
+    void consumeSpecial() {
+        consumeSpecial(false);
+    }
+
+    void consumeSpecial(boolean consumeType) {
         while (true) {
             int code = peekCode();
             switch (code) {
@@ -266,13 +278,13 @@ public class BinaryWire implements Wire, InternalWireIn {
                     bytes.readSkip(bytes.readUnsignedInt());
                     break;
 
-                case COMMENT: {
-                    bytes.readSkip(1);
-                    StringBuilder sb = Wires.acquireStringBuilder();
-                    bytes.readUTFΔ(sb);
-                    break;
-                }
 
+                case TYPE_PREFIX:
+                    if (!consumeType)
+                        return;
+                    // fall through
+
+                case COMMENT:
                 case HINT: {
                     bytes.readSkip(1);
                     StringBuilder sb = Wires.acquireStringBuilder();
@@ -1863,7 +1875,8 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireIn marshallable(@NotNull ReadMarshallable object) {
-            consumeSpecial();
+            consumeSpecial(true);
+
             long length = readLength();
             if (length >= 0) {
                 long limit = bytes.readLimit();
