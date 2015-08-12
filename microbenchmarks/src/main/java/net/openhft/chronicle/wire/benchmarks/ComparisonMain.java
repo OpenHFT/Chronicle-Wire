@@ -16,8 +16,16 @@
 
 package net.openhft.chronicle.wire.benchmarks;
 
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONStyle;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.core.Jvm;
+import org.boon.json.JsonFactory;
+import org.boon.json.JsonParser;
+import org.boon.json.ObjectMapper;
+import org.boon.json.implementation.JsonFastParser;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
@@ -44,6 +52,11 @@ public class ComparisonMain {
     final Yaml yaml;
     final Data data = new Data(123, 1234567890L, 1234, true, "Hello World", Side.Sell);
     String s;
+    StringBuilder sb = new StringBuilder();
+    JSONParser jsonParser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
+    // {"smallInt":123,"longInt":1234567890,"price":1234.0,"flag":true,"text":"Hello World","side":"Sell"}
+    ObjectMapper mapper = JsonFactory.create();
+    JsonParser parser = new JsonFastParser();
 
     public ComparisonMain() {
         DumperOptions options = new DumperOptions();
@@ -60,8 +73,14 @@ public class ComparisonMain {
                 if (m.getAnnotation(Benchmark.class) != null) {
                     m.invoke(main);
                     String s = main.s;
-                    System.out.println("Test " + m.getName() + " used " + s.length() + " chars.");
-                    System.out.println(s);
+                    if (s != null) {
+                        System.out.println("Test " + m.getName() + " used " + s.length() + " chars.");
+                        System.out.println(s);
+                    } else {
+                        System.out.println("Test " + m.getName() + " used " + main.sb.length() + " chars.");
+                        System.out.println(main.sb);
+
+                    }
                 }
             }
         } else {
@@ -79,10 +98,39 @@ public class ComparisonMain {
         }
     }
 
-    @Benchmark
-    public void snakeYaml() {
+    //    @Benchmark
+    public Data snakeYaml() {
         s = yaml.dumpAsMap(data);
         Data data = (Data) yaml.load(s);
+        return data;
+    }
+
+    // fails on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
+//    @Benchmark
+    public void jsonSmart() throws ParseException {
+        JSONObject obj = new JSONObject();
+        data.writeTo(obj);
+        s = obj.toJSONString();
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(s);
+        data.readFrom(jsonObject);
+
+    }
+
+    // fails on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
+//    @Benchmark
+    public void jsonSmartCompact() throws ParseException {
+        JSONObject obj = new JSONObject();
+        data.writeTo(obj);
+        s = obj.toJSONString(JSONStyle.MAX_COMPRESS);
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(s);
+        data.readFrom(jsonObject);
+    }
+
+    @Benchmark
+    public Data boon() {
+        sb.setLength(0);
+        mapper.toJson(data, sb);
+        return mapper.fromJson(sb.toString(), Data.class);
     }
 
 }

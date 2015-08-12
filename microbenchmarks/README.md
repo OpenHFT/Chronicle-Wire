@@ -35,7 +35,8 @@ In all cases, a 4 bytes header was used to determine the length of message.
 
 | Wire Format | Text encoding |  Fixed width values?  | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
 |--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-------:|-----------:|------------:|-------------:|-------:|
-| Snake YAML | UTF-       8     |  false                      | false                 | false        | 88     |  76.1       | 1,493         | 1,522       | 26,673 |
+| Snake YAML | UTF-8            |  false                      | false                 | false        | 88     |  76.1       | 1,493         | 1,522       | 26,673 |
+| BOON Json | UTF-16            |  false                      | false                 | false        | 99     |  25.0       | 1,386         | 2,121       | 33,423 |
 
 All times are in micro-seconds
 

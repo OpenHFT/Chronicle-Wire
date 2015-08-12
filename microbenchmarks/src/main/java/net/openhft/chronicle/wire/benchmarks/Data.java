@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.wire.benchmarks;
 
+import net.minidev.json.JSONObject;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
@@ -36,11 +37,11 @@ public class Data implements Marshallable {
     boolean flag = false;
     StringBuilder text = new StringBuilder();
     Side side;
-    private IntConsumer setSmallInt = x -> smallInt = x;
-    private LongConsumer setLongInt = x -> longInt = x;
-    private DoubleConsumer setPrice = x -> price = x;
-    private BooleanConsumer setFlag = x -> flag = x;
-    private Consumer<Side> setSide = x -> side = x;
+    private transient IntConsumer setSmallInt = x -> smallInt = x;
+    private transient LongConsumer setLongInt = x -> longInt = x;
+    private transient DoubleConsumer setPrice = x -> price = x;
+    private transient BooleanConsumer setFlag = x -> flag = x;
+    private transient Consumer<Side> setSide = x -> side = x;
 
     public Data(int smallInt, long longInt, double price, boolean flag, CharSequence text, Side side) {
         this.smallInt = smallInt;
@@ -122,5 +123,23 @@ public class Data implements Marshallable {
 
     public void setSide(Side side) {
         this.side = side;
+    }
+
+    public void writeTo(JSONObject obj) {
+        obj.put("price", price);
+        obj.put("flag", flag);
+        obj.put("text", text);
+        obj.put("side", side);
+        obj.put("smallInt", smallInt);
+        obj.put("longInt", longInt);
+    }
+
+    public void readFrom(JSONObject obj) {
+        price = obj.getAsNumber("price").doubleValue();
+        flag = Boolean.parseBoolean(obj.getAsString("flag"));
+        setText(obj.getAsString("text"));
+        side = Side.valueOf(obj.getAsString("side"));
+        smallInt = obj.getAsNumber("smallInt").intValue();
+        longInt = obj.getAsNumber("longInt").longValue();
     }
 }
