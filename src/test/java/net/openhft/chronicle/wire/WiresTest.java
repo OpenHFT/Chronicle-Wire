@@ -36,12 +36,12 @@ public class WiresTest {
                 "  value: Hello World\n" +
                 "}\n" +
                 "--- !!data #binary\n" +
-                "reply: {\n" +
+                "reply: [\n" +
                 "  key,\n" +
                 "  2,\n" +
                 "  value,\n" +
                 "  Hello World2\n" +
-                "}\n" +
+                "]\n" +
                 "--- !!data #binary\n" +
                 "userid: peter\n", actual);
     }
