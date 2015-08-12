@@ -30,7 +30,10 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
@@ -50,6 +53,10 @@ enum DataFields implements WireKey {
     public int code() {
         return ordinal();
     }
+}
+
+@Retention(RetentionPolicy.RUNTIME)
+@interface PrintAsText {
 }
 
 /**
@@ -76,15 +83,23 @@ public class Main {
         if (Jvm.isDebug()) {
             Main main = new Main();
             for (Method m : Main.class.getMethods()) {
-                if (m.getAnnotation(Benchmark.class) != null)
+                if (m.getAnnotation(Benchmark.class) != null) {
                     m.invoke(main);
+                    main.bytes.readPosition(0);
+                    System.out.println("Test " + m.getName() + " used " + main.bytes.readRemaining() + " bytes.");
+                    System.out.println(m.getAnnotation(PrintAsText.class) != null
+                            ? Wires.fromSizePrefixedBinaryToText(main.bytes) : main.bytes.toHexString());
+
+                }
             }
         } else {
+            int time = Boolean.getBoolean("longTest") ? 30 : 2;
+            System.out.println("measurementTime: " + time + " secs");
             Options opt = new OptionsBuilder()
                     .include(Main.class.getSimpleName())
                     .forks(1)
                     .mode(Mode.SampleTime)
-                    .measurementIterations(100)
+                    .measurementTime(TimeValue.seconds(time))
                     .timeUnit(TimeUnit.NANOSECONDS)
                     .build();
 
@@ -93,36 +108,43 @@ public class Main {
     }
 
     @Benchmark
+    @PrintAsText
     public Bytes twireUTF() {
         return writeReadTest(twireUTF);
     }
 
     @Benchmark
+    @PrintAsText
     public Bytes twire8bit() {
         return writeReadTest(twire8bit);
     }
 
     @Benchmark
+    @PrintAsText
     public Bytes bwireFFF() {
         return writeReadTest(bwireFFF);
     }
 
     @Benchmark
+    @PrintAsText
     public Bytes bwireFTF() {
         return writeReadTest(bwireFTF);
     }
 
     @Benchmark
+    @PrintAsText
     public Bytes bwireFTT() {
         return writeReadTest(bwireFTT);
     }
 
     @Benchmark
+    @PrintAsText
     public Bytes bwireTFF() {
         return writeReadTest(bwireTFF);
     }
 
     @Benchmark
+    @PrintAsText
     public Bytes bwireTTF() {
         return writeReadTest(bwireTTF);
     }
@@ -174,21 +196,21 @@ class Data implements Marshallable {
 
     @Override
     public void readMarshallable(WireIn wire) throws IllegalStateException {
-        wire.read(DataFields.smallInt).int32(setSmallInt)
-                .read(DataFields.longInt).int64(setLongInt)
-                .read(DataFields.price).float64(setPrice)
+        wire.read(DataFields.price).float64(setPrice)
                 .read(DataFields.flag).bool(setFlag)
                 .read(DataFields.text).text(text)
-                .read(DataFields.side).asEnum(Side.class, setSide);
+                .read(DataFields.side).asEnum(Side.class, setSide)
+                .read(DataFields.smallInt).int32(setSmallInt)
+                .read(DataFields.longInt).int64(setLongInt);
     }
 
     @Override
     public void writeMarshallable(WireOut wire) {
-        wire.write(DataFields.smallInt).int32(smallInt)
-                .write(DataFields.longInt).int64(longInt)
-                .write(DataFields.price).float64(price)
+        wire.write(DataFields.price).float64(price)
                 .write(DataFields.flag).bool(flag)
                 .write(DataFields.text).text(text)
-                .write(DataFields.side).asEnum(side);
+                .write(DataFields.side).asEnum(side)
+                .write(DataFields.smallInt).int32(smallInt)
+                .write(DataFields.longInt).int64(longInt);
     }
 }
