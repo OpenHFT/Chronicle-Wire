@@ -75,7 +75,7 @@ The main advantage of YAML based wire format is it is easier to implement with, 
 What you want is the ease of a text wire format but the speed of a binary wire format.  
 Being able to switch from one to the other can save you a lot of time in development and support, but still give you the speed you want.
 
-This uses 90 bytes
+This uses 90 bytes, Note: the "--- !!data" is added by the method to dump the data. This information is encoded in the first 4 bytes which contains the size.
 
 ```yaml
 --- !!data
@@ -90,7 +90,7 @@ longInt: 1234567890
 ## Binary Wire (default)
 This binary wire has be automatically decoded to text by  Wires.fromSizePrefixedBinaryToText(Bytes)
 
-This uses 69 bytes.
+This uses 69 bytes. Note: the "--- !!data #binary" is added by the method to dump the data. This information is encoded in the first 4 bytes which contains the size.
 ```yaml
 --- !!data #binary
 price: 1234
