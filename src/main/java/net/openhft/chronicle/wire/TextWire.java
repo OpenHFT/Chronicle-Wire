@@ -1408,6 +1408,12 @@ public class TextWire implements Wire, InternalWireIn {
             if (code != '[')
                 throw new IORuntimeException("Unsupported type " + code + " (" + code + ")");
 
+            // this code was added to support empty sets
+            consumeWhiteSpace();
+            code = (char) peekCode();
+            if (code == ']')
+                return TextWire.this;
+
             reader.accept(TextWire.this.valueIn);
 
             consumeWhiteSpace();
