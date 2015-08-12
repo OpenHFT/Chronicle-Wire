@@ -28,3 +28,120 @@ The tests were run with -Xmx1g for a modest heap size.
 All times are in micro-seconds
 
 "8-bit" encoding is ISO-8859-1 where characters 0 to 255 are mapped to bytes 0 to 255. I this case, (bytes) string.charAt(0)
+
+# The generating code.
+In all cases the code which generated this data is the same.  The only thing changes was the Wire format used.
+
+### Writing code
+```java
+wire.write(DataFields.price).float64(price)
+        .write(DataFields.flag).bool(flag)
+        .write(DataFields.text).text(text)
+        .write(DataFields.side).asEnum(side)
+        .write(DataFields.smallInt).int32(smallInt)
+        .write(DataFields.longInt).int64(longInt);
+```
+
+### Reading code.
+```java
+wire.read(DataFields.price).float64(setPrice)
+        .read(DataFields.flag).bool(setFlag)
+        .read(DataFields.text).text(text)
+        .read(DataFields.side).asEnum(Side.class, setSide)
+        .read(DataFields.smallInt).int32(setSmallInt)
+        .read(DataFields.longInt).int64(setLongInt);
+```
+# What does the format look like?
+Here some selected examples.  The UTF-8 encoded and 8-bit encoded tests look the same in these cases as there isn't any characters >= 128.
+
+## Text Wire
+This uses 90 bytes
+
+```yaml
+--- !!data
+price: 1234
+flag: true
+text: Hello World
+side: Sell
+smallInt: 123
+longInt: 1234567890
+```
+
+## Binary Wire (default)
+This binary wire has be automatically decoded to text by  Wires.fromSizePrefixedBinaryToText(Bytes)
+
+This uses 69 bytes.
+```yaml
+--- !!data #binary
+price: 1234
+flag: true
+text: Hello World
+side: Sell
+smallInt: 123
+longInt: 1234567890
+```
+
+## Binary Wire with fixed width fields.
+Fixed width fields support binding to values later and updating them atomically.  
+Note: if you want to bind to specific values, there is support for this which will also ensure the values are aligned.
+
+This format uses 83 bytes
+```yaml
+--- !!data #binary
+price: 1234
+flag: true
+text: Hello World
+side: Sell
+smallInt: 123
+longInt: 1234567890
+```
+
+## Binary Wire with field numbers
+Numbered fields are more efficient to write and read, but are not as friendly to work with.
+
+Test bwireFTF used 43 bytes.
+```yaml
+--- !!data #binary
+3: 1234
+4: true
+5: Hello World
+6: Sell
+1: 123
+2: 1234567890
+```
+
+## Binary Wire with field numbers and fixed width values
+
+Test bwireTTF used 57 bytes.
+```yaml
+--- !!data #binary
+3: 1234
+4: true
+5: Hello World
+6: Sell
+1: 123
+2: 1234567890
+```
+
+## Binary Wire with variable width values only. 
+
+Test bwireFTT used 31 bytes.
+```yaml
+--- !!data #binary
+1234
+true
+Hello World
+Sell
+123
+1234567890
+```
+
+## RawWire format
+Raw wire format drops all meta data. It must be fixed width as there is no way to use compact types.
+
+Test rwireUTF and rwire8bit used 42 bytes.
+```
+00000000 26 00 00 00 00 00 00 00  00 48 93 40 B1 0B 48 65 &······· ·H·@··He
+00000010 6C 6C 6F 20 57 6F 72 6C  64 04 53 65 6C 6C 7B 00 llo Worl d·Sell{·
+00000020 00 00 D2 02 96 49 00 00  00 00                   ·····I·· ··
+```
