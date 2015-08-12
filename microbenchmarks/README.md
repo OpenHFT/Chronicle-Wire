@@ -35,7 +35,7 @@ In all cases, a 4 bytes header was used to determine the length of message.
 
 | Wire Format | Text encoding |  Fixed width values?  | Numeric Fields? | field-less?| Bytes | 99.9%tile | 99.99%tile | 99.999%tile | worst |
 |--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-------:|-----------:|------------:|-------------:|-------:|
-| Snake YAML | UTF-       8     |  false                      | false                 | false        | 86     |  76.1       | 1,493         | 1,522       | 26,673 |
+| Snake YAML | UTF-       8     |  false                      | false                 | false        | 88     |  76.1       | 1,493         | 1,522       | 26,673 |
 
 All times are in micro-seconds
 
@@ -164,4 +164,19 @@ Test rwireUTF and rwire8bit used 42 bytes.
 00000000 26 00 00 00 00 00 00 00  00 48 93 40 B1 0B 48 65 &······· ·H·@··He
 00000010 6C 6C 6F 20 57 6F 72 6C  64 04 53 65 6C 6C 7B 00 llo Worl d·Sell{·
 00000020 00 00 D2 02 96 49 00 00  00 00                   ·····I·· ··
+```
+
+# Comparison outputs
+
+## SnakeYAML
+Snake YAML used the .0 on the end of the price to signify that it was a double.  
+This added two characters but is an elegant way of encoding that it should be a double.
+
+```yaml
+flag: true
+longInt: 1234567890
+price: 1234.0
+side: Sell
+smallInt: 123
+text: Hello World
 ```
