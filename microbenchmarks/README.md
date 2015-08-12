@@ -16,7 +16,7 @@ The tests were run with -Xmx1g for a modest heap size.
 | Wire Format | Text encoding |  Fixed width values?  | Numeric Fields? | field-less?| Bytes | 99.9%tile | 99.99%tile | 99.999%tile |
 |--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-------:|---------:|-----------:|------------:|
 | YAML (TextWire) | UTF-8     |  false                      | false                 | false        | 90     |  2.81     | 4.94       | 8.62        |
-| YAML (TextWire) | 8-bit      |  false                      | false                 | false        | 90      |   2.59    | 4.70       | 8.58        |
+| YAML (TextWire) | 8-bit       |  false                      | false                 | false        | 90      |   2.59    | 4.70       | 8.58        |
 | BinaryWire   |  UTF-8           | false                      | false                 | false        | 69      |  1.55    | 3.50       | 7.00         |
 | BinaryWire   |  UTF-8           | false                      | na                    | true         | 31      |  0.57    | 2.29       | 5.15         |
 | BinaryWire   |  UTF-8           | false                      | true                   | false        | 43    |  0.62     | 2.34       | 5.36         |
@@ -55,6 +55,11 @@ wire.read(DataFields.price).float64(setPrice)
 Here some selected examples.  The UTF-8 encoded and 8-bit encoded tests look the same in these cases as there isn't any characters >= 128.
 
 ## Text Wire
+The main advantage of YAML based wire format is it is easier to implement with, document and debug.
+
+What you want is the ease of a text wire format but the speed of a binary wire format.  
+Being able to switch from one to the other can save you a lot of time in development and support, but still give you the speed you want.
+
 This uses 90 bytes
 
 ```yaml
