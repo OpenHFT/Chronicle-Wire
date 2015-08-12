@@ -20,7 +20,6 @@ import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.*;
-import net.openhft.chronicle.wire.util.BooleanConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -37,14 +36,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.DoubleConsumer;
-import java.util.function.IntConsumer;
-import java.util.function.LongConsumer;
-
-enum Side {
-    Buy, Sell;
-}
 
 enum DataFields implements WireKey {
     unknown, smallInt, longInt, price, flag, text, side;
@@ -168,49 +159,3 @@ public class Main {
     }
 }
 
-class Data implements Marshallable {
-    int smallInt = 0;
-    long longInt = 0;
-    double price = 0;
-    boolean flag = false;
-    StringBuilder text = new StringBuilder();
-    Side side;
-    private IntConsumer setSmallInt = x -> smallInt = x;
-    private LongConsumer setLongInt = x -> longInt = x;
-    private DoubleConsumer setPrice = x -> price = x;
-    private BooleanConsumer setFlag = x -> flag = x;
-    private Consumer<Side> setSide = x -> side = x;
-
-    public Data(int smallInt, long longInt, double price, boolean flag, CharSequence text, Side side) {
-        this.smallInt = smallInt;
-        this.longInt = longInt;
-        this.price = price;
-        this.flag = flag;
-        this.side = side;
-        this.text.append(text);
-    }
-
-    public Data() {
-
-    }
-
-    @Override
-    public void readMarshallable(WireIn wire) throws IllegalStateException {
-        wire.read(DataFields.price).float64(setPrice)
-                .read(DataFields.flag).bool(setFlag)
-                .read(DataFields.text).text(text)
-                .read(DataFields.side).asEnum(Side.class, setSide)
-                .read(DataFields.smallInt).int32(setSmallInt)
-                .read(DataFields.longInt).int64(setLongInt);
-    }
-
-    @Override
-    public void writeMarshallable(WireOut wire) {
-        wire.write(DataFields.price).float64(price)
-                .write(DataFields.flag).bool(flag)
-                .write(DataFields.text).text(text)
-                .write(DataFields.side).asEnum(side)
-                .write(DataFields.smallInt).int32(smallInt)
-                .write(DataFields.longInt).int64(longInt);
-    }
-}
