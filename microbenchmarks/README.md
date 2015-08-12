@@ -13,7 +13,7 @@ The tests were run with -Xmx1g for a modest heap size.
 
 # Tests
 
-| Wire Format | Text encoding |  Fixed width values?  | Numeric Fields? | field-less?| Bytes | 99.9%tile | 99.99%tile | 99.999%tile | worst |
+| Wire Format | Text encoding |  Fixed width values?  | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
 |--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-------:|-----------:|-----------:|------------:|---------:|
 | YAML (TextWire) | UTF-8     |  false                      | false                 | false        | 90     |  2.81       | 4.94         | 8.62          |  17.2   |
 | YAML (TextWire) | 8-bit       |  false                      | false                 | false        | 90      |   2.59     | 4.70         | 8.58        |  16.8     |
@@ -33,7 +33,7 @@ In all cases, a 4 bytes header was used to determine the length of message.
 
 # Comparison with other libraries
 
-| Wire Format | Text encoding |  Fixed width values?  | Numeric Fields? | field-less?| Bytes | 99.9%tile | 99.99%tile | 99.999%tile | worst |
+| Wire Format | Text encoding |  Fixed width values?  | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
 |--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-------:|-----------:|------------:|-------------:|-------:|
 | Snake YAML | UTF-       8     |  false                      | false                 | false        | 88     |  76.1       | 1,493         | 1,522       | 26,673 |
 
