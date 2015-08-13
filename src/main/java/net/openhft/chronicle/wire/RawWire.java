@@ -551,7 +551,7 @@ public class RawWire implements Wire, InternalWireIn {
             long length = readLength();
             Bytes<?> bytes = wireIn().bytes();
 
-            toBytes.write(bytes, bytes.readPosition(), length);
+            toBytes.write((BytesStore) bytes, (long) bytes.readPosition(), (long) length);
             bytes.readSkip(length);
             return wireIn();
         }

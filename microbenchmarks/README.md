@@ -14,16 +14,17 @@ The tests were run with -Xmx1g for a modest heap size.
 # Tests
 
 | Wire Format | Text encoding |  Fixed width values?  | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
-|--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-------:|-----------:|-----------:|------------:|---------:|
+|--------------|:---------------:|:----------------------:|:----------------:|:-----------:|-------:|-----------:|-----------:|------------:|---------:|
 | YAML (TextWire) | UTF-8     |  false                      | false                 | false        | 90     |  2.81       | 4.94         | 8.62          |  17.2   |
 | YAML (TextWire) | 8-bit       |  false                      | false                 | false        | 90      |   2.59     | 4.70         | 8.58        |  16.8     |
 | BinaryWire   |  UTF-8           | false                      | false                 | false        | 69      |  1.55      | 3.50         | 7.00         | 14.1      |
 | BinaryWire   |  UTF-8           | false                      | na                    | true         | 31      |  0.57      | 2.29         | 5.15         | 10.2      |
-| BinaryWire   |  UTF-8           | false                      | true                   | false        | 43    |  0.62       | 2.34         | 5.36         |  7.4       |
-| BinaryWire   |  UTF-8           | true                      | false                   | false        | 83     | 1.40       | 3.35         | 6.61         | 20.7      |
+| BinaryWire   |  UTF-8           | false                      | true                  | false        | 43    |  0.62       | 2.34         | 5.36         |  7.4       |
+| BinaryWire   |  UTF-8           | true                      | false                  | false        | 83     | 1.40       | 3.35         | 6.61         | 20.7      |
 | BinaryWire   |  UTF-8           | true                      | true                   | false        | 57      | 0.57       | 2.26         | 5.09         |  17.5     |
 | RawWire      |  UTF-8           | true                      | na                     | true        | 42      |  0.40       | 0.60         | 2.94         |   8.6      |
-| RawWire      |  8-bit             | true                       | na                     | true        | 42      | 0.40       | 0.52         | 2.65         |   8.2     |
+| RawWire      |  8-bit             | true                      | na                     | true        | 42      | 0.40       | 0.52         | 2.65         |   8.2     |
+| BytesMarshallable |  8-bit     | true                       | na                    | true        | 38      | 0.18       | 0.23         | 2.18         |   8.3     |
 
 All times are in micro-seconds
 
@@ -34,9 +35,10 @@ In all cases, a 4 bytes header was used to determine the length of message.
 # Comparison with other libraries
 
 | Wire Format | Text encoding |  Fixed width values?  | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
-|--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-------:|-----------:|------------:|-------------:|-------:|
-| Snake YAML | UTF-8            |  false                      | false                 | false        | 88     |  76.1       | 1,493         | 1,522       | 26,673 |
-| BOON Json | UTF-16            |  false                      | false                 | false        | 99     |  25.0       | 1,386         | 2,121       | 33,423 |
+|--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-------:|-----------:|-------------:|--------------:|-------:|
+| SBE            | 8-bit              |  true                       | true                 | true         | 39      |  0.28       | 0.37           | 4.86            | 7.7     |
+| Snake YAML | UTF-8            |  false                      | false                 | false        | 88     |  76.1       | 1,493         | 1,522          | 26,673 |
+| BOON Json | UTF-16            |  false                      | false                 | false        | 99     |  25.0       | 1,386         | 2,121          | 33,423 |
 
 All times are in micro-seconds
 

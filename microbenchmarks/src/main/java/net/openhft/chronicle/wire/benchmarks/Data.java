@@ -16,12 +16,20 @@
 
 package net.openhft.chronicle.wire.benchmarks;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import net.minidev.json.JSONObject;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesMarshallable;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
+import net.openhft.chronicle.wire.benchmarks.bytes.NativeData;
 import net.openhft.chronicle.wire.util.BooleanConsumer;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
@@ -30,12 +38,12 @@ import java.util.function.LongConsumer;
 /**
  * Created by peter on 12/08/15.
  */
-public class Data implements Marshallable {
+public class Data implements Marshallable, BytesMarshallable {
     int smallInt = 0;
     long longInt = 0;
     double price = 0;
     boolean flag = false;
-    StringBuilder text = new StringBuilder();
+    Bytes text = Bytes.allocateDirect(16);
     Side side;
     private transient IntConsumer setSmallInt = x -> smallInt = x;
     private transient LongConsumer setLongInt = x -> longInt = x;
@@ -113,8 +121,12 @@ public class Data implements Marshallable {
     }
 
     public void setText(String text) {
-        this.text.setLength(0);
+        this.text.clear();
         this.text.append(text);
+    }
+
+    public Bytes getTextAsBytes() {
+        return text;
     }
 
     public Side getSide() {
@@ -141,5 +153,75 @@ public class Data implements Marshallable {
         side = Side.valueOf(obj.getAsString("side"));
         smallInt = obj.getAsNumber("smallInt").intValue();
         longInt = obj.getAsNumber("longInt").longValue();
+    }
+
+    public void readFrom(JsonParser parser) throws IOException {
+        parser.nextToken();
+        while (parser.nextToken() != JsonToken.END_OBJECT) {
+            String fieldname = parser.getCurrentName();
+            parser.nextToken();
+            switch (fieldname) {
+                case "price":
+                    setPrice(parser.getDoubleValue());
+                    break;
+                case "flag":
+                    flag = parser.getBooleanValue();
+                    break;
+                case "text":
+                    setText(parser.getValueAsString());
+                    break;
+                case "side":
+                    side = Side.valueOf(parser.getValueAsString());
+                    break;
+                case "smallInt":
+                    smallInt = parser.getIntValue();
+                    break;
+                case "longInt":
+                    longInt = parser.getLongValue();
+                    break;
+            }
+        }
+    }
+
+    public void writeTo(JsonGenerator generator) throws IOException {
+        generator.writeStartObject();
+        generator.writeNumberField("price", price);
+        generator.writeBooleanField("flag", flag);
+        generator.writeStringField("text", text.toString());
+        generator.writeStringField("side", side.name());
+        generator.writeNumberField("smallInt", smallInt);
+        generator.writeNumberField("longInt", longInt);
+        generator.close();
+    }
+
+    public void copyTextTo(ByteBuffer textBuffer) {
+        for (int i = 0; i < text.length(); i++)
+            textBuffer.put((byte) text.charAt(i));
+    }
+
+    public void copyTo(NativeData nd) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void readMarshallable(Bytes<?> bytes) {
+        price = bytes.readDouble();
+        longInt = bytes.readLong();
+        smallInt = bytes.readInt();
+        flag = bytes.readBoolean();
+//        side = bytes.readEnum(Side.class);
+        side = bytes.readBoolean() ? Side.Buy : Side.Sell;
+        bytes.read8bit(text);
+    }
+
+    @Override
+    public void writeMarshallable(Bytes bytes) {
+        bytes.writeDouble(price)
+                .writeLong(longInt)
+                .writeInt(smallInt)
+//             .writeEnum(side)
+                .writeBoolean(flag)
+                .writeBoolean(side == Side.Buy)
+                .write8bit(text);
     }
 }

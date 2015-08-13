@@ -17,7 +17,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.RandomDataInput;
-import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -44,7 +43,6 @@ public enum Wires {
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
     static final StackTraceElement[] NO_STE = {};
-    static final ClassLocal<EnumInterner> ENUM_INTERNER = ClassLocal.withInitial(c -> new EnumInterner<>(c));
     private static final int NOT_READY = 1 << 31;
     private static final int META_DATA = 1 << 30;
     private static final int UNKNOWN_LENGTH = 0x0;
@@ -57,7 +55,7 @@ public enum Wires {
     }
 
     public static <E extends Enum<E>> E internEnum(Class<E> eClass, CharSequence cs) {
-        return (E) ENUM_INTERNER.get(eClass).intern(cs);
+        return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(cs);
     }
 
     public static StringBuilder acquireStringBuilder() {

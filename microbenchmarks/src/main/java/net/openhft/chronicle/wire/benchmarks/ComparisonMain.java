@@ -16,16 +16,22 @@
 
 package net.openhft.chronicle.wire.benchmarks;
 
+import baseline.DataDecoder;
+import baseline.DataEncoder;
+import baseline.MessageHeaderDecoder;
+import baseline.MessageHeaderEncoder;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import de.undercouch.bson4jackson.BsonFactory;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONStyle;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import net.openhft.affinity.Affinity;
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.wire.benchmarks.bytes.NativeData;
 import org.boon.json.JsonFactory;
-import org.boon.json.JsonParser;
-import org.boon.json.ObjectMapper;
-import org.boon.json.implementation.JsonFastParser;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
@@ -39,9 +45,15 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
+import uk.co.real_logic.agrona.concurrent.UnsafeBuffer;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,12 +63,21 @@ import java.util.concurrent.TimeUnit;
 public class ComparisonMain {
     final Yaml yaml;
     final Data data = new Data(123, 1234567890L, 1234, true, "Hello World", Side.Sell);
+    private final ByteBuffer allocate = ByteBuffer.allocate(64);
+    private final UnsafeBuffer buffer = new UnsafeBuffer(allocate);
+    Data data2 = new Data();
     String s;
     StringBuilder sb = new StringBuilder();
     JSONParser jsonParser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
     // {"smallInt":123,"longInt":1234567890,"price":1234.0,"flag":true,"text":"Hello World","side":"Sell"}
-    ObjectMapper mapper = JsonFactory.create();
-    JsonParser parser = new JsonFastParser();
+    org.boon.json.ObjectMapper boonMapper = JsonFactory.create();
+    com.fasterxml.jackson.core.JsonFactory jsonFactory = new com.fasterxml.jackson.core.JsonFactory(); // or, for data binding, org.codehaus.jackson.mapper.MappingJsonFactory
+    BsonFactory factory = new BsonFactory();
+    UnsafeBuffer directBuffer = new UnsafeBuffer(ByteBuffer.allocateDirect(128));
+    DataEncoder de = new DataEncoder();
+    DataDecoder dd = new DataDecoder();
+    MessageHeaderEncoder mhe = new MessageHeaderEncoder();
+    MessageHeaderDecoder mhd = new MessageHeaderDecoder();
 
     public ComparisonMain() {
         DumperOptions options = new DumperOptions();
@@ -126,11 +147,71 @@ public class ComparisonMain {
         data.readFrom(jsonObject);
     }
 
-    @Benchmark
+    //    @Benchmark
     public Data boon() {
         sb.setLength(0);
-        mapper.toJson(data, sb);
-        return mapper.fromJson(sb.toString(), Data.class);
+        boonMapper.toJson(data, sb);
+        return boonMapper.fromJson(sb.toString(), Data.class);
     }
 
+    // need help with this one.
+//    @Benchmark
+    public Data jackson() throws IOException {
+        StringWriter sw = new StringWriter();
+        JsonGenerator generator = jsonFactory.createGenerator(sw);
+        data.writeTo(generator);
+        generator.flush();
+        s = sw.toString();
+//        System.out.println(s);
+        JsonParser jp = jsonFactory.createParser(s); // or URL, Stream, Reader, String, byte[]
+        data2.readFrom(jp);
+        return data2;
+    }
+
+    //    @Benchmark
+    public void bson() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        JsonGenerator gen = factory.createJsonGenerator(baos);
+        data.writeTo(gen);
+        s = baos.toString();
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(
+                baos.toByteArray());
+        JsonParser parser = factory.createJsonParser(bais);
+        data2.readFrom(parser);
+    }
+
+/*
+    @Benchmark
+    public void sbe() {
+        {
+            int len0 = mhe.wrap(directBuffer, 0).encodedLength();
+            int len = ExampleUsingGeneratedStub.encode(de, directBuffer, len0, data, allocate, buffer);
+            mhe.blockLength(len0 + len);
+        }
+        {
+            mhd.wrap(directBuffer, 0);
+            int len0 = mhd.encodedLength();
+            int len = mhd.blockLength();
+            ExampleUsingGeneratedStub.decode(dd, directBuffer, len0, len, 0, 0, data2);
+        }
+    }
+*/
+
+    //    @Benchmark
+    public void byteable() {
+
+        NativeData nd = new NativeData();
+        Bytes bytes = Bytes.wrapForWrite(ByteBuffer.allocateDirect(128)).unchecked(true);
+        {
+            nd.bytesStore(bytes, 4, nd.maxSize());
+            data.copyTo(nd);
+            bytes.writeInt(nd.encodedLength());
+        }
+        {
+            int len = bytes.readInt();
+            nd.bytesStore(bytes, 4, len);
+            nd.copyTo(data);
+        }
+    }
 }

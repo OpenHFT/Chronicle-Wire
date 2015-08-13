@@ -60,6 +60,12 @@ public interface ValueIn {
         return wireIn();
     }
 
+    default WireIn text(@NotNull Bytes sdo) {
+        sdo.clear();
+        textTo(sdo);
+        return wireIn();
+    }
+
     @Nullable
     String text();
 
