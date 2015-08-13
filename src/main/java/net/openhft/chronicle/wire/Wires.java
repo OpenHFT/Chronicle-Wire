@@ -80,6 +80,20 @@ public enum Wires {
         bytes.writeOrderedInt(position, length | (notReady ? NOT_READY : 0));
     }
 
+    public static void writeDataOnce(@NotNull WireOut wireOut, boolean metaData, @NotNull WriteMarshallable writer) {
+        Bytes bytes = wireOut.bytes();
+        long position = bytes.writePosition();
+        int metaDataBit = metaData ? META_DATA : 0;
+        int value = metaDataBit | NOT_READY | UNKNOWN_LENGTH;
+        if (!bytes.compareAndSwapInt(position, 0, value))
+            return;
+        bytes.writeSkip(4);
+        writer.writeMarshallable(wireOut);
+        int length = metaDataBit | toIntU30(bytes.writePosition() - position - 4, "Document length %,d out of 30-bit int range.");
+        if (!bytes.compareAndSwapInt(position, value, length | META_DATA))
+            throw new AssertionError();
+    }
+
     public static boolean readData(long offset,
                                    @NotNull WireIn wireIn,
                                    @Nullable ReadMarshallable metaDataConsumer,
