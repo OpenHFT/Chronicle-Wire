@@ -205,9 +205,9 @@ public class Data implements Marshallable, BytesMarshallable {
 
     @Override
     public void readMarshallable(Bytes<?> bytes) {
-        price = bytes.readDouble();
-        longInt = bytes.readLong();
-        smallInt = bytes.readInt();
+        price = bytes.readStopBitDouble();
+        longInt = bytes.readStopBit();
+        smallInt = (int) bytes.readStopBit();
         flag = bytes.readBoolean();
 //        side = bytes.readEnum(Side.class);
         side = bytes.readBoolean() ? Side.Buy : Side.Sell;
@@ -216,9 +216,9 @@ public class Data implements Marshallable, BytesMarshallable {
 
     @Override
     public void writeMarshallable(Bytes bytes) {
-        bytes.writeDouble(price)
-                .writeLong(longInt)
-                .writeInt(smallInt)
+        bytes.writeStopBit(price)
+                .writeStopBit(longInt)
+                .writeStopBit(smallInt)
 //             .writeEnum(side)
                 .writeBoolean(flag)
                 .writeBoolean(side == Side.Buy)
