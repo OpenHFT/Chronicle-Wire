@@ -248,3 +248,30 @@ SBE has a method to extract the binary as text. It is likely this data structure
 00000020 6C 6C 6F 20 57 6F 72 6C  64 00 00 00 00 00 01 00 llo Worl d·······
 00000030 00 00 00 00 00 00 00 
 ```
+
+## Externalizable
+While Externalizable is more efficient than Serializable, it is still a heavy weight serialization.  
+Where Java Serialization does well is in serializing Object Graphs instead of Object Tree, i.e. objects with circular references.
+
+```
+Test externalizable used 291 chars.
+00000000 AC ED 00 05 73 72 00 2A  6E 65 74 2E 6F 70 65 6E ····sr·* net.open
+00000010 68 66 74 2E 63 68 72 6F  6E 69 63 6C 65 2E 77 69 hft.chro nicle.wi
+00000020 72 65 2E 62 65 6E 63 68  6D 61 72 6B 73 2E 44 61 re.bench marks.Da
+00000030 74 61 FB 5E C8 1F BA EB  33 6F 0C 00 00 78 70 77 ta·^···· 3o···xpw
+00000040 15 40 93 48 00 00 00 00  00 00 00 00 00 49 96 02 ·@·H···· ·····I··
+00000050 D2 00 00 00 7B 01 7E 72  00 2A 6E 65 74 2E 6F 70 ····{·~r ·*net.op
+00000060 65 6E 68 66 74 2E 63 68  72 6F 6E 69 63 6C 65 2E enhft.ch ronicle.
+00000070 77 69 72 65 2E 62 65 6E  63 68 6D 61 72 6B 73 2E wire.ben chmarks.
+00000080 53 69 64 65 00 00 00 00  00 00 00 00 12 00 00 78 Side···· ·······x
+00000090 72 00 0E 6A 61 76 61 2E  6C 61 6E 67 2E 45 6E 75 r··java. lang.Enu
+000000a0 6D 00 00 00 00 00 00 00  00 12 00 00 78 70 74 00 m······· ····xpt·
+000000b0 04 53 65 6C 6C 74 00 0B  48 65 6C 6C 6F 20 57 6F ·Sellt·· Hello Wo
+000000c0 72 6C 64 78 5F 00 00 00  01 70 72 69 63 65 00 00 rldx_··· ·price··
+000000d0 00 00 00 00 48 93 40 08  66 6C 61 67 00 01 02 74 ····H·@· flag···t
+000000e0 65 78 74 00 0C 00 00 00  48 65 6C 6C 6F 20 57 6F ext····· Hello Wo
+000000f0 72 6C 64 00 02 73 69 64  65 00 05 00 00 00 53 65 rld··sid e·····Se
+00000100 6C 6C 00 10 73 6D 61 6C  6C 49 6E 74 00 7B 00 00 ll··smal lInt·{··
+00000110 00 12 6C 6F 6E 67 49 6E  74 00 D2 02 96 49 00 00 ··longIn t····I··
+00000120 00 00 00                                         ···              
+```

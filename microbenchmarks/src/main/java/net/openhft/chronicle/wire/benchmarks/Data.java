@@ -28,7 +28,10 @@ import net.openhft.chronicle.wire.WireOut;
 import net.openhft.chronicle.wire.benchmarks.bytes.NativeData;
 import net.openhft.chronicle.wire.util.BooleanConsumer;
 
+import java.io.Externalizable;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
@@ -38,7 +41,7 @@ import java.util.function.LongConsumer;
 /**
  * Created by peter on 12/08/15.
  */
-public class Data implements Marshallable, BytesMarshallable {
+public class Data implements Marshallable, BytesMarshallable, Externalizable {
     int smallInt = 0;
     long longInt = 0;
     double price = 0;
@@ -201,6 +204,26 @@ public class Data implements Marshallable, BytesMarshallable {
 
     public void copyTo(NativeData nd) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeDouble(price);
+        out.writeLong(longInt);
+        out.writeInt(smallInt);
+        out.writeBoolean(flag);
+        out.writeObject(side);
+        out.writeObject(getText());
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        setPrice(in.readDouble());
+        setLongInt(in.readLong());
+        setSmallInt(in.readInt());
+        setFlag(in.readBoolean());
+        setSide((Side) in.readObject());
+        setText((String) in.readObject());
     }
 
     @Override
