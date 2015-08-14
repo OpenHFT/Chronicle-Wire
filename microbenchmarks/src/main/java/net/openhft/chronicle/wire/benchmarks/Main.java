@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire.benchmarks;
 import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.wire.*;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -96,7 +97,7 @@ public class Main {
             new Runner(opt).run();
         }
     }
-/*
+
     @Benchmark
     @PrintAsText
     public Data twireUTF() {
@@ -155,7 +156,7 @@ public class Main {
         wire.writeDocument(false, data);
         Wires.rawReadData(wire, data2);
         return data2;
-    }*/
+    }
 
     /*
     Test bytesMarshallable used 42 bytes.

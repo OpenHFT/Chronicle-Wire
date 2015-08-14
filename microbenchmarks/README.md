@@ -90,8 +90,8 @@ There was a small advantage in encoding the side as a boolean rather than an Enu
 | Wire Format | Text encoding |  Fixed width values?  | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
 |--------------|:---------------:|:----------------------:|:-----------------:|:---------:|-------:|-----------:|-------------:|--------------:|-------:|
 | SBE            | 8-bit              |  true                       | true                  | true         | 43      |  0.31       | 0.44           | 4.11            | 9.2     |
-| Jackson       | UTF-8            |  false                       | false                 | false        | ?     |  4.89         | 15.56        |    1,417          | 1,468 |
-| BSON         | UTF-8              |  true                       | false                 | false       | ?       |  1,444       | 1,483         | 1,501          | 1,821 |
+| Jackson       | UTF-8            |  false                       | false                 | false        | 99     |  4.89         | 15.56        |    1,417          | 1,468 |
+| BSON         | UTF-8              |  true                       | false                 | false       | 95       |  1,444       | 1,483         | 1,501          | 1,821 |
 | Snake YAML | UTF-8            |  false                      | false                 | false        | 88      |  83.2       | 2,109         | 2,179          | 16,105 |
 | BOON Json | UTF-8              |  false                      | false                 | false        | 99      |  22.0       | 2,535         | 2,573          | 9,978 |
 | Externalizable | UTF-8          |  true                       | false                 | false        | 291   |  3,064       | 3,260        | 3,383          | 17,105 |
@@ -240,6 +240,27 @@ price: 1234.0
 side: Sell
 smallInt: 123
 text: Hello World
+```
+
+## Boon
+```json
+{"smallInt":123,"longInt":1234567890,"price":1234.0,"flag":true,"side":"Sell","text":"Hello World"}
+```
+
+## Jackson
+
+```
+{"price":1234.0,"flag":true,"text":"Hello World","side":"Sell","smallInt ":123,"longInt":1234567890}
+```
+## BSON
+
+```
+00000000 5F 00 00 00 01 70 72 69  63 65 00 00 00 00 00 00 _····pri ce······
+00000010 48 93 40 08 66 6C 61 67  00 01 02 74 65 78 74 00 H·@·flag ···text·
+00000020 0C 00 00 00 48 65 6C 6C  6F 20 57 6F 72 6C 64 00 ····Hell o World·
+00000030 02 73 69 64 65 00 05 00  00 00 53 65 6C 6C 00 10 ·side··· ··Sell··
+00000040 73 6D 61 6C 6C 49 6E 74  00 7B 00 00 00 12 6C 6F smallInt ·{····lo
+00000050 6E 67 49 6E 74 00 D2 02  96 49 00 00 00 00 00    ngInt··· ·I····· 
 ```
 
 ## SBE
