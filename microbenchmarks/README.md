@@ -9,7 +9,7 @@ Chronicle Wire supports a separation of describing what data you want to store a
 
 How do these options affect performance?
 
-The tests were run with -Xmx1g for a modest heap size.
+The tests were run with -Xmx128m for a modest heap size.
 
 # Tests
 
@@ -88,10 +88,13 @@ There was a small advantage in encoding the side as a boolean rather than an Enu
 # Comparison with other libraries
 
 | Wire Format | Text encoding |  Fixed width values?  | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
-|--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-------:|-----------:|-------------:|--------------:|-------:|
-| SBE            | 8-bit              |  true                       | true                 | true         | 55      |  0.28       | 0.37           | 4.86            | 7.7     |
-| Snake YAML | UTF-8            |  false                      | false                 | false        | 88     |  76.1       | 1,493         | 1,522          | 26,673 |
-| BOON Json | UTF-16            |  false                      | false                 | false        | 99     |  25.0       | 1,386         | 2,121          | 33,423 |
+|--------------|:---------------:|:----------------------:|:-----------------:|:---------:|-------:|-----------:|-------------:|--------------:|-------:|
+| SBE            | 8-bit              |  true                       | true                  | true         | 43      |  0.31       | 0.44           | 4.11            | 9.2     |
+| Jackson       | UTF-8            |  false                       | false                 | false        | ?     |  4.89         | 15.56        |    1,417          | 1,468 |
+| BSON         | UTF-8              |  true                       | false                 | false       | ?       |  1,444       | 1,483         | 1,501          | 1,821 |
+| Snake YAML | UTF-8            |  false                      | false                 | false        | 88      |  83.2       | 2,109         | 2,179          | 16,105 |
+| BOON Json | UTF-8              |  false                      | false                 | false        | 99      |  22.0       | 2,535         | 2,573          | 9,978 |
+| Externalizable | UTF-8          |  true                       | false                 | false        | 291   |  3,064       | 3,260        | 3,383          | 17,105 |
 
 All times are in micro-seconds
 
@@ -243,10 +246,9 @@ text: Hello World
 SBE has a method to extract the binary as text. It is likely this data structure could be optimised and made much shorter.
 
 ```
-00000000 2F 00 00 00 00 00 00 00  7B 00 00 00 D2 02 96 49 /······· {······I
-00000010 00 00 00 00 00 00 00 00  00 48 93 40 01 0B 48 65 ········ ·H·@··He
-00000020 6C 6C 6F 20 57 6F 72 6C  64 00 00 00 00 00 01 00 llo Worl d·······
-00000030 00 00 00 00 00 00 00 
+00000000 29 00 7B 00 00 00 D2 02  96 49 00 00 00 00 00 00 )·{····· ·I······
+00000010 00 00 00 48 93 40 01 0B  48 65 6C 6C 6F 20 57 6F ···H·@·· Hello Wo
+00000020 72 6C 64 00 00 00 00 00  01 00 00                rld····· ···   
 ```
 
 ## Externalizable
