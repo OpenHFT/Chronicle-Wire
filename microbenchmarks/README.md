@@ -89,7 +89,7 @@ There was a small advantage in encoding the side as a boolean rather than an Enu
 
 | Wire Format | Text encoding |  Fixed width values?  | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
 |--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-------:|-----------:|-------------:|--------------:|-------:|
-| SBE            | 8-bit              |  true                       | true                 | true         | 39      |  0.28       | 0.37           | 4.86            | 7.7     |
+| SBE            | 8-bit              |  true                       | true                 | true         | 55      |  0.28       | 0.37           | 4.86            | 7.7     |
 | Snake YAML | UTF-8            |  false                      | false                 | false        | 88     |  76.1       | 1,493         | 1,522          | 26,673 |
 | BOON Json | UTF-16            |  false                      | false                 | false        | 99     |  25.0       | 1,386         | 2,121          | 33,423 |
 
@@ -237,4 +237,14 @@ price: 1234.0
 side: Sell
 smallInt: 123
 text: Hello World
+```
+
+## SBE
+SBE has a method to extract the binary as text. It is likely this data structure could be optimised and made much shorter.
+
+```
+00000000 2F 00 00 00 00 00 00 00  7B 00 00 00 D2 02 96 49 /······· {······I
+00000010 00 00 00 00 00 00 00 00  00 48 93 40 01 0B 48 65 ········ ·H·@··He
+00000020 6C 6C 6F 20 57 6F 72 6C  64 00 00 00 00 00 01 00 llo Worl d·······
+00000030 00 00 00 00 00 00 00 
 ```

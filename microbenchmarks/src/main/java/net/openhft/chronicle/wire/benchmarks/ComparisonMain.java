@@ -29,8 +29,10 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.NativeBytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.benchmarks.bytes.NativeData;
+import net.openhft.chronicle.wire.benchmarks.sbe.ExampleUsingGeneratedStub;
 import org.boon.json.JsonFactory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -91,17 +93,23 @@ public class ComparisonMain {
         if (Jvm.isDebug()) {
             ComparisonMain main = new ComparisonMain();
             for (Method m : ComparisonMain.class.getMethods()) {
+                main.s = null;
+                main.sb.setLength(0);
+                main.mhe.wrap(main.directBuffer, 0).blockLength(0);
+
                 if (m.getAnnotation(Benchmark.class) != null) {
                     m.invoke(main);
                     String s = main.s;
                     if (s != null) {
                         System.out.println("Test " + m.getName() + " used " + s.length() + " chars.");
                         System.out.println(s);
-                    } else {
+                    } else if (main.sb.length() > 0) {
                         System.out.println("Test " + m.getName() + " used " + main.sb.length() + " chars.");
                         System.out.println(main.sb);
-
-                    }
+                    } else if (main.mhd.wrap(main.directBuffer, 0).blockLength() > 0) ;
+                    int len = main.mhd.wrap(main.directBuffer, 0).blockLength() + main.mhd.encodedLength();
+                    System.out.println("Test " + m.getName() + " used " + len + " chars.");
+                    System.out.println(new NativeBytesStore<>(main.directBuffer.addressOffset(), len).bytesForRead().toHexString());
                 }
             }
         } else {
@@ -119,7 +127,7 @@ public class ComparisonMain {
         }
     }
 
-    //    @Benchmark
+    @Benchmark
     public Data snakeYaml() {
         s = yaml.dumpAsMap(data);
         Data data = (Data) yaml.load(s);
@@ -147,15 +155,14 @@ public class ComparisonMain {
         data.readFrom(jsonObject);
     }
 
-    //    @Benchmark
+    @Benchmark
     public Data boon() {
         sb.setLength(0);
         boonMapper.toJson(data, sb);
         return boonMapper.fromJson(sb.toString(), Data.class);
     }
 
-    // need help with this one.
-//    @Benchmark
+    @Benchmark
     public Data jackson() throws IOException {
         StringWriter sw = new StringWriter();
         JsonGenerator generator = jsonFactory.createGenerator(sw);
@@ -168,7 +175,7 @@ public class ComparisonMain {
         return data2;
     }
 
-    //    @Benchmark
+    @Benchmark
     public void bson() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         JsonGenerator gen = factory.createJsonGenerator(baos);
@@ -181,7 +188,6 @@ public class ComparisonMain {
         data2.readFrom(parser);
     }
 
-/*
     @Benchmark
     public void sbe() {
         {
@@ -196,11 +202,9 @@ public class ComparisonMain {
             ExampleUsingGeneratedStub.decode(dd, directBuffer, len0, len, 0, 0, data2);
         }
     }
-*/
 
     //    @Benchmark
     public void byteable() {
-
         NativeData nd = new NativeData();
         Bytes bytes = Bytes.wrapForWrite(ByteBuffer.allocateDirect(128)).unchecked(true);
         {

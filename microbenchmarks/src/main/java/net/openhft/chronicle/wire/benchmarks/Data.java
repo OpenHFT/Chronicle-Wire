@@ -43,7 +43,7 @@ public class Data implements Marshallable, BytesMarshallable {
     long longInt = 0;
     double price = 0;
     boolean flag = false;
-    Bytes text = Bytes.allocateDirect(16);
+    transient Bytes text = Bytes.allocateDirect(16);
     Side side;
     private transient IntConsumer setSmallInt = x -> smallInt = x;
     private transient LongConsumer setLongInt = x -> longInt = x;
@@ -125,7 +125,7 @@ public class Data implements Marshallable, BytesMarshallable {
         this.text.append(text);
     }
 
-    public Bytes getTextAsBytes() {
+    public Bytes textAsBytes() {
         return text;
     }
 
