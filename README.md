@@ -68,6 +68,60 @@ Note: Wire supports debug/transparent combinations like self describing data wit
 
 To support wire format discovery, the first bytes should have the top bit set.
 
+# Using Wire
+
+## simple use case.
+
+First you need to have a buffer to write to.  This can be a byte[], a ByteBuffer, off heap memory, or even an address and length you have obtained from some other library.
+
+```java
+// Bytes which wraps a ByteBuffer which is resized as needed.
+Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+```
+
+Now you can coice which format you are using.  As the wire formats are themselves unbuffered, you can use them with the same buffer, but in general using one wire format is easier.
+```java
+Wire wire = new TextWire(bytes);
+// or
+WireType wireType = WireType.TEXT;
+Wire wire2 = wireType.apply(bytes);
+// or
+Bytes<ByteBuffer> bytes3 = Bytes.elasticByteBuffer();
+Wire wire3 = new BinaryWire(bytes3);
+```
+
+So now you can write to the wire with a simple document.
+```java
+wire.write(() -> "message").text("Hello World")
+      .write(() -> "number").int64(1234567890L)
+      .write(() -> "price").float64(10.50);
+System.out.println(bytes);
+```
+prints
+```yaml
+message: Hello World
+number: 1234567890
+price: 10.5
+```
+
+```java
+// the same code as for text wire
+wire3.write(() -> "message").text("Hello World")
+        .write(() -> "number").int64(1234567890L)
+        .write(() -> "price").float64(10.50);
+System.out.println(bytes3.toHexString());
+```
+
+prints
+```
+00000000 C7 6D 65 73 73 61 67 65  EB 48 65 6C 6C 6F 20 57 ·message ·Hello W
+00000010 6F 72 6C 64 C6 6E 75 6D  62 65 72 A3 D2 02 96 49 orld·num ber····I
+00000020 C5 70 72 69 63 65 90 00  00 28 41                ·price·· ·(A
+```
+
+For more examples see [README-Chapter1.md]
+
+
 # Binding to a field value
 
 While serialized data can be updated by replacing a whole record, this might not be the most efficient option, nor thread safe. Wire offers the ability to bind a reference to a fixed value of a field and perform atomic operations on that field such as volatile read/write and compare-and-swap.
