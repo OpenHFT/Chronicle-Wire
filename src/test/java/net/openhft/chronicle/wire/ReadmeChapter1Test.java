@@ -48,8 +48,11 @@ Now you can choice which format you are using.  As the wire formats are themselv
         WireType wireType = WireType.TEXT;
         Wire wireB = wireType.apply(bytes);
         // or
+        Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
+        Wire wire2 = new BinaryWire(bytes2);
+        // or
         Bytes<ByteBuffer> bytes3 = Bytes.elasticByteBuffer();
-        Wire wire2 = new BinaryWire(bytes3);
+        Wire wire3 = new RawWire(bytes3);
 /*
 ```
 So now you can write to the wire with a simple document.
@@ -57,7 +60,7 @@ So now you can write to the wire with a simple document.
  */
         wire.write(() -> "message").text("Hello World")
                 .write(() -> "number").int64(1234567890L)
-                .write(() -> "code").asEnum(TimeUnit.NANOSECONDS)
+                .write(() -> "code").asEnum(TimeUnit.SECONDS)
                 .write(() -> "price").float64(10.50);
         System.out.println(bytes);
 /*
@@ -68,7 +71,7 @@ prints
 /*
 message: Hello World
 number: 1234567890
-code: NANOSECONDS
+code: SECONDS
 price: 10.5
 ```
 
@@ -77,10 +80,9 @@ price: 10.5
 // the same code as for text wire
         wire2.write(() -> "message").text("Hello World")
                 .write(() -> "number").int64(1234567890L)
-                .write(() -> "code").asEnum(TimeUnit.NANOSECONDS)
+                .write(() -> "code").asEnum(TimeUnit.SECONDS)
                 .write(() -> "price").float64(10.50);
-        System.out.println(bytes3.toHexString());
-
+        System.out.println(bytes2.toHexString());
 /*
 ```
 
@@ -88,8 +90,27 @@ prints
 ```
 00000000 C7 6D 65 73 73 61 67 65  EB 48 65 6C 6C 6F 20 57 ·message ·Hello W
 00000010 6F 72 6C 64 C6 6E 75 6D  62 65 72 A3 D2 02 96 49 orld·num ber····I
-00000020 C8 74 69 6D 65 55 6E 69  74 EB 4E 41 4E 4F 53 45 ·timeUni t·NANOSE
-00000030 43 4F 4E 44 53 C5 70 72  69 63 65 90 00 00 28 41 CONDS·pr ice···(A
+00000020 C4 63 6F 64 65 E7 53 45  43 4F 4E 44 53 C5 70 72 ·code·SE CONDS·pr
+00000030 69 63 65 90 00 00 28 41                          ice···(A
+```
+
+Using the RawWire strips away all the meta data to reduce the size of the message, and improve speed.
+The down side is that we cannot easily see what the message contains.
+*/
+
+        // the same code as for text wire
+        wire3.write(() -> "message").text("Hello World")
+                .write(() -> "number").int64(1234567890L)
+                .write(() -> "code").asEnum(TimeUnit.SECONDS)
+                .write(() -> "price").float64(10.50);
+        System.out.println(bytes3.toHexString());
+/*
+```
+prints in RawWire
+```
+00000000 0B 48 65 6C 6C 6F 20 57  6F 72 6C 64 D2 02 96 49 ·Hello W orld···I
+00000010 00 00 00 00 07 53 45 43  4F 4E 44 53 00 00 00 00 ·····SEC ONDS····
+00000020 00 00 25 40                                      ··%@
 ```
 */
 
@@ -129,7 +150,6 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 To write in binary instead
 ```java
 */
-
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         Wire wire2 = new BinaryWire(bytes2);
 
