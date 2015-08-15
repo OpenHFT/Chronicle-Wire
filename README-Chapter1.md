@@ -66,7 +66,6 @@ The down side is that we cannot easily see what the message contains.
                 .write(() -> "code").asEnum(TimeUnit.SECONDS)
                 .write(() -> "price").float64(10.50);
         System.out.println(bytes3.toHexString());
-/*
 ```
 prints in RawWire
 ```
@@ -74,13 +73,6 @@ prints in RawWire
 00000010 00 00 00 00 07 53 45 43  4F 4E 44 53 00 00 00 00 ·····SEC ONDS····
 00000020 00 00 25 40                                      ··%@ 
 ```
-*/
-
-    }
-
-    @Test
-    public void example2() {
-/*
 
 ## simple example with a data type
 
