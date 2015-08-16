@@ -33,6 +33,12 @@ import static org.junit.Assert.assertTrue;
 public class BinaryWire2Test {
     @NotNull
     Bytes bytes = nativeBytes();
+    StringBuilder csp = new StringBuilder();
+    StringBuilder key1 = new StringBuilder();
+    StringBuilder key2 = new StringBuilder();
+    StringBuilder value1 = new StringBuilder();
+    StringBuilder value2 = new StringBuilder();
+    long tid;
 
     @NotNull
     private BinaryWire createWire() {
@@ -55,7 +61,7 @@ public class BinaryWire2Test {
     @Test
     public void testBytesStore() {
         Wire wire = createWire();
-        wire.write().object(Bytes.from("Hello"));
+        wire.write().object(Bytes.wrapForRead("Hello"));
 
         Bytes b = Bytes.elasticByteBuffer();
         wire.read().object(b, Object.class);
@@ -154,13 +160,6 @@ public class BinaryWire2Test {
                             .write(() -> "value").text("value-2"));
                 }));
     }
-
-    StringBuilder csp = new StringBuilder();
-    StringBuilder key1 = new StringBuilder();
-    StringBuilder key2 = new StringBuilder();
-    StringBuilder value1 = new StringBuilder();
-    StringBuilder value2 = new StringBuilder();
-    long tid;
 
     private void readMessage(WireIn wire) {
         wire.readDocument(in ->

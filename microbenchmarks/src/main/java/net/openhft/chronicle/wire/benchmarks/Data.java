@@ -46,7 +46,7 @@ public class Data implements Marshallable, BytesMarshallable, Externalizable {
     long longInt = 0;
     double price = 0;
     boolean flag = false;
-    transient Bytes text = Bytes.allocateDirect(16);
+    transient Bytes text = Bytes.allocateDirect(16).unchecked(true);
     Side side;
     private transient IntConsumer setSmallInt = x -> smallInt = x;
     private transient LongConsumer setLongInt = x -> longInt = x;

@@ -66,8 +66,10 @@ public class Main {
     final Wire rwireUTF = new RawWire(bytes, false);
     final Wire rwire8bit = new RawWire(bytes, true);
 
-    final Data data = new Data(123, 1234567890L, 1234, true, "Hello World", Side.Sell);
-    final Data data2 = new Data();
+    final Data data = new Data(123, 1234567890L, 1234, true, "Hello World!", Side.Sell);
+    final Data2 data2 = new Data2(123, 1234567890L, 1234, true, "Hello World!", Side.Sell);
+    final Data dataB = new Data();
+    final Data2 data2B = new Data2();
 
     public static void main(String... args) throws RunnerException, InvocationTargetException, IllegalAccessException {
         Affinity.setAffinity(2);
@@ -88,7 +90,9 @@ public class Main {
             System.out.println("measurementTime: " + time + " secs");
             Options opt = new OptionsBuilder()
                     .include(Main.class.getSimpleName())
-                    .forks(1)
+//                    .warmupIterations(5)
+                    .measurementIterations(5)
+                    .forks(10)
                     .mode(Mode.SampleTime)
                     .measurementTime(TimeValue.seconds(time))
                     .timeUnit(TimeUnit.NANOSECONDS)
@@ -127,7 +131,6 @@ public class Main {
     public Data bwireFTT() {
         return writeReadTest(bwireFTT);
     }
-
     @Benchmark
     @PrintAsText
     public Data bwireTFF() {
@@ -150,22 +153,13 @@ public class Main {
         return writeReadTest(rwireUTF);
     }
 
-    @NotNull
-    public Data writeReadTest(Wire wire) {
-        bytes.clear();
-        wire.writeDocument(false, data);
-        Wires.rawReadData(wire, data2);
-        return data2;
+    @Benchmark
+    public Data2 rwire8bit2() {
+        return writeReadTest2(rwire8bit);
     }
 
-    /*
-    Test bytesMarshallable used 42 bytes.
-00000000 26 00 00 00 00 00 00 00  00 48 93 40 59 0B 48 65 &······· ·H·@Y·He
-00000010 6C 6C 6F 20 57 6F 72 6C  64 04 53 65 6C 6C 7B 00 llo Worl d·Sell{·
-00000020 00 00 D2 02 96 49 00 00  00 00                   ·····I·· ··
-     */
     @Benchmark
-    public Data bytesMarshallable() {
+    public Data bytesMarshallableStopBit() {
         bytes.clear();
         bytes.writeSkip(4);
         data.writeMarshallable(bytes);
@@ -173,8 +167,37 @@ public class Main {
         bytes.writeInt(0, (int) (bytes.writePosition() - 4));
 
         int len = bytes.readInt();
-        data2.readMarshallable(bytes);
-        return data2;
+        dataB.readMarshallable(bytes);
+        return dataB;
+    }
+
+    @Benchmark
+    public Data bytesMarshallable() {
+        bytes.clear();
+        bytes.writeSkip(4);
+        data2.writeMarshallable(bytes);
+        // write the actual length.
+        bytes.writeInt(0, (int) (bytes.writePosition() - 4));
+
+        int len = bytes.readInt();
+        data2B.readMarshallable(bytes);
+        return dataB;
+    }
+
+    @NotNull
+    public Data writeReadTest(Wire wire) {
+        bytes.clear();
+        wire.writeDocument(false, data);
+        Wires.rawReadData(wire, dataB);
+        return dataB;
+    }
+
+    @NotNull
+    public Data2 writeReadTest2(Wire wire) {
+        bytes.clear();
+        wire.writeDocument(false, data2);
+        Wires.rawReadData(wire, data2B);
+        return data2B;
     }
 }
 

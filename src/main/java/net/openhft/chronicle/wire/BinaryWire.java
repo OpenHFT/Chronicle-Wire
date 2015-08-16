@@ -42,7 +42,6 @@ import java.util.UUID;
 import java.util.function.*;
 
 import static net.openhft.chronicle.bytes.BytesUtil.append;
-import static net.openhft.chronicle.bytes.BytesUtil.setLength;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
 
@@ -710,7 +709,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 }
             }
             bytes.writeByte((byte) (FIELD_NAME0 + len))
-                    .append8bit(name);
+                    .write(name);
 
         } else {
             writeCode(FIELD_NAME_ANY).write8bit(name);
@@ -830,6 +829,24 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut text(@Nullable CharSequence s) {
+            if (s == null) {
+                writeCode(NULL);
+
+            } else {
+                int len = s.length();
+                if (len < 0x20) {
+                    bytes.writeUnsignedByte(STRING_0 + len).append(s);
+                } else {
+                    writeCode(STRING_ANY).writeUTFΔ(s);
+                }
+            }
+
+            return BinaryWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut text(@Nullable BytesStore s) {
             if (s == null) {
                 writeCode(NULL);
 
@@ -1367,18 +1384,35 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @Nullable
         @Override
-        public <ACS extends Appendable & CharSequence> ACS textTo(@NotNull ACS s) {
+        public StringBuilder textTo(@NotNull StringBuilder sb) {
             int code = readCode();
             boolean wasNull = code == NULL;
             if (wasNull) {
-                setLength(s, 0);
+                sb.setLength(0);
                 return null;
 
             } else {
-                ACS text = readText(code, s);
+                StringBuilder text = readText(code, sb);
                 if (text == null)
                     cantRead(code);
-                return s;
+                return sb;
+            }
+        }
+
+        @Nullable
+        @Override
+        public Bytes textTo(@NotNull Bytes bytes) {
+            int code = readCode();
+            boolean wasNull = code == NULL;
+            if (wasNull) {
+                bytes.readPosition(0);
+                return null;
+
+            } else {
+                Bytes text = readText(code, bytes);
+                if (text == null)
+                    cantRead(code);
+                return bytes;
             }
         }
 

@@ -60,7 +60,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class ComparisonMain {
     final Yaml yaml;
-    final Data data = new Data(123, 1234567890L, 1234, true, "Hello World", Side.Sell);
+    final Data data = new Data(123, 1234567890L, 1234, true, "Hello World!", Side.Sell);
     private final ByteBuffer allocate = ByteBuffer.allocate(64);
     private final UnsafeBuffer buffer = new UnsafeBuffer(allocate);
     Data data2 = new Data();
@@ -119,7 +119,9 @@ public class ComparisonMain {
             System.out.println("measurementTime: " + time + " secs");
             Options opt = new OptionsBuilder()
                     .include(ComparisonMain.class.getSimpleName())
-                    .forks(1)
+//                    .warmupIterations(5)
+                    .measurementIterations(5)
+                    .forks(10)
                     .mode(Mode.SampleTime)
                     .measurementTime(TimeValue.seconds(time))
                     .timeUnit(TimeUnit.NANOSECONDS)
@@ -176,7 +178,6 @@ public class ComparisonMain {
         data2.readFrom(jp);
         return data2;
     }
-
     @Benchmark
     public Data bson() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -205,7 +206,6 @@ public class ComparisonMain {
             return data2;
         }
     }
-
 
     @Benchmark
     public Data externalizable() throws IOException, ClassNotFoundException {

@@ -48,7 +48,7 @@ public class RawWire implements Wire, InternalWireIn {
     boolean use8bit;
     @NotNull
     private
-    String lastField = "";
+    CharSequence lastField = "";
     @Nullable
     private
     StringBuilder lastSB;
@@ -177,7 +177,7 @@ public class RawWire implements Wire, InternalWireIn {
     @NotNull
     @Override
     public ValueOut write(@NotNull WireKey key) {
-        lastField = key.name().toString();
+        lastField = key.name();
         return valueOut;
     }
 
@@ -244,6 +244,16 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut text(@Nullable CharSequence s) {
+            if (use8bit)
+                bytes.write8bit(s);
+            else
+                bytes.writeUTFΔ(s);
+            return RawWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut text(@Nullable BytesStore s) {
             if (use8bit)
                 bytes.write8bit(s);
             else
@@ -508,7 +518,6 @@ public class RawWire implements Wire, InternalWireIn {
     }
 
     class RawValueIn implements ValueIn {
-
         @NotNull
         @Override
         public WireIn bool(@NotNull BooleanConsumer flag) {
@@ -528,9 +537,18 @@ public class RawWire implements Wire, InternalWireIn {
             return use8bit ? bytes.readUTFΔ() : bytes.read8bit();
         }
 
-        @NotNull
+        @Nullable
         @Override
-        public <ACS extends Appendable & CharSequence> ACS textTo(@NotNull ACS s) {
+        public StringBuilder textTo(@NotNull StringBuilder s) {
+            if (use8bit)
+                return bytes.read8bit(s) ? s : null;
+            else
+                return bytes.readUTFΔ(s) ? s : null;
+        }
+
+        @Nullable
+        @Override
+        public Bytes textTo(@NotNull Bytes s) {
             if (use8bit)
                 return bytes.read8bit(s) ? s : null;
             else
@@ -848,7 +866,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @Override
         public int uint16() {
-            throw new UnsupportedOperationException("todo");
+            return bytes.readUnsignedShort();
         }
 
         @Override
@@ -863,12 +881,12 @@ public class RawWire implements Wire, InternalWireIn {
 
         @Override
         public double float64() {
-            throw new UnsupportedOperationException("todo");
+            return bytes.readDouble();
         }
 
         @Override
         public float float32() {
-            throw new UnsupportedOperationException("todo");
+            return bytes.readFloat();
         }
 
         @Nullable

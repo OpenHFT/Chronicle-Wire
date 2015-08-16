@@ -42,6 +42,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.*;
 
+import static net.openhft.chronicle.bytes.Bytes.empty;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 
@@ -50,16 +51,17 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
  */
 public class TextWire implements Wire, InternalWireIn {
 
-    private static final String FIELD_SEP = "";
-    private static final String SEQ_MAP = "!seqmap";
-    private static final String NULL = "!null \"\"";
-    private static final BitSet QUOTE_CHARS = new BitSet();
-    private static final Logger LOG =
-            LoggerFactory.getLogger(TextWire.class);
-    private static final String END_FIELD = "\n";
-
-    private static final ThreadLocal<StopCharTester> ESCAPED_QUOTES = ThreadLocal.withInitial(() -> StopCharTesters.QUOTES.escaping());
-    private static final ThreadLocal<StopCharsTester> ESCAPED_END_OF_TEXT = ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
+    static final String SEQ_MAP = "!seqmap";
+    static final String NULL = "!null \"\"";
+    static final BitSet QUOTE_CHARS = new BitSet();
+    static final Logger LOG = LoggerFactory.getLogger(TextWire.class);
+    static final ThreadLocal<StopCharTester> ESCAPED_QUOTES = ThreadLocal.withInitial(() -> StopCharTesters.QUOTES.escaping());
+    static final ThreadLocal<StopCharsTester> ESCAPED_END_OF_TEXT = ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
+    static final BytesStore COMMA_SPACE = BytesStore.wrap(", ");
+    static final BytesStore COMMA_NEW_LINE = BytesStore.wrap(",\n");
+    static final BytesStore NEW_LINE = BytesStore.wrap("\n");
+    static final BytesStore SPACE = BytesStore.wrap(" ");
+    static final BytesStore END_FIELD = NEW_LINE;
 
     static {
         for (char ch : "\",\n\\#:{}[]".toCharArray())
@@ -84,7 +86,7 @@ public class TextWire implements Wire, InternalWireIn {
 
     @NotNull
     public static TextWire from(@NotNull String text) {
-        return new TextWire(Bytes.from(text));
+        return new TextWire(Bytes.wrapForRead(text));
     }
 
     public static String asText(@NotNull Wire wire) {
@@ -407,10 +409,16 @@ public class TextWire implements Wire, InternalWireIn {
     }
 
     public void parseUntil(StringBuilder sb, StopCharsTester testers) {
-        if (use8bit)
-            bytes.parse8bit(sb, testers);
-        else
-            bytes.parseUTF(sb, testers);
+        sb.setLength(0);
+        if (use8bit) {
+            BytesUtil.read8bitAndAppend(bytes, sb, testers);
+        } else {
+            try {
+                BytesUtil.readUTFAndAppend(bytes, sb, testers);
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
+        }
     }
 
     public void append(CharSequence cs) {
@@ -418,6 +426,13 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append8bit(cs);
         else
             bytes.append(cs);
+    }
+
+    public void append(CharSequence cs, int offset) {
+        if (use8bit)
+            bytes.append8bit(cs, offset, cs.length() - offset);
+        else
+            bytes.append(cs, offset, cs.length() - offset);
     }
 
     enum TextStopCharsTesters implements StopCharsTester {
@@ -444,14 +459,14 @@ public class TextWire implements Wire, InternalWireIn {
     class TextValueOut implements ValueOut {
         int indentation = 0;
         @NotNull
-        String sep = "";
+        BytesStore sep = Bytes.empty();
         boolean leaf = false;
 
         void prependSeparator() {
             append(sep);
-            if (sep.endsWith("\n"))
+            if (sep.endsWith('\n'))
                 indent();
-            sep = "";
+            sep = Bytes.empty();
         }
 
         @NotNull
@@ -474,11 +489,11 @@ public class TextWire implements Wire, InternalWireIn {
 
         public void elementSeparator() {
             if (indentation == 0) {
-                sep = "";
+                sep = Bytes.empty();
                 append("\n");
 
             } else {
-                sep = leaf ? ", " : ",\n";
+                sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
             }
         }
 
@@ -609,7 +624,7 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             sb.appendCodePoint(codepoint);
             text(sb);
-            sep = FIELD_SEP;
+            sep = empty();
             return TextWire.this;
         }
 
@@ -715,7 +730,7 @@ public class TextWire implements Wire, InternalWireIn {
             prependSeparator();
             bytes.append('!');
             append(typeName);
-            sep = " ";
+            sep = BytesStore.wrap(" ");
             return this;
         }
 
@@ -784,7 +799,7 @@ public class TextWire implements Wire, InternalWireIn {
         public WireOut sequence(@NotNull Consumer<ValueOut> writer) {
             pushState();
             append("[");
-            sep = "\n";
+            sep = BytesStore.wrap("\n");
             long pos = bytes.readPosition();
             writer.accept(this);
             if (bytes.writePosition() > pos + 1)
@@ -825,8 +840,8 @@ public class TextWire implements Wire, InternalWireIn {
                 pushState();
 
             prependSeparator();
-            append("{");
-            sep = leaf ? " " : END_FIELD;
+            bytes.append('{');
+            sep = leaf ? SPACE : END_FIELD;
 
             object.writeMarshallable(TextWire.this);
 
@@ -834,18 +849,18 @@ public class TextWire implements Wire, InternalWireIn {
                 popState();
             else
                 leaf = false;
-            if (sep.startsWith(","))
-                append(sep.substring(1));
+            if (sep.startsWith(','))
+                append(sep, 1);
             else
                 prependSeparator();
             bytes.append('}');
 
             if (indentation == 0) {
-                sep = "";
-                append("\n");
+                sep = empty();
+                append(NEW_LINE);
 
             } else {
-                sep = ",\n";
+                sep = COMMA_NEW_LINE;
             }
             return TextWire.this;
         }
@@ -862,13 +877,13 @@ public class TextWire implements Wire, InternalWireIn {
                 append("{ key: ");
                 leaf();
                 object2(k);
-                sep = ",\n";
+                sep = COMMA_NEW_LINE;
                 prependSeparator();
                 append("  value: ");
                 leaf();
                 object2(v);
                 append(" }");
-                sep = ",\n";
+                sep = COMMA_NEW_LINE;
             });
             popState();
             sep = END_FIELD;
@@ -903,7 +918,7 @@ public class TextWire implements Wire, InternalWireIn {
         public ValueOut write() {
             append(sep);
             append("\"\": ");
-            sep = "";
+            sep = empty();
             return this;
         }
 
@@ -923,7 +938,7 @@ public class TextWire implements Wire, InternalWireIn {
             append("# ");
             append(s);
             bytes.append('\n');
-            sep = "";
+            sep = empty();
         }
     }
 
@@ -959,7 +974,18 @@ public class TextWire implements Wire, InternalWireIn {
 
         @Nullable
         @Override
-        public <ACS extends Appendable & CharSequence> ACS textTo(@NotNull ACS a) {
+        public StringBuilder textTo(@NotNull StringBuilder sb) {
+            return textTo0(sb);
+        }
+
+        @Nullable
+        @Override
+        public Bytes textTo(@NotNull Bytes bytes) {
+            return textTo0(bytes);
+        }
+
+        @Nullable
+        <ACS extends Appendable & CharSequence> ACS textTo0(@NotNull ACS a) {
             consumeWhiteSpace();
             int ch = peekCode();
 

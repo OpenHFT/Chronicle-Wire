@@ -649,7 +649,15 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @Nullable
         @Override
-        public <ACS extends Appendable & CharSequence> ACS textTo(@NotNull ACS a) {
+        public StringBuilder textTo(@NotNull StringBuilder a) {
+            consumeWhiteSpace();
+            bytes.parseUTF(a, QueryStopCharTesters.QUERY_VALUE);
+            return a;
+        }
+
+        @Nullable
+        @Override
+        public Bytes textTo(@NotNull Bytes a) {
             consumeWhiteSpace();
             bytes.parseUTF(a, QueryStopCharTesters.QUERY_VALUE);
             return a;

@@ -70,7 +70,10 @@ public interface ValueIn {
     String text();
 
     @Nullable
-    <ACS extends Appendable & CharSequence> ACS textTo(@NotNull ACS s);
+    StringBuilder textTo(@NotNull StringBuilder sb);
+
+    @Nullable
+    Bytes textTo(@NotNull Bytes bytes);
 
     @NotNull
     WireIn int8(@NotNull ByteConsumer i);
