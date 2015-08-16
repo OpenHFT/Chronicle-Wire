@@ -74,7 +74,6 @@ public class TextWire implements Wire, InternalWireIn {
     private final ValueIn valueIn = new TextValueIn();
     private final boolean use8bit;
     private boolean ready;
-    private StopCharTester escapedQuotes;
 
     public TextWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
@@ -441,7 +440,7 @@ public class TextWire implements Wire, InternalWireIn {
             @Override
             public boolean isStopChar(int ch, int ch2) throws IllegalStateException {
                 // one character stop.
-                if (ch == '"' || ch == '#' || ch == '\n') return true;
+                if (ch == '"' || ch == '#' || ch == '\n' || ch == '}') return true;
                 // two character stop.
                 return (ch == ':' || ch == ',') && ch2 <= ' ';
             }
@@ -452,7 +451,7 @@ public class TextWire implements Wire, InternalWireIn {
         END_OF_TYPE {
             @Override
             public boolean isStopChar(int ch) throws IllegalStateException {
-                return ch == '"' || ch == '#' || ch == '\n' || ch == ':' || ch == ',' || ch == ' ';
+                return ch == '"' || ch == '#' || ch == '\n' || ch == ':' || ch == ',' || ch == ' ' || ch == '}';
             }
         }
     }
