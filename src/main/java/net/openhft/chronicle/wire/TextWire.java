@@ -51,6 +51,7 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
  */
 public class TextWire implements Wire, InternalWireIn {
 
+    public static final BytesStore TYPE = BytesStore.wrap("!type ");
     static final String SEQ_MAP = "!seqmap";
     static final String NULL = "!null \"\"";
     static final BitSet QUOTE_CHARS = new BitSet();
@@ -430,9 +431,9 @@ public class TextWire implements Wire, InternalWireIn {
 
     public void append(CharSequence cs, int offset) {
         if (use8bit)
-            bytes.append8bit(cs, offset, cs.length() - offset);
+            bytes.append8bit(cs, offset, cs.length());
         else
-            bytes.append(cs, offset, cs.length() - offset);
+            bytes.append(cs, offset, cs.length());
     }
 
     enum TextStopCharsTesters implements StopCharsTester {
@@ -483,14 +484,16 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         private void indent() {
-            for (int i = 0; i < indentation; i++)
-                append("  ");
+            for (int i = 0; i < indentation; i++) {
+                bytes.append(' ');
+                bytes.append(' ');
+            }
         }
 
         public void elementSeparator() {
             if (indentation == 0) {
                 sep = Bytes.empty();
-                append("\n");
+                bytes.append('\n');
 
             } else {
                 sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
@@ -730,7 +733,7 @@ public class TextWire implements Wire, InternalWireIn {
             prependSeparator();
             bytes.append('!');
             append(typeName);
-            sep = BytesStore.wrap(" ");
+            sep = SPACE;
             return this;
         }
 
@@ -738,7 +741,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, Class type) {
             prependSeparator();
-            append("!type ");
+            append(TYPE);
             typeTranslator.accept(type, bytes);
             elementSeparator();
             return TextWire.this;
@@ -748,7 +751,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut typeLiteral(@NotNull CharSequence type) {
             prependSeparator();
-            append("!type ");
+            append(TYPE);
             text(type);
             elementSeparator();
             return TextWire.this;
@@ -798,16 +801,16 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut sequence(@NotNull Consumer<ValueOut> writer) {
             pushState();
-            append("[");
-            sep = BytesStore.wrap("\n");
+            bytes.append('[');
+            sep = NEW_LINE;
             long pos = bytes.readPosition();
             writer.accept(this);
             if (bytes.writePosition() > pos + 1)
-                append("\n");
+                bytes.append('\n');
 
             popState();
             indent();
-            append("]");
+            bytes.append(']');
             sep = END_FIELD;
             return TextWire.this;
         }
@@ -816,9 +819,9 @@ public class TextWire implements Wire, InternalWireIn {
         public WireOut array(@NotNull Consumer<ValueOut> writer, Class arrayType) {
             if (arrayType == String[].class) append("!String[] ");
             else {
-                append("!");
+                bytes.append('!');
                 append(arrayType.getName());
-                append(" ");
+                bytes.append(' ');
             }
             ;
             return sequence(writer);
@@ -869,7 +872,8 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut map(@NotNull final Map map) {
             type(SEQ_MAP);
-            append(" [");
+            bytes.append(' ');
+            bytes.append('[');
             pushState();
             sep = END_FIELD;
             map.forEach((k, v) -> {
@@ -882,7 +886,8 @@ public class TextWire implements Wire, InternalWireIn {
                 append("  value: ");
                 leaf();
                 object2(v);
-                append(" }");
+                bytes.append(' ');
+                bytes.append('}');
                 sep = COMMA_NEW_LINE;
             });
             popState();
@@ -917,7 +922,10 @@ public class TextWire implements Wire, InternalWireIn {
         @NotNull
         public ValueOut write() {
             append(sep);
-            append("\"\": ");
+            bytes.append('"');
+            bytes.append('"');
+            bytes.append(':');
+            bytes.append(' ');
             sep = empty();
             return this;
         }
@@ -928,14 +936,16 @@ public class TextWire implements Wire, InternalWireIn {
             if (name == null) name = Integer.toString(key.code());
             prependSeparator();
             append(quotes(name));
-            append(": ");
+            bytes.append(':');
+            bytes.append(' ');
             return this;
         }
 
         public void writeComment(@NotNull CharSequence s) {
             prependSeparator();
             append(sep);
-            append("# ");
+            bytes.append('#');
+            bytes.append(' ');
             append(s);
             bytes.append('\n');
             sep = empty();
