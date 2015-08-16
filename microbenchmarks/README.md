@@ -104,6 +104,15 @@ There was a small advantage in encoding the side as a boolean rather than an Enu
 
 All times are in micro-seconds
 
+## Comparison of JSON formats
+
+| Wire Format | Text encoding | Fixed width values? | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
+|--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-----:|-----------:|-------------:|---------------:|---------:|
+| JSONWire   | 8-bit              |  false                      | false                | false        | 100   |  3.11       | 5.56          | 10.62           |  36.9    |
+| Jackson       | UTF-8            |  false                       | false                 | false       | 100   |   4.95       |        8.33    | 1,405           | 1,546 |
+| BSON         | UTF-8              |  true                       | false                 | false       | 96     |  19.8        |   1,430       | 1,477          | 1,602 |
+| BOON Json | UTF-8              |  false                      | false                 | false        | 100   |  20.7        |       32.5    | 11,005         | 69,730 |
+
 ## SBE (Simple Binary Encoding)
 SBE performs as well are BytesMarshallable.  Even though it was slower in this test, the difference to too small to draw any conclusions. i.e. in a different use case, a different developer might find the difference reversed.
 
