@@ -88,13 +88,13 @@ There was a small advantage in encoding the side as a boolean rather than an Enu
 # Comparison with other libraries
 
 | Wire Format | Text encoding |  Fixed width values?  | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
-|--------------|:---------------:|:----------------------:|:-----------------:|:---------:|-------:|-----------:|-------------:|--------------:|-------:|
-| SBE            | 8-bit              |  true                       | true                  | true         | 43      |  0.31       | 0.44           | 4.11            | 9.2     |
-| Jackson       | UTF-8            |  false                       | false                 | false        | 100     |  4.89         | 15.56        |    1,417          | 1,468 |
-| BSON         | UTF-8              |  true                       | false                 | false       | 96       |  1,444       | 1,483         | 1,501          | 1,821 |
-| Snake YAML | UTF-8            |  false                      | false                 | false        | 89      |  83.2       | 2,109         | 2,179          | 16,105 |
-| BOON Json | UTF-8              |  false                      | false                 | false        | 100      |  22.0       | 2,535         | 2,573          | 9,978 |
-| Externalizable | UTF-8          |  true                       | false                 | false        | 293   |  3,064       | 3,260        | 3,383          | 17,105 |
+|--------------|:---------------:|:----------------------:|:-----------------:|:---------:|-------:|------------:|-------------:|--------------:|-------:|
+| SBE            | 8-bit              |  true                       | true                  | true         | 43     |   0.31       |       0.44     | 4.11            | 9.2     |
+| Jackson       | UTF-8            |  false                       | false                 | false       | 100   |   4.95       |        8.33    | 1,405           | 1,546 |
+| BSON         | UTF-8              |  true                       | false                 | false       | 96     |  19.8        |   1,430       | 1,477          | 1,602 |
+| Snake YAML | UTF-8            |  false                      | false                 | false        | 89     |  80.3        |   4,067       | 16,089        | 24,117 |
+| BOON Json | UTF-8              |  false                      | false                 | false        | 100   |  20.7        |       32.5    | 11,005         | 69,730 |
+| Externalizable | UTF-8          |  true                       | false                 | false        | 293   |  23.9       |        34.8     | 92,757        | 120,848 |
 
 All times are in micro-seconds
 
