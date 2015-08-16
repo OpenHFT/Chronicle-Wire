@@ -9,7 +9,7 @@ Chronicle Wire supports a separation of describing what data you want to store a
 
 How do these options affect performance?
 
-The tests were run with -Xmx128m for a modest heap size.
+The tests were run with -Xmx1g -XX:MaxInlineSize=400 on an isolated CPU on an i7-3970X with 32 GB of memory.
 
 # Tests
 
