@@ -9,23 +9,28 @@ Chronicle Wire supports a separation of describing what data you want to store a
 
 How do these options affect performance?
 
-The tests were run with -Xmx1g for a modest heap size.
+The tests were run with -Xmx1g -XX:MaxInlineSize=400 on an isolated CPU on an i7-3970X with 32 GB of memory.
 
 # Tests
 
-| Wire Format | Text encoding |  Fixed width values?  | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
-|--------------|:---------------:|:----------------------:|:----------------:|:-----------:|-------:|-----------:|-----------:|------------:|---------:|
-| YAML (TextWire) | UTF-8     |  false                      | false                 | false        | 90     |  2.81       | 4.94         | 8.62          |  17.2   |
-| YAML (TextWire) | 8-bit       |  false                      | false                 | false        | 90      |   2.59     | 4.70         | 8.58        |  16.8     |
-| BinaryWire   |  UTF-8           | false                      | false                 | false        | 69      |  1.55      | 3.50         | 7.00         | 14.1      |
-| BinaryWire   |  UTF-8           | false                      | na                    | true         | 31      |  0.57      | 2.29         | 5.15         | 10.2      |
-| BinaryWire   |  UTF-8           | false                      | true                  | false        | 43    |  0.62       | 2.34         | 5.36         |  7.4       |
-| BinaryWire   |  UTF-8           | true                      | false                  | false        | 83     | 1.40       | 3.35         | 6.61         | 20.7      |
-| BinaryWire   |  UTF-8           | true                      | true                   | false        | 57      | 0.57       | 2.26         | 5.09         |  17.5     |
-| RawWire      |  UTF-8           | true                      | na                     | true        | 42      |  0.40       | 0.60         | 2.94         |   8.6      |
-| RawWire      |  8-bit             | true                      | na                     | true        | 42      | 0.40       | 0.52         | 2.65         |   8.2     |
-| BytesMarshallable |  8-bit     | true                       | na                    | true        | 42      | 0.18       | 0.23         | 2.18         |   8.3     |
-| BytesMarshallable with stop bit encoding |  8-bit  | true | na              | true        | 27      | 0.23       | 0.32         | 2.40         |   9.7     |
+These are latency test with the [Full Results Here](https://github.com/OpenHFT/Chronicle-Wire/tree/master/microbenchmarks/results)
+
+Something I found intresting is that while a typical time might be stable for a given run, you can get different results at different time.  
+For this reason I ran the tests with 10 forks.  By looking at the high percentiles, we tend to pick up the results of the worst run.
+
+| Wire Format | Text encoding | Fixed width values? | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
+|--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-----:|-----------:|------------:|-------------:|---------:|
+| YAML (TextWire) | UTF-8     |  false                      | false                | false        | 91    |  2.81       | 4.94         | 8.62           |  17.2     |
+| YAML (TextWire) | 8-bit       |  false                      | false                | false        | 91    |  2.59       | 4.70          | 8.58           |  16.8     |
+| BinaryWire   |  UTF-8           | false                      | false                | false        | 70    |  1.57       | 3.42          | 7.14          |  35.1     |
+| BinaryWire   |  UTF-8           | false                      | true                 | false        | 44    |  0.67       | 2.44          | 5.93          |  12.1     |
+| BinaryWire   |  UTF-8           | true                      | false                 | false        | 84    |  1.51        | 3.32          | 7.22          |  37.4     |
+| BinaryWire   |  UTF-8           | true                      | true                  | false        | 57    |  0.57        | 2.26          | 5.09          |  17.5     |
+| BinaryWire   |  UTF-8           | false                      | na                   | true         | 32    |  0.65        | 2.42          | 5.53          |   8.6     |
+| RawWire      |  UTF-8           | true                      | na                    | true         | 43    |  0.49        | 2.07          | 4.87          |   8.6      |
+| RawWire      |  8-bit             | true                      | na                    | true         | 43    |  0.40        | 0.57          | 2.90          |   7.6     |
+| BytesMarshallable |  8-bit     | true                       | na                   | true         | 39    |  0.17        | 0.21          | 2.13          |   6.9     |
+| BytesMarshallable + stop bit encoding |  8-bit | true | na                 | true         | 28    |  0.21        | 0.25          | 2.40          |   6.4     |
 
 All times are in micro-seconds
 
@@ -88,10 +93,13 @@ There was a small advantage in encoding the side as a boolean rather than an Enu
 # Comparison with other libraries
 
 | Wire Format | Text encoding |  Fixed width values?  | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
-|--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-------:|-----------:|-------------:|--------------:|-------:|
-| SBE            | 8-bit              |  true                       | true                 | true         | 39      |  0.28       | 0.37           | 4.86            | 7.7     |
-| Snake YAML | UTF-8            |  false                      | false                 | false        | 88     |  76.1       | 1,493         | 1,522          | 26,673 |
-| BOON Json | UTF-16            |  false                      | false                 | false        | 99     |  25.0       | 1,386         | 2,121          | 33,423 |
+|--------------|:---------------:|:----------------------:|:-----------------:|:---------:|-------:|------------:|-------------:|--------------:|-------:|
+| SBE            | 8-bit              |  true                       | true                  | true         | 43     |   0.31       |       0.44     | 4.11            | 9.2     |
+| Jackson       | UTF-8            |  false                       | false                 | false       | 100   |   4.95       |        8.33    | 1,405           | 1,546 |
+| BSON         | UTF-8              |  true                       | false                 | false       | 96     |  19.8        |   1,430       | 1,477          | 1,602 |
+| Snake YAML | UTF-8            |  false                      | false                 | false        | 89     |  80.3        |   4,067       | 16,089        | 24,117 |
+| BOON Json | UTF-8              |  false                      | false                 | false        | 100   |  20.7        |       32.5    | 11,005         | 69,730 |
+| Externalizable | UTF-8          |  true                       | false                 | false        | 293   |  23.9       |        34.8     | 92,757        | 120,848 |
 
 All times are in micro-seconds
 
@@ -117,13 +125,13 @@ The main advantage of YAML based wire format is it is easier to implement with, 
 What you want is the ease of a text wire format but the speed of a binary wire format.  
 Being able to switch from one to the other can save you a lot of time in development and support, but still give you the speed you want.
 
-This uses 90 bytes, Note: the "--- !!data" is added by the method to dump the data. This information is encoded in the first 4 bytes which contains the size.
+This uses 91 bytes, Note: the "--- !!data" is added by the method to dump the data. This information is encoded in the first 4 bytes which contains the size.
 
 ```yaml
 --- !!data
 price: 1234
 flag: true
-text: Hello World
+text: Hello World!
 side: Sell
 smallInt: 123
 longInt: 1234567890
@@ -132,12 +140,12 @@ longInt: 1234567890
 ## Binary Wire (default)
 This binary wire has be automatically decoded to text by  Wires.fromSizePrefixedBinaryToText(Bytes)
 
-This uses 69 bytes. Note: the "--- !!data #binary" is added by the method to dump the data. This information is encoded in the first 4 bytes which contains the size.
+This uses 70 bytes. Note: the "--- !!data #binary" is added by the method to dump the data. This information is encoded in the first 4 bytes which contains the size.
 ```yaml
 --- !!data #binary
 price: 1234
 flag: true
-text: Hello World
+text: Hello World!
 side: Sell
 smallInt: 123
 longInt: 1234567890
@@ -147,12 +155,12 @@ longInt: 1234567890
 Fixed width fields support binding to values later and updating them atomically.  
 Note: if you want to bind to specific values, there is support for this which will also ensure the values are aligned.
 
-This format uses 83 bytes
+This format uses 84 bytes
 ```yaml
 --- !!data #binary
 price: 1234
 flag: true
-text: Hello World
+text: Hello World!
 side: Sell
 smallInt: 123
 longInt: 1234567890
@@ -161,12 +169,12 @@ longInt: 1234567890
 ## Binary Wire with field numbers
 Numbered fields are more efficient to write and read, but are not as friendly to work with.
 
-Test bwireFTF used 43 bytes.
+Test bwireFTF used 44 bytes.
 ```yaml
 --- !!data #binary
 3: 1234
 4: true
-5: Hello World
+5: Hello World!
 6: Sell
 1: 123
 2: 1234567890
@@ -174,12 +182,12 @@ Test bwireFTF used 43 bytes.
 
 ## Binary Wire with field numbers and fixed width values
 
-Test bwireTTF used 57 bytes.
+Test bwireTTF used 58 bytes.
 ```yaml
 --- !!data #binary
 3: 1234
 4: true
-5: Hello World
+5: Hello World!
 6: Sell
 1: 123
 2: 1234567890
@@ -187,12 +195,12 @@ Test bwireTTF used 57 bytes.
 
 ## Binary Wire with variable width values only. 
 
-Test bwireFTT used 31 bytes.
+Test bwireFTT used 32 bytes.
 ```yaml
 --- !!data #binary
 1234
 true
-Hello World
+Hello World!
 Sell
 123
 1234567890
@@ -201,27 +209,29 @@ Sell
 ## RawWire format
 Raw wire format drops all meta data. It must be fixed width as there is no way to use compact types.
 
-Test rwireUTF and rwire8bit used 42 bytes.
+Test rwireUTF and rwire8bit used 43 bytes.
 ```
-00000000 26 00 00 00 00 00 00 00  00 48 93 40 B1 0B 48 65 &······· ·H·@··He
-00000010 6C 6C 6F 20 57 6F 72 6C  64 04 53 65 6C 6C 7B 00 llo Worl d·Sell{·
-00000020 00 00 D2 02 96 49 00 00  00 00                   ·····I·· ··
+00000000 27 00 00 00 00 00 00 00  00 48 93 40 B1 0C 48 65 '······· ·H·@··He
+00000010 6C 6C 6F 20 57 6F 72 6C  64 21 04 53 65 6C 6C 7B llo Worl d!·Sell{
+00000020 00 00 00 D2 02 96 49 00  00 00 00                ······I· ···
 ```
 ## BytesMarshallable
 The BytesMarshallable uses fixed width data types.
+
+Test bytesMarshallable used 39 bytes.
 ```
-Test bytesMarshallable used 42 bytes.
-00000000 26 00 00 00 00 00 00 00  00 48 93 40 59 0B 48 65 &······· ·H·@Y·He
-00000010 6C 6C 6F 20 57 6F 72 6C  64 04 53 65 6C 6C 7B 00 llo Worl d·Sell{·
-00000020 00 00 D2 02 96 49 00 00  00 00                   ·····I·· ··
+00000000 23 00 00 00 00 00 00 00  00 48 93 40 D2 02 96 49 #······· ·H·@···I
+00000010 00 00 00 00 7B 00 00 00  59 00 0C 48 65 6C 6C 6F ····{··· Y··Hello
+00000020 20 57 6F 72 6C 64 21                              World!
 ```
 
 ## BytesMarshallable with stop bit encoding
 This example used stop bit encoding to reduce the size of the message.
+
+Test bytesMarshallable used 28 bytes.
 ```
-Test bytesMarshallable used 27 bytes.
-00000000 17 00 00 00 A0 A4 69 D2  85 D8 CC 04 7B 59 00 0B ······i· ····{Y··
-00000010 48 65 6C 6C 6F 20 57 6F  72 6C 64                Hello Wo rld 
+00000000 18 00 00 00 A0 A4 69 D2  85 D8 CC 04 7B 59 00 0C ······i· ····{Y··
+00000010 48 65 6C 6C 6F 20 57 6F  72 6C 64 21             Hello Wo rld!
 ```
 
 # Comparison outputs
@@ -236,5 +246,64 @@ longInt: 1234567890
 price: 1234.0
 side: Sell
 smallInt: 123
-text: Hello World
+text: Hello World!
+```
+
+## Boon
+Test boon used 100 chars.
+```json
+{"smallInt":123,"longInt":1234567890,"price":1234.0,"flag":true,"side":"Sell","text":"Hello World!"}
+```
+
+## Jackson
+Test jackson used 100 chars.
+```
+{"price":1234.0,"flag":true,"text":"Hello World!","side":"Sell","smallInt ":123,"longInt":1234567890}
+```
+## BSON
+Test bson used 96 chars.
+```
+00000000 60 00 00 00 01 70 72 69  63 65 00 00 00 00 00 00 `····pri ce······
+00000010 48 93 40 08 66 6C 61 67  00 01 02 74 65 78 74 00 H·@·flag ···text·
+00000020 0D 00 00 00 48 65 6C 6C  6F 20 57 6F 72 6C 64 21 ····Hell o World!
+00000030 00 02 73 69 64 65 00 05  00 00 00 53 65 6C 6C 00 ··side·· ···Sell·
+00000040 10 73 6D 61 6C 6C 49 6E  74 00 7B 00 00 00 12 6C ·smallIn t·{····l
+00000050 6F 6E 67 49 6E 74 00 D2  02 96 49 00 00 00 00 00 ongInt·· ··I·····
+```
+
+## SBE
+SBE has a method to extract the binary as text. It is likely this data structure could be optimised and made much shorter.
+
+Test sbe used 43 chars.
+```
+00000000 29 00 7B 00 00 00 D2 02  96 49 00 00 00 00 00 00 )·{····· ·I······
+00000010 00 00 00 48 93 40 01 0C  48 65 6C 6C 6F 20 57 6F ···H·@·· Hello Wo
+00000020 72 6C 64 21 00 00 00 00  01 00 00                rld!···· ···     
+```
+
+## Externalizable
+While Externalizable is more efficient than Serializable, it is still a heavy weight serialization.  
+Where Java Serialization does well is in serializing Object Graphs instead of Object Tree, i.e. objects with circular references.
+
+Test externalizable used 293 chars.
+```
+00000000 AC ED 00 05 73 72 00 2A  6E 65 74 2E 6F 70 65 6E ····sr·* net.open
+00000010 68 66 74 2E 63 68 72 6F  6E 69 63 6C 65 2E 77 69 hft.chro nicle.wi
+00000020 72 65 2E 62 65 6E 63 68  6D 61 72 6B 73 2E 44 61 re.bench marks.Da
+00000030 74 61 FB 5E C8 1F BA EB  33 6F 0C 00 00 78 70 77 ta·^···· 3o···xpw
+00000040 15 40 93 48 00 00 00 00  00 00 00 00 00 49 96 02 ·@·H···· ·····I··
+00000050 D2 00 00 00 7B 01 7E 72  00 2A 6E 65 74 2E 6F 70 ····{·~r ·*net.op
+00000060 65 6E 68 66 74 2E 63 68  72 6F 6E 69 63 6C 65 2E enhft.ch ronicle.
+00000070 77 69 72 65 2E 62 65 6E  63 68 6D 61 72 6B 73 2E wire.ben chmarks.
+00000080 53 69 64 65 00 00 00 00  00 00 00 00 12 00 00 78 Side···· ·······x
+00000090 72 00 0E 6A 61 76 61 2E  6C 61 6E 67 2E 45 6E 75 r··java. lang.Enu
+000000a0 6D 00 00 00 00 00 00 00  00 12 00 00 78 70 74 00 m······· ····xpt·
+000000b0 04 53 65 6C 6C 74 00 0C  48 65 6C 6C 6F 20 57 6F ·Sellt·· Hello Wo
+000000c0 72 6C 64 21 78 60 00 00  00 01 70 72 69 63 65 00 rld!x`·· ··price·
+000000d0 00 00 00 00 00 48 93 40  08 66 6C 61 67 00 01 02 ·····H·@ ·flag···
+000000e0 74 65 78 74 00 0D 00 00  00 48 65 6C 6C 6F 20 57 text···· ·Hello W
+000000f0 6F 72 6C 64 21 00 02 73  69 64 65 00 05 00 00 00 orld!··s ide·····
+00000100 53 65 6C 6C 00 10 73 6D  61 6C 6C 49 6E 74 00 7B Sell··sm allInt·{
+00000110 00 00 00 12 6C 6F 6E 67  49 6E 74 00 D2 02 96 49 ····long Int····I
+00000120 00 00 00 00 00                                   ·····                  
 ```

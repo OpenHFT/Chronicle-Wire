@@ -29,8 +29,9 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.NativeBytesStore;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.wire.benchmarks.bytes.NativeData;
+import net.openhft.chronicle.wire.benchmarks.sbe.ExampleUsingGeneratedStub;
 import org.boon.json.JsonFactory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -47,10 +48,7 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
 import uk.co.real_logic.agrona.concurrent.UnsafeBuffer;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
@@ -62,7 +60,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class ComparisonMain {
     final Yaml yaml;
-    final Data data = new Data(123, 1234567890L, 1234, true, "Hello World", Side.Sell);
+    final Data data = new Data(123, 1234567890L, 1234, true, "Hello World!", Side.Sell);
     private final ByteBuffer allocate = ByteBuffer.allocate(64);
     private final UnsafeBuffer buffer = new UnsafeBuffer(allocate);
     Data data2 = new Data();
@@ -78,6 +76,7 @@ public class ComparisonMain {
     DataDecoder dd = new DataDecoder();
     MessageHeaderEncoder mhe = new MessageHeaderEncoder();
     MessageHeaderDecoder mhd = new MessageHeaderDecoder();
+    private byte[] buf;
 
     public ComparisonMain() {
         DumperOptions options = new DumperOptions();
@@ -91,16 +90,27 @@ public class ComparisonMain {
         if (Jvm.isDebug()) {
             ComparisonMain main = new ComparisonMain();
             for (Method m : ComparisonMain.class.getMethods()) {
+                main.s = null;
+                main.sb.setLength(0);
+                main.mhe.wrap(main.directBuffer, 0).blockLength(0);
+                main.buf = null;
+
                 if (m.getAnnotation(Benchmark.class) != null) {
                     m.invoke(main);
                     String s = main.s;
                     if (s != null) {
                         System.out.println("Test " + m.getName() + " used " + s.length() + " chars.");
                         System.out.println(s);
-                    } else {
+                    } else if (main.sb.length() > 0) {
                         System.out.println("Test " + m.getName() + " used " + main.sb.length() + " chars.");
                         System.out.println(main.sb);
-
+                    } else if (main.mhd.wrap(main.directBuffer, 0).blockLength() > 0) {
+                        int len = main.mhd.wrap(main.directBuffer, 0).blockLength() + main.mhd.encodedLength();
+                        System.out.println("Test " + m.getName() + " used " + len + " chars.");
+                        System.out.println(new NativeBytesStore<>(main.directBuffer.addressOffset(), len).bytesForRead().toHexString());
+                    } else if (main.buf != null) {
+                        System.out.println("Test " + m.getName() + " used " + main.buf.length + " chars.");
+                        System.out.println(Bytes.wrapForRead(main.buf).toHexString());
                     }
                 }
             }
@@ -109,7 +119,9 @@ public class ComparisonMain {
             System.out.println("measurementTime: " + time + " secs");
             Options opt = new OptionsBuilder()
                     .include(ComparisonMain.class.getSimpleName())
-                    .forks(1)
+//                    .warmupIterations(5)
+                    .measurementIterations(5)
+                    .forks(10)
                     .mode(Mode.SampleTime)
                     .measurementTime(TimeValue.seconds(time))
                     .timeUnit(TimeUnit.NANOSECONDS)
@@ -119,7 +131,7 @@ public class ComparisonMain {
         }
     }
 
-    //    @Benchmark
+    @Benchmark
     public Data snakeYaml() {
         s = yaml.dumpAsMap(data);
         Data data = (Data) yaml.load(s);
@@ -128,13 +140,13 @@ public class ComparisonMain {
 
     // fails on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
 //    @Benchmark
-    public void jsonSmart() throws ParseException {
+    public Data jsonSmart() throws ParseException {
         JSONObject obj = new JSONObject();
         data.writeTo(obj);
         s = obj.toJSONString();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(s);
-        data.readFrom(jsonObject);
-
+        data2.readFrom(jsonObject);
+        return data2;
     }
 
     // fails on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
@@ -147,43 +159,40 @@ public class ComparisonMain {
         data.readFrom(jsonObject);
     }
 
-    //    @Benchmark
+    @Benchmark
     public Data boon() {
         sb.setLength(0);
         boonMapper.toJson(data, sb);
         return boonMapper.fromJson(sb.toString(), Data.class);
     }
 
-    // need help with this one.
-//    @Benchmark
+    @Benchmark
     public Data jackson() throws IOException {
-        StringWriter sw = new StringWriter();
-        JsonGenerator generator = jsonFactory.createGenerator(sw);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        JsonGenerator generator = jsonFactory.createGenerator(baos);
         data.writeTo(generator);
         generator.flush();
-        s = sw.toString();
-//        System.out.println(s);
-        JsonParser jp = jsonFactory.createParser(s); // or URL, Stream, Reader, String, byte[]
+
+        buf = baos.toByteArray();
+        JsonParser jp = jsonFactory.createParser(buf); // or URL, Stream, Reader, String, byte[]
         data2.readFrom(jp);
         return data2;
     }
-
-    //    @Benchmark
-    public void bson() throws IOException {
+    @Benchmark
+    public Data bson() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         JsonGenerator gen = factory.createJsonGenerator(baos);
         data.writeTo(gen);
-        s = baos.toString();
 
-        ByteArrayInputStream bais = new ByteArrayInputStream(
-                baos.toByteArray());
+        buf = baos.toByteArray();
+        ByteArrayInputStream bais = new ByteArrayInputStream(buf);
         JsonParser parser = factory.createJsonParser(bais);
         data2.readFrom(parser);
+        return data2;
     }
 
-/*
     @Benchmark
-    public void sbe() {
+    public Data sbe() {
         {
             int len0 = mhe.wrap(directBuffer, 0).encodedLength();
             int len = ExampleUsingGeneratedStub.encode(de, directBuffer, len0, data, allocate, buffer);
@@ -194,24 +203,23 @@ public class ComparisonMain {
             int len0 = mhd.encodedLength();
             int len = mhd.blockLength();
             ExampleUsingGeneratedStub.decode(dd, directBuffer, len0, len, 0, 0, data2);
+            return data2;
         }
     }
-*/
 
-    //    @Benchmark
-    public void byteable() {
+    @Benchmark
+    public Data externalizable() throws IOException, ClassNotFoundException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(data);
+        JsonGenerator gen = factory.createJsonGenerator(baos);
+        data.writeTo(gen);
 
-        NativeData nd = new NativeData();
-        Bytes bytes = Bytes.wrapForWrite(ByteBuffer.allocateDirect(128)).unchecked(true);
-        {
-            nd.bytesStore(bytes, 4, nd.maxSize());
-            data.copyTo(nd);
-            bytes.writeInt(nd.encodedLength());
-        }
-        {
-            int len = bytes.readInt();
-            nd.bytesStore(bytes, 4, len);
-            nd.copyTo(data);
+        buf = baos.toByteArray();
+        ByteArrayInputStream bais = new ByteArrayInputStream(
+                buf);
+        try (ObjectInputStream ois = new ObjectInputStream(bais)) {
+            return (Data) ois.readObject();
         }
     }
 }

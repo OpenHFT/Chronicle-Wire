@@ -68,6 +68,84 @@ Note: Wire supports debug/transparent combinations like self describing data wit
 
 To support wire format discovery, the first bytes should have the top bit set.
 
+# Using Wire
+
+## simple use case.
+
+First you need to have a buffer to write to.  This can be a byte[], a ByteBuffer, off heap memory, or even an address and length you have obtained from some other library.
+
+```java
+// Bytes which wraps a ByteBuffer which is resized as needed.
+Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+```
+
+Now you can choice which format you are using.  As the wire formats are themselves unbuffered, you can use them with the same buffer, but in general using one wire format is easier.
+```java
+Wire wire = new TextWire(bytes);
+// or
+WireType wireType = WireType.TEXT;
+Wire wireB = wireType.apply(bytes);
+// or
+Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
+Wire wire2 = new BinaryWire(bytes2);
+// or
+Bytes<ByteBuffer> bytes3 = Bytes.elasticByteBuffer();
+Wire wire3 = new RawWire(bytes3);
+/*
+```
+So now you can write to the wire with a simple document.
+```java
+wire.write(() -> "message").text("Hello World")
+      .write(() -> "number").int64(1234567890L)
+       .write(() -> "code").asEnum(TimeUnit.SECONDS)
+      .write(() -> "price").float64(10.50);
+System.out.println(bytes);
+```
+prints
+```yaml
+message: Hello World
+number: 1234567890
+code: SECONDS
+price: 10.5
+```
+
+```java
+// the same code as for text wire
+wire2.write(() -> "message").text("Hello World")
+        .write(() -> "number").int64(1234567890L)
+        .write(() -> "code").asEnum(TimeUnit.SECONDS)
+        .write(() -> "price").float64(10.50);
+        System.out.println(bytes2.toHexString());
+```
+
+prints
+```
+00000000 C7 6D 65 73 73 61 67 65  EB 48 65 6C 6C 6F 20 57 ·message ·Hello W
+00000010 6F 72 6C 64 C6 6E 75 6D  62 65 72 A3 D2 02 96 49 orld·num ber····I
+00000020 C4 63 6F 64 65 E7 53 45  43 4F 4E 44 53 C5 70 72 ·code·SE CONDS·pr
+00000030 69 63 65 90 00 00 28 41                          ice···(A 
+```
+
+Using the RawWire strips away all the meta data to reduce the size of the message, and improve speed. 
+The down side is that we cannot easily see what the message contains.
+```java
+        // the same code as for text wire
+        wire3.write(() -> "message").text("Hello World")
+                .write(() -> "number").int64(1234567890L)
+                .write(() -> "code").asEnum(TimeUnit.SECONDS)
+                .write(() -> "price").float64(10.50);
+        System.out.println(bytes3.toHexString());
+```
+prints in RawWire
+```
+00000000 0B 48 65 6C 6C 6F 20 57  6F 72 6C 64 D2 02 96 49 ·Hello W orld···I
+00000010 00 00 00 00 07 53 45 43  4F 4E 44 53 00 00 00 00 ·····SEC ONDS····
+00000020 00 00 25 40                                      ··%@ 
+```
+
+For more examples see [Examples Chapter1](https://github.com/OpenHFT/Chronicle-Wire/blob/master/README-Chapter1.md)
+
+
 # Binding to a field value
 
 While serialized data can be updated by replacing a whole record, this might not be the most efficient option, nor thread safe. Wire offers the ability to bind a reference to a fixed value of a field and perform atomic operations on that field such as volatile read/write and compare-and-swap.

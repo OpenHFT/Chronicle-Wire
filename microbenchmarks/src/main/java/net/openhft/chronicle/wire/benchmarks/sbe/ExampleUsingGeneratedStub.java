@@ -57,7 +57,7 @@ public class ExampleUsingGeneratedStub {
                 .longInt(data.getLongInt())
                 .flag(data.isFlag() ? BooleanType.TRUE : BooleanType.FALSE)
                 .side(data.getSide() == net.openhft.chronicle.wire.benchmarks.Side.Buy ? baseline.Side.Buy : baseline.Side.Sell)
-                .text().write(data.getTextAsBytes());
+                .text().write(data.textAsBytes());
 
         return de.encodedLength();
     }
@@ -76,6 +76,6 @@ public class ExampleUsingGeneratedStub {
         data.setLongInt(dd.longInt());
         data.setFlag(dd.flag() == BooleanType.TRUE);
         data.setSide(dd.side() == baseline.Side.Buy ? Side.Buy : Side.Sell);
-        dd.text().read(data.getTextAsBytes());
+        dd.text().read(data.textAsBytes());
     }
 }

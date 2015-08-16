@@ -52,6 +52,11 @@ public interface ValueOut {
     WireOut text(@Nullable CharSequence s);
 
     @NotNull
+    default WireOut text(@Nullable BytesStore s) {
+        return text((CharSequence) s);
+    }
+
+    @NotNull
     default WireOut int8(long x) {
         return int8(Maths.toInt8(x));
     }
