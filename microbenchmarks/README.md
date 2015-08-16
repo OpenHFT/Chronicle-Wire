@@ -19,18 +19,19 @@ Something I found intresting is that while a typical time might be stable for a 
 For this reason I ran the tests with 10 forks.  By looking at the high percentiles, we tend to pick up the results of the worst run.
 
 | Wire Format | Text encoding | Fixed width values? | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
-|--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-----:|-----------:|------------:|-------------:|---------:|
-| YAML (TextWire) | UTF-8     |  false                      | false                | false        | 91    |  2.81       | 4.94         | 8.62           |  17.2     |
-| YAML (TextWire) | 8-bit       |  false                      | false                | false        | 91    |  2.59       | 4.70          | 8.58           |  16.8     |
-| BinaryWire   |  UTF-8           | false                      | false                | false        | 70    |  1.57       | 3.42          | 7.14          |  35.1     |
-| BinaryWire   |  UTF-8           | false                      | true                 | false        | 44    |  0.67       | 2.44          | 5.93          |  12.1     |
-| BinaryWire   |  UTF-8           | true                      | false                 | false        | 84    |  1.51        | 3.32          | 7.22          |  37.4     |
-| BinaryWire   |  UTF-8           | true                      | true                  | false        | 57    |  0.57        | 2.26          | 5.09          |  17.5     |
-| BinaryWire   |  UTF-8           | false                      | na                   | true         | 32    |  0.65        | 2.42          | 5.53          |   8.6     |
-| RawWire      |  UTF-8           | true                      | na                    | true         | 43    |  0.49        | 2.07          | 4.87          |   8.6      |
-| RawWire      |  8-bit             | true                      | na                    | true         | 43    |  0.40        | 0.57          | 2.90          |   7.6     |
-| BytesMarshallable |  8-bit     | true                       | na                   | true         | 39    |  0.17        | 0.21          | 2.13          |   6.9     |
-| BytesMarshallable + stop bit encoding |  8-bit | true | na                 | true         | 28    |  0.21        | 0.25          | 2.40          |   6.4     |
+|--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-----:|-----------:|-------------:|---------------:|---------:|
+| YAML (TextWire) | UTF-8     |  false                      | false                | false        | 91    |  2.81       | 4.94           | 8.62            |  17.2     |
+| YAML (TextWire) | 8-bit       |  false                      | false                | false        | 91    |  2.59       | 4.70          | 8.58            |  16.8     |
+| JSONWire   | 8-bit              |  false                      | false                | false        | 100   |  3.11       | 5.56          | 10.62           |  36.9    |
+| BinaryWire   |  UTF-8           | false                      | false                | false        | 70    |  1.57       | 3.42          | 7.14             |  35.1     |
+| BinaryWire   |  UTF-8           | false                      | true                 | false        | 44    |  0.67       | 2.44          | 5.93             |  12.1     |
+| BinaryWire   |  UTF-8           | true                      | false                 | false        | 84    |  1.51        | 3.32          | 7.22            |  37.4     |
+| BinaryWire   |  UTF-8           | true                      | true                  | false        | 57    |  0.57        | 2.26          | 5.09            |  17.5     |
+| BinaryWire   |  UTF-8           | false                      | na                   | true         | 32    |  0.65        | 2.42          | 5.53            |   8.6     |
+| RawWire      |  UTF-8           | true                      | na                    | true         | 43    |  0.49        | 2.07          | 4.87            |   8.6      |
+| RawWire      |  8-bit             | true                      | na                    | true         | 43    |  0.40        | 0.57          | 2.90            |   7.6     |
+| BytesMarshallable |  8-bit     | true                       | na                   | true         | 39    |  0.17        | 0.21          | 2.13            |   6.9     |
+| BytesMarshallable + stop bit encoding |  8-bit | true | na                 | true         | 28    |  0.21        | 0.25          | 2.40            |   6.4     |
 
 All times are in micro-seconds
 
@@ -135,6 +136,15 @@ text: Hello World!
 side: Sell
 smallInt: 123
 longInt: 1234567890
+```
+
+## JSON Wire
+This wire produces a JSON style output.  It has some YAML based extensions for typed data.
+
+Test json8bit used 100 bytes.
+```json
+--- !!data
+"price":1234,"longInt":1234567890,"smallInt":123,"flag":true,"text":"Hello World!","side":"Sell"
 ```
 
 ## Binary Wire (default)

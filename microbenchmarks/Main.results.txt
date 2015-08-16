@@ -1,3 +1,7 @@
+Test json8bit used 100 bytes.
+--- !!data
+"price":1234,"longInt":1234567890,"smallInt":123,"flag":true,"text":"Hello World!","side":"Sell"
+
 Test twire8bit used 91 bytes.
 --- !!data
 price: 1234

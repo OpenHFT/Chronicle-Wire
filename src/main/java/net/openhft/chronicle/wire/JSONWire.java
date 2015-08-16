@@ -13,6 +13,7 @@
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
@@ -47,19 +48,20 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 
 /**
- * YAML Based wire format
+ * JSON wire format
+ * <p>
+ * At the moment, this is a cut down version of the YAML wire format.
  */
-public class TextWire implements Wire, InternalWireIn {
+public class JSONWire implements Wire, InternalWireIn {
 
     public static final BytesStore TYPE = BytesStore.wrap("!type ");
     static final String SEQ_MAP = "!seqmap";
     static final String NULL = "!null \"\"";
     static final BitSet QUOTE_CHARS = new BitSet();
-    static final Logger LOG = LoggerFactory.getLogger(TextWire.class);
+    static final Logger LOG = LoggerFactory.getLogger(JSONWire.class);
     static final ThreadLocal<StopCharTester> ESCAPED_QUOTES = ThreadLocal.withInitial(() -> StopCharTesters.QUOTES.escaping());
     static final ThreadLocal<StopCharsTester> ESCAPED_END_OF_TEXT = ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
-    static final BytesStore COMMA_SPACE = BytesStore.wrap(", ");
-    static final BytesStore COMMA_NEW_LINE = BytesStore.wrap(",\n");
+    static final BytesStore COMMA = BytesStore.wrap(",");
     static final BytesStore NEW_LINE = BytesStore.wrap("\n");
     static final BytesStore SPACE = BytesStore.wrap(" ");
     static final BytesStore END_FIELD = NEW_LINE;
@@ -75,23 +77,23 @@ public class TextWire implements Wire, InternalWireIn {
     private final boolean use8bit;
     private boolean ready;
 
-    public TextWire(Bytes bytes, boolean use8bit) {
+    public JSONWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
         this.use8bit = use8bit;
     }
 
-    public TextWire(Bytes bytes) {
+    public JSONWire(Bytes bytes) {
         this(bytes, false);
     }
 
     @NotNull
-    public static TextWire from(@NotNull String text) {
-        return new TextWire(Bytes.wrapForRead(text));
+    public static JSONWire from(@NotNull String text) {
+        return new JSONWire(Bytes.wrapForRead(text));
     }
 
     public static String asText(@NotNull Wire wire) {
         long pos = wire.bytes().readPosition();
-        TextWire tw = new TextWire(nativeBytes());
+        JSONWire tw = new JSONWire(nativeBytes());
         wire.copyTo(tw);
         wire.bytes().readPosition(pos);
 
@@ -337,12 +339,15 @@ public class TextWire implements Wire, InternalWireIn {
         return this;
     }
 
-    void escape(@NotNull CharSequence s) {
+    void escaped(@NotNull CharSequence s) {
         if (!needsQuotes(s)) {
             bytes.append(s);
             return;
         }
-        bytes.append('"');
+        doEscape(s);
+    }
+
+    private void doEscape(@NotNull CharSequence s) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             switch (ch) {
@@ -359,7 +364,6 @@ public class TextWire implements Wire, InternalWireIn {
                     break;
             }
         }
-        bytes.append('"');
     }
 
     boolean needsQuotes(@NotNull CharSequence s) {
@@ -435,7 +439,6 @@ public class TextWire implements Wire, InternalWireIn {
     }
 
     class TextValueOut implements ValueOut {
-        int indentation = 0;
         @NotNull
         BytesStore sep = Bytes.empty();
         boolean leaf = false;
@@ -457,24 +460,14 @@ public class TextWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut wireOut() {
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         private void indent() {
-            for (int i = 0; i < indentation; i++) {
-                bytes.append(' ');
-                bytes.append(' ');
-            }
         }
 
         public void elementSeparator() {
-            if (indentation == 0) {
-                sep = Bytes.empty();
-                bytes.append('\n');
-
-            } else {
-                sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
-            }
+            sep = COMMA;
         }
 
         @NotNull
@@ -483,7 +476,7 @@ public class TextWire implements Wire, InternalWireIn {
             prependSeparator();
             append(flag == null ? "!" + NULL : flag ? "true" : "false");
             elementSeparator();
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -493,10 +486,12 @@ public class TextWire implements Wire, InternalWireIn {
             if (s == null) {
                 append("!" + NULL);
             } else {
-                escape(s);
+                bytes.append('"');
+                escaped(s);
+                bytes.append('"');
             }
             elementSeparator();
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -505,7 +500,7 @@ public class TextWire implements Wire, InternalWireIn {
             prependSeparator();
             bytes.append(i8);
             elementSeparator();
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -527,7 +522,7 @@ public class TextWire implements Wire, InternalWireIn {
             prependSeparator();
             bytes.write(value);
             elementSeparator();
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         private boolean isText(@Nullable BytesStore fromBytes) {
@@ -557,7 +552,7 @@ public class TextWire implements Wire, InternalWireIn {
             append(END_FIELD);
             elementSeparator();
 
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @Override
@@ -568,7 +563,7 @@ public class TextWire implements Wire, InternalWireIn {
             append(END_FIELD);
             elementSeparator();
 
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -578,7 +573,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(u8);
             elementSeparator();
 
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -588,7 +583,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(i16);
             elementSeparator();
 
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -598,7 +593,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(u16);
             elementSeparator();
 
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -609,7 +604,7 @@ public class TextWire implements Wire, InternalWireIn {
             sb.appendCodePoint(codepoint);
             text(sb);
             sep = empty();
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -619,7 +614,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(i32);
             elementSeparator();
 
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -629,7 +624,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(u32);
             elementSeparator();
 
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -639,14 +634,14 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(i64);
             elementSeparator();
 
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
         @Override
         public WireOut int64array(long capacity) {
             TextLongArrayReference.write(bytes, capacity);
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -655,7 +650,7 @@ public class TextWire implements Wire, InternalWireIn {
             long pos = bytes.writePosition();
             TextLongArrayReference.write(bytes, capacity);
             ((Byteable) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -665,7 +660,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(f);
             elementSeparator();
 
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -675,7 +670,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(d);
             elementSeparator();
 
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -685,7 +680,7 @@ public class TextWire implements Wire, InternalWireIn {
             append(localTime.toString());
             elementSeparator();
 
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -695,7 +690,7 @@ public class TextWire implements Wire, InternalWireIn {
             append(zonedDateTime.toString());
             elementSeparator();
 
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -705,7 +700,7 @@ public class TextWire implements Wire, InternalWireIn {
             append(localDate.toString());
             elementSeparator();
 
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -725,7 +720,7 @@ public class TextWire implements Wire, InternalWireIn {
             append(TYPE);
             typeTranslator.accept(type, bytes);
             elementSeparator();
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -735,7 +730,7 @@ public class TextWire implements Wire, InternalWireIn {
             append(TYPE);
             text(type);
             elementSeparator();
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -745,7 +740,7 @@ public class TextWire implements Wire, InternalWireIn {
             append(sep);
             append(uuid.toString());
             elementSeparator();
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -754,7 +749,7 @@ public class TextWire implements Wire, InternalWireIn {
             prependSeparator();
             TextIntReference.write(bytes, value);
             elementSeparator();
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -769,7 +764,7 @@ public class TextWire implements Wire, InternalWireIn {
             prependSeparator();
             TextLongReference.write(bytes, value);
             elementSeparator();
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -793,7 +788,7 @@ public class TextWire implements Wire, InternalWireIn {
             indent();
             bytes.append(']');
             sep = END_FIELD;
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @Override
@@ -809,12 +804,11 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         private void popState() {
-            indentation--;
             leaf = false;
         }
 
         private void pushState() {
-            indentation++;
+
         }
 
         @NotNull
@@ -827,7 +821,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append('{');
             sep = leaf ? SPACE : END_FIELD;
 
-            object.writeMarshallable(TextWire.this);
+            object.writeMarshallable(JSONWire.this);
 
             if (!leaf)
                 popState();
@@ -839,14 +833,8 @@ public class TextWire implements Wire, InternalWireIn {
                 prependSeparator();
             bytes.append('}');
 
-            if (indentation == 0) {
-                sep = empty();
-                append(NEW_LINE);
-
-            } else {
-                sep = COMMA_NEW_LINE;
-            }
-            return TextWire.this;
+            sep = COMMA;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -862,21 +850,21 @@ public class TextWire implements Wire, InternalWireIn {
                 append("{ key: ");
                 leaf();
                 object2(k);
-                sep = COMMA_NEW_LINE;
+                sep = COMMA;
                 prependSeparator();
                 append("  value: ");
                 leaf();
                 object2(v);
                 bytes.append(' ');
                 bytes.append('}');
-                sep = COMMA_NEW_LINE;
+                sep = COMMA;
             });
             popState();
             sep = END_FIELD;
             prependSeparator();
             bytes.append(']');
             sep = END_FIELD;
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         private void object2(Object v) {
@@ -897,7 +885,7 @@ public class TextWire implements Wire, InternalWireIn {
             map.forEach((k, v) -> sequence(w -> w.marshallable(m -> m
                     .write(() -> "key").typedMarshallable(k)
                     .write(() -> "value").typedMarshallable(v))));
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -906,7 +894,6 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append('"');
             bytes.append('"');
             bytes.append(':');
-            bytes.append(' ');
             sep = empty();
             return this;
         }
@@ -916,20 +903,14 @@ public class TextWire implements Wire, InternalWireIn {
             CharSequence name = key.name();
             if (name == null) name = Integer.toString(key.code());
             prependSeparator();
-            escape(name);
+            bytes.append('"');
+            escaped(name);
+            bytes.append('"');
             bytes.append(':');
-            bytes.append(' ');
             return this;
         }
 
         public void writeComment(@NotNull CharSequence s) {
-            prependSeparator();
-            append(sep);
-            bytes.append('#');
-            bytes.append(' ');
-            append(s);
-            bytes.append('\n');
-            sep = empty();
         }
     }
 
@@ -942,11 +923,11 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             if (textTo(sb) == null) {
                 flag.accept(null);
-                return TextWire.this;
+                return JSONWire.this;
             }
 
             flag.accept(StringUtils.isEqual(sb, "true"));
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -955,7 +936,7 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             Object acs = textTo(sb);
             s.accept(acs == null ? null : acs.toString());
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @Override
@@ -1065,7 +1046,7 @@ public class TextWire implements Wire, InternalWireIn {
         public WireIn int8(@NotNull ByteConsumer i) {
             consumeWhiteSpace();
             i.accept((byte) bytes.parseLong());
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1093,7 +1074,7 @@ public class TextWire implements Wire, InternalWireIn {
                     BytesUtil.setLength(sb, 0);
                     parseWord(sb);
                     byte[] decode = Base64.getDecoder().decode(sb.toString());
-                    bytesConsumer.readMarshallable(new TextWire(Bytes.wrapForRead(decode)));
+                    bytesConsumer.readMarshallable(new JSONWire(Bytes.wrapForRead(decode)));
 
                 } else if (str.equals("!!null")) {
                     bytesConsumer.readMarshallable(null);
@@ -1103,9 +1084,9 @@ public class TextWire implements Wire, InternalWireIn {
                 }
             } else {
                 textTo(sb);
-                bytesConsumer.readMarshallable(new TextWire(Bytes.wrapForRead(sb.toString().getBytes())));
+                bytesConsumer.readMarshallable(new JSONWire(Bytes.wrapForRead(sb.toString().getBytes())));
             }
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @Nullable
@@ -1168,7 +1149,7 @@ public class TextWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireIn wireIn() {
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @Override
@@ -1252,7 +1233,7 @@ public class TextWire implements Wire, InternalWireIn {
         public WireIn uint8(@NotNull ShortConsumer i) {
             consumeWhiteSpace();
             i.accept((short) bytes.parseLong());
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1260,7 +1241,7 @@ public class TextWire implements Wire, InternalWireIn {
         public WireIn int16(@NotNull ShortConsumer i) {
             consumeWhiteSpace();
             i.accept((short) bytes.parseLong());
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1268,7 +1249,7 @@ public class TextWire implements Wire, InternalWireIn {
         public WireIn uint16(@NotNull IntConsumer i) {
             consumeWhiteSpace();
             i.accept((int) bytes.parseLong());
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1276,7 +1257,7 @@ public class TextWire implements Wire, InternalWireIn {
         public WireIn int32(@NotNull IntConsumer i) {
             consumeWhiteSpace();
             i.accept((int) bytes.parseLong());
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1284,7 +1265,7 @@ public class TextWire implements Wire, InternalWireIn {
         public WireIn uint32(@NotNull LongConsumer i) {
             consumeWhiteSpace();
             i.accept(bytes.parseLong());
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1292,7 +1273,7 @@ public class TextWire implements Wire, InternalWireIn {
         public WireIn int64(@NotNull LongConsumer i) {
             consumeWhiteSpace();
             i.accept(bytes.parseLong());
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1300,7 +1281,7 @@ public class TextWire implements Wire, InternalWireIn {
         public WireIn float32(@NotNull FloatConsumer v) {
             consumeWhiteSpace();
             v.accept((float) bytes.parseDouble());
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1308,7 +1289,7 @@ public class TextWire implements Wire, InternalWireIn {
         public WireIn float64(@NotNull DoubleConsumer v) {
             consumeWhiteSpace();
             v.accept(bytes.parseDouble());
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1318,7 +1299,7 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             textTo(sb);
             localTime.accept(LocalTime.parse(Wires.INTERNER.intern(sb)));
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1328,7 +1309,7 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             textTo(sb);
             zonedDateTime.accept(ZonedDateTime.parse(Wires.INTERNER.intern(sb)));
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1338,7 +1319,7 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             textTo(sb);
             localDate.accept(LocalDate.parse(Wires.INTERNER.intern(sb)));
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @Override
@@ -1364,7 +1345,7 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             textTo(sb);
             uuid.accept(UUID.fromString(Wires.INTERNER.intern(sb)));
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1378,7 +1359,7 @@ public class TextWire implements Wire, InternalWireIn {
             long length = TextLongArrayReference.peakLength(bytes, bytes.readPosition());
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1392,7 +1373,7 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             if (peekCode() == ',')
                 bytes.readSkip(1);
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1417,7 +1398,7 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             if (peekCode() == ',')
                 bytes.readSkip(1);
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1432,16 +1413,16 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             code = (char) peekCode();
             if (code == ']')
-                return TextWire.this;
+                return JSONWire.this;
 
-            reader.accept(TextWire.this.valueIn);
+            reader.accept(JSONWire.this.valueIn);
 
             consumeWhiteSpace();
             code = (char) peekCode();
             if (code != ']')
                 throw new IORuntimeException("Expected a ] but got " + code + " (" + code + ")");
 
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @Override
@@ -1462,7 +1443,7 @@ public class TextWire implements Wire, InternalWireIn {
                 bytes.readLimit(newLimit);
                 bytes.readSkip(1); // skip the {
                 consumeWhiteSpace();
-                return marshallableReader.apply(TextWire.this);
+                return marshallableReader.apply(JSONWire.this);
             } finally {
                 bytes.readLimit(limit);
 
@@ -1489,7 +1470,7 @@ public class TextWire implements Wire, InternalWireIn {
 
                 parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             }
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1508,7 +1489,7 @@ public class TextWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             classNameConsumer.accept(sb);
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @NotNull
@@ -1533,7 +1514,7 @@ public class TextWire implements Wire, InternalWireIn {
                 bytes.readLimit(newLimit);
                 bytes.readSkip(1); // skip the {
                 consumeWhiteSpace();
-                object.readMarshallable(TextWire.this);
+                object.readMarshallable(JSONWire.this);
             } finally {
                 bytes.readLimit(limit);
                 bytes.readPosition(newLimit);
@@ -1545,7 +1526,7 @@ public class TextWire implements Wire, InternalWireIn {
                 throw new IORuntimeException("Unterminated { while reading marshallable " +
                         object + ",code='" + (char) code + "', bytes=" + Bytes.toString(bytes)
                 );
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @Nullable
@@ -1746,7 +1727,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public <E> WireIn object(@NotNull Class<E> clazz, @NotNull Consumer<E> e) {
             e.accept(ObjectUtils.convertTo(clazz, object0(null, clazz)));
-            return TextWire.this;
+            return JSONWire.this;
         }
 
         @Nullable

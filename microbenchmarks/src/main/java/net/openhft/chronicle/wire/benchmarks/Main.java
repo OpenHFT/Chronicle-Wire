@@ -65,6 +65,7 @@ public class Main {
     final Wire bwireFTT = new BinaryWire(bytes, false, true, true);
     final Wire rwireUTF = new RawWire(bytes, false);
     final Wire rwire8bit = new RawWire(bytes, true);
+    final Wire json = new JSONWire(bytes, true);
 
     final Data data = new Data(123, 1234567890L, 1234, true, "Hello World!", Side.Sell);
     final Data2 data2 = new Data2(123, 1234567890L, 1234, true, "Hello World!", Side.Sell);
@@ -102,6 +103,7 @@ public class Main {
         }
     }
 
+/*
     @Benchmark
     @PrintAsText
     public Data twireUTF() {
@@ -182,6 +184,13 @@ public class Main {
         int len = bytes.readInt();
         data2B.readMarshallable(bytes);
         return dataB;
+    }
+*/
+
+    @Benchmark
+    @PrintAsText
+    public Data2 json8bit() {
+        return writeReadTest2(json);
     }
 
     @NotNull
