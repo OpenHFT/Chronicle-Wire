@@ -112,6 +112,7 @@ All times are in micro-seconds
 | JSONWire             |  100   |  3.11       |        5.56    | 10.62           |  36.9    |
 | Jackson                |  100   |   4.95       |       8.3      | 1,400           | 1,500 |
 | Jackson + C-Bytes |  100   |   2.87       |      10.1     | 1,300           | 1,400 |
+| Jackson + C-Bytes Reader/Writer| 100  |  3.06 | 10.3 |  883           | 1,500 |
 | BSON                   | 96     |  19.8        |   1,430       | 1,400          | 1,600 |
 | BSON + C-Bytes    | 96     |  7.47        |       15.1    | 1,400          | 11,600 |
 | BOON Json           |  100   |  20.7        |       32.5    | 11,000         | 69,000 |

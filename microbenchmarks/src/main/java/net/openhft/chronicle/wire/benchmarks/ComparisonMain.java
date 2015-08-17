@@ -23,14 +23,11 @@ import baseline.MessageHeaderEncoder;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import de.undercouch.bson4jackson.BsonFactory;
-import net.minidev.json.JSONObject;
-import net.minidev.json.JSONStyle;
 import net.minidev.json.parser.JSONParser;
 import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytesStore;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.wire.benchmarks.sbe.ExampleUsingGeneratedStub;
 import org.boon.json.JsonFactory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -76,8 +73,11 @@ public class ComparisonMain {
     Bytes bytes = Bytes.allocateDirect(512).unchecked(true);
     InputStream inputStream = bytes.inputStream();
     OutputStream outputStream = bytes.outputStream();
+    Writer writer = bytes.writer();
+    Reader reader = bytes.reader();
     JsonGenerator generator;
-    JsonParser jp; // or URL, Stream, Reader, String, byte[]
+    JsonParser jp;
+    JsonParser textJP;
     JsonParser bsonParser;
     private byte[] buf;
 
@@ -88,6 +88,7 @@ public class ComparisonMain {
         yaml = new Yaml(new Constructor(Data.class), representer, options);
         try {
             jp = jsonFactory.createParser(inputStream);
+            textJP = jsonFactory.createParser(reader);
             bsonParser = factory.createJsonParser(inputStream);
         } catch (IOException e) {
             throw new AssertionError(e);
@@ -144,66 +145,79 @@ public class ComparisonMain {
         }
     }
 
+    /*
+        @Benchmark
+        public Data snakeYaml() {
+            s = yaml.dumpAsMap(data);
+            Data data = (Data) yaml.load(s);
+            return data;
+        }
+
+        // fails on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
+    //    @Benchmark
+        public Data jsonSmart() throws net.minidev.json.parser.ParseException {
+            JSONObject obj = new JSONObject();
+            data.writeTo(obj);
+            s = obj.toJSONString();
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(s);
+            data2.readFrom(jsonObject);
+            return data2;
+        }
+
+        // fails on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
+    //    @Benchmark
+        public void jsonSmartCompact() throws net.minidev.json.parser.ParseException {
+            JSONObject obj = new JSONObject();
+            data.writeTo(obj);
+            s = obj.toJSONString(JSONStyle.MAX_COMPRESS);
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(s);
+            data.readFrom(jsonObject);
+        }
+
+        @Benchmark
+        public Data boon() {
+            sb.setLength(0);
+            boonMapper.toJson(data, sb);
+            return boonMapper.fromJson(sb.toString(), Data.class);
+        }
+
+        @Benchmark
+        public Data jackson() throws IOException {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            JsonGenerator generator = jsonFactory.createGenerator(baos);
+            data.writeTo(generator);
+            generator.flush();
+
+            buf = baos.toByteArray();
+            JsonParser jp = jsonFactory.createParser(buf); // or URL, Stream, Reader, String, byte[]
+            data2.readFrom(jp);
+            return data2;
+        }
+
+        @Benchmark
+        public Data jacksonWithCBytes() throws IOException {
+            bytes.clear();
+            generator = jsonFactory.createGenerator(outputStream);
+            data.writeTo(generator);
+            generator.flush();
+
+            jp.clearCurrentToken();
+            data2.readFrom(jp);
+            return data2;
+        }
+    */
     @Benchmark
-    public Data snakeYaml() {
-        s = yaml.dumpAsMap(data);
-        Data data = (Data) yaml.load(s);
-        return data;
-    }
-
-    // fails on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
-//    @Benchmark
-    public Data jsonSmart() throws net.minidev.json.parser.ParseException {
-        JSONObject obj = new JSONObject();
-        data.writeTo(obj);
-        s = obj.toJSONString();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(s);
-        data2.readFrom(jsonObject);
-        return data2;
-    }
-
-    // fails on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
-//    @Benchmark
-    public void jsonSmartCompact() throws net.minidev.json.parser.ParseException {
-        JSONObject obj = new JSONObject();
-        data.writeTo(obj);
-        s = obj.toJSONString(JSONStyle.MAX_COMPRESS);
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(s);
-        data.readFrom(jsonObject);
-    }
-
-    @Benchmark
-    public Data boon() {
-        sb.setLength(0);
-        boonMapper.toJson(data, sb);
-        return boonMapper.fromJson(sb.toString(), Data.class);
-    }
-
-    @Benchmark
-    public Data jackson() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        JsonGenerator generator = jsonFactory.createGenerator(baos);
-        data.writeTo(generator);
-        generator.flush();
-
-        buf = baos.toByteArray();
-        JsonParser jp = jsonFactory.createParser(buf); // or URL, Stream, Reader, String, byte[]
-        data2.readFrom(jp);
-        return data2;
-    }
-
-    @Benchmark
-    public Data jacksonWithCBytes() throws IOException {
+    public Data jacksonWithTextCBytes() throws IOException {
         bytes.clear();
-        generator = jsonFactory.createGenerator(outputStream);
+        generator = jsonFactory.createGenerator(writer);
         data.writeTo(generator);
         generator.flush();
 
-        jp.clearCurrentToken();
-        data2.readFrom(jp);
+        textJP.clearCurrentToken();
+        data2.readFrom(textJP);
         return data2;
     }
-
+/*
     @Benchmark
     public Data bson() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -268,4 +282,5 @@ public class ComparisonMain {
             return (Data) ois.readObject();
         }
     }
+    */
 }

@@ -19,7 +19,6 @@ package net.openhft.chronicle.wire.benchmarks;
 import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.wire.*;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -102,7 +101,7 @@ public class Main {
             new Runner(opt).run();
         }
     }
-
+/*
     @Benchmark
     @PrintAsText
     public Data twireUTF() {
@@ -206,5 +205,6 @@ public class Main {
         Wires.rawReadData(wire, data2B);
         return data2B;
     }
+    */
 }
 
