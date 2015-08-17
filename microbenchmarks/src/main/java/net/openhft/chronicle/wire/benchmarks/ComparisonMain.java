@@ -20,19 +20,23 @@ import baseline.DataDecoder;
 import baseline.DataEncoder;
 import baseline.MessageHeaderDecoder;
 import baseline.MessageHeaderEncoder;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import de.undercouch.bson4jackson.BsonFactory;
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONStyle;
 import net.minidev.json.parser.JSONParser;
 import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytesStore;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.wire.benchmarks.sbe.ExampleUsingGeneratedStub;
 import org.boon.json.JsonFactory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
@@ -42,7 +46,7 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
 import uk.co.real_logic.agrona.concurrent.UnsafeBuffer;
 
-import java.lang.reflect.InvocationTargetException;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
@@ -69,6 +73,12 @@ public class ComparisonMain {
     DataDecoder dd = new DataDecoder();
     MessageHeaderEncoder mhe = new MessageHeaderEncoder();
     MessageHeaderDecoder mhd = new MessageHeaderDecoder();
+    Bytes bytes = Bytes.allocateDirect(512).unchecked(true);
+    InputStream inputStream = bytes.inputStream();
+    OutputStream outputStream = bytes.outputStream();
+    JsonGenerator generator;
+    JsonParser jp; // or URL, Stream, Reader, String, byte[]
+    JsonParser bsonParser;
     private byte[] buf;
 
     public ComparisonMain() {
@@ -76,9 +86,15 @@ public class ComparisonMain {
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         Representer representer = new Representer();
         yaml = new Yaml(new Constructor(Data.class), representer, options);
+        try {
+            jp = jsonFactory.createParser(inputStream);
+            bsonParser = factory.createJsonParser(inputStream);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
     }
 
-    public static void main(String... args) throws RunnerException, InvocationTargetException, IllegalAccessException {
+    public static void main(String... args) throws Exception {
         Affinity.setAffinity(2);
         if (Jvm.isDebug()) {
             ComparisonMain main = new ComparisonMain();
@@ -104,6 +120,10 @@ public class ComparisonMain {
                     } else if (main.buf != null) {
                         System.out.println("Test " + m.getName() + " used " + main.buf.length + " chars.");
                         System.out.println(Bytes.wrapForRead(main.buf).toHexString());
+                    } else if (main.bytes.writePosition() > 0) {
+                        main.bytes.readPosition(0);
+                        System.out.println("Test " + m.getName() + " used " + main.bytes.readRemaining() + " chars.");
+                        System.out.println(main.bytes.toHexString());
                     }
                 }
             }
@@ -124,7 +144,6 @@ public class ComparisonMain {
         }
     }
 
-    /*
     @Benchmark
     public Data snakeYaml() {
         s = yaml.dumpAsMap(data);
@@ -134,7 +153,7 @@ public class ComparisonMain {
 
     // fails on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
 //    @Benchmark
-    public Data jsonSmart() throws ParseException {
+    public Data jsonSmart() throws net.minidev.json.parser.ParseException {
         JSONObject obj = new JSONObject();
         data.writeTo(obj);
         s = obj.toJSONString();
@@ -145,7 +164,7 @@ public class ComparisonMain {
 
     // fails on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
 //    @Benchmark
-    public void jsonSmartCompact() throws ParseException {
+    public void jsonSmartCompact() throws net.minidev.json.parser.ParseException {
         JSONObject obj = new JSONObject();
         data.writeTo(obj);
         s = obj.toJSONString(JSONStyle.MAX_COMPRESS);
@@ -172,6 +191,19 @@ public class ComparisonMain {
         data2.readFrom(jp);
         return data2;
     }
+
+    @Benchmark
+    public Data jacksonWithCBytes() throws IOException {
+        bytes.clear();
+        generator = jsonFactory.createGenerator(outputStream);
+        data.writeTo(generator);
+        generator.flush();
+
+        jp.clearCurrentToken();
+        data2.readFrom(jp);
+        return data2;
+    }
+
     @Benchmark
     public Data bson() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -182,6 +214,17 @@ public class ComparisonMain {
         ByteArrayInputStream bais = new ByteArrayInputStream(buf);
         JsonParser parser = factory.createJsonParser(bais);
         data2.readFrom(parser);
+        return data2;
+    }
+
+    @Benchmark
+    public Data bsonWithCBytes() throws IOException {
+        bytes.clear();
+        JsonGenerator gen = factory.createJsonGenerator(outputStream);
+        data.writeTo(gen);
+
+        bsonParser.clearCurrentToken();
+        data2.readFrom(bsonParser);
         return data2;
     }
 
@@ -206,8 +249,6 @@ public class ComparisonMain {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(data);
-        JsonGenerator gen = factory.createJsonGenerator(baos);
-        data.writeTo(gen);
 
         buf = baos.toByteArray();
         ByteArrayInputStream bais = new ByteArrayInputStream(
@@ -216,5 +257,15 @@ public class ComparisonMain {
             return (Data) ois.readObject();
         }
     }
-    */
+
+    @Benchmark
+    public Data externalizableWithCBytes() throws IOException, ClassNotFoundException {
+        bytes.clear();
+        ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+        oos.writeObject(data);
+
+        try (ObjectInputStream ois = new ObjectInputStream(inputStream)) {
+            return (Data) ois.readObject();
+        }
+    }
 }

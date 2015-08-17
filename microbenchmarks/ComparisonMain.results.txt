@@ -31,7 +31,7 @@ Test sbe used 43 chars.
 00000010 00 00 00 48 93 40 01 0C  48 65 6C 6C 6F 20 57 6F ···H·@·· Hello Wo
 00000020 72 6C 64 21 00 00 00 00  01 00 00                rld!···· ···
 
-Test externalizable used 293 chars.
+Test externalizable used 197 chars.
 00000000 AC ED 00 05 73 72 00 2A  6E 65 74 2E 6F 70 65 6E ····sr·* net.open
 00000010 68 66 74 2E 63 68 72 6F  6E 69 63 6C 65 2E 77 69 hft.chro nicle.wi
 00000020 72 65 2E 62 65 6E 63 68  6D 61 72 6B 73 2E 44 61 re.bench marks.Da
@@ -44,10 +44,4 @@ Test externalizable used 293 chars.
 00000090 72 00 0E 6A 61 76 61 2E  6C 61 6E 67 2E 45 6E 75 r··java. lang.Enu
 000000a0 6D 00 00 00 00 00 00 00  00 12 00 00 78 70 74 00 m······· ····xpt·
 000000b0 04 53 65 6C 6C 74 00 0C  48 65 6C 6C 6F 20 57 6F ·Sellt·· Hello Wo
-000000c0 72 6C 64 21 78 60 00 00  00 01 70 72 69 63 65 00 rld!x`·· ··price·
-000000d0 00 00 00 00 00 48 93 40  08 66 6C 61 67 00 01 02 ·····H·@ ·flag···
-000000e0 74 65 78 74 00 0D 00 00  00 48 65 6C 6C 6F 20 57 text···· ·Hello W
-000000f0 6F 72 6C 64 21 00 02 73  69 64 65 00 05 00 00 00 orld!··s ide·····
-00000100 53 65 6C 6C 00 10 73 6D  61 6C 6C 49 6E 74 00 7B Sell··sm allInt·{
-00000110 00 00 00 12 6C 6F 6E 67  49 6E 74 00 D2 02 96 49 ····long Int····I
-00000120 00 00 00 00 00                                   ·····
+000000c0 72 6C 64 21 78                                   rld!x

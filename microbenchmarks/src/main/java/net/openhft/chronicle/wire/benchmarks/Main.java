@@ -103,7 +103,6 @@ public class Main {
         }
     }
 
-/*
     @Benchmark
     @PrintAsText
     public Data twireUTF() {
@@ -185,7 +184,6 @@ public class Main {
         data2B.readMarshallable(bytes);
         return dataB;
     }
-*/
 
     @Benchmark
     @PrintAsText

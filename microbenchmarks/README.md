@@ -96,22 +96,25 @@ There was a small advantage in encoding the side as a boolean rather than an Enu
 | Wire Format | Text encoding |  Fixed width values?  | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
 |--------------|:---------------:|:----------------------:|:-----------------:|:---------:|-------:|------------:|-------------:|--------------:|-------:|
 | SBE            | 8-bit              |  true                       | true                  | true         | 43     |   0.31       |       0.44     | 4.11            | 9.2     |
-| Jackson       | UTF-8            |  false                       | false                 | false       | 100   |   4.95       |        8.33    | 1,405           | 1,546 |
-| BSON         | UTF-8              |  true                       | false                 | false       | 96     |  19.8        |   1,430       | 1,477          | 1,602 |
-| Snake YAML | UTF-8            |  false                      | false                 | false        | 89     |  80.3        |   4,067       | 16,089        | 24,117 |
-| BOON Json | UTF-8              |  false                      | false                 | false        | 100   |  20.7        |       32.5    | 11,005         | 69,730 |
-| Externalizable | UTF-8          |  true                       | false                 | false        | 293   |  23.9       |        34.8     | 92,757        | 120,848 |
+| Jackson       | UTF-8            |  false                       | false                 | false       | 100   |   4.95       |        8.33    | 1,400           | 1,500 |
+| BSON         | UTF-8              |  true                       | false                 | false       | 96     |  19.8        |   1,430       | 1,400          | 1,600 |
+| Snake YAML | UTF-8            |  false                      | false                 | false        | 89     |  80.3        |   4,067       | 16,000        | 24,000 |
+| BOON Json | UTF-8              |  false                      | false                 | false        | 100   |  20.7        |       32.5    | 11,000         | 69,000 |
+| Externalizable | UTF-8          |  true                       | false                 | false        | 197   |  25.0       |        29.7     | 85,000        | 120,000 |
+| Externalizable with Chronicle Bytes | UTF-8 |  true   | false                 | false        | 197   |  24.5       |        29.3     | 85,000        | 118,000 |
 
 All times are in micro-seconds
 
 ## Comparison of JSON formats
 
 | Wire Format | Text encoding | Fixed width values? | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
-|--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-----:|-----------:|-------------:|---------------:|---------:|
-| JSONWire   | 8-bit              |  false                      | false                | false        | 100   |  3.11       | 5.56          | 10.62           |  36.9    |
-| Jackson       | UTF-8            |  false                       | false                 | false       | 100   |   4.95       |        8.33    | 1,405           | 1,546 |
-| BSON         | UTF-8              |  true                       | false                 | false       | 96     |  19.8        |   1,430       | 1,477          | 1,602 |
-| BOON Json | UTF-8              |  false                      | false                 | false        | 100   |  20.7        |       32.5    | 11,005         | 69,730 |
+|--------------|:---------------:|:---------------------:|:----------------:|:-----------:|-----:|------------:|-------------:|---------------:|--------:|
+| JSONWire   | 8-bit              |  false                      | false                | false        | 100   |  3.11       |        5.56    | 10.62           |  36.9    |
+| Jackson       | UTF-8            |  false                     | false                 | false       | 100   |   4.95       |       8.3      | 1,400           | 1,500 |
+| Jackson with Chronicle Bytes | UTF-8 |  false         | false                 | false       | 100   |   2.87       |      10.1     | 1,300           | 1,400 |
+| BSON         | UTF-8              |  true                     | false                 | false       | 96     |  19.8        |   1,430       | 1,400          | 1,600 |
+| BSON with Chronicle Bytes | UTF-8   |  true           | false                 | false       | 96     |  7.47        |       15.1    | 1,400          | 11,600 |
+| BOON Json | UTF-8              |  false                    | false                 | false        | 100   |  20.7        |       32.5    | 11,000         | 69,000 |
 
 ## SBE (Simple Binary Encoding)
 SBE performs as well are BytesMarshallable.  Even though it was slower in this test, the difference to too small to draw any conclusions. i.e. in a different use case, a different developer might find the difference reversed.
