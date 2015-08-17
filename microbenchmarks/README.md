@@ -109,15 +109,17 @@ All times are in micro-seconds
 
 | Wire Format          | Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
 |---------------------:|------:|------------:|------------:|---------------:|--------:|
-| JSONWire             |  100   |  3.11       |        5.56    | 10.62           |  36.9    |
+| JSONWire             |  100*   |  3.11       |        5.56    | 10.62           |  36.9    |
 | Jackson                |  100   |   4.95       |       8.3      | 1,400           | 1,500 |
-| Jackson + C-Bytes |  100   |   2.87       |      10.1     | 1,300           | 1,400 |
-| Jackson + C-Bytes Reader/Writer| 100  |  3.06 | 10.3 |  883           | 1,500 |
+| Jackson + C-Bytes |  100*   |   2.87       |      10.1     | 1,300           | 1,400 |
+| Jackson + C-Bytes Reader/Writer| 100*  |  3.06 | 10.3 |  883           | 1,500 |
 | BSON                   | 96     |  19.8        |   1,430       | 1,400          | 1,600 |
-| BSON + C-Bytes    | 96     |  7.47        |       15.1    | 1,400          | 11,600 |
+| BSON + C-Bytes    | 96*     |  7.47        |       15.1    | 1,400          | 11,600 |
 | BOON Json           |  100   |  20.7        |       32.5    | 11,000         | 69,000 |
 
 "C-Bytes" means using a recycled Chronicle Bytes buffer.
+
+Tests with "*" on Bytes mean this has been written to/read from direct memory and won't have a copy overhead when working with NIO such as TCP or Files.
 
 ## SBE (Simple Binary Encoding)
 SBE performs as well are BytesMarshallable.  Even though it was slower in this test, the difference to too small to draw any conclusions. i.e. in a different use case, a different developer might find the difference reversed.
