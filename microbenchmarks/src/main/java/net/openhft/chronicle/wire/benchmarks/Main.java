@@ -19,7 +19,6 @@ package net.openhft.chronicle.wire.benchmarks;
 import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.wire.*;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -65,6 +64,7 @@ public class Main {
     final Wire bwireFTT = new BinaryWire(bytes, false, true, true);
     final Wire rwireUTF = new RawWire(bytes, false);
     final Wire rwire8bit = new RawWire(bytes, true);
+    final Wire json = new JSONWire(bytes, true);
 
     final Data data = new Data(123, 1234567890L, 1234, true, "Hello World!", Side.Sell);
     final Data2 data2 = new Data2(123, 1234567890L, 1234, true, "Hello World!", Side.Sell);
@@ -101,7 +101,7 @@ public class Main {
             new Runner(opt).run();
         }
     }
-
+/*
     @Benchmark
     @PrintAsText
     public Data twireUTF() {
@@ -184,6 +184,12 @@ public class Main {
         return dataB;
     }
 
+    @Benchmark
+    @PrintAsText
+    public Data2 json8bit() {
+        return writeReadTest2(json);
+    }
+
     @NotNull
     public Data writeReadTest(Wire wire) {
         bytes.clear();
@@ -199,5 +205,6 @@ public class Main {
         Wires.rawReadData(wire, data2B);
         return data2B;
     }
+    */
 }
 

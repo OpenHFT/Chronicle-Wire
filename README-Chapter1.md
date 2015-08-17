@@ -47,6 +47,12 @@ wire2.write(() -> "message").text("Hello World")
         .write(() -> "code").asEnum(TimeUnit.SECONDS)
         .write(() -> "price").float64(10.50);
         System.out.println(bytes2.toHexString());
+
+// to obtain the underlying ByteBuffer to write to a Channel
+ByteBuffer byteBuffer = bytes2.underlyingObject();
+byteBuffer.position(0);
+byteBuffer.limit(bytes2.length());
+/*
 ```
 
 prints

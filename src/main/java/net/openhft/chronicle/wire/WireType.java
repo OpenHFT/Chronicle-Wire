@@ -43,6 +43,12 @@ public enum WireType implements Function<Bytes, Wire> {
         public Wire apply(Bytes bytes) {
             return new BinaryWire(bytes, false, false, true);
         }
+    }, JSON {
+        @NotNull
+        @Override
+        public Wire apply(Bytes bytes) {
+            return new JSONWire(bytes);
+        }
     }, RAW {
         @NotNull
         @Override
