@@ -2131,10 +2131,13 @@ public class BinaryWire implements Wire, InternalWireIn {
                 case BinaryWireHighCode.SPECIAL:
                     switch (code) {
                         case FALSE:
+                            bytes.readSkip(1);
                             return Boolean.FALSE;
                         case TRUE:
+                            bytes.readSkip(1);
                             return Boolean.TRUE;
                         case NULL:
+                            bytes.readSkip(1);
                             return null;
                         case STRING_ANY:
                             return text();
