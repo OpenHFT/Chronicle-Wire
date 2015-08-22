@@ -800,9 +800,9 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn type(@NotNull StringBuilder s) {
+        public ValueIn type(@NotNull StringBuilder s) {
             bytes.readUTFΔ(s);
-            return RawWire.this;
+            return this;
         }
 
         @NotNull

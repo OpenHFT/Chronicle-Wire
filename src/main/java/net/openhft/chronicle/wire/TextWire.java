@@ -1477,7 +1477,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn type(@NotNull StringBuilder sb) {
+        public ValueIn type(@NotNull StringBuilder sb) {
             consumeWhiteSpace();
             int code = peekCode();
             if (code == -1) {
@@ -1489,8 +1489,9 @@ public class TextWire implements Wire, InternalWireIn {
 
                 parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             }
-            return TextWire.this;
+            return this;
         }
+
 
         @NotNull
         String stringForCode(int code) {

@@ -165,7 +165,15 @@ public interface ValueIn {
     <T extends ReadMarshallable> T typedMarshallable();
 
     @NotNull
-    WireIn type(@NotNull StringBuilder s);
+    ValueIn type(@NotNull StringBuilder s);
+
+    @NotNull
+    default ValueIn type(@NotNull Consumer<StringBuilder> s) {
+        StringBuilder sb = Wires.acquireStringBuilder();
+        type(sb);
+        s.accept(sb);
+        return this;
+    }
 
     @NotNull
     WireIn typeLiteralAsText(@NotNull Consumer<CharSequence> classNameConsumer);
@@ -243,14 +251,14 @@ public interface ValueIn {
     @Nullable
     <E> WireIn object(@NotNull Class<E> clazz, Consumer<E> e);
 
-    default Class typeLiteral(){
+    default Class typeLiteral() {
         Class[] clazz = {null};
         typeLiteral(
-        ClassAliasPool.CLASS_ALIASES::forName,c->clazz[0]=c);
+                ClassAliasPool.CLASS_ALIASES::forName, c -> clazz[0] = c);
         return clazz[0];
     }
 
-    default byte[] snappy(){
+    default byte[] snappy() {
         throw new UnsupportedOperationException();
     }
 }

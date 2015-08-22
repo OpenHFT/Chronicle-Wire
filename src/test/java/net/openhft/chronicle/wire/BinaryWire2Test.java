@@ -173,7 +173,7 @@ public class BinaryWire2Test {
                             s.marshallable(m ->
                                     m.read(() -> "key").text(key2)
                                             .read(() -> "value").text(value2));
-                }));
+                        }));
     }
 
     @Test
@@ -186,5 +186,36 @@ public class BinaryWire2Test {
         assertEquals(WireType.BINARY, wire.read().object(Object.class));
         assertEquals(WireType.TEXT, wire.read().object(Object.class));
         assertEquals(WireType.RAW, wire.read().object(Object.class));
+    }
+
+    @Test
+    public void fieldAfterNull() {
+        Wire wire = createWire();
+        wire.writeDocument(false, w -> w.write(() -> "data").type("!UpdateEvent").marshallable(
+                v -> v.write(() -> "assetName").text("/name")
+                        .write(() -> "key").object("test")
+                        .write(() -> "oldValue").object(null)
+                        .write(() -> "value").object("world2")));
+        /*
+--- !!not-ready-data! #binary
+reply: !UpdatedEvent {
+  assetName: /name,
+  key: hello,
+  oldValue: !!null "",
+  value: world2
+}
+         */
+        assertEquals("--- !!data #binary\n" +
+                "data: !!UpdateEvent {\n" +
+                "  assetName: /name,\n" +
+                "  key: test,\n" +
+                "  oldValue: !!null \"\",\n" +
+                "  value: world2\n" +
+                "}\n", Wires.fromSizePrefixedBinaryToText(wire.bytes()));
+        wire.readDocument(null, w -> w.read(() -> "data").type(t -> assertEquals("!UpdateEvent", t.toString())).marshallable(
+                m -> m.read(() -> "assetName").object(String.class, s -> Assert.assertEquals("/name", s))
+                        .read(() -> "key").object(String.class, s -> Assert.assertEquals("test", s))
+                        .read(() -> "oldValue").object(String.class, s -> Assert.assertNull(s))
+                        .read(() -> "value").object(String.class, s -> Assert.assertEquals("world2", s))));
     }
 }
