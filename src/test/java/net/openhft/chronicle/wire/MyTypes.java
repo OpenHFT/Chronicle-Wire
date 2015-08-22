@@ -19,7 +19,7 @@ import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-class MyTypes implements Marshallable {
+final class MyTypes implements Marshallable {
     final StringBuilder text = new StringBuilder();
     boolean b;
     short s;
@@ -27,24 +27,53 @@ class MyTypes implements Marshallable {
     long l;
     int i;
 
-    void b(boolean b) {
+    public void b(boolean b) {
         this.b = b;
     }
 
-    void s(short s) {
+    public boolean b() {
+        return this.b;
+    }
+
+    public void s(short s) {
         this.s = s;
     }
 
-    void d(double d) {
+    public short s() {
+        return this.s;
+    }
+
+    public void d(double d) {
         this.d = d;
     }
 
-    void l(long l) {
+    public double d() {
+        return this.d;
+    }
+
+    public void l(long l) {
         this.l = l;
     }
 
-    void i(int i) {
+    public long l() {
+        return this.l;
+    }
+
+    public void i(int i) {
         this.i = i;
+    }
+
+    public int i() {
+        return this.i;
+    }
+
+    public CharSequence text() {
+        return text;
+    }
+
+    public void text(CharSequence value) {
+        text.setLength(0);
+        text.append(value);
     }
 
     @Override
@@ -81,7 +110,6 @@ class MyTypes implements Marshallable {
         if (l != myTypes.l) return false;
         if (s != myTypes.s) return false;
         return StringUtils.isEqual(text, myTypes.text);
-
     }
 
     @NotNull
