@@ -880,10 +880,10 @@ public class QueryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn type(@NotNull StringBuilder s) {
+        public ValueIn type(@NotNull StringBuilder s) {
             consumeWhiteSpace();
             bytes.parseUTF(s, QueryStopCharTesters.QUERY_VALUE);
-            return QueryWire.this;
+            return this;
         }
 
         @NotNull

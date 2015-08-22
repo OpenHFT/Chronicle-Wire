@@ -1458,7 +1458,7 @@ public class JSONWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn type(@NotNull StringBuilder sb) {
+        public ValueIn type(@NotNull StringBuilder sb) {
             consumeWhiteSpace();
             int code = peekCode();
             if (code == -1) {
@@ -1470,7 +1470,7 @@ public class JSONWire implements Wire, InternalWireIn {
 
                 parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             }
-            return JSONWire.this;
+            return this;
         }
 
         @NotNull

@@ -1877,7 +1877,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn type(@NotNull StringBuilder s) {
+        public ValueIn type(@NotNull StringBuilder s) {
             int code = readCode();
             if (code == TYPE_PREFIX) {
                 bytes.readUTFΔ(s);
@@ -1888,7 +1888,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             } else {
                 cantRead(code);
             }
-            return BinaryWire.this;
+            return this;
         }
 
         @NotNull
