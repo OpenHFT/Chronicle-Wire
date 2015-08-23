@@ -188,6 +188,37 @@ public class BinaryWire2Test {
         assertEquals(WireType.RAW, wire.read().object(Object.class));
     }
 
+
+    @Test
+    public void fieldAfterText() {
+        Wire wire = createWire();
+        wire.writeDocument(false, w -> w.write(() -> "data").type("!UpdateEvent").marshallable(
+                v -> v.write(() -> "assetName").text("/name")
+                        .write(() -> "key").object("test")
+                        .write(() -> "oldValue").object("world1")
+                        .write(() -> "value").object("world2")));
+        /*
+--- !!not-ready-data! #binary
+reply: !UpdatedEvent {
+  assetName: /name,
+  key: hello,
+  oldValue: world1,
+  value: world2
+}
+         */
+        assertEquals("--- !!data #binary\n" +
+                "data: !!UpdateEvent {\n" +
+                "  assetName: /name,\n" +
+                "  key: test,\n" +
+                "  oldValue: world1,\n" +
+                "  value: world2\n" +
+                "}\n", Wires.fromSizePrefixedBinaryToText(wire.bytes()));
+        wire.readDocument(null, w -> w.read(() -> "data").type(t -> assertEquals("!UpdateEvent", t.toString())).marshallable(
+                m -> m.read(() -> "assetName").object(String.class, s -> Assert.assertEquals("/name", s))
+                        .read(() -> "key").object(String.class, s -> Assert.assertEquals("test", s))
+                        .read(() -> "oldValue").object(String.class, s -> Assert.assertEquals("world1", s))
+                        .read(() -> "value").object(String.class, s -> Assert.assertEquals("world2", s))));
+    }
     @Test
     public void fieldAfterNull() {
         Wire wire = createWire();
@@ -215,7 +246,7 @@ reply: !UpdatedEvent {
         wire.readDocument(null, w -> w.read(() -> "data").type(t -> assertEquals("!UpdateEvent", t.toString())).marshallable(
                 m -> m.read(() -> "assetName").object(String.class, s -> Assert.assertEquals("/name", s))
                         .read(() -> "key").object(String.class, s -> Assert.assertEquals("test", s))
-                        .read(() -> "oldValue").object(String.class, s -> Assert.assertNull(s))
+                        .read(() -> "oldValue").object(String.class, Assert::assertNull)
                         .read(() -> "value").object(String.class, s -> Assert.assertEquals("world2", s))));
     }
 }

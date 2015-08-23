@@ -1436,6 +1436,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                     bytes.readLimit(bytes.readPosition() + len);
                     return UTF8_INTERNER.intern(bytes);
                 } finally {
+                    bytes.readPosition(bytes.readLimit());
                     bytes.readLimit(limit);
                 }
 
