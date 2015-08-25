@@ -2121,10 +2121,9 @@ public class TextWire implements Wire, InternalWireIn {
             } catch (NumberFormatException e) {
             }
             try {
-                if (s.length() >= 8 && s.length() <= 9)
-                    if (s.charAt(1) == ':')
+                if (s.length() == 7 && s.charAt(1) == ':')
                         return LocalTime.parse("0" + s);
-                    else
+                if (s.length() == 8 && s.charAt(2) == ':')
                         return LocalTime.parse(s);
             } catch (DateTimeParseException e) {
             }
@@ -2134,7 +2133,7 @@ public class TextWire implements Wire, InternalWireIn {
             } catch (DateTimeParseException e) {
             }
             try {
-                if (s.length() > 25)
+                if (s.length() >= 22)
                     return ZonedDateTime.parse(s);
             } catch (DateTimeParseException e) {
             }
