@@ -39,6 +39,7 @@ import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.*;
 
@@ -54,18 +55,23 @@ public class TextWire implements Wire, InternalWireIn {
     public static final BytesStore TYPE = BytesStore.wrap("!type ");
     static final String SEQ_MAP = "!seqmap";
     static final String NULL = "!null \"\"";
+    static final BitSet STARTS_QUOTE_CHARS = new BitSet();
     static final BitSet QUOTE_CHARS = new BitSet();
     static final Logger LOG = LoggerFactory.getLogger(TextWire.class);
     static final ThreadLocal<StopCharTester> ESCAPED_QUOTES = ThreadLocal.withInitial(() -> StopCharTesters.QUOTES.escaping());
+    static final ThreadLocal<StopCharTester> ESCAPED_SINGLE_QUOTES = ThreadLocal.withInitial(() -> StopCharTesters.SINGLE_QUOTES.escaping());
     static final ThreadLocal<StopCharsTester> ESCAPED_END_OF_TEXT = ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
     static final BytesStore COMMA_SPACE = BytesStore.wrap(", ");
     static final BytesStore COMMA_NEW_LINE = BytesStore.wrap(",\n");
     static final BytesStore NEW_LINE = BytesStore.wrap("\n");
     static final BytesStore SPACE = BytesStore.wrap(" ");
     static final BytesStore END_FIELD = NEW_LINE;
+    static final char[] HEX = "0123456789ABCDEF".toCharArray();
 
     static {
-        for (char ch : "\",\n\\#:{}[]".toCharArray())
+        for (char ch : "0123456789+- \t\',#:{}[]|>".toCharArray())
+            STARTS_QUOTE_CHARS.set(ch);
+        for (char ch : "\',#:{}[]|>".toCharArray())
             QUOTE_CHARS.set(ch);
     }
 
@@ -107,11 +113,29 @@ public class TextWire implements Wire, InternalWireIn {
             if (ch == '\\' && i < length - 1) {
                 char ch3 = sb.charAt(++i);
                 switch (ch3) {
+                    case 'b':
+                        ch = '\b';
+                        break;
+                    case 'r':
+                        ch = '\r';
+                        break;
                     case 'n':
                         ch = '\n';
                         break;
                     case 't':
                         ch = '\t';
+                        break;
+                    case 'x':
+                        ch = (char)
+                                (Character.getNumericValue(sb.charAt(++i)) * 16 +
+                                        Character.getNumericValue(sb.charAt(++i)));
+                        break;
+                    case 'u':
+                        ch = (char)
+                                (Character.getNumericValue(sb.charAt(++i)) * 4096 +
+                                        Character.getNumericValue(sb.charAt(++i)) * 256 +
+                                        Character.getNumericValue(sb.charAt(++i)) * 16 +
+                                        Character.getNumericValue(sb.charAt(++i)));
                         break;
                     default:
                         ch = ch3;
@@ -198,12 +222,20 @@ public class TextWire implements Wire, InternalWireIn {
         return sct;
     }
 
+    private StopCharTester getEscapingSingleQuotes() {
+        StopCharTester sct = ESCAPED_SINGLE_QUOTES.get();
+        // reset it.
+        sct.isStopChar(' ');
+        return sct;
+    }
+
     void consumeWhiteSpace() {
         for (; ; ) {
             int codePoint = peekCode();
             if (codePoint == '#') {
                 //noinspection StatementWithEmptyBody
                 while (readCode() >= ' ') ;
+                this.lineStart = bytes.readPosition();
             } else if (Character.isWhitespace(codePoint) || codePoint == ',') {
                 if (codePoint == '\n' || codePoint == '\r')
                     this.lineStart = bytes.readPosition() + 1;
@@ -211,6 +243,14 @@ public class TextWire implements Wire, InternalWireIn {
             } else {
                 break;
             }
+        }
+    }
+
+    void consumeDocumentStart() {
+        if (bytes.readRemaining() > 4) {
+            long pos = bytes.readPosition();
+            if (bytes.readByte(pos) == '-' && bytes.readByte(pos + 1) == '-' && bytes.readByte(pos + 2) == '-')
+                bytes.readSkip(3);
         }
     }
 
@@ -341,43 +381,79 @@ public class TextWire implements Wire, InternalWireIn {
     }
 
     void escape(@NotNull CharSequence s) {
-        if (!needsQuotes(s)) {
-            bytes.append(s);
+        Quotes quotes = needsQuotes(s);
+        if (quotes == Quotes.NONE) {
+            escape0(s, quotes);
             return;
         }
-        bytes.append('"');
+        bytes.append(quotes.q);
+        escape0(s, quotes);
+        bytes.append(quotes.q);
+    }
+
+    private void escape0(@NotNull CharSequence s, TextWire.Quotes quotes) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             switch (ch) {
                 case '"':
+                    if (ch == quotes.q) {
+                        bytes.append('\\').append(ch);
+                    } else {
+                        bytes.append(ch);
+                    }
+                    break;
+                case '\'':
+                    if (ch == quotes.q) {
+                        bytes.append('\\').append(ch);
+                    } else {
+                        bytes.append(ch);
+                    }
+                    break;
                 case '\\':
                     bytes.append('\\').append(ch);
                     break;
-
+                case '\b':
+                    bytes.append("\\b");
+                    break;
+                case '\t':
+                    bytes.append("\\t");
+                    break;
+                case '\r':
+                    bytes.append("\\r");
+                    break;
                 case '\n':
                     bytes.append("\\n");
                     break;
                 default:
-                    bytes.append(ch);
+                    if (ch > 127) {
+                        bytes.append("\\u");
+                        bytes.append(HEX[(ch >> 12) & 0xF]);
+                        bytes.append(HEX[(ch >> 8) & 0xF]);
+                        bytes.append(HEX[(ch >> 4) & 0xF]);
+                        bytes.append(HEX[ch & 0xF]);
+                    } else {
+                        bytes.append(ch);
+                    }
                     break;
             }
         }
-        bytes.append('"');
     }
 
-    boolean needsQuotes(@NotNull CharSequence s) {
-
+    Quotes needsQuotes(@NotNull CharSequence s) {
+        Quotes quotes = Quotes.NONE;
         if (s.length() == 0)
-            return true;
+            return Quotes.DOUBLE;
 
-        if (s.charAt(0) == ' ' || s.charAt(0) == '!' || s.charAt(s.length() - 1) == ' ')
-            return true;
-        for (int i = 0; i < s.length(); i++) {
+        if (STARTS_QUOTE_CHARS.get(s.charAt(0)))
+            return Quotes.DOUBLE;
+        for (int i = 1; i < s.length(); i++) {
             char ch = s.charAt(i);
             if (QUOTE_CHARS.get(ch))
-                return true;
+                return Quotes.DOUBLE;
+            if (ch == '"')
+                quotes = Quotes.SINGLE;
         }
-        return false;
+        return quotes;
     }
 
     @NotNull
@@ -385,7 +461,6 @@ public class TextWire implements Wire, InternalWireIn {
     public LongValue newLongReference() {
         return new TextLongReference();
     }
-
 
     @NotNull
     @Override
@@ -439,6 +514,7 @@ public class TextWire implements Wire, InternalWireIn {
 
     public Object readObject() {
         consumeWhiteSpace();
+        consumeDocumentStart();
         return readObject(0);
     }
 
@@ -450,6 +526,9 @@ public class TextWire implements Wire, InternalWireIn {
             return NoObject.NO_OBJECT;
         switch (code) {
             case '-':
+                if (bytes.readByte(bytes.readPosition() + 1) == '-')
+                    return NoObject.NO_OBJECT;
+
                 return readList(indentation2);
             case '[':
                 return readList();
@@ -478,6 +557,8 @@ public class TextWire implements Wire, InternalWireIn {
         List<Object> objects = new ArrayList<>();
         while (peekCode() == '-') {
             if (indentation() < indentation)
+                break;
+            if (bytes.readByte(bytes.readPosition() + 1) == '-')
                 break;
             long ls = lineStart;
             bytes.readSkip(1);
@@ -522,6 +603,8 @@ public class TextWire implements Wire, InternalWireIn {
                 break;
             read(sb);
             String key = Wires.INTERNER.intern(sb);
+            if (key.equals("..."))
+                break;
             Object value = valueIn.objectWithInferredType(Object.class);
             map.put(key, value);
         }
@@ -550,6 +633,15 @@ public class TextWire implements Wire, InternalWireIn {
     private void indentation(int indentation) {
         while (indentation-- > 0)
             bytes.append(' ');
+    }
+
+    enum Quotes {
+        NONE(' '), SINGLE('\''), DOUBLE('"');
+        final char q;
+
+        Quotes(char q) {
+            this.q = q;
+        }
     }
 
     enum NoObject {NO_OBJECT;}
@@ -1100,74 +1192,94 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             int ch = peekCode();
 
-            if (ch == '{') {
-                final long len = readLength();
-                try {
-                    a.append(Bytes.toString(bytes, bytes.readPosition(), len));
-                } catch (IOException e) {
-                    throw new AssertionError(e);
-                }
-                bytes.readSkip(len);
-
-                // read the next comma
-                bytes.skipTo(StopCharTesters.COMMA_STOP);
-
-                return a;
-
-            } else if (ch == '"') {
-                bytes.readSkip(1);
-                if (use8bit)
-                    bytes.parse8bit(a, getEscapingQuotes());
-                else
-                    bytes.parseUTF(a, getEscapingQuotes());
-                unescape(a);
-                int code = peekCode();
-                if (code == '"')
-                    readCode();
-
-            } else if (ch == '!') {
-                bytes.readSkip(1);
-                ch = peekCode();
-                if (ch == '!') {
-                    bytes.readSkip(1);
-                    StringBuilder sb = Wires.acquireStringBuilder();
-                    parseWord(sb);
-                    if (StringUtils.isEqual(sb, "null")) {
-                        textTo(sb);
-                        return null;
-                    } else if (StringUtils.isEqual(sb, "snappy")) {
-                        textTo(sb);
-                        try {
-                            //todo needs to be made efficient
-                            byte[] decodedBytes = Base64.getDecoder().decode(sb.toString().getBytes());
-                            String csq = Snappy.uncompressString(decodedBytes);
-                            return (ACS) Wires.acquireStringBuilder().append(csq);
-                        } catch (IOException e) {
-                            throw new AssertionError(e);
-                        }
+            switch (ch) {
+                case '{': {
+                    final long len = readLength();
+                    try {
+                        a.append(Bytes.toString(bytes, bytes.readPosition(), len));
+                    } catch (IOException e) {
+                        throw new AssertionError(e);
                     }
-                } else {
-                    StringBuilder sb = Wires.acquireStringBuilder();
-                    textTo(sb);
-                    // ignore the type.
-                }
+                    bytes.readSkip(len);
 
-            } else {
-                if (bytes.readRemaining() > 0) {
-                    if (a instanceof Bytes || use8bit)
-                        bytes.parse8bit(a, getEscapingEndOfText());
-                    else
-                        bytes.parseUTF(a, getEscapingEndOfText());
+                    // read the next comma
+                    bytes.skipTo(StopCharTesters.COMMA_STOP);
 
-                } else {
-                    BytesUtil.setLength(a, 0);
+                    return a;
+
                 }
-                // trim trailing spaces.
-                while (a.length() > 0)
-                    if (Character.isWhitespace(a.charAt(a.length() - 1)))
-                        BytesUtil.setLength(a, a.length() - 1);
+                case '"': {
+                    bytes.readSkip(1);
+                    if (use8bit)
+                        bytes.parse8bit(a, getEscapingQuotes());
                     else
-                        break;
+                        bytes.parseUTF(a, getEscapingQuotes());
+                    unescape(a);
+                    int code = peekCode();
+                    if (code == '"')
+                        readCode();
+                    break;
+
+                }
+                case '\'': {
+                    bytes.readSkip(1);
+                    if (use8bit)
+                        bytes.parse8bit(a, getEscapingSingleQuotes());
+                    else
+                        bytes.parseUTF(a, getEscapingSingleQuotes());
+                    unescape(a);
+                    int code = peekCode();
+                    if (code == '\'')
+                        readCode();
+                    break;
+
+                }
+                case '!': {
+                    bytes.readSkip(1);
+                    ch = peekCode();
+                    if (ch == '!') {
+                        bytes.readSkip(1);
+                        StringBuilder sb = Wires.acquireStringBuilder();
+                        parseWord(sb);
+                        if (StringUtils.isEqual(sb, "null")) {
+                            textTo(sb);
+                            return null;
+                        } else if (StringUtils.isEqual(sb, "snappy")) {
+                            textTo(sb);
+                            try {
+                                //todo needs to be made efficient
+                                byte[] decodedBytes = Base64.getDecoder().decode(sb.toString().getBytes());
+                                String csq = Snappy.uncompressString(decodedBytes);
+                                return (ACS) Wires.acquireStringBuilder().append(csq);
+                            } catch (IOException e) {
+                                throw new AssertionError(e);
+                            }
+                        }
+                    } else {
+                        StringBuilder sb = Wires.acquireStringBuilder();
+                        textTo(sb);
+                        // ignore the type.
+                    }
+                    break;
+                }
+                default: {
+                    if (bytes.readRemaining() > 0) {
+                        if (a instanceof Bytes || use8bit)
+                            bytes.parse8bit(a, getEscapingEndOfText());
+                        else
+                            bytes.parseUTF(a, getEscapingEndOfText());
+
+                    } else {
+                        BytesUtil.setLength(a, 0);
+                    }
+                    // trim trailing spaces.
+                    while (a.length() > 0)
+                        if (Character.isWhitespace(a.charAt(a.length() - 1)))
+                            BytesUtil.setLength(a, a.length() - 1);
+                        else
+                            break;
+                    break;
+                }
             }
 
             int prev = peekBack();
@@ -1964,19 +2076,69 @@ public class TextWire implements Wire, InternalWireIn {
                 case '!':
                     return typedObject();
                 case '-':
-                    return readList(indentation());
+                    if (bytes.readByte(bytes.readPosition() + 1) == ' ')
+                        return readList(indentation());
+                    return valueIn.readNumber();
                 case '[':
                     return readSequence(clazz);
                 case '{':
                     return readMap();
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                case '+':
+                    return valueIn.readNumber();
             }
             if (Enum.class.isAssignableFrom(clazz)) {
                 StringBuilder sb = Wires.acquireStringBuilder();
                 parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
                 return Wires.INTERNER.intern(sb);
             }
-
             return valueIn.text();
+        }
+
+        private Object readNumber() {
+            String s = text();
+            String ss = s;
+            if (s.length() > 40)
+                return s;
+
+            if (s.contains("_"))
+                ss = s.replace("_", "");
+            try {
+                return Long.decode(ss);
+            } catch (NumberFormatException e) {
+            }
+            try {
+                return Double.parseDouble(ss);
+            } catch (NumberFormatException e) {
+            }
+            try {
+                if (s.length() >= 8 && s.length() <= 9)
+                    if (s.charAt(1) == ':')
+                        return LocalTime.parse("0" + s);
+                    else
+                        return LocalTime.parse(s);
+            } catch (DateTimeParseException e) {
+            }
+            try {
+                if (s.length() == 10)
+                    return LocalDate.parse(s);
+            } catch (DateTimeParseException e) {
+            }
+            try {
+                if (s.length() > 25)
+                    return ZonedDateTime.parse(s);
+            } catch (DateTimeParseException e) {
+            }
+            return s;
         }
 
         @NotNull

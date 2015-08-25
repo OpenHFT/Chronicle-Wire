@@ -104,7 +104,7 @@ public class BinaryWireTest {
                 "[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ");
         checkAsText(wire,
                 "field1: field2: field3: ",
-                "1: 2: 3: ",
+                "\"1\": \"2\": \"3\": ",
                 "");
     }
 
@@ -131,7 +131,7 @@ public class BinaryWireTest {
                 "[pos: 0, rlim: 17, wlim: 8EiB, cap: 8EiB ] º²Ñ\\u0098!ºòÖø'º´Íýå\\u0083٠",
                 "[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ",
                 "[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ");
-        assertEquals(numericField ? "69609650: 83766130: -1019176629: " :
+        assertEquals(numericField ? "\"69609650\": \"83766130\": \"-1019176629\": " :
                 fieldLess ? "" : "Hello: World: \"" + name + "\": ", TextWire.asText(wire));
     }
 
@@ -142,7 +142,7 @@ public class BinaryWireTest {
         wire.write(BWKey.field1);
         wire.write(() -> "Test");
         checkAsText(wire, "\"\": field1: Test: ",
-                "\"\": 1: 2603186: ",
+                "\"\": \"1\": \"2603186\": ",
                 "");
 
         wire.read();
@@ -160,7 +160,7 @@ public class BinaryWireTest {
         wire.write(BWKey.field1);
         wire.write(() -> "Test");
         checkAsText(wire, "\"\": field1: Test: ",
-                "\"\": 1: 2603186: ",
+                "\"\": \"1\": \"2603186\": ",
                 "");
 
         // ok as blank matches anything
@@ -235,11 +235,24 @@ public class BinaryWireTest {
                         "field1: 2\n" +
                         "Test: 3\n",
                 "\"\": 1\n" +
-                        "1: 2\n" +
-                        "2603186: 3\n",
+                        "\"1\": 2\n" +
+                        "\"2603186\": 3\n",
                 "1\n" +
                         "2\n" +
                         "3\n"
+        );
+    }
+
+    private void checkAsText123_0(@NotNull Wire wire) {
+        checkAsText(wire, "\"\": 1.0\n" +
+                        "field1: 2.0\n" +
+                        "Test: 3.0\n",
+                "\"\": 1.0\n" +
+                        "\"1\": 2.0\n" +
+                        "\"2603186\": 3.0\n",
+                "1.0\n" +
+                        "2.0\n" +
+                        "3.0\n"
         );
     }
 
@@ -411,7 +424,10 @@ public class BinaryWireTest {
                 "[pos: 0, rlim: 35, wlim: 8EiB, cap: 8EiB ] À\\u0091٠٠٠٠٠٠ð?º⒈\\u0091٠٠٠٠٠٠٠@º²ñ\\u009E⒈\\u0091٠٠٠٠٠٠⒏@",
                 "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊",
                 "[pos: 0, rlim: 27, wlim: 8EiB, cap: 8EiB ] \\u0091٠٠٠٠٠٠ð?\\u0091٠٠٠٠٠٠٠@\\u0091٠٠٠٠٠٠⒏@");
+        if (wire.getValueOut() instanceof BinaryWire.BinaryValueOut)
         checkAsText123(wire);
+        else
+            checkAsText123_0(wire);
         wire.write().float64(0);
 
         // ok as blank matches anything
@@ -452,8 +468,8 @@ public class BinaryWireTest {
                         "field1: world\n" +
                         "Test: \"" + name + "\"\n",
                 "\"\": Hello\n" +
-                        "1: world\n" +
-                        "2603186: \"" + name + "\"\n",
+                        "\"1\": world\n" +
+                        "\"2603186\": \"" + name + "\"\n",
                 "Hello\n" +
                         "world\n" +
                         "\"" + name + "\"\n");
@@ -484,7 +500,7 @@ public class BinaryWireTest {
                 "[pos: 0, rlim: 145, wlim: 8EiB, cap: 8EiB ] ¶⒍MyType¶⒑AlsoMyType¶{" + name1,
                 "[pos: 0, rlim: 145, wlim: 8EiB, cap: 8EiB ] ¶⒍MyType¶⒑AlsoMyType¶{" + name1);
         checkAsText(wire, "\"\": !MyType field1: !AlsoMyType Test: !" + name1,
-                "\"\": !MyType 1: !AlsoMyType 2603186: !" + name1,
+                "\"\": !MyType \"1\": !AlsoMyType \"2603186\": !" + name1,
                 "!MyType !AlsoMyType !" + name1);
 
         // ok as blank matches anything

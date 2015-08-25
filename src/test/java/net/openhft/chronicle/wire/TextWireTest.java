@@ -392,10 +392,10 @@ public class TextWireTest {
         wire.write().float64(1);
         wire.write(BWKey.field1).float64(2);
         wire.write(() -> "Test").float64(3);
-        expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
-        assertEquals("\"\": 1\n" +
-                "field1: 2\n" +
-                "Test: 3\n", wire.toString());
+        assertEquals("\"\": 1.0\n" +
+                "field1: 2.0\n" +
+                "Test: 3.0\n", wire.toString());
+        expectWithSnakeYaml("{=1.0, field1=2.0, Test=3.0}", wire);
 
         // ok as blank matches anything
         class Floater {

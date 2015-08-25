@@ -220,41 +220,41 @@ public interface ValueOut {
 
     @NotNull
     default WireOut object(Object value) {
-        if (value instanceof byte[])
-            return rawBytes((byte[]) value);
         if (value == null)
             return text(null);
+        if (value instanceof Marshallable)
+            return typedMarshallable((Marshallable) value);
+        if (value instanceof BytesStore)
+            return bytes((BytesStore) value);
+        if (value instanceof CharSequence)
+            return text((CharSequence) value);
         if (value instanceof Map)
             return map((Map) value);
+        if (value instanceof byte[])
+            return rawBytes((byte[]) value);
         if (value instanceof Byte)
             return int8((Byte) value);
-        else if (value instanceof Boolean)
+        if (value instanceof Boolean)
             return bool((Boolean) value);
-        else if (value instanceof Character)
+        if (value instanceof Character)
             return text(value.toString());
-        else if (value instanceof Short)
+        if (value instanceof Short)
             return int16((Short) value);
-        else if (value instanceof Integer)
+        if (value instanceof Integer)
             return int32((Integer) value);
-        else if (value instanceof Long)
+        if (value instanceof Long)
             return int64((Long) value);
-        else if (value instanceof Double)
+        if (value instanceof Double)
             return float64((Double) value);
-        else if (value instanceof Float)
+        if (value instanceof Float)
             return float32((Float) value);
-        else if (value instanceof Marshallable)
-            return typedMarshallable((Marshallable) value);
-        else if (value instanceof Throwable)
+        if (value instanceof Throwable)
             return throwable((Throwable) value);
-        else if (value instanceof BytesStore)
-            return bytes((BytesStore) value);
-        else if (value instanceof CharSequence)
-            return text((CharSequence) value);
-        else if (value instanceof Enum)
+        if (value instanceof Enum)
             return typedScalar(value);
-        else if (value instanceof String[])
+        if (value instanceof String[])
             return array(v -> Stream.of((String[]) value).forEach(v::text), String[].class);
-        else if (value instanceof Collection) {
+        if (value instanceof Collection) {
             if (((Collection) value).size() == 0) return sequence(v -> {
             });
 
@@ -264,6 +264,12 @@ public interface ValueOut {
             return wireOut();
         } else if (Object[].class.isAssignableFrom(value.getClass())) {
             return array(v -> Stream.of((Object[]) value).forEach(v::object), Object[].class);
+        } else if (value instanceof LocalTime) {
+            return time((LocalTime) value);
+        } else if (value instanceof LocalDate) {
+            return date((LocalDate) value);
+        } else if (value instanceof ZonedDateTime) {
+            return zonedDateTime((ZonedDateTime) value);
         } else {
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +
