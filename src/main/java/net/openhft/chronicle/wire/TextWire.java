@@ -71,9 +71,10 @@ public class TextWire implements Wire, InternalWireIn {
 
     private final Bytes<?> bytes;
     private final TextValueOut valueOut = new TextValueOut();
-    private final ValueIn valueIn = new TextValueIn();
+    private final TextValueIn valueIn = new TextValueIn();
     private final boolean use8bit;
     private boolean ready;
+    private long lineStart = 0;
 
     public TextWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
@@ -204,6 +205,8 @@ public class TextWire implements Wire, InternalWireIn {
                 //noinspection StatementWithEmptyBody
                 while (readCode() >= ' ') ;
             } else if (Character.isWhitespace(codePoint) || codePoint == ',') {
+                if (codePoint == '\n' || codePoint == '\r')
+                    this.lineStart = bytes.readPosition() + 1;
                 bytes.readSkip(1);
             } else {
                 break;
@@ -433,6 +436,123 @@ public class TextWire implements Wire, InternalWireIn {
         else
             bytes.append(cs, offset, cs.length());
     }
+
+    public Object readObject() {
+        consumeWhiteSpace();
+        return readObject(0);
+    }
+
+    public Object readObject(int indentation) {
+        consumeWhiteSpace();
+        int code = peekCode();
+        int indentation2 = indentation();
+        if (indentation2 < indentation)
+            return NoObject.NO_OBJECT;
+        switch (code) {
+            case '-':
+                return readList(indentation2);
+            case '[':
+                return readList();
+            case '{':
+                return readMap();
+            case '!':
+                return readTypedObject();
+            default:
+                return readMap(indentation2);
+        }
+    }
+
+    private int indentation() {
+        return Maths.toInt32(bytes.readPosition() - lineStart);
+    }
+
+    private Object readTypedObject() {
+        throw new UnsupportedOperationException();
+    }
+
+    private List readList() {
+        throw new UnsupportedOperationException();
+    }
+
+    List readList(int indentation) {
+        List<Object> objects = new ArrayList<>();
+        while (peekCode() == '-') {
+            if (indentation() < indentation)
+                break;
+            long ls = lineStart;
+            bytes.readSkip(1);
+            consumeWhiteSpace();
+            if (lineStart == ls) {
+                objects.add(valueIn.objectWithInferredType(Object.class));
+            } else {
+                Object e = readObject(indentation);
+                if (e != NoObject.NO_OBJECT)
+                    objects.add(e);
+            }
+            consumeWhiteSpace();
+        }
+
+        return objects;
+    }
+
+    Map readMap() {
+        bytes.readSkip(1);
+        Map map = new LinkedHashMap<>();
+        StringBuilder sb = Wires.acquireAnotherStringBuilder(Wires.acquireStringBuilder());
+        while (bytes.readRemaining() > 0) {
+            consumeWhiteSpace();
+            if (peekCode() == '}') {
+                bytes.readSkip(1);
+                break;
+            }
+            read(sb);
+            String key = Wires.INTERNER.intern(sb);
+            Object value = valueIn.objectWithInferredType(Object.class);
+            map.put(key, value);
+        }
+        return map;
+    }
+
+    private Map readMap(int indentation) {
+        Map map = new LinkedHashMap<>();
+        StringBuilder sb = Wires.acquireAnotherStringBuilder(Wires.acquireStringBuilder());
+        while (bytes.readRemaining() > 0) {
+            consumeWhiteSpace();
+            if (indentation() < indentation || bytes.readRemaining() == 0)
+                break;
+            read(sb);
+            String key = Wires.INTERNER.intern(sb);
+            Object value = valueIn.objectWithInferredType(Object.class);
+            map.put(key, value);
+        }
+        return map;
+    }
+
+    public void writeObject(Object o) {
+        if (o instanceof Iterable) {
+            for (Object o2 : (Iterable) o) {
+                writeObject(o2, 2);
+            }
+        } else if (o instanceof Map) {
+            for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) o).entrySet()) {
+                write(() -> entry.getKey().toString()).object(entry.getValue());
+            }
+        }
+    }
+
+    private void writeObject(Object o, int indentation) {
+        bytes.append('-');
+        bytes.append(' ');
+        indentation(indentation - 2);
+        valueOut.object(o);
+    }
+
+    private void indentation(int indentation) {
+        while (indentation-- > 0)
+            bytes.append(' ');
+    }
+
+    enum NoObject {NO_OBJECT;}
 
     class TextValueOut implements ValueOut {
         int indentation = 0;
@@ -1050,14 +1170,24 @@ public class TextWire implements Wire, InternalWireIn {
                         break;
             }
 
-            int prev = rewindAndRead();
-            if (prev == ':')
+            int prev = peekBack();
+            if (prev == ':' || prev == '#' || prev == '}')
                 bytes.readSkip(-1);
             return a;
         }
 
-        private int rewindAndRead() {
-            return bytes.readPosition() > 0 ? bytes.readUnsignedByte(bytes.readPosition() - 1) : -1;
+        private int peekBack() {
+            while (bytes.readPosition() >= bytes.start()) {
+                int prev = bytes.readUnsignedByte(bytes.readPosition() - 1);
+                if (prev != ' ') {
+                    if (prev == '\n' || prev == '\r') {
+                        TextWire.this.lineStart = bytes.readPosition();
+                    }
+                    return prev;
+                }
+                bytes.readSkip(-1);
+            }
+            return -1;
         }
 
         @NotNull
@@ -1823,62 +1953,80 @@ public class TextWire implements Wire, InternalWireIn {
                 return result;
 
             } else {
-                // TODO assume for now it is a string.
-                int code = peekCode();
-                if (code == '!') {
-                    readCode();
-                    StringBuilder sb = Wires.acquireStringBuilder();
-                    parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
-                    final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
-                    return object(null, clazz2);
-                }
-                if (code == '[') {
-                    if (clazz == Object[].class || clazz == Object.class) {
-                        //todo should this use reflection so that all array types can be handled
-                        List<Object> list = new ArrayList<>();
-                        sequence(v -> {
-                            while (v.hasNextSequenceItem()) {
-                                list.add(v.object(Object.class));
-                            }
-                        });
-                        return list.toArray();
-                    } else if (clazz == String[].class) {
-                        List<String> list = new ArrayList<>();
-                        sequence(v -> {
-                            while (v.hasNextSequenceItem()) {
-                                list.add(v.text());
-                            }
-                        });
-                        return list.toArray(new String[0]);
-                    } else if (clazz == List.class) {
-                        List<String> list = new ArrayList<>();
-                        sequence(v -> {
-                            while (v.hasNextSequenceItem()) {
-                                list.add(v.text());
-                            }
-                        });
-                        return list;
-                    } else if (clazz == Set.class) {
-                        Set<String> list = new HashSet<>();
-                        sequence(v -> {
-                            while (v.hasNextSequenceItem()) {
-                                list.add(v.text());
-                            }
-                        });
-                        return list;
-                    } else {
-                        throw new UnsupportedOperationException("Arrays of type "
-                                + clazz + " not supported.");
-                    }
-                }
-                if (Enum.class.isAssignableFrom(clazz)) {
-                    StringBuilder sb = Wires.acquireStringBuilder();
-                    parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
-                    return Wires.INTERNER.intern(sb);
-                }
-
-                return valueIn.text();
+                return objectWithInferredType(clazz);
             }
         }
+
+        Object objectWithInferredType(@NotNull Class clazz) {
+            consumeWhiteSpace();
+            int code = peekCode();
+            switch (code) {
+                case '!':
+                    return typedObject();
+                case '-':
+                    return readList(indentation());
+                case '[':
+                    return readSequence(clazz);
+                case '{':
+                    return readMap();
+            }
+            if (Enum.class.isAssignableFrom(clazz)) {
+                StringBuilder sb = Wires.acquireStringBuilder();
+                parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
+                return Wires.INTERNER.intern(sb);
+            }
+
+            return valueIn.text();
+        }
+
+        @NotNull
+        private Object readSequence(@NotNull Class clazz) {
+            if (clazz == Object[].class || clazz == Object.class) {
+                //todo should this use reflection so that all array types can be handled
+                List<Object> list = new ArrayList<>();
+                sequence(v -> {
+                    while (v.hasNextSequenceItem()) {
+                        list.add(v.object(Object.class));
+                    }
+                });
+                return list.toArray();
+            } else if (clazz == String[].class) {
+                List<String> list = new ArrayList<>();
+                sequence(v -> {
+                    while (v.hasNextSequenceItem()) {
+                        list.add(v.text());
+                    }
+                });
+                return list.toArray(new String[0]);
+            } else if (clazz == List.class) {
+                List<String> list = new ArrayList<>();
+                sequence(v -> {
+                    while (v.hasNextSequenceItem()) {
+                        list.add(v.text());
+                    }
+                });
+                return list;
+            } else if (clazz == Set.class) {
+                Set<String> list = new HashSet<>();
+                sequence(v -> {
+                    while (v.hasNextSequenceItem()) {
+                        list.add(v.text());
+                    }
+                });
+                return list;
+            } else {
+                throw new UnsupportedOperationException("Arrays of type "
+                        + clazz + " not supported.");
+            }
+        }
+
+        private Object typedObject() {
+            readCode();
+            StringBuilder sb = Wires.acquireStringBuilder();
+            parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
+            final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
+            return object(null, clazz2);
+        }
     }
+
 }

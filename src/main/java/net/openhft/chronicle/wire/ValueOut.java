@@ -176,7 +176,7 @@ public interface ValueOut {
     WireOut sequence(Consumer<ValueOut> writer);
 
     @NotNull
-    default WireOut array(Consumer<ValueOut> writer, Class arrayType){
+    default WireOut array(Consumer<ValueOut> writer, Class arrayType) {
         throw new UnsupportedOperationException();
     }
 
@@ -217,6 +217,7 @@ public interface ValueOut {
     default <E extends Enum<E>> WireOut asEnum(E e) {
         return text(e == null ? null : e.name());
     }
+
     @NotNull
     default WireOut object(Object value) {
         if (value instanceof byte[])
@@ -254,19 +255,15 @@ public interface ValueOut {
         else if (value instanceof String[])
             return array(v -> Stream.of((String[]) value).forEach(v::text), String[].class);
         else if (value instanceof Collection) {
-            if(((Collection)value).size()==0)return sequence(v->{});
+            if (((Collection) value).size() == 0) return sequence(v -> {
+            });
 
-            Class listType = ((Collection)value).iterator().next().getClass();
-            if (listType == String.class)
-                return sequence(v -> ((Collection<String>) value).stream().forEach(v::text));
-            else
-                throw new UnsupportedOperationException("Collection of type " + listType + " not supported");
-        }
-        else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
+            return sequence(v -> ((Collection) value).stream().forEach(v::object));
+        } else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
             WireSerializedLambda.write(value, this);
             return wireOut();
         } else if (Object[].class.isAssignableFrom(value.getClass())) {
-            return array(v -> Stream.of((Object[]) value).forEach(v::object),Object[].class);
+            return array(v -> Stream.of((Object[]) value).forEach(v::object), Object[].class);
         } else {
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +
@@ -303,11 +300,11 @@ public interface ValueOut {
     @NotNull
     WireOut wireOut();
 
-    default WireOut snappy(byte[] compressedBytes){
+    default WireOut snappy(byte[] compressedBytes) {
         throw new UnsupportedOperationException();
     }
 
-    default WireOut compressWithSnappy(String str){
+    default WireOut compressWithSnappy(String str) {
         try {
             return snappy(Snappy.compress(str));
         } catch (IOException e) {
