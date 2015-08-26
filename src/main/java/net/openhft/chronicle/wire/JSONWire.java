@@ -1163,13 +1163,16 @@ public class JSONWire implements Wire, InternalWireIn {
                         int count = 1;
                         for (; ; ) {
                             byte b = bytes.readByte();
-                            if (b == '{')
+                            if (b == '{') {
                                 count += 1;
-                            else if (b == '}') {
+                            } else if (b == '}') {
                                 count -= 1;
                                 if (count == 0)
                                     return bytes.readPosition() - start;
+                            } else if (b <= 0) {
+                                return bytes.readPosition() - start - 1;
                             }
+
                             // do nothing
                         }
                     }
@@ -1177,11 +1180,8 @@ public class JSONWire implements Wire, InternalWireIn {
                     case '-': {
                         for (; ; ) {
                             byte b = bytes.readByte();
-                            if (b == '\n') {
-                                return (bytes.readPosition() - start) + 1;
-                            }
-                            if (bytes.readRemaining() == 0)
-                                return bytes.readLimit() - start;
+                            if (b < ' ')
+                                return bytes.readLimit() - start - 1;
                             // do nothing
                         }
                     }
@@ -1206,12 +1206,14 @@ public class JSONWire implements Wire, InternalWireIn {
                         int count = 1;
                         for (; ; ) {
                             byte b = bytes.readByte();
-                            if (b == '{')
+                            if (b == '{') {
                                 count += 1;
-                            else if (b == '}') {
+                            } else if (b == '}') {
                                 count -= 1;
                                 if (count == 0)
                                     return bytes.readPosition() - start;
+                            } else if (b == 0) {
+                                return bytes.readPosition() - start - 1;
                             }
                             // do nothing
                         }
