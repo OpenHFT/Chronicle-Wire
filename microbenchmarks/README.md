@@ -165,7 +165,7 @@ Test json8bit used 100 bytes.
 ```
 
 ## Binary Wire (default)
-This binary wire has be automatically decoded to text by  Wires.fromSizePrefixedBinaryToText(Bytes)
+This binary wire has be automatically decoded to text by  Wires.fromSizePrefixedBlobs(Bytes)
 
 This uses 70 bytes. Note: the "--- !!data #binary" is added by the method to dump the data. This information is encoded in the first 4 bytes which contains the size.
 ```yaml

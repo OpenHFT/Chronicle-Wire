@@ -143,7 +143,7 @@ public class BinaryWire2Test {
         Wire twire = new TextWire(Bytes.elasticByteBuffer());
         writeMessage(twire);
 
-        System.out.println(Wires.fromSizePrefixedBinaryToText(twire.bytes()));
+        System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
     }
 
     private void writeMessage(@NotNull WireOut wire) {
@@ -212,7 +212,7 @@ reply: !UpdatedEvent {
                 "  key: test,\n" +
                 "  oldValue: world1,\n" +
                 "  value: world2\n" +
-                "}\n", Wires.fromSizePrefixedBinaryToText(wire.bytes()));
+                "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
         wire.readDocument(null, w -> w.read(() -> "data").type(t -> assertEquals("!UpdateEvent", t.toString())).marshallable(
                 m -> m.read(() -> "assetName").object(String.class, s -> Assert.assertEquals("/name", s))
                         .read(() -> "key").object(String.class, s -> Assert.assertEquals("test", s))
@@ -242,7 +242,7 @@ reply: !UpdatedEvent {
                 "  key: test,\n" +
                 "  oldValue: !!null \"\",\n" +
                 "  value: world2\n" +
-                "}\n", Wires.fromSizePrefixedBinaryToText(wire.bytes()));
+                "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
         wire.readDocument(null, w -> w.read(() -> "data").type(t -> assertEquals("!UpdateEvent", t.toString())).marshallable(
                 m -> m.read(() -> "assetName").object(String.class, s -> Assert.assertEquals("/name", s))
                         .read(() -> "key").object(String.class, s -> Assert.assertEquals("test", s))

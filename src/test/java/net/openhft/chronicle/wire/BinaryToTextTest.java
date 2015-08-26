@@ -1,7 +1,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -14,7 +13,7 @@ public class BinaryToTextTest {
         Bytes tbytes = Bytes.elasticByteBuffer();
         Wire tw = new BinaryWire(tbytes);
         tw.writeDocument(false, w->w.write(() -> "key").text("hello"));
-        System.out.println(Wires.fromSizePrefixedBinaryToText(tbytes));
+        System.out.println(Wires.fromSizePrefixedBlobs(tbytes));
     }
 
 }

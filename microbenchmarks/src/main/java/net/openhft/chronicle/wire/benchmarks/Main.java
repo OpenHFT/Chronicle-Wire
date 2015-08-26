@@ -81,7 +81,7 @@ public class Main {
                     main.bytes.readPosition(0);
                     System.out.println("Test " + m.getName() + " used " + main.bytes.readRemaining() + " bytes.");
                     System.out.println(m.getAnnotation(PrintAsText.class) != null
-                            ? Wires.fromSizePrefixedBinaryToText(main.bytes) : main.bytes.toHexString());
+                            ? Wires.fromSizePrefixedBlobs(main.bytes) : main.bytes.toHexString());
 
                 }
             }
