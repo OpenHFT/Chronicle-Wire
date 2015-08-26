@@ -164,7 +164,7 @@ public class TextWire implements Wire, InternalWireIn {
 
     @Override
     public void copyTo(@NotNull WireOut wire) {
-        throw new UnsupportedOperationException();
+        wire.bytes().write(bytes, bytes().readPosition(), bytes().readLimit());
     }
 
     @NotNull
@@ -2122,9 +2122,9 @@ public class TextWire implements Wire, InternalWireIn {
             }
             try {
                 if (s.length() == 7 && s.charAt(1) == ':')
-                        return LocalTime.parse("0" + s);
+                    return LocalTime.parse("0" + s);
                 if (s.length() == 8 && s.charAt(2) == ':')
-                        return LocalTime.parse(s);
+                    return LocalTime.parse(s);
             } catch (DateTimeParseException e) {
             }
             try {
