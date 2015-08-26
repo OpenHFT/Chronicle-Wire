@@ -16,13 +16,12 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.RandomDataInput;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -182,9 +181,9 @@ public enum Wires {
         return fromSizePrefixedBlobs(bytes, position, bytes.readRemaining());
     }
 
+    @Deprecated
     public static String fromSizePrefixedBinaryToText(@NotNull Bytes bytes) {
-        long position = bytes.readPosition();
-        return fromSizePrefixedBinaryToText(bytes, position, bytes.readRemaining());
+        return fromSizePrefixedBlobs(bytes);
     }
 
     public static int lengthOf(long len) {
@@ -201,53 +200,6 @@ public enum Wires {
 
     @NotNull
     private static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position, long length) {
-        StringBuilder sb = new StringBuilder();
-
-        final long limit0 = bytes.readLimit();
-        final long position0 = bytes.readPosition();
-        try {
-            bytes.readPosition(position);
-            long limit2 = Math.min(limit0, position + length);
-            bytes.readLimit(limit2);
-            long missing = position + length - limit2;
-            while (bytes.readRemaining() >= 4) {
-                long header = bytes.readUnsignedInt();
-                int len = lengthOf(header);
-                String type = isData(header)
-                        ? isReady(header) ? "!!data" : "!!not-ready-data!"
-                        : isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
-                boolean binary = bytes.readByte(bytes.readPosition()) < ' ';
-
-                sb.append("--- ").append(type).append(binary ? " #binary" : "");
-                if (missing > 0)
-                    sb.append(" # missing: ").append(missing);
-                if (len > bytes.readRemaining())
-                    sb.append(" # len: ").append(len).append(", remaining: ").append(bytes.readRemaining());
-                sb.append("\n");
-                try {
-                    for (int i = 0; i < len; i++) {
-                        int ch = bytes.readUnsignedByte();
-                        if (binary)
-                            sb.append(RandomDataInput.charToString[ch]);
-                        else
-                            sb.append((char) ch);
-                    }
-                } catch (Exception e) {
-                    sb.append(" ").append(e);
-                }
-                if (sb.charAt(sb.length() - 1) != '\n')
-                    sb.append('\n');
-            }
-
-            return sb.toString();
-        } finally {
-            bytes.readLimit(limit0);
-            bytes.readPosition(position0);
-        }
-    }
-
-    @NotNull
-    private static String fromSizePrefixedBinaryToText(@NotNull Bytes bytes, long position, long length) {
         StringBuilder sb = new StringBuilder();
 
         final long limit0 = bytes.readLimit();
@@ -321,7 +273,7 @@ public enum Wires {
         Throwable throwable;
         try {
             //noinspection unchecked
-            throwable = OS.memory().allocateInstance((Class<Throwable>) Class.forName(INTERNER.intern(type)));
+            throwable = ObjectUtils.newInstance((Class<Throwable>) Class.forName(INTERNER.intern(type)));
         } catch (ClassNotFoundException e) {
             preMessage = type.toString();
             throwable = new RuntimeException();

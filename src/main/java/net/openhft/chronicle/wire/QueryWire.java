@@ -19,8 +19,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.IORuntimeException;
 import net.openhft.chronicle.bytes.StopCharTester;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -1007,7 +1007,7 @@ public class QueryWire implements Wire, InternalWireIn {
             if (Marshallable.class.isAssignableFrom(clazz)) {
                 final E v;
                 if (using == null)
-                    v = OS.memory().allocateInstance(clazz);
+                    v = ObjectUtils.newInstance(clazz);
                 else
                     v = using;
 

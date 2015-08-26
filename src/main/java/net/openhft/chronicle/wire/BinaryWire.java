@@ -18,7 +18,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -1862,7 +1861,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                         throw new IllegalStateException("its not possible to Marshallable and object that" +
                                 " is not of type Marshallable, type=" + sb);
 
-                    final ReadMarshallable m = OS.memory().allocateInstance((Class<ReadMarshallable>) clazz);
+                    final ReadMarshallable m = ObjectUtils.newInstance((Class<ReadMarshallable>) clazz);
 
                     marshallable(m);
                     return readResolve(m);
@@ -2077,7 +2076,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             if (ReadMarshallable.class.isAssignableFrom(clazz)) {
                 final Object v;
                 if (using == null)
-                    v = OS.memory().allocateInstance(clazz);
+                    v = ObjectUtils.newInstance(clazz);
                 else
                     v = using;
 

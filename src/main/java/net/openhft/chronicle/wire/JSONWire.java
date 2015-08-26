@@ -18,7 +18,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -1164,13 +1163,16 @@ public class JSONWire implements Wire, InternalWireIn {
                         int count = 1;
                         for (; ; ) {
                             byte b = bytes.readByte();
-                            if (b == '{')
+                            if (b == '{') {
                                 count += 1;
-                            else if (b == '}') {
+                            } else if (b == '}') {
                                 count -= 1;
                                 if (count == 0)
                                     return bytes.readPosition() - start;
+                            } else if (b <= 0) {
+                                return bytes.readPosition() - start - 1;
                             }
+
                             // do nothing
                         }
                     }
@@ -1178,11 +1180,8 @@ public class JSONWire implements Wire, InternalWireIn {
                     case '-': {
                         for (; ; ) {
                             byte b = bytes.readByte();
-                            if (b == '\n') {
-                                return (bytes.readPosition() - start) + 1;
-                            }
-                            if (bytes.readRemaining() == 0)
-                                return bytes.readLimit() - start;
+                            if (b < ' ')
+                                return bytes.readLimit() - start - 1;
                             // do nothing
                         }
                     }
@@ -1207,12 +1206,14 @@ public class JSONWire implements Wire, InternalWireIn {
                         int count = 1;
                         for (; ; ) {
                             byte b = bytes.readByte();
-                            if (b == '{')
+                            if (b == '{') {
                                 count += 1;
-                            else if (b == '}') {
+                            } else if (b == '}') {
                                 count -= 1;
                                 if (count == 0)
                                     return bytes.readPosition() - start;
+                            } else if (b == 0) {
+                                return bytes.readPosition() - start - 1;
                             }
                             // do nothing
                         }
@@ -1557,10 +1558,10 @@ public class JSONWire implements Wire, InternalWireIn {
                 // default constructor
                 final Class clazz = ClassAliasPool.CLASS_ALIASES.forName(sb);
 
-                if (!Marshallable.class.isAssignableFrom(clazz))
+                if (!ReadMarshallable.class.isAssignableFrom(clazz))
                     throw new ClassCastException("Cannot convert " + sb + " to Marshallable.");
 
-                final ReadMarshallable m = OS.memory().allocateInstance((Class<ReadMarshallable>) clazz);
+                final ReadMarshallable m = ObjectUtils.newInstance((Class<ReadMarshallable>) clazz);
 
                 marshallable(m);
                 return readResolve(m);
@@ -1748,7 +1749,7 @@ public class JSONWire implements Wire, InternalWireIn {
             if (ReadMarshallable.class.isAssignableFrom(clazz)) {
                 final Object v;
                 if (using == null)
-                    v = OS.memory().allocateInstance(clazz);
+                    v = ObjectUtils.newInstance(clazz);
                 else
                     v = using;
 
