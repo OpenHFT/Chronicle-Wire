@@ -17,11 +17,11 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -273,7 +273,7 @@ public enum Wires {
         Throwable throwable;
         try {
             //noinspection unchecked
-            throwable = OS.memory().allocateInstance((Class<Throwable>) Class.forName(INTERNER.intern(type)));
+            throwable = ObjectUtils.newInstance((Class<Throwable>) Class.forName(INTERNER.intern(type)));
         } catch (ClassNotFoundException e) {
             preMessage = type.toString();
             throwable = new RuntimeException();

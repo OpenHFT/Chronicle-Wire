@@ -18,7 +18,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -1557,10 +1556,10 @@ public class JSONWire implements Wire, InternalWireIn {
                 // default constructor
                 final Class clazz = ClassAliasPool.CLASS_ALIASES.forName(sb);
 
-                if (!Marshallable.class.isAssignableFrom(clazz))
+                if (!ReadMarshallable.class.isAssignableFrom(clazz))
                     throw new ClassCastException("Cannot convert " + sb + " to Marshallable.");
 
-                final ReadMarshallable m = OS.memory().allocateInstance((Class<ReadMarshallable>) clazz);
+                final ReadMarshallable m = ObjectUtils.newInstance((Class<ReadMarshallable>) clazz);
 
                 marshallable(m);
                 return readResolve(m);
@@ -1748,7 +1747,7 @@ public class JSONWire implements Wire, InternalWireIn {
             if (ReadMarshallable.class.isAssignableFrom(clazz)) {
                 final Object v;
                 if (using == null)
-                    v = OS.memory().allocateInstance(clazz);
+                    v = ObjectUtils.newInstance(clazz);
                 else
                     v = using;
 

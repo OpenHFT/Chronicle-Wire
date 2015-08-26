@@ -17,7 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -89,6 +89,10 @@ public class TextWire implements Wire, InternalWireIn {
 
     public TextWire(Bytes bytes) {
         this(bytes, false);
+    }
+
+    public static TextWire fromFile(String name) throws IOException {
+        return new TextWire(Bytes.wrapForRead(IOTools.readFile(name)), true);
     }
 
     @NotNull
@@ -518,7 +522,7 @@ public class TextWire implements Wire, InternalWireIn {
         return readObject(0);
     }
 
-    public Object readObject(int indentation) {
+    Object readObject(int indentation) {
         consumeWhiteSpace();
         int code = peekCode();
         int indentation2 = indentation();
@@ -546,7 +550,7 @@ public class TextWire implements Wire, InternalWireIn {
     }
 
     private Object readTypedObject() {
-        throw new UnsupportedOperationException();
+        return valueIn.object(Object.class);
     }
 
     private List readList() {
@@ -1722,11 +1726,10 @@ public class TextWire implements Wire, InternalWireIn {
         public ValueIn type(@NotNull StringBuilder sb) {
             consumeWhiteSpace();
             int code = peekCode();
+            sb.setLength(0);
             if (code == -1) {
                 sb.append("java.lang.Void");
-            } else if (code != '!') {
-                sb.append("java.lang.String");
-            } else {
+            } else if (code == '!') {
                 readCode();
 
                 parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
@@ -1797,10 +1800,10 @@ public class TextWire implements Wire, InternalWireIn {
                 consumeWhiteSpace();
                 int code = peekCode();
                 if (code < 0)
-                    throw new IllegalStateException("Cannot read nothing as a Marshallable " + bytes.toDebugString());
+                    throw new IllegalStateException("Cannot read nothing as a ReadMarshallable " + bytes.toDebugString());
                 StringBuilder sb = Wires.acquireStringBuilder();
                 if (code != '!')
-                    throw new ClassCastException("Cannot convert to Marshallable. " + bytes.toDebugString());
+                    throw new ClassCastException("Cannot convert to ReadMarshallable. " + bytes.toDebugString());
 
                 readCode();
                 parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
@@ -1819,10 +1822,11 @@ public class TextWire implements Wire, InternalWireIn {
                 // default constructor
                 final Class clazz = ClassAliasPool.CLASS_ALIASES.forName(sb);
 
-                if (!Marshallable.class.isAssignableFrom(clazz))
-                    throw new ClassCastException("Cannot convert " + sb + " to Marshallable.");
+                if (!ReadMarshallable.class.isAssignableFrom(clazz))
+                    throw new ClassCastException("Cannot convert " + sb + " to ReadMarshallable.");
 
-                final ReadMarshallable m = OS.memory().allocateInstance((Class<ReadMarshallable>) clazz);
+                Class<ReadMarshallable> clazz1 = (Class<ReadMarshallable>) clazz;
+                final ReadMarshallable m = ObjectUtils.newInstance(clazz1);
 
                 marshallable(m);
                 return readResolve(m);
@@ -2010,7 +2014,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (ReadMarshallable.class.isAssignableFrom(clazz)) {
                 final Object v;
                 if (using == null)
-                    v = OS.memory().allocateInstance(clazz);
+                    v = ObjectUtils.newInstance(clazz);
                 else
                     v = using;
 
@@ -2101,7 +2105,15 @@ public class TextWire implements Wire, InternalWireIn {
                 parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
                 return Wires.INTERNER.intern(sb);
             }
-            return valueIn.text();
+            String text = valueIn.text();
+            switch (text) {
+                case "true":
+                    return Boolean.TRUE;
+                case "false":
+                    return Boolean.FALSE;
+                default:
+                    return text;
+            }
         }
 
         private Object readNumber() {
@@ -2122,9 +2134,9 @@ public class TextWire implements Wire, InternalWireIn {
             }
             try {
                 if (s.length() == 7 && s.charAt(1) == ':')
-                        return LocalTime.parse("0" + s);
+                    return LocalTime.parse("0" + s);
                 if (s.length() == 8 && s.charAt(2) == ':')
-                        return LocalTime.parse(s);
+                    return LocalTime.parse(s);
             } catch (DateTimeParseException e) {
             }
             try {
@@ -2187,6 +2199,11 @@ public class TextWire implements Wire, InternalWireIn {
             parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
             return object(null, clazz2);
+        }
+
+        @Override
+        public String toString() {
+            return TextWire.this.toString();
         }
     }
 
