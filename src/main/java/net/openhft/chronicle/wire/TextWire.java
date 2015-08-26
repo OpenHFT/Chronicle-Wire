@@ -624,6 +624,10 @@ public class TextWire implements Wire, InternalWireIn {
             for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) o).entrySet()) {
                 write(() -> entry.getKey().toString()).object(entry.getValue());
             }
+        } else if (o instanceof WriteMarshallable) {
+            valueOut.typedMarshallable((WriteMarshallable) o);
+        } else {
+            valueOut.object(o);
         }
     }
 
