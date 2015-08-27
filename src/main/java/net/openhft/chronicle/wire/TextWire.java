@@ -1465,7 +1465,7 @@ public class TextWire implements Wire, InternalWireIn {
             }
         }
 
-        private long readLengthMarshable() {
+        private long readLengthMarshallable() {
             long start = bytes.readPosition();
             try {
                 consumeWhiteSpace();
@@ -1702,7 +1702,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (code != '{')
                 throw new IORuntimeException("Unsupported type " + (char) code);
 
-            final long len = readLengthMarshable() - 1;
+            final long len = readLengthMarshallable();
 
             final long limit = bytes.readLimit();
             final long position = bytes.readPosition();
@@ -1772,7 +1772,7 @@ public class TextWire implements Wire, InternalWireIn {
             else if (code != '{')
                 throw new IORuntimeException("Unsupported type " + stringForCode(code));
 
-            final long len = readLengthMarshable() - 1;
+            final long len = readLengthMarshallable();
 
             final long limit = bytes.readLimit();
             final long position = bytes.readPosition();
