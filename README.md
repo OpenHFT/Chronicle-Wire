@@ -3,6 +3,24 @@ Wire Format abstraction library
 
 # Purpose
 
+Chronicle Wire combines a number of concerns in a consistent manner.
+
+- Application configuration.
+- Data serialization
+- Accessing off heap memory in a thread safe manner.
+- High performance data exchange via binary formats.
+
+## Why are these concerns conflated?
+Often you want to use these interchangeably.
+
+- to send the configuration of a server to a client or visa-versa.
+- to store the configuration of a data store in it's header.
+- in configuration be able to create any object or component.
+- save a configuration after you have changed it.
+- to be able to share data in memory between processes in a thread safe manner.
+
+## Design
+
 Chronicle Wire supports a separation of describing what data you want to store and retrieve
    and how it should be rendered/parsed.
    Wire handles a variety of formatting options for a wide range of formats.
@@ -36,7 +54,7 @@ This library will require Java 8. Support for C++ and C\# planned.
 
 The text formats include
 * YAML (a subset of mapping structures included)
-* JSON (planned)
+* JSON (super set to support serialization)
 * XML (planned)
 * FIX (proposed)
 
