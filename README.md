@@ -5,14 +5,16 @@ Wire Format abstraction library
 
 Chronicle Wire combines a number of concerns in a consistent manner.
 
-- Application configuration.
-- Data serialization
-- Accessing off heap memory in a thread safe manner.
-- High performance data exchange via binary formats.
+- Application configuration. (Using YAML)
+- Data serialization (YAML, binary YAML, JSON, Raw binary data)
+- Accessing off heap memory in a thread safe manner. (Bind to shared off heap memory)
+- High performance data exchange via binary formats. (Only include as much meta data as you need)
 
 ## Why are these concerns conflated?
 Often you want to use these interchangeably.
 
+- configuration includes aliased type information.  This supports easy extension through adding new classes/versions and cross platform through type aliasing.
+- by supporting types, a configuration file can bootstrap itself. You control how the configuration file is decoded. [engine.yaml](https://github.com/OpenHFT/Chronicle-Engine/blob/master/demo/src/main/resources/engine.yaml)
 - to send the configuration of a server to a client or visa-versa.
 - to store the configuration of a data store in it's header.
 - in configuration be able to create any object or component.
