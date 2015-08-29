@@ -15,9 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Byteable;
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -46,7 +44,8 @@ public class TextLongArrayReference implements Byteable, LongArrayValues {
 
     public static void write(@NotNull Bytes bytes, long capacity) {
         bytes.write(SECTION1);
-        bytes.append(capacity, 20);
+        BytesUtil.append((RandomDataOutput) bytes, bytes.writePosition(), capacity, 20);
+        bytes.writeSkip(20);
         bytes.write(SECTION2);
         for (long i = 0; i < capacity; i++) {
             if (i > 0)

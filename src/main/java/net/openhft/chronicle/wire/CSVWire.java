@@ -480,9 +480,9 @@ public class CSVWire implements Wire, InternalWireIn {
 
     public void append(CharSequence cs, int offset) {
         if (use8bit)
-            bytes.append8bit(cs, offset, cs.length());
+            bytes.append8bit(cs, offset, offset + cs.length());
         else
-            bytes.append(cs, offset, cs.length());
+            bytes.append(cs, offset, offset + cs.length());
     }
 
     public Object readObject() {
