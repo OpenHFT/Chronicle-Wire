@@ -6,7 +6,7 @@ Wire Format abstraction library
 Chronicle Wire combines a number of concerns in a consistent manner.
 
 - Application configuration. (Using YAML)
-- Data serialization (YAML, binary YAML, JSON, Raw binary data)
+- Data serialization (YAML, binary YAML, JSON, Raw binary data, CSV)
 - Accessing off heap memory in a thread safe manner. (Bind to shared off heap memory)
 - High performance data exchange via binary formats. (Only include as much meta data as you need)
 
@@ -57,6 +57,7 @@ This library will require Java 8. Support for C++ and C\# planned.
 The text formats include
 * YAML (a subset of mapping structures included)
 * JSON (super set to support serialization)
+* CSV (super set to support serialization)
 * XML (planned)
 * FIX (proposed)
 
