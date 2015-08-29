@@ -21,7 +21,7 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
-import net.openhft.chronicle.core.util.ObjectUtils;
+import net.openhft.chronicle.core.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,6 +51,12 @@ public enum Wires {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(WireSerializedLambda.class, "SerializedLambda");
         ClassAliasPool.CLASS_ALIASES.addAlias(WireType.class);
+        ClassAliasPool.CLASS_ALIASES.addAlias(SerializableFunction.class, "Function");
+        ClassAliasPool.CLASS_ALIASES.addAlias(SerializableBiFunction.class, "BiFunction");
+        ClassAliasPool.CLASS_ALIASES.addAlias(SerializableConsumer.class, "Consumer");
+        ClassAliasPool.CLASS_ALIASES.addAlias(SerializablePredicate.class, "Predicate");
+        ClassAliasPool.CLASS_ALIASES.addAlias(SerializableUpdater.class, "Updater");
+        ClassAliasPool.CLASS_ALIASES.addAlias(SerializableUpdaterWithArg.class, "UpdaterWithArg");
     }
 
     public static <E extends Enum<E>> E internEnum(Class<E> eClass, CharSequence cs) {
