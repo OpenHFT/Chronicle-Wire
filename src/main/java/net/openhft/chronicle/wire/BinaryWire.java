@@ -40,7 +40,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
 
-import static net.openhft.chronicle.bytes.BytesUtil.append;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
 
@@ -316,9 +315,9 @@ public class BinaryWire implements Wire, InternalWireIn {
             case BinaryWireHighCode.FIELD1:
                 bytes.readSkip(1);
                 if (bytes.bytesStore() instanceof NativeBytesStore) {
-                    BytesUtil.parse8bit_SB1(bytes, sb, peekCode & 0x1f);
+                    AppendableUtil.parse8bit_SB1(bytes, sb, peekCode & 0x1f);
                 } else {
-                    BytesUtil.parse8bit(bytes, sb, peekCode & 0x1f);
+                    AppendableUtil.parse8bit(bytes, sb, peekCode & 0x1f);
                 }
                 return sb;
             default:
@@ -354,8 +353,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
     @NotNull
     private <ACS extends Appendable & CharSequence> ACS getStringBuilder(int code, @NotNull ACS sb) {
-        BytesUtil.setLength(sb, 0);
-        BytesUtil.parseUTF(bytes, sb, code & 0x1f);
+        bytes.parseUTF(sb, code & 0x1f);
         return sb;
     }
 
@@ -727,7 +725,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     @Nullable
     <ACS extends Appendable & CharSequence> ACS readText(int code, @NotNull ACS sb) {
         if (code <= 127) {
-            append(sb, code);
+            AppendableUtil.append(sb, code);
             return sb;
         }
         switch (code >> 4) {
@@ -745,13 +743,13 @@ public class BinaryWire implements Wire, InternalWireIn {
             case BinaryWireHighCode.SPECIAL:
                 switch (code) {
                     case NULL:
-                        append(sb, "null");
+                        AppendableUtil.append(sb, "null");
                         return sb;
                     case TRUE:
-                        append(sb, "true");
+                        AppendableUtil.append(sb, "true");
                         return sb;
                     case FALSE:
-                        append(sb, "false");
+                        AppendableUtil.append(sb, "false");
                         return sb;
                     case TIME:
                     case DATE:
@@ -767,10 +765,10 @@ public class BinaryWire implements Wire, InternalWireIn {
                 }
 
             case BinaryWireHighCode.FLOAT:
-                append(sb, readFloat(code));
+                AppendableUtil.append(sb, readFloat(code));
                 return sb;
             case BinaryWireHighCode.INT:
-                append(sb, readInt(code));
+                AppendableUtil.append(sb, readInt(code));
                 return sb;
             case BinaryWireHighCode.STR0:
             case BinaryWireHighCode.STR1:
@@ -937,7 +935,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public WireOut utf8(int codepoint) {
             writeCode(UINT16);
-            BytesUtil.appendUTF(bytes, codepoint);
+            bytes.appendUTF(codepoint);
             return BinaryWire.this;
         }
 
@@ -1366,7 +1364,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 default:
                     if (code >= STRING_0 && code <= STRING_31) {
                         StringBuilder sb = Wires.acquireStringBuilder();
-                        BytesUtil.parseUTF(bytes, sb, code & 0b11111);
+                        bytes.parseUTF(sb, code & 0b11111);
                         s.accept(Wires.INTERNER.intern(sb));
 
                     } else {
@@ -1424,7 +1422,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 return null;
 
             } else if (code == STRING_ANY) {
-                long len0 = BytesUtil.readStopBit(bytes);
+                long len0 = bytes.readStopBit();
                 if (len0 == -1L) {
                     return null;
 

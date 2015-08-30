@@ -61,7 +61,7 @@ public class BinaryWire2Test {
     @Test
     public void testBytesStore() {
         Wire wire = createWire();
-        wire.write().object(Bytes.wrapForRead("Hello"));
+        wire.write().object(Bytes.from("Hello"));
 
         Bytes b = Bytes.elasticByteBuffer();
         wire.read().object(b, Object.class);

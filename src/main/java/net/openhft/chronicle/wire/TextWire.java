@@ -97,7 +97,7 @@ public class TextWire implements Wire, InternalWireIn {
 
     @NotNull
     public static TextWire from(@NotNull String text) {
-        return new TextWire(Bytes.wrapForRead(text));
+        return new TextWire(Bytes.from(text));
     }
 
     public static String asText(@NotNull Wire wire) {
@@ -145,11 +145,11 @@ public class TextWire implements Wire, InternalWireIn {
                         ch = ch3;
                 }
             }
-            BytesUtil.setCharAt(sb, end++, ch);
+            AppendableUtil.setCharAt(sb, end++, ch);
         }
         if (length != sb.length())
             throw new IllegalStateException("Length changed from " + length + " to " + sb.length() + " for " + sb);
-        BytesUtil.setLength(sb, end);
+        AppendableUtil.setLength(sb, end);
     }
 
     public String toString() {
@@ -492,10 +492,10 @@ public class TextWire implements Wire, InternalWireIn {
     public void parseUntil(StringBuilder sb, StopCharsTester testers) {
         sb.setLength(0);
         if (use8bit) {
-            BytesUtil.read8bitAndAppend(bytes, sb, testers);
+            AppendableUtil.read8bitAndAppend(bytes, sb, testers);
         } else {
             try {
-                BytesUtil.readUTFAndAppend(bytes, sb, testers);
+                AppendableUtil.readUTFAndAppend(bytes, sb, testers);
             } catch (IOException e) {
                 throw new IORuntimeException(e);
             }
@@ -1278,12 +1278,12 @@ public class TextWire implements Wire, InternalWireIn {
                             bytes.parseUTF(a, getEscapingEndOfText());
 
                     } else {
-                        BytesUtil.setLength(a, 0);
+                        AppendableUtil.setLength(a, 0);
                     }
                     // trim trailing spaces.
                     while (a.length() > 0)
                         if (Character.isWhitespace(a.charAt(a.length() - 1)))
-                            BytesUtil.setLength(a, a.length() - 1);
+                            AppendableUtil.setLength(a, a.length() - 1);
                         else
                             break;
                     break;
@@ -1340,7 +1340,7 @@ public class TextWire implements Wire, InternalWireIn {
                 parseWord(sb);
                 String str = Wires.INTERNER.intern(sb);
                 if (str.equals("!!binary")) {
-                    BytesUtil.setLength(sb, 0);
+                    AppendableUtil.setLength(sb, 0);
                     parseWord(sb);
                     byte[] decode = Base64.getDecoder().decode(sb.toString());
                     bytesConsumer.readMarshallable(new TextWire(Bytes.wrapForRead(decode)));
@@ -1367,7 +1367,7 @@ public class TextWire implements Wire, InternalWireIn {
                 parseWord(sb);
                 String str = Wires.INTERNER.intern(sb);
                 if (str.equals("!!binary")) {
-                    BytesUtil.setLength(sb, 0);
+                    AppendableUtil.setLength(sb, 0);
                     parseWord(sb);
                     byte[] decode = Base64.getDecoder().decode(Wires.INTERNER.intern(sb));
                     return decode;
@@ -1401,7 +1401,7 @@ public class TextWire implements Wire, InternalWireIn {
                 parseWord(sb);
                 String str = Wires.INTERNER.intern(sb);
                 if (str.equals("!!snappy")) {
-                    BytesUtil.setLength(sb, 0);
+                    AppendableUtil.setLength(sb, 0);
                     parseWord(sb);
                     byte[] decode = Base64.getDecoder().decode(Wires.INTERNER.intern(sb));
                     return decode;

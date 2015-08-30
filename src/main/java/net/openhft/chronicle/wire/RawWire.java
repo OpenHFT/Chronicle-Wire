@@ -18,7 +18,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -321,7 +320,7 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut utf8(int codepoint) {
-            BytesUtil.appendUTF(bytes, codepoint);
+            bytes.appendUTF(codepoint);
             return RawWire.this;
         }
 
