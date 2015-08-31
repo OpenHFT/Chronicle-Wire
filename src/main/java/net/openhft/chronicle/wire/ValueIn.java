@@ -18,13 +18,10 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.wire.util.BooleanConsumer;
-import net.openhft.chronicle.wire.util.ByteConsumer;
-import net.openhft.chronicle.wire.util.FloatConsumer;
-import net.openhft.chronicle.wire.util.ShortConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -76,9 +73,6 @@ public interface ValueIn {
     Bytes textTo(@NotNull Bytes bytes);
 
     @NotNull
-    WireIn int8(@NotNull ByteConsumer i);
-
-    @NotNull
     WireIn bytes(@NotNull Bytes<?> toBytes);
 
     @NotNull
@@ -105,37 +99,100 @@ public interface ValueIn {
     long readLength();
 
     @NotNull
+    WireIn int8(@NotNull ByteConsumer b);
+
+    @NotNull
+    default <T> WireIn int8(@NotNull T t, @NotNull ObjByteConsumer<T> tb) {
+        return int8(b -> tb.accept(t, b));
+    }
+
+    @NotNull
     WireIn uint8(@NotNull ShortConsumer i);
+
+    @NotNull
+    default <T> WireIn uint8(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
+        return uint8(i -> ti.accept(t, i));
+    }
 
     @NotNull
     WireIn int16(@NotNull ShortConsumer i);
 
     @NotNull
+    default <T> WireIn int16(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
+        return int16(i -> ti.accept(t, i));
+    }
+
+    @NotNull
     WireIn uint16(@NotNull IntConsumer i);
+
+    @NotNull
+    default <T> WireIn uint16(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
+        return uint16(i -> ti.accept(t, i));
+    }
 
     @NotNull
     WireIn int32(@NotNull IntConsumer i);
 
     @NotNull
+    default <T> WireIn int32(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
+        return int32(i -> ti.accept(t, i));
+    }
+
+    @NotNull
     WireIn uint32(@NotNull LongConsumer i);
 
     @NotNull
-    WireIn int64(@NotNull LongConsumer i);
+    default <T> WireIn uint32(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
+        return uint32(l -> tl.accept(t, l));
+    }
+
+    @NotNull
+    WireIn int64(@NotNull LongConsumer l);
+
+    @NotNull
+    default <T> WireIn int64(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
+        return int64(l -> tl.accept(t, l));
+    }
 
     @NotNull
     WireIn float32(@NotNull FloatConsumer v);
 
     @NotNull
-    WireIn float64(@NotNull DoubleConsumer v);
+    default <T> WireIn float32(@NotNull T t, @NotNull ObjFloatConsumer<T> tf) {
+        return float32(f -> tf.accept(t, f));
+    }
 
     @NotNull
-    WireIn time(@NotNull Consumer<LocalTime> localTime);
+    WireIn float64(@NotNull DoubleConsumer d);
+
+    @NotNull
+    default <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td) {
+        return float64(d -> td.accept(t, d));
+    }
+
+    @NotNull
+    WireIn time(@NotNull Consumer<LocalTime> setLocalTime);
+
+    @NotNull
+    default <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime) {
+        return time(localTime -> setLocalTime.accept(t, localTime));
+    }
 
     @NotNull
     WireIn zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime);
 
     @NotNull
+    default <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime) {
+        return zonedDateTime(zonedDateTime -> tZonedDateTime.accept(t, zonedDateTime));
+    }
+
+    @NotNull
     WireIn date(@NotNull Consumer<LocalDate> localDate);
+
+    @NotNull
+    default <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate) {
+        return date(localDate -> tLocalDate.accept(t, localDate));
+    }
 
     boolean hasNext();
 
@@ -143,6 +200,11 @@ public interface ValueIn {
 
     @NotNull
     WireIn uuid(@NotNull Consumer<UUID> uuid);
+
+    @NotNull
+    default <T> WireIn uuid(@NotNull T t, @NotNull BiConsumer<T, UUID> tuuid) {
+        return uuid(uuid -> tuuid.accept(t, uuid));
+    }
 
     @NotNull
     WireIn int64array(@Nullable LongArrayValues values, @NotNull Consumer<LongArrayValues> setter);
@@ -159,6 +221,11 @@ public interface ValueIn {
     @NotNull
     WireIn sequence(@NotNull Consumer<ValueIn> reader);
 
+    @NotNull
+    default <T> WireIn sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
+        return sequence(reader -> tReader.accept(t, reader));
+    }
+
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
 
     @Nullable
@@ -166,6 +233,10 @@ public interface ValueIn {
 
     @NotNull
     ValueIn type(@NotNull StringBuilder s);
+
+    default <T> ValueIn type(T t, @NotNull BiConsumer<T, StringBuilder> ts) {
+        return type(s -> ts.accept(t, s));
+    }
 
     @NotNull
     default ValueIn type(@NotNull Consumer<StringBuilder> s) {
