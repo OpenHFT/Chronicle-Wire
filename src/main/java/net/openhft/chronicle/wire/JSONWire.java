@@ -933,7 +933,7 @@ public class JSONWire extends TextWire {
             if (peekCode() == '!') {
                 parseWord(sb);
                 String str = Wires.INTERNER.intern(sb);
-                if (str.equals("!!snappy")) {
+                if (str.equals("!snappy")) {
                     AppendableUtil.setLength(sb, 0);
                     parseWord(sb);
                     byte[] decode = Base64.getDecoder().decode(Wires.INTERNER.intern(sb));
