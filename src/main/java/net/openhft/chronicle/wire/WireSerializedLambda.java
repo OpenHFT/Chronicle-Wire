@@ -63,7 +63,7 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
                             String instantiatedMethodType,
                             Object[] capturedArgs) {
              */
-            valueOut.type("SerializedLambda");
+            valueOut.typePrefix("SerializedLambda");
             valueOut.marshallable(v -> {
                 v.write(() -> "cc").typeLiteral(sl.getCapturingClass().replace('/', '.'))
                         .write(() -> "fic").text(sl.getFunctionalInterfaceClass())

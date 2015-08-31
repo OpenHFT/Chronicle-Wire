@@ -144,7 +144,12 @@ public interface ValueOut {
     WireOut date(LocalDate localDate);
 
     @NotNull
-    ValueOut type(CharSequence typeName);
+    ValueOut typePrefix(CharSequence typeName);
+
+    @NotNull
+    default ValueOut typePrefix(Class type) {
+        return typePrefix(ClassAliasPool.CLASS_ALIASES.nameFor(type));
+    }
 
     @NotNull
     default WireOut typeLiteral(@NotNull Class type) {
@@ -204,13 +209,13 @@ public interface ValueOut {
     default WireOut typedMarshallable(@Nullable WriteMarshallable object) {
         if (object == null)
             return text(null);
-        type(ClassAliasPool.CLASS_ALIASES.nameFor(object.getClass()));
+        typePrefix(object.getClass());
         return marshallable(object);
     }
 
     @NotNull
     default WireOut typedMarshallable(CharSequence typeName, WriteMarshallable object) {
-        type(typeName);
+        typePrefix(typeName);
         return marshallable(object);
     }
 
@@ -279,7 +284,7 @@ public interface ValueOut {
 
     @NotNull
     default WireOut typedScalar(@NotNull Object value) {
-        type(ClassAliasPool.CLASS_ALIASES.nameFor(value.getClass()));
+        typePrefix(ClassAliasPool.CLASS_ALIASES.nameFor(value.getClass()));
         text(value.toString());
         return wireOut();
     }

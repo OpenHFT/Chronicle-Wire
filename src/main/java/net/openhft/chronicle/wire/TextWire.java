@@ -646,7 +646,7 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.append(' ');
     }
 
-    enum NoObject {NO_OBJECT;}
+    enum NoObject {NO_OBJECT}
 
     class TextValueOut implements ValueOut {
         int indentation = 0;
@@ -924,7 +924,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public ValueOut type(@NotNull CharSequence typeName) {
+        public ValueOut typePrefix(@NotNull CharSequence typeName) {
             prependSeparator();
             bytes.append('!');
             append(typeName);
@@ -1018,7 +1018,6 @@ public class TextWire implements Wire, InternalWireIn {
                 append(arrayType.getName());
                 bytes.append(' ');
             }
-            ;
             return sequence(writer);
         }
 
@@ -1066,7 +1065,7 @@ public class TextWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut map(@NotNull final Map map) {
-            type(SEQ_MAP);
+            typePrefix(SEQ_MAP);
             bytes.append(' ');
             bytes.append('[');
             pushState();
@@ -1107,7 +1106,7 @@ public class TextWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map) {
-            type(SEQ_MAP);
+            typePrefix(SEQ_MAP);
             map.forEach((k, v) -> sequence(w -> w.marshallable(m -> m
                     .write(() -> "key").typedMarshallable(k)
                     .write(() -> "value").typedMarshallable(v))));

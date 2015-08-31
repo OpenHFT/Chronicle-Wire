@@ -378,7 +378,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 bytes.readSkip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
-                wire.writeValue().type(sb);
+                wire.writeValue().typePrefix(sb);
                 break;
             }
 
@@ -1021,7 +1021,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public ValueOut type(CharSequence typeName) {
+        public ValueOut typePrefix(CharSequence typeName) {
             writeCode(TYPE_PREFIX).writeUTFΔ(typeName);
             return this;
         }

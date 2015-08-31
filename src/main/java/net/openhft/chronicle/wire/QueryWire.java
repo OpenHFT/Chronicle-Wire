@@ -19,7 +19,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.StopCharTester;
 import net.openhft.chronicle.core.annotation.ForceInline;
-import net.openhft.chronicle.core.util.BooleanConsumer;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
@@ -139,23 +138,6 @@ public class QueryWire extends TextWire {
         return valueIn;
     }
 
-    @NotNull
-    @Override
-    public Wire readComment(@NotNull StringBuilder s) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void clear() {
-        bytes.clear();
-    }
-
-    @NotNull
-    @Override
-    public Bytes<?> bytes() {
-        return bytes;
-    }
-
     @Override
     public boolean hasMore() {
         return bytes.readRemaining() > 0;
@@ -255,12 +237,6 @@ public class QueryWire extends TextWire {
             return this;
         }
 
-        @NotNull
-        @Override
-        public WireOut wireOut() {
-            return QueryWire.this;
-        }
-
         public void elementSeparator() {
             sep = "&";
         }
@@ -320,12 +296,6 @@ public class QueryWire extends TextWire {
                     return false;
             }
             return true;
-        }
-
-        @NotNull
-        @Override
-        public ValueOut writeLength(long remaining) {
-            throw new UnsupportedOperationException();
         }
 
         @NotNull
@@ -473,7 +443,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public ValueOut type(@NotNull CharSequence typeName) {
+        public ValueOut typePrefix(@NotNull CharSequence typeName) {
             prependSeparator();
             bytes.append(typeName);
             sep = " ";
@@ -617,12 +587,6 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer) {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @NotNull
-        @Override
         public WireIn bytes(@NotNull Bytes toBytes) {
             return bytes(wi -> toBytes.write(wi.bytes()));
         }
@@ -637,20 +601,9 @@ public class QueryWire extends TextWire {
             throw new UnsupportedOperationException("todo");
         }
 
-        @NotNull
-        @Override
-        public WireIn wireIn() {
-            return QueryWire.this;
-        }
-
         @Override
         public long readLength() {
             throw new UnsupportedOperationException("todo");
-        }
-
-        @Override
-        public boolean hasNext() {
-            return bytes.readRemaining() > 0;
         }
 
         @Override

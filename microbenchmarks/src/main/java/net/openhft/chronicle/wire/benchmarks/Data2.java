@@ -123,7 +123,7 @@ public class Data2 implements Marshallable, BytesMarshallable {
     public void readMarshallable(Bytes<?> bytes) {
         price = bytes.readDouble();
         longInt = bytes.readLong();
-        smallInt = (int) bytes.readInt();
+        smallInt = bytes.readInt();
         flag = bytes.readBoolean();
 //        side = bytes.readEnum(Side.class);
         side = bytes.readBoolean() ? Side.Buy : Side.Sell;

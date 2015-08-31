@@ -474,7 +474,7 @@ public class CSVWire extends TextWire {
             bytes.append(' ');
     }
 
-    enum NoObject {NO_OBJECT;}
+    enum NoObject {NO_OBJECT}
 
     class CSVValueOut extends TextValueOut {
         int indentation = 0;
@@ -752,7 +752,7 @@ public class CSVWire extends TextWire {
 
         @NotNull
         @Override
-        public ValueOut type(@NotNull CharSequence typeName) {
+        public ValueOut typePrefix(@NotNull CharSequence typeName) {
             prependSeparator();
             bytes.append('!');
             append(typeName);
@@ -846,7 +846,6 @@ public class CSVWire extends TextWire {
                 append(arrayType.getName());
                 bytes.append(' ');
             }
-            ;
             return sequence(writer);
         }
 
@@ -894,7 +893,7 @@ public class CSVWire extends TextWire {
         @NotNull
         @Override
         public WireOut map(@NotNull final Map map) {
-            type(SEQ_MAP);
+            typePrefix(SEQ_MAP);
             bytes.append(' ');
             bytes.append('[');
             pushState();
@@ -935,7 +934,7 @@ public class CSVWire extends TextWire {
         @NotNull
         @Override
         public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map) {
-            type(SEQ_MAP);
+            typePrefix(SEQ_MAP);
             map.forEach((k, v) -> sequence(w -> w.marshallable(m -> m
                     .write(() -> "key").typedMarshallable(k)
                     .write(() -> "value").typedMarshallable(v))));

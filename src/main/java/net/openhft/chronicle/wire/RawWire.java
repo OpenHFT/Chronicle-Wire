@@ -395,7 +395,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public ValueOut type(CharSequence typeName) {
+        public ValueOut typePrefix(CharSequence typeName) {
             bytes.writeUTFΔ(typeName);
             return this;
         }
@@ -561,7 +561,7 @@ public class RawWire implements Wire, InternalWireIn {
             long length = readLength();
             Bytes<?> bytes = wireIn().bytes();
 
-            toBytes.write((BytesStore) bytes, (long) bytes.readPosition(), (long) length);
+            toBytes.write((BytesStore) bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
             return wireIn();
         }

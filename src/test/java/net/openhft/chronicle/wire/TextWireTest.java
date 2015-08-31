@@ -444,10 +444,10 @@ public class TextWireTest {
     @Test
     public void type() {
         Wire wire = createWire();
-        wire.write().type("MyType");
-        wire.write(BWKey.field1).type("AlsoMyType");
+        wire.write().typePrefix("MyType");
+        wire.write(BWKey.field1).typePrefix("AlsoMyType");
         String name1 = "com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState";
-        wire.write(() -> "Test").type(name1);
+        wire.write(() -> "Test").typePrefix(name1);
         wire.writeComment("");
         // TODO fix how types are serialized.
 //        expectWithSnakeYaml(wire, "{=1, field1=2, Test=3}");
@@ -877,7 +877,7 @@ public class TextWireTest {
         // TODO we shouldn't need to create a new wire.
         wire = createWire();
 
-        List<String> threeObjects = Arrays.asList(new String[]{"abc", "def", "ghi"});
+        List<String> threeObjects = Arrays.asList("abc", "def", "ghi");
         wire.write().object(threeObjects);
 
         List<String> list2 = wire.read()

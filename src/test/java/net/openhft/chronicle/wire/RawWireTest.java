@@ -333,11 +333,11 @@ public class RawWireTest {
     @Test
     public void type() {
         Wire wire = createWire();
-        wire.write().type("MyType");
-        wire.write(BWKey.field1).type("AlsoMyType");
+        wire.write().typePrefix("MyType");
+        wire.write(BWKey.field1).typePrefix("AlsoMyType");
         String name1 = "com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState";
 
-        wire.write(() -> "Test").type(name1);
+        wire.write(() -> "Test").typePrefix(name1);
         wire.writeComment("");
         assertEquals("[pos: 0, rlim: 142, wlim: 8EiB, cap: 8EiB ] ⒍MyType⒑AlsoMyType{" + name1, wire.bytes().toDebugString());
 

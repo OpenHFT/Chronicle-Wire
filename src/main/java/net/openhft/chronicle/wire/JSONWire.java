@@ -19,7 +19,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import net.openhft.chronicle.core.util.BooleanConsumer;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
@@ -105,13 +104,6 @@ public class JSONWire extends TextWire {
     }
 
     @NotNull
-    @Override
-    public ValueIn read() {
-        readField(Wires.acquireStringBuilder());
-        return valueIn;
-    }
-
-    @NotNull
     private StopCharsTester getEscapingEndOfText() {
         StopCharsTester escaping = ESCAPED_END_OF_TEXT.get();
         // reset it.
@@ -138,10 +130,6 @@ public class JSONWire extends TextWire {
                 break;
             }
         }
-    }
-
-    int peekCode() {
-        return bytes.peekUnsignedByte();
     }
 
     /**
@@ -197,29 +185,6 @@ public class JSONWire extends TextWire {
         return valueIn;
     }
 
-    @NotNull
-    @Override
-    public ValueIn getValueIn() {
-        return valueIn;
-    }
-
-    @NotNull
-    @Override
-    public Wire readComment(@NotNull StringBuilder s) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void clear() {
-        bytes.clear();
-    }
-
-    @NotNull
-    @Override
-    public Bytes<?> bytes() {
-        return bytes;
-    }
-
     @Override
     public boolean hasMore() {
         consumeWhiteSpace();
@@ -229,26 +194,8 @@ public class JSONWire extends TextWire {
 
     @NotNull
     @Override
-    public ValueOut write() {
-        return valueOut.write();
-    }
-
-    @NotNull
-    @Override
     public ValueOut write(@NotNull WireKey key) {
         return valueOut.write(key);
-    }
-
-    @NotNull
-    @Override
-    public ValueOut writeValue() {
-        return valueOut;
-    }
-
-    @NotNull
-    @Override
-    public ValueOut getValueOut() {
-        return valueOut;
     }
 
     @NotNull
@@ -293,25 +240,6 @@ public class JSONWire extends TextWire {
         }
     }
 
-
-    @NotNull
-    @Override
-    public LongValue newLongReference() {
-        return new TextLongReference();
-    }
-
-
-    @NotNull
-    @Override
-    public IntValue newIntReference() {
-        return new TextIntReference();
-    }
-
-    @NotNull
-    @Override
-    public LongArrayValues newLongArrayReference() {
-        return new TextLongArrayReference();
-    }
 
     public void parseWord(StringBuilder sb) {
         parseUntil(sb, StopCharTesters.SPACE_STOP);
@@ -618,7 +546,7 @@ public class JSONWire extends TextWire {
 
         @NotNull
         @Override
-        public ValueOut type(@NotNull CharSequence typeName) {
+        public ValueOut typePrefix(@NotNull CharSequence typeName) {
             prependSeparator();
             bytes.append('!');
             append(typeName);
@@ -712,7 +640,6 @@ public class JSONWire extends TextWire {
                 append(arrayType.getName());
                 bytes.append(' ');
             }
-            ;
             return sequence(writer);
         }
 
@@ -753,7 +680,7 @@ public class JSONWire extends TextWire {
         @NotNull
         @Override
         public WireOut map(@NotNull final Map map) {
-            type(SEQ_MAP);
+            typePrefix(SEQ_MAP);
             bytes.append(' ');
             bytes.append('[');
             pushState();
@@ -794,7 +721,7 @@ public class JSONWire extends TextWire {
         @NotNull
         @Override
         public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map) {
-            type(SEQ_MAP);
+            typePrefix(SEQ_MAP);
             map.forEach((k, v) -> sequence(w -> w.marshallable(m -> m
                     .write(() -> "key").typedMarshallable(k)
                     .write(() -> "value").typedMarshallable(v))));
@@ -929,11 +856,6 @@ public class JSONWire extends TextWire {
         private int rewindAndRead() {
             return bytes.readPosition() > 0 ? bytes.readUnsignedByte(bytes.readPosition() - 1) : -1;
         }
-        @NotNull
-        @Override
-        public WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer) {
-            throw new UnsupportedOperationException("todo");
-        }
 
         @NotNull
         @Override
@@ -1026,12 +948,6 @@ public class JSONWire extends TextWire {
         }
 
 
-        @NotNull
-        @Override
-        public WireIn wireIn() {
-            return JSONWire.this;
-        }
-
         @Override
         public long readLength() {
             consumeWhiteSpace();
@@ -1108,11 +1024,6 @@ public class JSONWire extends TextWire {
             } finally {
                 bytes.readPosition(start);
             }
-        }
-
-        @Override
-        public boolean hasNext() {
-            return bytes.readRemaining() > 0;
         }
 
         @Override

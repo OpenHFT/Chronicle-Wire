@@ -491,10 +491,10 @@ public class BinaryWireTest {
     @Test
     public void type() {
         Wire wire = createWire();
-        wire.write().type("MyType");
-        wire.write(BWKey.field1).type("AlsoMyType");
+        wire.write().typePrefix("MyType");
+        wire.write(BWKey.field1).typePrefix("AlsoMyType");
         String name1 = "com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState";
-        wire.write(() -> "Test").type(name1);
+        wire.write(() -> "Test").typePrefix(name1);
         checkWire(wire, "[pos: 0, rlim: 158, wlim: 8EiB, cap: 8EiB ] À¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1,
                 "[pos: 0, rlim: 158, wlim: 8EiB, cap: 8EiB ] À¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1,
                 "[pos: 0, rlim: 153, wlim: 8EiB, cap: 8EiB ] À¶⒍MyTypeº⒈¶⒑AlsoMyTypeº²ñ\\u009E⒈¶{" + name1,

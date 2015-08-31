@@ -177,7 +177,7 @@ public class BinaryWire2Test {
     @Test
     public void fieldAfterText() {
         Wire wire = createWire();
-        wire.writeDocument(false, w -> w.write(() -> "data").type("!UpdateEvent").marshallable(
+        wire.writeDocument(false, w -> w.write(() -> "data").typePrefix("!UpdateEvent").marshallable(
                 v -> v.write(() -> "assetName").text("/name")
                         .write(() -> "key").object("test")
                         .write(() -> "oldValue").object("world1")
@@ -207,7 +207,7 @@ reply: !UpdatedEvent {
     @Test
     public void fieldAfterNull() {
         Wire wire = createWire();
-        wire.writeDocument(false, w -> w.write(() -> "data").type("!UpdateEvent").marshallable(
+        wire.writeDocument(false, w -> w.write(() -> "data").typePrefix("!UpdateEvent").marshallable(
                 v -> v.write(() -> "assetName").text("/name")
                         .write(() -> "key").object("test")
                         .write(() -> "oldValue").object(null)
