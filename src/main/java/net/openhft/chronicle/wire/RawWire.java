@@ -97,7 +97,7 @@ public class RawWire implements Wire, InternalWireIn {
         if (use8bit)
             bytes.read8bit(name);
         else
-            bytes.readUTFΔ(name);
+            bytes.readUtf8(name);
         lastSB = null;
         return valueIn;
     }
@@ -162,7 +162,7 @@ public class RawWire implements Wire, InternalWireIn {
         if (use8bit)
             bytes.write8bit(key.name());
         else
-            bytes.writeUTFΔ(key.name());
+            bytes.writeUtf8(key.name());
         return valueOut;
     }
 
@@ -237,7 +237,7 @@ public class RawWire implements Wire, InternalWireIn {
             if (use8bit)
                 bytes.write8bit(s);
             else
-                bytes.writeUTFΔ(s);
+                bytes.writeUtf8(s);
             return RawWire.this;
         }
 
@@ -247,7 +247,7 @@ public class RawWire implements Wire, InternalWireIn {
             if (use8bit)
                 bytes.write8bit(s);
             else
-                bytes.writeUTFΔ(s);
+                bytes.writeUtf8(s);
             return RawWire.this;
         }
 
@@ -382,7 +382,7 @@ public class RawWire implements Wire, InternalWireIn {
             if (use8bit)
                 bytes.write8bit(zonedDateTime.toString());
             else
-                bytes.writeUTFΔ(zonedDateTime.toString());
+                bytes.writeUtf8(zonedDateTime.toString());
             return RawWire.this;
         }
 
@@ -396,14 +396,14 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public ValueOut typePrefix(CharSequence typeName) {
-            bytes.writeUTFΔ(typeName);
+            bytes.writeUtf8(typeName);
             return this;
         }
 
         @NotNull
         @Override
         public WireOut typeLiteral(@NotNull CharSequence type) {
-            bytes.writeUTFΔ(type);
+            bytes.writeUtf8(type);
             return RawWire.this;
         }
 
@@ -495,7 +495,7 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut object(@Nullable Object o) {
-            bytes.writeUTFΔ(o == null ? null : o.toString());
+            bytes.writeUtf8(o == null ? null : o.toString());
             return RawWire.this;
         }
 
@@ -533,7 +533,7 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public String text() {
-            return use8bit ? bytes.readUTFΔ() : bytes.read8bit();
+            return use8bit ? bytes.readUtf8() : bytes.read8bit();
         }
 
         @Nullable
@@ -542,7 +542,7 @@ public class RawWire implements Wire, InternalWireIn {
             if (use8bit)
                 return bytes.read8bit(s) ? s : null;
             else
-                return bytes.readUTFΔ(s) ? s : null;
+                return bytes.readUtf8(s) ? s : null;
         }
 
         @Nullable
@@ -551,7 +551,7 @@ public class RawWire implements Wire, InternalWireIn {
             if (use8bit)
                 return bytes.read8bit(s) ? s : null;
             else
-                return bytes.readUTFΔ(s) ? s : null;
+                return bytes.readUtf8(s) ? s : null;
         }
 
         @NotNull
@@ -690,7 +690,7 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime) {
-            tZonedDateTime.accept(t, ZonedDateTime.parse(bytes.readUTFΔ()));
+            tZonedDateTime.accept(t, ZonedDateTime.parse(bytes.readUtf8()));
             return RawWire.this;
         }
 
@@ -764,7 +764,7 @@ public class RawWire implements Wire, InternalWireIn {
         @Override
         public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
             StringBuilder sb = Wires.acquireStringBuilder();
-            bytes.readUTFΔ(sb);
+            bytes.readUtf8(sb);
             ts.accept(t, sb);
             return this;
         }
@@ -773,7 +773,7 @@ public class RawWire implements Wire, InternalWireIn {
         @Override
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) {
             StringBuilder sb = Wires.acquireStringBuilder();
-            bytes.readUTFΔ(sb);
+            bytes.readUtf8(sb);
             classNameConsumer.accept(t, sb);
             return RawWire.this;
         }
@@ -781,7 +781,7 @@ public class RawWire implements Wire, InternalWireIn {
         @Override
         public Class typeLiteral() {
             StringBuilder sb = Wires.acquireStringBuilder();
-            bytes.readUTFΔ(sb);
+            bytes.readUtf8(sb);
             return ClassAliasPool.CLASS_ALIASES.forName(sb);
         }
 

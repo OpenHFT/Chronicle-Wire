@@ -280,7 +280,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 case HINT: {
                     bytes.readSkip(1);
                     StringBuilder sb = Wires.acquireStringBuilder();
-                    bytes.readUTFΔ(sb);
+                    bytes.readUtf8(sb);
                     break;
                 }
 
@@ -340,7 +340,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
         if (peekCode == FIELD_NAME_ANY || peekCode == EVENT_NAME) {
             bytes.readSkip(1);
-            bytes.readUTFΔ(sb);
+            bytes.readUtf8(sb);
             return sb;
         }
         return null;
@@ -357,7 +357,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             case COMMENT: {
                 bytes.readSkip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
-                bytes.readUTFΔ(sb);
+                bytes.readUtf8(sb);
                 wire.writeComment(sb);
                 break;
             }
@@ -365,7 +365,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             case HINT: {
                 bytes.readSkip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
-                bytes.readUTFΔ(sb);
+                bytes.readUtf8(sb);
                 break;
             }
 
@@ -377,7 +377,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             case TYPE_PREFIX: {
                 bytes.readSkip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
-                bytes.readUTFΔ(sb);
+                bytes.readUtf8(sb);
                 wire.writeValue().typePrefix(sb);
                 break;
             }
@@ -385,7 +385,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             case TYPE_LITERAL: {
                 bytes.readSkip(1);
                 StringBuilder sb = Wires.acquireStringBuilder();
-                bytes.readUTFΔ(sb);
+                bytes.readUtf8(sb);
                 wire.writeValue().typeLiteral(sb);
                 break;
             }
@@ -399,7 +399,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             case STRING_ANY: {
                 bytes.readSkip(1);
                 StringBuilder sb1 = Wires.acquireStringBuilder();
-                bytes.readUTFΔ(sb1);
+                bytes.readUtf8(sb1);
                 wire.writeValue().text(sb1);
                 break;
             }
@@ -637,7 +637,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     @NotNull
     @Override
     public ValueOut writeEventName(@NotNull WireKey key) {
-        writeCode(EVENT_NAME).writeUTFΔ(key.name());
+        writeCode(EVENT_NAME).writeUtf8(key.name());
         return valueOut;
     }
 
@@ -669,7 +669,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     @Override
     public Wire writeComment(CharSequence s) {
         writeCode(COMMENT);
-        bytes.writeUTFΔ(s);
+        bytes.writeUtf8(s);
         return BinaryWire.this;
     }
 
@@ -752,7 +752,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                     case ZONED_DATE_TIME:
                     case TYPE_LITERAL:
                     case STRING_ANY:
-                        if (bytes.readUTFΔ(sb))
+                        if (bytes.readUtf8(sb))
                             return sb;
                         return null;
                     default:
@@ -829,7 +829,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 if (len < 0x20) {
                     bytes.writeUnsignedByte(STRING_0 + len).append(s);
                 } else {
-                    writeCode(STRING_ANY).writeUTFΔ(s);
+                    writeCode(STRING_ANY).writeUtf8(s);
                 }
             }
 
@@ -847,7 +847,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 if (len < 0x20) {
                     bytes.writeUnsignedByte(STRING_0 + len).append(s);
                 } else {
-                    writeCode(STRING_ANY).writeUTFΔ(s);
+                    writeCode(STRING_ANY).writeUtf8(s);
                 }
             }
 
@@ -1001,42 +1001,42 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut time(@NotNull LocalTime localTime) {
-            writeCode(TIME).writeUTFΔ(localTime.toString());
+            writeCode(TIME).writeUtf8(localTime.toString());
             return BinaryWire.this;
         }
 
         @NotNull
         @Override
         public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
-            writeCode(ZONED_DATE_TIME).writeUTFΔ(zonedDateTime.toString());
+            writeCode(ZONED_DATE_TIME).writeUtf8(zonedDateTime.toString());
             return BinaryWire.this;
         }
 
         @NotNull
         @Override
         public WireOut date(@NotNull LocalDate localDate) {
-            writeCode(DATE_TIME).writeUTFΔ(localDate.toString());
+            writeCode(DATE_TIME).writeUtf8(localDate.toString());
             return BinaryWire.this;
         }
 
         @NotNull
         @Override
         public ValueOut typePrefix(CharSequence typeName) {
-            writeCode(TYPE_PREFIX).writeUTFΔ(typeName);
+            writeCode(TYPE_PREFIX).writeUtf8(typeName);
             return this;
         }
 
         @NotNull
         @Override
         public WireOut typeLiteral(@NotNull CharSequence type) {
-            writeCode(TYPE_LITERAL).writeUTFΔ(type);
+            writeCode(TYPE_LITERAL).writeUtf8(type);
             return BinaryWire.this;
         }
 
         @NotNull
         @Override
         public WireOut typeLiteral(@NotNull Class type) {
-            writeCode(TYPE_LITERAL).writeUTFΔ(ClassAliasPool.CLASS_ALIASES.nameFor(type));
+            writeCode(TYPE_LITERAL).writeUtf8(ClassAliasPool.CLASS_ALIASES.nameFor(type));
             return BinaryWire.this;
         }
 
@@ -1330,7 +1330,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                     break;
 
                 case STRING_ANY:
-                    s.accept(bytes.readUTFΔ());
+                    s.accept(bytes.readUtf8());
                     break;
                 default:
                     if (code >= STRING_0 && code <= STRING_31) {
@@ -1679,7 +1679,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         private LocalTime readLocalTime() {
             StringBuilder sb = Wires.acquireStringBuilder();
-            bytes.readUTFΔ(sb);
+            bytes.readUtf8(sb);
             return LocalTime.parse(sb);
         }
 
@@ -1690,7 +1690,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             int code = readCode();
             if (code == ZONED_DATE_TIME) {
                 StringBuilder sb = Wires.acquireStringBuilder();
-                bytes.readUTFΔ(sb);
+                bytes.readUtf8(sb);
                 tZonedDateTime.accept(t, ZonedDateTime.parse(sb));
 
             } else {
@@ -1706,7 +1706,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             int code = readCode();
             if (code == DATE_TIME) {
                 StringBuilder sb = Wires.acquireStringBuilder();
-                bytes.readUTFΔ(sb);
+                bytes.readUtf8(sb);
                 tLocalDate.accept(t, LocalDate.parse(sb));
 
             } else {
@@ -1852,7 +1852,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             int code = readCode();
             switch (code) {
                 case TYPE_PREFIX:
-                    bytes.readUTFΔ(sb);
+                    bytes.readUtf8(sb);
                     // its possible that the object that you are allocating may not have a
                     // default constructor
                     final Class clazz = ClassAliasPool.CLASS_ALIASES.forName(sb);
@@ -1880,7 +1880,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             int code = readCode();
             if (code == TYPE_PREFIX) {
-                bytes.readUTFΔ(sb);
+                bytes.readUtf8(sb);
 
             } else if (code == NULL) {
                 sb.setLength(0);
@@ -1897,7 +1897,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             int code = readCode();
             if (code == TYPE_PREFIX) {
-                bytes.readUTFΔ(sb);
+                bytes.readUtf8(sb);
 
             } else if (code == NULL) {
                 sb.setLength(0);
@@ -1915,7 +1915,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             int code = readCode();
             if (code == TYPE_LITERAL) {
                 StringBuilder sb = Wires.acquireStringBuilder();
-                bytes.readUTFΔ(sb);
+                bytes.readUtf8(sb);
                 classNameConsumer.accept(t, sb);
 
             } else {
@@ -1929,7 +1929,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             StringBuilder sb = Wires.acquireStringBuilder();
             int code = readCode();
             if (code == TYPE_LITERAL) {
-                bytes.readUTFΔ(sb);
+                bytes.readUtf8(sb);
                 return ClassAliasPool.CLASS_ALIASES.forName(sb);
             } else if (code == NULL) {
                 return null;
@@ -2177,7 +2177,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                         case TYPE_PREFIX: {
                             readCode();
                             StringBuilder sb = Wires.acquireStringBuilder();
-                            bytes.readUTFΔ(sb);
+                            bytes.readUtf8(sb);
                             final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
                             return object(null, clazz2);
                         }
