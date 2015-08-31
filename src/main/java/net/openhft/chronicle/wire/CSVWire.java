@@ -603,7 +603,7 @@ public class CSVWire extends TextWire {
         }
 
         @Override
-        public WireOut snappy(byte[] compressedBytes) {
+        public WireOut compress(byte[] compressedBytes) {
             prependSeparator();
             append("!!snappy ");
             append(Base64.getEncoder().encodeToString(compressedBytes));
@@ -1182,7 +1182,7 @@ public class CSVWire extends TextWire {
 
         @Nullable
         @Override
-        public byte[] snappy() {
+        public byte[] decompress() {
             consumeWhiteSpace();
             // TODO needs to be made much more efficient.
             StringBuilder sb = Wires.acquireStringBuilder();

@@ -311,15 +311,21 @@ public interface ValueOut {
     @NotNull
     WireOut wireOut();
 
-    default WireOut snappy(byte[] compressedBytes) {
+    default WireOut compress(String compression, Bytes compressedBytes) {
         throw new UnsupportedOperationException();
     }
 
-    default WireOut compressWithSnappy(String str) {
-        try {
-            return snappy(Snappy.compress(str));
-        } catch (IOException e) {
-            throw new AssertionError(e);
+    @Deprecated
+    default WireOut compress(String compression, String str) {
+        // replace with compress(String compression, Bytes compressedBytes)
+        if (compression.equals("snappy")) {
+            try {
+                return typePrefix("snappy").bytes(Snappy.compress(str));
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
+        } else {
+            throw new IllegalArgumentException("Unknown compression " + compression);
         }
     }
 }

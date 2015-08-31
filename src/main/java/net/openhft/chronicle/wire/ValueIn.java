@@ -241,7 +241,7 @@ public interface ValueIn {
     @Nullable
     <T, E> WireIn object(@NotNull Class<E> clazz, T t, BiConsumer<T, E> e);
 
-    default byte[] snappy() {
+    default WireIn decompress() {
         throw new UnsupportedOperationException();
     }
 

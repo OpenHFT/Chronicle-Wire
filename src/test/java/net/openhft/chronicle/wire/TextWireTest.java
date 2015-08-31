@@ -812,9 +812,9 @@ public class TextWireTest {
 
 
         byte[] compressedBytes = Snappy.compress(str.getBytes());
-        wire.write().snappy(compressedBytes);
+        wire.write().compress(compressedBytes);
 
-        byte[] returnBytes = wire.read().snappy();
+        byte[] returnBytes = wire.read().decompress();
         assertArrayEquals(compressedBytes, returnBytes);
     }
 
@@ -825,7 +825,7 @@ public class TextWireTest {
 
 
         byte[] compressedBytes = Snappy.compress(str.getBytes());
-        wire.write().snappy(compressedBytes);
+        wire.write().compress(compressedBytes);
 
         String returnString = wire.read().text();
         assertEquals(str, returnString);
