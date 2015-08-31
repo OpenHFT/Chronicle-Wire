@@ -1928,7 +1928,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         public Class typeLiteral() {
             StringBuilder sb = Wires.acquireStringBuilder();
             int code = readCode();
-            if (code == TYPE_PREFIX) {
+            if (code == TYPE_LITERAL) {
                 bytes.readUTFΔ(sb);
                 return ClassAliasPool.CLASS_ALIASES.forName(sb);
             } else if (code == NULL) {

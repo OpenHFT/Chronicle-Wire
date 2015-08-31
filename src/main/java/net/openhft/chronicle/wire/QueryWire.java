@@ -19,7 +19,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.StopCharTester;
 import net.openhft.chronicle.core.annotation.ForceInline;
-import net.openhft.chronicle.core.util.ObjectUtils;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -31,12 +31,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * THis wire decodes URL query strings.
@@ -585,25 +583,24 @@ public class QueryWire extends TextWire {
             return a;
         }
 
+        public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            textTo(sb);
+            classNameConsumer.accept(t, sb);
+            return wireIn();
+        }
+
+        @Override
+        public Class typeLiteral() {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            textTo(sb);
+            return ClassAliasPool.CLASS_ALIASES.forName(sb);
+        }
+
         @NotNull
         @Override
         public WireIn bytes(@NotNull Bytes toBytes) {
             return bytes(wi -> toBytes.write(wi.bytes()));
-        }
-
-        @NotNull
-        public WireIn bytes(@NotNull ReadMarshallable bytesConsumer) {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @NotNull
-        public byte[] bytes() {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @Override
-        public long readLength() {
-            throw new UnsupportedOperationException("todo");
         }
 
         @Override
@@ -615,184 +612,6 @@ public class QueryWire extends TextWire {
                 return true;
             }
             return ch != ']';
-        }
-
-        @NotNull
-        @Override
-        public <T> T applyToMarshallable(Function<WireIn, T> marshallableReader) {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @Nullable
-        @Override
-        public <T extends ReadMarshallable> T typedMarshallable() {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @NotNull
-        @Override
-        public WireIn marshallable(@NotNull ReadMarshallable object) {
-            throw new UnsupportedOperationException();
-        }
-
-        @NotNull
-        @Override
-        public <K, V> Map<K, V> map(@NotNull final Class<K> kClazz,
-                                    @NotNull final Class<V> vClass,
-                                    @NotNull final Map<K, V> usingMap) {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @Override
-        public <K extends ReadMarshallable, V extends ReadMarshallable> void typedMap(@NotNull Map<K, V> usingMap) {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @Override
-        public boolean bool() {
-            consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
-            if (textTo(sb) == null)
-                throw new NullPointerException("value is null");
-
-            return StringUtils.isEqual(sb, "true");
-        }
-
-        public byte int8() {
-            long l = int64();
-            if (l > Byte.MAX_VALUE || l < Byte.MIN_VALUE)
-                throw new IllegalStateException("value=" + l + ", is greater or less than Byte.MAX_VALUE/MIN_VALUE");
-            return (byte) l;
-        }
-
-        public short int16() {
-            long l = int64();
-            if (l > Short.MAX_VALUE || l < Short.MIN_VALUE)
-                throw new IllegalStateException("value=" + l + ", is greater or less than Short.MAX_VALUE/MIN_VALUE");
-            return (short) l;
-        }
-
-        public int int32() {
-            long l = int64();
-            if (l > Integer.MAX_VALUE || l < Integer.MIN_VALUE)
-                throw new IllegalStateException("value=" + l + ", is greater or less than Integer.MAX_VALUE/MIN_VALUE");
-            return (int) l;
-        }
-
-        public int uint16() {
-            long l = int64();
-            if (l > Integer.MAX_VALUE || l < 0)
-                throw new IllegalStateException("value=" + l + ", is greater or less than Integer" +
-                        ".MAX_VALUE/ZERO");
-            return (int) l;
-        }
-
-        @Override
-        public long int64() {
-            consumeWhiteSpace();
-            return bytes.parseLong();
-        }
-
-        @Override
-        public double float64() {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @Override
-        public float float32() {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        /**
-         * @return true if !!null, if {@code true} reads the !!null up to the next STOP, if {@code
-         * false} no  data is read  ( data is only peaked if {@code false} )
-         */
-        public boolean isNull() {
-            consumeWhiteSpace();
-
-            if (peekStringIgnoreCase("!!null ")) {
-                bytes.readSkip("!!null ".length());
-                // discard the text after it.
-                textTo(Wires.acquireStringBuilder());
-                return true;
-            }
-
-            return false;
-        }
-
-        @Override
-        @Nullable
-        public <E> E object(@Nullable E using,
-                            @NotNull Class<E> clazz) {
-            consumeWhiteSpace();
-
-            if (isNull())
-                return null;
-
-            if (byte[].class.isAssignableFrom(clazz))
-                return (E) bytes();
-
-            if (Marshallable.class.isAssignableFrom(clazz)) {
-                final E v;
-                if (using == null)
-                    v = ObjectUtils.newInstance(clazz);
-                else
-                    v = using;
-
-                valueIn.marshallable((Marshallable) v);
-                return v;
-
-            } else if (StringBuilder.class.isAssignableFrom(clazz)) {
-                StringBuilder builder = (using == null)
-                        ? Wires.acquireStringBuilder()
-                        : (StringBuilder) using;
-                valueIn.textTo(builder);
-                return using;
-
-            } else if (CharSequence.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return (E) valueIn.text();
-
-            } else if (Long.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return (E) (Long) valueIn.int64();
-
-            } else if (Double.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return (E) (Double) valueIn.float64();
-
-            } else if (Integer.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return (E) (Integer) valueIn.int32();
-
-            } else if (Float.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return (E) (Float) valueIn.float32();
-
-            } else if (Short.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return (E) (Short) valueIn.int16();
-
-            } else if (Character.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                final String text = valueIn.text();
-                if (text == null || text.length() == 0)
-                    return null;
-                return (E) (Character) text.charAt(0);
-
-            } else if (Byte.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return (E) (Byte) valueIn.int8();
-
-            } else if (Map.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                final Map result = new HashMap();
-                valueIn.map(result);
-                return (E) result;
-
-            } else {
-                throw new IllegalStateException("unsupported type=" + clazz);
-            }
         }
     }
 }
