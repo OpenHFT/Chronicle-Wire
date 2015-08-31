@@ -35,8 +35,7 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiConsumer;
-import java.util.function.IntConsumer;
+import java.util.function.ObjIntConsumer;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -238,7 +237,7 @@ public class TextWireTest {
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int8(i::set);
+            wire.read().int8(i, AtomicInteger::set);
             assertEquals(e, i.get());
         });
 
@@ -261,7 +260,7 @@ public class TextWireTest {
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int16(i::set);
+            wire.read().int16(i, AtomicInteger::set);
             assertEquals(e, i.get());
         });
 
@@ -284,7 +283,7 @@ public class TextWireTest {
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().uint8(i::set);
+            wire.read().uint8(i, AtomicInteger::set);
             assertEquals(e, i.get());
         });
 
@@ -307,7 +306,7 @@ public class TextWireTest {
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().uint16(i::set);
+            wire.read().uint16(i, AtomicInteger::set);
             assertEquals(e, i.get());
         });
 
@@ -330,7 +329,7 @@ public class TextWireTest {
         // ok as blank matches anything
         AtomicLong i = new AtomicLong();
         IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().uint32(i::set);
+            wire.read().uint32(i, AtomicLong::set);
             assertEquals(e, i.get());
         });
 
@@ -353,7 +352,7 @@ public class TextWireTest {
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int32(i::set);
+            wire.read().int32(i, AtomicInteger::set);
             assertEquals(e, i.get());
         });
 
@@ -375,9 +374,8 @@ public class TextWireTest {
 
         // ok as blank matches anything
         AtomicLong i = new AtomicLong();
-        IntConsumer ic = i::set;
         LongStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int64(i::set);
+            wire.read().int64(i, AtomicLong::set);
             assertEquals(e, i.get());
         });
 
@@ -407,7 +405,7 @@ public class TextWireTest {
         }
         Floater n = new Floater();
         IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().float64(n::set);
+            wire.read().float64(n, Floater::set);
             assertEquals(e, n.f, 0.0);
         });
 
@@ -421,10 +419,10 @@ public class TextWireTest {
         Wire wire = createWire();
         wire.write().text("Hello");
         wire.write(BWKey.field1).text("world");
-        String name1 = "Long field name which is more than 32 characters, \\ \nBye";
+        String name = "Long field name which is more than 32 characters, \\ \nBye";
 
         wire.write(() -> "Test")
-                .text(name1);
+                .text(name);
         expectWithSnakeYaml("{=Hello, field1=world, Test=Long field name which is more than 32 characters, \\ \n" +
                 "Bye}", wire);
         assertEquals("\"\": Hello\n" +
@@ -433,7 +431,7 @@ public class TextWireTest {
 
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
-        Stream.of("Hello", "world", name1).forEach(e -> {
+        Stream.of("Hello", "world", name).forEach(e -> {
             assertNotNull(wire.read().textTo(sb));
             assertEquals(e, sb.toString());
         });
@@ -460,8 +458,7 @@ public class TextWireTest {
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
         Stream.of("MyType", "AlsoMyType", name1).forEach(e -> {
-            wire.read().type(sb);
-            assertEquals(e, sb.toString());
+            wire.read().typePrefix(e, Assert::assertEquals);
         });
 
         assertEquals(3, bytes.readRemaining());
@@ -475,9 +472,9 @@ public class TextWireTest {
         wire.write().bool(false)
                 .write().bool(true)
                 .write().bool(null);
-        wire.read().bool(Assert::assertFalse)
-                .read().bool(Assert::assertTrue)
-                .read().bool(Assert::assertNull);
+        wire.read().bool(false, Assert::assertEquals)
+                .read().bool(true, Assert::assertEquals)
+                .read().bool(null, Assert::assertEquals);
     }
 
     @Test
@@ -488,12 +485,11 @@ public class TextWireTest {
                 .write().float32(Float.POSITIVE_INFINITY)
                 .write().float32(Float.NEGATIVE_INFINITY)
                 .write().float32(123456.0f);
-        System.out.println(wire.bytes());
-        wire.read().float32(t -> assertEquals(0.0F, t, 0.0F))
-                .read().float32(t -> assertTrue(Float.isNaN(t)))
-                .read().float32(t -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F))
-                .read().float32(t -> assertEquals(Float.NEGATIVE_INFINITY, t, 0.0F))
-                .read().float32(t -> assertEquals(123456.0f, t, 0.0F));
+        wire.read().float32(this, (o, t) -> assertEquals(0.0F, t, 0.0F))
+                .read().float32(this, (o, t) -> assertTrue(Float.isNaN(t)))
+                .read().float32(this, (o, t) -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F))
+                .read().float32(this, (o, t) -> assertEquals(Float.NEGATIVE_INFINITY, t, 0.0F))
+                .read().float32(this, (o, t) -> assertEquals(123456.0f, t, 0.0F));
     }
 
     @Test
@@ -507,9 +503,9 @@ public class TextWireTest {
                         "\"\": 23:59:59.999999999\n" +
                         "\"\": 00:00\n",
                 bytes.toString());
-        wire.read().time(t -> assertEquals(now, t))
-                .read().time(t -> assertEquals(LocalTime.MAX, t))
-                .read().time(t -> assertEquals(LocalTime.MIN, t));
+        wire.read().time(now, Assert::assertEquals)
+                .read().time(LocalTime.MAX, Assert::assertEquals)
+                .read().time(LocalTime.MIN, Assert::assertEquals);
     }
 
     @Test
@@ -519,9 +515,9 @@ public class TextWireTest {
         wire.write().zonedDateTime(now)
                 .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()))
                 .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()));
-        wire.read().zonedDateTime(t -> assertEquals(now, t))
-                .read().zonedDateTime(t -> assertEquals(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()), t))
-                .read().zonedDateTime(t -> assertEquals(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), t));
+        wire.read().zonedDateTime(now, Assert::assertEquals)
+                .read().zonedDateTime(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()), Assert::assertEquals)
+                .read().zonedDateTime(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), Assert::assertEquals);
     }
 
     @Test
@@ -531,9 +527,9 @@ public class TextWireTest {
         wire.write().date(now)
                 .write().date(LocalDate.MAX)
                 .write().date(LocalDate.MIN);
-        wire.read().date(t -> assertEquals(now, t))
-                .read().date(t -> assertEquals(LocalDate.MAX, t))
-                .read().date(t -> assertEquals(LocalDate.MIN, t));
+        wire.read().date(now, Assert::assertEquals)
+                .read().date(LocalDate.MAX, Assert::assertEquals)
+                .read().date(LocalDate.MIN, Assert::assertEquals);
     }
 
     @Test
@@ -543,9 +539,9 @@ public class TextWireTest {
         wire.write().uuid(uuid)
                 .write().uuid(new UUID(0, 0))
                 .write().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE));
-        wire.read().uuid(t -> assertEquals(uuid, t))
-                .read().uuid(t -> assertEquals(new UUID(0, 0), t))
-                .read().uuid(t -> assertEquals(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), t));
+        wire.read().uuid(uuid, Assert::assertEquals)
+                .read().uuid(new UUID(0, 0), Assert::assertEquals)
+                .read().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), Assert::assertEquals);
     }
 
     @Test
@@ -958,7 +954,7 @@ public class TextWireTest {
                 "       hostId: 21\n" +
                 "    }\n" +
                 "}\n";
-        BiConsumer<String, Integer> results = EasyMock.createMock(BiConsumer.class);
+        ObjIntConsumer<String> results = EasyMock.createMock(ObjIntConsumer.class);
         results.accept("host1", 1);
         results.accept("host2", 2);
         results.accept("host4", 4);
@@ -968,7 +964,7 @@ public class TextWireTest {
                     StringBuilder sb = new StringBuilder();
                     while (wire.hasMore()) {
                         wire.readEventName(sb).marshallable(m -> {
-                            m.read(() -> "hostId").int32(i -> results.accept(sb.toString(), i));
+                            m.read(() -> "hostId").int32(sb.toString(), results);
                         });
                     }
                 }

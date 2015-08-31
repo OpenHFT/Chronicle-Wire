@@ -120,70 +120,6 @@ public class BinaryWirePerfTest {
     static class MyType2 implements Marshallable {
         int i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x;
 
-        void i(int i) {
-            this.i = i;
-        }
-
-        void j(int i) {
-            this.j = i;
-        }
-
-        void k(int i) {
-            this.k = i;
-        }
-
-        void l(int i) {
-            this.l = i;
-        }
-
-        void m(int i) {
-            this.m = i;
-        }
-
-        void n(int i) {
-            this.n = i;
-        }
-
-        void o(int i) {
-            this.o = i;
-        }
-
-        void p(int i) {
-            this.p = i;
-        }
-
-        void q(int i) {
-            this.q = i;
-        }
-
-        void r(int i) {
-            this.r = i;
-        }
-
-        void s(int i) {
-            this.s = i;
-        }
-
-        void t(int i) {
-            this.t = i;
-        }
-
-        void u(int i) {
-            this.u = i;
-        }
-
-        void v(int i) {
-            this.v = i;
-        }
-
-        void w(int i) {
-            this.w = i;
-        }
-
-        void x(int i) {
-            this.x = i;
-        }
-
         @Override
         public void writeMarshallable(@NotNull WireOut wire) {
             wire.write(Fields.I).int32(i)
@@ -208,22 +144,22 @@ public class BinaryWirePerfTest {
 
         @Override
         public void readMarshallable(@NotNull WireIn wire) {
-            wire.read(Fields.I).int32(this::i)
-                    .read(Fields.J).int32(this::j)
-                    .read(Fields.K).int32(this::k)
-                    .read(Fields.L).int32(this::l)
-                    .read(Fields.M).int32(this::m)
-                    .read(Fields.N).int32(this::n)
-                    .read(Fields.O).int32(this::o)
-                    .read(Fields.P).int32(this::p)
-                    .read(Fields.Q).int32(this::q)
-                    .read(Fields.R).int32(this::r)
-                    .read(Fields.S).int32(this::s)
-                    .read(Fields.T).int32(this::t)
-                    .read(Fields.U).int32(this::u)
-                    .read(Fields.V).int32(this::v)
-                    .read(Fields.W).int32(this::w)
-                    .read(Fields.X).int32(this::x)
+            wire.read(Fields.I).int32(this, (o, x) -> o.i = x)
+                    .read(Fields.J).int32(this, (o, x) -> o.j = x)
+                    .read(Fields.K).int32(this, (o, x) -> o.k = x)
+                    .read(Fields.L).int32(this, (o, x) -> o.l = x)
+                    .read(Fields.M).int32(this, (o, x) -> o.m = x)
+                    .read(Fields.N).int32(this, (o, x) -> o.n = x)
+                    .read(Fields.O).int32(this, (t, x) -> t.o = x)
+                    .read(Fields.P).int32(this, (o, x) -> o.p = x)
+                    .read(Fields.Q).int32(this, (o, x) -> o.q = x)
+                    .read(Fields.R).int32(this, (o, x) -> o.r = x)
+                    .read(Fields.S).int32(this, (o, x) -> o.s = x)
+                    .read(Fields.T).int32(this, (o, x) -> o.t = x)
+                    .read(Fields.U).int32(this, (o, x) -> o.u = x)
+                    .read(Fields.V).int32(this, (o, x) -> o.v = x)
+                    .read(Fields.W).int32(this, (o, x) -> o.w = x)
+                    .read(Fields.X).int32(this, (o, x) -> o.x = x)
             ;
         }
 

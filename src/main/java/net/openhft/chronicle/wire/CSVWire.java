@@ -20,67 +20,39 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import net.openhft.chronicle.core.util.*;
+import net.openhft.chronicle.core.util.BooleanConsumer;
+import net.openhft.chronicle.core.util.ObjectUtils;
+import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static net.openhft.chronicle.bytes.Bytes.empty;
-import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 
 /**
  * YAML Based wire format
  */
-public class CSVWire implements Wire, InternalWireIn {
+public class CSVWire extends TextWire {
 
-    public static final BytesStore TYPE = BytesStore.wrap("!type ");
-    static final String SEQ_MAP = "!seqmap";
-    static final String NULL = "!null \"\"";
-    static final BitSet STARTS_QUOTE_CHARS = new BitSet();
-    static final BitSet QUOTE_CHARS = new BitSet();
-    static final Logger LOG = LoggerFactory.getLogger(CSVWire.class);
-    static final ThreadLocal<StopCharTester> ESCAPED_QUOTES = ThreadLocal.withInitial(() -> StopCharTesters.QUOTES.escaping());
-    static final ThreadLocal<StopCharTester> ESCAPED_SINGLE_QUOTES = ThreadLocal.withInitial(() -> StopCharTesters.SINGLE_QUOTES.escaping());
     static final ThreadLocal<StopCharTester> ESCAPED_END_OF_TEXT = ThreadLocal.withInitial(() -> StopCharTesters.COMMA_STOP.escaping());
-    static final BytesStore COMMA_SPACE = BytesStore.wrap(", ");
-    static final BytesStore COMMA_NEW_LINE = BytesStore.wrap(",\n");
-    static final BytesStore NEW_LINE = BytesStore.wrap("\n");
-    static final BytesStore SPACE = BytesStore.wrap(" ");
-    static final BytesStore END_FIELD = NEW_LINE;
-    static final char[] HEX = "0123456789ABCDEF".toCharArray();
 
-    static {
-        for (char ch : "0123456789+- \t\',#:{}[]|>".toCharArray())
-            STARTS_QUOTE_CHARS.set(ch);
-        for (char ch : "\',#:{}[]|>".toCharArray())
-            QUOTE_CHARS.set(ch);
-    }
-
-    private final Bytes<?> bytes;
-    private final TextValueOut valueOut = new TextValueOut();
-    private final TextValueIn valueIn = new TextValueIn();
-    private final boolean use8bit;
     private final List<String> header = new ArrayList<>();
-    private boolean ready;
-    private long lineStart = 0;
 
     public CSVWire(Bytes bytes, boolean use8bit) {
-        this.bytes = bytes;
-        this.use8bit = use8bit;
+        super(bytes, use8bit);
         while (lineStart == 0)
             header.add(valueIn.text());
     }
@@ -98,85 +70,20 @@ public class CSVWire implements Wire, InternalWireIn {
         return new CSVWire(Bytes.from(text));
     }
 
-    public static String asText(@NotNull Wire wire) {
-        long pos = wire.bytes().readPosition();
-        CSVWire tw = new CSVWire(nativeBytes());
-        wire.copyTo(tw);
-        wire.bytes().readPosition(pos);
-
-        return tw.toString();
-    }
-
-    public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb) {
-        int end = 0;
-        int length = sb.length();
-        for (int i = 0; i < length; i++) {
-            char ch = sb.charAt(i);
-            if (ch == '\\' && i < length - 1) {
-                char ch3 = sb.charAt(++i);
-                switch (ch3) {
-                    case 'b':
-                        ch = '\b';
-                        break;
-                    case 'r':
-                        ch = '\r';
-                        break;
-                    case 'n':
-                        ch = '\n';
-                        break;
-                    case 't':
-                        ch = '\t';
-                        break;
-                    case 'x':
-                        ch = (char)
-                                (Character.getNumericValue(sb.charAt(++i)) * 16 +
-                                        Character.getNumericValue(sb.charAt(++i)));
-                        break;
-                    case 'u':
-                        ch = (char)
-                                (Character.getNumericValue(sb.charAt(++i)) * 4096 +
-                                        Character.getNumericValue(sb.charAt(++i)) * 256 +
-                                        Character.getNumericValue(sb.charAt(++i)) * 16 +
-                                        Character.getNumericValue(sb.charAt(++i)));
-                        break;
-                    default:
-                        ch = ch3;
-                }
-            }
-            AppendableUtil.setCharAt(sb, end++, ch);
-        }
-        if (length != sb.length())
-            throw new IllegalStateException("Length changed from " + length + " to " + sb.length() + " for " + sb);
-        AppendableUtil.setLength(sb, end);
-    }
-
-    public String toString() {
-        return bytes.toString();
-    }
-
+    @NotNull
     @Override
-    public boolean isReady() {
-        return ready;
-    }
-
-    @Override
-    public void setReady(boolean ready) {
-        this.ready = ready;
-    }
-
-    @Override
-    public void copyTo(@NotNull WireOut wire) {
-        wire.bytes().write(bytes, bytes().readPosition(), bytes().readLimit());
+    protected TextValueOut createValueOut() {
+        return new CSVValueOut();
     }
 
     @NotNull
     @Override
-    public ValueIn read() {
-        return valueIn;
+    protected TextValueIn createValueIn() {
+        return new CSVValueIn();
     }
 
     @NotNull
-    private StringBuilder readField(@NotNull StringBuilder sb) {
+    public StringBuilder readField(@NotNull StringBuilder sb) {
         valueIn.text(sb);
         return sb;
     }
@@ -206,11 +113,7 @@ public class CSVWire implements Wire, InternalWireIn {
     void consumeWhiteSpace() {
         for (; ; ) {
             int codePoint = peekCode();
-            if (codePoint == '#') {
-                //noinspection StatementWithEmptyBody
-                while (readCode() >= ' ') ;
-                this.lineStart = bytes.readPosition();
-            } else if (Character.isWhitespace(codePoint) || codePoint == ',') {
+            if (Character.isWhitespace(codePoint) || codePoint == ',') {
                 if (codePoint == '\n' || codePoint == '\r')
                     this.lineStart = bytes.readPosition() + 1;
                 bytes.readSkip(1);
@@ -281,14 +184,9 @@ public class CSVWire implements Wire, InternalWireIn {
 
     @NotNull
     @Override
-    public ValueIn getValueIn() {
-        return valueIn;
-    }
-
-    @NotNull
-    @Override
     public Wire readComment(@NotNull StringBuilder s) {
-        throw new UnsupportedOperationException();
+        s.setLength(0);
+        return this;
     }
 
     @Override
@@ -311,37 +209,6 @@ public class CSVWire implements Wire, InternalWireIn {
 
     @NotNull
     @Override
-    public ValueOut write() {
-        return valueOut.write();
-    }
-
-    @NotNull
-    @Override
-    public ValueOut write(@NotNull WireKey key) {
-        return valueOut.write(key);
-    }
-
-    @NotNull
-    @Override
-    public ValueOut writeValue() {
-        return valueOut;
-    }
-
-    @NotNull
-    @Override
-    public ValueOut getValueOut() {
-        return valueOut;
-    }
-
-    @NotNull
-    @Override
-    public Wire writeComment(@NotNull CharSequence s) {
-        valueOut.writeComment(s);
-        return this;
-    }
-
-    @NotNull
-    @Override
     public WireOut addPadding(int paddingToAdd) {
         for (int i = 0; i < paddingToAdd; i++)
             bytes.append((bytes.writePosition() & 63) == 0 ? '\n' : ' ');
@@ -349,8 +216,8 @@ public class CSVWire implements Wire, InternalWireIn {
     }
 
     void escape(@NotNull CharSequence s) {
-        Quotes quotes = needsQuotes(s);
-        if (quotes == Quotes.NONE) {
+        net.openhft.chronicle.wire.Quotes quotes = needsQuotes(s);
+        if (quotes == net.openhft.chronicle.wire.Quotes.NONE) {
             escape0(s, quotes);
             return;
         }
@@ -359,7 +226,7 @@ public class CSVWire implements Wire, InternalWireIn {
         bytes.append(quotes.q);
     }
 
-    private void escape0(@NotNull CharSequence s, CSVWire.Quotes quotes) {
+    private void escape0(@NotNull CharSequence s, net.openhft.chronicle.wire.Quotes quotes) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             switch (ch) {
@@ -407,19 +274,19 @@ public class CSVWire implements Wire, InternalWireIn {
         }
     }
 
-    Quotes needsQuotes(@NotNull CharSequence s) {
-        Quotes quotes = Quotes.NONE;
+    protected Quotes needsQuotes(@NotNull CharSequence s) {
+        net.openhft.chronicle.wire.Quotes quotes = net.openhft.chronicle.wire.Quotes.NONE;
         if (s.length() == 0)
-            return Quotes.DOUBLE;
+            return net.openhft.chronicle.wire.Quotes.DOUBLE;
 
         if (STARTS_QUOTE_CHARS.get(s.charAt(0)))
-            return Quotes.DOUBLE;
+            return net.openhft.chronicle.wire.Quotes.DOUBLE;
         for (int i = 1; i < s.length(); i++) {
             char ch = s.charAt(i);
             if (QUOTE_CHARS.get(ch))
-                return Quotes.DOUBLE;
+                return net.openhft.chronicle.wire.Quotes.DOUBLE;
             if (ch == '"')
-                quotes = Quotes.SINGLE;
+                quotes = net.openhft.chronicle.wire.Quotes.SINGLE;
         }
         return quotes;
     }
@@ -607,18 +474,9 @@ public class CSVWire implements Wire, InternalWireIn {
             bytes.append(' ');
     }
 
-    enum Quotes {
-        NONE(' '), SINGLE('\''), DOUBLE('"');
-        final char q;
-
-        Quotes(char q) {
-            this.q = q;
-        }
-    }
-
     enum NoObject {NO_OBJECT;}
 
-    class TextValueOut implements ValueOut {
+    class CSVValueOut extends TextValueOut {
         int indentation = 0;
         @NotNull
         BytesStore sep = Bytes.empty();
@@ -1117,31 +975,7 @@ public class CSVWire implements Wire, InternalWireIn {
         }
     }
 
-    class TextValueIn implements ValueIn {
-        @NotNull
-        @Override
-        public WireIn bool(@NotNull BooleanConsumer flag) {
-            consumeWhiteSpace();
-
-            StringBuilder sb = Wires.acquireStringBuilder();
-            if (textTo(sb) == null) {
-                flag.accept(null);
-                return CSVWire.this;
-            }
-
-            flag.accept(StringUtils.isEqual(sb, "true"));
-            return CSVWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn text(@NotNull Consumer<String> s) {
-            StringBuilder sb = Wires.acquireStringBuilder();
-            Object acs = textTo(sb);
-            s.accept(acs == null ? null : acs.toString());
-            return CSVWire.this;
-        }
-
+    class CSVValueIn extends TextValueIn {
         @Override
         public String text() {
             return StringUtils.toString(textTo(Wires.acquireStringBuilder()));
@@ -1272,14 +1106,6 @@ public class CSVWire implements Wire, InternalWireIn {
                 bytes.readSkip(-1);
             }
             return -1;
-        }
-
-        @NotNull
-        @Override
-        public WireIn int8(@NotNull ByteConsumer i) {
-            consumeWhiteSpace();
-            i.accept((byte) bytes.parseLong());
-            return CSVWire.this;
         }
 
         @NotNull
@@ -1448,100 +1274,6 @@ public class CSVWire implements Wire, InternalWireIn {
             }
         }
 
-        @NotNull
-        @Override
-        public WireIn uint8(@NotNull ShortConsumer i) {
-            consumeWhiteSpace();
-            i.accept((short) bytes.parseLong());
-            return CSVWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn int16(@NotNull ShortConsumer i) {
-            consumeWhiteSpace();
-            i.accept((short) bytes.parseLong());
-            return CSVWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn uint16(@NotNull IntConsumer i) {
-            consumeWhiteSpace();
-            i.accept((int) bytes.parseLong());
-            return CSVWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn int32(@NotNull IntConsumer i) {
-            consumeWhiteSpace();
-            i.accept((int) bytes.parseLong());
-            return CSVWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn uint32(@NotNull LongConsumer i) {
-            consumeWhiteSpace();
-            i.accept(bytes.parseLong());
-            return CSVWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn int64(@NotNull LongConsumer i) {
-            consumeWhiteSpace();
-            i.accept(bytes.parseLong());
-            return CSVWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn float32(@NotNull FloatConsumer v) {
-            consumeWhiteSpace();
-            v.accept((float) bytes.parseDouble());
-            return CSVWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn float64(@NotNull DoubleConsumer v) {
-            consumeWhiteSpace();
-            v.accept(bytes.parseDouble());
-            return CSVWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn time(@NotNull Consumer<LocalTime> localTime) {
-            consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
-            textTo(sb);
-            localTime.accept(LocalTime.parse(Wires.INTERNER.intern(sb)));
-            return CSVWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime) {
-            consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
-            textTo(sb);
-            zonedDateTime.accept(ZonedDateTime.parse(Wires.INTERNER.intern(sb)));
-            return CSVWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn date(@NotNull Consumer<LocalDate> localDate) {
-            consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
-            textTo(sb);
-            localDate.accept(LocalDate.parse(Wires.INTERNER.intern(sb)));
-            return CSVWire.this;
-        }
-
         @Override
         public boolean hasNext() {
             return bytes.readRemaining() > 0;
@@ -1560,30 +1292,6 @@ public class CSVWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn uuid(@NotNull Consumer<UUID> uuid) {
-            consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
-            textTo(sb);
-            uuid.accept(UUID.fromString(Wires.INTERNER.intern(sb)));
-            return CSVWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn int64array(@Nullable LongArrayValues values, @NotNull Consumer<LongArrayValues> setter) {
-            consumeWhiteSpace();
-            if (!(values instanceof TextLongArrayReference)) {
-                setter.accept(values = new TextLongArrayReference());
-            }
-            Byteable b = (Byteable) values;
-            long length = TextLongArrayReference.peakLength(bytes, bytes.readPosition());
-            b.bytesStore(bytes, bytes.readPosition(), length);
-            bytes.readSkip(length);
-            return CSVWire.this;
-        }
-
-        @NotNull
-        @Override
         public WireIn int64(@Nullable LongValue value) {
             consumeWhiteSpace();
             Byteable b = (Byteable) value;
@@ -1593,55 +1301,6 @@ public class CSVWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             if (peekCode() == ',')
                 bytes.readSkip(1);
-            return CSVWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn int64(LongValue value, @NotNull Consumer<LongValue> setter) {
-            if (!(value instanceof TextLongReference)) {
-                setter.accept(value = new TextLongReference());
-            }
-            return int64(value);
-        }
-
-        @NotNull
-        @Override
-        public WireIn int32(IntValue value, @NotNull Consumer<IntValue> setter) {
-            if (!(value instanceof TextIntReference)) {
-                setter.accept(value = new TextIntReference());
-            }
-            Byteable b = (Byteable) value;
-            long length = b.maxSize();
-            b.bytesStore(bytes, bytes.readPosition(), length);
-            bytes.readSkip(length);
-            consumeWhiteSpace();
-            if (peekCode() == ',')
-                bytes.readSkip(1);
-            return CSVWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn sequence(@NotNull Consumer<ValueIn> reader) {
-            consumeWhiteSpace();
-            char code = (char) readCode();
-            if (code != '[')
-                throw new IORuntimeException("Unsupported type " + code + " (" + code + ")");
-
-            // this code was added to support empty sets
-            consumeWhiteSpace();
-            code = (char) peekCode();
-            if (code == ']')
-                return CSVWire.this;
-
-            reader.accept(CSVWire.this.valueIn);
-
-            consumeWhiteSpace();
-            code = (char) peekCode();
-            if (code != ']')
-                throw new IORuntimeException("Expected a ] but got " + code + " (" + code + ")");
-
             return CSVWire.this;
         }
 
@@ -1669,39 +1328,8 @@ public class CSVWire implements Wire, InternalWireIn {
         }
 
         @NotNull
-        @Override
-        public ValueIn type(@NotNull StringBuilder sb) {
-            consumeWhiteSpace();
-            int code = peekCode();
-            sb.setLength(0);
-            if (code == -1) {
-                sb.append("java.lang.Void");
-            } else if (code == '!') {
-                readCode();
-
-                parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
-            }
-            return this;
-        }
-
-
-        @NotNull
         String stringForCode(int code) {
             return code < 0 ? "Unexpected end of input" : "'" + (char) code + "'";
-        }
-
-        @NotNull
-        @Override
-        public WireIn typeLiteralAsText(@NotNull Consumer<CharSequence> classNameConsumer) {
-            consumeWhiteSpace();
-            int code = readCode();
-            if (!peekStringIgnoreCase("type "))
-                throw new UnsupportedOperationException(stringForCode(code));
-            bytes.readSkip("type ".length());
-            StringBuilder sb = Wires.acquireStringBuilder();
-            parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
-            classNameConsumer.accept(sb);
-            return CSVWire.this;
         }
 
         @NotNull
@@ -1821,13 +1449,13 @@ public class CSVWire implements Wire, InternalWireIn {
                 String str = Wires.INTERNER.intern(sb);
                 if (SEQ_MAP.contentEquals(sb)) {
                     while (hasNext()) {
-                        sequence(s -> s.marshallable(r -> {
+                        sequence(usingMap, (map, s) -> s.marshallable(r -> {
                             try {
                                 @SuppressWarnings("unchecked")
                                 final K k = r.read(() -> "key").typedMarshallable();
                                 @SuppressWarnings("unchecked")
                                 final V v = r.read(() -> "value").typedMarshallable();
-                                usingMap.put(k, v);
+                                map.put(k, v);
                             } catch (Exception e) {
                                 LOG.error("", e);
                             }
@@ -1925,13 +1553,6 @@ public class CSVWire implements Wire, InternalWireIn {
         }
 
         @Nullable
-        @Override
-        public <E> WireIn object(@NotNull Class<E> clazz, @NotNull Consumer<E> e) {
-            e.accept(ObjectUtils.convertTo(clazz, object0(null, clazz)));
-            return CSVWire.this;
-        }
-
-        @Nullable
         Object object0(@Nullable Object using, @NotNull Class clazz) {
             consumeWhiteSpace();
 
@@ -2005,126 +1626,6 @@ public class CSVWire implements Wire, InternalWireIn {
 
             } else {
                 return objectWithInferredType(clazz);
-            }
-        }
-
-        Object objectWithInferredType(@NotNull Class clazz) {
-            consumeWhiteSpace();
-            int code = peekCode();
-            switch (code) {
-                case '!':
-                    return typedObject();
-                case '-':
-                    if (bytes.readByte(bytes.readPosition() + 1) == ' ')
-                        return readList(indentation());
-                    return valueIn.readNumber();
-                case '[':
-                    return readSequence(clazz);
-                case '{':
-                    return readMap();
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                case '+':
-                    return valueIn.readNumber();
-            }
-            if (Enum.class.isAssignableFrom(clazz)) {
-                StringBuilder sb = Wires.acquireStringBuilder();
-                parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
-                return Wires.INTERNER.intern(sb);
-            }
-            String text = valueIn.text();
-            switch (text) {
-                case "true":
-                    return Boolean.TRUE;
-                case "false":
-                    return Boolean.FALSE;
-                default:
-                    return text;
-            }
-        }
-
-        private Object readNumber() {
-            String s = text();
-            String ss = s;
-            if (s.length() > 40)
-                return s;
-
-            if (s.contains("_"))
-                ss = s.replace("_", "");
-            try {
-                return Long.decode(ss);
-            } catch (NumberFormatException e) {
-            }
-            try {
-                return Double.parseDouble(ss);
-            } catch (NumberFormatException e) {
-            }
-            try {
-                if (s.length() == 7 && s.charAt(1) == ':')
-                    return LocalTime.parse("0" + s);
-                if (s.length() == 8 && s.charAt(2) == ':')
-                    return LocalTime.parse(s);
-            } catch (DateTimeParseException e) {
-            }
-            try {
-                if (s.length() == 10)
-                    return LocalDate.parse(s);
-            } catch (DateTimeParseException e) {
-            }
-            try {
-                if (s.length() >= 22)
-                    return ZonedDateTime.parse(s);
-            } catch (DateTimeParseException e) {
-            }
-            return s;
-        }
-
-        @NotNull
-        private Object readSequence(@NotNull Class clazz) {
-            if (clazz == Object[].class || clazz == Object.class) {
-                //todo should this use reflection so that all array types can be handled
-                List<Object> list = new ArrayList<>();
-                sequence(v -> {
-                    while (v.hasNextSequenceItem()) {
-                        list.add(v.object(Object.class));
-                    }
-                });
-                return list.toArray();
-            } else if (clazz == String[].class) {
-                List<String> list = new ArrayList<>();
-                sequence(v -> {
-                    while (v.hasNextSequenceItem()) {
-                        list.add(v.text());
-                    }
-                });
-                return list.toArray(new String[0]);
-            } else if (clazz == List.class) {
-                List<String> list = new ArrayList<>();
-                sequence(v -> {
-                    while (v.hasNextSequenceItem()) {
-                        list.add(v.text());
-                    }
-                });
-                return list;
-            } else if (clazz == Set.class) {
-                Set<String> list = new HashSet<>();
-                sequence(v -> {
-                    while (v.hasNextSequenceItem()) {
-                        list.add(v.text());
-                    }
-                });
-                return list;
-            } else {
-                throw new UnsupportedOperationException("Arrays of type "
-                        + clazz + " not supported.");
             }
         }
 

@@ -273,17 +273,9 @@ public enum Wires {
     }
 
     public static Throwable throwable(@NotNull ValueIn valueIn, boolean appendCurrentStack) {
-        StringBuilder type = Wires.acquireStringBuilder();
-        valueIn.type(type);
+        Class type = valueIn.typePrefix();
         String preMessage = null;
-        Throwable throwable;
-        try {
-            //noinspection unchecked
-            throwable = ObjectUtils.newInstance((Class<Throwable>) Class.forName(INTERNER.intern(type)));
-        } catch (ClassNotFoundException e) {
-            preMessage = type.toString();
-            throwable = new RuntimeException();
-        }
+        Throwable throwable = ObjectUtils.newInstance((Class<Throwable>) type);
 
         final String finalPreMessage = preMessage;
         final Throwable finalThrowable = throwable;
@@ -298,7 +290,7 @@ public enum Wires {
                     throw Jvm.rethrow(e);
                 }
             }
-            m.read(() -> "stackTrace").sequence(stackTrace -> {
+            m.read(() -> "stackTrace").sequence(stes, (stes0, stackTrace) -> {
                 while (stackTrace.hasNextSequenceItem()) {
                     stackTrace.marshallable(r -> {
                         final String declaringClass = r.read(() -> "class").text();
@@ -306,7 +298,7 @@ public enum Wires {
                         final String fileName = r.read(() -> "file").text();
                         final int lineNumber = r.read(() -> "line").int32();
 
-                        stes.add(new StackTraceElement(declaringClass, methodName,
+                        stes0.add(new StackTraceElement(declaringClass, methodName,
                                 fileName, lineNumber));
                     });
                 }

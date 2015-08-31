@@ -70,18 +70,16 @@ public class TextWire implements Wire, InternalWireIn {
             QUOTE_CHARS.set(ch);
     }
 
-    private final Bytes<?> bytes;
-    private final TextValueOut valueOut = new TextValueOut();
-    private final TextValueIn valueIn = new TextValueIn();
-    private final boolean use8bit;
+    protected final Bytes<?> bytes;
+    protected final TextValueOut valueOut = createValueOut();
+    protected final TextValueIn valueIn = createValueIn();
+    protected final boolean use8bit;
+    protected long lineStart = 0;
     private boolean ready;
-    private long lineStart = 0;
-
     public TextWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
         this.use8bit = use8bit;
     }
-
     public TextWire(Bytes bytes) {
         this(bytes, false);
     }
@@ -147,6 +145,16 @@ public class TextWire implements Wire, InternalWireIn {
         AppendableUtil.setLength(sb, end);
     }
 
+    @NotNull
+    protected TextValueOut createValueOut() {
+        return new TextValueOut();
+    }
+
+    @NotNull
+    protected TextValueIn createValueIn() {
+        return new TextValueIn();
+    }
+
     public String toString() {
         return bytes.toString();
     }
@@ -174,7 +182,7 @@ public class TextWire implements Wire, InternalWireIn {
     }
 
     @NotNull
-    private StringBuilder readField(@NotNull StringBuilder sb) {
+    protected StringBuilder readField(@NotNull StringBuilder sb) {
         consumeWhiteSpace();
         if (peekCode() == ',') {
             bytes.readSkip(1);
@@ -390,7 +398,7 @@ public class TextWire implements Wire, InternalWireIn {
         bytes.append(quotes.q);
     }
 
-    private void escape0(@NotNull CharSequence s, TextWire.Quotes quotes) {
+    private void escape0(@NotNull CharSequence s, Quotes quotes) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             switch (ch) {
@@ -438,7 +446,7 @@ public class TextWire implements Wire, InternalWireIn {
         }
     }
 
-    Quotes needsQuotes(@NotNull CharSequence s) {
+    protected Quotes needsQuotes(@NotNull CharSequence s) {
         Quotes quotes = Quotes.NONE;
         if (s.length() == 0)
             return Quotes.DOUBLE;
@@ -636,15 +644,6 @@ public class TextWire implements Wire, InternalWireIn {
     private void indentation(int indentation) {
         while (indentation-- > 0)
             bytes.append(' ');
-    }
-
-    enum Quotes {
-        NONE(' '), SINGLE('\''), DOUBLE('"');
-        final char q;
-
-        Quotes(char q) {
-            this.q = q;
-        }
     }
 
     enum NoObject {NO_OBJECT;}
@@ -1149,29 +1148,6 @@ public class TextWire implements Wire, InternalWireIn {
     }
 
     class TextValueIn implements ValueIn {
-        @NotNull
-        @Override
-        public WireIn bool(@NotNull BooleanConsumer flag) {
-            consumeWhiteSpace();
-
-            StringBuilder sb = Wires.acquireStringBuilder();
-            if (textTo(sb) == null) {
-                flag.accept(null);
-                return TextWire.this;
-            }
-
-            flag.accept(StringUtils.isEqual(sb, "true"));
-            return TextWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn text(@NotNull Consumer<String> s) {
-            StringBuilder sb = Wires.acquireStringBuilder();
-            Object acs = textTo(sb);
-            s.accept(acs == null ? null : acs.toString());
-            return TextWire.this;
-        }
 
         @Override
         public String text() {
@@ -1303,14 +1279,6 @@ public class TextWire implements Wire, InternalWireIn {
                 bytes.readSkip(-1);
             }
             return -1;
-        }
-
-        @NotNull
-        @Override
-        public WireIn int8(@NotNull ByteConsumer i) {
-            consumeWhiteSpace();
-            i.accept((byte) bytes.parseLong());
-            return TextWire.this;
         }
 
         @NotNull
@@ -1495,130 +1463,137 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn uint8(@NotNull ShortConsumer i) {
+        public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag) {
             consumeWhiteSpace();
-            i.accept((short) bytes.parseLong());
-            return TextWire.this;
-        }
 
-        @NotNull
-        @Override
-        public WireIn int16(@NotNull ShortConsumer i) {
-            consumeWhiteSpace();
-            i.accept((short) bytes.parseLong());
-            return TextWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn uint16(@NotNull IntConsumer i) {
-            consumeWhiteSpace();
-            i.accept((int) bytes.parseLong());
-            return TextWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn int32(@NotNull IntConsumer i) {
-            consumeWhiteSpace();
-            i.accept((int) bytes.parseLong());
-            return TextWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn uint32(@NotNull LongConsumer i) {
-            consumeWhiteSpace();
-            i.accept(bytes.parseLong());
-            return TextWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn int64(@NotNull LongConsumer i) {
-            consumeWhiteSpace();
-            i.accept(bytes.parseLong());
-            return TextWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn float32(@NotNull FloatConsumer v) {
-            consumeWhiteSpace();
-            v.accept((float) bytes.parseDouble());
-            return TextWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn float64(@NotNull DoubleConsumer v) {
-            consumeWhiteSpace();
-            v.accept(bytes.parseDouble());
-            return TextWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn time(@NotNull Consumer<LocalTime> localTime) {
-            consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
-            textTo(sb);
-            localTime.accept(LocalTime.parse(Wires.INTERNER.intern(sb)));
-            return TextWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime) {
-            consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
-            textTo(sb);
-            zonedDateTime.accept(ZonedDateTime.parse(Wires.INTERNER.intern(sb)));
-            return TextWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn date(@NotNull Consumer<LocalDate> localDate) {
-            consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
-            textTo(sb);
-            localDate.accept(LocalDate.parse(Wires.INTERNER.intern(sb)));
-            return TextWire.this;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return bytes.readRemaining() > 0;
-        }
-
-        @Override
-        public boolean hasNextSequenceItem() {
-            consumeWhiteSpace();
-            int ch = peekCode();
-            if (ch == ',') {
-                bytes.readSkip(1);
-                return true;
+            if (textTo(sb) == null) {
+                tFlag.accept(t, null);
+                return TextWire.this;
             }
-            return ch > 0 && ch != ']';
-        }
 
-        @NotNull
-        @Override
-        public WireIn uuid(@NotNull Consumer<UUID> uuid) {
-            consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
-            textTo(sb);
-            uuid.accept(UUID.fromString(Wires.INTERNER.intern(sb)));
+            tFlag.accept(t, StringUtils.isEqual(sb, "true"));
             return TextWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn int64array(@Nullable LongArrayValues values, @NotNull Consumer<LongArrayValues> setter) {
+        public <T> WireIn int8(@NotNull T t, @NotNull ObjByteConsumer<T> tb) {
+            consumeWhiteSpace();
+            tb.accept(t, (byte) bytes.parseLong());
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn uint8(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
+            consumeWhiteSpace();
+            ti.accept(t, (short) bytes.parseLong());
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn int16(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
+            consumeWhiteSpace();
+            ti.accept(t, (short) bytes.parseLong());
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn uint16(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
+            consumeWhiteSpace();
+            ti.accept(t, (int) bytes.parseLong());
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn int32(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
+            consumeWhiteSpace();
+            ti.accept(t, (int) bytes.parseLong());
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn uint32(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
+            consumeWhiteSpace();
+            tl.accept(t, bytes.parseLong());
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn int64(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
+            consumeWhiteSpace();
+            tl.accept(t, bytes.parseLong());
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn float32(@NotNull T t, @NotNull ObjFloatConsumer<T> tf) {
+            consumeWhiteSpace();
+            tf.accept(t, (float) bytes.parseDouble());
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td) {
+            consumeWhiteSpace();
+            td.accept(t, bytes.parseDouble());
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime) {
+            consumeWhiteSpace();
+            StringBuilder sb = Wires.acquireStringBuilder();
+            textTo(sb);
+            setLocalTime.accept(t, LocalTime.parse(Wires.INTERNER.intern(sb)));
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime) {
+            consumeWhiteSpace();
+            StringBuilder sb = Wires.acquireStringBuilder();
+            textTo(sb);
+            tZonedDateTime.accept(t, ZonedDateTime.parse(Wires.INTERNER.intern(sb)));
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate) {
+            consumeWhiteSpace();
+            StringBuilder sb = Wires.acquireStringBuilder();
+            textTo(sb);
+            tLocalDate.accept(t, LocalDate.parse(Wires.INTERNER.intern(sb)));
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn uuid(@NotNull T t, @NotNull BiConsumer<T, UUID> tuuid) {
+            consumeWhiteSpace();
+            StringBuilder sb = Wires.acquireStringBuilder();
+            textTo(sb);
+            tuuid.accept(t, UUID.fromString(Wires.INTERNER.intern(sb)));
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn int64array(@Nullable LongArrayValues values, T t, @NotNull BiConsumer<T, LongArrayValues> setter) {
             consumeWhiteSpace();
             if (!(values instanceof TextLongArrayReference)) {
-                setter.accept(values = new TextLongArrayReference());
+                setter.accept(t, values = new TextLongArrayReference());
             }
             Byteable b = (Byteable) values;
             long length = TextLongArrayReference.peakLength(bytes, bytes.readPosition());
@@ -1643,18 +1618,18 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn int64(LongValue value, @NotNull Consumer<LongValue> setter) {
+        public <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter) {
             if (!(value instanceof TextLongReference)) {
-                setter.accept(value = new TextLongReference());
+                setter.accept(t, value = new TextLongReference());
             }
             return int64(value);
         }
 
         @NotNull
         @Override
-        public WireIn int32(IntValue value, @NotNull Consumer<IntValue> setter) {
+        public <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter) {
             if (!(value instanceof TextIntReference)) {
-                setter.accept(value = new TextIntReference());
+                setter.accept(t, value = new TextIntReference());
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
@@ -1668,7 +1643,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn sequence(@NotNull Consumer<ValueIn> reader) {
+        public <T> WireIn sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
             consumeWhiteSpace();
             char code = (char) readCode();
             if (code != '[')
@@ -1680,7 +1655,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (code == ']')
                 return TextWire.this;
 
-            reader.accept(TextWire.this.valueIn);
+            tReader.accept(t, TextWire.this.valueIn);
 
             consumeWhiteSpace();
             code = (char) peekCode();
@@ -1688,6 +1663,22 @@ public class TextWire implements Wire, InternalWireIn {
                 throw new IORuntimeException("Expected a ] but got " + code + " (" + code + ")");
 
             return TextWire.this;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return bytes.readRemaining() > 0;
+        }
+
+        @Override
+        public boolean hasNextSequenceItem() {
+            consumeWhiteSpace();
+            int ch = peekCode();
+            if (ch == ',') {
+                bytes.readSkip(1);
+                return true;
+            }
+            return ch > 0 && ch != ']';
         }
 
         @Override
@@ -1723,12 +1714,13 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public ValueIn type(@NotNull StringBuilder sb) {
+        public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
             consumeWhiteSpace();
             int code = peekCode();
+            StringBuilder sb = Wires.acquireStringBuilder();
             sb.setLength(0);
             if (code == -1) {
-                sb.append("java.lang.Void");
+                sb.append("java.lang.Object");
             } else if (code == '!') {
                 readCode();
 
@@ -1737,6 +1729,27 @@ public class TextWire implements Wire, InternalWireIn {
             return this;
         }
 
+        @Override
+        public Class typePrefix() {
+            consumeWhiteSpace();
+            int code = peekCode();
+            if (code == '!') {
+                readCode();
+
+                StringBuilder sb = Wires.acquireStringBuilder();
+                sb.setLength(0);
+                parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
+                return ClassAliasPool.CLASS_ALIASES.forName(sb);
+            }
+            return Object.class;
+        }
+
+        @Override
+        public boolean isTyped() {
+            consumeWhiteSpace();
+            int code = peekCode();
+            return code == '!';
+        }
 
         @NotNull
         String stringForCode(int code) {
@@ -1745,7 +1758,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn typeLiteralAsText(@NotNull Consumer<CharSequence> classNameConsumer) {
+        public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) {
             consumeWhiteSpace();
             int code = readCode();
             if (!peekStringIgnoreCase("type "))
@@ -1753,8 +1766,20 @@ public class TextWire implements Wire, InternalWireIn {
             bytes.readSkip("type ".length());
             StringBuilder sb = Wires.acquireStringBuilder();
             parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
-            classNameConsumer.accept(sb);
+            classNameConsumer.accept(t, sb);
             return TextWire.this;
+        }
+
+        @Override
+        public Class typeLiteral() {
+            consumeWhiteSpace();
+            int code = readCode();
+            if (!peekStringIgnoreCase("type "))
+                throw new UnsupportedOperationException(stringForCode(code));
+            bytes.readSkip("type ".length());
+            StringBuilder sb = Wires.acquireStringBuilder();
+            parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
+            return ClassAliasPool.CLASS_ALIASES.forName(sb);
         }
 
         @NotNull
@@ -1762,10 +1787,11 @@ public class TextWire implements Wire, InternalWireIn {
         public WireIn marshallable(@NotNull ReadMarshallable object) {
             consumeWhiteSpace();
             int code = peekCode();
-            if (code == '!')
-                type(Wires.acquireStringBuilder());
-            else if (code != '{')
+            if (code == '!') {
+                typePrefix(null, (o, x) -> { /* sets Wires.acquireStringBuilder(); */});
+            } else if (code != '{') {
                 throw new IORuntimeException("Unsupported type " + stringForCode(code));
+            }
 
             final long len = readLengthMarshallable();
 
@@ -1886,7 +1912,7 @@ public class TextWire implements Wire, InternalWireIn {
                 String str = Wires.INTERNER.intern(sb);
                 if (SEQ_MAP.contentEquals(sb)) {
                     while (hasNext()) {
-                        sequence(s -> s.marshallable(r -> {
+                        sequence(this, (o, s) -> s.marshallable(r -> {
                             try {
                                 @SuppressWarnings("unchecked")
                                 final K k = r.read(() -> "key").typedMarshallable();
@@ -1991,8 +2017,8 @@ public class TextWire implements Wire, InternalWireIn {
 
         @Nullable
         @Override
-        public <E> WireIn object(@NotNull Class<E> clazz, @NotNull Consumer<E> e) {
-            e.accept(ObjectUtils.convertTo(clazz, object0(null, clazz)));
+        public <T, E> WireIn object(@NotNull Class<E> clazz, T t, BiConsumer<T, E> e) {
+            e.accept(t, ObjectUtils.convertTo(clazz, object0(null, clazz)));
             return TextWire.this;
         }
 
@@ -2116,38 +2142,38 @@ public class TextWire implements Wire, InternalWireIn {
             }
         }
 
-        private Object readNumber() {
+        protected Object readNumber() {
             String s = text();
             String ss = s;
-            if (s.length() > 40)
+            if (s == null || s.length() > 40)
                 return s;
 
             if (s.contains("_"))
                 ss = s.replace("_", "");
             try {
                 return Long.decode(ss);
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException ignored) {
             }
             try {
                 return Double.parseDouble(ss);
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException ignored) {
             }
             try {
                 if (s.length() == 7 && s.charAt(1) == ':')
                     return LocalTime.parse("0" + s);
                 if (s.length() == 8 && s.charAt(2) == ':')
                     return LocalTime.parse(s);
-            } catch (DateTimeParseException e) {
+            } catch (DateTimeParseException ignored) {
             }
             try {
                 if (s.length() == 10)
                     return LocalDate.parse(s);
-            } catch (DateTimeParseException e) {
+            } catch (DateTimeParseException ignored) {
             }
             try {
                 if (s.length() >= 22)
                     return ZonedDateTime.parse(s);
-            } catch (DateTimeParseException e) {
+            } catch (DateTimeParseException ignored) {
             }
             return s;
         }
@@ -2157,33 +2183,33 @@ public class TextWire implements Wire, InternalWireIn {
             if (clazz == Object[].class || clazz == Object.class) {
                 //todo should this use reflection so that all array types can be handled
                 List<Object> list = new ArrayList<>();
-                sequence(v -> {
+                sequence(list, (l, v) -> {
                     while (v.hasNextSequenceItem()) {
-                        list.add(v.object(Object.class));
+                        l.add(v.object(Object.class));
                     }
                 });
                 return list.toArray();
             } else if (clazz == String[].class) {
                 List<String> list = new ArrayList<>();
-                sequence(v -> {
+                sequence(list, (l, v) -> {
                     while (v.hasNextSequenceItem()) {
-                        list.add(v.text());
+                        l.add(v.text());
                     }
                 });
                 return list.toArray(new String[0]);
             } else if (clazz == List.class) {
                 List<String> list = new ArrayList<>();
-                sequence(v -> {
+                sequence(list, (l, v) -> {
                     while (v.hasNextSequenceItem()) {
-                        list.add(v.text());
+                        l.add(v.text());
                     }
                 });
                 return list;
             } else if (clazz == Set.class) {
                 Set<String> list = new HashSet<>();
-                sequence(v -> {
+                sequence(list, (l, v) -> {
                     while (v.hasNextSequenceItem()) {
-                        list.add(v.text());
+                        l.add(v.text());
                     }
                 });
                 return list;

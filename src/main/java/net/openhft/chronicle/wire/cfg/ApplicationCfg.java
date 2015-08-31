@@ -65,11 +65,9 @@ public class ApplicationCfg implements MapInstallable {
         StringBuilder name = new StringBuilder();
         while (wire.hasMore()) {
             ValueIn in = wire.read(name);
-            StringBuilder type = new StringBuilder();
             long pos = wire.bytes().readPosition();
-            in.type(type);
             String path2 = path + "/" + name;
-            if (type.length() == 0) {
+            if (in.isTyped()) {
                 in.marshallable(w -> this.readMarshallable(path2, w));
             } else {
                 wire.bytes().readPosition(pos);

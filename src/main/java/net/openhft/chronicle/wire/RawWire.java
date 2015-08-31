@@ -19,10 +19,8 @@ import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.util.BooleanConsumer;
-import net.openhft.chronicle.core.util.ByteConsumer;
-import net.openhft.chronicle.core.util.FloatConsumer;
-import net.openhft.chronicle.core.util.ShortConsumer;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -45,9 +43,6 @@ public class RawWire implements Wire, InternalWireIn {
     private final RawValueOut valueOut = new RawValueOut();
     private final RawValueIn valueIn = new RawValueIn();
     boolean use8bit;
-    @NotNull
-    private
-    CharSequence lastField = "";
     @Nullable
     private
     StringBuilder lastSB;
@@ -158,14 +153,12 @@ public class RawWire implements Wire, InternalWireIn {
     @NotNull
     @Override
     public ValueOut write() {
-        lastField = "";
         return valueOut;
     }
 
     @NotNull
     @Override
     public ValueOut writeEventName(@NotNull WireKey key) {
-        lastField = "";
         if (use8bit)
             bytes.write8bit(key.name());
         else
@@ -176,14 +169,12 @@ public class RawWire implements Wire, InternalWireIn {
     @NotNull
     @Override
     public ValueOut write(@NotNull WireKey key) {
-        lastField = key.name();
         return valueOut;
     }
 
     @NotNull
     @Override
     public ValueOut writeValue() {
-        lastField = "";
         return valueOut;
     }
 
@@ -467,7 +458,6 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut sequence(@NotNull Consumer<ValueOut> writer) {
-            text(lastField);
             long position = bytes.writePosition();
             bytes.writeInt(0);
 
@@ -480,13 +470,13 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut marshallable(@NotNull WriteMarshallable object) {
-            text(lastField);
             long position = bytes.writePosition();
             bytes.writeInt(0);
 
             object.writeMarshallable(RawWire.this);
 
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
+            int length = Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range.");
+            bytes.writeOrderedInt(position, length);
             return RawWire.this;
         }
 
@@ -519,15 +509,25 @@ public class RawWire implements Wire, InternalWireIn {
     class RawValueIn implements ValueIn {
         @NotNull
         @Override
-        public WireIn bool(@NotNull BooleanConsumer flag) {
+        public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> flag) {
             int b = bytes.readUnsignedByte();
             if (b == BinaryWireCode.NULL)
-                flag.accept(null);
+                flag.accept(t, null);
             else if (b == 0 || b == BinaryWireCode.FALSE)
-                flag.accept(false);
+                flag.accept(t, false);
             else
-                flag.accept(true);
+                flag.accept(t, true);
             return RawWire.this;
+        }
+
+        @Override
+        public boolean isTyped() {
+            return false;
+        }
+
+        @Override
+        public Class typePrefix() {
+            return Object.class;
         }
 
         @NotNull
@@ -552,13 +552,6 @@ public class RawWire implements Wire, InternalWireIn {
                 return bytes.read8bit(s) ? s : null;
             else
                 return bytes.readUTFΔ(s) ? s : null;
-        }
-
-        @NotNull
-        @Override
-        public WireIn int8(@NotNull ByteConsumer i) {
-            i.accept(bytes.readByte());
-            return RawWire.this;
         }
 
         @NotNull
@@ -626,116 +619,114 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn uint8(@NotNull ShortConsumer i) {
-            i.accept((short) bytes.readUnsignedByte());
+        public <T> WireIn int8(@NotNull T t, @NotNull ObjByteConsumer<T> tb) {
+            tb.accept(t, bytes.readByte());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn int16(@NotNull ShortConsumer i) {
-            i.accept(bytes.readShort());
+        public <T> WireIn uint8(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
+            ti.accept(t, (short) bytes.readUnsignedByte());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn uint16(@NotNull IntConsumer i) {
-            i.accept(bytes.readUnsignedShort());
+        public <T> WireIn int16(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
+            ti.accept(t, bytes.readShort());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn int32(@NotNull IntConsumer i) {
-            i.accept(bytes.readInt());
+        public <T> WireIn uint16(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
+            ti.accept(t, bytes.readUnsignedShort());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn uint32(@NotNull LongConsumer i) {
-            i.accept(bytes.readUnsignedInt());
+        public <T> WireIn int32(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
+            ti.accept(t, bytes.readInt());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn int64(@NotNull LongConsumer i) {
-            i.accept(bytes.readLong());
+        public <T> WireIn uint32(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
+            tl.accept(t, bytes.readUnsignedInt());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn float32(@NotNull FloatConsumer v) {
-            v.accept(bytes.readFloat());
+        public <T> WireIn int64(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
+            tl.accept(t, bytes.readLong());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn float64(@NotNull DoubleConsumer v) {
-            v.accept(bytes.readDouble());
+        public <T> WireIn float32(@NotNull T t, @NotNull ObjFloatConsumer<T> tf) {
+            tf.accept(t, bytes.readFloat());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn time(@NotNull Consumer<LocalTime> localTime) {
-            localTime.accept(LocalTime.ofNanoOfDay(bytes.readLong()));
+        public <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td) {
+            td.accept(t, bytes.readDouble());
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime) {
-            zonedDateTime.accept(ZonedDateTime.parse(bytes.readUTFΔ()));
+        public <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime) {
+            setLocalTime.accept(t, LocalTime.ofNanoOfDay(bytes.readLong()));
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn date(@NotNull Consumer<LocalDate> localDate) {
-            localDate.accept(LocalDate.ofEpochDay(bytes.readStopBit()));
-            return RawWire.this;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return bytes.readRemaining() > 0;
-        }
-
-        @Override
-        public boolean hasNextSequenceItem() {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @NotNull
-        @Override
-        public WireIn uuid(@NotNull Consumer<UUID> uuid) {
-            uuid.accept(new UUID(bytes.readLong(), bytes.readLong()));
+        public <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime) {
+            tZonedDateTime.accept(t, ZonedDateTime.parse(bytes.readUTFΔ()));
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn int64array(@Nullable LongArrayValues values, @NotNull Consumer<LongArrayValues> setter) {
+        public <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate) {
+            tLocalDate.accept(t, LocalDate.ofEpochDay(bytes.readStopBit()));
+            return RawWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn uuid(@NotNull T t, @NotNull BiConsumer<T, UUID> tuuid) {
+            tuuid.accept(t, new UUID(bytes.readLong(), bytes.readLong()));
+            return RawWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn int64array(@Nullable LongArrayValues values, T t, @NotNull BiConsumer<T, LongArrayValues> setter) {
             if (!(values instanceof Byteable)) {
-                setter.accept(values = new BinaryLongArrayReference());
+                values = new BinaryLongArrayReference();
             }
             Byteable b = (Byteable) values;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
+            setter.accept(t, values);
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn int64(LongValue value, @NotNull Consumer<LongValue> setter) {
+        public <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter) {
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
-                setter.accept(value = new BinaryLongReference());
+                setter.accept(t, value = new BinaryLongReference());
             }
             return int64(value);
         }
@@ -752,9 +743,9 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn int32(IntValue value, @NotNull Consumer<IntValue> setter) {
+        public <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter) {
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
-                setter.accept(value = new BinaryIntReference());
+                setter.accept(t, value = new BinaryIntReference());
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
@@ -765,10 +756,33 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn sequence(@NotNull Consumer<ValueIn> reader) {
-            textTo(lastSB);
+        public <T> WireIn sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
+            throw new UnsupportedOperationException("todo");
+        }
 
-            throw new UnsupportedOperationException();
+        @NotNull
+        @Override
+        public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            bytes.readUTFΔ(sb);
+            ts.accept(t, sb);
+            return this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            bytes.readUTFΔ(sb);
+            classNameConsumer.accept(t, sb);
+            return RawWire.this;
+        }
+
+        @Override
+        public Class typeLiteral() {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            bytes.readUTFΔ(sb);
+            return ClassAliasPool.CLASS_ALIASES.forName(sb);
         }
 
         @Override
@@ -797,20 +811,14 @@ public class RawWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException("todo");
         }
 
-        @NotNull
         @Override
-        public ValueIn type(@NotNull StringBuilder s) {
-            bytes.readUTFΔ(s);
-            return this;
+        public boolean hasNext() {
+            return bytes.readRemaining() > 0;
         }
 
-        @NotNull
         @Override
-        public WireIn typeLiteralAsText(@NotNull Consumer<CharSequence> classNameConsumer) {
-            StringBuilder sb = Wires.acquireStringBuilder();
-            type(sb);
-            classNameConsumer.accept(sb);
-            return RawWire.this;
+        public boolean hasNextSequenceItem() {
+            throw new UnsupportedOperationException("todo");
         }
 
         @NotNull
@@ -896,7 +904,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @Nullable
         @Override
-        public <E> WireIn object(@NotNull Class<E> clazz, Consumer<E> e) {
+        public <T, E> WireIn object(@NotNull Class<E> clazz, T t, BiConsumer<T, E> e) {
             throw new UnsupportedOperationException("todo");
         }
     }

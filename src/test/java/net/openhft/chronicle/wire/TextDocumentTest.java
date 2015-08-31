@@ -108,10 +108,10 @@ public class TextDocumentTest {
 
         @Override
         public void readMarshallable(@NotNull WireIn in) {
-            in.read(Keys.uuid).uuid(u -> uuid = u);
-            in.read(Keys.writeByte).int64(writeByte, x -> writeByte = x);
-            in.read(Keys.readByte).int64(readByte, x -> readByte = x);
-            in.read(Keys.created).zonedDateTime(c -> created = c);
+            in.read(Keys.uuid).uuid(this, (o, u) -> o.uuid = u);
+            in.read(Keys.writeByte).int64(writeByte, this, (o, x) -> o.writeByte = x);
+            in.read(Keys.readByte).int64(readByte, this, (o, x) -> o.readByte = x);
+            in.read(Keys.created).zonedDateTime(this, (o, c) -> o.created = c);
         }
     }
 }

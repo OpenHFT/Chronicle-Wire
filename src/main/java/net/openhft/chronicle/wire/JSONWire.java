@@ -19,23 +19,26 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import net.openhft.chronicle.core.util.*;
+import net.openhft.chronicle.core.util.BooleanConsumer;
+import net.openhft.chronicle.core.util.ObjectUtils;
+import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
 
 import java.io.IOException;
-import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.function.*;
+import java.util.Base64;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static net.openhft.chronicle.bytes.Bytes.empty;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
@@ -46,34 +49,11 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
  * <p>
  * At the moment, this is a cut down version of the YAML wire format.
  */
-public class JSONWire implements Wire, InternalWireIn {
-
-    public static final BytesStore TYPE = BytesStore.wrap("!type ");
-    static final String SEQ_MAP = "!seqmap";
-    static final String NULL = "!null \"\"";
-    static final BitSet QUOTE_CHARS = new BitSet();
-    static final Logger LOG = LoggerFactory.getLogger(JSONWire.class);
-    static final ThreadLocal<StopCharTester> ESCAPED_QUOTES = ThreadLocal.withInitial(() -> StopCharTesters.QUOTES.escaping());
-    static final ThreadLocal<StopCharsTester> ESCAPED_END_OF_TEXT = ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
-    static final BytesStore COMMA = BytesStore.wrap(",");
-    static final BytesStore NEW_LINE = BytesStore.wrap("\n");
-    static final BytesStore SPACE = BytesStore.wrap(" ");
-    static final BytesStore END_FIELD = NEW_LINE;
-
-    static {
-        for (char ch : "\",\n\\#:{}[]".toCharArray())
-            QUOTE_CHARS.set(ch);
-    }
-
-    private final Bytes<?> bytes;
-    private final TextValueOut valueOut = new TextValueOut();
-    private final ValueIn valueIn = new TextValueIn();
-    private final boolean use8bit;
-    private boolean ready;
+public class JSONWire extends TextWire {
+    static final BytesStore COMMA = BytesStore.from(",");
 
     public JSONWire(Bytes bytes, boolean use8bit) {
-        this.bytes = bytes;
-        this.use8bit = use8bit;
+        super(bytes, use8bit);
     }
 
     public JSONWire(Bytes bytes) {
@@ -119,20 +99,6 @@ public class JSONWire implements Wire, InternalWireIn {
         AppendableUtil.setLength(sb, end);
     }
 
-    public String toString() {
-        return bytes.toString();
-    }
-
-    @Override
-    public boolean isReady() {
-        return ready;
-    }
-
-    @Override
-    public void setReady(boolean ready) {
-        this.ready = ready;
-    }
-
     @Override
     public void copyTo(@NotNull WireOut wire) {
         throw new UnsupportedOperationException();
@@ -143,39 +109,6 @@ public class JSONWire implements Wire, InternalWireIn {
     public ValueIn read() {
         readField(Wires.acquireStringBuilder());
         return valueIn;
-    }
-
-    @NotNull
-    private StringBuilder readField(@NotNull StringBuilder sb) {
-        consumeWhiteSpace();
-        if (peekCode() == ',') {
-            bytes.readSkip(1);
-            consumeWhiteSpace();
-        }
-        try {
-            int ch = peekCode();
-            if (ch == '"') {
-                bytes.readSkip(1);
-
-                parseUntil(sb, getEscapingQuotes());
-
-                consumeWhiteSpace();
-                ch = readCode();
-                if (ch != ':')
-                    throw new UnsupportedOperationException("Expected a : at " + bytes.toDebugString());
-
-            } else if (ch < 0) {
-                sb.setLength(0);
-                return sb;
-
-            } else {
-                parseUntil(sb, getEscapingEndOfText());
-            }
-            unescape(sb);
-        } catch (BufferUnderflowException ignored) {
-        }
-        //      consumeWhiteSpace();
-        return sb;
     }
 
     @NotNull
@@ -334,7 +267,7 @@ public class JSONWire implements Wire, InternalWireIn {
     }
 
     void escaped(@NotNull CharSequence s) {
-        if (!needsQuotes(s)) {
+        if (needsQuotes(s) == Quotes.NONE) {
             bytes.append(s);
             return;
         }
@@ -360,20 +293,6 @@ public class JSONWire implements Wire, InternalWireIn {
         }
     }
 
-    boolean needsQuotes(@NotNull CharSequence s) {
-
-        if (s.length() == 0)
-            return true;
-
-        if (s.charAt(0) == ' ' || s.charAt(0) == '!' || s.charAt(s.length() - 1) == ' ')
-            return true;
-        for (int i = 0; i < s.length(); i++) {
-            char ch = s.charAt(i);
-            if (QUOTE_CHARS.get(ch))
-                return true;
-        }
-        return false;
-    }
 
     @NotNull
     @Override
@@ -908,31 +827,7 @@ public class JSONWire implements Wire, InternalWireIn {
         }
     }
 
-    class TextValueIn implements ValueIn {
-        @NotNull
-        @Override
-        public WireIn bool(@NotNull BooleanConsumer flag) {
-            consumeWhiteSpace();
-
-            StringBuilder sb = Wires.acquireStringBuilder();
-            if (textTo(sb) == null) {
-                flag.accept(null);
-                return JSONWire.this;
-            }
-
-            flag.accept(StringUtils.isEqual(sb, "true"));
-            return JSONWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn text(@NotNull Consumer<String> s) {
-            StringBuilder sb = Wires.acquireStringBuilder();
-            Object acs = textTo(sb);
-            s.accept(acs == null ? null : acs.toString());
-            return JSONWire.this;
-        }
-
+    class JSONValueIn extends TextValueIn {
         @Override
         public String text() {
             return StringUtils.toString(textTo(Wires.acquireStringBuilder()));
@@ -1034,15 +929,6 @@ public class JSONWire implements Wire, InternalWireIn {
         private int rewindAndRead() {
             return bytes.readPosition() > 0 ? bytes.readUnsignedByte(bytes.readPosition() - 1) : -1;
         }
-
-        @NotNull
-        @Override
-        public WireIn int8(@NotNull ByteConsumer i) {
-            consumeWhiteSpace();
-            i.accept((byte) bytes.parseLong());
-            return JSONWire.this;
-        }
-
         @NotNull
         @Override
         public WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer) {
@@ -1224,100 +1110,6 @@ public class JSONWire implements Wire, InternalWireIn {
             }
         }
 
-        @NotNull
-        @Override
-        public WireIn uint8(@NotNull ShortConsumer i) {
-            consumeWhiteSpace();
-            i.accept((short) bytes.parseLong());
-            return JSONWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn int16(@NotNull ShortConsumer i) {
-            consumeWhiteSpace();
-            i.accept((short) bytes.parseLong());
-            return JSONWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn uint16(@NotNull IntConsumer i) {
-            consumeWhiteSpace();
-            i.accept((int) bytes.parseLong());
-            return JSONWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn int32(@NotNull IntConsumer i) {
-            consumeWhiteSpace();
-            i.accept((int) bytes.parseLong());
-            return JSONWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn uint32(@NotNull LongConsumer i) {
-            consumeWhiteSpace();
-            i.accept(bytes.parseLong());
-            return JSONWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn int64(@NotNull LongConsumer i) {
-            consumeWhiteSpace();
-            i.accept(bytes.parseLong());
-            return JSONWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn float32(@NotNull FloatConsumer v) {
-            consumeWhiteSpace();
-            v.accept((float) bytes.parseDouble());
-            return JSONWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn float64(@NotNull DoubleConsumer v) {
-            consumeWhiteSpace();
-            v.accept(bytes.parseDouble());
-            return JSONWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn time(@NotNull Consumer<LocalTime> localTime) {
-            consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
-            textTo(sb);
-            localTime.accept(LocalTime.parse(Wires.INTERNER.intern(sb)));
-            return JSONWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime) {
-            consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
-            textTo(sb);
-            zonedDateTime.accept(ZonedDateTime.parse(Wires.INTERNER.intern(sb)));
-            return JSONWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn date(@NotNull Consumer<LocalDate> localDate) {
-            consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
-            textTo(sb);
-            localDate.accept(LocalDate.parse(Wires.INTERNER.intern(sb)));
-            return JSONWire.this;
-        }
-
         @Override
         public boolean hasNext() {
             return bytes.readRemaining() > 0;
@@ -1336,30 +1128,6 @@ public class JSONWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn uuid(@NotNull Consumer<UUID> uuid) {
-            consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
-            textTo(sb);
-            uuid.accept(UUID.fromString(Wires.INTERNER.intern(sb)));
-            return JSONWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn int64array(@Nullable LongArrayValues values, @NotNull Consumer<LongArrayValues> setter) {
-            consumeWhiteSpace();
-            if (!(values instanceof TextLongArrayReference)) {
-                setter.accept(values = new TextLongArrayReference());
-            }
-            Byteable b = (Byteable) values;
-            long length = TextLongArrayReference.peakLength(bytes, bytes.readPosition());
-            b.bytesStore(bytes, bytes.readPosition(), length);
-            bytes.readSkip(length);
-            return JSONWire.this;
-        }
-
-        @NotNull
-        @Override
         public WireIn int64(@Nullable LongValue value) {
             consumeWhiteSpace();
             Byteable b = (Byteable) value;
@@ -1369,55 +1137,6 @@ public class JSONWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             if (peekCode() == ',')
                 bytes.readSkip(1);
-            return JSONWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn int64(LongValue value, @NotNull Consumer<LongValue> setter) {
-            if (!(value instanceof TextLongReference)) {
-                setter.accept(value = new TextLongReference());
-            }
-            return int64(value);
-        }
-
-        @NotNull
-        @Override
-        public WireIn int32(IntValue value, @NotNull Consumer<IntValue> setter) {
-            if (!(value instanceof TextIntReference)) {
-                setter.accept(value = new TextIntReference());
-            }
-            Byteable b = (Byteable) value;
-            long length = b.maxSize();
-            b.bytesStore(bytes, bytes.readPosition(), length);
-            bytes.readSkip(length);
-            consumeWhiteSpace();
-            if (peekCode() == ',')
-                bytes.readSkip(1);
-            return JSONWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn sequence(@NotNull Consumer<ValueIn> reader) {
-            consumeWhiteSpace();
-            char code = (char) readCode();
-            if (code != '[')
-                throw new IORuntimeException("Unsupported type " + code + " (" + code + ")");
-
-            // this code was added to support empty sets
-            consumeWhiteSpace();
-            code = (char) peekCode();
-            if (code == ']')
-                return JSONWire.this;
-
-            reader.accept(JSONWire.this.valueIn);
-
-            consumeWhiteSpace();
-            code = (char) peekCode();
-            if (code != ']')
-                throw new IORuntimeException("Expected a ] but got " + code + " (" + code + ")");
-
             return JSONWire.this;
         }
 
@@ -1453,39 +1172,8 @@ public class JSONWire implements Wire, InternalWireIn {
         }
 
         @NotNull
-        @Override
-        public ValueIn type(@NotNull StringBuilder sb) {
-            consumeWhiteSpace();
-            int code = peekCode();
-            if (code == -1) {
-                sb.append("java.lang.Void");
-            } else if (code != '!') {
-                sb.append("java.lang.String");
-            } else {
-                readCode();
-
-                parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
-            }
-            return this;
-        }
-
-        @NotNull
         String stringForCode(int code) {
             return code < 0 ? "Unexpected end of input" : "'" + (char) code + "'";
-        }
-
-        @NotNull
-        @Override
-        public WireIn typeLiteralAsText(@NotNull Consumer<CharSequence> classNameConsumer) {
-            consumeWhiteSpace();
-            int code = readCode();
-            if (!peekStringIgnoreCase("type "))
-                throw new UnsupportedOperationException(stringForCode(code));
-            bytes.readSkip("type ".length());
-            StringBuilder sb = Wires.acquireStringBuilder();
-            parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
-            classNameConsumer.accept(sb);
-            return JSONWire.this;
         }
 
         @NotNull
@@ -1494,7 +1182,7 @@ public class JSONWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             int code = peekCode();
             if (code == '!')
-                type(Wires.acquireStringBuilder());
+                typePrefix();
             else if (code != '{')
                 throw new IORuntimeException("Unsupported type " + stringForCode(code));
 
@@ -1606,35 +1294,6 @@ public class JSONWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public <K extends ReadMarshallable, V extends ReadMarshallable> void typedMap(@NotNull Map<K, V> usingMap) {
-            consumeWhiteSpace();
-            usingMap.clear();
-
-            StringBuilder sb = Wires.acquireStringBuilder();
-            if (peekCode() == '!') {
-                parseUntil(sb, StopCharTesters.SPACE_STOP);
-                String str = Wires.INTERNER.intern(sb);
-                if (SEQ_MAP.contentEquals(sb)) {
-                    while (hasNext()) {
-                        sequence(s -> s.marshallable(r -> {
-                            try {
-                                @SuppressWarnings("unchecked")
-                                final K k = r.read(() -> "key").typedMarshallable();
-                                @SuppressWarnings("unchecked")
-                                final V v = r.read(() -> "value").typedMarshallable();
-                                usingMap.put(k, v);
-                            } catch (Exception e) {
-                                LOG.error("", e);
-                            }
-                        }));
-                    }
-                } else {
-                    throw new IORuntimeException("Unsupported type " + str);
-                }
-            }
-        }
-
-        @Override
         public boolean bool() {
             consumeWhiteSpace();
             StringBuilder sb = Wires.acquireStringBuilder();
@@ -1717,144 +1376,6 @@ public class JSONWire implements Wire, InternalWireIn {
         public <E> E object(@Nullable E using,
                             @NotNull Class<E> clazz) {
             return ObjectUtils.convertTo(clazz, object0(using, clazz));
-        }
-
-        @Nullable
-        @Override
-        public <E> WireIn object(@NotNull Class<E> clazz, @NotNull Consumer<E> e) {
-            e.accept(ObjectUtils.convertTo(clazz, object0(null, clazz)));
-            return JSONWire.this;
-        }
-
-        @Nullable
-        Object object0(@Nullable Object using, @NotNull Class clazz) {
-            consumeWhiteSpace();
-
-            if (isNull())
-                return null;
-
-            if (byte[].class.isAssignableFrom(clazz))
-                return bytes();
-
-            if (BytesStore.class.isAssignableFrom(clazz)) {
-                Bytes<byte[]> bytes = Bytes.wrapForRead(bytes());
-                return bytes;
-            }
-
-            if (ReadMarshallable.class.isAssignableFrom(clazz)) {
-                final Object v;
-                if (using == null)
-                    v = ObjectUtils.newInstance(clazz);
-                else
-                    v = using;
-
-                valueIn.marshallable((ReadMarshallable) v);
-                return readResolve(v);
-
-            } else if (StringBuilder.class.isAssignableFrom(clazz)) {
-                StringBuilder builder = (using == null)
-                        ? Wires.acquireStringBuilder()
-                        : (StringBuilder) using;
-                valueIn.textTo(builder);
-                return using;
-
-            } else if (CharSequence.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return valueIn.text();
-
-            } else if (Long.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return valueIn.int64();
-
-            } else if (Double.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return valueIn.float64();
-            } else if (Integer.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return valueIn.int32();
-
-            } else if (Float.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return valueIn.float32();
-
-            } else if (Short.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return valueIn.int16();
-
-            } else if (Character.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                final String text = valueIn.text();
-                if (text == null || text.length() == 0)
-                    return null;
-                return text.charAt(0);
-
-            } else if (Byte.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return valueIn.int8();
-
-            } else if (Map.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                final Map result = new HashMap();
-                valueIn.map(result);
-                return result;
-
-            } else {
-                // TODO assume for now it is a string.
-                int code = peekCode();
-                if (code == '!') {
-                    readCode();
-                    StringBuilder sb = Wires.acquireStringBuilder();
-                    parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
-                    final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
-                    return object(null, clazz2);
-                }
-                if (code == '[') {
-                    if (clazz == Object[].class || clazz == Object.class) {
-                        //todo should this use reflection so that all array types can be handled
-                        List<Object> list = new ArrayList<>();
-                        sequence(v -> {
-                            while (v.hasNextSequenceItem()) {
-                                list.add(v.object(Object.class));
-                            }
-                        });
-                        return list.toArray();
-                    } else if (clazz == String[].class) {
-                        List<String> list = new ArrayList<>();
-                        sequence(v -> {
-                            while (v.hasNextSequenceItem()) {
-                                list.add(v.text());
-                            }
-                        });
-                        return list.toArray(new String[0]);
-                    } else if (clazz == List.class) {
-                        List<String> list = new ArrayList<>();
-                        sequence(v -> {
-                            while (v.hasNextSequenceItem()) {
-                                list.add(v.text());
-                            }
-                        });
-                        return list;
-                    } else if (clazz == Set.class) {
-                        Set<String> list = new HashSet<>();
-                        sequence(v -> {
-                            while (v.hasNextSequenceItem()) {
-                                list.add(v.text());
-                            }
-                        });
-                        return list;
-                    } else {
-                        throw new UnsupportedOperationException("Arrays of type "
-                                + clazz + " not supported.");
-                    }
-                }
-                if (Enum.class.isAssignableFrom(clazz)) {
-                    StringBuilder sb = Wires.acquireStringBuilder();
-                    parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
-                    return Wires.INTERNER.intern(sb);
-                }
-
-                return valueIn.text();
-            }
         }
     }
 }

@@ -39,7 +39,7 @@ class MyTypes implements Marshallable {
 
     @Override
     public void readMarshallable(@NotNull WireIn wire) {
-        wire.read(Fields.B_FLAG).bool(x -> b = x)
+        wire.read(Fields.B_FLAG).bool(this, (o, x) -> o.b = x)
                 .read(Fields.S_NUM).int16(this, (o, x) -> o.s = x)
                 .read(Fields.D_NUM).float64(this, (o, x) -> o.d = x)
                 .read(Fields.L_NUM).int64(this, (o, x) -> o.l = x)

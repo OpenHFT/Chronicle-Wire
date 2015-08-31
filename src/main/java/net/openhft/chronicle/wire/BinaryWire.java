@@ -856,13 +856,6 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut int8(byte i8) {
-            writeCode(INT8).writeByte(i8);
-            return BinaryWire.this;
-        }
-
-        @NotNull
-        @Override
         public WireOut bytes(@Nullable BytesStore fromBytes) {
             long remaining = fromBytes.readRemaining();
             writeLength(Maths.toInt32(remaining + 1));
@@ -904,6 +897,14 @@ public class BinaryWire implements Wire, InternalWireIn {
             bytes.write(fromBytes);
             return BinaryWire.this;
         }
+
+        @NotNull
+        @Override
+        public WireOut int8(byte i8) {
+            writeCode(INT8).writeByte(i8);
+            return BinaryWire.this;
+        }
+
 
         @NotNull
         @Override
@@ -1320,32 +1321,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
     class BinaryValueIn implements ValueIn {
         @NotNull
-        @Override
-        public WireIn bool(@NotNull BooleanConsumer flag) {
-            consumeSpecial();
-            int code = readCode();
-            switch (code) {
-                case NULL:
-                    // todo take the default.
-                    flag.accept(null);
-                    break;
-
-                case FALSE:
-                    flag.accept(false);
-                    break;
-
-                case TRUE:
-                    flag.accept(true);
-                    break;
-                default:
-                    return cantRead(code);
-            }
-            return BinaryWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireIn text(@NotNull Consumer<String> s) {
+        WireIn text(@NotNull Consumer<String> s) {
             consumeSpecial();
             int code = readCode();
             switch (code) {
@@ -1368,6 +1344,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
             return BinaryWire.this;
         }
+
 
         private boolean isText(int code) {
             return code == STRING_ANY ||
@@ -1438,21 +1415,6 @@ public class BinaryWire implements Wire, InternalWireIn {
                     cantRead(code);
                 return Wires.INTERNER.intern(text);
             }
-        }
-
-        @NotNull
-        @Override
-        public WireIn int8(@NotNull ByteConsumer i) {
-            consumeSpecial();
-
-            final int code = bytes.readUnsignedByte();
-
-            if (isText(code))
-                i.accept(Byte.valueOf(text()));
-            else
-                i.accept((byte) readInt(code));
-
-            return BinaryWire.this;
         }
 
         @NotNull
@@ -1573,102 +1535,141 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn uint8(@NotNull ShortConsumer i) {
+        public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag) {
+            consumeSpecial();
+            int code = readCode();
+            switch (code) {
+                case NULL:
+                    // todo take the default.
+                    tFlag.accept(t, null);
+                    break;
+
+                case FALSE:
+                    tFlag.accept(t, false);
+                    break;
+
+                case TRUE:
+                    tFlag.accept(t, true);
+                    break;
+                default:
+                    throw cantRead(code);
+            }
+            return BinaryWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn int8(@NotNull T t, @NotNull ObjByteConsumer<T> tb) {
+            consumeSpecial();
+
+            final int code = bytes.readUnsignedByte();
+
+            if (isText(code))
+                tb.accept(t, Byte.parseByte(text()));
+            else
+                tb.accept(t, (byte) readInt(code));
+
+            return BinaryWire.this;
+        }
+
+        @NotNull
+        @Override
+        public <T> WireIn uint8(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
             consumeSpecial();
 
             final int code = readCode();
             if (isText(code))
-                i.accept(Short.valueOf(text()));
+                ti.accept(t, Short.parseShort(text()));
             else
-                i.accept((short) readInt(code));
+                ti.accept(t, (short) readInt(code));
             return BinaryWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn int16(@NotNull ShortConsumer i) {
+        public <T> WireIn int16(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
             final int code = readCode();
             if (isText(code))
-                i.accept(Short.valueOf(text()));
+                ti.accept(t, Short.parseShort(text()));
             else
-                i.accept((short) readInt(code));
+                ti.accept(t, (short) readInt(code));
             return BinaryWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn uint16(@NotNull IntConsumer i) {
+        public <T> WireIn uint16(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
             consumeSpecial();
             final int code = readCode();
             if (isText(code))
-                i.accept(Integer.valueOf(text()));
+                ti.accept(t, Integer.parseInt(text()));
             else
-                i.accept((int) readInt(code));
+                ti.accept(t, (int) readInt(code));
             return BinaryWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn int32(@NotNull IntConsumer i) {
+        public <T> WireIn int32(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
             consumeSpecial();
             final int code = readCode();
             if (isText(code))
-                i.accept(Integer.valueOf(text()));
+                ti.accept(t, Integer.parseInt(text()));
             else
-                i.accept((int) readInt(code));
+                ti.accept(t, (int) readInt(code));
             return BinaryWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn uint32(@NotNull LongConsumer i) {
+        public <T> WireIn uint32(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
             consumeSpecial();
             final int code = readCode();
             if (isText(code))
-                i.accept(Long.valueOf(text()));
+                tl.accept(t, Long.parseLong(text()));
             else
-                i.accept(readInt(code));
+                tl.accept(t, readInt(code));
             return BinaryWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn int64(@NotNull LongConsumer i) {
+        public <T> WireIn int64(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
             final int code = readCode();
             if (isText(code))
-                i.accept(Long.valueOf(text()));
+                tl.accept(t, Long.parseLong(text()));
             else
-                i.accept(readInt(code));
+                tl.accept(t, readInt(code));
             return BinaryWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn float32(@NotNull FloatConsumer v) {
+        public <T> WireIn float32(@NotNull T t, @NotNull ObjFloatConsumer<T> tf) {
             consumeSpecial();
             final int code = readCode();
             if (isText(code))
-                v.accept(Float.valueOf(text()));
+                tf.accept(t, Float.parseFloat(text()));
             else
-                v.accept((float) readFloat(code));
+                tf.accept(t, (float) readFloat(code));
             return BinaryWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn float64(@NotNull DoubleConsumer v) {
+        public <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td) {
             final int code = readCode();
-            v.accept(readFloat(code));
+            td.accept(t, readFloat(code));
             return BinaryWire.this;
         }
 
         @NotNull
         @Override
-        public WireIn time(@NotNull Consumer<LocalTime> localTime) {
+        public <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime) {
             consumeSpecial();
             int code = readCode();
             if (code == TIME) {
-                localTime.accept(readLocalTime());
+                setLocalTime.accept(t, readLocalTime());
 
             } else {
                 cantRead(code);
@@ -1684,13 +1685,13 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime) {
+        public <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime) {
             consumeSpecial();
             int code = readCode();
             if (code == ZONED_DATE_TIME) {
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
-                zonedDateTime.accept(ZonedDateTime.parse(sb));
+                tZonedDateTime.accept(t, ZonedDateTime.parse(sb));
 
             } else {
                 cantRead(code);
@@ -1700,13 +1701,13 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn date(@NotNull Consumer<LocalDate> localDate) {
+        public <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate) {
             consumeSpecial();
             int code = readCode();
             if (code == DATE_TIME) {
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
-                localDate.accept(LocalDate.parse(sb));
+                tLocalDate.accept(t, LocalDate.parse(sb));
 
             } else {
                 cantRead(code);
@@ -1726,11 +1727,11 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn uuid(@NotNull Consumer<UUID> uuid) {
+        public <T> WireIn uuid(@NotNull T t, @NotNull BiConsumer<T, UUID> tuuid) {
             consumeSpecial();
             int code = readCode();
             if (code == UUID) {
-                uuid.accept(new UUID(bytes.readLong(), bytes.readLong()));
+                tuuid.accept(t, new UUID(bytes.readLong(), bytes.readLong()));
 
             } else {
                 cantRead(code);
@@ -1740,12 +1741,12 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn int64array(@Nullable LongArrayValues values, @NotNull Consumer<LongArrayValues> setter) {
+        public <T> WireIn int64array(@Nullable LongArrayValues values, T t, @NotNull BiConsumer<T, LongArrayValues> setter) {
             consumeSpecial();
             int code = readCode();
             if (code == I64_ARRAY) {
                 if (!(values instanceof BinaryLongArrayReference))
-                    setter.accept(values = new BinaryLongArrayReference());
+                    setter.accept(t, values = new BinaryLongArrayReference());
                 Byteable b = (Byteable) values;
                 long length = BinaryLongArrayReference.peakLength(bytes, bytes.readPosition());
                 b.bytesStore(bytes, bytes.readPosition(), length);
@@ -1774,24 +1775,24 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn int64(LongValue value, @NotNull Consumer<LongValue> setter) {
+        public <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter) {
             // if the value is null, then we will create a LongDirectReference to write the data
             // into and then call setter.accept(), this will then update the value
             if (!(value instanceof BinaryLongReference)) {
-                setter.accept(value = new BinaryLongReference());
+                setter.accept(t, value = new BinaryLongReference());
             }
             return int64(value);
         }
 
         @NotNull
         @Override
-        public WireIn int32(IntValue value, @NotNull Consumer<IntValue> setter) {
+        public <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter) {
             consumeSpecial();
             int code = readCode();
             if (code != INT32)
                 cantRead(code);
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 4) {
-                setter.accept(value = new BinaryIntReference());
+                setter.accept(t, value = new BinaryIntReference());
             }
             Byteable b = (Byteable) value;
             long length = b.maxSize();
@@ -1802,7 +1803,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn sequence(@NotNull Consumer<ValueIn> reader) {
+        public <T> WireIn sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
             consumeSpecial();
             int code = readCode();
             if (code != BYTES_LENGTH32)
@@ -1812,7 +1813,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             long limit2 = bytes.readPosition() + length;
             bytes.readLimit(limit2);
             try {
-                reader.accept(this);
+                tReader.accept(t, this);
             } finally {
                 bytes.readLimit(limit);
                 bytes.readPosition(limit2);
@@ -1837,6 +1838,12 @@ public class BinaryWire implements Wire, InternalWireIn {
             } else {
                 return marshallableReader.apply(BinaryWire.this);
             }
+        }
+
+        @Override
+        public boolean isTyped() {
+            int code = peekCode();
+            return code == TYPE_PREFIX;
         }
 
         @Nullable
@@ -1868,35 +1875,68 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
         }
 
-        @NotNull
         @Override
-        public ValueIn type(@NotNull StringBuilder s) {
+        public Class typePrefix() {
+            StringBuilder sb = Wires.acquireStringBuilder();
             int code = readCode();
             if (code == TYPE_PREFIX) {
-                bytes.readUTFΔ(s);
+                bytes.readUTFΔ(sb);
 
             } else if (code == NULL) {
-                s.setLength(0);
-                s.append("!null");
+                sb.setLength(0);
+                sb.append("!null");
             } else {
                 cantRead(code);
             }
+            return ClassAliasPool.CLASS_ALIASES.forName(sb);
+        }
+
+        @NotNull
+        @Override
+        public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            int code = readCode();
+            if (code == TYPE_PREFIX) {
+                bytes.readUTFΔ(sb);
+
+            } else if (code == NULL) {
+                sb.setLength(0);
+                sb.append("!null");
+            } else {
+                cantRead(code);
+            }
+            ts.accept(t, sb);
             return this;
         }
 
         @NotNull
         @Override
-        public WireIn typeLiteralAsText(@NotNull Consumer<CharSequence> classNameConsumer) {
+        public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) {
             int code = readCode();
             if (code == TYPE_LITERAL) {
                 StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.readUTFΔ(sb);
-                classNameConsumer.accept(sb);
+                classNameConsumer.accept(t, sb);
 
             } else {
                 cantRead(code);
             }
             return BinaryWire.this;
+        }
+
+        @Override
+        public Class typeLiteral() {
+            StringBuilder sb = Wires.acquireStringBuilder();
+            int code = readCode();
+            if (code == TYPE_PREFIX) {
+                bytes.readUTFΔ(sb);
+                return ClassAliasPool.CLASS_ALIASES.forName(sb);
+            } else if (code == NULL) {
+                return null;
+
+            } else {
+                throw cantRead(code);
+            }
         }
 
         @NotNull
@@ -2047,7 +2087,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @NotNull
-        private WireIn cantRead(int code) {
+        private RuntimeException cantRead(int code) {
             throw new UnsupportedOperationException(stringForCode(code));
         }
 
@@ -2059,8 +2099,8 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @Nullable
         @Override
-        public <E> WireIn object(@NotNull Class<E> clazz, @NotNull Consumer<E> e) {
-            e.accept(ObjectUtils.convertTo(clazz, object0(null, clazz)));
+        public <T, E> WireIn object(@NotNull Class<E> clazz, T t, BiConsumer<T, E> e) {
+            e.accept(t, ObjectUtils.convertTo(clazz, object0(null, clazz)));
             return BinaryWire.this;
         }
 

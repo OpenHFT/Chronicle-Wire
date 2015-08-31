@@ -23,7 +23,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
@@ -50,16 +49,16 @@ public class QueryWireTest {
                 .write(() -> "float").float64(12.345);
 
         assertEquals("bool=true&int=12345&text=Hello World&float=12.345", bytes.toString());
-        wire.read(() -> "bool").bool(b -> assertTrue(b))
-                .read(() -> "int").int64(i -> assertEquals(12345, i))
-                .read(() -> "text").text(s -> assertEquals("Hello World", s))
-                .read(() -> "float").float64(f -> assertEquals(12.345, f, 0.0));
+        wire.read(() -> "bool").bool(this, (o, b) -> assertTrue(b))
+                .read(() -> "int").int64(this, (o, i) -> assertEquals(12345, i))
+                .read(() -> "text").text(this, (o, s) -> assertEquals("Hello World", s))
+                .read(() -> "float").float64(this, (o, f) -> assertEquals(12.345, f, 0.0));
         WireParser wp = WireParser.wireParser();
         List<Object> results = new ArrayList<>();
-        wp.register(() -> "bool", v -> v.bool(results::add));
-        wp.register(() -> "int", v -> v.int64(results::add));
-        wp.register(() -> "text", v -> v.text((Consumer<String>) s -> results.add(s)));
-        wp.register(() -> "float", v -> v.float64(results::add));
+        wp.register(() -> "bool", v -> v.bool(results, List::add));
+        wp.register(() -> "int", v -> v.int64(results, List::add));
+        wp.register(() -> "text", v -> v.text(results, List::add));
+        wp.register(() -> "float", v -> v.float64(results, List::add));
         bytes.readPosition(0);
         while (bytes.readRemaining() > 0)
             wp.parse(wire);
