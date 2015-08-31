@@ -571,19 +571,19 @@ public class TextWireTest {
     public void testWriteMarshallable() {
         Wire wire = createWire();
         MyTypes mtA = new MyTypes();
-        mtA.b(true);
-        mtA.d(123.456);
-        mtA.i(-12345789);
-        mtA.s((short) 12345);
+        mtA.b = true;
+        mtA.d =123.456;
+        mtA.i = -12345789;
+        mtA.s = (short) 12345;
         mtA.text.append("Hello World");
 
         wire.write(() -> "A").marshallable(mtA);
 
         MyTypes mtB = new MyTypes();
-        mtB.b(false);
-        mtB.d(123.4567);
-        mtB.i(-123457890);
-        mtB.s((short) 1234);
+        mtB.b = false;
+        mtB.d = 123.4567;
+        mtB.i = -123457890;
+        mtB.s = (short) 1234;
         mtB.text.append("Bye now");
         wire.write(() -> "B").marshallable(mtB);
 
@@ -618,10 +618,10 @@ public class TextWireTest {
     public void testWriteMarshallableAndFieldLength() {
         Wire wire = createWire();
         MyTypes mtA = new MyTypes();
-        mtA.b(true);
-        mtA.d(123.456);
-        mtA.i(-12345789);
-        mtA.s((short) 12345);
+        mtA.b = true;
+        mtA.d = 123.456;
+        mtA.i = -12345789;
+        mtA.s = (short) 12345;
 
         ValueOut write = wire.write(() -> "A");
 
