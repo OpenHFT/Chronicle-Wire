@@ -51,6 +51,11 @@ public interface ValueIn {
         return wireIn();
     }
 
+    default <T> WireIn text(T t, @NotNull BiConsumer<T, String> ts) {
+        ts.accept(t, text());
+        return wireIn();
+    }
+
     default WireIn text(@NotNull StringBuilder sb) {
         if (textTo(sb) == null)
             sb.setLength(0);
