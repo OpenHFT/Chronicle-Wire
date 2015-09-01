@@ -211,13 +211,13 @@ public interface ValueIn {
     Class typeLiteral();
 
     default Throwable throwable(boolean appendCurrentStack) {
-        return Wires.throwable(this, appendCurrentStack);
+        return WireInternal.throwable(this, appendCurrentStack);
     }
 
     default <E extends Enum<E>> E asEnum(Class<E> eClass) {
-        StringBuilder sb = Wires.acquireStringBuilder();
+        StringBuilder sb = WireInternal.acquireStringBuilder();
         text(sb);
-        return sb.length() == 0 ? null : Wires.internEnum(eClass, sb);
+        return sb.length() == 0 ? null : WireInternal.internEnum(eClass, sb);
     }
 
     default <E extends Enum<E>> WireIn asEnum(Class<E> eClass, Consumer<E> eConsumer) {
@@ -241,7 +241,7 @@ public interface ValueIn {
     @Nullable
     <T, E> WireIn object(@NotNull Class<E> clazz, T t, BiConsumer<T, E> e);
 
-    default WireIn decompress() {
+    default WireIn decompress(Bytes bytes) {
         throw new UnsupportedOperationException();
     }
 

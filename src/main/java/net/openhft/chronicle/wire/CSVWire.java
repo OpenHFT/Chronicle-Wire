@@ -414,7 +414,7 @@ public class CSVWire extends TextWire {
     Map readMap() {
         bytes.readSkip(1);
         Map map = new LinkedHashMap<>();
-        StringBuilder sb = Wires.acquireAnotherStringBuilder(Wires.acquireStringBuilder());
+        StringBuilder sb = WireInternal.acquireAnotherStringBuilder(WireInternal.acquireStringBuilder());
         while (bytes.readRemaining() > 0) {
             consumeWhiteSpace();
             if (peekCode() == '}') {
@@ -422,7 +422,7 @@ public class CSVWire extends TextWire {
                 break;
             }
             read(sb);
-            String key = Wires.INTERNER.intern(sb);
+            String key = WireInternal.INTERNER.intern(sb);
             Object value = valueIn.objectWithInferredType(Object.class);
             map.put(key, value);
         }
@@ -431,13 +431,13 @@ public class CSVWire extends TextWire {
 
     private Map readMap(int indentation) {
         Map map = new LinkedHashMap<>();
-        StringBuilder sb = Wires.acquireAnotherStringBuilder(Wires.acquireStringBuilder());
+        StringBuilder sb = WireInternal.acquireAnotherStringBuilder(WireInternal.acquireStringBuilder());
         while (bytes.readRemaining() > 0) {
             consumeWhiteSpace();
             if (indentation() < indentation || bytes.readRemaining() == 0)
                 break;
             read(sb);
-            String key = Wires.INTERNER.intern(sb);
+            String key = WireInternal.INTERNER.intern(sb);
             if (key.equals("..."))
                 break;
             Object value = valueIn.objectWithInferredType(Object.class);
@@ -602,17 +602,6 @@ public class CSVWire extends TextWire {
             return CSVWire.this;
         }
 
-        @Override
-        public WireOut compress(byte[] compressedBytes) {
-            prependSeparator();
-            append("!!snappy ");
-            append(Base64.getEncoder().encodeToString(compressedBytes));
-            append(END_FIELD);
-            elementSeparator();
-
-            return CSVWire.this;
-        }
-
         @NotNull
         @Override
         public WireOut uint8checked(int u8) {
@@ -647,7 +636,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut utf8(int codepoint) {
             prependSeparator();
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             sb.appendCodePoint(codepoint);
             text(sb);
             sep = empty();
@@ -977,7 +966,7 @@ public class CSVWire extends TextWire {
     class CSVValueIn extends TextValueIn {
         @Override
         public String text() {
-            return StringUtils.toString(textTo(Wires.acquireStringBuilder()));
+            return StringUtils.toString(textTo(WireInternal.acquireStringBuilder()));
         }
 
         @Nullable
@@ -1044,7 +1033,7 @@ public class CSVWire extends TextWire {
                     ch = peekCode();
                     if (ch == '!') {
                         bytes.readSkip(1);
-                        StringBuilder sb = Wires.acquireStringBuilder();
+                        StringBuilder sb = WireInternal.acquireStringBuilder();
                         parseWord(sb);
                         if (StringUtils.isEqual(sb, "null")) {
                             textTo(sb);
@@ -1055,13 +1044,13 @@ public class CSVWire extends TextWire {
                                 //todo needs to be made efficient
                                 byte[] decodedBytes = Base64.getDecoder().decode(sb.toString().getBytes());
                                 String csq = Snappy.uncompressString(decodedBytes);
-                                return (ACS) Wires.acquireStringBuilder().append(csq);
+                                return (ACS) WireInternal.acquireStringBuilder().append(csq);
                             } catch (IOException e) {
                                 throw new AssertionError(e);
                             }
                         }
                     } else {
-                        StringBuilder sb = Wires.acquireStringBuilder();
+                        StringBuilder sb = WireInternal.acquireStringBuilder();
                         textTo(sb);
                         // ignore the type.
                     }
@@ -1124,10 +1113,10 @@ public class CSVWire extends TextWire {
             consumeWhiteSpace();
 
             // TODO needs to be made much more efficient.
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             if (peekCode() == '!') {
                 parseWord(sb);
-                String str = Wires.INTERNER.intern(sb);
+                String str = WireInternal.INTERNER.intern(sb);
                 if (str.equals("!!binary")) {
                     AppendableUtil.setLength(sb, 0);
                     parseWord(sb);
@@ -1151,14 +1140,14 @@ public class CSVWire extends TextWire {
         public byte[] bytes() {
             consumeWhiteSpace();
             // TODO needs to be made much more efficient.
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             if (peekCode() == '!') {
                 parseWord(sb);
-                String str = Wires.INTERNER.intern(sb);
+                String str = WireInternal.INTERNER.intern(sb);
                 if (str.equals("!!binary")) {
                     AppendableUtil.setLength(sb, 0);
                     parseWord(sb);
-                    byte[] decode = Base64.getDecoder().decode(Wires.INTERNER.intern(sb));
+                    byte[] decode = Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb));
                     return decode;
 
                 } else if (str.equals("!!null")) {
@@ -1167,35 +1156,12 @@ public class CSVWire extends TextWire {
                 } else if (str.equals("!" + SEQ_MAP)) {
                     sb.append(bytes.toString());
                     // todo fix this.
-                    return Wires.INTERNER.intern(sb).getBytes();
+                    return WireInternal.INTERNER.intern(sb).getBytes();
 
                 } else {
                     throw new IllegalStateException("unsupported type=" + str);
                 }
 
-            } else {
-                textTo(sb);
-                // todo fix this.
-                return sb.toString().getBytes();
-            }
-        }
-
-        @Nullable
-        @Override
-        public byte[] decompress() {
-            consumeWhiteSpace();
-            // TODO needs to be made much more efficient.
-            StringBuilder sb = Wires.acquireStringBuilder();
-            if (peekCode() == '!') {
-                parseWord(sb);
-                String str = Wires.INTERNER.intern(sb);
-                if (str.equals("!snappy")) {
-                    AppendableUtil.setLength(sb, 0);
-                    parseWord(sb);
-                    byte[] decode = Base64.getDecoder().decode(Wires.INTERNER.intern(sb));
-                    return decode;
-                }
-                throw new AssertionError("Incorrect format for snappy");
             } else {
                 textTo(sb);
                 // todo fix this.
@@ -1363,7 +1329,7 @@ public class CSVWire extends TextWire {
                 int code = peekCode();
                 if (code < 0)
                     throw new IllegalStateException("Cannot read nothing as a ReadMarshallable " + bytes.toDebugString());
-                StringBuilder sb = Wires.acquireStringBuilder();
+                StringBuilder sb = WireInternal.acquireStringBuilder();
                 if (code != '!')
                     throw new ClassCastException("Cannot convert to ReadMarshallable. " + bytes.toDebugString());
 
@@ -1405,10 +1371,10 @@ public class CSVWire extends TextWire {
             consumeWhiteSpace();
             usingMap.clear();
 
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             if (peekCode() == '!') {
                 parseUntil(sb, StopCharTesters.SPACE_STOP);
-                String str = Wires.INTERNER.intern(sb);
+                String str = WireInternal.INTERNER.intern(sb);
 
                 if (("!!null").contentEquals(sb)) {
                     text();
@@ -1442,10 +1408,10 @@ public class CSVWire extends TextWire {
             consumeWhiteSpace();
             usingMap.clear();
 
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             if (peekCode() == '!') {
                 parseUntil(sb, StopCharTesters.SPACE_STOP);
-                String str = Wires.INTERNER.intern(sb);
+                String str = WireInternal.INTERNER.intern(sb);
                 if (SEQ_MAP.contentEquals(sb)) {
                     while (hasNext()) {
                         sequence(usingMap, (map, s) -> s.marshallable(r -> {
@@ -1469,7 +1435,7 @@ public class CSVWire extends TextWire {
         @Override
         public boolean bool() {
             consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             if (textTo(sb) == null)
                 throw new NullPointerException("value is null");
 
@@ -1537,7 +1503,7 @@ public class CSVWire extends TextWire {
             if (peekStringIgnoreCase("!!null \"\"")) {
                 bytes.readSkip("!!null \"\"".length());
                 // discard the text after it.
-                //  text(Wires.acquireStringBuilder());
+                //  text(WireInternal.acquireStringBuilder());
                 return true;
             }
 
@@ -1578,7 +1544,7 @@ public class CSVWire extends TextWire {
 
             } else if (StringBuilder.class.isAssignableFrom(clazz)) {
                 StringBuilder builder = (using == null)
-                        ? Wires.acquireStringBuilder()
+                        ? WireInternal.acquireStringBuilder()
                         : (StringBuilder) using;
                 valueIn.textTo(builder);
                 return using;
@@ -1630,7 +1596,7 @@ public class CSVWire extends TextWire {
 
         private Object typedObject() {
             readCode();
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
             return object(null, clazz2);

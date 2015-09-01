@@ -25,9 +25,7 @@ import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.xerial.snappy.Snappy;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -75,6 +73,9 @@ public interface ValueOut {
 
     @NotNull
     WireOut bytes(byte[] fromBytes);
+
+    @NotNull
+    WireOut bytes(String type, byte[] fromBytes);
 
     @NotNull
     default WireOut uint8(int x) {
@@ -312,20 +313,15 @@ public interface ValueOut {
     WireOut wireOut();
 
     default WireOut compress(String compression, Bytes compressedBytes) {
-        throw new UnsupportedOperationException();
+        WireInternal.compress(this, compression, compressedBytes);
+        return wireOut();
     }
 
     @Deprecated
     default WireOut compress(String compression, String str) {
         // replace with compress(String compression, Bytes compressedBytes)
-        if (compression.equals("snappy")) {
-            try {
-                return typePrefix("snappy").bytes(Snappy.compress(str));
-            } catch (IOException e) {
-                throw new AssertionError(e);
-            }
-        } else {
-            throw new IllegalArgumentException("Unknown compression " + compression);
-        }
+        WireInternal.compress(this, compression, str);
+        return wireOut();
     }
+
 }

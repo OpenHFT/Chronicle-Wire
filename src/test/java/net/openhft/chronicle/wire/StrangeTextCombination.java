@@ -15,22 +15,20 @@ import java.util.Collection;
  * @author Rob Austin.
  */
 @RunWith(value = Parameterized.class)
-public class StrangeTextCobination {
-
-
-    private boolean isTextWire;
+public class StrangeTextCombination {
+    private WireType wireType;
     private Bytes bytes;
 
-    public StrangeTextCobination(Object isTextWire) {
-        this.isTextWire = (Boolean) isTextWire;
+    public StrangeTextCombination(WireType wireType) {
+        this.wireType = wireType;
     }
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() throws IOException {
         return Arrays.asList(
-                new Object[]{Boolean.FALSE}
-                , new Object[]{Boolean.TRUE}
-
+                new Object[]{WireType.TEXT}
+                , new Object[]{WireType.BINARY}
+                , new Object[]{WireType.RAW}
         );
     }
 
@@ -130,7 +128,7 @@ public class StrangeTextCobination {
     @NotNull
     private Wire wireFactory() {
         bytes = Bytes.allocateElasticDirect();
-        return (isTextWire) ? new TextWire(bytes) : new BinaryWire(bytes);
+        return wireType.apply(bytes);
     }
 
 }

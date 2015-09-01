@@ -194,7 +194,7 @@ public class Main {
     public Data writeReadTest(Wire wire) {
         bytes.clear();
         wire.writeDocument(false, data);
-        Wires.rawReadData(wire, dataB);
+        WireInternal.rawReadData(wire, dataB);
         return dataB;
     }
 
@@ -202,7 +202,7 @@ public class Main {
     public Data2 writeReadTest2(Wire wire) {
         bytes.clear();
         wire.writeDocument(false, data2);
-        Wires.rawReadData(wire, data2B);
+        WireInternal.rawReadData(wire, data2B);
         return data2B;
     }
     */

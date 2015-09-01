@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
@@ -37,6 +38,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.*;
+import java.util.zip.GZIPInputStream;
 
 import static net.openhft.chronicle.bytes.Bytes.empty;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
@@ -64,9 +66,9 @@ public class TextWire implements Wire, InternalWireIn {
     static final char[] HEX = "0123456789ABCDEF".toCharArray();
 
     static {
-        for (char ch : "0123456789+- \t\',#:{}[]|>".toCharArray())
+        for (char ch : "0123456789+- \t\',#:{}[]|>!".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
-        for (char ch : "\',#:{}[]|>".toCharArray())
+        for (char ch : ",#:{}[]|>".toCharArray())
             QUOTE_CHARS.set(ch);
     }
 
@@ -76,10 +78,12 @@ public class TextWire implements Wire, InternalWireIn {
     protected final boolean use8bit;
     protected long lineStart = 0;
     private boolean ready;
+
     public TextWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
         this.use8bit = use8bit;
     }
+
     public TextWire(Bytes bytes) {
         this(bytes, false);
     }
@@ -177,7 +181,7 @@ public class TextWire implements Wire, InternalWireIn {
     @NotNull
     @Override
     public ValueIn read() {
-        readField(Wires.acquireStringBuilder());
+        readField(WireInternal.acquireStringBuilder());
         return valueIn;
     }
 
@@ -302,7 +306,7 @@ public class TextWire implements Wire, InternalWireIn {
     @Override
     public ValueIn read(@NotNull WireKey key) {
         long position = bytes.readPosition();
-        StringBuilder sb = readField(Wires.acquireStringBuilder());
+        StringBuilder sb = readField(WireInternal.acquireStringBuilder());
         if (sb.length() == 0 || StringUtils.isEqual(sb, key.name()))
             return valueIn;
         bytes.readPosition(position);
@@ -453,6 +457,10 @@ public class TextWire implements Wire, InternalWireIn {
 
         if (STARTS_QUOTE_CHARS.get(s.charAt(0)))
             return Quotes.DOUBLE;
+        if (s.charAt(0) == '"')
+            return Quotes.SINGLE;
+        if (Character.isWhitespace(s.charAt(s.length() - 1)))
+            return Quotes.DOUBLE;
         for (int i = 1; i < s.length(); i++) {
             char ch = s.charAt(i);
             if (QUOTE_CHARS.get(ch))
@@ -586,7 +594,7 @@ public class TextWire implements Wire, InternalWireIn {
     Map readMap() {
         bytes.readSkip(1);
         Map map = new LinkedHashMap<>();
-        StringBuilder sb = Wires.acquireAnotherStringBuilder(Wires.acquireStringBuilder());
+        StringBuilder sb = WireInternal.acquireAnotherStringBuilder(WireInternal.acquireStringBuilder());
         while (bytes.readRemaining() > 0) {
             consumeWhiteSpace();
             if (peekCode() == '}') {
@@ -594,7 +602,7 @@ public class TextWire implements Wire, InternalWireIn {
                 break;
             }
             read(sb);
-            String key = Wires.INTERNER.intern(sb);
+            String key = WireInternal.INTERNER.intern(sb);
             Object value = valueIn.objectWithInferredType(Object.class);
             map.put(key, value);
         }
@@ -603,13 +611,13 @@ public class TextWire implements Wire, InternalWireIn {
 
     private Map readMap(int indentation) {
         Map map = new LinkedHashMap<>();
-        StringBuilder sb = Wires.acquireAnotherStringBuilder(Wires.acquireStringBuilder());
+        StringBuilder sb = WireInternal.acquireAnotherStringBuilder(WireInternal.acquireStringBuilder());
         while (bytes.readRemaining() > 0) {
             consumeWhiteSpace();
             if (indentation() < indentation || bytes.readRemaining() == 0)
                 break;
             read(sb);
-            String key = Wires.INTERNER.intern(sb);
+            String key = WireInternal.INTERNER.intern(sb);
             if (key.equals("..."))
                 break;
             Object value = valueIn.objectWithInferredType(Object.class);
@@ -762,23 +770,19 @@ public class TextWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException();
         }
 
+
         @NotNull
         @Override
         public WireOut bytes(byte[] byteArray) {
-            prependSeparator();
-            append("!!binary ");
-            append(Base64.getEncoder().encodeToString(byteArray));
-            append(END_FIELD);
-            elementSeparator();
-
-            return TextWire.this;
+            return bytes("!binary", byteArray);
         }
 
+        @NotNull
         @Override
-        public WireOut compress(byte[] compressedBytes) {
+        public WireOut bytes(String type, byte[] byteArray) {
             prependSeparator();
-            append("!!snappy ");
-            append(Base64.getEncoder().encodeToString(compressedBytes));
+            typePrefix(type);
+            append(Base64.getEncoder().encodeToString(byteArray));
             append(END_FIELD);
             elementSeparator();
 
@@ -819,7 +823,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut utf8(int codepoint) {
             prependSeparator();
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             sb.appendCodePoint(codepoint);
             text(sb);
             sep = empty();
@@ -928,7 +932,8 @@ public class TextWire implements Wire, InternalWireIn {
             prependSeparator();
             bytes.append('!');
             append(typeName);
-            sep = SPACE;
+            bytes.append(' ');
+            sep = Bytes.empty();
             return this;
         }
 
@@ -1066,7 +1071,6 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut map(@NotNull final Map map) {
             typePrefix(SEQ_MAP);
-            bytes.append(' ');
             bytes.append('[');
             pushState();
             sep = END_FIELD;
@@ -1150,7 +1154,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         @Override
         public String text() {
-            return StringUtils.toString(textTo(Wires.acquireStringBuilder()));
+            return StringUtils.toString(textTo(WireInternal.acquireStringBuilder()));
         }
 
         @Nullable
@@ -1217,7 +1221,7 @@ public class TextWire implements Wire, InternalWireIn {
                     ch = peekCode();
                     if (ch == '!') {
                         bytes.readSkip(1);
-                        StringBuilder sb = Wires.acquireStringBuilder();
+                        StringBuilder sb = WireInternal.acquireStringBuilder();
                         parseWord(sb);
                         if (StringUtils.isEqual(sb, "null")) {
                             textTo(sb);
@@ -1228,13 +1232,13 @@ public class TextWire implements Wire, InternalWireIn {
                                 //todo needs to be made efficient
                                 byte[] decodedBytes = Base64.getDecoder().decode(sb.toString().getBytes());
                                 String csq = Snappy.uncompressString(decodedBytes);
-                                return (ACS) Wires.acquireStringBuilder().append(csq);
+                                return (ACS) WireInternal.acquireStringBuilder().append(csq);
                             } catch (IOException e) {
                                 throw new AssertionError(e);
                             }
                         }
                     } else {
-                        StringBuilder sb = Wires.acquireStringBuilder();
+                        StringBuilder sb = WireInternal.acquireStringBuilder();
                         textTo(sb);
                         // ignore the type.
                     }
@@ -1297,10 +1301,10 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
 
             // TODO needs to be made much more efficient.
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             if (peekCode() == '!') {
                 parseWord(sb);
-                String str = Wires.INTERNER.intern(sb);
+                String str = WireInternal.INTERNER.intern(sb);
                 if (str.equals("!!binary")) {
                     AppendableUtil.setLength(sb, 0);
                     parseWord(sb);
@@ -1324,14 +1328,14 @@ public class TextWire implements Wire, InternalWireIn {
         public byte[] bytes() {
             consumeWhiteSpace();
             // TODO needs to be made much more efficient.
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             if (peekCode() == '!') {
                 parseWord(sb);
-                String str = Wires.INTERNER.intern(sb);
+                String str = WireInternal.INTERNER.intern(sb);
                 if (str.equals("!!binary")) {
                     AppendableUtil.setLength(sb, 0);
                     parseWord(sb);
-                    byte[] decode = Base64.getDecoder().decode(Wires.INTERNER.intern(sb));
+                    byte[] decode = Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb));
                     return decode;
 
                 } else if (str.equals("!!null")) {
@@ -1340,7 +1344,7 @@ public class TextWire implements Wire, InternalWireIn {
                 } else if (str.equals("!" + SEQ_MAP)) {
                     sb.append(bytes.toString());
                     // todo fix this.
-                    return Wires.INTERNER.intern(sb).getBytes();
+                    return WireInternal.INTERNER.intern(sb).getBytes();
 
                 } else {
                     throw new IllegalStateException("unsupported type=" + str);
@@ -1353,27 +1357,39 @@ public class TextWire implements Wire, InternalWireIn {
             }
         }
 
+
         @Nullable
         @Override
-        public byte[] decompress() {
+        public WireIn decompress(Bytes bytes) {
             consumeWhiteSpace();
             // TODO needs to be made much more efficient.
-            StringBuilder sb = Wires.acquireStringBuilder();
+            bytes.clear();
             if (peekCode() == '!') {
+                StringBuilder sb = WireInternal.acquireStringBuilder();
                 parseWord(sb);
-                String str = Wires.INTERNER.intern(sb);
-                if (str.equals("!snappy")) {
-                    AppendableUtil.setLength(sb, 0);
-                    parseWord(sb);
-                    byte[] decode = Base64.getDecoder().decode(Wires.INTERNER.intern(sb));
-                    return decode;
+                try {
+                    if (StringUtils.isEqual(sb, "!snappy")) {
+                        AppendableUtil.setLength(sb, 0);
+                        parseWord(sb);
+                        byte[] decode = Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb));
+                        bytes.write(Snappy.uncompress(decode));
+                    } else if (StringUtils.isEqual(sb, "!gzip")) {
+                        AppendableUtil.setLength(sb, 0);
+                        parseWord(sb);
+                        byte[] decode = Base64.getDecoder().decode(sb.toString());
+                        GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(decode));
+                        bytes.copyFrom(gis);
+                    } else {
+                        throw new AssertionError("Unknown format " + sb);
+                    }
+                } catch (IOException e) {
+                    throw new AssertionError(e);
                 }
-                throw new AssertionError("Incorrect format for snappy");
+
             } else {
-                textTo(sb);
-                // todo fix this.
-                return sb.toString().getBytes();
+                textTo(bytes);
             }
+            return wireIn();
         }
 
 
@@ -1465,7 +1481,7 @@ public class TextWire implements Wire, InternalWireIn {
         public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag) {
             consumeWhiteSpace();
 
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             if (textTo(sb) == null) {
                 tFlag.accept(t, null);
                 return TextWire.this;
@@ -1551,9 +1567,9 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime) {
             consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             textTo(sb);
-            setLocalTime.accept(t, LocalTime.parse(Wires.INTERNER.intern(sb)));
+            setLocalTime.accept(t, LocalTime.parse(WireInternal.INTERNER.intern(sb)));
             return TextWire.this;
         }
 
@@ -1561,9 +1577,9 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime) {
             consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             textTo(sb);
-            tZonedDateTime.accept(t, ZonedDateTime.parse(Wires.INTERNER.intern(sb)));
+            tZonedDateTime.accept(t, ZonedDateTime.parse(WireInternal.INTERNER.intern(sb)));
             return TextWire.this;
         }
 
@@ -1571,9 +1587,9 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate) {
             consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             textTo(sb);
-            tLocalDate.accept(t, LocalDate.parse(Wires.INTERNER.intern(sb)));
+            tLocalDate.accept(t, LocalDate.parse(WireInternal.INTERNER.intern(sb)));
             return TextWire.this;
         }
 
@@ -1581,9 +1597,9 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public <T> WireIn uuid(@NotNull T t, @NotNull BiConsumer<T, UUID> tuuid) {
             consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             textTo(sb);
-            tuuid.accept(t, UUID.fromString(Wires.INTERNER.intern(sb)));
+            tuuid.accept(t, UUID.fromString(WireInternal.INTERNER.intern(sb)));
             return TextWire.this;
         }
 
@@ -1716,7 +1732,7 @@ public class TextWire implements Wire, InternalWireIn {
         public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
             consumeWhiteSpace();
             int code = peekCode();
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             sb.setLength(0);
             if (code == -1) {
                 sb.append("java.lang.Object");
@@ -1735,7 +1751,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (code == '!') {
                 readCode();
 
-                StringBuilder sb = Wires.acquireStringBuilder();
+                StringBuilder sb = WireInternal.acquireStringBuilder();
                 sb.setLength(0);
                 parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
                 return ClassAliasPool.CLASS_ALIASES.forName(sb);
@@ -1763,7 +1779,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (!peekStringIgnoreCase("type "))
                 throw new UnsupportedOperationException(stringForCode(code));
             bytes.readSkip("type ".length());
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             classNameConsumer.accept(t, sb);
             return TextWire.this;
@@ -1776,7 +1792,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (!peekStringIgnoreCase("type "))
                 throw new UnsupportedOperationException(stringForCode(code));
             bytes.readSkip("type ".length());
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             return ClassAliasPool.CLASS_ALIASES.forName(sb);
         }
@@ -1787,7 +1803,7 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             int code = peekCode();
             if (code == '!') {
-                typePrefix(null, (o, x) -> { /* sets Wires.acquireStringBuilder(); */});
+                typePrefix(null, (o, x) -> { /* sets WireInternal.acquireStringBuilder(); */});
             } else if (code != '{') {
                 throw new IORuntimeException("Unsupported type " + stringForCode(code));
             }
@@ -1826,7 +1842,7 @@ public class TextWire implements Wire, InternalWireIn {
                 int code = peekCode();
                 if (code < 0)
                     throw new IllegalStateException("Cannot read nothing as a ReadMarshallable " + bytes.toDebugString());
-                StringBuilder sb = Wires.acquireStringBuilder();
+                StringBuilder sb = WireInternal.acquireStringBuilder();
                 if (code != '!')
                     throw new ClassCastException("Cannot convert to ReadMarshallable. " + bytes.toDebugString());
 
@@ -1868,10 +1884,10 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             usingMap.clear();
 
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             if (peekCode() == '!') {
                 parseUntil(sb, StopCharTesters.SPACE_STOP);
-                String str = Wires.INTERNER.intern(sb);
+                String str = WireInternal.INTERNER.intern(sb);
 
                 if (("!!null").contentEquals(sb)) {
                     text();
@@ -1905,10 +1921,10 @@ public class TextWire implements Wire, InternalWireIn {
             consumeWhiteSpace();
             usingMap.clear();
 
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             if (peekCode() == '!') {
                 parseUntil(sb, StopCharTesters.SPACE_STOP);
-                String str = Wires.INTERNER.intern(sb);
+                String str = WireInternal.INTERNER.intern(sb);
                 if (SEQ_MAP.contentEquals(sb)) {
                     while (hasNext()) {
                         sequence(this, (o, s) -> s.marshallable(r -> {
@@ -1932,7 +1948,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public boolean bool() {
             consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             if (textTo(sb) == null)
                 throw new NullPointerException("value is null");
 
@@ -2000,7 +2016,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (peekStringIgnoreCase("!!null \"\"")) {
                 bytes.readSkip("!!null \"\"".length());
                 // discard the text after it.
-                //  text(Wires.acquireStringBuilder());
+                //  text(WireInternal.acquireStringBuilder());
                 return true;
             }
 
@@ -2048,7 +2064,7 @@ public class TextWire implements Wire, InternalWireIn {
 
             } else if (StringBuilder.class.isAssignableFrom(clazz)) {
                 StringBuilder builder = (using == null)
-                        ? Wires.acquireStringBuilder()
+                        ? WireInternal.acquireStringBuilder()
                         : (StringBuilder) using;
                 valueIn.textTo(builder);
                 return using;
@@ -2126,9 +2142,9 @@ public class TextWire implements Wire, InternalWireIn {
                     return valueIn.readNumber();
             }
             if (Enum.class.isAssignableFrom(clazz)) {
-                StringBuilder sb = Wires.acquireStringBuilder();
+                StringBuilder sb = WireInternal.acquireStringBuilder();
                 parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
-                return Wires.INTERNER.intern(sb);
+                return WireInternal.INTERNER.intern(sb);
             }
             String text = valueIn.text();
             switch (text) {
@@ -2220,7 +2236,7 @@ public class TextWire implements Wire, InternalWireIn {
 
         private Object typedObject() {
             readCode();
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
             return object(null, clazz2);

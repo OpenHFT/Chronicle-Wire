@@ -114,7 +114,7 @@ public class QueryWire extends TextWire {
     @Override
     public ValueIn read(@NotNull WireKey key) {
         long position = bytes.readPosition();
-        StringBuilder sb = readField(Wires.acquireStringBuilder());
+        StringBuilder sb = readField(WireInternal.acquireStringBuilder());
         if (sb.length() == 0 || StringUtils.isEqual(sb, key.name()))
             return valueIn;
         bytes.readPosition(position);
@@ -340,7 +340,7 @@ public class QueryWire extends TextWire {
         @Override
         public WireOut utf8(int codepoint) {
             prependSeparator();
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             sb.appendCodePoint(codepoint);
             text(sb);
             return QueryWire.this;
@@ -564,7 +564,7 @@ public class QueryWire extends TextWire {
     class QueryValueIn extends TextValueIn {
         @Override
         public String text() {
-            return StringUtils.toString(textTo(Wires.acquireStringBuilder()));
+            return StringUtils.toString(textTo(WireInternal.acquireStringBuilder()));
         }
 
         @Nullable
@@ -584,7 +584,7 @@ public class QueryWire extends TextWire {
         }
 
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) {
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             textTo(sb);
             classNameConsumer.accept(t, sb);
             return wireIn();
@@ -592,7 +592,7 @@ public class QueryWire extends TextWire {
 
         @Override
         public Class typeLiteral() {
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             textTo(sb);
             return ClassAliasPool.CLASS_ALIASES.forName(sb);
         }

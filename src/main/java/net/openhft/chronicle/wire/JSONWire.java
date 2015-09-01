@@ -98,6 +98,18 @@ public class JSONWire extends TextWire {
         AppendableUtil.setLength(sb, end);
     }
 
+    @NotNull
+    @Override
+    protected TextValueOut createValueOut() {
+        return new JSONValueOut();
+    }
+
+    @NotNull
+    @Override
+    protected TextValueIn createValueIn() {
+        return new JSONValueIn();
+    }
+
     @Override
     public void copyTo(@NotNull WireOut wire) {
         throw new UnsupportedOperationException();
@@ -169,7 +181,7 @@ public class JSONWire extends TextWire {
     @Override
     public ValueIn read(@NotNull WireKey key) {
         long position = bytes.readPosition();
-        StringBuilder sb = readField(Wires.acquireStringBuilder());
+        StringBuilder sb = readField(WireInternal.acquireStringBuilder());
         if (sb.length() == 0 || StringUtils.isEqual(sb, key.name()))
             return valueIn;
         bytes.readPosition(position);
@@ -279,7 +291,7 @@ public class JSONWire extends TextWire {
             bytes.append(cs, offset, offset + cs.length());
     }
 
-    class TextValueOut implements ValueOut {
+    class JSONValueOut extends TextValueOut {
         @NotNull
         BytesStore sep = Bytes.empty();
         boolean leaf = false;
@@ -396,17 +408,6 @@ public class JSONWire extends TextWire {
             return JSONWire.this;
         }
 
-        @Override
-        public WireOut compress(byte[] compressedBytes) {
-            prependSeparator();
-            append("!!snappy ");
-            append(Base64.getEncoder().encodeToString(compressedBytes));
-            append(END_FIELD);
-            elementSeparator();
-
-            return JSONWire.this;
-        }
-
         @NotNull
         @Override
         public WireOut uint8checked(int u8) {
@@ -441,7 +442,7 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut utf8(int codepoint) {
             prependSeparator();
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             sb.appendCodePoint(codepoint);
             text(sb);
             sep = empty();
@@ -757,7 +758,7 @@ public class JSONWire extends TextWire {
     class JSONValueIn extends TextValueIn {
         @Override
         public String text() {
-            return StringUtils.toString(textTo(Wires.acquireStringBuilder()));
+            return StringUtils.toString(textTo(WireInternal.acquireStringBuilder()));
         }
 
         @Nullable
@@ -807,7 +808,7 @@ public class JSONWire extends TextWire {
                 ch = peekCode();
                 if (ch == '!') {
                     bytes.readSkip(1);
-                    StringBuilder sb = Wires.acquireStringBuilder();
+                    StringBuilder sb = WireInternal.acquireStringBuilder();
                     parseWord(sb);
                     if (StringUtils.isEqual(sb, "null")) {
                         textTo(sb);
@@ -818,13 +819,13 @@ public class JSONWire extends TextWire {
                             //todo needs to be made efficient
                             byte[] decodedBytes = Base64.getDecoder().decode(sb.toString().getBytes());
                             String csq = Snappy.uncompressString(decodedBytes);
-                            return (ACS) Wires.acquireStringBuilder().append(csq);
+                            return (ACS) WireInternal.acquireStringBuilder().append(csq);
                         } catch (IOException e) {
                             throw new AssertionError(e);
                         }
                     }
                 } else {
-                    StringBuilder sb = Wires.acquireStringBuilder();
+                    StringBuilder sb = WireInternal.acquireStringBuilder();
                     textTo(sb);
                     // ignore the type.
                 }
@@ -868,10 +869,10 @@ public class JSONWire extends TextWire {
             consumeWhiteSpace();
 
             // TODO needs to be made much more efficient.
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             if (peekCode() == '!') {
                 parseWord(sb);
-                String str = Wires.INTERNER.intern(sb);
+                String str = WireInternal.INTERNER.intern(sb);
                 if (str.equals("!!binary")) {
                     AppendableUtil.setLength(sb, 0);
                     parseWord(sb);
@@ -895,14 +896,14 @@ public class JSONWire extends TextWire {
         public byte[] bytes() {
             consumeWhiteSpace();
             // TODO needs to be made much more efficient.
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             if (peekCode() == '!') {
                 parseWord(sb);
-                String str = Wires.INTERNER.intern(sb);
+                String str = WireInternal.INTERNER.intern(sb);
                 if (str.equals("!!binary")) {
                     AppendableUtil.setLength(sb, 0);
                     parseWord(sb);
-                    byte[] decode = Base64.getDecoder().decode(Wires.INTERNER.intern(sb));
+                    byte[] decode = Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb));
                     return decode;
 
                 } else if (str.equals("!!null")) {
@@ -911,7 +912,7 @@ public class JSONWire extends TextWire {
                 } else if (str.equals("!" + SEQ_MAP)) {
                     sb.append(bytes.toString());
                     // todo fix this.
-                    return Wires.INTERNER.intern(sb).getBytes();
+                    return WireInternal.INTERNER.intern(sb).getBytes();
 
                 } else {
                     throw new IllegalStateException("unsupported type=" + str);
@@ -923,30 +924,6 @@ public class JSONWire extends TextWire {
                 return sb.toString().getBytes();
             }
         }
-
-        @Nullable
-        @Override
-        public byte[] decompress() {
-            consumeWhiteSpace();
-            // TODO needs to be made much more efficient.
-            StringBuilder sb = Wires.acquireStringBuilder();
-            if (peekCode() == '!') {
-                parseWord(sb);
-                String str = Wires.INTERNER.intern(sb);
-                if (str.equals("!snappy")) {
-                    AppendableUtil.setLength(sb, 0);
-                    parseWord(sb);
-                    byte[] decode = Base64.getDecoder().decode(Wires.INTERNER.intern(sb));
-                    return decode;
-                }
-                throw new AssertionError("Incorrect format for snappy");
-            } else {
-                textTo(sb);
-                // todo fix this.
-                return sb.toString().getBytes();
-            }
-        }
-
 
         @Override
         public long readLength() {
@@ -1131,7 +1108,7 @@ public class JSONWire extends TextWire {
                 int code = peekCode();
                 if (code < 0)
                     throw new IllegalStateException("Cannot read nothing as a Marshallable " + bytes.toDebugString());
-                StringBuilder sb = Wires.acquireStringBuilder();
+                StringBuilder sb = WireInternal.acquireStringBuilder();
                 if (code != '!')
                     throw new ClassCastException("Cannot convert to Marshallable. " + bytes.toDebugString());
 
@@ -1172,10 +1149,10 @@ public class JSONWire extends TextWire {
             consumeWhiteSpace();
             usingMap.clear();
 
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             if (peekCode() == '!') {
                 parseUntil(sb, StopCharTesters.SPACE_STOP);
-                String str = Wires.INTERNER.intern(sb);
+                String str = WireInternal.INTERNER.intern(sb);
 
                 if (("!!null").contentEquals(sb)) {
                     text();
@@ -1207,7 +1184,7 @@ public class JSONWire extends TextWire {
         @Override
         public boolean bool() {
             consumeWhiteSpace();
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             if (textTo(sb) == null)
                 throw new NullPointerException("value is null");
 
@@ -1275,7 +1252,7 @@ public class JSONWire extends TextWire {
             if (peekStringIgnoreCase("!!null \"\"")) {
                 bytes.readSkip("!!null \"\"".length());
                 // discard the text after it.
-                //  text(Wires.acquireStringBuilder());
+                //  text(WireInternal.acquireStringBuilder());
                 return true;
             }
 

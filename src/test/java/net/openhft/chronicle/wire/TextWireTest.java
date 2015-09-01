@@ -40,6 +40,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
@@ -812,9 +813,12 @@ public class TextWireTest {
 
 
         byte[] compressedBytes = Snappy.compress(str.getBytes());
-        wire.write().compress(compressedBytes);
+        wire.write().compress("snappy", Bytes.wrapForRead(compressedBytes));
 
-        byte[] returnBytes = wire.read().decompress();
+        Bytes ret = Bytes.allocateElasticDirect();
+        wire.read().decompress(ret);
+        byte[] returnBytes = new byte[(int) ret.readRemaining()];
+        ret.read(returnBytes);
         assertArrayEquals(compressedBytes, returnBytes);
     }
 
@@ -824,11 +828,26 @@ public class TextWireTest {
         String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
 
-        byte[] compressedBytes = Snappy.compress(str.getBytes());
-        wire.write().compress(compressedBytes);
+        byte[] bytes0 = str.getBytes();
+        wire.write().compress("snappy", Bytes.wrapForRead(bytes0));
 
-        String returnString = wire.read().text();
-        assertEquals(str, returnString);
+        Bytes bytes = allocateElasticDirect();
+        wire.read().decompress(bytes);
+        assertEquals(str, bytes.toString());
+    }
+
+    @Test
+    public void testGZIPCompressionAsText() throws IOException {
+        Wire wire = createWire();
+        String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+
+
+        byte[] compressedBytes = str.getBytes();
+        wire.write().compress("gzip", Bytes.wrapForRead(compressedBytes));
+
+        Bytes bytes = allocateElasticDirect();
+        wire.read().decompress(bytes);
+        assertEquals(str, bytes.toString());
     }
 
     @Test
@@ -836,10 +855,12 @@ public class TextWireTest {
         Wire wire = createWire();
         String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
-        wire.write().compressWithSnappy(str);
+        wire.write().compress("snappy", str);
+//        System.out.println(wire.bytes());
+        Bytes bytes = allocateElasticDirect();
+        wire.read().decompress(bytes);
+        assertEquals(str, bytes.toString());
 
-        String returnString = wire.read().text();
-        assertEquals(str, returnString);
     }
 
     @Test

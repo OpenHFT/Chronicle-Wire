@@ -79,12 +79,12 @@ public interface WireIn extends WireCommon {
 
     default boolean readDocument(@Nullable ReadMarshallable metaDataConsumer,
                                  @Nullable ReadMarshallable dataConsumer) {
-        return Wires.readData(this, metaDataConsumer, dataConsumer);
+        return WireInternal.readData(this, metaDataConsumer, dataConsumer);
     }
 
     default boolean readDocument(long position,
                                  @Nullable ReadMarshallable metaDataConsumer,
                                  @Nullable ReadMarshallable dataConsumer) {
-        return Wires.readData(position, this, metaDataConsumer, dataConsumer);
+        return WireInternal.readData(position, this, metaDataConsumer, dataConsumer);
     }
 }

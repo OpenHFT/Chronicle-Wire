@@ -501,9 +501,9 @@ public class BinaryWireTest {
                 "[pos: 0, rlim: 153, wlim: 8EiB, cap: 8EiB ] À¶⒍MyTypeº⒈¶⒑AlsoMyTypeº²ñ\\u009E⒈¶{" + name1,
                 "[pos: 0, rlim: 145, wlim: 8EiB, cap: 8EiB ] ¶⒍MyType¶⒑AlsoMyType¶{" + name1,
                 "[pos: 0, rlim: 145, wlim: 8EiB, cap: 8EiB ] ¶⒍MyType¶⒑AlsoMyType¶{" + name1);
-        checkAsText(wire, "\"\": !MyType field1: !AlsoMyType Test: !" + name1,
-                "\"\": !MyType \"1\": !AlsoMyType \"2603186\": !" + name1,
-                "!MyType !AlsoMyType !" + name1);
+        checkAsText(wire, "\"\": !MyType field1: !AlsoMyType Test: !" + name1 + " ",
+                "\"\": !MyType \"1\": !AlsoMyType \"2603186\": !" + name1 + " ",
+                "!MyType !AlsoMyType !" + name1 + " ");
 
         // ok as blank matches anything
         Stream.of("MyType", "AlsoMyType", name1).forEach(e -> {

@@ -77,7 +77,7 @@ public class BinaryWirePerfTest {
 
     private void wirePerf0(@NotNull Wire wire, @NotNull MyTypes a, @NotNull MyTypes b, int t) throws StreamCorruptedException {
         long start = System.nanoTime();
-        int runs = 500000;
+        int runs = 200000;
         for (int i = 0; i < runs; i++) {
             wire.clear();
             a.b = (i & 1) != 0;
@@ -104,7 +104,7 @@ public class BinaryWirePerfTest {
 
     private void wirePerf0(@NotNull Wire wire, @NotNull MyType2 a, @NotNull MyType2 b, int t) {
         long start = System.nanoTime();
-        int runs = 1500000;
+        int runs = 300000;
         for (int i = 0; i < runs; i++) {
             wire.clear();
             a.i = i;

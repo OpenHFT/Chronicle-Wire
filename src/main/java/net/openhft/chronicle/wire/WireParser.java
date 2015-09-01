@@ -31,7 +31,7 @@ public interface WireParser {
     }
 
     default void parse(@NotNull WireIn wireIn) {
-        StringBuilder sb = Wires.SBP.acquireStringBuilder();
+        StringBuilder sb = WireInternal.SBP.acquireStringBuilder();
         ValueIn valueIn = wireIn.read(sb);
         Consumer<ValueIn> consumer = lookup(sb);
         if (consumer == null)

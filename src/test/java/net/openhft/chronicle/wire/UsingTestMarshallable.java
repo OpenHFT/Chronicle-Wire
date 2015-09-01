@@ -29,7 +29,7 @@ public class UsingTestMarshallable {
         textWire.writeDocument(false, d -> d.write(() -> "any-key").marshallable(testMarshallable));
 
 
-        String value = Wires.fromSizePrefixedBinaryToText(textWire.bytes());
+        String value = WireInternal.fromSizePrefixedBinaryToText(textWire.bytes());
 
         //String replace = value.replace("\n", "\\n");
 

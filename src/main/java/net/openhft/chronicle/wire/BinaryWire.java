@@ -156,14 +156,14 @@ public class BinaryWire implements Wire, InternalWireIn {
 
                 case BinaryWireHighCode.FIELD0:
                 case BinaryWireHighCode.FIELD1:
-                    StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, Wires.acquireStringBuilder());
+                    StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, WireInternal.acquireStringBuilder());
                     wire.write(() -> fsb);
                     break;
 
                 case BinaryWireHighCode.STR0:
                 case BinaryWireHighCode.STR1:
                     bytes.readSkip(1);
-                    StringBuilder sb = readText(peekCode, Wires.acquireStringBuilder());
+                    StringBuilder sb = readText(peekCode, WireInternal.acquireStringBuilder());
                     wire.writeValue().text(sb);
                     break;
             }
@@ -178,7 +178,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     @NotNull
     @Override
     public ValueIn read() {
-        readField(Wires.acquireStringBuilder(), ANY_CODE_MATCH);
+        readField(WireInternal.acquireStringBuilder(), ANY_CODE_MATCH);
         return valueIn;
     }
 
@@ -186,7 +186,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     @Override
     public ValueIn read(@NotNull WireKey key) {
         long position = bytes.readPosition();
-        StringBuilder sb = readField(Wires.acquireStringBuilder(), key.code());
+        StringBuilder sb = readField(WireInternal.acquireStringBuilder(), key.code());
 
         if (fieldLess || (sb != null && (sb.length() == 0 || StringUtils.isEqual(sb, key.name()))))
             return valueIn;
@@ -197,7 +197,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     private ValueIn unorderedField(@NotNull WireKey key, long position, @Nullable StringBuilder sb) {
         bytes.readPosition(position);
         if (sb == null)
-            sb = Wires.acquireStringBuilder();
+            sb = WireInternal.acquireStringBuilder();
         readEventName(sb);
         throw new UnsupportedOperationException("Unordered fields not supported yet, " +
                 "Expected=" + key.name() + " was: '" + sb + "'");
@@ -279,7 +279,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 case COMMENT:
                 case HINT: {
                     bytes.readSkip(1);
-                    StringBuilder sb = Wires.acquireStringBuilder();
+                    StringBuilder sb = WireInternal.acquireStringBuilder();
                     bytes.readUtf8(sb);
                     break;
                 }
@@ -356,7 +356,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         switch (peekCode) {
             case COMMENT: {
                 bytes.readSkip(1);
-                StringBuilder sb = Wires.acquireStringBuilder();
+                StringBuilder sb = WireInternal.acquireStringBuilder();
                 bytes.readUtf8(sb);
                 wire.writeComment(sb);
                 break;
@@ -364,7 +364,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
             case HINT: {
                 bytes.readSkip(1);
-                StringBuilder sb = Wires.acquireStringBuilder();
+                StringBuilder sb = WireInternal.acquireStringBuilder();
                 bytes.readUtf8(sb);
                 break;
             }
@@ -376,7 +376,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
             case TYPE_PREFIX: {
                 bytes.readSkip(1);
-                StringBuilder sb = Wires.acquireStringBuilder();
+                StringBuilder sb = WireInternal.acquireStringBuilder();
                 bytes.readUtf8(sb);
                 wire.writeValue().typePrefix(sb);
                 break;
@@ -384,7 +384,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
             case TYPE_LITERAL: {
                 bytes.readSkip(1);
-                StringBuilder sb = Wires.acquireStringBuilder();
+                StringBuilder sb = WireInternal.acquireStringBuilder();
                 bytes.readUtf8(sb);
                 wire.writeValue().typeLiteral(sb);
                 break;
@@ -392,13 +392,13 @@ public class BinaryWire implements Wire, InternalWireIn {
 
             case EVENT_NAME:
             case FIELD_NAME_ANY:
-                StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, Wires.acquireStringBuilder());
+                StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, WireInternal.acquireStringBuilder());
                 wire.write(() -> fsb);
                 break;
 
             case STRING_ANY: {
                 bytes.readSkip(1);
-                StringBuilder sb1 = Wires.acquireStringBuilder();
+                StringBuilder sb1 = WireInternal.acquireStringBuilder();
                 bytes.readUtf8(sb1);
                 wire.writeValue().text(sb1);
                 break;
@@ -900,6 +900,13 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
+        public WireOut bytes(String type, byte[] fromBytes) {
+            typePrefix(type);
+            return bytes(fromBytes);
+        }
+
+        @NotNull
+        @Override
         public WireOut int8(byte i8) {
             writeCode(INT8).writeByte(i8);
             return BinaryWire.this;
@@ -1334,9 +1341,9 @@ public class BinaryWire implements Wire, InternalWireIn {
                     break;
                 default:
                     if (code >= STRING_0 && code <= STRING_31) {
-                        StringBuilder sb = Wires.acquireStringBuilder();
+                        StringBuilder sb = WireInternal.acquireStringBuilder();
                         bytes.parseUTF(sb, code & 0b11111);
-                        s.accept(Wires.INTERNER.intern(sb));
+                        s.accept(WireInternal.INTERNER.intern(sb));
 
                     } else {
                         cantRead(code);
@@ -1410,10 +1417,10 @@ public class BinaryWire implements Wire, InternalWireIn {
                 }
 
             } else {
-                StringBuilder text = readText(code, Wires.acquireStringBuilder());
+                StringBuilder text = readText(code, WireInternal.acquireStringBuilder());
                 if (text == null)
                     cantRead(code);
-                return Wires.INTERNER.intern(text);
+                return WireInternal.INTERNER.intern(text);
             }
         }
 
@@ -1678,7 +1685,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         private LocalTime readLocalTime() {
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             bytes.readUtf8(sb);
             return LocalTime.parse(sb);
         }
@@ -1689,7 +1696,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             consumeSpecial();
             int code = readCode();
             if (code == ZONED_DATE_TIME) {
-                StringBuilder sb = Wires.acquireStringBuilder();
+                StringBuilder sb = WireInternal.acquireStringBuilder();
                 bytes.readUtf8(sb);
                 tZonedDateTime.accept(t, ZonedDateTime.parse(sb));
 
@@ -1705,7 +1712,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             consumeSpecial();
             int code = readCode();
             if (code == DATE_TIME) {
-                StringBuilder sb = Wires.acquireStringBuilder();
+                StringBuilder sb = WireInternal.acquireStringBuilder();
                 bytes.readUtf8(sb);
                 tLocalDate.accept(t, LocalDate.parse(sb));
 
@@ -1848,7 +1855,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @Nullable
         public <T extends ReadMarshallable> T typedMarshallable() {
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             int code = readCode();
             switch (code) {
                 case TYPE_PREFIX:
@@ -1877,7 +1884,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @Override
         public Class typePrefix() {
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             int code = readCode();
             if (code == TYPE_PREFIX) {
                 bytes.readUtf8(sb);
@@ -1894,7 +1901,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             int code = readCode();
             if (code == TYPE_PREFIX) {
                 bytes.readUtf8(sb);
@@ -1914,7 +1921,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) {
             int code = readCode();
             if (code == TYPE_LITERAL) {
-                StringBuilder sb = Wires.acquireStringBuilder();
+                StringBuilder sb = WireInternal.acquireStringBuilder();
                 bytes.readUtf8(sb);
                 classNameConsumer.accept(t, sb);
 
@@ -1926,7 +1933,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @Override
         public Class typeLiteral() {
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             int code = readCode();
             if (code == TYPE_LITERAL) {
                 bytes.readUtf8(sb);
@@ -2119,7 +2126,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             } else if (CharSequence.class.isAssignableFrom(clazz)) {
                 if (StringBuilder.class.isAssignableFrom(clazz)) {
                     StringBuilder builder = (using == null)
-                            ? Wires.acquireStringBuilder()
+                            ? WireInternal.acquireStringBuilder()
                             : (StringBuilder) using;
                     textTo(builder);
                     return builder;
@@ -2176,7 +2183,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                             return text();
                         case TYPE_PREFIX: {
                             readCode();
-                            StringBuilder sb = Wires.acquireStringBuilder();
+                            StringBuilder sb = WireInternal.acquireStringBuilder();
                             bytes.readUtf8(sb);
                             final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
                             return object(null, clazz2);

@@ -260,10 +260,21 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireOut bytes(@Nullable BytesStore fromBytes) {
-            writeLength(fromBytes.readRemaining());
-            bytes.write(fromBytes);
+        public WireOut bytes(@Nullable BytesStore bytesStore) {
+            if (bytesStore == null) {
+                writeLength(-1);
+            } else {
+                writeLength(bytesStore.readRemaining());
+                bytes.write(bytesStore);
+            }
             return RawWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut bytes(String type, byte[] bytesArr) {
+            typePrefix(type);
+            return bytes(bytesArr);
         }
 
         @NotNull
@@ -763,7 +774,7 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             bytes.readUtf8(sb);
             ts.accept(t, sb);
             return this;
@@ -772,7 +783,7 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) {
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             bytes.readUtf8(sb);
             classNameConsumer.accept(t, sb);
             return RawWire.this;
@@ -780,7 +791,7 @@ public class RawWire implements Wire, InternalWireIn {
 
         @Override
         public Class typeLiteral() {
-            StringBuilder sb = Wires.acquireStringBuilder();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
             bytes.readUtf8(sb);
             return ClassAliasPool.CLASS_ALIASES.forName(sb);
         }
