@@ -232,7 +232,10 @@ enum WireInternal {
                     len = (int) textBytes.readRemaining();
                 }
                 try {
-                    textBytes.parseUTF(sb, len);
+                    for (int i = 0; i < len; i++) {
+                        int ch = textBytes.readUnsignedByte();
+                        sb.append((char) ch);
+                    }
                 } catch (Exception e) {
                     sb.append(" ").append(e);
                 }
