@@ -31,6 +31,13 @@ public enum Wires {
     static final int META_DATA = 1 << 30;
     static final int UNKNOWN_LENGTH = 0x0;
 
+    /**
+     * This decodes some Bytes where the first 4-bytes is the length.  e.g. Wire.writeDocument wrote it.
+     * <a href="https://github.com/OpenHFT/RFC/tree/master/Size-Prefixed-Blob">Size Prefixed Blob</a>
+     *
+     * @param bytes to decode
+     * @return as String
+     */
     public static String fromSizePrefixedBlobs(@NotNull Bytes bytes) {
         long position = bytes.readPosition();
         return WireInternal.fromSizePrefixedBlobs(bytes, position, bytes.readRemaining());
