@@ -202,7 +202,7 @@ enum WireInternal {
                 long header = bytes.readUnsignedInt();
                 int len = Wires.lengthOf(header);
                 if (len > bytes.readRemaining())
-                    throw new RuntimeException("Are you sure this was written with writeDocument and has a size prefix");
+                    throw new RuntimeException("Are you sure this was written with writeDocument and has a 4 byte size prefix, " + len + " > " + bytes.readRemaining());
                 String type = Wires.isData(header)
                         ? Wires.isReady(header) ? "!!data" : "!!not-ready-data!"
                         : Wires.isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
