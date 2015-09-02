@@ -333,14 +333,14 @@ public class CSVWire extends TextWire {
         }
     }
 
-    public void appendUtf8(CharSequence cs) {
+    public void append(CharSequence cs) {
         if (use8bit)
             bytes.append8bit(cs);
         else
             bytes.appendUtf8(cs);
     }
 
-    public void appendUtf8(CharSequence cs, int offset) {
+    public void append(CharSequence cs, int offset) {
         if (use8bit)
             bytes.append8bit(cs, offset, offset + cs.length());
         else
@@ -483,7 +483,7 @@ public class CSVWire extends TextWire {
         boolean leaf = false;
 
         void prependSeparator() {
-            appendUtf8(sep);
+            append(sep);
             if (sep.endsWith('\n'))
                 indent();
             sep = Bytes.empty();
@@ -523,7 +523,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut bool(@Nullable Boolean flag) {
             prependSeparator();
-            appendUtf8(flag == null ? "!" + NULL : flag ? "true" : "false");
+            append(flag == null ? "!" + NULL : flag ? "true" : "false");
             elementSeparator();
             return CSVWire.this;
         }
@@ -533,7 +533,7 @@ public class CSVWire extends TextWire {
         public WireOut text(@Nullable CharSequence s) {
             prependSeparator();
             if (s == null) {
-                appendUtf8("!" + NULL);
+                append("!" + NULL);
             } else {
                 escape(s);
             }
@@ -594,9 +594,9 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut bytes(byte[] byteArray) {
             prependSeparator();
-            appendUtf8("!!binary ");
-            appendUtf8(Base64.getEncoder().encodeToString(byteArray));
-            appendUtf8(END_FIELD);
+            append("!!binary ");
+            append(Base64.getEncoder().encodeToString(byteArray));
+            append(END_FIELD);
             elementSeparator();
 
             return CSVWire.this;
@@ -713,7 +713,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut time(@NotNull LocalTime localTime) {
             prependSeparator();
-            appendUtf8(localTime.toString());
+            append(localTime.toString());
             elementSeparator();
 
             return CSVWire.this;
@@ -723,7 +723,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
             prependSeparator();
-            appendUtf8(zonedDateTime.toString());
+            append(zonedDateTime.toString());
             elementSeparator();
 
             return CSVWire.this;
@@ -733,7 +733,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut date(@NotNull LocalDate localDate) {
             prependSeparator();
-            appendUtf8(localDate.toString());
+            append(localDate.toString());
             elementSeparator();
 
             return CSVWire.this;
@@ -744,7 +744,7 @@ public class CSVWire extends TextWire {
         public ValueOut typePrefix(@NotNull CharSequence typeName) {
             prependSeparator();
             bytes.appendUtf8('!');
-            appendUtf8(typeName);
+            append(typeName);
             sep = SPACE;
             return this;
         }
@@ -753,7 +753,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, Class type) {
             prependSeparator();
-            appendUtf8(TYPE);
+            append(TYPE);
             typeTranslator.accept(type, bytes);
             elementSeparator();
             return CSVWire.this;
@@ -763,7 +763,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut typeLiteral(@NotNull CharSequence type) {
             prependSeparator();
-            appendUtf8(TYPE);
+            append(TYPE);
             text(type);
             elementSeparator();
             return CSVWire.this;
@@ -773,8 +773,8 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut uuid(@NotNull UUID uuid) {
             prependSeparator();
-            appendUtf8(sep);
-            appendUtf8(uuid.toString());
+            append(sep);
+            append(uuid.toString());
             elementSeparator();
             return CSVWire.this;
         }
@@ -829,10 +829,10 @@ public class CSVWire extends TextWire {
 
         @Override
         public WireOut array(@NotNull Consumer<ValueOut> writer, Class arrayType) {
-            if (arrayType == String[].class) appendUtf8("!String[] ");
+            if (arrayType == String[].class) append("!String[] ");
             else {
                 bytes.appendUtf8('!');
-                appendUtf8(arrayType.getName());
+                append(arrayType.getName());
                 bytes.appendUtf8(' ');
             }
             return sequence(writer);
@@ -864,14 +864,14 @@ public class CSVWire extends TextWire {
             else
                 leaf = false;
             if (sep.startsWith(','))
-                appendUtf8(sep, 1);
+                append(sep, 1);
             else
                 prependSeparator();
             bytes.appendUtf8('}');
 
             if (indentation == 0) {
                 sep = empty();
-                appendUtf8(NEW_LINE);
+                append(NEW_LINE);
 
             } else {
                 sep = COMMA_NEW_LINE;
@@ -889,12 +889,12 @@ public class CSVWire extends TextWire {
             sep = END_FIELD;
             map.forEach((k, v) -> {
                 prependSeparator();
-                appendUtf8("{ key: ");
+                append("{ key: ");
                 leaf();
                 object2(k);
                 sep = COMMA_NEW_LINE;
                 prependSeparator();
-                appendUtf8("  value: ");
+                append("  value: ");
                 leaf();
                 object2(v);
                 bytes.appendUtf8(' ');
@@ -915,7 +915,7 @@ public class CSVWire extends TextWire {
             else if (v instanceof WriteMarshallable)
                 typedMarshallable((WriteMarshallable) v);
             else if (v == null)
-                appendUtf8("!" + NULL);
+                append("!" + NULL);
             else
                 text(String.valueOf(v));
         }
@@ -932,7 +932,7 @@ public class CSVWire extends TextWire {
 
         @NotNull
         public ValueOut write() {
-            appendUtf8(sep);
+            append(sep);
             bytes.appendUtf8('"');
             bytes.appendUtf8('"');
             bytes.appendUtf8(':');
@@ -954,10 +954,10 @@ public class CSVWire extends TextWire {
 
         public void writeComment(@NotNull CharSequence s) {
             prependSeparator();
-            appendUtf8(sep);
+            append(sep);
             bytes.appendUtf8('#');
             bytes.appendUtf8(' ');
-            appendUtf8(s);
+            append(s);
             bytes.appendUtf8('\n');
             sep = empty();
         }
