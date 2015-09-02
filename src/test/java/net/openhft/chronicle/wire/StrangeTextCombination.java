@@ -100,6 +100,14 @@ public class StrangeTextCombination {
         Assert.assertEquals(expected, wire.read().text());
     }
 
+    @Test
+    public void testNull() throws Exception {
+        final String expected = null;
+        final Wire wire = wireFactory();
+        wire.write().text(expected);
+        Assert.assertEquals(expected, wire.read().text());
+    }
+
 
     @Test
     public void testNewLine() throws Exception {

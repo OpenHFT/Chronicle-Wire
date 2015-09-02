@@ -542,7 +542,7 @@ public class RawWire implements Wire, InternalWireIn {
             return Object.class;
         }
 
-        @NotNull
+        @Nullable
         @Override
         public String text() {
             return use8bit ? bytes.readUtf8() : bytes.read8bit();

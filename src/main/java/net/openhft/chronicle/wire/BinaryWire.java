@@ -99,7 +99,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 case BinaryWireHighCode.NUM6:
                 case BinaryWireHighCode.NUM7:
                     bytes.readSkip(1);
-                    wire.writeValue().uint8(peekCode);
+                    wire.writeValue().uint8checked(peekCode);
                     break;
 
                 case BinaryWireHighCode.CONTROL:

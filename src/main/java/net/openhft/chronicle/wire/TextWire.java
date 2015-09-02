@@ -387,7 +387,7 @@ public class TextWire implements Wire, InternalWireIn {
     @Override
     public WireOut addPadding(int paddingToAdd) {
         for (int i = 0; i < paddingToAdd; i++)
-            bytes.appendUtf8((bytes.writePosition() & 63) == 0 ? '\n' : ' ');
+            bytes.writeUnsignedByte((bytes.writePosition() & 63) == 0 ? '\n' : ' ');
         return this;
     }
 
@@ -397,9 +397,9 @@ public class TextWire implements Wire, InternalWireIn {
             escape0(s, quotes);
             return;
         }
-        bytes.appendUtf8(quotes.q);
+        bytes.writeUnsignedByte(quotes.q);
         escape0(s, quotes);
-        bytes.appendUtf8(quotes.q);
+        bytes.writeUnsignedByte(quotes.q);
     }
 
     private void escape0(@NotNull CharSequence s, Quotes quotes) {
@@ -408,9 +408,9 @@ public class TextWire implements Wire, InternalWireIn {
             switch (ch) {
                 case '"':
                     if (ch == quotes.q) {
-                        bytes.appendUtf8('\\').appendUtf8(ch);
+                        bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);
                     } else {
-                        bytes.appendUtf8(ch);
+                        bytes.writeUnsignedByte(ch);
                     }
                     break;
                 case '\'':
@@ -643,15 +643,15 @@ public class TextWire implements Wire, InternalWireIn {
     }
 
     private void writeObject(Object o, int indentation) {
-        bytes.appendUtf8('-');
-        bytes.appendUtf8(' ');
+        bytes.writeUnsignedByte('-');
+        bytes.writeUnsignedByte(' ');
         indentation(indentation - 2);
         valueOut.object(o);
     }
 
     private void indentation(int indentation) {
         while (indentation-- > 0)
-            bytes.appendUtf8(' ');
+            bytes.writeUnsignedByte(' ');
     }
 
     enum NoObject {NO_OBJECT}
@@ -684,15 +684,15 @@ public class TextWire implements Wire, InternalWireIn {
 
         private void indent() {
             for (int i = 0; i < indentation; i++) {
-                bytes.appendUtf8(' ');
-                bytes.appendUtf8(' ');
+                bytes.writeUnsignedByte(' ');
+                bytes.writeUnsignedByte(' ');
             }
         }
 
         public void elementSeparator() {
             if (indentation == 0) {
                 sep = Bytes.empty();
-                bytes.appendUtf8('\n');
+                bytes.writeUnsignedByte('\n');
 
             } else {
                 sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
@@ -725,7 +725,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut int8(byte i8) {
             prependSeparator();
-            bytes.appendUtf8(i8);
+            bytes.append(i8);
             elementSeparator();
             return TextWire.this;
         }
@@ -793,7 +793,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut uint8checked(int u8) {
             prependSeparator();
-            bytes.appendUtf8(u8);
+            bytes.append(u8);
             elementSeparator();
 
             return TextWire.this;
@@ -803,7 +803,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut int16(short i16) {
             prependSeparator();
-            bytes.appendUtf8(i16);
+            bytes.append(i16);
             elementSeparator();
 
             return TextWire.this;
@@ -813,7 +813,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut uint16checked(int u16) {
             prependSeparator();
-            bytes.appendUtf8(u16);
+            bytes.append(u16);
             elementSeparator();
 
             return TextWire.this;
@@ -834,7 +834,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut int32(int i32) {
             prependSeparator();
-            bytes.appendUtf8(i32);
+            bytes.append(i32);
             elementSeparator();
 
             return TextWire.this;
@@ -930,9 +930,9 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public ValueOut typePrefix(@NotNull CharSequence typeName) {
             prependSeparator();
-            bytes.appendUtf8('!');
+            bytes.writeUnsignedByte('!');
             append(typeName);
-            bytes.appendUtf8(' ');
+            bytes.writeUnsignedByte(' ');
             sep = Bytes.empty();
             return this;
         }
@@ -1001,16 +1001,16 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut sequence(@NotNull Consumer<ValueOut> writer) {
             pushState();
-            bytes.appendUtf8('[');
+            bytes.writeUnsignedByte('[');
             sep = NEW_LINE;
             long pos = bytes.readPosition();
             writer.accept(this);
             if (bytes.writePosition() > pos + 1)
-                bytes.appendUtf8('\n');
+                bytes.writeUnsignedByte('\n');
 
             popState();
             indent();
-            bytes.appendUtf8(']');
+            bytes.writeUnsignedByte(']');
             sep = END_FIELD;
             return TextWire.this;
         }
@@ -1019,9 +1019,9 @@ public class TextWire implements Wire, InternalWireIn {
         public WireOut array(@NotNull Consumer<ValueOut> writer, Class arrayType) {
             if (arrayType == String[].class) append("!String[] ");
             else {
-                bytes.appendUtf8('!');
+                bytes.writeUnsignedByte('!');
                 append(arrayType.getName());
-                bytes.appendUtf8(' ');
+                bytes.writeUnsignedByte(' ');
             }
             return sequence(writer);
         }
@@ -1042,7 +1042,7 @@ public class TextWire implements Wire, InternalWireIn {
                 pushState();
 
             prependSeparator();
-            bytes.appendUtf8('{');
+            bytes.writeUnsignedByte('{');
             sep = leaf ? SPACE : END_FIELD;
 
             object.writeMarshallable(TextWire.this);
@@ -1055,7 +1055,7 @@ public class TextWire implements Wire, InternalWireIn {
                 append(sep, 1, sep.length() - 1);
             else
                 prependSeparator();
-            bytes.appendUtf8('}');
+            bytes.writeUnsignedByte('}');
 
             if (indentation == 0) {
                 sep = empty();
@@ -1071,7 +1071,7 @@ public class TextWire implements Wire, InternalWireIn {
         @Override
         public WireOut map(@NotNull final Map map) {
             typePrefix(SEQ_MAP);
-            bytes.appendUtf8('[');
+            bytes.writeUnsignedByte('[');
             pushState();
             sep = END_FIELD;
             map.forEach((k, v) -> {
@@ -1084,14 +1084,14 @@ public class TextWire implements Wire, InternalWireIn {
                 append("  value: ");
                 leaf();
                 object2(v);
-                bytes.appendUtf8(' ');
-                bytes.appendUtf8('}');
+                bytes.writeUnsignedByte(' ');
+                bytes.writeUnsignedByte('}');
                 sep = COMMA_NEW_LINE;
             });
             popState();
             sep = END_FIELD;
             prependSeparator();
-            bytes.appendUtf8(']');
+            bytes.writeUnsignedByte(']');
             sep = END_FIELD;
             return TextWire.this;
         }
@@ -1120,10 +1120,10 @@ public class TextWire implements Wire, InternalWireIn {
         @NotNull
         public ValueOut write() {
             append(sep);
-            bytes.appendUtf8('"');
-            bytes.appendUtf8('"');
-            bytes.appendUtf8(':');
-            bytes.appendUtf8(' ');
+            bytes.writeUnsignedByte('"');
+            bytes.writeUnsignedByte('"');
+            bytes.writeUnsignedByte(':');
+            bytes.writeUnsignedByte(' ');
             sep = empty();
             return this;
         }
@@ -1134,18 +1134,18 @@ public class TextWire implements Wire, InternalWireIn {
             if (name == null) name = Integer.toString(key.code());
             prependSeparator();
             escape(name);
-            bytes.appendUtf8(':');
-            bytes.appendUtf8(' ');
+            bytes.writeUnsignedByte(':');
+            bytes.writeUnsignedByte(' ');
             return this;
         }
 
         public void writeComment(@NotNull CharSequence s) {
             prependSeparator();
             append(sep);
-            bytes.appendUtf8('#');
-            bytes.appendUtf8(' ');
+            bytes.writeUnsignedByte('#');
+            bytes.writeUnsignedByte(' ');
             append(s);
-            bytes.appendUtf8('\n');
+            bytes.writeUnsignedByte('\n');
             sep = empty();
         }
     }
