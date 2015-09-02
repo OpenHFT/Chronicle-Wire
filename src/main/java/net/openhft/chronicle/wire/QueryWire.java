@@ -17,6 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.IORuntimeException;
 import net.openhft.chronicle.bytes.StopCharTester;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -221,10 +222,10 @@ public class QueryWire extends TextWire {
         CharSequence fieldName = null;
 
         void prependSeparator() {
-            bytes.append(sep);
+            bytes.appendUtf8(sep);
             sep = "";
             if (fieldName != null) {
-                bytes.append(fieldName).append("=");
+                bytes.appendUtf8(fieldName).appendUtf8('=');
                 fieldName = null;
             }
         }
@@ -244,7 +245,7 @@ public class QueryWire extends TextWire {
         public WireOut bool(@Nullable Boolean flag) {
             if (flag != null) {
                 prependSeparator();
-                bytes.append(flag ? "true" : "false");
+                bytes.appendUtf8(flag ? "true" : "false");
                 elementSeparator();
             }
             return QueryWire.this;
@@ -255,7 +256,7 @@ public class QueryWire extends TextWire {
         public WireOut text(@Nullable CharSequence s) {
             if (s != null) {
                 prependSeparator();
-                bytes.append(s);
+                bytes.appendUtf8(s);
                 elementSeparator();
             }
             return QueryWire.this;
@@ -265,7 +266,7 @@ public class QueryWire extends TextWire {
         @Override
         public WireOut int8(byte i8) {
             prependSeparator();
-            bytes.append(i8);
+            bytes.appendUtf8(i8);
             elementSeparator();
             return QueryWire.this;
         }
@@ -300,7 +301,7 @@ public class QueryWire extends TextWire {
         @Override
         public WireOut bytes(byte[] byteArray) {
             prependSeparator();
-            bytes.append(Base64.getEncoder().encodeToString(byteArray));
+            bytes.appendUtf8(Base64.getEncoder().encodeToString(byteArray));
             elementSeparator();
 
             return QueryWire.this;
@@ -310,7 +311,7 @@ public class QueryWire extends TextWire {
         @Override
         public WireOut uint8checked(int u8) {
             prependSeparator();
-            bytes.append(u8);
+            bytes.appendUtf8(u8);
             elementSeparator();
 
             return QueryWire.this;
@@ -320,7 +321,7 @@ public class QueryWire extends TextWire {
         @Override
         public WireOut int16(short i16) {
             prependSeparator();
-            bytes.append(i16);
+            bytes.appendUtf8(i16);
             elementSeparator();
 
             return QueryWire.this;
@@ -330,7 +331,7 @@ public class QueryWire extends TextWire {
         @Override
         public WireOut uint16checked(int u16) {
             prependSeparator();
-            bytes.append(u16);
+            bytes.appendUtf8(u16);
             elementSeparator();
 
             return QueryWire.this;
@@ -350,7 +351,7 @@ public class QueryWire extends TextWire {
         @Override
         public WireOut int32(int i32) {
             prependSeparator();
-            bytes.append(i32);
+            bytes.appendUtf8(i32);
             elementSeparator();
 
             return QueryWire.this;
@@ -413,7 +414,7 @@ public class QueryWire extends TextWire {
         @Override
         public WireOut time(@NotNull LocalTime localTime) {
             prependSeparator();
-            bytes.append(localTime.toString());
+            bytes.appendUtf8(localTime.toString());
             elementSeparator();
 
             return QueryWire.this;
@@ -423,7 +424,7 @@ public class QueryWire extends TextWire {
         @Override
         public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
             prependSeparator();
-            bytes.append(zonedDateTime.toString());
+            bytes.appendUtf8(zonedDateTime.toString());
             elementSeparator();
 
             return QueryWire.this;
@@ -433,7 +434,7 @@ public class QueryWire extends TextWire {
         @Override
         public WireOut date(@NotNull LocalDate localDate) {
             prependSeparator();
-            bytes.append(localDate.toString());
+            bytes.appendUtf8(localDate.toString());
             elementSeparator();
 
             return QueryWire.this;
@@ -443,7 +444,7 @@ public class QueryWire extends TextWire {
         @Override
         public ValueOut typePrefix(@NotNull CharSequence typeName) {
             prependSeparator();
-            bytes.append(typeName);
+            bytes.appendUtf8(typeName);
             sep = " ";
             return this;
         }
@@ -464,7 +465,7 @@ public class QueryWire extends TextWire {
         @Override
         public WireOut uuid(@NotNull UUID uuid) {
             prependSeparator();
-            bytes.append(sep).append(uuid.toString());
+            bytes.appendUtf8(sep).appendUtf8(uuid.toString());
             elementSeparator();
             return QueryWire.this;
         }
@@ -498,15 +499,15 @@ public class QueryWire extends TextWire {
         public WireOut sequence(@NotNull Consumer<ValueOut> writer) {
             prependSeparator();
             pushState();
-            bytes.append("[");
+            bytes.appendUtf8("[");
             sep = ",";
             long pos = bytes.writePosition();
             writer.accept(this);
             if (pos != bytes.writePosition())
-                bytes.append(",");
+                bytes.appendUtf8(",");
 
             popState();
-            bytes.append("]");
+            bytes.appendUtf8("]");
             elementSeparator();
             return QueryWire.this;
         }
@@ -523,14 +524,14 @@ public class QueryWire extends TextWire {
             pushState();
 
             prependSeparator();
-            bytes.append("{");
+            bytes.appendUtf8("{");
             sep = ",";
 
             object.writeMarshallable(QueryWire.this);
 
             popState();
 
-            bytes.append('}');
+            bytes.appendUtf8('}');
             elementSeparator();
             return QueryWire.this;
         }
@@ -549,7 +550,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         public ValueOut write() {
-            bytes.append(sep).append("\"\": ");
+            bytes.appendUtf8(sep).appendUtf8("\"\": ");
             sep = "";
             return this;
         }
@@ -594,7 +595,11 @@ public class QueryWire extends TextWire {
         public Class typeLiteral() {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             textTo(sb);
-            return ClassAliasPool.CLASS_ALIASES.forName(sb);
+            try {
+                return ClassAliasPool.CLASS_ALIASES.forName(sb);
+            } catch (ClassNotFoundException e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         @NotNull

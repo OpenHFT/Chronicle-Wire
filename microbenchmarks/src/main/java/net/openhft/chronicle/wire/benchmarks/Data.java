@@ -50,7 +50,7 @@ public class Data implements Marshallable, BytesMarshallable, Externalizable {
         this.price = price;
         this.flag = flag;
         this.side = side;
-        this.text.append(text);
+        this.text.appendUtf8(text);
     }
 
     public Data() {
@@ -115,7 +115,7 @@ public class Data implements Marshallable, BytesMarshallable, Externalizable {
 
     public void setText(String text) {
         this.text.clear();
-        this.text.append(text);
+        this.text.appendUtf8(text);
     }
 
     public Bytes textAsBytes() {

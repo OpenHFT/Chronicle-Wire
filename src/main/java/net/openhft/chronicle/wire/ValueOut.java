@@ -154,7 +154,7 @@ public interface ValueOut {
 
     @NotNull
     default WireOut typeLiteral(@NotNull Class type) {
-        return typeLiteral((t, b) -> b.append(ClassAliasPool.CLASS_ALIASES.nameFor(t)), type);
+        return typeLiteral((t, b) -> b.appendUtf8(ClassAliasPool.CLASS_ALIASES.nameFor(t)), type);
     }
 
     @NotNull

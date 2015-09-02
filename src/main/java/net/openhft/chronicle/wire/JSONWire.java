@@ -221,13 +221,13 @@ public class JSONWire extends TextWire {
     @Override
     public WireOut addPadding(int paddingToAdd) {
         for (int i = 0; i < paddingToAdd; i++)
-            bytes.append((bytes.writePosition() & 63) == 0 ? '\n' : ' ');
+            bytes.appendUtf8((bytes.writePosition() & 63) == 0 ? '\n' : ' ');
         return this;
     }
 
     void escaped(@NotNull CharSequence s) {
         if (needsQuotes(s) == Quotes.NONE) {
-            bytes.append(s);
+            bytes.appendUtf8(s);
             return;
         }
         doEscape(s);
@@ -239,14 +239,14 @@ public class JSONWire extends TextWire {
             switch (ch) {
                 case '"':
                 case '\\':
-                    bytes.append('\\').append(ch);
+                    bytes.appendUtf8('\\').appendUtf8(ch);
                     break;
 
                 case '\n':
-                    bytes.append("\\n");
+                    bytes.appendUtf8("\\n");
                     break;
                 default:
-                    bytes.append(ch);
+                    bytes.appendUtf8(ch);
                     break;
             }
         }
@@ -277,18 +277,18 @@ public class JSONWire extends TextWire {
         }
     }
 
-    public void append(CharSequence cs) {
+    public void appendUtf8(CharSequence cs) {
         if (use8bit)
             bytes.append8bit(cs);
         else
-            bytes.append(cs);
+            bytes.appendUtf8(cs);
     }
 
-    public void append(CharSequence cs, int offset) {
+    public void appendUtf8(CharSequence cs, int offset) {
         if (use8bit)
             bytes.append8bit(cs, offset, offset + cs.length());
         else
-            bytes.append(cs, offset, offset + cs.length());
+            bytes.appendUtf8(cs, offset, offset + cs.length());
     }
 
     class JSONValueOut extends TextValueOut {
@@ -297,7 +297,7 @@ public class JSONWire extends TextWire {
         boolean leaf = false;
 
         void prependSeparator() {
-            append(sep);
+            appendUtf8(sep);
             if (sep.endsWith('\n'))
                 indent();
             sep = Bytes.empty();
@@ -327,7 +327,7 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut bool(@Nullable Boolean flag) {
             prependSeparator();
-            append(flag == null ? "!" + NULL : flag ? "true" : "false");
+            appendUtf8(flag == null ? "!" + NULL : flag ? "true" : "false");
             elementSeparator();
             return JSONWire.this;
         }
@@ -337,11 +337,11 @@ public class JSONWire extends TextWire {
         public WireOut text(@Nullable CharSequence s) {
             prependSeparator();
             if (s == null) {
-                append("!" + NULL);
+                appendUtf8("!" + NULL);
             } else {
-                bytes.append('"');
+                bytes.appendUtf8('"');
                 escaped(s);
-                bytes.append('"');
+                bytes.appendUtf8('"');
             }
             elementSeparator();
             return JSONWire.this;
@@ -351,7 +351,7 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut int8(byte i8) {
             prependSeparator();
-            bytes.append(i8);
+            bytes.appendUtf8(i8);
             elementSeparator();
             return JSONWire.this;
         }
@@ -400,9 +400,9 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut bytes(byte[] byteArray) {
             prependSeparator();
-            append("!!binary ");
-            append(Base64.getEncoder().encodeToString(byteArray));
-            append(END_FIELD);
+            appendUtf8("!!binary ");
+            appendUtf8(Base64.getEncoder().encodeToString(byteArray));
+            appendUtf8(END_FIELD);
             elementSeparator();
 
             return JSONWire.this;
@@ -412,7 +412,7 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut uint8checked(int u8) {
             prependSeparator();
-            bytes.append(u8);
+            bytes.appendUtf8(u8);
             elementSeparator();
 
             return JSONWire.this;
@@ -422,7 +422,7 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut int16(short i16) {
             prependSeparator();
-            bytes.append(i16);
+            bytes.appendUtf8(i16);
             elementSeparator();
 
             return JSONWire.this;
@@ -432,7 +432,7 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut uint16checked(int u16) {
             prependSeparator();
-            bytes.append(u16);
+            bytes.appendUtf8(u16);
             elementSeparator();
 
             return JSONWire.this;
@@ -453,7 +453,7 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut int32(int i32) {
             prependSeparator();
-            bytes.append(i32);
+            bytes.appendUtf8(i32);
             elementSeparator();
 
             return JSONWire.this;
@@ -519,7 +519,7 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut time(@NotNull LocalTime localTime) {
             prependSeparator();
-            append(localTime.toString());
+            appendUtf8(localTime.toString());
             elementSeparator();
 
             return JSONWire.this;
@@ -529,7 +529,7 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
             prependSeparator();
-            append(zonedDateTime.toString());
+            appendUtf8(zonedDateTime.toString());
             elementSeparator();
 
             return JSONWire.this;
@@ -539,7 +539,7 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut date(@NotNull LocalDate localDate) {
             prependSeparator();
-            append(localDate.toString());
+            appendUtf8(localDate.toString());
             elementSeparator();
 
             return JSONWire.this;
@@ -549,8 +549,8 @@ public class JSONWire extends TextWire {
         @Override
         public ValueOut typePrefix(@NotNull CharSequence typeName) {
             prependSeparator();
-            bytes.append('!');
-            append(typeName);
+            bytes.appendUtf8('!');
+            appendUtf8(typeName);
             sep = SPACE;
             return this;
         }
@@ -559,7 +559,7 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, Class type) {
             prependSeparator();
-            append(TYPE);
+            appendUtf8(TYPE);
             typeTranslator.accept(type, bytes);
             elementSeparator();
             return JSONWire.this;
@@ -569,7 +569,7 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut typeLiteral(@NotNull CharSequence type) {
             prependSeparator();
-            append(TYPE);
+            appendUtf8(TYPE);
             text(type);
             elementSeparator();
             return JSONWire.this;
@@ -579,8 +579,8 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut uuid(@NotNull UUID uuid) {
             prependSeparator();
-            append(sep);
-            append(uuid.toString());
+            appendUtf8(sep);
+            appendUtf8(uuid.toString());
             elementSeparator();
             return JSONWire.this;
         }
@@ -619,27 +619,27 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut sequence(@NotNull Consumer<ValueOut> writer) {
             pushState();
-            bytes.append('[');
+            bytes.appendUtf8('[');
             sep = NEW_LINE;
             long pos = bytes.readPosition();
             writer.accept(this);
             if (bytes.writePosition() > pos + 1)
-                bytes.append('\n');
+                bytes.appendUtf8('\n');
 
             popState();
             indent();
-            bytes.append(']');
+            bytes.appendUtf8(']');
             sep = END_FIELD;
             return JSONWire.this;
         }
 
         @Override
         public WireOut array(@NotNull Consumer<ValueOut> writer, Class arrayType) {
-            if (arrayType == String[].class) append("!String[] ");
+            if (arrayType == String[].class) appendUtf8("!String[] ");
             else {
-                bytes.append('!');
-                append(arrayType.getName());
-                bytes.append(' ');
+                bytes.appendUtf8('!');
+                appendUtf8(arrayType.getName());
+                bytes.appendUtf8(' ');
             }
             return sequence(writer);
         }
@@ -659,7 +659,7 @@ public class JSONWire extends TextWire {
                 pushState();
 
             prependSeparator();
-            bytes.append('{');
+            bytes.appendUtf8('{');
             sep = leaf ? SPACE : END_FIELD;
 
             object.writeMarshallable(JSONWire.this);
@@ -669,10 +669,10 @@ public class JSONWire extends TextWire {
             else
                 leaf = false;
             if (sep.startsWith(','))
-                append(sep, 1);
+                appendUtf8(sep, 1);
             else
                 prependSeparator();
-            bytes.append('}');
+            bytes.appendUtf8('}');
 
             sep = COMMA;
             return JSONWire.this;
@@ -682,28 +682,28 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut map(@NotNull final Map map) {
             typePrefix(SEQ_MAP);
-            bytes.append(' ');
-            bytes.append('[');
+            bytes.appendUtf8(' ');
+            bytes.appendUtf8('[');
             pushState();
             sep = END_FIELD;
             map.forEach((k, v) -> {
                 prependSeparator();
-                append("{ key: ");
+                appendUtf8("{ key: ");
                 leaf();
                 object2(k);
                 sep = COMMA;
                 prependSeparator();
-                append("  value: ");
+                appendUtf8("  value: ");
                 leaf();
                 object2(v);
-                bytes.append(' ');
-                bytes.append('}');
+                bytes.appendUtf8(' ');
+                bytes.appendUtf8('}');
                 sep = COMMA;
             });
             popState();
             sep = END_FIELD;
             prependSeparator();
-            bytes.append(']');
+            bytes.appendUtf8(']');
             sep = END_FIELD;
             return JSONWire.this;
         }
@@ -714,7 +714,7 @@ public class JSONWire extends TextWire {
             else if (v instanceof WriteMarshallable)
                 typedMarshallable((WriteMarshallable) v);
             else if (v == null)
-                append("!" + NULL);
+                appendUtf8("!" + NULL);
             else
                 text(String.valueOf(v));
         }
@@ -731,10 +731,10 @@ public class JSONWire extends TextWire {
 
         @NotNull
         public ValueOut write() {
-            append(sep);
-            bytes.append('"');
-            bytes.append('"');
-            bytes.append(':');
+            appendUtf8(sep);
+            bytes.appendUtf8('"');
+            bytes.appendUtf8('"');
+            bytes.appendUtf8(':');
             sep = empty();
             return this;
         }
@@ -744,10 +744,10 @@ public class JSONWire extends TextWire {
             CharSequence name = key.name();
             if (name == null) name = Integer.toString(key.code());
             prependSeparator();
-            bytes.append('"');
+            bytes.appendUtf8('"');
             escaped(name);
-            bytes.append('"');
-            bytes.append(':');
+            bytes.appendUtf8('"');
+            bytes.appendUtf8(':');
             return this;
         }
 

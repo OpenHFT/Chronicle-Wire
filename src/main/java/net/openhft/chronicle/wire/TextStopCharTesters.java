@@ -24,7 +24,7 @@ import net.openhft.chronicle.bytes.StopCharTester;
 enum TextStopCharTesters implements StopCharTester {
     END_OF_TYPE {
         @Override
-        public boolean isStopChar(int ch) throws IllegalStateException {
+        public boolean isStopChar(int ch) {
             return ch == '"' || ch == '#' || ch == '\n' || ch == ':' || ch == ',' || ch == ' ' || ch == '}';
         }
     }

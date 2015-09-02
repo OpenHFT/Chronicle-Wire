@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.IORuntimeException;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.*;
@@ -322,7 +323,7 @@ public class RawWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut utf8(int codepoint) {
-            bytes.appendUTF(codepoint);
+            bytes.appendUtf8(codepoint);
             return RawWire.this;
         }
 
@@ -793,7 +794,11 @@ public class RawWire implements Wire, InternalWireIn {
         public Class typeLiteral() {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             bytes.readUtf8(sb);
-            return ClassAliasPool.CLASS_ALIASES.forName(sb);
+            try {
+                return ClassAliasPool.CLASS_ALIASES.forName(sb);
+            } catch (ClassNotFoundException e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         @Override

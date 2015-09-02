@@ -51,7 +51,7 @@ public class TextLongArrayReference implements Byteable, LongArrayValues {
         bytes.write(SECTION2);
         for (long i = 0; i < capacity; i++) {
             if (i > 0)
-                bytes.append(", ");
+                bytes.appendUtf8(", ");
             bytes.write(ZERO);
         }
         bytes.write(SECTION3);

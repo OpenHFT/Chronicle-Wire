@@ -68,7 +68,7 @@ public class VarDataEncodingDecoder {
         int len = CodecUtil.uint8Get(buffer, offset + 0);
         sb.clear();
         for (int i = 0; i < len; i++)
-            sb.append((char) CodecUtil.uint8Get(buffer, offset + 1 + i));
+            sb.appendUtf8((char) CodecUtil.uint8Get(buffer, offset + 1 + i));
     }
 
 }

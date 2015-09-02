@@ -17,6 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
@@ -25,6 +26,7 @@ import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -158,21 +160,40 @@ public interface ValueIn {
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
 
     @Nullable
-    <T extends ReadMarshallable> T typedMarshallable();
+    <T extends ReadMarshallable> T typedMarshallable() throws IORuntimeException;
 
     @NotNull
     <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts);
 
     @NotNull
-    <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer);
+    <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) throws IORuntimeException, BufferUnderflowException;
 
     @NotNull
-    default <T> WireIn typeLiteral(T t, @NotNull BiConsumer<T, Class> classConsumer) {
-        return typeLiteralAsText(t, (o, x) -> classConsumer.accept(o, ClassAliasPool.CLASS_ALIASES.forName(x)));
+    default <T> WireIn typeLiteral(T t, @NotNull BiConsumer<T, Class> classConsumer) throws IORuntimeException {
+        return typeLiteralAsText(t, (o, x) -> {
+            try {
+                classConsumer.accept(o, ClassAliasPool.CLASS_ALIASES.forName(x));
+            } catch (ClassNotFoundException e) {
+                throw new IORuntimeException(e);
+            }
+        });
     }
 
     @NotNull
-    WireIn marshallable(@NotNull ReadMarshallable object);
+    default <T> WireIn typeLiteral(T t, @NotNull BiConsumer<T, Class> classConsumer, Class defaultClass) {
+        return typeLiteralAsText(t, (o, x) -> {
+            Class u = defaultClass;
+            try {
+                u = ClassAliasPool.CLASS_ALIASES.forName(x);
+            } catch (ClassNotFoundException e) {
+                // use default class.
+            }
+            classConsumer.accept(o, u);
+        });
+    }
+
+    @NotNull
+    WireIn marshallable(@NotNull ReadMarshallable object) throws BufferUnderflowException, IORuntimeException;
 
     /**
      * reads the map from the wire
@@ -192,7 +213,7 @@ public interface ValueIn {
                          @NotNull Class<V> vClass,
                          @NotNull Map<K, V> usingMap);
 
-    boolean bool();
+    boolean bool() throws IORuntimeException;
 
     byte int8();
 
@@ -208,7 +229,7 @@ public interface ValueIn {
 
     float float32();
 
-    Class typeLiteral();
+    Class typeLiteral() throws IORuntimeException, BufferUnderflowException;
 
     default Throwable throwable(boolean appendCurrentStack) {
         return WireInternal.throwable(this, appendCurrentStack);

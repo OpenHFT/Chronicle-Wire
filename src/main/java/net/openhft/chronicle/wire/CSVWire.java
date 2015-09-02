@@ -211,7 +211,7 @@ public class CSVWire extends TextWire {
     @Override
     public WireOut addPadding(int paddingToAdd) {
         for (int i = 0; i < paddingToAdd; i++)
-            bytes.append((bytes.writePosition() & 63) == 0 ? '\n' : ' ');
+            bytes.appendUtf8((bytes.writePosition() & 63) == 0 ? '\n' : ' ');
         return this;
     }
 
@@ -221,9 +221,9 @@ public class CSVWire extends TextWire {
             escape0(s, quotes);
             return;
         }
-        bytes.append(quotes.q);
+        bytes.appendUtf8(quotes.q);
         escape0(s, quotes);
-        bytes.append(quotes.q);
+        bytes.appendUtf8(quotes.q);
     }
 
     private void escape0(@NotNull CharSequence s, net.openhft.chronicle.wire.Quotes quotes) {
@@ -232,42 +232,42 @@ public class CSVWire extends TextWire {
             switch (ch) {
                 case '"':
                     if (ch == quotes.q) {
-                        bytes.append('\\').append(ch);
+                        bytes.appendUtf8('\\').appendUtf8(ch);
                     } else {
-                        bytes.append(ch);
+                        bytes.appendUtf8(ch);
                     }
                     break;
                 case '\'':
                     if (ch == quotes.q) {
-                        bytes.append('\\').append(ch);
+                        bytes.appendUtf8('\\').appendUtf8(ch);
                     } else {
-                        bytes.append(ch);
+                        bytes.appendUtf8(ch);
                     }
                     break;
                 case '\\':
-                    bytes.append('\\').append(ch);
+                    bytes.appendUtf8('\\').appendUtf8(ch);
                     break;
                 case '\b':
-                    bytes.append("\\b");
+                    bytes.appendUtf8("\\b");
                     break;
                 case '\t':
-                    bytes.append("\\t");
+                    bytes.appendUtf8("\\t");
                     break;
                 case '\r':
-                    bytes.append("\\r");
+                    bytes.appendUtf8("\\r");
                     break;
                 case '\n':
-                    bytes.append("\\n");
+                    bytes.appendUtf8("\\n");
                     break;
                 default:
                     if (ch > 127) {
-                        bytes.append("\\u");
-                        bytes.append(HEX[(ch >> 12) & 0xF]);
-                        bytes.append(HEX[(ch >> 8) & 0xF]);
-                        bytes.append(HEX[(ch >> 4) & 0xF]);
-                        bytes.append(HEX[ch & 0xF]);
+                        bytes.appendUtf8("\\u");
+                        bytes.appendUtf8(HEX[(ch >> 12) & 0xF]);
+                        bytes.appendUtf8(HEX[(ch >> 8) & 0xF]);
+                        bytes.appendUtf8(HEX[(ch >> 4) & 0xF]);
+                        bytes.appendUtf8(HEX[ch & 0xF]);
                     } else {
-                        bytes.append(ch);
+                        bytes.appendUtf8(ch);
                     }
                     break;
             }
@@ -333,18 +333,18 @@ public class CSVWire extends TextWire {
         }
     }
 
-    public void append(CharSequence cs) {
+    public void appendUtf8(CharSequence cs) {
         if (use8bit)
             bytes.append8bit(cs);
         else
-            bytes.append(cs);
+            bytes.appendUtf8(cs);
     }
 
-    public void append(CharSequence cs, int offset) {
+    public void appendUtf8(CharSequence cs, int offset) {
         if (use8bit)
             bytes.append8bit(cs, offset, offset + cs.length());
         else
-            bytes.append(cs, offset, offset + cs.length());
+            bytes.appendUtf8(cs, offset, offset + cs.length());
     }
 
     public Object readObject() {
@@ -463,15 +463,15 @@ public class CSVWire extends TextWire {
     }
 
     private void writeObject(Object o, int indentation) {
-        bytes.append('-');
-        bytes.append(' ');
+        bytes.appendUtf8('-');
+        bytes.appendUtf8(' ');
         indentation(indentation - 2);
         valueOut.object(o);
     }
 
     private void indentation(int indentation) {
         while (indentation-- > 0)
-            bytes.append(' ');
+            bytes.appendUtf8(' ');
     }
 
     enum NoObject {NO_OBJECT}
@@ -483,7 +483,7 @@ public class CSVWire extends TextWire {
         boolean leaf = false;
 
         void prependSeparator() {
-            append(sep);
+            appendUtf8(sep);
             if (sep.endsWith('\n'))
                 indent();
             sep = Bytes.empty();
@@ -504,15 +504,15 @@ public class CSVWire extends TextWire {
 
         private void indent() {
             for (int i = 0; i < indentation; i++) {
-                bytes.append(' ');
-                bytes.append(' ');
+                bytes.appendUtf8(' ');
+                bytes.appendUtf8(' ');
             }
         }
 
         public void elementSeparator() {
             if (indentation == 0) {
                 sep = Bytes.empty();
-                bytes.append('\n');
+                bytes.appendUtf8('\n');
 
             } else {
                 sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
@@ -523,7 +523,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut bool(@Nullable Boolean flag) {
             prependSeparator();
-            append(flag == null ? "!" + NULL : flag ? "true" : "false");
+            appendUtf8(flag == null ? "!" + NULL : flag ? "true" : "false");
             elementSeparator();
             return CSVWire.this;
         }
@@ -533,7 +533,7 @@ public class CSVWire extends TextWire {
         public WireOut text(@Nullable CharSequence s) {
             prependSeparator();
             if (s == null) {
-                append("!" + NULL);
+                appendUtf8("!" + NULL);
             } else {
                 escape(s);
             }
@@ -545,7 +545,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut int8(byte i8) {
             prependSeparator();
-            bytes.append(i8);
+            bytes.appendUtf8(i8);
             elementSeparator();
             return CSVWire.this;
         }
@@ -594,9 +594,9 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut bytes(byte[] byteArray) {
             prependSeparator();
-            append("!!binary ");
-            append(Base64.getEncoder().encodeToString(byteArray));
-            append(END_FIELD);
+            appendUtf8("!!binary ");
+            appendUtf8(Base64.getEncoder().encodeToString(byteArray));
+            appendUtf8(END_FIELD);
             elementSeparator();
 
             return CSVWire.this;
@@ -606,7 +606,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut uint8checked(int u8) {
             prependSeparator();
-            bytes.append(u8);
+            bytes.appendUtf8(u8);
             elementSeparator();
 
             return CSVWire.this;
@@ -616,7 +616,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut int16(short i16) {
             prependSeparator();
-            bytes.append(i16);
+            bytes.appendUtf8(i16);
             elementSeparator();
 
             return CSVWire.this;
@@ -626,7 +626,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut uint16checked(int u16) {
             prependSeparator();
-            bytes.append(u16);
+            bytes.appendUtf8(u16);
             elementSeparator();
 
             return CSVWire.this;
@@ -647,7 +647,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut int32(int i32) {
             prependSeparator();
-            bytes.append(i32);
+            bytes.appendUtf8(i32);
             elementSeparator();
 
             return CSVWire.this;
@@ -713,7 +713,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut time(@NotNull LocalTime localTime) {
             prependSeparator();
-            append(localTime.toString());
+            appendUtf8(localTime.toString());
             elementSeparator();
 
             return CSVWire.this;
@@ -723,7 +723,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
             prependSeparator();
-            append(zonedDateTime.toString());
+            appendUtf8(zonedDateTime.toString());
             elementSeparator();
 
             return CSVWire.this;
@@ -733,7 +733,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut date(@NotNull LocalDate localDate) {
             prependSeparator();
-            append(localDate.toString());
+            appendUtf8(localDate.toString());
             elementSeparator();
 
             return CSVWire.this;
@@ -743,8 +743,8 @@ public class CSVWire extends TextWire {
         @Override
         public ValueOut typePrefix(@NotNull CharSequence typeName) {
             prependSeparator();
-            bytes.append('!');
-            append(typeName);
+            bytes.appendUtf8('!');
+            appendUtf8(typeName);
             sep = SPACE;
             return this;
         }
@@ -753,7 +753,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, Class type) {
             prependSeparator();
-            append(TYPE);
+            appendUtf8(TYPE);
             typeTranslator.accept(type, bytes);
             elementSeparator();
             return CSVWire.this;
@@ -763,7 +763,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut typeLiteral(@NotNull CharSequence type) {
             prependSeparator();
-            append(TYPE);
+            appendUtf8(TYPE);
             text(type);
             elementSeparator();
             return CSVWire.this;
@@ -773,8 +773,8 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut uuid(@NotNull UUID uuid) {
             prependSeparator();
-            append(sep);
-            append(uuid.toString());
+            appendUtf8(sep);
+            appendUtf8(uuid.toString());
             elementSeparator();
             return CSVWire.this;
         }
@@ -813,27 +813,27 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut sequence(@NotNull Consumer<ValueOut> writer) {
             pushState();
-            bytes.append('[');
+            bytes.appendUtf8('[');
             sep = NEW_LINE;
             long pos = bytes.readPosition();
             writer.accept(this);
             if (bytes.writePosition() > pos + 1)
-                bytes.append('\n');
+                bytes.appendUtf8('\n');
 
             popState();
             indent();
-            bytes.append(']');
+            bytes.appendUtf8(']');
             sep = END_FIELD;
             return CSVWire.this;
         }
 
         @Override
         public WireOut array(@NotNull Consumer<ValueOut> writer, Class arrayType) {
-            if (arrayType == String[].class) append("!String[] ");
+            if (arrayType == String[].class) appendUtf8("!String[] ");
             else {
-                bytes.append('!');
-                append(arrayType.getName());
-                bytes.append(' ');
+                bytes.appendUtf8('!');
+                appendUtf8(arrayType.getName());
+                bytes.appendUtf8(' ');
             }
             return sequence(writer);
         }
@@ -854,7 +854,7 @@ public class CSVWire extends TextWire {
                 pushState();
 
             prependSeparator();
-            bytes.append('{');
+            bytes.appendUtf8('{');
             sep = leaf ? SPACE : END_FIELD;
 
             object.writeMarshallable(CSVWire.this);
@@ -864,14 +864,14 @@ public class CSVWire extends TextWire {
             else
                 leaf = false;
             if (sep.startsWith(','))
-                append(sep, 1);
+                appendUtf8(sep, 1);
             else
                 prependSeparator();
-            bytes.append('}');
+            bytes.appendUtf8('}');
 
             if (indentation == 0) {
                 sep = empty();
-                append(NEW_LINE);
+                appendUtf8(NEW_LINE);
 
             } else {
                 sep = COMMA_NEW_LINE;
@@ -883,28 +883,28 @@ public class CSVWire extends TextWire {
         @Override
         public WireOut map(@NotNull final Map map) {
             typePrefix(SEQ_MAP);
-            bytes.append(' ');
-            bytes.append('[');
+            bytes.appendUtf8(' ');
+            bytes.appendUtf8('[');
             pushState();
             sep = END_FIELD;
             map.forEach((k, v) -> {
                 prependSeparator();
-                append("{ key: ");
+                appendUtf8("{ key: ");
                 leaf();
                 object2(k);
                 sep = COMMA_NEW_LINE;
                 prependSeparator();
-                append("  value: ");
+                appendUtf8("  value: ");
                 leaf();
                 object2(v);
-                bytes.append(' ');
-                bytes.append('}');
+                bytes.appendUtf8(' ');
+                bytes.appendUtf8('}');
                 sep = COMMA_NEW_LINE;
             });
             popState();
             sep = END_FIELD;
             prependSeparator();
-            bytes.append(']');
+            bytes.appendUtf8(']');
             sep = END_FIELD;
             return CSVWire.this;
         }
@@ -915,7 +915,7 @@ public class CSVWire extends TextWire {
             else if (v instanceof WriteMarshallable)
                 typedMarshallable((WriteMarshallable) v);
             else if (v == null)
-                append("!" + NULL);
+                appendUtf8("!" + NULL);
             else
                 text(String.valueOf(v));
         }
@@ -932,11 +932,11 @@ public class CSVWire extends TextWire {
 
         @NotNull
         public ValueOut write() {
-            append(sep);
-            bytes.append('"');
-            bytes.append('"');
-            bytes.append(':');
-            bytes.append(' ');
+            appendUtf8(sep);
+            bytes.appendUtf8('"');
+            bytes.appendUtf8('"');
+            bytes.appendUtf8(':');
+            bytes.appendUtf8(' ');
             sep = empty();
             return this;
         }
@@ -947,18 +947,18 @@ public class CSVWire extends TextWire {
             if (name == null) name = Integer.toString(key.code());
             prependSeparator();
             escape(name);
-            bytes.append(':');
-            bytes.append(' ');
+            bytes.appendUtf8(':');
+            bytes.appendUtf8(' ');
             return this;
         }
 
         public void writeComment(@NotNull CharSequence s) {
             prependSeparator();
-            append(sep);
-            bytes.append('#');
-            bytes.append(' ');
-            append(s);
-            bytes.append('\n');
+            appendUtf8(sep);
+            bytes.appendUtf8('#');
+            bytes.appendUtf8(' ');
+            appendUtf8(s);
+            bytes.appendUtf8('\n');
             sep = empty();
         }
     }
@@ -989,11 +989,7 @@ public class CSVWire extends TextWire {
             switch (ch) {
                 case '{': {
                     final long len = readLength();
-                    try {
-                        a.append(Bytes.toString(bytes, bytes.readPosition(), len));
-                    } catch (IOException e) {
-                        throw new AssertionError(e);
-                    }
+                    AppendableUtil.append(a, bytes, bytes.readPosition(), len);
                     bytes.readSkip(len);
 
                     // read the next comma
@@ -1154,7 +1150,7 @@ public class CSVWire extends TextWire {
                     parseWord(sb);
                     return null;
                 } else if (str.equals("!" + SEQ_MAP)) {
-                    sb.append(bytes.toString());
+                    sb.append(bytes);
                     // todo fix this.
                     return WireInternal.INTERNER.intern(sb).getBytes();
 
@@ -1598,7 +1594,12 @@ public class CSVWire extends TextWire {
             readCode();
             StringBuilder sb = WireInternal.acquireStringBuilder();
             parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
-            final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
+            final Class clazz2;
+            try {
+                clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
+            } catch (ClassNotFoundException e) {
+                throw new IORuntimeException(e);
+            }
             return object(null, clazz2);
         }
 

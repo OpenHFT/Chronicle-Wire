@@ -827,7 +827,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             } else {
                 int len = s.length();
                 if (len < 0x20) {
-                    bytes.writeUnsignedByte(STRING_0 + len).append(s);
+                    bytes.writeUnsignedByte(STRING_0 + len).appendUtf8(s);
                 } else {
                     writeCode(STRING_ANY).writeUtf8(s);
                 }
@@ -845,7 +845,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             } else {
                 int len = s.length();
                 if (len < 0x20) {
-                    bytes.writeUnsignedByte(STRING_0 + len).append(s);
+                    bytes.writeUnsignedByte(STRING_0 + len).appendUtf8(s);
                 } else {
                     writeCode(STRING_ANY).writeUtf8(s);
                 }
@@ -938,7 +938,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public WireOut utf8(int codepoint) {
             writeCode(UINT16);
-            bytes.appendUTF(codepoint);
+            bytes.appendUtf8(codepoint);
             return BinaryWire.this;
         }
 
@@ -1854,7 +1854,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @Nullable
-        public <T extends ReadMarshallable> T typedMarshallable() {
+        public <T extends ReadMarshallable> T typedMarshallable() throws IORuntimeException {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             int code = readCode();
             switch (code) {
@@ -1862,7 +1862,12 @@ public class BinaryWire implements Wire, InternalWireIn {
                     bytes.readUtf8(sb);
                     // its possible that the object that you are allocating may not have a
                     // default constructor
-                    final Class clazz = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                    final Class clazz;
+                    try {
+                        clazz = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                    } catch (ClassNotFoundException e) {
+                        throw new IORuntimeException(e);
+                    }
 
                     if (!Marshallable.class.isAssignableFrom(clazz))
                         throw new IllegalStateException("its not possible to Marshallable and object that" +
@@ -1895,7 +1900,11 @@ public class BinaryWire implements Wire, InternalWireIn {
             } else {
                 cantRead(code);
             }
-            return ClassAliasPool.CLASS_ALIASES.forName(sb);
+            try {
+                return ClassAliasPool.CLASS_ALIASES.forName(sb);
+            } catch (ClassNotFoundException e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         @NotNull
@@ -1937,7 +1946,11 @@ public class BinaryWire implements Wire, InternalWireIn {
             int code = readCode();
             if (code == TYPE_LITERAL) {
                 bytes.readUtf8(sb);
-                return ClassAliasPool.CLASS_ALIASES.forName(sb);
+                try {
+                    return ClassAliasPool.CLASS_ALIASES.forName(sb);
+                } catch (ClassNotFoundException e) {
+                    throw new IORuntimeException(e);
+                }
             } else if (code == NULL) {
                 return null;
 
@@ -1948,7 +1961,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
-        public WireIn marshallable(@NotNull ReadMarshallable object) {
+        public WireIn marshallable(@NotNull ReadMarshallable object) throws BufferUnderflowException, IORuntimeException {
             consumeSpecial(true);
 
             long length = readLength();
@@ -1979,7 +1992,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException("todo");
         }
 
-        private long readTextAsLong() {
+        private long readTextAsLong() throws IORuntimeException, BufferUnderflowException {
             bytes.readSkip(-1);
             final String text = text();
             if (text == null)
@@ -1991,7 +2004,7 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
         }
 
-        private double readTextAsDouble() {
+        private double readTextAsDouble() throws IORuntimeException, BufferUnderflowException {
             bytes.readSkip(-1);
             final String text = text();
             if (text == null || text.length() == 0)
@@ -2000,7 +2013,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public boolean bool() {
+        public boolean bool() throws IORuntimeException {
             consumeSpecial();
             int code = readCode();
             if (isText(code))
@@ -2012,7 +2025,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 case FALSE:
                     return false;
             }
-            throw new IllegalStateException();
+            throw new IORuntimeException(stringForCode(code));
         }
 
         @Override
@@ -2185,7 +2198,12 @@ public class BinaryWire implements Wire, InternalWireIn {
                             readCode();
                             StringBuilder sb = WireInternal.acquireStringBuilder();
                             bytes.readUtf8(sb);
-                            final Class clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                            final Class clazz2;
+                            try {
+                                clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                            } catch (ClassNotFoundException e) {
+                                throw new IORuntimeException(e);
+                            }
                             return object(null, clazz2);
                         }
                     }
