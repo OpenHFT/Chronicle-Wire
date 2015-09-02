@@ -230,13 +230,7 @@ enum WireInternal {
                     len = (int) textBytes.readRemaining();
                 }
                 try {
-                    for (int i = 0; i < len; i++) {
-                        int ch = textBytes.readUnsignedByte();
-//                        if (binary)
-//                            sb.append(RandomDataInput.charToString[ch]);
-//                        else
-                            sb.append((char) ch);
-                    }
+                    textBytes.parseUTF(sb, len);
                 } catch (Exception e) {
                     sb.append(" ").append(e);
                 }
