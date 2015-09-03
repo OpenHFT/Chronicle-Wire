@@ -81,7 +81,7 @@ public class Main {
                     main.bytes.readPosition(0);
                     System.out.println("Test " + m.getName() + " used " + main.bytes.readRemaining() + " bytes.");
                     System.out.println(m.getAnnotation(PrintAsText.class) != null
-                            ? Wires.fromSizePrefixedBinaryToText(main.bytes) : main.bytes.toHexString());
+                            ? Wires.fromSizePrefixedBlobs(main.bytes) : main.bytes.toHexString());
 
                 }
             }
@@ -194,7 +194,7 @@ public class Main {
     public Data writeReadTest(Wire wire) {
         bytes.clear();
         wire.writeDocument(false, data);
-        Wires.rawReadData(wire, dataB);
+        WireInternal.rawReadData(wire, dataB);
         return dataB;
     }
 
@@ -202,7 +202,7 @@ public class Main {
     public Data2 writeReadTest2(Wire wire) {
         bytes.clear();
         wire.writeDocument(false, data2);
-        Wires.rawReadData(wire, data2B);
+        WireInternal.rawReadData(wire, data2B);
         return data2B;
     }
     */

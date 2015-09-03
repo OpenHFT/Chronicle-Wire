@@ -26,17 +26,12 @@ import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
 import net.openhft.chronicle.wire.benchmarks.bytes.NativeData;
-import net.openhft.chronicle.wire.util.BooleanConsumer;
 
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.nio.ByteBuffer;
-import java.util.function.Consumer;
-import java.util.function.DoubleConsumer;
-import java.util.function.IntConsumer;
-import java.util.function.LongConsumer;
 
 /**
  * Created by peter on 12/08/15.
@@ -48,11 +43,6 @@ public class Data implements Marshallable, BytesMarshallable, Externalizable {
     boolean flag = false;
     transient Bytes text = Bytes.allocateDirect(16).unchecked(true);
     Side side;
-    private transient IntConsumer setSmallInt = x -> smallInt = x;
-    private transient LongConsumer setLongInt = x -> longInt = x;
-    private transient DoubleConsumer setPrice = x -> price = x;
-    private transient BooleanConsumer setFlag = x -> flag = x;
-    private transient Consumer<Side> setSide = x -> side = x;
 
     public Data(int smallInt, long longInt, double price, boolean flag, CharSequence text, Side side) {
         this.smallInt = smallInt;
@@ -60,7 +50,7 @@ public class Data implements Marshallable, BytesMarshallable, Externalizable {
         this.price = price;
         this.flag = flag;
         this.side = side;
-        this.text.append(text);
+        this.text.appendUtf8(text);
     }
 
     public Data() {
@@ -69,12 +59,12 @@ public class Data implements Marshallable, BytesMarshallable, Externalizable {
 
     @Override
     public void readMarshallable(WireIn wire) throws IllegalStateException {
-        wire.read(DataFields.price).float64(setPrice)
-                .read(DataFields.flag).bool(setFlag)
+        wire.read(DataFields.price).float64(this, (o, x) -> o.price = x)
+                .read(DataFields.flag).bool(this, (o, x) -> o.flag = x)
                 .read(DataFields.text).text(text)
-                .read(DataFields.side).asEnum(Side.class, setSide)
-                .read(DataFields.smallInt).int32(setSmallInt)
-                .read(DataFields.longInt).int64(setLongInt);
+                .read(DataFields.side).asEnum(Side.class, this, (o, x) -> o.side = x)
+                .read(DataFields.smallInt).int32(this, (o, x) -> o.smallInt = x)
+                .read(DataFields.longInt).int64(this, (o, x) -> o.longInt = x);
     }
 
     @Override
@@ -125,7 +115,7 @@ public class Data implements Marshallable, BytesMarshallable, Externalizable {
 
     public void setText(String text) {
         this.text.clear();
-        this.text.append(text);
+        this.text.appendUtf8(text);
     }
 
     public Bytes textAsBytes() {

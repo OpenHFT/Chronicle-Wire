@@ -53,9 +53,9 @@ public class YamlExamples {
 
         // to read this.
         List<String> names = new ArrayList<>();
-        wire.read(Keys.list).sequence(valueIn -> {
+        wire.read(Keys.list).sequence(names, (l, valueIn) -> {
             while (valueIn.hasNext()) {
-                names.add(valueIn.text());
+                l.add(valueIn.text());
             }
         });
     }
@@ -238,9 +238,9 @@ public class YamlExamples {
 
         Stats stats = new Stats();
         wire.read(Keys.name).textTo(stats.name);
-        wire.read(Keys.hr).int32(stats::hr)
-                .read(Keys.avg).float64(stats::avg)
-                .read(Keys.rbi).int64(stats::rbi);
+        wire.read(Keys.hr).int32(stats, (o, x) -> o.hr = x)
+                .read(Keys.avg).float64(stats, (o, x) -> o.avg = x)
+                .read(Keys.rbi).int64(stats, (o, x) -> o.rbi = x);
         wire.clear();
 
         assertEquals("Stats{name=Mark McGwire, hr=65, avg=0.278, rbi=147}", stats.toString());

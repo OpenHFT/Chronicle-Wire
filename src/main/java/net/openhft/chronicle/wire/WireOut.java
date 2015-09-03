@@ -74,10 +74,10 @@ public interface WireOut extends WireCommon {
     }
 
     default void writeDocument(boolean metaData, @NotNull WriteMarshallable writer) {
-        Wires.writeData(this, metaData, false, writer);
+        WireInternal.writeData(this, metaData, false, writer);
     }
 
     default void writeNotReadyDocument(boolean metaData, @NotNull WriteMarshallable writer) {
-        Wires.writeData(this, metaData, true, writer);
+        WireInternal.writeData(this, metaData, true, writer);
     }
 }

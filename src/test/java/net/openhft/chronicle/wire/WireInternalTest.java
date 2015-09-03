@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class WiresTest {
+public class WireInternalTest {
 
     @Test
     public void testFromSizePrefixedBinaryToText() throws Exception {
@@ -26,7 +26,7 @@ public class WiresTest {
                 }));
         out.writeDocument(false, wireOut -> wireOut.writeEventName(() -> "userid").text("peter"));
 
-        String actual = Wires.fromSizePrefixedBinaryToText(bytes);
+        String actual = WireInternal.fromSizePrefixedBinaryToText(bytes);
         assertEquals("--- !!meta-data #binary\n" +
                 "csp: \"csp://hello-world\"\n" +
                 "tid: 123456789\n" +

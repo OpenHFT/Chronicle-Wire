@@ -18,7 +18,6 @@ package net.openhft.chronicle.wire.benchmarks.bytes;
 
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.wire.benchmarks.Data;
 import net.openhft.chronicle.wire.benchmarks.Side;
 
@@ -68,14 +67,6 @@ public class NativeData implements Byteable {
 
     public void setFlag(boolean flag) {
         bytesStore.writeBoolean(offset + FLAG, flag);
-    }
-
-    public void readText(StringBuilder sb) {
-        BytesUtil.parse8bit(offset + TEXT + 1, bytesStore, sb, bytesStore.readUnsignedByte(offset + TEXT));
-    }
-
-    public void writeText(CharSequence text) {
-        BytesUtil.append8bit(offset + TEXT + 1, bytesStore, text, 0, text.length());
     }
 
     public Side getSide() {

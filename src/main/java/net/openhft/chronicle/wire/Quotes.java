@@ -13,25 +13,17 @@
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.openhft.chronicle.wire.util;
 
-import net.openhft.chronicle.core.annotation.ForceInline;
-import org.jetbrains.annotations.NotNull;
+package net.openhft.chronicle.wire;
 
-import java.util.Comparator;
+/**
+ * Created by peter on 31/08/15.
+ */
+enum Quotes {
+    NONE(' '), SINGLE('\''), DOUBLE('"');
+    final char q;
 
-public enum CharSequenceComparator implements Comparator<CharSequence> {
-    INSTANCE;
-
-    @Override
-    @ForceInline
-    public int compare(@NotNull CharSequence o1, @NotNull CharSequence o2) {
-        int len = Math.min(o1.length(), o2.length());
-        for (int i = 0; i < len; i++) {
-            int cmp = Character.compare(o1.charAt(i), o2.charAt(i));
-            if (cmp != 0)
-                return cmp;
-        }
-        return Integer.compare(o1.length(), o2.length());
+    Quotes(char q) {
+        this.q = q;
     }
 }

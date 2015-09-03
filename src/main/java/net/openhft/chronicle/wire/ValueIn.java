@@ -17,17 +17,16 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.wire.util.BooleanConsumer;
-import net.openhft.chronicle.wire.util.ByteConsumer;
-import net.openhft.chronicle.wire.util.FloatConsumer;
-import net.openhft.chronicle.wire.util.ShortConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -45,12 +44,8 @@ public interface ValueIn {
     /*
      * Text / Strings.
      */
-    @NotNull
-    WireIn bool(@NotNull BooleanConsumer flag);
-
-    @NotNull
-    default WireIn text(@NotNull Consumer<String> s) {
-        s.accept(text());
+    default <T> WireIn text(T t, @NotNull BiConsumer<T, String> ts) {
+        ts.accept(t, text());
         return wireIn();
     }
 
@@ -74,9 +69,6 @@ public interface ValueIn {
 
     @Nullable
     Bytes textTo(@NotNull Bytes bytes);
-
-    @NotNull
-    WireIn int8(@NotNull ByteConsumer i);
 
     @NotNull
     WireIn bytes(@NotNull Bytes<?> toBytes);
@@ -105,91 +97,103 @@ public interface ValueIn {
     long readLength();
 
     @NotNull
-    WireIn uint8(@NotNull ShortConsumer i);
+    <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag);
 
     @NotNull
-    WireIn int16(@NotNull ShortConsumer i);
+    <T> WireIn int8(@NotNull T t, @NotNull ObjByteConsumer<T> tb);
 
     @NotNull
-    WireIn uint16(@NotNull IntConsumer i);
+    <T> WireIn uint8(@NotNull T t, @NotNull ObjShortConsumer<T> ti);
 
     @NotNull
-    WireIn int32(@NotNull IntConsumer i);
+    <T> WireIn int16(@NotNull T t, @NotNull ObjShortConsumer<T> ti);
 
     @NotNull
-    WireIn uint32(@NotNull LongConsumer i);
+    <T> WireIn uint16(@NotNull T t, @NotNull ObjIntConsumer<T> ti);
 
     @NotNull
-    WireIn int64(@NotNull LongConsumer i);
+    <T> WireIn int32(@NotNull T t, @NotNull ObjIntConsumer<T> ti);
 
     @NotNull
-    WireIn float32(@NotNull FloatConsumer v);
+    <T> WireIn uint32(@NotNull T t, @NotNull ObjLongConsumer<T> tl);
 
     @NotNull
-    WireIn float64(@NotNull DoubleConsumer v);
+    <T> WireIn int64(@NotNull T t, @NotNull ObjLongConsumer<T> tl);
 
     @NotNull
-    WireIn time(@NotNull Consumer<LocalTime> localTime);
+    <T> WireIn float32(@NotNull T t, @NotNull ObjFloatConsumer<T> tf);
 
     @NotNull
-    WireIn zonedDateTime(@NotNull Consumer<ZonedDateTime> zonedDateTime);
+    <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td);
 
     @NotNull
-    WireIn date(@NotNull Consumer<LocalDate> localDate);
+    <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime);
+
+    @NotNull
+    <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime);
+
+    @NotNull
+    <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate);
 
     boolean hasNext();
 
     boolean hasNextSequenceItem();
 
     @NotNull
-    WireIn uuid(@NotNull Consumer<UUID> uuid);
+    <T> WireIn uuid(@NotNull T t, @NotNull BiConsumer<T, UUID> tuuid);
 
     @NotNull
-    WireIn int64array(@Nullable LongArrayValues values, @NotNull Consumer<LongArrayValues> setter);
+    <T> WireIn int64array(@Nullable LongArrayValues values, T t, @NotNull BiConsumer<T, LongArrayValues> setter);
 
     @NotNull
     WireIn int64(@Nullable LongValue value);
 
     @NotNull
-    WireIn int64(@Nullable LongValue value, @NotNull Consumer<LongValue> setter);
+    <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter);
 
     @NotNull
-    WireIn int32(@Nullable IntValue value, @NotNull Consumer<IntValue> setter);
+    <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter);
 
     @NotNull
-    WireIn sequence(@NotNull Consumer<ValueIn> reader);
+    <T> WireIn sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader);
 
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
 
     @Nullable
-    <T extends ReadMarshallable> T typedMarshallable();
+    <T extends ReadMarshallable> T typedMarshallable() throws IORuntimeException;
 
     @NotNull
-    ValueIn type(@NotNull StringBuilder s);
+    <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts);
 
     @NotNull
-    default ValueIn type(@NotNull Consumer<StringBuilder> s) {
-        StringBuilder sb = Wires.acquireStringBuilder();
-        type(sb);
-        s.accept(sb);
-        return this;
+    <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) throws IORuntimeException, BufferUnderflowException;
+
+    @NotNull
+    default <T> WireIn typeLiteral(T t, @NotNull BiConsumer<T, Class> classConsumer) throws IORuntimeException {
+        return typeLiteralAsText(t, (o, x) -> {
+            try {
+                classConsumer.accept(o, ClassAliasPool.CLASS_ALIASES.forName(x));
+            } catch (ClassNotFoundException e) {
+                throw new IORuntimeException(e);
+            }
+        });
     }
 
     @NotNull
-    WireIn typeLiteralAsText(@NotNull Consumer<CharSequence> classNameConsumer);
-
-    @NotNull
-    default WireIn typeLiteral(@NotNull Function<CharSequence, Class> typeLookup, @NotNull Consumer<Class> classConsumer) {
-        return typeLiteralAsText(sb -> classConsumer.accept(typeLookup.apply(sb)));
+    default <T> WireIn typeLiteral(T t, @NotNull BiConsumer<T, Class> classConsumer, Class defaultClass) {
+        return typeLiteralAsText(t, (o, x) -> {
+            Class u = defaultClass;
+            try {
+                u = ClassAliasPool.CLASS_ALIASES.forName(x);
+            } catch (ClassNotFoundException e) {
+                // use default class.
+            }
+            classConsumer.accept(o, u);
+        });
     }
 
     @NotNull
-    default WireIn typeLiteral(@NotNull Consumer<Class> classConsumer) {
-        return typeLiteral(ClassAliasPool.CLASS_ALIASES::forName, classConsumer);
-    }
-
-    @NotNull
-    WireIn marshallable(@NotNull ReadMarshallable object);
+    WireIn marshallable(@NotNull ReadMarshallable object) throws BufferUnderflowException, IORuntimeException;
 
     /**
      * reads the map from the wire
@@ -209,7 +213,7 @@ public interface ValueIn {
                          @NotNull Class<V> vClass,
                          @NotNull Map<K, V> usingMap);
 
-    boolean bool();
+    boolean bool() throws IORuntimeException;
 
     byte int8();
 
@@ -225,18 +229,25 @@ public interface ValueIn {
 
     float float32();
 
+    Class typeLiteral() throws IORuntimeException, BufferUnderflowException;
+
     default Throwable throwable(boolean appendCurrentStack) {
-        return Wires.throwable(this, appendCurrentStack);
+        return WireInternal.throwable(this, appendCurrentStack);
     }
 
     default <E extends Enum<E>> E asEnum(Class<E> eClass) {
-        StringBuilder sb = Wires.acquireStringBuilder();
+        StringBuilder sb = WireInternal.acquireStringBuilder();
         text(sb);
-        return sb.length() == 0 ? null : Wires.internEnum(eClass, sb);
+        return sb.length() == 0 ? null : WireInternal.internEnum(eClass, sb);
     }
 
     default <E extends Enum<E>> WireIn asEnum(Class<E> eClass, Consumer<E> eConsumer) {
         eConsumer.accept(asEnum(eClass));
+        return wireIn();
+    }
+
+    default <E extends Enum<E>, T> WireIn asEnum(Class<E> eClass, T t, BiConsumer<T, E> teConsumer) {
+        teConsumer.accept(t, asEnum(eClass));
         return wireIn();
     }
 
@@ -249,16 +260,13 @@ public interface ValueIn {
     <E> E object(@Nullable E using, @NotNull Class<E> clazz);
 
     @Nullable
-    <E> WireIn object(@NotNull Class<E> clazz, Consumer<E> e);
+    <T, E> WireIn object(@NotNull Class<E> clazz, T t, BiConsumer<T, E> e);
 
-    default Class typeLiteral() {
-        Class[] clazz = {null};
-        typeLiteral(
-                ClassAliasPool.CLASS_ALIASES::forName, c -> clazz[0] = c);
-        return clazz[0];
-    }
-
-    default byte[] snappy() {
+    default WireIn decompress(Bytes bytes) {
         throw new UnsupportedOperationException();
     }
+
+    boolean isTyped();
+
+    Class typePrefix();
 }

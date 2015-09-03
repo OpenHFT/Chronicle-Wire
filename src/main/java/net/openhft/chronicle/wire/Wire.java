@@ -15,10 +15,23 @@
  */
 package net.openhft.chronicle.wire;
 
+import java.io.IOException;
+
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream.
- *
+ * <p>
  * Created by peter.lawrey on 12/01/15.
  */
 public interface Wire extends WireIn, WireOut {
+    static Wire fromFile(String name) throws IOException {
+        String ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
+        switch (ext) {
+            case "csv":
+                return CSVWire.fromFile(name);
+            case "yaml":
+                return TextWire.fromFile(name);
+            default:
+                throw new IllegalArgumentException("Unknown file type " + name);
+        }
+    }
 }

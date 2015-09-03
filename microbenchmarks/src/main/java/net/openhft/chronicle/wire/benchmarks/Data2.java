@@ -39,7 +39,7 @@ public class Data2 implements Marshallable, BytesMarshallable {
         this.price = price;
         this.flag = flag;
         this.side = side;
-        this.text.append(text);
+        this.text.appendUtf8(text);
     }
 
     public Data2() {
@@ -104,7 +104,7 @@ public class Data2 implements Marshallable, BytesMarshallable {
 
     public void setText(String text) {
         this.text.clear();
-        this.text.append(text);
+        this.text.appendUtf8(text);
     }
 
     public Bytes textAsBytes() {
@@ -123,7 +123,7 @@ public class Data2 implements Marshallable, BytesMarshallable {
     public void readMarshallable(Bytes<?> bytes) {
         price = bytes.readDouble();
         longInt = bytes.readLong();
-        smallInt = (int) bytes.readInt();
+        smallInt = bytes.readInt();
         flag = bytes.readBoolean();
 //        side = bytes.readEnum(Side.class);
         side = bytes.readBoolean() ? Side.Buy : Side.Sell;

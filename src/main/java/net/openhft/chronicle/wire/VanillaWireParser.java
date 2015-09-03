@@ -15,7 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.wire.util.CharSequenceComparator;
+import net.openhft.chronicle.core.util.CharSequenceComparator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;

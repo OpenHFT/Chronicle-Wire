@@ -35,5 +35,5 @@ public enum Updat implements SerializableUpdater<AtomicLong> {
         public void accept(AtomicLong aLong) {
             aLong.decrementAndGet();
         }
-    };
+    }
 }

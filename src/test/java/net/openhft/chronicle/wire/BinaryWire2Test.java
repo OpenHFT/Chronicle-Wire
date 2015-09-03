@@ -53,15 +53,15 @@ public class BinaryWire2Test {
                 .write().bool(true)
                 .write().bool(null);
 
-        wire.read().bool(Assert::assertFalse)
-                .read().bool(Assert::assertTrue)
-                .read().bool(Assert::assertNull);
+        wire.read().bool("error", Assert::assertFalse)
+                .read().bool("error", Assert::assertTrue)
+                .read().bool("error", Assert::assertNull);
     }
 
     @Test
     public void testBytesStore() {
         Wire wire = createWire();
-        wire.write().object(Bytes.wrapForRead("Hello"));
+        wire.write().object(Bytes.from("Hello"));
 
         Bytes b = Bytes.elasticByteBuffer();
         wire.read().object(b, Object.class);
@@ -76,9 +76,9 @@ public class BinaryWire2Test {
                 .write().float32(Float.NaN)
                 .write().float32(Float.POSITIVE_INFINITY);
 
-        wire.read().float32(t -> assertEquals(0.0F, t, 0.0F))
-                .read().float32(t -> assertTrue(Float.isNaN(t)))
-                .read().float32(t -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F));
+        wire.read().float32(this, (o, t) -> assertEquals(0.0F, t, 0.0F))
+                .read().float32(this, (o, t) -> assertTrue(Float.isNaN(t)))
+                .read().float32(this, (o, t) -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F));
     }
 
     @Test
@@ -89,9 +89,9 @@ public class BinaryWire2Test {
                 .write().time(LocalTime.MAX)
                 .write().time(LocalTime.MIN);
 
-        wire.read().time(t -> assertEquals(now, t))
-                .read().time(t -> assertEquals(LocalTime.MAX, t))
-                .read().time(t -> assertEquals(LocalTime.MIN, t));
+        wire.read().time(this, (o, t) -> assertEquals(now, t))
+                .read().time(this, (o, t) -> assertEquals(LocalTime.MAX, t))
+                .read().time(this, (o, t) -> assertEquals(LocalTime.MIN, t));
     }
 
     @Test
@@ -102,9 +102,9 @@ public class BinaryWire2Test {
                 .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()))
                 .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()));
 
-        wire.read().zonedDateTime(t -> assertEquals(now, t))
-                .read().zonedDateTime(t -> assertEquals(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()), t))
-                .read().zonedDateTime(t -> assertEquals(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), t));
+        wire.read().zonedDateTime(this, (o, t) -> assertEquals(now, t))
+                .read().zonedDateTime(this, (o, t) -> assertEquals(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()), t))
+                .read().zonedDateTime(this, (o, t) -> assertEquals(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), t));
     }
 
     @Test
@@ -115,9 +115,9 @@ public class BinaryWire2Test {
                 .write().date(LocalDate.MAX)
                 .write().date(LocalDate.MIN);
 
-        wire.read().date(t -> assertEquals(now, t))
-                .read().date(t -> assertEquals(LocalDate.MAX, t))
-                .read().date(t -> assertEquals(LocalDate.MIN, t));
+        wire.read().date(this, (o, t) -> assertEquals(now, t))
+                .read().date(this, (o, t) -> assertEquals(LocalDate.MAX, t))
+                .read().date(this, (o, t) -> assertEquals(LocalDate.MIN, t));
     }
 
     @Test
@@ -128,9 +128,9 @@ public class BinaryWire2Test {
                 .write().uuid(new UUID(0, 0))
                 .write().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE));
 
-        wire.read().uuid(t -> assertEquals(uuid, t))
-                .read().uuid(t -> assertEquals(new UUID(0, 0), t))
-                .read().uuid(t -> assertEquals(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), t));
+        wire.read().uuid(this, (o, t) -> assertEquals(uuid, t))
+                .read().uuid(this, (o, t) -> assertEquals(new UUID(0, 0), t))
+                .read().uuid(this, (o, t) -> assertEquals(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), t));
     }
 
     @Test
@@ -143,7 +143,7 @@ public class BinaryWire2Test {
         Wire twire = new TextWire(Bytes.elasticByteBuffer());
         writeMessage(twire);
 
-        System.out.println(Wires.fromSizePrefixedBinaryToText(twire.bytes()));
+        System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
     }
 
     private void writeMessage(@NotNull WireOut wire) {
@@ -161,21 +161,6 @@ public class BinaryWire2Test {
                 }));
     }
 
-    private void readMessage(WireIn wire) {
-        wire.readDocument(in ->
-                        in.read(() -> "csp").text(csp)
-                                .read(() -> "tid").int64(t -> tid = t),
-                in ->
-                        in.read(() -> "entrySet").sequence(s -> {
-                            s.marshallable(m ->
-                                    m.read(() -> "key").text(key1)
-                                            .read(() -> "value").text(value1));
-                            s.marshallable(m ->
-                                    m.read(() -> "key").text(key2)
-                                            .read(() -> "value").text(value2));
-                        }));
-    }
-
     @Test
     public void testEnum() {
         Wire wire = createWire();
@@ -188,10 +173,41 @@ public class BinaryWire2Test {
         assertEquals(WireType.RAW, wire.read().object(Object.class));
     }
 
+
+    @Test
+    public void fieldAfterText() {
+        Wire wire = createWire();
+        wire.writeDocument(false, w -> w.write(() -> "data").typePrefix("!UpdateEvent").marshallable(
+                v -> v.write(() -> "assetName").text("/name")
+                        .write(() -> "key").object("test")
+                        .write(() -> "oldValue").object("world1")
+                        .write(() -> "value").object("world2")));
+        /*
+--- !!not-ready-data! #binary
+reply: !UpdatedEvent {
+  assetName: /name,
+  key: hello,
+  oldValue: world1,
+  value: world2
+}
+         */
+        assertEquals("--- !!data #binary\n" +
+                "data: !!UpdateEvent {\n" +
+                "  assetName: /name,\n" +
+                "  key: test,\n" +
+                "  oldValue: world1,\n" +
+                "  value: world2\n" +
+                "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
+        wire.readDocument(null, w -> w.read(() -> "data").typePrefix(this, (o, t) -> assertEquals("!UpdateEvent", t.toString())).marshallable(
+                m -> m.read(() -> "assetName").object(String.class, this, (o, s) -> Assert.assertEquals("/name", s))
+                        .read(() -> "key").object(String.class, this, (o, s) -> Assert.assertEquals("test", s))
+                        .read(() -> "oldValue").object(String.class, this, (o, s) -> Assert.assertEquals("world1", s))
+                        .read(() -> "value").object(String.class, this, (o, s) -> Assert.assertEquals("world2", s))));
+    }
     @Test
     public void fieldAfterNull() {
         Wire wire = createWire();
-        wire.writeDocument(false, w -> w.write(() -> "data").type("!UpdateEvent").marshallable(
+        wire.writeDocument(false, w -> w.write(() -> "data").typePrefix("!UpdateEvent").marshallable(
                 v -> v.write(() -> "assetName").text("/name")
                         .write(() -> "key").object("test")
                         .write(() -> "oldValue").object(null)
@@ -211,11 +227,11 @@ reply: !UpdatedEvent {
                 "  key: test,\n" +
                 "  oldValue: !!null \"\",\n" +
                 "  value: world2\n" +
-                "}\n", Wires.fromSizePrefixedBinaryToText(wire.bytes()));
-        wire.readDocument(null, w -> w.read(() -> "data").type(t -> assertEquals("!UpdateEvent", t.toString())).marshallable(
-                m -> m.read(() -> "assetName").object(String.class, s -> Assert.assertEquals("/name", s))
-                        .read(() -> "key").object(String.class, s -> Assert.assertEquals("test", s))
-                        .read(() -> "oldValue").object(String.class, s -> Assert.assertNull(s))
-                        .read(() -> "value").object(String.class, s -> Assert.assertEquals("world2", s))));
+                "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
+        wire.readDocument(null, w -> w.read(() -> "data").typePrefix(this, (o, t) -> assertEquals("!UpdateEvent", t.toString())).marshallable(
+                m -> m.read(() -> "assetName").object(String.class, this, (o, s) -> Assert.assertEquals("/name", s))
+                        .read(() -> "key").object(String.class, this, (o, s) -> Assert.assertEquals("test", s))
+                        .read(() -> "oldValue").object(String.class, "error", Assert::assertNull)
+                        .read(() -> "value").object(String.class, this, (o, s) -> Assert.assertEquals("world2", s))));
     }
 }

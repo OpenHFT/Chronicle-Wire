@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
+import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -33,8 +34,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class RawWireTest {
 
@@ -142,7 +142,7 @@ public class RawWireTest {
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int8(i::set);
+            wire.read().int8(i, AtomicInteger::set);
             assertEquals(e, i.get());
         });
 
@@ -163,7 +163,7 @@ public class RawWireTest {
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int16(i::set);
+            wire.read().int16(i, AtomicInteger::set);
             assertEquals(e, i.get());
         });
 
@@ -184,7 +184,7 @@ public class RawWireTest {
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().uint8(i::set);
+            wire.read().uint8(i, AtomicInteger::set);
             assertEquals(e, i.get());
         });
 
@@ -205,7 +205,7 @@ public class RawWireTest {
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().uint16(i::set);
+            wire.read().uint16(i, AtomicInteger::set);
             assertEquals(e, i.get());
         });
 
@@ -226,7 +226,7 @@ public class RawWireTest {
         // ok as blank matches anything
         AtomicLong i = new AtomicLong();
         IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().uint32(i::set);
+            wire.read().uint32(i, AtomicLong::set);
             assertEquals(e, i.get());
         });
 
@@ -247,7 +247,7 @@ public class RawWireTest {
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int32(i::set);
+            wire.read().int32(i, AtomicInteger::set);
             assertEquals(e, i.get());
         });
 
@@ -269,7 +269,7 @@ public class RawWireTest {
         AtomicLong i = new AtomicLong();
         IntConsumer ic = i::set;
         LongStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int64(i::set);
+            wire.read().int64(i, AtomicLong::set);
             assertEquals(e, i.get());
         });
 
@@ -297,7 +297,7 @@ public class RawWireTest {
         }
         Floater n = new Floater();
         IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().float64(n::set);
+            wire.read().float64(n, Floater::set);
             assertEquals(e, n.f, 0.0);
         });
 
@@ -321,8 +321,7 @@ public class RawWireTest {
         // ok as blank matches anything
         StringBuilder sb = new StringBuilder();
         Stream.of("Hello", "world", name1).forEach(e -> {
-            wire.read()
-                    .textTo(sb);
+            assertNotNull(wire.read().textTo(sb));
             assertEquals(e, sb.toString());
         });
 
@@ -334,19 +333,17 @@ public class RawWireTest {
     @Test
     public void type() {
         Wire wire = createWire();
-        wire.write().type("MyType");
-        wire.write(BWKey.field1).type("AlsoMyType");
+        wire.write().typePrefix("MyType");
+        wire.write(BWKey.field1).typePrefix("AlsoMyType");
         String name1 = "com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState";
 
-        wire.write(() -> "Test").type(name1);
+        wire.write(() -> "Test").typePrefix(name1);
         wire.writeComment("");
         assertEquals("[pos: 0, rlim: 142, wlim: 8EiB, cap: 8EiB ] ⒍MyType⒑AlsoMyType{" + name1, wire.bytes().toDebugString());
 
         // ok as blank matches anything
-        StringBuilder sb = new StringBuilder();
         Stream.of("MyType", "AlsoMyType", name1).forEach(e -> {
-            wire.read().type(sb);
-            assertEquals(e, sb.toString());
+            wire.read().typePrefix(e, StringUtils::isEqual);
         });
 
         assertEquals(0, bytes.readRemaining());
@@ -360,9 +357,9 @@ public class RawWireTest {
         wire.write().bool(false)
                 .write().bool(true)
                 .write().bool(null);
-        wire.read().bool(Assert::assertFalse)
-                .read().bool(Assert::assertTrue)
-                .read().bool(Assert::assertNull);
+        wire.read().bool(false, Assert::assertEquals)
+                .read().bool(true, Assert::assertEquals)
+                .read().bool(null, Assert::assertEquals);
     }
 
     @Test
@@ -373,11 +370,11 @@ public class RawWireTest {
                 .write().float32(Float.POSITIVE_INFINITY)
                 .write().float32(Float.NEGATIVE_INFINITY)
                 .write().float32(123456.0f);
-        wire.read().float32(t -> assertEquals(0.0F, t, 0.0F))
-                .read().float32(t -> assertTrue(Float.isNaN(t)))
-                .read().float32(t -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F))
-                .read().float32(t -> assertEquals(Float.NEGATIVE_INFINITY, t, 0.0F))
-                .read().float32(t -> assertEquals(123456.0f, t, 0.0F));
+        wire.read().float32(this, (o, t) -> assertEquals(0.0F, t, 0.0F))
+                .read().float32(this, (o, t) -> assertTrue(Float.isNaN(t)))
+                .read().float32(this, (o, t) -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F))
+                .read().float32(this, (o, t) -> assertEquals(Float.NEGATIVE_INFINITY, t, 0.0F))
+                .read().float32(this, (o, t) -> assertEquals(123456.0f, t, 0.0F));
     }
 
     @Test
@@ -387,9 +384,9 @@ public class RawWireTest {
         wire.write().time(now)
                 .write().time(LocalTime.MAX)
                 .write().time(LocalTime.MIN);
-        wire.read().time(t -> assertEquals(now, t))
-                .read().time(t -> assertEquals(LocalTime.MAX, t))
-                .read().time(t -> assertEquals(LocalTime.MIN, t));
+        wire.read().time(now, Assert::assertEquals)
+                .read().time(LocalTime.MAX, Assert::assertEquals)
+                .read().time(LocalTime.MIN, Assert::assertEquals);
     }
 
     @Test
@@ -399,9 +396,9 @@ public class RawWireTest {
         wire.write().zonedDateTime(now)
                 .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()))
                 .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()));
-        wire.read().zonedDateTime(t -> assertEquals(now, t))
-                .read().zonedDateTime(t -> assertEquals(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()), t))
-                .read().zonedDateTime(t -> assertEquals(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), t));
+        wire.read().zonedDateTime(now, Assert::assertEquals)
+                .read().zonedDateTime(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()), Assert::assertEquals)
+                .read().zonedDateTime(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), Assert::assertEquals);
     }
 
     @Test
@@ -411,9 +408,9 @@ public class RawWireTest {
         wire.write().date(now)
                 .write().date(LocalDate.MAX)
                 .write().date(LocalDate.MIN);
-        wire.read().date(t -> assertEquals(now, t))
-                .read().date(t -> assertEquals(LocalDate.MAX, t))
-                .read().date(t -> assertEquals(LocalDate.MIN, t));
+        wire.read().date(now, Assert::assertEquals)
+                .read().date(LocalDate.MAX, Assert::assertEquals)
+                .read().date(LocalDate.MIN, Assert::assertEquals);
     }
 
     @Test
@@ -423,9 +420,9 @@ public class RawWireTest {
         wire.write().uuid(uuid)
                 .write().uuid(new UUID(0, 0))
                 .write().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE));
-        wire.read().uuid(t -> assertEquals(uuid, t))
-                .read().uuid(t -> assertEquals(new UUID(0, 0), t))
-                .read().uuid(t -> assertEquals(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), t));
+        wire.read().uuid(uuid, Assert::assertEquals)
+                .read().uuid(new UUID(0, 0), Assert::assertEquals)
+                .read().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), Assert::assertEquals);
     }
 
     @Ignore("todo fix :currently using NoBytesStore so will fail with UnsupportedOperationException")
@@ -449,33 +446,38 @@ public class RawWireTest {
     }
 
     @Test
-    @Ignore("Waiting for writeEntryName()")
     public void testWriteMarshallable() {
         Wire wire = createWire();
         MyTypes mtA = new MyTypes();
-        mtA.b(true);
-        mtA.d(123.456);
-        mtA.i(-12345789);
-        mtA.s((short) 12345);
+        mtA.b = (true);
+        mtA.d = (123.456);
+        mtA.i = (-12345789);
+        mtA.s = ((short) 12345);
         mtA.text.append("Hello World");
 
-        wire.write(() -> "A").marshallable(mtA);
+        wire.writeEventName(() -> "A").marshallable(mtA);
 
         MyTypes mtB = new MyTypes();
-        mtB.b(false);
-        mtB.d(123.4567);
-        mtB.i(-123457890);
-        mtB.s((short) 1234);
+        mtB.b = (false);
+        mtB.d = (123.4567);
+        mtB.i = (-123457890);
+        mtB.s = ((short) 1234);
         mtB.text.append("Bye now");
-        wire.write(() -> "B").marshallable(mtB);
+        wire.writeEventName(() -> "B").marshallable(mtB);
 
-        //        assertEquals("[pos: 0, rlim: 74, wlim: 8EiB, cap: 8EiB ] #٠٠٠¿90w¾\u009F\u001A/Ý^@٠٠٠٠٠٠٠٠C\u009ECÿ⒒Hello World\u001F٠٠٠٠Ò⒋S⒌£\u0092:Ý^@٠٠٠٠٠٠٠٠\u009E.¤ø⒎Bye now", wire.bytes().toDebugString(400));
+        assertEquals("[pos: 0, rlim: 78, wlim: 8EiB, cap: 8EiB ] " +
+                        "⒈A#٠٠٠±90w¾\\u009F\\u001A/Ý^@٠٠٠٠٠٠٠٠C\\u009ECÿ⒒Hello World" +
+                        "⒈B\\u001F٠٠٠٠Ò⒋S⒌£\\u0092:Ý^@٠٠٠٠٠٠٠٠\\u009E.¤ø⒎Bye now",
+                wire.bytes().toDebugString());
 
         MyTypes mt2 = new MyTypes();
-        wire.read(() -> "A").marshallable(mt2);
+        StringBuilder key = new StringBuilder();
+        wire.readEventName(key).marshallable(mt2);
+        assertEquals("A", key.toString());
         assertEquals(mt2, mtA);
 
-        wire.read(() -> "B").marshallable(mt2);
+        wire.readEventName(key).marshallable(mt2);
+        assertEquals("B", key.toString());
         assertEquals(mt2, mtB);
     }
 

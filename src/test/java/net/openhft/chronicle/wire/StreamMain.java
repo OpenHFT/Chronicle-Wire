@@ -54,11 +54,11 @@ class FileFormat implements Marshallable {
 
     @Override
     public void readMarshallable(WireIn wire) throws IllegalStateException {
-        wire.read(() -> "version").int32(s -> version = s)
-                .read(() -> "createdTime").zonedDateTime(z -> createdTime = z)
-                .read(() -> "creator").text(s -> creator = s)
-                .read(() -> "identity").uuid(u -> identity = u)
-                .read(() -> "wireType").object(WireType.class, wt -> wireType = wt);
+        wire.read(() -> "version").int32(this, (o, s) -> o.version = s)
+                .read(() -> "createdTime").zonedDateTime(this, (o, z) -> o.createdTime = z)
+                .read(() -> "creator").text(this, (o, s) -> o.creator = s)
+                .read(() -> "identity").uuid(this, (o, u) -> o.identity = u)
+                .read(() -> "wireType").object(WireType.class, this, (o, wt) -> o.wireType = wt);
     }
 
     @Override

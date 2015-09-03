@@ -41,10 +41,10 @@ public class TextDocumentTest {
          at net.openhft.chronicle.wire.TextWire$TextValueIn.marshallable(TextWire.java:653)
          at net.openhft.chronicle.wire.TextDocumentTest.lambda$testDocument$6(TextDocumentTest.java:62)
          at net.openhft.chronicle.wire.TextDocumentTest$$Lambda$10/21801535.accept(Unknown Source)
-         at net.openhft.chronicle.wire.Wires.lambda$readData$7(Wires.java:79)
-         at net.openhft.chronicle.wire.Wires$$Lambda$11/13492111.accept(Unknown Source)
+         at net.openhft.chronicle.wire.WireInternal.lambda$readData$7(WireInternal.java:79)
+         at net.openhft.chronicle.wire.WireInternal$$Lambda$11/13492111.accept(Unknown Source)
          at net.openhft.chronicle.bytes.StreamingCommon.withLength(StreamingCommon.java:33)
-         at net.openhft.chronicle.wire.Wires.readData(Wires.java:79)
+         at net.openhft.chronicle.wire.WireInternal.readData(WireInternal.java:79)
          at net.openhft.chronicle.wire.WireIn.readDocument(WireIn.java:53)
          at net.openhft.chronicle.wire.TextDocumentTest.testDocument(TextDocumentTest.java:62)
      */
@@ -108,10 +108,10 @@ public class TextDocumentTest {
 
         @Override
         public void readMarshallable(@NotNull WireIn in) {
-            in.read(Keys.uuid).uuid(u -> uuid = u);
-            in.read(Keys.writeByte).int64(writeByte, x -> writeByte = x);
-            in.read(Keys.readByte).int64(readByte, x -> readByte = x);
-            in.read(Keys.created).zonedDateTime(c -> created = c);
+            in.read(Keys.uuid).uuid(this, (o, u) -> o.uuid = u);
+            in.read(Keys.writeByte).int64(writeByte, this, (o, x) -> o.writeByte = x);
+            in.read(Keys.readByte).int64(readByte, this, (o, x) -> o.readByte = x);
+            in.read(Keys.created).zonedDateTime(this, (o, c) -> o.created = c);
         }
     }
 }

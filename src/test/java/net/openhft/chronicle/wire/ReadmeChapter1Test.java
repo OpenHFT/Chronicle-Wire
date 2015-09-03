@@ -344,7 +344,7 @@ To write in binary instead
         Wire wire2 = new BinaryWire(bytes2);
 
         wire2.writeDocument(false, data);
-        System.out.println(Wires.fromSizePrefixedBinaryToText(bytes2));
+        System.out.println(WireInternal.fromSizePrefixedBinaryToText(bytes2));
 
         Data data3 = new Data();
         assertTrue(wire2.readDocument(null, data3));
@@ -389,8 +389,9 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 
         List<Data> dataList = new ArrayList<>();
         assertTrue(wire.readDocument(null, w -> w.read(() -> "mydata")
-                .sequence(v -> {
-                    while (v.hasNextSequenceItem()) dataList.add(v.object(Data.class));
+                .sequence(dataList, (l, v) -> {
+                    while (v.hasNextSequenceItem())
+                        l.add(v.object(Data.class));
                 })));
         dataList.forEach(System.out::println);
 
@@ -433,12 +434,13 @@ To write in binary instead
 
         wire2.writeDocument(false, w -> w.write(() -> "mydata")
                 .sequence(v -> Stream.of(data).forEach(v::object)));
-        System.out.println(Wires.fromSizePrefixedBinaryToText(bytes2));
+        System.out.println(WireInternal.fromSizePrefixedBinaryToText(bytes2));
 
         List<Data> dataList2 = new ArrayList<>();
         assertTrue(wire2.readDocument(null, w -> w.read(() -> "mydata")
-                .sequence(v -> {
-                    while (v.hasNextSequenceItem()) dataList2.add(v.object(Data.class));
+                .sequence(dataList2, (l, v) -> {
+                    while (v.hasNextSequenceItem())
+                        l.add(v.object(Data.class));
                 })));
         dataList2.forEach(System.out::println);
 /*
@@ -498,10 +500,10 @@ class Data implements Marshallable {
 
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
-        wire.read(() -> "message").text(s -> message = s)
-                .read(() -> "number").int64(i -> number = i)
-                .read(() -> "timeUnit").asEnum(TimeUnit.class, e -> timeUnit = e)
-                .read(() -> "price").float64(d -> price = d);
+        wire.read(() -> "message").text(this, (o, s) -> o.message = s)
+                .read(() -> "number").int64(this, (o, i) -> number = i)
+                .read(() -> "timeUnit").asEnum(TimeUnit.class, this, (o, e) -> o.timeUnit = e)
+                .read(() -> "price").float64(this, (o, d) -> o.price = d);
     }
 
     @Override

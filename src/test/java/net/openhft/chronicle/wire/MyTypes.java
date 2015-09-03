@@ -27,26 +27,6 @@ class MyTypes implements Marshallable {
     long l;
     int i;
 
-    void b(boolean b) {
-        this.b = b;
-    }
-
-    void s(short s) {
-        this.s = s;
-    }
-
-    void d(double d) {
-        this.d = d;
-    }
-
-    void l(long l) {
-        this.l = l;
-    }
-
-    void i(int i) {
-        this.i = i;
-    }
-
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
         wire.write(Fields.B_FLAG).bool(b)
@@ -59,11 +39,11 @@ class MyTypes implements Marshallable {
 
     @Override
     public void readMarshallable(@NotNull WireIn wire) {
-        wire.read(Fields.B_FLAG).bool(x -> b = x)
-                .read(Fields.S_NUM).int16(this::s)
-                .read(Fields.D_NUM).float64(this::d)
-                .read(Fields.L_NUM).int64(this::l)
-                .read(Fields.I_NUM).int32(this::i)
+        wire.read(Fields.B_FLAG).bool(this, (o, x) -> o.b = x)
+                .read(Fields.S_NUM).int16(this, (o, x) -> o.s = x)
+                .read(Fields.D_NUM).float64(this, (o, x) -> o.d = x)
+                .read(Fields.L_NUM).int64(this, (o, x) -> o.l = x)
+                .read(Fields.I_NUM).int32(this, (o, x) -> o.i = x)
                 .read(Fields.TEXT).textTo(text)
         ;
     }

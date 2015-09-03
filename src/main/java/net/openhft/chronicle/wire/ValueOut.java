@@ -25,9 +25,7 @@ import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.xerial.snappy.Snappy;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -75,6 +73,9 @@ public interface ValueOut {
 
     @NotNull
     WireOut bytes(byte[] fromBytes);
+
+    @NotNull
+    WireOut bytes(String type, byte[] fromBytes);
 
     @NotNull
     default WireOut uint8(int x) {
@@ -144,11 +145,16 @@ public interface ValueOut {
     WireOut date(LocalDate localDate);
 
     @NotNull
-    ValueOut type(CharSequence typeName);
+    ValueOut typePrefix(CharSequence typeName);
+
+    @NotNull
+    default ValueOut typePrefix(Class type) {
+        return typePrefix(ClassAliasPool.CLASS_ALIASES.nameFor(type));
+    }
 
     @NotNull
     default WireOut typeLiteral(@NotNull Class type) {
-        return typeLiteral((t, b) -> b.append(ClassAliasPool.CLASS_ALIASES.nameFor(t)), type);
+        return typeLiteral((t, b) -> b.appendUtf8(ClassAliasPool.CLASS_ALIASES.nameFor(t)), type);
     }
 
     @NotNull
@@ -176,7 +182,7 @@ public interface ValueOut {
     WireOut sequence(Consumer<ValueOut> writer);
 
     @NotNull
-    default WireOut array(Consumer<ValueOut> writer, Class arrayType){
+    default WireOut array(Consumer<ValueOut> writer, Class arrayType) {
         throw new UnsupportedOperationException();
     }
 
@@ -204,69 +210,72 @@ public interface ValueOut {
     default WireOut typedMarshallable(@Nullable WriteMarshallable object) {
         if (object == null)
             return text(null);
-        type(ClassAliasPool.CLASS_ALIASES.nameFor(object.getClass()));
+        typePrefix(object.getClass());
         return marshallable(object);
     }
 
     @NotNull
     default WireOut typedMarshallable(CharSequence typeName, WriteMarshallable object) {
-        type(typeName);
+        typePrefix(typeName);
         return marshallable(object);
     }
 
     default <E extends Enum<E>> WireOut asEnum(E e) {
         return text(e == null ? null : e.name());
     }
+
     @NotNull
     default WireOut object(Object value) {
-        if (value instanceof byte[])
-            return rawBytes((byte[]) value);
         if (value == null)
             return text(null);
+        if (value instanceof Marshallable)
+            return typedMarshallable((Marshallable) value);
+        if (value instanceof BytesStore)
+            return bytes((BytesStore) value);
+        if (value instanceof CharSequence)
+            return text((CharSequence) value);
         if (value instanceof Map)
             return map((Map) value);
+        if (value instanceof byte[])
+            return rawBytes((byte[]) value);
         if (value instanceof Byte)
             return int8((Byte) value);
-        else if (value instanceof Boolean)
+        if (value instanceof Boolean)
             return bool((Boolean) value);
-        else if (value instanceof Character)
+        if (value instanceof Character)
             return text(value.toString());
-        else if (value instanceof Short)
+        if (value instanceof Short)
             return int16((Short) value);
-        else if (value instanceof Integer)
+        if (value instanceof Integer)
             return int32((Integer) value);
-        else if (value instanceof Long)
+        if (value instanceof Long)
             return int64((Long) value);
-        else if (value instanceof Double)
+        if (value instanceof Double)
             return float64((Double) value);
-        else if (value instanceof Float)
+        if (value instanceof Float)
             return float32((Float) value);
-        else if (value instanceof Marshallable)
-            return typedMarshallable((Marshallable) value);
-        else if (value instanceof Throwable)
+        if (value instanceof Throwable)
             return throwable((Throwable) value);
-        else if (value instanceof BytesStore)
-            return bytes((BytesStore) value);
-        else if (value instanceof CharSequence)
-            return text((CharSequence) value);
-        else if (value instanceof Enum)
+        if (value instanceof Enum)
             return typedScalar(value);
-        else if (value instanceof String[])
+        if (value instanceof String[])
             return array(v -> Stream.of((String[]) value).forEach(v::text), String[].class);
-        else if (value instanceof Collection) {
-            if(((Collection)value).size()==0)return sequence(v->{});
+        if (value instanceof Collection) {
+            if (((Collection) value).size() == 0) return sequence(v -> {
+            });
 
-            Class listType = ((Collection)value).iterator().next().getClass();
-            if (listType == String.class)
-                return sequence(v -> ((Collection<String>) value).stream().forEach(v::text));
-            else
-                throw new UnsupportedOperationException("Collection of type " + listType + " not supported");
-        }
-        else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
+            return sequence(v -> ((Collection) value).stream().forEach(v::object));
+        } else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
             WireSerializedLambda.write(value, this);
             return wireOut();
         } else if (Object[].class.isAssignableFrom(value.getClass())) {
-            return array(v -> Stream.of((Object[]) value).forEach(v::object),Object[].class);
+            return array(v -> Stream.of((Object[]) value).forEach(v::object), Object[].class);
+        } else if (value instanceof LocalTime) {
+            return time((LocalTime) value);
+        } else if (value instanceof LocalDate) {
+            return date((LocalDate) value);
+        } else if (value instanceof ZonedDateTime) {
+            return zonedDateTime((ZonedDateTime) value);
         } else {
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +
@@ -276,7 +285,7 @@ public interface ValueOut {
 
     @NotNull
     default WireOut typedScalar(@NotNull Object value) {
-        type(ClassAliasPool.CLASS_ALIASES.nameFor(value.getClass()));
+        typePrefix(ClassAliasPool.CLASS_ALIASES.nameFor(value.getClass()));
         text(value.toString());
         return wireOut();
     }
@@ -303,15 +312,16 @@ public interface ValueOut {
     @NotNull
     WireOut wireOut();
 
-    default WireOut snappy(byte[] compressedBytes){
-        throw new UnsupportedOperationException();
+    default WireOut compress(String compression, Bytes compressedBytes) {
+        WireInternal.compress(this, compression, compressedBytes);
+        return wireOut();
     }
 
-    default WireOut compressWithSnappy(String str){
-        try {
-            return snappy(Snappy.compress(str));
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
+    @Deprecated
+    default WireOut compress(String compression, String str) {
+        // replace with compress(String compression, Bytes compressedBytes)
+        WireInternal.compress(this, compression, str);
+        return wireOut();
     }
+
 }
