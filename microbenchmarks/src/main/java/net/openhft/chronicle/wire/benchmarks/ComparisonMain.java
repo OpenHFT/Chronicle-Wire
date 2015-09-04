@@ -23,11 +23,14 @@ import baseline.MessageHeaderEncoder;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import de.undercouch.bson4jackson.BsonFactory;
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONStyle;
 import net.minidev.json.parser.JSONParser;
 import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytesStore;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.wire.benchmarks.sbe.ExampleUsingGeneratedStub;
 import org.boon.json.JsonFactory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -145,7 +148,6 @@ public class ComparisonMain {
         }
     }
 
-    /*
         @Benchmark
         public Data snakeYaml() {
             s = yaml.dumpAsMap(data);
@@ -205,7 +207,7 @@ public class ComparisonMain {
             data2.readFrom(jp);
             return data2;
         }
-    */
+
     @Benchmark
     public Data jacksonWithTextCBytes() throws IOException {
         bytes.clear();
@@ -217,7 +219,7 @@ public class ComparisonMain {
         data2.readFrom(textJP);
         return data2;
     }
-/*
+
     @Benchmark
     public Data bson() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -282,5 +284,4 @@ public class ComparisonMain {
             return (Data) ois.readObject();
         }
     }
-    */
 }

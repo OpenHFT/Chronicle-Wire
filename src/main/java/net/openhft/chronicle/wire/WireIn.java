@@ -87,4 +87,8 @@ public interface WireIn extends WireCommon {
                                  @Nullable ReadMarshallable dataConsumer) {
         return WireInternal.readData(position, this, metaDataConsumer, dataConsumer);
     }
+
+    default void rawReadData(ReadMarshallable marshallable) {
+        WireInternal.rawReadData(this, marshallable);
+    }
 }
