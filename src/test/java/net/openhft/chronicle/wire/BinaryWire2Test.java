@@ -207,7 +207,7 @@ reply: !UpdatedEvent {
     @Test
     public void fieldAfterNull() {
         Wire wire = createWire();
-        wire.writeDocument(false, w -> w.write(() -> "data").typePrefix("!UpdateEvent").marshallable(
+        wire.writeDocument(false, w -> w.write(() -> "data").typedMarshallable("!UpdateEvent",
                 v -> v.write(() -> "assetName").text("/name")
                         .write(() -> "key").object("test")
                         .write(() -> "oldValue").object(null)
@@ -229,9 +229,9 @@ reply: !UpdatedEvent {
                 "  value: world2\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
         wire.readDocument(null, w -> w.read(() -> "data").typePrefix(this, (o, t) -> assertEquals("!UpdateEvent", t.toString())).marshallable(
-                m -> m.read(() -> "assetName").object(String.class, this, (o, s) -> Assert.assertEquals("/name", s))
-                        .read(() -> "key").object(String.class, this, (o, s) -> Assert.assertEquals("test", s))
+                m -> m.read(() -> "assetName").object(String.class, "/name", Assert::assertEquals)
+                        .read(() -> "key").object(String.class, "test", Assert::assertEquals)
                         .read(() -> "oldValue").object(String.class, "error", Assert::assertNull)
-                        .read(() -> "value").object(String.class, this, (o, s) -> Assert.assertEquals("world2", s))));
+                        .read(() -> "value").object(String.class, "world2", Assert::assertEquals)));
     }
 }
