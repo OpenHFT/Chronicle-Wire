@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -36,5 +37,34 @@ public enum YamlLogging {
     public static void setAll(boolean flag) {
         showServerReads = showServerWrites = clientWrites = clientReads = flag;
     }
+
+    public static void setAll(YamlLoggingLevel level) {
+        showServerReads = showServerWrites = clientWrites = clientReads = level.isSet();
+    }
+
+    public enum YamlLoggingLevel {
+        OFF {
+            @Override
+            public boolean isSet() {
+                return false;
+            }
+        },
+        DEBUG_ONLY {
+            @Override
+            public boolean isSet() {
+                return Jvm.isDebug();
+            }
+        },
+        ON {
+            @Override
+            public boolean isSet() {
+                return true;
+            }
+        };
+
+        public abstract boolean isSet();
+    }
+
+
 }
 
