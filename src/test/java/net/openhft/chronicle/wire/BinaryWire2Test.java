@@ -89,22 +89,24 @@ public class BinaryWire2Test {
                 .write().time(LocalTime.MAX)
                 .write().time(LocalTime.MIN);
 
-        wire.read().time(this, (o, t) -> assertEquals(now, t))
-                .read().time(this, (o, t) -> assertEquals(LocalTime.MAX, t))
-                .read().time(this, (o, t) -> assertEquals(LocalTime.MIN, t));
+        wire.read().time(now, Assert::assertEquals)
+                .read().time(LocalTime.MAX, Assert::assertEquals)
+                .read().time(LocalTime.MIN, Assert::assertEquals);
     }
 
     @Test
     public void testZonedDateTime() {
         Wire wire = createWire();
         ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime max = ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault());
+        ZonedDateTime min = ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault());
         wire.write().zonedDateTime(now)
-                .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()))
-                .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()));
+                .write().zonedDateTime(max)
+                .write().zonedDateTime(min);
 
-        wire.read().zonedDateTime(this, (o, t) -> assertEquals(now, t))
-                .read().zonedDateTime(this, (o, t) -> assertEquals(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()), t))
-                .read().zonedDateTime(this, (o, t) -> assertEquals(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), t));
+        wire.read().zonedDateTime(now, Assert::assertEquals)
+                .read().zonedDateTime(max, Assert::assertEquals)
+                .read().zonedDateTime(min, Assert::assertEquals);
     }
 
     @Test
@@ -199,15 +201,16 @@ reply: !UpdatedEvent {
                 "  value: world2\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
         wire.readDocument(null, w -> w.read(() -> "data").typePrefix(this, (o, t) -> assertEquals("!UpdateEvent", t.toString())).marshallable(
-                m -> m.read(() -> "assetName").object(String.class, this, (o, s) -> Assert.assertEquals("/name", s))
-                        .read(() -> "key").object(String.class, this, (o, s) -> Assert.assertEquals("test", s))
-                        .read(() -> "oldValue").object(String.class, this, (o, s) -> Assert.assertEquals("world1", s))
-                        .read(() -> "value").object(String.class, this, (o, s) -> Assert.assertEquals("world2", s))));
+                m -> m.read(() -> "assetName").object(String.class, "/name", Assert::assertEquals)
+                        .read(() -> "key").object(String.class, "test", Assert::assertEquals)
+                        .read(() -> "oldValue").object(String.class, "world1", Assert::assertEquals)
+                        .read(() -> "value").object(String.class, "world2", Assert::assertEquals)));
     }
+
     @Test
     public void fieldAfterNull() {
         Wire wire = createWire();
-        wire.writeDocument(false, w -> w.write(() -> "data").typePrefix("!UpdateEvent").marshallable(
+        wire.writeDocument(false, w -> w.write(() -> "data").typedMarshallable("!UpdateEvent",
                 v -> v.write(() -> "assetName").text("/name")
                         .write(() -> "key").object("test")
                         .write(() -> "oldValue").object(null)
@@ -229,9 +232,9 @@ reply: !UpdatedEvent {
                 "  value: world2\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
         wire.readDocument(null, w -> w.read(() -> "data").typePrefix(this, (o, t) -> assertEquals("!UpdateEvent", t.toString())).marshallable(
-                m -> m.read(() -> "assetName").object(String.class, this, (o, s) -> Assert.assertEquals("/name", s))
-                        .read(() -> "key").object(String.class, this, (o, s) -> Assert.assertEquals("test", s))
+                m -> m.read(() -> "assetName").object(String.class, "/name", Assert::assertEquals)
+                        .read(() -> "key").object(String.class, "test", Assert::assertEquals)
                         .read(() -> "oldValue").object(String.class, "error", Assert::assertNull)
-                        .read(() -> "value").object(String.class, this, (o, s) -> Assert.assertEquals("world2", s))));
+                        .read(() -> "value").object(String.class, "world2", Assert::assertEquals)));
     }
 }
