@@ -501,7 +501,7 @@ class Data implements Marshallable {
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
         wire.read(() -> "message").text(this, (o, s) -> o.message = s)
-                .read(() -> "number").int64(this, (o, i) -> number = i)
+                .read(() -> "number").int64(this, (o, i) -> o.number = i)
                 .read(() -> "timeUnit").asEnum(TimeUnit.class, this, (o, e) -> o.timeUnit = e)
                 .read(() -> "price").float64(this, (o, d) -> o.price = d);
     }

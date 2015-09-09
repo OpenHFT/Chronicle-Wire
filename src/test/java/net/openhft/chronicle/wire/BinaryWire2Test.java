@@ -117,9 +117,9 @@ public class BinaryWire2Test {
                 .write().date(LocalDate.MAX)
                 .write().date(LocalDate.MIN);
 
-        wire.read().date(this, (o, t) -> assertEquals(now, t))
-                .read().date(this, (o, t) -> assertEquals(LocalDate.MAX, t))
-                .read().date(this, (o, t) -> assertEquals(LocalDate.MIN, t));
+        wire.read().date(now, Assert::assertEquals)
+                .read().date(LocalDate.MAX, Assert::assertEquals)
+                .read().date(LocalDate.MIN, Assert::assertEquals);
     }
 
     @Test
