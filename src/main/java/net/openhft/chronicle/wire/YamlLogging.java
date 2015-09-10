@@ -33,6 +33,7 @@ public enum YamlLogging {
     public static volatile String writeMessage = "";
     public static volatile boolean clientReads = false;
     public static volatile boolean showServerReads = false;
+    public static volatile boolean showHeartBeats = false;
 
     public static void setAll(boolean flag) {
         showServerReads = showServerWrites = clientWrites = clientReads = flag;
