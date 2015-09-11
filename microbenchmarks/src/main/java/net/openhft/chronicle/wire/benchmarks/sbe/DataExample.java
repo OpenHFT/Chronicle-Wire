@@ -121,7 +121,6 @@ public class DataExample {
         byteBuffer.position(bufferOffset);
     }
 
-
     private static Ir decodeIr(final ByteBuffer buffer)
             throws IOException {
         try (final IrDecoder irDecoder = new IrDecoder(buffer)) {

@@ -19,7 +19,6 @@ public class UsingTestMarshallable {
 
         Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer();
 
-
         ByteBuffer byteBuffer = byteBufferBytes.underlyingObject();
         System.out.println(byteBuffer.getClass());
 
@@ -28,11 +27,9 @@ public class UsingTestMarshallable {
 
         textWire.writeDocument(false, d -> d.write(() -> "any-key").marshallable(testMarshallable));
 
-
         String value = WireInternal.fromSizePrefixedBinaryToText(textWire.bytes());
 
         //String replace = value.replace("\n", "\\n");
-
 
         System.out.println(byteBufferBytes.toHexString());
         System.out.println(value);

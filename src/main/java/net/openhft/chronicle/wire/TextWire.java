@@ -770,7 +770,6 @@ public class TextWire implements Wire, InternalWireIn {
             throw new UnsupportedOperationException();
         }
 
-
         @NotNull
         @Override
         public WireOut bytes(byte[] byteArray) {
@@ -1357,7 +1356,6 @@ public class TextWire implements Wire, InternalWireIn {
             }
         }
 
-
         @Nullable
         @Override
         public WireIn decompress(Bytes bytes) {
@@ -1391,7 +1389,6 @@ public class TextWire implements Wire, InternalWireIn {
             }
             return wireIn();
         }
-
 
         @NotNull
         @Override

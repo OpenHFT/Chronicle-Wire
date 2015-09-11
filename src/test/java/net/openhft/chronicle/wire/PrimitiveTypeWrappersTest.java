@@ -76,7 +76,6 @@ public class PrimitiveTypeWrappersTest {
         Assert.assertEquals("1", object);
     }
 
-
     @Test
     public void testStoreStringReadAsChar() throws Exception {
         final Wire wire = wireFactory();

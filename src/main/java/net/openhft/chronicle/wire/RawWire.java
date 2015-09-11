@@ -355,7 +355,6 @@ public class RawWire implements Wire, InternalWireIn {
             return RawWire.this;
         }
 
-
         @NotNull
         @Override
         public WireOut int64array(long capacity, @NotNull LongArrayValues values) {
@@ -364,7 +363,6 @@ public class RawWire implements Wire, InternalWireIn {
             ((Byteable) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
             return RawWire.this;
         }
-
 
         @NotNull
         @Override

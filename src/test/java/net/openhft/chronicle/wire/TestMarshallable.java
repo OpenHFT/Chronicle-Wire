@@ -37,7 +37,6 @@ public class TestMarshallable implements Marshallable {
         wire.write(() -> "name").text(name);
         wire.write(() -> "count").int32(count);
 
-
     }
 
     public StringBuilder getName() {

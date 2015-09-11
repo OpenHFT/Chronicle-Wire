@@ -252,7 +252,6 @@ public class JSONWire extends TextWire {
         }
     }
 
-
     public void parseWord(StringBuilder sb) {
         parseUntil(sb, StopCharTesters.SPACE_STOP);
     }
