@@ -102,7 +102,6 @@ prints
 Using the RawWire strips away all the meta data to reduce the size of the message, and improve speed.
 The down side is that we cannot easily see what the message contains.
 */
-
         // the same code as for text wire
         wire3.write(() -> "message").text("Hello World")
                 .write(() -> "number").int64(1234567890L)
@@ -118,7 +117,6 @@ prints in RawWire
 00000020 00 00 25 40                                      ··%@
 ```
 */
-
     }
 
     @Test
@@ -212,7 +210,6 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 To write in binary instead
 ```java
 */
-
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         Wire wire2 = new BinaryWire(bytes2);
 
@@ -273,7 +270,6 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 To write in binary instead
 ```java
 */
-
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         Wire wire2 = new BinaryWire(bytes2);
 
@@ -339,7 +335,6 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 To write in binary instead
 ```java
 */
-
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         Wire wire2 = new BinaryWire(bytes2);
 
@@ -428,7 +423,6 @@ Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
 To write in binary instead
 ```java
 */
-
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         Wire wire2 = new BinaryWire(bytes2);
 
@@ -504,14 +498,24 @@ class Data implements Marshallable {
                 .read(() -> "number").int64(this, (o, i) -> o.number = i)
                 .read(() -> "timeUnit").asEnum(TimeUnit.class, this, (o, e) -> o.timeUnit = e)
                 .read(() -> "price").float64(this, (o, d) -> o.price = d);
+/*
+wire.read(() -> "message").text("Hello World", Assert::assertEquals)
+        .read(() -> "number").int64(1234567890L, Assert::assertEquals)
+        .read(() -> "timeUnit").asEnum(TimeUnit.class, TimeUnit.SECONDS,Assert::assertEquals)
+        .read(() -> "price").float64(10.5, (o, d) -> assertEquals(o, d, 0));
+*/
+    }
+
+    enum Field implements WireKey {
+        message, number, timeUnit, price;
     }
 
     @Override
     public void writeMarshallable(WireOut wire) {
-        wire.write(() -> "message").text(message)
-                .write(() -> "number").int64(number)
-                .write(() -> "timeUnit").asEnum(timeUnit)
-                .write(() -> "price").float64(price);
+        wire.write(Field.message).text(message)
+                .write(Field.number).int64(number)
+                .write(Field.timeUnit).asEnum(timeUnit)
+                .write(Field.price).float64(price);
     }
 
     @Override
