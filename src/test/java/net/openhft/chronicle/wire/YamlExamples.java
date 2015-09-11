@@ -50,7 +50,6 @@ public class YamlExamples {
         }
         valueOut.sequenceEnd();
 */
-
         // to read this.
         List<String> names = new ArrayList<>();
         wire.read(Keys.list).sequence(names, (l, valueIn) -> {
@@ -83,7 +82,6 @@ public class YamlExamples {
         List<String> team = new ArrayList<String>();
         wire.readSequence(Keys.national, team, String.class);
 */
-
         /*
         -
           name: Mark McGwire
