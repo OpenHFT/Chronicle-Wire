@@ -497,14 +497,24 @@ class Data implements Marshallable {
                 .read(() -> "number").int64(this, (o, i) -> o.number = i)
                 .read(() -> "timeUnit").asEnum(TimeUnit.class, this, (o, e) -> o.timeUnit = e)
                 .read(() -> "price").float64(this, (o, d) -> o.price = d);
+/*
+wire.read(() -> "message").text("Hello World", Assert::assertEquals)
+        .read(() -> "number").int64(1234567890L, Assert::assertEquals)
+        .read(() -> "timeUnit").asEnum(TimeUnit.class, TimeUnit.SECONDS,Assert::assertEquals)
+        .read(() -> "price").float64(10.5, (o, d) -> assertEquals(o, d, 0));
+*/
+    }
+
+    enum Field implements WireKey {
+        message, number, timeUnit, price;
     }
 
     @Override
     public void writeMarshallable(WireOut wire) {
-        wire.write(() -> "message").text(message)
-                .write(() -> "number").int64(number)
-                .write(() -> "timeUnit").asEnum(timeUnit)
-                .write(() -> "price").float64(price);
+        wire.write(Field.message).text(message)
+                .write(Field.number).int64(number)
+                .write(Field.timeUnit).asEnum(timeUnit)
+                .write(Field.price).float64(price);
     }
 
     @Override
