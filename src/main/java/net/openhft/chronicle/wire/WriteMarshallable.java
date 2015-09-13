@@ -15,6 +15,8 @@
  */
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
+
 @FunctionalInterface
 public interface WriteMarshallable {
     WriteMarshallable EMPTY = wire -> {
@@ -26,5 +28,5 @@ public interface WriteMarshallable {
      *
      * @param wire to write to.
      */
-    void writeMarshallable(WireOut wire);
+    void writeMarshallable(@NotNull WireOut wire);
 }
