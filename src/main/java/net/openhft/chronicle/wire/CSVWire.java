@@ -833,7 +833,6 @@ public class CSVWire extends TextWire {
             }
         }
 
-
         @NotNull
         @Override
         public WireIn wireIn() {

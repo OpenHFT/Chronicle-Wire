@@ -471,7 +471,6 @@ Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
     }
 }
 
-
 /*
 The code for the class Data
 ```java

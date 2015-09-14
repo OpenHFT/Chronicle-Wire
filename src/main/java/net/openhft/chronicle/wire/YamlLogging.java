@@ -66,6 +66,5 @@ public enum YamlLogging {
         public abstract boolean isSet();
     }
 
-
 }
 

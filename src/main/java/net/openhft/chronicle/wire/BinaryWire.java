@@ -67,7 +67,6 @@ public class BinaryWire implements Wire, InternalWireIn {
         valueOut = fixed ? fixedValueOut : new BinaryValueOut();
     }
 
-
     public static int toIntU30(long l, @NotNull String error) {
         if (l < 0 || l > Wires.LENGTH_MASK)
             throw new IllegalStateException(String.format(error, l));
@@ -270,7 +269,6 @@ public class BinaryWire implements Wire, InternalWireIn {
                     bytes.readSkip(bytes.readUnsignedInt());
                     break;
 
-
                 case TYPE_PREFIX:
                     if (!consumeType)
                         return;
@@ -432,7 +430,6 @@ public class BinaryWire implements Wire, InternalWireIn {
                 bytes.readSkip(1);
                 wire.writeValue().bool(false);
                 break;
-
 
             case TRUE:
                 bytes.readSkip(1);
@@ -912,7 +909,6 @@ public class BinaryWire implements Wire, InternalWireIn {
             return BinaryWire.this;
         }
 
-
         @NotNull
         @Override
         public WireOut uint8checked(int u8) {
@@ -1351,7 +1347,6 @@ public class BinaryWire implements Wire, InternalWireIn {
             }
             return BinaryWire.this;
         }
-
 
         private boolean isText(int code) {
             return code == STRING_ANY ||

@@ -91,7 +91,6 @@ public class StrangeTextCombination {
         Assert.assertEquals(expected, wire.read().text());
     }
 
-
     @Test
     public void testEmpty() throws Exception {
         final String expected = "";
@@ -107,7 +106,6 @@ public class StrangeTextCombination {
         wire.write().text(expected);
         Assert.assertEquals(expected, wire.read().text());
     }
-
 
     @Test
     public void testNewLine() throws Exception {

@@ -15,7 +15,6 @@
  */
 package net.openhft.chronicle.wire;
 
-
 import net.openhft.chronicle.core.annotation.ForceInline;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +28,16 @@ import java.util.Map;
  */
 @FunctionalInterface
 public interface WireKey {
+
+    static boolean checkKeys(@NotNull WireKey[] keys) {
+        Map<Integer, WireKey> codes = new HashMap<>();
+        for (WireKey key : keys) {
+            WireKey pkey = codes.put(key.code(), key);
+            if (pkey != null)
+                throw new AssertionError(pkey + " and " + key + " have the same code " + key.code());
+        }
+        return true;
+    }
 
     @Nullable
     CharSequence name();
@@ -46,16 +55,6 @@ public interface WireKey {
     @Nullable
     default Object defaultValue() {
         return null;
-    }
-
-    static boolean checkKeys(@NotNull WireKey[] keys) {
-        Map<Integer, WireKey> codes = new HashMap<>();
-        for (WireKey key : keys) {
-            WireKey pkey = codes.put(key.code(), key);
-            if (pkey != null)
-                throw new AssertionError(pkey + " and " + key + " have the same code " + key.code());
-        }
-        return true;
     }
 
     default boolean contentEquals(@NotNull CharSequence c){

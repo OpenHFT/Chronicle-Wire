@@ -175,7 +175,6 @@ public class BinaryWire2Test {
         assertEquals(WireType.RAW, wire.read().object(Object.class));
     }
 
-
     @Test
     public void fieldAfterText() {
         Wire wire = createWire();

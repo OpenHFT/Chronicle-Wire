@@ -811,7 +811,6 @@ public class TextWireTest {
         Wire wire = createWire();
         String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
-
         byte[] compressedBytes = Snappy.compress(str.getBytes());
         wire.write().compress("snappy", Bytes.wrapForRead(compressedBytes));
 
@@ -827,7 +826,6 @@ public class TextWireTest {
         Wire wire = createWire();
         String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
-
         byte[] bytes0 = str.getBytes();
         wire.write().compress("snappy", Bytes.wrapForRead(bytes0));
 
@@ -840,7 +838,6 @@ public class TextWireTest {
     public void testGZIPCompressionAsText() throws IOException {
         Wire wire = createWire();
         String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-
 
         byte[] compressedBytes = str.getBytes();
         wire.write().compress("gzip", Bytes.wrapForRead(compressedBytes));
@@ -951,7 +948,6 @@ public class TextWireTest {
 //        assertEquals(3, list2.size());
 //        assertEquals("[abc, def, ghi]", list2.toString());
     }
-
 
     @Test
     public void testNestedDecode() {
