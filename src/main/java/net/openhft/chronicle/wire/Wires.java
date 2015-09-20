@@ -58,4 +58,8 @@ public enum Wires {
     public static boolean isData(long len) {
         return (len & META_DATA) == 0;
     }
+
+    public static boolean isKnownLength(int len) {
+        return (len & (META_DATA | LENGTH_MASK)) != UNKNOWN_LENGTH;
+    }
 }
