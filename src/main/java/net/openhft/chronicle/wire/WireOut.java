@@ -45,13 +45,7 @@ public interface WireOut extends WireCommon {
     ValueOut write(WireKey key);
 
     /**
-     * write a field less value.
-     */
-    @NotNull
-    ValueOut writeValue();
-
-    /**
-     * Obtain the value out (for internal use)
+     * Obtain the value out
      */
     @NotNull
     ValueOut getValueOut();

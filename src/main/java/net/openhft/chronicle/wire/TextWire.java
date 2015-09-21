@@ -366,12 +366,6 @@ public class TextWire implements Wire, InternalWireIn {
 
     @NotNull
     @Override
-    public ValueOut writeValue() {
-        return valueOut;
-    }
-
-    @NotNull
-    @Override
     public ValueOut getValueOut() {
         return valueOut;
     }

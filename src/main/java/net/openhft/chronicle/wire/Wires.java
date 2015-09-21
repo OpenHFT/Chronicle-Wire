@@ -30,6 +30,7 @@ public enum Wires {
     static final int NOT_READY = 1 << 31;
     static final int META_DATA = 1 << 30;
     static final int UNKNOWN_LENGTH = 0x0;
+    static final int NOT_INITIALIZED = 0x0;
 
     /**
      * This decodes some Bytes where the first 4-bytes is the length.  e.g. Wire.writeDocument wrote it.
@@ -61,5 +62,11 @@ public enum Wires {
 
     public static boolean isKnownLength(int len) {
         return (len & (META_DATA | LENGTH_MASK)) != UNKNOWN_LENGTH;
+    }
+
+    public static int toIntU30(long l, @NotNull String error) {
+        if (l < 0 || l > LENGTH_MASK)
+            throw new IllegalStateException(String.format(error, l));
+        return (int) l;
     }
 }
