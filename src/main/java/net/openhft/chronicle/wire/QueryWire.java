@@ -156,12 +156,6 @@ public class QueryWire extends TextWire {
 
     @NotNull
     @Override
-    public ValueOut writeValue() {
-        return valueOut;
-    }
-
-    @NotNull
-    @Override
     public ValueOut getValueOut() {
         return valueOut;
     }
