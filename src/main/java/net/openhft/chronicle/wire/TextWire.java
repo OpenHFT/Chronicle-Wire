@@ -972,7 +972,15 @@ public class TextWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut int32forBinding(int value, IntValue intValue) {
-            throw new UnsupportedOperationException("todo");
+            if (!TextIntReference.class.isInstance(intValue))
+                throw new IllegalArgumentException();
+            prependSeparator();
+            long offset = bytes.writePosition();
+            TextIntReference.write(bytes, value);
+            long length = bytes.writePosition() - offset;
+            ((Byteable) intValue).bytesStore(bytes, offset, length);
+            elementSeparator();
+            return TextWire.this;
         }
 
         @NotNull
@@ -1634,6 +1642,7 @@ public class TextWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter) {
+            consumeWhiteSpace();
             if (!(value instanceof TextIntReference)) {
                 setter.accept(t, value = new TextIntReference());
             }

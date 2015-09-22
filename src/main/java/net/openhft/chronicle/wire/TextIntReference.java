@@ -28,8 +28,8 @@ import java.util.function.Supplier;
  */
 class TextIntReference implements IntValue, Byteable {
     private static final byte[] template = "!!atomic { locked: false, value: 0000000000 }".getBytes();
-    private static final int FALSE = ('f' << 24) | ('a' << 16) | ('l' << 8) | 's';
-    private static final int TRUE = (' ' << 24) | ('t' << 16) | ('r' << 8) | 'u';
+    private static final int FALSE = 'f' | ('a' << 8) | ('l' << 16) | ('s' << 24);
+    private static final int TRUE = ' ' | ('t' << 8) | ('r' << 16) | ('u' << 24);
     private static final int LOCKED = 19;
     private static final int VALUE = 33;
     private static final int DIGITS = 10;

@@ -6,10 +6,11 @@ import net.openhft.chronicle.bytes.MappedBytesStoreFactory;
 import net.openhft.chronicle.bytes.MappedFile;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.ReferenceCounted;
+import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.util.ThrowingFunction;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -17,7 +18,7 @@ import java.util.function.Supplier;
 /**
  * Created by peter.lawrey on 21/09/2015.
  */
-public class WiredFile<D extends Marshallable> {
+public class WiredFile<D extends Marshallable> implements Closeable {
     private static final long TIMEOUT_MS = 10_000; // 10 seconds.
 
     private final String masterFile;
@@ -25,17 +26,20 @@ public class WiredFile<D extends Marshallable> {
     private final MappedFile mappedFile;
     private final D delegate;
     private final MappedBytesStore header;
+    private final MappedBytesStoreFactory<WiredMappedBytesStore> mappedBytesStoreFactory;
 
-    public WiredFile(String masterFile, Function<Bytes, Wire> wireType, MappedFile mappedFile, D delegate, MappedBytesStore header) {
+    public WiredFile(String masterFile, Function<Bytes, Wire> wireType, MappedFile mappedFile, D delegate,
+                     MappedBytesStore header, MappedBytesStoreFactory<WiredMappedBytesStore> mappedBytesStoreFactory) {
         this.masterFile = masterFile;
         this.wireType = wireType;
         this.mappedFile = mappedFile;
         this.delegate = delegate;
         this.header = header;
+        this.mappedBytesStoreFactory = mappedBytesStoreFactory;
     }
 
     public static <D extends Marshallable> WiredFile<D> build(String masterFile,
-                                                              BiFunction<File, MappedBytesStoreFactory, MappedFile> mappedFileFunction,
+                                                              ThrowingFunction<File, IOException, MappedFile> mappedFileFunction,
                                                               Function<Bytes, Wire> wireType,
                                                               Supplier<D> delegateSupplier,
                                                               Consumer<WiredFile<D>> installer) throws IOException {
@@ -45,9 +49,11 @@ public class WiredFile<D extends Marshallable> {
             //noinspection ResultOfMethodCallIgnored
             parentFile.mkdirs();
 
-        MappedFile mappedFile = mappedFileFunction.apply(file, (owner, start, address, capacity, safeCapacity) ->
-                new WiredMappedBytesStore(owner, start, address, capacity, safeCapacity, wireType));
-        MappedBytesStore header = mappedFile.acquireByteStore(0);
+        MappedFile mappedFile = mappedFileFunction.apply(file);
+        MappedBytesStoreFactory<WiredMappedBytesStore> mappedBytesStoreFactory = (owner, start, address, capacity, safeCapacity) ->
+                new WiredMappedBytesStore(owner, start, address, capacity, safeCapacity, wireType);
+
+        MappedBytesStore header = mappedFile.acquireByteStore(0, mappedBytesStoreFactory);
         assert header != null;
         D delegate;
         //noinspection PointlessBitwiseExpression
@@ -68,7 +74,7 @@ public class WiredFile<D extends Marshallable> {
             //noinspection unchecked
             delegate = (D) wireType.apply(bytes).getValueIn().typedMarshallable();
         }
-        WiredFile<D> wiredFile = new WiredFile<>(masterFile, wireType, mappedFile, delegate, header);
+        WiredFile<D> wiredFile = new WiredFile<>(masterFile, wireType, mappedFile, delegate, header, mappedBytesStoreFactory);
         installer.accept(wiredFile);
         return wiredFile;
     }
@@ -86,8 +92,13 @@ public class WiredFile<D extends Marshallable> {
     }
 
     public Wire acquireWiredChunk(long position) throws IOException {
-        WiredMappedBytesStore mappedBytesStore = (WiredMappedBytesStore) mappedFile.acquireByteStore(position);
+        WiredMappedBytesStore mappedBytesStore = mappedFile.acquireByteStore(position, mappedBytesStoreFactory);
         return mappedBytesStore.getWire();
+    }
+
+    @Override
+    public void close() {
+        mappedFile.close();
     }
 
     static class WiredMappedBytesStore extends MappedBytesStore {
