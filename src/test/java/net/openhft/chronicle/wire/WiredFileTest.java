@@ -21,7 +21,6 @@ public class WiredFileTest {
     @Test
     public void testBuildText() throws IOException {
         // use a class alias for MyHeader_1_0
-//        ClassAliasPool.CLASS_ALIASES.addAlias(MyHeader_1_0.class, "my-header");
         ClassAliasPool.CLASS_ALIASES.addAlias(MyHeader_1_0.class, "MyHeader-1.0");
 
         String masterFile = OS.TARGET + "/wired-file-" + System.nanoTime();
@@ -44,7 +43,6 @@ public class WiredFileTest {
     @Test
     public void testBuild() throws IOException {
         // use a class alias for MyHeader_1_0
-//        ClassAliasPool.CLASS_ALIASES.addAlias(MyHeader_1_0.class, "my-header");
         ClassAliasPool.CLASS_ALIASES.addAlias(MyHeader_1_0.class, "MyHeader-1.0");
 
         String masterFile = OS.TARGET + "/wired-file-" + System.nanoTime();
