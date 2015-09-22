@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 public class WiredFileTest {
 
     @Test
-    public void testBuild() throws IOException {
+    public void testBuildText() throws IOException {
         // use a class alias for MyHeader_1_0
 //        ClassAliasPool.CLASS_ALIASES.addAlias(MyHeader_1_0.class, "my-header");
         ClassAliasPool.CLASS_ALIASES.addAlias(MyHeader_1_0.class, "MyHeader-1.0");
@@ -36,6 +36,29 @@ public class WiredFileTest {
             assertEquals(i, header.installCount.getValue());
             Bytes<?> bytes = wf.acquireWiredChunk(0).bytes();
             bytes.readLimit(88);
+            System.out.println(Wires.fromSizePrefixedBlobs(bytes));
+            wf.close();
+        }
+    }
+
+    @Test
+    public void testBuild() throws IOException {
+        // use a class alias for MyHeader_1_0
+//        ClassAliasPool.CLASS_ALIASES.addAlias(MyHeader_1_0.class, "my-header");
+        ClassAliasPool.CLASS_ALIASES.addAlias(MyHeader_1_0.class, "MyHeader-1.0");
+
+        String masterFile = OS.TARGET + "/wired-file-" + System.nanoTime();
+        for (int i = 1; i <= 5; i++) {
+            WiredFile<MyHeader_1_0> wf = WiredFile.build(masterFile,
+                    file -> MappedFile.mappedFile(file, 64 << 10, 0),
+                    WireType.BINARY,
+                    MyHeader_1_0::new,
+                    wf0 -> wf0.delegate().install(wf0)
+            );
+            MyHeader_1_0 header = wf.delegate();
+            assertEquals(i, header.installCount.getValue());
+            Bytes<?> bytes = wf.acquireWiredChunk(0).bytes();
+            bytes.readLimit(42);
             System.out.println(Wires.fromSizePrefixedBlobs(bytes));
             wf.close();
         }
