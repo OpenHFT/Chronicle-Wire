@@ -34,7 +34,8 @@ public class WiredFileTest {
             MyHeader_1_0 header = wf.delegate();
             assertEquals(i, header.installCount.getValue());
             Bytes<?> bytes = wf.acquireWiredChunk(0).bytes();
-            bytes.readLimit(88);
+            bytes.readPosition(0);
+            bytes.readLimit(wf.headerLength());
             System.out.println(Wires.fromSizePrefixedBlobs(bytes));
             wf.close();
         }
@@ -56,7 +57,8 @@ public class WiredFileTest {
             MyHeader_1_0 header = wf.delegate();
             assertEquals(i, header.installCount.getValue());
             Bytes<?> bytes = wf.acquireWiredChunk(0).bytes();
-            bytes.readLimit(42);
+            bytes.readPosition(0);
+            bytes.readLimit(wf.headerLength());
             System.out.println(Wires.fromSizePrefixedBlobs(bytes));
             wf.close();
         }
