@@ -109,6 +109,16 @@ public class TextLongArrayReference implements Byteable, LongArrayValues {
     }
 
     @Override
+    public BytesStore bytesStore() {
+        return bytes;
+    }
+
+    @Override
+    public long offset() {
+        return offset;
+    }
+
+    @Override
     public long maxSize() {
         return length;
     }

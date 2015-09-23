@@ -35,6 +35,16 @@ public class BinaryIntReference implements IntValue, Byteable {
     }
 
     @Override
+    public BytesStore bytesStore() {
+        return bytes;
+    }
+
+    @Override
+    public long offset() {
+        return offset;
+    }
+
+    @Override
     public long maxSize() {
         return 4;
     }

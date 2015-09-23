@@ -68,6 +68,16 @@ class TextLongReference implements LongValue, Byteable {
     }
 
     @Override
+    public BytesStore bytesStore() {
+        return bytes;
+    }
+
+    @Override
+    public long offset() {
+        return offset;
+    }
+
+    @Override
     public long getValue() {
         return withLock(() -> bytes.parseLong(offset + VALUE));
     }
