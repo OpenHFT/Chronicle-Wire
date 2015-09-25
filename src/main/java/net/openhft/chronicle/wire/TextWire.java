@@ -995,7 +995,15 @@ public class TextWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut int64forBinding(long value, LongValue longValue) {
-            throw new UnsupportedOperationException("todo");
+            if (!TextLongReference.class.isInstance(longValue))
+                throw new IllegalArgumentException();
+            prependSeparator();
+            long offset = bytes.writePosition();
+            TextLongReference.write(bytes, value);
+            long length = bytes.writePosition() - offset;
+            ((Byteable) longValue).bytesStore(bytes, offset, length);
+            elementSeparator();
+            return TextWire.this;
         }
 
         @NotNull
