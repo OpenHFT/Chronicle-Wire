@@ -26,10 +26,10 @@ public class WiredFileTest {
         String masterFile = OS.TARGET + "/wired-file-" + System.nanoTime();
         for (int i = 1; i <= 5; i++) {
             WiredFile<MyHeader_1_0> wf = WiredFile.build(masterFile,
-                    file -> MappedFile.mappedFile(file, 64 << 10, 0),
-                    WireType.TEXT,
-                    MyHeader_1_0::new,
-                    wf0 -> wf0.delegate().install(wf0)
+                file -> MappedFile.mappedFile(file, 64 << 10, 0),
+                WireType.TEXT,
+                MyHeader_1_0::new,
+                wf0 -> wf0.delegate().install(wf0)
             );
             MyHeader_1_0 header = wf.delegate();
             assertEquals(i, header.installCount.getValue());
@@ -49,10 +49,10 @@ public class WiredFileTest {
         String masterFile = OS.TARGET + "/wired-file-" + System.nanoTime();
         for (int i = 1; i <= 5; i++) {
             WiredFile<MyHeader_1_0> wf = WiredFile.build(masterFile,
-                    file -> MappedFile.mappedFile(file, 64 << 10, 0),
-                    WireType.BINARY,
-                    MyHeader_1_0::new,
-                    wf0 -> wf0.delegate().install(wf0)
+                file -> MappedFile.mappedFile(file, 64 << 10, 0),
+                WireType.BINARY,
+                MyHeader_1_0::new,
+                wf0 -> wf0.delegate().install(wf0)
             );
             MyHeader_1_0 header = wf.delegate();
             assertEquals(i, header.installCount.getValue());
@@ -63,23 +63,23 @@ public class WiredFileTest {
             wf.close();
         }
     }
-}
 
-class MyHeader_1_0 implements Marshallable {
-    IntValue installCount;
+    static class MyHeader_1_0 implements Marshallable {
+        IntValue installCount;
 
-    @Override
-    public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
-        wire.read(() -> "install-count").int32(null, this, (t, i) -> t.installCount = i);
-    }
+        @Override
+        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
+            wire.read(() -> "install-count").int32(null, this, (t, i) -> t.installCount = i);
+        }
 
-    @Override
-    public void writeMarshallable(@NotNull WireOut wire) {
-        wire.write(() -> "install-count").int32forBinding(0, installCount = wire.newIntReference());
+        @Override
+        public void writeMarshallable(@NotNull WireOut wire) {
+            wire.write(() -> "install-count").int32forBinding(0, installCount = wire.newIntReference());
 
-    }
+        }
 
-    public void install(WiredFile<MyHeader_1_0> wiredFile) {
-        installCount.addAtomicValue(1);
+        public void install(WiredFile<MyHeader_1_0> wiredFile) {
+            installCount.addAtomicValue(1);
+        }
     }
 }
