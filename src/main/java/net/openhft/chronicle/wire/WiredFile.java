@@ -29,7 +29,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -148,15 +147,18 @@ public class WiredFile<D extends Marshallable> implements Closeable {
 
             length = bytes.writePosition();
 
-            wiredFile = new WiredFile<>(masterFile, wireType, mappedFile, delegate, header, length, true, mappedBytesStoreFactory);
-            installer.accept(wiredFile);
+            installer.accept(
+                wiredFile = new WiredFile<>(masterFile, wireType, mappedFile, delegate, header, length, true, mappedBytesStoreFactory)
+            );
 
             header.writeOrderedInt(0L, Wires.META_DATA | Wires.toIntU30(bytes.writePosition() - 4, "Delegate too large"));
         } else {
             long end = System.currentTimeMillis() + TIMEOUT_MS;
             while ((header.readVolatileInt(0) & Wires.NOT_READY) == Wires.NOT_READY) {
-                if (System.currentTimeMillis() > end)
+                if (System.currentTimeMillis() > end) {
                     throw new IllegalStateException("Timed out waiting for the header record to be ready in " + masterFile);
+                }
+
                 Jvm.pause(1);
             }
             Bytes<?> bytes = header.wire.bytes();
@@ -165,10 +167,11 @@ public class WiredFile<D extends Marshallable> implements Closeable {
             int len = Wires.lengthOf(bytes.readVolatileInt());
             bytes.readLimit(length = bytes.readPosition() + len);
             //noinspection unchecked
-            delegate = (D) wireType.apply(bytes).getValueIn().typedMarshallable();
+            delegate = wireType.apply(bytes).getValueIn().typedMarshallable();
 
-            wiredFile = new WiredFile<>(masterFile, wireType, mappedFile, delegate, header, length, false, mappedBytesStoreFactory);
-            installer.accept(wiredFile);
+            installer.accept(
+                wiredFile = new WiredFile<>(masterFile, wireType, mappedFile, delegate, header, length, false, mappedBytesStoreFactory)
+            );
         }
 
         return wiredFile;
