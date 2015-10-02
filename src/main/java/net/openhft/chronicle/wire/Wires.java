@@ -17,6 +17,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
 
@@ -64,9 +66,83 @@ public enum Wires {
         return (len & (META_DATA | LENGTH_MASK)) != UNKNOWN_LENGTH;
     }
 
+    public static boolean isNotInitialized(int len) {
+        return len == NOT_INITIALIZED;
+    }
+
     public static int toIntU30(long l, @NotNull String error) {
         if (l < 0 || l > LENGTH_MASK)
             throw new IllegalStateException(String.format(error, l));
         return (int) l;
+    }
+
+    public static boolean acquireLock(BytesStore store, long position) {
+        return store.compareAndSwapInt(position, NOT_INITIALIZED, NOT_READY);
+    }
+
+    public static boolean exceedsMaxLength(long length) {
+        return length > LENGTH_MASK;
+    }
+
+    @ForceInline
+    public static <T extends ReadMarshallable> long readData(
+        @NotNull WireIn wireIn,
+        @NotNull T reader) {
+
+        // We assume that check on data readiness and type has been done by the
+        // caller
+        return rawRead(wireIn, reader);
+    }
+
+    @ForceInline
+    public static <T extends WriteMarshallable> long writeData(
+        @NotNull WireOut wireOut,
+        @NotNull T writer) {
+
+        WireInternal.writeData(wireOut, false, false, writer);
+
+        return wireOut.bytes().writePosition();
+    }
+
+    @ForceInline
+    public static <T extends WriteMarshallable> long writeMeta(
+        @NotNull WireOut wireOut,
+        @NotNull T writer) {
+
+        WireInternal.writeData(wireOut, true, false, writer);
+
+        return wireOut.bytes().writePosition();
+    }
+
+    @ForceInline
+    public static <T extends ReadMarshallable> long readMeta(
+        @NotNull WireIn wireIn,
+        @NotNull T reader) {
+
+        // We assume that check on meta-data readiness and type has been done by
+        // the caller
+        return rawRead(wireIn, reader);
+    }
+
+    @ForceInline
+    static long rawRead(@NotNull WireIn wireIn, @NotNull ReadMarshallable dataConsumer) {
+
+        final Bytes<?> bytes = wireIn.bytes();
+        final int header = bytes.readVolatileInt(bytes.readPosition());
+        final int len = Wires.lengthOf(header);
+
+        bytes.readSkip(4);
+
+        final long limit0 = bytes.readLimit();
+        final long limit = bytes.readPosition() + (long) len;
+        try {
+            bytes.readLimit(limit);
+            dataConsumer.readMarshallable(wireIn);
+        } finally {
+            bytes.readLimit(limit0);
+            bytes.readPosition(limit);
+        }
+
+        return bytes.readPosition();
     }
 }
