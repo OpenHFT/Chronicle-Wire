@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
-import static net.openhft.chronicle.wire.BinaryWire.toIntU30;
+import static net.openhft.chronicle.wire.Wires.toIntU30;
 
 /**
  * Created by peter.lawrey on 16/01/15.

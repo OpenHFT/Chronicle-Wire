@@ -17,9 +17,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * A selection of prebuilt wire types.
@@ -30,6 +32,11 @@ public enum WireType implements Function<Bytes, Wire> {
         @Override
         public Wire apply(Bytes bytes) {
             return new TextWire(bytes);
+        }
+
+        @Override
+        public Supplier<LongValue> newLongReference() {
+            return TextLongReference::new;
         }
     }, BINARY {
         @NotNull
@@ -65,5 +72,9 @@ public enum WireType implements Function<Bytes, Wire> {
                 return FIELDLESS_BINARY.apply(bytes);
             return BINARY.apply(bytes);
         }
+    };
+
+    public Supplier<LongValue> newLongReference() {
+        return BinaryLongReference::new;
     }
 }

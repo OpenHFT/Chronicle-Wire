@@ -117,19 +117,19 @@ public class ConventionsTest {
         final BinaryWire wire = new BinaryWire(Bytes.elasticByteBuffer());
 
         if (source instanceof String)
-            wire.writeValue().text((String) source);
+            wire.getValueOut().text((String) source);
         else if (source instanceof Long)
-            wire.writeValue().int64((Long) source);
+            wire.getValueOut().int64((Long) source);
         else if (source instanceof Integer)
-            wire.writeValue().int32((Integer) source);
+            wire.getValueOut().int32((Integer) source);
         else if (source instanceof Short)
-            wire.writeValue().int16((Short) source);
+            wire.getValueOut().int16((Short) source);
         else if (source instanceof Byte)
-            wire.writeValue().int8((Byte) source);
+            wire.getValueOut().int8((Byte) source);
         else if (source instanceof Float)
-            wire.writeValue().float32((Float) source);
+            wire.getValueOut().float32((Float) source);
         else if (source instanceof Double)
-            wire.writeValue().float64((Double) source);
+            wire.getValueOut().float64((Double) source);
 
         if (String.class.isAssignableFrom(destinationType))
             return (T) wire.getValueIn().text();
