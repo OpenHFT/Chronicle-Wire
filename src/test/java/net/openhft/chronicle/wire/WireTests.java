@@ -36,7 +36,7 @@ public class WireTests {
         final List<Object[]> list = new ArrayList<>();
         list.add(new Object[]{WireType.BINARY});
         list.add(new Object[]{WireType.TEXT});
-        list.add(new Object[]{WireType.RAW});
+        //      list.add(new Object[]{WireType.RAW});
         return list;
     }
 

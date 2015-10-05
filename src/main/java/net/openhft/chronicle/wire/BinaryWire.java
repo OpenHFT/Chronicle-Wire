@@ -2103,12 +2103,20 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Nullable
         @Override
         public <T, E> WireIn object(@NotNull Class<E> clazz, T t, BiConsumer<T, E> e) {
-            e.accept(t, ObjectUtils.convertTo(clazz, object0(null, clazz)));
+            final Object o = object0(null, clazz);
+            final E u = ObjectUtils.convertTo(clazz, o);
+            e.accept(t, u);
             return BinaryWire.this;
         }
 
         @Nullable
         Object object0(@Nullable Object using, @NotNull Class clazz) {
+
+            final int code = peekCode();
+            if (code == 0xBB) {
+                readCode();
+                return null;
+            }
 
             if (ReadMarshallable.class.isAssignableFrom(clazz)) {
                 final Object v;
