@@ -2109,10 +2109,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         @Nullable
         Object object0(@Nullable Object using, @NotNull Class clazz) {
-            int code = peekCode();
-            if (code == NULL){
-                return null;
-            }
+
             if (ReadMarshallable.class.isAssignableFrom(clazz)) {
                 final Object v;
                 if (using == null)
