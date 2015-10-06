@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.lang.annotation.RetentionPolicy;
 import java.time.*;
 import java.util.Arrays;
 import java.util.Collection;
@@ -656,6 +657,24 @@ public class BinaryWireTest {
         assertEquals(mt2, mtB);
     }
 
+    @Test
+    public void writeNull() {
+        Wire wire = createWire();
+        wire.write().object(null);
+        wire.write().object(null);
+        wire.write().object(null);
+        wire.write().object(null);
+
+        Object o = wire.read().object(Object.class);
+        assertEquals(null, o);
+        String s = wire.read().object(String.class);
+        assertEquals(null, s);
+        RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
+        assertEquals(null, rp);
+        Circle c = wire.read().object(Circle.class);
+        assertEquals(null, c);
+    }
+
     enum BWKey implements WireKey {
         field1(1), field2(2), field3(3);
         private final int code;
@@ -669,5 +688,4 @@ public class BinaryWireTest {
             return code;
         }
     }
-
 }

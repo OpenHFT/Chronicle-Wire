@@ -30,6 +30,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.annotation.RetentionPolicy;
 import java.security.InvalidAlgorithmParameterException;
 import java.time.*;
 import java.util.*;
@@ -987,6 +988,24 @@ public class TextWireTest {
                 }
         );
         verify(results);
+    }
+
+    @Test
+    public void writeNull() {
+        Wire wire = createWire();
+        wire.write().object(null);
+        wire.write().object(null);
+        wire.write().object(null);
+        wire.write().object(null);
+
+        Object o = wire.read().object(Object.class);
+        assertEquals(null, o);
+        String s = wire.read().object(String.class);
+        assertEquals(null, s);
+        RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
+        assertEquals(null, rp);
+        Circle c = wire.read().object(Circle.class);
+        assertEquals(null, c);
     }
 
     enum BWKey implements WireKey {
