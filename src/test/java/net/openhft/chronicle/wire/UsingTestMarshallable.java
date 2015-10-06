@@ -62,6 +62,10 @@ public class UsingTestMarshallable {
         }
     }
 
+
+    /**
+     * see WIRE-37 issue when using numbers as keys in binary wire
+     */
     @Test
     public void testMarshall() {
 
