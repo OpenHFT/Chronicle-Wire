@@ -43,8 +43,9 @@ public class TestMarshallable implements Marshallable {
         return name;
     }
 
-    public void setName(StringBuilder name) {
-        this.name = name;
+    public void setName(CharSequence name) {
+        this.name.setLength(0);
+        this.name.append(name);
     }
 
     public int getCount() {

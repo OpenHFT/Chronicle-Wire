@@ -39,12 +39,19 @@ public interface WireKey {
         return true;
     }
 
-    @Nullable
+    @NotNull
     CharSequence name();
 
     @ForceInline
     default int code() {
-        return name().toString().hashCode();
+        String s = name().toString();
+        if (s.length() > 0 && Character.isDigit(s.charAt(0)))
+            try {
+                return Integer.parseInt(s);
+            } catch (NumberFormatException e) {
+                // ignored
+            }
+        return s.hashCode();
     }
 
     default Type type() {

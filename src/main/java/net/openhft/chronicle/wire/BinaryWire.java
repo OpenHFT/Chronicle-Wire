@@ -36,26 +36,23 @@ import java.util.UUID;
 import java.util.function.*;
 
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
+import static net.openhft.chronicle.wire.BinaryWire.AnyCodeMatch.ANY_CODE_MATCH;
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
 
 /**
  * This Wire is a binary translation of TextWire which is a sub set of YAML.
  */
 public class BinaryWire implements Wire, InternalWireIn {
-    private static final int ANY_CODE_MATCH = -1;
     private static final int END_OF_BYTES = -1;
     private static final UTF8StringInterner UTF8_INTERNER = new UTF8StringInterner(128);
-
     private final Bytes<?> bytes;
     private final ValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     private final ValueOut valueOut;
     private final BinaryValueIn valueIn = new BinaryValueIn();
-
     private final boolean numericFields;
     private final boolean fieldLess;
     private boolean ready;
-
     public BinaryWire(Bytes bytes) {
         this(bytes, false, false, false);
     }
@@ -179,7 +176,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     @Override
     public ValueIn read(@NotNull WireKey key) {
         long position = bytes.readPosition();
-        StringBuilder sb = readField(WireInternal.acquireStringBuilder(), key.code());
+        StringBuilder sb = readField(WireInternal.acquireStringBuilder(), key);
 
         if (fieldLess || (sb != null && (sb.length() == 0 || StringUtils.isEqual(sb, key.name()))))
             return valueIn;
@@ -240,10 +237,10 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     @Nullable
-    private StringBuilder readField(@NotNull StringBuilder name, int codeMatch) {
+    private StringBuilder readField(@NotNull StringBuilder name, WireKey key) {
         consumeSpecial();
         int peekCode = peekCode();
-        return readField(peekCode, codeMatch, name);
+        return readField(peekCode, key, name);
     }
 
     void consumeSpecial() {
@@ -289,14 +286,14 @@ public class BinaryWire implements Wire, InternalWireIn {
         return bytes.readUnsignedByte(pos);
     }
 
-    private StringBuilder readField(int peekCode, int codeMatch, @NotNull StringBuilder sb) {
+    private StringBuilder readField(int peekCode, WireKey key, @NotNull StringBuilder sb) {
         sb.setLength(0);
         switch (peekCode >> 4) {
             case BinaryWireHighCode.END_OF_STREAM:
                 break;
 
             case BinaryWireHighCode.SPECIAL:
-                return readSpecialField(peekCode, codeMatch, sb);
+                return readSpecialField(peekCode, key, sb);
 
             case BinaryWireHighCode.FIELD0:
             case BinaryWireHighCode.FIELD1:
@@ -320,10 +317,11 @@ public class BinaryWire implements Wire, InternalWireIn {
     }
 
     @Nullable
-    private StringBuilder readSpecialField(int peekCode, int codeMatch, @NotNull StringBuilder sb) {
+    private StringBuilder readSpecialField(int peekCode, WireKey key, @NotNull StringBuilder sb) {
         if (peekCode == FIELD_NUMBER) {
             bytes.readSkip(1);
             long fieldId = bytes.readStopBit();
+            int codeMatch = key.code();
             if (codeMatch >= 0 && fieldId != codeMatch)
                 throw new UnsupportedOperationException("Field was: " + fieldId + " expected " + codeMatch);
             if (codeMatch < 0)
@@ -400,7 +398,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 bytes.readSkip(1);
                 long code2 = bytes.readStopBit();
                 wire.write(new WireKey() {
-                    @Nullable
+                    @NotNull
                     @Override
                     public String name() {
                         return null;
@@ -785,6 +783,14 @@ public class BinaryWire implements Wire, InternalWireIn {
     @Override
     public BinaryLongArrayReference newLongArrayReference() {
         return new BinaryLongArrayReference();
+    }
+
+    enum AnyCodeMatch implements WireKey {
+        ANY_CODE_MATCH;
+
+        public int code() {
+            return Integer.MIN_VALUE;
+        }
     }
 
     class FixedBinaryValueOut implements ValueOut {
@@ -1519,7 +1525,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                     bytes.readSkip(1);
                     return bytes.readUnsignedInt();
                 default:
-                    return ANY_CODE_MATCH;
+                    return ANY_CODE_MATCH.code();
             }
         }
 
