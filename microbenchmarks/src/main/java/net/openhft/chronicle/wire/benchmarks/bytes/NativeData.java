@@ -96,4 +96,14 @@ public class NativeData implements Byteable {
     public void copyTo(Data data) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public BytesStore bytesStore() {
+        return bytesStore;
+    }
+
+    @Override
+    public long offset() {
+        return offset;
+    }
 }
