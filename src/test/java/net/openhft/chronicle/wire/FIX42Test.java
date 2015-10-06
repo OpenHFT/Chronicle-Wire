@@ -15,6 +15,54 @@
  */
 
 package net.openhft.chronicle.wire;
+/* This test prints
+
+TextWire, fixed=false, numericField=false, fieldLess=false
+Symbol: EURUSD
+NoMDEntries: 2
+MDEntryType: 52
+MDEntryPx: 1.1187
+MDEntryType: 53
+MDEntryPx: 1.1179
+
+BinaryWire, fixed=false, numericField=false, fieldLess=false
+00000000 C6 53 79 6D 62 6F 6C E6  45 55 52 55 53 44 CB 4E ·Symbol· EURUSD·N
+00000010 6F 4D 44 45 6E 74 72 69  65 73 02 CB 4D 44 45 6E oMDEntri es··MDEn
+00000020 74 72 79 54 79 70 65 34  C9 4D 44 45 6E 74 72 79 tryType4 ·MDEntry
+00000030 50 78 91 2E 90 A0 F8 31  E6 F1 3F CB 4D 44 45 6E Px·.···1 ··?·MDEn
+00000040 74 72 79 54 79 70 65 35  C9 4D 44 45 6E 74 72 79 tryType5 ·MDEntry
+00000050 50 78 91 A5 2C 43 1C EB  E2 F1 3F                Px··,C·· ··?
+
+BinaryWire, fixed=true, numericField=false, fieldLess=false
+00000000 C6 53 79 6D 62 6F 6C E6  45 55 52 55 53 44 CB 4E ·Symbol· EURUSD·N
+00000010 6F 4D 44 45 6E 74 72 69  65 73 A6 02 00 00 00 CB oMDEntri es······
+00000020 4D 44 45 6E 74 72 79 54  79 70 65 A1 34 C9 4D 44 MDEntryT ype·4·MD
+00000030 45 6E 74 72 79 50 78 91  2E 90 A0 F8 31 E6 F1 3F EntryPx· .···1··?
+00000040 CB 4D 44 45 6E 74 72 79  54 79 70 65 A1 35 C9 4D ·MDEntry Type·5·M
+00000050 44 45 6E 74 72 79 50 78  91 A5 2C 43 1C EB E2 F1 DEntryPx ··,C····
+00000060 3F                                               ?
+
+BinaryWire, fixed=false, numericField=true, fieldLess=false
+00000000 BA 37 E6 45 55 52 55 53  44 BA 8C 02 02 BA 8D 02 ·7·EURUS D·······
+00000010 34 BA 8E 02 91 2E 90 A0  F8 31 E6 F1 3F BA 8D 02 4····.·· ·1··?···
+00000020 35 BA 8E 02 91 A5 2C 43  1C EB E2 F1 3F          5·····,C ····?
+
+BinaryWire, fixed=true, numericField=true, fieldLess=false
+00000000 BA 37 E6 45 55 52 55 53  44 BA 8C 02 A6 02 00 00 ·7·EURUS D·······
+00000010 00 BA 8D 02 A1 34 BA 8E  02 91 2E 90 A0 F8 31 E6 ·····4·· ··.···1·
+00000020 F1 3F BA 8D 02 A1 35 BA  8E 02 91 A5 2C 43 1C EB ·?····5· ····,C··
+00000030 E2 F1 3F                                         ··?
+
+BinaryWire, fixed=false, numericField=false, fieldLess=true
+00000000 E6 45 55 52 55 53 44 02  34 91 2E 90 A0 F8 31 E6 ·EURUSD· 4·.···1·
+00000010 F1 3F 35 91 A5 2C 43 1C  EB E2 F1 3F             ·?5··,C· ···?
+
+BinaryWire, fixed=true, numericField=false, fieldLess=true
+00000000 E6 45 55 52 55 53 44 A6  02 00 00 00 A1 34 91 2E ·EURUSD· ·····4·.
+00000010 90 A0 F8 31 E6 F1 3F A1  35 91 A5 2C 43 1C EB E2 ···1··?· 5··,C···
+00000020 F1 3F                                            ·?
+
+ */
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
