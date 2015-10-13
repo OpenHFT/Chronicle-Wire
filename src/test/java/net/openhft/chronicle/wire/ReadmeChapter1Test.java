@@ -469,8 +469,72 @@ Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
 ```
 */
     }
+
+    @Test
+    public void example7() {
+/*
+
+## simple example with a data type
+
+*/
+        // Bytes which wraps a ByteBuffer which is resized as needed.
+        Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+
+        Wire wire = new TextWire(bytes);
+        ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
+
+        Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
+        wire.getValueOut().object(data);
+        System.out.println(bytes);
+
+        Object o = wire.getValueIn().object(Object.class);
+        if (o instanceof Data) {
+            Data data2 = (Data) o;
+            System.out.println(data2);
+        }
+
+/*
+```
+prints
+```yaml
+!Data {
+  message: Hello World,
+  number: 1234567890,
+  timeUnit: NANOSECONDS,
+  price: 10.5
 }
 
+Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
+```
+To write in binary instead
+```java
+*/
+        Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
+        Wire wire2 = new BinaryWire(bytes2);
+
+        wire2.getValueOut().object(data);
+        System.out.println(bytes2.toHexString());
+
+        Object o2 = wire2.getValueIn().object(Object.class);
+        if (o2 instanceof Data) {
+            Data data2 = (Data) o2;
+            System.out.println(data2);
+        }
+/*
+```
+prints
+```
+00000000 B6 04 44 61 74 61 82 40  00 00 00 C7 6D 65 73 73 ··Data·@ ····mess
+00000010 61 67 65 EB 48 65 6C 6C  6F 20 57 6F 72 6C 64 C6 age·Hell o World·
+00000020 6E 75 6D 62 65 72 A3 D2  02 96 49 C8 74 69 6D 65 number·· ··I·time
+00000030 55 6E 69 74 EB 4E 41 4E  4F 53 45 43 4F 4E 44 53 Unit·NAN OSECONDS
+00000040 C5 70 72 69 63 65 90 00  00 28 41                ·price·· ·(A
+
+Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
+```
+*/
+    }
+}
 /*
 The code for the class Data
 ```java
@@ -529,5 +593,6 @@ wire.read(() -> "message").text("Hello World", Assert::assertEquals)
 /*
 ```
  */
+
 
 }
