@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 /**
  * reference to an array fo 32-bit in values in Text wire format.
  */
-class TextLongReference implements LongValue, Byteable {
+public class TextLongReference implements LongValue, Byteable {
     private static final byte[] template = "!!atomic { locked: false, value: 00000000000000000000 }".getBytes();
     private static final int FALSE = BytesUtil.asInt("fals");
     private static final int TRUE = BytesUtil.asInt(" tru");

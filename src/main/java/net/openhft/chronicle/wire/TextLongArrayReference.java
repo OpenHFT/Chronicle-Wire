@@ -15,11 +15,9 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,7 +26,7 @@ The format for a long array in text is
 { capacity: 12345678901234567890, values: [ 12345678901234567890, ... ] }
  */
 
-public class TextLongArrayReference implements Byteable, LongArrayValues {
+public class TextLongArrayReference implements ByteableLongArrayValues {
     private static final byte[] SECTION1 = "{ capacity: ".getBytes();
     private static final byte[] SECTION2 = ", values: [ ".getBytes();
     private static final byte[] SECTION3 = " ] }\n".getBytes();
@@ -134,5 +132,10 @@ public class TextLongArrayReference implements Byteable, LongArrayValues {
         }
 
         return "value: " + getValueAt(0) + " ...";
+    }
+
+    @Override
+    public long sizeInBytes(long capacity) {
+        return (capacity * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;
     }
 }
