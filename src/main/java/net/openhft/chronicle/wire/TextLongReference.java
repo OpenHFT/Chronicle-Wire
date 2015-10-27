@@ -22,7 +22,7 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
+import java.util.function.LongSupplier;
 
 /**
  * reference to an array fo 32-bit in values in Text wire format.
@@ -32,6 +32,8 @@ public class TextLongReference implements LongValue, Byteable {
     private static final int FALSE = BytesUtil.asInt("fals");
     private static final int TRUE = BytesUtil.asInt(" tru");
     private static final long UNINITIALIZED = 0x0L;
+    private static final long LONG_TRUE = 1L;
+    private static final long LONG_FALSE = 0L;
     private static final int LOCKED = 19;
     static final int VALUE = 33;
     private static final int DIGITS = 20;
@@ -44,14 +46,14 @@ public class TextLongReference implements LongValue, Byteable {
         bytes.append(position + VALUE, value, DIGITS);
     }
 
-    private <T> T withLock(@NotNull Supplier<T> call) {
+    private long withLock(@NotNull LongSupplier call) {
         long valueOffset = offset + LOCKED;
         int value = bytes.readVolatileInt(valueOffset);
         if (value != FALSE && value != TRUE)
             throw new IllegalStateException();
         while (true) {
             if (bytes.compareAndSwapInt(valueOffset, FALSE, TRUE)) {
-                T t = call.get();
+                long t = call.getAsLong();
                 bytes.writeOrderedInt(valueOffset, FALSE);
                 return t;
             }
@@ -60,7 +62,8 @@ public class TextLongReference implements LongValue, Byteable {
 
     @Override
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
-        if (length != template.length) throw new IllegalArgumentException();
+        if (length != template.length)
+            throw new IllegalArgumentException();
         this.bytes = bytes;
         this.offset = offset;
         if (bytes.readLong(offset) == UNINITIALIZED)
@@ -84,7 +87,10 @@ public class TextLongReference implements LongValue, Byteable {
 
     @Override
     public void setValue(long value) {
-        withLock(() -> bytes.append(offset + VALUE, value, DIGITS));
+        withLock(() -> {
+            bytes.append(offset + VALUE, value, DIGITS);
+            return LONG_TRUE;
+        });
     }
 
     @Override
@@ -126,9 +132,9 @@ public class TextLongReference implements LongValue, Byteable {
         return withLock(() -> {
             if (bytes.parseLong(offset + VALUE) == expected) {
                 bytes.append(offset + VALUE, value, DIGITS);
-                return true;
+                return LONG_TRUE;
             }
-            return false;
-        });
+            return LONG_FALSE;
+        }) == LONG_TRUE;
     }
 }

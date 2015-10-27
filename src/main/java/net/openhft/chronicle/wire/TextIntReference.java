@@ -21,7 +21,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
+import java.util.function.IntSupplier;
 
 /**
  * Implementation of a reference to a 32-bit in in text wire format.
@@ -30,6 +30,8 @@ class TextIntReference implements IntValue, Byteable {
     private static final byte[] template = "!!atomic { locked: false, value: 0000000000 }".getBytes();
     private static final int FALSE = 'f' | ('a' << 8) | ('l' << 16) | ('s' << 24);
     private static final int TRUE = ' ' | ('t' << 8) | ('r' << 16) | ('u' << 24);
+    private static final int INT_TRUE = 1;
+    private static final int INT_FALSE = 0;
     private static final int LOCKED = 19;
     private static final int VALUE = 33;
     private static final int DIGITS = 10;
@@ -42,14 +44,14 @@ class TextIntReference implements IntValue, Byteable {
         bytes.append(position + VALUE, value, DIGITS);
     }
 
-    private <T> T withLock(@NotNull Supplier<T> call) {
+    private int withLock(@NotNull IntSupplier call) {
         long valueOffset = offset + LOCKED;
         int value = bytes.readVolatileInt(valueOffset);
         if (value != FALSE && value != TRUE)
             throw new IllegalStateException();
         while (true) {
             if (bytes.compareAndSwapInt(valueOffset, FALSE, TRUE)) {
-                T t = call.get();
+                int t = call.getAsInt();
                 bytes.writeOrderedInt(valueOffset, FALSE);
                 return t;
             }
@@ -63,7 +65,10 @@ class TextIntReference implements IntValue, Byteable {
 
     @Override
     public void setValue(int value) {
-        withLock(() -> bytes.append(offset + VALUE, value, DIGITS));
+        withLock(() -> {
+            bytes.append(offset + VALUE, value, DIGITS);
+            return INT_TRUE;
+        });
     }
 
     @Override
@@ -95,15 +100,16 @@ class TextIntReference implements IntValue, Byteable {
         return withLock(() -> {
             if (bytes.parseLong(offset + VALUE) == expected) {
                 bytes.append(offset + VALUE, value, DIGITS);
-                return true;
+                return INT_TRUE;
             }
-            return false;
-        });
+            return INT_FALSE;
+        }) == INT_TRUE;
     }
 
     @Override
     public void bytesStore(BytesStore bytes, long offset, long length) {
-        if (length != template.length) throw new IllegalArgumentException();
+        if (length != template.length)
+            throw new IllegalArgumentException();
         this.bytes = bytes;
         this.offset = offset;
     }
@@ -124,5 +130,7 @@ class TextIntReference implements IntValue, Byteable {
     }
 
     @NotNull
-    public String toString() { return "value: "+getValue(); }
+    public String toString() {
+        return "value: "+getValue();
+    }
 }
