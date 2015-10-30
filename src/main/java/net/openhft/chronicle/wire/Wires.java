@@ -91,7 +91,7 @@ public enum Wires {
 
         // We assume that check on data readiness and type has been done by the
         // caller
-        return rawRead(wireIn, reader);
+        return readWire(wireIn, reader);
     }
 
     @ForceInline
@@ -121,23 +121,28 @@ public enum Wires {
 
         // We assume that check on meta-data readiness and type has been done by
         // the caller
-        return rawRead(wireIn, reader);
+        return readWire(wireIn, reader);
     }
 
     @ForceInline
-    static long rawRead(@NotNull WireIn wireIn, @NotNull ReadMarshallable dataConsumer) {
-
+    public static long readWire(@NotNull WireIn wireIn, @NotNull ReadMarshallable readMarshallable) {
         final Bytes<?> bytes = wireIn.bytes();
         final int header = bytes.readVolatileInt(bytes.readPosition());
         final int len = Wires.lengthOf(header);
 
         bytes.readSkip(4);
 
+        return readWire(wireIn, len, readMarshallable);
+    }
+
+    @ForceInline
+    public static long readWire(@NotNull WireIn wireIn, long size, @NotNull ReadMarshallable readMarshallable) {
+        final Bytes<?> bytes = wireIn.bytes();
         final long limit0 = bytes.readLimit();
-        final long limit = bytes.readPosition() + (long) len;
+        final long limit = bytes.readPosition() + size;
         try {
             bytes.readLimit(limit);
-            dataConsumer.readMarshallable(wireIn);
+            readMarshallable.readMarshallable(wireIn);
         } finally {
             bytes.readLimit(limit0);
             bytes.readPosition(limit);
@@ -145,4 +150,5 @@ public enum Wires {
 
         return bytes.readPosition();
     }
+
 }
