@@ -764,7 +764,8 @@ public class BinaryWire implements Wire, InternalWireIn {
 
     @NotNull
     public String toString() {
-        return bytes.toDebugString();
+        return bytes.readRemaining() > 1024  ?
+                bytes.toDebugString(1024)+"..." :bytes.toDebugString();
     }
 
     @NotNull
