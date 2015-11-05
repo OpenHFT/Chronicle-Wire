@@ -160,10 +160,10 @@ public class TextWire implements Wire, InternalWireIn {
     }
 
     public String toString() {
-        if (bytes.readRemaining() > 1024) {
+        if (bytes.readRemaining() > (1024 * 10)) {
             final long l = bytes.readLimit();
             try {
-                bytes.readLimit(bytes.readPosition() + 1024);
+                bytes.readLimit(bytes.readPosition() + (1024 * 10));
                 return bytes.toString() + "..";
             } finally {
                 bytes.readLimit(l);
