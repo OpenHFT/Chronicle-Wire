@@ -53,6 +53,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     private final boolean numericFields;
     private final boolean fieldLess;
     private boolean ready;
+
     public BinaryWire(Bytes bytes) {
         this(bytes, false, false, false);
     }
@@ -764,8 +765,8 @@ public class BinaryWire implements Wire, InternalWireIn {
 
     @NotNull
     public String toString() {
-        return bytes.readRemaining() > 1024  ?
-                bytes.toDebugString(1024)+"..." :bytes.toDebugString();
+        return bytes.readRemaining() > 1024 ?
+                bytes.toDebugString(1024) + "..." : bytes.toDebugString();
     }
 
     @NotNull
