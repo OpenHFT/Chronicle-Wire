@@ -15,22 +15,16 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.MappedBytesStore;
-import net.openhft.chronicle.bytes.MappedBytesStoreFactory;
-import net.openhft.chronicle.bytes.MappedFile;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.io.Closeable;
-import net.openhft.chronicle.core.util.ThrowingAcceptor;
-import net.openhft.chronicle.core.util.ThrowingFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Created by peter.lawrey on 21/09/2015.
@@ -105,24 +99,23 @@ public class WiredFile<D extends Marshallable> implements Closeable {
         mappedFile.close();
     }
 
-
-
     public static <D extends Marshallable> WiredFile<D> build(
-        @NotNull String masterFile,
-        @NotNull ThrowingFunction<File, IOException, MappedFile> mappedFileFunction,
-        @NotNull Function<Bytes, Wire> wireType,
-        @NotNull Supplier<D> delegateSupplier,
-        @NotNull ThrowingAcceptor<WiredFile<D>, IOException> installer) throws IOException {
+            String masterFile,
+            Function<File, MappedFile> toMappedFile,
+            WireType wireType,
+            Function<MappedFile, D> delegateSupplier,
+            Consumer<WiredFile<D>> consumer) {
 
-        return build(new File(masterFile), mappedFileFunction, wireType, delegateSupplier, installer);
+        return build(new File(masterFile), toMappedFile, wireType, delegateSupplier, consumer);
     }
 
     public static <D extends Marshallable> WiredFile<D> build(
-        @NotNull File masterFile,
-        @NotNull ThrowingFunction<File, IOException, MappedFile> mappedFileFunction,
-        @NotNull Function<Bytes, Wire> wireType,
-        @NotNull Supplier<D> delegateSupplier,
-        @NotNull ThrowingAcceptor<WiredFile<D>, IOException> installer) throws IOException {
+            File masterFile,
+            Function<File, MappedFile> mappedFileFunction,
+            WireType wireType,
+            Function<MappedFile, D> delegateSupplier,
+            Consumer<WiredFile<D>> installer) {
+
 
         File parentFile = masterFile.getParentFile();
         if (parentFile != null) {
@@ -132,9 +125,14 @@ public class WiredFile<D extends Marshallable> implements Closeable {
 
         MappedFile mappedFile = mappedFileFunction.apply(masterFile);
         MappedBytesStoreFactory<WiredMappedBytesStore> mappedBytesStoreFactory = (owner, start, address, capacity, safeCapacity) ->
-            new WiredMappedBytesStore(owner, start, address, capacity, safeCapacity, wireType);
+                new WiredMappedBytesStore(owner, start, address, capacity, safeCapacity, wireType);
 
-        WiredMappedBytesStore header = mappedFile.acquireByteStore(0, mappedBytesStoreFactory);
+        WiredMappedBytesStore header = null;
+        try {
+            header = mappedFile.acquireByteStore(0, mappedBytesStoreFactory);
+        } catch (IOException e) {
+            throw Jvm.rethrow(e);
+        }
         assert header != null;
         D delegate;
         long length;
@@ -143,12 +141,12 @@ public class WiredFile<D extends Marshallable> implements Closeable {
         //noinspection PointlessBitwiseExpression
         if (header.compareAndSwapInt(0, Wires.NOT_INITIALIZED, Wires.META_DATA | Wires.NOT_READY | Wires.UNKNOWN_LENGTH)) {
             Bytes<?> bytes = header.bytesForWrite().writePosition(4);
-            wireType.apply(bytes).getValueOut().typedMarshallable(delegate = delegateSupplier.get());
+            wireType.apply(bytes).getValueOut().typedMarshallable(delegate = delegateSupplier.apply(mappedFile));
 
             length = bytes.writePosition();
 
             installer.accept(
-                wiredFile = new WiredFile<>(masterFile, wireType, mappedFile, delegate, header, length, true, mappedBytesStoreFactory)
+                    wiredFile = new WiredFile<>(masterFile, wireType, mappedFile, delegate, header, length, true, mappedBytesStoreFactory)
             );
 
             header.writeOrderedInt(0L, Wires.META_DATA | Wires.toIntU30(bytes.writePosition() - 4, "Delegate too large"));
@@ -170,12 +168,13 @@ public class WiredFile<D extends Marshallable> implements Closeable {
             delegate = wireType.apply(bytes).getValueIn().typedMarshallable();
 
             installer.accept(
-                wiredFile = new WiredFile<>(masterFile, wireType, mappedFile, delegate, header, length, false, mappedBytesStoreFactory)
+                    wiredFile = new WiredFile<>(masterFile, wireType, mappedFile, delegate, header, length, false, mappedBytesStoreFactory)
             );
         }
 
         return wiredFile;
     }
+
 
     static class WiredMappedBytesStore extends MappedBytesStore {
         private final Wire wire;

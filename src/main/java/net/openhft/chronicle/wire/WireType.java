@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,12 +39,19 @@ public enum WireType implements Function<Bytes, Wire> {
         public Supplier<LongValue> newLongReference() {
             return TextLongReference::new;
         }
+
+        @Override
+        public Supplier<LongArrayValues> newLongArrayReference() {
+            return TextLongArrayReference::new;
+        }
+
     }, BINARY {
         @NotNull
         @Override
         public Wire apply(Bytes bytes) {
             return new BinaryWire(bytes);
         }
+
     }, FIELDLESS_BINARY {
         @NotNull
         @Override
@@ -77,4 +85,10 @@ public enum WireType implements Function<Bytes, Wire> {
     public Supplier<LongValue> newLongReference() {
         return BinaryLongReference::new;
     }
+
+    public Supplier<LongArrayValues> newLongArrayReference() {
+        return BinaryLongArrayReference::new;
+    }
+
+
 }
