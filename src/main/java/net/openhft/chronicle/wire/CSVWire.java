@@ -339,7 +339,7 @@ public class CSVWire extends TextWire {
         if (use8bit)
             bytes.append8bit(cs, offset, offset + cs.length());
         else
-            bytes.appendUtf8(cs, offset, offset + cs.length());
+            bytes.appendUtf8(cs, offset, cs.length());
     }
 
     public Object readObject() {
