@@ -285,9 +285,9 @@ public class JSONWire extends TextWire {
 
     public void append(CharSequence cs, int offset) {
         if (use8bit)
-            bytes.append8bit(cs, offset, offset + cs.length());
+            bytes.append8bit(cs, offset, cs.length());
         else
-            bytes.appendUtf8(cs, offset, cs.length());
+            bytes.appendUtf8(cs, offset, cs.length() - offset);
     }
 
     class JSONValueOut extends TextValueOut {
