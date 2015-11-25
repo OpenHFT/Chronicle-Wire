@@ -1808,7 +1808,7 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Class typeLiteral() throws IORuntimeException, BufferUnderflowException {
+        public <T> Class<T> typeLiteral() throws IORuntimeException, BufferUnderflowException {
             consumeWhiteSpace();
             int code = readCode();
             if (!peekStringIgnoreCase("type "))

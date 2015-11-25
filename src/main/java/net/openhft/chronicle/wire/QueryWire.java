@@ -586,7 +586,7 @@ public class QueryWire extends TextWire {
         }
 
         @Override
-        public Class typeLiteral() {
+        public <T> Class<T> typeLiteral() {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             textTo(sb);
             try {

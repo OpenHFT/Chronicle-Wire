@@ -229,7 +229,7 @@ public interface ValueIn {
 
     float float32();
 
-    Class typeLiteral() throws IORuntimeException, BufferUnderflowException;
+    <T> Class<T> typeLiteral() throws IORuntimeException, BufferUnderflowException;
 
     default Throwable throwable(boolean appendCurrentStack) {
         return WireInternal.throwable(this, appendCurrentStack);

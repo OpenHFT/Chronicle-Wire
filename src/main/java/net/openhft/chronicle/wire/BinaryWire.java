@@ -1932,7 +1932,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Class typeLiteral() {
+        public <T> Class<T> typeLiteral() {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             int code = readCode();
             if (code == TYPE_LITERAL) {

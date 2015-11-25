@@ -783,7 +783,7 @@ public class RawWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Class typeLiteral() {
+        public <T> Class<T> typeLiteral() {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             bytes.readUtf8(sb);
             try {
