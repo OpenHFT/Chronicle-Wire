@@ -525,7 +525,7 @@ public class TextWire implements Wire, InternalWireIn {
 
     public void append(CharSequence cs, int offset, int length) {
         if (use8bit)
-            bytes.append8bit(cs, offset, length);
+            bytes.append8bit(cs, offset, offset + length);
         else
             bytes.appendUtf8(cs, offset, length);
     }
@@ -1808,7 +1808,7 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Class typeLiteral() throws IORuntimeException, BufferUnderflowException {
+        public <T> Class<T> typeLiteral() throws IORuntimeException, BufferUnderflowException {
             consumeWhiteSpace();
             int code = readCode();
             if (!peekStringIgnoreCase("type "))
