@@ -79,7 +79,10 @@ enum WireInternal {
         int metaDataBit = metaData ? Wires.META_DATA : 0;
         bytes.writeOrderedInt(metaDataBit | Wires.NOT_READY | Wires.UNKNOWN_LENGTH);
         writer.writeMarshallable(wireOut);
-        int length = metaDataBit | toIntU30(bytes.writePosition() - position - 4, "Document length %,d out of 30-bit int range.");
+        long position1 = bytes.writePosition();
+        if (position1 < position)
+            System.out.println("Message truncated from " + position + " to " + position1);
+        int length = metaDataBit | toIntU30(position1 - position - 4, "Document length %,d out of 30-bit int range.");
         bytes.writeOrderedInt(position, length | (notReady ? Wires.NOT_READY : 0));
     }
 
