@@ -72,10 +72,10 @@ public class TextWire implements Wire, InternalWireIn {
             QUOTE_CHARS.set(ch);
     }
 
-    protected final Bytes<?> bytes;
     protected final TextValueOut valueOut = createValueOut();
     protected final TextValueIn valueIn = createValueIn();
     protected final boolean use8bit;
+    protected Bytes<?> bytes;
     protected long lineStart = 0;
     private boolean ready;
 

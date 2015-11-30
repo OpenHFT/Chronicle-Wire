@@ -402,7 +402,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                     @NotNull
                     @Override
                     public String name() {
-                        return null;
+                        return Integer.toString(code());
                     }
 
                     @Override
