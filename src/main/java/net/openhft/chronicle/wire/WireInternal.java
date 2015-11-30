@@ -206,7 +206,8 @@ enum WireInternal {
                 String type = Wires.isData(header)
                         ? Wires.isReady(header) ? "!!data" : "!!not-ready-data!"
                         : Wires.isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
-                boolean binary = bytes.readByte(bytes.readPosition()) < ' ';
+                byte firstByte = bytes.readByte(bytes.readPosition());
+                boolean binary = firstByte < ' ' && firstByte != '\n';
 
                 sb.append("--- ").append(type).append(binary ? " #binary" : "");
                 if (missing > 0)
