@@ -56,6 +56,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     private final boolean fieldLess;
     private final int compressedSize;
     private boolean ready;
+    private String compression = "gzip";
 
     public BinaryWire(Bytes bytes) {
         this(bytes, false, false, false, Integer.MAX_VALUE);
@@ -858,7 +859,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 return object(null);
             long remaining = fromBytes.readRemaining();
             if (remaining >= compressedSize) {
-                compress("snappy", fromBytes);
+                compress(compression, fromBytes);
             } else {
                 bytes0(fromBytes, remaining);
             }
@@ -1506,6 +1507,10 @@ public class BinaryWire implements Wire, InternalWireIn {
                         } catch (IOException e) {
                             throw new IORuntimeException(e);
                         }
+                    }
+                    if (StringUtils.isEqual("gzip", sb)) {
+                        byte[] bytes = bytes();
+                        return BytesStore.wrap(GZIP.uncompress(bytes));
                     }
                     throw new UnsupportedOperationException("Unsupported type " + sb);
                 }
