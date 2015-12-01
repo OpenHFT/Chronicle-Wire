@@ -274,6 +274,13 @@ public class RawWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
+        public WireOut bytes(String type, @Nullable BytesStore fromBytes) {
+            typePrefix(type);
+            return bytes(fromBytes);
+        }
+
+        @NotNull
+        @Override
         public WireOut rawBytes(byte[] value) {
             throw new UnsupportedOperationException("todo");
         }

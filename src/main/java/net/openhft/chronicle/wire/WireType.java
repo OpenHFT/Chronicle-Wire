@@ -56,7 +56,13 @@ public enum WireType implements Function<Bytes, Wire> {
         @NotNull
         @Override
         public Wire apply(Bytes bytes) {
-            return new BinaryWire(bytes, false, false, true);
+            return new BinaryWire(bytes, false, false, true, Integer.MAX_VALUE);
+        }
+    }, COMPRESSED_BINARY {
+        @NotNull
+        @Override
+        public Wire apply(Bytes bytes) {
+            return new BinaryWire(bytes, false, false, false, COMPRESSED_SIZE);
         }
     }, JSON {
         @NotNull
@@ -81,6 +87,8 @@ public enum WireType implements Function<Bytes, Wire> {
             return BINARY.apply(bytes);
         }
     };
+
+    private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 256);
 
     public Supplier<LongValue> newLongReference() {
         return BinaryLongReference::new;

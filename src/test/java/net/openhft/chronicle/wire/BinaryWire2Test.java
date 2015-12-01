@@ -16,6 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
@@ -44,7 +45,7 @@ public class BinaryWire2Test {
     @NotNull
     private BinaryWire createWire() {
         bytes.clear();
-        return new BinaryWire(bytes);
+        return new BinaryWire(bytes, false, false, false, 32);
     }
 
     @Test
@@ -253,5 +254,23 @@ reply: !UpdatedEvent {
         wire.bytes().readPosition(0);
         String str2 = wire.read().text();
         assertEquals(str, str2);
+    }
+
+    @Test
+    public void testSnappyCompression() {
+        Wire wire = createWire();
+        String str = "xxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy2yyyyyyyyyyyyyyyyy";
+        BytesStore bytes = BytesStore.from(str);
+
+        wire.write().bytes(bytes);
+        System.out.println("str.length() = " + str.length() + ", wire.bytes().readRemaining() = " + wire.bytes().readRemaining());
+        assertTrue(wire.bytes().readRemaining() + " >= " + str.length(),
+                wire.bytes().readRemaining() < str.length());
+
+        wire.bytes().readPosition(0);
+        BytesStore bytesStore = wire.read().bytesStore();
+        assert bytesStore != null;
+        assertEquals(bytes.toDebugString(), bytesStore.toDebugString());
+
     }
 }

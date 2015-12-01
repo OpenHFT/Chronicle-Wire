@@ -40,9 +40,12 @@ import java.util.stream.Stream;
  * Write out data after writing a field.
  */
 public interface ValueOut {
+
+    int SMALL_MESSAGE = 64;
+
     /*
-     * data types
-     */
+             * data types
+             */
     @NotNull
     WireOut bool(Boolean flag);
 
@@ -64,6 +67,9 @@ public interface ValueOut {
 
     @NotNull
     WireOut bytes(@Nullable BytesStore fromBytes);
+
+    @NotNull
+    WireOut bytes(String type, @Nullable BytesStore fromBytes);
 
     @NotNull
     WireOut rawBytes(byte[] value);
@@ -312,13 +318,17 @@ public interface ValueOut {
     @NotNull
     WireOut wireOut();
 
-    default WireOut compress(String compression, Bytes compressedBytes) {
-        WireInternal.compress(this, compression, compressedBytes);
+    default WireOut compress(String compression, BytesStore uncompressedBytes) {
+        if (uncompressedBytes.readRemaining() < SMALL_MESSAGE)
+            return bytes(uncompressedBytes);
+        WireInternal.compress(this, compression, uncompressedBytes);
         return wireOut();
     }
 
     @Deprecated
     default WireOut compress(String compression, String str) {
+        if (str.length() < SMALL_MESSAGE)
+            return text(str);
         // replace with compress(String compression, Bytes compressedBytes)
         WireInternal.compress(this, compression, str);
         return wireOut();

@@ -793,6 +793,18 @@ public class TextWire implements Wire, InternalWireIn {
 
         @NotNull
         @Override
+        public WireOut bytes(String type, BytesStore bytesStore) {
+            prependSeparator();
+            typePrefix(type);
+            append(Base64.getEncoder().encodeToString(bytesStore.toByteArray()));
+            append(END_FIELD);
+            elementSeparator();
+
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
         public WireOut uint8checked(int u8) {
             prependSeparator();
             bytes.append(u8);
@@ -1149,7 +1161,6 @@ public class TextWire implements Wire, InternalWireIn {
         @NotNull
         public ValueOut write(@NotNull WireKey key) {
             CharSequence name = key.name();
-            if (name == null) name = Integer.toString(key.code());
             prependSeparator();
             escape(name);
             bytes.writeUnsignedByte(':');
@@ -1169,7 +1180,6 @@ public class TextWire implements Wire, InternalWireIn {
     }
 
     class TextValueIn implements ValueIn {
-
         @Override
         public String text() {
             CharSequence cs = textTo0(WireInternal.acquireStringBuilder());
@@ -1381,6 +1391,16 @@ public class TextWire implements Wire, InternalWireIn {
                     // todo fix this.
                     return WireInternal.INTERNER.intern(sb).getBytes();
 
+                } else if (str.equals("!snappy")) {
+                    AppendableUtil.setLength(sb, 0);
+                    parseWord(sb);
+                    byte[] decode = Base64.getDecoder().decode(sb.toString());
+                    try {
+                        return Snappy.uncompress(decode);
+                    } catch (IOException e) {
+                        throw new IORuntimeException(e);
+                    }
+
                 } else {
                     throw new IllegalStateException("unsupported type=" + str);
                 }
@@ -1405,7 +1425,7 @@ public class TextWire implements Wire, InternalWireIn {
                     if (StringUtils.isEqual(sb, "!snappy")) {
                         AppendableUtil.setLength(sb, 0);
                         parseWord(sb);
-                        byte[] decode = Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb));
+                        byte[] decode = Base64.getDecoder().decode(sb.toString());
                         bytes.write(Snappy.uncompress(decode));
                     } else if (StringUtils.isEqual(sb, "!gzip")) {
                         AppendableUtil.setLength(sb, 0);

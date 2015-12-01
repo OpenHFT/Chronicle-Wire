@@ -54,16 +54,18 @@ public class BinaryWire implements Wire, InternalWireIn {
     private final BinaryValueIn valueIn = new BinaryValueIn();
     private final boolean numericFields;
     private final boolean fieldLess;
+    private final int compressedSize;
     private boolean ready;
 
     public BinaryWire(Bytes bytes) {
-        this(bytes, false, false, false);
+        this(bytes, false, false, false, Integer.MAX_VALUE);
     }
 
-    public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess) {
+    public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize) {
         this.numericFields = numericFields;
         this.fieldLess = fieldLess;
         this.bytes = bytes;
+        this.compressedSize = compressedSize;
         valueOut = fixed ? fixedValueOut : new BinaryValueOut();
     }
 
@@ -852,12 +854,22 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut bytes(@Nullable BytesStore fromBytes) {
+            if (fromBytes == null)
+                return object(null);
             long remaining = fromBytes.readRemaining();
+            if (remaining >= compressedSize) {
+                compress("snappy", fromBytes);
+            } else {
+                bytes0(fromBytes, remaining);
+            }
+            return BinaryWire.this;
+        }
+
+        public void bytes0(@Nullable BytesStore fromBytes, long remaining) {
             writeLength(Maths.toInt32(remaining + 1));
             writeCode(U8_ARRAY);
             if (remaining > 0)
                 bytes.write(fromBytes);
-            return BinaryWire.this;
         }
 
         @NotNull
@@ -890,6 +902,14 @@ public class BinaryWire implements Wire, InternalWireIn {
             writeLength(Maths.toInt32(fromBytes.length + 1));
             writeCode(U8_ARRAY);
             bytes.write(fromBytes);
+            return BinaryWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut bytes(String type, @Nullable BytesStore fromBytes) {
+            typePrefix(type);
+            bytes0(fromBytes, fromBytes.readRemaining());
             return BinaryWire.this;
         }
 
@@ -1469,12 +1489,31 @@ public class BinaryWire implements Wire, InternalWireIn {
         public BytesStore bytesStore() {
             long length = readLength() - 1;
             int code = readCode();
-            if (code != U8_ARRAY)
-                cantRead(code);
-            BytesStore toBytes = NativeBytesStore.nativeStore(length);
-            toBytes.write(0, bytes, bytes.readPosition(), length);
-            bytes.readSkip(length);
-            return toBytes;
+            switch (code) {
+                case U8_ARRAY:
+                    BytesStore toBytes = NativeBytesStore.nativeStore(length);
+                    toBytes.write(0, bytes, bytes.readPosition(), length);
+                    bytes.readSkip(length);
+                    return toBytes;
+
+                case TYPE_PREFIX: {
+                    StringBuilder sb = WireInternal.acquireStringBuilder();
+                    bytes.readUtf8(sb);
+                    if (StringUtils.isEqual("snappy", sb)) {
+                        byte[] bytes = bytes();
+                        try {
+                            return BytesStore.wrap(Snappy.uncompress(bytes));
+                        } catch (IOException e) {
+                            throw new IORuntimeException(e);
+                        }
+                    }
+                    throw new UnsupportedOperationException("Unsupported type " + sb);
+                }
+
+                default:
+                    cantRead(code);
+                    throw new AssertionError();
+            }
         }
 
         public void bytesStore(@NotNull StringBuilder sb) {
