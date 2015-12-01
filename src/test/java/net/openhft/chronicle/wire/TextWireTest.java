@@ -570,7 +570,7 @@ public class TextWireTest {
         Wire wire = createWire();
         MyTypes mtA = new MyTypes();
         mtA.b = true;
-        mtA.d =123.456;
+        mtA.d = 123.456;
         mtA.i = -12345789;
         mtA.s = (short) 12345;
         mtA.text.append("Hello World");
@@ -859,6 +859,9 @@ public class TextWireTest {
         wire.read().decompress(bytes);
         assertEquals(str, bytes.toString());
 
+        wire.bytes().readPosition(0);
+        String str2 = wire.read().text();
+        assertEquals(str, str2);
     }
 
     @Test

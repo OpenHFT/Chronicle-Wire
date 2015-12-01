@@ -1172,25 +1172,41 @@ public class TextWire implements Wire, InternalWireIn {
 
         @Override
         public String text() {
-            return StringUtils.toString(textTo(WireInternal.acquireStringBuilder()));
+            CharSequence cs = textTo0(WireInternal.acquireStringBuilder());
+            return cs == null ? null : WireInternal.INTERNER.intern(cs);
         }
 
         @Nullable
         @Override
         public StringBuilder textTo(@NotNull StringBuilder sb) {
-            return textTo0(sb);
+            CharSequence cs = textTo0(sb);
+            if (cs == null)
+                return null;
+            if (cs != sb) {
+                sb.setLength(0);
+                sb.append(cs);
+            }
+            return sb;
         }
 
         @Nullable
         @Override
         public Bytes textTo(@NotNull Bytes bytes) {
-            return textTo0(bytes);
+            CharSequence cs = textTo0(bytes);
+            if (cs == null)
+                return null;
+            if (cs != bytes) {
+                bytes.clear();
+                bytes.writeUtf8(cs);
+            }
+            return bytes;
         }
 
         @Nullable
-        <ACS extends Appendable & CharSequence> ACS textTo0(@NotNull ACS a) {
+        <ACS extends Appendable & CharSequence> CharSequence textTo0(@NotNull ACS a) {
             consumeWhiteSpace();
             int ch = peekCode();
+            CharSequence ret = a;
 
             switch (ch) {
                 case '{': {
@@ -1236,32 +1252,33 @@ public class TextWire implements Wire, InternalWireIn {
                 }
                 case '!': {
                     bytes.readSkip(1);
-                    ch = peekCode();
-                    if (ch == '!') {
-                        bytes.readSkip(1);
-                        StringBuilder sb = WireInternal.acquireStringBuilder();
-                        parseWord(sb);
-                        if (StringUtils.isEqual(sb, "null")) {
-                            textTo(sb);
-                            return null;
-                        } else if (StringUtils.isEqual(sb, "snappy")) {
-                            textTo(sb);
-                            try {
-                                //todo needs to be made efficient
-                                byte[] decodedBytes = Base64.getDecoder().decode(sb.toString().getBytes());
-                                String csq = Snappy.uncompressString(decodedBytes);
-                                return (ACS) WireInternal.acquireStringBuilder().append(csq);
-                            } catch (IOException e) {
-                                throw new AssertionError(e);
-                            }
+                    StringBuilder sb = WireInternal.acquireStringBuilder();
+                    parseWord(sb);
+                    if (StringUtils.isEqual(sb, "!null")) {
+                        textTo(sb);
+                        ret = null;
+                    } else if (StringUtils.isEqual(sb, "snappy")) {
+                        textTo(sb);
+                        try {
+                            //todo needs to be made efficient
+                            byte[] decodedBytes = Base64.getDecoder().decode(sb.toString().getBytes());
+                            String csq = Snappy.uncompressString(decodedBytes);
+                            ret = WireInternal.acquireStringBuilder().append(csq);
+                        } catch (IOException e) {
+                            throw new AssertionError(e);
                         }
                     } else {
-                        StringBuilder sb = WireInternal.acquireStringBuilder();
-                        textTo(sb);
                         // ignore the type.
+                        if (a instanceof StringBuilder) {
+                            textTo((StringBuilder) a);
+                        } else {
+                            textTo(sb);
+                            ret = sb;
+                        }
                     }
                     break;
                 }
+
                 default: {
                     if (bytes.readRemaining() > 0) {
                         if (a instanceof Bytes || use8bit)
@@ -1285,7 +1302,7 @@ public class TextWire implements Wire, InternalWireIn {
             int prev = peekBack();
             if (prev == ':' || prev == '#' || prev == '}')
                 bytes.readSkip(-1);
-            return a;
+            return ret;
         }
 
         private int peekBack() {
@@ -1978,7 +1995,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (textTo(sb) == null)
                 throw new NullPointerException("value is null");
 
-            return StringUtils.isEqual(sb, "true");
+            return StringUtils.equalsCaseIgnore(sb, "true");
         }
 
         public byte int8() {

@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.time.*;
 import java.util.UUID;
 
@@ -235,5 +236,22 @@ reply: !UpdatedEvent {
                         .read(() -> "key").object(String.class, "test", Assert::assertEquals)
                         .read(() -> "oldValue").object(String.class, "error", Assert::assertNull)
                         .read(() -> "value").object(String.class, "world2", Assert::assertEquals)));
+    }
+
+
+    @Test
+    public void testSnappyCompressWithSnappy() throws IOException {
+        Wire wire = createWire();
+        String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+
+        wire.write().compress("snappy", str);
+//        System.out.println(wire.bytes());
+//        Bytes bytes = allocateElasticDirect();
+//        wire.read().decompress(bytes);
+//        assertEquals(str, bytes.toString());
+
+        wire.bytes().readPosition(0);
+        String str2 = wire.read().text();
+        assertEquals(str, str2);
     }
 }

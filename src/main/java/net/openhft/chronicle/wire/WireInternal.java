@@ -41,7 +41,7 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
  */
 enum WireInternal {
     ;
-    public static final StringInterner INTERNER = new StringInterner(128);
+    static final StringInterner INTERNER = new StringInterner(128);
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
     static final StackTraceElement[] NO_STE = {};
@@ -318,7 +318,8 @@ enum WireInternal {
         switch (compression) {
             case "snappy":
                 try {
-                    out.bytes("snappy", Snappy.compress(bytes.toByteArray()));
+                    byte[] compress = Snappy.compress(bytes.toByteArray());
+                    out.bytes("snappy", compress);
                 } catch (IOException e) {
                     throw new AssertionError(e);
                 }
@@ -343,7 +344,8 @@ enum WireInternal {
     public static void compress(ValueOut out, String compression, String str) {
         if (compression.equals("snappy")) {
             try {
-                out.bytes("snappy", Snappy.compress(str));
+                byte[] compress = Snappy.compress(str);
+                out.bytes("snappy", compress);
             } catch (IOException e) {
                 throw new AssertionError(e);
             }

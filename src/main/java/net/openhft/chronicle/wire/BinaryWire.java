@@ -25,7 +25,9 @@ import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.xerial.snappy.Snappy;
 
+import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -1387,31 +1389,50 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public String text() {
             int code = readCode();
-            boolean wasNull = code == NULL;
-            if (wasNull) {
-                return null;
-
-            } else if (code == STRING_ANY) {
-                long len0 = bytes.readStopBit();
-                if (len0 == -1L) {
+            switch (code) {
+                case NULL:
                     return null;
 
-                }
-                int len = Maths.toUInt31(len0);
-                long limit = bytes.readLimit();
-                try {
-                    bytes.readLimit(bytes.readPosition() + len);
-                    return UTF8_INTERNER.intern(bytes);
-                } finally {
-                    bytes.readPosition(bytes.readLimit());
-                    bytes.readLimit(limit);
+                case STRING_ANY: {
+                    long len0 = bytes.readStopBit();
+                    if (len0 == -1L) {
+                        return null;
+
+                    }
+                    int len = Maths.toUInt31(len0);
+                    long limit = bytes.readLimit();
+                    try {
+                        bytes.readLimit(bytes.readPosition() + len);
+                        return UTF8_INTERNER.intern(bytes);
+                    } finally {
+                        bytes.readPosition(bytes.readLimit());
+                        bytes.readLimit(limit);
+                    }
+
                 }
 
-            } else {
-                StringBuilder text = readText(code, WireInternal.acquireStringBuilder());
-                if (text == null)
-                    cantRead(code);
-                return WireInternal.INTERNER.intern(text);
+                case TYPE_PREFIX: {
+                    StringBuilder sb = WireInternal.acquireStringBuilder();
+                    if (bytes.readUtf8(sb)) {
+                        if (StringUtils.isEqual("snappy", sb)) {
+                            try {
+                                byte[] bytes = bytes();
+                                return new String(Snappy.uncompress(bytes), "UTF-8");
+                            } catch (IOException e) {
+                                throw new IORuntimeException(e);
+                            }
+                        }
+                    }
+                    StringBuilder text = readText(code, sb);
+                    return WireInternal.INTERNER.intern(text);
+                }
+
+                default: {
+                    StringBuilder text = readText(code, WireInternal.acquireStringBuilder());
+                    if (text == null)
+                        cantRead(code);
+                    return WireInternal.INTERNER.intern(text);
+                }
             }
         }
 
@@ -1501,7 +1522,13 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public byte[] bytes() {
-            throw new UnsupportedOperationException("todo");
+            long length = readLength();
+            int code = readCode();
+            if (code != U8_ARRAY)
+                cantRead(code);
+            byte[] bytes2 = new byte[Maths.toUInt31(length - 1)];
+            bytes.readWithLength(length - 1, b -> b.read(bytes2));
+            return bytes2;
         }
 
         @NotNull
