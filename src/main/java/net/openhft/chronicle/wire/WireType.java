@@ -88,7 +88,7 @@ public enum WireType implements Function<Bytes, Wire> {
         }
     };
 
-    private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 256);
+    private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
 
     public Supplier<LongValue> newLongReference() {
         return BinaryLongReference::new;
