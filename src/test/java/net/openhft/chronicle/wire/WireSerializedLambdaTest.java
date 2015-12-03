@@ -110,7 +110,7 @@ public class WireSerializedLambdaTest {
                 "Ãimt¸&(Ljava/lang/String;)Ljava/lang/String;" +
                 "Âca\\u0082٠٠٠٠" +
                 "Ãtwo¶⒊FunåADD_A" +
-                "Åthree¶⒌UpdatäDECR", wire.bytes().toDebugString());
+                "Åthree¶⒌UpdatäDECR", wire.bytes().toDebugString(400));
 
         Function<String, String> function = wire.read().object(Function.class);
         assertEquals("HELLO", function.apply("hello"));

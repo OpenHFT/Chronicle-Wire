@@ -72,10 +72,10 @@ public class TextWire implements Wire, InternalWireIn {
             QUOTE_CHARS.set(ch);
     }
 
-    protected final Bytes<?> bytes;
     protected final TextValueOut valueOut = createValueOut();
     protected final TextValueIn valueIn = createValueIn();
     protected final boolean use8bit;
+    protected Bytes<?> bytes;
     protected long lineStart = 0;
     private boolean ready;
 
@@ -525,7 +525,7 @@ public class TextWire implements Wire, InternalWireIn {
 
     public void append(CharSequence cs, int offset, int length) {
         if (use8bit)
-            bytes.append8bit(cs, offset, length);
+            bytes.append8bit(cs, offset, offset + length);
         else
             bytes.appendUtf8(cs, offset, length);
     }
@@ -785,6 +785,18 @@ public class TextWire implements Wire, InternalWireIn {
             prependSeparator();
             typePrefix(type);
             append(Base64.getEncoder().encodeToString(byteArray));
+            append(END_FIELD);
+            elementSeparator();
+
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut bytes(String type, BytesStore bytesStore) {
+            prependSeparator();
+            typePrefix(type);
+            append(Base64.getEncoder().encodeToString(bytesStore.toByteArray()));
             append(END_FIELD);
             elementSeparator();
 
@@ -1149,7 +1161,6 @@ public class TextWire implements Wire, InternalWireIn {
         @NotNull
         public ValueOut write(@NotNull WireKey key) {
             CharSequence name = key.name();
-            if (name == null) name = Integer.toString(key.code());
             prependSeparator();
             escape(name);
             bytes.writeUnsignedByte(':');
@@ -1169,28 +1180,43 @@ public class TextWire implements Wire, InternalWireIn {
     }
 
     class TextValueIn implements ValueIn {
-
         @Override
         public String text() {
-            return StringUtils.toString(textTo(WireInternal.acquireStringBuilder()));
+            CharSequence cs = textTo0(WireInternal.acquireStringBuilder());
+            return cs == null ? null : WireInternal.INTERNER.intern(cs);
         }
 
         @Nullable
         @Override
         public StringBuilder textTo(@NotNull StringBuilder sb) {
-            return textTo0(sb);
+            CharSequence cs = textTo0(sb);
+            if (cs == null)
+                return null;
+            if (cs != sb) {
+                sb.setLength(0);
+                sb.append(cs);
+            }
+            return sb;
         }
 
         @Nullable
         @Override
         public Bytes textTo(@NotNull Bytes bytes) {
-            return textTo0(bytes);
+            CharSequence cs = textTo0(bytes);
+            if (cs == null)
+                return null;
+            if (cs != bytes) {
+                bytes.clear();
+                bytes.writeUtf8(cs);
+            }
+            return bytes;
         }
 
         @Nullable
-        <ACS extends Appendable & CharSequence> ACS textTo0(@NotNull ACS a) {
+        <ACS extends Appendable & CharSequence> CharSequence textTo0(@NotNull ACS a) {
             consumeWhiteSpace();
             int ch = peekCode();
+            CharSequence ret = a;
 
             switch (ch) {
                 case '{': {
@@ -1236,32 +1262,33 @@ public class TextWire implements Wire, InternalWireIn {
                 }
                 case '!': {
                     bytes.readSkip(1);
-                    ch = peekCode();
-                    if (ch == '!') {
-                        bytes.readSkip(1);
-                        StringBuilder sb = WireInternal.acquireStringBuilder();
-                        parseWord(sb);
-                        if (StringUtils.isEqual(sb, "null")) {
-                            textTo(sb);
-                            return null;
-                        } else if (StringUtils.isEqual(sb, "snappy")) {
-                            textTo(sb);
-                            try {
-                                //todo needs to be made efficient
-                                byte[] decodedBytes = Base64.getDecoder().decode(sb.toString().getBytes());
-                                String csq = Snappy.uncompressString(decodedBytes);
-                                return (ACS) WireInternal.acquireStringBuilder().append(csq);
-                            } catch (IOException e) {
-                                throw new AssertionError(e);
-                            }
+                    StringBuilder sb = WireInternal.acquireStringBuilder();
+                    parseWord(sb);
+                    if (StringUtils.isEqual(sb, "!null")) {
+                        textTo(sb);
+                        ret = null;
+                    } else if (StringUtils.isEqual(sb, "snappy")) {
+                        textTo(sb);
+                        try {
+                            //todo needs to be made efficient
+                            byte[] decodedBytes = Base64.getDecoder().decode(sb.toString().getBytes());
+                            String csq = Snappy.uncompressString(decodedBytes);
+                            ret = WireInternal.acquireStringBuilder().append(csq);
+                        } catch (IOException e) {
+                            throw new AssertionError(e);
                         }
                     } else {
-                        StringBuilder sb = WireInternal.acquireStringBuilder();
-                        textTo(sb);
                         // ignore the type.
+                        if (a instanceof StringBuilder) {
+                            textTo((StringBuilder) a);
+                        } else {
+                            textTo(sb);
+                            ret = sb;
+                        }
                     }
                     break;
                 }
+
                 default: {
                     if (bytes.readRemaining() > 0) {
                         if (a instanceof Bytes || use8bit)
@@ -1285,7 +1312,7 @@ public class TextWire implements Wire, InternalWireIn {
             int prev = peekBack();
             if (prev == ':' || prev == '#' || prev == '}')
                 bytes.readSkip(-1);
-            return a;
+            return ret;
         }
 
         private int peekBack() {
@@ -1364,6 +1391,16 @@ public class TextWire implements Wire, InternalWireIn {
                     // todo fix this.
                     return WireInternal.INTERNER.intern(sb).getBytes();
 
+                } else if (str.equals("!snappy")) {
+                    AppendableUtil.setLength(sb, 0);
+                    parseWord(sb);
+                    byte[] decode = Base64.getDecoder().decode(sb.toString());
+                    try {
+                        return Snappy.uncompress(decode);
+                    } catch (IOException e) {
+                        throw new IORuntimeException(e);
+                    }
+
                 } else {
                     throw new IllegalStateException("unsupported type=" + str);
                 }
@@ -1388,7 +1425,7 @@ public class TextWire implements Wire, InternalWireIn {
                     if (StringUtils.isEqual(sb, "!snappy")) {
                         AppendableUtil.setLength(sb, 0);
                         parseWord(sb);
-                        byte[] decode = Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb));
+                        byte[] decode = Base64.getDecoder().decode(sb.toString());
                         bytes.write(Snappy.uncompress(decode));
                     } else if (StringUtils.isEqual(sb, "!gzip")) {
                         AppendableUtil.setLength(sb, 0);
@@ -1808,7 +1845,7 @@ public class TextWire implements Wire, InternalWireIn {
         }
 
         @Override
-        public Class typeLiteral() throws IORuntimeException, BufferUnderflowException {
+        public <T> Class<T> typeLiteral() throws IORuntimeException, BufferUnderflowException {
             consumeWhiteSpace();
             int code = readCode();
             if (!peekStringIgnoreCase("type "))
@@ -1978,7 +2015,7 @@ public class TextWire implements Wire, InternalWireIn {
             if (textTo(sb) == null)
                 throw new NullPointerException("value is null");
 
-            return StringUtils.isEqual(sb, "true");
+            return StringUtils.equalsCaseIgnore(sb, "true");
         }
 
         public byte int8() {

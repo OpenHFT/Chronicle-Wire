@@ -17,7 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.IORuntimeException;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
@@ -229,7 +229,7 @@ public interface ValueIn {
 
     float float32();
 
-    Class typeLiteral() throws IORuntimeException, BufferUnderflowException;
+    <T> Class<T> typeLiteral() throws IORuntimeException, BufferUnderflowException;
 
     default Throwable throwable(boolean appendCurrentStack) {
         return WireInternal.throwable(this, appendCurrentStack);

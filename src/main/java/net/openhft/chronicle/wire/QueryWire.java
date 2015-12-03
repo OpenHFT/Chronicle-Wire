@@ -17,9 +17,9 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.IORuntimeException;
 import net.openhft.chronicle.bytes.StopCharTester;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
@@ -586,7 +586,7 @@ public class QueryWire extends TextWire {
         }
 
         @Override
-        public Class typeLiteral() {
+        public <T> Class<T> typeLiteral() {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             textTo(sb);
             try {

@@ -16,7 +16,10 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
@@ -25,11 +28,13 @@ import net.openhft.chronicle.core.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.xerial.snappy.Snappy;
+import sun.nio.ch.DirectBuffer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
@@ -41,10 +46,11 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
  */
 enum WireInternal {
     ;
-    public static final StringInterner INTERNER = new StringInterner(128);
+    static final StringInterner INTERNER = new StringInterner(128);
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
     static final StackTraceElement[] NO_STE = {};
+    static final ThreadLocal<ByteBuffer[]> byteBufferTL = ThreadLocal.withInitial(() -> new ByteBuffer[1]);
     private static final Field DETAILED_MESSAGE = Jvm.getField(Throwable.class, "detailMessage");
     private static final Field STACK_TRACE = Jvm.getField(Throwable.class, "stackTrace");
 
@@ -79,7 +85,10 @@ enum WireInternal {
         int metaDataBit = metaData ? Wires.META_DATA : 0;
         bytes.writeOrderedInt(metaDataBit | Wires.NOT_READY | Wires.UNKNOWN_LENGTH);
         writer.writeMarshallable(wireOut);
-        int length = metaDataBit | toIntU30(bytes.writePosition() - position - 4, "Document length %,d out of 30-bit int range.");
+        long position1 = bytes.writePosition();
+        if (position1 < position)
+            System.out.println("Message truncated from " + position + " to " + position1);
+        int length = metaDataBit | toIntU30(position1 - position - 4, "Document length %,d out of 30-bit int range.");
         bytes.writeOrderedInt(position, length | (notReady ? Wires.NOT_READY : 0));
     }
 
@@ -206,7 +215,8 @@ enum WireInternal {
                 String type = Wires.isData(header)
                         ? Wires.isReady(header) ? "!!data" : "!!not-ready-data!"
                         : Wires.isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
-                boolean binary = bytes.readByte(bytes.readPosition()) < ' ';
+                byte firstByte = bytes.readByte(bytes.readPosition());
+                boolean binary = firstByte < ' ' && firstByte != '\n';
 
                 sb.append("--- ").append(type).append(binary ? " #binary" : "");
                 if (missing > 0)
@@ -310,11 +320,19 @@ enum WireInternal {
         return a == null ? b : b == null ? a : a + " " + b;
     }
 
-    public static void compress(ValueOut out, String compression, Bytes bytes) {
+    public static void compress(ValueOut out, String compression, BytesStore bytes) {
         switch (compression) {
             case "snappy":
                 try {
-                    out.bytes("snappy", Snappy.compress(bytes.toByteArray()));
+                    long len0 = bytes.readRemaining();
+                    ByteBuffer uncompressed = bytes.toTemporaryDirectByteBuffer();
+                    ByteBuffer compressed = acquireByteBuffer(Maths.toUInt31(len0 + OS.pageSize()));
+                    Snappy.compress(uncompressed, compressed);
+                    if (compressed.limit() == compressed.capacity())
+                        throw new AssertionError("Buffer too small " + compressed.limit() + " remaining");
+                    Bytes<ByteBuffer> wrap = Bytes.wrapForRead(compressed);
+                    wrap.readLimit(compressed.limit());
+                    out.bytes("snappy", wrap);
                 } catch (IOException e) {
                     throw new AssertionError(e);
                 }
@@ -335,11 +353,26 @@ enum WireInternal {
         }
     }
 
+    private static ByteBuffer acquireByteBuffer(int size) {
+        ByteBuffer[] bbArray = byteBufferTL.get();
+        ByteBuffer bb = bbArray[0];
+        if (bb != null) {
+            if (bb.capacity() >= size) {
+                bb.clear();
+                return bb;
+            }
+            ((DirectBuffer) bb).cleaner().clean();
+        }
+        int capacity = (size + OS.pageSize() - 1) & ~(OS.pageSize() - 1);
+        return bbArray[0] = ByteBuffer.allocateDirect(capacity);
+    }
+
     @Deprecated
     public static void compress(ValueOut out, String compression, String str) {
         if (compression.equals("snappy")) {
             try {
-                out.bytes("snappy", Snappy.compress(str));
+                byte[] compress = Snappy.compress(str);
+                out.bytes("snappy", compress);
             } catch (IOException e) {
                 throw new AssertionError(e);
             }
