@@ -321,15 +321,19 @@ public interface ValueOut {
     default WireOut compress(String compression, BytesStore uncompressedBytes) {
         if (uncompressedBytes == null)
             return text(null);
-        if (uncompressedBytes.readRemaining() < SMALL_MESSAGE)
+        if (uncompressedBytes.readRemaining() < compressedSize())
             return bytes(uncompressedBytes);
         WireInternal.compress(this, compression, uncompressedBytes);
         return wireOut();
     }
 
+    default int compressedSize() {
+        return Integer.MAX_VALUE;
+    }
+
     @Deprecated
     default WireOut compress(String compression, String str) {
-        if (str.length() < SMALL_MESSAGE)
+        if (str == null || str.length() < SMALL_MESSAGE)
             return text(str);
         // replace with compress(String compression, Bytes compressedBytes)
         WireInternal.compress(this, compression, str);

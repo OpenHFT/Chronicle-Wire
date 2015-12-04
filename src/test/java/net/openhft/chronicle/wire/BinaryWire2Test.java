@@ -245,15 +245,34 @@ reply: !UpdatedEvent {
         Wire wire = createWire();
         String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
-        wire.write().compress("snappy", str);
-//        System.out.println(wire.bytes());
-//        Bytes bytes = allocateElasticDirect();
-//        wire.read().decompress(bytes);
-//        assertEquals(str, bytes.toString());
+        wire.write(() -> "message").compress("snappy", str);
 
         wire.bytes().readPosition(0);
-        String str2 = wire.read().text();
+        String str2 = wire.read(() -> "message").text();
         assertEquals(str, str2);
+
+        wire.bytes().readPosition(0);
+        Bytes asText = Bytes.elasticByteBuffer();
+        wire.copyTo(new TextWire(asText));
+        assertEquals("message: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n", asText.toString());
+    }
+
+    @Test
+    public void testSnappyCompressWithSnappy2() throws IOException {
+        Wire wire = createWire();
+        Bytes str = Bytes.from("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+
+        wire.write(() -> "message").compress("snappy", str);
+
+        wire.bytes().readPosition(0);
+        String str2 = wire.read(() -> "message").text();
+        assertEquals(str.toString(), str2);
+
+        wire.bytes().readPosition(0);
+        Bytes asText = Bytes.elasticByteBuffer();
+        wire.copyTo(new TextWire(asText));
+        assertEquals("message: # snappy\n" +
+                "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n", asText.toString());
     }
 
     @Test

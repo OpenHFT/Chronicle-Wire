@@ -133,18 +133,27 @@ public class BinaryWire implements Wire, InternalWireIn {
                             break;
 
                     }
-                    throw new UnsupportedOperationException("peekCode=" + stringForCode(peekCode));
+                    unknownCode(wire);
+                    break;
 
                 case BinaryWireHighCode.FLOAT:
                     bytes.readSkip(1);
-                    Number d = readFloat0(peekCode);
-                    wire.getValueOut().object(d);
+                    try {
+                        Number d = readFloat0(peekCode);
+                        wire.getValueOut().object(d);
+                    } catch (Exception e) {
+                        unknownCode(wire);
+                    }
                     break;
 
                 case BinaryWireHighCode.INT:
                     bytes.readSkip(1);
-                    Number l = readInt0object(peekCode);
-                    wire.getValueOut().object(l);
+                    try {
+                        Number l = readInt0object(peekCode);
+                        wire.getValueOut().object(l);
+                    } catch (Exception e) {
+                        unknownCode(wire);
+                    }
                     break;
 
                 case BinaryWireHighCode.SPECIAL:
@@ -153,7 +162,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
                 case BinaryWireHighCode.FIELD0:
                 case BinaryWireHighCode.FIELD1:
-                    StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, WireInternal.acquireStringBuilder());
+                    StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, WireInternal.acquireStringBuilder(), false);
                     wire.write(() -> fsb);
                     break;
 
@@ -165,6 +174,10 @@ public class BinaryWire implements Wire, InternalWireIn {
                     break;
             }
         }
+    }
+
+    private void unknownCode(@NotNull WireOut wire) {
+        wire.writeComment("# " + stringForCode(bytes.readUnsignedByte()));
     }
 
     private boolean isFieldNext() {
@@ -247,7 +260,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     private StringBuilder readField(@NotNull StringBuilder name, WireKey key) {
         consumeSpecial();
         int peekCode = peekCode();
-        return readField(peekCode, key, name);
+        return readField(peekCode, key, name, true);
     }
 
     void consumeSpecial() {
@@ -293,7 +306,7 @@ public class BinaryWire implements Wire, InternalWireIn {
         return bytes.readUnsignedByte(pos);
     }
 
-    private StringBuilder readField(int peekCode, WireKey key, @NotNull StringBuilder sb) {
+    private StringBuilder readField(int peekCode, WireKey key, @NotNull StringBuilder sb, boolean missingOk) {
         sb.setLength(0);
         switch (peekCode >> 4) {
             case BinaryWireHighCode.END_OF_STREAM:
@@ -312,8 +325,10 @@ public class BinaryWire implements Wire, InternalWireIn {
                 }
                 return sb;
             default:
-                // if it's not a field, perhaps none was written.
-                break;
+                if (missingOk)
+                    // if it's not a field, perhaps none was written.
+                    break;
+                throw new UnsupportedOperationException("Unknown code " + stringForCode(peekCode));
         }
         // if field-less accept anything in order.
         if (fieldLess) {
@@ -372,10 +387,17 @@ public class BinaryWire implements Wire, InternalWireIn {
                 throw new UnsupportedOperationException();
 
             case TYPE_PREFIX: {
+                long readPosition = bytes.readPosition();
                 bytes.readSkip(1);
                 StringBuilder sb = WireInternal.acquireStringBuilder();
                 bytes.readUtf8(sb);
-                wire.getValueOut().typePrefix(sb);
+                if (StringUtils.isEqual("snappy", sb)) {
+                    bytes.readPosition(readPosition);
+                    wire.writeComment("snappy");
+                    wire.getValueOut().text(valueIn.text());
+                } else {
+                    wire.getValueOut().typePrefix(sb);
+                }
                 break;
             }
 
@@ -389,7 +411,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
             case EVENT_NAME:
             case FIELD_NAME_ANY:
-                StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, WireInternal.acquireStringBuilder());
+                StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, WireInternal.acquireStringBuilder(), false);
                 wire.write(() -> fsb);
                 break;
 
@@ -435,7 +457,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 wire.getValueOut().bool(true);
                 break;
             default:
-                throw new UnsupportedOperationException(stringForCode(peekCode));
+                unknownCode(wire);
         }
     }
 
@@ -859,12 +881,17 @@ public class BinaryWire implements Wire, InternalWireIn {
             if (fromBytes == null)
                 return object(null);
             long remaining = fromBytes.readRemaining();
-            if (remaining >= compressedSize) {
+            if (remaining >= compressedSize()) {
                 compress(compression, fromBytes);
             } else {
                 bytes0(fromBytes, remaining);
             }
             return BinaryWire.this;
+        }
+
+        @Override
+        public int compressedSize() {
+            return compressedSize;
         }
 
         public void bytes0(@Nullable BytesStore fromBytes, long remaining) {
