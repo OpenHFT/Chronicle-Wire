@@ -66,9 +66,9 @@ public class TextWire implements Wire, InternalWireIn {
     static final char[] HEX = "0123456789ABCDEF".toCharArray();
 
     static {
-        for (char ch : "0123456789+- \t\',#:{}[]|>!".toCharArray())
+        for (char ch : "0123456789+- \t\',#:{}[]|>!\0\b\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
-        for (char ch : ",#:{}[]|>".toCharArray())
+        for (char ch : ",#:{}[]|>\0\b\\".toCharArray())
             QUOTE_CHARS.set(ch);
     }
 
@@ -137,6 +137,9 @@ public class TextWire implements Wire, InternalWireIn {
                                         Character.getNumericValue(sb.charAt(++i)) * 256 +
                                         Character.getNumericValue(sb.charAt(++i)) * 16 +
                                         Character.getNumericValue(sb.charAt(++i)));
+                        break;
+                    case '0':
+                        ch = 0;
                         break;
                     default:
                         ch = ch3;
@@ -438,16 +441,19 @@ public class TextWire implements Wire, InternalWireIn {
                 case '\n':
                     bytes.appendUtf8("\\n");
                     break;
+                case '\0':
+                    bytes.appendUtf8("\\0");
+                    break;
                 default:
-                    if (ch > 127) {
-                        bytes.appendUtf8("\\u");
-                        bytes.appendUtf8(HEX[(ch >> 12) & 0xF]);
-                        bytes.appendUtf8(HEX[(ch >> 8) & 0xF]);
-                        bytes.appendUtf8(HEX[(ch >> 4) & 0xF]);
-                        bytes.appendUtf8(HEX[ch & 0xF]);
-                    } else {
+//                    if (ch > 127) {
+//                        bytes.appendUtf8("\\u");
+//                        bytes.appendUtf8(HEX[(ch >> 12) & 0xF]);
+//                        bytes.appendUtf8(HEX[(ch >> 8) & 0xF]);
+//                        bytes.appendUtf8(HEX[(ch >> 4) & 0xF]);
+//                        bytes.appendUtf8(HEX[ch & 0xF]);
+//                    } else {
                         bytes.appendUtf8(ch);
-                    }
+//                    }
                     break;
             }
         }
@@ -1893,7 +1899,7 @@ public class TextWire implements Wire, InternalWireIn {
             code = readCode();
             if (code != '}')
                 throw new IORuntimeException("Unterminated { while reading marshallable " +
-                        object + ",code='" + (char) code + "', bytes=" + Bytes.toString(bytes)
+                        object + ",code='" + (char) code + "', bytes=" + Bytes.toString(bytes, 1024)
                 );
             return TextWire.this;
         }

@@ -1095,7 +1095,7 @@ public class JSONWire extends TextWire {
             code = readCode();
             if (code != '}')
                 throw new IORuntimeException("Unterminated { while reading marshallable " +
-                        object + ",code='" + (char) code + "', bytes=" + Bytes.toString(bytes)
+                        object + ",code='" + (char) code + "', bytes=" + Bytes.toString(bytes, 1024)
                 );
             return JSONWire.this;
         }
