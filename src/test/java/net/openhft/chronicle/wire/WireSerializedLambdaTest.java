@@ -59,7 +59,7 @@ public class WireSerializedLambdaTest {
                 .write(() -> "two").object(Fun.ADD_A)
                 .write(() -> "three").object(Updat.INCR);
 
-        // System.out.println(wire.bytes().toString());
+         System.out.println(wire.bytes().toString());
 
         assertEquals("one: !SerializedLambda {\n" +
                 "  cc: !type net.openhft.chronicle.wire.WireSerializedLambdaTest,\n" +
@@ -110,7 +110,7 @@ public class WireSerializedLambdaTest {
                 "Ãimt¸&(Ljava/lang/String;)Ljava/lang/String;" +
                 "Âca\\u0082٠٠٠٠" +
                 "Ãtwo¶⒊FunåADD_A" +
-                "Åthree¶⒌UpdatäDECR", wire.bytes().toDebugString());
+                "Åthree¶⒌UpdatäDECR", wire.bytes().toDebugString(400));
 
         Function<String, String> function = wire.read().object(Function.class);
         assertEquals("HELLO", function.apply("hello"));

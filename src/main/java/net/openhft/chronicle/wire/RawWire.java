@@ -18,8 +18,8 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.IORuntimeException;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
@@ -270,6 +270,13 @@ public class RawWire implements Wire, InternalWireIn {
         public WireOut bytes(String type, byte[] bytesArr) {
             typePrefix(type);
             return bytes(bytesArr);
+        }
+
+        @NotNull
+        @Override
+        public WireOut bytes(String type, @Nullable BytesStore fromBytes) {
+            typePrefix(type);
+            return bytes(fromBytes);
         }
 
         @NotNull

@@ -1,5 +1,5 @@
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.IORuntimeException;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.*;
 
@@ -10,7 +10,7 @@ public class WireTextBug {
     @org.junit.Test
     public void testText() throws Exception {
         ClassAliasPool.CLASS_ALIASES.addAlias(Bug.class);
-        Wire encodeWire = new BinaryWire(Bytes.elasticByteBuffer().unchecked(true), false, true, false);
+        Wire encodeWire = new BinaryWire(Bytes.elasticByteBuffer().unchecked(true), false, true, false, Integer.MAX_VALUE);
         Bug b = new Bug();
         b.setClOrdID("FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12");
         System.out.println("b = " + b);

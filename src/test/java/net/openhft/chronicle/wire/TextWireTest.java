@@ -25,7 +25,6 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.xerial.snappy.Snappy;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
@@ -570,7 +569,7 @@ public class TextWireTest {
         Wire wire = createWire();
         MyTypes mtA = new MyTypes();
         mtA.b = true;
-        mtA.d =123.456;
+        mtA.d = 123.456;
         mtA.i = -12345789;
         mtA.s = (short) 12345;
         mtA.text.append("Hello World");
@@ -810,22 +809,23 @@ public class TextWireTest {
     @Test
     public void testSnappyCompression() throws IOException {
         Wire wire = createWire();
-        String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        String str = s + s + s + s;
 
-        byte[] compressedBytes = Snappy.compress(str.getBytes());
-        wire.write().compress("snappy", Bytes.wrapForRead(compressedBytes));
+        wire.write().compress("snappy", Bytes.wrapForRead(str.getBytes()));
 
         Bytes ret = Bytes.allocateElasticDirect();
         wire.read().decompress(ret);
         byte[] returnBytes = new byte[(int) ret.readRemaining()];
         ret.read(returnBytes);
-        assertArrayEquals(compressedBytes, returnBytes);
+        assertArrayEquals(str.getBytes(), returnBytes);
     }
 
     @Test
     public void testSnappyCompressionAsText() throws IOException {
         Wire wire = createWire();
-        String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        String str = s + s + s + s;
 
         byte[] bytes0 = str.getBytes();
         wire.write().compress("snappy", Bytes.wrapForRead(bytes0));
@@ -838,7 +838,8 @@ public class TextWireTest {
     @Test
     public void testGZIPCompressionAsText() throws IOException {
         Wire wire = createWire();
-        String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        String str = s + s + s + s;
 
         byte[] compressedBytes = str.getBytes();
         wire.write().compress("gzip", Bytes.wrapForRead(compressedBytes));
@@ -851,7 +852,8 @@ public class TextWireTest {
     @Test
     public void testSnappyCompressWithSnappy() throws IOException {
         Wire wire = createWire();
-        String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        String str = s + s + s + s;
 
         wire.write().compress("snappy", str);
 //        System.out.println(wire.bytes());
@@ -859,6 +861,9 @@ public class TextWireTest {
         wire.read().decompress(bytes);
         assertEquals(str, bytes.toString());
 
+        wire.bytes().readPosition(0);
+        String str2 = wire.read().text();
+        assertEquals(str, str2);
     }
 
     @Test

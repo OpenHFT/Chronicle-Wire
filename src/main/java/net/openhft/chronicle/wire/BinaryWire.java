@@ -25,7 +25,9 @@ import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.xerial.snappy.Snappy;
 
+import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -52,16 +54,19 @@ public class BinaryWire implements Wire, InternalWireIn {
     private final BinaryValueIn valueIn = new BinaryValueIn();
     private final boolean numericFields;
     private final boolean fieldLess;
+    private final int compressedSize;
     private boolean ready;
+    private String compression = "gzip";
 
     public BinaryWire(Bytes bytes) {
-        this(bytes, false, false, false);
+        this(bytes, false, false, false, Integer.MAX_VALUE);
     }
 
-    public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess) {
+    public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize) {
         this.numericFields = numericFields;
         this.fieldLess = fieldLess;
         this.bytes = bytes;
+        this.compressedSize = compressedSize;
         valueOut = fixed ? fixedValueOut : new BinaryValueOut();
     }
 
@@ -402,7 +407,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                     @NotNull
                     @Override
                     public String name() {
-                        return null;
+                        return Integer.toString(code());
                     }
 
                     @Override
@@ -850,12 +855,22 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public WireOut bytes(@Nullable BytesStore fromBytes) {
+            if (fromBytes == null)
+                return object(null);
             long remaining = fromBytes.readRemaining();
+            if (remaining >= compressedSize) {
+                compress(compression, fromBytes);
+            } else {
+                bytes0(fromBytes, remaining);
+            }
+            return BinaryWire.this;
+        }
+
+        public void bytes0(@Nullable BytesStore fromBytes, long remaining) {
             writeLength(Maths.toInt32(remaining + 1));
             writeCode(U8_ARRAY);
             if (remaining > 0)
                 bytes.write(fromBytes);
-            return BinaryWire.this;
         }
 
         @NotNull
@@ -888,6 +903,14 @@ public class BinaryWire implements Wire, InternalWireIn {
             writeLength(Maths.toInt32(fromBytes.length + 1));
             writeCode(U8_ARRAY);
             bytes.write(fromBytes);
+            return BinaryWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut bytes(String type, @Nullable BytesStore fromBytes) {
+            typePrefix(type);
+            bytes0(fromBytes, fromBytes.readRemaining());
             return BinaryWire.this;
         }
 
@@ -1387,31 +1410,50 @@ public class BinaryWire implements Wire, InternalWireIn {
         @Override
         public String text() {
             int code = readCode();
-            boolean wasNull = code == NULL;
-            if (wasNull) {
-                return null;
-
-            } else if (code == STRING_ANY) {
-                long len0 = bytes.readStopBit();
-                if (len0 == -1L) {
+            switch (code) {
+                case NULL:
                     return null;
 
-                }
-                int len = Maths.toUInt31(len0);
-                long limit = bytes.readLimit();
-                try {
-                    bytes.readLimit(bytes.readPosition() + len);
-                    return UTF8_INTERNER.intern(bytes);
-                } finally {
-                    bytes.readPosition(bytes.readLimit());
-                    bytes.readLimit(limit);
+                case STRING_ANY: {
+                    long len0 = bytes.readStopBit();
+                    if (len0 == -1L) {
+                        return null;
+
+                    }
+                    int len = Maths.toUInt31(len0);
+                    long limit = bytes.readLimit();
+                    try {
+                        bytes.readLimit(bytes.readPosition() + len);
+                        return UTF8_INTERNER.intern(bytes);
+                    } finally {
+                        bytes.readPosition(bytes.readLimit());
+                        bytes.readLimit(limit);
+                    }
+
                 }
 
-            } else {
-                StringBuilder text = readText(code, WireInternal.acquireStringBuilder());
-                if (text == null)
-                    cantRead(code);
-                return WireInternal.INTERNER.intern(text);
+                case TYPE_PREFIX: {
+                    StringBuilder sb = WireInternal.acquireStringBuilder();
+                    if (bytes.readUtf8(sb)) {
+                        if (StringUtils.isEqual("snappy", sb)) {
+                            try {
+                                byte[] bytes = bytes();
+                                return new String(Snappy.uncompress(bytes), "UTF-8");
+                            } catch (IOException e) {
+                                throw new IORuntimeException(e);
+                            }
+                        }
+                    }
+                    StringBuilder text = readText(code, sb);
+                    return WireInternal.INTERNER.intern(text);
+                }
+
+                default: {
+                    StringBuilder text = readText(code, WireInternal.acquireStringBuilder());
+                    if (text == null)
+                        cantRead(code);
+                    return WireInternal.INTERNER.intern(text);
+                }
             }
         }
 
@@ -1448,12 +1490,35 @@ public class BinaryWire implements Wire, InternalWireIn {
         public BytesStore bytesStore() {
             long length = readLength() - 1;
             int code = readCode();
-            if (code != U8_ARRAY)
-                cantRead(code);
-            BytesStore toBytes = NativeBytesStore.nativeStore(length);
-            toBytes.write(0, bytes, bytes.readPosition(), length);
-            bytes.readSkip(length);
-            return toBytes;
+            switch (code) {
+                case U8_ARRAY:
+                    BytesStore toBytes = NativeBytesStore.nativeStore(length);
+                    toBytes.write(0, bytes, bytes.readPosition(), length);
+                    bytes.readSkip(length);
+                    return toBytes;
+
+                case TYPE_PREFIX: {
+                    StringBuilder sb = WireInternal.acquireStringBuilder();
+                    bytes.readUtf8(sb);
+                    if (StringUtils.isEqual("snappy", sb)) {
+                        byte[] bytes = bytes();
+                        try {
+                            return BytesStore.wrap(Snappy.uncompress(bytes));
+                        } catch (IOException e) {
+                            throw new IORuntimeException(e);
+                        }
+                    }
+                    if (StringUtils.isEqual("gzip", sb)) {
+                        byte[] bytes = bytes();
+                        return BytesStore.wrap(GZIP.uncompress(bytes));
+                    }
+                    throw new UnsupportedOperationException("Unsupported type " + sb);
+                }
+
+                default:
+                    cantRead(code);
+                    throw new AssertionError();
+            }
         }
 
         public void bytesStore(@NotNull StringBuilder sb) {
@@ -1501,7 +1566,13 @@ public class BinaryWire implements Wire, InternalWireIn {
         @NotNull
         @Override
         public byte[] bytes() {
-            throw new UnsupportedOperationException("todo");
+            long length = readLength();
+            int code = readCode();
+            if (code != U8_ARRAY)
+                cantRead(code);
+            byte[] bytes2 = new byte[Maths.toUInt31(length - 1)];
+            bytes.readWithLength(length - 1, b -> b.read(bytes2));
+            return bytes2;
         }
 
         @NotNull

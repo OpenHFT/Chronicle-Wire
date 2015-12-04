@@ -15,7 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.IORuntimeException;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 @FunctionalInterface
