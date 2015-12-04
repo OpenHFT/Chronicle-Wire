@@ -749,6 +749,7 @@ public class TextWire implements Wire, InternalWireIn {
             int length = Maths.toInt32(fromBytes.readRemaining());
             byte[] byteArray = new byte[length];
             fromBytes.copyTo(byteArray);
+
             return bytes(byteArray);
         }
 

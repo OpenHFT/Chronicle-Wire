@@ -125,6 +125,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                         case U8_ARRAY:
                             bytes.readSkip(1);
                             wire.getValueOut().bytes(bytes);
+                            bytes.readPosition(bytes.readLimit());
                             break outerSwitch;
 
                         case I64_ARRAY:

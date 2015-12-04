@@ -233,10 +233,12 @@ enum WireInternal {
                     TextWire textWire = new TextWire(bytes2);
                     long readLimit = bytes.readLimit();
 
+                    long readPosition = bytes.readPosition();
                     try {
-                        bytes.readLimit(bytes.readPosition() + len);
+                        bytes.readLimit(readPosition + len);
                         new BinaryWire(bytes).copyTo(textWire);
                     } catch (Exception e) {
+                        bytes.readPosition(readPosition);
                         throw new IORuntimeException("Unable to parse\n" + bytes.toHexString(Integer.MAX_VALUE), e);
                     } finally {
                         bytes.readLimit(readLimit);
