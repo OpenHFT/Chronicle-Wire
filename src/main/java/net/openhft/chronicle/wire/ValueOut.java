@@ -319,6 +319,8 @@ public interface ValueOut {
     WireOut wireOut();
 
     default WireOut compress(String compression, BytesStore uncompressedBytes) {
+        if (uncompressedBytes == null)
+            return text(null);
         if (uncompressedBytes.readRemaining() < SMALL_MESSAGE)
             return bytes(uncompressedBytes);
         WireInternal.compress(this, compression, uncompressedBytes);

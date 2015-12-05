@@ -20,6 +20,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
@@ -232,9 +233,13 @@ enum WireInternal {
                     TextWire textWire = new TextWire(bytes2);
                     long readLimit = bytes.readLimit();
 
+                    long readPosition = bytes.readPosition();
                     try {
-                        bytes.readLimit(bytes.readPosition() + len);
+                        bytes.readLimit(readPosition + len);
                         new BinaryWire(bytes).copyTo(textWire);
+                    } catch (Exception e) {
+                        bytes.readPosition(readPosition);
+                        throw new IORuntimeException("Unable to parse\n" + bytes.toHexString(Integer.MAX_VALUE), e);
                     } finally {
                         bytes.readLimit(readLimit);
                     }
