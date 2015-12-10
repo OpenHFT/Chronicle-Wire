@@ -16,6 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -1382,75 +1383,28 @@ public class TextWire implements Wire, InternalWireIn {
             // TODO needs to be made much more efficient.
             StringBuilder sb = WireInternal.acquireStringBuilder();
             if (peekCode() == '!') {
+                bytes.readSkip(1);
                 parseWord(sb);
-                String str = WireInternal.INTERNER.intern(sb);
-                if (str.equals("!!binary")) {
-                    AppendableUtil.setLength(sb, 0);
-                    parseWord(sb);
-                    byte[] decode = Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb));
-                    return decode;
+                byte[] bytes = Compression.uncompress(sb, this, t -> {
+                    StringBuilder sb0 = WireInternal.acquireStringBuilder();
+                    AppendableUtil.setLength(sb0, 0);
+                    parseWord(sb0);
+                    return Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb));
+                });
+                if (bytes != null)
+                    return bytes;
 
-                } else if (str.equals("!!null")) {
+                if (StringUtils.isEqual("!null", sb)) {
                     parseWord(sb);
                     return null;
-                } else if (str.equals("!" + SEQ_MAP)) {
-                    sb.append(bytes.toString());
-                    // todo fix this.
-                    return WireInternal.INTERNER.intern(sb).getBytes();
-
-                } else if (str.equals("!snappy")) {
-                    AppendableUtil.setLength(sb, 0);
-                    parseWord(sb);
-                    byte[] decode = Base64.getDecoder().decode(sb.toString());
-                    try {
-                        return Snappy.uncompress(decode);
-                    } catch (IOException e) {
-                        throw new IORuntimeException(e);
-                    }
-
-                } else {
-                    throw new IllegalStateException("unsupported type=" + str);
                 }
+                throw new IllegalStateException("unsupported type=" + sb);
 
             } else {
                 textTo(sb);
                 // todo fix this.
                 return sb.toString().getBytes();
             }
-        }
-
-        @Nullable
-        @Override
-        public WireIn decompress(Bytes bytes) {
-            consumeWhiteSpace();
-            // TODO needs to be made much more efficient.
-            bytes.clear();
-            if (peekCode() == '!') {
-                StringBuilder sb = WireInternal.acquireStringBuilder();
-                parseWord(sb);
-                try {
-                    if (StringUtils.isEqual(sb, "!snappy")) {
-                        AppendableUtil.setLength(sb, 0);
-                        parseWord(sb);
-                        byte[] decode = Base64.getDecoder().decode(sb.toString());
-                        bytes.write(Snappy.uncompress(decode));
-                    } else if (StringUtils.isEqual(sb, "!gzip")) {
-                        AppendableUtil.setLength(sb, 0);
-                        parseWord(sb);
-                        byte[] decode = Base64.getDecoder().decode(sb.toString());
-                        GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(decode));
-                        bytes.copyFrom(gis);
-                    } else {
-                        throw new AssertionError("Unknown format " + sb);
-                    }
-                } catch (IOException e) {
-                    throw new AssertionError(e);
-                }
-
-            } else {
-                textTo(bytes);
-            }
-            return wireIn();
         }
 
         @NotNull

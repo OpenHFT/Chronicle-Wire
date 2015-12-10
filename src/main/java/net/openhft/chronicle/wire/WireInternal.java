@@ -17,6 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
@@ -50,6 +51,7 @@ enum WireInternal {
     static final StringInterner INTERNER = new StringInterner(128);
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
+    static final ThreadLocal<Bytes> BYTES_TL = ThreadLocal.withInitial(Bytes::allocateElasticDirect);
     static final StackTraceElement[] NO_STE = {};
     static final ThreadLocal<ByteBuffer[]> byteBufferTL = ThreadLocal.withInitial(() -> new ByteBuffer[1]);
     private static final Field DETAILED_MESSAGE = Jvm.getField(Throwable.class, "detailMessage");
@@ -325,7 +327,9 @@ enum WireInternal {
         return a == null ? b : b == null ? a : a + " " + b;
     }
 
+/*
     public static void compress(ValueOut out, String compression, BytesStore bytes) {
+        Compression.compress(compression, bytes, out.w)
         switch (compression) {
             case "snappy":
                 try {
@@ -357,6 +361,7 @@ enum WireInternal {
                 throw new IllegalArgumentException("Unknown compression " + compression);
         }
     }
+*/
 
     private static ByteBuffer acquireByteBuffer(int size) {
         ByteBuffer[] bbArray = byteBufferTL.get();

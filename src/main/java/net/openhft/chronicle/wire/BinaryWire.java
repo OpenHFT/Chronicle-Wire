@@ -16,6 +16,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.util.Compression;
+import net.openhft.chronicle.bytes.util.Compressions;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -25,10 +27,9 @@ import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.xerial.snappy.Snappy;
 
-import java.io.IOException;
 import java.nio.BufferUnderflowException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -882,7 +883,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 return object(null);
             long remaining = fromBytes.readRemaining();
             if (remaining >= compressedSize()) {
-                compress(compression, fromBytes);
+                compress(compression, fromBytes.bytesForRead());
             } else {
                 bytes0(fromBytes, remaining);
             }
@@ -1463,14 +1464,9 @@ public class BinaryWire implements Wire, InternalWireIn {
                 case TYPE_PREFIX: {
                     StringBuilder sb = WireInternal.acquireStringBuilder();
                     if (bytes.readUtf8(sb)) {
-                        if (StringUtils.isEqual("snappy", sb)) {
-                            try {
-                                byte[] bytes = bytes();
-                                return new String(Snappy.uncompress(bytes), "UTF-8");
-                            } catch (IOException e) {
-                                throw new IORuntimeException(e);
-                            }
-                        }
+                        byte[] bytes = Compression.uncompress(sb, this, ValueIn::bytes);
+                        if (bytes != null)
+                            return new String(bytes, StandardCharsets.UTF_8);
                     }
                     StringBuilder text = readText(code, sb);
                     return WireInternal.INTERNER.intern(text);
@@ -1528,18 +1524,9 @@ public class BinaryWire implements Wire, InternalWireIn {
                 case TYPE_PREFIX: {
                     StringBuilder sb = WireInternal.acquireStringBuilder();
                     bytes.readUtf8(sb);
-                    if (StringUtils.isEqual("snappy", sb)) {
-                        byte[] bytes = bytes();
-                        try {
-                            return BytesStore.wrap(Snappy.uncompress(bytes));
-                        } catch (IOException e) {
-                            throw new IORuntimeException(e);
-                        }
-                    }
-                    if (StringUtils.isEqual("gzip", sb)) {
-                        byte[] bytes = bytes();
-                        return BytesStore.wrap(GZIP.uncompress(bytes));
-                    }
+                    byte[] bytes = Compression.uncompress(sb, this, ValueIn::bytes);
+                    if (bytes != null)
+                        return BytesStore.wrap(bytes);
                     throw new UnsupportedOperationException("Unsupported type " + sb);
                 }
 

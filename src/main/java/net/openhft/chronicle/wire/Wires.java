@@ -151,4 +151,7 @@ public enum Wires {
         return bytes.readPosition();
     }
 
+    public static Bytes acquireBytes() {
+        return WireInternal.BYTES_TL.get();
+    }
 }

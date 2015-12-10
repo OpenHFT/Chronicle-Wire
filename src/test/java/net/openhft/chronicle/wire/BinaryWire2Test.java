@@ -201,6 +201,7 @@ reply: !UpdatedEvent {
                 "  oldValue: world1,\n" +
                 "  value: world2\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
+
         wire.readDocument(null, w -> w.read(() -> "data").typePrefix(this, (o, t) -> assertEquals("!UpdateEvent", t.toString())).marshallable(
                 m -> m.read(() -> "assetName").object(String.class, "/name", Assert::assertEquals)
                         .read(() -> "key").object(String.class, "test", Assert::assertEquals)

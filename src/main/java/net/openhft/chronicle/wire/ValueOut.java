@@ -17,6 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -318,12 +319,14 @@ public interface ValueOut {
     @NotNull
     WireOut wireOut();
 
-    default WireOut compress(String compression, BytesStore uncompressedBytes) {
+    default WireOut compress(String compression, Bytes uncompressedBytes) {
         if (uncompressedBytes == null)
             return text(null);
         if (uncompressedBytes.readRemaining() < compressedSize())
             return bytes(uncompressedBytes);
-        WireInternal.compress(this, compression, uncompressedBytes);
+        Bytes tmpBytes = Wires.acquireBytes();
+        Compression.compress(compression, uncompressedBytes, tmpBytes);
+        bytes(tmpBytes);
         return wireOut();
     }
 

@@ -815,7 +815,7 @@ public class TextWireTest {
         wire.write().compress("snappy", Bytes.wrapForRead(str.getBytes()));
 
         Bytes ret = Bytes.allocateElasticDirect();
-        wire.read().decompress(ret);
+        wire.read().bytes(ret);
         byte[] returnBytes = new byte[(int) ret.readRemaining()];
         ret.read(returnBytes);
         assertArrayEquals(str.getBytes(), returnBytes);
@@ -831,7 +831,7 @@ public class TextWireTest {
         wire.write().compress("snappy", Bytes.wrapForRead(bytes0));
 
         Bytes bytes = allocateElasticDirect();
-        wire.read().decompress(bytes);
+        wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
 
@@ -845,7 +845,7 @@ public class TextWireTest {
         wire.write().compress("gzip", Bytes.wrapForRead(compressedBytes));
 
         Bytes bytes = allocateElasticDirect();
-        wire.read().decompress(bytes);
+        wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
 
@@ -858,7 +858,7 @@ public class TextWireTest {
         wire.write().compress("snappy", str);
 //        System.out.println(wire.bytes());
         Bytes bytes = allocateElasticDirect();
-        wire.read().decompress(bytes);
+        wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
 
         wire.bytes().readPosition(0);
