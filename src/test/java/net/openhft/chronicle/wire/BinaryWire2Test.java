@@ -36,12 +36,6 @@ import static org.junit.Assert.assertTrue;
 public class BinaryWire2Test {
     @NotNull
     Bytes bytes = nativeBytes();
-    StringBuilder csp = new StringBuilder();
-    StringBuilder key1 = new StringBuilder();
-    StringBuilder key2 = new StringBuilder();
-    StringBuilder value1 = new StringBuilder();
-    StringBuilder value2 = new StringBuilder();
-    long tid;
 
     @NotNull
     private BinaryWire createWire() {
@@ -279,7 +273,7 @@ reply: !UpdatedEvent {
     }
 
     @Test
-    public void testSnappyCompression() {
+    public void testCompression() {
         for (String comp : "binary,gzip,lzw".split(",")) {
             bytes.clear();
 
