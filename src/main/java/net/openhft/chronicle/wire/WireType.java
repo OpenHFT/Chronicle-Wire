@@ -56,13 +56,13 @@ public enum WireType implements Function<Bytes, Wire> {
         @NotNull
         @Override
         public Wire apply(Bytes bytes) {
-            return new BinaryWire(bytes, false, false, true, Integer.MAX_VALUE);
+            return new BinaryWire(bytes, false, false, true, Integer.MAX_VALUE, "binary");
         }
     }, COMPRESSED_BINARY {
         @NotNull
         @Override
         public Wire apply(Bytes bytes) {
-            return new BinaryWire(bytes, false, false, false, COMPRESSED_SIZE);
+            return new BinaryWire(bytes, false, false, false, COMPRESSED_SIZE, "lzw");
         }
     }, JSON {
         @NotNull

@@ -838,7 +838,7 @@ public class TextWireTest {
     @Test
     public void testGZIPCompressionAsText() throws IOException {
         Wire wire = createWire();
-        final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        final String s = "xxxxxxxxxxx1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
         String str = s + s + s + s;
 
         byte[] compressedBytes = str.getBytes();
@@ -848,22 +848,18 @@ public class TextWireTest {
         wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
-
     @Test
-    public void testSnappyCompressWithSnappy() throws IOException {
+    public void testLZWCompressionAsText() throws IOException {
         Wire wire = createWire();
-        final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        final String s = "xxxxxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxx";
         String str = s + s + s + s;
 
-        wire.write().compress("snappy", str);
-//        System.out.println(wire.bytes());
+        byte[] compressedBytes = str.getBytes();
+        wire.write().compress("lzw", Bytes.wrapForRead(compressedBytes));
+
         Bytes bytes = allocateElasticDirect();
         wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
-
-        wire.bytes().readPosition(0);
-        String str2 = wire.read().text();
-        assertEquals(str, str2);
     }
 
     @Test

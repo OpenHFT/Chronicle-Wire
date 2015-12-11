@@ -152,6 +152,14 @@ public enum Wires {
     }
 
     public static Bytes acquireBytes() {
-        return WireInternal.BYTES_TL.get();
+        Bytes bytes = WireInternal.BYTES_TL.get();
+        bytes.clear();
+        return bytes;
+    }
+
+    public static Bytes acquireAnotherBytes() {
+        Bytes bytes = WireInternal.ABYTES_TL.get();
+        bytes.clear();
+        return bytes;
     }
 }

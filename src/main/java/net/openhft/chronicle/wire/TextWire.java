@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
@@ -39,7 +38,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.*;
-import java.util.zip.GZIPInputStream;
 
 import static net.openhft.chronicle.bytes.Bytes.empty;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
@@ -1356,19 +1354,23 @@ public class TextWire implements Wire, InternalWireIn {
             // TODO needs to be made much more efficient.
             StringBuilder sb = WireInternal.acquireStringBuilder();
             if (peekCode() == '!') {
+                bytes.readSkip(1);
                 parseWord(sb);
-                String str = WireInternal.INTERNER.intern(sb);
-                if (str.equals("!!binary")) {
-                    AppendableUtil.setLength(sb, 0);
-                    parseWord(sb);
-                    byte[] decode = Base64.getDecoder().decode(sb.toString());
-                    bytesConsumer.readMarshallable(new TextWire(Bytes.wrapForRead(decode)));
+                byte[] uncompressed = Compression.uncompress(sb, TextWire.this, t -> {
+                    StringBuilder sb2 = WireInternal.acquireStringBuilder();
+                    AppendableUtil.setLength(sb2, 0);
+                    t.parseWord(sb2);
+                    byte[] decode = Base64.getDecoder().decode(sb2.toString());
+                    return decode;
+                });
+                if (uncompressed != null) {
+                    bytesConsumer.readMarshallable(new TextWire(Bytes.wrapForRead(uncompressed)));
 
-                } else if (str.equals("!!null")) {
+                } else if (StringUtils.isEqual(sb, "!null")) {
                     bytesConsumer.readMarshallable(null);
                     parseWord(sb);
                 } else {
-                    throw new IORuntimeException("Unsupported type=" + str);
+                    throw new IORuntimeException("Unsupported type=" + sb);
                 }
             } else {
                 textTo(sb);

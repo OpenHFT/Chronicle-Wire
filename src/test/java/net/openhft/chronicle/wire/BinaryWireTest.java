@@ -90,7 +90,7 @@ public class BinaryWireTest {
     @NotNull
     private BinaryWire createWire() {
         bytes.clear();
-        return new BinaryWire(bytes, fixed, numericField, fieldLess, compressedSize);
+        return new BinaryWire(bytes, fixed, numericField, fieldLess, compressedSize, "lzw");
     }
 
     private void checkWire(@NotNull Wire wire, String... expected) {

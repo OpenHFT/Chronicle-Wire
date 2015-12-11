@@ -98,7 +98,7 @@ public class BinaryWireNumbersTest {
 
     public void test(@NotNull Consumer<ValueOut> expected, @NotNull Consumer<ValueOut> perform) {
         Bytes bytes1 = nativeBytes();
-        Wire wire1 = new BinaryWire(bytes1, true, false, false, Integer.MAX_VALUE);
+        Wire wire1 = new BinaryWire(bytes1, true, false, false, Integer.MAX_VALUE, "binary");
         expected.accept(wire1.write());
 
         assertEquals("Length for fixed length doesn't match for " + TextWire.asText(wire1), len, bytes1.readRemaining());

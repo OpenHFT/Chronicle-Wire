@@ -10,7 +10,7 @@ public class WireTextBug {
     @org.junit.Test
     public void testText() throws Exception {
         ClassAliasPool.CLASS_ALIASES.addAlias(Bug.class);
-        Wire encodeWire = new BinaryWire(Bytes.elasticByteBuffer().unchecked(true), false, true, false, Integer.MAX_VALUE);
+        Wire encodeWire = new BinaryWire(Bytes.elasticByteBuffer().unchecked(true), false, true, false, Integer.MAX_VALUE, "lzw");
         Bug b = new Bug();
         b.setClOrdID("FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12");
         System.out.println("b = " + b);

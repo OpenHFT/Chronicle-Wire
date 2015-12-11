@@ -17,7 +17,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.util.Compression;
-import net.openhft.chronicle.bytes.util.Compressions;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -57,18 +56,19 @@ public class BinaryWire implements Wire, InternalWireIn {
     private final boolean fieldLess;
     private final int compressedSize;
     private boolean ready;
-    private String compression = "gzip";
+    private String compression;
 
     public BinaryWire(Bytes bytes) {
-        this(bytes, false, false, false, Integer.MAX_VALUE);
+        this(bytes, false, false, false, Integer.MAX_VALUE, "binary");
     }
 
-    public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize) {
+    public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression) {
         this.numericFields = numericFields;
         this.fieldLess = fieldLess;
         this.bytes = bytes;
         this.compressedSize = compressedSize;
         valueOut = fixed ? fixedValueOut : new BinaryValueOut();
+        this.compression = compression;
     }
 
     @Override
@@ -392,9 +392,9 @@ public class BinaryWire implements Wire, InternalWireIn {
                 bytes.readSkip(1);
                 StringBuilder sb = WireInternal.acquireStringBuilder();
                 bytes.readUtf8(sb);
-                if (StringUtils.isEqual("snappy", sb)) {
+                if (StringUtils.isEqual("snappy", sb) || StringUtils.isEqual("gzip", sb) || StringUtils.isEqual("lzw", sb)) {
                     bytes.readPosition(readPosition);
-                    wire.writeComment("snappy");
+                    wire.writeComment(sb);
                     wire.getValueOut().text(valueIn.text());
                 } else {
                     wire.getValueOut().typePrefix(sb);

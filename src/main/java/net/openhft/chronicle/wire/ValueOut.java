@@ -326,7 +326,7 @@ public interface ValueOut {
             return bytes(uncompressedBytes);
         Bytes tmpBytes = Wires.acquireBytes();
         Compression.compress(compression, uncompressedBytes, tmpBytes);
-        bytes(tmpBytes);
+        bytes(compression, tmpBytes);
         return wireOut();
     }
 
