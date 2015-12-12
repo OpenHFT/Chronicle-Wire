@@ -361,7 +361,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
     @NotNull
     private <ACS extends Appendable & CharSequence> ACS getStringBuilder(int code, @NotNull ACS sb) {
-        bytes.parseUTF(sb, code & 0x1f);
+        bytes.parseUtf8(sb, code & 0x1f);
         return sb;
     }
 
@@ -1386,7 +1386,7 @@ public class BinaryWire implements Wire, InternalWireIn {
                 default:
                     if (code >= STRING_0 && code <= STRING_31) {
                         StringBuilder sb = WireInternal.acquireStringBuilder();
-                        bytes.parseUTF(sb, code & 0b11111);
+                        bytes.parseUtf8(sb, code & 0b11111);
                         s.accept(WireInternal.INTERNER.intern(sb));
 
                     } else {

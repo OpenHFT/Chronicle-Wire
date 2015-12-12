@@ -260,7 +260,7 @@ public class JSONWire extends TextWire {
         if (use8bit)
             bytes.parse8bit(sb, testers);
         else
-            bytes.parseUTF(sb, testers);
+            bytes.parseUtf8(sb, testers);
     }
 
     public void parseUntil(StringBuilder sb, StopCharsTester testers) {
@@ -796,7 +796,7 @@ public class JSONWire extends TextWire {
                 if (use8bit)
                     bytes.parse8bit(a, getEscapingQuotes());
                 else
-                    bytes.parseUTF(a, getEscapingQuotes());
+                    bytes.parseUtf8(a, getEscapingQuotes());
                 unescape(a);
                 int code = peekCode();
                 if (code == '"')
@@ -834,7 +834,7 @@ public class JSONWire extends TextWire {
                     if (a instanceof Bytes || use8bit)
                         bytes.parse8bit(a, getEscapingEndOfText());
                     else
-                        bytes.parseUTF(a, getEscapingEndOfText());
+                        bytes.parseUtf8(a, getEscapingEndOfText());
 
                 } else {
                     AppendableUtil.setLength(a, 0);

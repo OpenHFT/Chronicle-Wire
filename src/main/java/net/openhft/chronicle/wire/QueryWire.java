@@ -63,7 +63,7 @@ public class QueryWire extends TextWire {
     @NotNull
     protected StringBuilder readField(@NotNull StringBuilder sb) {
         consumeWhiteSpace();
-        bytes.parseUTF(sb, QueryStopCharTesters.QUERY_FIELD_NAME);
+        bytes.parseUtf8(sb, QueryStopCharTesters.QUERY_FIELD_NAME);
         if (rewindAndRead() == '&')
             bytes.readSkip(-1);
         return sb;
@@ -566,7 +566,7 @@ public class QueryWire extends TextWire {
         @Override
         public StringBuilder textTo(@NotNull StringBuilder a) {
             consumeWhiteSpace();
-            bytes.parseUTF(a, QueryStopCharTesters.QUERY_VALUE);
+            bytes.parseUtf8(a, QueryStopCharTesters.QUERY_VALUE);
             return a;
         }
 
@@ -574,7 +574,7 @@ public class QueryWire extends TextWire {
         @Override
         public Bytes textTo(@NotNull Bytes a) {
             consumeWhiteSpace();
-            bytes.parseUTF(a, QueryStopCharTesters.QUERY_VALUE);
+            bytes.parseUtf8(a, QueryStopCharTesters.QUERY_VALUE);
             return a;
         }
 
