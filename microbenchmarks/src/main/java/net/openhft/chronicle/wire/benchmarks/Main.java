@@ -58,11 +58,11 @@ public class Main {
     final Bytes bytes = Bytes.allocateDirect(128).unchecked(true);
     final Wire twireUTF = new TextWire(bytes, false);
     final Wire twire8bit = new TextWire(bytes, true);
-    final Wire bwireFFF = new BinaryWire(bytes, false, false, false, Integer.MAX_VALUE);
-    final Wire bwireTFF = new BinaryWire(bytes, true, false, false, Integer.MAX_VALUE);
-    final Wire bwireFTF = new BinaryWire(bytes, false, true, false, Integer.MAX_VALUE);
-    final Wire bwireTTF = new BinaryWire(bytes, true, true, false, Integer.MAX_VALUE);
-    final Wire bwireFTT = new BinaryWire(bytes, false, true, true, Integer.MAX_VALUE);
+    final Wire bwireFFF = new BinaryWire(bytes, false, false, false, Integer.MAX_VALUE, "binary");
+    final Wire bwireTFF = new BinaryWire(bytes, true, false, false, Integer.MAX_VALUE, "binary");
+    final Wire bwireFTF = new BinaryWire(bytes, false, true, false, Integer.MAX_VALUE, "binary");
+    final Wire bwireTTF = new BinaryWire(bytes, true, true, false, Integer.MAX_VALUE, "binary");
+    final Wire bwireFTT = new BinaryWire(bytes, false, true, true, Integer.MAX_VALUE, "binary");
     final Wire rwireUTF = new RawWire(bytes, false);
     final Wire rwire8bit = new RawWire(bytes, true);
     final Wire json = new JSONWire(bytes, true);
