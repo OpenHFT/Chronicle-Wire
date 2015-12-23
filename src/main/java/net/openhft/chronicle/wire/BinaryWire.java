@@ -1510,7 +1510,7 @@ public class BinaryWire implements Wire, InternalWireIn {
 
         }
 
-        @NotNull
+        @Nullable
         public BytesStore bytesStore() {
             long length = readLength() - 1;
             int code = readCode();
@@ -1529,7 +1529,8 @@ public class BinaryWire implements Wire, InternalWireIn {
                         return BytesStore.wrap(bytes);
                     throw new UnsupportedOperationException("Unsupported type " + sb);
                 }
-
+                case NULL:
+                    return null;
                 default:
                     cantRead(code);
                     throw new AssertionError();
