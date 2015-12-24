@@ -56,6 +56,7 @@ public class BinaryWire implements Wire, InternalWire {
     private final boolean fieldLess;
     private final int compressedSize;
     private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
+    private final ReadDocumentContext readContext = new ReadDocumentContext(this);
     private boolean ready;
     private String compression;
 
@@ -76,6 +77,12 @@ public class BinaryWire implements Wire, InternalWire {
     public DocumentContext writingDocument(boolean metaData) {
         writeContext.start(metaData);
         return writeContext;
+    }
+
+    @Override
+    public DocumentContext readingDocument() {
+        readContext.start();
+        return readContext;
     }
 
     @Override

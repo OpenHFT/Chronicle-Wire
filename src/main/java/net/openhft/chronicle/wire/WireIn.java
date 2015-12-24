@@ -93,4 +93,6 @@ public interface WireIn extends WireCommon {
     default void rawReadData(ReadMarshallable marshallable) {
         WireInternal.rawReadData(this, marshallable);
     }
+
+    DocumentContext readingDocument();
 }

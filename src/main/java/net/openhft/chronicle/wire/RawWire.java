@@ -44,15 +44,16 @@ public class RawWire implements Wire, InternalWire {
     private final RawValueOut valueOut = new RawValueOut();
     private final RawValueIn valueIn = new RawValueIn();
     private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
+    private final ReadDocumentContext readContext = new ReadDocumentContext(this);
     boolean use8bit;
     @Nullable
     private
     StringBuilder lastSB;
     private boolean ready;
-
     public RawWire(Bytes bytes) {
         this(bytes, true);
     }
+
     public RawWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
         this.use8bit = use8bit;
@@ -64,6 +65,11 @@ public class RawWire implements Wire, InternalWire {
         return writeContext;
     }
 
+    @Override
+    public DocumentContext readingDocument() {
+        readContext.start();
+        return readContext;
+    }
 
     @Override
     public boolean isReady() {

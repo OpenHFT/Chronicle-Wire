@@ -40,7 +40,7 @@ public class WriteDocumentContext implements DocumentContext {
     }
 
     @Override
-    public boolean metaData() {
+    public boolean isMetaData() {
         return metaDataBit != 0;
     }
 
@@ -52,5 +52,15 @@ public class WriteDocumentContext implements DocumentContext {
             System.out.println("Message truncated from " + position + " to " + position1);
         int length = metaDataBit | toIntU30(position1 - position - 4, "Document length %,d out of 30-bit int range.");
         bytes.writeOrderedInt(position, length);
+    }
+
+    @Override
+    public boolean isPresent() {
+        return false;
+    }
+
+    @Override
+    public boolean isData() {
+        return metaDataBit == 0;
     }
 }

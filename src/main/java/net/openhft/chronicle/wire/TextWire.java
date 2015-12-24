@@ -75,6 +75,7 @@ public class TextWire implements Wire, InternalWire {
     protected final TextValueIn valueIn = createValueIn();
     protected final boolean use8bit;
     private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
+    private final ReadDocumentContext readContext = new ReadDocumentContext(this);
     protected Bytes<?> bytes;
     protected long lineStart = 0;
     private boolean ready;
@@ -156,6 +157,12 @@ public class TextWire implements Wire, InternalWire {
     public DocumentContext writingDocument(boolean metaData) {
         writeContext.start(metaData);
         return writeContext;
+    }
+
+    @Override
+    public DocumentContext readingDocument() {
+        readContext.start();
+        return readContext;
     }
 
     @NotNull

@@ -27,8 +27,7 @@ import java.time.*;
 import java.util.UUID;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by peter.lawrey on 06/02/15.
@@ -269,6 +268,10 @@ reply: !UpdatedEvent {
     @Test
     public void fieldAfterNullContext() {
         Wire wire = createWire();
+        try (DocumentContext _ = wire.writingDocument(true)) {
+            wire.write(() -> "tid").int64(1234567890L);
+        }
+
         try (DocumentContext _ = wire.writingDocument(false)) {
             wire.write(() -> "data").typedMarshallable("!UpdateEvent",
                     v -> v.write(() -> "assetName").text("/name")
@@ -285,18 +288,32 @@ reply: !UpdatedEvent {
   value: world2
 }
          */
-        assertEquals("--- !!data #binary\n" +
+        assertEquals("--- !!meta-data #binary\n" +
+                "tid: 1234567890\n" +
+                "--- !!data #binary\n" +
                 "data: !!UpdateEvent {\n" +
                 "  assetName: /name,\n" +
                 "  key: test,\n" +
                 "  oldValue: !!null \"\",\n" +
                 "  value: world2\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
-        wire.readDocument(null, w -> w.read(() -> "data").typePrefix(this, (o, t) -> assertEquals("!UpdateEvent", t.toString())).marshallable(
-                m -> m.read(() -> "assetName").object(String.class, "/name", Assert::assertEquals)
-                        .read(() -> "key").object(String.class, "test", Assert::assertEquals)
-                        .read(() -> "oldValue").object(String.class, "error", Assert::assertNull)
-                        .read(() -> "value").object(String.class, "world2", Assert::assertEquals)));
+        try (DocumentContext context = wire.readingDocument()) {
+            assertTrue(context.isPresent());
+            assertTrue(context.isMetaData());
+            Assert.assertEquals(1234567890L, wire.read(() -> "tid").int64());
+        }
+        try (DocumentContext context = wire.readingDocument()) {
+            assertTrue(context.isPresent());
+            assertTrue(context.isData());
+            wire.read(() -> "data").typePrefix(this, (o, t) -> assertEquals("!UpdateEvent", t.toString())).marshallable(
+                    m -> m.read(() -> "assetName").object(String.class, "/name", Assert::assertEquals)
+                            .read(() -> "key").object(String.class, "test", Assert::assertEquals)
+                            .read(() -> "oldValue").object(String.class, "error", Assert::assertNull)
+                            .read(() -> "value").object(String.class, "world2", Assert::assertEquals));
+        }
+        try (DocumentContext context = wire.readingDocument()) {
+            assertFalse(context.isPresent());
+        }
     }
 
 

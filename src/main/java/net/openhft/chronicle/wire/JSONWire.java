@@ -50,7 +50,6 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
  */
 public class JSONWire extends TextWire {
     static final BytesStore COMMA = BytesStore.from(",");
-    private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
 
     public JSONWire(Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
@@ -97,12 +96,6 @@ public class JSONWire extends TextWire {
         if (length != sb.length())
             throw new IllegalStateException("Length changed from " + length + " to " + sb.length() + " for " + sb);
         AppendableUtil.setLength(sb, end);
-    }
-
-    @Override
-    public DocumentContext writingDocument(boolean metaData) {
-        writeContext.start(metaData);
-        return writeContext;
     }
 
     @NotNull
