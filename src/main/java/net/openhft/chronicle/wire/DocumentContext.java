@@ -22,4 +22,5 @@ import net.openhft.chronicle.core.io.Closeable;
  * Created by peter on 24/12/15.
  */
 public interface DocumentContext extends Closeable {
+    boolean metaData();
 }

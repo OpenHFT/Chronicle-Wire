@@ -77,6 +77,8 @@ public interface WireIn extends WireCommon {
         return this;
     }
 
+    // TODO add a try-with-resource support for readDocument.
+
     default boolean readDocument(@Nullable ReadMarshallable metaDataConsumer,
                                  @Nullable ReadMarshallable dataConsumer) {
         return WireInternal.readData(this, metaDataConsumer, dataConsumer);

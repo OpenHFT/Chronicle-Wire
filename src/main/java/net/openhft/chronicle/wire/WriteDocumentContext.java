@@ -23,12 +23,12 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
 /**
  * Created by peter on 24/12/15.
  */
-public class VanillaDocumentContext implements DocumentContext {
+public class WriteDocumentContext implements DocumentContext {
     final InternalWire wire;
     long position;
     private int metaDataBit;
 
-    public VanillaDocumentContext(InternalWire wire) {
+    public WriteDocumentContext(InternalWire wire) {
         this.wire = wire;
     }
 
@@ -37,6 +37,11 @@ public class VanillaDocumentContext implements DocumentContext {
         this.position = bytes.writePosition();
         metaDataBit = metaData ? Wires.META_DATA : 0;
         bytes.writeOrderedInt(metaDataBit | Wires.NOT_READY | Wires.UNKNOWN_LENGTH);
+    }
+
+    @Override
+    public boolean metaData() {
+        return metaDataBit != 0;
     }
 
     @Override

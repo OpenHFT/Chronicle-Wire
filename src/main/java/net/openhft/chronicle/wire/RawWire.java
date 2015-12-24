@@ -43,7 +43,7 @@ public class RawWire implements Wire, InternalWire {
     private final Bytes bytes;
     private final RawValueOut valueOut = new RawValueOut();
     private final RawValueIn valueIn = new RawValueIn();
-    private final VanillaDocumentContext writeContext = new VanillaDocumentContext(this);
+    private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
     boolean use8bit;
     @Nullable
     private

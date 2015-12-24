@@ -50,7 +50,7 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
  */
 public class JSONWire extends TextWire {
     static final BytesStore COMMA = BytesStore.from(",");
-    private final VanillaDocumentContext writeContext = new VanillaDocumentContext(this);
+    private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
 
     public JSONWire(Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);

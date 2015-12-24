@@ -74,7 +74,7 @@ public class TextWire implements Wire, InternalWire {
     protected final TextValueOut valueOut = createValueOut();
     protected final TextValueIn valueIn = createValueIn();
     protected final boolean use8bit;
-    private final VanillaDocumentContext writeContext = new VanillaDocumentContext(this);
+    private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
     protected Bytes<?> bytes;
     protected long lineStart = 0;
     private boolean ready;

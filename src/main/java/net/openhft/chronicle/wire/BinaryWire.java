@@ -55,7 +55,7 @@ public class BinaryWire implements Wire, InternalWire {
     private final boolean numericFields;
     private final boolean fieldLess;
     private final int compressedSize;
-    private final VanillaDocumentContext writeContext = new VanillaDocumentContext(this);
+    private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
     private boolean ready;
     private String compression;
 
