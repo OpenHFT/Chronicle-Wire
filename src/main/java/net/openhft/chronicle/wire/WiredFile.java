@@ -61,44 +61,6 @@ public class WiredFile<D extends Marshallable> implements Closeable {
         this.mappedBytesStoreFactory = mappedBytesStoreFactory;
     }
 
-    public File masterFile() {
-        return masterFile;
-    }
-
-    public MappedFile mappedFile() {
-        return mappedFile;
-    }
-
-    public D delegate() {
-        return delegate;
-    }
-
-    public long headerLength() {
-        return headerLength;
-    }
-
-    public BytesStore headerStore() {
-        return this.headerStore;
-    }
-
-    public boolean headerCreated() {
-        return this.headerCreated;
-    }
-
-    public Function<Bytes, Wire> wireSupplier() {
-        return this.wireType;
-    }
-
-    public Wire acquireWiredChunk(long position) throws IOException {
-        WiredMappedBytesStore mappedBytesStore = mappedFile.acquireByteStore(position, mappedBytesStoreFactory);
-        return mappedBytesStore.getWire();
-    }
-
-    @Override
-    public void close() {
-        mappedFile.close();
-    }
-
     public static <D extends Marshallable> WiredFile<D> build(
             String masterFile,
             Function<File, MappedFile> toMappedFile,
@@ -127,7 +89,7 @@ public class WiredFile<D extends Marshallable> implements Closeable {
         MappedBytesStoreFactory<WiredMappedBytesStore> mappedBytesStoreFactory = (owner, start, address, capacity, safeCapacity) ->
                 new WiredMappedBytesStore(owner, start, address, capacity, safeCapacity, wireType);
 
-        WiredMappedBytesStore header = null;
+        WiredMappedBytesStore header;
         try {
             header = mappedFile.acquireByteStore(0, mappedBytesStoreFactory);
         } catch (IOException e) {
@@ -175,6 +137,43 @@ public class WiredFile<D extends Marshallable> implements Closeable {
         return wiredFile;
     }
 
+    public File masterFile() {
+        return masterFile;
+    }
+
+    public MappedFile mappedFile() {
+        return mappedFile;
+    }
+
+    public D delegate() {
+        return delegate;
+    }
+
+    public long headerLength() {
+        return headerLength;
+    }
+
+    public BytesStore headerStore() {
+        return this.headerStore;
+    }
+
+    public boolean headerCreated() {
+        return this.headerCreated;
+    }
+
+    public Function<Bytes, Wire> wireSupplier() {
+        return this.wireType;
+    }
+
+    public Wire acquireWiredChunk(long position) throws IOException {
+        WiredMappedBytesStore mappedBytesStore = mappedFile.acquireByteStore(position, mappedBytesStoreFactory);
+        return mappedBytesStore.getWire();
+    }
+
+    @Override
+    public void close() {
+        mappedFile.close();
+    }
 
     static class WiredMappedBytesStore extends MappedBytesStore {
         private final Wire wire;
