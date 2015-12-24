@@ -39,10 +39,11 @@ import java.util.function.*;
 /**
  * This format writes just the data, without meta data.
  */
-public class RawWire implements Wire, InternalWireIn {
+public class RawWire implements Wire, InternalWire {
     private final Bytes bytes;
     private final RawValueOut valueOut = new RawValueOut();
     private final RawValueIn valueIn = new RawValueIn();
+    private final VanillaDocumentContext writeContext = new VanillaDocumentContext(this);
     boolean use8bit;
     @Nullable
     private
@@ -52,11 +53,17 @@ public class RawWire implements Wire, InternalWireIn {
     public RawWire(Bytes bytes) {
         this(bytes, true);
     }
-
     public RawWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
         this.use8bit = use8bit;
     }
+
+    @Override
+    public DocumentContext writingDocument(boolean metaData) {
+        writeContext.start(metaData);
+        return writeContext;
+    }
+
 
     @Override
     public boolean isReady() {

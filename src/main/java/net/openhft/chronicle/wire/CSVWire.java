@@ -65,6 +65,11 @@ public class CSVWire extends TextWire {
         return new CSVWire(Bytes.from(text));
     }
 
+    @Override
+    public DocumentContext writingDocument(boolean metaData) {
+        throw new UnsupportedOperationException("todo");
+    }
+
     @NotNull
     @Override
     protected TextValueOut createValueOut() {

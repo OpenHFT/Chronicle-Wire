@@ -16,11 +16,10 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.io.Closeable;
+
 /**
- * These methods are for internal use only.
- *
- * Created by peter.lawrey on 17/04/15.
+ * Created by peter on 24/12/15.
  */
-public interface InternalWireIn extends WireIn {
-    void setReady(boolean ready);
+public interface DocumentContext extends Closeable {
 }

@@ -136,7 +136,7 @@ enum WireInternal {
                     return false;
 
                 } else {
-                    ((InternalWireIn) wireIn).setReady(ready);
+                    ((InternalWire) wireIn).setReady(ready);
                     bytes.readWithLength(len, b -> dataConsumer.readMarshallable(wireIn));
                     return true;
                 }

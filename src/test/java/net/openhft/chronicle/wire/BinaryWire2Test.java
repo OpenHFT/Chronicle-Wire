@@ -161,6 +161,37 @@ public class BinaryWire2Test {
     }
 
     @Test
+    public void testSequenceContext() {
+        Wire wire = createWire();
+        writeMessageContext(wire);
+
+        System.out.println(wire.bytes().toHexString());
+
+        Wire twire = new TextWire(Bytes.elasticByteBuffer());
+        writeMessageContext(twire);
+
+        System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
+    }
+
+
+    private void writeMessageContext(@NotNull WireOut wire) {
+        try (DocumentContext _ = wire.writingDocument(true)) {
+            wire.write(() -> "csp").text("//path/service")
+                    .write(() -> "tid").int64(123456789);
+        }
+        try (DocumentContext _ = wire.writingDocument(false)) {
+            wire.write(() -> "entrySet").sequence(s -> {
+                s.marshallable(m -> m
+                        .write(() -> "key").text("key-1")
+                        .write(() -> "value").text("value-1"));
+                s.marshallable(m -> m
+                        .write(() -> "key").text("key-2")
+                        .write(() -> "value").text("value-2"));
+            });
+        }
+    }
+
+    @Test
     public void testEnum() {
         Wire wire = createWire();
         wire.write().object(WireType.BINARY)
@@ -212,6 +243,39 @@ reply: !UpdatedEvent {
                         .write(() -> "key").object("test")
                         .write(() -> "oldValue").object(null)
                         .write(() -> "value").object("world2")));
+        /*
+--- !!not-ready-data! #binary
+reply: !UpdatedEvent {
+  assetName: /name,
+  key: hello,
+  oldValue: !!null "",
+  value: world2
+}
+         */
+        assertEquals("--- !!data #binary\n" +
+                "data: !!UpdateEvent {\n" +
+                "  assetName: /name,\n" +
+                "  key: test,\n" +
+                "  oldValue: !!null \"\",\n" +
+                "  value: world2\n" +
+                "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
+        wire.readDocument(null, w -> w.read(() -> "data").typePrefix(this, (o, t) -> assertEquals("!UpdateEvent", t.toString())).marshallable(
+                m -> m.read(() -> "assetName").object(String.class, "/name", Assert::assertEquals)
+                        .read(() -> "key").object(String.class, "test", Assert::assertEquals)
+                        .read(() -> "oldValue").object(String.class, "error", Assert::assertNull)
+                        .read(() -> "value").object(String.class, "world2", Assert::assertEquals)));
+    }
+
+    @Test
+    public void fieldAfterNullContext() {
+        Wire wire = createWire();
+        try (DocumentContext _ = wire.writingDocument(false)) {
+            wire.write(() -> "data").typedMarshallable("!UpdateEvent",
+                    v -> v.write(() -> "assetName").text("/name")
+                            .write(() -> "key").object("test")
+                            .write(() -> "oldValue").object(null)
+                            .write(() -> "value").object("world2"));
+        }
         /*
 --- !!not-ready-data! #binary
 reply: !UpdatedEvent {

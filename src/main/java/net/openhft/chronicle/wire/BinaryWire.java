@@ -44,7 +44,7 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
 /**
  * This Wire is a binary translation of TextWire which is a sub set of YAML.
  */
-public class BinaryWire implements Wire, InternalWireIn {
+public class BinaryWire implements Wire, InternalWire {
     private static final int END_OF_BYTES = -1;
     private static final UTF8StringInterner UTF8_INTERNER = new UTF8StringInterner(128);
     private final Bytes<?> bytes;
@@ -55,6 +55,7 @@ public class BinaryWire implements Wire, InternalWireIn {
     private final boolean numericFields;
     private final boolean fieldLess;
     private final int compressedSize;
+    private final VanillaDocumentContext writeContext = new VanillaDocumentContext(this);
     private boolean ready;
     private String compression;
 
@@ -69,6 +70,12 @@ public class BinaryWire implements Wire, InternalWireIn {
         this.compressedSize = compressedSize;
         valueOut = fixed ? fixedValueOut : new BinaryValueOut();
         this.compression = compression;
+    }
+
+    @Override
+    public DocumentContext writingDocument(boolean metaData) {
+        writeContext.start(metaData);
+        return writeContext;
     }
 
     @Override

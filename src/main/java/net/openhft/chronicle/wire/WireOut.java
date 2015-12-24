@@ -71,6 +71,8 @@ public interface WireOut extends WireCommon {
         WireInternal.writeData(this, metaData, false, writer);
     }
 
+    DocumentContext writingDocument(boolean metaData);
+
     default void writeNotReadyDocument(boolean metaData, @NotNull WriteMarshallable writer) {
         WireInternal.writeData(this, metaData, true, writer);
     }

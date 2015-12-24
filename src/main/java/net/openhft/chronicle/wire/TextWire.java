@@ -46,7 +46,7 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 /**
  * YAML Based wire format
  */
-public class TextWire implements Wire, InternalWireIn {
+public class TextWire implements Wire, InternalWire {
 
     public static final BytesStore TYPE = BytesStore.wrap("!type ");
     static final String SEQ_MAP = "!seqmap";
@@ -74,6 +74,7 @@ public class TextWire implements Wire, InternalWireIn {
     protected final TextValueOut valueOut = createValueOut();
     protected final TextValueIn valueIn = createValueIn();
     protected final boolean use8bit;
+    private final VanillaDocumentContext writeContext = new VanillaDocumentContext(this);
     protected Bytes<?> bytes;
     protected long lineStart = 0;
     private boolean ready;
@@ -149,6 +150,12 @@ public class TextWire implements Wire, InternalWireIn {
         if (length != sb.length())
             throw new IllegalStateException("Length changed from " + length + " to " + sb.length() + " for " + sb);
         AppendableUtil.setLength(sb, end);
+    }
+
+    @Override
+    public DocumentContext writingDocument(boolean metaData) {
+        writeContext.start(metaData);
+        return writeContext;
     }
 
     @NotNull
