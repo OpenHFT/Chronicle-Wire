@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -186,10 +185,10 @@ public interface ValueOut {
     WireOut int64forBinding(long value, LongValue longValue);
 
     @NotNull
-    WireOut sequence(Consumer<ValueOut> writer);
+    WireOut sequence(WriteValue writer);
 
     @NotNull
-    default WireOut array(Consumer<ValueOut> writer, Class arrayType) {
+    default WireOut array(WriteValue writer, Class arrayType) {
         throw new UnsupportedOperationException();
     }
 

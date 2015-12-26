@@ -279,15 +279,7 @@ reply: !UpdatedEvent {
                             .write(() -> "oldValue").object(null)
                             .write(() -> "value").object("world2"));
         }
-        /*
---- !!not-ready-data! #binary
-reply: !UpdatedEvent {
-  assetName: /name,
-  key: hello,
-  oldValue: !!null "",
-  value: world2
-}
-         */
+
         assertEquals("--- !!meta-data #binary\n" +
                 "tid: 1234567890\n" +
                 "--- !!data #binary\n" +

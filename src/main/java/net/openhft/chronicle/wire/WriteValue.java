@@ -13,24 +13,12 @@
  *     You should have received a copy of the GNU Lesser General Public License
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package net.openhft.chronicle.wire;
 
-import org.jetbrains.annotations.NotNull;
-
-@FunctionalInterface
-public interface WriteMarshallable extends WriteValue {
-    WriteMarshallable EMPTY = wire -> {
-        // nothing
-    };
-
-    /**
-     * Write data to the wire
-     *
-     * @param wire to write to.
-     */
-    void writeMarshallable(@NotNull WireOut wire);
-
-    default void writeValue(ValueOut out) {
-        out.marshallable(this);
-    }
+/**
+ * Created by peter on 26/12/15.
+ */
+public interface WriteValue {
+    void writeValue(ValueOut out);
 }

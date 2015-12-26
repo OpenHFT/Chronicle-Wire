@@ -36,7 +36,6 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static net.openhft.chronicle.bytes.Bytes.empty;
@@ -616,12 +615,12 @@ public class JSONWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut sequence(@NotNull Consumer<ValueOut> writer) {
+        public WireOut sequence(@NotNull WriteValue writer) {
             pushState();
             bytes.appendUtf8('[');
             sep = NEW_LINE;
             long pos = bytes.readPosition();
-            writer.accept(this);
+            writer.writeValue(this);
             if (bytes.writePosition() > pos + 1)
                 bytes.appendUtf8('\n');
 
@@ -633,7 +632,7 @@ public class JSONWire extends TextWire {
         }
 
         @Override
-        public WireOut array(@NotNull Consumer<ValueOut> writer, Class arrayType) {
+        public WireOut array(@NotNull WriteValue writer, Class arrayType) {
             if (arrayType == String[].class) append("!String[] ");
             else {
                 bytes.appendUtf8('!');

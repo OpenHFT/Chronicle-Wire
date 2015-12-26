@@ -1049,12 +1049,12 @@ public class TextWire implements Wire, InternalWire {
 
         @NotNull
         @Override
-        public WireOut sequence(@NotNull Consumer<ValueOut> writer) {
+        public WireOut sequence(@NotNull WriteValue writer) {
             pushState();
             bytes.writeUnsignedByte('[');
             sep = NEW_LINE;
             long pos = bytes.readPosition();
-            writer.accept(this);
+            writer.writeValue(this);
             if (bytes.writePosition() > pos + 1)
                 bytes.writeUnsignedByte('\n');
 
@@ -1066,7 +1066,7 @@ public class TextWire implements Wire, InternalWire {
         }
 
         @Override
-        public WireOut array(@NotNull Consumer<ValueOut> writer, Class arrayType) {
+        public WireOut array(@NotNull WriteValue writer, Class arrayType) {
             if (arrayType == String[].class) append("!String[] ");
             else {
                 bytes.writeUnsignedByte('!');

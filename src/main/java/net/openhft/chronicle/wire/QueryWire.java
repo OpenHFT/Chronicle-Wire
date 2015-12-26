@@ -35,7 +35,6 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
  * THis wire decodes URL query strings.
@@ -490,13 +489,13 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut sequence(@NotNull Consumer<ValueOut> writer) {
+        public WireOut sequence(@NotNull WriteValue writer) {
             prependSeparator();
             pushState();
             bytes.appendUtf8("[");
             sep = ",";
             long pos = bytes.writePosition();
-            writer.accept(this);
+            writer.writeValue(this);
             if (pos != bytes.writePosition())
                 bytes.appendUtf8(",");
 

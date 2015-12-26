@@ -481,11 +481,11 @@ public class RawWire implements Wire, InternalWire {
 
         @NotNull
         @Override
-        public WireOut sequence(@NotNull Consumer<ValueOut> writer) {
+        public WireOut sequence(@NotNull WriteValue writer) {
             long position = bytes.writePosition();
             bytes.writeInt(0);
 
-            writer.accept(this);
+            writer.writeValue(this);
 
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
             return RawWire.this;
