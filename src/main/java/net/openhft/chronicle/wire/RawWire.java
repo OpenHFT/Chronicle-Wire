@@ -50,6 +50,7 @@ public class RawWire implements Wire, InternalWire {
     private
     StringBuilder lastSB;
     private boolean ready;
+
     public RawWire(Bytes bytes) {
         this(bytes, true);
     }

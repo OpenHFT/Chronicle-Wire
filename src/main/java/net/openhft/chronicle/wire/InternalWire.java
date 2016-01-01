@@ -18,7 +18,7 @@ package net.openhft.chronicle.wire;
 
 /**
  * These methods are for internal use only.
- *
+ * <p>
  * Created by peter.lawrey on 17/04/15.
  */
 public interface InternalWire extends Wire {

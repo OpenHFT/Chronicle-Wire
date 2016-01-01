@@ -465,7 +465,7 @@ public class TextWire implements Wire, InternalWire {
 //                        bytes.appendUtf8(HEX[(ch >> 4) & 0xF]);
 //                        bytes.appendUtf8(HEX[ch & 0xF]);
 //                    } else {
-                        bytes.appendUtf8(ch);
+                    bytes.appendUtf8(ch);
 //                    }
                     break;
             }

@@ -28,11 +28,11 @@ import org.jetbrains.annotations.NotNull;
 public enum Wires {
     ;
     public static final int LENGTH_MASK = -1 >>> 2;
-    static final StringBuilderPool SBP = new StringBuilderPool();
     public static final int NOT_READY = 1 << 31;
     public static final int META_DATA = 1 << 30;
     public static final int UNKNOWN_LENGTH = 0x0;
     public static final int NOT_INITIALIZED = 0x0;
+    static final StringBuilderPool SBP = new StringBuilderPool();
 
     /**
      * This decodes some Bytes where the first 4-bytes is the length.  e.g. Wire.writeDocument wrote it.
@@ -86,8 +86,8 @@ public enum Wires {
 
     @ForceInline
     public static <T extends ReadMarshallable> long readData(
-        @NotNull WireIn wireIn,
-        @NotNull T reader) {
+            @NotNull WireIn wireIn,
+            @NotNull T reader) {
 
         // We assume that check on data readiness and type has been done by the
         // caller
@@ -96,8 +96,8 @@ public enum Wires {
 
     @ForceInline
     public static <T extends WriteMarshallable> long writeData(
-        @NotNull WireOut wireOut,
-        @NotNull T writer) {
+            @NotNull WireOut wireOut,
+            @NotNull T writer) {
 
         WireInternal.writeData(wireOut, false, false, writer);
 
@@ -106,8 +106,8 @@ public enum Wires {
 
     @ForceInline
     public static <T extends WriteMarshallable> long writeMeta(
-        @NotNull WireOut wireOut,
-        @NotNull T writer) {
+            @NotNull WireOut wireOut,
+            @NotNull T writer) {
 
         WireInternal.writeData(wireOut, true, false, writer);
 
@@ -116,8 +116,8 @@ public enum Wires {
 
     @ForceInline
     public static <T extends ReadMarshallable> long readMeta(
-        @NotNull WireIn wireIn,
-        @NotNull T reader) {
+            @NotNull WireIn wireIn,
+            @NotNull T reader) {
 
         // We assume that check on meta-data readiness and type has been done by
         // the caller

@@ -28,6 +28,7 @@ import java.util.function.LongSupplier;
  * reference to an array fo 32-bit in values in Text wire format.
  */
 public class TextLongReference implements LongValue, Byteable {
+    static final int VALUE = 33;
     private static final byte[] template = "!!atomic { locked: false, value: 00000000000000000000 }".getBytes();
     private static final int FALSE = BytesUtil.asInt("fals");
     private static final int TRUE = BytesUtil.asInt(" tru");
@@ -35,7 +36,6 @@ public class TextLongReference implements LongValue, Byteable {
     private static final long LONG_TRUE = 1L;
     private static final long LONG_FALSE = 0L;
     private static final int LOCKED = 19;
-    static final int VALUE = 33;
     private static final int DIGITS = 20;
     private BytesStore bytes;
     private long offset;

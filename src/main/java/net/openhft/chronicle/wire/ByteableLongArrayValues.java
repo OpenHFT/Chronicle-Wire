@@ -1,5 +1,3 @@
-
-
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Byteable;

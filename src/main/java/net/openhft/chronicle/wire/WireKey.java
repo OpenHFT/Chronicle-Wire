@@ -64,7 +64,7 @@ public interface WireKey {
         return null;
     }
 
-    default boolean contentEquals(@NotNull CharSequence c){
+    default boolean contentEquals(@NotNull CharSequence c) {
         return this.toString().contentEquals(c);
     }
 }

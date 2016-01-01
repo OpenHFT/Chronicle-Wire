@@ -131,6 +131,6 @@ class TextIntReference implements IntValue, Byteable {
 
     @NotNull
     public String toString() {
-        return "value: "+getValue();
+        return "value: " + getValue();
     }
 }
