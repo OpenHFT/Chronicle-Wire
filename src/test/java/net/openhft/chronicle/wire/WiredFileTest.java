@@ -23,7 +23,6 @@ import static org.junit.Assert.assertEquals;
  */
 public class WiredFileTest {
 
-
     final Function<File, MappedFile> toMappedFile = file -> {
         try {
             return MappedFile.mappedFile(file, 64 << 10, 0);
@@ -38,7 +37,6 @@ public class WiredFileTest {
     public void testBuildText() throws IOException {
         // use a class alias for MyHeader_1_0
         ClassAliasPool.CLASS_ALIASES.addAlias(MyHeader_1_0.class, "MyHeader-1.0");
-
 
         String masterFile = OS.TARGET + "/wired-file-" + System.nanoTime();
         for (int i = 1; i <= 5; i++) {

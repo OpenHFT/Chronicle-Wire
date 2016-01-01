@@ -1009,6 +1009,20 @@ public class TextWireTest {
         assertEquals(null, c);
     }
 
+    @Test
+    public void testAllChars() {
+        Wire wire = createWire();
+        char[] chars = new char[256];
+        for (int i = 0; i < 1024; i++) {
+            wire.bytes().clear();
+            Arrays.fill(chars, (char) i);
+            String s = new String(chars);
+            wire.writeDocument(false, w -> w.write(() -> "message").text(s));
+
+            wire.readDocument(null, w -> w.read(() -> "message").text(s, Assert::assertEquals));
+        }
+    }
+
     enum BWKey implements WireKey {
         field1, field2, field3
 
@@ -1053,21 +1067,6 @@ public class TextWireTest {
         @Override
         public String toString() {
             return "MyMarshable{" + "someData='" + someData + '\'' + '}';
-        }
-
-    }
-
-    @Test
-    public void testAllChars() {
-        Wire wire = createWire();
-        char[] chars = new char[256];
-        for (int i = 0; i < 1024; i++) {
-            wire.bytes().clear();
-            Arrays.fill(chars, (char) i);
-            String s = new String(chars);
-            wire.writeDocument(false, w -> w.write(() -> "message").text(s));
-
-            wire.readDocument(null, w -> w.read(() -> "message").text(s, Assert::assertEquals));
         }
     }
 }

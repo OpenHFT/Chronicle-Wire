@@ -98,5 +98,4 @@ public enum WireType implements Function<Bytes, Wire> {
         return BinaryLongArrayReference::new;
     }
 
-
 }

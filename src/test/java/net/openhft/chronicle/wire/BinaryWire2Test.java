@@ -172,7 +172,6 @@ public class BinaryWire2Test {
         System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
     }
 
-
     private void writeMessageContext(@NotNull WireOut wire) {
         try (DocumentContext _ = wire.writingDocument(true)) {
             wire.write(() -> "csp").text("//path/service")
@@ -308,7 +307,6 @@ reply: !UpdatedEvent {
         }
     }
 
-
     @Test
     public void testSnappyCompressWithSnappy() throws IOException {
         Wire wire = createWire();
@@ -367,6 +365,5 @@ reply: !UpdatedEvent {
             assert bytesStore != null;
             assertEquals(bytes.toDebugString(), bytesStore.toDebugString());
         }
-
     }
 }

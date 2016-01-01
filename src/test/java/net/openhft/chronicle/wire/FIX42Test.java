@@ -127,7 +127,6 @@ public class FIX42Test {
             System.out.println(wire.bytes().toHexString());
     }
 
-
     static class MarketDataSnapshot implements WriteMarshallable {
         String symbol;
         double openingPrice, closingPrice;

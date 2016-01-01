@@ -1472,7 +1472,6 @@ public class BinaryWire implements Wire, InternalWire {
                         bytes.readPosition(bytes.readLimit());
                         bytes.readLimit(limit);
                     }
-
                 }
 
                 case TYPE_PREFIX: {

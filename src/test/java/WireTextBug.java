@@ -47,7 +47,6 @@ public class WireTextBug {
         public String toString() {
             return mString;
         }
-
     }
 
     class Bug implements Marshallable {

@@ -78,7 +78,6 @@ public class WiredFile<D extends Marshallable> implements Closeable {
             Function<MappedFile, D> delegateSupplier,
             Consumer<WiredFile<D>> installer) {
 
-
         File parentFile = masterFile.getParentFile();
         if (parentFile != null) {
             //noinspection ResultOfMethodCallIgnored

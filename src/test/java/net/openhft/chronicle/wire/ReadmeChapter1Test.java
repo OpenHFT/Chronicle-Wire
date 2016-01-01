@@ -569,10 +569,6 @@ wire.read(() -> "message").text("Hello World", Assert::assertEquals)
 */
     }
 
-    enum Field implements WireKey {
-        message, number, timeUnit, price;
-    }
-
     @Override
     public void writeMarshallable(WireOut wire) {
         wire.write(Field.message).text(message)
@@ -590,9 +586,12 @@ wire.read(() -> "message").text("Hello World", Assert::assertEquals)
                 ", price=" + price +
                 '}';
     }
+
+    enum Field implements WireKey {
+        message, number, timeUnit, price;
+    }
 /*
 ```
  */
-
 
 }
