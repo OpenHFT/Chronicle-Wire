@@ -308,12 +308,6 @@ public class JSONWire extends TextWire {
             return this;
         }
 
-        @NotNull
-        @Override
-        public WireOut wireOut() {
-            return JSONWire.this;
-        }
-
         private void indent() {
         }
 
@@ -386,12 +380,6 @@ public class JSONWire extends TextWire {
                     return false;
             }
             return true;
-        }
-
-        @NotNull
-        @Override
-        public ValueOut writeLength(long remaining) {
-            throw new UnsupportedOperationException();
         }
 
         @NotNull
@@ -854,12 +842,6 @@ public class JSONWire extends TextWire {
 
         private int rewindAndRead() {
             return bytes.readPosition() > 0 ? bytes.readUnsignedByte(bytes.readPosition() - 1) : -1;
-        }
-
-        @NotNull
-        @Override
-        public WireIn bytes(@NotNull Bytes toBytes) {
-            return bytes(wi -> toBytes.write(wi.bytes()));
         }
 
         @NotNull

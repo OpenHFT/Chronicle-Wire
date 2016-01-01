@@ -1361,6 +1361,12 @@ public class TextWire implements Wire, InternalWire {
             return bytes(wi -> toBytes.write(wi.bytes()));
         }
 
+        @Nullable
+        @Override
+        public Bytes<?> bytesUsing(@NotNull Bytes<?> toBytes) {
+            throw new UnsupportedOperationException("todo");
+        }
+
         @NotNull
         public WireIn bytes(@NotNull ReadMarshallable bytesConsumer) {
             consumeWhiteSpace();

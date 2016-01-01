@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -73,6 +74,9 @@ public interface ValueIn {
     @NotNull
     WireIn bytes(@NotNull Bytes<?> toBytes);
 
+    @Nullable
+    Bytes<?> bytesUsing(@NotNull Bytes<?> toBytes);
+
     @NotNull
     WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer);
 
@@ -86,6 +90,10 @@ public interface ValueIn {
     default BytesStore bytesStore() {
         byte[] bytes = bytes();
         return bytes == null ? null : BytesStore.wrap(bytes);
+    }
+
+    default void byteBuffer(ByteBuffer bb) {
+        bb.put(bytes());
     }
 
     @NotNull

@@ -595,12 +595,6 @@ public class QueryWire extends TextWire {
             }
         }
 
-        @NotNull
-        @Override
-        public WireIn bytes(@NotNull Bytes toBytes) {
-            return bytes(wi -> toBytes.write(wi.bytes()));
-        }
-
         @Override
         public boolean hasNextSequenceItem() {
             consumeWhiteSpace();

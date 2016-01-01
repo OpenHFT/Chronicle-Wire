@@ -1501,8 +1501,21 @@ public class BinaryWire implements Wire, InternalWire {
             if (code != U8_ARRAY)
                 cantRead(code);
             toBytes.clear();
-            bytes.readWithLength(length - 1, b -> toBytes.write(b));
+            bytes.readWithLength(length - 1, toBytes::write);
             return wireIn();
+        }
+
+        @Nullable
+        public Bytes bytesUsing(@NotNull Bytes toBytes) {
+            long length = readLength();
+            int code = readCode();
+            if (code == NULL)
+                return null;
+            if (code != U8_ARRAY)
+                cantRead(code);
+            toBytes.clear();
+            bytes.readWithLength(length - 1, toBytes::write);
+            return toBytes;
         }
 
         @NotNull

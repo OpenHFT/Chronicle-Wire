@@ -591,6 +591,13 @@ public class RawWire implements Wire, InternalWire {
             return wireIn();
         }
 
+        @Nullable
+        @Override
+        public Bytes<?> bytesUsing(@NotNull Bytes<?> toBytes) {
+            bytes(toBytes);
+            return toBytes;
+        }
+
         @NotNull
         @Override
         public WireIn bytesMatch(@NotNull BytesStore compareBytes, @NotNull BooleanConsumer consumer) {

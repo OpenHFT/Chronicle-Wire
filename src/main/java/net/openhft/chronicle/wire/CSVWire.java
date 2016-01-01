@@ -20,11 +20,8 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import net.openhft.chronicle.core.util.BooleanConsumer;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
-import net.openhft.chronicle.core.values.IntValue;
-import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -126,10 +123,6 @@ public class CSVWire extends TextWire {
         }
     }
 
-    int peekCode() {
-        return bytes.peekUnsignedByte();
-    }
-
     /**
      * returns true if the next string is {@code str}
      *
@@ -182,17 +175,6 @@ public class CSVWire extends TextWire {
     public Wire readComment(@NotNull StringBuilder s) {
         s.setLength(0);
         return this;
-    }
-
-    @Override
-    public void clear() {
-        bytes.clear();
-    }
-
-    @NotNull
-    @Override
-    public Bytes<?> bytes() {
-        return bytes;
     }
 
     @Override
@@ -284,24 +266,6 @@ public class CSVWire extends TextWire {
                 quotes = net.openhft.chronicle.wire.Quotes.SINGLE;
         }
         return quotes;
-    }
-
-    @NotNull
-    @Override
-    public LongValue newLongReference() {
-        return new TextLongReference();
-    }
-
-    @NotNull
-    @Override
-    public IntValue newIntReference() {
-        return new TextIntReference();
-    }
-
-    @NotNull
-    @Override
-    public LongArrayValues newLongArrayReference() {
-        return new TextLongArrayReference();
     }
 
     public void parseWord(StringBuilder sb) {
@@ -489,12 +453,6 @@ public class CSVWire extends TextWire {
         public ValueOut leaf() {
             leaf = true;
             return this;
-        }
-
-        @NotNull
-        @Override
-        public WireOut wireOut() {
-            return CSVWire.this;
         }
 
         private void indent() {
@@ -760,129 +718,6 @@ public class CSVWire extends TextWire {
             return -1;
         }
 
-        @NotNull
-        @Override
-        public WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer) {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @NotNull
-        @Override
-        public WireIn bytes(@NotNull Bytes toBytes) {
-            return bytes(wi -> toBytes.write(wi.bytes()));
-        }
-
-        @NotNull
-        public WireIn bytes(@NotNull ReadMarshallable bytesConsumer) {
-            consumeWhiteSpace();
-
-            // TODO needs to be made much more efficient.
-            StringBuilder sb = WireInternal.acquireStringBuilder();
-            if (peekCode() == '!') {
-                parseWord(sb);
-                String str = WireInternal.INTERNER.intern(sb);
-                if (str.equals("!!binary")) {
-                    AppendableUtil.setLength(sb, 0);
-                    parseWord(sb);
-                    byte[] decode = Base64.getDecoder().decode(sb.toString());
-                    bytesConsumer.readMarshallable(new CSVWire(Bytes.wrapForRead(decode)));
-
-                } else if (str.equals("!!null")) {
-                    bytesConsumer.readMarshallable(null);
-                    parseWord(sb);
-                } else {
-                    throw new IORuntimeException("Unsupported type=" + str);
-                }
-            } else {
-                textTo(sb);
-                bytesConsumer.readMarshallable(new CSVWire(Bytes.wrapForRead(sb.toString().getBytes())));
-            }
-            return CSVWire.this;
-        }
-
-        @Nullable
-        public byte[] bytes() {
-            consumeWhiteSpace();
-            // TODO needs to be made much more efficient.
-            StringBuilder sb = WireInternal.acquireStringBuilder();
-            if (peekCode() == '!') {
-                parseWord(sb);
-                String str = WireInternal.INTERNER.intern(sb);
-                if (str.equals("!!binary")) {
-                    AppendableUtil.setLength(sb, 0);
-                    parseWord(sb);
-                    byte[] decode = Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb));
-                    return decode;
-
-                } else if (str.equals("!!null")) {
-                    parseWord(sb);
-                    return null;
-                } else if (str.equals("!" + SEQ_MAP)) {
-                    sb.append(bytes);
-                    // todo fix this.
-                    return WireInternal.INTERNER.intern(sb).getBytes();
-
-                } else {
-                    throw new IllegalStateException("unsupported type=" + str);
-                }
-
-            } else {
-                textTo(sb);
-                // todo fix this.
-                return sb.toString().getBytes();
-            }
-        }
-
-        @NotNull
-        @Override
-        public WireIn wireIn() {
-            return CSVWire.this;
-        }
-
-        @Override
-        public long readLength() {
-            consumeWhiteSpace();
-            long start = bytes.readPosition();
-            try {
-                consumeWhiteSpace();
-                int code = readCode();
-                switch (code) {
-                    case '{': {
-                        int count = 1;
-                        for (; ; ) {
-                            byte b = bytes.readByte();
-                            if (b == '{')
-                                count += 1;
-                            else if (b == '}') {
-                                count -= 1;
-                                if (count == 0)
-                                    return bytes.readPosition() - start;
-                            } else if (b == 0) {
-                                return bytes.readPosition() - start - 1;
-                            }
-                            // do nothing
-                        }
-                    }
-
-                    case '-': {
-                        for (; ; ) {
-                            byte b = bytes.readByte();
-                            if (b < ' ')
-                                return bytes.readLimit() - start - 1;
-                            // do nothing
-                        }
-                    }
-
-                    default:
-                        // TODO needs to be made much more efficient.
-                        bytes();
-                        return bytes.readPosition() - start;
-                }
-            } finally {
-                bytes.readPosition(start);
-            }
-        }
-
         private long readLengthMarshallable() {
             long start = bytes.readPosition();
             try {
@@ -900,11 +735,6 @@ public class CSVWire extends TextWire {
             } finally {
                 bytes.readPosition(start);
             }
-        }
-
-        @Override
-        public boolean hasNext() {
-            return bytes.readRemaining() > 0;
         }
 
         @Override
