@@ -1121,6 +1121,11 @@ public class JSONWire extends TextWire {
             }
         }
 
+
+        private final ThreadLocal<CharSequence> usingKey = ThreadLocal.withInitial(StringBuilder::new);
+        private final ThreadLocal<CharSequence> usingValue = ThreadLocal.withInitial(StringBuilder::new);
+
+
         @Nullable
         @Override
         public <K, V> Map<K, V> map(@NotNull final Class<K> kClazz,
@@ -1145,10 +1150,16 @@ public class JSONWire extends TextWire {
                         throw new IORuntimeException("Unsupported start of sequence : " + (char) start);
                     do {
                         marshallable(r -> {
-                            final K k = r.read(() -> "key")
-                                    .object(kClazz);
-                            final V v = r.read(() -> "value")
-                                    .object(vClass);
+
+                            final K k = (K) ((kClazz == CharSequence.class) ?
+                                    r.read(() -> "key").object(usingKey.get(), CharSequence.class) :
+                                    r.read(() -> "key").object(kClazz));
+
+
+                            final V v = (V) ((vClass == CharSequence.class) ?
+                                    r.read(() -> "value").object(usingValue.get(), CharSequence.class) :
+                                    r.read(() -> "value").object(vClass));
+
                             usingMap.put(k, v);
                         });
                     } while (hasNextSequenceItem());
