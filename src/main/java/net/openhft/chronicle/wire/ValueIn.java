@@ -259,8 +259,15 @@ public interface ValueIn {
         return wireIn();
     }
 
+
+    ThreadLocal<CharSequence> charSequenceThreadLocal = ThreadLocal.withInitial(StringBuilder::new);
+
     @Nullable
     default <E> E object(@NotNull Class<E> clazz) {
+
+        if (clazz == CharSequence.class || clazz == StringBuilder.class)
+            return object((E) charSequenceThreadLocal.get(), clazz);
+
         return object(null, clazz);
     }
 
