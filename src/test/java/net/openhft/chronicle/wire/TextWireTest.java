@@ -807,6 +807,7 @@ public class TextWireTest {
     }
 
     @Test
+    @Ignore
     public void testSnappyCompression() throws IOException {
         Wire wire = createWire();
         final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
@@ -822,6 +823,7 @@ public class TextWireTest {
     }
 
     @Test
+    @Ignore
     public void testSnappyCompressionAsText() throws IOException {
         Wire wire = createWire();
         final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";

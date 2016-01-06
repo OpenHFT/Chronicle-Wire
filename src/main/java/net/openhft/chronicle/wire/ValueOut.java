@@ -321,7 +321,7 @@ public interface ValueOut {
     default WireOut compress(String compression, Bytes uncompressedBytes) {
         if (uncompressedBytes == null)
             return text(null);
-        if (uncompressedBytes.readRemaining() < compressedSize())
+        if (uncompressedBytes.readRemaining() < SMALL_MESSAGE)
             return bytes(uncompressedBytes);
         Bytes tmpBytes = Wires.acquireBytes();
         Compression.compress(compression, uncompressedBytes, tmpBytes);

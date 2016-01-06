@@ -1363,7 +1363,7 @@ public class TextWire implements Wire, InternalWire {
 
         @Nullable
         @Override
-        public Bytes<?> bytesUsing(@NotNull Bytes<?> toBytes) {
+        public WireIn bytesSet(@NotNull PointerBytesStore toBytes) {
             throw new UnsupportedOperationException("todo");
         }
 

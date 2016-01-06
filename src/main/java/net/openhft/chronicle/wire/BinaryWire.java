@@ -1498,6 +1498,20 @@ public class BinaryWire implements Wire, InternalWire {
         public WireIn bytes(@NotNull Bytes toBytes) {
             long length = readLength();
             int code = readCode();
+            if (code == TYPE_PREFIX) {
+                StringBuilder sb = WireInternal.acquireStringBuilder();
+                if (bytes.readUtf8(sb)) {
+                    long length2 = readLength();
+                    int code2 = readCode();
+                    if (code2 != U8_ARRAY)
+                        cantRead(code);
+                    toBytes.clear();
+                    bytes.readWithLength(length2 - 1, b -> Compression.uncompress(sb, b, toBytes));
+                    return wireIn();
+                } else {
+                    throw new AssertionError();
+                }
+            }
             if (code != U8_ARRAY)
                 cantRead(code);
             toBytes.clear();
@@ -1506,16 +1520,17 @@ public class BinaryWire implements Wire, InternalWire {
         }
 
         @Nullable
-        public Bytes bytesUsing(@NotNull Bytes toBytes) {
+        public WireIn bytesSet(@NotNull PointerBytesStore toBytes) {
             long length = readLength();
             int code = readCode();
             if (code == NULL)
                 return null;
             if (code != U8_ARRAY)
                 cantRead(code);
-            toBytes.clear();
-            bytes.readWithLength(length - 1, toBytes::write);
-            return toBytes;
+            long startAddr = bytes.address(bytes.readPosition());
+            toBytes.set(startAddr, length - 1);
+            bytes.readSkip(length - 1);
+            return wireIn();
         }
 
         @NotNull
@@ -1542,7 +1557,7 @@ public class BinaryWire implements Wire, InternalWire {
             int code = readCode();
             switch (code) {
                 case U8_ARRAY:
-                    BytesStore toBytes = NativeBytesStore.nativeStore(length);
+                    BytesStore toBytes = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
                     toBytes.write(0, bytes, bytes.readPosition(), length);
                     bytes.readSkip(length);
                     return toBytes;

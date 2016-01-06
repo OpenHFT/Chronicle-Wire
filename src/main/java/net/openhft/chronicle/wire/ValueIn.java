@@ -17,6 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.PointerBytesStore;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.*;
@@ -75,7 +76,7 @@ public interface ValueIn {
     WireIn bytes(@NotNull Bytes<?> toBytes);
 
     @Nullable
-    Bytes<?> bytesUsing(@NotNull Bytes<?> toBytes);
+    WireIn bytesSet(@NotNull PointerBytesStore toBytes);
 
     @NotNull
     WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer);

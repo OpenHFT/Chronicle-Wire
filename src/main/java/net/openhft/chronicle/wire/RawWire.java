@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.PointerBytesStore;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -593,9 +594,8 @@ public class RawWire implements Wire, InternalWire {
 
         @Nullable
         @Override
-        public Bytes<?> bytesUsing(@NotNull Bytes<?> toBytes) {
-            bytes(toBytes);
-            return toBytes;
+        public WireIn bytesSet(@NotNull PointerBytesStore toBytes) {
+            throw new UnsupportedOperationException("todo");
         }
 
         @NotNull
