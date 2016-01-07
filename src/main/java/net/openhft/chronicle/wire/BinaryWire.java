@@ -894,7 +894,7 @@ public class BinaryWire implements Wire, InternalWire {
         @Override
         public WireOut bytes(@Nullable BytesStore fromBytes) {
             if (fromBytes == null)
-                return object(null);
+                return text(null);
             long remaining = fromBytes.readRemaining();
             if (remaining >= compressedSize()) {
                 compress(compression, fromBytes.bytesForRead());
