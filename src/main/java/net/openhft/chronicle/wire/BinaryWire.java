@@ -46,7 +46,7 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
  */
 public class BinaryWire implements Wire, InternalWire {
     private static final int END_OF_BYTES = -1;
-    private static final UTF8StringInterner UTF8_INTERNER = new UTF8StringInterner(128);
+    private static final UTF8StringInterner UTF8_INTERNER = new UTF8StringInterner(512);
     private final Bytes<?> bytes;
     private final ValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
