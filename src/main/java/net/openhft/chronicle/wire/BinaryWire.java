@@ -1498,6 +1498,10 @@ public class BinaryWire implements Wire, InternalWire {
         public WireIn bytes(@NotNull Bytes toBytes) {
             long length = readLength();
             int code = readCode();
+            if (code == NULL) {
+                toBytes.isPresent(false);
+                return BinaryWire.this;
+            }
             if (code == TYPE_PREFIX) {
                 StringBuilder sb = WireInternal.acquireStringBuilder();
                 if (bytes.readUtf8(sb)) {
@@ -1523,8 +1527,10 @@ public class BinaryWire implements Wire, InternalWire {
         public WireIn bytesSet(@NotNull PointerBytesStore toBytes) {
             long length = readLength();
             int code = readCode();
-            if (code == NULL)
-                return null;
+            if (code == NULL) {
+                toBytes.isPresent(false);
+                return BinaryWire.this;
+            }
             if (code != U8_ARRAY)
                 cantRead(code);
             long startAddr = bytes.address(bytes.readPosition());
@@ -1592,6 +1598,10 @@ public class BinaryWire implements Wire, InternalWire {
             toBytes.clear();
             long length = readLength() - 1;
             int code = readCode();
+            if (code == NULL) {
+                toBytes.isPresent(false);
+                return;
+            }
             if (code != U8_ARRAY)
                 cantRead(code);
             toBytes.write(0, bytes, bytes.readPosition(), length);
@@ -1625,6 +1635,9 @@ public class BinaryWire implements Wire, InternalWire {
         public byte[] bytes() {
             long length = readLength();
             int code = readCode();
+            if (code == NULL) {
+                return null;
+            }
             if (code != U8_ARRAY)
                 cantRead(code);
             byte[] bytes2 = new byte[Maths.toUInt31(length - 1)];
