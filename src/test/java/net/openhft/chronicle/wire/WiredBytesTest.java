@@ -1,7 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.MappedFile;
+import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -21,17 +21,17 @@ import static org.junit.Assert.assertEquals;
 /**
  * Created by peter on 22/09/15.
  */
-public class WiredFileTest {
+public class WiredBytesTest {
 
-    final Function<File, MappedFile> toMappedFile = file -> {
+    final Function<File, MappedBytes> toMappedFile = file -> {
         try {
-            return MappedFile.mappedFile(file, 64 << 10, 0);
+            return MappedBytes.mappedBytes(file, 64 << 10);
         } catch (FileNotFoundException e) {
             throw Jvm.rethrow(e);
         }
     };
 
-    final Consumer<WiredFile<MyHeader_1_0>> consumer = wiredFile -> wiredFile.delegate().install(wiredFile);
+    final Consumer<WiredBytes<MyHeader_1_0>> consumer = wiredFile -> wiredFile.delegate().install(wiredFile);
 
     @Test
     public void testBuildText() throws IOException {
@@ -41,7 +41,7 @@ public class WiredFileTest {
         String masterFile = OS.TARGET + "/wired-file-" + System.nanoTime();
         for (int i = 1; i <= 5; i++) {
 
-            WiredFile<MyHeader_1_0> wf = WiredFile.build(masterFile,
+            WiredBytes<MyHeader_1_0> wf = WiredBytes.build(masterFile,
                     toMappedFile,
                     WireType.TEXT,
                     x -> new MyHeader_1_0(),
@@ -50,7 +50,7 @@ public class WiredFileTest {
 
             MyHeader_1_0 header = wf.delegate();
             assertEquals(i, header.installCount.getValue());
-            Bytes<?> bytes = wf.acquireWiredChunk(0).bytes();
+            Bytes<?> bytes = wf.mappedBytes();
             bytes.readPosition(0);
             bytes.readLimit(wf.headerLength());
             System.out.println(Wires.fromSizePrefixedBlobs(bytes));
@@ -65,7 +65,7 @@ public class WiredFileTest {
 
         String masterFile = OS.TARGET + "/wired-file-" + System.nanoTime();
         for (int i = 1; i <= 5; i++) {
-            WiredFile<MyHeader_1_0> wf = WiredFile.build(masterFile,
+            WiredBytes<MyHeader_1_0> wf = WiredBytes.build(masterFile,
                     toMappedFile,
                     WireType.BINARY,
                     x -> new MyHeader_1_0(),
@@ -73,7 +73,7 @@ public class WiredFileTest {
             );
             MyHeader_1_0 header = wf.delegate();
             assertEquals(i, header.installCount.getValue());
-            Bytes<?> bytes = wf.acquireWiredChunk(0).bytes();
+            Bytes<?> bytes = wf.mappedBytes();
             bytes.readPosition(0);
             bytes.readLimit(wf.headerLength());
             System.out.println(Wires.fromSizePrefixedBlobs(bytes));
@@ -95,7 +95,7 @@ public class WiredFileTest {
 
         }
 
-        public void install(WiredFile<MyHeader_1_0> wiredFile) {
+        public void install(WiredBytes<MyHeader_1_0> wiredBytes) {
             installCount.addAtomicValue(1);
         }
     }
