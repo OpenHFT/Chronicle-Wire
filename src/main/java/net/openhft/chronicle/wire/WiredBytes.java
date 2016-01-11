@@ -17,10 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MappedBytes;
-import net.openhft.chronicle.bytes.MappedBytesStore;
-import net.openhft.chronicle.bytes.MappedBytesStoreFactory;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,22 +36,19 @@ public class WiredBytes<D extends Marshallable> implements Closeable {
     private final D delegate;
     private final long headerLength;
     private final boolean headerCreated;
-    private final MappedBytesStoreFactory<WiredMappedBytesStore> mappedBytesStoreFactory;
 
     public WiredBytes(
             @NotNull Function<Bytes, Wire> wireType,
             @NotNull MappedBytes mappedBytes,
             @NotNull D delegate,
             long headerLength,
-            boolean headerCreated,
-            @NotNull MappedBytesStoreFactory<WiredMappedBytesStore> mappedBytesStoreFactory) {
+            boolean headerCreated) {
 
         this.wireType = wireType;
         this.mappedBytes = mappedBytes;
         this.delegate = delegate;
         this.headerLength = headerLength;
         this.headerCreated = headerCreated;
-        this.mappedBytesStoreFactory = mappedBytesStoreFactory;
     }
 
     public static <D extends Marshallable> WiredBytes<D> build(
@@ -81,8 +75,6 @@ public class WiredBytes<D extends Marshallable> implements Closeable {
         }
 
         MappedBytes mappedBytes = mappedBytesFunction.apply(masterFile);
-        MappedBytesStoreFactory<WiredMappedBytesStore> mappedBytesStoreFactory = (owner, start, address, capacity, safeCapacity) ->
-                new WiredMappedBytesStore(owner, start, address, capacity, safeCapacity, wireType, mappedFile);
 
         D delegate;
         long length;
@@ -96,7 +88,7 @@ public class WiredBytes<D extends Marshallable> implements Closeable {
             length = bytes.writePosition();
 
             installer.accept(
-                    wiredBytes = new WiredBytes<>(wireType, mappedBytes, delegate, length, true, mappedBytesStoreFactory)
+                    wiredBytes = new WiredBytes<>(wireType, mappedBytes, delegate, length, true)
             );
 
             mappedBytes.writeOrderedInt(0L, Wires.META_DATA | Wires.toIntU30(bytes.writePosition() - 4, "Delegate too large"));
@@ -118,7 +110,7 @@ public class WiredBytes<D extends Marshallable> implements Closeable {
             delegate = wireType.apply(bytes).getValueIn().typedMarshallable();
 
             installer.accept(
-                    wiredBytes = new WiredBytes<>(wireType, mappedBytes, delegate, length, false, mappedBytesStoreFactory)
+                    wiredBytes = new WiredBytes<>(wireType, mappedBytes, delegate, length, false)
             );
         }
 
@@ -148,18 +140,5 @@ public class WiredBytes<D extends Marshallable> implements Closeable {
 
     public MappedBytes mappedBytes() {
         return mappedBytes;
-    }
-
-    static class WiredMappedBytesStore extends MappedBytesStore {
-        private final Wire wire;
-
-        WiredMappedBytesStore(ReferenceCounted owner, long start, long address, long capacity, long safeCapacity, Function<Bytes, Wire> wireType, final MappedFile mappedFile) throws IllegalStateException {
-            super(owner, start, address, capacity, safeCapacity, mappedFile);
-            this.wire = wireType.apply(this.bytesForWrite());
-        }
-
-        public Wire getWire() {
-            return wire;
-        }
     }
 }

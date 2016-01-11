@@ -54,8 +54,6 @@
     </dependencyManagement>
 
     <dependencies>
-
-
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>chronicle-core</artifactId>
