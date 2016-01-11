@@ -1367,7 +1367,7 @@ public class TextWire implements Wire, InternalWire {
             return bytes(wi -> {
                 Bytes<?> bytes = wi.bytes();
                 long capacity = bytes.readRemaining();
-                VanillaBytes<Void> bytes2 = Bytes.allocateDirect(capacity);
+                Bytes<Void> bytes2 = Bytes.allocateDirect(capacity);
                 bytes2.write(bytes);
                 toBytes.set(bytes2.address(bytes2.start()), capacity);
             });

@@ -86,7 +86,7 @@ public class WiredFile<D extends Marshallable> implements Closeable {
 
         MappedFile mappedFile = mappedFileFunction.apply(masterFile);
         MappedBytesStoreFactory<WiredMappedBytesStore> mappedBytesStoreFactory = (owner, start, address, capacity, safeCapacity) ->
-                new WiredMappedBytesStore(owner, start, address, capacity, safeCapacity, wireType);
+                new WiredMappedBytesStore(owner, start, address, capacity, safeCapacity, wireType, mappedFile);
 
         WiredMappedBytesStore header;
         try {
@@ -177,8 +177,8 @@ public class WiredFile<D extends Marshallable> implements Closeable {
     static class WiredMappedBytesStore extends MappedBytesStore {
         private final Wire wire;
 
-        WiredMappedBytesStore(ReferenceCounted owner, long start, long address, long capacity, long safeCapacity, Function<Bytes, Wire> wireType) throws IllegalStateException {
-            super(owner, start, address, capacity, safeCapacity);
+        WiredMappedBytesStore(ReferenceCounted owner, long start, long address, long capacity, long safeCapacity, Function<Bytes, Wire> wireType, final MappedFile mappedFile) throws IllegalStateException {
+            super(owner, start, address, capacity, safeCapacity, mappedFile);
             this.wire = wireType.apply(this.bytesForWrite());
         }
 
