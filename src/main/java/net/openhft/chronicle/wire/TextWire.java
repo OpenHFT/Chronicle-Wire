@@ -1893,7 +1893,8 @@ public class TextWire implements Wire, InternalWire {
                 consumeWhiteSpace();
                 int code = peekCode();
                 if (code < 0)
-                    throw new IllegalStateException("Cannot read nothing as a ReadMarshallable " + bytes.toDebugString());
+                    throw new IllegalStateException("Cannot read as a ReadMarshallable " +
+                            "" + bytes.toDebugString());
                 StringBuilder sb = WireInternal.acquireStringBuilder();
                 if (code != '!')
                     throw new ClassCastException("Cannot convert to ReadMarshallable. " + bytes.toDebugString());
