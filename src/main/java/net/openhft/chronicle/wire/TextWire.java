@@ -530,6 +530,7 @@ public class TextWire implements Wire, InternalWire {
             try {
                 AppendableUtil.readUTFAndAppend(bytes, sb, testers);
             } catch (IOException e) {
+                e.printStackTrace();
                 throw new IORuntimeException(e);
             }
         }
