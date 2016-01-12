@@ -101,13 +101,14 @@ public class WiredBytes<D extends Marshallable> implements Closeable {
 
                 Jvm.pause(1);
             }
-            Bytes<?> bytes = mappedBytes.bytesForRead();
-            bytes.readPosition(0);
-            bytes.writePosition(bytes.capacity());
-            int len = Wires.lengthOf(bytes.readVolatileInt());
-            bytes.readLimit(length = bytes.readPosition() + len);
+
+
+            mappedBytes.readPosition(0);
+            mappedBytes.writePosition(mappedBytes.capacity());
+            int len = Wires.lengthOf(mappedBytes.readVolatileInt());
+            mappedBytes.readLimit(length = mappedBytes.readPosition() + len);
             //noinspection unchecked
-            delegate = wireType.apply(bytes).getValueIn().typedMarshallable();
+            delegate = wireType.apply(mappedBytes).getValueIn().typedMarshallable();
 
             installer.accept(
                     wiredBytes = new WiredBytes<>(wireType, mappedBytes, delegate, length, false)
