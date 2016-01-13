@@ -77,6 +77,7 @@ enum WireInternal {
                                  @NotNull WriteMarshallable writer) {
         Bytes bytes = wireOut.bytes();
         long position = bytes.writePosition();
+
         int metaDataBit = metaData ? Wires.META_DATA : 0;
         bytes.writeOrderedInt(metaDataBit | Wires.NOT_READY | Wires.UNKNOWN_LENGTH);
         writer.writeMarshallable(wireOut);
@@ -89,6 +90,7 @@ enum WireInternal {
         return position;
     }
 
+/*
     public static void writeDataOnce(@NotNull WireOut wireOut, boolean metaData, @NotNull WriteMarshallable writer) {
         Bytes bytes = wireOut.bytes();
         long position = bytes.writePosition();
@@ -102,6 +104,7 @@ enum WireInternal {
         if (!bytes.compareAndSwapInt(position, value, length | Wires.META_DATA))
             throw new AssertionError();
     }
+*/
 
     public static boolean readData(long offset,
                                    @NotNull WireIn wireIn,
