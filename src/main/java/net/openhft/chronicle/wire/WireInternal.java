@@ -73,9 +73,11 @@ enum WireInternal {
         return sb;
     }
 
-    public static void writeData(@NotNull WireOut wireOut, boolean metaData, boolean notReady, @NotNull WriteMarshallable writer) {
+    public static long writeData(@NotNull WireOut wireOut, boolean metaData, boolean notReady,
+                                 @NotNull WriteMarshallable writer) {
         Bytes bytes = wireOut.bytes();
         long position = bytes.writePosition();
+
         int metaDataBit = metaData ? Wires.META_DATA : 0;
         bytes.writeOrderedInt(metaDataBit | Wires.NOT_READY | Wires.UNKNOWN_LENGTH);
         writer.writeMarshallable(wireOut);
@@ -84,8 +86,11 @@ enum WireInternal {
             System.out.println("Message truncated from " + position + " to " + position1);
         int length = metaDataBit | toIntU30(position1 - position - 4, "Document length %,d out of 30-bit int range.");
         bytes.writeOrderedInt(position, length | (notReady ? Wires.NOT_READY : 0));
+
+        return position;
     }
 
+/*
     public static void writeDataOnce(@NotNull WireOut wireOut, boolean metaData, @NotNull WriteMarshallable writer) {
         Bytes bytes = wireOut.bytes();
         long position = bytes.writePosition();
@@ -99,6 +104,7 @@ enum WireInternal {
         if (!bytes.compareAndSwapInt(position, value, length | Wires.META_DATA))
             throw new AssertionError();
     }
+*/
 
     public static boolean readData(long offset,
                                    @NotNull WireIn wireIn,

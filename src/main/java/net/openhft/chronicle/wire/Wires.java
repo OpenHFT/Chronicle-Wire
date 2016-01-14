@@ -35,8 +35,9 @@ public enum Wires {
     static final StringBuilderPool SBP = new StringBuilderPool();
 
     /**
-     * This decodes some Bytes where the first 4-bytes is the length.  e.g. Wire.writeDocument wrote it.
-     * <a href="https://github.com/OpenHFT/RFC/tree/master/Size-Prefixed-Blob">Size Prefixed Blob</a>
+     * This decodes some Bytes where the first 4-bytes is the length.  e.g. Wire.writeDocument wrote
+     * it. <a href="https://github.com/OpenHFT/RFC/tree/master/Size-Prefixed-Blob">Size Prefixed
+     * Blob</a>
      *
      * @param bytes to decode
      * @return as String
@@ -98,10 +99,7 @@ public enum Wires {
     public static <T extends WriteMarshallable> long writeData(
             @NotNull WireOut wireOut,
             @NotNull T writer) {
-
-        WireInternal.writeData(wireOut, false, false, writer);
-
-        return wireOut.bytes().writePosition();
+        return WireInternal.writeData(wireOut, false, false, writer);
     }
 
     @ForceInline
@@ -109,9 +107,7 @@ public enum Wires {
             @NotNull WireOut wireOut,
             @NotNull T writer) {
 
-        WireInternal.writeData(wireOut, true, false, writer);
-
-        return wireOut.bytes().writePosition();
+        return WireInternal.writeData(wireOut, true, false, writer);
     }
 
     @ForceInline

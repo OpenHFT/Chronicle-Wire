@@ -530,6 +530,7 @@ public class TextWire implements Wire, InternalWire {
             try {
                 AppendableUtil.readUTFAndAppend(bytes, sb, testers);
             } catch (IOException e) {
+                e.printStackTrace();
                 throw new IORuntimeException(e);
             }
         }
@@ -1364,7 +1365,13 @@ public class TextWire implements Wire, InternalWire {
         @Nullable
         @Override
         public WireIn bytesSet(@NotNull PointerBytesStore toBytes) {
-            throw new UnsupportedOperationException("todo");
+            return bytes(wi -> {
+                Bytes<?> bytes = wi.bytes();
+                long capacity = bytes.readRemaining();
+                Bytes<Void> bytes2 = Bytes.allocateDirect(capacity);
+                bytes2.write(bytes);
+                toBytes.set(bytes2.address(bytes2.start()), capacity);
+            });
         }
 
         @NotNull
@@ -1887,7 +1894,8 @@ public class TextWire implements Wire, InternalWire {
                 consumeWhiteSpace();
                 int code = peekCode();
                 if (code < 0)
-                    throw new IllegalStateException("Cannot read nothing as a ReadMarshallable " + bytes.toDebugString());
+                    throw new IllegalStateException("Cannot read as a ReadMarshallable " +
+                            "" + bytes.toDebugString());
                 StringBuilder sb = WireInternal.acquireStringBuilder();
                 if (code != '!')
                     throw new ClassCastException("Cannot convert to ReadMarshallable. " + bytes.toDebugString());
