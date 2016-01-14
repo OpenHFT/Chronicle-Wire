@@ -204,20 +204,13 @@ public class BinaryWire2Test {
     @Test
     public void fieldAfterText() {
         Wire wire = createWire();
-        wire.writeDocument(false, w -> w.write(() -> "data").typePrefix("!UpdateEvent").marshallable(
-                v -> v.write(() -> "assetName").text("/name")
-                        .write(() -> "key").object("test")
-                        .write(() -> "oldValue").object("world1")
-                        .write(() -> "value").object("world2")));
-        /*
---- !!not-ready-data! #binary
-reply: !UpdatedEvent {
-  assetName: /name,
-  key: hello,
-  oldValue: world1,
-  value: world2
-}
-         */
+        wire.writeDocument(false, w -> w.write(() -> "data")
+                .typePrefix("!UpdateEvent").marshallable(
+                        v -> v.write(() -> "assetName").text("/name")
+                                .write(() -> "key").object("test")
+                                .write(() -> "oldValue").object("world1")
+                                .write(() -> "value").object("world2")));
+
         assertEquals("--- !!data #binary\n" +
                 "data: !!UpdateEvent {\n" +
                 "  assetName: /name,\n" +
@@ -241,15 +234,7 @@ reply: !UpdatedEvent {
                         .write(() -> "key").object("test")
                         .write(() -> "oldValue").object(null)
                         .write(() -> "value").object("world2")));
-        /*
---- !!not-ready-data! #binary
-reply: !UpdatedEvent {
-  assetName: /name,
-  key: hello,
-  oldValue: !!null "",
-  value: world2
-}
-         */
+
         assertEquals("--- !!data #binary\n" +
                 "data: !!UpdateEvent {\n" +
                 "  assetName: /name,\n" +
@@ -257,6 +242,7 @@ reply: !UpdatedEvent {
                 "  oldValue: !!null \"\",\n" +
                 "  value: world2\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
+
         wire.readDocument(null, w -> w.read(() -> "data").typePrefix(this, (o, t) -> assertEquals("!UpdateEvent", t.toString())).marshallable(
                 m -> m.read(() -> "assetName").object(String.class, "/name", Assert::assertEquals)
                         .read(() -> "key").object(String.class, "test", Assert::assertEquals)
