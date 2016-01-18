@@ -91,7 +91,7 @@ public class ReadDocumentContext implements DocumentContext {
             throw new BufferUnderflowException();
         readLimit = bytes.readLimit();
         readPosition = bytes.readPosition() + len;
-        bytes.readLimit(readLimit);
+        bytes.readLimit(readPosition);
         present = true;
     }
 
