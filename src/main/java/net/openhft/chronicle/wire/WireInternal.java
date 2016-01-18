@@ -99,8 +99,8 @@ public enum WireInternal {
      */
     public static long writeDataOrAdvanceIfNotEmpty(@NotNull WireOut wireOut,
                                                     boolean metaData,
-                                                    @NotNull WriteMarshallable writer) {
-
+                                                    @NotNull WriteMarshallable writer,
+                                                    @NotNull Runnable onAdvance) {
         for (; ; ) {
             Bytes bytes = wireOut.bytes();
             long position = bytes.writePosition();
@@ -108,6 +108,7 @@ public enum WireInternal {
             int value = metaDataBit | Wires.NOT_READY | Wires.UNKNOWN_LENGTH;
             if (!bytes.compareAndSwapInt(position, 0, value)) {
                 bytes.writeSkip(Wires.lengthOf(bytes.readLong(bytes.writePosition())));
+                onAdvance.run();
                 continue;
             }
 
