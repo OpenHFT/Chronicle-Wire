@@ -37,7 +37,7 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
 /**
  * Created by peter.lawrey on 16/01/15.
  */
-enum WireInternal {
+public enum WireInternal {
     ;
     static final StringInterner INTERNER = new StringInterner(128);
     static final StringBuilderPool SBP = new StringBuilderPool();
@@ -90,21 +90,37 @@ enum WireInternal {
         return position;
     }
 
-/*
-    public static void writeDataOnce(@NotNull WireOut wireOut, boolean metaData, @NotNull WriteMarshallable writer) {
-        Bytes bytes = wireOut.bytes();
-        long position = bytes.writePosition();
-        int metaDataBit = metaData ? Wires.META_DATA : 0;
-        int value = metaDataBit | Wires.NOT_READY | Wires.UNKNOWN_LENGTH;
-        if (!bytes.compareAndSwapInt(position, 0, value))
-            return;
-        bytes.writeSkip(4);
-        writer.writeMarshallable(wireOut);
-        int length = metaDataBit | toIntU30(bytes.writePosition() - position - 4, "Document length %,d out of 30-bit int range.");
-        if (!bytes.compareAndSwapInt(position, value, length | Wires.META_DATA))
-            throw new AssertionError();
+
+    /**
+     * @param wireOut  the target
+     * @param metaData {@code true} if meta data
+     * @param writer   the write of the data
+     * @return the position the data was written to
+     */
+    public static long writeDataOrAdvanceIfNotEmpty(@NotNull WireOut wireOut,
+                                                    boolean metaData,
+                                                    @NotNull WriteMarshallable writer) {
+
+        for (; ; ) {
+            Bytes bytes = wireOut.bytes();
+            long position = bytes.writePosition();
+            int metaDataBit = metaData ? Wires.META_DATA : 0;
+            int value = metaDataBit | Wires.NOT_READY | Wires.UNKNOWN_LENGTH;
+            if (!bytes.compareAndSwapInt(position, 0, value)) {
+                bytes.writeSkip(Wires.lengthOf(bytes.readLong(bytes.writePosition())));
+                continue;
+            }
+
+            bytes.writeSkip(4);
+            writer.writeMarshallable(wireOut);
+            int length = toIntU30(bytes.writePosition() - position - 4, "Document length %,d " +
+                    "out of 30-bit int range.");
+            if (!bytes.compareAndSwapInt(position, value, length | metaDataBit))
+                throw new AssertionError();
+            return position;
+        }
     }
-*/
+
 
     public static boolean readData(long offset,
                                    @NotNull WireIn wireIn,
