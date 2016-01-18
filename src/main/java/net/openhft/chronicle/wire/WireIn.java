@@ -19,8 +19,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * The defines the stand interface for writing and reading sequentially to/from a Bytes stream. <p> Created by peter.lawrey on
- * 12/01/15.
+ * The defines the stand interface for writing and reading sequentially to/from a Bytes stream. <p>
+ * Created by peter.lawrey on 12/01/15.
  */
 public interface WireIn extends WireCommon {
     boolean isReady();
@@ -40,7 +40,8 @@ public interface WireIn extends WireCommon {
     ValueIn read(@NotNull WireKey key);
 
     /**
-     * Read a field, or string which is always written, even for formats which might drop the field such as RAW.
+     * Read a field, or string which is always written, even for formats which might drop the field
+     * such as RAW.
      */
     @NotNull
     default ValueIn readEventName(@NotNull StringBuilder name) {
@@ -95,4 +96,9 @@ public interface WireIn extends WireCommon {
     }
 
     DocumentContext readingDocument();
+
+
+    DocumentContext readingDocument(long readLocation);
+
+
 }

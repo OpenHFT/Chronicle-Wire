@@ -86,6 +86,17 @@ public class BinaryWire implements Wire, InternalWire {
     }
 
     @Override
+    public DocumentContext readingDocument(long readLocation) {
+        final long readPosition = bytes().readPosition();
+        final long readLimit = bytes().readLimit();
+        bytes().readPosition(readLocation);
+        readContext.start();
+        readContext.closeReadLimit(readLimit);
+        readContext.closeReadPosition(readPosition);
+        return readContext;
+    }
+
+    @Override
     public boolean isReady() {
         return ready;
     }

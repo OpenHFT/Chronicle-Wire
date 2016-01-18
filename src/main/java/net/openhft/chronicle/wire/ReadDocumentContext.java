@@ -44,8 +44,16 @@ public class ReadDocumentContext implements DocumentContext {
     @Override
     public boolean isPresent() {
         return present;
-
     }
+
+    public void closeReadPosition(long readPosition) {
+        this.readPosition = readPosition;
+    }
+
+    public void closeReadLimit(long readLimit) {
+        this.readLimit = readLimit;
+    }
+
 
     @Override
     public boolean isData() {
@@ -86,4 +94,6 @@ public class ReadDocumentContext implements DocumentContext {
         bytes.readLimit(readLimit);
         present = true;
     }
+
+
 }
