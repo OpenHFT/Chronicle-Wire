@@ -750,7 +750,6 @@ public class TextWireTest {
         final Wire wire = new TextWire(bytes);
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception").object(e));
 
-        // TODO figure out where the newline before ] went.
         assertEquals("--- !!data\n" +
                 "exception: !" + e.getClass().getName() + " {\n" +
                 "  message: Reference cannot be null,\n" +
