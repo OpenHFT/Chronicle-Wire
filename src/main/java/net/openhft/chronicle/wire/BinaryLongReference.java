@@ -48,7 +48,7 @@ public class BinaryLongReference implements LongValue, Byteable {
 
     @NotNull
     public String toString() {
-        return "value: " + getValue();
+        return bytes == null ? "bytes is null" : "value: " + getValue();
     }
 
     @Override
