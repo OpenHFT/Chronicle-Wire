@@ -18,6 +18,8 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.StopCharTester;
+import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
+import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;

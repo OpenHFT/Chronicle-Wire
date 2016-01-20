@@ -17,6 +17,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.ref.TextIntReference;
+import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
+import net.openhft.chronicle.bytes.ref.TextLongReference;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -742,6 +745,9 @@ public class JSONWire extends TextWire {
     }
 
     class JSONValueIn extends TextValueIn {
+        private final ThreadLocal<CharSequence> usingKey = ThreadLocal.withInitial(StringBuilder::new);
+        private final ThreadLocal<CharSequence> usingValue = ThreadLocal.withInitial(StringBuilder::new);
+
         @Override
         public String text() {
             return StringUtils.toString(textTo(WireInternal.acquireStringBuilder()));
@@ -1120,11 +1126,6 @@ public class JSONWire extends TextWire {
                 throw new IORuntimeException(e);
             }
         }
-
-
-        private final ThreadLocal<CharSequence> usingKey = ThreadLocal.withInitial(StringBuilder::new);
-        private final ThreadLocal<CharSequence> usingValue = ThreadLocal.withInitial(StringBuilder::new);
-
 
         @Nullable
         @Override
