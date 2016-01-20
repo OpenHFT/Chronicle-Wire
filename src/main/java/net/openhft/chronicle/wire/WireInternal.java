@@ -107,8 +107,9 @@ public enum WireInternal {
         int metaDataBit = metaData ? Wires.META_DATA : 0;
         int value = metaDataBit | Wires.NOT_READY | Wires.UNKNOWN_LENGTH;
         if (!bytes.compareAndSwapInt(position, 0, value)) {
-            bytes.writeSkip(Wires.lengthOf(4 + bytes.readLong(bytes.writePosition())));
-            return -1;
+            final int len = Wires.lengthOf(bytes.readLong(bytes.writePosition()));
+            bytes.writeSkip(4 + len);
+            return -len;
         }
 
         bytes.writeSkip(4);
