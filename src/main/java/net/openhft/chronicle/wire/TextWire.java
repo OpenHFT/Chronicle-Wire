@@ -16,6 +16,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.ref.TextIntReference;
+import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
+import net.openhft.chronicle.bytes.ref.TextLongReference;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IOTools;
@@ -54,7 +57,7 @@ public class TextWire implements Wire, InternalWire {
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
     static final BitSet QUOTE_CHARS = new BitSet();
     static final Logger LOG = LoggerFactory.getLogger(TextWire.class);
-    static final ThreadLocal<StopCharTester> ESCAPED_QUOTES = ThreadLocal.withInitial(() -> StopCharTesters.QUOTES.escaping());
+    static final ThreadLocal<StopCharTester> ESCAPED_QUOTES = ThreadLocal.withInitial(StopCharTesters.QUOTES::escaping);
     static final ThreadLocal<StopCharTester> ESCAPED_SINGLE_QUOTES = ThreadLocal.withInitial(() -> StopCharTesters.SINGLE_QUOTES.escaping());
     static final ThreadLocal<StopCharsTester> ESCAPED_END_OF_TEXT = ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
     static final BytesStore COMMA_SPACE = BytesStore.wrap(", ");

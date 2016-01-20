@@ -17,6 +17,10 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
+import net.openhft.chronicle.bytes.ref.BinaryLongReference;
+import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
+import net.openhft.chronicle.bytes.ref.TextLongReference;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;

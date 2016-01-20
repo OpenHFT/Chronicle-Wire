@@ -16,6 +16,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.ref.BinaryIntReference;
+import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
+import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.Maths;
