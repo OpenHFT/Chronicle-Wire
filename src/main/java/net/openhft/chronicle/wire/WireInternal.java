@@ -101,13 +101,14 @@ public enum WireInternal {
     public static long writeDataOrAdvanceIfNotEmpty(@NotNull WireOut wireOut,
                                                     boolean metaData,
                                                     @NotNull WriteMarshallable writer) {
-
-        Bytes bytes = wireOut.bytes();
+        final Bytes bytes = wireOut.bytes();
         long position = bytes.writePosition();
         int metaDataBit = metaData ? Wires.META_DATA : 0;
-        int value = metaDataBit | Wires.NOT_READY | Wires.UNKNOWN_LENGTH;
+        int value = metaDataBit | Wires.NOT_READY;
         if (!bytes.compareAndSwapInt(position, 0, value)) {
             final int len = Wires.lengthOf(bytes.readLong(bytes.writePosition()));
+            if (len == 0)
+                return 0;
             bytes.writeSkip(4 + len);
             return -len;
         }
