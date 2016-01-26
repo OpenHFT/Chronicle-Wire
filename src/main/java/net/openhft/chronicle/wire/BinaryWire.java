@@ -1027,6 +1027,12 @@ public class BinaryWire implements Wire, InternalWire {
         }
 
         @NotNull
+        public WireOut fixedOrderedInt32(int i32) {
+            writeCode(INT32).writeOrderedInt(i32);
+            return BinaryWire.this;
+        }
+
+        @NotNull
         @Override
         public WireOut uint32checked(long u32) {
             writeCode(UINT32).writeUnsignedInt(u32);
@@ -1042,6 +1048,12 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         private WireOut fixedInt64(long i64) {
             writeCode(INT64).writeLong(i64);
+            return BinaryWire.this;
+        }
+
+        @NotNull
+        private WireOut fixedOrderedInt64(long i64) {
+            writeCode(INT64).writeOrderedLong(i64);
             return BinaryWire.this;
         }
 
@@ -1150,7 +1162,7 @@ public class BinaryWire implements Wire, InternalWire {
             int fromEndOfCacheLine = (int) ((-bytes.readPosition() - 1) & 63);
             if (fromEndOfCacheLine < 8)
                 addPadding(fromEndOfCacheLine);
-            fixedInt64(value);
+            fixedOrderedInt64(value);
             return BinaryWire.this;
         }
 
