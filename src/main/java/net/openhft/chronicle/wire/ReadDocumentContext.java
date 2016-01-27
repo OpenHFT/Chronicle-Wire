@@ -20,7 +20,7 @@ import net.openhft.chronicle.bytes.Bytes;
 
 import java.nio.BufferUnderflowException;
 
-import static net.openhft.chronicle.wire.Wires.isKnownLength;
+import static net.openhft.chronicle.wire.Wires.*;
 
 /**
  * Created by peter on 24/12/15.
@@ -62,6 +62,7 @@ public class ReadDocumentContext implements DocumentContext {
 
     @Override
     public void close() {
+        System.out.println("documented close readPosition=" + readPosition);
         if (readLimit > 0) {
             final Bytes<?> bytes = wire.bytes();
             bytes.readPosition(readPosition);
@@ -73,24 +74,30 @@ public class ReadDocumentContext implements DocumentContext {
         final Bytes<?> bytes = wire.bytes();
         if (bytes.readRemaining() < 4) {
             present = false;
+            System.out.println("bytes.readRemaining() < 4");
             readPosition = readLimit = -1;
             return;
         }
         long position = bytes.readPosition();
+
         int header = bytes.readVolatileInt(position);
-        if (!isKnownLength(header)) {
+        if (!isKnownLength(header) || !isReady(header)) {
             present = false;
+            System.out.println("!isKnownLength || !isReady(header)" );
             return;
         }
+
         bytes.readSkip(4);
-        final boolean ready = Wires.isReady(header);
-        final int len = Wires.lengthOf(header);
+        final boolean ready = isReady(header);
+        final int len = lengthOf(header);
+        assert len > 0 : "len=" + len;
         data = Wires.isData(header);
         wire.setReady(ready);
         if (len > bytes.readRemaining())
             throw new BufferUnderflowException();
         readLimit = bytes.readLimit();
         readPosition = bytes.readPosition() + len;
+        System.out.println("start - len=" + len + ",position=" + position);
         bytes.readLimit(readPosition);
         present = true;
     }
