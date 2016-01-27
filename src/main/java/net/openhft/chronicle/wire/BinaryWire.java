@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
@@ -2027,7 +2028,10 @@ public class BinaryWire implements Wire, InternalWire {
                         throw new IORuntimeException(e);
                     }
 
-                    if (!Marshallable.class.isAssignableFrom(clazz))
+                    if (Demarshallable.class.isAssignableFrom(clazz)) {
+                        return Demarshallable.newInstance(clazz, wireIn());
+                    }
+                    if (!Marshallable.class.isAssignableFrom(clazz) && !Demarshallable.class.isAssignableFrom(clazz))
                         throw new IllegalStateException("its not possible to Marshallable and object that" +
                                 " is not of type Marshallable, type=" + sb);
 

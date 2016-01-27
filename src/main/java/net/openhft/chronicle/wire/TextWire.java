@@ -2119,8 +2119,10 @@ public class TextWire implements Wire, InternalWire {
                 Bytes<byte[]> bytes = Bytes.wrapForRead(bytes());
                 return bytes;
             }
+            if (Demarshallable.class.isAssignableFrom(clazz)) {
+                return Demarshallable.newInstance(clazz, wireIn());
 
-            if (ReadMarshallable.class.isAssignableFrom(clazz)) {
+            } else if (ReadMarshallable.class.isAssignableFrom(clazz)) {
                 final Object v;
                 if (using == null)
                     v = ObjectUtils.newInstance(clazz);
