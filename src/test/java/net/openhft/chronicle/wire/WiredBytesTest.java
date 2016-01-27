@@ -2,9 +2,9 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MappedBytes;
+import net.openhft.chronicle.bytes.ref.BinaryIntReference;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
@@ -81,11 +81,14 @@ public class WiredBytesTest {
         }
     }
 
-    static class MyHeader_1_0 implements Marshallable {
+    static class MyHeader_1_0 implements Demarshallable, WriteMarshallable {
         IntValue installCount;
 
-        @Override
-        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
+        public MyHeader_1_0() {
+            installCount = new BinaryIntReference();
+        }
+
+        private MyHeader_1_0(@NotNull WireIn wire) {
             wire.read(() -> "install-count").int32(null, this, (t, i) -> t.installCount = i);
         }
 

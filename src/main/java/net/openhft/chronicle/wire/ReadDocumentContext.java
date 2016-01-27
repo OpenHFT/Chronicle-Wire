@@ -62,7 +62,6 @@ public class ReadDocumentContext implements DocumentContext {
 
     @Override
     public void close() {
-        System.out.println("documented close readPosition=" + readPosition);
         if (readLimit > 0) {
             final Bytes<?> bytes = wire.bytes();
             bytes.readPosition(readPosition);
@@ -74,7 +73,6 @@ public class ReadDocumentContext implements DocumentContext {
         final Bytes<?> bytes = wire.bytes();
         if (bytes.readRemaining() < 4) {
             present = false;
-            System.out.println("bytes.readRemaining() < 4");
             readPosition = readLimit = -1;
             return;
         }
@@ -83,7 +81,6 @@ public class ReadDocumentContext implements DocumentContext {
         int header = bytes.readVolatileInt(position);
         if (!isKnownLength(header) || !isReady(header)) {
             present = false;
-            System.out.println("!isKnownLength || !isReady(header)" );
             return;
         }
 
@@ -97,7 +94,7 @@ public class ReadDocumentContext implements DocumentContext {
             throw new BufferUnderflowException();
         readLimit = bytes.readLimit();
         readPosition = bytes.readPosition() + len;
-        System.out.println("start - len=" + len + ",position=" + position);
+
         bytes.readLimit(readPosition);
         present = true;
     }

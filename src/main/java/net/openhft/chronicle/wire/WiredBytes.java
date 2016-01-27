@@ -28,7 +28,7 @@ import java.util.function.Function;
 /**
  * Created by peter.lawrey on 21/09/2015.
  */
-public class WiredBytes<D extends Marshallable> implements Closeable {
+public class WiredBytes<D extends Demarshallable & WriteMarshallable> implements Closeable {
     private static final long TIMEOUT_MS = 10_000; // 10 seconds.
 
     private final Function<Bytes, Wire> wireType;
@@ -51,7 +51,7 @@ public class WiredBytes<D extends Marshallable> implements Closeable {
         this.headerCreated = headerCreated;
     }
 
-    public static <D extends Marshallable> WiredBytes<D> build(
+    public static <D extends Demarshallable & WriteMarshallable> WiredBytes<D> build(
             String masterFile,
             Function<File, MappedBytes> toMappedBytes,
             WireType wireType,
@@ -61,7 +61,7 @@ public class WiredBytes<D extends Marshallable> implements Closeable {
         return build(new File(masterFile), toMappedBytes, wireType, delegateSupplier, consumer);
     }
 
-    public static <D extends Marshallable> WiredBytes<D> build(
+    public static <D extends Demarshallable & WriteMarshallable> WiredBytes<D> build(
             File masterFile,
             Function<File, MappedBytes> mappedBytesFunction,
             WireType wireType,
