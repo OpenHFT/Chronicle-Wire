@@ -1088,7 +1088,7 @@ public class JSONWire extends TextWire {
         }
 
         @Nullable
-        public <T extends ReadMarshallable> T typedMarshallable() {
+        public <T> T typedMarshallable() {
             try {
                 consumeWhiteSpace();
                 int code = peekCode();

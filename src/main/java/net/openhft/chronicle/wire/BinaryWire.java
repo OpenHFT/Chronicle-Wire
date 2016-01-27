@@ -2013,7 +2013,7 @@ public class BinaryWire implements Wire, InternalWire {
         }
 
         @Nullable
-        public <T extends ReadMarshallable> T typedMarshallable() throws IORuntimeException {
+        public <T> T typedMarshallable() throws IORuntimeException {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             int code = readCode();
             switch (code) {
@@ -2029,7 +2029,7 @@ public class BinaryWire implements Wire, InternalWire {
                     }
 
                     if (Demarshallable.class.isAssignableFrom(clazz)) {
-                        return Demarshallable.newInstance(clazz, wireIn());
+                        return (T) demarshallable(clazz);
                     }
                     if (!Marshallable.class.isAssignableFrom(clazz) && !Demarshallable.class.isAssignableFrom(clazz))
                         throw new IllegalStateException("its not possible to Marshallable and object that" +
@@ -2141,6 +2141,25 @@ public class BinaryWire implements Wire, InternalWire {
                 object.readMarshallable(BinaryWire.this);
             }
             return BinaryWire.this;
+        }
+
+        public Demarshallable demarshallable(@NotNull Class clazz) throws BufferUnderflowException, IORuntimeException {
+            consumeSpecial(true);
+
+            long length = readLength();
+            if (length >= 0) {
+                long limit = bytes.readLimit();
+                long limit2 = bytes.readPosition() + length;
+                bytes.readLimit(limit2);
+                try {
+                    return Demarshallable.newInstance(clazz, wireIn());
+                } finally {
+                    bytes.readLimit(limit);
+                    bytes.readPosition(limit2);
+                }
+            } else {
+                return Demarshallable.newInstance(clazz, wireIn());
+            }
         }
 
         @Override

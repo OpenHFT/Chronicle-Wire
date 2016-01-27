@@ -30,7 +30,7 @@ public interface Demarshallable {
     };
 
     @NotNull
-    static <T extends ReadMarshallable> T newInstance(Class<? extends Demarshallable> clazz, WireIn wireIn) {
+    static <T extends Demarshallable> T newInstance(Class<T> clazz, WireIn wireIn) {
         try {
             return (T) DEMARSHALLABLES.get(clazz).newInstance(wireIn);
         } catch (IllegalAccessException e) {

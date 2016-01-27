@@ -859,7 +859,7 @@ public class RawWire implements Wire, InternalWire {
 
         @Nullable
         @Override
-        public <T extends ReadMarshallable> T typedMarshallable() {
+        public <T> T typedMarshallable() {
             throw new UnsupportedOperationException("todo");
         }
 
