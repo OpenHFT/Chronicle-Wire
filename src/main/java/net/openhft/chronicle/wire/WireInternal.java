@@ -101,8 +101,6 @@ public enum WireInternal {
     public static long writeDataOrAdvanceIfNotEmpty(@NotNull WireOut wireOut,
                                                     boolean metaData,
                                                     @NotNull WriteMarshallable writer) {
-
-
         final Bytes bytes = wireOut.bytes();
         long position = bytes.writePosition();
         int metaDataBit = metaData ? Wires.META_DATA : 0;
