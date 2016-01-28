@@ -98,7 +98,7 @@ public enum WireInternal {
      * @return the position the data was written or -1 if the data could not be written ( in which
      * case the position is advanced,
      */
-    public static long writeDataOrAdvanceIfNotEmpty(@NotNull WireOut wireOut,
+    public static long writeWireOrAdvanceIfNotEmpty(@NotNull WireOut wireOut,
                                                     boolean metaData,
                                                     @NotNull WriteMarshallable writer) {
         final Bytes bytes = wireOut.bytes();
@@ -129,7 +129,7 @@ public enum WireInternal {
      * @return the position the data was written or -1 if the data could not be written ( in which
      * case the position is advanced,
      */
-    public static long writeDataOrAdvanceIfNotEmpty(@NotNull WireOut wireOut,
+    public static long writeWireOrAdvanceIfNotEmpty(@NotNull WireOut wireOut,
                                                     boolean metaData,
                                                     @NotNull Bytes sourceBytes) {
         final Bytes bytes = wireOut.bytes();
