@@ -2,6 +2,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.*;
+import org.jetbrains.annotations.NotNull;
 
 /**
  */
@@ -70,7 +71,7 @@ public class WireTextBug {
                     '}';
         }
 
-        public void writeMarshallable(WireOut aWireOut) {
+        public void writeMarshallable(@NotNull WireOut aWireOut) {
             aWireOut.write(FIXTag.ClOrdID).text(getClOrdID());
         }
     }

@@ -70,7 +70,7 @@ public class UsingTestMarshallable {
         }
 
         @Override
-        public void writeMarshallable(WireOut wire) {
+        public void writeMarshallable(@NotNull WireOut wire) {
             wire.write(() -> "262").text(text);
         }
 

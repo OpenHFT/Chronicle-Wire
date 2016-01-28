@@ -570,7 +570,7 @@ wire.read(() -> "message").text("Hello World", Assert::assertEquals)
     }
 
     @Override
-    public void writeMarshallable(WireOut wire) {
+    public void writeMarshallable(@NotNull WireOut wire) {
         wire.write(Field.message).text(message)
                 .write(Field.number).int64(number)
                 .write(Field.timeUnit).asEnum(timeUnit)

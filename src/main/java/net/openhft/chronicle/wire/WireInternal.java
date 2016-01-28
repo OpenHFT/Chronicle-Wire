@@ -101,6 +101,8 @@ public enum WireInternal {
     public static long writeDataOrAdvanceIfNotEmpty(@NotNull WireOut wireOut,
                                                     boolean metaData,
                                                     @NotNull WriteMarshallable writer) {
+
+
         final Bytes bytes = wireOut.bytes();
         long position = bytes.writePosition();
         int metaDataBit = metaData ? Wires.META_DATA : 0;
@@ -115,6 +117,37 @@ public enum WireInternal {
 
         bytes.writeSkip(4);
         writer.writeMarshallable(wireOut);
+        int length = toIntU30(bytes.writePosition() - position - 4, "Document length %,d " +
+                "out of 30-bit int range.");
+        if (!bytes.compareAndSwapInt(position, value, length | metaDataBit))
+            throw new AssertionError();
+        return position;
+    }
+
+    /**
+     * @param wireOut     the target
+     * @param metaData    {@code true} if meta data
+     * @param sourceBytes the write of the data
+     * @return the position the data was written or -1 if the data could not be written ( in which
+     * case the position is advanced,
+     */
+    public static long writeDataOrAdvanceIfNotEmpty(@NotNull WireOut wireOut,
+                                                    boolean metaData,
+                                                    @NotNull Bytes sourceBytes) {
+        final Bytes bytes = wireOut.bytes();
+        long position = bytes.writePosition();
+        int metaDataBit = metaData ? Wires.META_DATA : 0;
+        int value = metaDataBit | Wires.NOT_READY;
+        if (!bytes.compareAndSwapInt(position, 0, value)) {
+            final int len = Wires.lengthOf(bytes.readLong(bytes.writePosition()));
+            if (len == 0)
+                return 0;
+            bytes.writeSkip(4 + len);
+            return -len;
+        }
+
+        bytes.writeSkip(4);
+        bytes.write(sourceBytes);
         int length = toIntU30(bytes.writePosition() - position - 4, "Document length %,d " +
                 "out of 30-bit int range.");
         if (!bytes.compareAndSwapInt(position, value, length | metaDataBit))
