@@ -2400,9 +2400,11 @@ public class BinaryWire implements Wire, InternalWire {
                     break;
 
                 case BinaryWireHighCode.FLOAT:
+                    bytes.readSkip(1);
                     return readFloat0object(code);
 
                 case BinaryWireHighCode.INT:
+                    bytes.readSkip(1);
                     return readInt0object(code);
             }
             // assume it a String
