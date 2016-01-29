@@ -136,7 +136,8 @@ public enum WireInternal {
         final Bytes bytes = wireOut.bytes();
         long position = bytes.writePosition();
         int metaDataBit = metaData ? Wires.META_DATA : 0;
-        int value = metaDataBit | Wires.NOT_READY;
+        int value = toIntU30(sourceBytes.readRemaining(), "Document length %,d " +
+                "out of 30-bit int range.") + (metaDataBit | Wires.NOT_READY);
         if (!bytes.compareAndSwapInt(position, 0, value)) {
             final int len = Wires.lengthOf(bytes.readLong(bytes.writePosition()));
             if (len == 0)
