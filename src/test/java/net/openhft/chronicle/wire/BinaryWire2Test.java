@@ -303,7 +303,7 @@ public class BinaryWire2Test {
         assertEquals("--- !!meta-data #binary\n" +
                 "!net.openhft.chronicle.wire.DemarshallableObject {\n" +
                 "  name: test,\n" +
-                "  value: 12345\n" +
+                "  value: !int 12345\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         try (DocumentContext $ = wire.readingDocument()) {

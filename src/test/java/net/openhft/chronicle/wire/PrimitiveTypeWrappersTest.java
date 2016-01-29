@@ -26,7 +26,7 @@ public class PrimitiveTypeWrappersTest {
     @Parameterized.Parameters
     public static Collection<Object[]> data() throws IOException {
         return Arrays.asList(
-                new Object[]{Boolean.TRUE}
+                new Object[]{Boolean.FALSE}
                 , new Object[]{Boolean.TRUE}
 
         );
@@ -60,6 +60,7 @@ public class PrimitiveTypeWrappersTest {
             final Wire wire = wireFactory();
 
             wire.write().object(num);
+            System.out.println(num.getClass() + " of " + num + " is " + (isTextWire ? wire.toString() : wire.bytes().toHexString()));
             final Object object = wire.read().object(Object.class);
             Assert.assertSame(num.getClass(), object.getClass());
             Assert.assertEquals(num.getClass().getName(), num, object);
