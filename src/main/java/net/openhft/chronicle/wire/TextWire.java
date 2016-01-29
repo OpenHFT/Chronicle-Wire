@@ -2101,13 +2101,24 @@ public class TextWire implements Wire, InternalWire {
         @Override
         public long int64() {
             consumeWhiteSpace();
+            valueIn.skipType();
             return bytes.parseLong();
         }
 
         @Override
         public double float64() {
             consumeWhiteSpace();
+            valueIn.skipType();
             return bytes.parseDouble();
+        }
+
+        private void skipType() {
+            long peek = bytes.peekUnsignedByte();
+            if (peek == '!') {
+                StringBuilder sb = WireInternal.acquireStringBuilder();
+                parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
+                consumeWhiteSpace();
+            }
         }
 
         @Override
