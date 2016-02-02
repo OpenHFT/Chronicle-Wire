@@ -438,9 +438,9 @@ public class RawWireTest {
                 .write().bytes(allBytes);
         System.out.println(bytes.toDebugString());
         NativeBytes allBytes2 = nativeBytes();
-        wire.read().bytes(wi -> assertEquals(0, wi.bytes().readRemaining()))
-                .read().bytes(wi -> assertEquals("Hello", wi.bytes().toString()))
-                .read().bytes(wi -> assertEquals("quotable, text", wi.bytes().toString()))
+        wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
+                .read().bytes(b -> assertEquals("Hello", b.toString()))
+                .read().bytes(b -> assertEquals("quotable, text", b.toString()))
                 .read().bytes(allBytes2);
         assertEquals(Bytes.wrapForRead(allBytes), allBytes2);
     }

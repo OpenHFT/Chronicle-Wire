@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.PointerBytesStore;
+import net.openhft.chronicle.bytes.ReadBytesMarshallable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.*;
@@ -83,7 +84,7 @@ public interface ValueIn {
     WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer);
 
     @NotNull
-    WireIn bytes(@NotNull ReadMarshallable wireInConsumer);
+    WireIn bytes(@NotNull ReadBytesMarshallable bytesMarshallable);
 
     @Nullable
     byte[] bytes();
@@ -156,7 +157,7 @@ public interface ValueIn {
     <T> WireIn int64array(@Nullable LongArrayValues values, T t, @NotNull BiConsumer<T, LongArrayValues> setter);
 
     @NotNull
-    WireIn int64(@Nullable LongValue value);
+    WireIn int64(@NotNull LongValue value);
 
     @NotNull
     <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter);
@@ -279,4 +280,6 @@ public interface ValueIn {
     boolean isTyped();
 
     Class typePrefix();
+
+    void resetState();
 }

@@ -81,6 +81,7 @@ public class TextWire implements Wire, InternalWire {
     private final ReadDocumentContext readContext = new ReadDocumentContext(this);
     protected Bytes<?> bytes;
     protected long lineStart = 0;
+    DefaultValueIn defaultValueIn;
     private boolean ready;
 
     public TextWire(Bytes bytes, boolean use8bit) {
@@ -344,13 +345,50 @@ public class TextWire implements Wire, InternalWire {
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
-        long position = bytes.readPosition();
-        StringBuilder sb = readField(WireInternal.acquireStringBuilder());
-        if (sb.length() == 0 || StringUtils.isEqual(sb, key.name()))
-            return valueIn;
-        bytes.readPosition(position);
-        throw new UnsupportedOperationException("Unordered fields not supported yet. key=" + key
-                .name() + ", was=" + sb + ", data='" + sb + "'");
+        consumeWhiteSpace();
+        ValueInState curr = valueIn.curr();
+        StringBuilder sb = WireInternal.acquireStringBuilder();
+        // did we save the position last time
+        // so we could go back and parse an older field?
+        if (curr.savedPosition() > 0) {
+            bytes.readPosition(curr.savedPosition() - 1);
+            curr.savedPosition(0L);
+        }
+        CharSequence name = key.name();
+        while (bytes.readRemaining() > 0) {
+            long position = bytes.readPosition();
+            // at the current position look for the field.
+            readField(sb);
+            if (sb.length() == 0 || StringUtils.isEqual(sb, name))
+                return valueIn;
+
+            // if no old field nor current field matches, set to default values.
+            // we may come back and set the field later if we find it.
+            curr.addUnexpected(position);
+            long toSkip = valueIn.readLengthMarshallable();
+            bytes.readSkip(toSkip);
+            consumeWhiteSpace();
+        }
+
+        long position2 = bytes.readPosition();
+
+        // if not a match go back and look at old fields.
+        for (int i = 0; i < curr.unexpectedSize(); i++) {
+            bytes.readPosition(curr.unexpected(i));
+            readField(sb);
+            if (sb.length() == 0 || StringUtils.isEqual(sb, name)) {
+                // if an old field matches, remove it, save the current position
+                curr.removeUnexpected(i);
+                curr.savedPosition(position2 + 1);
+                return valueIn;
+            }
+        }
+        bytes.readPosition(position2);
+
+        if (defaultValueIn == null)
+            defaultValueIn = new DefaultValueIn(this);
+        defaultValueIn.wireKey = key;
+        return defaultValueIn;
     }
 
     @NotNull
@@ -376,6 +414,7 @@ public class TextWire implements Wire, InternalWire {
     @Override
     public void clear() {
         bytes.clear();
+        valueIn.resetState();
     }
 
     @NotNull
@@ -1236,6 +1275,25 @@ public class TextWire implements Wire, InternalWire {
     }
 
     class TextValueIn implements ValueIn {
+        final ValueInStack stack = new ValueInStack();
+
+        @Override
+        public void resetState() {
+            stack.reset();
+        }
+
+        public void pushState() {
+            stack.push();
+        }
+
+        public void popState() {
+            stack.pop();
+        }
+
+        public ValueInState curr() {
+            return stack.curr();
+        }
+
         @Override
         public String text() {
             CharSequence cs = textTo0(WireInternal.acquireStringBuilder());
@@ -1394,14 +1452,13 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public WireIn bytes(@NotNull Bytes toBytes) {
-            return bytes(wi -> toBytes.write(wi.bytes()));
+            return bytes(toBytes::write);
         }
 
         @Nullable
         @Override
         public WireIn bytesSet(@NotNull PointerBytesStore toBytes) {
-            return bytes(wi -> {
-                Bytes<?> bytes = wi.bytes();
+            return bytes(bytes -> {
                 long capacity = bytes.readRemaining();
                 Bytes<Void> bytes2 = Bytes.allocateDirect(capacity);
                 bytes2.write(bytes);
@@ -1410,7 +1467,7 @@ public class TextWire implements Wire, InternalWire {
         }
 
         @NotNull
-        public WireIn bytes(@NotNull ReadMarshallable bytesConsumer) {
+        public WireIn bytes(@NotNull ReadBytesMarshallable bytesConsumer) {
             consumeWhiteSpace();
 
             // TODO needs to be made much more efficient.
@@ -1426,7 +1483,7 @@ public class TextWire implements Wire, InternalWire {
                     return decode;
                 });
                 if (uncompressed != null) {
-                    bytesConsumer.readMarshallable(new TextWire(Bytes.wrapForRead(uncompressed)));
+                    bytesConsumer.readMarshallable(Bytes.wrapForRead(uncompressed));
 
                 } else if (StringUtils.isEqual(sb, "!null")) {
                     bytesConsumer.readMarshallable(null);
@@ -1436,7 +1493,7 @@ public class TextWire implements Wire, InternalWire {
                 }
             } else {
                 textTo(sb);
-                bytesConsumer.readMarshallable(new TextWire(Bytes.wrapForRead(sb.toString().getBytes())));
+                bytesConsumer.readMarshallable(Bytes.wrapForRead(sb.toString().getBytes()));
             }
             return TextWire.this;
         }
@@ -1525,9 +1582,10 @@ public class TextWire implements Wire, InternalWire {
             long start = bytes.readPosition();
             try {
                 consumeWhiteSpace();
-                int code = readCode();
+                int code = peekCode();
                 switch (code) {
                     case '{': {
+                        bytes.readSkip(1);
                         int count = 1;
                         for (; ; ) {
                             int b = bytes.readByte();
@@ -1545,12 +1603,24 @@ public class TextWire implements Wire, InternalWire {
                     }
 
                     default:
-                        // TODO needs to be made much more efficient.
-                        bytes();
+                        consumeValue();
                         return bytes.readPosition() - start;
                 }
             } finally {
                 bytes.readPosition(start);
+            }
+        }
+
+        private void consumeValue() {
+            consumeWhiteSpace();
+            StringBuilder sb = WireInternal.acquireStringBuilder();
+            if (peekCode() == '!') {
+                bytes.readSkip(1);
+                parseWord(sb);
+                parseWord(sb);
+
+            } else {
+                textTo(sb);
             }
         }
 
@@ -1776,6 +1846,7 @@ public class TextWire implements Wire, InternalWire {
 
         @Override
         public <T> T applyToMarshallable(@NotNull Function<WireIn, T> marshallableReader) {
+            popState();
             consumeWhiteSpace();
             int code = peekCode();
             if (code != '{')
@@ -1798,6 +1869,7 @@ public class TextWire implements Wire, InternalWire {
 
                 consumeWhiteSpace();
                 code = readCode();
+                popState();
                 if (code != '}')
                     throw new IORuntimeException("Unterminated { while reading marshallable "
                             + "bytes=" + Bytes.toString(bytes)
@@ -1887,6 +1959,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public WireIn marshallable(@NotNull ReadMarshallable object) {
+            pushState();
             consumeWhiteSpace();
             int code = peekCode();
             if (code == '!') {
@@ -1911,6 +1984,7 @@ public class TextWire implements Wire, InternalWire {
             } finally {
                 bytes.readLimit(limit);
                 bytes.readPosition(newLimit);
+                popState();
             }
 
             consumeWhiteSpace();
@@ -1924,6 +1998,7 @@ public class TextWire implements Wire, InternalWire {
 
         @NotNull
         public Demarshallable demarshallable(@NotNull Class clazz) {
+            pushState();
             consumeWhiteSpace();
             int code = peekCode();
             if (code == '!') {
@@ -1950,6 +2025,7 @@ public class TextWire implements Wire, InternalWire {
             } finally {
                 bytes.readLimit(limit);
                 bytes.readPosition(newLimit);
+                popState();
             }
 
             consumeWhiteSpace();

@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.VanillaBytes;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +33,8 @@ public enum Wires {
     public static final int META_DATA = 1 << 30;
     public static final int UNKNOWN_LENGTH = 0x0;
     public static final int NOT_INITIALIZED = 0x0;
+    public static final Bytes<?> NO_BYTES = new VanillaBytes<>(Bytes.empty());
+    public static final WireIn EMPTY = new BinaryWire(NO_BYTES);
     static final StringBuilderPool SBP = new StringBuilderPool();
 
     /**

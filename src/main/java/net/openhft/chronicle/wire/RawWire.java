@@ -15,10 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Byteable;
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.PointerBytesStore;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.ref.BinaryIntReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongReference;
@@ -549,6 +546,25 @@ public class RawWire implements Wire, InternalWire {
     }
 
     class RawValueIn implements ValueIn {
+        final ValueInStack stack = new ValueInStack();
+
+        @Override
+        public void resetState() {
+            stack.reset();
+        }
+
+        public void pushState() {
+            stack.push();
+        }
+
+        public void popState() {
+            stack.pop();
+        }
+
+        public ValueInState curr() {
+            return stack.curr();
+        }
+
         @NotNull
         @Override
         public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> flag) {
@@ -631,7 +647,7 @@ public class RawWire implements Wire, InternalWire {
         }
 
         @NotNull
-        public WireIn bytes(@NotNull ReadMarshallable bytesConsumer) {
+        public WireIn bytes(@NotNull ReadBytesMarshallable bytesConsumer) {
             long length = readLength();
 
             if (length > bytes.readRemaining())
@@ -640,7 +656,7 @@ public class RawWire implements Wire, InternalWire {
             long limit = bytes.readPosition() + length;
             try {
                 bytes.readLimit(limit);
-                bytesConsumer.readMarshallable(wireIn());
+                bytesConsumer.readMarshallable(bytes);
             } finally {
                 bytes.readLimit(limit0);
                 bytes.readPosition(limit);

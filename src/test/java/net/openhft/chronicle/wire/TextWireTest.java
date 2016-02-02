@@ -187,14 +187,7 @@ public class TextWireTest {
         wire.read(BWKey.field1);
         wire.read(BWKey.field1);
         // not a match
-        try {
-            wire.read(BWKey.field1);
-            fail();
-        } catch (UnsupportedOperationException expected) {
-            StringBuilder name = new StringBuilder();
-            wire.read(name);
-            assertEquals("Test", name.toString());
-        }
+        wire.read(BWKey.field1);
         assertEquals(1, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
@@ -552,14 +545,14 @@ public class TextWireTest {
         for (int i = 0; i < 256; i++)
             allBytes[i] = (byte) i;
         wire.write().bytes(NoBytesStore.NO_BYTES)
-                .write().bytes(Bytes.wrapForRead("Hello".getBytes()))
-                .write().bytes(Bytes.wrapForRead("quotable, text".getBytes()))
+                .write().bytes(Bytes.wrapForRead("Hello" .getBytes()))
+                .write().bytes(Bytes.wrapForRead("quotable, text" .getBytes()))
                 .write().bytes(allBytes);
         System.out.println(bytes.toString());
         NativeBytes allBytes2 = nativeBytes();
-        wire.read().bytes(wi -> assertEquals(0, wi.bytes().readRemaining()))
-                .read().bytes(wi -> assertEquals("Hello", wi.bytes().toString()))
-                .read().bytes(wi -> assertEquals("quotable, text", wi.bytes().toString()))
+        wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
+                .read().bytes(b -> assertEquals("Hello", b.toString()))
+                .read().bytes(b -> assertEquals("quotable, text", b.toString()))
                 .read().bytes(allBytes2);
         assertEquals(Bytes.wrapForRead(allBytes), allBytes2);
     }
@@ -849,6 +842,7 @@ public class TextWireTest {
         wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
+
     @Test
     public void testLZWCompressionAsText() throws IOException {
         Wire wire = createWire();

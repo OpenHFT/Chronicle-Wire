@@ -227,6 +227,7 @@ public class CSVWire extends TextWire {
         @NotNull
         @Override
         public WireIn marshallable(@NotNull ReadMarshallable object) {
+            pushState();
             consumeWhiteSpace();
             final long len = readLengthMarshallable();
 
@@ -243,6 +244,7 @@ public class CSVWire extends TextWire {
             } finally {
                 bytes.readLimit(limit);
                 bytes.readPosition(newLimit);
+                popState();
             }
 
             consumeWhiteSpace();

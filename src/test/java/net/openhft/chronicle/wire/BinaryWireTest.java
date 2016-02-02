@@ -36,7 +36,8 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(value = Parameterized.class)
 public class BinaryWireTest {
@@ -176,12 +177,7 @@ public class BinaryWireTest {
         wire.read(BWKey.field1);
         wire.read(BWKey.field1);
         // not a match
-        try {
-            wire.read(BWKey.field1);
-            if (!fieldLess) fail();
-        } catch (UnsupportedOperationException expected) {
-            wire.read(new StringBuilder());
-        }
+        wire.read(BWKey.field1);
         assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
@@ -635,9 +631,9 @@ public class BinaryWireTest {
                 .bytes(allBytes);
         System.out.println(bytes.toDebugString());
         NativeBytes allBytes2 = nativeBytes();
-        wire.read().bytes(wi -> assertEquals(0, wi.bytes().readRemaining()))
-                .read().bytes(wi -> assertEquals("Hello", wi.bytes().toString()))
-                .read().bytes(wi -> assertEquals("quotable, text", wi.bytes().toString()))
+        wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
+                .read().bytes(b -> assertEquals("Hello", b.toString()))
+                .read().bytes(b -> assertEquals("quotable, text", b.toString()))
                 .read()
                 .bytes(allBytes2);
         assertEquals(Bytes.wrapForRead(allBytes), allBytes2);

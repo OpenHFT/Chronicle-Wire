@@ -63,6 +63,7 @@ public class BinaryWire implements Wire, InternalWire {
     private final int compressedSize;
     private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
     private final ReadDocumentContext readContext = new ReadDocumentContext(this);
+    DefaultValueIn defaultValueIn;
     private boolean ready;
     private String compression;
 
@@ -227,22 +228,49 @@ public class BinaryWire implements Wire, InternalWire {
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
-        long position = bytes.readPosition();
-        StringBuilder sb = readField(WireInternal.acquireStringBuilder(), key);
+        consumeSpecial();
+        ValueInState curr = valueIn.curr();
+        StringBuilder sb = WireInternal.acquireStringBuilder();
+        // did we save the position last time
+        // so we could go back and parse an older field?
+        if (curr.savedPosition() > 0) {
+            bytes.readPosition(curr.savedPosition() - 1);
+            curr.savedPosition(0L);
+        }
+        CharSequence name = key.name();
+        while (bytes.readRemaining() > 0) {
+            long position = bytes.readPosition();
+            // at the current position look for the field.
+            readField(sb, key);
+            if (sb.length() == 0 || StringUtils.isEqual(sb, name))
+                return valueIn;
 
-        if (fieldLess || (sb != null && (sb.length() == 0 || StringUtils.isEqual(sb, key.name()))))
-            return valueIn;
-        return unorderedField(key, position, sb);
-    }
+            // if no old field nor current field matches, set to default values.
+            // we may come back and set the field later if we find it.
+            curr.addUnexpected(position);
+            valueIn.consumeNext();
+            consumeSpecial();
+        }
 
-    @NotNull
-    private ValueIn unorderedField(@NotNull WireKey key, long position, @Nullable StringBuilder sb) {
-        bytes.readPosition(position);
-        if (sb == null)
-            sb = WireInternal.acquireStringBuilder();
-        readEventName(sb);
-        throw new UnsupportedOperationException("Unordered fields not supported yet, " +
-                "Expected=" + key.name() + " was: '" + sb + "'");
+        long position2 = bytes.readPosition();
+
+        // if not a match go back and look at old fields.
+        for (int i = 0; i < curr.unexpectedSize(); i++) {
+            bytes.readPosition(curr.unexpected(i));
+            readField(sb, key);
+            if (sb.length() == 0 || StringUtils.isEqual(sb, name)) {
+                // if an old field matches, remove it, save the current position
+                curr.removeUnexpected(i);
+                curr.savedPosition(position2 + 1);
+                return valueIn;
+            }
+        }
+        bytes.readPosition(position2);
+
+        if (defaultValueIn == null)
+            defaultValueIn = new DefaultValueIn(this);
+        defaultValueIn.wireKey = key;
+        return defaultValueIn;
     }
 
     @NotNull
@@ -375,9 +403,14 @@ public class BinaryWire implements Wire, InternalWire {
         if (peekCode == FIELD_NUMBER) {
             bytes.readSkip(1);
             long fieldId = bytes.readStopBit();
+            if (key == ANY_CODE_MATCH) {
+                sb.append(fieldId);
+                return sb;
+            }
             int codeMatch = key.code();
-            if (codeMatch >= 0 && fieldId != codeMatch)
-                throw new UnsupportedOperationException("Field was: " + fieldId + " expected " + codeMatch);
+            if (fieldId != codeMatch)
+                return sb;
+
             sb.append(key.name());
             return sb;
         }
@@ -1493,6 +1526,25 @@ public class BinaryWire implements Wire, InternalWire {
     }
 
     class BinaryValueIn implements ValueIn {
+        final ValueInStack stack = new ValueInStack();
+
+        @Override
+        public void resetState() {
+            stack.reset();
+        }
+
+        public void pushState() {
+            stack.push();
+        }
+
+        public void popState() {
+            stack.pop();
+        }
+
+        public ValueInState curr() {
+            return stack.curr();
+        }
+
         @NotNull
         WireIn text(@NotNull Consumer<String> s) {
             consumeSpecial();
@@ -1718,7 +1770,7 @@ public class BinaryWire implements Wire, InternalWire {
         }
 
         @NotNull
-        public WireIn bytes(@NotNull ReadMarshallable bytesConsumer) {
+        public WireIn bytes(@NotNull ReadBytesMarshallable bytesConsumer) {
             long length = readLength() - 1;
             int code = readCode();
             if (code != U8_ARRAY)
@@ -1730,7 +1782,7 @@ public class BinaryWire implements Wire, InternalWire {
             long limit = bytes.readPosition() + length;
             try {
                 bytes.readLimit(limit);
-                bytesConsumer.readMarshallable(wireIn());
+                bytesConsumer.readMarshallable(bytes);
             } finally {
                 bytes.readLimit(limit0);
                 bytes.readPosition(limit);
@@ -2071,19 +2123,24 @@ public class BinaryWire implements Wire, InternalWire {
         @Override
         public <T> T applyToMarshallable(@NotNull Function<WireIn, T> marshallableReader) {
             consumeSpecial();
-            long length = readLength();
-            if (length >= 0) {
-                long limit = bytes.readLimit();
-                long limit2 = bytes.readPosition() + length;
-                bytes.readLimit(limit2);
-                try {
+            pushState();
+            try {
+                long length = readLength();
+                if (length >= 0) {
+                    long limit = bytes.readLimit();
+                    long limit2 = bytes.readPosition() + length;
+                    bytes.readLimit(limit2);
+                    try {
+                        return marshallableReader.apply(BinaryWire.this);
+                    } finally {
+                        bytes.readLimit(limit);
+                        bytes.readPosition(limit2);
+                    }
+                } else {
                     return marshallableReader.apply(BinaryWire.this);
-                } finally {
-                    bytes.readLimit(limit);
-                    bytes.readPosition(limit2);
                 }
-            } else {
-                return marshallableReader.apply(BinaryWire.this);
+            } finally {
+                popState();
             }
         }
 
@@ -2096,37 +2153,42 @@ public class BinaryWire implements Wire, InternalWire {
         @Nullable
         public <T> T typedMarshallable() throws IORuntimeException {
             StringBuilder sb = WireInternal.acquireStringBuilder();
-            int code = readCode();
-            switch (code) {
-                case TYPE_PREFIX:
-                    bytes.readUtf8(sb);
-                    // its possible that the object that you are allocating may not have a
-                    // default constructor
-                    final Class clazz;
-                    try {
-                        clazz = ClassAliasPool.CLASS_ALIASES.forName(sb);
-                    } catch (ClassNotFoundException e) {
-                        throw new IORuntimeException(e);
-                    }
+            pushState();
+            try {
+                int code = readCode();
+                switch (code) {
+                    case TYPE_PREFIX:
+                        bytes.readUtf8(sb);
+                        // its possible that the object that you are allocating may not have a
+                        // default constructor
+                        final Class clazz;
+                        try {
+                            clazz = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                        } catch (ClassNotFoundException e) {
+                            throw new IORuntimeException(e);
+                        }
 
-                    if (Demarshallable.class.isAssignableFrom(clazz)) {
-                        return (T) demarshallable(clazz);
-                    }
-                    if (!Marshallable.class.isAssignableFrom(clazz) && !Demarshallable.class.isAssignableFrom(clazz))
-                        throw new IllegalStateException("its not possible to Marshallable and object that" +
-                                " is not of type Marshallable, type=" + sb);
+                        if (Demarshallable.class.isAssignableFrom(clazz)) {
+                            return (T) demarshallable(clazz);
+                        }
+                        if (!Marshallable.class.isAssignableFrom(clazz) && !Demarshallable.class.isAssignableFrom(clazz))
+                            throw new IllegalStateException("its not possible to Marshallable and object that" +
+                                    " is not of type Marshallable, type=" + sb);
 
-                    final ReadMarshallable m = ObjectUtils.newInstance((Class<ReadMarshallable>) clazz);
+                        final ReadMarshallable m = ObjectUtils.newInstance((Class<ReadMarshallable>) clazz);
 
-                    marshallable(m);
-                    return readResolve(m);
+                        marshallable(m);
+                        return readResolve(m);
 
-                case NULL:
-                    return null;
+                    case NULL:
+                        return null;
 
-                default:
-                    cantRead(code);
-                    return null; // only if the throw doesn't work.
+                    default:
+                        cantRead(code);
+                        return null; // only if the throw doesn't work.
+                }
+            } finally {
+                popState();
             }
         }
 
@@ -2206,7 +2268,7 @@ public class BinaryWire implements Wire, InternalWire {
         @Override
         public WireIn marshallable(@NotNull ReadMarshallable object) throws BufferUnderflowException, IORuntimeException {
             consumeSpecial(true);
-
+            pushState();
             long length = readLength();
             if (length >= 0) {
                 long limit = bytes.readLimit();
@@ -2217,9 +2279,10 @@ public class BinaryWire implements Wire, InternalWire {
                 } finally {
                     bytes.readLimit(limit);
                     bytes.readPosition(limit2);
+                    popState();
                 }
             } else {
-                object.readMarshallable(BinaryWire.this);
+                throw new IORuntimeException("Length unknown");
             }
             return BinaryWire.this;
         }
@@ -2490,6 +2553,60 @@ public class BinaryWire implements Wire, InternalWire {
             }
             // assume it a String
             return text();
+        }
+
+        void consumeNext() {
+            int code = peekCode();
+            if ((code & 0x80) == 0) {
+                bytes.readSkip(1);
+                return;
+            }
+            switch (code >> 4) {
+                case BinaryWireHighCode.CONTROL:
+                    switch (code) {
+                        case BYTES_LENGTH32:
+                            bytesStore();
+                            return;
+                    }
+                    break;
+                case BinaryWireHighCode.SPECIAL:
+                    switch (code) {
+                        case FALSE:
+                        case TRUE:
+                        case NULL:
+                            bytes.readSkip(1);
+                            return;
+                        case STRING_ANY:
+                            text();
+                            return;
+                        case TYPE_PREFIX: {
+                            readCode();
+                            StringBuilder sb = WireInternal.acquireStringBuilder();
+                            bytes.readUtf8(sb);
+                            final Class clazz2;
+                            try {
+                                clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                            } catch (ClassNotFoundException e) {
+                                throw new IORuntimeException(e);
+                            }
+                            object(null, clazz2);
+                            return;
+                        }
+                    }
+                    break;
+
+                case BinaryWireHighCode.FLOAT:
+                    bytes.readSkip(1);
+                    readFloat0object(code);
+                    return;
+
+                case BinaryWireHighCode.INT:
+                    bytes.readSkip(1);
+                    readInt0object(code);
+                    return;
+            }
+            // assume it a String
+            text();
         }
     }
 }
