@@ -1371,7 +1371,7 @@ public class TextWire implements Wire, InternalWire {
             return ret;
         }
 
-        private int peekBack() {
+        protected int peekBack() {
             while (bytes.readPosition() >= bytes.start()) {
                 int prev = bytes.readUnsignedByte(bytes.readPosition() - 1);
                 if (prev != ' ') {

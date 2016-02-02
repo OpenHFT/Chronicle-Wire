@@ -19,7 +19,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.StopCharTester;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
-import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -30,12 +29,8 @@ import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.BiConsumer;
 
 /**
@@ -71,76 +66,12 @@ public class QueryWire extends TextWire {
     }
 
     @ForceInline
-    void consumeWhiteSpace() {
+    protected void consumeWhiteSpace() {
         int codePoint = peekCode();
         while (Character.isWhitespace(codePoint)) {
             bytes.readSkip(1);
             codePoint = peekCode();
         }
-    }
-
-    /**
-     * returns true if the next string is {@code str}
-     *
-     * @param source string
-     * @return true if the strings are the same
-     */
-    private boolean peekStringIgnoreCase(@NotNull final String source) {
-        if (source.isEmpty())
-            return true;
-
-        if (bytes.readRemaining() < 1)
-            return false;
-
-        long pos = bytes.readPosition();
-
-        try {
-            for (int i = 0; i < source.length(); i++) {
-                if (Character.toLowerCase(source.charAt(i)) != Character.toLowerCase(bytes.readByte()))
-                    return false;
-            }
-        } finally {
-            bytes.readPosition(pos);
-        }
-
-        return true;
-    }
-
-    private int readCode() {
-        if (bytes.readRemaining() < 1)
-            return -1;
-        return bytes.readUnsignedByte();
-    }
-
-    @NotNull
-    @Override
-    public ValueIn read(@NotNull WireKey key) {
-        long position = bytes.readPosition();
-        StringBuilder sb = readField(WireInternal.acquireStringBuilder());
-        if (sb.length() == 0 || StringUtils.isEqual(sb, key.name()))
-            return valueIn;
-        bytes.readPosition(position);
-        throw new UnsupportedOperationException("Unordered fields not supported yet. key=" + key
-                .name() + ", was=" + sb + ", data='" + sb + "'");
-    }
-
-    @NotNull
-    @Override
-    public ValueIn read(@NotNull StringBuilder name) {
-        consumeWhiteSpace();
-        readField(name);
-        return valueIn;
-    }
-
-    @NotNull
-    @Override
-    public ValueIn getValueIn() {
-        return valueIn;
-    }
-
-    @Override
-    public boolean hasMore() {
-        return bytes.readRemaining() > 0;
     }
 
     @NotNull
@@ -304,135 +235,14 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut uint8checked(int u8) {
-            prependSeparator();
-            bytes.appendUtf8(u8);
-            elementSeparator();
-
-            return QueryWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireOut int16(short i16) {
-            prependSeparator();
-            bytes.appendUtf8(i16);
-            elementSeparator();
-
-            return QueryWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireOut uint16checked(int u16) {
-            prependSeparator();
-            bytes.appendUtf8(u16);
-            elementSeparator();
-
-            return QueryWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireOut utf8(int codepoint) {
-            prependSeparator();
-            StringBuilder sb = WireInternal.acquireStringBuilder();
-            sb.appendCodePoint(codepoint);
-            text(sb);
-            return QueryWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireOut int32(int i32) {
-            prependSeparator();
-            bytes.appendUtf8(i32);
-            elementSeparator();
-
-            return QueryWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireOut uint32checked(long u32) {
-            prependSeparator();
-            bytes.append(u32);
-            elementSeparator();
-
-            return QueryWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireOut int64(long i64) {
-            prependSeparator();
-            bytes.append(i64);
-            elementSeparator();
-
-            return QueryWire.this;
-        }
-
-        @NotNull
-        @Override
         public WireOut int64array(long capacity) {
-            TextLongArrayReference.write(bytes, capacity);
-            return QueryWire.this;
+            throw new UnsupportedOperationException();
         }
 
         @NotNull
         @Override
         public WireOut int64array(long capacity, LongArrayValues values) {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @NotNull
-        @Override
-        public WireOut float32(float f) {
-            prependSeparator();
-            bytes.append(f);
-            elementSeparator();
-
-            return QueryWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireOut float64(double d) {
-            prependSeparator();
-            bytes.append(d);
-            elementSeparator();
-
-            return QueryWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireOut time(@NotNull LocalTime localTime) {
-            prependSeparator();
-            bytes.appendUtf8(localTime.toString());
-            elementSeparator();
-
-            return QueryWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
-            prependSeparator();
-            bytes.appendUtf8(zonedDateTime.toString());
-            elementSeparator();
-
-            return QueryWire.this;
-        }
-
-        @NotNull
-        @Override
-        public WireOut date(@NotNull LocalDate localDate) {
-            prependSeparator();
-            bytes.appendUtf8(localDate.toString());
-            elementSeparator();
-
-            return QueryWire.this;
+            throw new UnsupportedOperationException();
         }
 
         @NotNull
@@ -447,22 +257,13 @@ public class QueryWire extends TextWire {
         @NotNull
         @Override
         public WireOut typeLiteral(@NotNull CharSequence type) {
-            throw new UnsupportedOperationException("todo");
+            throw new UnsupportedOperationException();
         }
 
         @NotNull
         @Override
         public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @NotNull Class type) {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @NotNull
-        @Override
-        public WireOut uuid(@NotNull UUID uuid) {
-            prependSeparator();
-            bytes.appendUtf8(sep).appendUtf8(uuid.toString());
-            elementSeparator();
-            return QueryWire.this;
+            throw new UnsupportedOperationException();
         }
 
         @NotNull
@@ -507,10 +308,10 @@ public class QueryWire extends TextWire {
             return QueryWire.this;
         }
 
-        private void popState() {
+        protected void popState() {
         }
 
-        private void pushState() {
+        protected void pushState() {
         }
 
         @NotNull
@@ -545,9 +346,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         public ValueOut write() {
-            bytes.appendUtf8(sep).appendUtf8("\"\": ");
-            sep = "";
-            return this;
+            throw new UnsupportedOperationException();
         }
 
         @NotNull
