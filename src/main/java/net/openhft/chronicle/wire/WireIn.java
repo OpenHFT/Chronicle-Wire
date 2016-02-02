@@ -95,6 +95,12 @@ public interface WireIn extends WireCommon {
         WireInternal.rawReadData(this, marshallable);
     }
 
+    /**
+     * equivalent to {@link  WireIn#readDocument(net.openhft.chronicle.wire.ReadMarshallable,
+     * net.openhft.chronicle.wire.ReadMarshallable)} but with out the use of a lambda expression
+     *
+     * @return the document context
+     */
     DocumentContext readingDocument();
 
 
