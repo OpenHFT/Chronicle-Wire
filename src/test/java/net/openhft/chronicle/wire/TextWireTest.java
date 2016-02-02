@@ -1024,6 +1024,26 @@ public class TextWireTest {
         }
     }
 
+    @Test
+    public void readDemarshallable() {
+        Wire wire = createWire();
+        try (DocumentContext $ = wire.writingDocument(true)) {
+            wire.getValueOut().typedMarshallable(new DemarshallableObject("test", 12345));
+        }
+
+        assertEquals("--- !!meta-data\n" +
+                "!net.openhft.chronicle.wire.DemarshallableObject {\n" +
+                "  name: test,\n" +
+                "  value: 12345\n" +
+                "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
+
+        try (DocumentContext $ = wire.readingDocument()) {
+            DemarshallableObject dobj = wire.getValueIn().typedMarshallable();
+            assertEquals("test", dobj.name);
+            assertEquals(12345, dobj.value);
+        }
+    }
+
     enum BWKey implements WireKey {
         field1, field2, field3
 

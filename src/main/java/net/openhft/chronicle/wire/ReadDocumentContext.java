@@ -20,7 +20,7 @@ import net.openhft.chronicle.bytes.Bytes;
 
 import java.nio.BufferUnderflowException;
 
-import static net.openhft.chronicle.wire.Wires.isKnownLength;
+import static net.openhft.chronicle.wire.Wires.*;
 
 /**
  * Created by peter on 24/12/15.
@@ -77,20 +77,24 @@ public class ReadDocumentContext implements DocumentContext {
             return;
         }
         long position = bytes.readPosition();
+
         int header = bytes.readVolatileInt(position);
-        if (!isKnownLength(header)) {
+        if (!isKnownLength(header) || !isReady(header)) {
             present = false;
             return;
         }
+
         bytes.readSkip(4);
-        final boolean ready = Wires.isReady(header);
-        final int len = Wires.lengthOf(header);
+        final boolean ready = isReady(header);
+        final int len = lengthOf(header);
+        assert len > 0 : "len=" + len;
         data = Wires.isData(header);
         wire.setReady(ready);
         if (len > bytes.readRemaining())
             throw new BufferUnderflowException();
         readLimit = bytes.readLimit();
         readPosition = bytes.readPosition() + len;
+
         bytes.readLimit(readPosition);
         present = true;
     }

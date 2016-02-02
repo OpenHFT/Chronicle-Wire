@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -62,7 +63,7 @@ class FileFormat implements Marshallable {
     }
 
     @Override
-    public void writeMarshallable(WireOut wire) {
+    public void writeMarshallable(@NotNull WireOut wire) {
         wire.write(() -> "version").int32(version)
                 .write(() -> "createdTime").zonedDateTime(createdTime)
                 .write(() -> "creator").text(creator)

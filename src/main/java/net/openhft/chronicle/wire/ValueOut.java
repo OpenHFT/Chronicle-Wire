@@ -250,21 +250,21 @@ public interface ValueOut {
         if (value instanceof byte[])
             return rawBytes((byte[]) value);
         if (value instanceof Byte)
-            return int8((Byte) value);
+            return typePrefix(byte.class).int8((Byte) value);
         if (value instanceof Boolean)
             return bool((Boolean) value);
         if (value instanceof Character)
             return text(value.toString());
         if (value instanceof Short)
-            return int16((Short) value);
+            return typePrefix(short.class).int16((Short) value);
         if (value instanceof Integer)
-            return int32((Integer) value);
+            return typePrefix(int.class).int32((Integer) value);
         if (value instanceof Long)
             return int64((Long) value);
         if (value instanceof Double)
             return float64((Double) value);
         if (value instanceof Float)
-            return float32((Float) value);
+            return typePrefix(float.class).float32((Float) value);
         if (value instanceof Throwable)
             return throwable((Throwable) value);
         if (value instanceof Enum)

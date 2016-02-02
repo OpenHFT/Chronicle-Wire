@@ -226,7 +226,7 @@ public class BinaryWireTest {
                 "[pos: 0, rlim: 14, wlim: 8EiB, cap: 8EiB ] À¤⒈º⒈¤⒉º²ñ\\u009E⒈¤⒊",
                 "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊",
                 "[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] ¤⒈¤⒉¤⒊");
-        checkAsText123(wire);
+        checkAsText123(wire, fixed ? "!byte " : "");
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -241,15 +241,20 @@ public class BinaryWireTest {
     }
 
     private void checkAsText123(@NotNull Wire wire) {
-        checkAsText(wire, "\"\": 1\n" +
-                        "field1: 2\n" +
-                        "Test: 3\n",
-                "\"\": 1\n" +
-                        "\"1\": 2\n" +
-                        "\"2603186\": 3\n",
-                "1\n" +
-                        "2\n" +
-                        "3\n"
+        checkAsText123(wire, "");
+        ;
+    }
+
+    private void checkAsText123(@NotNull Wire wire, String type) {
+        checkAsText(wire, "\"\": " + type + "1\n" +
+                        "field1: " + type + "2\n" +
+                        "Test: " + type + "3\n",
+                "\"\": " + type + "1\n" +
+                        "\"1\": " + type + "2\n" +
+                        "\"2603186\": " + type + "3\n",
+                "" + type + "1\n" +
+                        "" + type + "2\n" +
+                        "" + type + "3\n"
         );
     }
 
@@ -279,7 +284,7 @@ public class BinaryWireTest {
                 "[pos: 0, rlim: 17, wlim: 8EiB, cap: 8EiB ] À¥⒈٠º⒈¥⒉٠º²ñ\\u009E⒈¥⒊٠",
                 "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊",
                 "[pos: 0, rlim: 9, wlim: 8EiB, cap: 8EiB ] ¥⒈٠¥⒉٠¥⒊٠");
-        checkAsText123(wire);
+        checkAsText123(wire, fixed ? "!short " : "");
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -306,7 +311,7 @@ public class BinaryWireTest {
                 "[pos: 0, rlim: 14, wlim: 8EiB, cap: 8EiB ] À¡⒈º⒈¡⒉º²ñ\\u009E⒈¡⒊",
                 "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊",
                 "[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] ¡⒈¡⒉¡⒊");
-        checkAsText123(wire);
+        checkAsText123(wire, fixed ? "!int " : "");
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -333,7 +338,7 @@ public class BinaryWireTest {
                 "[pos: 0, rlim: 17, wlim: 8EiB, cap: 8EiB ] À¢⒈٠º⒈¢⒉٠º²ñ\\u009E⒈¢⒊٠",
                 "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊",
                 "[pos: 0, rlim: 9, wlim: 8EiB, cap: 8EiB ] ¢⒈٠¢⒉٠¢⒊٠");
-        checkAsText123(wire);
+        checkAsText123(wire, fixed ? "!int " : "");
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -387,7 +392,7 @@ public class BinaryWireTest {
                 "[pos: 0, rlim: 23, wlim: 8EiB, cap: 8EiB ] À¦⒈٠٠٠º⒈¦⒉٠٠٠º²ñ\\u009E⒈¦⒊٠٠٠",
                 "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊",
                 "[pos: 0, rlim: 15, wlim: 8EiB, cap: 8EiB ] ¦⒈٠٠٠¦⒉٠٠٠¦⒊٠٠٠");
-        checkAsText123(wire);
+        checkAsText123(wire, fixed ? "!int " : "");
 
         // ok as blank matches anything
         AtomicInteger i = new AtomicInteger();
@@ -692,20 +697,6 @@ public class BinaryWireTest {
         assertEquals(null, c);
     }
 
-    enum BWKey implements WireKey {
-        field1(1), field2(2), field3(3);
-        private final int code;
-
-        BWKey(int code) {
-            this.code = code;
-        }
-
-        @Override
-        public int code() {
-            return code;
-        }
-    }
-
     @Test
     public void testAllChars() {
         Wire wire = createWire();
@@ -717,6 +708,20 @@ public class BinaryWireTest {
             wire.writeDocument(false, w -> w.write(() -> "message").text(s));
 
             wire.readDocument(null, w -> w.read(() -> "message").text(s, Assert::assertEquals));
+        }
+    }
+
+    enum BWKey implements WireKey {
+        field1(1), field2(2), field3(3);
+        private final int code;
+
+        BWKey(int code) {
+            this.code = code;
+        }
+
+        @Override
+        public int code() {
+            return code;
         }
     }
 }

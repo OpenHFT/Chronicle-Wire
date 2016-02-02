@@ -294,6 +294,26 @@ public class BinaryWire2Test {
     }
 
     @Test
+    public void readDemarshallable() {
+        Wire wire = createWire();
+        try (DocumentContext $ = wire.writingDocument(true)) {
+            wire.getValueOut().typedMarshallable(new DemarshallableObject("test", 12345));
+        }
+
+        assertEquals("--- !!meta-data #binary\n" +
+                "!net.openhft.chronicle.wire.DemarshallableObject {\n" +
+                "  name: test,\n" +
+                "  value: !int 12345\n" +
+                "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
+
+        try (DocumentContext $ = wire.readingDocument()) {
+            DemarshallableObject dobj = wire.getValueIn().typedMarshallable();
+            assertEquals("test", dobj.name);
+            assertEquals(12345, dobj.value);
+        }
+    }
+
+    @Test
     public void testSnappyCompressWithSnappy() throws IOException {
         Wire wire = createWire();
         String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";

@@ -34,18 +34,36 @@ public class PrimitiveTypeWrappersTest {
 
     @Test
     public void testNumbers() throws Exception {
-
         final Class[] types = new Class[]{Byte.class,
                 Short.class, Float.class,
                 Integer.class, Long.class, Double.class};
 
-        for (Class type : types) {
+        final Number[] nums = new Number[]{(byte) 1, (short) 1, (float) 1, (int) 1, (long) 1, (double) 1};
+
+        for (Number num : nums) {
+            for (Class type : types) {
+                final Wire wire = wireFactory();
+
+                wire.write().object(num);
+                final Object object = wire.read().object(type);
+                Assert.assertTrue(num.getClass() + " to " + type.getName(), type.isAssignableFrom(object.getClass()));
+                Assert.assertEquals(num.getClass() + " to " + type.getName(), 1, ((Number) object).intValue());
+            }
+        }
+    }
+
+    @Test
+    public void testNumbers2() throws Exception {
+        final Number[] nums = new Number[]{(byte) 1, (short) 1, (float) 1, (int) 1, (long) 1, (double) 1};
+
+        for (Number num : nums) {
             final Wire wire = wireFactory();
 
-            wire.write().object(1);
-            final Object object = wire.read().object(type);
-            Assert.assertTrue(type.isAssignableFrom(object.getClass()));
-            Assert.assertEquals(1, ((Number) object).intValue());
+            wire.write().object(num);
+            System.out.println(num.getClass() + " of " + num + " is " + (isTextWire ? wire.toString() : wire.bytes().toHexString()));
+            final Object object = wire.read().object(Object.class);
+            Assert.assertSame(num.getClass(), object.getClass());
+            Assert.assertEquals(num.getClass().getName(), num, object);
         }
     }
 

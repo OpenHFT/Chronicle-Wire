@@ -18,6 +18,13 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
+
+/**
+ * This interface marks a object which can be reloaded from stream re-using an
+ * existing object.
+ * <p/>
+ * For objects which must deserialze final field see Demarshallable
+ */
 @FunctionalInterface
 public interface ReadMarshallable {
     ReadMarshallable DISCARD = w -> {

@@ -25,8 +25,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>chronicle-wire</artifactId>
-    <version>1.2.1-SNAPSHOT</version>
-
+    <version>1.2.5-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Wire</name>
     <description>Chronicle-Wire</description>
     <packaging>bundle</packaging>
@@ -37,14 +36,14 @@
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom</artifactId>
                 <type>pom</type>
-                <version>3.4.20</version>
+                <version>3.4.26-SNAPSHOT</version>
                 <scope>import</scope>
             </dependency>
 
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>1.11.0</version>
+               <version>1.11.7</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -91,7 +90,6 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.15</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

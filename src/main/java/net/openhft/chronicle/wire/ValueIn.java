@@ -42,6 +42,7 @@ import java.util.function.*;
 public interface ValueIn {
     Consumer<ValueIn> DISCARD = v -> {
     };
+    ThreadLocal<CharSequence> charSequenceThreadLocal = ThreadLocal.withInitial(StringBuilder::new);
 
     /*
      * Text / Strings.
@@ -169,7 +170,7 @@ public interface ValueIn {
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
 
     @Nullable
-    <T extends ReadMarshallable> T typedMarshallable() throws IORuntimeException;
+    <T> T typedMarshallable() throws IORuntimeException;
 
     @NotNull
     <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts);
@@ -259,8 +260,6 @@ public interface ValueIn {
         teConsumer.accept(t, asEnum(eClass));
         return wireIn();
     }
-
-    ThreadLocal<CharSequence> charSequenceThreadLocal = ThreadLocal.withInitial(StringBuilder::new);
 
     @Nullable
     default <E> E object(@NotNull Class<E> clazz) {

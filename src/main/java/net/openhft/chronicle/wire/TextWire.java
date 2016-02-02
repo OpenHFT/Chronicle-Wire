@@ -1922,8 +1922,47 @@ public class TextWire implements Wire, InternalWire {
             return TextWire.this;
         }
 
+        @NotNull
+        public Demarshallable demarshallable(@NotNull Class clazz) {
+            consumeWhiteSpace();
+            int code = peekCode();
+            if (code == '!') {
+                typePrefix(null, (o, x) -> { /* sets WireInternal.acquireStringBuilder(); */});
+            } else if (code != '{') {
+                throw new IORuntimeException("Unsupported type " + stringForCode(code));
+            }
+
+            final long len = readLengthMarshallable();
+
+            final long limit = bytes.readLimit();
+            final long position = bytes.readPosition();
+
+            final long newLimit = position - 1 + len;
+            Demarshallable object;
+            try {
+                // ensure that you can read past the end of this marshable object
+
+                bytes.readLimit(newLimit);
+                bytes.readSkip(1); // skip the {
+                consumeWhiteSpace();
+
+                object = Demarshallable.newInstance(clazz, TextWire.this);
+            } finally {
+                bytes.readLimit(limit);
+                bytes.readPosition(newLimit);
+            }
+
+            consumeWhiteSpace();
+            code = readCode();
+            if (code != '}')
+                throw new IORuntimeException("Unterminated { while reading marshallable " +
+                        object + ",code='" + (char) code + "', bytes=" + Bytes.toString(bytes, 1024)
+                );
+            return object;
+        }
+
         @Nullable
-        public <T extends ReadMarshallable> T typedMarshallable() {
+        public <T> T typedMarshallable() {
             try {
                 consumeWhiteSpace();
                 int code = peekCode();
@@ -1951,14 +1990,21 @@ public class TextWire implements Wire, InternalWire {
                 // default constructor
                 final Class clazz = ClassAliasPool.CLASS_ALIASES.forName(sb);
 
-                if (!ReadMarshallable.class.isAssignableFrom(clazz))
+                if (ReadMarshallable.class.isAssignableFrom(clazz)) {
+
+                    Class<ReadMarshallable> clazz1 = (Class<ReadMarshallable>) clazz;
+                    final ReadMarshallable m = ObjectUtils.newInstance(clazz1);
+
+                    marshallable(m);
+                    return readResolve(m);
+
+                } else if (Demarshallable.class.isAssignableFrom(clazz)) {
+
+                    return (T) demarshallable(clazz);
+
+                } else {
                     throw new ClassCastException("Cannot convert " + sb + " to ReadMarshallable.");
-
-                Class<ReadMarshallable> clazz1 = (Class<ReadMarshallable>) clazz;
-                final ReadMarshallable m = ObjectUtils.newInstance(clazz1);
-
-                marshallable(m);
-                return readResolve(m);
+                }
             } catch (Exception e) {
                 throw new IORuntimeException(e);
             }
@@ -2075,13 +2121,24 @@ public class TextWire implements Wire, InternalWire {
         @Override
         public long int64() {
             consumeWhiteSpace();
+            valueIn.skipType();
             return bytes.parseLong();
         }
 
         @Override
         public double float64() {
             consumeWhiteSpace();
+            valueIn.skipType();
             return bytes.parseDouble();
+        }
+
+        private void skipType() {
+            long peek = bytes.peekUnsignedByte();
+            if (peek == '!') {
+                StringBuilder sb = WireInternal.acquireStringBuilder();
+                parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
+                consumeWhiteSpace();
+            }
         }
 
         @Override
@@ -2139,8 +2196,10 @@ public class TextWire implements Wire, InternalWire {
                 Bytes<byte[]> bytes = Bytes.wrapForRead(bytes());
                 return bytes;
             }
+            if (Demarshallable.class.isAssignableFrom(clazz)) {
+                return Demarshallable.newInstance(clazz, wireIn());
 
-            if (ReadMarshallable.class.isAssignableFrom(clazz)) {
+            } else if (ReadMarshallable.class.isAssignableFrom(clazz)) {
                 final Object v;
                 if (using == null)
                     v = ObjectUtils.newInstance(clazz);

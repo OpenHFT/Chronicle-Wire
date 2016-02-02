@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
@@ -35,10 +36,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
+import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.BinaryWire.AnyCodeMatch.ANY_CODE_MATCH;
@@ -981,6 +984,11 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public WireOut int8(byte i8) {
+            return fixedInt8(i8);
+        }
+
+        @NotNull
+        WireOut fixedInt8(byte i8) {
             writeCode(INT8).writeByte(i8);
             return BinaryWire.this;
         }
@@ -995,6 +1003,11 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public WireOut int16(short i16) {
+            return fixedInt16(i16);
+        }
+
+        @NotNull
+        WireOut fixedInt16(short i16) {
             writeCode(INT16).writeShort(i16);
             return BinaryWire.this;
         }
@@ -1027,6 +1040,12 @@ public class BinaryWire implements Wire, InternalWire {
         }
 
         @NotNull
+        public WireOut fixedOrderedInt32(int i32) {
+            writeCode(INT32).writeOrderedInt(i32);
+            return BinaryWire.this;
+        }
+
+        @NotNull
         @Override
         public WireOut uint32checked(long u32) {
             writeCode(UINT32).writeUnsignedInt(u32);
@@ -1040,8 +1059,14 @@ public class BinaryWire implements Wire, InternalWire {
         }
 
         @NotNull
-        private WireOut fixedInt64(long i64) {
+        public WireOut fixedInt64(long i64) {
             writeCode(INT64).writeLong(i64);
+            return BinaryWire.this;
+        }
+
+        @NotNull
+        private WireOut fixedOrderedInt64(long i64) {
+            writeCode(INT64).writeOrderedLong(i64);
             return BinaryWire.this;
         }
 
@@ -1066,6 +1091,11 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public WireOut float32(float f) {
+            return fixedFloat32(f);
+        }
+
+        @NotNull
+        WireOut fixedFloat32(float f) {
             writeCode(FLOAT32).writeFloat(f);
             return BinaryWire.this;
         }
@@ -1073,6 +1103,11 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public WireOut float64(double d) {
+            return fixedFloat64(d);
+        }
+
+        @NotNull
+        WireOut fixedFloat64(double d) {
             writeCode(FLOAT64).writeDouble(d);
             return BinaryWire.this;
         }
@@ -1150,7 +1185,7 @@ public class BinaryWire implements Wire, InternalWire {
             int fromEndOfCacheLine = (int) ((-bytes.readPosition() - 1) & 63);
             if (fromEndOfCacheLine < 8)
                 addPadding(fromEndOfCacheLine);
-            fixedInt64(value);
+            fixedOrderedInt64(value);
             return BinaryWire.this;
         }
 
@@ -1396,6 +1431,66 @@ public class BinaryWire implements Wire, InternalWire {
             writeNumber(d);
             return BinaryWire.this;
         }
+
+        @NotNull
+        public WireOut object(Object value) {
+            if (value == null)
+                return text(null);
+            if (value instanceof Marshallable)
+                return typedMarshallable((Marshallable) value);
+            if (value instanceof BytesStore)
+                return bytes((BytesStore) value);
+            if (value instanceof CharSequence)
+                return text((CharSequence) value);
+            if (value instanceof Map)
+                return map((Map) value);
+            if (value instanceof byte[])
+                return rawBytes((byte[]) value);
+            if (value instanceof Byte)
+                return fixedInt8((Byte) value);
+            if (value instanceof Boolean)
+                return bool((Boolean) value);
+            if (value instanceof Character)
+                return text(value.toString());
+            if (value instanceof Short)
+                return fixedInt16((Short) value);
+            if (value instanceof Integer)
+                return fixedInt32((Integer) value);
+            if (value instanceof Long)
+                return fixedInt64((Long) value);
+            if (value instanceof Double)
+                return fixedFloat64((Double) value);
+            if (value instanceof Float)
+                return fixedFloat32((Float) value);
+            if (value instanceof Throwable)
+                return throwable((Throwable) value);
+            if (value instanceof Enum)
+                return typedScalar(value);
+            if (value instanceof String[])
+                return array(v -> Stream.of((String[]) value).forEach(v::text), String[].class);
+            if (value instanceof Collection) {
+                if (((Collection) value).size() == 0) return sequence(v -> {
+                });
+
+                return sequence(v -> ((Collection) value).stream().forEach(v::object));
+            } else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
+                WireSerializedLambda.write(value, this);
+                return wireOut();
+            } else if (Object[].class.isAssignableFrom(value.getClass())) {
+                return array(v -> Stream.of((Object[]) value).forEach(v::object), Object[].class);
+            } else if (value instanceof LocalTime) {
+                return time((LocalTime) value);
+            } else if (value instanceof LocalDate) {
+                return date((LocalDate) value);
+            } else if (value instanceof ZonedDateTime) {
+                return zonedDateTime((ZonedDateTime) value);
+            } else {
+                throw new IllegalStateException("type=" + value.getClass() +
+                        " is unsupported, it must either be of type Marshallable, String or " +
+                        "AutoBoxed primitive Object");
+            }
+        }
+
     }
 
     class BinaryValueIn implements ValueIn {
@@ -2000,7 +2095,7 @@ public class BinaryWire implements Wire, InternalWire {
         }
 
         @Nullable
-        public <T extends ReadMarshallable> T typedMarshallable() throws IORuntimeException {
+        public <T> T typedMarshallable() throws IORuntimeException {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             int code = readCode();
             switch (code) {
@@ -2015,7 +2110,10 @@ public class BinaryWire implements Wire, InternalWire {
                         throw new IORuntimeException(e);
                     }
 
-                    if (!Marshallable.class.isAssignableFrom(clazz))
+                    if (Demarshallable.class.isAssignableFrom(clazz)) {
+                        return (T) demarshallable(clazz);
+                    }
+                    if (!Marshallable.class.isAssignableFrom(clazz) && !Demarshallable.class.isAssignableFrom(clazz))
                         throw new IllegalStateException("its not possible to Marshallable and object that" +
                                 " is not of type Marshallable, type=" + sb);
 
@@ -2125,6 +2223,25 @@ public class BinaryWire implements Wire, InternalWire {
                 object.readMarshallable(BinaryWire.this);
             }
             return BinaryWire.this;
+        }
+
+        public Demarshallable demarshallable(@NotNull Class clazz) throws BufferUnderflowException, IORuntimeException {
+            consumeSpecial(true);
+
+            long length = readLength();
+            if (length >= 0) {
+                long limit = bytes.readLimit();
+                long limit2 = bytes.readPosition() + length;
+                bytes.readLimit(limit2);
+                try {
+                    return Demarshallable.newInstance(clazz, wireIn());
+                } finally {
+                    bytes.readLimit(limit);
+                    bytes.readPosition(limit2);
+                }
+            } else {
+                return Demarshallable.newInstance(clazz, wireIn());
+            }
         }
 
         @Override
@@ -2365,9 +2482,11 @@ public class BinaryWire implements Wire, InternalWire {
                     break;
 
                 case BinaryWireHighCode.FLOAT:
+                    bytes.readSkip(1);
                     return readFloat0object(code);
 
                 case BinaryWireHighCode.INT:
+                    bytes.readSkip(1);
                     return readInt0object(code);
             }
             // assume it a String
