@@ -53,7 +53,7 @@ public class QueryWireTest {
                 .read(() -> "int").int64(this, (o, i) -> assertEquals(12345, i))
                 .read(() -> "text").text(this, (o, s) -> assertEquals("Hello World", s))
                 .read(() -> "float").float64(this, (o, f) -> assertEquals(12.345, f, 0.0));
-        WireParser wp = WireParser.wireParser();
+        WireParser wp = WireParser.wireParser((s, v) -> System.err.println(s + " " + v.text()));
         List<Object> results = new ArrayList<>();
         wp.register(() -> "bool", v -> v.bool(results, List::add));
         wp.register(() -> "int", v -> v.int64(results, List::add));

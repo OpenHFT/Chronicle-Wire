@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -29,6 +30,16 @@ import java.util.function.Consumer;
 public class VanillaWireParser implements WireParser {
     private final Map<CharSequence, Consumer<ValueIn>> namedConsumer = new TreeMap<>(CharSequenceComparator.INSTANCE);
     private final Map<Integer, Consumer<ValueIn>> numberedConsumer = new HashMap<>();
+    private final BiConsumer<CharSequence, ValueIn> defaultConsumer;
+
+    public VanillaWireParser(BiConsumer<CharSequence, ValueIn> defaultConsumer) {
+        this.defaultConsumer = defaultConsumer;
+    }
+
+    @Override
+    public BiConsumer<CharSequence, ValueIn> getDefaultConsumer() {
+        return defaultConsumer;
+    }
 
     @Override
     public void register(@NotNull WireKey key, Consumer<ValueIn> valueInConsumer) {
@@ -45,4 +56,5 @@ public class VanillaWireParser implements WireParser {
     public Consumer<ValueIn> lookup(int number) {
         return numberedConsumer.get(number);
     }
+
 }

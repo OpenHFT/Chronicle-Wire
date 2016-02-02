@@ -17,35 +17,32 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
  * Interface to parse arbitrary field-value data.
  */
 public interface WireParser {
-    WireKey DEFAULT = () -> ":default:";
-
     @NotNull
-    static WireParser wireParser() {
-        return new VanillaWireParser();
+    static WireParser wireParser(BiConsumer<CharSequence, ValueIn> defaultConsumer) {
+        return new VanillaWireParser(defaultConsumer);
     }
+
+    BiConsumer<CharSequence, ValueIn> getDefaultConsumer();
 
     default void parse(@NotNull WireIn wireIn) {
         StringBuilder sb = WireInternal.SBP.acquireStringBuilder();
-        ValueIn valueIn = wireIn.read(sb);
+        ValueIn valueIn = wireIn.readEventName(sb);
         Consumer<ValueIn> consumer = lookup(sb);
-        if (consumer == null)
-            consumer = lookup(DEFAULT.name());
-        if (consumer == null)
-            throw new IllegalArgumentException("Unhandled event type " + sb);
-        consumer.accept(valueIn);
+        if (consumer == null) {
+            getDefaultConsumer().accept(sb, valueIn);
+        } else {
+            consumer.accept(valueIn);
+        }
     }
 
     Consumer<ValueIn> lookup(CharSequence name);
-
-    default void setDefault(Consumer<ValueIn> valueInConsumer) {
-        register(DEFAULT, valueInConsumer);
-    }
 
     void register(WireKey key, Consumer<ValueIn> valueInConsumer);
 
