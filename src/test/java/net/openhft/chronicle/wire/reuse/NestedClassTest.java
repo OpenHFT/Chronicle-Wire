@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import org.junit.Test;
@@ -18,7 +19,6 @@ import static org.junit.Assert.assertEquals;
  */
 @RunWith(value = Parameterized.class)
 public class NestedClassTest {
-    private final Function<Bytes, Wire> wireType;
     private static final OuterClass outerClass1 = new OuterClass();
     private static final OuterClass outerClass2 = new OuterClass();
 
@@ -39,6 +39,8 @@ public class NestedClassTest {
         outerClass2.addListB().setTextNumber("num2B", 22);
     }
 
+    private final Function<Bytes, Wire> wireType;
+
     public NestedClassTest(Function<Bytes, Wire> wireType) {
         this.wireType = wireType;
     }
@@ -46,10 +48,10 @@ public class NestedClassTest {
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         return Arrays.asList(
+                new Object[]{(Function<Bytes, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary")},
                 new Object[]{WireType.TEXT},
                 new Object[]{WireType.BINARY},
                 new Object[]{WireType.FIELDLESS_BINARY},
-//                new Object[]{WireType.RAW},
                 new Object[]{WireType.JSON}
         );
     }

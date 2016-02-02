@@ -378,8 +378,7 @@ public class BinaryWire implements Wire, InternalWire {
             int codeMatch = key.code();
             if (codeMatch >= 0 && fieldId != codeMatch)
                 throw new UnsupportedOperationException("Field was: " + fieldId + " expected " + codeMatch);
-            if (codeMatch < 0)
-                sb.append(fieldId);
+            sb.append(key.name());
             return sb;
         }
         if (peekCode == FIELD_NAME_ANY || peekCode == EVENT_NAME) {
