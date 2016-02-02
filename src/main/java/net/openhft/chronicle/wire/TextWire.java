@@ -370,6 +370,10 @@ public class TextWire implements Wire, InternalWire {
             consumeWhiteSpace();
         }
 
+        return read2(key, curr, sb, name);
+    }
+
+    protected ValueIn read2(@NotNull WireKey key, ValueInState curr, StringBuilder sb, CharSequence name) {
         long position2 = bytes.readPosition();
 
         // if not a match go back and look at old fields.
@@ -1846,7 +1850,7 @@ public class TextWire implements Wire, InternalWire {
 
         @Override
         public <T> T applyToMarshallable(@NotNull Function<WireIn, T> marshallableReader) {
-            popState();
+            pushState();
             consumeWhiteSpace();
             int code = peekCode();
             if (code != '{')

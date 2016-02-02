@@ -252,6 +252,10 @@ public class BinaryWire implements Wire, InternalWire {
             consumeSpecial();
         }
 
+        return read2(key, curr, sb, name);
+    }
+
+    protected ValueIn read2(@NotNull WireKey key, ValueInState curr, StringBuilder sb, CharSequence name) {
         long position2 = bytes.readPosition();
 
         // if not a match go back and look at old fields.
