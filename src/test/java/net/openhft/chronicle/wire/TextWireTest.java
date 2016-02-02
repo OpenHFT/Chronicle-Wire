@@ -647,7 +647,7 @@ public class TextWireTest {
         expected.put("hello2", "world2");
 
         wire.writeDocument(false, o -> {
-            o.write(() -> "example")
+            o.writeEventName(() -> "example")
                     .map(expected);
         });
 //        bytes.readPosition(4);

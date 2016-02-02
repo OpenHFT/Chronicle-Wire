@@ -1172,12 +1172,12 @@ public class BinaryWire implements Wire, InternalWire {
 
         @NotNull
         @Override
-        public WireOut sequence(@NotNull WriteValue writer) {
+        public <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer) {
             writeCode(BYTES_LENGTH32);
             long position = bytes.writePosition();
             bytes.writeInt(0);
 
-            writer.writeValue(this);
+            writer.accept(t, this);
 
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
             return BinaryWire.this;

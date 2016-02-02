@@ -491,13 +491,13 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut sequence(@NotNull WriteValue writer) {
+        public <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer) {
             prependSeparator();
             pushState();
             bytes.appendUtf8("[");
             sep = ",";
             long pos = bytes.writePosition();
-            writer.writeValue(this);
+            writer.accept(t, this);
             if (pos != bytes.writePosition())
                 bytes.appendUtf8(",");
 

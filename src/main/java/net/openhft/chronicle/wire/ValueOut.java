@@ -185,7 +185,12 @@ public interface ValueOut {
     WireOut int64forBinding(long value, LongValue longValue);
 
     @NotNull
-    WireOut sequence(WriteValue writer);
+    default WireOut sequence(WriteValue writer) {
+        return sequence(writer, WriteValue::writeValue);
+    }
+
+    @NotNull
+    <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer);
 
     @NotNull
     default WireOut array(WriteValue writer, Class arrayType) {
