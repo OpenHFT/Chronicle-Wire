@@ -71,6 +71,16 @@ public class JSONWire extends TextWire {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    protected Quotes needsQuotes(@NotNull CharSequence s) {
+        for(int i = 0; i < s.length();i++) {
+            char ch = s.charAt(i);
+            if (ch == '"' || ch < ' ')
+                return Quotes.DOUBLE;
+        }
+        return Quotes.NONE;
+    }
+
     void escape(@NotNull CharSequence s) {
         bytes.writeUnsignedByte('"');
         if (needsQuotes(s) == Quotes.NONE) {
