@@ -134,6 +134,12 @@ public enum WireType implements Function<Bytes, Wire> {
     static final ThreadLocal<Bytes> bytesTL = ThreadLocal.withInitial(Bytes::allocateElasticDirect);
     private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
 
+    static Bytes getBytes() {
+        Bytes bytes = bytesTL.get();
+        bytes.clear();
+        return bytes;
+    }
+
     public Supplier<LongValue> newLongReference() {
         return BinaryLongReference::new;
     }
@@ -143,21 +149,21 @@ public enum WireType implements Function<Bytes, Wire> {
     }
 
     public String asString(WriteMarshallable marshallable) {
-        Bytes bytes = bytesTL.get();
+        Bytes bytes = getBytes();
         Wire wire = apply(bytes);
         wire.getValueOut().typedMarshallable(marshallable);
         return bytes.toString();
     }
 
     public <T> T fromString(CharSequence cs) {
-        Bytes bytes = bytesTL.get();
+        Bytes bytes = getBytes();
         bytes.appendUtf8(cs);
         Wire wire = apply(bytes);
         return wire.getValueIn().typedMarshallable();
     }
 
     String asHexString(WriteMarshallable marshallable) {
-        Bytes bytes = bytesTL.get();
+        Bytes bytes = getBytes();
         Wire wire = apply(bytes);
         wire.getValueOut().typedMarshallable(marshallable);
         return bytes.toHexString();
