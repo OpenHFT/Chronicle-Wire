@@ -92,6 +92,7 @@ public enum WireType implements Function<Bytes, Wire> {
         }
     };
 
+    static final ThreadLocal<Bytes> bytesTL = ThreadLocal.withInitial(Bytes::allocateElasticDirect);
     private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
 
     public Supplier<LongValue> newLongReference() {
@@ -102,4 +103,17 @@ public enum WireType implements Function<Bytes, Wire> {
         return BinaryLongArrayReference::new;
     }
 
+    public String asString(WriteMarshallable marshallable) {
+        Bytes bytes = bytesTL.get();
+        Wire wire = apply(bytes);
+        wire.getValueOut().typedMarshallable(marshallable);
+        return bytes.toString();
+    }
+
+    public <T> T fromString(CharSequence cs) {
+        Bytes bytes = bytesTL.get();
+        bytes.appendUtf8(cs);
+        Wire wire = apply(bytes);
+        return wire.getValueIn().typedMarshallable();
+    }
 }
