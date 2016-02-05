@@ -56,17 +56,46 @@ public enum WireType implements Function<Bytes, Wire> {
             return new BinaryWire(bytes);
         }
 
+        @Override
+        public String asString(WriteMarshallable marshallable) {
+            return asHexString(marshallable);
+        }
+
+        @Override
+        public <T> T fromString(CharSequence cs) {
+            return fromHexString(cs);
+        }
     }, FIELDLESS_BINARY {
         @NotNull
         @Override
         public Wire apply(Bytes bytes) {
             return new BinaryWire(bytes, false, false, true, Integer.MAX_VALUE, "binary");
         }
+
+        @Override
+        public String asString(WriteMarshallable marshallable) {
+            return asHexString(marshallable);
+        }
+
+        @Override
+        public <T> T fromString(CharSequence cs) {
+            return fromHexString(cs);
+        }
     }, COMPRESSED_BINARY {
         @NotNull
         @Override
         public Wire apply(Bytes bytes) {
             return new BinaryWire(bytes, false, false, false, COMPRESSED_SIZE, "lzw");
+        }
+
+        @Override
+        public String asString(WriteMarshallable marshallable) {
+            return asHexString(marshallable);
+        }
+
+        @Override
+        public <T> T fromString(CharSequence cs) {
+            return fromHexString(cs);
         }
     }, JSON {
         @NotNull
@@ -79,6 +108,16 @@ public enum WireType implements Function<Bytes, Wire> {
         @Override
         public Wire apply(Bytes bytes) {
             return new RawWire(bytes);
+        }
+
+        @Override
+        public String asString(WriteMarshallable marshallable) {
+            return asHexString(marshallable);
+        }
+
+        @Override
+        public <T> T fromString(CharSequence cs) {
+            return fromHexString(cs);
         }
     }, READ_ANY {
         @Override
@@ -114,6 +153,18 @@ public enum WireType implements Function<Bytes, Wire> {
         Bytes bytes = bytesTL.get();
         bytes.appendUtf8(cs);
         Wire wire = apply(bytes);
+        return wire.getValueIn().typedMarshallable();
+    }
+
+    String asHexString(WriteMarshallable marshallable) {
+        Bytes bytes = bytesTL.get();
+        Wire wire = apply(bytes);
+        wire.getValueOut().typedMarshallable(marshallable);
+        return bytes.toHexString();
+    }
+
+    <T> T fromHexString(CharSequence s) {
+        Wire wire = apply(Bytes.fromHexString(s.toString()));
         return wire.getValueIn().typedMarshallable();
     }
 }
