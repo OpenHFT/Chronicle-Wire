@@ -70,7 +70,7 @@ public class TextWire implements Wire, InternalWire {
     static {
         for (char ch : "0123456789+- \t\',#:{}[]|>!\0\b\\" .toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
-        for (char ch : ",#:{}[]|>\0\b\\" .toCharArray())
+        for (char ch : "?,#:{}[]|>\0\b\\".toCharArray())
             QUOTE_CHARS.set(ch);
     }
 
