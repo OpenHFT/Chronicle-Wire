@@ -30,6 +30,13 @@ public class JSONWireTest {
         String textB2 = wire2.readEventName(sb).text();
         assertEquals("echo2B", sb.toString());
         assertEquals("Hello2B", textB2);
+    }
 
+    @Test
+    public void testNoSpaces() {
+        JSONWire wire = new JSONWire(Bytes.from("\"echo\":\"\""));
+        WireParser<Void> parser = new VanillaWireParser<>((s, v, $) -> System.out.println(s + " - " + v.text()));
+        parser.parseOne(wire, null);
+        assertEquals("", wire.bytes().toString());
     }
 }

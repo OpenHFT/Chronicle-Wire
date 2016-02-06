@@ -25,12 +25,12 @@ import java.util.TreeMap;
 /**
  * A simple parser to associate actions based on events/field names received.
  */
-public class VanillaWireParser implements WireParser {
-    private final Map<CharSequence, WireParselet> namedConsumer = new TreeMap<>(CharSequenceComparator.INSTANCE);
-    private final Map<Integer, WireParselet> numberedConsumer = new HashMap<>();
-    private final WireParselet defaultConsumer;
+public class VanillaWireParser<O> implements WireParser<O> {
+    private final Map<CharSequence, WireParselet<O>> namedConsumer = new TreeMap<>(CharSequenceComparator.INSTANCE);
+    private final Map<Integer, WireParselet<O>> numberedConsumer = new HashMap<>();
+    private final WireParselet<O> defaultConsumer;
 
-    public VanillaWireParser(WireParselet defaultConsumer) {
+    public VanillaWireParser(WireParselet<O> defaultConsumer) {
         this.defaultConsumer = defaultConsumer;
     }
 
@@ -40,19 +40,19 @@ public class VanillaWireParser implements WireParser {
     }
 
     @Override
-    public VanillaWireParser register(@NotNull WireKey key, WireParselet valueInConsumer) {
+    public VanillaWireParser<O> register(@NotNull WireKey key, WireParselet<O> valueInConsumer) {
         namedConsumer.put(key.name(), valueInConsumer);
         numberedConsumer.put(key.code(), valueInConsumer);
         return this;
     }
 
     @Override
-    public WireParselet lookup(CharSequence name) {
+    public WireParselet<O> lookup(CharSequence name) {
         return namedConsumer.get(name);
     }
 
     @Override
-    public WireParselet lookup(int number) {
+    public WireParselet<O> lookup(int number) {
         return numberedConsumer.get(number);
     }
 

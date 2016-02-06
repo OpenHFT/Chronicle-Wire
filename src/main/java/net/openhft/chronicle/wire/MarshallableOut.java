@@ -8,6 +8,8 @@ import java.util.function.BiConsumer;
  * Created by peter.lawrey on 06/02/2016.
  */
 public interface MarshallableOut {
+    void send(WireKey key, WriteValue value);
+
     default void marshallable(WriteMarshallable object) {
         marshallable(object, ValueOut::marshallable);
     }

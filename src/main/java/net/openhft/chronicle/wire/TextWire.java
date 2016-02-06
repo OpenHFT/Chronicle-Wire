@@ -425,6 +425,7 @@ public class TextWire implements Wire, InternalWire {
     public void clear() {
         bytes.clear();
         valueIn.resetState();
+        valueOut.resetState();
     }
 
     @NotNull
@@ -746,6 +747,12 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         protected BytesStore sep = Bytes.empty();
         protected boolean leaf = false;
+
+        public void resetState() {
+            indentation = 0;
+            sep = empty();
+            leaf = false;
+        }
 
         void prependSeparator() {
             append(sep);
@@ -1282,6 +1289,7 @@ public class TextWire implements Wire, InternalWire {
             bytes.writeUnsignedByte('\n');
             sep = empty();
         }
+
     }
 
     class TextValueIn implements ValueIn {

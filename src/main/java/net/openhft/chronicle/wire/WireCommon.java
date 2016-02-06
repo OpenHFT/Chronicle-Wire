@@ -50,4 +50,9 @@ public interface WireCommon {
      */
     @NotNull
     LongArrayValues newLongArrayReference();
+
+    /**
+     * reset the state of the current wire for reuse.
+     */
+    void clear();
 }

@@ -22,25 +22,25 @@ import java.util.function.BiConsumer;
 /**
  * Interface to parseOne arbitrary field-value data.
  */
-public interface WireParser extends BiConsumer<WireIn, MarshallableOut> {
+public interface WireParser<O> extends BiConsumer<WireIn, O> {
     @NotNull
-    static WireParser wireParser(WireParselet defaultConsumer) {
-        return new VanillaWireParser(defaultConsumer);
+    static <O> WireParser<O> wireParser(WireParselet<O> defaultConsumer) {
+        return new VanillaWireParser<>(defaultConsumer);
     }
 
-    WireParselet getDefaultConsumer();
+    WireParselet<O> getDefaultConsumer();
 
-    default void parseOne(@NotNull WireIn wireIn, MarshallableOut out) {
+    default void parseOne(@NotNull WireIn wireIn, O out) {
         StringBuilder sb = WireInternal.SBP.acquireStringBuilder();
         ValueIn valueIn = wireIn.readEventName(sb);
-        WireParselet consumer = lookup(sb);
+        WireParselet<O> consumer = lookup(sb);
         if (consumer == null)
             consumer = getDefaultConsumer();
         consumer.accept(sb, valueIn, out);
     }
 
     @Override
-    default void accept(WireIn wireIn, MarshallableOut marshallableOut) {
+    default void accept(WireIn wireIn, O marshallableOut) {
         while (wireIn.bytes().readRemaining() > 0) {
             parseOne(wireIn, marshallableOut);
             consume(wireIn, ',');
@@ -55,9 +55,9 @@ public interface WireParser extends BiConsumer<WireIn, MarshallableOut> {
         }
     }
 
-    WireParselet lookup(CharSequence name);
+    WireParselet<O> lookup(CharSequence name);
 
-    VanillaWireParser register(WireKey key, WireParselet valueInConsumer);
+    VanillaWireParser<O> register(WireKey key, WireParselet<O> valueInConsumer);
 
-    WireParselet lookup(int number);
+    WireParselet<O> lookup(int number);
 }

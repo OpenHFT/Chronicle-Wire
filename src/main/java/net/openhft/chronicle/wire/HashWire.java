@@ -40,6 +40,11 @@ public class HashWire implements WireOut {
         return hashWire.hash32();
     }
 
+    @Override
+    public void clear() {
+        hash = 0;
+    }
+
     public long hash64() {
         return Maths.agitate(hash);
     }
