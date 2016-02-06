@@ -73,7 +73,7 @@ public class JSONWire extends TextWire {
 
     @Override
     protected Quotes needsQuotes(@NotNull CharSequence s) {
-        for(int i = 0; i < s.length();i++) {
+        for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             if (ch == '"' || ch < ' ')
                 return Quotes.DOUBLE;
@@ -89,6 +89,24 @@ public class JSONWire extends TextWire {
             escape0(s, Quotes.DOUBLE);
         }
         bytes.writeUnsignedByte('"');
+    }
+
+    @NotNull
+    @Override
+    protected StringBuilder readField(@NotNull StringBuilder sb) {
+        consumePadding();
+        int code = peekCode();
+        if (code == '}') {
+            valueIn.popState();
+            bytes.readSkip(1);
+            consumePadding();
+            code = peekCode();
+        }
+        if (code == '{') {
+            valueIn.pushState();
+            bytes.readSkip(1);
+        }
+        return super.readField(sb);
     }
 
     class JSONValueOut extends TextValueOut {

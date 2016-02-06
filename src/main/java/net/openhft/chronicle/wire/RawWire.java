@@ -85,6 +85,10 @@ public class RawWire implements Wire, InternalWire {
         return readContext;
     }
 
+    @Override
+    public void consumePadding() {
+
+    }
 
     @Override
     public boolean isReady() {

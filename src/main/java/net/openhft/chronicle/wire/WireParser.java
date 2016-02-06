@@ -18,33 +18,46 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
- * Interface to parse arbitrary field-value data.
+ * Interface to parseOne arbitrary field-value data.
  */
-public interface WireParser {
+public interface WireParser extends BiConsumer<WireIn, MarshallableOut> {
     @NotNull
-    static WireParser wireParser(BiConsumer<CharSequence, ValueIn> defaultConsumer) {
+    static WireParser wireParser(WireParselet defaultConsumer) {
         return new VanillaWireParser(defaultConsumer);
     }
 
-    BiConsumer<CharSequence, ValueIn> getDefaultConsumer();
+    WireParselet getDefaultConsumer();
 
-    default void parse(@NotNull WireIn wireIn) {
+    default void parseOne(@NotNull WireIn wireIn, MarshallableOut out) {
         StringBuilder sb = WireInternal.SBP.acquireStringBuilder();
         ValueIn valueIn = wireIn.readEventName(sb);
-        Consumer<ValueIn> consumer = lookup(sb);
-        if (consumer == null) {
-            getDefaultConsumer().accept(sb, valueIn);
-        } else {
-            consumer.accept(valueIn);
+        WireParselet consumer = lookup(sb);
+        if (consumer == null)
+            consumer = getDefaultConsumer();
+        consumer.accept(sb, valueIn, out);
+    }
+
+    @Override
+    default void accept(WireIn wireIn, MarshallableOut marshallableOut) {
+        while (wireIn.bytes().readRemaining() > 0) {
+            parseOne(wireIn, marshallableOut);
+            consume(wireIn, ',');
+            consume(wireIn, '}');
+            wireIn.consumePadding();
         }
     }
 
-    Consumer<ValueIn> lookup(CharSequence name);
+    default void consume(WireIn wireIn, char ch) {
+        if (wireIn.bytes().peekUnsignedByte() == ch) {
+            wireIn.bytes().readSkip(1);
+        }
+    }
 
-    void register(WireKey key, Consumer<ValueIn> valueInConsumer);
+    WireParselet lookup(CharSequence name);
 
-    Consumer<ValueIn> lookup(int number);
+    VanillaWireParser register(WireKey key, WireParselet valueInConsumer);
+
+    WireParselet lookup(int number);
 }

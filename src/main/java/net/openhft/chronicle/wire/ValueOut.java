@@ -43,9 +43,9 @@ public interface ValueOut {
 
     int SMALL_MESSAGE = 64;
 
-    /*
-             * data types
-             */
+    /**
+     * scalar data types
+     */
     @NotNull
     WireOut bool(Boolean flag);
 

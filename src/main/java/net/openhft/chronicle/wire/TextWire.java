@@ -79,6 +79,7 @@ public class TextWire implements Wire, InternalWire {
     protected final boolean use8bit;
     private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
     private final ReadDocumentContext readContext = new ReadDocumentContext(this);
+    private final StringBuilder sb = new StringBuilder();
     protected Bytes<?> bytes;
     protected long lineStart = 0;
     DefaultValueIn defaultValueIn;
@@ -218,7 +219,6 @@ public class TextWire implements Wire, InternalWire {
         wire.bytes().write(bytes, bytes().readPosition(), bytes().readLimit());
     }
 
-    private final StringBuilder sb = new StringBuilder();
     @NotNull
     @Override
     public ValueIn read() {
@@ -233,10 +233,10 @@ public class TextWire implements Wire, InternalWire {
 
     @NotNull
     protected StringBuilder readField(@NotNull StringBuilder sb) {
-        consumeWhiteSpace();
+        consumePadding();
         if (peekCode() == ',') {
             bytes.readSkip(1);
-            consumeWhiteSpace();
+            consumePadding();
         }
         try {
             int ch = peekCode();
@@ -245,7 +245,7 @@ public class TextWire implements Wire, InternalWire {
 
                 parseUntil(sb, getEscapingQuotes());
 
-                consumeWhiteSpace();
+                consumePadding();
                 ch = readCode();
                 if (ch != ':')
                     throw new UnsupportedOperationException("Expected a : at " + bytes.toDebugString());
@@ -260,7 +260,7 @@ public class TextWire implements Wire, InternalWire {
             unescape(sb);
         } catch (BufferUnderflowException ignored) {
         }
-        //      consumeWhiteSpace();
+        //      consumePadding();
         return sb;
     }
 
@@ -286,7 +286,7 @@ public class TextWire implements Wire, InternalWire {
         return sct;
     }
 
-    protected void consumeWhiteSpace() {
+    public void consumePadding() {
         for (; ; ) {
             int codePoint = peekCode();
             if (codePoint == '#') {
@@ -351,11 +351,11 @@ public class TextWire implements Wire, InternalWire {
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
-        consumeWhiteSpace();
+        consumePadding();
         ValueInState curr = valueIn.curr();
         StringBuilder sb = acquireStringBuilder();
         // did we save the position last time
-        // so we could go back and parse an older field?
+        // so we could go back and parseOne an older field?
         if (curr.savedPosition() > 0) {
             bytes.readPosition(curr.savedPosition() - 1);
             curr.savedPosition(0L);
@@ -373,7 +373,7 @@ public class TextWire implements Wire, InternalWire {
             curr.addUnexpected(position);
             long toSkip = valueIn.readLengthMarshallable();
             bytes.readSkip(toSkip);
-            consumeWhiteSpace();
+            consumePadding();
         }
 
         return read2(key, curr, sb, name);
@@ -404,7 +404,7 @@ public class TextWire implements Wire, InternalWire {
     @NotNull
     @Override
     public ValueIn read(@NotNull StringBuilder name) {
-        consumeWhiteSpace();
+        consumePadding();
         readField(name);
         return valueIn;
     }
@@ -435,7 +435,7 @@ public class TextWire implements Wire, InternalWire {
 
     @Override
     public boolean hasMore() {
-        consumeWhiteSpace();
+        consumePadding();
 
         return bytes.readRemaining() > 0;
     }
@@ -613,13 +613,13 @@ public class TextWire implements Wire, InternalWire {
     }
 
     public Object readObject() {
-        consumeWhiteSpace();
+        consumePadding();
         consumeDocumentStart();
         return readObject(0);
     }
 
     Object readObject(int indentation) {
-        consumeWhiteSpace();
+        consumePadding();
         int code = peekCode();
         int indentation2 = indentation();
         if (indentation2 < indentation)
@@ -662,7 +662,7 @@ public class TextWire implements Wire, InternalWire {
                 break;
             long ls = lineStart;
             bytes.readSkip(1);
-            consumeWhiteSpace();
+            consumePadding();
             if (lineStart == ls) {
                 objects.add(valueIn.objectWithInferredType(Object.class));
             } else {
@@ -670,7 +670,7 @@ public class TextWire implements Wire, InternalWire {
                 if (e != NoObject.NO_OBJECT)
                     objects.add(e);
             }
-            consumeWhiteSpace();
+            consumePadding();
         }
 
         return objects;
@@ -681,7 +681,7 @@ public class TextWire implements Wire, InternalWire {
         Map map = new LinkedHashMap<>();
         StringBuilder sb = WireInternal.acquireAnotherStringBuilder(acquireStringBuilder());
         while (bytes.readRemaining() > 0) {
-            consumeWhiteSpace();
+            consumePadding();
             if (peekCode() == '}') {
                 bytes.readSkip(1);
                 break;
@@ -698,7 +698,7 @@ public class TextWire implements Wire, InternalWire {
         Map map = new LinkedHashMap<>();
         StringBuilder sb = WireInternal.acquireAnotherStringBuilder(acquireStringBuilder());
         while (bytes.readRemaining() > 0) {
-            consumeWhiteSpace();
+            consumePadding();
             if (indentation() < indentation || bytes.readRemaining() == 0)
                 break;
             read(sb);
@@ -1338,7 +1338,7 @@ public class TextWire implements Wire, InternalWire {
 
         @Nullable
         <ACS extends Appendable & CharSequence> CharSequence textTo0(@NotNull ACS a) {
-            consumeWhiteSpace();
+            consumePadding();
             int ch = peekCode();
             CharSequence ret = a;
 
@@ -1478,7 +1478,7 @@ public class TextWire implements Wire, InternalWire {
 
         @NotNull
         public WireIn bytes(@NotNull ReadBytesMarshallable bytesConsumer) {
-            consumeWhiteSpace();
+            consumePadding();
 
             // TODO needs to be made much more efficient.
             StringBuilder sb = acquireStringBuilder();
@@ -1510,7 +1510,7 @@ public class TextWire implements Wire, InternalWire {
 
         @Nullable
         public byte[] bytes() {
-            consumeWhiteSpace();
+            consumePadding();
             // TODO needs to be made much more efficient.
             StringBuilder sb = acquireStringBuilder();
             if (peekCode() == '!') {
@@ -1546,10 +1546,10 @@ public class TextWire implements Wire, InternalWire {
 
         @Override
         public long readLength() {
-            consumeWhiteSpace();
+            consumePadding();
             long start = bytes.readPosition();
             try {
-                consumeWhiteSpace();
+                consumePadding();
                 int code = readCode();
                 switch (code) {
                     case '{': {
@@ -1591,7 +1591,7 @@ public class TextWire implements Wire, InternalWire {
         protected long readLengthMarshallable() {
             long start = bytes.readPosition();
             try {
-                consumeWhiteSpace();
+                consumePadding();
                 int code = peekCode();
                 switch (code) {
                     case '{': {
@@ -1622,7 +1622,7 @@ public class TextWire implements Wire, InternalWire {
         }
 
         private void consumeValue() {
-            consumeWhiteSpace();
+            consumePadding();
             StringBuilder sb = acquireStringBuilder();
             if (peekCode() == '!') {
                 bytes.readSkip(1);
@@ -1637,7 +1637,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag) {
-            consumeWhiteSpace();
+            consumePadding();
 
             StringBuilder sb = acquireStringBuilder();
             if (textTo(sb) == null) {
@@ -1652,7 +1652,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn int8(@NotNull T t, @NotNull ObjByteConsumer<T> tb) {
-            consumeWhiteSpace();
+            consumePadding();
             tb.accept(t, (byte) bytes.parseLong());
             return TextWire.this;
         }
@@ -1660,7 +1660,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn uint8(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
-            consumeWhiteSpace();
+            consumePadding();
             ti.accept(t, (short) bytes.parseLong());
             return TextWire.this;
         }
@@ -1668,7 +1668,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn int16(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
-            consumeWhiteSpace();
+            consumePadding();
             ti.accept(t, (short) bytes.parseLong());
             return TextWire.this;
         }
@@ -1676,7 +1676,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn uint16(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
-            consumeWhiteSpace();
+            consumePadding();
             ti.accept(t, (int) bytes.parseLong());
             return TextWire.this;
         }
@@ -1684,7 +1684,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn int32(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
-            consumeWhiteSpace();
+            consumePadding();
             ti.accept(t, (int) bytes.parseLong());
             return TextWire.this;
         }
@@ -1692,7 +1692,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn uint32(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
-            consumeWhiteSpace();
+            consumePadding();
             tl.accept(t, bytes.parseLong());
             return TextWire.this;
         }
@@ -1700,7 +1700,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn int64(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
-            consumeWhiteSpace();
+            consumePadding();
             tl.accept(t, bytes.parseLong());
             return TextWire.this;
         }
@@ -1708,7 +1708,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn float32(@NotNull T t, @NotNull ObjFloatConsumer<T> tf) {
-            consumeWhiteSpace();
+            consumePadding();
             tf.accept(t, (float) bytes.parseDouble());
             return TextWire.this;
         }
@@ -1716,7 +1716,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td) {
-            consumeWhiteSpace();
+            consumePadding();
             td.accept(t, bytes.parseDouble());
             return TextWire.this;
         }
@@ -1724,7 +1724,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime) {
-            consumeWhiteSpace();
+            consumePadding();
             StringBuilder sb = acquireStringBuilder();
             textTo(sb);
             setLocalTime.accept(t, LocalTime.parse(WireInternal.INTERNER.intern(sb)));
@@ -1734,7 +1734,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime) {
-            consumeWhiteSpace();
+            consumePadding();
             StringBuilder sb = acquireStringBuilder();
             textTo(sb);
             tZonedDateTime.accept(t, ZonedDateTime.parse(WireInternal.INTERNER.intern(sb)));
@@ -1744,7 +1744,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate) {
-            consumeWhiteSpace();
+            consumePadding();
             StringBuilder sb = acquireStringBuilder();
             textTo(sb);
             tLocalDate.accept(t, LocalDate.parse(WireInternal.INTERNER.intern(sb)));
@@ -1754,7 +1754,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn uuid(@NotNull T t, @NotNull BiConsumer<T, UUID> tuuid) {
-            consumeWhiteSpace();
+            consumePadding();
             StringBuilder sb = acquireStringBuilder();
             textTo(sb);
             tuuid.accept(t, UUID.fromString(WireInternal.INTERNER.intern(sb)));
@@ -1764,7 +1764,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn int64array(@Nullable LongArrayValues values, T t, @NotNull BiConsumer<T, LongArrayValues> setter) {
-            consumeWhiteSpace();
+            consumePadding();
             if (!(values instanceof TextLongArrayReference)) {
                 setter.accept(t, values = new TextLongArrayReference());
             }
@@ -1778,12 +1778,12 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public WireIn int64(@Nullable LongValue value) {
-            consumeWhiteSpace();
+            consumePadding();
             Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
-            consumeWhiteSpace();
+            consumePadding();
             if (peekCode() == ',')
                 bytes.readSkip(1);
             return TextWire.this;
@@ -1801,7 +1801,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter) {
-            consumeWhiteSpace();
+            consumePadding();
             if (!(value instanceof TextIntReference)) {
                 setter.accept(t, value = new TextIntReference());
             }
@@ -1809,7 +1809,7 @@ public class TextWire implements Wire, InternalWire {
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
-            consumeWhiteSpace();
+            consumePadding();
             if (peekCode() == ',')
                 bytes.readSkip(1);
             return TextWire.this;
@@ -1818,20 +1818,20 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
-            consumeWhiteSpace();
+            consumePadding();
             char code = (char) readCode();
             if (code != '[')
                 throw new IORuntimeException("Unsupported type " + code + " (" + code + ")");
 
             // this code was added to support empty sets
-            consumeWhiteSpace();
+            consumePadding();
             code = (char) peekCode();
             if (code == ']')
                 return TextWire.this;
 
             tReader.accept(t, TextWire.this.valueIn);
 
-            consumeWhiteSpace();
+            consumePadding();
             code = (char) readCode();
             if (code != ']')
                 throw new IORuntimeException("Expected a ] but got " + code + " (" + code + ")");
@@ -1845,7 +1845,7 @@ public class TextWire implements Wire, InternalWire {
 
         @Override
         public boolean hasNextSequenceItem() {
-            consumeWhiteSpace();
+            consumePadding();
             int ch = peekCode();
             if (ch == ',') {
                 bytes.readSkip(1);
@@ -1857,7 +1857,7 @@ public class TextWire implements Wire, InternalWire {
         @Override
         public <T> T applyToMarshallable(@NotNull Function<WireIn, T> marshallableReader) {
             pushState();
-            consumeWhiteSpace();
+            consumePadding();
             int code = peekCode();
             if (code != '{')
                 throw new IORuntimeException("Unsupported type " + (char) code);
@@ -1872,12 +1872,12 @@ public class TextWire implements Wire, InternalWire {
                 final long newLimit = position - 1 + len;
                 bytes.readLimit(newLimit);
                 bytes.readSkip(1); // skip the {
-                consumeWhiteSpace();
+                consumePadding();
                 return marshallableReader.apply(TextWire.this);
             } finally {
                 bytes.readLimit(limit);
 
-                consumeWhiteSpace();
+                consumePadding();
                 code = readCode();
                 popState();
                 if (code != '}')
@@ -1890,7 +1890,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
-            consumeWhiteSpace();
+            consumePadding();
             int code = peekCode();
             StringBuilder sb = acquireStringBuilder();
             sb.setLength(0);
@@ -1906,7 +1906,7 @@ public class TextWire implements Wire, InternalWire {
 
         @Override
         public Class typePrefix() {
-            consumeWhiteSpace();
+            consumePadding();
             int code = peekCode();
             if (code == '!') {
                 readCode();
@@ -1925,7 +1925,7 @@ public class TextWire implements Wire, InternalWire {
 
         @Override
         public boolean isTyped() {
-            consumeWhiteSpace();
+            consumePadding();
             int code = peekCode();
             return code == '!';
         }
@@ -1939,7 +1939,7 @@ public class TextWire implements Wire, InternalWire {
         @Override
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer)
                 throws IORuntimeException, BufferUnderflowException {
-            consumeWhiteSpace();
+            consumePadding();
             int code = readCode();
             if (!peekStringIgnoreCase("type "))
                 throw new UnsupportedOperationException(stringForCode(code));
@@ -1952,7 +1952,7 @@ public class TextWire implements Wire, InternalWire {
 
         @Override
         public <T> Class<T> typeLiteral() throws IORuntimeException, BufferUnderflowException {
-            consumeWhiteSpace();
+            consumePadding();
             int code = readCode();
             if (!peekStringIgnoreCase("type "))
                 throw new UnsupportedOperationException(stringForCode(code));
@@ -1970,7 +1970,7 @@ public class TextWire implements Wire, InternalWire {
         @Override
         public WireIn marshallable(@NotNull ReadMarshallable object) {
             pushState();
-            consumeWhiteSpace();
+            consumePadding();
             int code = peekCode();
             if (code == '!') {
                 typePrefix(null, (o, x) -> { /* sets acquireStringBuilder(); */});
@@ -1989,7 +1989,7 @@ public class TextWire implements Wire, InternalWire {
 
                 bytes.readLimit(newLimit);
                 bytes.readSkip(1); // skip the {
-                consumeWhiteSpace();
+                consumePadding();
                 object.readMarshallable(TextWire.this);
             } finally {
                 bytes.readLimit(limit);
@@ -1997,7 +1997,7 @@ public class TextWire implements Wire, InternalWire {
                 popState();
             }
 
-            consumeWhiteSpace();
+            consumePadding();
             code = readCode();
             if (code != '}')
                 throw new IORuntimeException("Unterminated { while reading marshallable " +
@@ -2009,7 +2009,7 @@ public class TextWire implements Wire, InternalWire {
         @NotNull
         public Demarshallable demarshallable(@NotNull Class clazz) {
             pushState();
-            consumeWhiteSpace();
+            consumePadding();
             int code = peekCode();
             if (code == '!') {
                 typePrefix(null, (o, x) -> { /* sets acquireStringBuilder(); */});
@@ -2029,7 +2029,7 @@ public class TextWire implements Wire, InternalWire {
 
                 bytes.readLimit(newLimit);
                 bytes.readSkip(1); // skip the {
-                consumeWhiteSpace();
+                consumePadding();
 
                 object = Demarshallable.newInstance(clazz, TextWire.this);
             } finally {
@@ -2038,7 +2038,7 @@ public class TextWire implements Wire, InternalWire {
                 popState();
             }
 
-            consumeWhiteSpace();
+            consumePadding();
             code = readCode();
             if (code != '}')
                 throw new IORuntimeException("Unterminated { while reading marshallable " +
@@ -2050,7 +2050,7 @@ public class TextWire implements Wire, InternalWire {
         @Nullable
         public <T> T typedMarshallable() {
             try {
-                consumeWhiteSpace();
+                consumePadding();
                 int code = peekCode();
                 if (code < 0)
                     throw new IllegalStateException("Cannot read as a ReadMarshallable " +
@@ -2101,7 +2101,7 @@ public class TextWire implements Wire, InternalWire {
         public <K, V> Map<K, V> map(@NotNull final Class<K> kClazz,
                                     @NotNull final Class<V> vClass,
                                     @NotNull final Map<K, V> usingMap) {
-            consumeWhiteSpace();
+            consumePadding();
             usingMap.clear();
 
             StringBuilder sb = acquireStringBuilder();
@@ -2114,7 +2114,7 @@ public class TextWire implements Wire, InternalWire {
                     return null;
 
                 } else if (("!" + SEQ_MAP).contentEquals(sb)) {
-                    consumeWhiteSpace();
+                    consumePadding();
                     int start = readCode();
                     if (start != '[')
                         throw new IORuntimeException("Unsupported start of sequence : " + (char) start);
@@ -2138,7 +2138,7 @@ public class TextWire implements Wire, InternalWire {
 
         @Override
         public <K extends ReadMarshallable, V extends ReadMarshallable> void typedMap(@NotNull Map<K, V> usingMap) {
-            consumeWhiteSpace();
+            consumePadding();
             usingMap.clear();
 
             StringBuilder sb = acquireStringBuilder();
@@ -2167,7 +2167,7 @@ public class TextWire implements Wire, InternalWire {
 
         @Override
         public boolean bool() {
-            consumeWhiteSpace();
+            consumePadding();
             StringBuilder sb = acquireStringBuilder();
             if (textTo(sb) == null)
                 throw new NullPointerException("value is null");
@@ -2206,14 +2206,14 @@ public class TextWire implements Wire, InternalWire {
 
         @Override
         public long int64() {
-            consumeWhiteSpace();
+            consumePadding();
             valueIn.skipType();
             return bytes.parseLong();
         }
 
         @Override
         public double float64() {
-            consumeWhiteSpace();
+            consumePadding();
             valueIn.skipType();
             return bytes.parseDouble();
         }
@@ -2223,7 +2223,7 @@ public class TextWire implements Wire, InternalWire {
             if (peek == '!') {
                 StringBuilder sb = acquireStringBuilder();
                 parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
-                consumeWhiteSpace();
+                consumePadding();
             }
         }
 
@@ -2242,7 +2242,7 @@ public class TextWire implements Wire, InternalWire {
          * {@code false} no  data is read  ( data is only peaked if {@code false} )
          */
         public boolean isNull() {
-            consumeWhiteSpace();
+            consumePadding();
 
             if (peekStringIgnoreCase("!!null \"\"")) {
                 bytes.readSkip("!!null \"\"" .length());
@@ -2270,7 +2270,7 @@ public class TextWire implements Wire, InternalWire {
 
         @Nullable
         Object object0(@Nullable Object using, @NotNull Class clazz) {
-            consumeWhiteSpace();
+            consumePadding();
 
             if (isNull())
                 return null;
@@ -2348,7 +2348,7 @@ public class TextWire implements Wire, InternalWire {
         }
 
         Object objectWithInferredType(@NotNull Class clazz) {
-            consumeWhiteSpace();
+            consumePadding();
             int code = peekCode();
             switch (code) {
                 case '!':

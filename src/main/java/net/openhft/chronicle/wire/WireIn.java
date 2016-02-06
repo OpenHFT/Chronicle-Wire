@@ -103,8 +103,7 @@ public interface WireIn extends WireCommon {
      */
     DocumentContext readingDocument();
 
-
     DocumentContext readingDocument(long readLocation);
 
-
+    void consumePadding();
 }

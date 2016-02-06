@@ -21,39 +21,38 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
  * A simple parser to associate actions based on events/field names received.
  */
 public class VanillaWireParser implements WireParser {
-    private final Map<CharSequence, Consumer<ValueIn>> namedConsumer = new TreeMap<>(CharSequenceComparator.INSTANCE);
-    private final Map<Integer, Consumer<ValueIn>> numberedConsumer = new HashMap<>();
-    private final BiConsumer<CharSequence, ValueIn> defaultConsumer;
+    private final Map<CharSequence, WireParselet> namedConsumer = new TreeMap<>(CharSequenceComparator.INSTANCE);
+    private final Map<Integer, WireParselet> numberedConsumer = new HashMap<>();
+    private final WireParselet defaultConsumer;
 
-    public VanillaWireParser(BiConsumer<CharSequence, ValueIn> defaultConsumer) {
+    public VanillaWireParser(WireParselet defaultConsumer) {
         this.defaultConsumer = defaultConsumer;
     }
 
     @Override
-    public BiConsumer<CharSequence, ValueIn> getDefaultConsumer() {
+    public WireParselet getDefaultConsumer() {
         return defaultConsumer;
     }
 
     @Override
-    public void register(@NotNull WireKey key, Consumer<ValueIn> valueInConsumer) {
+    public VanillaWireParser register(@NotNull WireKey key, WireParselet valueInConsumer) {
         namedConsumer.put(key.name(), valueInConsumer);
         numberedConsumer.put(key.code(), valueInConsumer);
+        return this;
     }
 
     @Override
-    public Consumer<ValueIn> lookup(CharSequence name) {
+    public WireParselet lookup(CharSequence name) {
         return namedConsumer.get(name);
     }
 
     @Override
-    public Consumer<ValueIn> lookup(int number) {
+    public WireParselet lookup(int number) {
         return numberedConsumer.get(number);
     }
 

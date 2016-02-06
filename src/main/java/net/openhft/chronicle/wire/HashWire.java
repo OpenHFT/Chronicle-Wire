@@ -28,15 +28,15 @@ public class HashWire implements WireOut {
     private final ValueOut valueOut = new HashValueOut();
     long hash = 0;
 
-    public static long hash64(WriteMarshallable marshallable) {
+    public static long hash64(WriteMarshallable value) {
         HashWire hashWire = new HashWire();
-        hashWire.getValueOut().marshallable(marshallable);
+        hashWire.getValueOut().marshallable(value);
         return hashWire.hash64();
     }
 
-    public static long hash32(WriteMarshallable marshallable) {
+    public static int hash32(WriteMarshallable value) {
         HashWire hashWire = new HashWire();
-        hashWire.getValueOut().marshallable(marshallable);
+        hashWire.getValueOut().marshallable(value);
         return hashWire.hash32();
     }
 

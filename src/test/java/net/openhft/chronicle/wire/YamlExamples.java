@@ -194,7 +194,7 @@ public class YamlExamples {
         */
 
 /*
-        wire.writeZonedDateTime(Keys.canonical, ZonedDateTime.parse("2001-12-15T02:59:43.1Z"));
+        wire.writeZonedDateTime(Keys.canonical, ZonedDateTime.parseOne("2001-12-15T02:59:43.1Z"));
         ZonedDateTime zdt = wire.readZonedDateTime(Keys.canonical);
 
         wire.writeDate(Keys.date, LocalDate.of(2002, 12, 14));

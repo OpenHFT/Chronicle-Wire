@@ -89,7 +89,7 @@ public class CSVWire extends TextWire {
         return sct;
     }
 
-    protected void consumeWhiteSpace() {
+    public void consumePadding() {
         for (; ; ) {
             int codePoint = peekCode();
             if (Character.isWhitespace(codePoint) || codePoint == ',') {
@@ -111,7 +111,7 @@ public class CSVWire extends TextWire {
     @NotNull
     @Override
     public ValueIn read(@NotNull StringBuilder name) {
-        consumeWhiteSpace();
+        consumePadding();
         readField(name);
         return valueIn;
     }
@@ -125,7 +125,7 @@ public class CSVWire extends TextWire {
 
     @Override
     public boolean hasMore() {
-        consumeWhiteSpace();
+        consumePadding();
 
         return bytes.readRemaining() > 0;
     }
@@ -138,7 +138,7 @@ public class CSVWire extends TextWire {
 
         @Nullable
         <ACS extends Appendable & CharSequence> ACS textTo0(@NotNull ACS a) {
-            consumeWhiteSpace();
+            consumePadding();
             int ch = peekCode();
 
             switch (ch) {
@@ -197,7 +197,7 @@ public class CSVWire extends TextWire {
         protected long readLengthMarshallable() {
             long start = bytes.readPosition();
             try {
-                consumeWhiteSpace();
+                consumePadding();
                 for (; ; ) {
                     int code = readCode();
                     switch (code) {
@@ -215,7 +215,7 @@ public class CSVWire extends TextWire {
 
         @Override
         public boolean hasNextSequenceItem() {
-            consumeWhiteSpace();
+            consumePadding();
             int ch = peekCode();
             if (ch == ',') {
                 bytes.readSkip(1);
@@ -228,7 +228,7 @@ public class CSVWire extends TextWire {
         @Override
         public WireIn marshallable(@NotNull ReadMarshallable object) {
             pushState();
-            consumeWhiteSpace();
+            consumePadding();
             final long len = readLengthMarshallable();
 
             final long limit = bytes.readLimit();
@@ -239,7 +239,7 @@ public class CSVWire extends TextWire {
                 // ensure that you can read past the end of this marshable object
 
                 bytes.readLimit(newLimit);
-                consumeWhiteSpace();
+                consumePadding();
                 object.readMarshallable(CSVWire.this);
             } finally {
                 bytes.readLimit(limit);
@@ -247,7 +247,7 @@ public class CSVWire extends TextWire {
                 popState();
             }
 
-            consumeWhiteSpace();
+            consumePadding();
             return CSVWire.this;
         }
 

@@ -58,7 +58,7 @@ public class QueryWire extends TextWire {
 
     @NotNull
     protected StringBuilder readField(@NotNull StringBuilder sb) {
-        consumeWhiteSpace();
+        consumePadding();
         bytes.parseUtf8(sb, QueryStopCharTesters.QUERY_FIELD_NAME);
         if (rewindAndRead() == '&')
             bytes.readSkip(-1);
@@ -66,7 +66,7 @@ public class QueryWire extends TextWire {
     }
 
     @ForceInline
-    protected void consumeWhiteSpace() {
+    public void consumePadding() {
         int codePoint = peekCode();
         while (Character.isWhitespace(codePoint)) {
             bytes.readSkip(1);
@@ -365,7 +365,7 @@ public class QueryWire extends TextWire {
         @Nullable
         @Override
         public StringBuilder textTo(@NotNull StringBuilder a) {
-            consumeWhiteSpace();
+            consumePadding();
             bytes.parseUtf8(a, QueryStopCharTesters.QUERY_VALUE);
             return a;
         }
@@ -373,7 +373,7 @@ public class QueryWire extends TextWire {
         @Nullable
         @Override
         public Bytes textTo(@NotNull Bytes a) {
-            consumeWhiteSpace();
+            consumePadding();
             bytes.parseUtf8(a, QueryStopCharTesters.QUERY_VALUE);
             return a;
         }
@@ -398,7 +398,7 @@ public class QueryWire extends TextWire {
 
         @Override
         public boolean hasNextSequenceItem() {
-            consumeWhiteSpace();
+            consumePadding();
             int ch = peekCode();
             if (ch == ',') {
                 bytes.readSkip(1);

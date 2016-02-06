@@ -228,11 +228,11 @@ public class BinaryWire implements Wire, InternalWire {
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
-        consumeSpecial();
+        consumePadding();
         ValueInState curr = valueIn.curr();
         StringBuilder sb = WireInternal.acquireStringBuilder();
         // did we save the position last time
-        // so we could go back and parse an older field?
+        // so we could go back and parseOne an older field?
         if (curr.savedPosition() > 0) {
             bytes.readPosition(curr.savedPosition() - 1);
             curr.savedPosition(0L);
@@ -249,7 +249,7 @@ public class BinaryWire implements Wire, InternalWire {
             // we may come back and set the field later if we find it.
             curr.addUnexpected(position);
             valueIn.consumeNext();
-            consumeSpecial();
+            consumePadding();
         }
 
         return read2(key, curr, sb, name);
@@ -316,22 +316,22 @@ public class BinaryWire implements Wire, InternalWire {
 
     @Override
     public boolean hasMore() {
-        consumeSpecial();
+        consumePadding();
         return bytes.readRemaining() > 0;
     }
 
     @Nullable
     private StringBuilder readField(@NotNull StringBuilder name, WireKey key) {
-        consumeSpecial();
+        consumePadding();
         int peekCode = peekCode();
         return readField(peekCode, key, name, true);
     }
 
-    void consumeSpecial() {
-        consumeSpecial(false);
+    public void consumePadding() {
+        consumePadding(false);
     }
 
-    void consumeSpecial(boolean consumeType) {
+    void consumePadding(boolean consumeType) {
         while (true) {
             int code = peekCode();
             switch (code) {
@@ -1551,7 +1551,7 @@ public class BinaryWire implements Wire, InternalWire {
 
         @NotNull
         WireIn text(@NotNull Consumer<String> s) {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
             switch (code) {
                 case NULL:
@@ -1839,7 +1839,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag) {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
             switch (code) {
                 case NULL:
@@ -1863,7 +1863,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn int8(@NotNull T t, @NotNull ObjByteConsumer<T> tb) {
-            consumeSpecial();
+            consumePadding();
 
             final int code = bytes.readUnsignedByte();
 
@@ -1878,7 +1878,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn uint8(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
-            consumeSpecial();
+            consumePadding();
 
             final int code = readCode();
             if (isText(code))
@@ -1902,7 +1902,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn uint16(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
-            consumeSpecial();
+            consumePadding();
             final int code = readCode();
             if (isText(code))
                 ti.accept(t, Integer.parseInt(text()));
@@ -1914,7 +1914,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn int32(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
-            consumeSpecial();
+            consumePadding();
             final int code = readCode();
             if (isText(code))
                 ti.accept(t, Integer.parseInt(text()));
@@ -1926,7 +1926,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn uint32(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
-            consumeSpecial();
+            consumePadding();
             final int code = readCode();
             if (isText(code))
                 tl.accept(t, Long.parseLong(text()));
@@ -1949,7 +1949,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn float32(@NotNull T t, @NotNull ObjFloatConsumer<T> tf) {
-            consumeSpecial();
+            consumePadding();
             final int code = readCode();
             if (isText(code))
                 tf.accept(t, Float.parseFloat(text()));
@@ -1969,7 +1969,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime) {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
             if (code == TIME) {
                 setLocalTime.accept(t, readLocalTime());
@@ -1989,7 +1989,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime) {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
             if (code == ZONED_DATE_TIME) {
                 StringBuilder sb = WireInternal.acquireStringBuilder();
@@ -2005,7 +2005,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate) {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
             if (code == DATE_TIME) {
                 StringBuilder sb = WireInternal.acquireStringBuilder();
@@ -2031,7 +2031,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn uuid(@NotNull T t, @NotNull BiConsumer<T, UUID> tuuid) {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
             if (code == UUID) {
                 tuuid.accept(t, new UUID(bytes.readLong(), bytes.readLong()));
@@ -2045,7 +2045,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn int64array(@Nullable LongArrayValues values, T t, @NotNull BiConsumer<T, LongArrayValues> setter) {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
             if (code == I64_ARRAY) {
                 if (!(values instanceof BinaryLongArrayReference))
@@ -2064,7 +2064,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public WireIn int64(LongValue value) {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
             if (code != INT64)
                 cantRead(code);
@@ -2090,7 +2090,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter) {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
             if (code != INT32)
                 cantRead(code);
@@ -2107,7 +2107,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public <T> WireIn sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
             if (code != BYTES_LENGTH32)
                 cantRead(code);
@@ -2126,7 +2126,7 @@ public class BinaryWire implements Wire, InternalWire {
 
         @Override
         public <T> T applyToMarshallable(@NotNull Function<WireIn, T> marshallableReader) {
-            consumeSpecial();
+            consumePadding();
             pushState();
             try {
                 long length = readLength();
@@ -2271,7 +2271,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public WireIn marshallable(@NotNull ReadMarshallable object) throws BufferUnderflowException, IORuntimeException {
-            consumeSpecial(true);
+            consumePadding(true);
             pushState();
             long length = readLength();
             if (length >= 0) {
@@ -2292,7 +2292,7 @@ public class BinaryWire implements Wire, InternalWire {
         }
 
         public Demarshallable demarshallable(@NotNull Class clazz) throws BufferUnderflowException, IORuntimeException {
-            consumeSpecial(true);
+            consumePadding(true);
 
             long length = readLength();
             if (length >= 0) {
@@ -2343,7 +2343,7 @@ public class BinaryWire implements Wire, InternalWire {
 
         @Override
         public boolean bool() throws IORuntimeException {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
             if (isText(code))
                 return Boolean.valueOf(text());
@@ -2359,7 +2359,7 @@ public class BinaryWire implements Wire, InternalWire {
 
         @Override
         public byte int8() {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
             final long value = isText(code) ? readTextAsLong() : readInt0(code);
 
@@ -2371,7 +2371,7 @@ public class BinaryWire implements Wire, InternalWire {
 
         @Override
         public short int16() {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
             final long value = isText(code) ? readTextAsLong() : readInt0(code);
             if (value > Short.MAX_VALUE || value < Short.MIN_VALUE)
@@ -2381,7 +2381,7 @@ public class BinaryWire implements Wire, InternalWire {
 
         @Override
         public int uint16() {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
 
             final long value = isText(code) ? readTextAsLong() : readInt0(code);
@@ -2395,7 +2395,7 @@ public class BinaryWire implements Wire, InternalWire {
 
         @Override
         public int int32() {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
             final long value = isText(code) ? readTextAsLong() : readInt0(code);
 
@@ -2407,7 +2407,7 @@ public class BinaryWire implements Wire, InternalWire {
 
         @Override
         public long int64() {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
 
             if (code >> 4 == BinaryWireHighCode.FLOAT)
@@ -2425,7 +2425,7 @@ public class BinaryWire implements Wire, InternalWire {
 
         @Override
         public float float32() {
-            consumeSpecial();
+            consumePadding();
             int code = readCode();
             final double value = isText(code) ? readTextAsDouble() : readFloat0(code);
 
