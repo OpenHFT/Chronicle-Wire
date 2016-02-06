@@ -65,10 +65,9 @@ public class TextWire implements Wire, InternalWire {
     static final BytesStore NEW_LINE = BytesStore.wrap("\n");
     static final BytesStore SPACE = BytesStore.wrap(" ");
     static final BytesStore END_FIELD = NEW_LINE;
-    static final char[] HEX = "0123456789ABCDEF" .toCharArray();
 
     static {
-        for (char ch : "0123456789+- \t\',#:{}[]|>!\0\b\\" .toCharArray())
+        for (char ch : "?0123456789+- \t\',#:{}[]|>!\0\b\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
         for (char ch : "?,#:{}[]|>\0\b\\".toCharArray())
             QUOTE_CHARS.set(ch);
