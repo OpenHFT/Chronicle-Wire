@@ -37,7 +37,7 @@ public class ReadDocumentContext implements DocumentContext {
 
     @Override
     public boolean isMetaData() {
-        return !data;
+        return !data && present;
 
     }
 
@@ -57,7 +57,7 @@ public class ReadDocumentContext implements DocumentContext {
 
     @Override
     public boolean isData() {
-        return data;
+        return data && present;
     }
 
     @Override
