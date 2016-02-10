@@ -189,11 +189,11 @@ public enum WireType implements Function<Bytes, Wire> {
         return map;
     }
 
-    public <T extends Marshallable> void toFile(String filename, Map<String, T> map) throws IOException {
-        toFile(filename, map, false);
+    public <T extends Marshallable> void toFileAsMap(String filename, Map<String, T> map) throws IOException {
+        toFileAsMap(filename, map, false);
     }
 
-    public <T extends Marshallable> void toFile(String filename, Map<String, T> map, boolean compact) throws IOException {
+    public <T extends Marshallable> void toFileAsMap(String filename, Map<String, T> map, boolean compact) throws IOException {
         Bytes bytes = getBytes();
         Wire wire = apply(bytes);
         for (Map.Entry<String, T> entry : map.entrySet()) {
