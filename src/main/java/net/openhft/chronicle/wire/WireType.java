@@ -28,6 +28,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -122,7 +124,14 @@ public enum WireType implements Function<Bytes, Wire> {
         public <T> T fromString(CharSequence cs) {
             return fromHexString(cs);
         }
-    }, READ_ANY {
+    }, CSV {
+        @NotNull
+        @Override
+        public Wire apply(Bytes bytes) {
+            return new CSVWire(bytes);
+        }
+    },
+    READ_ANY {
         @Override
         public Wire apply(@NotNull Bytes bytes) {
             int code = bytes.readByte(0);
@@ -167,6 +176,17 @@ public enum WireType implements Function<Bytes, Wire> {
 
     public <T> T fromFile(String filename) throws IOException {
         return (T) (apply(Bytes.wrapForRead(IOTools.readFile(filename))).getValueIn().typedMarshallable());
+    }
+
+    public <T> Map<String, T> fromFileAsMap(String filename, Class<T> tClass) throws IOException {
+        Map<String, T> map = new LinkedHashMap<>();
+        Wire wire = apply(Bytes.wrapForRead(IOTools.readFile(filename)));
+        StringBuilder sb = new StringBuilder();
+        while (wire.hasMore()) {
+            wire.readEventName(sb)
+                    .object(tClass, map, (m, o) -> m.put(sb.toString(), o));
+        }
+        return map;
     }
 
     public <T> void toFile(String filename, WriteMarshallable marshallable) throws IOException {
