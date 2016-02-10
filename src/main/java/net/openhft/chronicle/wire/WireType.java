@@ -189,6 +189,28 @@ public enum WireType implements Function<Bytes, Wire> {
         return map;
     }
 
+    public <T extends Marshallable> void toFile(String filename, Map<String, T> map) throws IOException {
+        toFile(filename, map, false);
+    }
+
+    public <T extends Marshallable> void toFile(String filename, Map<String, T> map, boolean compact) throws IOException {
+        Bytes bytes = getBytes();
+        Wire wire = apply(bytes);
+        for (Map.Entry<String, T> entry : map.entrySet()) {
+            ValueOut valueOut = wire.writeEventName(entry::getKey);
+            if (compact)
+                valueOut.leaf();
+            valueOut.marshallable(entry.getValue());
+        }
+        String tempFilename = IOTools.tempName(filename);
+        IOTools.writeFile(tempFilename, bytes.toByteArray());
+        File file2 = new File(tempFilename);
+        if (!file2.renameTo(new File(filename))) {
+            file2.delete();
+            throw new IOException("Failed to rename " + tempFilename + " to " + filename);
+        }
+    }
+
     public <T> void toFile(String filename, WriteMarshallable marshallable) throws IOException {
         Bytes bytes = getBytes();
         Wire wire = apply(bytes);
