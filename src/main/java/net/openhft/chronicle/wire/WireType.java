@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -172,7 +173,13 @@ public enum WireType implements Function<Bytes, Wire> {
         Bytes bytes = getBytes();
         Wire wire = apply(bytes);
         wire.getValueOut().typedMarshallable(marshallable);
-        IOTools.writeFile(filename, bytes.toByteArray());
+        String tempFilename = IOTools.tempName(filename);
+        IOTools.writeFile(tempFilename, bytes.toByteArray());
+        File file2 = new File(tempFilename);
+        if (!file2.renameTo(new File(filename))) {
+            file2.delete();
+            throw new IOException("Failed to rename " + tempFilename + " to " + filename);
+        }
     }
 
     String asHexString(WriteMarshallable marshallable) {
