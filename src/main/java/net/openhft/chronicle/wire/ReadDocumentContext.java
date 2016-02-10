@@ -38,7 +38,6 @@ public class ReadDocumentContext implements DocumentContext {
     @Override
     public boolean isMetaData() {
         return !data && present;
-
     }
 
     @Override
