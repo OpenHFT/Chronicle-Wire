@@ -55,4 +55,19 @@ public class TestMarshallable implements Marshallable {
     public void setCount(int count) {
         this.count = count;
     }
+
+    @Override
+    public int hashCode() {
+        return HashWire.hash32(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof WriteMarshallable && toString().equals(obj.toString());
+    }
+
+    @Override
+    public String toString() {
+        return WireType.TEXT.asString(this);
+    }
 }

@@ -21,10 +21,12 @@ import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
 import net.openhft.chronicle.bytes.ref.TextLongReference;
+import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -160,6 +162,17 @@ public enum WireType implements Function<Bytes, Wire> {
         bytes.appendUtf8(cs);
         Wire wire = apply(bytes);
         return wire.getValueIn().typedMarshallable();
+    }
+
+    public <T> T fromFile(String filename) throws IOException {
+        return (T) (apply(Bytes.wrapForRead(IOTools.readFile(filename))).getValueIn().typedMarshallable());
+    }
+
+    public <T> void toFile(String filename, WriteMarshallable marshallable) throws IOException {
+        Bytes bytes = getBytes();
+        Wire wire = apply(bytes);
+        wire.getValueOut().typedMarshallable(marshallable);
+        IOTools.writeFile(filename, bytes.toByteArray());
     }
 
     String asHexString(WriteMarshallable marshallable) {
