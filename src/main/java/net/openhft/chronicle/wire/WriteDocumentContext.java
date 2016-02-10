@@ -64,5 +64,9 @@ public class WriteDocumentContext implements DocumentContext {
         return metaDataBit == 0;
     }
 
+    @Override
+    public Wire wire() {
+        return wire;
+    }
 
 }

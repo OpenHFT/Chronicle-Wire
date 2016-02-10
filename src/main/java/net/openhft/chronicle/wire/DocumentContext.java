@@ -22,9 +22,24 @@ import net.openhft.chronicle.core.io.Closeable;
  * Created by peter on 24/12/15.
  */
 public interface DocumentContext extends Closeable {
+
+    /**
+     * @return true - is the entry is of type meta data
+     */
     boolean isMetaData();
 
+    /**
+     * @return true - if is a document document
+     */
     boolean isPresent();
 
+    /**
+     * @return true - is the entry is of type data
+     */
     boolean isData();
+
+    /**
+     * @return the wire of the document
+     */
+    Wire wire();
 }
