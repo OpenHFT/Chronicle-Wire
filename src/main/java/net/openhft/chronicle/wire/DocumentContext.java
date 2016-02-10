@@ -42,4 +42,9 @@ public interface DocumentContext extends Closeable {
      * @return the wire of the document
      */
     Wire wire();
+
+    /**
+     * @return the index of this document
+     */
+    long index();
 }

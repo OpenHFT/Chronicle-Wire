@@ -32,6 +32,11 @@ public class WriteDocumentContext implements DocumentContext {
         this.wire = wire;
     }
 
+    @Override
+    public long index() {
+        throw new UnsupportedOperationException("todo");
+    }
+
     public void start(boolean metaData) {
         Bytes<?> bytes = wire.bytes();
         this.position = bytes.writePosition();
