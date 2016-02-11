@@ -1730,11 +1730,13 @@ public class BinaryWire implements Wire, InternalWire {
             long length = readLength() - 1;
             int code = readCode();
             switch (code) {
+                case I64_ARRAY:
                 case U8_ARRAY:
                     BytesStore toBytes = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
                     toBytes.write(0, bytes, bytes.readPosition(), length);
                     bytes.readSkip(length);
                     return toBytes;
+
 
                 case TYPE_PREFIX: {
                     StringBuilder sb = WireInternal.acquireStringBuilder();
