@@ -40,8 +40,7 @@ public class ReadAnyWire implements Wire, InternalWire {
                 return wire = (InternalWire) BINARY.apply(bytes);
             }
 
-            throw new IllegalStateException("unknown wire type");
-
+            return null;
         }
 
         public Bytes bytes() {
