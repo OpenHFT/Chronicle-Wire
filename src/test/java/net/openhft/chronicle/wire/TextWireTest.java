@@ -545,8 +545,8 @@ public class TextWireTest {
         for (int i = 0; i < 256; i++)
             allBytes[i] = (byte) i;
         wire.write().bytes(NoBytesStore.NO_BYTES)
-                .write().bytes(Bytes.wrapForRead("Hello" .getBytes()))
-                .write().bytes(Bytes.wrapForRead("quotable, text" .getBytes()))
+                .write().bytes(Bytes.wrapForRead("Hello".getBytes()))
+                .write().bytes(Bytes.wrapForRead("quotable, text".getBytes()))
                 .write().bytes(allBytes);
         System.out.println(bytes.toString());
         NativeBytes allBytes2 = nativeBytes();
@@ -1036,6 +1036,22 @@ public class TextWireTest {
             assertEquals("test", dobj.name);
             assertEquals(12345, dobj.value);
         }
+    }
+
+    @Test
+    public void testByteArrayValueWithRealBytesNegative() {
+        Wire wire = createWire();
+
+        final byte[] expected = {-1, -2, -3, -4, -5, -6, -7};
+        wire.writeDocument(false, wir -> wir.writeEventName(() -> "put")
+                .marshallable(w -> w.write(() -> "key").text("1")
+                        .write(() -> "value")
+                        .object(expected)));
+        System.out.println(wire);
+
+        wire.readDocument(null, wir -> wire.read(() -> "put")
+                .marshallable(w -> w.read(() -> "key").object(Object.class, "1", Assert::assertEquals)
+                        .read(() -> "value").object(byte[].class, expected, Assert::assertArrayEquals)));
     }
 
     enum BWKey implements WireKey {
