@@ -17,6 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -371,5 +372,21 @@ public class BinaryWire2Test {
             assert bytesStore != null;
             assertEquals(bytes.toDebugString(), bytesStore.toDebugString());
         }
+    }
+
+    @Test
+    public void testByteArrayValueWithRealBytesNegative() {
+        Wire wire = createWire();
+
+        final byte[] expected = {-1, -2, -3, -4, -5, -6, -7};
+        wire.writeDocument(false, wir -> wir.writeEventName(() -> "put")
+                .marshallable(w -> w.write(() -> "key").text("1")
+                        .write(() -> "value")
+                        .object(expected)));
+        System.out.println(wire);
+
+        wire.readDocument(null, wir -> wire.read(() -> "put")
+                .marshallable(w -> w.read(() -> "key").object(Object.class, "1", Assert::assertEquals)
+                        .read(() -> "value").object(Object.class, expected, (e, v) -> Assert.assertArrayEquals(e, ((NativeBytesStore) v).toByteArray()))));
     }
 }
