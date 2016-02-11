@@ -1010,7 +1010,8 @@ public class BinaryWire implements Wire, InternalWire {
         @Override
         public WireOut bytes(String type, @Nullable BytesStore fromBytes) {
             typePrefix(type);
-            bytes0(fromBytes, fromBytes.readRemaining());
+            if (fromBytes != null)
+                bytes0(fromBytes, fromBytes.readRemaining());
             return BinaryWire.this;
         }
 
