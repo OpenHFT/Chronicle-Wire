@@ -205,7 +205,10 @@ public enum WireType implements Function<Bytes, Wire> {
         String tempFilename = IOTools.tempName(filename);
         IOTools.writeFile(tempFilename, bytes.toByteArray());
         File file2 = new File(tempFilename);
-        if (!file2.renameTo(new File(filename))) {
+        File dest = new File(filename);
+        if (!file2.renameTo(dest)) {
+            if (dest.delete() && file2.renameTo(dest))
+                return;
             file2.delete();
             throw new IOException("Failed to rename " + tempFilename + " to " + filename);
         }

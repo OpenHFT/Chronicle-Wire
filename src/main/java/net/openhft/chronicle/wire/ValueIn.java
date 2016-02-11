@@ -33,8 +33,7 @@ import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.*;
 
 /**
@@ -167,6 +166,58 @@ public interface ValueIn {
 
     @NotNull
     <T> WireIn sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader);
+
+    default <T> Set<T> set(Class<T> t) {
+        return collection(LinkedHashSet::new, t);
+    }
+
+    default <T> List<T> list(Class<T> t) {
+        return collection(ArrayList::new, t);
+    }
+
+    default <T, C extends Collection<T>> C collection(Supplier<C> supplier, Class<T> t) {
+        C list = supplier.get();
+        sequence(list, (s, v) -> {
+            while (v.hasNextSequenceItem())
+                s.add(v.object(t));
+        });
+        return list;
+    }
+
+    default <O, T extends ReadMarshallable, C extends Set<T>> WireIn set(O o, Function<O, C> supplier, Function<O, T> tSupplier) {
+        return collection(o, supplier, tSupplier);
+    }
+
+    default <O, T extends ReadMarshallable, C extends List<T>> WireIn list(O o, Function<O, C> supplier, Function<O, T> tSupplier) {
+        return collection(o, supplier, tSupplier);
+    }
+
+    default <O, T extends ReadMarshallable, C extends Collection<T>> WireIn collection(O o, Function<O, C> supplier, Function<O, T> tSupplier) {
+        C list = supplier.apply(o);
+        sequence(list, (s, v) -> {
+            while (v.hasNextSequenceItem()) {
+                T t = tSupplier.apply(o);
+                v.marshallable(t);
+                s.add(t);
+            }
+        });
+        return wireIn();
+    }
+
+    default <V> Map<String, V> marshallableAsMap(Class<V> vClass) {
+        return marshallableAsMap(vClass, LinkedHashMap<String, V>::new);
+    }
+
+    default <V> Map<String, V> marshallableAsMap(Class<V> vClass, Supplier<Map<String, V>> supplier) {
+        Map<String, V> map = supplier.get();
+        marshallable(m -> {
+            StringBuilder sb = new StringBuilder();
+            while (m.hasMore()) {
+                m.readEventName(sb).object(vClass, map, (map2, v) -> map2.put(sb.toString(), v));
+            }
+        });
+        return map;
+    }
 
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
 
