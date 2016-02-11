@@ -1043,11 +1043,15 @@ public class TextWireTest {
         Wire wire = createWire();
 
         final byte[] expected = {-1, -2, -3, -4, -5, -6, -7};
-        wire.writeDocument(false, wir -> wir.writeEventName(() -> "put")
-                .marshallable(w -> w.write(() -> "key").text("1")
+        wire.writeDocument(false, wir -> wir.writeEventName(() -> "put").leaf()
+                .marshallable(w -> w.write(() -> "key")
+                        .text("1")
                         .write(() -> "value")
                         .object(expected)));
-        System.out.println(wire);
+        assertEquals("--- !!data\n" +
+                "put: { key: \"1\", " +
+                "value: !!binary //79/Pv6+Q==  " +
+                "}\n", (Wires.fromSizePrefixedBlobs(wire.bytes())));
 
         wire.readDocument(null, wir -> wire.read(() -> "put")
                 .marshallable(w -> w.read(() -> "key").object(Object.class, "1", Assert::assertEquals)

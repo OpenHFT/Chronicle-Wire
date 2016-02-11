@@ -30,9 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -233,6 +231,56 @@ public interface ValueOut {
 
     default <E extends Enum<E>> WireOut asEnum(E e) {
         return text(e == null ? null : e.name());
+    }
+
+
+    default <V> WireOut set(Set<V> coll) {
+        return set(coll, null);
+    }
+
+    default <V> WireOut set(Set<V> coll, Class<V> assumedClass) {
+        return collection(coll, assumedClass);
+    }
+
+    default <V> WireOut list(List<V> coll) {
+        return list(coll, null);
+    }
+
+    default <V> WireOut list(List<V> coll, Class<V> assumedClass) {
+        return collection(coll, assumedClass);
+    }
+
+    default <V> WireOut collection(Collection<V> coll, Class<V> assumedClass) {
+        sequence(coll, (s, out) -> {
+            for (V v : s) {
+                out.leaf();
+                object(assumedClass, v);
+            }
+        });
+        return wireOut();
+    }
+
+    default <V> void object(Class<V> assumedClass, V v) {
+        if (v instanceof WriteMarshallable)
+            if (v.getClass() == assumedClass)
+                marshallable((WriteMarshallable) v);
+            else
+                typedMarshallable((WriteMarshallable) v);
+        else
+            object(v);
+    }
+
+    default <V> WireOut marshallableAsMap(Map<String, V> map) {
+        return marshallableAsMap(map, null);
+    }
+
+    default <V> WireOut marshallableAsMap(Map<String, V> map, Class<V> vClass) {
+        marshallable(m -> {
+            for (Map.Entry<String, V> entry : map.entrySet()) {
+                m.write(entry::getKey).leaf().object(vClass, entry.getValue());
+            }
+        });
+        return wireOut();
     }
 
     @NotNull
