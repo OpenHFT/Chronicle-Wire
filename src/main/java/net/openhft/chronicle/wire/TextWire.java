@@ -782,8 +782,12 @@ public class TextWire implements Wire, InternalWire {
 
         public void elementSeparator() {
             if (indentation == 0) {
-                sep = Bytes.empty();
-                bytes.writeUnsignedByte('\n');
+                if (leaf) {
+                    sep = COMMA_SPACE;
+                } else {
+                    sep = Bytes.empty();
+                    bytes.writeUnsignedByte('\n');
+                }
 
             } else {
                 sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
@@ -874,7 +878,7 @@ public class TextWire implements Wire, InternalWire {
             prependSeparator();
             typePrefix(type);
             append(Base64.getEncoder().encodeToString(byteArray));
-            append(END_FIELD);
+            append(leaf ? SPACE : END_FIELD);
             elementSeparator();
 
             return TextWire.this;
