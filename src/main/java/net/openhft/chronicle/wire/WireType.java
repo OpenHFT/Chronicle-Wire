@@ -21,10 +21,15 @@ import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
 import net.openhft.chronicle.bytes.ref.TextLongReference;
+import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -119,7 +124,14 @@ public enum WireType implements Function<Bytes, Wire> {
         public <T> T fromString(CharSequence cs) {
             return fromHexString(cs);
         }
-    }, READ_ANY {
+    }, CSV {
+        @NotNull
+        @Override
+        public Wire apply(Bytes bytes) {
+            return new CSVWire(bytes);
+        }
+    },
+    READ_ANY {
         @Override
         public Wire apply(@NotNull Bytes bytes) {
             int code = bytes.readByte(0);
@@ -160,6 +172,56 @@ public enum WireType implements Function<Bytes, Wire> {
         bytes.appendUtf8(cs);
         Wire wire = apply(bytes);
         return wire.getValueIn().typedMarshallable();
+    }
+
+    public <T> T fromFile(String filename) throws IOException {
+        return (T) (apply(Bytes.wrapForRead(IOTools.readFile(filename))).getValueIn().typedMarshallable());
+    }
+
+    public <T> Map<String, T> fromFileAsMap(String filename, Class<T> tClass) throws IOException {
+        Map<String, T> map = new LinkedHashMap<>();
+        Wire wire = apply(Bytes.wrapForRead(IOTools.readFile(filename)));
+        StringBuilder sb = new StringBuilder();
+        while (wire.hasMore()) {
+            wire.readEventName(sb)
+                    .object(tClass, map, (m, o) -> m.put(sb.toString(), o));
+        }
+        return map;
+    }
+
+    public <T extends Marshallable> void toFileAsMap(String filename, Map<String, T> map) throws IOException {
+        toFileAsMap(filename, map, false);
+    }
+
+    public <T extends Marshallable> void toFileAsMap(String filename, Map<String, T> map, boolean compact) throws IOException {
+        Bytes bytes = getBytes();
+        Wire wire = apply(bytes);
+        for (Map.Entry<String, T> entry : map.entrySet()) {
+            ValueOut valueOut = wire.writeEventName(entry::getKey);
+            if (compact)
+                valueOut.leaf();
+            valueOut.marshallable(entry.getValue());
+        }
+        String tempFilename = IOTools.tempName(filename);
+        IOTools.writeFile(tempFilename, bytes.toByteArray());
+        File file2 = new File(tempFilename);
+        if (!file2.renameTo(new File(filename))) {
+            file2.delete();
+            throw new IOException("Failed to rename " + tempFilename + " to " + filename);
+        }
+    }
+
+    public <T> void toFile(String filename, WriteMarshallable marshallable) throws IOException {
+        Bytes bytes = getBytes();
+        Wire wire = apply(bytes);
+        wire.getValueOut().typedMarshallable(marshallable);
+        String tempFilename = IOTools.tempName(filename);
+        IOTools.writeFile(tempFilename, bytes.toByteArray());
+        File file2 = new File(tempFilename);
+        if (!file2.renameTo(new File(filename))) {
+            file2.delete();
+            throw new IOException("Failed to rename " + tempFilename + " to " + filename);
+        }
     }
 
     String asHexString(WriteMarshallable marshallable) {
