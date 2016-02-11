@@ -29,12 +29,14 @@ class MyTypes implements Marshallable {
 
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
+        wire.writeComment("Start");
         wire.write(Fields.B_FLAG).bool(b)
                 .write(Fields.S_NUM).int16(s)
                 .write(Fields.D_NUM).float64(d)
                 .write(Fields.L_NUM).int64(l)
                 .write(Fields.I_NUM).int32(i)
                 .write(Fields.TEXT).text(text);
+        wire.writeComment("End");
     }
 
     @Override
