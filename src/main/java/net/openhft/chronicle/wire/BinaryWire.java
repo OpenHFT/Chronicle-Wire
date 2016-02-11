@@ -973,7 +973,7 @@ public class BinaryWire implements Wire, InternalWire {
         @Override
         public WireOut rawBytes(byte[] value) {
             writeLength(Maths.toInt32(value.length + 1));
-            writeCode(U8_ARRAY);
+            writeCode(I64_ARRAY);
             if (value.length > 0)
                 bytes.write(value);
             return BinaryWire.this;

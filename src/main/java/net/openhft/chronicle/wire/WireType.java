@@ -134,12 +134,7 @@ public enum WireType implements Function<Bytes, Wire> {
     READ_ANY {
         @Override
         public Wire apply(@NotNull Bytes bytes) {
-            int code = bytes.readByte(0);
-            if (code >= ' ' && code < 127)
-                return TEXT.apply(bytes);
-            if (BinaryWireCode.isFieldCode(code))
-                return FIELDLESS_BINARY.apply(bytes);
-            return BINARY.apply(bytes);
+            return new ReadAnyWire(bytes);
         }
     };
 
