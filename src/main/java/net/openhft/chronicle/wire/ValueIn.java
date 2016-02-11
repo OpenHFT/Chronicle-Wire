@@ -184,21 +184,19 @@ public interface ValueIn {
         return list;
     }
 
-    default <O, T extends ReadMarshallable, C extends Set<T>> WireIn set(O o, Function<O, C> supplier, Function<O, T> tSupplier) {
-        return collection(o, supplier, tSupplier);
+    default <O, T extends ReadMarshallable, C extends Set<T>> WireIn set(O o, Function<O, T> tSupplier) {
+        return collection(o, tSupplier);
     }
 
-    default <O, T extends ReadMarshallable, C extends List<T>> WireIn list(O o, Function<O, C> supplier, Function<O, T> tSupplier) {
-        return collection(o, supplier, tSupplier);
+    default <O, T extends ReadMarshallable, C extends List<T>> WireIn list(O o, Function<O, T> tSupplier) {
+        return collection(o, tSupplier);
     }
 
-    default <O, T extends ReadMarshallable, C extends Collection<T>> WireIn collection(O o, Function<O, C> supplier, Function<O, T> tSupplier) {
-        C list = supplier.apply(o);
-        sequence(list, (s, v) -> {
+    default <O, T extends ReadMarshallable, C extends Collection<T>> WireIn collection(O o, Function<O, T> tSupplier) {
+        sequence(o, (o2, v) -> {
             while (v.hasNextSequenceItem()) {
-                T t = tSupplier.apply(o);
+                T t = tSupplier.apply(o2);
                 v.marshallable(t);
-                s.add(t);
             }
         });
         return wireIn();
