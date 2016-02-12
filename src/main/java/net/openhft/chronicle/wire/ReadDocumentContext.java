@@ -32,6 +32,8 @@ public class ReadDocumentContext implements DocumentContext {
     private long readPosition, readLimit;
 
     public ReadDocumentContext(Wire wire) {
+        if (wire == null)
+            throw new NullPointerException("null Wire");
         this.wire = (InternalWire) wire;
     }
 
@@ -74,7 +76,6 @@ public class ReadDocumentContext implements DocumentContext {
     }
 
     public void start() {
-
         final Bytes<?> bytes = wire.bytes();
         if (bytes.readRemaining() < 4) {
             present = false;
