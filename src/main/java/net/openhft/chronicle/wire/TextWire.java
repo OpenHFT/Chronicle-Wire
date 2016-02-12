@@ -63,6 +63,7 @@ public class TextWire implements Wire, InternalWire {
     static final BytesStore COMMA_SPACE = BytesStore.wrap(", ");
     static final BytesStore COMMA_NEW_LINE = BytesStore.wrap(",\n");
     static final BytesStore NEW_LINE = BytesStore.wrap("\n");
+    static final BytesStore EMPTY_AFTER_COMMENT = BytesStore.wrap("");
     static final BytesStore SPACE = BytesStore.wrap(" ");
     static final BytesStore END_FIELD = NEW_LINE;
 
@@ -755,7 +756,7 @@ public class TextWire implements Wire, InternalWire {
 
         void prependSeparator() {
             append(sep);
-            if (sep.endsWith('\n'))
+            if (sep.endsWith('\n') || sep == EMPTY_AFTER_COMMENT)
                 indent();
             sep = Bytes.empty();
         }
@@ -1290,7 +1291,7 @@ public class TextWire implements Wire, InternalWire {
             bytes.writeUnsignedByte(' ');
             append(s);
             bytes.writeUnsignedByte('\n');
-            sep = empty();
+            sep = EMPTY_AFTER_COMMENT;
         }
 
     }
