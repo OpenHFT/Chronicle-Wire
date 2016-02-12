@@ -69,4 +69,9 @@ public class WriteDocumentContext implements DocumentContext {
         return wire;
     }
 
+    @Override
+    public void start() {
+
+    }
+
 }

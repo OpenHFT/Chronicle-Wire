@@ -43,4 +43,5 @@ public interface DocumentContext extends Closeable {
      */
     Wire wire();
 
+    void start();
 }
