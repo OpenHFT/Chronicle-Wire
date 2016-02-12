@@ -57,7 +57,8 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire, InternalWire {
                 return wire;
             if (bytes.readRemaining() > 0) {
                 int firstByte = bytes.readByte(0);
-                if (firstByte < ' ' && firstByte != '\n') {
+
+                if ((firstByte & 0x80) == 0) {
                     System.out.println("TEXT_WIRE");
                     wireType = WireType.TEXT;
                 } else if (BinaryWireCode.isFieldCode(firstByte)) {
