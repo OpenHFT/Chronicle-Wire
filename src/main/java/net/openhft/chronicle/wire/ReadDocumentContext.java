@@ -30,7 +30,6 @@ public class ReadDocumentContext implements DocumentContext {
     private boolean data;
     private boolean present;
     private long readPosition, readLimit;
-    private long index;
 
     public ReadDocumentContext(Wire wire) {
         this.wire = (InternalWire) wire;
@@ -74,19 +73,10 @@ public class ReadDocumentContext implements DocumentContext {
         }
     }
 
-    @Override
-    public long index() {
-        return index;
-    }
-
     public void start() {
-        start(true, wire.bytes().readPosition());
-    }
 
-    public void start(boolean next, long index) {
-        this.index = index;
         final Bytes<?> bytes = wire.bytes();
-        if (!next || bytes.readRemaining() < 4) {
+        if (bytes.readRemaining() < 4) {
             present = false;
             readPosition = readLimit = -1;
             return;
