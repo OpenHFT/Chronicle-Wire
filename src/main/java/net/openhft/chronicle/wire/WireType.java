@@ -233,4 +233,23 @@ public enum WireType implements Function<Bytes, Wire> {
         Wire wire = apply(Bytes.fromHexString(s.toString()));
         return wire.getValueIn().typedMarshallable();
     }
+
+    public static WireType valueOf(Wire wire) {
+
+        if (wire instanceof AbstractAnyWire)
+            wire = ((AbstractAnyWire) wire).underlyingWire();
+
+        if (wire instanceof TextWire)
+            return WireType.TEXT;
+
+        if (wire instanceof BinaryWire) {
+
+            if (((BinaryWire) wire).fieldLess())
+                return FIELDLESS_BINARY;
+            else
+                return WireType.BINARY;
+        }
+
+        throw new IllegalStateException("unknown type");
+    }
 }

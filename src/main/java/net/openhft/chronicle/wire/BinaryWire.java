@@ -71,6 +71,11 @@ public class BinaryWire implements Wire, InternalWire {
         this(bytes, false, false, false, Integer.MAX_VALUE, "binary");
     }
 
+
+    public boolean fieldLess() {
+        return fieldLess;
+    }
+
     public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression) {
         this.numericFields = numericFields;
         this.fieldLess = fieldLess;
