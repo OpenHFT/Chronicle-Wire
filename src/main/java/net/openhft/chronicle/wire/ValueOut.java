@@ -215,6 +215,11 @@ public interface ValueOut {
     @NotNull
     ValueOut leaf();
 
+    default ValueOut leaf(boolean leaf) {
+        return leaf ? leaf() : this;
+    }
+
+
     @NotNull
     default WireOut typedMarshallable(@Nullable WriteMarshallable object) {
         if (object == null)
@@ -275,9 +280,13 @@ public interface ValueOut {
     }
 
     default <V> WireOut marshallableAsMap(Map<String, V> map, Class<V> vClass) {
+        return marshallableAsMap(map, vClass, true);
+    }
+
+    default <V> WireOut marshallableAsMap(Map<String, V> map, Class<V> vClass, boolean leaf) {
         marshallable(m -> {
             for (Map.Entry<String, V> entry : map.entrySet()) {
-                m.writeEventName(entry::getKey).leaf().object(vClass, entry.getValue());
+                m.writeEventName(entry::getKey).leaf(leaf).object(vClass, entry.getValue());
             }
         });
         return wireOut();

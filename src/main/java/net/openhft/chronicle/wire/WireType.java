@@ -147,6 +147,25 @@ public enum WireType implements Function<Bytes, Wire> {
         return bytes;
     }
 
+    public static WireType valueOf(Wire wire) {
+
+        if (wire instanceof AbstractAnyWire)
+            wire = ((AbstractAnyWire) wire).underlyingWire();
+
+        if (wire instanceof TextWire)
+            return WireType.TEXT;
+
+        if (wire instanceof BinaryWire) {
+
+            if (((BinaryWire) wire).fieldLess())
+                return FIELDLESS_BINARY;
+            else
+                return WireType.BINARY;
+        }
+
+        throw new IllegalStateException("unknown type");
+    }
+
     public Supplier<LongValue> newLongReference() {
         return BinaryLongReference::new;
     }
@@ -193,9 +212,7 @@ public enum WireType implements Function<Bytes, Wire> {
         Wire wire = apply(bytes);
         for (Map.Entry<String, T> entry : map.entrySet()) {
             ValueOut valueOut = wire.writeEventName(entry::getKey);
-            if (compact)
-                valueOut.leaf();
-            valueOut.marshallable(entry.getValue());
+            valueOut.leaf(compact).marshallable(entry.getValue());
         }
         String tempFilename = IOTools.tempName(filename);
         IOTools.writeFile(tempFilename, bytes.toByteArray());
@@ -232,24 +249,5 @@ public enum WireType implements Function<Bytes, Wire> {
     <T> T fromHexString(CharSequence s) {
         Wire wire = apply(Bytes.fromHexString(s.toString()));
         return wire.getValueIn().typedMarshallable();
-    }
-
-    public static WireType valueOf(Wire wire) {
-
-        if (wire instanceof AbstractAnyWire)
-            wire = ((AbstractAnyWire) wire).underlyingWire();
-
-        if (wire instanceof TextWire)
-            return WireType.TEXT;
-
-        if (wire instanceof BinaryWire) {
-
-            if (((BinaryWire) wire).fieldLess())
-                return FIELDLESS_BINARY;
-            else
-                return WireType.BINARY;
-        }
-
-        throw new IllegalStateException("unknown type");
     }
 }

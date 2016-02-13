@@ -9,7 +9,6 @@ import net.openhft.chronicle.wire.*;
 public class WireProperty extends WireModel implements Marshallable {
 
     private String reference;
-    ;
     private String path;
     private String name;
     private String value;
