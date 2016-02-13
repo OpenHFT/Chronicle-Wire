@@ -7,7 +7,8 @@ package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.wire.Marshallable;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.wire.WireIn;
+import net.openhft.chronicle.wire.WireOut;
 
 /**
  *
@@ -15,9 +16,7 @@ import net.openhft.chronicle.wire.*;
  */
 public class WireModel implements Marshallable {
 
-    enum Values implements WireKey {
-        ID, REVISION, KEY
-    };
+    ;
 
     private long id;
     private int revision;
@@ -34,17 +33,17 @@ public class WireModel implements Marshallable {
 
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
-        this.id = wire.read(WireModel.Values.ID).int64();
-        this.revision = wire.read(WireModel.Values.REVISION).int32();
-        this.key = wire.read(WireModel.Values.KEY).text();
+        this.id = wire.read(WireModelValues.id).int64();
+        this.revision = wire.read(WireModelValues.revision).int32();
+        this.key = wire.read(WireModelValues.key).text();
     }
 
     @Override
     public void writeMarshallable(WireOut wire) {
         wire
-                .write(WireModel.Values.ID).int64(id)
-                .write(WireModel.Values.REVISION).int32(revision)
-                .write(WireModel.Values.KEY).text(key);
+                .write(WireModelValues.id).int64(id)
+                .write(WireModelValues.revision).int32(revision)
+                .write(WireModelValues.key).text(key);
     }
 
     public long getId() {

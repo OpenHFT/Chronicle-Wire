@@ -277,7 +277,7 @@ public interface ValueOut {
     default <V> WireOut marshallableAsMap(Map<String, V> map, Class<V> vClass) {
         marshallable(m -> {
             for (Map.Entry<String, V> entry : map.entrySet()) {
-                m.write(entry::getKey).leaf().object(vClass, entry.getValue());
+                m.writeEventName(entry::getKey).leaf().object(vClass, entry.getValue());
             }
         });
         return wireOut();

@@ -1,9 +1,12 @@
 package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.Wires;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -11,19 +14,20 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
-import net.openhft.chronicle.wire.Wires;
 
-import org.junit.Before;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by peter.lawrey on 01/02/2016.
  */
 @RunWith(value = Parameterized.class)
 public class WireCollectionTest {
-
-    private WireCollection collection;// = new WireModel();
+    static {
+        ClassAliasPool.CLASS_ALIASES.addAlias(WireProperty.class);
+    }
 
     private final Function<Bytes, Wire> wireType;
+    private WireCollection collection;// = new WireModel();
 
     public WireCollectionTest(Function<Bytes, Wire> wireType) {
         this.wireType = wireType;
@@ -56,6 +60,7 @@ public class WireCollectionTest {
         WireCollection results = new WireCollection();
         wire.readDocument(results, null);
 
+        assertEquals(collection.toString(), results.toString());
         WireUtils.compareWireCollection(collection, results);
     }
 }

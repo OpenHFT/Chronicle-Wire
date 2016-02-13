@@ -12,18 +12,14 @@ import net.openhft.chronicle.wire.WireOut;
  */
 public class WireProperty extends WireModel implements Marshallable {
 
-    enum Values implements WireKey {
-        REFERENCE, PATH, NAME, VALUE
-    };
-
     private String reference;
+    ;
     private String path;
     private String name;
     private String value;
-
     public WireProperty() {
     }
-    
+
     public WireProperty(String reference, String path, String name, String value, long id, int revision, String key) {
         super(id, revision, key);
         this.reference = reference;
@@ -35,20 +31,20 @@ public class WireProperty extends WireModel implements Marshallable {
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
         super.readMarshallable(wire);
-        this.reference = wire.read(WireProperty.Values.REFERENCE).text();
-        this.path = wire.read(WireProperty.Values.PATH).text();
-        this.name = wire.read(WireProperty.Values.NAME).text();
-        this.value = wire.read(WireProperty.Values.VALUE).text();
+        this.reference = wire.read(WireModelValues.reference).text();
+        this.path = wire.read(WireModelValues.path).text();
+        this.name = wire.read(WireModelValues.name).text();
+        this.value = wire.read(WireModelValues.value).text();
     }
 
     @Override
     public void writeMarshallable(WireOut wire) {
         super.writeMarshallable(wire);
         wire
-                .write(WireProperty.Values.REFERENCE).text(reference)
-                .write(WireProperty.Values.PATH).text(path)
-                .write(WireProperty.Values.NAME).text(name)
-                .write(WireProperty.Values.VALUE).text(value);
+                .write(WireModelValues.reference).text(reference)
+                .write(WireModelValues.path).text(path)
+                .write(WireModelValues.name).text(name)
+                .write(WireModelValues.value).text(value);
     }
 
     public String getReference() {
@@ -81,6 +77,9 @@ public class WireProperty extends WireModel implements Marshallable {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    enum Values implements WireKey {
     }
 
 }
