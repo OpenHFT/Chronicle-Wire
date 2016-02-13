@@ -1,10 +1,7 @@
 package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.core.annotation.NotNull;
-import net.openhft.chronicle.wire.Marshallable;
-import net.openhft.chronicle.wire.WireIn;
-import net.openhft.chronicle.wire.WireOut;
-import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,25 +31,25 @@ public class WireCollection extends WireModel implements Marshallable {
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
         super.readMarshallable(wire);
-        this.reference = wire.read(WireModelValues.reference).text();
-        this.path = wire.read(WireModelValues.path).text();
-        this.name = wire.read(WireModelValues.name).text();
-        this.properties = wire.read(WireModelValues.properties).marshallableAsMap(WireProperty.class);
-        this.collections = wire.read(WireModelValues.collections).marshallableAsMap(WireCollection.class);
+        this.reference = wire.read(ModelKeys.reference).text();
+        this.path = wire.read(ModelKeys.path).text();
+        this.name = wire.read(ModelKeys.name).text();
+        this.properties = wire.read(ModelKeys.properties).marshallableAsMap(WireProperty.class);
+        this.collections = wire.read(ModelKeys.collections).marshallableAsMap(WireCollection.class);
     }
 
     @Override
     public void writeMarshallable(WireOut wire) {
         super.writeMarshallable(wire);
         wire
-                .write(WireModelValues.reference).text(reference)
-                .write(WireModelValues.path).text(path)
-                .write(WireModelValues.name).text(name);
+                .write(ModelKeys.reference).text(reference)
+                .write(ModelKeys.path).text(path)
+                .write(ModelKeys.name).text(name);
         if (properties.size() > 0) {
-            wire.write(WireModelValues.properties).marshallableAsMap(properties);
+            wire.write(ModelKeys.properties).marshallableAsMap(properties);
         }
         if (collections.size() > 0) {
-            wire.write(WireModelValues.collections).marshallableAsMap(collections);
+            wire.write(ModelKeys.collections).marshallableAsMap(collections);
         }
     }
 
@@ -106,6 +103,17 @@ public class WireCollection extends WireModel implements Marshallable {
 
     public void addCollection(WireCollection collection) {
         this.collections.put(collection.getReference(), collection);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashWire.hash32(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof WriteMarshallable &&
+                obj.toString().equals(toString());
     }
 
     @Override

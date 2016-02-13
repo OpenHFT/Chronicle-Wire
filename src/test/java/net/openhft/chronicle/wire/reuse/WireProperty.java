@@ -1,13 +1,9 @@
 package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.core.annotation.NotNull;
-import net.openhft.chronicle.wire.Marshallable;
-import net.openhft.chronicle.wire.WireIn;
-import net.openhft.chronicle.wire.WireKey;
-import net.openhft.chronicle.wire.WireOut;
+import net.openhft.chronicle.wire.*;
 
 /**
- *
  * @author Gadi Eichhorn
  */
 public class WireProperty extends WireModel implements Marshallable {
@@ -17,6 +13,7 @@ public class WireProperty extends WireModel implements Marshallable {
     private String path;
     private String name;
     private String value;
+
     public WireProperty() {
     }
 
@@ -31,20 +28,19 @@ public class WireProperty extends WireModel implements Marshallable {
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
         super.readMarshallable(wire);
-        this.reference = wire.read(WireModelValues.reference).text();
-        this.path = wire.read(WireModelValues.path).text();
-        this.name = wire.read(WireModelValues.name).text();
-        this.value = wire.read(WireModelValues.value).text();
+        this.reference = wire.read(ModelKeys.reference).text();
+        this.path = wire.read(ModelKeys.path).text();
+        this.name = wire.read(ModelKeys.name).text();
+        this.value = wire.read(ModelKeys.value).text();
     }
 
     @Override
     public void writeMarshallable(WireOut wire) {
         super.writeMarshallable(wire);
-        wire
-                .write(WireModelValues.reference).text(reference)
-                .write(WireModelValues.path).text(path)
-                .write(WireModelValues.name).text(name)
-                .write(WireModelValues.value).text(value);
+        wire.write(ModelKeys.reference).text(reference)
+                .write(ModelKeys.path).text(path)
+                .write(ModelKeys.name).text(name)
+                .write(ModelKeys.value).text(value);
     }
 
     public String getReference() {
@@ -79,7 +75,19 @@ public class WireProperty extends WireModel implements Marshallable {
         this.value = value;
     }
 
-    enum Values implements WireKey {
+    @Override
+    public int hashCode() {
+        return HashWire.hash32(this);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof WriteMarshallable &&
+                obj.toString().equals(toString());
+    }
+
+    @Override
+    public String toString() {
+        return WireType.TEXT.asString(this);
+    }
 }

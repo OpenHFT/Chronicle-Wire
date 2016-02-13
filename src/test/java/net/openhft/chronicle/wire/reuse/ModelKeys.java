@@ -5,7 +5,7 @@ import net.openhft.chronicle.wire.WireKey;
 /**
  * Created by peter_2 on 13/02/2016.
  */
-enum WireModelValues implements WireKey {
+enum ModelKeys implements WireKey {
     id, revision, properties, collections, reference, path, name, value, key;
 
     @Override

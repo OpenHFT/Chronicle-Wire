@@ -6,18 +6,12 @@
 package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.core.annotation.NotNull;
-import net.openhft.chronicle.wire.Marshallable;
-import net.openhft.chronicle.wire.WireIn;
-import net.openhft.chronicle.wire.WireOut;
+import net.openhft.chronicle.wire.*;
 
 /**
- *
  * @author gadei
  */
 public class WireModel implements Marshallable {
-
-    ;
-
     private long id;
     private int revision;
     private String key;
@@ -33,17 +27,16 @@ public class WireModel implements Marshallable {
 
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
-        this.id = wire.read(WireModelValues.id).int64();
-        this.revision = wire.read(WireModelValues.revision).int32();
-        this.key = wire.read(WireModelValues.key).text();
+        this.id = wire.read(ModelKeys.id).int64();
+        this.revision = wire.read(ModelKeys.revision).int32();
+        this.key = wire.read(ModelKeys.key).text();
     }
 
     @Override
     public void writeMarshallable(WireOut wire) {
-        wire
-                .write(WireModelValues.id).int64(id)
-                .write(WireModelValues.revision).int32(revision)
-                .write(WireModelValues.key).text(key);
+        wire.write(ModelKeys.id).int64(id)
+                .write(ModelKeys.revision).int32(revision)
+                .write(ModelKeys.key).text(key);
     }
 
     public long getId() {
@@ -70,4 +63,19 @@ public class WireModel implements Marshallable {
         this.key = key;
     }
 
+    @Override
+    public int hashCode() {
+        return HashWire.hash32(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof WriteMarshallable &&
+                obj.toString().equals(toString());
+    }
+
+    @Override
+    public String toString() {
+        return WireType.TEXT.asString(this);
+    }
 }
