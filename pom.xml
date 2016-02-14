@@ -163,9 +163,12 @@
                         <Bundle-Name>OpenHFT :: ${project.artifactId}</Bundle-Name>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Export-Package>
-                            net.openhft.chronicle.wire.*,
-                            net.openhft.chronicle.wire.util.*
+                            net.openhft.chronicle.wire.*;-noimport:=true
                         </Export-Package>
+                        <Import-Package>
+                            org.xerial.snappy;resolution:=optional,
+                            *
+                        </Import-Package>
                     </instructions>
                 </configuration>
                 <executions>
