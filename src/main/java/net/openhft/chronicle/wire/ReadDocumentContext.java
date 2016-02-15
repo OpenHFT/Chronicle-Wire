@@ -73,7 +73,6 @@ public class ReadDocumentContext implements DocumentContext {
         }
     }
 
-    @Override
     public void start() {
         final Bytes<?> bytes = wire.bytes();
         if (bytes.readRemaining() < 4) {
