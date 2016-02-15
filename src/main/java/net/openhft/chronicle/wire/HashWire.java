@@ -3,6 +3,8 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -28,10 +30,26 @@ public class HashWire implements WireOut {
     private final ValueOut valueOut = new HashValueOut();
     long hash = 0;
 
+
+    @Override
+    public void classLookup(ClassLookup classLookup) {
+    }
+
+    @Override
+    public ClassLookup classLookup() {
+        return ClassAliasPool.CLASS_ALIASES;
+    }
+
+
     public static long hash64(WriteMarshallable value) {
         HashWire hashWire = new HashWire();
         hashWire.getValueOut().marshallable(value);
         return hashWire.hash64();
+    }
+
+    @Override
+    public ClassLookup classLookup() {
+        return ClassAliasPool.CLASS_ALIASES;
     }
 
     public static int hash32(WriteMarshallable value) {

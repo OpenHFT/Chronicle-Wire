@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -26,6 +27,18 @@ import org.jetbrains.annotations.NotNull;
  * Created by peter on 30/06/15.
  */
 public interface WireCommon {
+
+    /**
+     * Define how classes should be looked up.
+     *
+     * @param classLookup to use
+     */
+    void classLookup(ClassLookup classLookup);
+
+    /**
+     * @return the current implementation for looking up classes.
+     */
+    ClassLookup classLookup();
 
     /**
      * @return the underlying Bytes

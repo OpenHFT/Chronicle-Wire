@@ -1,6 +1,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.pool.ClassLookup;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
@@ -13,7 +15,6 @@ import java.util.function.Supplier;
  * @author Rob Austin.
  */
 public class ReadAnyWire extends AbstractAnyWire implements Wire, InternalWire {
-
     private final Bytes bytes;
 
     public ReadAnyWire(Bytes bytes) {
@@ -21,13 +22,21 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire, InternalWire {
         this.bytes = bytes;
     }
 
+    @Override
+    public void classLookup(ClassLookup classLookup) {
+        this.wireAcquisition.classLookup(classLookup);
+    }
+
+    @Override
+    public ClassLookup classLookup() {
+        return wireAcquisition.classLookup();
+    }
 
     @Override
     public void clear() {
         checkWire();
         bytes.clear();
     }
-
 
     @NotNull
     @Override
@@ -36,16 +45,27 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire, InternalWire {
         return bytes;
     }
 
-    private static class ReadAnyWireAcquisition implements WireAcquisition {
+    static class ReadAnyWireAcquisition implements WireAcquisition {
         private final Bytes bytes;
-
         WireType wireType;
+        InternalWire wire = null;
+        private ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
 
         public ReadAnyWireAcquisition(Bytes bytes) {
             this.bytes = bytes;
         }
 
-        InternalWire wire = null;
+        @Override
+        public void classLookup(ClassLookup classLookup) {
+            this.classLookup = classLookup;
+            if (wire != null)
+                wire.classLookup(classLookup);
+        }
+
+        @Override
+        public ClassLookup classLookup() {
+            return classLookup;
+        }
 
         @Override
         public Supplier<WireType> underlyingType() {
@@ -69,7 +89,9 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire, InternalWire {
                     wireType = WireType.BINARY;
                 }
 
-                return wire = (InternalWire) wireType.apply(bytes);
+                Wire wire = wireType.apply(bytes);
+                wire.classLookup(classLookup);
+                return this.wire = (InternalWire) wire;
             }
 
             return null;

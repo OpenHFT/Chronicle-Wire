@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -16,24 +17,14 @@ import java.util.function.Supplier;
  */
 public abstract class AbstractAnyWire implements Wire, InternalWire {
 
-    public Wire underlyingWire() {
-        return wireAcquisition.acquireWire();
-    }
-
-    interface WireAcquisition {
-
-        /**
-         * @return the type of wire for example Text or Binary
-         */
-        Supplier<WireType> underlyingType();
-
-        InternalWire acquireWire();
-    }
-
-    private WireAcquisition wireAcquisition;
+    protected final WireAcquisition wireAcquisition;
 
     public AbstractAnyWire(@NotNull WireAcquisition wa) {
         this.wireAcquisition = wa;
+    }
+
+    public Wire underlyingWire() {
+        return wireAcquisition.acquireWire();
     }
 
     public Supplier<WireType> underlyingType() {
@@ -41,13 +32,13 @@ public abstract class AbstractAnyWire implements Wire, InternalWire {
     }
 
     @Override
-    public void setReady(boolean ready) {
-        wireAcquisition.acquireWire().setReady(ready);
+    public boolean isReady() {
+        return wireAcquisition.acquireWire().isReady();
     }
 
     @Override
-    public boolean isReady() {
-        return wireAcquisition.acquireWire().isReady();
+    public void setReady(boolean ready) {
+        wireAcquisition.acquireWire().setReady(ready);
     }
 
     @Override
@@ -85,7 +76,6 @@ public abstract class AbstractAnyWire implements Wire, InternalWire {
         return wireAcquisition.acquireWire().readComment(sb);
     }
 
-
     @NotNull
     @Override
     public IntValue newIntReference() {
@@ -103,7 +93,6 @@ public abstract class AbstractAnyWire implements Wire, InternalWire {
     public LongArrayValues newLongArrayReference() {
         return wireAcquisition.acquireWire().newLongArrayReference();
     }
-
 
     void checkWire() {
         wireAcquisition.acquireWire();
@@ -162,5 +151,19 @@ public abstract class AbstractAnyWire implements Wire, InternalWire {
     @Override
     public DocumentContext writingDocument(boolean metaData) {
         return wireAcquisition.acquireWire().writingDocument(metaData);
+    }
+
+    interface WireAcquisition {
+
+        /**
+         * @return the type of wire for example Text or Binary
+         */
+        Supplier<WireType> underlyingType();
+
+        InternalWire acquireWire();
+
+        void classLookup(ClassLookup classLookup);
+
+        ClassLookup classLookup();
     }
 }

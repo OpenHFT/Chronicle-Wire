@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -47,6 +48,7 @@ public class RawWire implements Wire, InternalWire {
     private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
     private final ReadDocumentContext readContext = new ReadDocumentContext(this);
     boolean use8bit;
+    private ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
     @Nullable
     private
     StringBuilder lastSB;
@@ -59,6 +61,16 @@ public class RawWire implements Wire, InternalWire {
     public RawWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
         this.use8bit = use8bit;
+    }
+
+    @Override
+    public void classLookup(ClassLookup classLookup) {
+        this.classLookup = classLookup;
+    }
+
+    @Override
+    public ClassLookup classLookup() {
+        return classLookup;
     }
 
     @Override
@@ -851,7 +863,7 @@ public class RawWire implements Wire, InternalWire {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             bytes.readUtf8(sb);
             try {
-                return ClassAliasPool.CLASS_ALIASES.forName(sb);
+                return classLookup.forName(sb);
             } catch (ClassNotFoundException e) {
                 throw new IORuntimeException(e);
             }
