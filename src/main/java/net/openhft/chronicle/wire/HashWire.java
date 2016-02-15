@@ -30,6 +30,17 @@ public class HashWire implements WireOut {
     private final ValueOut valueOut = new HashValueOut();
     long hash = 0;
 
+    public static long hash64(WriteMarshallable value) {
+        HashWire hashWire = new HashWire();
+        hashWire.getValueOut().marshallable(value);
+        return hashWire.hash64();
+    }
+
+    public static int hash32(WriteMarshallable value) {
+        HashWire hashWire = new HashWire();
+        hashWire.getValueOut().marshallable(value);
+        return hashWire.hash32();
+    }
 
     @Override
     public void classLookup(ClassLookup classLookup) {
@@ -38,24 +49,6 @@ public class HashWire implements WireOut {
     @Override
     public ClassLookup classLookup() {
         return ClassAliasPool.CLASS_ALIASES;
-    }
-
-
-    public static long hash64(WriteMarshallable value) {
-        HashWire hashWire = new HashWire();
-        hashWire.getValueOut().marshallable(value);
-        return hashWire.hash64();
-    }
-
-    @Override
-    public ClassLookup classLookup() {
-        return ClassAliasPool.CLASS_ALIASES;
-    }
-
-    public static int hash32(WriteMarshallable value) {
-        HashWire hashWire = new HashWire();
-        hashWire.getValueOut().marshallable(value);
-        return hashWire.hash32();
     }
 
     @Override
