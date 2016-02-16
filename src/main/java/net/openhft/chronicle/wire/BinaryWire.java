@@ -24,6 +24,7 @@ import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -66,15 +67,12 @@ public class BinaryWire implements Wire, InternalWire {
     DefaultValueIn defaultValueIn;
     private boolean ready;
     private String compression;
+    private ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
 
     public BinaryWire(Bytes bytes) {
         this(bytes, false, false, false, Integer.MAX_VALUE, "binary");
     }
 
-
-    public boolean fieldLess() {
-        return fieldLess;
-    }
 
     public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression) {
         this.numericFields = numericFields;
@@ -83,6 +81,10 @@ public class BinaryWire implements Wire, InternalWire {
         this.compressedSize = compressedSize;
         valueOut = fixed ? fixedValueOut : new BinaryValueOut();
         this.compression = compression;
+    }
+
+    public boolean fieldLess() {
+        return fieldLess;
     }
 
     @Override
@@ -311,6 +313,16 @@ public class BinaryWire implements Wire, InternalWire {
     @Override
     public void clear() {
         bytes.clear();
+    }
+
+    @Override
+    public void classLookup(ClassLookup classLookup) {
+        this.classLookup = classLookup;
+    }
+
+    @Override
+    public ClassLookup classLookup() {
+        return classLookup;
     }
 
     @NotNull
@@ -1196,7 +1208,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public WireOut typeLiteral(@NotNull Class type) {
-            writeCode(TYPE_LITERAL).writeUtf8(ClassAliasPool.CLASS_ALIASES.nameFor(type));
+            writeCode(TYPE_LITERAL).writeUtf8(classLookup().nameFor(type));
             return BinaryWire.this;
         }
 
@@ -2179,7 +2191,7 @@ public class BinaryWire implements Wire, InternalWire {
                         // default constructor
                         final Class clazz;
                         try {
-                            clazz = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                            clazz = classLookup().forName(sb);
                         } catch (ClassNotFoundException e) {
                             throw new IORuntimeException(e);
                         }
@@ -2222,7 +2234,7 @@ public class BinaryWire implements Wire, InternalWire {
                 cantRead(code);
             }
             try {
-                return ClassAliasPool.CLASS_ALIASES.forName(sb);
+                return classLookup().forName(sb);
             } catch (ClassNotFoundException e) {
                 throw new IORuntimeException(e);
             }
@@ -2268,7 +2280,7 @@ public class BinaryWire implements Wire, InternalWire {
             if (code == TYPE_LITERAL) {
                 bytes.readUtf8(sb);
                 try {
-                    return ClassAliasPool.CLASS_ALIASES.forName(sb);
+                    return classLookup().forName(sb);
                 } catch (ClassNotFoundException e) {
                     throw new IORuntimeException(e);
                 }
@@ -2550,7 +2562,7 @@ public class BinaryWire implements Wire, InternalWire {
                             bytes.readUtf8(sb);
                             final Class clazz2;
                             try {
-                                clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                                clazz2 = classLookup().forName(sb);
                             } catch (ClassNotFoundException e) {
                                 throw new IORuntimeException(e);
                             }
@@ -2601,7 +2613,7 @@ public class BinaryWire implements Wire, InternalWire {
                             bytes.readUtf8(sb);
                             final Class clazz2;
                             try {
-                                clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                                clazz2 = classLookup().forName(sb);
                             } catch (ClassNotFoundException e) {
                                 throw new IORuntimeException(e);
                             }

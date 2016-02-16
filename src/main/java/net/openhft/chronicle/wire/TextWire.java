@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -84,6 +85,7 @@ public class TextWire implements Wire, InternalWire {
     protected long lineStart = 0;
     DefaultValueIn defaultValueIn;
     private boolean ready;
+    private ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
 
     public TextWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
@@ -157,6 +159,17 @@ public class TextWire implements Wire, InternalWire {
             throw new IllegalStateException("Length changed from " + length + " to " + sb.length() + " for " + sb);
         AppendableUtil.setLength(sb, end);
     }
+
+    @Override
+    public void classLookup(ClassLookup classLookup) {
+        this.classLookup = classLookup;
+    }
+
+    @Override
+    public ClassLookup classLookup() {
+        return classLookup;
+    }
+
 
     @Override
     public DocumentContext writingDocument(boolean metaData) {
@@ -1927,7 +1940,7 @@ public class TextWire implements Wire, InternalWire {
                 sb.setLength(0);
                 parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
                 try {
-                    return ClassAliasPool.CLASS_ALIASES.forName(sb);
+                    return classLookup().forName(sb);
                 } catch (ClassNotFoundException e) {
                     throw new IORuntimeException(e);
                 }
@@ -1972,7 +1985,7 @@ public class TextWire implements Wire, InternalWire {
             StringBuilder sb = acquireStringBuilder();
             parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             try {
-                return ClassAliasPool.CLASS_ALIASES.forName(sb);
+                return classLookup().forName(sb);
             } catch (ClassNotFoundException e) {
                 throw new IORuntimeException(e);
             }
@@ -2086,7 +2099,7 @@ public class TextWire implements Wire, InternalWire {
 
                 // its possible that the object that you are allocating may not have a
                 // default constructor
-                final Class clazz = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                final Class clazz = classLookup().forName(sb);
 
                 if (ReadMarshallable.class.isAssignableFrom(clazz)) {
 
@@ -2483,7 +2496,7 @@ public class TextWire implements Wire, InternalWire {
             parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             final Class clazz2;
             try {
-                clazz2 = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                clazz2 = classLookup().forName(sb);
             } catch (ClassNotFoundException e) {
                 throw new IORuntimeException(e);
             }

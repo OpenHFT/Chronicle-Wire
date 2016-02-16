@@ -1,6 +1,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.pool.ClassLookup;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
@@ -25,6 +27,16 @@ public class DeferredTypeWire extends AbstractAnyWire implements Wire, InternalW
     }
 
     @Override
+    public void classLookup(ClassLookup classLookup) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ClassLookup classLookup() {
+        return ClassAliasPool.CLASS_ALIASES;
+    }
+
+    @Override
     public void clear() {
         checkWire();
         bytes.clear();
@@ -37,7 +49,7 @@ public class DeferredTypeWire extends AbstractAnyWire implements Wire, InternalW
         return bytes;
     }
 
-    private static class DeferredTypeWireAcquisition implements WireAcquisition {
+    static class DeferredTypeWireAcquisition implements WireAcquisition {
         private final Bytes bytes;
         private final Supplier<WireType> wireTypeSupplier;
         private InternalWire wire = null;
@@ -61,6 +73,16 @@ public class DeferredTypeWire extends AbstractAnyWire implements Wire, InternalW
                 throw new IllegalStateException("unknown type");
             return (InternalWire) wireType.apply(bytes);
 
+        }
+
+        @Override
+        public void classLookup(ClassLookup classLookup) {
+
+        }
+
+        @Override
+        public ClassLookup classLookup() {
+            return null;
         }
 
         public Bytes bytes() {
