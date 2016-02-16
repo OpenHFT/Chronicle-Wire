@@ -321,6 +321,11 @@ public interface ValueIn {
     }
 
     @Nullable
+    default Object object() {
+        return object(charSequenceThreadLocal.get(), Object.class);
+    }
+
+    @Nullable
     <E> E object(@Nullable E using, @NotNull Class<E> clazz);
 
     @Nullable
