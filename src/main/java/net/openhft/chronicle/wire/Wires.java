@@ -161,4 +161,8 @@ public enum Wires {
         bytes.clear();
         return bytes;
     }
+
+    public static String fromSizePrefixedBlobs(Bytes<?> bytes, long position, long length) {
+        return WireInternal.fromSizePrefixedBlobs(bytes, position, length);
+    }
 }

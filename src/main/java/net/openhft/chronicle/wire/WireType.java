@@ -37,6 +37,12 @@ import java.util.function.Supplier;
  * A selection of prebuilt wire types.
  */
 public enum WireType implements Function<Bytes, Wire> {
+    NOT_SET {
+        @Override
+        public Wire apply(Bytes bytes) {
+            throw new UnsupportedOperationException();
+        }
+    },
     TEXT {
         @NotNull
         @Override
