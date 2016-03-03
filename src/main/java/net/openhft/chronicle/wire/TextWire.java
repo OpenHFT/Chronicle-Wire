@@ -1968,7 +1968,7 @@ public class TextWire implements Wire, InternalWire {
             int code = readCode();
             if (!peekStringIgnoreCase("type "))
                 throw new UnsupportedOperationException(stringForCode(code));
-            bytes.readSkip("type " .length());
+            bytes.readSkip("type ".length());
             StringBuilder sb = acquireStringBuilder();
             parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             classNameConsumer.accept(t, sb);
@@ -1981,7 +1981,7 @@ public class TextWire implements Wire, InternalWire {
             int code = readCode();
             if (!peekStringIgnoreCase("type "))
                 throw new UnsupportedOperationException(stringForCode(code));
-            bytes.readSkip("type " .length());
+            bytes.readSkip("type ".length());
             StringBuilder sb = acquireStringBuilder();
             parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             try {
@@ -2117,6 +2117,8 @@ public class TextWire implements Wire, InternalWire {
                     throw new ClassCastException("Cannot convert " + sb + " to ReadMarshallable.");
                 }
             } catch (Exception e) {
+
+                e.printStackTrace();
                 throw new IORuntimeException(e);
             }
         }
@@ -2270,7 +2272,7 @@ public class TextWire implements Wire, InternalWire {
             consumePadding();
 
             if (peekStringIgnoreCase("!!null \"\"")) {
-                bytes.readSkip("!!null \"\"" .length());
+                bytes.readSkip("!!null \"\"".length());
                 // discard the text after it.
                 //  text(acquireStringBuilder());
                 return true;

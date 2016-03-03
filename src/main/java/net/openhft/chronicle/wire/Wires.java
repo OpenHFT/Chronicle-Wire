@@ -50,6 +50,21 @@ public enum Wires {
         return WireInternal.fromSizePrefixedBlobs(bytes, position, bytes.readRemaining());
     }
 
+    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position) {
+        final long limit = bytes.readLimit();
+        if (position > limit)
+            return "";
+        return WireInternal.fromSizePrefixedBlobs(bytes, position, limit - position);
+    }
+
+
+    public static String fromSizePrefixedBlobs(@NotNull Wire wire) {
+        final Bytes<?> bytes = wire.bytes();
+        long position = bytes.readPosition();
+        return WireInternal.fromSizePrefixedBlobs(bytes, position, bytes.readRemaining());
+    }
+
+
     public static StringBuilder acquireStringBuilder() {
         return SBP.acquireStringBuilder();
     }
