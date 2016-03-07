@@ -68,8 +68,9 @@ public class ReadDocumentContext implements DocumentContext {
     public void close() {
         if (readLimit > 0) {
             final Bytes<?> bytes = wire.bytes();
-            bytes.readPosition(readPosition);
             bytes.readLimit(readLimit);
+            bytes.readPosition(readPosition);
+
         }
     }
 

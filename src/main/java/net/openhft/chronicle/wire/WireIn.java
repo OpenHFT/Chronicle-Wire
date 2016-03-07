@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,14 +39,19 @@ public interface WireIn extends WireCommon {
      */
     @NotNull
     ValueIn read(@NotNull WireKey key);
-
     /**
      * Read a field, or string which is always written, even for formats which might drop the field
      * such as RAW.
      */
     @NotNull
     default ValueIn readEventName(@NotNull StringBuilder name) {
-        return read(name);
+
+        try {
+            return read(name);
+        } catch (Exception e) {
+            throw new IORuntimeException("failed to parse bytes=" + bytes().toDebugString(128), e);
+        }
+
     }
 
     /**

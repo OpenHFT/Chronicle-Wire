@@ -2117,8 +2117,6 @@ public class TextWire implements Wire, InternalWire {
                     throw new ClassCastException("Cannot convert " + sb + " to ReadMarshallable.");
                 }
             } catch (Exception e) {
-
-                e.printStackTrace();
                 throw new IORuntimeException(e);
             }
         }
