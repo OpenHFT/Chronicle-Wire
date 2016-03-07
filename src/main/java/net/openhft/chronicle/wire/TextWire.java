@@ -1541,6 +1541,12 @@ public class TextWire implements Wire, InternalWire {
             if (peekCode() == '!') {
                 bytes.readSkip(1);
                 parseWord(sb);
+
+                if ("byte[]".contentEquals(sb)) {
+                    bytes.readSkip(1);
+                    parseWord(sb);
+                }
+
                 byte[] bytes = Compression.uncompress(sb, this, t -> {
                     StringBuilder sb0 = acquireStringBuilder();
                     AppendableUtil.setLength(sb0, 0);
@@ -1550,10 +1556,12 @@ public class TextWire implements Wire, InternalWire {
                 if (bytes != null)
                     return bytes;
 
-                if (StringUtils.isEqual("!null", sb)) {
+                if ("!null".contentEquals(sb)) {
                     parseWord(sb);
                     return null;
                 }
+
+
                 throw new IllegalStateException("unsupported type=" + sb);
 
             } else {
@@ -2091,6 +2099,7 @@ public class TextWire implements Wire, InternalWire {
                     text();
                     return null;
                 }
+
 
                 if (StringUtils.isEqual(sb, "!binary")) {
                     bytesStore();

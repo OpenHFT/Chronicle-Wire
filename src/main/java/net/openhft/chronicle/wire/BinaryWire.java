@@ -996,6 +996,7 @@ public class BinaryWire implements Wire, InternalWire {
         @NotNull
         @Override
         public WireOut rawBytes(byte[] value) {
+            typePrefix(byte[].class);
             writeLength(Maths.toInt32(value.length + 1));
             writeCode(U8_ARRAY);
             if (value.length > 0)
@@ -1833,6 +1834,15 @@ public class BinaryWire implements Wire, InternalWire {
             if (code == NULL) {
                 return null;
             }
+
+            if (code == TYPE_PREFIX) {
+                StringBuilder sb = WireInternal.acquireStringBuilder();
+                bytes.readUtf8(sb);
+                assert "byte[]".contentEquals(sb);
+                length = readLength();
+                code = readCode();
+            }
+
             if (code != U8_ARRAY)
                 cantRead(code);
             byte[] bytes2 = new byte[Maths.toUInt31(length - 1)];

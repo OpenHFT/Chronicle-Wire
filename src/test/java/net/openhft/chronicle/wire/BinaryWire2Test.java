@@ -17,7 +17,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -388,7 +387,9 @@ public class BinaryWire2Test {
 
         wire.readDocument(null, wir -> wire.read(() -> "put")
                 .marshallable(w -> w.read(() -> "key").object(Object.class, "1", Assert::assertEquals)
-                        .read(() -> "value").object(Object.class, expected, (e, v) -> Assert.assertArrayEquals(e, ((NativeBytesStore) v).toByteArray()))));
+                        .read(() -> "value").object(Object.class, expected, (e, v) -> {
+                            Assert.assertArrayEquals(e, (byte[]) v);
+                        })));
     }
 
     @Test
