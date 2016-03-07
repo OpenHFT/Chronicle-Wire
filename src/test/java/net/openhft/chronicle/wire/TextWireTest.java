@@ -1054,7 +1054,7 @@ public class TextWireTest {
                         .object(expected)));
         assertEquals("--- !!data\n" +
                 "put: { key: \"1\", " +
-                "value: !!binary //79/Pv6+Q==  " +
+                "value: !byte[] !!binary //79/Pv6+Q==  " +
                 "}\n", (Wires.fromSizePrefixedBlobs(wire.bytes())));
 
         wire.readDocument(null, wir -> wire.read(() -> "put")
