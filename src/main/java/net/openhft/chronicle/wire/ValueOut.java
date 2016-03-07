@@ -305,7 +305,7 @@ public interface ValueOut {
         if (value instanceof Map)
             return map((Map) value);
         if (value instanceof byte[])
-            return bytes((byte[]) value);
+            return typePrefix(byte[].class).bytes((byte[]) value);
         if (value instanceof Byte)
             return typePrefix(byte.class).int8((Byte) value);
         if (value instanceof Boolean)
