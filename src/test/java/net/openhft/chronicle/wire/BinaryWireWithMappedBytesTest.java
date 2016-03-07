@@ -48,17 +48,17 @@ public class BinaryWireWithMappedBytesTest {
         });
         wire.read().int64(c, null, (o, i) -> {
         });
-        assertEquals(2, ((Byteable) a).bytesStore().refCount());
+        assertEquals(2 + 3, ((Byteable) a).bytesStore().refCount());
 
         System.out.println(a + " " + b + " " + c);
 
         // cause the old memory to drop out.
         bytes.compareAndSwapInt(1 << 20, 1, 1);
-        assertEquals(1, ((Byteable) a).bytesStore().refCount());
+        assertEquals(1 + 3, ((Byteable) a).bytesStore().refCount());
         System.out.println(a + " " + b + " " + c);
 
         bytes.compareAndSwapInt(2 << 20, 1, 1);
-        assertEquals(1, ((Byteable) a).bytesStore().refCount());
+        assertEquals(1 + 3, ((Byteable) a).bytesStore().refCount());
         System.out.println(a + " " + b + " " + c);
 
         bytes.close();
