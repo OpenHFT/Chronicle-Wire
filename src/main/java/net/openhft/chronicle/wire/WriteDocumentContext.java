@@ -24,8 +24,8 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
  * Created by peter on 24/12/15.
  */
 public class WriteDocumentContext implements DocumentContext {
-    final InternalWire wire;
-    long position;
+    protected InternalWire wire;
+    protected long position = -1;
     private int metaDataBit;
 
     public WriteDocumentContext(InternalWire wire) {
@@ -33,7 +33,7 @@ public class WriteDocumentContext implements DocumentContext {
     }
 
     public void start(boolean metaData) {
-        Bytes<?> bytes = wire.bytes();
+        Bytes<?> bytes = wire().bytes();
         this.position = bytes.writePosition();
         metaDataBit = metaData ? Wires.META_DATA : 0;
         bytes.writeOrderedInt(metaDataBit | Wires.NOT_READY | Wires.UNKNOWN_LENGTH);
@@ -46,12 +46,13 @@ public class WriteDocumentContext implements DocumentContext {
 
     @Override
     public void close() {
-        Bytes bytes = wire.bytes();
+        Bytes bytes = wire().bytes();
         long position1 = bytes.writePosition();
         if (position1 < position)
             System.out.println("Message truncated from " + position + " to " + position1);
         int length = metaDataBit | toIntU30(position1 - position - 4, "Document length %,d out of 30-bit int range.");
-        bytes.writeOrderedInt(position, length);
+        if (!bytes.compareAndSwapInt(position, Wires.NOT_READY, length))
+            throw new IllegalStateException("Header overwritten with " + Integer.toHexString(bytes.readInt(position)));
     }
 
     @Override
@@ -69,5 +70,7 @@ public class WriteDocumentContext implements DocumentContext {
         return wire;
     }
 
-
+    protected long position() {
+        return position;
+    }
 }

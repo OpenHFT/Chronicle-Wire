@@ -268,6 +268,7 @@ public class BinaryWire2Test {
 
         assertEquals("--- !!meta-data #binary\n" +
                 "tid: 1234567890\n" +
+                "# position: 13\n" +
                 "--- !!data #binary\n" +
                 "data: !!UpdateEvent {\n" +
                 "  assetName: /name,\n" +
@@ -388,5 +389,25 @@ public class BinaryWire2Test {
         wire.readDocument(null, wir -> wire.read(() -> "put")
                 .marshallable(w -> w.read(() -> "key").object(Object.class, "1", Assert::assertEquals)
                         .read(() -> "value").object(Object.class, expected, (e, v) -> Assert.assertArrayEquals(e, ((NativeBytesStore) v).toByteArray()))));
+    }
+
+    @Test
+    public void testSmallArray() {
+        Wire wire = createWire();
+        wire.writeDocument(false, w -> w.write(() -> "index")
+                .int64array(10));
+        assertEquals("--- !!data #binary\n" +
+                "index: [\n" +
+                "  0,\n" +
+                "  0,\n" +
+                "  0,\n" +
+                "  0,\n" +
+                "  0,\n" +
+                "  0,\n" +
+                "  0,\n" +
+                "  0,\n" +
+                "  0,\n" +
+                "  0\n" +
+                "]\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
     }
 }

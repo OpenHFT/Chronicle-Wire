@@ -26,7 +26,7 @@ import static net.openhft.chronicle.wire.Wires.*;
  * Created by peter on 24/12/15.
  */
 public class ReadDocumentContext implements DocumentContext {
-    private final InternalWire wire;
+    protected InternalWire wire;
     private boolean data;
     private boolean present;
     private long readPosition, readLimit;
@@ -70,7 +70,6 @@ public class ReadDocumentContext implements DocumentContext {
             final Bytes<?> bytes = wire.bytes();
             bytes.readLimit(readLimit);
             bytes.readPosition(readPosition);
-
         }
     }
 
@@ -103,6 +102,4 @@ public class ReadDocumentContext implements DocumentContext {
         bytes.readLimit(readPosition);
         present = true;
     }
-
-
 }

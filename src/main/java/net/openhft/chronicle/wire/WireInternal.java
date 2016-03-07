@@ -119,7 +119,7 @@ public enum WireInternal {
         int length = toIntU30(bytes.writePosition() - position - 4, "Document length %,d " +
                 "out of 30-bit int range.");
         if (!bytes.compareAndSwapInt(position, value, length | metaDataBit))
-            throw new AssertionError();
+            throw new AssertionError("Position was over written " + position + " with " + Integer.toHexString(bytes.readInt(position)));
         return position;
     }
 
@@ -257,12 +257,22 @@ public enum WireInternal {
             bytes.readLimit(limit2);
             long missing = position + length - limit2;
             while (bytes.readRemaining() >= 4) {
+                long start = bytes.readPosition();
                 long header = bytes.readUnsignedInt();
+                if (header == 0) {
+                    sb.append("...\n");
+                    sb.append("# ").append(bytes.readRemaining()).append(" bytes remaining\n");
+                    break;
+                }
+                if (start > 0) {
+                    sb.append("# position: ").append(start).append("\n");
+                }
+
                 int len = Wires.lengthOf(header);
-                if (len > bytes.readRemaining())
-                    throw new RuntimeException("Are you sure this was written with writeDocument " +
-                            "and has a 4 byte size prefix, " + len + " > " + bytes.readRemaining()
-                            + ",  bytes=" + Bytes.toString(bytes, 100));
+                if (len > bytes.readRemaining()) {
+                    sb.append("#  has a 4 byte size prefix, ").append(len).append(" > ").append(bytes.readRemaining());
+                    break;
+                }
                 String type = Wires.isData(header)
                         ? Wires.isReady(header) ? "!!data" : "!!not-ready-data!"
                         : Wires.isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";

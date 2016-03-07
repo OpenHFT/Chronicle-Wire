@@ -169,9 +169,16 @@ public class BinaryWire implements Wire, InternalWire {
                             break outerSwitch;
 
                         case I64_ARRAY:
-                            // no supported.
-                            break;
+                            bytes.readSkip(1);
+                            long len2 = bytes.readLong();
+                            wire.getValueOut().sequence(o -> {
+                                for (long i = 0; i < len2; i++) {
+                                    long v = bytes.readLong();
+                                    o.int64(v);
+                                }
+                            });
 
+                            break outerSwitch;
                     }
                     unknownCode(wire);
                     break;

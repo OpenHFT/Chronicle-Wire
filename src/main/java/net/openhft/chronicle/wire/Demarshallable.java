@@ -4,6 +4,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * This is similar to ReadMarshallable however it is expected that
@@ -35,7 +36,9 @@ public interface Demarshallable {
             return (T) DEMARSHALLABLES.get(clazz).newInstance(wireIn);
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            if (e instanceof InvocationTargetException)
+                e = e.getCause();
             throw new IORuntimeException(e);
         }
     }

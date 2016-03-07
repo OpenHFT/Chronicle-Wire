@@ -158,6 +158,12 @@ public interface ValueIn {
     @NotNull
     WireIn int64(@NotNull LongValue value);
 
+    default LongValue int64ForBinding(@NotNull LongValue value) {
+        LongValue ret = wireIn().newLongReference();
+        int64(ret);
+        return ret;
+    }
+
     @NotNull
     <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter);
 
