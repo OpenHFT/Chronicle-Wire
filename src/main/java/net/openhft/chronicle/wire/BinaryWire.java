@@ -1659,12 +1659,13 @@ public class BinaryWire implements Wire, InternalWire {
                     }
                     int len = Maths.toUInt31(len0);
                     long limit = bytes.readLimit();
+                    long end = bytes.readPosition() + len;
                     try {
-                        bytes.readLimit(bytes.readPosition() + len);
+                        bytes.readLimit(end);
                         return UTF8_INTERNER.intern(bytes);
                     } finally {
-                        bytes.readPosition(bytes.readLimit());
                         bytes.readLimit(limit);
+                        bytes.readPosition(end);
                     }
                 }
 
