@@ -118,8 +118,11 @@ public enum WireInternal {
         writer.writeMarshallable(wireOut);
         int length = toIntU30(bytes.writePosition() - position - 4, "Document length %,d " +
                 "out of 30-bit int range.");
-        if (!bytes.compareAndSwapInt(position, value, length | metaDataBit))
-            throw new AssertionError("Position was over written " + position + " with " + Integer.toHexString(bytes.readInt(position)));
+        if (!bytes.compareAndSwapInt(position, value, length | metaDataBit)) {
+            String s = Integer.toHexString(bytes.readInt(position));
+            bytes.writeOrderedInt(position, length | metaDataBit);
+            throw new AssertionError("Position was over written " + position + " with " + s);
+        }
         return position;
     }
 
