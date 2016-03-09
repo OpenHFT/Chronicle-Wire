@@ -97,7 +97,7 @@ public class WireSerializedLambdaTest {
                 .write(() -> "two").object(Fun.ADD_A)
                 .write(() -> "three").object(Updat.DECR);
 
-        assertEquals("[pos: 0, rlim: 348, wlim: 8EiB, cap: 8EiB ] " +
+        assertEquals("[pos: 0, rlim: 348, wlim: 8EiB, cap: 8EiB ] ‖" +
                 "Ãone¶⒗SerializedLambda\\u0082 ⒈٠٠" +
                 "Âcc¼3net.openhft.chronicle.wire.WireSerializedLambdaTest" +
                 "Ãfic¸4net/openhft/chronicle/core/util/SerializableFunction" +
@@ -110,7 +110,7 @@ public class WireSerializedLambdaTest {
                 "Ãimt¸&(Ljava/lang/String;)Ljava/lang/String;" +
                 "Âca\\u0082٠٠٠٠" +
                 "Ãtwo¶⒊FunåADD_A" +
-                "Åthree¶⒌UpdatäDECR", wire.bytes().toDebugString(400));
+                "Åthree¶⒌UpdatäDECR‡", wire.bytes().toDebugString(348));
 
         Function<String, String> function = wire.read().object(Function.class);
         assertEquals("HELLO", function.apply("hello"));

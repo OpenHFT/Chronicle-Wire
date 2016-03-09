@@ -34,7 +34,9 @@ import static org.junit.Assert.assertEquals;
 public class BinaryWireWithMappedBytesTest {
     @Test
     public void testRefAtStart() throws FileNotFoundException {
-        MappedBytes bytes = MappedBytes.mappedBytes(new File(OS.TARGET, "testRefAtStart.map"), 64 << 10);
+        File file = new File(OS.TARGET, "testRefAtStart.map");
+        file.delete();
+        MappedBytes bytes = MappedBytes.mappedBytes(file, 64 << 10);
         Wire wire = WireType.BINARY.apply(bytes);
         wire.write(() -> "int32").int32forBinding(1)
                 .write(() -> "int32b").int32forBinding(2)
