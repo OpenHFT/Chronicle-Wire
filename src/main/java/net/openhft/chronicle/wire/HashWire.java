@@ -13,11 +13,15 @@ import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.EOFException;
+import java.io.StreamCorruptedException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 
 /**
@@ -102,6 +106,31 @@ public class HashWire implements WireOut {
     @Override
     public DocumentContext writingDocument(boolean metaData) {
         throw new UnsupportedOperationException("todo");
+    }
+
+    @Override
+    public long writeHeader(int length, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateHeader(int length, long position, boolean metaData) throws StreamCorruptedException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean writeFirstHeader() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateFirstHeader() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void writeEndOfWire(long timeout, TimeUnit timeUnit) throws TimeoutException {
+        throw new UnsupportedOperationException();
     }
 
     @NotNull

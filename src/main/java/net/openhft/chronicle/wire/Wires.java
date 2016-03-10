@@ -32,9 +32,17 @@ public enum Wires {
     public static final int NOT_READY = 1 << 31;
     public static final int META_DATA = 1 << 30;
     public static final int UNKNOWN_LENGTH = 0x0;
+    public static final int MAX_LENGTH = (1 << 30) - 1;
+
+    // value to use when the message is not ready and of an unknown length
+    public static final int NOT_READY_UNKNOWN_LENGTH = NOT_READY | UNKNOWN_LENGTH;
+    // value to use when no more data is possible e.g. on a roll.
+    public static final int END_OF_DATA = NOT_READY | META_DATA | UNKNOWN_LENGTH;
+
     public static final int NOT_INITIALIZED = 0x0;
     public static final Bytes<?> NO_BYTES = new VanillaBytes<>(Bytes.empty());
     public static final WireIn EMPTY = new BinaryWire(NO_BYTES);
+    public static final int SPB_HEADER_SIZE = 4;
     static final StringBuilderPool SBP = new StringBuilderPool();
 
     /**
@@ -77,8 +85,20 @@ public enum Wires {
         return (len & NOT_READY) == 0;
     }
 
+    public static boolean isNotReady(long len) {
+        return (len & NOT_READY) != 0;
+    }
+
+    public static boolean isReadyData(long len) {
+        return (len & (META_DATA | NOT_READY)) == 0;
+    }
+
     public static boolean isData(long len) {
         return (len & META_DATA) == 0;
+    }
+
+    public static boolean isReadyMetaData(long len) {
+        return (len & (META_DATA | NOT_READY)) == META_DATA;
     }
 
     public static boolean isKnownLength(int len) {

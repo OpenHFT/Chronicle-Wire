@@ -19,12 +19,16 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.EOFException;
+import java.io.StreamCorruptedException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream. <p>
  * Created by peter.lawrey on 12/01/15.
  */
 public interface WireIn extends WireCommon {
-    boolean isReady();
 
     void copyTo(@NotNull WireOut wire);
 
@@ -112,4 +116,14 @@ public interface WireIn extends WireCommon {
     DocumentContext readingDocument(long readLocation);
 
     void consumePadding();
+
+    /**
+     * Consume a header if one is available.
+     *
+     * @return true, if a message can be read between readPosition and readLimit, else false if no header is ready.
+     * @throws EOFException if the end of wire marker is reached.
+     */
+    boolean readHeader() throws EOFException;
+
+    void readFirstHeader(long timeout, TimeUnit timeUnit) throws TimeoutException, StreamCorruptedException;
 }

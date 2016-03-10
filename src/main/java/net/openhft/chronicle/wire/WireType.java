@@ -157,11 +157,8 @@ public enum WireType implements Function<Bytes, Wire> {
             return WireType.TEXT;
 
         if (wire instanceof BinaryWire) {
-
-            if (((BinaryWire) wire).fieldLess())
-                return FIELDLESS_BINARY;
-            else
-                return WireType.BINARY;
+            BinaryWire binaryWire = (BinaryWire) wire;
+            return binaryWire.fieldLess() ? FIELDLESS_BINARY : WireType.BINARY;
         }
 
         throw new IllegalStateException("unknown type");

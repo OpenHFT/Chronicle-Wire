@@ -17,7 +17,7 @@ import java.util.function.Supplier;
  *
  * @author Rob Austin.
  */
-public class DeferredTypeWire extends AbstractAnyWire implements Wire, InternalWire {
+public class DeferredTypeWire extends AbstractAnyWire implements Wire {
 
     public DeferredTypeWire(Bytes bytes, Supplier<WireType> wireTypeSupplier) {
         super(bytes, new DeferredTypeWireAcquisition(bytes, wireTypeSupplier));
@@ -49,7 +49,7 @@ public class DeferredTypeWire extends AbstractAnyWire implements Wire, InternalW
     static class DeferredTypeWireAcquisition implements WireAcquisition {
         private final Bytes bytes;
         private final Supplier<WireType> wireTypeSupplier;
-        private InternalWire wire = null;
+        private Wire wire = null;
         private WireType wireType;
 
         public DeferredTypeWireAcquisition(Bytes bytes, Supplier<WireType> wireTypeSupplier) {
@@ -62,13 +62,13 @@ public class DeferredTypeWire extends AbstractAnyWire implements Wire, InternalW
             return () -> wireType;
         }
 
-        public InternalWire acquireWire() {
+        public Wire acquireWire() {
             if (wire != null)
                 return wire;
             wireType = wireTypeSupplier.get();
             if (wireType == null)
                 throw new IllegalStateException("unknown type");
-            return (InternalWire) wireType.apply(bytes);
+            return wireType.apply(bytes);
 
         }
 

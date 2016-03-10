@@ -49,7 +49,7 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 /**
  * YAML Based wire format
  */
-public class TextWire extends AbstractWire implements Wire, InternalWire {
+public class TextWire extends AbstractWire implements Wire {
 
     public static final BytesStore TYPE = BytesStore.wrap("!type ");
     static final String SEQ_MAP = "!seqmap";
@@ -210,16 +210,6 @@ public class TextWire extends AbstractWire implements Wire, InternalWire {
             }
         } else
             return bytes.toString();
-    }
-
-    @Override
-    public boolean isReady() {
-        return ready;
-    }
-
-    @Override
-    public void setReady(boolean ready) {
-        this.ready = ready;
     }
 
     @Override

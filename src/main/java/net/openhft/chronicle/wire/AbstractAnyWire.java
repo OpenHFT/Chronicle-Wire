@@ -16,7 +16,7 @@ import java.util.function.Supplier;
  *
  * @author Rob Austin.
  */
-public abstract class AbstractAnyWire extends AbstractWire implements Wire, InternalWire {
+public abstract class AbstractAnyWire extends AbstractWire implements Wire {
 
     protected final WireAcquisition wireAcquisition;
 
@@ -31,16 +31,6 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire, Inte
 
     public Supplier<WireType> underlyingType() {
         return wireAcquisition.underlyingType();
-    }
-
-    @Override
-    public boolean isReady() {
-        return wireAcquisition.acquireWire().isReady();
-    }
-
-    @Override
-    public void setReady(boolean ready) {
-        wireAcquisition.acquireWire().setReady(ready);
     }
 
     @Override
@@ -162,7 +152,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire, Inte
          */
         Supplier<WireType> underlyingType();
 
-        InternalWire acquireWire();
+        Wire acquireWire();
 
         void classLookup(ClassLookup classLookup);
 

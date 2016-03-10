@@ -20,24 +20,25 @@ import net.openhft.chronicle.bytes.Bytes;
 
 import java.nio.BufferUnderflowException;
 
-import static net.openhft.chronicle.wire.Wires.*;
+import static net.openhft.chronicle.wire.Wires.isNotReady;
+import static net.openhft.chronicle.wire.Wires.lengthOf;
 
 /**
  * Created by peter on 24/12/15.
  */
 public class ReadDocumentContext implements DocumentContext {
-    protected InternalWire wire;
-    private boolean data;
+    protected Wire wire;
+    private boolean metaData;
     private boolean present;
     private long readPosition, readLimit;
 
     public ReadDocumentContext(Wire wire) {
-        this.wire = (InternalWire) wire;
+        this.wire = wire;
     }
 
     @Override
     public boolean isMetaData() {
-        return !data && present;
+        return metaData;
     }
 
     @Override
@@ -51,12 +52,6 @@ public class ReadDocumentContext implements DocumentContext {
 
     public void closeReadLimit(long readLimit) {
         this.readLimit = readLimit;
-    }
-
-
-    @Override
-    public boolean isData() {
-        return data && present;
     }
 
     @Override
@@ -83,17 +78,16 @@ public class ReadDocumentContext implements DocumentContext {
         long position = bytes.readPosition();
 
         int header = bytes.readVolatileInt(position);
-        if (!isKnownLength(header) || !isReady(header)) {
+        if (header == 0 || isNotReady(header)) {
             present = false;
             return;
         }
 
         bytes.readSkip(4);
-        final boolean ready = isReady(header);
+
         final int len = lengthOf(header);
         assert len > 0 : "len=" + len;
-        data = Wires.isData(header);
-        wire.setReady(ready);
+        metaData = Wires.isReadyMetaData(header);
         if (len > bytes.readRemaining())
             throw new BufferUnderflowException();
         readLimit = bytes.readLimit();

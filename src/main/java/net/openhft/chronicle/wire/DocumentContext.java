@@ -36,7 +36,9 @@ public interface DocumentContext extends Closeable {
     /**
      * @return true - is the entry is of type data
      */
-    boolean isData();
+    default boolean isData() {
+        return isPresent() && !isMetaData();
+    }
 
     /**
      * @return the wire of the document

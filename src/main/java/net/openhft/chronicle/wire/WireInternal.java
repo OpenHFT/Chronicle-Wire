@@ -194,7 +194,6 @@ public enum WireInternal {
                     return false;
 
                 } else {
-                    ((InternalWire) wireIn).setReady(ready);
                     bytes.readWithLength(len, b -> dataConsumer.readMarshallable(wireIn));
                     return true;
                 }

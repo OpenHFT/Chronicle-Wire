@@ -24,12 +24,12 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
  * Created by peter on 24/12/15.
  */
 public class WriteDocumentContext implements DocumentContext {
-    protected InternalWire wire;
+    protected Wire wire;
     protected long position = -1;
     protected int tmpHeader;
     private int metaDataBit;
 
-    public WriteDocumentContext(InternalWire wire) {
+    public WriteDocumentContext(Wire wire) {
         this.wire = wire;
     }
 
@@ -61,11 +61,6 @@ public class WriteDocumentContext implements DocumentContext {
     @Override
     public boolean isPresent() {
         return false;
-    }
-
-    @Override
-    public boolean isData() {
-        return metaDataBit == 0;
     }
 
     @Override

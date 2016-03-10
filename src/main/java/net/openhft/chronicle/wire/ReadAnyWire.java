@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  *
  * @author Rob Austin.
  */
-public class ReadAnyWire extends AbstractAnyWire implements Wire, InternalWire {
+public class ReadAnyWire extends AbstractAnyWire implements Wire {
 
     public ReadAnyWire(Bytes bytes) {
         super(bytes, new ReadAnyWireAcquisition(bytes));
@@ -46,7 +46,7 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire, InternalWire {
     static class ReadAnyWireAcquisition implements WireAcquisition {
         private final Bytes bytes;
         WireType wireType;
-        InternalWire wire = null;
+        Wire wire = null;
         private ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
 
         public ReadAnyWireAcquisition(Bytes bytes) {
@@ -70,7 +70,7 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire, InternalWire {
             return () -> wireType;
         }
 
-        public InternalWire acquireWire() {
+        public Wire acquireWire() {
             if (wire != null)
                 return wire;
             if (bytes.readRemaining() > 0) {
@@ -89,7 +89,7 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire, InternalWire {
 
                 Wire wire = wireType.apply(bytes);
                 wire.classLookup(classLookup);
-                return this.wire = (InternalWire) wire;
+                return this.wire = wire;
             }
 
             return null;

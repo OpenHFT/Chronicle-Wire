@@ -41,7 +41,7 @@ import java.util.function.*;
 /**
  * This format writes just the data, without meta data.
  */
-public class RawWire extends AbstractWire implements Wire, InternalWire {
+public class RawWire extends AbstractWire implements Wire {
     private final RawValueOut valueOut = new RawValueOut();
     private final RawValueIn valueIn = new RawValueIn();
     private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
@@ -98,16 +98,6 @@ public class RawWire extends AbstractWire implements Wire, InternalWire {
     @Override
     public void consumePadding() {
 
-    }
-
-    @Override
-    public boolean isReady() {
-        return ready;
-    }
-
-    @Override
-    public void setReady(boolean ready) {
-        this.ready = ready;
     }
 
     @Override
