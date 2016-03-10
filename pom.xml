@@ -56,12 +56,12 @@
     <dependencies>
         <dependency>
             <groupId>net.openhft</groupId>
-            <artifactId>chronicle-core</artifactId>
+            <artifactId>chronicle-bytes</artifactId>
         </dependency>
 
         <dependency>
             <groupId>net.openhft</groupId>
-            <artifactId>chronicle-bytes</artifactId>
+            <artifactId>chronicle-threads</artifactId>
         </dependency>
 
         <dependency>

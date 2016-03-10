@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -15,11 +16,12 @@ import java.util.function.Supplier;
  *
  * @author Rob Austin.
  */
-public abstract class AbstractAnyWire implements Wire, InternalWire {
+public abstract class AbstractAnyWire extends AbstractWire implements Wire, InternalWire {
 
     protected final WireAcquisition wireAcquisition;
 
-    public AbstractAnyWire(@NotNull WireAcquisition wa) {
+    public AbstractAnyWire(Bytes bytes, @NotNull WireAcquisition wa) {
+        super(bytes, false);
         this.wireAcquisition = wa;
     }
 

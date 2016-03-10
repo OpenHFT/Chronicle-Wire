@@ -21,6 +21,7 @@ import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -39,6 +40,16 @@ public interface WireCommon {
      * @return the current implementation for looking up classes.
      */
     ClassLookup classLookup();
+
+    /**
+     * @param pauser to use for blocking operations.
+     */
+    void pauser(Pauser pauser);
+
+    /**
+     * @return pauser used.
+     */
+    Pauser pauser();
 
     /**
      * @return the underlying Bytes

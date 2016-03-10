@@ -20,11 +20,8 @@ import net.openhft.chronicle.bytes.ref.BinaryIntReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.bytes.util.Compression;
-import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.pool.ClassAliasPool;
-import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -51,10 +48,8 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
 /**
  * This Wire is a binary translation of TextWire which is a sub set of YAML.
  */
-public class BinaryWire implements Wire, InternalWire {
+public class BinaryWire extends AbstractWire implements Wire, InternalWire {
     private static final int END_OF_BYTES = -1;
-    private static final UTF8StringInterner UTF8_INTERNER = new UTF8StringInterner(512);
-    private final Bytes<?> bytes;
     private final ValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     private final ValueOut valueOut;
@@ -67,7 +62,6 @@ public class BinaryWire implements Wire, InternalWire {
     DefaultValueIn defaultValueIn;
     private boolean ready;
     private String compression;
-    private ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
 
     public BinaryWire(Bytes bytes) {
         this(bytes, false, false, false, Integer.MAX_VALUE, "binary");
@@ -75,9 +69,9 @@ public class BinaryWire implements Wire, InternalWire {
 
 
     public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression) {
+        super(bytes, false);
         this.numericFields = numericFields;
         this.fieldLess = fieldLess;
-        this.bytes = bytes;
         this.compressedSize = compressedSize;
         valueOut = fixed ? fixedValueOut : new BinaryValueOut();
         this.compression = compression;
@@ -315,33 +309,6 @@ public class BinaryWire implements Wire, InternalWire {
     @Override
     public Wire readComment(@NotNull StringBuilder s) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void clear() {
-        bytes.clear();
-    }
-
-    @Override
-    public void classLookup(ClassLookup classLookup) {
-        this.classLookup = classLookup;
-    }
-
-    @Override
-    public ClassLookup classLookup() {
-        return classLookup;
-    }
-
-    @NotNull
-    @Override
-    public Bytes<?> bytes() {
-        return bytes;
-    }
-
-    @Override
-    public boolean hasMore() {
-        consumePadding();
-        return bytes.readRemaining() > 0;
     }
 
     @Nullable

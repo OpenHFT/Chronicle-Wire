@@ -22,7 +22,6 @@ import net.openhft.chronicle.bytes.ref.TextLongReference;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IOTools;
-import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
@@ -50,7 +49,7 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 /**
  * YAML Based wire format
  */
-public class TextWire implements Wire, InternalWire {
+public class TextWire extends AbstractWire implements Wire, InternalWire {
 
     public static final BytesStore TYPE = BytesStore.wrap("!type ");
     static final String SEQ_MAP = "!seqmap";
@@ -77,19 +76,15 @@ public class TextWire implements Wire, InternalWire {
 
     protected final TextValueOut valueOut = createValueOut();
     protected final TextValueIn valueIn = createValueIn();
-    protected final boolean use8bit;
     private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
     private final ReadDocumentContext readContext = new ReadDocumentContext(this);
     private final StringBuilder sb = new StringBuilder();
-    protected Bytes<?> bytes;
     protected long lineStart = 0;
     DefaultValueIn defaultValueIn;
     private boolean ready;
-    private ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
 
     public TextWire(Bytes bytes, boolean use8bit) {
-        this.bytes = bytes;
-        this.use8bit = use8bit;
+        super(bytes, use8bit);
     }
 
     public TextWire(Bytes bytes) {

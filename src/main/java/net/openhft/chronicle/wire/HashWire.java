@@ -8,6 +8,8 @@ import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.threads.BusyPauser;
+import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -123,6 +125,16 @@ public class HashWire implements WireOut {
     @NotNull
     @Override
     public LongArrayValues newLongArrayReference() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Pauser pauser() {
+        return BusyPauser.INSTANCE;
+    }
+
+    @Override
+    public void pauser(Pauser pauser) {
         throw new UnsupportedOperationException();
     }
 

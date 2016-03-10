@@ -19,11 +19,8 @@ import java.util.function.Supplier;
  */
 public class DeferredTypeWire extends AbstractAnyWire implements Wire, InternalWire {
 
-    private final Bytes bytes;
-
     public DeferredTypeWire(Bytes bytes, Supplier<WireType> wireTypeSupplier) {
-        super(new DeferredTypeWireAcquisition(bytes, wireTypeSupplier));
-        this.bytes = bytes;
+        super(bytes, new DeferredTypeWireAcquisition(bytes, wireTypeSupplier));
     }
 
     @Override

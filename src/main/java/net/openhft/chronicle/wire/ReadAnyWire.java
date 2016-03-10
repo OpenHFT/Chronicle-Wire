@@ -15,11 +15,9 @@ import java.util.function.Supplier;
  * @author Rob Austin.
  */
 public class ReadAnyWire extends AbstractAnyWire implements Wire, InternalWire {
-    private final Bytes bytes;
 
     public ReadAnyWire(Bytes bytes) {
-        super(new ReadAnyWireAcquisition(bytes));
-        this.bytes = bytes;
+        super(bytes, new ReadAnyWireAcquisition(bytes));
     }
 
     @Override
