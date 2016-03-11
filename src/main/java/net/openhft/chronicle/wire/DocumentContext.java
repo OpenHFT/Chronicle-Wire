@@ -29,6 +29,13 @@ public interface DocumentContext extends Closeable {
     boolean isMetaData();
 
     /**
+     * Set the metaData flag.  When writing this will determine whether the message is written as metaData or not.
+     *
+     * @param metaData write as metaData instead of data if true.
+     */
+    void metaData(boolean metaData);
+
+    /**
      * @return true - if is a document document
      */
     boolean isPresent();

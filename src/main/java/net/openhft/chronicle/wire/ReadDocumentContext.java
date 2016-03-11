@@ -42,6 +42,12 @@ public class ReadDocumentContext implements DocumentContext {
     }
 
     @Override
+    public void metaData(boolean metaData) {
+        // NOTE: this will not change the entry in the queue just read.
+        this.metaData = metaData;
+    }
+
+    @Override
     public boolean isPresent() {
         return present;
     }

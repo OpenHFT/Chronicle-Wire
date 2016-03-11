@@ -47,6 +47,11 @@ public class WriteDocumentContext implements DocumentContext {
     }
 
     @Override
+    public void metaData(boolean metaData) {
+        metaDataBit = metaData ? Wires.META_DATA : 0;
+    }
+
+    @Override
     public void close() {
         Bytes bytes = wire().bytes();
         long position1 = bytes.writePosition();
