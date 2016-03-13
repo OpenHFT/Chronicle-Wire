@@ -123,7 +123,11 @@ public interface WireIn extends WireCommon {
      * @return true, if a message can be read between readPosition and readLimit, else false if no header is ready.
      * @throws EOFException if the end of wire marker is reached.
      */
-    boolean readHeader() throws EOFException;
+    boolean readDataHeader() throws EOFException;
+
+    void readAndSetLength(long position);
 
     void readFirstHeader(long timeout, TimeUnit timeUnit) throws TimeoutException, StreamCorruptedException;
+
+    void readMetaDataHeader();
 }

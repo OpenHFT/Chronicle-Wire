@@ -67,19 +67,57 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public boolean readHeader() throws EOFException {
-        long pos = bytes.readPosition();
-        int header = bytes.readVolatileInt(pos);
-        if ((header & Wires.NOT_READY) != 0) {
-            if (header == Wires.NOT_READY_UNKNOWN_LENGTH)
-                throw new EOFException();
-            return false;
+    public boolean readDataHeader() throws EOFException {
+        bytes.readLimit(bytes.capacity());
+        int header;
+        for (; ; ) {
+            header = bytes.readVolatileInt(bytes.readPosition());
+            if (Wires.isReady(header)) {
+                if (header == Wires.NOT_INITIALIZED)
+                    return false;
+                if (Wires.isReadyData(header)) {
+                    return true;
+                }
+            } else {
+                if (header == Wires.END_OF_DATA)
+                    throw new EOFException();
+                return false;
+            }
+            bytes.readSkip(Wires.lengthOf(header) + Wires.SPB_HEADER_SIZE);
         }
+    }
 
-        int len = Wires.lengthOf(header) + Wires.SPB_HEADER_SIZE;
-        bytes.readLimit(pos + len);
-        bytes.readSkip(4);
-        return true;
+    @Override
+    public void readAndSetLength(long position) {
+        int header = bytes.readVolatileInt(bytes.readPosition());
+        if (Wires.isReady(header)) {
+            if (header == Wires.NOT_INITIALIZED)
+                throw new IllegalStateException();
+            long start = position + Wires.SPB_HEADER_SIZE;
+            bytes.readLimit(start + Wires.lengthOf(header));
+            bytes.readPosition(start);
+            return;
+        }
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public void readMetaDataHeader() {
+        int header = bytes.readVolatileInt(bytes.readPosition());
+        if (Wires.isReady(header)) {
+            if (header == Wires.NOT_INITIALIZED)
+                throw new IllegalStateException("Meta data not initialised");
+            if (Wires.isReadyMetaData(header)) {
+                setLimitPosition(header);
+                return;
+            }
+        }
+        throw new IllegalStateException("Meta data not ready " + Integer.toHexString(header));
+    }
+
+    private void setLimitPosition(int header) {
+        bytes.readLimit(bytes.readPosition() + Wires.lengthOf(header) + Wires.SPB_HEADER_SIZE)
+                .readSkip(Wires.SPB_HEADER_SIZE);
     }
 
     @Override
