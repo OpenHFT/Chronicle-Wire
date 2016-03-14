@@ -69,21 +69,20 @@ public abstract class AbstractWire implements Wire {
     @Override
     public boolean readDataHeader() throws EOFException {
         bytes.readLimit(bytes.capacity());
-        int header;
         for (; ; ) {
-            header = bytes.readVolatileInt(bytes.readPosition());
+            int header = bytes.readVolatileInt(bytes.readPosition());
             if (Wires.isReady(header)) {
                 if (header == Wires.NOT_INITIALIZED)
                     return false;
                 if (Wires.isReadyData(header)) {
                     return true;
                 }
+                bytes.readSkip(Wires.lengthOf(header) + Wires.SPB_HEADER_SIZE);
             } else {
                 if (header == Wires.END_OF_DATA)
                     throw new EOFException();
                 return false;
             }
-            bytes.readSkip(Wires.lengthOf(header) + Wires.SPB_HEADER_SIZE);
         }
     }
 
@@ -94,8 +93,7 @@ public abstract class AbstractWire implements Wire {
             if (header == Wires.NOT_INITIALIZED)
                 throw new IllegalStateException();
             long start = position + Wires.SPB_HEADER_SIZE;
-            bytes.readLimit(start + Wires.lengthOf(header));
-            bytes.readPosition(start);
+            bytes.readPositionRemaining(start, Wires.lengthOf(header));
             return;
         }
         throw new IllegalStateException();
@@ -134,8 +132,7 @@ public abstract class AbstractWire implements Wire {
         int len = Wires.lengthOf(header);
         if (!Wires.isReadyMetaData(header) || len > 64 << 10)
             throw new StreamCorruptedException("Unexpected magic number " + Integer.toHexString(header));
-        bytes.readLimit(len + 4);
-        bytes.readSkip(4);
+        bytes.readPositionRemaining(Wires.SPB_HEADER_SIZE, len);
     }
 
 
