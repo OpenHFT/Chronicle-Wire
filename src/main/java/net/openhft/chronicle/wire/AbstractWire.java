@@ -23,6 +23,13 @@ public abstract class AbstractWire implements Wire {
     protected final boolean use8bit;
     protected Pauser pauser = BusyPauser.INSTANCE;
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
+    protected static final boolean ASSERTIONS;
+
+    static {
+        boolean assertions = false;
+        assert assertions = true;
+        ASSERTIONS = assertions;
+    }
 
     public AbstractWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
@@ -141,14 +148,38 @@ public abstract class AbstractWire implements Wire {
         if (length < 0 || length > Wires.MAX_LENGTH)
             throw new IllegalArgumentException();
         long pos = bytes.writePosition();
+
+        if (bytes.compareAndSwapInt(pos, 0, Wires.NOT_READY | length)) {
+            int maxlen = length == Wires.UNKNOWN_LENGTH ? Wires.MAX_LENGTH : length;
+            if (maxlen > bytes.writeRemaining())
+                return throwNotEnoughSpace(maxlen, bytes);
+            bytes.writePositionRemaining(pos + Wires.SPB_HEADER_SIZE, maxlen);
+            return pos;
+        }
+        return writeHeader0(length, timeout, timeUnit);
+    }
+
+    private static long throwNotEnoughSpace(int maxlen, Bytes<?> bytes) {
+        throw new IllegalStateException("not enough space to write " + maxlen + " was " + bytes.writeRemaining());
+    }
+
+    private long writeHeader0(int length, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {
+        if (length < 0 || length > Wires.MAX_LENGTH)
+            throw new IllegalArgumentException();
+        long pos = bytes.writePosition();
+//        long start = System.nanoTime();
         try {
+//            for (int i = 0; ; i++) {
             for (; ; ) {
                 if (bytes.compareAndSwapInt(pos, 0, Wires.NOT_READY | length)) {
                     bytes.writePosition(pos + Wires.SPB_HEADER_SIZE);
                     int maxlen = length == Wires.UNKNOWN_LENGTH ? Wires.MAX_LENGTH : length;
                     if (maxlen > bytes.writeRemaining())
-                        throw new IllegalStateException("not enough space to write " + maxlen + " was " + bytes.writeRemaining());
+                        throwNotEnoughSpace(maxlen, bytes);
                     bytes.writeLimit(bytes.writePosition() + maxlen);
+//                    long time =System.nanoTime() - start;
+//                    if (time > 20e3)
+//                        System.out.println(time/1000+" "+i);
                     return pos;
                 }
                 pauser.pause(timeout, timeUnit);
@@ -168,18 +199,50 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public void updateHeader(int length, long position, boolean metaData) throws StreamCorruptedException {
-        int expectedHeader = Wires.NOT_READY | length;
         long pos = bytes.writePosition();
         int actualLength = Maths.toUInt31(pos - position - 4);
-        if (length == Wires.UNKNOWN_LENGTH) {
+        int expectedHeader = Wires.NOT_READY | length;
+        if (length == Wires.UNKNOWN_LENGTH)
             length = actualLength;
-        } else if (length < actualLength)
-            throw new StreamCorruptedException("Wrote " + actualLength + " when " + length + " was set initially.");
+        else if (length < actualLength)
+            throwLengthMismatch(length, actualLength);
         int header = length;
         if (metaData) header |= Wires.META_DATA;
-        if (!bytes.compareAndSwapInt(position, expectedHeader, header))
-            throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(bytes.readVolatileInt(position)));
+        if (ASSERTIONS) {
+            if (!bytes.compareAndSwapInt(position, expectedHeader, header))
+                throwHeaderOverwritten(position, expectedHeader, bytes);
+        } else {
+            bytes.writeOrderedInt(position, header);
+        }
         bytes.writeLimit(bytes.capacity());
+    }
+
+    private static void throwHeaderOverwritten(long position, int expectedHeader, Bytes<?> bytes) throws StreamCorruptedException {
+        throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(bytes.readVolatileInt(position)));
+    }
+
+    @Override
+    public void updateHeader(int length, long position, boolean metaData) throws StreamCorruptedException {
+        long pos = bytes.writePosition();
+        int actualLength = Maths.toUInt31(pos - position - 4);
+        int expectedHeader = Wires.NOT_READY | length;
+        if (length == Wires.UNKNOWN_LENGTH)
+            length = actualLength;
+        else if (length < actualLength)
+            throwLengthMismatch(length, actualLength);
+        int header = length;
+        if (metaData) header |= Wires.META_DATA;
+        if (ASSERTIONS) {
+            if (!bytes.compareAndSwapInt(position, expectedHeader, header))
+                throwHeaderOverwritten(position, expectedHeader, bytes);
+        } else {
+            bytes.writeOrderedInt(position, header);
+        }
+        bytes.writeLimit(bytes.capacity());
+    }
+
+    private static void throwLengthMismatch(int length, int actualLength) throws StreamCorruptedException {
+        throw new StreamCorruptedException("Wrote " + actualLength + " when " + length + " was set initially.");
     }
 
     @Override

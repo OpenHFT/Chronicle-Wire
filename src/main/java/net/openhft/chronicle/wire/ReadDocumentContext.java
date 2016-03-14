@@ -27,13 +27,13 @@ import static net.openhft.chronicle.wire.Wires.lengthOf;
  * Created by peter on 24/12/15.
  */
 public class ReadDocumentContext implements DocumentContext {
-    protected Wire wire;
+    protected AbstractWire wire;
     private boolean metaData;
     private boolean present;
     private long readPosition, readLimit;
 
     public ReadDocumentContext(Wire wire) {
-        this.wire = wire;
+        this.wire = (AbstractWire) wire;
     }
 
     @Override
