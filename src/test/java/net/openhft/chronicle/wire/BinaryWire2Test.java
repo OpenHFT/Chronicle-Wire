@@ -399,6 +399,8 @@ public class BinaryWire2Test {
                 .int64array(10));
         assertEquals("--- !!data #binary\n" +
                 "index: [\n" +
+                "  # length: 10, used: 0\n" +
+                "  # ^ used ^\n" +
                 "  0,\n" +
                 "  0,\n" +
                 "  0,\n" +
