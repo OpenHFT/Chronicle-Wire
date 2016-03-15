@@ -154,9 +154,13 @@ public class BinaryWire extends AbstractWire implements Wire {
                         case I64_ARRAY:
                             bytes.readSkip(1);
                             long len2 = bytes.readLong();
+                            long used = bytes.readLong();
                             wire.getValueOut().sequence(o -> {
+                                wire.writeComment("length: " + len2 + ", used: " + used);
                                 for (long i = 0; i < len2; i++) {
                                     long v = bytes.readLong();
+                                    if (i == used)
+                                        wire.writeComment("^ used ^");
                                     o.int64(v);
                                 }
                             });
