@@ -19,10 +19,6 @@ import java.util.concurrent.TimeoutException;
  */
 public abstract class AbstractWire implements Wire {
     protected static final UTF8StringInterner UTF8_INTERNER = new UTF8StringInterner(512);
-    protected final Bytes<?> bytes;
-    protected final boolean use8bit;
-    protected Pauser pauser = BusyPauser.INSTANCE;
-    protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
     protected static final boolean ASSERTIONS;
 
     static {
@@ -31,9 +27,26 @@ public abstract class AbstractWire implements Wire {
         ASSERTIONS = assertions;
     }
 
+    protected final Bytes<?> bytes;
+    protected final boolean use8bit;
+    protected Pauser pauser = BusyPauser.INSTANCE;
+    protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
+
     public AbstractWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
         this.use8bit = use8bit;
+    }
+
+    private static long throwNotEnoughSpace(int maxlen, Bytes<?> bytes) {
+        throw new IllegalStateException("not enough space to write " + maxlen + " was " + bytes.writeRemaining());
+    }
+
+    private static void throwHeaderOverwritten(long position, int expectedHeader, Bytes<?> bytes) throws StreamCorruptedException {
+        throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(bytes.readVolatileInt(position)));
+    }
+
+    private static void throwLengthMismatch(int length, int actualLength) throws StreamCorruptedException {
+        throw new StreamCorruptedException("Wrote " + actualLength + " when " + length + " was set initially.");
     }
 
     @Override
@@ -142,7 +155,6 @@ public abstract class AbstractWire implements Wire {
         bytes.readPositionRemaining(Wires.SPB_HEADER_SIZE, len);
     }
 
-
     @Override
     public long writeHeader(int length, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {
         if (length < 0 || length > Wires.MAX_LENGTH)
@@ -157,10 +169,6 @@ public abstract class AbstractWire implements Wire {
             return pos;
         }
         return writeHeader0(length, timeout, timeUnit);
-    }
-
-    private static long throwNotEnoughSpace(int maxlen, Bytes<?> bytes) {
-        throw new IllegalStateException("not enough space to write " + maxlen + " was " + bytes.writeRemaining());
     }
 
     private long writeHeader0(int length, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {
@@ -215,34 +223,6 @@ public abstract class AbstractWire implements Wire {
             bytes.writeOrderedInt(position, header);
         }
         bytes.writeLimit(bytes.capacity());
-    }
-
-    private static void throwHeaderOverwritten(long position, int expectedHeader, Bytes<?> bytes) throws StreamCorruptedException {
-        throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(bytes.readVolatileInt(position)));
-    }
-
-    @Override
-    public void updateHeader(int length, long position, boolean metaData) throws StreamCorruptedException {
-        long pos = bytes.writePosition();
-        int actualLength = Maths.toUInt31(pos - position - 4);
-        int expectedHeader = Wires.NOT_READY | length;
-        if (length == Wires.UNKNOWN_LENGTH)
-            length = actualLength;
-        else if (length < actualLength)
-            throwLengthMismatch(length, actualLength);
-        int header = length;
-        if (metaData) header |= Wires.META_DATA;
-        if (ASSERTIONS) {
-            if (!bytes.compareAndSwapInt(position, expectedHeader, header))
-                throwHeaderOverwritten(position, expectedHeader, bytes);
-        } else {
-            bytes.writeOrderedInt(position, header);
-        }
-        bytes.writeLimit(bytes.capacity());
-    }
-
-    private static void throwLengthMismatch(int length, int actualLength) throws StreamCorruptedException {
-        throw new StreamCorruptedException("Wrote " + actualLength + " when " + length + " was set initially.");
     }
 
     @Override
