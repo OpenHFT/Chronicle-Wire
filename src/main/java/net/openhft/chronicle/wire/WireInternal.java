@@ -287,6 +287,11 @@ public enum WireInternal {
                 if (len > bytes.readRemaining())
                     sb.append(" # len: ").append(len).append(", remaining: ").append(bytes.readRemaining());
                 sb.append("\n");
+                if (len == 0) {
+                    sb.append("...\n");
+                    sb.append("# ").append(bytes.readRemaining()).append(" bytes remaining\n");
+                    break;
+                }
 
                 Bytes textBytes = bytes;
 
