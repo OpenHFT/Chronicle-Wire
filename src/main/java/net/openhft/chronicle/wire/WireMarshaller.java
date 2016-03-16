@@ -202,8 +202,8 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, ValueOut write) throws IllegalAccessException {
-            write.sequence(o, (o2, out) -> {
-                Collection coll = (Collection) o2;
+            Collection c = (Collection) field.get(o);
+            write.sequence(c, (coll, out) -> {
                 if (coll instanceof RandomAccess) {
                     List list = (List) coll;
                     for (int i = 0, len = list.size(); i < len; i++)
@@ -277,7 +277,8 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, ValueOut write) throws IllegalAccessException {
-            write.map((Map) o);
+            Map map = (Map) field.get(o);
+            write.map(map);
         }
 
         void read(Object o, WireIn in) {
