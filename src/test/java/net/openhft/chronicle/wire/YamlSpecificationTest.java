@@ -18,7 +18,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -126,50 +125,13 @@ public class YamlSpecificationTest {
  */
 
 class Shape implements Marshallable {
-    @Override
-    public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
-    }
-
-    @Override
-    public void writeMarshallable(@NotNull WireOut wire) {
-    }
 }
 
 class Circle implements Marshallable {
-
-    @Override
-    public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
-
-    }
-
-    @Override
-    public void writeMarshallable(@NotNull WireOut wire) {
-
-    }
 }
 
 class Line implements Marshallable {
-
-    @Override
-    public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
-
-    }
-
-    @Override
-    public void writeMarshallable(@NotNull WireOut wire) {
-
-    }
 }
 
 class Label implements Marshallable {
-
-    @Override
-    public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
-
-    }
-
-    @Override
-    public void writeMarshallable(@NotNull WireOut wire) {
-
-    }
 }

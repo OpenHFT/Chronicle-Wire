@@ -16,28 +16,18 @@
 
 package net.openhft.chronicle.wire;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.Serializable;
 
 /**
  * Created by peter on 27/08/15.
  */
-public class EndOfDayShort implements Marshallable, Serializable {
+public class EndOfDayShort extends AbstractMarshallable implements Serializable {
     // Symbol,Company,Price,Change,ChangePercent,Day's Volume
     public String name;
     public double closingPrice, change, changePercent;
     long daysVolume;
 
-    @Override
-    public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
-        wire.read(() -> "name").text(this, (o, s) -> o.name = s)
-                .read(() -> "price").float64(this, (o, d) -> o.closingPrice = d)
-                .read(() -> "change").float64(this, (o, d) -> o.change = d)
-                .read(() -> "changePercent").float64(this, (o, d) -> o.changePercent = d)
-                .read(() -> "daysVolume").int64(this, (o, d) -> o.daysVolume = d);
-    }
-
+    // TODO FIX the formatting of leaf nodes so this looks ok.
     @Override
     public void writeMarshallable(WireOut wire) {
         wire.write(() -> "name").text(name)
@@ -45,10 +35,5 @@ public class EndOfDayShort implements Marshallable, Serializable {
                 .write(() -> "change").float64(change)
                 .write(() -> "changePercent").float64(changePercent)
                 .write(() -> "daysVolume").int64(daysVolume);
-    }
-
-    @Override
-    public String toString() {
-        return WireType.TEXT.asString(this);
     }
 }

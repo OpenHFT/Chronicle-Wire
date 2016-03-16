@@ -2,10 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.ClassLocal;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -36,6 +33,8 @@ public class WireMarshaller<T> {
         if (clazz != Object.class)
             getAllField(clazz.getSuperclass(), map);
         for (Field field : clazz.getDeclaredFields()) {
+            if ((field.getModifiers() & (Modifier.STATIC | Modifier.TRANSIENT)) != 0)
+                continue;
             field.setAccessible(true);
             map.put(field.getName(), field);
         }

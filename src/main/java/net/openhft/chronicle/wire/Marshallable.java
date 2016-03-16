@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
 /**
- * The implementation of this interface is both readable and writeable as marshallable data.
+ * The implementation of this interface is both readable and write-able as marshallable data.
  */
 public interface Marshallable extends WriteMarshallable, ReadMarshallable {
     static boolean $equals(WriteMarshallable $this, Object o) {
