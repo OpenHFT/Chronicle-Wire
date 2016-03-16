@@ -578,24 +578,20 @@ public class TextWireTest {
         wire.write(() -> "B").marshallable(mtB);
 
         assertEquals("A: {\n" +
-                "  # Start\n" +
                 "  B_FLAG: true,\n" +
                 "  S_NUM: 12345,\n" +
                 "  D_NUM: 123.456,\n" +
                 "  L_NUM: 0,\n" +
                 "  I_NUM: -12345789,\n" +
-                "  TEXT: Hello World,\n" +
-                "  # End\n" +
+                "  TEXT: Hello World\n" +
                 "}\n" +
                 "B: {\n" +
-                "  # Start\n" +
                 "  B_FLAG: false,\n" +
                 "  S_NUM: 1234,\n" +
                 "  D_NUM: 123.4567,\n" +
                 "  L_NUM: 0,\n" +
                 "  I_NUM: -123457890,\n" +
-                "  TEXT: Bye now,\n" +
-                "  # End\n" +
+                "  TEXT: Bye now\n" +
                 "}\n", wire.bytes().toString());
         expectWithSnakeYaml("{A={B_FLAG=true, S_NUM=12345, D_NUM=123.456, L_NUM=0, I_NUM=-12345789, TEXT=Hello World}, " +
                 "B={B_FLAG=false, S_NUM=1234, D_NUM=123.4567, L_NUM=0, I_NUM=-123457890, TEXT=Bye now}}", wire);
