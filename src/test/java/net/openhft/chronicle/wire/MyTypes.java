@@ -15,8 +15,6 @@
  */
 package net.openhft.chronicle.wire;
 
-import static net.openhft.chronicle.wire.WireType.TEXT;
-
 class MyTypes implements Marshallable {
     final StringBuilder text = new StringBuilder();
     boolean b;
@@ -27,18 +25,17 @@ class MyTypes implements Marshallable {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof WriteMarshallable &&
-                TEXT.asString(this).equals(TEXT.asString((WriteMarshallable) o));
+        return Marshallable.$equals(this, o);
     }
 
     @Override
     public int hashCode() {
-        return HashWire.hash32(this);
+        return Marshallable.$hashCode(this);
     }
 
     @Override
     public String toString() {
-        return TEXT.asString(this);
+        return Marshallable.$toString(this);
     }
 
     enum Fields implements WireKey {

@@ -18,10 +18,25 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
+import static net.openhft.chronicle.wire.WireType.TEXT;
+
 /**
  * The implementation of this interface is both readable and writeable as marshallable data.
  */
 public interface Marshallable extends WriteMarshallable, ReadMarshallable {
+    static boolean $equals(WriteMarshallable $this, Object o) {
+        return o instanceof WriteMarshallable &&
+                TEXT.asString($this).equals(TEXT.asString((WriteMarshallable) o));
+    }
+
+    static int $hashCode(WriteMarshallable $this) {
+        return HashWire.hash32($this);
+    }
+
+    static String $toString(WriteMarshallable $this) {
+        return TEXT.asString($this);
+    }
+
     @Override
     default void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
         Wires.readMarshallable(this, wire);
@@ -31,4 +46,5 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
     default void writeMarshallable(@NotNull WireOut wire) {
         Wires.writeMarshallable(this, wire);
     }
+
 }

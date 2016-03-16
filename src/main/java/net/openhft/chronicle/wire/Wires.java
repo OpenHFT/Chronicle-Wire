@@ -19,7 +19,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
-import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +44,6 @@ public enum Wires {
     public static final WireIn EMPTY = new BinaryWire(NO_BYTES);
     public static final int SPB_HEADER_SIZE = 4;
     static final StringBuilderPool SBP = new StringBuilderPool();
-    static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial(WireMarshaller::new);
 
     /**
      * This decodes some Bytes where the first 4-bytes is the length.  e.g. Wire.writeDocument wrote
@@ -202,10 +200,10 @@ public enum Wires {
     }
 
     public static void readMarshallable(Object marshallable, WireIn wire) {
-        WIRE_MARSHALLER_CL.get(marshallable.getClass()).readMarshallable(marshallable, wire);
+        WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass()).readMarshallable(marshallable, wire);
     }
 
     public static void writeMarshallable(Object marshallable, WireOut wire) {
-        WIRE_MARSHALLER_CL.get(marshallable.getClass()).writeMarshallable(marshallable, wire);
+        WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass()).writeMarshallable(marshallable, wire);
     }
 }

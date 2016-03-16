@@ -103,13 +103,19 @@ public class OuterClass implements Marshallable {
         return nc;
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        return Marshallable.$equals(this, o);
+    }
+
+    @Override
+    public int hashCode() {
+        return Marshallable.$hashCode(this);
+    }
+
     @Override
     public String toString() {
-        return "OuterClass{" +
-                "text='" + text + '\'' +
-                ", wireType=" + wireType +
-                ", listA=" + listA +
-                ", listB=" + listB +
-                '}';
+        return Marshallable.$toString(this);
     }
 }
