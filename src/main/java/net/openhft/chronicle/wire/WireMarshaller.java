@@ -17,10 +17,12 @@ public class WireMarshaller<T> {
     public WireMarshaller(Class<T> tClass) {
         Map<String, Field> map = new LinkedHashMap<>();
         getAllField(tClass, map);
-        fields = map.values().stream().map(FieldAccess::create).toArray(FieldAccess[]::new);
-        isLeaf = map.values().stream().map(Field::getType).noneMatch(
-                c -> WireMarshaller.class.isAssignableFrom(c) ||
-                        isCollection(c));
+        fields = map.values().stream()
+                .map(FieldAccess::create).toArray(FieldAccess[]::new);
+        isLeaf = map.values().stream()
+                .map(Field::getType).noneMatch(
+                        c -> WireMarshaller.class.isAssignableFrom(c) ||
+                                isCollection(c));
     }
 
     private static boolean isCollection(Class<?> c) {
@@ -173,7 +175,7 @@ public class WireMarshaller<T> {
             type = field.getType();
             if (type == List.class || type == Collection.class)
                 collectionSupplier = ArrayList::new;
-            else if (type == SortedSet.class)
+            else if (type == SortedSet.class || type == NavigableSet.class)
                 collectionSupplier = TreeSet::new;
             else if (type == Set.class)
                 collectionSupplier = LinkedHashSet::new;

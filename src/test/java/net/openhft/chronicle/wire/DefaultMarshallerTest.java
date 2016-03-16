@@ -50,7 +50,7 @@ public class DefaultMarshallerTest {
         assertEquals(oc, oc2);
     }
 
-    static class DMOuterClass implements Marshallable {
+    static class DMOuterClass extends AbstractMarshallable {
         String text;
         boolean b;
         byte bb;
@@ -75,21 +75,6 @@ public class DefaultMarshallerTest {
             this.i = i;
             this.l = l;
             this.s = s;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return Marshallable.$equals(this, o);
-        }
-
-        @Override
-        public int hashCode() {
-            return Marshallable.$hashCode(this);
-        }
-
-        @Override
-        public String toString() {
-            return Marshallable.$toString(this);
         }
     }
 

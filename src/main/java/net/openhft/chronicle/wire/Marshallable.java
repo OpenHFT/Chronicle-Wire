@@ -26,7 +26,8 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 public interface Marshallable extends WriteMarshallable, ReadMarshallable {
     static boolean $equals(WriteMarshallable $this, Object o) {
         return o instanceof WriteMarshallable &&
-                TEXT.asString($this).equals(TEXT.asString((WriteMarshallable) o));
+                ($this == o ||
+                        TEXT.asString($this).equals(TEXT.asString((WriteMarshallable) o)));
     }
 
     static int $hashCode(WriteMarshallable $this) {
