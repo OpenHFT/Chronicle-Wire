@@ -15,8 +15,20 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.io.IORuntimeException;
+import org.jetbrains.annotations.NotNull;
+
 /**
  * The implementation of this interface is both readable and writeable as marshallable data.
  */
 public interface Marshallable extends WriteMarshallable, ReadMarshallable {
+    @Override
+    default void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
+        Wires.readMarshallable(this, wire);
+    }
+
+    @Override
+    default void writeMarshallable(@NotNull WireOut wire) {
+        Wires.writeMarshallable(this, wire);
+    }
 }

@@ -65,13 +65,21 @@ public class BinaryWirePerfTest {
 
     @Test
     public void wirePerf() throws StreamCorruptedException {
-        System.out.println("TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
+        System.out.println("Custom TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
         Wire wire = createBytes();
-        MyTypes a = new MyTypes();
+        MyTypesCustom a = new MyTypesCustom();
         for (int t = 0; t < 3; t++) {
             a.text.setLength(0);
             a.text.append("Hello World");
-            wirePerf0(wire, a, new MyTypes(), t);
+            wirePerf0(wire, a, new MyTypesCustom(), t);
+        }
+
+        System.out.println("Reflective TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
+        MyTypes b = new MyTypes();
+        for (int t = 0; t < 3; t++) {
+            b.text.setLength(0);
+            b.text.append("Hello World");
+            wirePerf0(wire, b, new MyTypes(), t);
         }
     }
 

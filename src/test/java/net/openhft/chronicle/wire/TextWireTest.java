@@ -560,7 +560,7 @@ public class TextWireTest {
     @Test
     public void testWriteMarshallable() {
         Wire wire = createWire();
-        MyTypes mtA = new MyTypes();
+        MyTypesCustom mtA = new MyTypesCustom();
         mtA.b = true;
         mtA.d = 123.456;
         mtA.i = -12345789;
@@ -569,7 +569,7 @@ public class TextWireTest {
 
         wire.write(() -> "A").marshallable(mtA);
 
-        MyTypes mtB = new MyTypes();
+        MyTypesCustom mtB = new MyTypesCustom();
         mtB.b = false;
         mtB.d = 123.4567;
         mtB.i = -123457890;
@@ -600,7 +600,7 @@ public class TextWireTest {
         expectWithSnakeYaml("{A={B_FLAG=true, S_NUM=12345, D_NUM=123.456, L_NUM=0, I_NUM=-12345789, TEXT=Hello World}, " +
                 "B={B_FLAG=false, S_NUM=1234, D_NUM=123.4567, L_NUM=0, I_NUM=-123457890, TEXT=Bye now}}", wire);
 
-        MyTypes mt2 = new MyTypes();
+        MyTypesCustom mt2 = new MyTypesCustom();
         wire.read(() -> "A").marshallable(mt2);
         assertEquals(mt2, mtA);
 
@@ -611,7 +611,7 @@ public class TextWireTest {
     @Test
     public void testWriteMarshallableAndFieldLength() {
         Wire wire = createWire();
-        MyTypes mtA = new MyTypes();
+        MyTypesCustom mtA = new MyTypesCustom();
         mtA.b = true;
         mtA.d = 123.456;
         mtA.i = -12345789;

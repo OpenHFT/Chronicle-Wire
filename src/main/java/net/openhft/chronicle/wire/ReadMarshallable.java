@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
  * This interface marks a object which can be reloaded from stream re-using an
  * existing object.
  * <p/>
- * For objects which must deserialze final field see Demarshallable
+ * For objects which must deserialize final field see Demarshallable
  */
 @FunctionalInterface
 public interface ReadMarshallable {
