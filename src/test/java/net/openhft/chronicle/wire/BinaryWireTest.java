@@ -642,7 +642,7 @@ public class BinaryWireTest {
     @Test
     public void testWriteMarshallable() {
         Wire wire = createWire();
-        MyTypes mtA = new MyTypes();
+        MyTypesCustom mtA = new MyTypesCustom();
         mtA.b = true;
         mtA.d = 123.456;
         mtA.i = -12345789;
@@ -651,7 +651,7 @@ public class BinaryWireTest {
 
         wire.write(() -> "A").marshallable(mtA);
 
-        MyTypes mtB = new MyTypes();
+        MyTypesCustom mtB = new MyTypesCustom();
         mtB.b = false;
         mtB.d = 123.4567;
         mtB.i = -123457890;
@@ -668,7 +668,7 @@ public class BinaryWireTest {
                 "[pos: 0, rlim: 68, wlim: 8EiB, cap: 8EiB ] ‖\\u0082\\u001F٠٠٠±¢90\\u0091w¾\\u009F\\u001A/Ý^@٠¦C\\u009ECÿëHello World\\u0082\\u001B٠٠٠°¢Ò⒋\\u0091S⒌£\\u0092:Ý^@٠¦\\u009E.¤øçBye now",
                 "[pos: 0, rlim: 84, wlim: 8EiB, cap: 8EiB ] ‖\\u0082'٠٠٠±¥90\\u0091w¾\\u009F\\u001A/Ý^@§٠٠٠٠٠٠٠٠¦C\\u009ECÿëHello World\\u0082#٠٠٠°¥Ò⒋\\u0091S⒌£\\u0092:Ý^@§٠٠٠٠٠٠٠٠¦\\u009E.¤øçBye now");
 */
-        MyTypes mt2 = new MyTypes();
+        MyTypesCustom mt2 = new MyTypesCustom();
         wire.read(() -> "A").marshallable(mt2);
         assertEquals(mt2, mtA);
 

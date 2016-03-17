@@ -449,7 +449,7 @@ public class RawWireTest {
     @Test
     public void testWriteMarshallable() {
         Wire wire = createWire();
-        MyTypes mtA = new MyTypes();
+        MyTypesCustom mtA = new MyTypesCustom();
         mtA.b = (true);
         mtA.d = (123.456);
         mtA.i = (-12345789);
@@ -458,7 +458,7 @@ public class RawWireTest {
 
         wire.writeEventName(() -> "A").marshallable(mtA);
 
-        MyTypes mtB = new MyTypes();
+        MyTypesCustom mtB = new MyTypesCustom();
         mtB.b = (false);
         mtB.d = (123.4567);
         mtB.i = (-123457890);
@@ -471,7 +471,7 @@ public class RawWireTest {
                         "⒈B\\u001F٠٠٠٠Ò⒋S⒌£\\u0092:Ý^@٠٠٠٠٠٠٠٠\\u009E.¤ø⒎Bye now‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠",
                 wire.bytes().toDebugString());
 
-        MyTypes mt2 = new MyTypes();
+        MyTypesCustom mt2 = new MyTypesCustom();
         StringBuilder key = new StringBuilder();
         wire.readEventName(key).marshallable(mt2);
         assertEquals("A", key.toString());

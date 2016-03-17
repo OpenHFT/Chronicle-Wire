@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 public class MarshallableTest {
     @Test
     public void testBytesMarshallable() {
-        Marshallable m = new MyTypes();
+        Marshallable m = new MyTypesCustom();
 
         Bytes bytes = nativeBytes();
         assertTrue(bytes.isElastic());

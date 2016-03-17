@@ -1,8 +1,9 @@
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import net.openhft.chronicle.wire.*;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.wire.BinaryWire;
+import net.openhft.chronicle.wire.Marshallable;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireKey;
 
 /**
  */
@@ -61,18 +62,19 @@ public class WireTextBug {
             clOrdID = aClOrdID;
         }
 
-        public void readMarshallable(WireIn aWireIn) throws IORuntimeException {
-            aWireIn.read(FIXTag.ClOrdID).text(this, Bug::setClOrdID);
+        @Override
+        public boolean equals(Object o) {
+            return Marshallable.$equals(this, o);
         }
 
+        @Override
+        public int hashCode() {
+            return Marshallable.$hashCode(this);
+        }
+
+        @Override
         public String toString() {
-            return "Bug{" +
-                    "clOrdID='" + clOrdID + '\'' +
-                    '}';
-        }
-
-        public void writeMarshallable(@NotNull WireOut aWireOut) {
-            aWireOut.write(FIXTag.ClOrdID).text(getClOrdID());
+            return Marshallable.$toString(this);
         }
     }
 }

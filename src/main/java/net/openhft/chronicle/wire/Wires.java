@@ -65,13 +65,11 @@ public enum Wires {
         return WireInternal.fromSizePrefixedBlobs(bytes, position, limit - position);
     }
 
-
     public static String fromSizePrefixedBlobs(@NotNull Wire wire) {
         final Bytes<?> bytes = wire.bytes();
         long position = bytes.readPosition();
         return WireInternal.fromSizePrefixedBlobs(bytes, position, bytes.readRemaining());
     }
-
 
     public static StringBuilder acquireStringBuilder() {
         return SBP.acquireStringBuilder();
@@ -199,5 +197,13 @@ public enum Wires {
 
     public static String fromSizePrefixedBlobs(Bytes<?> bytes, long position, long length) {
         return WireInternal.fromSizePrefixedBlobs(bytes, position, length);
+    }
+
+    public static void readMarshallable(Object marshallable, WireIn wire) {
+        WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass()).readMarshallable(marshallable, wire);
+    }
+
+    public static void writeMarshallable(Object marshallable, WireOut wire) {
+        WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass()).writeMarshallable(marshallable, wire);
     }
 }
