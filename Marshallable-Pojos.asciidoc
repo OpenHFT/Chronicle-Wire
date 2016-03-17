@@ -48,6 +48,7 @@ System.out.println(mps);
 
 prints
 
+[source,yaml]
 ----
 !MyPojos {
   name: test-list,
