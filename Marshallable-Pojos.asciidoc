@@ -1,7 +1,7 @@
 = Pojo Example
 The following is a simple example of a POJO with a nested data type in a List.
 
-[source,java]
+[source, java]
 ----
 class MyPojo extends AbstractMarshallable {
     String text;
@@ -37,7 +37,7 @@ A important feature of the toString() method is no information is lost.  The obj
 the text of the toString() method.  This is useful for building sample data in unit tests for from a file.
 It also means that you can take the dump of an object in a log file and reconstruct the original object.
 
-[source,java]
+[source, java]
 ----
 MyPojos mps = new MyPojos("test-list");
 mps.myPojos.add(new MyPojo("text1", 1, 1.1));
@@ -48,7 +48,7 @@ System.out.println(mps);
 
 prints
 
-[source,yaml]
+[source, yaml]
 ----
 !MyPojos {
   name: test-list,
@@ -60,7 +60,7 @@ prints
 
 You can take this same output and reconstruct the original object
 
-[source,java]
+[source, java]
 ----
 MyPojos mps2 = Marshallable.fromString(mps.toString());
 assertEquals(mps, mps2);
@@ -77,7 +77,7 @@ assertEquals(mps, mps3);
 
 Finally you can take data from a file and build the object
 
-[source,java]
+[source, java]
 ----
 MyPojos mps4 = Marshallable.fromFile("my-pojos.yaml");
 assertEquals(mps, mps4);
