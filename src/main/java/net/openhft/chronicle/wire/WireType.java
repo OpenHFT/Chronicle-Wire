@@ -251,4 +251,19 @@ public enum WireType implements Function<Bytes, Wire> {
         Wire wire = apply(Bytes.fromHexString(s.toString()));
         return wire.getValueIn().typedMarshallable();
     }
+
+    public String asString(Map<String, Object> map) {
+        Bytes bytes = getBytes();
+        Wire wire = apply(bytes);
+        wire.getValueOut()
+                .marshallableAsMap(map, Object.class, false);
+        return bytes.toString();
+    }
+
+    public Map<String, Object> asMap(CharSequence cs) {
+        Bytes bytes = getBytes();
+        bytes.appendUtf8(cs);
+        Wire wire = apply(bytes);
+        return wire.getValueIn().marshallableAsMap(Object.class);
+    }
 }

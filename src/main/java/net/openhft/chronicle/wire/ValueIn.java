@@ -217,7 +217,8 @@ public interface ValueIn {
         marshallable(m -> {
             StringBuilder sb = new StringBuilder();
             while (m.hasMore()) {
-                m.readEventName(sb).object(vClass, map, (map2, v) -> map2.put(sb.toString(), v));
+                m.readEventName(sb)
+                        .object(vClass, map, (map2, v) -> map2.put(sb.toString(), v));
             }
         });
         return map;

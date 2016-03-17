@@ -647,18 +647,15 @@ public class TextWireTest {
 //        expectWithSnakeYaml("{example={hello=world, hello1=world1, hello2=world2}}", wire);
 //        bytes.readPosition(0);
         assertEquals("--- !!data\n" +
-                        "example: !!seqmap [\n" +
-                        "  { key: hello,\n" +
-                        "    value: world },\n" +
-                        "  { key: hello1,\n" +
-                        "    value: world1 },\n" +
-                        "  { key: hello2,\n" +
-                        "    value: world2 }\n" +
-                        "]\n",
+                        "example: {\n" +
+                        "  hello: world,\n" +
+                        "  hello1: world1,\n" +
+                        "  hello2: world2\n" +
+                        "}\n",
                 Wires.fromSizePrefixedBlobs(bytes));
         final Map<String, String> actual = new LinkedHashMap<>();
         wire.readDocument(null, c -> c.read(() -> "example").map(actual));
-        assertEquals(actual, expected);
+        assertEquals(expected, actual);
     }
 
     @Test

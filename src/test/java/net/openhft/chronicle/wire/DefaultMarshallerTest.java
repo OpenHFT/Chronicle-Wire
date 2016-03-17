@@ -40,12 +40,16 @@ public class DefaultMarshallerTest {
                 "    { str: hi, num: 111 },\n" +
                 "    { str: bye, num: 999 }\n" +
                 "  ]\n" +
-                "  map: !!seqmap [\n" +
-                "    { key: key,\n" +
-                "      value: !net.openhft.chronicle.wire.DefaultMarshallerTest$DMNestedClass { str: value, num: 1 } },\n" +
-                "    { key: keyz,\n" +
-                "      value: !net.openhft.chronicle.wire.DefaultMarshallerTest$DMNestedClass { str: valuez, num: 1111 } }\n" +
-                "  ]\n" +
+                "  map: {\n" +
+                "    key: !net.openhft.chronicle.wire.DefaultMarshallerTest$DMNestedClass {\n" +
+                "      str: value,\n" +
+                "      num: 1\n" +
+                "        },\n" +
+                "    keyz: !net.openhft.chronicle.wire.DefaultMarshallerTest$DMNestedClass {\n" +
+                "      str: valuez,\n" +
+                "      num: 1111\n" +
+                "        }\n" +
+                "    }\n" +
                 "}\n", oc.toString());
 
         Wire text = new TextWire(Bytes.elasticByteBuffer());

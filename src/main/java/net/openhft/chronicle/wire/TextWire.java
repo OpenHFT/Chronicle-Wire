@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
 import net.openhft.chronicle.bytes.ref.TextLongReference;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
@@ -1178,6 +1179,10 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut marshallable(@NotNull WriteMarshallable object) {
+            if (bytes.writePosition() == 0) {
+                object.writeMarshallable(TextWire.this);
+                return TextWire.this;
+            }
             boolean wasLeaf = leaf;
             if (!wasLeaf)
                 pushState();
@@ -1220,6 +1225,26 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut map(@NotNull final Map map) {
+            if (allStringKeys(map))
+                stringKeys(map);
+            else
+                objectKeys(map);
+            return TextWire.this;
+        }
+
+        private boolean allStringKeys(Map map) {
+            for (Object o : map.keySet()) {
+                if (!(o instanceof String))
+                    return false;
+            }
+            return true;
+        }
+
+        private void stringKeys(Map map) {
+            marshallableAsMap(map, Object.class, false);
+        }
+
+        private void objectKeys(@NotNull Map map) {
             typePrefix(SEQ_MAP);
             bytes.writeUnsignedByte('[');
             pushState();
@@ -1245,7 +1270,6 @@ public class TextWire extends AbstractWire implements Wire {
             prependSeparator();
             bytes.writeUnsignedByte(']');
             endField();
-            return TextWire.this;
         }
 
         protected void endField() {
@@ -2002,6 +2026,10 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireIn marshallable(@NotNull ReadMarshallable object) {
+            if (indentation() == 0) {
+                object.readMarshallable(TextWire.this);
+                return TextWire.this;
+            }
             pushState();
             consumePadding();
             int code = peekCode();
@@ -2139,35 +2167,43 @@ public class TextWire extends AbstractWire implements Wire {
             usingMap.clear();
 
             StringBuilder sb = acquireStringBuilder();
-            if (peekCode() == '!') {
-                parseUntil(sb, StopCharTesters.SPACE_STOP);
-                String str = WireInternal.INTERNER.intern(sb);
-
-                if (("!!null").contentEquals(sb)) {
-                    text();
-                    return null;
-
-                } else if (("!" + SEQ_MAP).contentEquals(sb)) {
-                    consumePadding();
-                    int start = readCode();
-                    if (start != '[')
-                        throw new IORuntimeException("Unsupported start of sequence : " + (char) start);
-                    do {
-                        marshallable(r -> {
-                            final K k = r.read(() -> "key")
-                                    .object(kClazz);
-                            final V v = r.read(() -> "value")
-                                    .object(vClass);
-                            usingMap.put(k, v);
-                        });
-                    } while (hasNextSequenceItem());
-                    return usingMap;
-
-                } else {
-                    throw new IORuntimeException("Unsupported type :" + str);
-                }
+            int code = peekCode();
+            if (code == '!') {
+                return typedMap(kClazz, vClass, usingMap, sb);
+            } else if (code == '{') {
+                return marshallableAsMap(Object.class, () -> (Map) usingMap);
             }
             return usingMap;
+        }
+
+        @Nullable
+        private <K, V> Map<K, V> typedMap(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap, StringBuilder sb) {
+            parseUntil(sb, StopCharTesters.SPACE_STOP);
+            String str = WireInternal.INTERNER.intern(sb);
+
+            if (("!!null").contentEquals(sb)) {
+                text();
+                return null;
+
+            } else if (("!" + SEQ_MAP).contentEquals(sb)) {
+                consumePadding();
+                int start = readCode();
+                if (start != '[')
+                    throw new IORuntimeException("Unsupported start of sequence : " + (char) start);
+                do {
+                    marshallable(r -> {
+                        final K k = r.read(() -> "key")
+                                .object(kClazz);
+                        final V v = r.read(() -> "value")
+                                .object(vClass);
+                        usingMap.put(k, v);
+                    });
+                } while (hasNextSequenceItem());
+                return usingMap;
+
+            } else {
+                throw new IORuntimeException("Unsupported type :" + str);
+            }
         }
 
         @Override
@@ -2468,7 +2504,7 @@ public class TextWire extends AbstractWire implements Wire {
                         l.add(v.object(Object.class));
                     }
                 });
-                return list.toArray();
+                return clazz == Object[].class ? list.toArray() : list;
             } else if (clazz == String[].class) {
                 List<String> list = new ArrayList<>();
                 sequence(list, (l, v) -> {

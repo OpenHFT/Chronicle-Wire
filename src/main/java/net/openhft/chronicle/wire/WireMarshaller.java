@@ -114,6 +114,15 @@ public class WireMarshaller<T> {
                 return Object.class;
         }
 
+        @Override
+        public String toString() {
+            return "FieldAccess{" +
+                    "field=" + field +
+                    ", key=" + key.name() +
+                    ", isLeaf=" + isLeaf +
+                    '}';
+        }
+
         void write(Object o, WireOut out) {
             try {
                 ValueOut write = out.write(key);
