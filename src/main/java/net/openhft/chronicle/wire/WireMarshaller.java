@@ -23,6 +23,7 @@ public class WireMarshaller<T> {
                 .map(Field::getType).noneMatch(
                         c -> WireMarshaller.class.isAssignableFrom(c) ||
                                 isCollection(c));
+        System.out.println(tClass + " leaf= " + isLeaf);
     }
 
     private static boolean isCollection(Class<?> c) {
@@ -57,16 +58,17 @@ public class WireMarshaller<T> {
     static class FieldAccess {
         final Field field;
         final WireKey key;
-        final boolean isLeaf;
+        Boolean isLeaf;
 
         public FieldAccess(Field field) {
-            this(field, false);
+            this(field, null);
         }
 
-        public FieldAccess(Field field, boolean isLeaf) {
+        public FieldAccess(Field field, Boolean isLeaf) {
             this.field = field;
             key = field::getName;
             this.isLeaf = isLeaf;
+            System.out.println(field + " isLeaf=" + isLeaf);
         }
 
         public static Object create(Field field) {
@@ -94,7 +96,7 @@ public class WireMarshaller<T> {
                 case "double":
                     return new DoubleFieldAccess(field);
                 default:
-                    boolean isLeaf = true;
+                    Boolean isLeaf = null;
                     if (WireMarshaller.class.isAssignableFrom(type))
                         isLeaf = WIRE_MARSHALLER_CL.get(type).isLeaf;
                     else if (isCollection(type))
@@ -122,7 +124,9 @@ public class WireMarshaller<T> {
         }
 
         protected void getValue(Object o, ValueOut write) throws IllegalAccessException {
-            write.leaf(isLeaf).object(field.get(o));
+            if (isLeaf != null)
+                write.leaf(isLeaf);
+            write.object(field.get(o));
         }
 
         void read(Object o, WireIn in) {
@@ -186,6 +190,7 @@ public class WireMarshaller<T> {
                 ParameterizedType pType = (ParameterizedType) genericType;
                 Type type0 = pType.getActualTypeArguments()[0];
                 componentType = extractClass(type0);
+                isLeaf = WIRE_MARSHALLER_CL.get(componentType).isLeaf;
             } else {
                 componentType = Object.class;
             }
@@ -207,10 +212,13 @@ public class WireMarshaller<T> {
             write.sequence(c, (coll, out) -> {
                 if (coll instanceof RandomAccess) {
                     List list = (List) coll;
-                    for (int i = 0, len = list.size(); i < len; i++)
+                    for (int i = 0, len = list.size(); i < len; i++) {
+                        if (Boolean.TRUE.equals(isLeaf)) out.leaf();
                         out.object(componentType, list.get(i));
+                    }
                 } else {
                     for (Object element : coll) {
+                        if (Boolean.TRUE.equals(isLeaf)) out.leaf();
                         out.object(componentType, element);
                     }
                 }

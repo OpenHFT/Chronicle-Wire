@@ -1,0 +1,83 @@
+= Pojo Example
+The following is a simple example of a POJO with a nested data type in a List.
+
+[source,java]
+----
+class MyPojo extends AbstractMarshallable {
+    String text;
+    int num;
+    double factor;
+
+    public MyPojo(String text, int num, double factor) {
+        this.text = text;
+        this.num = num;
+        this.factor = factor;
+    }
+}
+
+class MyPojos extends AbstractMarshallable {
+    String name;
+    List<MyPojo> myPojos = new ArrayList<>();
+
+    public MyPojos(String name) {
+        this.name = name;
+    }
+}
+----
+
+By extending `AbstractMarshallable` the class has an implementation
+ for `readMarshallable(WireIn)`, `writeMarshallable(WireOut)` and from these
+ `toString()`, `hashCode()` and `equals(Object)`.  You only need to define the method
+  yourself for improved efficiency.  These default implementations can give you
+  2/3rds of the performance of hand coding but save time and potential errors
+  writing them yourself.
+
+=== The toString()
+A important feature of the toString() method is no information is lost.  The object can be reconstructed from
+the text of the toString() method.  This is useful for building sample data in unit tests for from a file.
+It also means that you can take the dump of an object in a log file and reconstruct the original object.
+
+[source,java]
+----
+MyPojos mps = new MyPojos("test-list");
+mps.myPojos.add(new MyPojo("text1", 1, 1.1));
+mps.myPojos.add(new MyPojo("text2", 2, 2.2));
+
+System.out.println(mps);
+----
+
+prints
+
+----
+!MyPojos {
+  name: test-list,
+  myPojos: [
+    { text: text1, num: 1, factor: 1.1 },
+    { text: text2, num: 2, factor: 2.2 }
+  ]}
+----
+
+You can take this same output and reconstruct the original object
+
+[source,java]
+----
+MyPojos mps2 = Marshallable.fromString(mps.toString());
+assertEquals(mps, mps2);
+
+String text = "!MyPojos {\n" +
+        "  name: test-list,\n" +
+        "  myPojos: [\n" +
+        "    { text: text1, num: 1, factor: 1.1 },\n" +
+        "    { text: text2, num: 2, factor: 2.2 }\n" +
+        "  ]}\n";
+MyPojos mps3 = Marshallable.fromString(text);
+assertEquals(mps, mps3);
+----
+
+Finally you can take data from a file and build the object
+
+[source,java]
+----
+MyPojos mps4 = Marshallable.fromFile("my-pojos.yaml");
+assertEquals(mps, mps4);
+----

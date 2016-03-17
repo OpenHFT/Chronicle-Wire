@@ -20,7 +20,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import org.jetbrains.annotations.NotNull;
 
-import static net.openhft.chronicle.bytes.Bytes.empty;
+import static net.openhft.chronicle.bytes.BytesStore.empty;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 /**

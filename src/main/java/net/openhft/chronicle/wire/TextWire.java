@@ -42,7 +42,7 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.*;
 
-import static net.openhft.chronicle.bytes.Bytes.empty;
+import static net.openhft.chronicle.bytes.BytesStore.empty;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 
@@ -60,11 +60,11 @@ public class TextWire extends AbstractWire implements Wire {
     static final ThreadLocal<StopCharTester> ESCAPED_QUOTES = ThreadLocal.withInitial(StopCharTesters.QUOTES::escaping);
     static final ThreadLocal<StopCharTester> ESCAPED_SINGLE_QUOTES = ThreadLocal.withInitial(() -> StopCharTesters.SINGLE_QUOTES.escaping());
     static final ThreadLocal<StopCharsTester> ESCAPED_END_OF_TEXT = ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
-    static final BytesStore COMMA_SPACE = BytesStore.wrap(", ");
-    static final BytesStore COMMA_NEW_LINE = BytesStore.wrap(",\n");
-    static final BytesStore NEW_LINE = BytesStore.wrap("\n");
-    static final BytesStore EMPTY_AFTER_COMMENT = BytesStore.wrap("");
-    static final BytesStore SPACE = BytesStore.wrap(" ");
+    static final BytesStore COMMA_SPACE = BytesStore.from(", ");
+    static final BytesStore COMMA_NEW_LINE = BytesStore.from(",\n");
+    static final BytesStore NEW_LINE = BytesStore.from("\n");
+    static final BytesStore EMPTY_AFTER_COMMENT = BytesStore.from("");
+    static final BytesStore SPACE = BytesStore.from(" ");
     static final BytesStore END_FIELD = NEW_LINE;
 
     static {
@@ -742,12 +742,14 @@ public class TextWire extends AbstractWire implements Wire {
 
     class TextValueOut implements ValueOut {
         protected int indentation = 0;
+        protected List<BytesStore> seps = new ArrayList<>(4);
         @NotNull
-        protected BytesStore sep = Bytes.empty();
+        protected BytesStore sep = BytesStore.empty();
         protected boolean leaf = false;
 
         public void resetState() {
             indentation = 0;
+            seps.clear();
             sep = empty();
             leaf = false;
         }
@@ -756,13 +758,19 @@ public class TextWire extends AbstractWire implements Wire {
             append(sep);
             if (sep.endsWith('\n') || sep == EMPTY_AFTER_COMMENT)
                 indent();
-            sep = Bytes.empty();
+            sep = BytesStore.empty();
         }
 
         @NotNull
         @Override
         public ValueOut leaf() {
             leaf = true;
+            return this;
+        }
+
+        @Override
+        public ValueOut leaf(boolean leaf) {
+            this.leaf = leaf;
             return this;
         }
 
@@ -774,8 +782,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         private void indent() {
             for (int i = 0; i < indentation; i++) {
-                bytes.writeUnsignedByte(' ');
-                bytes.writeUnsignedByte(' ');
+                bytes.writeUnsignedShort(' ' * 257);
             }
         }
 
@@ -784,7 +791,7 @@ public class TextWire extends AbstractWire implements Wire {
                 if (leaf) {
                     sep = COMMA_SPACE;
                 } else {
-                    sep = Bytes.empty();
+                    sep = BytesStore.empty();
                     bytes.writeUnsignedByte('\n');
                 }
 
@@ -1039,7 +1046,7 @@ public class TextWire extends AbstractWire implements Wire {
             bytes.writeUnsignedByte('!');
             append(typeName);
             bytes.writeUnsignedByte(' ');
-            sep = Bytes.empty();
+            sep = BytesStore.empty();
             return this;
         }
 
@@ -1157,12 +1164,15 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         protected void popState() {
+            sep = seps.remove(seps.size() - 1);
             indentation--;
             leaf = false;
         }
 
         protected void pushState() {
             indentation++;
+            seps.add(sep);
+            sep = BytesStore.empty();
         }
 
         @NotNull

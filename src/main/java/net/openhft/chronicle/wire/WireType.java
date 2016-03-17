@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
 import net.openhft.chronicle.bytes.ref.TextLongReference;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -37,7 +38,6 @@ import java.util.function.Supplier;
  * A selection of prebuilt wire types.
  */
 public enum WireType implements Function<Bytes, Wire> {
-
     TEXT {
         @NotNull
         @Override
@@ -143,6 +143,9 @@ public enum WireType implements Function<Bytes, Wire> {
     private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
 
     static Bytes getBytes() {
+        // when in debug, the output becomes confused if you reuse the buffer.
+        if (Jvm.isDebug())
+            return Bytes.allocateElasticDirect();
         Bytes bytes = bytesTL.get();
         bytes.clear();
         return bytes;

@@ -40,7 +40,7 @@ public enum Wires {
     public static final int END_OF_DATA = NOT_READY | META_DATA | UNKNOWN_LENGTH;
 
     public static final int NOT_INITIALIZED = 0x0;
-    public static final Bytes<?> NO_BYTES = new VanillaBytes<>(Bytes.empty());
+    public static final Bytes<?> NO_BYTES = new VanillaBytes<>(BytesStore.empty());
     public static final WireIn EMPTY = new BinaryWire(NO_BYTES);
     public static final int SPB_HEADER_SIZE = 4;
     static final StringBuilderPool SBP = new StringBuilderPool();
@@ -200,10 +200,12 @@ public enum Wires {
     }
 
     public static void readMarshallable(Object marshallable, WireIn wire) {
-        WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass()).readMarshallable(marshallable, wire);
+        WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass())
+                .readMarshallable(marshallable, wire);
     }
 
     public static void writeMarshallable(Object marshallable, WireOut wire) {
-        WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass()).writeMarshallable(marshallable, wire);
+        WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass())
+                .writeMarshallable(marshallable, wire);
     }
 }

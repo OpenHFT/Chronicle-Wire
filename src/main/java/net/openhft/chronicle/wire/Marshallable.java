@@ -18,6 +18,10 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.util.Map;
+
+import static net.openhft.chronicle.wire.WireType.READ_ANY;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
 /**
@@ -38,6 +42,26 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         return TEXT.asString($this);
     }
 
+    static <T> T fromString(CharSequence cs) {
+        return TEXT.fromString(cs);
+    }
+
+    static <T> T fromFile(String filename) throws IOException {
+        return TEXT.fromFile(filename);
+    }
+
+    static Map<String, Object> fromFileAsMap(String filename) throws IOException {
+        return TEXT.fromFileAsMap(filename, Object.class);
+    }
+
+    static <V> Map<String, V> fromFileAsMap(String filename, Class<V> valueClass) throws IOException {
+        return TEXT.fromFileAsMap(filename, valueClass);
+    }
+
+    static Map<String, Object> fromHexString(CharSequence cs) throws IOException {
+        return READ_ANY.fromHexString(cs);
+    }
+
     @Override
     default void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
         Wires.readMarshallable(this, wire);
@@ -47,5 +71,4 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
     default void writeMarshallable(@NotNull WireOut wire) {
         Wires.writeMarshallable(this, wire);
     }
-
 }
