@@ -28,18 +28,25 @@ public class DefaultMarshallerTest {
         oc.map.put("keyz", new DMNestedClass("valuez", 1111));
 
         assertEquals("!net.openhft.chronicle.wire.DefaultMarshallerTest$DMOuterClass {\n" +
-                "  text: words, b: true, bb: 1, s: 6, f: 3.0, d: 2.0, l: 5, i: 4, nested: [\n" +
+                "  text: words,\n" +
+                "  b: true,\n" +
+                "  bb: 1,\n" +
+                "  s: 6,\n" +
+                "  f: 3.0,\n" +
+                "  d: 2.0,\n" +
+                "  l: 5,\n" +
+                "  i: 4,\n" +
+                "  nested: [\n" +
                 "    { str: hi, num: 111 },\n" +
-                "      {\n" +
-                "      str: bye, num: 999 }\n" +
-                "    ]\n" +
-                "    map: !!seqmap [\n" +
-                "      { key: key,\n" +
-                "        value: !net.openhft.chronicle.wire.DefaultMarshallerTest$DMNestedClass { str: value, num: 1 } },\n" +
-                "      { key: keyz,\n" +
-                "        value: !net.openhft.chronicle.wire.DefaultMarshallerTest$DMNestedClass { str: valuez, num: 1111 } }\n" +
-                "    ]\n" +
-                "    }", oc.toString());
+                "    { str: bye, num: 999 }\n" +
+                "  ]\n" +
+                "  map: !!seqmap [\n" +
+                "    { key: key,\n" +
+                "      value: !net.openhft.chronicle.wire.DefaultMarshallerTest$DMNestedClass { str: value, num: 1 } },\n" +
+                "    { key: keyz,\n" +
+                "      value: !net.openhft.chronicle.wire.DefaultMarshallerTest$DMNestedClass { str: valuez, num: 1111 } }\n" +
+                "  ]\n" +
+                "}\n", oc.toString());
 
         Wire text = new TextWire(Bytes.elasticByteBuffer());
         oc.writeMarshallable(text);

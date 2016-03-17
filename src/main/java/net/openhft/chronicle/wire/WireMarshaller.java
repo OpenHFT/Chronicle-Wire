@@ -23,7 +23,7 @@ public class WireMarshaller<T> {
                 .map(Field::getType).noneMatch(
                         c -> WireMarshaller.class.isAssignableFrom(c) ||
                                 isCollection(c));
-        System.out.println(tClass + " leaf= " + isLeaf);
+//        System.out.println(tClass + " leaf= " + isLeaf);
     }
 
     private static boolean isCollection(Class<?> c) {
@@ -68,7 +68,7 @@ public class WireMarshaller<T> {
             this.field = field;
             key = field::getName;
             this.isLeaf = isLeaf;
-            System.out.println(field + " isLeaf=" + isLeaf);
+//            System.out.println(field + " isLeaf=" + isLeaf);
         }
 
         public static Object create(Field field) {

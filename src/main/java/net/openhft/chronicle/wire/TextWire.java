@@ -1178,20 +1178,24 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut marshallable(@NotNull WriteMarshallable object) {
-            if (!leaf)
+            boolean wasLeaf = leaf;
+            if (!wasLeaf)
                 pushState();
 
             prependSeparator();
             bytes.writeUnsignedByte('{');
-            if (leaf) sep = SPACE;
+            if (wasLeaf) sep = SPACE;
             else newLine();
 
             object.writeMarshallable(TextWire.this);
-            boolean wasLeaf = leaf;
-            if (!leaf)
-                popState();
-            else
+            BytesStore popSep = null;
+            if (wasLeaf) {
                 leaf = false;
+            } else if (seps.size() > 0) {
+                popSep = seps.get(seps.size() - 1);
+                popState();
+                sep = NEW_LINE;
+            }
             if (sep.startsWith(','))
                 append(sep, 1, sep.length() - 1);
             else
@@ -1200,7 +1204,8 @@ public class TextWire extends AbstractWire implements Wire {
                 indent();
             }
             bytes.writeUnsignedByte('}');
-
+            if (popSep != null)
+                sep = popSep;
             if (indentation == 0) {
                 newLine();
                 append(sep);

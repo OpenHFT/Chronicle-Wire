@@ -32,7 +32,8 @@ public class ReadmePojoTest {
                 "  myPojos: [\n" +
                 "    { text: text1, num: 1, factor: 1.1 },\n" +
                 "    { text: text2, num: 2, factor: 2.2 }\n" +
-                "  ]}\n";
+                "  ]\n" +
+                "}\n";
         MyPojos mps3 = Marshallable.fromString(text);
         assertEquals(mps, mps3);
 
