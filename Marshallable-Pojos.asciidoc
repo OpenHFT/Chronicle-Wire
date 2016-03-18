@@ -1,6 +1,17 @@
+== Why use Marshallable objects.
+
+Marshallable object have been designed to allow you to
+
+- write a simple POJO
+- have the `toString()`, `hashCode()` and `equals(Object)` methods created for you.
+- serialization to a human readable format (based on YAML), as well as efficient binary formats.
+- the string format for text and binary can be logged and reconstructed from the text or hexi-decimal dump
+- copying and conversion of data from one type to another
+
 = Pojo Example
 The following is a simple example of a POJO with a nested data type in a List.
 
+.A Simple Pojo without needing to define toString/hashCode/equals
 [source, java]
 ----
 class MyPojo extends AbstractMarshallable {
