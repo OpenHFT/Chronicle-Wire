@@ -8,7 +8,7 @@ Marshallable object have been designed to allow you to
 - the string format for text and binary can be logged and reconstructed from the text or hexi-decimal dump
 - copying and conversion of data from one type to another
 
-= Pojo Example
+== Pojo Example
 The following is a simple example of a POJO with a nested data type in a List.
 
 .A Simple Pojo without needing to define toString/hashCode/equals
