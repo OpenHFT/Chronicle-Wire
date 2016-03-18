@@ -72,9 +72,10 @@ String text = "!MyPojos {\n" +
         "    { text: text2, num: 2, factor: 2.2 }\n" +
         "  ]\n" +
         "}\n";
-MyPojos mps3 = Marshallable.fromString(teMxt);
-assertEquals(mps, mps3);
+MyPojos mps3 = Marshallable.fromString(text);
+assertEquals(mps, mps3); // <1>
 ----
+<1> AbstractMarshallable also provides a default equals(Object) and hashCode()
 
 Finally you can take data from a file and build the object
 
