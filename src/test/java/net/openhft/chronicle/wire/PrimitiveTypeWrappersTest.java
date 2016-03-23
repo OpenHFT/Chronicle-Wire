@@ -56,7 +56,7 @@ public class PrimitiveTypeWrappersTest {
                 Short.class, Float.class,
                 Integer.class, Long.class, Double.class};
 
-        final Number[] nums = new Number[]{(byte) 1, (short) 1, (float) 1, (int) 1, (long) 1, (double) 1};
+        final Number[] nums = new Number[]{(byte) 1, (short) 1, (float) 1, 1, (long) 1, (double) 1};
 
         for (Number num : nums) {
             for (Class type : types) {
@@ -72,7 +72,7 @@ public class PrimitiveTypeWrappersTest {
 
     @Test
     public void testNumbers2() throws Exception {
-        final Number[] nums = new Number[]{(byte) 1, (short) 1, (float) 1, (int) 1, (long) 1, (double) 1};
+        final Number[] nums = new Number[]{(byte) 1, (short) 1, (float) 1, 1, (long) 1, (double) 1};
 
         for (Number num : nums) {
             final Wire wire = wireFactory();
