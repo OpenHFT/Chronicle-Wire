@@ -44,6 +44,7 @@ public enum WireInternal {
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
     static final ThreadLocal<Bytes> BYTES_TL = ThreadLocal.withInitial(Bytes::allocateElasticDirect);
+    static final ThreadLocal<Wire> BINARY_WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.allocateElasticDirect()));
     static final ThreadLocal<Bytes> ABYTES_TL = ThreadLocal.withInitial(Bytes::allocateElasticDirect);
     static final StackTraceElement[] NO_STE = {};
     private static final Field DETAILED_MESSAGE = Jvm.getField(Throwable.class, "detailMessage");

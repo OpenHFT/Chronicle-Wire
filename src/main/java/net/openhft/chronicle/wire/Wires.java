@@ -189,6 +189,12 @@ public enum Wires {
         return bytes;
     }
 
+    public static Wire acquireBinaryWire() {
+        Wire wire = WireInternal.BINARY_WIRE_TL.get();
+        wire.bytes().clear();
+        return wire;
+    }
+
     public static Bytes acquireAnotherBytes() {
         Bytes bytes = WireInternal.ABYTES_TL.get();
         bytes.clear();
@@ -207,5 +213,20 @@ public enum Wires {
     public static void writeMarshallable(Object marshallable, WireOut wire) {
         WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass())
                 .writeMarshallable(marshallable, wire);
+    }
+
+    public static Marshallable deepCopy(Marshallable marshallable) {
+        Wire wire = acquireBinaryWire();
+        @SuppressWarnings("unchecked")
+        Class<Marshallable> clazz = (Class) marshallable.getClass();
+        wire.getValueOut().object(clazz, marshallable);
+        return wire.getValueIn().object(clazz);
+    }
+
+    public static <T extends Marshallable> T copyFrom(T t, Marshallable marshallable) {
+        Wire wire = acquireBinaryWire();
+        marshallable.writeMarshallable(wire);
+        t.readMarshallable(wire);
+        return t;
     }
 }

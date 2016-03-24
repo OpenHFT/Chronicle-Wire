@@ -73,16 +73,16 @@ public class WireMarshaller<T> {
         }
     }
 
-    static class FieldAccess {
+    static abstract class FieldAccess {
         final Field field;
         final WireKey key;
         Boolean isLeaf;
 
-        public FieldAccess(Field field) {
+         FieldAccess(Field field) {
             this(field, null);
         }
 
-        public FieldAccess(Field field, Boolean isLeaf) {
+         FieldAccess(Field field, Boolean isLeaf) {
             this.field = field;
             key = field::getName;
             this.isLeaf = isLeaf;
@@ -119,7 +119,7 @@ public class WireMarshaller<T> {
                         isLeaf = WIRE_MARSHALLER_CL.get(type).isLeaf;
                     else if (isCollection(type))
                         isLeaf = false;
-                    return new FieldAccess(field, isLeaf);
+                    return new ObjectFieldAccess(field, isLeaf);
             }
         }
 
@@ -150,11 +150,7 @@ public class WireMarshaller<T> {
             }
         }
 
-        protected void getValue(Object o, ValueOut write) throws IllegalAccessException {
-            if (isLeaf != null)
-                write.leaf(isLeaf);
-            write.object(field.get(o));
-        }
+        protected abstract void getValue(Object o, ValueOut write) throws IllegalAccessException;
 
         void read(Object o, WireIn in) {
             try {
@@ -165,10 +161,26 @@ public class WireMarshaller<T> {
             }
         }
 
+        protected abstract void setValue(Object o, ValueIn read) throws IllegalAccessException;
+    }
+
+    static class ObjectFieldAccess extends FieldAccess {
+        private final Class type;
+
+        public ObjectFieldAccess(Field field, Boolean isLeaf) {
+            super(field, isLeaf);
+            type = field.getType();
+        }
+
+        protected void getValue(Object o, ValueOut write) throws IllegalAccessException {
+            if (isLeaf != null)
+                write.leaf(isLeaf);
+            write.object(type, field.get(o));
+        }
+
         protected void setValue(Object o, ValueIn read) throws IllegalAccessException {
             field.set(o, read.object(field.getType()));
         }
-
     }
 
     static class ArrayFieldAccess extends FieldAccess {
@@ -270,6 +282,11 @@ public class WireMarshaller<T> {
                 throw new AssertionError(e);
             }
         }
+
+        @Override
+        protected void setValue(Object o, ValueIn read) throws IllegalAccessException {
+            throw new UnsupportedOperationException();
+        }
     }
 
     static class MapFieldAccess extends FieldAccess {
@@ -331,6 +348,11 @@ public class WireMarshaller<T> {
             } catch (IllegalAccessException e) {
                 throw new AssertionError(e);
             }
+        }
+
+        @Override
+        protected void setValue(Object o, ValueIn read) throws IllegalAccessException {
+            throw new UnsupportedOperationException();
         }
     }
 

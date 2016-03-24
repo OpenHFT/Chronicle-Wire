@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.function.Function;
 
 import static net.openhft.chronicle.wire.WireType.READ_ANY;
 import static net.openhft.chronicle.wire.WireType.TEXT;
@@ -70,5 +71,20 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
     @Override
     default void writeMarshallable(@NotNull WireOut wire) {
         Wires.writeMarshallable(this, wire);
+    }
+
+    default <T extends Marshallable> T deepCopy() {
+        return (T) Wires.deepCopy(this);
+    }
+
+    default <T extends Marshallable> T copyFrom(T t) {
+        return Wires.copyFrom(t, this);
+    }
+
+    default <K, T extends Marshallable> T mergeToMap(Map<K, T> map, Function<T, K> getKey) {
+        @SuppressWarnings("unchecked")
+        T t = (T) this;
+        return map.merge(getKey.apply(t), t,
+                (p, c) -> p == null ? c.deepCopy() : p.copyFrom(c));
     }
 }

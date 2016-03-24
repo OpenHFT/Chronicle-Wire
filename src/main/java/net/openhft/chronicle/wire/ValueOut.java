@@ -271,6 +271,8 @@ public interface ValueOut {
                 marshallable((WriteMarshallable) v);
             else
                 typedMarshallable((WriteMarshallable) v);
+        else if (v != null && v.getClass() == assumedClass)
+            untypedObject(v);
         else
             object(v);
     }
@@ -326,6 +328,65 @@ public interface ValueOut {
             return throwable((Throwable) value);
         if (value instanceof Enum)
             return typedScalar(value);
+        if (value instanceof String[])
+            return array(v -> Stream.of((String[]) value).forEach(v::text), String[].class);
+        if (value instanceof Collection) {
+            if (((Collection) value).size() == 0) return sequence(v -> {
+            });
+
+            return sequence(v -> ((Collection) value).stream().forEach(v::object));
+        } else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
+            WireSerializedLambda.write(value, this);
+            return wireOut();
+        } else if (Object[].class.isAssignableFrom(value.getClass())) {
+            return array(v -> Stream.of((Object[]) value).forEach(v::object), Object[].class);
+        } else if (value instanceof LocalTime) {
+            return time((LocalTime) value);
+        } else if (value instanceof LocalDate) {
+            return date((LocalDate) value);
+        } else if (value instanceof ZonedDateTime) {
+            return zonedDateTime((ZonedDateTime) value);
+        } else {
+            throw new IllegalStateException("type=" + value.getClass() +
+                    " is unsupported, it must either be of type Marshallable, String or " +
+                    "AutoBoxed primitive Object");
+        }
+    }
+
+    @NotNull
+    default WireOut untypedObject(Object value) {
+        if (value == null)
+            return text(null);
+        if (value instanceof Marshallable)
+            return marshallable((Marshallable) value);
+        if (value instanceof BytesStore)
+            return bytes((BytesStore) value);
+        if (value instanceof CharSequence)
+            return text((CharSequence) value);
+        if (value instanceof Map)
+            return map((Map) value);
+        if (value instanceof byte[])
+            return bytes((byte[]) value);
+        if (value instanceof Byte)
+            return int8((Byte) value);
+        if (value instanceof Boolean)
+            return bool((Boolean) value);
+        if (value instanceof Character)
+            return text(value.toString());
+        if (value instanceof Short)
+            return int16((Short) value);
+        if (value instanceof Integer)
+            return int32((Integer) value);
+        if (value instanceof Long)
+            return int64((Long) value);
+        if (value instanceof Double)
+            return float64((Double) value);
+        if (value instanceof Float)
+            return float32((Float) value);
+        if (value instanceof Throwable)
+            return throwable((Throwable) value);
+        if (value instanceof Enum)
+            return text(value.toString());
         if (value instanceof String[])
             return array(v -> Stream.of((String[]) value).forEach(v::text), String[].class);
         if (value instanceof Collection) {
