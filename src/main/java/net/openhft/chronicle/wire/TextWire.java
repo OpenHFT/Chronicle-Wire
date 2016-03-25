@@ -1201,12 +1201,13 @@ public class TextWire extends AbstractWire implements Wire {
                 popState();
                 sep = NEW_LINE;
             }
-            if (sep.startsWith(','))
+            if (sep.startsWith(',')) {
                 append(sep, 1, sep.length() - 1);
-            else
+                if (!wasLeaf)
+                    indent();
+
+            } else {
                 prependSeparator();
-            if (!wasLeaf) {
-                indent();
             }
             bytes.writeUnsignedByte('}');
             if (popSep != null)

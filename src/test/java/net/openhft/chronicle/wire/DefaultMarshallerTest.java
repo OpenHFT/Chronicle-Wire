@@ -62,12 +62,12 @@ public class DefaultMarshallerTest {
                 "    key: !net.openhft.chronicle.wire.DefaultMarshallerTest$DMNestedClass {\n" +
                 "      str: value,\n" +
                 "      num: 1\n" +
-                "        },\n" +
+                "    },\n" +
                 "    keyz: !net.openhft.chronicle.wire.DefaultMarshallerTest$DMNestedClass {\n" +
                 "      str: valuez,\n" +
                 "      num: 1111\n" +
-                "        }\n" +
                 "    }\n" +
+                "  }\n" +
                 "}\n", oc.toString());
 
         Wire text = new TextWire(Bytes.elasticByteBuffer());
