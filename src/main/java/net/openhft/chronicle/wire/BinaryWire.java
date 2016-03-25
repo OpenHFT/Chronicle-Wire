@@ -1742,12 +1742,26 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         public void bytesStore(@NotNull StringBuilder sb) {
             sb.setLength(0);
-            long length = readLength() - 1;
+            int code0 = readCode();
+            if (code0 != BYTES_LENGTH32)
+                throw cantRead(code0);
+            long pos = bytes.readPosition();
+            long length = bytes.readUnsignedInt();
             int code = readCode();
-            if (code != U8_ARRAY)
-                cantRead(code);
-            for (long i = 0; i < length; i++)
-                sb.append((char) bytes.readUnsignedByte());
+            if (code == U8_ARRAY) {
+                for (long i = 1; i < length; i++)
+                    sb.append((char) bytes.readUnsignedByte());
+            } else {
+                bytes.readPosition(pos);
+                long limit = bytes.readLimit();
+                bytes.readLimit(pos + 4 + length);
+                try {
+                    sb.append(Wires.fromSizePrefixedBlobs(bytes));
+                } finally {
+                    bytes.readLimit(limit);
+                    bytes.readPosition(limit);
+                }
+            }
         }
 
         public void bytesStore(@NotNull Bytes toBytes) {
