@@ -454,6 +454,12 @@ public class TextWire extends AbstractWire implements Wire {
 
     @NotNull
     @Override
+    public ValueOut write(@NotNull CharSequence name) {
+        return valueOut.write(name);
+    }
+
+    @NotNull
+    @Override
     public ValueOut getValueOut() {
         return valueOut;
     }
@@ -1315,7 +1321,11 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         public ValueOut write(@NotNull WireKey key) {
-            CharSequence name = key.name();
+            return write(key.name());
+        }
+
+        @NotNull
+        public ValueOut write(@NotNull CharSequence name) {
             prependSeparator();
             escape(name);
             fieldValueSeperator();

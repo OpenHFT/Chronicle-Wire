@@ -140,6 +140,11 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         return wireAcquisition.acquireWire().write(key);
     }
 
+    @Override
+    public ValueOut write(CharSequence key) {
+        return wireAcquisition.acquireWire().write(key);
+    }
+
     @NotNull
     @Override
     public ValueOut getValueOut() {

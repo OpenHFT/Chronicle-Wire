@@ -404,7 +404,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
         if (peekCode == FIELD_NAME_ANY || peekCode == EVENT_NAME) {
             bytes.readSkip(1);
-            bytes.readUtf8(sb);
+            bytes.read8bit(sb);
             return sb;
         }
         return null;
@@ -707,7 +707,13 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public ValueOut writeEventName(@NotNull WireKey key) {
-        writeCode(EVENT_NAME).writeUtf8(key.name());
+        return writeEventName(key.name());
+    }
+
+    @NotNull
+    @Override
+    public ValueOut writeEventName(@NotNull CharSequence name) {
+        writeCode(EVENT_NAME).write8bit(name);
         return valueOut;
     }
 
@@ -719,6 +725,18 @@ public class BinaryWire extends AbstractWire implements Wire {
                 writeField(key.code());
             else
                 writeField(key.name());
+        }
+        return valueOut;
+    }
+
+    @NotNull
+    @Override
+    public ValueOut write(@NotNull CharSequence key) {
+        if (!fieldLess) {
+            if (numericFields)
+                writeField(WireKey.toCode(key));
+            else
+                writeField(key);
         }
         return valueOut;
     }
@@ -765,7 +783,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 }
             }
             bytes.writeByte((byte) (FIELD_NAME0 + len))
-                    .write(name);
+                    .write8bit(name);
 
         } else {
             writeCode(FIELD_NAME_ANY).write8bit(name);

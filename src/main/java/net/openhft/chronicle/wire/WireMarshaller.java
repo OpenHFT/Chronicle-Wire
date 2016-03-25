@@ -136,14 +136,13 @@ public class WireMarshaller<T> {
         public String toString() {
             return "FieldAccess{" +
                     "field=" + field +
-                    ", key=" + key.name() +
                     ", isLeaf=" + isLeaf +
                     '}';
         }
 
         void write(Object o, WireOut out) {
             try {
-                ValueOut write = out.write(key);
+                ValueOut write = out.write(field.getName());
                 getValue(o, write);
             } catch (IllegalAccessException e) {
                 throw new AssertionError(e);

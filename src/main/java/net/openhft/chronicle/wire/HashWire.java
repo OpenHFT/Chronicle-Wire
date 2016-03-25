@@ -99,7 +99,13 @@ public class HashWire implements WireOut {
     @NotNull
     @Override
     public ValueOut write(WireKey key) {
-        hash += K0 + key.name().hashCode() * M0;
+        return write(key.name());
+    }
+
+    @NotNull
+    @Override
+    public ValueOut write(CharSequence name) {
+        hash += K0 + name.hashCode() * M0;
         return valueOut;
     }
 

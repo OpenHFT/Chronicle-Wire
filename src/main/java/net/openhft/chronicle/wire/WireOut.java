@@ -43,11 +43,17 @@ public interface WireOut extends WireCommon {
         return write(key);
     }
 
+    default ValueOut writeEventName(CharSequence key) {
+        return write(key);
+    }
+
     /**
      * Write a key for wires that support fields.
      */
     @NotNull
     ValueOut write(WireKey key);
+
+    ValueOut write(CharSequence key);
 
     /**
      * Obtain the value out

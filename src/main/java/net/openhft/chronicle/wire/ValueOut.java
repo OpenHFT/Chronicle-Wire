@@ -415,7 +415,10 @@ public interface ValueOut {
     @NotNull
     default WireOut typedScalar(@NotNull Object value) {
         typePrefix(ClassAliasPool.CLASS_ALIASES.nameFor(value.getClass()));
-        text(value.toString());
+        if (!(value instanceof CharSequence))
+            value = value.toString();
+
+        text((CharSequence) value);
         return wireOut();
     }
 

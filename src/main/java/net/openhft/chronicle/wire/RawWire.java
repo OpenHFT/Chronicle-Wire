@@ -192,16 +192,28 @@ public class RawWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public ValueOut writeEventName(@NotNull WireKey key) {
+        return writeEventName(key.name());
+    }
+
+    @NotNull
+    @Override
+    public ValueOut writeEventName(@NotNull CharSequence name) {
         if (use8bit)
-            bytes.write8bit(key.name());
+            bytes.write8bit(name);
         else
-            bytes.writeUtf8(key.name());
+            bytes.writeUtf8(name);
         return valueOut;
     }
 
     @NotNull
     @Override
     public ValueOut write(@NotNull WireKey key) {
+        return valueOut;
+    }
+
+    @NotNull
+    @Override
+    public ValueOut write(@NotNull CharSequence name) {
         return valueOut;
     }
 

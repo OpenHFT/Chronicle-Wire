@@ -39,12 +39,8 @@ public interface WireKey {
         return true;
     }
 
-    @NotNull
-    CharSequence name();
-
-    @ForceInline
-    default int code() {
-        String s = name().toString();
+    static int toCode(CharSequence cs) {
+        String s = cs.toString();
         if (s.length() > 0 && Character.isDigit(s.charAt(0)))
             try {
                 return Integer.parseInt(s);
@@ -52,6 +48,14 @@ public interface WireKey {
                 // ignored
             }
         return s.hashCode();
+    }
+
+    @NotNull
+    CharSequence name();
+
+    @ForceInline
+    default int code() {
+        return toCode(name());
     }
 
     default Type type() {

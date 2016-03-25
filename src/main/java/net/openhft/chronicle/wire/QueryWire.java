@@ -88,6 +88,12 @@ public class QueryWire extends TextWire {
 
     @NotNull
     @Override
+    public ValueOut write(@NotNull CharSequence name) {
+        return valueOut.write(name);
+    }
+
+    @NotNull
+    @Override
     public ValueOut getValueOut() {
         return valueOut;
     }
@@ -352,6 +358,12 @@ public class QueryWire extends TextWire {
         @NotNull
         public ValueOut write(@NotNull WireKey key) {
             fieldName = key.name();
+            return this;
+        }
+
+        @NotNull
+        public ValueOut write(@NotNull CharSequence name) {
+            fieldName = name;
             return this;
         }
     }
