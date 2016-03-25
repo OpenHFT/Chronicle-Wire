@@ -783,7 +783,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 }
             }
             bytes.writeByte((byte) (FIELD_NAME0 + len))
-                    .write8bit(name);
+                    .append8bit(name);
 
         } else {
             writeCode(FIELD_NAME_ANY).write8bit(name);
