@@ -79,4 +79,12 @@ public interface WireCommon {
      * reset the state of the current wire for reuse.
      */
     void clear();
+
+    int sourceId();
+
+    Wire sourceId(int sourceId);
+
+    long sourceIndex();
+
+    Wire sourceIndex(long sourceIndex);
 }

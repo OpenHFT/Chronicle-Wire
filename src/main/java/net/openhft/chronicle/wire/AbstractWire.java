@@ -49,6 +49,8 @@ public abstract class AbstractWire implements Wire {
     protected final boolean use8bit;
     protected Pauser pauser = BusyPauser.INSTANCE;
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
+    protected int sourceId = -1;
+    protected long sourceIndex = -1;
 
     public AbstractWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
@@ -284,5 +286,23 @@ public abstract class AbstractWire implements Wire {
         } finally {
             pauser.reset();
         }
+    }
+
+    public int sourceId() {
+        return sourceId;
+    }
+
+    public Wire sourceId(int sourceId) {
+        this.sourceId = sourceId;
+        return this;
+    }
+
+    public long sourceIndex() {
+        return sourceIndex;
+    }
+
+    public Wire sourceIndex(long sourceIndex) {
+        this.sourceIndex = sourceIndex;
+        return this;
     }
 }

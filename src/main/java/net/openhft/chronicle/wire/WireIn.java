@@ -131,4 +131,14 @@ public interface WireIn extends WireCommon {
     void readFirstHeader(long timeout, TimeUnit timeUnit) throws TimeoutException, StreamCorruptedException;
 
     void readMetaDataHeader();
+
+    /**
+     * @return the sourceId if there is one for this wire, or -1
+     */
+    int sourceId();
+
+    /**
+     * @return the source index if there is one for this wire, or -1
+     */
+    long sourceIndex();
 }

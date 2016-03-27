@@ -80,6 +80,26 @@ public class HashWire implements WireOut {
         hash = 0;
     }
 
+    @Override
+    public int sourceId() {
+        return -1;
+    }
+
+    @Override
+    public Wire sourceId(int sourceId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long sourceIndex() {
+        return -1;
+    }
+
+    @Override
+    public Wire sourceIndex(long sourceIndex) {
+        throw new UnsupportedOperationException();
+    }
+
     public long hash64() {
         return Maths.agitate(hash);
     }
