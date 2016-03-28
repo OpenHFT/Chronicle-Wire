@@ -76,4 +76,14 @@ public class WriteDocumentContext implements DocumentContext {
     protected long position() {
         return position;
     }
+
+    @Override
+    public long index() {
+        return 0;
+    }
+
+    @Override
+    public int sourceId() {
+        return -1;
+    }
 }

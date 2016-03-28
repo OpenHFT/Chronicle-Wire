@@ -80,11 +80,17 @@ public interface WireCommon {
      */
     void clear();
 
-    int sourceId();
+    /**
+     * Obtain the parent class of this wire if there is one
+     *
+     * @return the parent or null if none was assigned.
+     */
+    Object parent();
 
-    Wire sourceId(int sourceId);
-
-    long sourceIndex();
-
-    Wire sourceIndex(long sourceIndex);
+    /**
+     * Assign a parent object to this wire for later retrieval.
+     *
+     * @param parent to set, or null if there isn't one.
+     */
+    void parent(Object parent);
 }

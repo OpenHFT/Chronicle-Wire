@@ -102,4 +102,14 @@ public class ReadDocumentContext implements DocumentContext {
         bytes.readLimit(readPosition);
         present = true;
     }
+
+    @Override
+    public long index() {
+        return 0;
+    }
+
+    @Override
+    public int sourceId() {
+        return -1;
+    }
 }

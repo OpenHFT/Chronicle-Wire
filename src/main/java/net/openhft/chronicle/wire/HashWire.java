@@ -79,22 +79,12 @@ public class HashWire implements WireOut {
     }
 
     @Override
-    public int sourceId() {
-        return -1;
+    public Object parent() {
+        return null;
     }
 
     @Override
-    public Wire sourceId(int sourceId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public long sourceIndex() {
-        return -1;
-    }
-
-    @Override
-    public Wire sourceIndex(long sourceIndex) {
+    public void parent(Object parent) {
         throw new UnsupportedOperationException();
     }
 

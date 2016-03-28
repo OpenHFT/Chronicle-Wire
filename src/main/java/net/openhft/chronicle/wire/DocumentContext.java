@@ -52,5 +52,15 @@ public interface DocumentContext extends Closeable {
      */
     Wire wire();
 
+    /**
+     * @return the current source id or -1
+     */
+    int sourceId();
 
+    /**
+     * Index last read, only available for read contexts.
+     *
+     * @return the current Excerpt's index
+     */
+    long index();
 }
