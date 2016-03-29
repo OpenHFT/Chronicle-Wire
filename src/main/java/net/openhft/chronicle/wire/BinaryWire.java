@@ -183,8 +183,12 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case BinaryWireHighCode.INT:
                     bytes.readSkip(1);
                     try {
-                        Number l = readInt0object(peekCode);
-                        wire.getValueOut().object(l);
+                        if (peekCode == INT64_0x) {
+                            wire.getValueOut().int64_0x(bytes.readLong());
+                        } else {
+                            Number l = readInt0object(peekCode);
+                            wire.getValueOut().object(l);
+                        }
                     } catch (Exception e) {
                         unknownCode(wire);
                     }
@@ -614,6 +618,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             case UINT32:
                 return bytes.readUnsignedInt();
             case INT64:
+            case INT64_0x:
                 return bytes.readLong();
 /*
             case FIXED_6:
@@ -657,6 +662,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             case UINT32:
                 return bytes.readUnsignedInt();
             case INT64:
+            case INT64_0x:
                 return bytes.readLong();
 /*
             case FIXED_6:
@@ -1104,6 +1110,13 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         public WireOut fixedInt64(long i64) {
             writeCode(INT64).writeLong(i64);
+            return BinaryWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut int64_0x(long i64) {
+            writeCode(INT64_0x).writeLong(i64);
             return BinaryWire.this;
         }
 

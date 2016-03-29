@@ -64,7 +64,7 @@ enum BinaryWireCode {
 //    static final int FIXED_3 = 0xAC;
 //    static final int FIXED_2 = 0xAD;
 //    static final int FIXED_1 = 0xAE;
-//    static final int FIXED = 0xAF;
+static final int INT64_0x = 0xAF;
 
     static final int FALSE = 0xB0;
     static final int TRUE = 0xB1;

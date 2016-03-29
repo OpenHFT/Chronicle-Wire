@@ -315,6 +315,12 @@ public class HashWire implements WireOut {
 
         @NotNull
         @Override
+        public WireOut int64_0x(long i64) {
+            return int64(i64);
+        }
+
+        @NotNull
+        @Override
         public WireOut int64array(long capacity) {
             hash = hash * M1 + capacity * M2;
             return HashWire.this;

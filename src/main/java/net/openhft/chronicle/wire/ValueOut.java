@@ -128,6 +128,9 @@ public interface ValueOut {
     WireOut int64(long i64);
 
     @NotNull
+    WireOut int64_0x(long i64);
+
+    @NotNull
     WireOut int64array(long capacity);
 
     @NotNull

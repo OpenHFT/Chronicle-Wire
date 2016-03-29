@@ -982,6 +982,18 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
+        public WireOut int64_0x(long i64) {
+            prependSeparator();
+            bytes.writeUnsignedByte('0')
+                    .writeUnsignedByte('x')
+                    .appendBase(i64, 16);
+            elementSeparator();
+
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
         public WireOut int64array(long capacity) {
             TextLongArrayReference.write(bytes, capacity);
             return TextWire.this;

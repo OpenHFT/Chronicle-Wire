@@ -395,6 +395,12 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
+        public WireOut int64_0x(long i64) {
+            return int64(i64);
+        }
+
+        @NotNull
+        @Override
         public WireOut int64array(long capacity) {
             BinaryLongArrayReference.lazyWrite(bytes, capacity);
             return RawWire.this;
