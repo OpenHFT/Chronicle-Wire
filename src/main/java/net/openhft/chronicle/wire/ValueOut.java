@@ -160,8 +160,9 @@ public interface ValueOut {
     }
 
     @NotNull
-    default WireOut typeLiteral(@NotNull Class type) {
-        return typeLiteral((t, b) -> b.appendUtf8(ClassAliasPool.CLASS_ALIASES.nameFor(t)), type);
+    default WireOut typeLiteral(Class type) {
+        return type == null ? text(null)
+                : typeLiteral((t, b) -> b.appendUtf8(ClassAliasPool.CLASS_ALIASES.nameFor(t)), type);
     }
 
     @NotNull

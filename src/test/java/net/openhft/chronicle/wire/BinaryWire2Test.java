@@ -146,16 +146,16 @@ public class BinaryWire2Test {
 
     private void writeMessage(@NotNull WireOut wire) {
         wire.writeDocument(true, w -> w
-                .write(() -> "csp").text("//path/service")
-                .write(() -> "tid").int64(123456789));
+                .write("csp").text("//path/service")
+                .write("tid").int64(123456789));
         wire.writeDocument(false, w -> w
-                .write(() -> "entrySet").sequence(s -> {
+                .write("entrySet").sequence(s -> {
                     s.marshallable(m -> m
-                            .write(() -> "key").text("key-1")
-                            .write(() -> "value").text("value-1"));
+                            .write("key").text("key-1")
+                            .write("value").text("value-1"));
                     s.marshallable(m -> m
-                            .write(() -> "key").text("key-2")
-                            .write(() -> "value").text("value-2"));
+                            .write("key").text("key-2")
+                            .write("value").text("value-2"));
                 }));
     }
 
@@ -174,17 +174,17 @@ public class BinaryWire2Test {
 
     private void writeMessageContext(@NotNull WireOut wire) {
         try (DocumentContext _ = wire.writingDocument(true)) {
-            wire.write(() -> "csp").text("//path/service")
-                    .write(() -> "tid").int64(123456789);
+            wire.write("csp").text("//path/service")
+                    .write("tid").int64(123456789);
         }
         try (DocumentContext _ = wire.writingDocument(false)) {
-            wire.write(() -> "entrySet").sequence(s -> {
+            wire.write("entrySet").sequence(s -> {
                 s.marshallable(m -> m
-                        .write(() -> "key").text("key-1")
-                        .write(() -> "value").text("value-1"));
+                        .write("key").text("key-1")
+                        .write("value").text("value-1"));
                 s.marshallable(m -> m
-                        .write(() -> "key").text("key-2")
-                        .write(() -> "value").text("value-2"));
+                        .write("key").text("key-2")
+                        .write("value").text("value-2"));
             });
         }
     }
@@ -204,12 +204,12 @@ public class BinaryWire2Test {
     @Test
     public void fieldAfterText() {
         Wire wire = createWire();
-        wire.writeDocument(false, w -> w.write(() -> "data")
+        wire.writeDocument(false, w -> w.write("data")
                 .typePrefix("!UpdateEvent").marshallable(
-                        v -> v.write(() -> "assetName").text("/name")
-                                .write(() -> "key").object("test")
-                                .write(() -> "oldValue").object("world1")
-                                .write(() -> "value").object("world2")));
+                        v -> v.write("assetName").text("/name")
+                                .write("key").object("test")
+                                .write("oldValue").object("world1")
+                                .write("value").object("world2")));
 
         assertEquals("--- !!data #binary\n" +
                 "data: !!UpdateEvent {\n" +
@@ -229,11 +229,11 @@ public class BinaryWire2Test {
     @Test
     public void fieldAfterNull() {
         Wire wire = createWire();
-        wire.writeDocument(false, w -> w.write(() -> "data").typedMarshallable("!UpdateEvent",
-                v -> v.write(() -> "assetName").text("/name")
-                        .write(() -> "key").object("test")
-                        .write(() -> "oldValue").object(null)
-                        .write(() -> "value").object("world2")));
+        wire.writeDocument(false, w -> w.write("data").typedMarshallable("!UpdateEvent",
+                v -> v.write("assetName").text("/name")
+                        .write("key").object("test")
+                        .write("oldValue").object(null)
+                        .write("value").object("world2")));
 
         assertEquals("--- !!data #binary\n" +
                 "data: !!UpdateEvent {\n" +
@@ -254,15 +254,15 @@ public class BinaryWire2Test {
     public void fieldAfterNullContext() {
         Wire wire = createWire();
         try (DocumentContext _ = wire.writingDocument(true)) {
-            wire.write(() -> "tid").int64(1234567890L);
+            wire.write("tid").int64(1234567890L);
         }
 
         try (DocumentContext _ = wire.writingDocument(false)) {
-            wire.write(() -> "data").typedMarshallable("!UpdateEvent",
-                    v -> v.write(() -> "assetName").text("/name")
-                            .write(() -> "key").object("test")
-                            .write(() -> "oldValue").object(null)
-                            .write(() -> "value").object("world2"));
+            wire.write("data").typedMarshallable("!UpdateEvent",
+                    v -> v.write("assetName").text("/name")
+                            .write("key").object("test")
+                            .write("oldValue").object(null)
+                            .write("value").object("world2"));
         }
 
         assertEquals("--- !!meta-data #binary\n" +
@@ -319,7 +319,7 @@ public class BinaryWire2Test {
         Wire wire = createWire();
         String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
-        wire.write(() -> "message").compress("snappy", str);
+        wire.write("message").compress("snappy", str);
 
         wire.bytes().readPosition(0);
         String str2 = wire.read(() -> "message").text();
@@ -337,7 +337,7 @@ public class BinaryWire2Test {
         Wire wire = createWire();
         Bytes str = Bytes.from("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
-        wire.write(() -> "message").compress("snappy", str);
+        wire.write("message").compress("snappy", str);
 
         wire.bytes().readPosition(0);
         String str2 = wire.read(() -> "message").text();
@@ -380,8 +380,8 @@ public class BinaryWire2Test {
 
         final byte[] expected = {-1, -2, -3, -4, -5, -6, -7};
         wire.writeDocument(false, wir -> wir.writeEventName(() -> "put")
-                .marshallable(w -> w.write(() -> "key").text("1")
-                        .write(() -> "value")
+                .marshallable(w -> w.write("key").text("1")
+                        .write("value")
                         .object(expected)));
         System.out.println(wire);
 
@@ -395,7 +395,7 @@ public class BinaryWire2Test {
     @Test
     public void testSmallArray() {
         Wire wire = createWire();
-        wire.writeDocument(false, w -> w.write(() -> "index")
+        wire.writeDocument(false, w -> w.write("index")
                 .int64array(10));
         assertEquals("--- !!data #binary\n" +
                 "index: [\n" +
@@ -412,5 +412,21 @@ public class BinaryWire2Test {
                 "  0,\n" +
                 "  0\n" +
                 "]\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
+    }
+
+    @Test
+    public void testTypeLiteral() {
+        Wire wire = createWire();
+        wire.writeDocument(false, w -> w.write("a").typeLiteral(String.class)
+                .write("b").typeLiteral(int.class)
+                .write("c").typeLiteral(byte[].class)
+                .write("d").typeLiteral(Double[].class)
+                .write("z").typeLiteral((Class) null));
+        assertEquals("--- !!data #binary\n" +
+                "a: !type String\n" +
+                "b: !type int\n" +
+                "c: !type \"byte[]\"\n" +
+                "d: !type \"[Ljava.lang.Double;\"\n" +
+                "z: !!null \"\"", Wires.fromSizePrefixedBlobs(wire.bytes()));
     }
 }

@@ -1205,7 +1205,10 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull Class type) {
+        public WireOut typeLiteral(Class type) {
+            if (type == null)
+                text(null);
+            else
             writeCode(TYPE_LITERAL).writeUtf8(classLookup().nameFor(type));
             return BinaryWire.this;
         }
