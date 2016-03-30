@@ -25,15 +25,15 @@ import org.jetbrains.annotations.NotNull;
 public enum YamlLogging {
     ;
     // TODO Doesn't show all writes. Use clientReads
-    public static volatile boolean showServerWrites = Boolean.getBoolean("yaml.logging");
-    public static volatile boolean clientWrites = Boolean.getBoolean("yaml.logging");
+    private static volatile boolean showServerWrites = Boolean.getBoolean("yaml.logging");
+    private static volatile boolean clientWrites = Boolean.getBoolean("yaml.logging");
     @NotNull
     public static volatile String title = "";
     @NotNull
-    public static volatile String writeMessage = "";
-    public static volatile boolean clientReads = Boolean.getBoolean("yaml.logging");
-    public static volatile boolean showServerReads = Boolean.getBoolean("yaml.logging");
-    public static volatile boolean showHeartBeats = false;
+    private static volatile String writeMessage = "";
+    private static volatile boolean clientReads = Boolean.getBoolean("yaml.logging");
+    private static volatile boolean showServerReads = Boolean.getBoolean("yaml.logging");
+    private static volatile boolean showHeartBeats = false;
 
     public static void setAll(boolean flag) {
         showServerReads = showServerWrites = clientWrites = clientReads = flag;
@@ -42,6 +42,55 @@ public enum YamlLogging {
     public static void setAll(YamlLoggingLevel level) {
         showServerReads = showServerWrites = clientWrites = clientReads = level.isSet();
     }
+
+    public static boolean showClientReads() {
+        return clientReads;
+    }
+
+    public static void writeMessage(String s) {
+        writeMessage = s;
+    }
+
+    public static void showServerWrites(boolean logging) {
+        showServerWrites = logging;
+    }
+
+    public static boolean showClientWrites() {
+        return clientWrites;
+    }
+
+    public static String writeMessage() {
+        return writeMessage;
+    }
+
+    public static boolean showHeartBeats() {
+        return showHeartBeats;
+    }
+
+    public static boolean showServerReads() {
+        return showServerReads;
+    }
+
+    public static void showHeartBeats(boolean log) {
+        showHeartBeats = log;
+    }
+
+    public static void showClientWrites(boolean logging) {
+        clientWrites = logging;
+    }
+
+    public static void showClientReads(boolean logging) {
+        clientReads = logging;
+    }
+
+    public static boolean showServerWrites() {
+        return showServerWrites;
+    }
+
+    public static void showServerReads(boolean logging) {
+        showServerReads = logging;
+    }
+
 
     public enum YamlLoggingLevel {
         OFF {
