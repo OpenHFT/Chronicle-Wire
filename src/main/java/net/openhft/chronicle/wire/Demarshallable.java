@@ -29,7 +29,6 @@ import java.lang.reflect.InvocationTargetException;
  * Any implementation must have a constructor which takes a WireIn for deserialization.
  */
 public interface Demarshallable {
-    // Demarshallable(WireIn)
 
     ClassValue<Constructor<Demarshallable>> DEMARSHALLABLES = new ClassValue<Constructor<Demarshallable>>() {
         @Override
