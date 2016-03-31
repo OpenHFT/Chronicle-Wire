@@ -159,8 +159,9 @@ public class BinaryWire extends AbstractWire implements Wire {
                                 wire.writeComment("length: " + len2 + ", used: " + used);
                                 for (long i = 0; i < len2; i++) {
                                     long v = bytes.readLong();
-                                    if (i == used)
-                                        wire.writeComment("^ used ^");
+                                    if (i == used) {
+                                        o.leaf(true);
+                                    }
                                     o.int64(v);
                                 }
                             });
