@@ -352,7 +352,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
-    private int peekCode() {
+    int peekCode() {
         if (bytes.readRemaining() < 1)
             return END_OF_BYTES;
         long pos = bytes.readPosition();
