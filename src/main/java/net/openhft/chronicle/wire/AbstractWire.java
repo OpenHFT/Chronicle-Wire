@@ -104,21 +104,24 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public boolean readDataHeader() throws EOFException {
+    public HeaderType readDataHeader(boolean includeMetaData) throws EOFException {
         bytes.readLimit(bytes.capacity());
         for (; ; ) {
             int header = bytes.readVolatileInt(bytes.readPosition());
             if (Wires.isReady(header)) {
                 if (header == Wires.NOT_INITIALIZED)
-                    return false;
-                if (Wires.isReadyData(header)) {
-                    return true;
+                    return HeaderType.NONE;
+                if (Wires.isReady(header)) {
+                    if (Wires.isData(header))
+                        return HeaderType.DATA;
+                    if (includeMetaData && Wires.isReadyMetaData(header))
+                        return HeaderType.META_DATA;
                 }
                 bytes.readSkip(Wires.lengthOf(header) + Wires.SPB_HEADER_SIZE);
             } else {
                 if (header == Wires.END_OF_DATA)
                     throw new EOFException();
-                return false;
+                return HeaderType.NONE;
             }
         }
     }
