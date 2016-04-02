@@ -401,7 +401,7 @@ public class BinaryWire2Test {
                 "index: [\n" +
                 "  # length: 10, used: 0\n" +
                 "  0, 0, 0, 0, 0, 0, 0, 0, 0, 0\n" +
-                "]", Wires.fromSizePrefixedBlobs(wire.bytes()));
+                "]\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
     }
 
     @Test
