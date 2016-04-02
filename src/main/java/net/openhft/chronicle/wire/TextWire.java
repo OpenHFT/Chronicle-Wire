@@ -1084,7 +1084,7 @@ public class TextWire extends AbstractWire implements Wire {
         public WireOut typeLiteral(@NotNull CharSequence type) {
             prependSeparator();
             append(TYPE);
-            text(type);
+            escape(type);
             elementSeparator();
             return TextWire.this;
         }

@@ -400,22 +400,11 @@ public class BinaryWire2Test {
         assertEquals("--- !!data #binary\n" +
                 "index: [\n" +
                 "  # length: 10, used: 0\n" +
-                "  # ^ used ^\n" +
-                "  0,\n" +
-                "  0,\n" +
-                "  0,\n" +
-                "  0,\n" +
-                "  0,\n" +
-                "  0,\n" +
-                "  0,\n" +
-                "  0,\n" +
-                "  0,\n" +
-                "  0\n" +
-                "]\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
+                "  0, 0, 0, 0, 0, 0, 0, 0, 0, 0\n" +
+                "]", Wires.fromSizePrefixedBlobs(wire.bytes()));
     }
 
     @Test
-    @Ignore("TODO FIX")
     public void testTypeLiteral() {
         Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("a").typeLiteral(String.class)
@@ -428,6 +417,6 @@ public class BinaryWire2Test {
                 "b: !type int\n" +
                 "c: !type \"byte[]\"\n" +
                 "d: !type \"[Ljava.lang.Double;\"\n" +
-                "z: !!null \"\"", Wires.fromSizePrefixedBlobs(wire.bytes()));
+                "z: !!null \"\"\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
     }
 }
