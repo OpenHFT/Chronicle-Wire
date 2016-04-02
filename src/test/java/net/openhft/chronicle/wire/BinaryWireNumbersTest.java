@@ -22,7 +22,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -47,7 +46,7 @@ public class BinaryWireNumbersTest {
     }
 
     @Parameterized.Parameters
-    public static Collection<Object[]> data() throws IOException {
+    public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
 
                 {2 + 4, (WriteValue) w -> w.float32(-(1L << 48L)), (WriteValue) w -> w.int64(-(1L << 48L))},    //0

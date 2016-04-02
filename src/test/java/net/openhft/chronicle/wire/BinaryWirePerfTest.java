@@ -83,7 +83,7 @@ public class BinaryWirePerfTest {
         }
     }
 
-    private void wirePerf0(@NotNull Wire wire, @NotNull MyTypes a, @NotNull MyTypes b, int t) throws StreamCorruptedException {
+    private void wirePerf0(@NotNull Wire wire, @NotNull MyTypes a, @NotNull MyTypes b, int t) {
         long start = System.nanoTime();
         int runs = 200000;
         for (int i = 0; i < runs; i++) {

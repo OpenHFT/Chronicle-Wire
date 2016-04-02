@@ -59,7 +59,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         return TEXT.fromFileAsMap(filename, valueClass);
     }
 
-    static Map<String, Object> fromHexString(CharSequence cs) throws IOException {
+    static Map<String, Object> fromHexString(CharSequence cs) {
         return READ_ANY.fromHexString(cs);
     }
 

@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -40,7 +39,7 @@ public class StrangeTextCombination {
     }
 
     @Parameterized.Parameters
-    public static Collection<Object[]> data() throws IOException {
+    public static Collection<Object[]> data() {
         return Arrays.asList(
                 new Object[]{WireType.TEXT}
                 , new Object[]{WireType.BINARY}
