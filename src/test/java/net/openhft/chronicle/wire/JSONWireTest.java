@@ -19,12 +19,37 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 
 /**
  * Created by peter.lawrey on 06/02/2016.
  */
 public class JSONWireTest {
+    @Test
+    public void testJsonArray() {
+        Wire wire = new JSONWire(Bytes.elasticByteBuffer());
+
+        List<Item> items = new ArrayList<>();
+        Item item1 = new Item("item1", 1235666L, 1.1231231);
+        items.add(item1);
+        Item item2 = new Item("item2", 2235666L, 1.0987987);
+        items.add(item2);
+        Item item3 = new Item("item3", 3235666L, 1.12312);
+        items.add(item3);
+        Item item4 = new Item("item4", 4235666L, 1.51231);
+        items.add(item4);
+
+        WireOut out = wire.write(() -> "myEvent").list(items, Item.class);
+
+        assertEquals("{\"myEvent\":[{\"name\":\"item1\",\"number1\":1235666,\"number2\":1.1231231}," +
+                "{\"name\":\"item2\",\"number1\":2235666,\"number2\":1.0987987}," +
+                "{\"name\":\"item3\",\"number1\":3235666,\"number2\":1.12312}," +
+                "{\"name\":\"item4\",\"number1\":4235666,\"number2\":1.51231}]}", out.toString());
+    }
+
     @Test
     public void testOpenBracket() {
         StringBuilder sb = new StringBuilder();
@@ -54,5 +79,17 @@ public class JSONWireTest {
         WireParser<Void> parser = new VanillaWireParser<>((s, v, $) -> System.out.println(s + " - " + v.text()));
         parser.parseOne(wire, null);
         assertEquals("", wire.bytes().toString());
+    }
+
+    private static class Item extends AbstractMarshallable {
+        String name;
+        long number1;
+        double number2;
+
+        public Item(String name, long number1, double number2) {
+            this.name = name;
+            this.number1 = number1;
+            this.number2 = number2;
+        }
     }
 }
