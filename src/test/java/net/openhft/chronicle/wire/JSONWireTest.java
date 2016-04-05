@@ -29,20 +29,16 @@ import static org.junit.Assert.assertEquals;
  */
 public class JSONWireTest {
     @Test
-    public void testJsonArray() {
-        Wire wire = new JSONWire(Bytes.elasticByteBuffer());
+    public void testListFormatting() {
+        JSONWire wire = new JSONWire(Bytes.elasticByteBuffer());
 
         List<Item> items = new ArrayList<>();
-        Item item1 = new Item("item1", 1235666L, 1.1231231);
-        items.add(item1);
-        Item item2 = new Item("item2", 2235666L, 1.0987987);
-        items.add(item2);
-        Item item3 = new Item("item3", 3235666L, 1.12312);
-        items.add(item3);
-        Item item4 = new Item("item4", 4235666L, 1.51231);
-        items.add(item4);
+        items.add(new Item("item1", 1235666L, 1.1231231));
+        items.add(new Item("item2", 2235666L, 1.0987987));
+        items.add(new Item("item3", 3235666L, 1.12312));
+        items.add(new Item("item4", 4235666L, 1.51231));
 
-        WireOut out = wire.write(() -> "myEvent").list(items, Item.class);
+        WireOut out = wire.writeEventName(() -> "myEvent").list(items, Item.class);
 
         assertEquals("{\"myEvent\":[{\"name\":\"item1\",\"number1\":1235666,\"number2\":1.1231231}," +
                 "{\"name\":\"item2\",\"number1\":2235666,\"number2\":1.0987987}," +
