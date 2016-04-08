@@ -78,6 +78,9 @@ public class ReadDocumentContext implements DocumentContext {
 
         if (bytes.readRemaining() < 4) {
             present = false;
+            // I think this has no effect 1 as its only set on close
+            readPosition = readLimit = -1;
+
             return;
         }
         long position = bytes.readPosition();
