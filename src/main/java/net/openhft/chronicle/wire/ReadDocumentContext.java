@@ -94,8 +94,10 @@ public class ReadDocumentContext implements DocumentContext {
         final int len = lengthOf(header);
         assert len > 0 : "len=" + len;
         metaData = Wires.isReadyMetaData(header);
-        if (len > bytes.readRemaining())
+        if (len > bytes.readRemaining()) {
+            bytes.readSkip(-4);
             throw new BufferUnderflowException();
+        }
         readLimit = bytes.readLimit();
         readPosition = bytes.readPosition() + len;
 
