@@ -80,7 +80,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
 
     @NotNull
     @Override
-    public Wire readComment(@NotNull StringBuilder sb) {
+    public WireIn readComment(@NotNull StringBuilder sb) {
         return wireAcquisition.acquireWire().readComment(sb);
     }
 

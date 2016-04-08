@@ -273,7 +273,7 @@ public enum WireInternal {
 
                 int len = Wires.lengthOf(header);
                 if (len > bytes.readRemaining()) {
-                    sb.append("#  has a 4 byte size prefix, ").append(len).append(" > ").append(bytes.readRemaining());
+                    sb.append("#  has a 4 byte size prefix, ").append(len).append(" > ").append(bytes.readRemaining()).append(" len is ").append(Integer.toString(len));
                     break;
                 }
                 String type = Wires.isData(header)

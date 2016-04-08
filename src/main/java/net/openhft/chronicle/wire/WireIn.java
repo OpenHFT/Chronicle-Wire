@@ -75,7 +75,7 @@ public interface WireIn extends WireCommon {
      * read and write comments.
      */
     @NotNull
-    Wire readComment(@NotNull StringBuilder sb);
+    WireIn readComment(@NotNull StringBuilder sb);
 
     void clear();
 

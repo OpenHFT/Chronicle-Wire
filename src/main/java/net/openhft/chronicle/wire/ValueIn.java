@@ -285,7 +285,7 @@ public interface ValueIn {
                          @NotNull Class<V> vClass,
                          @NotNull Map<K, V> usingMap);
 
-    boolean bool() throws IORuntimeException;
+    boolean bool();
 
     byte int8();
 

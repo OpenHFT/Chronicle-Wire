@@ -73,11 +73,12 @@ public class ReadDocumentContext implements DocumentContext {
     }
 
     public void start() {
+        readPosition = readLimit = -1;
         final Bytes<?> bytes = wire.bytes();
+
         if (bytes.readRemaining() < 4) {
             present = false;
             // I think this has no effect 1 as its only set on close
-            readPosition = readLimit = -1;
             return;
         }
         long position = bytes.readPosition();
@@ -91,7 +92,6 @@ public class ReadDocumentContext implements DocumentContext {
         bytes.readSkip(4);
 
         final int len = lengthOf(header);
-
 
         if (len > bytes.readRemaining()) {
             bytes.readSkip(-4);
