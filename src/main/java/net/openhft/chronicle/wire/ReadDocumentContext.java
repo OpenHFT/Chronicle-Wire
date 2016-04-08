@@ -18,8 +18,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 
-import java.nio.BufferUnderflowException;
-
 import static net.openhft.chronicle.wire.Wires.isNotReady;
 import static net.openhft.chronicle.wire.Wires.lengthOf;
 
@@ -78,6 +76,7 @@ public class ReadDocumentContext implements DocumentContext {
         final Bytes<?> bytes = wire.bytes();
         if (bytes.readRemaining() < 4) {
             present = false;
+            // I think this has no effect 1 as its only set on close
             readPosition = readLimit = -1;
             return;
         }
@@ -92,12 +91,15 @@ public class ReadDocumentContext implements DocumentContext {
         bytes.readSkip(4);
 
         final int len = lengthOf(header);
-        assert len > 0 : "len=" + len;
-        metaData = Wires.isReadyMetaData(header);
+
+
         if (len > bytes.readRemaining()) {
             bytes.readSkip(-4);
-            throw new BufferUnderflowException();
+            present = false;
+            return;
         }
+
+        metaData = Wires.isReadyMetaData(header);
         readLimit = bytes.readLimit();
         readPosition = bytes.readPosition() + len;
 
