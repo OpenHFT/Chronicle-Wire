@@ -197,7 +197,7 @@ public interface ValueOut {
     @NotNull
     default WireOut array(@NotNull WriteValue writer, Class arrayType) {
         if (arrayType == String[].class) {
-            typePrefix("!String[] ");
+            typePrefix("String[] ");
         } else if (arrayType != Object[].class) {
             typePrefix(ClassAliasPool.CLASS_ALIASES.nameFor(arrayType.getComponentType()) + "[]");
         }
