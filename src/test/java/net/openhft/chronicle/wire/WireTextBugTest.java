@@ -1,4 +1,4 @@
-/*
+package net.openhft.chronicle.wire;/*
  * Copyright 2016 higherfrequencytrading.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,17 +16,14 @@
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import net.openhft.chronicle.wire.BinaryWire;
-import net.openhft.chronicle.wire.Marshallable;
-import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.WireKey;
 
 /**
+ * @author Rob Austin
  */
-public class WireTextBug {
+public class WireTextBugTest {
 
     @org.junit.Test
-    public void testText() throws Exception {
+    public void testText() {
         ClassAliasPool.CLASS_ALIASES.addAlias(Bug.class);
         Wire encodeWire = new BinaryWire(Bytes.elasticByteBuffer().unchecked(true), false, true, false, Integer.MAX_VALUE, "lzw");
         Bug b = new Bug();
@@ -41,33 +38,7 @@ public class WireTextBug {
         System.out.println("b2 = " + b2);
     }
 
-    public enum FIXTag implements WireKey {
-        ClOrdID(11);
-        private final int mCode;
-        private final String mString;
-
-        FIXTag(int aCode) {
-            mCode = aCode;
-            mString = mCode + "";
-        }
-
-        @Override
-        public int code() {
-            return mCode;
-        }
-
-        @Override
-        public boolean contentEquals(CharSequence c) {
-            return mString.contentEquals(c) || name().equals(c);
-        }
-
-        @Override
-        public String toString() {
-            return mString;
-        }
-    }
-
-    class Bug implements Marshallable {
+    static class Bug extends AbstractMarshallable {
         private String clOrdID;
 
         public String getClOrdID() {
@@ -76,21 +47,6 @@ public class WireTextBug {
 
         public void setClOrdID(String aClOrdID) {
             clOrdID = aClOrdID;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return Marshallable.$equals(this, o);
-        }
-
-        @Override
-        public int hashCode() {
-            return Marshallable.$hashCode(this);
-        }
-
-        @Override
-        public String toString() {
-            return Marshallable.$toString(this);
         }
     }
 }

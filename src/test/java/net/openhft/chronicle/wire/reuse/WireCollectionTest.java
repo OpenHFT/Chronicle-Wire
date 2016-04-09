@@ -18,10 +18,12 @@ package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.Wires;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +46,7 @@ public class WireCollectionTest {
 
     private final Function<Bytes, Wire> wireType;
     private WireCollection collection;// = new WireModel();
+    private ThreadDump threadDump;
 
     public WireCollectionTest(Function<Bytes, Wire> wireType) {
         this.wireType = wireType;
@@ -61,10 +64,20 @@ public class WireCollectionTest {
     }
 
     @Before
+    public void threadDump() {
+        threadDump = new ThreadDump();
+    }
+
+    @After
+    public void checkThreadDump() {
+        threadDump.assertNoNewThreads();
+    }
+
+    @Before
     public void setUp() {
         collection = WireUtils.randomWireCollection();
     }
-    
+
     @Test
     public void testMultipleReads() {
         Bytes bytes = Bytes.elasticByteBuffer();
