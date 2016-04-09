@@ -731,7 +731,6 @@ public class BinaryWireTest {
         assertEquals("[abc, def, ghi]", Arrays.toString(object2));
     }
 
-
     @Test
     public void testArrays2() {
         Wire wire = createWire();

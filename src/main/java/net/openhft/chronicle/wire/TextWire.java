@@ -170,7 +170,6 @@ public class TextWire extends AbstractWire implements Wire {
         return classLookup;
     }
 
-
     @Override
     public DocumentContext writingDocument(boolean metaData) {
         writeContext.start(metaData);
@@ -1605,7 +1604,6 @@ public class TextWire extends AbstractWire implements Wire {
                     return null;
                 }
 
-
                 throw new IllegalStateException("unsupported type=" + sb);
 
             } else {
@@ -2150,7 +2148,6 @@ public class TextWire extends AbstractWire implements Wire {
                     return null;
                 }
 
-
                 if (StringUtils.isEqual(sb, "!binary")) {
                     bytesStore();
                     return null;
@@ -2584,5 +2581,4 @@ public class TextWire extends AbstractWire implements Wire {
             return TextWire.this.toString();
         }
     }
-
 }

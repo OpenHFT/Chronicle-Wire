@@ -244,5 +244,4 @@ public class DataDecoder {
     public Side side() {
         return Side.get(CodecUtil.uint8Get(buffer, offset + 22 + 16));
     }
-
 }

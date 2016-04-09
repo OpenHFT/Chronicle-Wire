@@ -151,5 +151,4 @@ public class StrangeTextCombination {
         bytes = Bytes.allocateElasticDirect();
         return wireType.apply(bytes);
     }
-
 }

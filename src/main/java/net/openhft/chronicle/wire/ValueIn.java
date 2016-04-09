@@ -229,10 +229,8 @@ public interface ValueIn {
     @Nullable
     <T> T typedMarshallable() throws IORuntimeException;
 
-
     // todo peter to implement
     // <T> T typedMarshallable(Object context) throws IORuntimeException;
-
 
     @NotNull
     <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts);

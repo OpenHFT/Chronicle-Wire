@@ -125,5 +125,4 @@ public class PrimitiveTypeWrappersTest {
         assert wire.startUse();
         return wire;
     }
-
 }

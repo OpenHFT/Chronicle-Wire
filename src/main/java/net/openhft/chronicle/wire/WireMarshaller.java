@@ -314,7 +314,6 @@ public class WireMarshaller<T> {
             }
         }
 
-
         private Supplier<Map> newInstance() {
             try {
                 return (Supplier<Map>) type.newInstance();

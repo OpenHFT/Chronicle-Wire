@@ -83,7 +83,6 @@ public class RawWire extends AbstractWire implements Wire {
         return readContext;
     }
 
-
     @Override
     public DocumentContext readingDocument(long readLocation) {
         final long readPosition = bytes().readPosition();

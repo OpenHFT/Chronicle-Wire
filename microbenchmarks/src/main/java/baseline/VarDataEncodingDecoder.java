@@ -70,5 +70,4 @@ public class VarDataEncodingDecoder {
         for (int i = 0; i < len; i++)
             sb.appendUtf8((char) CodecUtil.uint8Get(buffer, offset + 1 + i));
     }
-
 }

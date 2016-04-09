@@ -102,5 +102,4 @@ public class DeferredTypeWire extends AbstractAnyWire implements Wire {
             return bytes;
         }
     }
-
 }

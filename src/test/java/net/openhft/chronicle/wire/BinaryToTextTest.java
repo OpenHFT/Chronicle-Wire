@@ -31,5 +31,4 @@ public class BinaryToTextTest {
         tw.writeDocument(false, w->w.write(() -> "key").text("hello"));
         System.out.println(Wires.fromSizePrefixedBlobs(tbytes));
     }
-
 }

@@ -62,7 +62,6 @@ public class BinaryWire extends AbstractWire implements Wire {
         this(bytes, false, false, false, Integer.MAX_VALUE, "binary");
     }
 
-
     public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression) {
         super(bytes, false);
         this.numericFields = numericFields;
@@ -1693,7 +1692,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                     toBytes.write(0, bytes, bytes.readPosition(), length);
                     bytes.readSkip(length);
                     return toBytes;
-
 
                 case TYPE_PREFIX: {
                     StringBuilder sb = WireInternal.acquireStringBuilder();

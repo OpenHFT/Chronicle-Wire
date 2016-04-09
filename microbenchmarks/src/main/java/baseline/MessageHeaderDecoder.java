@@ -50,5 +50,4 @@ public class MessageHeaderDecoder {
     public int blockLength() {
         return CodecUtil.uint16Get(buffer, offset + 0, java.nio.ByteOrder.LITTLE_ENDIAN);
     }
-
 }

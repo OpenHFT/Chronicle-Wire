@@ -124,5 +124,4 @@ public class WireSerializedLambdaTest {
         updater.accept(aLong);
         assertEquals(-1, aLong.get());
     }
-
 }

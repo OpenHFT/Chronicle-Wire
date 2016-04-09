@@ -45,7 +45,6 @@ public class ReadAnyWireTest {
         Assert.assertEquals(expected, READ_ANY.apply(bytes).read((() -> "hello")).text());
     }
 
-
     @Test
     public void testCreateReadAnyFirstBinaryWire() throws Exception {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -53,7 +52,6 @@ public class ReadAnyWireTest {
         BINARY.apply(bytes).write((() -> "hello")).text(expected);
         Assert.assertEquals(expected, READ_ANY.apply(bytes).read((() -> "hello")).text());
     }
-
 
     @Test
     public void testCreateReadAnyFirstFIELDLESS_BINARYWire() throws Exception {
@@ -63,5 +61,4 @@ public class ReadAnyWireTest {
         Assert.assertEquals(expected, READ_ANY.apply(bytes).read((() -> "hello")).text());
     }
 }
-
 

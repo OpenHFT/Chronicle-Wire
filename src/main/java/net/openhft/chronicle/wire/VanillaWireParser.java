@@ -55,5 +55,4 @@ public class VanillaWireParser<O> implements WireParser<O> {
     public WireParselet<O> lookup(int number) {
         return numberedConsumer.get(number);
     }
-
 }

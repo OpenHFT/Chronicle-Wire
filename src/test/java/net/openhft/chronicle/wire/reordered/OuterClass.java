@@ -118,7 +118,6 @@ public class OuterClass implements Marshallable {
         return nc;
     }
 
-
     @Override
     public boolean equals(Object o) {
         return Marshallable.$equals(this, o);

@@ -53,7 +53,6 @@ public class JSONWire extends TextWire {
         return tw.toString();
     }
 
-
     @NotNull
     @Override
     protected TextValueOut createValueOut() {

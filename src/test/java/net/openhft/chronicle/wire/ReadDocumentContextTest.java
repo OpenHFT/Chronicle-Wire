@@ -4,7 +4,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 /**
  * @author Rob Austin.
  */
@@ -80,7 +79,6 @@ public class ReadDocumentContextTest {
         }
 
     }
-
 
     @Test
     public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt5Bytes() throws

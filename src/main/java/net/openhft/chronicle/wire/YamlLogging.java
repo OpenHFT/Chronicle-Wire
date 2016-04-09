@@ -24,11 +24,11 @@ import org.jetbrains.annotations.NotNull;
  */
 public enum YamlLogging {
     ;
+    @NotNull
+    public static volatile String title = "";
     // TODO Doesn't show all writes. Use clientReads
     private static volatile boolean showServerWrites = Boolean.getBoolean("yaml.logging");
     private static volatile boolean clientWrites = Boolean.getBoolean("yaml.logging");
-    @NotNull
-    public static volatile String title = "";
     @NotNull
     private static volatile String writeMessage = "";
     private static volatile boolean clientReads = Boolean.getBoolean("yaml.logging");
@@ -91,7 +91,6 @@ public enum YamlLogging {
         showServerReads = logging;
     }
 
-
     public enum YamlLoggingLevel {
         OFF {
             @Override
@@ -114,6 +113,5 @@ public enum YamlLogging {
 
         public abstract boolean isSet();
     }
-
 }
 

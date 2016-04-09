@@ -228,7 +228,6 @@ public interface ValueOut {
         return leaf ? leaf() : this;
     }
 
-
     @NotNull
     default WireOut typedMarshallable(@Nullable WriteMarshallable object) {
         if (object == null)
@@ -246,7 +245,6 @@ public interface ValueOut {
     default <E extends Enum<E>> WireOut asEnum(E e) {
         return text(e == null ? null : e.name());
     }
-
 
     default <V> WireOut set(Set<V> coll) {
         return set(coll, null);

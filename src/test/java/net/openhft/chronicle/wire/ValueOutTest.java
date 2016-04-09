@@ -32,7 +32,6 @@ import java.util.Collection;
 @RunWith(value = Parameterized.class)
 public class ValueOutTest extends TestCase {
 
-
     private final WireType wireType;
 
     public ValueOutTest(WireType wireType) {
@@ -85,7 +84,6 @@ public class ValueOutTest extends TestCase {
 
     }
 
-
     @Test
     public void testAllBytes() {
 
@@ -107,6 +105,5 @@ public class ValueOutTest extends TestCase {
 
         }
     }
-
 
 }

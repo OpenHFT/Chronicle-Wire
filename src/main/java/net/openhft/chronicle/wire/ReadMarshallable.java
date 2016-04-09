@@ -18,7 +18,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
-
 /**
  * This interface marks a object which can be reloaded from stream re-using an
  * existing object.

@@ -82,7 +82,6 @@ public class CSVBytesMarshallableTest {
         System.out.println(wt);
         System.out.println(binary ? bytes2.toHexString() : bytes2.toString());
     }
-
 }
 
 class FXPrice implements BytesMarshallable {

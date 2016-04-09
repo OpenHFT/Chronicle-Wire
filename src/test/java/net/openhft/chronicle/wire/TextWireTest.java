@@ -804,7 +804,6 @@ public class TextWireTest {
         assertEquals("[abc, def, ghi]", Arrays.toString(object2));
     }
 
-
     @Test
     public void testArrays2() {
         Wire wire = createWire();
@@ -1084,7 +1083,6 @@ public class TextWireTest {
                 .marshallable(w -> w.read(() -> "key").object(Object.class, "1", Assert::assertEquals)
                         .read(() -> "value").object(byte[].class, expected, Assert::assertArrayEquals)));
     }
-
 
     enum BWKey implements WireKey {
         field1, field2, field3
