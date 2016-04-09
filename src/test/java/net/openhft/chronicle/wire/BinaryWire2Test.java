@@ -62,7 +62,6 @@ public class BinaryWire2Test {
         Bytes b = Bytes.elasticByteBuffer();
         wire.read().object(b, Object.class);
         assertEquals("Hello", b.toString());
-
     }
 
     @Test

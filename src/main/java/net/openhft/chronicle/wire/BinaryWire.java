@@ -2503,6 +2503,11 @@ public class BinaryWire extends AbstractWire implements Wire {
                             } else {
                                 bytes.readSkip(1);
                                 int len = bytes.readInt();
+                                code = peekCode();
+                                if (code == U8_ARRAY) {
+                                    bytes.readSkip(-5);
+                                    return bytesStore();
+                                }
                                 long lim = bytes.readLimit();
                                 try {
                                     bytes.readLimit(bytes.readPosition() + len);
