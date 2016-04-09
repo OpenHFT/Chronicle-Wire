@@ -110,9 +110,11 @@ public class FIX42Test {
     @NotNull
     private Wire createWire() {
         bytes.clear();
-        if (testId < 0)
-            return new TextWire(bytes);
-        return new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "binary");
+        Wire wire = testId < 0
+                ? new TextWire(bytes)
+                : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "binary");
+        assert wire.startUse();
+        return wire;
     }
 
     @Test

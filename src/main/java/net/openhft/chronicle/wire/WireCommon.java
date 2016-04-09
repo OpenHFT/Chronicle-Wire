@@ -93,4 +93,19 @@ public interface WireCommon {
      * @param parent to set, or null if there isn't one.
      */
     void parent(Object parent);
+
+    /**
+     * Used to check that the wrie is being used by only one thread
+     *
+     * @return true always, so it can be used in an assert line
+     */
+    boolean startUse();
+
+    /**
+     * Check the Wire was not used by another thread.
+     *
+     * @return true always, so it can be used in an assert line
+     */
+    boolean endUse();
+
 }

@@ -69,6 +69,7 @@ public class WireCollectionTest {
     public void testMultipleReads() {
         Bytes bytes = Bytes.elasticByteBuffer();
         Wire wire = wireType.apply(bytes);
+        assert wire.startUse();
 
         wire.writeDocument(true, collection);
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));

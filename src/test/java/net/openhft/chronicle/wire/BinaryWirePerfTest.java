@@ -58,9 +58,11 @@ public class BinaryWirePerfTest {
     @NotNull
     private Wire createBytes() {
         bytes.clear();
-        if (testId == -1)
-            return new RawWire(bytes);
-        return new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "lzw");
+        Wire wire = testId == -1
+                ? new RawWire(bytes)
+                : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "lzw");
+        assert wire.startUse();
+        return wire;
     }
 
     @Test
@@ -97,6 +99,7 @@ public class BinaryWirePerfTest {
             b.readMarshallable(wire);
         }
         long rate = (System.nanoTime() - start) / runs;
+        assert wire.startUse();
         System.out.printf("(vars) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());
     }
 

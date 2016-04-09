@@ -48,6 +48,9 @@ public abstract class AbstractWire implements Wire {
     protected Pauser pauser = BusyPauser.INSTANCE;
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
     protected Object parent;
+    volatile Thread usedBy;
+    volatile Throwable usedHere, lastEnded;
+    int usedCount = 0;
 
     public AbstractWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
@@ -94,6 +97,8 @@ public abstract class AbstractWire implements Wire {
     @NotNull
     @Override
     public Bytes<?> bytes() {
+//        if (usedBy == null)
+//            throw new AssertionError(lastEnded);
         return bytes;
     }
 
@@ -294,5 +299,32 @@ public abstract class AbstractWire implements Wire {
 
     public void parent(Object parent) {
         this.parent = parent;
+    }
+
+    @Override
+    public boolean startUse() {
+        Throwable usedHere = this.usedHere;
+        Thread usedBy = this.usedBy;
+        if (usedBy != Thread.currentThread() && usedBy != null) {
+            throw new IllegalStateException("Used by " + usedBy + " while trying to use it in " + Thread.currentThread(), usedHere);
+        }
+        this.usedBy = Thread.currentThread();
+        this.usedHere = new Throwable();
+        usedCount++;
+        return true;
+    }
+
+    @Override
+    public boolean endUse() {
+        if (usedBy != Thread.currentThread()) {
+            throw new IllegalStateException("Used by " + usedHere, usedHere);
+        }
+        if (--usedCount <= 0) {
+            usedBy = null;
+            usedHere = null;
+            usedCount = 0;
+            lastEnded = new Throwable();
+        }
+        return true;
     }
 }

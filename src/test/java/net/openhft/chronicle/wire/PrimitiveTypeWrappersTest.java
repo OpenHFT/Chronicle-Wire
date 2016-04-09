@@ -121,7 +121,9 @@ public class PrimitiveTypeWrappersTest {
     @NotNull
     private Wire wireFactory() {
         final Bytes bytes = Bytes.allocateElasticDirect();
-        return (isTextWire) ? new TextWire(bytes) : new BinaryWire(bytes);
+        Wire wire = (isTextWire) ? new TextWire(bytes) : new BinaryWire(bytes);
+        assert wire.startUse();
+        return wire;
     }
 
 }

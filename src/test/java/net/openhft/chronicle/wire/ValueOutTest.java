@@ -51,7 +51,7 @@ public class ValueOutTest extends TestCase {
     public void test() {
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
-
+        assert wire.startUse();
         final byte[] expected = "this is my byte array".getBytes();
         wire.writeDocument(false, w ->
                 w.write().object(expected)
@@ -72,7 +72,7 @@ public class ValueOutTest extends TestCase {
     public void testRequestedType() {
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
-
+        assert wire.startUse();
         final byte[] expected = "this is my byte array".getBytes();
         wire.writeDocument(false, w -> w.write().object(expected));
 
@@ -90,7 +90,7 @@ public class ValueOutTest extends TestCase {
     public void testAllBytes() {
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
-
+        assert wire.startUse();
         for (int i = -128; i < 127; i++) {
 
             final byte[] expected = {(byte) i};

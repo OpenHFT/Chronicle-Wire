@@ -88,6 +88,16 @@ public class HashWire implements WireOut {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public boolean startUse() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean endUse() {
+        throw new UnsupportedOperationException();
+    }
+
     public long hash64() {
         return Maths.agitate(hash);
     }

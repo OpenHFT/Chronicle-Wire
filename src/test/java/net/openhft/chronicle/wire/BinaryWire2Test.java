@@ -39,7 +39,9 @@ public class BinaryWire2Test {
     @NotNull
     private BinaryWire createWire() {
         bytes.clear();
-        return new BinaryWire(bytes, false, false, false, 32, "lzw");
+        BinaryWire wire = new BinaryWire(bytes, false, false, false, 32, "lzw");
+        assert wire.startUse();
+        return wire;
     }
 
     @Test
@@ -355,11 +357,11 @@ public class BinaryWire2Test {
             bytes.clear();
 
             Wire wire = new BinaryWire(bytes, false, false, false, 32, comp);
+            assert wire.startUse();
             String str = "xxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy2yyyyyyyyyyyyyyyyy";
             BytesStore bytes = BytesStore.from(str);
 
-            wire.write()
-                    .bytes(bytes);
+            wire.write().bytes(bytes);
             System.out.println(comp + ": str.length() = " + str.length() + ", wire.bytes().readRemaining() = " + wire.bytes().readRemaining());
             if (!comp.equals("binary"))
                 assertTrue(wire.bytes().readRemaining() + " >= " + str.length(),

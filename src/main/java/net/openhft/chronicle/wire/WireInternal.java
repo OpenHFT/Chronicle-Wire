@@ -77,17 +77,25 @@ public enum WireInternal {
 
     public static long writeData(@NotNull WireOut wireOut, boolean metaData, boolean notReady,
                                  @NotNull WriteMarshallable writer) {
-        Bytes bytes = wireOut.bytes();
-        long position = bytes.writePosition();
+        assert wireOut.startUse();
+        long position;
+        try {
+            Bytes bytes = wireOut.bytes();
+            position = bytes.writePosition();
 
-        int metaDataBit = metaData ? Wires.META_DATA : 0;
-        bytes.writeOrderedInt(metaDataBit | Wires.NOT_READY | Wires.UNKNOWN_LENGTH);
-        writer.writeMarshallable(wireOut);
-        long position1 = bytes.writePosition();
-        if (position1 < position)
-            System.out.println("Message truncated from " + position + " to " + position1);
-        int length = metaDataBit | toIntU30(position1 - position - 4, "Document length %,d out of 30-bit int range.");
-        bytes.writeOrderedInt(position, length | (notReady ? Wires.NOT_READY : 0));
+            int metaDataBit = metaData ? Wires.META_DATA : 0;
+            int len0 = metaDataBit | Wires.NOT_READY | Wires.UNKNOWN_LENGTH;
+            bytes.writeOrderedInt(len0);
+            writer.writeMarshallable(wireOut);
+            long position1 = bytes.writePosition();
+            if (position1 < position)
+                System.out.println("Message truncated from " + position + " to " + position1);
+            int length = metaDataBit | toIntU30(position1 - position - 4, "Document length %,d out of 30-bit int range.");
+            if (!bytes.compareAndSwapInt(position, len0, length | (notReady ? Wires.NOT_READY : 0)))
+                throw new IllegalStateException("This wire was altered by more than one thread.");
+        } finally {
+            assert wireOut.endUse();
+        }
 
         return position;
     }

@@ -92,6 +92,7 @@ public class WireSerializedLambdaTest {
     @Test
     public void testBinaryWire() {
         Wire wire = new BinaryWire(Bytes.elasticByteBuffer());
+        assert wire.startUse();
         SerializableFunction<String, String> fun = String::toUpperCase;
         wire.write(() -> "one").object(fun)
                 .write(() -> "two").object(Fun.ADD_A)

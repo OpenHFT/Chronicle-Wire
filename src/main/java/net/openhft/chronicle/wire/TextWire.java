@@ -102,12 +102,16 @@ public class TextWire extends AbstractWire implements Wire {
     }
 
     public static String asText(@NotNull Wire wire) {
-        long pos = wire.bytes().readPosition();
-        TextWire tw = new TextWire(nativeBytes());
-        wire.copyTo(tw);
-        wire.bytes().readPosition(pos);
-
-        return tw.toString();
+        assert wire.startUse();
+        try {
+            long pos = wire.bytes().readPosition();
+            TextWire tw = new TextWire(nativeBytes());
+            wire.copyTo(tw);
+            wire.bytes().readPosition(pos);
+            return tw.toString();
+        } finally {
+            assert wire.endUse();
+        }
     }
 
     public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb) {
@@ -239,6 +243,10 @@ public class TextWire extends AbstractWire implements Wire {
         }
         try {
             int ch = peekCode();
+            // 10xx xxxx, 1111 xxxx
+            if (ch > 0x80 && ((ch & 0xC0) == 0x80 || (ch & 0xF0) == 0xF0)) {
+                throw new IllegalStateException("Attempting to read binary as TextWire ch=" + Integer.toHexString(ch));
+            }
             if (ch == '"') {
                 bytes.readSkip(1);
 

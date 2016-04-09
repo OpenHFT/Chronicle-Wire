@@ -336,6 +336,7 @@ To write in binary instead
 */
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         Wire wire2 = new BinaryWire(bytes2);
+        assert wire2.startUse();
 
         wire2.writeDocument(false, data);
         System.out.println(WireInternal.fromSizePrefixedBinaryToText(bytes2));
@@ -424,7 +425,7 @@ To write in binary instead
 */
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         Wire wire2 = new BinaryWire(bytes2);
-
+        assert wire2.startUse();
         wire2.writeDocument(false, w -> w.write(() -> "mydata")
                 .sequence(v -> Stream.of(data).forEach(v::object)));
         System.out.println(WireInternal.fromSizePrefixedBinaryToText(bytes2));
