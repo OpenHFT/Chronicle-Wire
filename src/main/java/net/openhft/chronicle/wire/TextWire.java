@@ -1171,17 +1171,6 @@ public class TextWire extends AbstractWire implements Wire {
             sep = NEW_LINE;
         }
 
-        @Override
-        public WireOut array(@NotNull WriteValue writer, Class arrayType) {
-            if (arrayType == String[].class) append("!String[] ");
-            else {
-                bytes.writeUnsignedByte('!');
-                append(arrayType.getName());
-                bytes.writeUnsignedByte(' ');
-            }
-            return sequence(writer);
-        }
-
         protected void popState() {
             sep = seps.remove(seps.size() - 1);
             indentation--;
@@ -1906,8 +1895,10 @@ public class TextWire extends AbstractWire implements Wire {
             // this code was added to support empty sets
             consumePadding();
             code = (char) peekCode();
-            if (code == ']')
+            if (code == ']') {
+                readCode();
                 return TextWire.this;
+            }
 
             tReader.accept(t, TextWire.this.valueIn);
 
@@ -2368,17 +2359,63 @@ public class TextWire extends AbstractWire implements Wire {
             if (isNull())
                 return null;
 
-            if (byte[].class.isAssignableFrom(clazz))
-                return bytes();
+            switch (clazz.getName()) {
+                case "[B":
+                    return bytes();
 
-            if (BytesStore.class.isAssignableFrom(clazz)) {
-                Bytes<byte[]> bytes = Bytes.wrapForRead(bytes());
-                return bytes;
+                case "java.lang.StringBuilder":
+                    StringBuilder builder = (using == null)
+                            ? acquireStringBuilder()
+                            : (StringBuilder) using;
+                    valueIn.textTo(builder);
+                    return using;
+
+                case "java.lang.String":
+                    //noinspection unchecked
+                    return valueIn.text();
+
+                case "java.lang.Object":
+                case "[java.lang.Object;":
+                    return objectWithInferredType(clazz);
+
+                case "java.lang.Long":
+                    //noinspection unchecked
+                    return valueIn.int64();
+
+                case "java.lang.Double":
+                    //noinspection unchecked
+                    return valueIn.float64();
+                case "java.lang.Integer":
+                    //noinspection unchecked
+                    return valueIn.int32();
+
+                case "java.lang.Float":
+                    //noinspection unchecked
+                    return valueIn.float32();
+
+                case "java.lang.Short":
+                    //noinspection unchecked
+                    return valueIn.int16();
+
+                case "java.lang.Character":
+                    //noinspection unchecked
+                    final String text = valueIn.text();
+                    if (text == null || text.length() == 0)
+                        return null;
+                    return text.charAt(0);
+
+                case "java.lang.Byte":
+                    //noinspection unchecked
+                    return valueIn.int8();
             }
-            if (Demarshallable.class.isAssignableFrom(clazz)) {
+
+            if (BytesStore.class.isAssignableFrom(clazz))
+                return Bytes.wrapForRead(bytes());
+
+            if (Demarshallable.class.isAssignableFrom(clazz))
                 return Demarshallable.newInstance(clazz, wireIn());
 
-            } else if (ReadMarshallable.class.isAssignableFrom(clazz)) {
+            if (ReadMarshallable.class.isAssignableFrom(clazz)) {
                 final Object v;
                 if (using == null)
                     v = ObjectUtils.newInstance(clazz);
@@ -2388,56 +2425,19 @@ public class TextWire extends AbstractWire implements Wire {
                 valueIn.marshallable((ReadMarshallable) v);
                 return readResolve(v);
 
-            } else if (StringBuilder.class.isAssignableFrom(clazz)) {
-                StringBuilder builder = (using == null)
-                        ? acquireStringBuilder()
-                        : (StringBuilder) using;
-                valueIn.textTo(builder);
-                return using;
-
-            } else if (CharSequence.class.isAssignableFrom(clazz)) {
+            }
+            if (CharSequence.class.isAssignableFrom(clazz))
                 //noinspection unchecked
                 return valueIn.text();
 
-            } else if (Long.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return valueIn.int64();
-
-            } else if (Double.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return valueIn.float64();
-            } else if (Integer.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return valueIn.int32();
-
-            } else if (Float.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return valueIn.float32();
-
-            } else if (Short.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return valueIn.int16();
-
-            } else if (Character.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                final String text = valueIn.text();
-                if (text == null || text.length() == 0)
-                    return null;
-                return text.charAt(0);
-
-            } else if (Byte.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                return valueIn.int8();
-
-            } else if (Map.class.isAssignableFrom(clazz)) {
+            if (Map.class.isAssignableFrom(clazz)) {
                 //noinspection unchecked
                 final Map result = new HashMap();
                 valueIn.map(result);
                 return result;
-
-            } else {
-                return objectWithInferredType(clazz);
             }
+
+            return objectWithInferredType(clazz);
         }
 
         Object objectWithInferredType(@NotNull Class clazz) {

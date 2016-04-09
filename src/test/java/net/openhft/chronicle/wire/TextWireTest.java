@@ -778,7 +778,10 @@ public class TextWireTest {
         Wire wire = createWire();
 
         Object[] noObjects = {};
-        wire.write().object(noObjects);
+        wire.write("a").object(noObjects);
+
+        assertEquals("a: [\n" +
+                "]", wire.toString());
 
         Object[] object = wire.read().object(Object[].class);
         assertEquals(0, object.length);
@@ -787,12 +790,39 @@ public class TextWireTest {
         wire = createWire();
 
         Object[] threeObjects = {"abc", "def", "ghi"};
-        wire.write().object(threeObjects);
+        wire.write("b").object(threeObjects);
+
+        assertEquals("b: [\n" +
+                "  abc,\n" +
+                "  def,\n" +
+                "  ghi\n" +
+                "]", wire.toString());
 
         Object[] object2 = wire.read()
                 .object(Object[].class);
         assertEquals(3, object2.length);
         assertEquals("[abc, def, ghi]", Arrays.toString(object2));
+    }
+
+
+    @Test
+    public void testArrays2() {
+        Wire wire = createWire();
+        Object[] a1 = new Object[0];
+        wire.write("empty").object(a1);
+        Object[] a2 = {1L};
+        wire.write("one").object(a2);
+        Object[] a3 = {"Hello", 123, 10.1};
+        wire.write("three").object(Object[].class, a3);
+
+        System.out.println(wire);
+        Object o1 = wire.read()
+                .object(Object[].class);
+        assertArrayEquals(a1, (Object[]) o1);
+        Object o2 = wire.read().object(Object[].class);
+        assertArrayEquals(a2, (Object[]) o2);
+        Object o3 = wire.read().object(Object[].class);
+        assertArrayEquals(a3, (Object[]) o3);
     }
 
     @Test
@@ -1054,6 +1084,7 @@ public class TextWireTest {
                 .marshallable(w -> w.read(() -> "key").object(Object.class, "1", Assert::assertEquals)
                         .read(() -> "value").object(byte[].class, expected, Assert::assertArrayEquals)));
     }
+
 
     enum BWKey implements WireKey {
         field1, field2, field3

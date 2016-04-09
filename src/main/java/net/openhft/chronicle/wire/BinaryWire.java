@@ -34,12 +34,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.*;
-import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.BinaryWire.AnyCodeMatch.ANY_CODE_MATCH;
@@ -1164,7 +1160,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @NotNull
-        WireOut fixedFloat64(double d) {
+        public WireOut fixedFloat64(double d) {
             writeCode(FLOAT64).writeDouble(d);
             return BinaryWire.this;
         }
@@ -1491,66 +1487,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             writeNumber(d);
             return BinaryWire.this;
         }
-
-        @NotNull
-        public WireOut object(Object value) {
-            if (value == null)
-                return text(null);
-            if (value instanceof Marshallable)
-                return typedMarshallable((Marshallable) value);
-            if (value instanceof BytesStore)
-                return bytes((BytesStore) value);
-            if (value instanceof CharSequence)
-                return text((CharSequence) value);
-            if (value instanceof Map)
-                return map((Map) value);
-            if (value instanceof byte[])
-                return rawBytes((byte[]) value);
-            if (value instanceof Byte)
-                return fixedInt8((Byte) value);
-            if (value instanceof Boolean)
-                return bool((Boolean) value);
-            if (value instanceof Character)
-                return text(value.toString());
-            if (value instanceof Short)
-                return fixedInt16((Short) value);
-            if (value instanceof Integer)
-                return fixedInt32((Integer) value);
-            if (value instanceof Long)
-                return fixedInt64((Long) value);
-            if (value instanceof Double)
-                return fixedFloat64((Double) value);
-            if (value instanceof Float)
-                return fixedFloat32((Float) value);
-            if (value instanceof Throwable)
-                return throwable((Throwable) value);
-            if (value instanceof Enum)
-                return typedScalar(value);
-            if (value instanceof String[])
-                return array(v -> Stream.of((String[]) value).forEach(v::text), String[].class);
-            if (value instanceof Collection) {
-                if (((Collection) value).size() == 0) return sequence(v -> {
-                });
-
-                return sequence(v -> ((Collection) value).stream().forEach(v::object));
-            } else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
-                WireSerializedLambda.write(value, this);
-                return wireOut();
-            } else if (Object[].class.isAssignableFrom(value.getClass())) {
-                return array(v -> Stream.of((Object[]) value).forEach(v::object), Object[].class);
-            } else if (value instanceof LocalTime) {
-                return time((LocalTime) value);
-            } else if (value instanceof LocalDate) {
-                return date((LocalDate) value);
-            } else if (value instanceof ZonedDateTime) {
-                return zonedDateTime((ZonedDateTime) value);
-            } else {
-                throw new IllegalStateException("type=" + value.getClass() +
-                        " is unsupported, it must either be of type Marshallable, String or " +
-                        "AutoBoxed primitive Object");
-            }
-        }
-
     }
 
     class BinaryValueIn implements ValueIn {
@@ -2565,7 +2501,22 @@ public class BinaryWire extends AbstractWire implements Wire {
                                 bytesStore((Bytes) using);
                                 return using;
                             } else {
-                                return bytesStore();
+                                bytes.readSkip(1);
+                                int len = bytes.readInt();
+                                long lim = bytes.readLimit();
+                                try {
+                                    bytes.readLimit(bytes.readPosition() + len);
+                                    if (isFieldNext()) {
+                                        return getValueOut().marshallableAsMap(new LinkedHashMap<>());
+                                    } else {
+                                        List list = new ArrayList<>();
+                                        while (bytes.readRemaining() > 0)
+                                            list.add(object(Object.class));
+                                        return list;
+                                    }
+                                } finally {
+                                    bytes.readLimit(lim);
+                                }
                             }
                     }
                     break;

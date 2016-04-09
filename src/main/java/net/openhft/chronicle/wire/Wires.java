@@ -65,10 +65,21 @@ public enum Wires {
         return WireInternal.fromSizePrefixedBlobs(bytes, position, limit - position);
     }
 
-    public static String fromSizePrefixedBlobs(@NotNull Wire wire) {
-        final Bytes<?> bytes = wire.bytes();
+    public static String fromSizePrefixedBlobs(@NotNull WireIn wireIn) {
+        final Bytes<?> bytes = wireIn.bytes();
         long position = bytes.readPosition();
         return WireInternal.fromSizePrefixedBlobs(bytes, position, bytes.readRemaining());
+    }
+
+    public static CharSequence asText(@NotNull WireIn wireIn) {
+        long pos = wireIn.bytes().readPosition();
+        try {
+            Bytes bytes = acquireBytes();
+            wireIn.copyTo(new TextWire(bytes));
+            return bytes;
+        } finally {
+            wireIn.bytes().readPosition(pos);
+        }
     }
 
     public static StringBuilder acquireStringBuilder() {

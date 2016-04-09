@@ -195,8 +195,13 @@ public interface ValueOut {
     <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer);
 
     @NotNull
-    default WireOut array(WriteValue writer, Class arrayType) {
-        throw new UnsupportedOperationException();
+    default WireOut array(@NotNull WriteValue writer, Class arrayType) {
+        if (arrayType == String[].class) {
+            typePrefix("!String[] ");
+        } else if (arrayType != Object[].class) {
+            typePrefix(ClassAliasPool.CLASS_ALIASES.nameFor(arrayType.getComponentType()) + "[]");
+        }
+        return sequence(writer);
     }
 
     @NotNull
@@ -302,6 +307,39 @@ public interface ValueOut {
     default WireOut object(Object value) {
         if (value == null)
             return text(null);
+        // look for exact matches
+        switch (value.getClass().getName()) {
+            case "[B":
+                return typePrefix(byte[].class).bytes((byte[]) value);
+            case "java.lang.String":
+                return text((String) value);
+            case "java.lang.Byte":
+                return typePrefix(byte.class).int8((Byte) value);
+            case "java.lang.Boolean":
+                return bool((Boolean) value);
+            case "java.lang.Character":
+                return text(value.toString());
+            case "java.lang.Short":
+                return typePrefix(short.class).int16((Short) value);
+            case "java.lang.Integer":
+                return typePrefix(int.class).int32((Integer) value);
+            case "java.lang.Long":
+                return fixedInt64((Long) value);
+            case "java.lang.Double":
+                return fixedFloat64((Double) value);
+            case "java.lang.Float":
+                return typePrefix(float.class).float32((Float) value);
+            case "[java.lang.String;":
+                return array(v -> Stream.of((String[]) value).forEach(v::text), String[].class);
+            case "[java.lang.Object;":
+                return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(val)), Object[].class);
+            case "java.time.LocalTime":
+                return time((LocalTime) value);
+            case "java.time.LocalDate":
+                return date((LocalDate) value);
+            case "java.time.ZonedDateTime":
+                return zonedDateTime((ZonedDateTime) value);
+        }
         if (value instanceof Marshallable)
             return typedMarshallable((Marshallable) value);
         if (value instanceof BytesStore)
@@ -310,46 +348,18 @@ public interface ValueOut {
             return text((CharSequence) value);
         if (value instanceof Map)
             return map((Map) value);
-        if (value instanceof byte[])
-            return typePrefix(byte[].class).bytes((byte[]) value);
-        if (value instanceof Byte)
-            return typePrefix(byte.class).int8((Byte) value);
-        if (value instanceof Boolean)
-            return bool((Boolean) value);
-        if (value instanceof Character)
-            return text(value.toString());
-        if (value instanceof Short)
-            return typePrefix(short.class).int16((Short) value);
-        if (value instanceof Integer)
-            return typePrefix(int.class).int32((Integer) value);
-        if (value instanceof Long)
-            return int64((Long) value);
-        if (value instanceof Double)
-            return float64((Double) value);
-        if (value instanceof Float)
-            return typePrefix(float.class).float32((Float) value);
         if (value instanceof Throwable)
             return throwable((Throwable) value);
         if (value instanceof Enum)
             return typedScalar(value);
-        if (value instanceof String[])
-            return array(v -> Stream.of((String[]) value).forEach(v::text), String[].class);
         if (value instanceof Collection) {
-            if (((Collection) value).size() == 0) return sequence(v -> {
-            });
-
             return sequence(v -> ((Collection) value).stream().forEach(v::object));
         } else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
             WireSerializedLambda.write(value, this);
             return wireOut();
         } else if (Object[].class.isAssignableFrom(value.getClass())) {
-            return array(v -> Stream.of((Object[]) value).forEach(v::object), Object[].class);
-        } else if (value instanceof LocalTime) {
-            return time((LocalTime) value);
-        } else if (value instanceof LocalDate) {
-            return date((LocalDate) value);
-        } else if (value instanceof ZonedDateTime) {
-            return zonedDateTime((ZonedDateTime) value);
+            Class type = (Class) value.getClass().getComponentType();
+            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), value.getClass());
         } else {
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +
@@ -357,63 +367,44 @@ public interface ValueOut {
         }
     }
 
+    default WireOut fixedFloat64(double value) {
+        return float64(value);
+    }
+
+    default WireOut fixedInt64(long value) {
+        return int64(value);
+    }
+
     @NotNull
     default WireOut untypedObject(Object value) {
         if (value == null)
             return text(null);
+        // look for exact matches
+        switch (value.getClass().getName()) {
+            case "[B":
+                return bytes((byte[]) value);
+            case "java.lang.Byte":
+                return int8((Byte) value);
+            case "java.lang.Short":
+                return int16((Short) value);
+            case "java.lang.Integer":
+                return int32((Integer) value);
+            case "java.lang.Long":
+                return int64((Long) value);
+            case "java.lang.Double":
+                return float64((Double) value);
+            case "java.lang.Float":
+                return float32((Float) value);
+        }
         if (value instanceof Marshallable)
             return marshallable((Marshallable) value);
-        if (value instanceof BytesStore)
-            return bytes((BytesStore) value);
-        if (value instanceof CharSequence)
-            return text((CharSequence) value);
-        if (value instanceof Map)
-            return map((Map) value);
-        if (value instanceof byte[])
-            return bytes((byte[]) value);
-        if (value instanceof Byte)
-            return int8((Byte) value);
-        if (value instanceof Boolean)
-            return bool((Boolean) value);
-        if (value instanceof Character)
-            return text(value.toString());
-        if (value instanceof Short)
-            return int16((Short) value);
-        if (value instanceof Integer)
-            return int32((Integer) value);
-        if (value instanceof Long)
-            return int64((Long) value);
-        if (value instanceof Double)
-            return float64((Double) value);
-        if (value instanceof Float)
-            return float32((Float) value);
-        if (value instanceof Throwable)
-            return throwable((Throwable) value);
         if (value instanceof Enum)
-            return text(value.toString());
-        if (value instanceof String[])
-            return array(v -> Stream.of((String[]) value).forEach(v::text), String[].class);
-        if (value instanceof Collection) {
-            if (((Collection) value).size() == 0) return sequence(v -> {
-            });
-
-            return sequence(v -> ((Collection) value).stream().forEach(v::object));
-        } else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
-            WireSerializedLambda.write(value, this);
-            return wireOut();
-        } else if (Object[].class.isAssignableFrom(value.getClass())) {
-            return array(v -> Stream.of((Object[]) value).forEach(v::object), Object[].class);
-        } else if (value instanceof LocalTime) {
-            return time((LocalTime) value);
-        } else if (value instanceof LocalDate) {
-            return date((LocalDate) value);
-        } else if (value instanceof ZonedDateTime) {
-            return zonedDateTime((ZonedDateTime) value);
-        } else {
-            throw new IllegalStateException("type=" + value.getClass() +
-                    " is unsupported, it must either be of type Marshallable, String or " +
-                    "AutoBoxed primitive Object");
+            return text(((Enum) value).name());
+        if (Object[].class.isAssignableFrom(value.getClass())) {
+            Class type = (Class) value.getClass().getComponentType();
+            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), Object[].class);
         }
+        return object(value);
     }
 
     @NotNull

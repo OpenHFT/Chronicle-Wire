@@ -136,6 +136,10 @@ public interface WireIn extends WireCommon {
 
     void readMetaDataHeader();
 
+    default CharSequence asText() {
+        return Wires.asText(this);
+    }
+
     enum HeaderType {
         NONE, DATA, META_DATA
     }

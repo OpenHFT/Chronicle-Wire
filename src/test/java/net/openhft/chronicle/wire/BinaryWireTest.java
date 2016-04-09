@@ -36,8 +36,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(value = Parameterized.class)
 public class BinaryWireTest {
@@ -659,14 +658,13 @@ public class BinaryWireTest {
         wire.write(() -> "B").marshallable(mtB);
 
         //        System.out.println(wire.bytes().toDebugString(400));
-    /*    checkWire(wire, "[pos: 0, rlim: 144, wlim: 8EiB, cap: 8EiB ] ‖ÁA\\u0082C٠٠٠ÆB_FLAG±ÅS_NUM¢90ÅD_NUM\\u0091w¾\\u009F\\u001A/Ý^@ÅL_NUM٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082?٠٠٠ÆB_FLAG°ÅS_NUM¢Ò⒋ÅD_NUM\\u0091S⒌£\\u0092:Ý^@ÅL_NUM٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now",
-                "[pos: 0, rlim: 144, wlim: 8EiB, cap: 8EiB ] ‖ÁA\\u0082C٠٠٠ÆB_FLAG±ÅS_NUM¢90ÅD_NUM\\u0091w¾\\u009F\\u001A/Ý^@ÅL_NUM٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082?٠٠٠ÆB_FLAG°ÅS_NUM¢Ò⒋ÅD_NUM\\u0091S⒌£\\u0092:Ý^@ÅL_NUM٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now",
-                "[pos: 0, rlim: 160, wlim: 8EiB, cap: 8EiB ] ‖ÁA\\u0082K٠٠٠ÆB_FLAG±ÅS_NUM¥90ÅD_NUM\\u0091w¾\\u009F\\u001A/Ý^@ÅL_NUM§٠٠٠٠٠٠٠٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082G٠٠٠ÆB_FLAG°ÅS_NUM¥Ò⒋ÅD_NUM\\u0091S⒌£\\u0092:Ý^@ÅL_NUM§٠٠٠٠٠٠٠٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now",
-                "[pos: 0, rlim: 96, wlim: 8EiB, cap: 8EiB ] ‖ºA\\u0082+٠٠٠º٠±º⒈¢90º⒉\\u0091w¾\\u009F\\u001A/Ý^@º⒊٠º⒋¦C\\u009ECÿº⒌ëHello WorldºB\\u0082'٠٠٠º٠°º⒈¢Ò⒋º⒉\\u0091S⒌£\\u0092:Ý^@º⒊٠º⒋¦\\u009E.¤øº⒌çBye now",
-                "[pos: 0, rlim: 112, wlim: 8EiB, cap: 8EiB ] ‖ºA\\u00823٠٠٠º٠±º⒈¥90º⒉\\u0091w¾\\u009F\\u001A/Ý^@º⒊§٠٠٠٠٠٠٠٠º⒋¦C\\u009ECÿº⒌ëHello WorldºB\\u0082/٠٠٠º٠°º⒈¥Ò⒋º⒉\\u0091S⒌£\\u0092:Ý^@º⒊§٠٠٠٠٠٠٠٠º⒋¦\\u009E.¤øº⒌çBye now",
-                "[pos: 0, rlim: 68, wlim: 8EiB, cap: 8EiB ] ‖\\u0082\\u001F٠٠٠±¢90\\u0091w¾\\u009F\\u001A/Ý^@٠¦C\\u009ECÿëHello World\\u0082\\u001B٠٠٠°¢Ò⒋\\u0091S⒌£\\u0092:Ý^@٠¦\\u009E.¤øçBye now",
-                "[pos: 0, rlim: 84, wlim: 8EiB, cap: 8EiB ] ‖\\u0082'٠٠٠±¥90\\u0091w¾\\u009F\\u001A/Ý^@§٠٠٠٠٠٠٠٠¦C\\u009ECÿëHello World\\u0082#٠٠٠°¥Ò⒋\\u0091S⒌£\\u0092:Ý^@§٠٠٠٠٠٠٠٠¦\\u009E.¤øçBye now");
-*/
+        checkWire(wire, "[pos: 0, rlim: 144, wlim: 8EiB, cap: 8EiB ] ‖ÁA\\u0082C٠٠٠ÆB_FLAG±ÅS_NUM¢90ÅD_NUM\\u0091w¾\\u009F\\u001A/Ý^@ÅL_NUM٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082?٠٠٠ÆB_FLAG°ÅS_NUM¢Ò⒋ÅD_NUM\\u0091S⒌£\\u0092:Ý^@ÅL_NUM٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 144, wlim: 8EiB, cap: 8EiB ] ‖ÁA\\u0082C٠٠٠ÆB_FLAG±ÅS_NUM¢90ÅD_NUM\\u0091w¾\\u009F\\u001A/Ý^@ÅL_NUM٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082?٠٠٠ÆB_FLAG°ÅS_NUM¢Ò⒋ÅD_NUM\\u0091S⒌£\\u0092:Ý^@ÅL_NUM٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 160, wlim: 8EiB, cap: 8EiB ] ‖ÁA\\u0082K٠٠٠ÆB_FLAG±ÅS_NUM¥90ÅD_NUM\\u0091w¾\\u009F\\u001A/Ý^@ÅL_NUM§٠٠٠٠٠٠٠٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082G٠٠٠ÆB_FLAG°ÅS_NUM¥Ò⒋ÅD_NUM\\u0091S⒌£\\u0092:Ý^@ÅL_NUM§٠٠٠٠٠٠٠٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 96, wlim: 8EiB, cap: 8EiB ] ‖ºA\\u0082+٠٠٠º٠±º⒈¢90º⒉\\u0091w¾\\u009F\\u001A/Ý^@º⒊٠º⒋¦C\\u009ECÿº⒌ëHello WorldºB\\u0082'٠٠٠º٠°º⒈¢Ò⒋º⒉\\u0091S⒌£\\u0092:Ý^@º⒊٠º⒋¦\\u009E.¤øº⒌çBye now‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 112, wlim: 8EiB, cap: 8EiB ] ‖ºA\\u00823٠٠٠º٠±º⒈¥90º⒉\\u0091w¾\\u009F\\u001A/Ý^@º⒊§٠٠٠٠٠٠٠٠º⒋¦C\\u009ECÿº⒌ëHello WorldºB\\u0082/٠٠٠º٠°º⒈¥Ò⒋º⒉\\u0091S⒌£\\u0092:Ý^@º⒊§٠٠٠٠٠٠٠٠º⒋¦\\u009E.¤øº⒌çBye now‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 68, wlim: 8EiB, cap: 8EiB ] ‖\\u0082\\u001F٠٠٠±¢90\\u0091w¾\\u009F\\u001A/Ý^@٠¦C\\u009ECÿëHello World\\u0082\\u001B٠٠٠°¢Ò⒋\\u0091S⒌£\\u0092:Ý^@٠¦\\u009E.¤øçBye now‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 84, wlim: 8EiB, cap: 8EiB ] ‖\\u0082'٠٠٠±¥90\\u0091w¾\\u009F\\u001A/Ý^@§٠٠٠٠٠٠٠٠¦C\\u009ECÿëHello World\\u0082#٠٠٠°¥Ò⒋\\u0091S⒌£\\u0092:Ý^@§٠٠٠٠٠٠٠٠¦\\u009E.¤øçBye now‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠");
         MyTypesCustom mt2 = new MyTypesCustom();
         wire.read(() -> "A").marshallable(mt2);
         assertEquals(mt2, mtA);
@@ -705,6 +703,49 @@ public class BinaryWireTest {
 
             wire.readDocument(null, w -> w.read(() -> "message").text(s, Assert::assertEquals));
         }
+    }
+
+    @Test
+    public void testArrays() {
+        Wire wire = createWire();
+
+        Object[] noObjects = {};
+        wire.write("a").object(noObjects);
+
+        System.out.println(wire.asText());
+        Object[] object = wire.read().object(Object[].class);
+        assertEquals(0, object.length);
+
+        // TODO we shouldn't need to create a new wire.
+        wire = createWire();
+
+        Object[] threeObjects = {"abc", "def", "ghi"};
+        wire.write("b").object(threeObjects);
+        System.out.println(wire.asText());
+
+        Object[] object2 = wire.read()
+                .object(Object[].class);
+        assertEquals(3, object2.length);
+        assertEquals("[abc, def, ghi]", Arrays.toString(object2));
+    }
+
+
+    @Test
+    public void testArrays2() {
+        Wire wire = createWire();
+        Object[] a1 = new Object[0];
+        wire.write("empty").object(a1);
+        Object[] a2 = {1L};
+        wire.write("one").object(a2);
+        Object[] a3 = {"Hello", 123, 10.1};
+        wire.write("three").object(Object[].class, a3);
+
+        Object o1 = wire.read().object(Object[].class);
+        assertArrayEquals(a1, (Object[]) o1);
+        Object o2 = wire.read().object(Object[].class);
+        assertArrayEquals(a2, (Object[]) o2);
+        Object o3 = wire.read().object(Object[].class);
+        assertArrayEquals(a3, (Object[]) o3);
     }
 
     enum BWKey implements WireKey {
