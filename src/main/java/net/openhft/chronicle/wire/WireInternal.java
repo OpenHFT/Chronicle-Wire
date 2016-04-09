@@ -196,7 +196,7 @@ public enum WireInternal {
             if (!isKnownLength(header))
                 return read;
             bytes.readSkip(4);
-            final boolean ready = Wires.isReady(header);
+
             final int len = Wires.lengthOf(header);
             if (Wires.isData(header)) {
                 if (dataConsumer == null) {
