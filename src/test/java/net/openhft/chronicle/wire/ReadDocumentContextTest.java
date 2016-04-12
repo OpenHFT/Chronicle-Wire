@@ -9,6 +9,24 @@ import org.junit.Test;
  */
 public class ReadDocumentContextTest {
 
+
+    @Test
+    public void testWritingNotReadDocument() throws Exception {
+
+        Bytes b = Bytes.elasticByteBuffer();
+
+        TextWire textWire = new TextWire(b);
+
+        textWire.writeNotReadyDocument(false, w -> w.write("key").text("someText"));
+
+        try (DocumentContext dc = textWire.readingDocument()) {
+            Assert.assertTrue(dc.isPresent());
+            Assert.assertFalse(dc.isMetaData());
+            Assert.assertEquals("someText", textWire.read(() -> "key").text());
+        }
+    }
+
+
     @Test
     public void testEmptyMessage() throws Exception {
 
