@@ -26,7 +26,7 @@ import static org.junit.Assert.assertFalse;
 public class HashWireTest {
 
     @Test
-    public void testHash64() throws Exception {
+    public void testHash64() {
         long h = HashWire.hash64(wire ->
                 wire.write(() -> "entrySet").sequence(s -> {
                     s.marshallable(m -> m

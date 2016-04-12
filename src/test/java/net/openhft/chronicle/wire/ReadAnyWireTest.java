@@ -30,7 +30,7 @@ import static net.openhft.chronicle.wire.WireType.*;
 public class ReadAnyWireTest {
 
     @Test
-    public void testReadAny() throws Exception {
+    public void testReadAny() {
         final Bytes<ByteBuffer> t = Bytes.elasticByteBuffer();
         final Wire wire = TEXT.apply(t);
         wire.write((() -> "hello")).text("world");
@@ -38,7 +38,7 @@ public class ReadAnyWireTest {
     }
 
     @Test
-    public void testCreateReadAnyFirstTextWire() throws Exception {
+    public void testCreateReadAnyFirstTextWire() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         final String expected = "world";
         TEXT.apply(bytes).write((() -> "hello")).text(expected);
@@ -46,7 +46,7 @@ public class ReadAnyWireTest {
     }
 
     @Test
-    public void testCreateReadAnyFirstBinaryWire() throws Exception {
+    public void testCreateReadAnyFirstBinaryWire() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         final String expected = "world";
         BINARY.apply(bytes).write((() -> "hello")).text(expected);
@@ -54,7 +54,7 @@ public class ReadAnyWireTest {
     }
 
     @Test
-    public void testCreateReadAnyFirstFIELDLESS_BINARYWire() throws Exception {
+    public void testCreateReadAnyFirstFIELDLESS_BINARYWire() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         final String expected = "world";
         FIELDLESS_BINARY.apply(bytes).write((() -> "hello")).text(expected);

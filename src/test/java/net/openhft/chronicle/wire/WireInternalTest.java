@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 public class WireInternalTest {
 
     @Test
-    public void testFromSizePrefixedBinaryToText() throws Exception {
+    public void testFromSizePrefixedBinaryToText() {
         Bytes bytes = Bytes.elasticByteBuffer();
         Wire out = new BinaryWire(bytes);
         out.writeDocument(true, w -> w

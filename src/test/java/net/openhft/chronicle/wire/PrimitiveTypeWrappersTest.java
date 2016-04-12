@@ -48,7 +48,7 @@ public class PrimitiveTypeWrappersTest {
     }
 
     @Test
-    public void testNumbers() throws Exception {
+    public void testNumbers() {
         final Class[] types = new Class[]{Byte.class,
                 Short.class, Float.class,
                 Integer.class, Long.class, Double.class};
@@ -68,7 +68,7 @@ public class PrimitiveTypeWrappersTest {
     }
 
     @Test
-    public void testNumbers2() throws Exception {
+    public void testNumbers2() {
         final Number[] nums = new Number[]{(byte) 1, (short) 1, (float) 1, 1, (long) 1, (double) 1};
 
         for (Number num : nums) {
@@ -83,7 +83,7 @@ public class PrimitiveTypeWrappersTest {
     }
 
     @Test
-    public void testCharacter() throws Exception {
+    public void testCharacter() {
         final Wire wire = wireFactory();
         wire.write().object('1');
         final Object object = wire.read().object(Character.class);
@@ -92,7 +92,7 @@ public class PrimitiveTypeWrappersTest {
     }
 
     @Test
-    public void testCharacterWritenAsString() throws Exception {
+    public void testCharacterWritenAsString() {
         final Wire wire = wireFactory();
         wire.write().object("1");
         final Object object = wire.read().object(Character.class);
@@ -101,7 +101,7 @@ public class PrimitiveTypeWrappersTest {
     }
 
     @Test
-    public void testCharReadAsString() throws Exception {
+    public void testCharReadAsString() {
         final Wire wire = wireFactory();
         wire.write().object('1');
         final Object object = wire.read().object(String.class);
@@ -110,7 +110,7 @@ public class PrimitiveTypeWrappersTest {
     }
 
     @Test
-    public void testStoreStringReadAsChar() throws Exception {
+    public void testStoreStringReadAsChar() {
         final Wire wire = wireFactory();
         wire.write().object("LONG STRING");
         final Object object = wire.read().object(Character.class);

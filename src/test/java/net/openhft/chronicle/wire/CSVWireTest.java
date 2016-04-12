@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
 public class CSVWireTest {
 
     @Test
-    public void testFrom() throws Exception {
+    public void testFrom() {
         Wire wire = CSVWire.from(
                 "heading1, heading2,heading3\n" +
                         "data1, data2, \"data three\"\n" +

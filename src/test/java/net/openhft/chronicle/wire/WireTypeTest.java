@@ -20,6 +20,8 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.Test;
 
+import java.io.IOException;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -31,7 +33,7 @@ public class WireTypeTest {
     }
 
     @Test
-    public void testAsString() throws Exception {
+    public void testAsString() {
         TestMarshallable tm = new TestMarshallable();
         tm.setCount(1);
         tm.setName("name");
@@ -47,7 +49,7 @@ public class WireTypeTest {
     }
 
     @Test
-    public void testFromString() throws Exception {
+    public void testFromString() {
         String asText = "!TestMarshallable {\n" +
                 "  name: name,\n" +
                 "  count: 1\n" +
@@ -70,7 +72,7 @@ public class WireTypeTest {
     }
 
     @Test
-    public void testFromFile() throws Exception {
+    public void testFromFile() throws IOException {
         TestMarshallable tm = new TestMarshallable();
         tm.setCount(1);
         tm.setName("name");

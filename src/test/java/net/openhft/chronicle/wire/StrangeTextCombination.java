@@ -48,7 +48,7 @@ public class StrangeTextCombination {
     }
 
     @Test
-    public void testPrependedSpace() throws Exception {
+    public void testPrependedSpace() {
         final String prependedSpace = " hello world";
         final Wire wire = wireFactory();
         wire.write().text(prependedSpace);
@@ -58,7 +58,7 @@ public class StrangeTextCombination {
     }
 
     @Test
-    public void testPostpendedSpace() throws Exception {
+    public void testPostpendedSpace() {
         final String postpendedSpace = "hello world ";
         final Wire wire = wireFactory();
         wire.write().text(postpendedSpace);
@@ -67,7 +67,7 @@ public class StrangeTextCombination {
     }
 
     @Test
-    public void testSlashQuoteTest() throws Exception {
+    public void testSlashQuoteTest() {
         final String expected = "\\\" ";
         final Wire wire = wireFactory();
         wire.write().text(expected);
@@ -75,7 +75,7 @@ public class StrangeTextCombination {
     }
 
     @Test
-    public void testYaml() throws Exception {
+    public void testYaml() {
         final String expected = "!String{chars:hello world}";
         final Wire wire = wireFactory();
         wire.write().text(expected);
@@ -83,7 +83,7 @@ public class StrangeTextCombination {
     }
 
     @Test
-    public void testString() throws Exception {
+    public void testString() {
         final String expected = "!String";
         final Wire wire = wireFactory();
         wire.write().text(expected);
@@ -91,7 +91,7 @@ public class StrangeTextCombination {
     }
 
     @Test
-    public void testBinary() throws Exception {
+    public void testBinary() {
         final String expected = "!binary";
         final Wire wire = wireFactory();
         wire.write().text(expected);
@@ -99,7 +99,7 @@ public class StrangeTextCombination {
     }
 
     @Test
-    public void testBinaryWithSpace() throws Exception {
+    public void testBinaryWithSpace() {
         final String expected = " !binary";
         final Wire wire = wireFactory();
         wire.write().text(expected);
@@ -107,7 +107,7 @@ public class StrangeTextCombination {
     }
 
     @Test
-    public void testEmpty() throws Exception {
+    public void testEmpty() {
         final String expected = "";
         final Wire wire = wireFactory();
         wire.write().text(expected);
@@ -115,7 +115,7 @@ public class StrangeTextCombination {
     }
 
     @Test
-    public void testNull() throws Exception {
+    public void testNull() {
         final String expected = null;
         final Wire wire = wireFactory();
         wire.write().text(expected);
@@ -123,7 +123,7 @@ public class StrangeTextCombination {
     }
 
     @Test
-    public void testNewLine() throws Exception {
+    public void testNewLine() {
         final String expected = "\n";
         final Wire wire = wireFactory();
         wire.write().text(expected);
@@ -131,7 +131,7 @@ public class StrangeTextCombination {
     }
 
     @Test
-    public void testUnicode() throws Exception {
+    public void testUnicode() {
         final String expected = "\u0000";
         final Wire wire = wireFactory();
         wire.write().text(expected);
@@ -139,7 +139,7 @@ public class StrangeTextCombination {
     }
 
     @Test
-    public void testXML() throws Exception {
+    public void testXML() {
         final String expected = "<name>rob austin</name>";
         final Wire wire = wireFactory();
         wire.write().text(expected);

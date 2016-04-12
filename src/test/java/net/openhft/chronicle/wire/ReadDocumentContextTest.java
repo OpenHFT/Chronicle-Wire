@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -15,7 +16,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class ReadDocumentContextTest {
     @Test
-    public void testWritingNotCompleteDocument() throws Exception {
+    public void testWritingNotCompleteDocument() {
 
         Bytes b = Bytes.elasticByteBuffer();
         assertFalse(b.sharedMemory());
@@ -47,7 +48,7 @@ public class ReadDocumentContextTest {
     }
 
     @Test
-    public void testWritingNotCompleteDocumentShared() throws Exception {
+    public void testWritingNotCompleteDocumentShared() throws IOException {
 
         try (MappedBytes b = MappedBytes.mappedBytes(File.createTempFile("delete", "me"), 64 << 10)) {
             assertTrue(b.sharedMemory());
@@ -92,7 +93,7 @@ public class ReadDocumentContextTest {
     }
 
     @Test
-    public void testEmptyMessage() throws Exception {
+    public void testEmptyMessage() {
 
         Bytes b = Bytes.elasticByteBuffer();
 
