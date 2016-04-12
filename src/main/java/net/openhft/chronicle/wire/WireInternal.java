@@ -74,7 +74,7 @@ public enum WireInternal {
         return sb;
     }
 
-    public static long writeData(@NotNull WireOut wireOut, boolean metaData, boolean notReady,
+    public static long writeData(@NotNull WireOut wireOut, boolean metaData, boolean notComplete,
                                  @NotNull WriteMarshallable writer) {
         assert wireOut.startUse();
         long position;
@@ -83,14 +83,14 @@ public enum WireInternal {
             position = bytes.writePosition();
 
             int metaDataBit = metaData ? Wires.META_DATA : 0;
-            int len0 = metaDataBit | Wires.NOT_READY | Wires.UNKNOWN_LENGTH;
+            int len0 = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
             bytes.writeOrderedInt(len0);
             writer.writeMarshallable(wireOut);
             long position1 = bytes.writePosition();
             if (position1 < position)
                 System.out.println("Message truncated from " + position + " to " + position1);
             int length = metaDataBit | toIntU30(position1 - position - 4, "Document length %,d out of 30-bit int range.");
-            if (!bytes.compareAndSwapInt(position, len0, length | (notReady ? Wires.NOT_READY : 0)))
+            if (!bytes.compareAndSwapInt(position, len0, length | (notComplete ? Wires.NOT_COMPLETE : 0)))
                 throw new IllegalStateException("This wire was altered by more than one thread.");
         } finally {
             assert wireOut.endUse();
@@ -112,7 +112,7 @@ public enum WireInternal {
         final Bytes bytes = wireOut.bytes();
         long position = bytes.writePosition();
         int metaDataBit = metaData ? Wires.META_DATA : 0;
-        int value = metaDataBit | Wires.NOT_READY;
+        int value = metaDataBit | Wires.NOT_COMPLETE;
         if (!bytes.compareAndSwapInt(position, 0, value)) {
             final int len = Wires.lengthOf(bytes.readLong(bytes.writePosition()));
             if (len == 0)
@@ -147,7 +147,7 @@ public enum WireInternal {
         long position = bytes.writePosition();
         int metaDataBit = metaData ? Wires.META_DATA : 0;
         int value = toIntU30(sourceBytes.readRemaining(), "Document length %,d " +
-                "out of 30-bit int range.") + (metaDataBit | Wires.NOT_READY);
+                "out of 30-bit int range.") + (metaDataBit | Wires.NOT_COMPLETE);
         if (!bytes.compareAndSwapInt(position, 0, value)) {
             final int len = Wires.lengthOf(bytes.readLong(bytes.writePosition()));
             if (len == 0)

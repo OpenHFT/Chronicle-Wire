@@ -51,10 +51,12 @@ public abstract class AbstractWire implements Wire {
     volatile Thread usedBy;
     volatile Throwable usedHere, lastEnded;
     int usedCount = 0;
+    private boolean notCompleteIsNotPresent;
 
     public AbstractWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
         this.use8bit = use8bit;
+        notCompleteIsNotPresent = bytes.sharedMemory();
     }
 
     private static long throwNotEnoughSpace(int maxlen, Bytes<?> bytes) {
@@ -186,7 +188,7 @@ public abstract class AbstractWire implements Wire {
             throw new IllegalArgumentException();
         long pos = bytes.writePosition();
 
-        if (bytes.compareAndSwapInt(pos, 0, Wires.NOT_READY | length)) {
+        if (bytes.compareAndSwapInt(pos, 0, Wires.NOT_COMPLETE | length)) {
             int maxlen = length == Wires.UNKNOWN_LENGTH ? Wires.MAX_LENGTH : length;
             if (maxlen > bytes.writeRemaining())
                 return throwNotEnoughSpace(maxlen, bytes);
@@ -204,7 +206,7 @@ public abstract class AbstractWire implements Wire {
         try {
 //            for (int i = 0; ; i++) {
             for (; ; ) {
-                if (bytes.compareAndSwapInt(pos, 0, Wires.NOT_READY | length)) {
+                if (bytes.compareAndSwapInt(pos, 0, Wires.NOT_COMPLETE | length)) {
                     bytes.writePosition(pos + Wires.SPB_HEADER_SIZE);
                     int maxlen = length == Wires.UNKNOWN_LENGTH ? Wires.MAX_LENGTH : length;
                     if (maxlen > bytes.writeRemaining())
@@ -220,7 +222,7 @@ public abstract class AbstractWire implements Wire {
                 // two states where it is unable to continue.
                 if (header == Wires.END_OF_DATA)
                     throw new EOFException();
-                if (header == Wires.NOT_READY_UNKNOWN_LENGTH)
+                if (header == Wires.NOT_COMPLETE_UNKNOWN_LENGTH)
                     continue;
                 int len = Wires.lengthOf(header);
                 pos += len + Wires.SPB_HEADER_SIZE; // length of message plus length of header
@@ -234,7 +236,7 @@ public abstract class AbstractWire implements Wire {
     public void updateHeader(int length, long position, boolean metaData) throws StreamCorruptedException {
         long pos = bytes.writePosition();
         int actualLength = Maths.toUInt31(pos - position - 4);
-        int expectedHeader = Wires.NOT_READY | length;
+        int expectedHeader = Wires.NOT_COMPLETE | length;
         if (length == Wires.UNKNOWN_LENGTH)
             length = actualLength;
         else if (length < actualLength)
@@ -252,7 +254,7 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public boolean writeFirstHeader() {
-        boolean cas = bytes.compareAndSwapInt(0L, 0, Wires.NOT_READY_UNKNOWN_LENGTH);
+        boolean cas = bytes.compareAndSwapInt(0L, 0, Wires.NOT_COMPLETE_UNKNOWN_LENGTH);
         if (cas)
             bytes.writeSkip(Wires.SPB_HEADER_SIZE);
         return cas;
@@ -265,8 +267,8 @@ public abstract class AbstractWire implements Wire {
         if (actualLength >= 1 << 30)
             throw new IllegalStateException("Header too large was " + actualLength);
         int header = (int) (Wires.META_DATA | actualLength);
-        if (!bytes.compareAndSwapInt(0L, Wires.NOT_READY_UNKNOWN_LENGTH, header))
-            throw new IllegalStateException("Data at 0 overwritten? Expected: " + Integer.toHexString(Wires.NOT_READY_UNKNOWN_LENGTH) + " was " + Integer.toHexString(bytes.readVolatileInt(0L)));
+        if (!bytes.compareAndSwapInt(0L, Wires.NOT_COMPLETE_UNKNOWN_LENGTH, header))
+            throw new IllegalStateException("Data at 0 overwritten? Expected: " + Integer.toHexString(Wires.NOT_COMPLETE_UNKNOWN_LENGTH) + " was " + Integer.toHexString(bytes.readVolatileInt(0L)));
     }
 
     @Override
@@ -283,7 +285,7 @@ public abstract class AbstractWire implements Wire {
                 // two states where it is unable to continue.
                 if (header == Wires.END_OF_DATA)
                     return; // already written.
-                if (header == Wires.NOT_READY_UNKNOWN_LENGTH)
+                if (header == Wires.NOT_COMPLETE_UNKNOWN_LENGTH)
                     continue;
                 int len = Wires.lengthOf(header);
                 pos += len + Wires.SPB_HEADER_SIZE; // length of message plus length of header
@@ -326,5 +328,13 @@ public abstract class AbstractWire implements Wire {
             lastEnded = new Throwable();
         }
         return true;
+    }
+
+    public boolean notCompleteIsNotPresent() {
+        return notCompleteIsNotPresent;
+    }
+
+    public void notCompleteIsNotPresent(boolean notCompleteIsNotPresent) {
+        this.notCompleteIsNotPresent = notCompleteIsNotPresent;
     }
 }

@@ -108,4 +108,16 @@ public interface WireCommon {
      */
     boolean endUse();
 
+    /**
+     * If a message is marked as NOT_COMPLETE is it still present.
+     *
+     * @return true if NOT_COMPLETE messages can be seen, false if they cannot.
+     */
+    default boolean notCompleteIsNotPresent() {
+        return true;
+    }
+
+    default void notCompleteIsNotPresent(boolean notCompleteArePresent) {
+        throw new UnsupportedOperationException();
+    }
 }

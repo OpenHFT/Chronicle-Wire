@@ -63,4 +63,9 @@ public interface DocumentContext extends Closeable {
      * @return the current Excerpt's index
      */
     long index();
+
+    /**
+     * @return whether the NOT_COMPLETE flag has been set.
+     */
+    boolean isNotComplete();
 }

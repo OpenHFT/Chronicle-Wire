@@ -29,15 +29,17 @@ import org.jetbrains.annotations.NotNull;
 public enum Wires {
     ;
     public static final int LENGTH_MASK = -1 >>> 2;
-    public static final int NOT_READY = 1 << 31;
+    public static final int NOT_COMPLETE = 1 << 31;
+    @Deprecated
+    public static final int NOT_READY = NOT_COMPLETE;
     public static final int META_DATA = 1 << 30;
     public static final int UNKNOWN_LENGTH = 0x0;
     public static final int MAX_LENGTH = (1 << 30) - 1;
 
     // value to use when the message is not ready and of an unknown length
-    public static final int NOT_READY_UNKNOWN_LENGTH = NOT_READY | UNKNOWN_LENGTH;
+    public static final int NOT_COMPLETE_UNKNOWN_LENGTH = NOT_COMPLETE | UNKNOWN_LENGTH;
     // value to use when no more data is possible e.g. on a roll.
-    public static final int END_OF_DATA = NOT_READY | META_DATA | UNKNOWN_LENGTH;
+    public static final int END_OF_DATA = NOT_COMPLETE | META_DATA | UNKNOWN_LENGTH;
 
     public static final int NOT_INITIALIZED = 0x0;
     public static final Bytes<?> NO_BYTES = new VanillaBytes<>(BytesStore.empty());
@@ -91,15 +93,15 @@ public enum Wires {
     }
 
     public static boolean isReady(long len) {
-        return (len & NOT_READY) == 0;
+        return (len & NOT_COMPLETE) == 0;
     }
 
-    public static boolean isNotReady(long len) {
-        return (len & NOT_READY) != 0;
+    public static boolean isNotComplete(long len) {
+        return (len & NOT_COMPLETE) != 0;
     }
 
     public static boolean isReadyData(long len) {
-        return (len & (META_DATA | NOT_READY)) == 0;
+        return (len & (META_DATA | NOT_COMPLETE)) == 0;
     }
 
     public static boolean isData(long len) {
@@ -107,7 +109,7 @@ public enum Wires {
     }
 
     public static boolean isReadyMetaData(long len) {
-        return (len & (META_DATA | NOT_READY)) == META_DATA;
+        return (len & (META_DATA | NOT_COMPLETE)) == META_DATA;
     }
 
     public static boolean isKnownLength(int len) {
@@ -125,7 +127,7 @@ public enum Wires {
     }
 
     public static boolean acquireLock(BytesStore store, long position) {
-        return store.compareAndSwapInt(position, NOT_INITIALIZED, NOT_READY);
+        return store.compareAndSwapInt(position, NOT_INITIALIZED, NOT_COMPLETE);
     }
 
     public static boolean exceedsMaxLength(long length) {

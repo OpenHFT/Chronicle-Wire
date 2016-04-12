@@ -37,7 +37,7 @@ public class WriteDocumentContext implements DocumentContext {
         Bytes<?> bytes = wire().bytes();
         this.position = bytes.writePosition();
         metaDataBit = metaData ? Wires.META_DATA : 0;
-        tmpHeader = metaDataBit | Wires.NOT_READY | Wires.UNKNOWN_LENGTH;
+        tmpHeader = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
         bytes.writeOrderedInt(tmpHeader);
     }
 
@@ -85,5 +85,10 @@ public class WriteDocumentContext implements DocumentContext {
     @Override
     public int sourceId() {
         return -1;
+    }
+
+    @Override
+    public boolean isNotComplete() {
+        return true;
     }
 }

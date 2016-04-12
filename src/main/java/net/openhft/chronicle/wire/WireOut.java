@@ -84,7 +84,7 @@ public interface WireOut extends WireCommon {
 
     DocumentContext writingDocument(boolean metaData);
 
-    default void writeNotReadyDocument(boolean metaData, @NotNull WriteMarshallable writer) {
+    default void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) {
         WireInternal.writeData(this, metaData, true, writer);
     }
 
@@ -102,7 +102,7 @@ public interface WireOut extends WireCommon {
     }
 
     /**
-     * Change the header from NOT_READY | UNKNOWN_LENGTH to metaData * META_DATA | length.
+     * Change the header from NOT_COMPLETE | UNKNOWN_LENGTH to metaData * META_DATA | length.
      *
      * @param position returned by writeHeader
      * @param metaData whether the message is meta data or not.
@@ -125,7 +125,7 @@ public interface WireOut extends WireCommon {
     long writeHeader(int length, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException;
 
     /**
-     * Change the header from NOT_READY | length to metaData * META_DATA | length.
+     * Change the header from NOT_COMPLETE | length to metaData * META_DATA | length.
      *
      * @param length   provided to make the header, note this can be larger than the message actually used.
      * @param position returned by writeHeader

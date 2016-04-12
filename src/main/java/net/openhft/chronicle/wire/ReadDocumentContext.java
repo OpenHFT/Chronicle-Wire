@@ -18,7 +18,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 
-import static net.openhft.chronicle.wire.Wires.isNotReady;
 import static net.openhft.chronicle.wire.Wires.lengthOf;
 
 /**
@@ -26,7 +25,7 @@ import static net.openhft.chronicle.wire.Wires.lengthOf;
  */
 public class ReadDocumentContext implements DocumentContext {
     protected AbstractWire wire;
-    protected boolean present;
+    protected boolean present, notComplete;
     private boolean metaData;
     private long readPosition, readLimit;
 
@@ -78,15 +77,17 @@ public class ReadDocumentContext implements DocumentContext {
         readPosition = readLimit = -1;
         final Bytes<?> bytes = wire.bytes();
 
+        present = false;
         if (bytes.readRemaining() < 4) {
-            present = false;
+            notComplete = false;
             return;
         }
+
         long position = bytes.readPosition();
 
         int header = bytes.readVolatileInt(position);
-        if (header == 0 || isNotReady(header)) {
-            present = false;
+        notComplete = Wires.isNotComplete(header);
+        if (header == 0 || (wire.notCompleteIsNotPresent() && notComplete)) {
             return;
         }
 
@@ -96,7 +97,6 @@ public class ReadDocumentContext implements DocumentContext {
 
         if (len > bytes.readRemaining()) {
             bytes.readSkip(-4);
-            present = false;
             return;
         }
 
@@ -116,5 +116,10 @@ public class ReadDocumentContext implements DocumentContext {
     @Override
     public int sourceId() {
         return -1;
+    }
+
+    @Override
+    public boolean isNotComplete() {
+        return notComplete;
     }
 }

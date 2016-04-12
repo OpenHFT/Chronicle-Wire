@@ -82,7 +82,6 @@ public class TextWire extends AbstractWire implements Wire {
     private final StringBuilder sb = new StringBuilder();
     protected long lineStart = 0;
     DefaultValueIn defaultValueIn;
-    private boolean ready;
 
     public TextWire(Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
