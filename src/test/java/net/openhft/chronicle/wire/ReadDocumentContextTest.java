@@ -14,8 +14,6 @@ import static org.junit.Assert.assertTrue;
  * @author Rob Austin.
  */
 public class ReadDocumentContextTest {
-
-
     @Test
     public void testWritingNotCompleteDocument() throws Exception {
 
@@ -23,6 +21,11 @@ public class ReadDocumentContextTest {
         assertFalse(b.sharedMemory());
         Wire wire = new TextWire(b);
         assertFalse(wire.notCompleteIsNotPresent());
+
+        try (DocumentContext dc = wire.readingDocument()) {
+            assertFalse(dc.isPresent());
+            assertFalse(dc.isNotComplete());
+        }
 
         wire.writeNotCompleteDocument(false, w -> w.write("key").text("someText"));
 
@@ -50,6 +53,11 @@ public class ReadDocumentContextTest {
             assertTrue(b.sharedMemory());
             Wire wire = new TextWire(b);
             assertTrue(wire.notCompleteIsNotPresent());
+
+            try (DocumentContext dc = wire.readingDocument()) {
+                assertFalse(dc.isPresent());
+                assertFalse(dc.isNotComplete());
+            }
 
             long pos = wire.bytes().writePosition();
             wire.writeNotCompleteDocument(false, w -> w.write("key").text("someText"));
