@@ -40,10 +40,10 @@ public class JSONWireTest {
 
         WireOut out = wire.writeEventName(() -> "myEvent").list(items, Item.class);
 
-        assertEquals("{\"myEvent\":[{\"name\":\"item1\",\"number1\":1235666,\"number2\":1.1231231}," +
+        assertEquals("\"myEvent\":[{\"name\":\"item1\",\"number1\":1235666,\"number2\":1.1231231}," +
                 "{\"name\":\"item2\",\"number1\":2235666,\"number2\":1.0987987}," +
                 "{\"name\":\"item3\",\"number1\":3235666,\"number2\":1.12312}," +
-                "{\"name\":\"item4\",\"number1\":4235666,\"number2\":1.51231}]}", out.toString());
+                "{\"name\":\"item4\",\"number1\":4235666,\"number2\":1.51231}]", out.toString());
     }
 
     @Test

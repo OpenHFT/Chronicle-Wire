@@ -20,7 +20,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import org.jetbrains.annotations.NotNull;
 
-import static net.openhft.chronicle.bytes.BytesStore.empty;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 /**
@@ -120,6 +119,14 @@ public class JSONWire extends TextWire {
             leaf = true;
         }
 
+        protected void afterOpen() {
+            sep = EMPTY;
+        }
+
+        protected void afterClose() {
+
+        }
+
         @Override
         protected void addNewLine(long pos) {
 
@@ -127,8 +134,6 @@ public class JSONWire extends TextWire {
 
         @Override
         protected void newLine() {
-            append(sep);
-            sep = empty();
         }
 
         @Override
