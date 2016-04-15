@@ -420,4 +420,33 @@ public class BinaryWire2Test {
                 "d: !type \"[Ljava.lang.Double;\"\n" +
                 "z: !!null \"\"\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
     }
+
+    @Test
+    public void testByteArray() {
+        Wire wire = createWire();
+        wire.writeDocument(false, w -> w.write("nothing").object(new byte[0]));
+        byte[] one = {1};
+        wire.writeDocument(false, w -> w.write("one").object(one));
+        byte[] four = {1, 2, 3, 4};
+        wire.writeDocument(false, w -> w.write("four").object(four));
+
+//        wire.copyTo(
+//                new TextWire(Bytes.elasticByteBuffer()));
+        // TODO fix this output.
+/*        assertEquals("--- !!data #binary\n" +
+                        "nothing: !byte[] !!binary \n" +
+                        "\n" +
+                        "# position: 32\n" +
+                        "--- !!data\n" +
+                        "one: !byte[] !!binary AQ==\n" +
+                        "\n" +
+                        "# position: 64\n" +
+                        "--- !!data\n" +
+                        "four: !byte[] !!binary AQIDBA==\n" +
+                        "\n"
+                , Wires.fromSizePrefixedBlobs(wire.bytes()));*/
+        wire.readDocument(null, w -> assertArrayEquals(new byte[0], (byte[]) w.read(() -> "nothing").object()));
+        wire.readDocument(null, w -> assertArrayEquals(one, (byte[]) w.read(() -> "one").object()));
+        wire.readDocument(null, w -> assertArrayEquals(four, (byte[]) w.read(() -> "four").object()));
+    }
 }
