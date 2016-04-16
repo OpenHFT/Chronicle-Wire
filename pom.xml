@@ -68,6 +68,12 @@
             <artifactId>annotations</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.xerial.snappy</groupId>
+            <artifactId>snappy-java</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- test dependencies -->
 
         <dependency>
