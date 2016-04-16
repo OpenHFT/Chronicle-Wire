@@ -64,7 +64,8 @@ public class TextWire extends AbstractWire implements Wire {
     static final BytesStore COMMA_SPACE = BytesStore.from(", ");
     static final BytesStore COMMA_NEW_LINE = BytesStore.from(",\n");
     static final BytesStore NEW_LINE = BytesStore.from("\n");
-    static final BytesStore EMPTY_AFTER_COMMENT = BytesStore.from("");
+    static final BytesStore EMPTY_AFTER_COMMENT = BytesStore.from(""); // not the same as EMPTY so we can check this value.
+    static final BytesStore EMPTY = BytesStore.from("");
     static final BytesStore SPACE = BytesStore.from(" ");
     static final BytesStore END_FIELD = NEW_LINE;
 
@@ -1186,7 +1187,7 @@ public class TextWire extends AbstractWire implements Wire {
         protected void pushState() {
             indentation++;
             seps.add(sep);
-            sep = BytesStore.empty();
+            sep = EMPTY;
         }
 
         @NotNull
@@ -1202,8 +1203,10 @@ public class TextWire extends AbstractWire implements Wire {
 
             prependSeparator();
             bytes.writeUnsignedByte('{');
-            if (wasLeaf) sep = SPACE;
-            else newLine();
+            if (wasLeaf)
+                afterOpen();
+            else
+                newLine();
 
             object.writeMarshallable(TextWire.this);
             BytesStore popSep = null;
@@ -1226,14 +1229,22 @@ public class TextWire extends AbstractWire implements Wire {
             if (popSep != null)
                 sep = popSep;
             if (indentation == 0) {
-                newLine();
-                append(sep);
-                sep = empty();
+                afterClose();
 
             } else {
                 elementSeparator();
             }
             return TextWire.this;
+        }
+
+        protected void afterClose() {
+            newLine();
+            append(sep);
+            sep = EMPTY;
+        }
+
+        protected void afterOpen() {
+            sep = SPACE;
         }
 
         @NotNull
