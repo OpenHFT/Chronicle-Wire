@@ -28,6 +28,8 @@ class ValueInStack {
 
     public void reset() {
         level = 0;
+        curr();
+        freeList.get(level).reset();
     }
 
     public void push() {

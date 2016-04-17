@@ -63,8 +63,8 @@ public class ReorderedTest {
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         return Arrays.asList(
-                new Object[]{WireType.BINARY},
                 new Object[]{WireType.TEXT},
+                new Object[]{WireType.BINARY},
                 new Object[]{WireType.JSON}
         );
     }
@@ -89,6 +89,22 @@ public class ReorderedTest {
         wire.readEventName(sb).marshallable(outerClass0);
         assertEquals("test2", sb.toString());
         assertEquals(outerClass2.toString().replace(',', '\n'), outerClass0.toString().replace(',', '\n'));
+    }
 
+    @Test
+    public void testTopLevel() {
+        Bytes bytes = Bytes.elasticByteBuffer();
+        Wire wire = wireType.apply(bytes);
+        for (int i = 1; i < 5; i++) {
+            wire.clear();
+            wire.write("a").int32(i);
+            wire.write("b").int32(i * 11);
+            wire.write("c").int32(i * 111);
+
+//            System.out.println(wire);
+            assertEquals(i * 111, wire.read(() -> "c").int32());
+            assertEquals(i, wire.read(() -> "a").int32());
+            assertEquals(i * 11, wire.read(() -> "b").int32());
+        }
     }
 }

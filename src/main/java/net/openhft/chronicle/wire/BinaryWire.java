@@ -46,9 +46,9 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
  */
 public class BinaryWire extends AbstractWire implements Wire {
     private static final int END_OF_BYTES = -1;
-    private final ValueOut fixedValueOut = new FixedBinaryValueOut();
+    private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
-    private final ValueOut valueOut;
+    private final FixedBinaryValueOut valueOut;
     private final BinaryValueIn valueIn = new BinaryValueIn();
     private final boolean numericFields;
     private final boolean fieldLess;
@@ -69,6 +69,12 @@ public class BinaryWire extends AbstractWire implements Wire {
         this.compressedSize = compressedSize;
         valueOut = fixed ? fixedValueOut : new BinaryValueOut();
         this.compression = compression;
+    }
+
+    public void clear() {
+        bytes.clear();
+        valueIn.resetState();
+        valueOut.resetState();
     }
 
     public boolean fieldLess() {
@@ -1302,6 +1308,10 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public WireOut wireOut() {
             return BinaryWire.this;
+        }
+
+        public void resetState() {
+
         }
     }
 
