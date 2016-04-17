@@ -69,11 +69,11 @@ public class ReadDocumentContext implements DocumentContext {
             bytes.readLimit(readLimit);
             bytes.readPosition(readPosition);
         }
-        wire.endUse();
+        assert wire.endUse();
     }
 
     public void start() {
-        wire.startUse();
+        assert wire.startUse();
         readPosition = readLimit = -1;
         final Bytes<?> bytes = wire.bytes();
 
