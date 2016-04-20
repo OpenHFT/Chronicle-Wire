@@ -1,9 +1,6 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.PointerBytesStore;
-import net.openhft.chronicle.bytes.ReadBytesMarshallable;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -233,7 +230,7 @@ public class ResultSetWireIn implements WireIn {
 
         @NotNull
         @Override
-        public WireIn bytes(@NotNull Bytes<?> bytes) {
+        public WireIn bytes(@NotNull BytesOut bytes) {
             bytes.clear();
             bytes.appendUtf8(text());
             return wireIn();

@@ -15,10 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.PointerBytesStore;
-import net.openhft.chronicle.bytes.ReadBytesMarshallable;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.*;
@@ -74,7 +71,13 @@ public interface ValueIn {
     Bytes textTo(@NotNull Bytes bytes);
 
     @NotNull
-    WireIn bytes(@NotNull Bytes<?> toBytes);
+    @Deprecated
+    default WireIn bytes(@NotNull Bytes toBytes) {
+        return bytes((BytesOut) toBytes);
+    }
+
+    @NotNull
+    WireIn bytes(@NotNull BytesOut toBytes);
 
     @Nullable
     WireIn bytesSet(@NotNull PointerBytesStore toBytes);

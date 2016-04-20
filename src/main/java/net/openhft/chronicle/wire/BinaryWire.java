@@ -1629,11 +1629,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @NotNull
-        public WireIn bytes(@NotNull Bytes toBytes) {
+        public WireIn bytes(@NotNull BytesOut toBytes) {
             long length = readLength();
             int code = readCode();
             if (code == NULL) {
-                toBytes.isPresent(false);
+                ((BytesStore) toBytes).isPresent(false);
                 return BinaryWire.this;
             }
             if (code == TYPE_PREFIX) {

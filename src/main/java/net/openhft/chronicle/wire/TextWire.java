@@ -1539,8 +1539,8 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireIn bytes(@NotNull Bytes toBytes) {
-            return bytes(toBytes::write);
+        public WireIn bytes(@NotNull BytesOut toBytes) {
+            return bytes(b -> toBytes.write((BytesStore) b));
         }
 
         @Nullable
@@ -1549,7 +1549,7 @@ public class TextWire extends AbstractWire implements Wire {
             return bytes(bytes -> {
                 long capacity = bytes.readRemaining();
                 Bytes<Void> bytes2 = Bytes.allocateDirect(capacity);
-                bytes2.write(bytes);
+                bytes2.write((BytesStore) bytes);
                 toBytes.set(bytes2.address(bytes2.start()), capacity);
             });
         }

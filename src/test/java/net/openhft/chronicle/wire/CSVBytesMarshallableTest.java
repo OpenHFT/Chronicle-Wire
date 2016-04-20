@@ -16,10 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesMarshallable;
-import net.openhft.chronicle.bytes.IORuntimeException;
-import net.openhft.chronicle.bytes.StopCharTesters;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import org.jetbrains.annotations.NotNull;
@@ -95,7 +92,7 @@ class FXPrice implements BytesMarshallable {
     public transient double midPrice;
 
     @Override
-    public void readMarshallable(Bytes<?> bytes) {
+    public void readMarshallable(BytesIn bytes) {
         bidprice = bytes.parseDouble();
         offerprice = bytes.parseDouble();
         pair = parseEnum(bytes, CcyPair.INTERNER);
@@ -106,7 +103,7 @@ class FXPrice implements BytesMarshallable {
     }
 
     @Override
-    public void writeMarshallable(Bytes bytes) {
+    public void writeMarshallable(BytesOut bytes) {
         try {
             bytes.append(bidprice).append(',');
             bytes.append(offerprice).append(',');
@@ -118,7 +115,7 @@ class FXPrice implements BytesMarshallable {
         }
     }
 
-    private <T extends Enum<T>> T parseEnum(Bytes<?> bytes, EnumInterner<T> interner) {
+    private <T extends Enum<T>> T parseEnum(BytesIn bytes, EnumInterner<T> interner) {
         StringBuilder sb = Wires.acquireStringBuilder();
         bytes.parseUtf8(sb, StopCharTesters.COMMA_STOP);
         return interner.intern(sb);

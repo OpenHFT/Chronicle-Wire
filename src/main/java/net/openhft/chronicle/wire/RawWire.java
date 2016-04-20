@@ -634,7 +634,7 @@ public class RawWire extends AbstractWire implements Wire {
         }
 
         @NotNull
-        public WireIn bytes(@NotNull Bytes toBytes) {
+        public WireIn bytes(@NotNull BytesOut toBytes) {
             toBytes.clear();
 
             long length = readLength();
