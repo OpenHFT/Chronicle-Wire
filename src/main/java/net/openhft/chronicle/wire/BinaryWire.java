@@ -2520,7 +2520,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                                 try {
                                     bytes.readLimit(bytes.readPosition() + len);
                                     if (isFieldNext()) {
-                                        return getValueOut().marshallableAsMap(new LinkedHashMap<>());
+                                        return getValueOut().marshallable(new LinkedHashMap<>());
                                     } else {
                                         List list = new ArrayList<>();
                                         while (bytes.readRemaining() > 0)

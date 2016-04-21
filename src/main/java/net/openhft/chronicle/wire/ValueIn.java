@@ -214,6 +214,10 @@ public interface ValueIn {
 
     default <V> Map<String, V> marshallableAsMap(Class<V> vClass, Supplier<Map<String, V>> supplier) {
         Map<String, V> map = supplier.get();
+        return marshallableAsMap(vClass, map);
+    }
+
+    default <V> Map<String, V> marshallableAsMap(Class<V> vClass, Map<String, V> map) {
         marshallable(m -> {
             StringBuilder sb = new StringBuilder();
             while (m.hasMore()) {
@@ -267,17 +271,26 @@ public interface ValueIn {
 
     /**
      * reads the map from the wire
+     *
+     * @deprecated use marshallableAsMap
      */
+    @Deprecated
     default void map(@NotNull Map<String, String> usingMap) {
         map(String.class, String.class, usingMap);
     }
 
+    /**
+     * @deprecated use marshallableAsMap
+     */
+    @Deprecated
     <K extends ReadMarshallable, V extends ReadMarshallable>
     void typedMap(@NotNull final Map<K, V> usingMap);
 
     /**
      * reads the map from the wire
+     * @deprecated use marshallableAsMap
      */
+    @Deprecated
     @Nullable
     <K, V> Map<K, V> map(@NotNull Class<K> kClazz,
                          @NotNull Class<V> vClass,
