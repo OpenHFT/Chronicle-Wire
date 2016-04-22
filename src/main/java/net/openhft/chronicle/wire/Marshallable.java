@@ -78,7 +78,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
     }
 
     default <T extends Marshallable> T copyFrom(T t) {
-        return Wires.copyFrom(t, this);
+        return Wires.copyTo(this, t);
     }
 
     default <K, T extends Marshallable> T mergeToMap(Map<K, T> map, Function<T, K> getKey) {

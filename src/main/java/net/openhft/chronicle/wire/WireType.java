@@ -256,7 +256,7 @@ public enum WireType implements Function<Bytes, Wire> {
         Bytes bytes = getBytes();
         Wire wire = apply(bytes);
         wire.getValueOut()
-                .marshallableAsMap(map, Object.class, false);
+                .marshallable(map, Object.class, false);
         return bytes.toString();
     }
 

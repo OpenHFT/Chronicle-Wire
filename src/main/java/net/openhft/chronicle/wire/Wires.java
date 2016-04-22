@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -228,18 +229,30 @@ public enum Wires {
                 .writeMarshallable(marshallable, wire);
     }
 
-    public static Marshallable deepCopy(Marshallable marshallable) {
-        Wire wire = acquireBinaryWire();
-        @SuppressWarnings("unchecked")
-        Class<Marshallable> clazz = (Class) marshallable.getClass();
-        wire.getValueOut().object(clazz, marshallable);
-        return wire.getValueIn().object(clazz);
-    }
-
-    public static <T extends Marshallable> T copyFrom(T t, Marshallable marshallable) {
+    public static <T extends Marshallable> T deepCopy(T marshallable) {
         Wire wire = acquireBinaryWire();
         marshallable.writeMarshallable(wire);
+        T t = (T) ObjectUtils.newInstance(marshallable.getClass());
         t.readMarshallable(wire);
+        return t;
+    }
+
+    public static <T> T copyTo(Object marshallable, T t) {
+        Wire wire = acquireBinaryWire();
+        if (marshallable instanceof WriteMarshallable)
+            ((WriteMarshallable) marshallable).writeMarshallable(wire);
+        else
+            writeMarshallable(marshallable, wire);
+        if (t instanceof ReadMarshallable)
+            ((ReadMarshallable) t).readMarshallable(wire);
+        else
+            readMarshallable(t, wire);
+        return t;
+    }
+
+    public static <T> T project(Class<T> tClass, Object obj) {
+        T t = ObjectUtils.newInstance(tClass);
+        Wires.copyTo(obj, t);
         return t;
     }
 }

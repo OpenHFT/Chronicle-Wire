@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.junit.Test;
 
@@ -34,6 +35,7 @@ import static org.junit.Assert.assertNotNull;
 public class DefaultMarshallerTest {
     @Test
     public void testDeserialize() {
+        ClassAliasPool.CLASS_ALIASES.addAlias(DMNestedClass.class);
         DMOuterClass dmOuterClass = ObjectUtils.newInstance(DMOuterClass.class);
         assertNotNull(dmOuterClass.nested);
 
@@ -57,14 +59,8 @@ public class DefaultMarshallerTest {
                 "    { str: bye, num: 999 }\n" +
                 "  ]\n" +
                 "  map: {\n" +
-                "    key: !net.openhft.chronicle.wire.DefaultMarshallerTest$DMNestedClass {\n" +
-                "      str: value,\n" +
-                "      num: 1\n" +
-                "    },\n" +
-                "    keyz: !net.openhft.chronicle.wire.DefaultMarshallerTest$DMNestedClass {\n" +
-                "      str: valuez,\n" +
-                "      num: 1111\n" +
-                "    }\n" +
+                "    key: !DMNestedClass { str: value, num: 1 },\n" +
+                "    keyz: !DMNestedClass { str: valuez, num: 1111 }\n" +
                 "  }\n" +
                 "}\n", oc.toString());
 

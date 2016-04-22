@@ -1266,7 +1266,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         private void stringKeys(Map map) {
-            marshallableAsMap(map, Object.class, false);
+            marshallable(map, Object.class, false);
         }
 
         private void objectKeys(@NotNull Map map) {

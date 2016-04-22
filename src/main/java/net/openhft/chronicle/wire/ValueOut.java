@@ -178,13 +178,13 @@ public interface ValueOut {
     WireOut int32forBinding(int value);
 
     @NotNull
-    WireOut int32forBinding(int value, IntValue intValue);
+    WireOut int32forBinding(int value, @NotNull IntValue intValue);
 
     @NotNull
     WireOut int64forBinding(long value);
 
     @NotNull
-    WireOut int64forBinding(long value, LongValue longValue);
+    WireOut int64forBinding(long value, @NotNull LongValue longValue);
 
     @NotNull
     default WireOut sequence(WriteValue writer) {
@@ -208,17 +208,23 @@ public interface ValueOut {
     WireOut marshallable(WriteMarshallable object);
 
     /**
-     * wites the contents of the map to wire
+     * writes the contents of the map to wire
      *
      * @param map a java map with, the key and value type of the map must be either Marshallable,
      *            String or Autoboxed primitives.
      * @return throws IllegalArgumentException  If the type of the map is not one of those listed
      * above
+     * @deprecated use marshallable(map) or object(map)
      */
     @NotNull
+    @Deprecated
     WireOut map(Map map);
 
+    /**
+     * @deprecated use typedMarshallable(map) or object(map)
+     */
     @NotNull
+    @Deprecated
     WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map);
 
     @NotNull
@@ -284,15 +290,15 @@ public interface ValueOut {
             object(v);
     }
 
-    default <V> WireOut marshallableAsMap(Map<String, V> map) {
-        return marshallableAsMap(map, null);
+    default <V> WireOut marshallable(Map<String, V> map) {
+        return marshallable(map, null);
     }
 
-    default <V> WireOut marshallableAsMap(Map<String, V> map, Class<V> vClass) {
-        return marshallableAsMap(map, vClass, true);
+    default <V> WireOut marshallable(Map<String, V> map, Class<V> vClass) {
+        return marshallable(map, vClass, true);
     }
 
-    default <V> WireOut marshallableAsMap(Map<String, V> map, Class<V> vClass, boolean leaf) {
+    default <V> WireOut marshallable(Map<String, V> map, Class<V> vClass, boolean leaf) {
         marshallable(m -> {
             for (Map.Entry<String, V> entry : map.entrySet()) {
                 m.writeEventName(entry::getKey).leaf(leaf).object(vClass, entry.getValue());

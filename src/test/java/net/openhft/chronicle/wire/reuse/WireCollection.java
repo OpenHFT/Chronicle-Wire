@@ -62,10 +62,10 @@ public class WireCollection extends WireModel implements Marshallable {
                 .write(ModelKeys.path).text(path)
                 .write(ModelKeys.name).text(name);
         if (properties.size() > 0) {
-            wire.write(ModelKeys.properties).marshallableAsMap(properties, WireProperty.class);
+            wire.write(ModelKeys.properties).marshallable(properties, WireProperty.class);
         }
         if (collections.size() > 0) {
-            wire.write(ModelKeys.collections).marshallableAsMap(collections, WireCollection.class, false);
+            wire.write(ModelKeys.collections).marshallable(collections, WireCollection.class, false);
         }
     }
 

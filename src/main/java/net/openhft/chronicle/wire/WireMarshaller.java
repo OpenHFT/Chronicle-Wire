@@ -327,7 +327,7 @@ public class WireMarshaller<T> {
         @Override
         protected void getValue(Object o, ValueOut write) throws IllegalAccessException {
             Map map = (Map) field.get(o);
-            write.map(map);
+            write.marshallable(map);
         }
 
         void read(Object o, WireIn in) {
@@ -340,7 +340,7 @@ public class WireMarshaller<T> {
                 } else {
                     map.clear();
                 }
-                read.map(keyType, valueType, map);
+                read.marshallableAsMap(valueType, map);
             } catch (IllegalAccessException e) {
                 throw new AssertionError(e);
             }
