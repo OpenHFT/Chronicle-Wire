@@ -96,7 +96,7 @@ public interface MarshallableOut {
      */
     default void writeText(CharSequence text) {
         try (DocumentContext dc = writingDocument()) {
-            dc.wire().bytes().writeUtf8(text);
+            dc.wire().bytes().append8bit(text);
         }
     }
 
