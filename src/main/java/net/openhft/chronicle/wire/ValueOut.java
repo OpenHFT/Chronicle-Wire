@@ -178,13 +178,13 @@ public interface ValueOut {
     WireOut int32forBinding(int value);
 
     @NotNull
-    WireOut int32forBinding(int value, IntValue intValue);
+    WireOut int32forBinding(int value, @NotNull IntValue intValue);
 
     @NotNull
     WireOut int64forBinding(long value);
 
     @NotNull
-    WireOut int64forBinding(long value, LongValue longValue);
+    WireOut int64forBinding(long value, @NotNull LongValue longValue);
 
     @NotNull
     default WireOut sequence(WriteValue writer) {
