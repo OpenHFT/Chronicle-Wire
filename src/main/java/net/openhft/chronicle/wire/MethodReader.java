@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.Closeable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,10 +33,11 @@ import java.util.function.BiConsumer;
 /**
  * Created by peter on 24/03/16.
  */
-public class MethodReader {
+public class MethodReader implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodReader.class);
     private final MarshallableIn in;
     private final WireParser<Void> wireParser;
+    private boolean closeIn = false, closed;
 
     public MethodReader(MarshallableIn in, Object... objects) {
         this.in = in;
@@ -96,6 +98,11 @@ public class MethodReader {
             rest = v.toString();
         }
         LOGGER.debug("read " + name + " - " + rest);
+    }
+
+    public MethodReader closeIn(boolean closeIn) {
+        this.closeIn = closeIn;
+        return this;
     }
 
     public void addParseletForMethod(Object o, Method m, Class<?> parameterType) {
@@ -172,5 +179,17 @@ public class MethodReader {
             wireParser.accept(context.wire(), null);
         }
         return true;
+    }
+
+    @Override
+    public void close() {
+        if (closeIn)
+            Closeable.closeQuietly(in);
+        closed = true;
+    }
+
+    @Override
+    public boolean isClosed() {
+        return closed;
     }
 }

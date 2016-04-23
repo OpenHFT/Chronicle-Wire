@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.ObjectUtils;
 
 import java.lang.reflect.InvocationHandler;
@@ -30,6 +31,7 @@ public class MethodWriterInvocationHandler implements InvocationHandler {
     private final MarshallableOut appender;
     private final Map<Method, Class[]> parameterMap = new ConcurrentHashMap<>();
     private boolean recordHistory;
+    private Closeable closeable;
 
     MethodWriterInvocationHandler(MarshallableOut appender) {
         this.appender = appender;
@@ -39,8 +41,12 @@ public class MethodWriterInvocationHandler implements InvocationHandler {
     // Note the Object[] passed in creates an object on every call.
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (method.getDeclaringClass() == Object.class) {
+        Class<?> declaringClass = method.getDeclaringClass();
+        if (declaringClass == Object.class) {
             return method.invoke(this, args);
+        } else if (declaringClass == Closeable.class && method.getName().equals("close")) {
+            Closeable.closeQuietly(closeable);
+            return null;
         }
         try (DocumentContext context = appender.writingDocument()) {
             Wire wire = context.wire();
@@ -73,5 +79,9 @@ public class MethodWriterInvocationHandler implements InvocationHandler {
 
     public void recordHistory(boolean recordHistory) {
         this.recordHistory = recordHistory;
+    }
+
+    public void onClose(Closeable closeable) {
+        this.closeable = closeable;
     }
 }

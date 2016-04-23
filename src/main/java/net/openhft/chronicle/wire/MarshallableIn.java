@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.ReadBytesMarshallable;
 import net.openhft.chronicle.bytes.StopCharTesters;
+import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -14,7 +15,7 @@ import java.util.Map;
  * <p>
  * Anything you can read marshallable object from.
  */
-public interface MarshallableIn {
+public interface MarshallableIn extends Closeable {
     DocumentContext readingDocument();
 
     /**

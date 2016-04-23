@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.WriteBytesMarshallable;
+import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,7 +30,7 @@ import java.util.function.BiConsumer;
  *
  * Anything you can write Marshallable objects to.
  */
-public interface MarshallableOut {
+public interface MarshallableOut extends Closeable {
     /**
      * Start a document which is completed when DocumentContext.close() is called. You can use a
      * <pre>
