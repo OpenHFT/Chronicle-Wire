@@ -108,6 +108,18 @@ public class JSONWire extends TextWire {
     }
 
     class JSONValueOut extends TextValueOut {
+        @NotNull
+        @Override
+        public WireOut typeLiteral(@NotNull CharSequence type) {
+            return text(type);
+        }
+
+        @NotNull
+        @Override
+        public ValueOut typePrefix(@NotNull CharSequence typeName) {
+            return this;
+        }
+
         public void elementSeparator() {
             sep = COMMA;
         }

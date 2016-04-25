@@ -17,7 +17,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static net.openhft.chronicle.wire.RFCExamplesTest.Fields.*;
@@ -35,7 +34,6 @@ public class RFCExamplesTest {
     map.put(3, "bye");
      */
     @Test
-    @Ignore
     public void testPuts() {
         Bytes bytes = Bytes.allocateElasticDirect();
 /*
@@ -55,30 +53,35 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         assertEquals("--- !!meta-data\n" +
                         "csp: ///service-lookup\n" +
                         "tid: 149873598325\n" +
+                        "# position: 45\n" +
                         "--- !!data\n" +
                         "lookup: {\n" +
                         "  relativeUri: test,\n" +
-                        "  view: !Map types: {\n" +
-                        "    keyType: !Integer valueType: !String }\n" +
-                        "}",
+                        "  view: !type Map,\n" +
+                        "  types: {\n" +
+                        "    keyType: !type Integer,\n" +
+                        "    valueType: !type String\n" +
+                        "  }\n" +
+                        "}\n",
                 Wires.fromSizePrefixedBlobs(bytes));
 
         Wire bin = new BinaryWire(bytes);
-        bytes.clear();
+        clear(bytes);
         writeMessageOne(bin);
 
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));
-        assertEquals("[pos: 0, lim: 124, cap: 8EiB ] \u001F٠٠@Ãcspñ///service-lookup" +
-                "Ãtid\u0090¦\u0094⒒RU" +
-                "٠٠٠Ælookup\u0082I٠٠٠ËrelativeUriätestÄview¶⒊MapÅtypes\u0082#٠٠٠ÇkeyType¶⒎IntegerÉvalueType¶⒍String", bytes.toDebugString());
+        assertEquals("[pos: 0, rlim: 128, wlim: 8EiB, cap: 8EiB ] ‖" +
+                "#٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠" +
+                "U٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String" +
+                "‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
 
         Wire raw = new RawWire(bytes);
-        bytes.clear();
+        clear(bytes);
         writeMessageOne(raw);
 
-        assertEquals("[pos: 0, lim: 79, cap: 8EiB ] " +
-                "\u001A٠٠@⒘///service-lookupu\u009F)å\"٠٠٠-٠٠٠" +
-                "⒍lookup\"٠٠٠⒋test⒊Map⒌types⒖٠٠٠⒎Integer⒍String", bytes.toDebugString());
+        assertEquals("[pos: 0, rlim: 66, wlim: 8EiB, cap: 8EiB ] ‖" +
+                "\\u001A٠٠@⒘///service-lookupu\\u009F)å\"٠٠٠ ٠٠٠\\u001C٠٠٠⒋test⒊Map⒖٠٠٠⒎Integer⒍String" +
+                "‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
 /*
 --- !!meta-data
 cid: 1
@@ -92,44 +95,61 @@ put: [ 2, world ]
 --- !!data
 put: [ 3, bye ]
 */
-        bytes.clear();
+        clear(bytes);
         writeMessageTwo(text);
         assertEquals("--- !!meta-data\n" +
-                        "\n" +
-                        "csp://server1/test\n" +
+                        "csp: //server1/test\n" +
                         "cid: 1\n" +
+                        "# position: 31\n" +
                         "--- !!data\n" +
-                        "put: { key: 1, value: hello }\n" +
+                        "put: {\n" +
+                        "  key: 1,\n" +
+                        "  value: hello\n" +
+                        "}\n" +
+                        "# position: 69\n" +
                         "--- !!data\n" +
-                        "\n" +
-                        "put: { key: 2, value: world }\n" +
+                        "put: {\n" +
+                        "  key: 2,\n" +
+                        "  value: world\n" +
+                        "}\n" +
+                        "# position: 107\n" +
                         "--- !!data\n" +
-                        "\n" +
-                        "put: { key: 3, value: bye\n",
+                        "put: {\n" +
+                        "  key: 3,\n" +
+                        "  value: bye\n" +
+                        "}\n",
                 Wires.fromSizePrefixedBlobs(bytes));
-        assertEquals("[pos: 0, lim: 130, cap: 8EiB ] " +
-                "\u001B٠٠@⒑csp://server1/test⒑cid: 1⒑" +
-                "\u001D٠٠٠put: { key: 1, value: hello }" +
-                "\u001E٠٠٠⒑put: { key: 2, value: world }" +
-                "\u001C٠٠٠⒑put: { key: 3, value: bye }", bytes.toDebugString());
+        assertEquals("[pos: 0, rlim: 143, wlim: 8EiB, cap: 8EiB ] ‖" +
+                "\\u001B٠٠@csp: //server1/test⒑cid: 1⒑" +
+                "\"٠٠٠put: {⒑  key: 1,⒑  value: hello⒑}⒑" +
+                "\"٠٠٠put: {⒑  key: 2,⒑  value: world⒑}⒑" +
+                " ٠٠٠put: {⒑  key: 3,⒑  value: bye⒑}⒑" +
+                "‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
 
-        bytes.clear();
+        clear(bytes);
         writeMessageTwo(bin);
 
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));
-        assertEquals("[pos: 0, lim: 86, cap: 8EiB ] " +
-                "\u0018٠٠@Ãcspî//server1/testÃcid⒈" +
-                "⒗٠٠٠Ãput\u0082⒎٠٠٠⒈åhello" +
-                "⒗٠٠٠Ãput\u0082⒎٠٠٠⒉åworld" +
-                "⒕٠٠٠Ãput\u0082⒌٠٠٠⒊ãbye", bytes.toDebugString());
+        assertEquals("[pos: 0, rlim: 116, wlim: 8EiB, cap: 8EiB ] ‖" +
+                "\\u0018٠٠@Ãcspî//server1/testÃcid⒈" +
+                "\\u001A٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒈Åvalueåhello" +
+                "\\u001A٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒉Åvalueåworld" +
+                "\\u0018٠٠٠Ãput\\u0082⒖٠٠٠Ãkey⒊Åvalueãbye" +
+                "‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
 
-        bytes.clear();
+        clear(bytes);
         writeMessageTwo(raw);
-        assertEquals("[pos: 0, lim: 103, cap: 8EiB ] " +
-                "\u0017٠٠@⒕//server1/test⒈٠٠٠٠٠٠٠\u0016" +
-                "٠٠٠⒊put⒕٠٠٠⒈٠٠٠٠٠٠٠⒌hello\u0016" +
-                "٠٠٠⒊put⒕٠٠٠⒉٠٠٠٠٠٠٠⒌world⒛" +
-                "٠٠٠⒊put⒓٠٠٠⒊٠٠٠٠٠٠٠⒊bye", bytes.toDebugString());
+        assertEquals("[pos: 0, rlim: 91, wlim: 8EiB, cap: 8EiB ] ‖" +
+                "\\u0017٠٠@⒕//server1/test⒈٠٠٠٠٠٠٠" +
+                "⒙٠٠٠⒕٠٠٠⒈٠٠٠٠٠٠٠⒌hello" +
+                "⒙٠٠٠⒕٠٠٠⒉٠٠٠٠٠٠٠⒌world" +
+                "⒗٠٠٠⒓٠٠٠⒊٠٠٠٠٠٠٠⒊bye" +
+                "‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+    }
+
+    public void clear(Bytes bytes) {
+        bytes.clear();
+        bytes.zeroOut(0, bytes.realCapacity());
     }
 
     public void writeMessageOne(@NotNull Wire wire) {
@@ -143,6 +163,7 @@ put: [ 3, bye ]
                                 .write(types).marshallable(m ->
                                 m.write(() -> "keyType").typeLiteral("Integer")
                                         .write(() -> "valueType").typeLiteral("String"))));
+        System.out.println(wire);
     }
 
     private void writeMessageTwo(@NotNull Wire wire) {
@@ -157,6 +178,7 @@ put: [ 3, bye ]
                             .write(() -> "value").text(words[n])));
         }
     }
+
     enum Fields implements WireKey {
         csp, tid, lookup, relativeUri, view, types
     }
