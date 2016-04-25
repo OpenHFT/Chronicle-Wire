@@ -75,20 +75,6 @@ public class WireTests {
         Assert.assertEquals(null, c);
     }
 
-
-    private class TestClass extends AbstractMarshallable {
-
-        Class o;
-
-        TestClass(Class o) {
-            this.o = o;
-        }
-
-        Class clazz() {
-            return o;
-        }
-    }
-
     @Test
     public void testClassTypedMarshallableObject() throws Exception {
 
@@ -100,5 +86,18 @@ public class WireTests {
 
         TestClass o = wire.read().typedMarshallable();
         Assert.assertEquals(Boolean.class, o.clazz());
+    }
+
+    static class TestClass extends AbstractMarshallable {
+
+        Class o;
+
+        TestClass(Class o) {
+            this.o = o;
+        }
+
+        Class clazz() {
+            return o;
+        }
     }
 }

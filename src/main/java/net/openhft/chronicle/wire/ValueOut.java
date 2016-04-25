@@ -338,7 +338,7 @@ public interface ValueOut {
             case "[java.lang.String;":
                 return array(v -> Stream.of((String[]) value).forEach(v::text), String[].class);
             case "[java.lang.Object;":
-                return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(val)), Object[].class);
+                return array(v -> Stream.of((Object[]) value).forEach(v::object), Object[].class);
             case "java.time.LocalTime":
                 return time((LocalTime) value);
             case "java.time.LocalDate":
