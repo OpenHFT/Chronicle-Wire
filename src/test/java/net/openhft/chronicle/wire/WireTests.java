@@ -74,4 +74,31 @@ public class WireTests {
         Circle c = wire.read().object(Circle.class);  // this fails without the check.
         Assert.assertEquals(null, c);
     }
+
+
+    private class TestClass extends AbstractMarshallable {
+
+        Class o;
+
+        TestClass(Class o) {
+            this.o = o;
+        }
+
+        Class clazz() {
+            return o;
+        }
+    }
+
+    @Test
+    public void testClassTypedMarshallableObject() throws Exception {
+
+        TestClass testClass = new TestClass(Boolean.class);
+
+        final Bytes b = Bytes.elasticByteBuffer();
+        final Wire wire = wireType.apply(b);
+        wire.write().typedMarshallable(testClass);
+
+        TestClass o = wire.read().typedMarshallable();
+        Assert.assertEquals(Boolean.class, o.clazz());
+    }
 }
