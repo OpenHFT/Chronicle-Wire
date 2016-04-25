@@ -16,7 +16,9 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.Test;
 
@@ -82,7 +84,12 @@ public class WireTypeTest {
                 continue;
             String tmp = OS.getTarget() + "/testFromFile-" + System.nanoTime();
             wt.toFile(tmp, tm);
-            Object o = wt.fromFile(tmp);
+            Object o;
+            if (wt == WireType.JSON)
+                o = wt.apply(Bytes.wrapForRead(IOTools.readFile(tmp))).getValueIn().object(TestMarshallable.class);
+            else
+                o = wt.fromFile(tmp);
+
             assertEquals(tm, o);
         }
     }
