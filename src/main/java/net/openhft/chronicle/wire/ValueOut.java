@@ -323,6 +323,8 @@ public interface ValueOut {
                 return bool((Boolean) value);
             case "java.lang.Character":
                 return text(value.toString());
+            case "java.lang.Class":
+                return typeLiteral((Class) value);
             case "java.lang.Short":
                 return typePrefix(short.class).int16((Short) value);
             case "java.lang.Integer":
