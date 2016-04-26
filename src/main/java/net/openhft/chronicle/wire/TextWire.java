@@ -818,9 +818,14 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public WireOut bool(@Nullable Boolean flag) {
             prependSeparator();
-            append(flag == null ? "!" + NULL : flag ? "true" : "false");
+            append(flag == null ? nullOut() : flag ? "true" : "false");
             elementSeparator();
             return wireOut();
+        }
+
+        @NotNull
+        public String nullOut() {
+            return "!" + NULL;
         }
 
         @NotNull
@@ -828,7 +833,7 @@ public class TextWire extends AbstractWire implements Wire {
         public WireOut text(@Nullable CharSequence s) {
             prependSeparator();
             if (s == null) {
-                append("!" + NULL);
+                append(nullOut());
             } else {
                 escape(s);
             }
@@ -1307,7 +1312,7 @@ public class TextWire extends AbstractWire implements Wire {
             else if (v instanceof WriteMarshallable)
                 typedMarshallable((WriteMarshallable) v);
             else if (v == null)
-                append("!" + NULL);
+                append(nullOut());
             else
                 text(String.valueOf(v));
         }

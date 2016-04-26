@@ -110,6 +110,12 @@ public class JSONWire extends TextWire {
     class JSONValueOut extends TextValueOut {
         @NotNull
         @Override
+        public String nullOut() {
+            return "null";
+        }
+
+        @NotNull
+        @Override
         public WireOut typeLiteral(@NotNull CharSequence type) {
             return text(type);
         }
