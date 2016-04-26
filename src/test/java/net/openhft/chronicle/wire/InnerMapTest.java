@@ -18,12 +18,16 @@ public class InnerMapTest {
     public void testMyInnnerMap() {
         MyMarshable myMarshable = new MyMarshable().name("rob");
         myMarshable.commission().put("hello", 123.4);
+        myMarshable.nested = new MyNested("text");
 
         String asString = myMarshable.toString();
         Assert.assertEquals("!net.openhft.chronicle.wire.InnerMapTest$MyMarshable {\n" +
                 "  name: rob,\n" +
                 "  commission: {\n" +
                 "    hello: 123.4\n" +
+                "  },\n" +
+                "  nested: !net.openhft.chronicle.wire.InnerMapTest$MyNested {\n" +
+                "    value: text\n" +
                 "  }\n" +
                 "}\n", asString);
 
@@ -44,6 +48,7 @@ public class InnerMapTest {
     static class MyMarshable extends AbstractMarshallable implements Demarshallable {
         String name;
         Map<String, Double> commission;
+        Marshallable nested;
 
         @UsedViaReflection
         public MyMarshable(@NotNull WireIn wire) {
@@ -65,6 +70,14 @@ public class InnerMapTest {
         public MyMarshable name(String name) {
             this.name = name;
             return this;
+        }
+    }
+
+    static class MyNested extends AbstractMarshallable implements Demarshallable {
+        String value;
+
+        public MyNested(String value) {
+            this.value = value;
         }
     }
 }

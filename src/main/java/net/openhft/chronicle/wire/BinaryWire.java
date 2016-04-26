@@ -2458,7 +2458,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return null;
             }
 
-            if (ReadMarshallable.class.isAssignableFrom(clazz)) {
+            if (ReadMarshallable.class.isAssignableFrom(clazz) && !clazz.isInterface()) {
                 final Object v;
                 if (using == null)
                     v = ObjectUtils.newInstance(clazz);
