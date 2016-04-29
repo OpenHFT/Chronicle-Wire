@@ -1211,7 +1211,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (type == null)
                 text(null);
             else
-            writeCode(TYPE_LITERAL).writeUtf8(classLookup().nameFor(type));
+                writeCode(TYPE_LITERAL).writeUtf8(classLookup().nameFor(type));
             return BinaryWire.this;
         }
 
@@ -2142,14 +2142,21 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
+        @Nullable
+        @Override
+        public <T> T typedMarshallable() throws IORuntimeException {
+            return typedMarshallable(null);
+        }
+
         @Override
         public boolean isTyped() {
             int code = peekCode();
             return code == TYPE_PREFIX;
         }
 
+
         @Nullable
-        public <T> T typedMarshallable() throws IORuntimeException {
+        public <T> T typedMarshallable(@Nullable Function<CharSequence, ReadMarshallable> factory) throws IORuntimeException {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             pushState();
             try {
@@ -2157,6 +2164,16 @@ public class BinaryWire extends AbstractWire implements Wire {
                 switch (code) {
                     case TYPE_PREFIX:
                         bytes.readUtf8(sb);
+
+
+                        if (factory != null) {
+                            ReadMarshallable m = factory.apply(sb);
+                            if (m != null) {
+                                marshallable(m);
+                                return readResolve(m);
+                            }
+
+                        }
                         // its possible that the object that you are allocating may not have a
                         // default constructor
                         final Class clazz;

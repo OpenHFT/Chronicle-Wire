@@ -390,6 +390,7 @@ public class QueryWire extends TextWire {
             return a;
         }
 
+        @NotNull
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             textTo(sb);

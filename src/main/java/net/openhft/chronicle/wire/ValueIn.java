@@ -236,6 +236,11 @@ public interface ValueIn {
     @Nullable
     <T> T typedMarshallable() throws IORuntimeException;
 
+    default <T> T typedMarshallable(@Nullable Function<CharSequence, ReadMarshallable> factory) throws
+            IORuntimeException {
+        return typedMarshallable();
+    }
+
     // todo peter to implement
     // <T> T typedMarshallable(Object context) throws IORuntimeException;
 
@@ -291,6 +296,7 @@ public interface ValueIn {
 
     /**
      * reads the map from the wire
+     *
      * @deprecated use marshallableAsMap
      */
     @Deprecated
