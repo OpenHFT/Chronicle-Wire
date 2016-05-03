@@ -111,6 +111,8 @@ public class WireMarshaller<T> {
                     return new LongFieldAccess(field);
                 case "double":
                     return new DoubleFieldAccess(field);
+                case "java.lang.StringBuilder":
+                    return new StringBuilderFieldAccess(field);
                 default:
                     Boolean isLeaf = null;
                     if (WireMarshaller.class.isAssignableFrom(type))
@@ -159,6 +161,25 @@ public class WireMarshaller<T> {
         }
 
         protected abstract void setValue(Object o, ValueIn read) throws IllegalAccessException;
+    }
+
+    static class StringBuilderFieldAccess extends FieldAccess {
+
+        public StringBuilderFieldAccess(Field field) {
+            super(field, true);
+        }
+
+        protected void getValue(Object o, ValueOut write) throws IllegalAccessException {
+            CharSequence cs = (CharSequence) field.get(o);
+            write.text(cs);
+        }
+
+        protected void setValue(Object o, ValueIn read) throws IllegalAccessException {
+            StringBuilder sb = (StringBuilder) field.get(o);
+            if (sb == null)
+                field.set(o, sb = new StringBuilder());
+            read.text(sb);
+        }
     }
 
     static class ObjectFieldAccess extends FieldAccess {
