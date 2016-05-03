@@ -126,7 +126,6 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
         wire.writeDocument(false, w -> w.getValueOut().marshallable(new DTO2(1, 2, "3")));
         System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
-
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
                 Assert.fail();
