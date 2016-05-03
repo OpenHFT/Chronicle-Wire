@@ -178,7 +178,8 @@ public class WireMarshaller<T> {
             StringBuilder sb = (StringBuilder) field.get(o);
             if (sb == null)
                 field.set(o, sb = new StringBuilder());
-            read.text(sb);
+            if (read.textTo(sb) == null)
+                field.set(o, null);
         }
     }
 
