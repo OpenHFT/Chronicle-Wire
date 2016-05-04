@@ -89,27 +89,27 @@ public enum Wires {
         return SBP.acquireStringBuilder();
     }
 
-    public static int lengthOf(long len) {
-        return (int) (len & LENGTH_MASK);
+    public static int lengthOf(int len) {
+        return len & LENGTH_MASK;
     }
 
-    public static boolean isReady(long len) {
+    public static boolean isReady(int len) {
         return (len & NOT_COMPLETE) == 0;
     }
 
-    public static boolean isNotComplete(long len) {
+    public static boolean isNotComplete(int len) {
         return (len & NOT_COMPLETE) != 0;
     }
 
-    public static boolean isReadyData(long len) {
+    public static boolean isReadyData(int len) {
         return (len & (META_DATA | NOT_COMPLETE)) == 0;
     }
 
-    public static boolean isData(long len) {
+    public static boolean isData(int len) {
         return (len & META_DATA) == 0;
     }
 
-    public static boolean isReadyMetaData(long len) {
+    public static boolean isReadyMetaData(int len) {
         return (len & (META_DATA | NOT_COMPLETE)) == META_DATA;
     }
 

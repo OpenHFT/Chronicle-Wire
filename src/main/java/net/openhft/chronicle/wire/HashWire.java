@@ -146,6 +146,16 @@ public class HashWire implements WireOut {
     }
 
     @Override
+    public WireOut headerNumber(long headerNumber) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long headerNumber() {
+        return 0;
+    }
+
+    @Override
     public DocumentContext writingDocument(boolean metaData) {
         throw new UnsupportedOperationException("todo");
     }
