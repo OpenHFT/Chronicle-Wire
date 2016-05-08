@@ -19,8 +19,8 @@ public class BinaryWireHeadersTest {
     @Test
     public void testHeaderNumbers() throws TimeoutException, EOFException, StreamCorruptedException {
         BytesStore store = NativeBytesStore.elasticByteBuffer();
-        Wire wire = new BinaryWire(store.bytesForWrite());
-        Wire wire2 = new BinaryWire(store.bytesForWrite());
+        Wire wire = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
+        Wire wire2 = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
 
         assertEquals(0, wire.headerNumber());
         assertTrue(wire.writeFirstHeader());

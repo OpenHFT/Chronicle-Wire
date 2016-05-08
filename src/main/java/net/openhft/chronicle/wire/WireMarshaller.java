@@ -210,16 +210,31 @@ public class WireMarshaller<T> {
         }
 
         protected void getValue(Object o, ValueOut write) throws IllegalAccessException {
+
+        }
+
+        protected void setValue(Object o, ValueIn read) throws IllegalAccessException {
+
+        }
+
+        @Override
+        protected void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException {
             CharSequence cs = (CharSequence) field.get(o);
             write.text(cs);
         }
 
-        protected void setValue(Object o, ValueIn read) throws IllegalAccessException {
+        @Override
+        protected void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException {
             StringBuilder sb = (StringBuilder) field.get(o);
             if (sb == null)
                 field.set(o, sb = new StringBuilder());
             if (read.textTo(sb) == null)
                 field.set(o, null);
+        }
+
+        @Override
+        public void getAsBytes(Object o, Bytes bytes) throws IllegalAccessException {
+            bytes.writeUtf8((CharSequence) field.get(o));
         }
     }
 
@@ -333,7 +348,8 @@ public class WireMarshaller<T> {
             });
         }
 
-        void read(Object o, WireIn in) {
+        @Override
+        void read(Object o, WireIn in, boolean overwrite) {
             try {
                 ValueIn read = in.read(key);
                 Collection coll = (Collection) field.get(o);
@@ -407,7 +423,8 @@ public class WireMarshaller<T> {
             write.marshallable(map);
         }
 
-        void read(Object o, WireIn in) {
+        @Override
+        void read(Object o, WireIn in, boolean overwrite) {
             try {
                 ValueIn read = in.read(key);
                 Map map = (Map) field.get(o);

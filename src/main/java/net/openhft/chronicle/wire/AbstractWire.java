@@ -90,7 +90,7 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public WireOut headerNumber(long headerNumber) {
+    public Wire headerNumber(long headerNumber) {
         this.headerNumber = headerNumber;
         return this;
     }

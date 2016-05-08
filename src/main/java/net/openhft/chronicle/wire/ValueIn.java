@@ -236,14 +236,6 @@ public interface ValueIn {
     @Nullable
     <T> T typedMarshallable() throws IORuntimeException;
 
-    default <T> T typedMarshallable(@Nullable Function<CharSequence, ReadMarshallable> factory) throws
-            IORuntimeException {
-        return typedMarshallable();
-    }
-
-    // todo peter to implement
-    // <T> T typedMarshallable(Object context) throws IORuntimeException;
-
     @NotNull
     <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts);
 

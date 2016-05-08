@@ -2139,12 +2139,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
-        @Nullable
-        @Override
-        public <T> T typedMarshallable() throws IORuntimeException {
-            return typedMarshallable(null);
-        }
-
         @Override
         public boolean isTyped() {
             int code = peekCode();

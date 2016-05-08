@@ -34,4 +34,7 @@ public interface Wire extends WireIn, WireOut {
                 throw new IllegalArgumentException("Unknown file type " + name);
         }
     }
+
+    Wire headerNumber(long headerNumber);
+
 }
