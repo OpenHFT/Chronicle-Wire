@@ -309,7 +309,15 @@ public interface ValueIn {
 
     int int32();
 
+    default int int32(int previous) {
+        return int32();
+    }
+
     long int64();
+
+    default long int64(long previous) {
+        return int64();
+    }
 
     double float64();
 

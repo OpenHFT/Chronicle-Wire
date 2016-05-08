@@ -116,6 +116,10 @@ public interface ValueOut {
     @NotNull
     WireOut int32(int i32);
 
+    default WireOut int32(int i32, int previous) {
+        return int32(i32);
+    }
+
     @NotNull
     default WireOut uint32(long x) {
         return uint32checked(x);
@@ -126,6 +130,11 @@ public interface ValueOut {
 
     @NotNull
     WireOut int64(long i64);
+
+    @NotNull
+    default WireOut int64(long i64, long previous) {
+        return int64(i64);
+    }
 
     @NotNull
     WireOut int64_0x(long i64);

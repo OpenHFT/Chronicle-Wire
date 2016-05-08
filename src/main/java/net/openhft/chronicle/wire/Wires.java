@@ -219,14 +219,25 @@ public enum Wires {
         return WireInternal.fromSizePrefixedBlobs(bytes, position, length);
     }
 
-    public static void readMarshallable(Object marshallable, WireIn wire) {
+    public static void readMarshallable(Object marshallable, WireIn wire, boolean overwrite) {
         WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass())
-                .readMarshallable(marshallable, wire);
+                .readMarshallable(marshallable, wire, overwrite);
     }
 
     public static void writeMarshallable(Object marshallable, WireOut wire) {
         WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass())
                 .writeMarshallable(marshallable, wire);
+    }
+
+    public static void writeMarshallable(Object marshallable, WireOut wire, Object previous, boolean copy) {
+        assert marshallable.getClass() == previous.getClass();
+        WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass())
+                .writeMarshallable(marshallable, wire, previous, copy);
+    }
+
+    public static void writeKey(Object marshallable, Bytes bytes) {
+        WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass())
+                .writeKey(marshallable, bytes);
     }
 
     public static <T extends Marshallable> T deepCopy(T marshallable) {
@@ -246,7 +257,7 @@ public enum Wires {
         if (t instanceof ReadMarshallable)
             ((ReadMarshallable) t).readMarshallable(wire);
         else
-            readMarshallable(t, wire);
+            readMarshallable(t, wire, true);
         return t;
     }
 

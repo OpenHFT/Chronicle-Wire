@@ -36,7 +36,7 @@ import java.util.function.*;
 /**
  * Created by peter.lawrey on 02/02/2016.
  */
-class DefaultValueIn implements ValueIn {
+public class DefaultValueIn implements ValueIn {
     private final WireIn wireIn;
     WireKey wireKey;
 
