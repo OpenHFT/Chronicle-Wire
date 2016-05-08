@@ -197,6 +197,8 @@ public class WireMarshaller<T> {
         protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
             final Object v1 = field.get(o);
             final Object v2 = field.get(o2);
+            if (v1 instanceof CharSequence && v2 instanceof CharSequence)
+                return StringUtils.isEqual((CharSequence) v1, (CharSequence) v2);
             return Objects.equals(v1, v2);
         }
 

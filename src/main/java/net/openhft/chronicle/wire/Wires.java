@@ -109,6 +109,10 @@ public enum Wires {
         return (len & (META_DATA | NOT_COMPLETE)) == 0;
     }
 
+    @Deprecated
+    public static boolean isData(long len) {
+        return isData((int) len);
+    }
     public static boolean isData(int len) {
         return (len & META_DATA) == 0;
     }

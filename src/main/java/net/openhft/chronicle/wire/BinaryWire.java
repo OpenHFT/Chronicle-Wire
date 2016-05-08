@@ -2605,11 +2605,12 @@ public class BinaryWire extends AbstractWire implements Wire {
                                 bytesStore((Bytes) using);
                                 return using;
                             } else {
+                                long pos = bytes.readPosition();
                                 bytes.readSkip(1);
                                 int len = code == BYTES_LENGTH16 ? bytes.readUnsignedShort() : bytes.readInt();
                                 code = peekCode();
                                 if (code == U8_ARRAY) {
-                                    bytes.readSkip(-5);
+                                    bytes.readPosition(pos);
                                     return bytesStore();
                                 }
                                 long lim = bytes.readLimit();
