@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.threads.BusyPauser;
+import net.openhft.chronicle.threads.LongPauser;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 
@@ -48,6 +49,7 @@ public abstract class AbstractWire implements Wire {
     protected Pauser pauser = BusyPauser.INSTANCE;
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
     protected Object parent;
+    protected long headerNumber = Long.MIN_VALUE;
     volatile Thread usedBy;
     volatile Throwable usedHere, lastEnded;
     int usedCount = 0;
@@ -84,6 +86,18 @@ public abstract class AbstractWire implements Wire {
     @Override
     public void clear() {
         bytes.clear();
+        headerNumber = 0L;
+    }
+
+    @Override
+    public WireOut headerNumber(long headerNumber) {
+        this.headerNumber = headerNumber;
+        return this;
+    }
+
+    @Override
+    public long headerNumber() {
+        return headerNumber;
     }
 
     @Override
@@ -202,6 +216,8 @@ public abstract class AbstractWire implements Wire {
         if (length < 0 || length > Wires.MAX_LENGTH)
             throw new IllegalArgumentException();
         long pos = bytes.writePosition();
+        if (pauser == BusyPauser.INSTANCE)
+            pauser = new LongPauser(1_000, 1_000, 1, 10, TimeUnit.MILLISECONDS);
 //        long start = System.nanoTime();
         try {
 //            for (int i = 0; ; i++) {
@@ -224,6 +240,8 @@ public abstract class AbstractWire implements Wire {
                     throw new EOFException();
                 if (header == Wires.NOT_COMPLETE_UNKNOWN_LENGTH)
                     continue;
+                if (Wires.isData(header))
+                    incrementHeaderNumber();
                 int len = Wires.lengthOf(header);
                 pos += len + Wires.SPB_HEADER_SIZE; // length of message plus length of header
             }
@@ -250,6 +268,13 @@ public abstract class AbstractWire implements Wire {
             bytes.writeOrderedInt(position, header);
         }
         bytes.writeLimit(bytes.capacity());
+        if (!metaData)
+            incrementHeaderNumber();
+    }
+
+    private void incrementHeaderNumber() {
+        if (headerNumber != Long.MIN_VALUE)
+            headerNumber++;
     }
 
     @Override

@@ -78,18 +78,47 @@ public interface WireOut extends WireCommon {
         return this;
     }
 
+    WireOut headerNumber(long headerNumber);
+
+    long headerNumber();
+
+    /**
+     * This will reset the positions and the header number.
+     */
+    @Override
+    void clear();
+
+    /**
+     * This will increment the headerNumber as appropriate if successful
+     *
+     * @param metaData
+     * @param writer
+     */
     default void writeDocument(boolean metaData, @NotNull WriteMarshallable writer) {
         WireInternal.writeData(this, metaData, false, writer);
     }
 
+    /**
+     * This will increment the headerNumber as appropriate if successful
+     *
+     * @param metaData
+     * @return
+     */
     DocumentContext writingDocument(boolean metaData);
 
+    /**
+     * This will increment the headerNumber as appropriate if successful
+     *
+     * @param metaData
+     * @param writer
+     */
     default void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) {
         WireInternal.writeData(this, metaData, true, writer);
     }
 
     /**
      * Write a new header, an unknown length, handling timeouts and the end of wire marker.
+     * This will increment the headerNumber as appropriate if successful
      *
      * @param timeout  throw a TimeoutException if the header could not be written in this time.
      * @param timeUnit of the timeOut
@@ -114,6 +143,7 @@ public interface WireOut extends WireCommon {
 
     /**
      * Write a message of a known length, handling timeouts and the end of wire marker.
+     * This will increment the headerNumber as appropriate if successful
      *
      * @param length   the maximum length of the message.
      * @param timeout  throw a TimeoutException if the header could not be written in this time.
@@ -136,6 +166,7 @@ public interface WireOut extends WireCommon {
 
     /**
      * Start the first header, if there is none
+     * This will increment the headerNumber as appropriate if successful
      * <p>
      * Note: the file might contain other data and the caller has to check this.
      * </p>
@@ -151,6 +182,7 @@ public interface WireOut extends WireCommon {
 
     /**
      * Write the end of wire marker, unless one is already written.
+     * This will increment the headerNumber as appropriate if successful
      *
      * @param timeout  throw TimeoutException if it could not write the marker in time.
      * @param timeUnit of the timeout

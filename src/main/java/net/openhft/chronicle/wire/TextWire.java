@@ -2143,8 +2143,15 @@ public class TextWire extends AbstractWire implements Wire {
             return object;
         }
 
+
         @Nullable
         public <T> T typedMarshallable() {
+            return typedMarshallable(null);
+        }
+
+        @Nullable
+        public <T> T typedMarshallable(@Nullable Function<CharSequence, ReadMarshallable> factory)
+                throws IORuntimeException {
             try {
                 consumePadding();
                 int code = peekCode();
@@ -2167,6 +2174,15 @@ public class TextWire extends AbstractWire implements Wire {
                     bytesStore();
                     return null;
                 }
+
+                if (factory != null) {
+                    final ReadMarshallable o = factory.apply(sb);
+                    if (o != null) {
+                        marshallable(o);
+                        return readResolve(o);
+                    }
+                }
+
 
                 // its possible that the object that you are allocating may not have a
                 // default constructor
