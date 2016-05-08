@@ -89,6 +89,10 @@ public enum Wires {
         return SBP.acquireStringBuilder();
     }
 
+    @Deprecated
+    public static int lengthOf(long len) {
+        return lengthOf((int) len);
+    }
     public static int lengthOf(int len) {
         return len & LENGTH_MASK;
     }
