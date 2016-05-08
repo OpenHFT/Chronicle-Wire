@@ -99,9 +99,14 @@ public class DefaultMarshallerTest {
             this.l = l;
             this.s = s;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            return super.equals(o);
+        }
     }
 
-    static class DMNestedClass implements Marshallable {
+    static class DMNestedClass extends AbstractMarshallable {
         String str;
         int num;
 

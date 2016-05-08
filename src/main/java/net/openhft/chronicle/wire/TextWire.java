@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -1214,6 +1215,53 @@ public class TextWire extends AbstractWire implements Wire {
                 newLine();
 
             object.writeMarshallable(TextWire.this);
+            BytesStore popSep = null;
+            if (wasLeaf) {
+                leaf = false;
+            } else if (seps.size() > 0) {
+                popSep = seps.get(seps.size() - 1);
+                popState();
+                sep = NEW_LINE;
+            }
+            if (sep.startsWith(',')) {
+                append(sep, 1, sep.length() - 1);
+                if (!wasLeaf)
+                    indent();
+
+            } else {
+                prependSeparator();
+            }
+            bytes.writeUnsignedByte('}');
+            if (popSep != null)
+                sep = popSep;
+            if (indentation == 0) {
+                afterClose();
+
+            } else {
+                elementSeparator();
+            }
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut marshallable(@NotNull Serializable object) {
+            if (bytes.writePosition() == 0) {
+                Wires.writeMarshallable(object, TextWire.this);
+                return TextWire.this;
+            }
+            boolean wasLeaf = leaf;
+            if (!wasLeaf)
+                pushState();
+
+            prependSeparator();
+            bytes.writeUnsignedByte('{');
+            if (wasLeaf)
+                afterOpen();
+            else
+                newLine();
+
+            Wires.writeMarshallable(object, TextWire.this);
             BytesStore popSep = null;
             if (wasLeaf) {
                 leaf = false;

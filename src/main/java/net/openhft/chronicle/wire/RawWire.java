@@ -30,6 +30,7 @@ import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serializable;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -534,6 +535,19 @@ public class RawWire extends AbstractWire implements Wire {
             bytes.writeInt(0);
 
             object.writeMarshallable(RawWire.this);
+
+            int length = Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range.");
+            bytes.writeOrderedInt(position, length);
+            return RawWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut marshallable(@NotNull Serializable object) {
+            long position = bytes.writePosition();
+            bytes.writeInt(0);
+
+            Wires.writeMarshallable(object, RawWire.this);
 
             int length = Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range.");
             bytes.writeOrderedInt(position, length);

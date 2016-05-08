@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
+import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -450,6 +451,13 @@ public class HashWire implements WireOut {
         @Override
         public WireOut marshallable(WriteMarshallable object) {
             object.writeMarshallable(HashWire.this);
+            return HashWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut marshallable(Serializable object) {
+            Wires.writeMarshallable(object, HashWire.this);
             return HashWire.this;
         }
 

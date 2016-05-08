@@ -266,4 +266,11 @@ public enum Wires {
         Wires.copyTo(obj, t);
         return t;
     }
+
+    public static boolean isEquals(Object o1, Object o2) {
+        if (o1.getClass() != o2.getClass())
+            return false;
+        return WireMarshaller.WIRE_MARSHALLER_CL.get(o1.getClass())
+                .isEqual(o1, o2);
+    }
 }

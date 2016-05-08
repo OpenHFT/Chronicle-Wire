@@ -27,6 +27,7 @@ import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -49,6 +50,15 @@ public interface ValueOut {
 
     @NotNull
     WireOut text(@Nullable CharSequence s);
+
+    @NotNull
+    default WireOut text(@Nullable String s) {
+        return text((CharSequence) s);
+    }
+
+    default WireOut nu11() {
+        return text((CharSequence) null);
+    }
 
     @NotNull
     default WireOut text(@Nullable BytesStore s) {
@@ -170,7 +180,7 @@ public interface ValueOut {
 
     @NotNull
     default WireOut typeLiteral(Class type) {
-        return type == null ? text(null)
+        return type == null ? nu11()
                 : typeLiteral((t, b) -> b.appendUtf8(ClassAliasPool.CLASS_ALIASES.nameFor(t)), type);
     }
 
@@ -216,6 +226,9 @@ public interface ValueOut {
     @NotNull
     WireOut marshallable(WriteMarshallable object);
 
+    @NotNull
+    WireOut marshallable(Serializable object);
+
     /**
      * writes the contents of the map to wire
      *
@@ -246,9 +259,21 @@ public interface ValueOut {
     @NotNull
     default WireOut typedMarshallable(@Nullable WriteMarshallable object) {
         if (object == null)
-            return text(null);
+            return nu11();
         typePrefix(object.getClass());
         return marshallable(object);
+    }
+
+    @NotNull
+    default WireOut typedMarshallable(@Nullable Serializable object) {
+        if (object == null)
+            return nu11();
+        typePrefix(object.getClass());
+        if (object instanceof WriteMarshallable) {
+            return marshallable((WriteMarshallable) object);
+        } else {
+            return marshallable(object);
+        }
     }
 
     @NotNull
@@ -319,7 +344,7 @@ public interface ValueOut {
     @NotNull
     default WireOut object(Object value) {
         if (value == null)
-            return text(null);
+            return nu11();
         // look for exact matches
         switch (value.getClass().getName()) {
             case "[B":
@@ -375,6 +400,8 @@ public interface ValueOut {
         } else if (Object[].class.isAssignableFrom(value.getClass())) {
             Class type = (Class) value.getClass().getComponentType();
             return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), value.getClass());
+        } else if (value instanceof Serializable) {
+            return typedMarshallable((Serializable) value);
         } else {
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +
@@ -393,7 +420,7 @@ public interface ValueOut {
     @NotNull
     default WireOut untypedObject(Object value) {
         if (value == null)
-            return text(null);
+            return nu11();
         // look for exact matches
         switch (value.getClass().getName()) {
             case "[B":
@@ -456,7 +483,7 @@ public interface ValueOut {
 
     default WireOut compress(String compression, Bytes uncompressedBytes) {
         if (uncompressedBytes == null)
-            return text(null);
+            return nu11();
         if (uncompressedBytes.readRemaining() < SMALL_MESSAGE)
             return bytes(uncompressedBytes);
         Bytes tmpBytes = Wires.acquireBytes();

@@ -29,6 +29,7 @@ import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serializable;
 import java.nio.BufferUnderflowException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -774,19 +775,23 @@ public class BinaryWire extends AbstractWire implements Wire {
     private void writeField(@NotNull CharSequence name) {
         int len = name.length();
         if (len < 0x20) {
-            if (len > 0 && Character.isDigit(name.charAt(0))) {
-                try {
-                    writeField(Integer.parseInt(name.toString()));
-                    return;
-                } catch (NumberFormatException ignored) {
-                }
-            }
-            bytes.writeByte((byte) (FIELD_NAME0 + len))
-                    .append8bit(name);
+            writeField0(name, len);
 
         } else {
             writeCode(FIELD_NAME_ANY).write8bit(name);
         }
+    }
+
+    private void writeField0(@NotNull CharSequence name, int len) {
+        if (len > 0 && Character.isDigit(name.charAt(0))) {
+            try {
+                writeField(Integer.parseInt(name.toString()));
+                return;
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        bytes.writeByte((byte) (FIELD_NAME0 + len));
+        bytes.append8bit(name);
     }
 
     private void writeField(int code) {
@@ -908,23 +913,50 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        @Override
+        public WireOut nu11() {
+            writeCode(NULL);
+            return BinaryWire.this;
+        }
+
         @NotNull
         @Override
         public WireOut text(@Nullable CharSequence s) {
             if (s == null) {
-                writeCode(NULL);
+                nu11();
 
             } else {
                 int len = s.length();
                 if (len < 0x20) {
                     bytes.writeUnsignedByte(STRING_0 + len).appendUtf8(s);
                 } else {
-                    writeCode(STRING_ANY).writeUtf8(s);
+                    writeCode(STRING_ANY);
+                    bytes.writeUtf8(s);
                 }
             }
 
             return BinaryWire.this;
         }
+
+        @NotNull
+        @Override
+        public WireOut text(@Nullable String s) {
+            if (s == null) {
+                writeCode(NULL);
+
+            } else {
+                int len = s.length();
+                if (len < 0x20) {
+                    bytes.writeUnsignedByte(STRING_0 + len).appendUtf8(StringUtils.extractChars(s), 0, s.length());
+                } else {
+                    writeCode(STRING_ANY);
+                    bytes.writeUtf8(s);
+                }
+            }
+
+            return BinaryWire.this;
+        }
+
 
         @NotNull
         @Override
@@ -948,7 +980,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public WireOut bytes(@Nullable BytesStore fromBytes) {
             if (fromBytes == null)
-                return text(null);
+                return nu11();
             long remaining = fromBytes.readRemaining();
             if (remaining >= compressedSize()) {
                 compress(compression, fromBytes.bytesForRead());
@@ -1202,7 +1234,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public WireOut typeLiteral(Class type) {
             if (type == null)
-                text(null);
+                nu11();
             else
                 writeCode(TYPE_LITERAL).writeUtf8(classLookup().nameFor(type));
             return BinaryWire.this;
@@ -1280,6 +1312,19 @@ public class BinaryWire extends AbstractWire implements Wire {
             bytes.writeInt(0);
 
             object.writeMarshallable(BinaryWire.this);
+
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
+            return BinaryWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut marshallable(@NotNull Serializable object) {
+            writeCode(BYTES_LENGTH32);
+            long position = bytes.writePosition();
+            bytes.writeInt(0);
+
+            Wires.writeMarshallable(object, BinaryWire.this);
 
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
             return BinaryWire.this;
@@ -2309,6 +2354,28 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        public WireIn marshallable(@NotNull Serializable object) throws BufferUnderflowException, IORuntimeException {
+            consumePadding(true);
+            pushState();
+            long length = readLength();
+            if (length >= 0) {
+                long limit = bytes.readLimit();
+                long limit2 = bytes.readPosition() + length;
+                bytes.readLimit(limit2);
+                try {
+                    Wires.readMarshallable(object, BinaryWire.this, true);
+
+                } finally {
+                    bytes.readLimit(limit);
+                    bytes.readPosition(limit2);
+                    popState();
+                }
+            } else {
+                throw new IORuntimeException("Length unknown");
+            }
+            return BinaryWire.this;
+        }
+
         public Demarshallable demarshallable(@NotNull Class clazz) throws BufferUnderflowException, IORuntimeException {
             consumePadding(true);
 
@@ -2483,7 +2550,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
 
             if (clazz == Object.class) {
-                return object(using);
+                return object1(using, clazz);
             }
 
             if (ReadMarshallable.class.isAssignableFrom(clazz) && !clazz.isInterface()) {
@@ -2515,12 +2582,12 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return bytes();
 
             } else {
-                return object(using);
+                return object1(using, clazz);
             }
         }
 
         @Nullable
-        private Object object(@Nullable Object using) {
+        private Object object1(@Nullable Object using, Class clazz) {
             int code = peekCode();
             if ((code & 0x80) == 0) {
                 bytes.readSkip(1);
@@ -2549,7 +2616,12 @@ public class BinaryWire extends AbstractWire implements Wire {
                                 try {
                                     bytes.readLimit(bytes.readPosition() + len);
                                     if (isFieldNext()) {
-                                        return getValueOut().marshallable(new LinkedHashMap<>());
+                                        if (Serializable.class.isAssignableFrom(clazz)) {
+                                            Serializable s = (Serializable) ObjectUtils.newInstance(clazz);
+                                            Wires.readMarshallable(s, wireIn(), true);
+                                            return s;
+                                        }
+                                        return getValueOut().marshallable((Map) new LinkedHashMap<>());
                                     } else {
                                         List list = new ArrayList<>();
                                         while (bytes.readRemaining() > 0)
