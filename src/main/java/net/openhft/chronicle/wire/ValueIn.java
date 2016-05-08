@@ -236,6 +236,16 @@ public interface ValueIn {
     @Nullable
     <T> T typedMarshallable() throws IORuntimeException;
 
+    default <T> T typedMarshallable(Function<Class, ReadMarshallable> marshallableFunction) throws IORuntimeException {
+        final Class aClass = typePrefix();
+        if (ReadMarshallable.class.isAssignableFrom(aClass)) {
+            final ReadMarshallable marshallable = marshallableFunction.apply(aClass);
+            marshallable(marshallable);
+            return (T) marshallable;
+        }
+        return (T) object(null, aClass);
+    }
+
     @NotNull
     <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts);
 
