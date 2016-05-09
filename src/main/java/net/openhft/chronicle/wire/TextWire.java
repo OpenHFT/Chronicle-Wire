@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
 
+import java.io.Externalizable;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.BufferUnderflowException;
@@ -1247,7 +1248,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public WireOut marshallable(@NotNull Serializable object) {
             if (bytes.writePosition() == 0) {
-                Wires.writeMarshallable(object, TextWire.this);
+                writeSerializable(object);
                 return TextWire.this;
             }
             boolean wasLeaf = leaf;
@@ -1261,7 +1262,7 @@ public class TextWire extends AbstractWire implements Wire {
             else
                 newLine();
 
-            Wires.writeMarshallable(object, TextWire.this);
+            writeSerializable(object);
             BytesStore popSep = null;
             if (wasLeaf) {
                 leaf = false;
@@ -1289,6 +1290,18 @@ public class TextWire extends AbstractWire implements Wire {
             }
             return TextWire.this;
         }
+
+        private void writeSerializable(@NotNull Serializable object) {
+            try {
+                if (object instanceof Externalizable)
+                    ((Externalizable) object).writeExternal(objectOutput());
+                else
+                    Wires.writeMarshallable(object, TextWire.this);
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
+        }
+
 
         protected void afterClose() {
             newLine();

@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
+import java.io.ObjectInput;
 import java.io.StreamCorruptedException;
 import java.nio.BufferUnderflowException;
 import java.sql.ResultSet;
@@ -199,6 +200,11 @@ public class ResultSetWireIn implements WireIn {
     @Override
     public boolean endUse() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ObjectInput objectInput() {
+        return new WireObjectInput(this);
     }
 
     class RSValueIn implements ValueIn {

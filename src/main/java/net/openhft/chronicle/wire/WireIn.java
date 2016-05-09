@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
+import java.io.ObjectInput;
 import java.io.StreamCorruptedException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -71,6 +72,7 @@ public interface WireIn extends WireCommon {
     @NotNull
     ValueIn getValueIn();
 
+    ObjectInput objectInput();
     /*
      * read and write comments.
      */

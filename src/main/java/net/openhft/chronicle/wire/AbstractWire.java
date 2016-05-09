@@ -27,6 +27,8 @@ import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.EOFException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.StreamCorruptedException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -54,6 +56,8 @@ public abstract class AbstractWire implements Wire {
     volatile Throwable usedHere, lastEnded;
     int usedCount = 0;
     private boolean notCompleteIsNotPresent;
+    private ObjectOutput objectOutput;
+    private ObjectInput objectInput;
 
     public AbstractWire(Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
@@ -361,5 +365,17 @@ public abstract class AbstractWire implements Wire {
 
     public void notCompleteIsNotPresent(boolean notCompleteIsNotPresent) {
         this.notCompleteIsNotPresent = notCompleteIsNotPresent;
+    }
+
+    public ObjectOutput objectOutput() {
+        if (objectOutput == null)
+            objectOutput = new WireObjectOutput(this);
+        return objectOutput;
+    }
+
+    public ObjectInput objectInput() {
+        if (objectInput == null)
+            objectInput = new WireObjectInput(this);
+        return objectInput;
     }
 }
