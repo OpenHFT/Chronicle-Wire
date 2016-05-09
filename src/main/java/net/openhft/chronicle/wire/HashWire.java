@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
+import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.time.LocalDate;
@@ -132,6 +133,11 @@ public class HashWire implements WireOut {
     @Override
     public ValueOut getValueOut() {
         return valueOut;
+    }
+
+    @Override
+    public ObjectOutput objectOutput() {
+        return new WireObjectOutput(this);
     }
 
     @NotNull

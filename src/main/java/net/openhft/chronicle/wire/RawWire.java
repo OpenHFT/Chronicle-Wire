@@ -30,6 +30,8 @@ import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Externalizable;
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
@@ -547,11 +549,22 @@ public class RawWire extends AbstractWire implements Wire {
             long position = bytes.writePosition();
             bytes.writeInt(0);
 
-            Wires.writeMarshallable(object, RawWire.this);
+            writeSerializable(object);
 
             int length = Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range.");
             bytes.writeOrderedInt(position, length);
             return RawWire.this;
+        }
+
+        private void writeSerializable(@NotNull Serializable object) {
+            try {
+                if (object instanceof Externalizable)
+                    ((Externalizable) object).writeExternal(objectOutput());
+                else
+                    Wires.writeMarshallable(object, RawWire.this);
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         @NotNull

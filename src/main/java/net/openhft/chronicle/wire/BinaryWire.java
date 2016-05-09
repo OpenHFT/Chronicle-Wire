@@ -29,6 +29,8 @@ import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Externalizable;
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.BufferUnderflowException;
 import java.nio.charset.StandardCharsets;
@@ -1324,7 +1326,15 @@ public class BinaryWire extends AbstractWire implements Wire {
             long position = bytes.writePosition();
             bytes.writeInt(0);
 
-            Wires.writeMarshallable(object, BinaryWire.this);
+            try {
+                if (object instanceof Externalizable) {
+                    ((Externalizable) object).writeExternal(objectOutput());
+                } else {
+                    Wires.writeMarshallable(object, BinaryWire.this);
+                }
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
 
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
             return BinaryWire.this;
@@ -2363,7 +2373,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 long limit2 = bytes.readPosition() + length;
                 bytes.readLimit(limit2);
                 try {
-                    Wires.readMarshallable(object, BinaryWire.this, true);
+                    readSerializable(object);
 
                 } finally {
                     bytes.readLimit(limit);
@@ -2374,6 +2384,18 @@ public class BinaryWire extends AbstractWire implements Wire {
                 throw new IORuntimeException("Length unknown");
             }
             return BinaryWire.this;
+        }
+
+        private void readSerializable(@NotNull Serializable object) {
+            try {
+                if (object instanceof Externalizable) {
+                    ((Externalizable) object).readExternal(objectInput());
+                } else {
+                    Wires.readMarshallable(object, BinaryWire.this, true);
+                }
+            } catch (IOException | ClassNotFoundException e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         public Demarshallable demarshallable(@NotNull Class clazz) throws BufferUnderflowException, IORuntimeException {
@@ -2619,11 +2641,16 @@ public class BinaryWire extends AbstractWire implements Wire {
                                     if (isFieldNext()) {
                                         if (Serializable.class.isAssignableFrom(clazz)) {
                                             Serializable s = (Serializable) ObjectUtils.newInstance(clazz);
-                                            Wires.readMarshallable(s, wireIn(), true);
+                                            readSerializable(s);
                                             return s;
                                         }
                                         return getValueOut().marshallable((Map) new LinkedHashMap<>());
                                     } else {
+                                        if (Externalizable.class.isAssignableFrom(clazz)) {
+                                            Externalizable s = (Externalizable) ObjectUtils.newInstance(clazz);
+                                            readSerializable(s);
+                                            return s;
+                                        }
                                         List list = new ArrayList<>();
                                         while (bytes.readRemaining() > 0)
                                             list.add(object(Object.class));
@@ -2734,5 +2761,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             text();
         }
     }
+
 }
 

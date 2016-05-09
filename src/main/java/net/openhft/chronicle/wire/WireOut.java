@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.EOFException;
+import java.io.ObjectOutput;
 import java.io.StreamCorruptedException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -60,6 +61,8 @@ public interface WireOut extends WireCommon {
      */
     @NotNull
     ValueOut getValueOut();
+
+    ObjectOutput objectOutput();
 
     /*
      * read and write comments.
