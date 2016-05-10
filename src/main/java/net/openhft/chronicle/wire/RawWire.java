@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -458,6 +459,14 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
+        public WireOut dateTime(LocalDateTime localDateTime) {
+            date(localDateTime.toLocalDate());
+            time(localDateTime.toLocalTime());
+            return RawWire.this;
+        }
+
+        @NotNull
+        @Override
         public ValueOut typePrefix(CharSequence typeName) {
             bytes.writeUtf8(typeName);
             return this;
@@ -633,7 +642,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @Override
         public Class typePrefix() {
-            return Object.class;
+            return null;
         }
 
         @Nullable
@@ -868,7 +877,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public <T> WireIn sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
+        public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
             throw new UnsupportedOperationException("todo");
         }
 
@@ -937,10 +946,10 @@ public class RawWire extends AbstractWire implements Wire {
             throw new UnsupportedOperationException("todo");
         }
 
-        @NotNull
-        @Override
-        public WireIn marshallable(@NotNull ReadMarshallable object) {
+        public boolean marshallable(@NotNull Object object, SerializationStrategy strategy) {
             long length = bytes.readUnsignedInt();
+            if (length == 0xFFFF_FFFF)
+                return false;
             if (length > bytes.readRemaining()) {
                 throw new IllegalStateException("Length was " + length
                         + " greater than remaining " + bytes.readRemaining());
@@ -950,16 +959,18 @@ public class RawWire extends AbstractWire implements Wire {
                 long limit2 = bytes.readPosition() + length;
                 bytes.readLimit(limit2);
                 try {
-                    object.readMarshallable(RawWire.this);
+                    strategy.readUsing(object, this);
+
                 } finally {
                     bytes.readLimit(limit);
                     bytes.readPosition(limit2);
                 }
             } else {
-                object.readMarshallable(RawWire.this);
+                strategy.readUsing(object, this);
             }
-            return RawWire.this;
+            return true;
         }
+
 
         @Override
         public <K extends ReadMarshallable, V extends ReadMarshallable> void typedMap(@NotNull Map<K, V> usingMap) {
@@ -1012,16 +1023,19 @@ public class RawWire extends AbstractWire implements Wire {
             return bytes.readFloat();
         }
 
-        @Nullable
         @Override
-        public <E> E object(@Nullable E using, @NotNull Class<E> clazz) {
-            throw new UnsupportedOperationException("todo");
+        public boolean isNull() {
+            return false;
         }
 
-        @Nullable
         @Override
-        public <T, E> WireIn object(@NotNull Class<E> clazz, T t, BiConsumer<T, E> e) {
-            throw new UnsupportedOperationException("todo");
+        public boolean isNested() {
+            throw new IllegalArgumentException("Only scalar or nested types supported");
+        }
+
+        @Override
+        public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type) {
+            throw new UnsupportedOperationException();
         }
     }
 }

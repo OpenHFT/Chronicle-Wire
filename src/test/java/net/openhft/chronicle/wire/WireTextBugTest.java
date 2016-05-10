@@ -25,15 +25,16 @@ public class WireTextBugTest {
     @org.junit.Test
     public void testText() {
         ClassAliasPool.CLASS_ALIASES.addAlias(Bug.class);
-        Wire encodeWire = new BinaryWire(Bytes.elasticByteBuffer().unchecked(true), false, true, false, Integer.MAX_VALUE, "lzw");
+        Wire encodeWire = new BinaryWire(Bytes.elasticByteBuffer(), false, true, false, Integer.MAX_VALUE, "lzw");
         Bug b = new Bug();
         b.setClOrdID("FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12");
         System.out.println("b = " + b);
         encodeWire.getValueOut().object(b);
         byte[] bytes = encodeWire.bytes().toByteArray();
 
-        Wire decodeWire = new BinaryWire(Bytes.wrapForRead(bytes).unchecked(true));
-        Object o = decodeWire.getValueIn().object(Object.class);
+        Wire decodeWire = new BinaryWire(Bytes.wrapForRead(bytes));
+        Object o = decodeWire.getValueIn()
+                .object(Object.class);
         Bug b2 = (Bug) o;
         System.out.println("b2 = " + b2);
     }

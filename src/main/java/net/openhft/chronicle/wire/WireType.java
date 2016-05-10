@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -63,7 +64,7 @@ public enum WireType implements Function<Bytes, Wire> {
         }
 
         @Override
-        public String asString(WriteMarshallable marshallable) {
+        public String asString(Object marshallable) {
             return asHexString(marshallable);
         }
 
@@ -79,7 +80,7 @@ public enum WireType implements Function<Bytes, Wire> {
         }
 
         @Override
-        public String asString(WriteMarshallable marshallable) {
+        public String asString(Object marshallable) {
             return asHexString(marshallable);
         }
 
@@ -95,7 +96,7 @@ public enum WireType implements Function<Bytes, Wire> {
         }
 
         @Override
-        public String asString(WriteMarshallable marshallable) {
+        public String asString(Object marshallable) {
             return asHexString(marshallable);
         }
 
@@ -117,7 +118,7 @@ public enum WireType implements Function<Bytes, Wire> {
         }
 
         @Override
-        public String asString(WriteMarshallable marshallable) {
+        public String asString(Object marshallable) {
             return asHexString(marshallable);
         }
 
@@ -175,11 +176,27 @@ public enum WireType implements Function<Bytes, Wire> {
         return BinaryLongArrayReference::new;
     }
 
-    public String asString(WriteMarshallable marshallable) {
+    public String asString(Object marshallable) {
+        Bytes bytes = asBytes(marshallable);
+        return bytes.toString();
+    }
+
+    private Bytes asBytes(Object marshallable) {
         Bytes bytes = getBytes();
         Wire wire = apply(bytes);
-        wire.getValueOut().typedMarshallable(marshallable);
-        return bytes.toString();
+        final ValueOut valueOut = wire.getValueOut();
+
+        if (marshallable instanceof WriteMarshallable)
+            valueOut.typedMarshallable((WriteMarshallable) marshallable);
+        else if (marshallable instanceof Map)
+            wire.getValueOut().marshallable((Map) marshallable, Object.class, false);
+//        else if (marshallable instanceof List)
+//            wire.getValueOut().sequence((List) marshallable);
+        else if (marshallable instanceof Serializable)
+            valueOut.typedMarshallable((Serializable) marshallable);
+        else
+            bytes.appendUtf8(marshallable.toString());
+        return bytes;
     }
 
     public <T> T fromString(CharSequence cs) {
@@ -240,24 +257,14 @@ public enum WireType implements Function<Bytes, Wire> {
         }
     }
 
-    String asHexString(WriteMarshallable marshallable) {
-        Bytes bytes = getBytes();
-        Wire wire = apply(bytes);
-        wire.getValueOut().typedMarshallable(marshallable);
+    String asHexString(Object marshallable) {
+        Bytes bytes = asBytes(marshallable);
         return bytes.toHexString();
     }
 
     <T> T fromHexString(CharSequence s) {
         Wire wire = apply(Bytes.fromHexString(s.toString()));
         return wire.getValueIn().typedMarshallable();
-    }
-
-    public String asString(Map<String, Object> map) {
-        Bytes bytes = getBytes();
-        Wire wire = apply(bytes);
-        wire.getValueOut()
-                .marshallable(map, Object.class, false);
-        return bytes.toString();
     }
 
     public Map<String, Object> asMap(CharSequence cs) {

@@ -41,7 +41,7 @@ public class PrimitiveTypeWrappersTest {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(
-                new Object[]{Boolean.FALSE}
+                new Object[]{Boolean.TRUE}
                 , new Object[]{Boolean.TRUE}
 
         );
@@ -53,16 +53,17 @@ public class PrimitiveTypeWrappersTest {
                 Short.class, Float.class,
                 Integer.class, Long.class, Double.class};
 
-        final Number[] nums = new Number[]{(byte) 1, (short) 1, (float) 1, 1, (long) 1, (double) 1};
+        final Number[] nums = new Number[]{(byte) 1, (short) 2, (float) 3, 4, (long) 5, (double) 6};
 
         for (Number num : nums) {
             for (Class type : types) {
                 final Wire wire = wireFactory();
 
                 wire.write().object(num);
+                System.out.println(wire);
                 final Object object = wire.read().object(type);
                 Assert.assertTrue(num.getClass() + " to " + type.getName(), type.isAssignableFrom(object.getClass()));
-                Assert.assertEquals(num.getClass() + " to " + type.getName(), 1, ((Number) object).intValue());
+                Assert.assertEquals(num.getClass() + " to " + type.getName(), num.intValue(), ((Number) object).intValue());
             }
         }
     }

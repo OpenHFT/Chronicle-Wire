@@ -489,7 +489,7 @@ public class ResultSetWireIn implements WireIn {
 
         @NotNull
         @Override
-        public <T> WireIn sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
+        public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
             throw new UnsupportedOperationException();
         }
 
@@ -516,9 +516,8 @@ public class ResultSetWireIn implements WireIn {
             throw new UnsupportedOperationException();
         }
 
-        @NotNull
         @Override
-        public WireIn marshallable(@NotNull ReadMarshallable object) throws BufferUnderflowException, IORuntimeException {
+        public boolean marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
             throw new UnsupportedOperationException();
         }
 
@@ -538,28 +537,29 @@ public class ResultSetWireIn implements WireIn {
             throw new UnsupportedOperationException();
         }
 
-        @Nullable
         @Override
-        public <E> E object(@Nullable E using, @NotNull Class<E> clazz) {
+        public boolean isNested() {
+            return false;
+        }
+
+        @Override
+        public boolean isNull() {
             try {
-                Object x = key == null ? resultSet.getObject(index) : resultSet.getObject(key.name().toString());
-                return ObjectUtils.convertTo(clazz, x);
+                return resultSet.wasNull();
             } catch (SQLException e) {
                 throw Jvm.rethrow(e);
             }
         }
 
-        @Nullable
         @Override
-        public <T, E> WireIn object(@NotNull Class<E> clazz, T t, BiConsumer<T, E> c) {
+        public Object objectWithInferredType(Object using, SerializationStrategy hint, Class type) {
             try {
-                Object x = key == null ? resultSet.getObject(index) : resultSet.getObject(key.name().toString());
-                c.accept(t, ObjectUtils.convertTo(clazz, x));
+                return key == null ? resultSet.getObject(index) : resultSet.getObject(key.name().toString());
             } catch (SQLException e) {
                 throw Jvm.rethrow(e);
             }
-            return wireIn();
         }
+
 
         @Override
         public boolean isTyped() {

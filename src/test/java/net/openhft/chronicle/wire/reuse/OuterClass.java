@@ -45,8 +45,8 @@ public class OuterClass implements Marshallable {
             t.clearListA();
             while (v.hasNextSequenceItem())
                 v.marshallable(addListA());
-        })
-                .read(() -> "listB").sequence(this, (t, v) -> {
+        });
+        wire.read(() -> "listB").sequence(this, (t, v) -> {
             t.clearListB();
             while (v.hasNextSequenceItem())
                 v.marshallable(addListB());

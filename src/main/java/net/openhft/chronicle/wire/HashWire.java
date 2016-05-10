@@ -34,6 +34,7 @@ import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -391,6 +392,13 @@ public class HashWire implements WireOut {
         @Override
         public WireOut date(LocalDate localDate) {
             hash = hash * M1 + localDate.hashCode() * M2;
+            return HashWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut dateTime(LocalDateTime localDateTime) {
+            hash = hash * M1 + localDateTime.hashCode() * M2;
             return HashWire.this;
         }
 

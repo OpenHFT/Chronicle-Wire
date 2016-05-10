@@ -18,6 +18,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.ClassLocal;
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 
 import java.lang.reflect.*;
@@ -131,6 +133,8 @@ public class WireMarshaller<T> {
                     return new BooleanFieldAccess(field);
                 case "byte":
                     return new ByteFieldAccess(field);
+                case "char":
+                    return new CharFieldAccess(field);
                 case "short":
                     return new ShortFieldAccess(field);
                 case "int":
@@ -279,7 +283,11 @@ public class WireMarshaller<T> {
         }
 
         protected void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException {
-            field.set(o, read.object(field.get(o), type));
+            try {
+                field.set(o, read.object(field.get(o), type));
+            } catch (Exception e) {
+                throw new IORuntimeException("Error reading " + field, e);
+            }
         }
 
         @Override
@@ -317,10 +325,14 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException {
-            write.sequence(o, (array, out) -> {
-                for (int i = 0, len = Array.getLength(array); i < len; i++)
-                    out.object(componentType, Array.get(array, i));
-            });
+            Object arr = field.get(o);
+            if (arr == null)
+                write.nu11();
+            else
+                write.sequence(arr, (array, out) -> {
+                    for (int i = 0, len = Array.getLength(array); i < len; i++)
+                        out.object(componentType, Array.get(array, i));
+                });
         }
 
         @Override
@@ -403,6 +415,12 @@ public class WireMarshaller<T> {
                         if (Boolean.TRUE.equals(isLeaf)) out.leaf();
                         out.object(componentType, list.get(i));
                     }
+                } else if (coll == null) {
+                    try {
+                        field.set(o, null);
+                    } catch (IllegalAccessException e) {
+                        throw Jvm.rethrow(e);
+                    }
                 } else {
                     for (Object element : coll) {
                         if (Boolean.TRUE.equals(isLeaf)) out.leaf();
@@ -410,6 +428,7 @@ public class WireMarshaller<T> {
                     }
                 }
             });
+
         }
 
         @Override
@@ -423,10 +442,12 @@ public class WireMarshaller<T> {
                 } else {
                     coll.clear();
                 }
-                read.sequence(coll, (c, in2) -> {
+                if (!read.sequence(coll, (c, in2) -> {
                     while (in2.hasNextSequenceItem())
                         c.add(in2.object(componentType));
-                });
+                })) {
+                    field.set(o, null);
+                }
             } catch (IllegalAccessException e) {
                 throw new AssertionError(e);
             }
@@ -503,7 +524,9 @@ public class WireMarshaller<T> {
                 } else {
                     coll.clear();
                 }
-                read.sequence(coll, seqConsumer);
+                if (!read.sequence(coll, seqConsumer)) {
+                    field.set(o, null);
+                }
             } catch (IllegalAccessException e) {
                 throw new AssertionError(e);
             }
@@ -575,7 +598,8 @@ public class WireMarshaller<T> {
                 } else {
                     map.clear();
                 }
-                read.marshallableAsMap(valueType, map);
+                if (read.marshallableAsMap(valueType, map) == null)
+                    field.set(o, null);
             } catch (IllegalAccessException e) {
                 throw new AssertionError(e);
             }
@@ -682,6 +706,39 @@ public class WireMarshaller<T> {
         @Override
         protected void copy(Object from, Object to) throws IllegalAccessException {
             UNSAFE.putShort(to, offset, UNSAFE.getShort(from, offset));
+        }
+    }
+
+    static class CharFieldAccess extends FieldAccess {
+        CharFieldAccess(Field field) {
+            super(field);
+        }
+
+        @Override
+        protected void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException {
+            StringBuilder sb = new StringBuilder();
+            sb.append(UNSAFE.getChar(o, offset));
+            write.text(sb);
+        }
+
+        @Override
+        protected void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException {
+            UNSAFE.putChar(o, offset, read.text().charAt(0));
+        }
+
+        @Override
+        public void getAsBytes(Object o, Bytes bytes) throws IllegalAccessException {
+            bytes.writeUnsignedShort(UNSAFE.getChar(o, offset));
+        }
+
+        @Override
+        protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
+            return UNSAFE.getChar(o, offset) == UNSAFE.getChar(o2, offset);
+        }
+
+        @Override
+        protected void copy(Object from, Object to) throws IllegalAccessException {
+            UNSAFE.putChar(to, offset, UNSAFE.getChar(from, offset));
         }
     }
 

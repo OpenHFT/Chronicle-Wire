@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -169,6 +170,9 @@ public interface ValueOut {
 
     @NotNull
     WireOut date(LocalDate localDate);
+
+    @NotNull
+    WireOut dateTime(LocalDateTime localDateTime);
 
     @NotNull
     ValueOut typePrefix(CharSequence typeName);
@@ -333,6 +337,11 @@ public interface ValueOut {
     }
 
     default <V> WireOut marshallable(Map<String, V> map, Class<V> vClass, boolean leaf) {
+        if (map == null) {
+            nu11();
+            return wireOut();
+        }
+
         marshallable(m -> {
             for (Map.Entry<String, V> entry : map.entrySet()) {
                 m.writeEventName(entry::getKey).leaf(leaf).object(vClass, entry.getValue());
@@ -377,8 +386,16 @@ public interface ValueOut {
                 return time((LocalTime) value);
             case "java.time.LocalDate":
                 return date((LocalDate) value);
+            case "java.time.LocalDateTime":
+                return dateTime((LocalDateTime) value);
             case "java.time.ZonedDateTime":
                 return zonedDateTime((ZonedDateTime) value);
+            case "java.util.UUID":
+                return uuid((UUID) value);
+            case "java.math.BigInteger":
+            case "java.math.BigDecimal":
+            case "java.io.File":
+                return text(value.toString());
         }
         if (value instanceof Marshallable)
             return typedMarshallable((Marshallable) value);

@@ -19,10 +19,30 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
+import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.Externalizable;
+import java.io.File;
+import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 
 /**
  * Created by peter on 31/08/15.
@@ -46,7 +66,27 @@ public enum Wires {
     public static final Bytes<?> NO_BYTES = new VanillaBytes<>(BytesStore.empty());
     public static final WireIn EMPTY = new BinaryWire(NO_BYTES);
     public static final int SPB_HEADER_SIZE = 4;
+    public static final List<Function<Class, SerializationStrategy>> CLASS_STRATEGY_FUNCTIONS = new CopyOnWriteArrayList<>();
+    public static final ClassLocal<SerializationStrategy> CLASS_STRATEGY = ClassLocal.withInitial(c -> {
+        for (Function<Class, SerializationStrategy> func : CLASS_STRATEGY_FUNCTIONS) {
+            final SerializationStrategy strategy = func.apply(c);
+            if (strategy != null)
+                return strategy;
+        }
+        return SerializationStrategies.ANY_OBJECT;
+    });
     static final StringBuilderPool SBP = new StringBuilderPool();
+
+    static {
+        CLASS_STRATEGY_FUNCTIONS.add(new SerializeJavaLang());
+        CLASS_STRATEGY_FUNCTIONS.add(new SerializeMarshallables());
+        CLASS_STRATEGY_FUNCTIONS.add(new SerializeBytes());
+    }
+
+    public static <T> T read(Class<T> tClass, ValueIn in) {
+        final SerializationStrategy<T> strategy = CLASS_STRATEGY.get(tClass);
+        return strategy.read(in, tClass);
+    }
 
     /**
      * This decodes some Bytes where the first 4-bytes is the length.  e.g. Wire.writeDocument wrote
@@ -288,5 +328,144 @@ public enum Wires {
             return false;
         return WireMarshaller.WIRE_MARSHALLER_CL.get(o1.getClass())
                 .isEqual(o1, o2);
+    }
+
+    static class SerializeBytes implements Function<Class, SerializationStrategy> {
+        @Override
+        public SerializationStrategy apply(Class aClass) {
+            switch (aClass.getName()) {
+                case "net.openhft.chronicle.bytes.BytesStore":
+                    return ScalarStrategy.of(BytesStore.class, (o, in) -> in.bytesStore());
+                default:
+                    return null;
+            }
+        }
+    }
+
+    static class SerializeJavaLang implements Function<Class, SerializationStrategy> {
+        @Override
+        public SerializationStrategy apply(Class aClass) {
+            switch (aClass.getName()) {
+                case "[B":
+                    return ScalarStrategy.of(byte[].class, (o, in) -> in.bytes());
+
+                case "java.lang.StringBuilder":
+                    return ScalarStrategy.of(StringBuilder.class, (o, in) -> {
+                        StringBuilder builder = (o == null)
+                                ? acquireStringBuilder()
+                                : o;
+                        in.textTo(builder);
+                        return o;
+                    });
+
+                case "java.lang.String":
+                    return ScalarStrategy.of(String.class, (o, in) -> in.text());
+
+                case "java.lang.Object":
+                    return SerializationStrategies.ANY_OBJECT;
+
+                case "java.lang.Class":
+                    return ScalarStrategy.of(Class.class, (o, in) -> {
+                        try {
+                            return ClassAliasPool.CLASS_ALIASES.forName(in.text());
+                        } catch (ClassNotFoundException e) {
+                            throw new IORuntimeException(e);
+                        }
+                    });
+
+                case "java.lang.Boolean":
+                    return ScalarStrategy.of(Boolean.class, (o, in) -> in.bool());
+
+                case "java.lang.Byte":
+                    return ScalarStrategy.of(Byte.class, (o, in) -> in.int8());
+
+                case "java.lang.Short":
+                    return ScalarStrategy.of(Short.class, (o, in) -> in.int16());
+
+                case "java.lang.Character":
+                    return ScalarStrategy.of(Character.class, (o, in) -> {
+                        //noinspection unchecked
+                        final String text = in.text();
+                        if (text == null || text.length() == 0)
+                            return null;
+                        return text.charAt(0);
+                    });
+
+                case "java.lang.Integer":
+                    return ScalarStrategy.of(Integer.class, (o, in) -> in.int32());
+
+                case "java.lang.Float":
+                    return ScalarStrategy.of(Float.class, (o, in) -> in.float32());
+
+                case "java.lang.Long":
+                    return ScalarStrategy.of(Long.class, (o, in) -> in.int64());
+
+                case "java.lang.Double":
+                    return ScalarStrategy.of(Double.class, (o, in) -> in.float64());
+
+                case "java.time.LocalTime":
+                    return ScalarStrategy.of(LocalTime.class, (o, in) -> in.time());
+
+                case "java.time.LocalDate":
+                    return ScalarStrategy.of(LocalDate.class, (o, in) -> in.date());
+
+                case "java.time.LocalDateTime":
+                    return ScalarStrategy.of(LocalDateTime.class, (o, in) -> in.dateTime());
+
+                case "java.time.ZonedDateTime":
+                    return ScalarStrategy.of(ZonedDateTime.class, (o, in) -> in.zonedDateTime());
+
+                case "java.io.File":
+                    return ScalarStrategy.text(File.class, File::new);
+
+                case "java.util.UUID":
+                    return ScalarStrategy.of(UUID.class, (o, in) -> in.uuid());
+
+                case "java.math.BigInteger":
+                    return ScalarStrategy.text(BigInteger.class, BigInteger::new);
+
+                case "java.math.BigDecimal":
+                    return ScalarStrategy.text(BigDecimal.class, BigDecimal::new);
+
+                default:
+                    if (aClass.isArray()) {
+                        final Class componentType = aClass.getComponentType();
+                        if (componentType.isPrimitive())
+                            throw new UnsupportedOperationException();
+                        final Object[] empty = (Object[]) Array.newInstance(componentType, 0);
+                        return new ScalarStrategy<Object[]>(Object[].class, (o, in) -> {
+                            List list = new ArrayList();
+                            in.sequence(list, (l, vi) -> {
+                                while (vi.hasNextSequenceItem())
+                                    l.add(vi.object());
+                            });
+                            return list.toArray(empty);
+                        }) {
+                            @Override
+                            public Object[] newInstance(Class type) {
+                                return empty;
+                            }
+                        };
+                    }
+                    if (Enum.class.isAssignableFrom(aClass))
+                        return SerializationStrategies.ANY_SCALAR;
+                    return null;
+            }
+        }
+    }
+
+    static class SerializeMarshallables implements Function<Class, SerializationStrategy> {
+        @Override
+        public SerializationStrategy apply(Class aClass) {
+            if (ReadMarshallable.class.isAssignableFrom(aClass))
+                return SerializationStrategies.MARSHALLABLE;
+            if (Map.class.isAssignableFrom(aClass))
+                return SerializationStrategies.MAP;
+            if (Externalizable.class.isAssignableFrom(aClass))
+                return SerializationStrategies.EXTERNALIZABLE;
+            if (Serializable.class.isAssignableFrom(aClass))
+                return SerializationStrategies.ANY_NESTED;
+            return null;
+        }
     }
 }

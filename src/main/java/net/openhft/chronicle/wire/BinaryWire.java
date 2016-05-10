@@ -35,9 +35,11 @@ import java.io.Serializable;
 import java.nio.BufferUnderflowException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.*;
 
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
@@ -49,13 +51,17 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
  */
 public class BinaryWire extends AbstractWire implements Wire {
     private static final int END_OF_BYTES = -1;
+
+    static {
+        // make sure it has loaded.
+        WireInternal.INTERNER.valueCount();
+    }
+
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     private final FixedBinaryValueOut valueOut;
     private final BinaryValueIn valueIn = getBinaryValueIn();
-
     private final boolean numericFields;
-
     private final boolean fieldLess;
     private final int compressedSize;
     private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
@@ -238,6 +244,10 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     private boolean isFieldNext() {
         int peekCode = peekCode();
+        return isField(peekCode);
+    }
+
+    private boolean isField(int peekCode) {
         return peekCode == FIELD_NAME_ANY || (peekCode >= FIELD_NAME0 && peekCode <= FIELD_NAME31);
     }
 
@@ -470,8 +480,9 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
 
             case TIME:
-            case ZONED_DATE_TIME:
+            case DATE:
             case DATE_TIME:
+            case ZONED_DATE_TIME:
                 throw new UnsupportedOperationException();
 
             case TYPE_PREFIX: {
@@ -1214,7 +1225,14 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut date(@NotNull LocalDate localDate) {
-            writeCode(DATE_TIME).writeUtf8(localDate.toString());
+            writeCode(DATE).writeUtf8(localDate.toString());
+            return BinaryWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut dateTime(@NotNull LocalDateTime localDateTime) {
+            writeCode(DATE_TIME).writeUtf8(localDateTime.toString());
             return BinaryWire.this;
         }
 
@@ -1564,6 +1582,18 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         public ValueInState curr() {
             return stack.curr();
+        }
+
+        @Override
+        public boolean isNested() {
+            consumePadding();
+            switch (peekCode()) {
+                case BYTES_LENGTH16:
+                    return isField(bytes.readUnsignedByte(bytes.readPosition() + 2 + 1));
+                case BYTES_LENGTH32:
+                    return isField(bytes.readUnsignedByte(bytes.readPosition() + 4 + 1));
+            }
+            return false;
         }
 
         @NotNull
@@ -2053,7 +2083,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         public <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate) {
             consumePadding();
             int code = readCode();
-            if (code == DATE_TIME) {
+            if (code == DATE) {
                 StringBuilder sb = WireInternal.acquireStringBuilder();
                 bytes.readUtf8(sb);
                 tLocalDate.accept(t, LocalDate.parse(sb));
@@ -2072,6 +2102,18 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public boolean hasNextSequenceItem() {
             return bytes.readRemaining() > 0;
+        }
+
+        @Override
+        public UUID uuid() {
+            consumePadding();
+            int code = readCode();
+            if (code == UUID) {
+                return new UUID(bytes.readLong(), bytes.readLong());
+
+            } else {
+                throw cantRead(code);
+            }
         }
 
         @NotNull
@@ -2152,8 +2194,9 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public <T> WireIn sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
-            consumePadding();
+        public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
+            if (isNull())
+                return false;
             int code = readCode();
             if (code != BYTES_LENGTH32 && code != BYTES_LENGTH16)
                 cantRead(code);
@@ -2167,7 +2210,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 bytes.readLimit(limit);
                 bytes.readPosition(limit2);
             }
-            return BinaryWire.this;
+            return true;
         }
 
         @Override
@@ -2264,20 +2307,17 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public Class typePrefix() {
             StringBuilder sb = WireInternal.acquireStringBuilder();
-            int code = readCode();
+            int code = peekCode();
             if (code == TYPE_PREFIX) {
+                bytes.readSkip(1);
                 bytes.readUtf8(sb);
-
-            } else if (code == NULL) {
-                sb.setLength(0);
-                sb.append("!null");
             } else {
-                cantRead(code);
+                return null;
             }
             try {
                 return classLookup().forName(sb);
             } catch (ClassNotFoundException e) {
-                throw new IORuntimeException(e);
+                return null;
             }
         }
 
@@ -2307,7 +2347,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                 StringBuilder sb = WireInternal.acquireStringBuilder();
                 bytes.readUtf8(sb);
                 classNameConsumer.accept(t, sb);
-
+            } else if (code == NULL) {
+                classNameConsumer.accept(t, null);
             } else {
                 cantRead(code);
             }
@@ -2335,12 +2376,13 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireIn marshallable(@NotNull ReadMarshallable object) throws BufferUnderflowException, IORuntimeException {
+        public boolean marshallable(@NotNull ReadMarshallable object) throws BufferUnderflowException, IORuntimeException {
             return marshallable(object, true);
         }
 
-        public WireIn marshallable(@NotNull ReadMarshallable object, boolean overwrite) throws BufferUnderflowException, IORuntimeException {
-            consumePadding(true);
+        public boolean marshallable(@NotNull ReadMarshallable object, boolean overwrite) throws BufferUnderflowException, IORuntimeException {
+            if (this.isNull())
+                return false;
             pushState();
             long length = readLength();
             if (length >= 0) {
@@ -2361,11 +2403,21 @@ public class BinaryWire extends AbstractWire implements Wire {
             } else {
                 throw new IORuntimeException("Length unknown");
             }
-            return BinaryWire.this;
+            return true;
         }
 
-        public WireIn marshallable(@NotNull Serializable object) throws BufferUnderflowException, IORuntimeException {
+        public boolean isNull() {
             consumePadding(true);
+            if (peekCode() == NULL) {
+                bytes.readSkip(1);
+                return true;
+            }
+            return false;
+        }
+
+        public boolean marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
+            if (this.isNull())
+                return false;
             pushState();
             long length = readLength();
             if (length >= 0) {
@@ -2373,7 +2425,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 long limit2 = bytes.readPosition() + length;
                 bytes.readLimit(limit2);
                 try {
-                    readSerializable(object);
+                    strategy.readUsing(object, this);
 
                 } finally {
                     bytes.readLimit(limit);
@@ -2383,23 +2435,12 @@ public class BinaryWire extends AbstractWire implements Wire {
             } else {
                 throw new IORuntimeException("Length unknown");
             }
-            return BinaryWire.this;
-        }
-
-        private void readSerializable(@NotNull Serializable object) {
-            try {
-                if (object instanceof Externalizable) {
-                    ((Externalizable) object).readExternal(objectInput());
-                } else {
-                    Wires.readMarshallable(object, BinaryWire.this, true);
-                }
-            } catch (IOException | ClassNotFoundException e) {
-                throw new IORuntimeException(e);
-            }
+            return true;
         }
 
         public Demarshallable demarshallable(@NotNull Class clazz) throws BufferUnderflowException, IORuntimeException {
-            consumePadding(true);
+            if (this.isNull())
+                return null;
 
             long length = readLength();
             if (length >= 0) {
@@ -2536,7 +2577,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             int code = readCode();
             final double value = isText(code) ? readTextAsDouble() : readFloat0(code);
 
-            if (Double.isFinite(value) && (value > Float.MAX_VALUE || value < Float.MIN_VALUE))
+            if (Double.isFinite(value) && (value > Float.MAX_VALUE || value < -Float.MAX_VALUE))
                 throw new IllegalStateException("Cannot convert " + value + " to float");
 
             return (float) value;
@@ -2546,22 +2587,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         private RuntimeException cantRead(int code) {
             throw new UnsupportedOperationException(stringForCode(code));
         }
-
-        @Nullable
-        @Override
-        public <E> E object(@Nullable E using, @NotNull Class<E> clazz) {
-            return ObjectUtils.convertTo(clazz, object0(using, clazz));
-        }
-
-        @Nullable
-        @Override
-        public <T, E> WireIn object(@NotNull Class<E> clazz, T t, BiConsumer<T, E> e) {
-            final Object o = object0(null, clazz);
-            final E u = ObjectUtils.convertTo(clazz, o);
-            e.accept(t, u);
-            return BinaryWire.this;
-        }
-
+/*
         @Nullable
         Object object0(@Nullable Object using, @NotNull Class clazz) {
 
@@ -2597,19 +2623,19 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             } else if (Map.class.isAssignableFrom(clazz)) {
                 final Map result = new LinkedHashMap();
-                map(result);
+                marshallable(result, SerializationStrategies.MAP);
                 return result;
 
             } else if (byte[].class.isAssignableFrom(clazz)) {
                 return bytes();
 
             } else {
-                return object1(using, clazz);
+                return objectWithInferredType(using, clazz);
             }
-        }
+        }*/
 
-        @Nullable
-        private Object object1(@Nullable Object using, Class clazz) {
+        @Override
+        public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type) {
             int code = peekCode();
             if ((code & 0x80) == 0) {
                 bytes.readSkip(1);
@@ -2638,24 +2664,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                                 long lim = bytes.readLimit();
                                 try {
                                     bytes.readLimit(bytes.readPosition() + len);
-                                    if (isFieldNext()) {
-                                        if (Serializable.class.isAssignableFrom(clazz)) {
-                                            Serializable s = (Serializable) ObjectUtils.newInstance(clazz);
-                                            readSerializable(s);
-                                            return s;
-                                        }
-                                        return getValueOut().marshallable((Map) new LinkedHashMap<>());
-                                    } else {
-                                        if (Externalizable.class.isAssignableFrom(clazz)) {
-                                            Externalizable s = (Externalizable) ObjectUtils.newInstance(clazz);
-                                            readSerializable(s);
-                                            return s;
-                                        }
-                                        List list = new ArrayList<>();
-                                        while (bytes.readRemaining() > 0)
-                                            list.add(object(Object.class));
-                                        return list;
-                                    }
+                                    strategy.readUsing(using, this, type);
+
                                 } finally {
                                     bytes.readLimit(lim);
                                 }
@@ -2700,6 +2710,8 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                 case BinaryWireHighCode.INT:
                     bytes.readSkip(1);
+                    if (code == UUID)
+                        return new java.util.UUID(bytes.readLong(), bytes.readLong());
                     return readInt0object(code);
             }
             // assume it a String

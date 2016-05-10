@@ -226,9 +226,10 @@ public class CSVWire extends TextWire {
 
         @NotNull
         @Override
-        public WireIn marshallable(@NotNull ReadMarshallable object) {
+        public boolean marshallable(@NotNull ReadMarshallable object) {
+            if (isNull())
+                return false;
             pushState();
-            consumePadding();
             final long len = readLengthMarshallable();
 
             final long limit = bytes.readLimit();
@@ -248,7 +249,7 @@ public class CSVWire extends TextWire {
             }
 
             consumePadding();
-            return CSVWire.this;
+            return true;
         }
 
     }

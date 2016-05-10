@@ -64,7 +64,7 @@ public class WireCollection extends WireModel implements Marshallable {
         if (properties.size() > 0) {
             wire.write(ModelKeys.properties).marshallable(properties, WireProperty.class);
         }
-        if (collections.size() > 0) {
+        if (collections != null && collections.size() > 0) {
             wire.write(ModelKeys.collections).marshallable(collections, WireCollection.class, false);
         }
     }

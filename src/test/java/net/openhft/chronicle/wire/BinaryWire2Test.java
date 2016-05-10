@@ -197,7 +197,8 @@ public class BinaryWire2Test {
                 .write().object(WireType.TEXT)
                 .write().object(WireType.RAW);
 
-        assertEquals(WireType.BINARY, wire.read().object(Object.class));
+        assertEquals(WireType.BINARY, wire.read()
+                .object(Object.class));
         assertEquals(WireType.TEXT, wire.read().object(Object.class));
         assertEquals(WireType.RAW, wire.read().object(Object.class));
     }

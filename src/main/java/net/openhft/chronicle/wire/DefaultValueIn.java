@@ -302,10 +302,8 @@ public class DefaultValueIn implements ValueIn {
 
     @NotNull
     @Override
-    public <T> WireIn sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
-        assert wireKey.defaultValue() == null;
-        tReader.accept(t, this);
-        return wireIn();
+    public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
+        return false;
     }
 
     @Override
@@ -333,12 +331,10 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
-    @NotNull
     @Override
-    public WireIn marshallable(@NotNull ReadMarshallable object) throws BufferUnderflowException, IORuntimeException {
+    public boolean marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
         assert wireKey.defaultValue() == null;
-        object.readMarshallable(Wires.EMPTY);
-        return wireIn();
+        return false;
     }
 
     @Override
@@ -414,17 +410,19 @@ public class DefaultValueIn implements ValueIn {
         return (Class<T>) wireKey.defaultValue();
     }
 
-    @Nullable
     @Override
-    public <E> E object(@Nullable E using, @NotNull Class<E> clazz) {
-        return (E) wireKey.defaultValue();
+    public boolean isNested() {
+        return false;
     }
 
-    @Nullable
     @Override
-    public <T, E> WireIn object(@NotNull Class<E> clazz, T t, BiConsumer<T, E> e) {
-        e.accept(t, (E) wireKey.defaultValue());
-        return wireIn();
+    public boolean isNull() {
+        return wireKey.defaultValue() == null;
+    }
+
+    @Override
+    public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type) {
+        return wireKey.defaultValue();
     }
 
     @Override

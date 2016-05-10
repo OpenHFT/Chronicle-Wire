@@ -25,13 +25,17 @@ import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serializable;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.*;
+
+import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 
 /**
  * Read in data after reading a field.
@@ -39,7 +43,6 @@ import java.util.function.*;
 public interface ValueIn {
     Consumer<ValueIn> DISCARD = v -> {
     };
-    ThreadLocal<CharSequence> charSequenceThreadLocal = ThreadLocal.withInitial(StringBuilder::new);
 
     /*
      * Text / Strings.
@@ -148,6 +151,22 @@ public interface ValueIn {
     @NotNull
     <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate);
 
+    default LocalDate date() {
+        return LocalDate.parse(text());
+    }
+
+    default LocalTime time() {
+        return LocalTime.parse(text());
+    }
+
+    default LocalDateTime dateTime() {
+        return LocalDateTime.parse(text());
+    }
+
+    default ZonedDateTime zonedDateTime() {
+        return ZonedDateTime.parse(text());
+    }
+
     boolean hasNext();
 
     boolean hasNextSequenceItem();
@@ -174,7 +193,7 @@ public interface ValueIn {
     <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter);
 
     @NotNull
-    <T> WireIn sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader);
+    <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader);
 
     default <T> Set<T> set(Class<T> t) {
         return collection(LinkedHashSet::new, t);
@@ -221,14 +240,13 @@ public interface ValueIn {
     }
 
     default <V> Map<String, V> marshallableAsMap(Class<V> vClass, Map<String, V> map) {
-        marshallable(m -> {
+        return marshallable(m -> {
             StringBuilder sb = new StringBuilder();
             while (m.hasMore()) {
                 m.readEventName(sb)
                         .object(vClass, map, (map2, v) -> map2.put(sb.toString(), v));
             }
-        });
-        return map;
+        }) ? map : null;
     }
 
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
@@ -276,8 +294,15 @@ public interface ValueIn {
         });
     }
 
-    @NotNull
-    WireIn marshallable(@NotNull ReadMarshallable object) throws BufferUnderflowException, IORuntimeException;
+    boolean marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException;
+
+    default boolean marshallable(@NotNull Serializable object) throws BufferUnderflowException, IORuntimeException {
+        return marshallable(object, SerializationStrategies.SERIALIZABLE);
+    }
+
+    default boolean marshallable(@NotNull ReadMarshallable object) throws BufferUnderflowException, IORuntimeException {
+        return marshallable(object, SerializationStrategies.MARSHALLABLE);
+    }
 
     /**
      * reads the map from the wire
@@ -355,27 +380,67 @@ public interface ValueIn {
 
     @Nullable
     default <E> E object(@NotNull Class<E> clazz) {
-
-        if (clazz == CharSequence.class)
-            return object((E) charSequenceThreadLocal.get(), clazz);
-
         return object(null, clazz);
     }
 
     @Nullable
     default Object object() {
-        return object(charSequenceThreadLocal.get(), Object.class);
+        return objectWithInferredType(null, SerializationStrategies.ANY_OBJECT, null);
     }
 
     @Nullable
-    <E> E object(@Nullable E using, @NotNull Class<E> clazz);
+    default <E> E object(@Nullable E using, Class clazz) {
+        final Class clazz2 = typePrefix();
+        if (clazz2 == void.class) {
+            text();
+            return null;
+        }
+        if (clazz2 != null && (clazz == null || clazz.isAssignableFrom(clazz2) || ReadResolvable.class.isAssignableFrom(clazz2)))
+            clazz = clazz2;
+        if (clazz == null)
+            clazz = Object.class;
+        SerializationStrategy strategy = Wires.CLASS_STRATEGY.get(clazz);
+        Boolean brackets = strategy.inBrackets();
+        if (brackets == null)
+            brackets = isNested();
+
+        if (brackets) {
+            if (clazz == Object.class)
+                strategy = SerializationStrategies.MAP;
+            if (using == null)
+                using = (E) strategy.newInstance(clazz);
+
+            if (marshallable(using, strategy))
+                return readResolve(using);
+            else return null;
+
+        } else {
+            final E e = (E) strategy.readUsing(using, this);
+            return clazz.isInstance(e) ? e : (E) ObjectUtils.convertTo(clazz, e);
+        }
+    }
+
+    boolean isNested();
+
+    boolean isNull();
 
     @Nullable
-    <T, E> WireIn object(@NotNull Class<E> clazz, T t, BiConsumer<T, E> e);
+    default <T, E> WireIn object(@NotNull Class<E> clazz, T t, BiConsumer<T, E> e) {
+        e.accept(t, object(clazz));
+        return wireIn();
+    }
 
     boolean isTyped();
 
+    @Nullable
     Class typePrefix();
 
     void resetState();
+
+    @Nullable
+    Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type);
+
+    default UUID uuid() {
+        return UUID.fromString(text());
+    }
 }
