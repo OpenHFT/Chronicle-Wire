@@ -30,16 +30,15 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Externalizable;
 import java.io.File;
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
@@ -432,23 +431,10 @@ public enum Wires {
                         final Class componentType = aClass.getComponentType();
                         if (componentType.isPrimitive())
                             throw new UnsupportedOperationException();
-                        final Object[] empty = (Object[]) Array.newInstance(componentType, 0);
-                        return new ScalarStrategy<Object[]>(Object[].class, (o, in) -> {
-                            List list = new ArrayList();
-                            in.sequence(list, (l, vi) -> {
-                                while (vi.hasNextSequenceItem())
-                                    l.add(vi.object());
-                            });
-                            return list.toArray(empty);
-                        }) {
-                            @Override
-                            public Object[] newInstance(Class type) {
-                                return empty;
-                            }
-                        };
+                        return SerializationStrategies.ARRAY;
                     }
                     if (Enum.class.isAssignableFrom(aClass))
-                        return SerializationStrategies.ANY_SCALAR;
+                        return SerializationStrategies.ENUM;
                     return null;
             }
         }
@@ -457,10 +443,16 @@ public enum Wires {
     static class SerializeMarshallables implements Function<Class, SerializationStrategy> {
         @Override
         public SerializationStrategy apply(Class aClass) {
+            if (Demarshallable.class.isAssignableFrom(aClass))
+                return SerializationStrategies.DEMARSHALLABLE;
             if (ReadMarshallable.class.isAssignableFrom(aClass))
                 return SerializationStrategies.MARSHALLABLE;
             if (Map.class.isAssignableFrom(aClass))
                 return SerializationStrategies.MAP;
+            if (Set.class.isAssignableFrom(aClass))
+                return SerializationStrategies.SET;
+            if (List.class.isAssignableFrom(aClass))
+                return SerializationStrategies.LIST;
             if (Externalizable.class.isAssignableFrom(aClass))
                 return SerializationStrategies.EXTERNALIZABLE;
             if (Serializable.class.isAssignableFrom(aClass))

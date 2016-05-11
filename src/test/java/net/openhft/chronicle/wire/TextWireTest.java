@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.NoBytesStore;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -430,7 +429,7 @@ public class TextWireTest {
             assertEquals(e, sb.toString());
         });
 
-        assertEquals(1, bytes.readRemaining());
+        assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
@@ -697,20 +696,19 @@ public class TextWireTest {
         final Bytes bytes = nativeBytes();
         final Wire wire = new TextWire(bytes);
 
-        final Map<Marshallable, Marshallable> expected = new LinkedHashMap<>();
+        final Map<MyMarshallable, MyMarshallable> expected = new LinkedHashMap<>();
 
         expected.put(new MyMarshallable("aKey"), new MyMarshallable("aValue"));
         expected.put(new MyMarshallable("aKey2"), new MyMarshallable("aValue2"));
 
-        wire.writeDocument(false, o -> o.write(() -> "example").map(expected));
+        wire.writeDocument(false, o -> o.write(() -> "example").marshallable(expected, MyMarshallable.class, MyMarshallable.class, true));
 
         assertEquals("--- !!data\n" +
-                "example: !!seqmap [\n" +
-                "  { key: !net.openhft.chronicle.wire.TextWireTest$MyMarshallable { MyField: aKey },\n" +
-                "    value: !net.openhft.chronicle.wire.TextWireTest$MyMarshallable { MyField: aValue } },\n" +
-                "  { key: !net.openhft.chronicle.wire.TextWireTest$MyMarshallable { MyField: aKey2 },\n" +
-                "    value: !net.openhft.chronicle.wire.TextWireTest$MyMarshallable { MyField: aValue2 } }\n" +
-                "]\n", Wires.fromSizePrefixedBlobs(bytes));
+                        "example: {\n" +
+                        "  ? { MyField: aKey }: { MyField: aValue },\n" +
+                        "  ? { MyField: aKey2 }: { MyField: aValue2 }\n" +
+                        "}\n",
+                Wires.fromSizePrefixedBlobs(bytes));
         final Map<MyMarshallable, MyMarshallable> actual = new LinkedHashMap<>();
 
         wire.readDocument(null, c -> c.read(() -> "example")
@@ -1058,7 +1056,8 @@ public class TextWireTest {
                 "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         try (DocumentContext $ = wire.readingDocument()) {
-            DemarshallableObject dobj = wire.getValueIn().typedMarshallable();
+            DemarshallableObject dobj = wire.getValueIn()
+                    .typedMarshallable();
             assertEquals("test", dobj.name);
             assertEquals(12345, dobj.value);
         }
@@ -1110,50 +1109,36 @@ public class TextWireTest {
         wire.readDocument(null, w -> assertArrayEquals(four, (byte[]) w.read(() -> "four").object()));
     }
 
+    @Test
+    public void testObjectKeys() {
+        Map<MyMarshallable, String> map = new LinkedHashMap<>();
+        map.put(new MyMarshallable("key1"), "value1");
+        map.put(new MyMarshallable("key2"), "value2");
+
+        Wire wire = createWire();
+        final MyMarshallable parent = new MyMarshallable("parent");
+        wire.writeDocument(false, w -> w.writeEvent(MyMarshallable.class, parent).object(map));
+
+        assertEquals("--- !!data\n" +
+                        "? { MyField: parent }: {\n" +
+                        "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key1 }: value1,\n" +
+                        "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key2 }: value2\n" +
+                        "}\n"
+                , Wires.fromSizePrefixedBlobs(wire.bytes()));
+
+        wire.readDocument(null, w -> {
+            MyMarshallable mm = w.readEvent(MyMarshallable.class);
+            assertEquals(parent.toString(), mm.toString());
+            parent.equals(mm);
+            assertEquals(parent, mm);
+            final Map map2 = w.getValueIn()
+                    .object(Map.class);
+            assertEquals(map, map2);
+        });
+    }
+
     enum BWKey implements WireKey {
         field1, field2, field3
-
     }
 
-    class MyMarshallable implements Marshallable {
-
-        @Nullable
-        String someData;
-
-        public MyMarshallable(String someData) {
-            this.someData = someData;
-        }
-
-        @Override
-        public void writeMarshallable(@NotNull WireOut wire) {
-            wire.write(() -> "MyField").text(someData);
-        }
-
-        @Override
-        public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
-            someData = wire.read(() -> "MyField").text();
-        }
-
-        @Override
-        public boolean equals(@Nullable Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            MyMarshallable that = (MyMarshallable) o;
-
-            return !(someData != null ? !someData.equals(that.someData) : that.someData != null);
-
-        }
-
-        @Override
-        public int hashCode() {
-            return someData != null ? someData.hashCode() : 0;
-        }
-
-        @NotNull
-        @Override
-        public String toString() {
-            return "MyMarshable{" + "someData='" + someData + '\'' + '}';
-        }
-    }
 }

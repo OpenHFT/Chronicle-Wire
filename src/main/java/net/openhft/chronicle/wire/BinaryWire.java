@@ -128,113 +128,129 @@ public class BinaryWire extends AbstractWire implements Wire {
     @Override
     public void copyTo(@NotNull WireOut wire) {
         while (bytes.readRemaining() > 0) {
-            int peekCode = peekCode();
-            outerSwitch:
-            switch (peekCode >> 4) {
-                case BinaryWireHighCode.NUM0:
-                case BinaryWireHighCode.NUM1:
-                case BinaryWireHighCode.NUM2:
-                case BinaryWireHighCode.NUM3:
-                case BinaryWireHighCode.NUM4:
-                case BinaryWireHighCode.NUM5:
-                case BinaryWireHighCode.NUM6:
-                case BinaryWireHighCode.NUM7:
-                    bytes.readSkip(1);
-                    wire.getValueOut().uint8checked(peekCode);
-                    break;
+            copyOne(wire);
+        }
+    }
 
-                case BinaryWireHighCode.CONTROL:
-                    switch (peekCode) {
-                        case PADDING:
-                            bytes.readSkip(1);
-                            break outerSwitch;
-                        case PADDING32:
-                            bytes.readSkip(1);
-                            bytes.readSkip(bytes.readUnsignedInt());
-                            break outerSwitch;
-                        case BYTES_LENGTH16:
-                        case BYTES_LENGTH32:
-                            bytes.readSkip(1);
-                            int len = peekCode == BYTES_LENGTH16 ? bytes.readUnsignedShort() : bytes.readInt();
-                            long lim = bytes.readLimit();
-                            try {
-                                bytes.readLimit(bytes.readPosition() + len);
-                                if (isFieldNext())
-                                    wire.getValueOut().marshallable(w -> copyTo(w));
-                                else
-                                    wire.getValueOut().sequence(v -> copyTo(v.wireOut()));
-                            } finally {
-                                bytes.readLimit(lim);
-                            }
-                            break outerSwitch;
+    public void copyOne(@NotNull WireOut wire) {
+        int peekCode = peekCode();
+        outerSwitch:
+        switch (peekCode >> 4) {
+            case BinaryWireHighCode.NUM0:
+            case BinaryWireHighCode.NUM1:
+            case BinaryWireHighCode.NUM2:
+            case BinaryWireHighCode.NUM3:
+            case BinaryWireHighCode.NUM4:
+            case BinaryWireHighCode.NUM5:
+            case BinaryWireHighCode.NUM6:
+            case BinaryWireHighCode.NUM7:
+                bytes.readSkip(1);
+                wire.getValueOut().uint8checked(peekCode);
+                break;
 
-                        case U8_ARRAY:
-                            bytes.readSkip(1);
-                            wire.getValueOut().bytes(bytes);
-                            bytes.readPosition(bytes.readLimit());
-                            break outerSwitch;
+            case BinaryWireHighCode.CONTROL:
+                switch (peekCode) {
+                    case EVENT_OBJECT:
+                        bytes.readSkip(1);
+                        wire.startEvent();
+                        wire.getValueOut().leaf(true);
+                        consumePadding();
+                        peekCode = peekCode();
+                        if (peekCode == TYPE_PREFIX)
+                            copyOne(wire);
+                        copyOne(wire);
+                        wire.endEvent();
+                        break outerSwitch;
 
-                        case I64_ARRAY:
-                            bytes.readSkip(1);
-                            long len2 = bytes.readLong();
-                            long used = bytes.readLong();
-                            wire.getValueOut().sequence(o -> {
-                                wire.writeComment("length: " + len2 + ", used: " + used);
-                                for (long i = 0; i < len2; i++) {
-                                    long v = bytes.readLong();
-                                    if (i == used) {
-                                        o.leaf(true);
-                                    }
-                                    o.int64(v);
-                                }
-                            });
-
-                            break outerSwitch;
-                    }
-                    unknownCode(wire);
-                    break;
-
-                case BinaryWireHighCode.FLOAT:
-                    bytes.readSkip(1);
-                    try {
-                        Number d = readFloat0(peekCode);
-                        wire.getValueOut().object(d);
-                    } catch (Exception e) {
-                        unknownCode(wire);
-                    }
-                    break;
-
-                case BinaryWireHighCode.INT:
-                    bytes.readSkip(1);
-                    try {
-                        if (peekCode == INT64_0x) {
-                            wire.getValueOut().int64_0x(bytes.readLong());
-                        } else {
-                            Number l = readInt0object(peekCode);
-                            wire.getValueOut().object(l);
+                    case PADDING:
+                        bytes.readSkip(1);
+                        break outerSwitch;
+                    case PADDING32:
+                        bytes.readSkip(1);
+                        bytes.readSkip(bytes.readUnsignedInt());
+                        break outerSwitch;
+                    case BYTES_LENGTH16:
+                    case BYTES_LENGTH32:
+                        bytes.readSkip(1);
+                        int len = peekCode == BYTES_LENGTH16 ? bytes.readUnsignedShort() : bytes.readInt();
+                        long lim = bytes.readLimit();
+                        try {
+                            bytes.readLimit(bytes.readPosition() + len);
+                            if (isFieldNext())
+                                wire.getValueOut().marshallable(w -> copyTo(w));
+                            else
+                                wire.getValueOut().sequence(v -> copyTo(v.wireOut()));
+                        } finally {
+                            bytes.readLimit(lim);
                         }
-                    } catch (Exception e) {
-                        unknownCode(wire);
+                        break outerSwitch;
+
+                    case U8_ARRAY:
+                        bytes.readSkip(1);
+                        wire.getValueOut().bytes(bytes);
+                        bytes.readPosition(bytes.readLimit());
+                        break outerSwitch;
+
+                    case I64_ARRAY:
+                        bytes.readSkip(1);
+                        long len2 = bytes.readLong();
+                        long used = bytes.readLong();
+                        wire.getValueOut().sequence(o -> {
+                            wire.writeComment("length: " + len2 + ", used: " + used);
+                            for (long i = 0; i < len2; i++) {
+                                long v = bytes.readLong();
+                                if (i == used) {
+                                    o.leaf(true);
+                                }
+                                o.int64(v);
+                            }
+                        });
+
+                        break outerSwitch;
+                }
+                unknownCode(wire);
+                break;
+
+            case BinaryWireHighCode.FLOAT:
+                bytes.readSkip(1);
+                try {
+                    Number d = readFloat0(peekCode);
+                    wire.getValueOut().object(d);
+                } catch (Exception e) {
+                    unknownCode(wire);
+                }
+                break;
+
+            case BinaryWireHighCode.INT:
+                bytes.readSkip(1);
+                try {
+                    if (peekCode == INT64_0x) {
+                        wire.getValueOut().int64_0x(bytes.readLong());
+                    } else {
+                        Number l = readInt0object(peekCode);
+                        wire.getValueOut().object(l);
                     }
-                    break;
+                } catch (Exception e) {
+                    unknownCode(wire);
+                }
+                break;
 
-                case BinaryWireHighCode.SPECIAL:
-                    copySpecial(wire, peekCode);
-                    break;
+            case BinaryWireHighCode.SPECIAL:
+                copySpecial(wire, peekCode);
+                break;
 
-                case BinaryWireHighCode.FIELD0:
-                case BinaryWireHighCode.FIELD1:
-                    StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, WireInternal.acquireStringBuilder(), false);
-                    wire.write(() -> fsb);
-                    break;
+            case BinaryWireHighCode.FIELD0:
+            case BinaryWireHighCode.FIELD1:
+                StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, WireInternal.acquireStringBuilder(), false);
+                wire.write(() -> fsb);
+                break;
 
-                case BinaryWireHighCode.STR0:
-                case BinaryWireHighCode.STR1:
-                    bytes.readSkip(1);
-                    StringBuilder sb = readText(peekCode, WireInternal.acquireStringBuilder());
-                    wire.getValueOut().text(sb);
-                    break;
-            }
+            case BinaryWireHighCode.STR0:
+            case BinaryWireHighCode.STR1:
+                bytes.readSkip(1);
+                StringBuilder sb = readText(peekCode, WireInternal.acquireStringBuilder());
+                wire.getValueOut().text(sb);
+                break;
         }
     }
 
@@ -248,7 +264,9 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     private boolean isField(int peekCode) {
-        return peekCode == FIELD_NAME_ANY || (peekCode >= FIELD_NAME0 && peekCode <= FIELD_NAME31);
+        return peekCode == FIELD_NAME_ANY ||
+                peekCode == EVENT_OBJECT ||
+                (peekCode >= FIELD_NAME0 && peekCode <= FIELD_NAME31);
     }
 
     @NotNull
@@ -343,6 +361,66 @@ public class BinaryWire extends AbstractWire implements Wire {
         return readField(peekCode, key, name, true);
     }
 
+    @Override
+    public <K> K readEvent(Class<K> expectedClass) {
+        int peekCode = peekCode();
+        switch (peekCode >> 4) {
+            case BinaryWireHighCode.END_OF_STREAM:
+                return null;
+
+            case BinaryWireHighCode.CONTROL:
+            case BinaryWireHighCode.SPECIAL:
+                return readSpecialField(peekCode, expectedClass);
+
+            case BinaryWireHighCode.FIELD0:
+            case BinaryWireHighCode.FIELD1:
+                return readSmallField(peekCode, expectedClass);
+
+            default:
+                return null;
+        }
+    }
+
+
+    @NotNull
+    private <K> K readSmallField(int peekCode, Class<K> expectedClass) {
+        StringBuilder sb = Wires.acquireStringBuilder();
+        bytes.readSkip(1);
+        if (bytes.bytesStore() instanceof NativeBytesStore) {
+            AppendableUtil.parse8bit_SB1(bytes, sb, peekCode & 0x1f);
+        } else {
+            AppendableUtil.parse8bit(bytes, sb, peekCode & 0x1f);
+        }
+        return ObjectUtils.convertTo(expectedClass, WireInternal.INTERNER.intern(sb));
+    }
+
+    @Nullable
+    private <K> K readSpecialField(int peekCode, Class<K> expectedClass) {
+        switch (peekCode) {
+            case FIELD_NUMBER:
+                bytes.readSkip(1);
+                long fieldId = bytes.readStopBit();
+                return ObjectUtils.convertTo(expectedClass, fieldId);
+
+            case FIELD_NAME_ANY:
+            case EVENT_NAME:
+                StringBuilder sb = Wires.acquireStringBuilder();
+                bytes.readSkip(1);
+                bytes.read8bit(sb);
+                return ObjectUtils.convertTo(expectedClass, WireInternal.INTERNER.intern(sb));
+
+            case FIELD_ANCHOR:
+                bytes.readSkip(1);
+                throw new UnsupportedOperationException();
+
+            case EVENT_OBJECT:
+                bytes.readSkip(1);
+                return valueIn.object(expectedClass);
+        }
+
+        return null;
+    }
+
     public void consumePadding() {
         consumePadding(false);
     }
@@ -398,13 +476,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case BinaryWireHighCode.FIELD0:
             case BinaryWireHighCode.FIELD1:
-                bytes.readSkip(1);
-                if (bytes.bytesStore() instanceof NativeBytesStore) {
-                    AppendableUtil.parse8bit_SB1(bytes, sb, peekCode & 0x1f);
-                } else {
-                    AppendableUtil.parse8bit(bytes, sb, peekCode & 0x1f);
-                }
-                return sb;
+                return readSmallField(peekCode, sb);
             default:
                 if (missingOk)
                     // if it's not a field, perhaps none was written.
@@ -419,22 +491,37 @@ public class BinaryWire extends AbstractWire implements Wire {
         return null;
     }
 
+    @NotNull
+    private StringBuilder readSmallField(int peekCode, @NotNull StringBuilder sb) {
+        bytes.readSkip(1);
+        if (bytes.bytesStore() instanceof NativeBytesStore) {
+            AppendableUtil.parse8bit_SB1(bytes, sb, peekCode & 0x1f);
+        } else {
+            AppendableUtil.parse8bit(bytes, sb, peekCode & 0x1f);
+        }
+        return sb;
+    }
+
     @Nullable
     private StringBuilder readSpecialField(int peekCode, WireKey key, @NotNull StringBuilder sb) {
-        if (peekCode == FIELD_NUMBER) {
-            bytes.readSkip(1);
-            long fieldId = bytes.readStopBit();
-            return readFieldNumber(key, sb, fieldId);
+        switch (peekCode) {
+            case FIELD_NUMBER:
+                bytes.readSkip(1);
+                long fieldId = bytes.readStopBit();
+                return readFieldNumber(key, sb, fieldId);
+            case FIELD_NAME_ANY:
+            case EVENT_NAME:
+                bytes.readSkip(1);
+                bytes.read8bit(sb);
+                return sb;
+            case FIELD_ANCHOR:
+                bytes.readSkip(1);
+                return readFieldAnchor(sb);
+            case EVENT_OBJECT:
+                valueIn.text(sb);
+                return sb;
         }
-        if (peekCode == FIELD_NAME_ANY || peekCode == EVENT_NAME) {
-            bytes.readSkip(1);
-            bytes.read8bit(sb);
-            return sb;
-        }
-        if (peekCode == BinaryWireCode.FIELD_ANCHOR) {
-            bytes.readSkip(1);
-            return readFieldAnchor(sb);
-        }
+
         return null;
     }
 
@@ -510,6 +597,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case EVENT_NAME:
             case FIELD_NAME_ANY:
+            case EVENT_OBJECT:
                 StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, WireInternal.acquireStringBuilder(), false);
                 wire.write(() -> fsb);
                 break;
@@ -728,6 +816,16 @@ public class BinaryWire extends AbstractWire implements Wire {
     public ValueOut writeEventName(@NotNull CharSequence name) {
         writeCode(EVENT_NAME).write8bit(name);
         return valueOut;
+    }
+
+    @Override
+    public void startEvent() {
+        writeCode(EVENT_OBJECT);
+    }
+
+    @Override
+    public void endEvent() {
+
     }
 
     @NotNull
@@ -1361,7 +1459,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut map(Map map) {
-            throw new UnsupportedOperationException("todo");
+            return marshallable(map);
         }
 
         @NotNull
@@ -1585,15 +1683,15 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public boolean isNested() {
+        public BracketType getBracketType() {
             consumePadding();
             switch (peekCode()) {
                 case BYTES_LENGTH16:
-                    return isField(bytes.readUnsignedByte(bytes.readPosition() + 2 + 1));
+                    return isField(bytes.readUnsignedByte(bytes.readPosition() + 2 + 1)) ? BracketType.MAP : BracketType.SEQ;
                 case BYTES_LENGTH32:
-                    return isField(bytes.readUnsignedByte(bytes.readPosition() + 4 + 1));
+                    return isField(bytes.readUnsignedByte(bytes.readPosition() + 4 + 1)) ? BracketType.MAP : BracketType.SEQ;
             }
-            return false;
+            return BracketType.NONE;
         }
 
         @NotNull
@@ -2096,12 +2194,12 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         public boolean hasNext() {
-            throw new UnsupportedOperationException("todo");
+            return bytes.readRemaining() > 0;
         }
 
         @Override
         public boolean hasNextSequenceItem() {
-            return bytes.readRemaining() > 0;
+            return hasNext();
         }
 
         @Override
@@ -2415,7 +2513,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return false;
         }
 
-        public boolean marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
+        public boolean marshallable(Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
             if (this.isNull())
                 return false;
             pushState();
@@ -2645,7 +2743,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case BinaryWireHighCode.CONTROL:
                     switch (code) {
                         case BYTES_LENGTH16:
-                        case BYTES_LENGTH32:
+                        case BYTES_LENGTH32: {
                             if (using instanceof StringBuilder) {
                                 bytesStore((StringBuilder) using);
                                 return using;
@@ -2664,16 +2762,27 @@ public class BinaryWire extends AbstractWire implements Wire {
                                 long lim = bytes.readLimit();
                                 try {
                                     bytes.readLimit(bytes.readPosition() + len);
-                                    strategy.readUsing(using, this, type);
+                                    return strategy.readUsing(using, this, type);
 
                                 } finally {
                                     bytes.readLimit(lim);
                                 }
                             }
+                        }
 
                         case ANCHOR:
                         case UPDATED_ALIAS:
                             return typedMarshallable();
+
+                        case EVENT_OBJECT: {
+                            if (using == null) {
+                                strategy = SerializationStrategies.MAP;
+                                using = strategy.newInstance(null);
+                            }
+
+                            strategy.readUsing(using, valueIn);
+                            return ObjectUtils.convertTo(type, using);
+                        }
                     }
                     break;
                 case BinaryWireHighCode.SPECIAL:

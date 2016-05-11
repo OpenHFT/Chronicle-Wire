@@ -1,7 +1,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -149,7 +148,6 @@ class WireObjectInput implements ObjectInput {
         return readUTF();
     }
 
-    @NotNull
     @Override
     public String readUTF() throws IOException {
         if (wire.bytes().readRemaining() <= 0)

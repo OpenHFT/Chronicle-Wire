@@ -9,7 +9,7 @@ public interface SerializationStrategy<T> {
     }
 
     default T readUsing(T using, ValueIn in, Class<T> type) {
-        if (using == null)
+        if (using == null && type != null)
             using = newInstance(type);
         return readUsing(using, in);
     }
@@ -20,5 +20,5 @@ public interface SerializationStrategy<T> {
 
     Class<T> type();
 
-    Boolean inBrackets();
+    BracketType bracketType();
 }

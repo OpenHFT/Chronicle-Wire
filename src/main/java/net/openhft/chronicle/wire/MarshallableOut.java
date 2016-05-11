@@ -104,11 +104,9 @@ public interface MarshallableOut extends Closeable {
     /**
      * Write a Map as a marshallable
      */
-    default void writeMap(Map<String, ?> map) {
+    default void writeMap(Map<?, ?> map) {
         try (DocumentContext dc = writingDocument()) {
-            for (Map.Entry<String, ?> entry : map.entrySet()) {
-                dc.wire().writeEventName(entry::getKey).object(entry.getValue());
-            }
+            dc.wire().getValueOut().marshallable(map);
         }
     }
 

@@ -195,6 +195,10 @@ public interface ValueIn {
     @NotNull
     <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader);
 
+    default <T> boolean sequence(@NotNull T t, @NotNull SerializationStrategy<T> tReader) {
+        return sequence(t, tReader::readUsing);
+    }
+
     default <T> Set<T> set(Class<T> t) {
         return collection(LinkedHashSet::new, t);
     }
@@ -230,23 +234,23 @@ public interface ValueIn {
         return wireIn();
     }
 
-    default <V> Map<String, V> marshallableAsMap(Class<V> vClass) {
-        return marshallableAsMap(vClass, LinkedHashMap<String, V>::new);
+    default <K, V> Map<K, V> marshallableAsMap(Class<K> kClass, Class<V> vClass) {
+        return marshallableAsMap(kClass, vClass, new LinkedHashMap<>());
     }
 
-    default <V> Map<String, V> marshallableAsMap(Class<V> vClass, Supplier<Map<String, V>> supplier) {
-        Map<String, V> map = supplier.get();
-        return marshallableAsMap(vClass, map);
-    }
-
-    default <V> Map<String, V> marshallableAsMap(Class<V> vClass, Map<String, V> map) {
+    default <K, V> Map<K, V> marshallableAsMap(Class<K> kClass, Class<V> vClass, Map<K, V> map) {
         return marshallable(m -> {
-            StringBuilder sb = new StringBuilder();
-            while (m.hasMore()) {
-                m.readEventName(sb)
-                        .object(vClass, map, (map2, v) -> map2.put(sb.toString(), v));
-            }
+            readAllAsMap(kClass, vClass, map, m);
         }) ? map : null;
+    }
+
+    default <K, V> Map<K, V> readAllAsMap(Class<K> kClass, Class<V> vClass, Map<K, V> map, WireIn m) {
+        while (m.hasMore()) {
+            final K k = m.readEvent(kClass);
+            final V v = m.getValueIn().object(vClass);
+            map.put(k, v);
+        }
+        return map;
     }
 
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
@@ -294,7 +298,7 @@ public interface ValueIn {
         });
     }
 
-    boolean marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException;
+    boolean marshallable(Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException;
 
     default boolean marshallable(@NotNull Serializable object) throws BufferUnderflowException, IORuntimeException {
         return marshallable(object, SerializationStrategies.SERIALIZABLE);
@@ -330,7 +334,7 @@ public interface ValueIn {
     @Nullable
     <K, V> Map<K, V> map(@NotNull Class<K> kClazz,
                          @NotNull Class<V> vClass,
-                         @NotNull Map<K, V> usingMap);
+                         Map<K, V> usingMap);
 
     boolean bool();
 
@@ -400,27 +404,36 @@ public interface ValueIn {
         if (clazz == null)
             clazz = Object.class;
         SerializationStrategy strategy = Wires.CLASS_STRATEGY.get(clazz);
-        Boolean brackets = strategy.inBrackets();
-        if (brackets == null)
-            brackets = isNested();
+        BracketType brackets = strategy.bracketType();
+        if (brackets == BracketType.UNKNOWN)
+            brackets = getBracketType();
 
-        if (brackets) {
-            if (clazz == Object.class)
-                strategy = SerializationStrategies.MAP;
-            if (using == null)
-                using = (E) strategy.newInstance(clazz);
+        switch (brackets) {
+            case MAP:
+                if (clazz == Object.class)
+                    strategy = SerializationStrategies.MAP;
+                if (using == null)
+                    using = (E) strategy.newInstance(clazz);
 
-            if (marshallable(using, strategy))
-                return readResolve(using);
-            else return null;
+                return marshallable(using, strategy) ? readResolve(using) : null;
+            case SEQ:
+                if (clazz == Object.class)
+                    strategy = SerializationStrategies.LIST;
+                if (using == null)
+                    using = (E) strategy.newInstance(clazz);
 
-        } else {
-            final E e = (E) strategy.readUsing(using, this);
-            return clazz.isInstance(e) ? e : (E) ObjectUtils.convertTo(clazz, e);
+                return sequence(using, strategy) ? readResolve(using) : null;
+
+            case NONE:
+                final E e = (E) strategy.readUsing(using, this);
+                return clazz.isInstance(e) ? e : (E) ObjectUtils.convertTo(clazz, e);
+
+            default:
+                throw new AssertionError();
         }
     }
 
-    boolean isNested();
+    BracketType getBracketType();
 
     boolean isNull();
 

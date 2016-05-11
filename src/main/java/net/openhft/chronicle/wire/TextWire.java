@@ -48,7 +48,6 @@ import java.util.function.*;
 
 import static net.openhft.chronicle.bytes.BytesStore.empty;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
-import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 
 /**
  * YAML Based wire format
@@ -241,15 +240,17 @@ public class TextWire extends AbstractWire implements Wire {
     @NotNull
     protected StringBuilder readField(@NotNull StringBuilder sb) {
         consumePadding();
-        if (peekCode() == ',') {
-            bytes.readSkip(1);
-            consumePadding();
-        }
         try {
             int ch = peekCode();
             // 10xx xxxx, 1111 xxxx
             if (ch > 0x80 && ((ch & 0xC0) == 0x80 || (ch & 0xF0) == 0xF0)) {
                 throw new IllegalStateException("Attempting to read binary as TextWire ch=" + Integer.toHexString(ch));
+            }
+            if (ch == '?') {
+                bytes.readSkip(1);
+                consumePadding();
+                ch = peekCode();
+
             }
             if (ch == '"') {
                 bytes.readSkip(1);
@@ -259,7 +260,7 @@ public class TextWire extends AbstractWire implements Wire {
                 consumePadding();
                 ch = readCode();
                 if (ch != ':')
-                    throw new UnsupportedOperationException("Expected a : at " + bytes.toDebugString());
+                    throw new UnsupportedOperationException("Expected a : at " + bytes.toDebugString() + " was " + (char) ch);
 
             } else if (ch < 0) {
                 sb.setLength(0);
@@ -273,6 +274,54 @@ public class TextWire extends AbstractWire implements Wire {
         }
         //      consumePadding();
         return sb;
+    }
+
+    @Override
+    public <K> K readEvent(Class<K> expectedClass) {
+        consumePadding(0);
+        StringBuilder sb = acquireStringBuilder();
+        try {
+            int ch = peekCode();
+            // 10xx xxxx, 1111 xxxx
+            if (ch > 0x80 && ((ch & 0xC0) == 0x80 || (ch & 0xF0) == 0xF0)) {
+                throw new IllegalStateException("Attempting to read binary as TextWire ch=" + Integer.toHexString(ch));
+
+            } else if (ch == '?') {
+                bytes.readSkip(1);
+                consumePadding();
+                final K object = valueIn.object(expectedClass);
+                consumePadding();
+                ch = readCode();
+                if (ch != ':')
+                    throw new IllegalStateException("Unexpected character after field " + ch + " '" + (char) ch + "'");
+                return object;
+
+            } else if (ch == '"') {
+                bytes.readSkip(1);
+
+                parseUntil(sb, getEscapingQuotes());
+
+                consumePadding(1);
+                ch = readCode();
+                if (ch != ':')
+                    throw new UnsupportedOperationException("Expected a : at " + bytes.toDebugString());
+
+            } else if (ch < 0) {
+                sb.setLength(0);
+                return null;
+
+            } else {
+                parseUntil(sb, getEscapingEndOfText());
+            }
+            unescape(sb);
+        } catch (BufferUnderflowException ignored) {
+        }
+        //      consumePadding();
+        return toExpected(expectedClass, sb);
+    }
+
+    private <K> K toExpected(Class<K> expectedClass, StringBuilder sb) {
+        return ObjectUtils.convertTo(expectedClass, WireInternal.INTERNER.intern(sb));
     }
 
     @NotNull
@@ -297,14 +346,25 @@ public class TextWire extends AbstractWire implements Wire {
         return sct;
     }
 
+    @Override
     public void consumePadding() {
+        consumePadding(0);
+    }
+
+    public void consumePadding(int commas) {
         for (; ; ) {
             int codePoint = peekCode();
             if (codePoint == '#') {
                 //noinspection StatementWithEmptyBody
                 while (readCode() >= ' ') ;
                 this.lineStart = bytes.readPosition();
-            } else if (Character.isWhitespace(codePoint) || codePoint == ',') {
+            } else if (codePoint == ',') {
+                if (commas-- <= 0)
+                    return;
+                bytes.readSkip(1);
+                if (commas == 0)
+                    return;
+            } else if (Character.isWhitespace(codePoint)) {
                 if (codePoint == '\n' || codePoint == '\r')
                     this.lineStart = bytes.readPosition() + 1;
                 bytes.readSkip(1);
@@ -384,7 +444,7 @@ public class TextWire extends AbstractWire implements Wire {
             curr.addUnexpected(position);
             long toSkip = valueIn.readLengthMarshallable();
             bytes.readSkip(toSkip);
-            consumePadding();
+            consumePadding(1);
         }
 
         return read2(key, curr, sb, name);
@@ -468,6 +528,16 @@ public class TextWire extends AbstractWire implements Wire {
     @Override
     public ValueOut write(@NotNull CharSequence name) {
         return valueOut.write(name);
+    }
+
+    @Override
+    public ValueOut writeEvent(Class expectedType, Object eventKey) {
+        if (eventKey instanceof WireKey)
+            return writeEventName((WireKey) eventKey);
+        if (eventKey instanceof CharSequence)
+            return writeEventName((CharSequence) eventKey);
+        valueOut.leaf(true);
+        return valueOut.write(expectedType, eventKey);
     }
 
     @NotNull
@@ -651,7 +721,7 @@ public class TextWire extends AbstractWire implements Wire {
             case '[':
                 return readList();
             case '{':
-                return readMap(null);
+                return valueIn.marshallableAsMap(Object.class, Object.class);
             case '!':
                 return readTypedObject();
             default:
@@ -688,35 +758,17 @@ public class TextWire extends AbstractWire implements Wire {
                 if (e != NoObject.NO_OBJECT)
                     objects.add(e);
             }
-            consumePadding();
+            consumePadding(1);
         }
 
         return objects;
     }
 
-    Map readMap(Class valueType) {
-        bytes.readSkip(1);
-        Map map = new LinkedHashMap<>();
-        StringBuilder sb = WireInternal.acquireAnotherStringBuilder(acquireStringBuilder());
-        while (bytes.readRemaining() > 0) {
-            consumePadding();
-            if (peekCode() == '}') {
-                bytes.readSkip(1);
-                break;
-            }
-            read(sb);
-            String key = WireInternal.INTERNER.intern(sb);
-            Object value = valueIn.objectWithInferredType(null, SerializationStrategies.ANY_OBJECT, valueType);
-            map.put(key, value);
-        }
-        return map;
-    }
-
     private Map readMap(int indentation, Class valueType) {
         Map map = new LinkedHashMap<>();
         StringBuilder sb = WireInternal.acquireAnotherStringBuilder(acquireStringBuilder());
+        consumePadding();
         while (bytes.readRemaining() > 0) {
-            consumePadding();
             if (indentation() < indentation || bytes.readRemaining() == 0)
                 break;
             read(sb);
@@ -725,6 +777,7 @@ public class TextWire extends AbstractWire implements Wire {
                 break;
             Object value = valueIn.objectWithInferredType(null, SerializationStrategies.ANY_OBJECT, valueType);
             map.put(key, value);
+            consumePadding(1);
         }
         return map;
     }
@@ -746,8 +799,7 @@ public class TextWire extends AbstractWire implements Wire {
     }
 
     private void writeObject(Object o, int indentation) {
-        bytes.writeUnsignedByte('-');
-        bytes.writeUnsignedByte(' ');
+        writeTwo('-', ' ');
         indentation(indentation - 2);
         valueOut.object(o);
     }
@@ -755,6 +807,21 @@ public class TextWire extends AbstractWire implements Wire {
     private void indentation(int indentation) {
         while (indentation-- > 0)
             bytes.writeUnsignedByte(' ');
+    }
+
+    public void startEvent() {
+        valueOut.prependSeparator();
+        writeTwo('?', ' ');
+    }
+
+    @Override
+    public void endEvent() {
+        valueOut.endEvent();
+    }
+
+    void writeTwo(char ch1, char ch2) {
+        bytes.writeUnsignedByte(ch1);
+        bytes.writeUnsignedByte(ch2);
     }
 
     enum NoObject {NO_OBJECT}
@@ -1322,51 +1389,8 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut map(@NotNull final Map map) {
-            if (allStringKeys(map))
-                stringKeys(map);
-            else
-                objectKeys(map);
+            marshallable(map, Object.class, Object.class, false);
             return TextWire.this;
-        }
-
-        private boolean allStringKeys(Map map) {
-            for (Object o : map.keySet()) {
-                if (!(o instanceof String))
-                    return false;
-            }
-            return true;
-        }
-
-        private void stringKeys(Map map) {
-            marshallable(map, Object.class, false);
-        }
-
-        private void objectKeys(@NotNull Map map) {
-            typePrefix(SEQ_MAP);
-            bytes.writeUnsignedByte('[');
-            pushState();
-            endField();
-            map.forEach((k, v) -> {
-                prependSeparator();
-                append("{ key: ");
-                leaf();
-                object2(k);
-                leaf = false;
-                elementSeparator();
-                prependSeparator();
-                append("  value: ");
-                leaf();
-                object2(v);
-                leaf = false;
-                bytes.writeUnsignedByte(' ');
-                bytes.writeUnsignedByte('}');
-                elementSeparator();
-            });
-            popState();
-            endField();
-            prependSeparator();
-            bytes.writeUnsignedByte(']');
-            endField();
         }
 
         protected void endField() {
@@ -1395,17 +1419,14 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         protected void fieldValueSeperator() {
-            bytes.writeUnsignedByte(':');
-            bytes.writeUnsignedByte(' ');
+            writeTwo(':', ' ');
         }
 
         @NotNull
         public ValueOut write() {
             append(sep);
-            bytes.writeUnsignedByte('"');
-            bytes.writeUnsignedByte('"');
-            fieldValueSeperator();
-            sep = empty();
+            writeTwo('"', '"');
+            endEvent();
             return this;
         }
 
@@ -1422,11 +1443,25 @@ public class TextWire extends AbstractWire implements Wire {
             return this;
         }
 
+        public ValueOut write(Class expectedType, @NotNull Object objectKey) {
+            prependSeparator();
+            startEvent();
+            object(expectedType, objectKey);
+            endEvent();
+            return this;
+        }
+
+        public void endEvent() {
+            if (bytes.readByte(bytes.writePosition() - 1) <= ' ')
+                bytes.writeSkip(-1);
+            fieldValueSeperator();
+            sep = empty();
+        }
+
         public void writeComment(@NotNull CharSequence s) {
             prependSeparator();
             append(sep);
-            bytes.writeUnsignedByte('#');
-            bytes.writeUnsignedByte(' ');
+            writeTwo('#', ' ');
             append(s);
             bytes.writeUnsignedByte('\n');
             sep = EMPTY_AFTER_COMMENT;
@@ -1487,9 +1522,16 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public boolean isNested() {
+        public BracketType getBracketType() {
             consumePadding();
-            return peekCode() == '{';
+            switch (peekCode()) {
+                case '{':
+                    return BracketType.MAP;
+                case '[':
+                    return BracketType.SEQ;
+                default:
+                    return BracketType.NONE;
+            }
         }
 
         @Nullable
@@ -1514,32 +1556,14 @@ public class TextWire extends AbstractWire implements Wire {
                     return a;
 
                 }
-                case '"': {
-                    bytes.readSkip(1);
-                    if (use8bit)
-                        bytes.parse8bit(a, getEscapingQuotes());
-                    else
-                        bytes.parseUtf8(a, getEscapingQuotes());
-                    unescape(a);
-                    int code = peekCode();
-                    if (code == '"')
-                        readCode();
+                case '"':
+                    readText(a, getEscapingQuotes());
                     break;
 
-                }
-                case '\'': {
-                    bytes.readSkip(1);
-                    if (use8bit)
-                        bytes.parse8bit(a, getEscapingSingleQuotes());
-                    else
-                        bytes.parseUtf8(a, getEscapingSingleQuotes());
-                    unescape(a);
-                    int code = peekCode();
-                    if (code == '\'')
-                        readCode();
+                case '\'':
+                    readText(a, getEscapingSingleQuotes());
                     break;
 
-                }
                 case '!': {
                     bytes.readSkip(1);
                     StringBuilder sb = acquireStringBuilder();
@@ -1593,6 +1617,16 @@ public class TextWire extends AbstractWire implements Wire {
             if (prev == ':' || prev == '#' || prev == '}')
                 bytes.readSkip(-1);
             return ret;
+        }
+
+        private <ACS extends Appendable & CharSequence> void readText(@NotNull ACS a, StopCharTester quotes) {
+            bytes.readSkip(1);
+            if (use8bit)
+                bytes.parse8bit(a, quotes);
+            else
+                bytes.parseUtf8(a, quotes);
+            unescape(a);
+            consumePadding(1);
         }
 
         protected int peekBack() {
@@ -1709,7 +1743,6 @@ public class TextWire extends AbstractWire implements Wire {
 
         @Override
         public long readLength() {
-            consumePadding();
             long start = bytes.readPosition();
             try {
                 consumePadding();
@@ -1946,9 +1979,7 @@ public class TextWire extends AbstractWire implements Wire {
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
-            consumePadding();
-            if (peekCode() == ',')
-                bytes.readSkip(1);
+            consumePadding(1);
             return TextWire.this;
         }
 
@@ -1972,9 +2003,7 @@ public class TextWire extends AbstractWire implements Wire {
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
-            consumePadding();
-            if (peekCode() == ',')
-                bytes.readSkip(1);
+            consumePadding(1);
             return TextWire.this;
         }
 
@@ -1999,10 +2028,11 @@ public class TextWire extends AbstractWire implements Wire {
 
             tReader.accept(t, TextWire.this.valueIn);
 
-            consumePadding();
+            consumePadding(1);
             code = (char) readCode();
             if (code != ']')
                 throw new IORuntimeException("Expected a ] but got " + code + " (" + code + ")");
+            consumePadding(1);
             return true;
         }
 
@@ -2046,7 +2076,7 @@ public class TextWire extends AbstractWire implements Wire {
             } finally {
                 bytes.readLimit(limit);
 
-                consumePadding();
+                consumePadding(1);
                 code = readCode();
                 popState();
                 if (code != '}')
@@ -2172,12 +2202,13 @@ public class TextWire extends AbstractWire implements Wire {
                 popState();
             }
 
-            consumePadding();
+            consumePadding(1);
             code = readCode();
             if (code != '}')
                 throw new IORuntimeException("Unterminated { while reading marshallable " +
                         object + ",code='" + (char) code + "', bytes=" + Bytes.toString(bytes, 1024)
                 );
+            consumePadding(1);
             return true;
         }
 
@@ -2213,7 +2244,7 @@ public class TextWire extends AbstractWire implements Wire {
                 popState();
             }
 
-            consumePadding();
+            consumePadding(1);
             code = readCode();
             if (code != '}')
                 throw new IORuntimeException("Unterminated { while reading marshallable " +
@@ -2225,80 +2256,29 @@ public class TextWire extends AbstractWire implements Wire {
 
         @Nullable
         public <T> T typedMarshallable() {
-
-            try {
-                consumePadding();
-                int code = peekCode();
-                if (code < 0)
-                    throw new IllegalStateException("Cannot read as a ReadMarshallable " +
-                            "" + bytes.toDebugString());
-                StringBuilder sb = acquireStringBuilder();
-                if (code != '!')
-                    throw new ClassCastException("Cannot convert to ReadMarshallable. " + bytes.toDebugString());
-
-                readCode();
-                parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
-
-                if (StringUtils.isEqual(sb, "!null")) {
-                    text();
-                    return null;
-                }
-
-                if (StringUtils.isEqual(sb, "!binary")) {
-                    bytesStore();
-                    return null;
-                }
-
-                // its possible that the object that you are allocating may not have a
-                // default constructor
-                final Class clazz = classLookup().forName(sb);
-
-                if (ReadMarshallable.class.isAssignableFrom(clazz)) {
-
-                    Class<ReadMarshallable> clazz1 = (Class<ReadMarshallable>) clazz;
-                    final ReadMarshallable m = ObjectUtils.newInstance(clazz1);
-
-                    marshallable(m);
-                    return readResolve(m);
-
-                } else if (Demarshallable.class.isAssignableFrom(clazz)) {
-
-                    return (T) demarshallable(clazz);
-
-                } else if (Externalizable.class.isAssignableFrom(clazz)) {
-                    Class<Externalizable> clazz1 = (Class<Externalizable>) clazz;
-                    final Externalizable m = ObjectUtils.newInstance(clazz1);
-                    m.readExternal(objectInput());
-                    return readResolve(m);
-
-                } else if (Serializable.class.isAssignableFrom(clazz)) {
-                    Class<Serializable> clazz1 = (Class<Serializable>) clazz;
-                    final Serializable m = ObjectUtils.newInstance(clazz1);
-                    object(m, clazz1);
-                    return readResolve(m);
-
-                } else {
-                    throw new ClassCastException("Cannot convert " + sb + " to ReadMarshallable.");
-                }
-            } catch (Exception e) {
-                throw new IORuntimeException(e);
-            }
+            return (T) objectWithInferredType(null, SerializationStrategies.ANY_NESTED, null);
         }
 
         @Nullable
         @Override
-        public <K, V> Map<K, V> map(@NotNull final Class<K> kClazz,
+        public <K, V> Map<K, V> map(@NotNull final Class<K> kClass,
                                     @NotNull final Class<V> vClass,
-                                    @NotNull final Map<K, V> usingMap) {
+                                    Map<K, V> usingMap) {
             consumePadding();
-            usingMap.clear();
+            if (usingMap == null)
+                usingMap = new LinkedHashMap<>();
+            else
+                usingMap.clear();
 
             StringBuilder sb = acquireStringBuilder();
             int code = peekCode();
-            if (code == '!') {
-                return typedMap(kClazz, vClass, usingMap, sb);
-            } else if (code == '{') {
-                return marshallableAsMap(Object.class, () -> (Map) usingMap);
+            switch (code) {
+                case '!':
+                    return typedMap(kClass, vClass, usingMap, sb);
+                case '{':
+                    return marshallableAsMap(kClass, vClass, usingMap);
+                case '?':
+                    return readAllAsMap(kClass, vClass, usingMap, wireIn());
             }
             return usingMap;
         }
@@ -2451,68 +2431,12 @@ public class TextWire extends AbstractWire implements Wire {
             return false;
         }
 
-        @Nullable
-        Object object0(@Nullable Object using, @NotNull Class clazz) {
-            consumePadding();
-
-            if (isNull())
-                return null;
-
-
-            if (BytesStore.class.isAssignableFrom(clazz))
-                return Bytes.wrapForRead(bytes());
-
-            if (Demarshallable.class.isAssignableFrom(clazz))
-                return Demarshallable.newInstance(clazz, wireIn());
-
-            if (Externalizable.class.isAssignableFrom(clazz)) {
-                final Object v;
-                if (using == null)
-                    v = ObjectUtils.newInstance(clazz);
-                else
-                    v = using;
-
-                try {
-                    ((Externalizable) v).readExternal(objectInput());
-                } catch (IOException | ClassNotFoundException e) {
-                    throw new IORuntimeException(e);
-                }
-                return readResolve(v);
-
-            }
-            if (ReadMarshallable.class.isAssignableFrom(clazz)) {
-                final Object v;
-                if (using == null)
-                    v = ObjectUtils.newInstance(clazz);
-                else
-                    v = using;
-
-                valueIn.marshallable((ReadMarshallable) v);
-                return readResolve(v);
-
-            }
-            if (Serializable.class.isAssignableFrom(clazz) && !clazz.getName().startsWith("java")) {
-                final Object v;
-                if (using == null)
-                    v = ObjectUtils.newInstance(clazz);
-                else
-                    v = using;
-
-                valueIn.marshallable((Serializable) v);
-                return readResolve(v);
-
-            }
-            if (CharSequence.class.isAssignableFrom(clazz))
-                //noinspection unchecked
-                return valueIn.text();
-
-            throw new AssertionError();
-        }
-
         public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) {
             consumePadding();
             int code = peekCode();
             switch (code) {
+                case '?':
+                    return map(Object.class, Object.class, (Map) using);
                 case '!':
                     return object(using, type);
                 case '-':
@@ -2522,7 +2446,7 @@ public class TextWire extends AbstractWire implements Wire {
                 case '[':
                     return readSequence(strategy.type());
                 case '{':
-                    return readMap(null);
+                    return valueIn.marshallableAsMap(Object.class, Object.class);
                 case '0':
                 case '1':
                 case '2':

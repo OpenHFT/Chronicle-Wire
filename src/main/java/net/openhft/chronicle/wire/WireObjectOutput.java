@@ -3,6 +3,8 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 
 import java.io.ObjectOutput;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by peter on 09/05/16.
@@ -16,7 +18,12 @@ class WireObjectOutput implements ObjectOutput {
 
     @Override
     public void writeObject(Object obj) {
-        wire.getValueOut().object(obj);
+        final ValueOut valueOut = wire.getValueOut();
+        if (obj instanceof Map)
+            valueOut.typePrefix(Map.class);
+        else if (obj instanceof List)
+            valueOut.typePrefix(List.class);
+        valueOut.object(obj);
     }
 
     @Override

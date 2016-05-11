@@ -138,6 +138,11 @@ public class RawWire extends AbstractWire implements Wire {
         return valueIn;
     }
 
+    @Override
+    public <K> K readEvent(Class<K> expectedClass) {
+        return (K) valueIn.object(expectedClass);
+    }
+
     @NotNull
     @Override
     public ValueIn read(@NotNull StringBuilder name) {
@@ -206,6 +211,16 @@ public class RawWire extends AbstractWire implements Wire {
         else
             bytes.writeUtf8(name);
         return valueOut;
+    }
+
+    @Override
+    public void startEvent() {
+
+    }
+
+    @Override
+    public void endEvent() {
+
     }
 
     @NotNull
@@ -1029,7 +1044,7 @@ public class RawWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public boolean isNested() {
+        public BracketType getBracketType() {
             throw new IllegalArgumentException("Only scalar or nested types supported");
         }
 

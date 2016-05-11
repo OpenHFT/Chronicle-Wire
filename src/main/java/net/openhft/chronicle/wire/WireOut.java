@@ -48,6 +48,16 @@ public interface WireOut extends WireCommon {
         return write(key);
     }
 
+    default ValueOut writeEvent(Class expectedType, Object eventKey) {
+        if (eventKey instanceof WireKey)
+            return writeEventName((WireKey) eventKey);
+        if (eventKey instanceof CharSequence)
+            return writeEventName((CharSequence) eventKey);
+        startEvent();
+        getValueOut().object(expectedType, eventKey);
+        return getValueOut();
+    }
+
     /**
      * Write a key for wires that support fields.
      */
@@ -193,4 +203,12 @@ public interface WireOut extends WireCommon {
      */
 
     void writeEndOfWire(long timeout, TimeUnit timeUnit) throws TimeoutException;
+
+    /**
+     * Start an event object, mostly for internal use.
+     */
+    void startEvent();
+
+    void endEvent();
+
 }

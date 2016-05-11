@@ -1,19 +1,21 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
+import net.openhft.chronicle.core.util.ReadResolvable;
 
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * Created by peter on 10/05/16.
  */
-public enum SerializationStrategies implements SerializationStrategy<Object> {
+public enum SerializationStrategies implements SerializationStrategy {
     MARSHALLABLE {
         @Override
         public Object readUsing(Object o, ValueIn in) {
@@ -38,8 +40,8 @@ public enum SerializationStrategies implements SerializationStrategy<Object> {
         }
 
         @Override
-        public Boolean inBrackets() {
-            return null;
+        public BracketType bracketType() {
+            return BracketType.UNKNOWN;
         }
     },
 
@@ -55,8 +57,24 @@ public enum SerializationStrategies implements SerializationStrategy<Object> {
         }
 
         @Override
-        public Boolean inBrackets() {
-            return false;
+        public BracketType bracketType() {
+            return BracketType.NONE;
+        }
+    },
+    ENUM {
+        @Override
+        public Object readUsing(Object o, ValueIn in) {
+            return in.objectWithInferredType(o, ANY_NESTED, null);
+        }
+
+        @Override
+        public Class type() {
+            return Enum.class;
+        }
+
+        @Override
+        public BracketType bracketType() {
+            return BracketType.NONE;
         }
     },
     ANY_NESTED {
@@ -71,9 +89,24 @@ public enum SerializationStrategies implements SerializationStrategy<Object> {
             return Object.class;
         }
 
+
+    },
+    DEMARSHALLABLE {
         @Override
-        public Boolean inBrackets() {
-            return true;
+        public Object readUsing(Object using, ValueIn in) {
+            final DemarshallableWrapper wrapper = (DemarshallableWrapper) using;
+            wrapper.demarshallable = Demarshallable.newInstance(wrapper.type, in.wireIn());
+            return wrapper;
+        }
+
+        @Override
+        public Class type() {
+            return Demarshallable.class;
+        }
+
+        @Override
+        public Object newInstance(Class type) {
+            return new DemarshallableWrapper(type);
         }
     },
     SERIALIZABLE {
@@ -110,19 +143,18 @@ public enum SerializationStrategies implements SerializationStrategy<Object> {
     MAP {
         @Override
         public Object readUsing(Object o, ValueIn in) {
-            Map<String, Object> map = (Map<String, Object>) o;
-            final StringBuilder sb = Wires.acquireStringBuilder();
-            long pos = in.wireIn().bytes().readPosition();
+            Map<Object, Object> map = (Map<Object, Object>) o;
+            final WireIn wireIn = in.wireIn();
+            long pos = wireIn.bytes().readPosition();
             while (in.hasNext()) {
-                in.wireIn().readEventName(sb);
-                String key = WireInternal.INTERNER.intern(sb);
+                Object key = wireIn.readEvent(Object.class);
                 map.put(key, in.object());
 
                 // make sure we are progressing.
-                long pos2 = in.wireIn().bytes().readPosition();
+                long pos2 = wireIn.bytes().readPosition();
                 if (pos2 <= pos)
                     if (!Jvm.isDebug())
-                        throw new IllegalStateException();
+                        throw new IllegalStateException(wireIn.bytes().toDebugString());
                 pos = pos2;
             }
             return o;
@@ -137,6 +169,103 @@ public enum SerializationStrategies implements SerializationStrategy<Object> {
         public Class type() {
             return Map.class;
         }
+    },
+    SET {
+        @Override
+        public Object readUsing(Object o, ValueIn in) {
+            Set<Object> set = (Set<Object>) o;
+            final WireIn wireIn = in.wireIn();
+            final Bytes<?> bytes = wireIn.bytes();
+            long pos = bytes.readPosition();
+            while (in.hasNextSequenceItem()) {
+                final Object object = in.object();
+                set.add(object);
+
+                // make sure we are progressing.
+                long pos2 = bytes.readPosition();
+                if (pos2 <= pos)
+                    if (!Jvm.isDebug())
+                        throw new IllegalStateException(bytes.toDebugString());
+                pos = pos2;
+            }
+            return o;
+        }
+
+        @Override
+        public Object newInstance(Class type) {
+            return new LinkedHashSet<>();
+        }
+
+        @Override
+        public Class type() {
+            return Set.class;
+        }
+
+        @Override
+        public BracketType bracketType() {
+            return BracketType.SEQ;
+        }
+    },
+    LIST {
+        @Override
+        public Object readUsing(Object o, ValueIn in) {
+            List<Object> list = (List<Object>) o;
+            final WireIn wireIn = in.wireIn();
+            long pos = wireIn.bytes().readPosition();
+            while (in.hasNextSequenceItem()) {
+                list.add(in.object());
+
+                // make sure we are progressing.
+                long pos2 = wireIn.bytes().readPosition();
+                if (pos2 <= pos)
+                    if (!Jvm.isDebug())
+                        throw new IllegalStateException(wireIn.bytes().toDebugString());
+                pos = pos2;
+            }
+            return o;
+        }
+
+        @Override
+        public Object newInstance(Class type) {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public Class type() {
+            return List.class;
+        }
+
+        @Override
+        public BracketType bracketType() {
+            return BracketType.SEQ;
+        }
+    },
+    ARRAY {
+        @Override
+        public Object readUsing(Object using, ValueIn in) {
+            ArrayWrapper wrapper = (ArrayWrapper) using;
+            final Class componentType = wrapper.type.getComponentType();
+            List list = new ArrayList<>();
+            while (in.hasNextSequenceItem())
+                list.add(in.object(componentType));
+            wrapper.array = list.toArray((Object[]) Array.newInstance(componentType, list.size()));
+            return wrapper;
+        }
+
+        @Override
+        public Class type() {
+            return Object[].class;
+        }
+
+        @Override
+        public Object newInstance(Class type) {
+            return new ArrayWrapper(type);
+        }
+
+        @Override
+        public BracketType bracketType() {
+            return BracketType.SEQ;
+        }
     };
 
 
@@ -146,7 +275,35 @@ public enum SerializationStrategies implements SerializationStrategy<Object> {
     }
 
     @Override
-    public Boolean inBrackets() {
-        return true;
+    public BracketType bracketType() {
+        return BracketType.MAP;
+    }
+
+    static class ArrayWrapper implements ReadResolvable<Object[]> {
+        final Class type;
+        Object[] array;
+
+        ArrayWrapper(Class type) {
+            this.type = type;
+        }
+
+        @Override
+        public Object[] readResolve() {
+            return array;
+        }
+    }
+
+    static class DemarshallableWrapper implements ReadResolvable<Demarshallable> {
+        final Class type;
+        Demarshallable demarshallable;
+
+        DemarshallableWrapper(Class type) {
+            this.type = type;
+        }
+
+        @Override
+        public Demarshallable readResolve() {
+            return demarshallable;
+        }
     }
 }

@@ -716,7 +716,8 @@ public class BinaryWireTest {
         wire.write("a").object(noObjects);
 
         System.out.println(wire.asText());
-        Object[] object = wire.read().object(Object[].class);
+        Object[] object = wire.read()
+                .object(Object[].class);
         assertEquals(0, object.length);
 
         // TODO we shouldn't need to create a new wire.

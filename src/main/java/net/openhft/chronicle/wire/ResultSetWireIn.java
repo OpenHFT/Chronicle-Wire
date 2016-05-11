@@ -82,6 +82,15 @@ public class ResultSetWireIn implements WireIn {
         return valueIn;
     }
 
+    @Override
+    public <K> K readEvent(Class<K> expectedClass) {
+        try {
+            return ObjectUtils.convertTo(expectedClass, metaData.getColumnName(++index));
+        } catch (SQLException e) {
+            throw Jvm.rethrow(e);
+        }
+    }
+
     @NotNull
     @Override
     public ValueIn getValueIn() {
@@ -538,8 +547,8 @@ public class ResultSetWireIn implements WireIn {
         }
 
         @Override
-        public boolean isNested() {
-            return false;
+        public BracketType getBracketType() {
+            return BracketType.NONE;
         }
 
         @Override

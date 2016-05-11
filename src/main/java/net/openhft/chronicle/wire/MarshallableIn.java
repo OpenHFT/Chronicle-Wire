@@ -96,18 +96,19 @@ public interface MarshallableIn extends Closeable {
      *
      * @return the Map, or null if no message is waiting.
      */
-    default Map<String, Object> readMap() {
+    default <K, V> Map<K, V> readMap() {
         try (DocumentContext dc = readingDocument()) {
             if (!dc.isPresent()) {
                 return null;
             }
-            if (!dc.wire().hasMore())
+            final Wire wire = dc.wire();
+            if (!wire.hasMore())
                 return Collections.emptyMap();
-            Map<String, Object> ret = new LinkedHashMap<>();
-            StringBuilder sb = Wires.acquireStringBuilder();
-            while (dc.wire().hasMore()) {
-                Object o = dc.wire().readEventName(sb).object();
-                ret.put(WireInternal.INTERNER.intern(sb), o);
+            Map<K, V> ret = new LinkedHashMap<>();
+            while (wire.hasMore()) {
+                K key = (K) wire.readEvent(Object.class);
+                V value = (V) wire.getValueIn().object();
+                ret.put(key, value);
             }
             return ret;
         }

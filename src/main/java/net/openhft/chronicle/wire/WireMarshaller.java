@@ -61,6 +61,8 @@ public class WireMarshaller<T> {
         for (Field field : clazz.getDeclaredFields()) {
             if ((field.getModifiers() & (Modifier.STATIC | Modifier.TRANSIENT)) != 0)
                 continue;
+            if (field.getName().equals("this$0"))
+                throw new IllegalArgumentException("Found this$0, classes must be static or top level");
             field.setAccessible(true);
             map.put(field.getName(), field);
         }
@@ -598,7 +600,7 @@ public class WireMarshaller<T> {
                 } else {
                     map.clear();
                 }
-                if (read.marshallableAsMap(valueType, map) == null)
+                if (read.marshallableAsMap(keyType, valueType, map) == null)
                     field.set(o, null);
             } catch (IllegalAccessException e) {
                 throw new AssertionError(e);

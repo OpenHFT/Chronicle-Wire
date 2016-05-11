@@ -141,6 +141,7 @@ public enum WireType implements Function<Bytes, Wire> {
     };
 
     static final ThreadLocal<Bytes> bytesTL = ThreadLocal.withInitial(Bytes::allocateElasticDirect);
+    static final ThreadLocal<Bytes> bytes2TL = ThreadLocal.withInitial(Bytes::allocateElasticDirect);
     private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
 
     static Bytes getBytes() {
@@ -148,6 +149,15 @@ public enum WireType implements Function<Bytes, Wire> {
         if (Jvm.isDebug())
             return Bytes.allocateElasticDirect();
         Bytes bytes = bytesTL.get();
+        bytes.clear();
+        return bytes;
+    }
+
+    static Bytes getBytes2() {
+        // when in debug, the output becomes confused if you reuse the buffer.
+        if (Jvm.isDebug())
+            return Bytes.allocateElasticDirect();
+        Bytes bytes = bytes2TL.get();
         bytes.clear();
         return bytes;
     }
@@ -189,9 +199,9 @@ public enum WireType implements Function<Bytes, Wire> {
         if (marshallable instanceof WriteMarshallable)
             valueOut.typedMarshallable((WriteMarshallable) marshallable);
         else if (marshallable instanceof Map)
-            wire.getValueOut().marshallable((Map) marshallable, Object.class, false);
-//        else if (marshallable instanceof List)
-//            wire.getValueOut().sequence((List) marshallable);
+            wire.getValueOut().marshallable((Map) marshallable, Object.class, Object.class, false);
+        else if (marshallable instanceof Iterable)
+            wire.getValueOut().sequence((Iterable) marshallable);
         else if (marshallable instanceof Serializable)
             valueOut.typedMarshallable((Serializable) marshallable);
         else
@@ -200,10 +210,11 @@ public enum WireType implements Function<Bytes, Wire> {
     }
 
     public <T> T fromString(CharSequence cs) {
-        Bytes bytes = getBytes();
+        Bytes bytes = getBytes2();
         bytes.appendUtf8(cs);
         Wire wire = apply(bytes);
-        return wire.getValueIn().typedMarshallable();
+        return (T) wire.getValueIn()
+                .object();
     }
 
     public <T> T fromFile(String filename) throws IOException {
@@ -268,9 +279,9 @@ public enum WireType implements Function<Bytes, Wire> {
     }
 
     public Map<String, Object> asMap(CharSequence cs) {
-        Bytes bytes = getBytes();
+        Bytes bytes = getBytes2();
         bytes.appendUtf8(cs);
         Wire wire = apply(bytes);
-        return wire.getValueIn().marshallableAsMap(Object.class);
+        return wire.getValueIn().marshallableAsMap(String.class, Object.class);
     }
 }

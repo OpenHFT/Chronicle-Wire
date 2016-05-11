@@ -215,6 +215,19 @@ public interface ValueOut {
     }
 
     @NotNull
+    default <T> WireOut sequence(Iterable<T> t) {
+        if (t instanceof SortedSet)
+            typePrefix(SortedSet.class);
+        else if (t instanceof Set)
+            typePrefix(Set.class);
+        return sequence(t, (it, out) -> {
+            for (T o : it) {
+                out.object(o);
+            }
+        });
+    }
+
+    @NotNull
     <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer);
 
     @NotNull
@@ -316,35 +329,31 @@ public interface ValueOut {
         return wireOut();
     }
 
-    default <V> void object(Class<V> assumedClass, V v) {
+    default <V> void object(Class<V> expectedType, V v) {
         if (v instanceof WriteMarshallable)
-            if (v.getClass() == assumedClass)
+            if (v.getClass() == expectedType)
                 marshallable((WriteMarshallable) v);
             else
                 typedMarshallable((WriteMarshallable) v);
-        else if (v != null && v.getClass() == assumedClass)
+        else if (v != null && v.getClass() == expectedType)
             untypedObject(v);
         else
             object(v);
     }
 
-    default <V> WireOut marshallable(Map<String, V> map) {
-        return marshallable(map, null);
+    default <K, V> WireOut marshallable(Map<K, V> map) {
+        return marshallable(map, null, null, true);
     }
 
-    default <V> WireOut marshallable(Map<String, V> map, Class<V> vClass) {
-        return marshallable(map, vClass, true);
-    }
-
-    default <V> WireOut marshallable(Map<String, V> map, Class<V> vClass, boolean leaf) {
+    default <K, V> WireOut marshallable(Map<K, V> map, Class<K> kClass, Class<V> vClass, boolean leaf) {
         if (map == null) {
             nu11();
             return wireOut();
         }
 
         marshallable(m -> {
-            for (Map.Entry<String, V> entry : map.entrySet()) {
-                m.writeEventName(entry::getKey).leaf(leaf).object(vClass, entry.getValue());
+            for (Map.Entry<K, V> entry : map.entrySet()) {
+                m.writeEvent(kClass, entry.getKey()).leaf(leaf).object(vClass, entry.getValue());
             }
         });
         return wireOut();
@@ -397,19 +406,27 @@ public interface ValueOut {
             case "java.io.File":
                 return text(value.toString());
         }
-        if (value instanceof Marshallable)
-            return typedMarshallable((Marshallable) value);
+        if (value instanceof WriteMarshallable)
+            return typedMarshallable((WriteMarshallable) value);
         if (value instanceof BytesStore)
             return bytes((BytesStore) value);
         if (value instanceof CharSequence)
             return text((CharSequence) value);
-        if (value instanceof Map)
+        if (value instanceof Map) {
+            if (value instanceof SortedMap)
+                typePrefix(SortedMap.class);
+
             return map((Map) value);
+        }
         if (value instanceof Throwable)
             return throwable((Throwable) value);
         if (value instanceof Enum)
             return typedScalar(value);
         if (value instanceof Collection) {
+            if (value instanceof SortedSet)
+                typePrefix(SortedSet.class);
+            if (value instanceof Set)
+                typePrefix(Set.class);
             return sequence(v -> ((Collection) value).stream().forEach(v::object));
         } else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
             WireSerializedLambda.write(value, this);

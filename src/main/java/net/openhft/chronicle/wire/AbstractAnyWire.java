@@ -72,6 +72,21 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         return wireAcquisition.acquireWire().read(name);
     }
 
+    @Override
+    public <K> K readEvent(Class<K> expectedClass) {
+        return wireAcquisition.acquireWire().readEvent(expectedClass);
+    }
+
+    @Override
+    public void startEvent() {
+        wireAcquisition.acquireWire().startEvent();
+    }
+
+    @Override
+    public void endEvent() {
+        wireAcquisition.acquireWire().endEvent();
+    }
+
     @NotNull
     @Override
     public ValueIn getValueIn() {
@@ -143,6 +158,11 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         return wireAcquisition.acquireWire().write(key);
     }
 
+    @Override
+    public ValueOut writeEvent(Class expectedType, Object eventKey) {
+        return wireAcquisition.acquireWire().writeEvent(expectedType, eventKey);
+    }
+
     @NotNull
     @Override
     public ValueOut getValueOut() {
@@ -165,6 +185,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
     public DocumentContext writingDocument(boolean metaData) {
         return wireAcquisition.acquireWire().writingDocument(metaData);
     }
+
 
     interface WireAcquisition {
 

@@ -31,6 +31,7 @@ public enum BinaryWireCode {
     public static final int BYTES_LENGTH32 = 0x82;
     // sequence of length 0 - 255
 //        public static final int BYTES_LENGTH64 = 0x83;
+    public static final int EVENT_OBJECT = 0x84;
 
     public static final int FIELD_ANCHOR = 0x87;
     public static final int ANCHOR = 0x88;
@@ -127,6 +128,6 @@ public enum BinaryWireCode {
     }
 
     public static String stringForCode(int code) {
-        return STRING_FOR_CODE[code];
+        return code == -1 ? "EndOfFile" : STRING_FOR_CODE[code];
     }
 }

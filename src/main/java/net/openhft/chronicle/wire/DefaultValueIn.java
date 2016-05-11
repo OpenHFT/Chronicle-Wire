@@ -411,8 +411,8 @@ public class DefaultValueIn implements ValueIn {
     }
 
     @Override
-    public boolean isNested() {
-        return false;
+    public BracketType getBracketType() {
+        return BracketType.NONE;
     }
 
     @Override

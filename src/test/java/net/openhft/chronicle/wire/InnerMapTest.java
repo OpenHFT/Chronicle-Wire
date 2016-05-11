@@ -73,7 +73,7 @@ public class InnerMapTest {
         }
     }
 
-    static class MyNested extends AbstractMarshallable implements Demarshallable {
+    static class MyNested extends AbstractMarshallable {
         String value;
 
         public MyNested(String value) {

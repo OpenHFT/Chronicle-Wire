@@ -29,8 +29,8 @@ class ScalarStrategy<T> implements SerializationStrategy<T> {
     }
 
     @Override
-    public Boolean inBrackets() {
-        return false;
+    public BracketType bracketType() {
+        return BracketType.NONE;
     }
 
     @Override

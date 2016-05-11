@@ -56,14 +56,22 @@ public class HashWire implements WireOut {
     long hash = 0;
 
     public static long hash64(WriteMarshallable value) {
+        return hash64((Object) value);
+    }
+
+    public static long hash64(Object value) {
         HashWire hashWire = new HashWire();
-        hashWire.getValueOut().marshallable(value);
+        hashWire.getValueOut().object(value);
         return hashWire.hash64();
     }
 
     public static int hash32(WriteMarshallable value) {
+        return hash32((Object) value);
+    }
+
+    public static int hash32(Object value) {
         HashWire hashWire = new HashWire();
-        hashWire.getValueOut().marshallable(value);
+        hashWire.getValueOut().object(value);
         return hashWire.hash32();
     }
 
@@ -128,6 +136,20 @@ public class HashWire implements WireOut {
     public ValueOut write(CharSequence name) {
         hash += K0 + name.hashCode() * M0;
         return valueOut;
+    }
+
+    @Override
+    public ValueOut writeEvent(Class ignored, Object eventKey) {
+        hash += K0 + eventKey.hashCode() * M0;
+        return valueOut;
+    }
+
+    @Override
+    public void startEvent() {
+    }
+
+    @Override
+    public void endEvent() {
     }
 
     @NotNull

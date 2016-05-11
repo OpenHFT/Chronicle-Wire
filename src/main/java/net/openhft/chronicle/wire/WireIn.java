@@ -67,12 +67,20 @@ public interface WireIn extends WireCommon {
     ValueIn read(@NotNull StringBuilder name);
 
     /**
+     * Read a field which might be an object of any type.
+     *
+     * @param expectedClass to use as a hint, or Object.class if no hint available.
+     * @return an instance of expectedClass
+     */
+    <K> K readEvent(Class<K> expectedClass);
+
+    /**
      * Obtain the value in (for internal use)
      */
     @NotNull
     ValueIn getValueIn();
-
     ObjectInput objectInput();
+
     /*
      * read and write comments.
      */
