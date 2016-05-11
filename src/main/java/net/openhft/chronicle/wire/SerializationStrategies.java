@@ -139,6 +139,11 @@ public enum SerializationStrategies implements SerializationStrategy {
         public Class type() {
             return Externalizable.class;
         }
+
+        @Override
+        public BracketType bracketType() {
+            return BracketType.SEQ;
+        }
     },
     MAP {
         @Override

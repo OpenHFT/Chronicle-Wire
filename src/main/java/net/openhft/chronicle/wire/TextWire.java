@@ -1121,7 +1121,8 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
-            return asText(zonedDateTime);
+            final String s = zonedDateTime.toString();
+            return s.endsWith("]") ? text(s) : asText(s);
         }
 
         @NotNull
@@ -1329,7 +1330,7 @@ public class TextWire extends AbstractWire implements Wire {
                 pushState();
 
             prependSeparator();
-            bytes.writeUnsignedByte('{');
+            bytes.writeUnsignedByte(object instanceof Externalizable ? '[' : '{');
             if (wasLeaf)
                 afterOpen();
             else
@@ -1352,7 +1353,7 @@ public class TextWire extends AbstractWire implements Wire {
             } else {
                 prependSeparator();
             }
-            bytes.writeUnsignedByte('}');
+            bytes.writeUnsignedByte(object instanceof Externalizable ? ']' : '}');
             if (popSep != null)
                 sep = popSep;
             if (indentation == 0) {
@@ -1599,7 +1600,6 @@ public class TextWire extends AbstractWire implements Wire {
                             bytes.parse8bit(a, getEscapingEndOfText());
                         else
                             bytes.parseUtf8(a, getEscapingEndOfText());
-
                     } else {
                         AppendableUtil.setLength(a, 0);
                     }
@@ -1614,7 +1614,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
 
             int prev = peekBack();
-            if (prev == ':' || prev == '#' || prev == '}')
+            if (prev == ':' || prev == '#' || prev == '}' || prev == ']')
                 bytes.readSkip(-1);
             return ret;
         }

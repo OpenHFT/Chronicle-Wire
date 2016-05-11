@@ -25,10 +25,21 @@ enum TextStopCharsTesters implements StopCharsTester {
     END_OF_TEXT {
         @Override
         public boolean isStopChar(int ch, int ch2) throws IllegalStateException {
-            // one character stop.
-            if (ch == '"' || ch == '#' || ch == '\n' || ch == '}') return true;
-            // two character stop.
-            return (ch == ':' || ch == ',') && (ch2 <= ' ' || ch2 == '"');
+            switch (ch) {
+                // one character stop.
+                case '"':
+                case '#':
+                case '\n':
+                case '}':
+                case ']':
+                    return true;
+                // two character stop.
+                case ':':
+                case ',':
+                    return ch2 <= ' ' || ch2 == '"';
+                default:
+                    return false;
+            }
         }
-    },
+    }
 }

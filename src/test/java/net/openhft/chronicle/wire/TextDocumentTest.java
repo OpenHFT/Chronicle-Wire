@@ -63,7 +63,7 @@ public class TextDocumentTest {
                 "  uuid: "+wheader.uuid+",\n" +
                 "  writeByte: !!atomic { locked: false, value: 00000000000000000512 },\n" +
                 "  readByte: !!atomic { locked: false, value: 00000000000000001024 },\n" +
-                "  created: " + wheader.created+"\n" +
+                "  created: \"" + wheader.created + "\"\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(bytes));
         wire.readDocument(w -> w.read(() -> "header").marshallable(rheader), null);
 
@@ -103,7 +103,8 @@ public class TextDocumentTest {
             out.write(Keys.uuid).uuid(uuid);
             out.write(Keys.writeByte).int64forBinding(WRITE_BYTE);
             out.write(Keys.readByte).int64forBinding(READ_BYTE);
-            out.write(Keys.created).zonedDateTime(created);
+            out.write(Keys.created)
+                    .zonedDateTime(created);
         }
 
         @Override
