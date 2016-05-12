@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 
 /**
  * A wire type than can be either
- *
+ * <p>
  * TextWire BinaryWire
  *
  * @author Rob Austin.
@@ -89,13 +89,17 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
         public Wire acquireWire() {
             if (wire != null)
                 return wire;
-            if (bytes.readRemaining() > 0) {
-                int firstByte = bytes.readByte(0);
+            if (bytes.readRemaining() >= 4) {
+                int firstBytes = bytes.readInt(0);
+                if (bytes.readRemaining() >= 8)
+                    firstBytes |= bytes.readInt(4);
+                firstBytes |= firstBytes >> 16;
+                firstBytes |= firstBytes >> 8;
 
-                if ((firstByte & 0x80) == 0) {
+                if ((firstBytes & 0x80) == 0) {
                     System.out.println("TEXT_WIRE");
                     wireType = WireType.TEXT;
-                } else if (BinaryWireCode.isFieldCode(firstByte)) {
+                } else if (BinaryWireCode.isFieldCode(bytes.readByte(0))) {
                     System.out.println("FIELDLESS_BINARY");
                     wireType = WireType.FIELDLESS_BINARY;
                 } else {

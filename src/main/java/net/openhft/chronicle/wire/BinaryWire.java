@@ -172,14 +172,24 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case BYTES_LENGTH16:
                     case BYTES_LENGTH32:
                         bytes.readSkip(1);
-                        int len = peekCode == BYTES_LENGTH16 ? bytes.readUnsignedShort() : bytes.readInt();
+                        int len = peekCode == BYTES_LENGTH16
+                                ? bytes.readUnsignedShort()
+                                : bytes.readInt();
                         long lim = bytes.readLimit();
                         try {
                             bytes.readLimit(bytes.readPosition() + len);
-                            if (isFieldNext())
-                                wire.getValueOut().marshallable(w -> copyTo(w));
-                            else
-                                wire.getValueOut().sequence(v -> copyTo(v.wireOut()));
+                            final ValueOut valueOut = wire.getValueOut();
+                            switch (getBracketTypeNext()) {
+                                case MAP:
+                                    valueOut.marshallable(this::copyTo);
+                                    break;
+                                case SEQ:
+                                    valueOut.sequence(v -> copyTo(v.wireOut()));
+                                    break;
+                                case NONE:
+                                    valueOut.object(this.getValueIn().object());
+                                    break;
+                            }
                         } finally {
                             bytes.readLimit(lim);
                         }
@@ -258,15 +268,24 @@ public class BinaryWire extends AbstractWire implements Wire {
         wire.writeComment("# " + stringForCode(bytes.readUnsignedByte()));
     }
 
-    private boolean isFieldNext() {
+    private BracketType getBracketTypeNext() {
         int peekCode = peekCode();
-        return isField(peekCode);
+        return getBracketTypeFor(peekCode);
     }
 
-    private boolean isField(int peekCode) {
-        return peekCode == FIELD_NAME_ANY ||
-                peekCode == EVENT_OBJECT ||
-                (peekCode >= FIELD_NAME0 && peekCode <= FIELD_NAME31);
+    BracketType getBracketTypeFor(int peekCode) {
+        if (peekCode >= FIELD_NAME0 && peekCode <= FIELD_NAME31)
+            return BracketType.MAP;
+        switch (peekCode) {
+            case FIELD_NAME_ANY:
+            case EVENT_OBJECT:
+                return BracketType.MAP;
+            case U8_ARRAY:
+            case I64_ARRAY:
+                return BracketType.NONE;
+            default:
+                return BracketType.SEQ;
+        }
     }
 
     @NotNull
@@ -1690,9 +1709,9 @@ public class BinaryWire extends AbstractWire implements Wire {
             consumePadding();
             switch (peekCode()) {
                 case BYTES_LENGTH16:
-                    return isField(bytes.readUnsignedByte(bytes.readPosition() + 2 + 1)) ? BracketType.MAP : BracketType.SEQ;
+                    return getBracketTypeFor(bytes.readUnsignedByte(bytes.readPosition() + 2 + 1));
                 case BYTES_LENGTH32:
-                    return isField(bytes.readUnsignedByte(bytes.readPosition() + 4 + 1)) ? BracketType.MAP : BracketType.SEQ;
+                    return getBracketTypeFor(bytes.readUnsignedByte(bytes.readPosition() + 4 + 1));
             }
             return BracketType.NONE;
         }
@@ -2295,9 +2314,17 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (isNull())
                 return false;
             int code = readCode();
-            if (code != BYTES_LENGTH32 && code != BYTES_LENGTH16)
-                cantRead(code);
-            final int length = bytes.readInt();
+            final int length;
+            switch (code) {
+                case BYTES_LENGTH16:
+                    length = bytes.readUnsignedShort();
+                    break;
+                case BYTES_LENGTH32:
+                    length = bytes.readInt();
+                    break;
+                default:
+                    throw cantRead(code);
+            }
             long limit = bytes.readLimit();
             long limit2 = bytes.readPosition() + length;
             bytes.readLimit(limit2);
@@ -2767,6 +2794,13 @@ public class BinaryWire extends AbstractWire implements Wire {
                                     bytes.readLimit(lim);
                                 }
                             }
+                        }
+                        case U8_ARRAY: {
+                            long length = bytes.readRemaining();
+                            BytesStore toBytes = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
+                            toBytes.write(0, bytes, bytes.readPosition(), length);
+                            bytes.readSkip(length);
+                            return toBytes;
                         }
 
                         case ANCHOR:

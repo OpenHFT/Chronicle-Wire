@@ -220,15 +220,6 @@ public class QueryWire extends TextWire {
             return QueryWire.this;
         }
 
-        private boolean isText(@NotNull Bytes fromBytes) {
-            for (long i = fromBytes.readPosition(); i < fromBytes.readLimit(); i++) {
-                int ch = fromBytes.readUnsignedByte(i);
-                if ((ch < ' ' && ch != '\t') || ch == '&' || ch >= 127)
-                    return false;
-            }
-            return true;
-        }
-
         @NotNull
         @Override
         public WireOut bytes(byte[] byteArray) {

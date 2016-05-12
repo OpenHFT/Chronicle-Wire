@@ -1669,69 +1669,76 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         public WireIn bytes(@NotNull ReadBytesMarshallable bytesConsumer) {
             consumePadding();
-
-            // TODO needs to be made much more efficient.
-            StringBuilder sb = acquireStringBuilder();
-            if (peekCode() == '!') {
-                bytes.readSkip(1);
-                parseWord(sb);
-                byte[] uncompressed = Compression.uncompress(sb, TextWire.this, t -> {
-                    StringBuilder sb2 = acquireStringBuilder();
-                    AppendableUtil.setLength(sb2, 0);
-                    t.parseWord(sb2);
-                    byte[] decode = Base64.getDecoder().decode(sb2.toString());
-                    return decode;
-                });
-                if (uncompressed != null) {
-                    bytesConsumer.readMarshallable(Bytes.wrapForRead(uncompressed));
-
-                } else if (StringUtils.isEqual(sb, "!null")) {
-                    bytesConsumer.readMarshallable(null);
+            try {
+                // TODO needs to be made much more efficient.
+                StringBuilder sb = acquireStringBuilder();
+                if (peekCode() == '!') {
+                    bytes.readSkip(1);
                     parseWord(sb);
+                    byte[] uncompressed = Compression.uncompress(sb, TextWire.this, t -> {
+                        StringBuilder sb2 = acquireStringBuilder();
+                        AppendableUtil.setLength(sb2, 0);
+                        t.parseWord(sb2);
+                        byte[] decode = Base64.getDecoder().decode(sb2.toString());
+                        return decode;
+                    });
+                    if (uncompressed != null) {
+                        bytesConsumer.readMarshallable(Bytes.wrapForRead(uncompressed));
+
+                    } else if (StringUtils.isEqual(sb, "!null")) {
+                        bytesConsumer.readMarshallable(null);
+                        parseWord(sb);
+                    } else {
+                        throw new IORuntimeException("Unsupported type=" + sb);
+                    }
                 } else {
-                    throw new IORuntimeException("Unsupported type=" + sb);
+                    textTo(sb);
+                    bytesConsumer.readMarshallable(Bytes.wrapForRead(sb.toString().getBytes()));
                 }
-            } else {
-                textTo(sb);
-                bytesConsumer.readMarshallable(Bytes.wrapForRead(sb.toString().getBytes()));
+                return TextWire.this;
+            } finally {
+                consumePadding(1);
             }
-            return TextWire.this;
         }
 
         @Nullable
         public byte[] bytes() {
             consumePadding();
-            // TODO needs to be made much more efficient.
-            StringBuilder sb = acquireStringBuilder();
-            if (peekCode() == '!') {
-                bytes.readSkip(1);
-                parseWord(sb);
-
-                if ("byte[]".contentEquals(sb)) {
+            try {
+                // TODO needs to be made much more efficient.
+                StringBuilder sb = acquireStringBuilder();
+                if (peekCode() == '!') {
                     bytes.readSkip(1);
                     parseWord(sb);
+
+                    if ("byte[]".contentEquals(sb)) {
+                        bytes.readSkip(1);
+                        parseWord(sb);
+                    }
+
+                    byte[] bytes = Compression.uncompress(sb, this, t -> {
+                        StringBuilder sb0 = acquireStringBuilder();
+                        AppendableUtil.setLength(sb0, 0);
+                        parseWord(sb0);
+                        return Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb));
+                    });
+                    if (bytes != null)
+                        return bytes;
+
+                    if ("!null".contentEquals(sb)) {
+                        parseWord(sb);
+                        return null;
+                    }
+
+                    throw new IllegalStateException("unsupported type=" + sb);
+
+                } else {
+                    textTo(sb);
+                    // todo fix this.
+                    return sb.toString().getBytes();
                 }
-
-                byte[] bytes = Compression.uncompress(sb, this, t -> {
-                    StringBuilder sb0 = acquireStringBuilder();
-                    AppendableUtil.setLength(sb0, 0);
-                    parseWord(sb0);
-                    return Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb));
-                });
-                if (bytes != null)
-                    return bytes;
-
-                if ("!null".contentEquals(sb)) {
-                    parseWord(sb);
-                    return null;
-                }
-
-                throw new IllegalStateException("unsupported type=" + sb);
-
-            } else {
-                textTo(sb);
-                // todo fix this.
-                return sb.toString().getBytes();
+            } finally {
+                consumePadding(1);
             }
         }
 
