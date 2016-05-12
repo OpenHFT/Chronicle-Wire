@@ -1797,9 +1797,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                 default: {
                     StringBuilder text = readText(code, WireInternal.acquireStringBuilder());
-                    if (text == null)
-                        cantRead(code);
-                    return WireInternal.INTERNER.intern(text);
+                    return text == null ? null : WireInternal.INTERNER.intern(text);
                 }
             }
         }

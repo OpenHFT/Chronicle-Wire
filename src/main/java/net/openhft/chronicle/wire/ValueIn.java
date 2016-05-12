@@ -426,7 +426,7 @@ public interface ValueIn {
 
             case NONE:
                 final E e = (E) strategy.readUsing(using, this);
-                return clazz.isInstance(e) ? e : (E) ObjectUtils.convertTo(clazz, e);
+                return (E) ObjectUtils.convertTo(clazz, e);
 
             default:
                 throw new AssertionError();
