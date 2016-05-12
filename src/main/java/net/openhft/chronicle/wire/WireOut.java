@@ -84,8 +84,8 @@ public interface WireOut extends WireCommon {
     WireOut addPadding(int paddingToAdd);
 
     @NotNull
-    default WireOut writeAlignTo(int alignment) {
-        long mod = bytes().writePosition() % alignment;
+    default WireOut writeAlignTo(int alignment, int plus) {
+        long mod = (bytes().writePosition() + plus) % alignment;
         if (mod != 0)
             addPadding((int) (alignment - mod));
         return this;

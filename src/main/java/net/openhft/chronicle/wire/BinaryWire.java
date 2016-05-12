@@ -1260,6 +1260,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         private WireOut fixedOrderedInt64(long i64) {
+            writeAlignTo(8, 1);
             writeCode(INT64).writeOrderedLong(i64);
             return BinaryWire.this;
         }
@@ -1267,6 +1268,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int64array(long capacity) {
+            writeAlignTo(8, 1);
             writeCode(I64_ARRAY);
             BinaryLongArrayReference.lazyWrite(bytes, capacity);
             return BinaryWire.this;
@@ -1275,6 +1277,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int64array(long capacity, @NotNull LongArrayValues values) {
+            writeAlignTo(8, 1);
             writeCode(I64_ARRAY);
             long pos = bytes.writePosition();
             BinaryLongArrayReference.lazyWrite(bytes, capacity);
@@ -1985,6 +1988,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         public long readLength() {
+            consumePadding();
             int code = peekCode();
             // TODO handle non length types as well.
             switch (code) {
@@ -1992,9 +1996,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case BYTES_LENGTH8:
                     bytes.readSkip(1);
                     return bytes.readUnsignedByte();
-                case BYTES_LENGTH16:
-                    bytes.readSkip(1);
-                    return bytes.readUnsignedShort();
 */
                 case BYTES_LENGTH16:
                     bytes.readSkip(1);
