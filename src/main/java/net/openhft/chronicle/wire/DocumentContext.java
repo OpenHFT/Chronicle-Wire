@@ -21,7 +21,7 @@ import net.openhft.chronicle.core.io.Closeable;
 /**
  * Created by peter on 24/12/15.
  */
-public interface DocumentContext extends Closeable {
+public interface DocumentContext extends Closeable, SourceContext {
 
     /**
      * @return true - is the entry is of type meta data
@@ -51,18 +51,6 @@ public interface DocumentContext extends Closeable {
      * @return the wire of the document
      */
     Wire wire();
-
-    /**
-     * @return the current source id or -1
-     */
-    int sourceId();
-
-    /**
-     * Index last read, only available for read contexts.
-     *
-     * @return the current Excerpt's index
-     */
-    long index();
 
     /**
      * @return whether the NOT_COMPLETE flag has been set.

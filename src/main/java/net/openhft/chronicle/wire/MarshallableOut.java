@@ -105,7 +105,9 @@ public interface MarshallableOut {
      */
     default void writeMap(Map<?, ?> map) {
         try (DocumentContext dc = writingDocument()) {
-            dc.wire().getValueOut().marshallable(map);
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                dc.wire().writeEvent(Object.class, entry.getKey()).object(Object.class, entry.getValue());
+            }
         }
     }
 

@@ -82,22 +82,22 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
 
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
+        sources = 0;
         wire.read(() -> "sources").sequence(this, (t, in) -> {
-            t.sources = 0;
             while (in.hasNextSequenceItem()) {
                 t.addSource(in.int32(), in.int64());
             }
         });
+        timings = 0;
         wire.read(() -> "timings").sequence(this, (t, in) -> {
-            t.timings = 0;
             while (in.hasNextSequenceItem()) {
                 t.addTiming(in.int64());
             }
         });
         if (addSourceDetails) {
             Object o = wire.parent();
-            if (o instanceof DocumentContext) {
-                DocumentContext dc = (DocumentContext) o;
+            if (o instanceof SourceContext) {
+                SourceContext dc = (SourceContext) o;
                 addSource(dc.sourceId(), dc.index());
             }
 
