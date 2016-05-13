@@ -371,7 +371,7 @@ public interface ValueOut {
             case "java.lang.String":
                 return text((String) value);
             case "java.lang.Byte":
-                return typePrefix(byte.class).int8((Byte) value);
+                return fixedInt8((byte) value);
             case "java.lang.Boolean":
                 return bool((Boolean) value);
             case "java.lang.Character":
@@ -379,15 +379,15 @@ public interface ValueOut {
             case "java.lang.Class":
                 return typeLiteral((Class) value);
             case "java.lang.Short":
-                return typePrefix(short.class).int16((Short) value);
+                return fixedInt16((short) value);
             case "java.lang.Integer":
-                return typePrefix(int.class).int32((Integer) value);
+                return fixedInt32((int) value);
             case "java.lang.Long":
-                return fixedInt64((Long) value);
+                return fixedInt64((long) value);
             case "java.lang.Double":
-                return fixedFloat64((Double) value);
+                return fixedFloat64((double) value);
             case "java.lang.Float":
-                return typePrefix(float.class).float32((Float) value);
+                return fixedFloat32((float) value);
             case "[java.lang.String;":
                 return array(v -> Stream.of((String[]) value).forEach(v::text), String[].class);
             case "[java.lang.Object;":
@@ -442,6 +442,26 @@ public interface ValueOut {
                     " is unsupported, it must either be of type Marshallable, String or " +
                     "AutoBoxed primitive Object");
         }
+    }
+
+    @NotNull
+    default WireOut fixedFloat32(float value) {
+        return typePrefix(float.class).float32((Float) value);
+    }
+
+    @NotNull
+    default WireOut fixedInt8(byte value) {
+        return typePrefix(byte.class).int8((Byte) value);
+    }
+
+    @NotNull
+    default WireOut fixedInt16(short value) {
+        return typePrefix(short.class).int16((Short) value);
+    }
+
+    @NotNull
+    default WireOut fixedInt32(int value) {
+        return typePrefix(int.class).int32(value);
     }
 
     default WireOut fixedFloat64(double value) {

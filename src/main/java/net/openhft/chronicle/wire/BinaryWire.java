@@ -1076,6 +1076,8 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             } else {
                 int len = s.length();
+                if (len < 0x20)
+                    len = (int) AppendableUtil.findUtf8Length(s);
 
                 if (len < 0x20) {
                     bytes.writeUnsignedByte((int) (STRING_0 + len)).appendUtf8(StringUtils.extractChars(s), 0, s.length());
@@ -1196,7 +1198,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @NotNull
-        WireOut fixedInt8(byte i8) {
+        public WireOut fixedInt8(byte i8) {
             writeCode(INT8).writeByte(i8);
             return BinaryWire.this;
         }
@@ -1215,7 +1217,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @NotNull
-        WireOut fixedInt16(short i16) {
+        public WireOut fixedInt16(short i16) {
             writeCode(INT16).writeShort(i16);
             return BinaryWire.this;
         }
@@ -1313,7 +1315,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @NotNull
-        WireOut fixedFloat32(float f) {
+        public WireOut fixedFloat32(float f) {
             writeCode(FLOAT32).writeFloat(f);
             return BinaryWire.this;
         }
