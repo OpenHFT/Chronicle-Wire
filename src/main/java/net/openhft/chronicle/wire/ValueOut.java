@@ -353,7 +353,8 @@ public interface ValueOut {
 
         marshallable(m -> {
             for (Map.Entry<K, V> entry : map.entrySet()) {
-                m.writeEvent(kClass, entry.getKey()).leaf(leaf).object(vClass, entry.getValue());
+                m.writeEvent(kClass, entry.getKey()).leaf(leaf)
+                        .object(vClass, entry.getValue());
             }
         });
         return wireOut();

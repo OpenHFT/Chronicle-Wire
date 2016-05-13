@@ -296,10 +296,11 @@ public class TextWire extends AbstractWire implements Wire {
                     throw new IllegalStateException("Unexpected character after field " + ch + " '" + (char) ch + "'");
                 return object;
 
-            } else if (ch == '"') {
+            } else if (ch == '"' || ch == '\'') {
                 bytes.readSkip(1);
 
-                parseUntil(sb, getEscapingQuotes());
+                final StopCharTester escapingQuotes = ch == '"' ? getEscapingQuotes() : getEscapingSingleQuotes();
+                parseUntil(sb, escapingQuotes);
 
                 consumePadding(1);
                 ch = readCode();
@@ -585,13 +586,13 @@ public class TextWire extends AbstractWire implements Wire {
                     break;
                 case '\'':
                     if (ch == quotes.q) {
-                        bytes.appendUtf8('\\').appendUtf8(ch);
+                        bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);
                     } else {
-                        bytes.appendUtf8(ch);
+                        bytes.writeUnsignedByte(ch);
                     }
                     break;
                 case '\\':
-                    bytes.appendUtf8('\\').appendUtf8(ch);
+                    bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);
                     break;
                 case '\b':
                     bytes.appendUtf8("\\b");
@@ -609,15 +610,7 @@ public class TextWire extends AbstractWire implements Wire {
                     bytes.appendUtf8("\\0");
                     break;
                 default:
-//                    if (ch > 127) {
-//                        bytes.appendUtf8("\\u");
-//                        bytes.appendUtf8(HEX[(ch >> 12) & 0xF]);
-//                        bytes.appendUtf8(HEX[(ch >> 8) & 0xF]);
-//                        bytes.appendUtf8(HEX[(ch >> 4) & 0xF]);
-//                        bytes.appendUtf8(HEX[ch & 0xF]);
-//                    } else {
                     bytes.appendUtf8(ch);
-//                    }
                     break;
             }
         }
@@ -2392,14 +2385,24 @@ public class TextWire extends AbstractWire implements Wire {
         public long int64() {
             consumePadding();
             valueIn.skipType();
-            return bytes.parseLong();
+            long l = bytes.parseLong();
+            checkRewind();
+            return l;
+        }
+
+        public void checkRewind() {
+            int ch = bytes.readUnsignedByte(bytes.readPosition() - 1);
+            if (ch == ':' || ch == '}' || ch == ']')
+                bytes.readSkip(-1);
         }
 
         @Override
         public double float64() {
             consumePadding();
             valueIn.skipType();
-            return bytes.parseDouble();
+            final double v = bytes.parseDouble();
+            checkRewind();
+            return v;
         }
 
         private void skipType() {
