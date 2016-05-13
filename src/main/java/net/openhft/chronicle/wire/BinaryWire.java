@@ -1076,8 +1076,6 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             } else {
                 int len = s.length();
-                if (len < 0x20) // if short check it would still be short with UTF8 encoding.
-                    len = (int) AppendableUtil.findUtf8Length(s);
 
                 if (len < 0x20) {
                     bytes.writeUnsignedByte((int) (STRING_0 + len)).appendUtf8(StringUtils.extractChars(s), 0, s.length());
