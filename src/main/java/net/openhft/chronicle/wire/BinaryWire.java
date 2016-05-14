@@ -526,6 +526,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 bytes.readSkip(1);
                 bytes.read8bit(sb);
                 return sb;
+
             case FIELD_ANCHOR:
                 bytes.readSkip(1);
                 return readFieldAnchor(sb);
@@ -602,9 +603,18 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case EVENT_NAME:
             case FIELD_NAME_ANY:
-            case EVENT_OBJECT:
                 StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, WireInternal.acquireStringBuilder(), false);
                 wire.write(fsb);
+                break;
+
+            case EVENT_OBJECT:
+                bytes.readSkip(1);
+                wire.startEvent();
+                wire.getValueOut().leaf(true);
+                if (peekCode() == TYPE_PREFIX)
+                    copyOne(wire);
+                copyOne(wire);
+                wire.endEvent();
                 break;
 
             case STRING_ANY: {

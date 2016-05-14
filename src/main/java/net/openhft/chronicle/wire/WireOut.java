@@ -55,6 +55,7 @@ public interface WireOut extends WireCommon {
             return writeEventName((CharSequence) eventKey);
         startEvent();
         getValueOut().object(expectedType, eventKey);
+        endEvent();
         return getValueOut();
     }
 
