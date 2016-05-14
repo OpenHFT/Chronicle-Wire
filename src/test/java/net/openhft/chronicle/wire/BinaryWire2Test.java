@@ -437,11 +437,11 @@ public class BinaryWire2Test {
 
         assertEquals("--- !!data #binary\n" +
                         "nothing: !byte[] \"\"\n" +
-                        "# position: 24\n" +
+                        "# position: 23\n" +
                         "--- !!data #binary\n" +
                         "one: !byte[] !!binary AQ==\n" +
                         "\n" +
-                        "# position: 45\n" +
+                        "# position: 43\n" +
                         "--- !!data #binary\n" +
                         "four: !byte[] !!binary AQIDBA==\n" +
                         "\n"

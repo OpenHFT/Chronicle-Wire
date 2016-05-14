@@ -24,7 +24,7 @@ import java.lang.reflect.Field;
 public enum BinaryWireCode {
     ;
     // sequence of length 0 - 255 bytes
-//        public static final int BYTES_LENGTH8 = 0x80;
+    public static final int BYTES_LENGTH8 = 0x80;
 //     sequence of length 0 - 2^16-1 bytes
     public static final int BYTES_LENGTH16 = 0x81;
     // sequence of length 0 - 2^32-1
