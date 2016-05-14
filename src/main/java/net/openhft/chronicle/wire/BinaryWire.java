@@ -456,8 +456,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         return;
                     // fall through
 
-                case COMMENT:
-                case HINT: {
+                case COMMENT: {
                     bytes.readSkip(1);
                     StringBuilder sb = WireInternal.acquireStringBuilder();
                     bytes.readUtf8(sb);
@@ -569,13 +568,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                 StringBuilder sb = WireInternal.acquireStringBuilder();
                 bytes.readUtf8(sb);
                 wire.writeComment(sb);
-                break;
-            }
-
-            case HINT: {
-                bytes.readSkip(1);
-                StringBuilder sb = WireInternal.acquireStringBuilder();
-                bytes.readUtf8(sb);
                 break;
             }
 

@@ -31,7 +31,6 @@ public enum BinaryWireCode {
     public static final int BYTES_LENGTH32 = 0x82;
     // sequence of length 0 - 255
 //        public static final int BYTES_LENGTH64 = 0x83;
-    public static final int EVENT_OBJECT = 0x84;
 
     public static final int FIELD_ANCHOR = 0x87;
     public static final int ANCHOR = 0x88;
@@ -86,6 +85,7 @@ public enum BinaryWireCode {
     public static final int FIELD_NUMBER = 0xBA;
     public static final int NULL = 0xBB;
     public static final int TYPE_LITERAL = 0xBC;
+    public static final int EVENT_OBJECT = 0xBD;
     public static final int COMMENT = 0xBE;
     public static final int HINT = 0xBF;
 
