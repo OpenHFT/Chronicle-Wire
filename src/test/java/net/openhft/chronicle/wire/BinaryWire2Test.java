@@ -438,18 +438,17 @@ public class BinaryWire2Test {
 //        wire.copyTo(
 //                new TextWire(Bytes.elasticByteBuffer()));
         // TODO fix this output.
-/*        assertEquals("--- !!data #binary\n" +
-                        "nothing: !byte[] !!binary \n" +
-                        "\n" +
-                        "# position: 32\n" +
-                        "--- !!data\n" +
+        assertEquals("--- !!data #binary\n" +
+                        "nothing: !byte[] \"\"\n" +
+                        "# position: 24\n" +
+                        "--- !!data #binary\n" +
                         "one: !byte[] !!binary AQ==\n" +
                         "\n" +
-                        "# position: 64\n" +
-                        "--- !!data\n" +
+                        "# position: 45\n" +
+                        "--- !!data #binary\n" +
                         "four: !byte[] !!binary AQIDBA==\n" +
                         "\n"
-                , Wires.fromSizePrefixedBlobs(wire.bytes()));*/
+                , Wires.fromSizePrefixedBlobs(wire.bytes()));
         wire.readDocument(null, w -> assertArrayEquals(new byte[0], (byte[]) w.read(() -> "nothing").object()));
         wire.readDocument(null, w -> assertArrayEquals(one, (byte[]) w.read(() -> "one").object()));
         wire.readDocument(null, w -> assertArrayEquals(four, (byte[]) w.read(() -> "four").object()));

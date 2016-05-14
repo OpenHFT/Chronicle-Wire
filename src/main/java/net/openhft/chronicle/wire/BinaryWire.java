@@ -251,7 +251,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             case BinaryWireHighCode.FIELD0:
             case BinaryWireHighCode.FIELD1:
                 StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, WireInternal.acquireStringBuilder(), false);
-                wire.write(() -> fsb);
+                wire.write(fsb);
                 break;
 
             case BinaryWireHighCode.STR0:
@@ -612,7 +612,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             case FIELD_NAME_ANY:
             case EVENT_OBJECT:
                 StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, WireInternal.acquireStringBuilder(), false);
-                wire.write(() -> fsb);
+                wire.write(fsb);
                 break;
 
             case STRING_ANY: {
@@ -2794,7 +2794,10 @@ public class BinaryWire extends AbstractWire implements Wire {
                             }
                         }
                         case U8_ARRAY: {
+                            bytes.readSkip(1);
                             long length = bytes.readRemaining();
+                            if (length == 0)
+                                return BytesStore.empty();
                             BytesStore toBytes = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
                             toBytes.write(0, bytes, bytes.readPosition(), length);
                             bytes.readSkip(length);
