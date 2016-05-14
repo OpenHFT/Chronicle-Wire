@@ -702,7 +702,7 @@ public class BinaryWireTest {
         for (int i = 0; i < Character.MAX_VALUE; i++) {
             if (!Character.isValidCodePoint(i))
                 continue;
-            wire.bytes().clear();
+            wire.clear();
             Arrays.fill(chars, (char) i);
             String s = new String(chars);
             wire.writeDocument(false, w -> w.write(() -> "message").text(s));
@@ -723,9 +723,6 @@ public class BinaryWireTest {
         Object[] object = wire.read()
                 .object(Object[].class);
         assertEquals(0, object.length);
-
-        // TODO we shouldn't need to create a new wire.
-        wire = createWire();
 
         Object[] threeObjects = {"abc", "def", "ghi"};
         wire.write("b").object(threeObjects);

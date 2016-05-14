@@ -784,8 +784,7 @@ public class TextWireTest {
         Object[] object = wire.read().object(Object[].class);
         assertEquals(0, object.length);
 
-        // TODO we shouldn't need to create a new wire.
-        wire = createWire();
+        wire.clear();
 
         Object[] threeObjects = {"abc", "def", "ghi"};
         wire.write("b").object(threeObjects);
@@ -1033,7 +1032,7 @@ public class TextWireTest {
         Wire wire = createWire();
         char[] chars = new char[256];
         for (int i = 0; i < 1024; i++) {
-            wire.bytes().clear();
+            wire.clear();
             Arrays.fill(chars, (char) i);
             String s = new String(chars);
             wire.writeDocument(false, w -> w.write(() -> "message").text(s));

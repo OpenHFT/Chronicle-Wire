@@ -27,7 +27,6 @@ public class EndOfDayShort extends AbstractMarshallable implements Serializable 
     public double closingPrice, change, changePercent;
     long daysVolume;
 
-    // TODO FIX the formatting of leaf nodes so this looks ok.
     @Override
     public void writeMarshallable(WireOut wire) {
         wire.write(() -> "name").text(name)

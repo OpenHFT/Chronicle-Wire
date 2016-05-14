@@ -435,9 +435,6 @@ public class BinaryWire2Test {
         byte[] four = {1, 2, 3, 4};
         wire.writeDocument(false, w -> w.write("four").object(four));
 
-//        wire.copyTo(
-//                new TextWire(Bytes.elasticByteBuffer()));
-        // TODO fix this output.
         assertEquals("--- !!data #binary\n" +
                         "nothing: !byte[] \"\"\n" +
                         "# position: 24\n" +

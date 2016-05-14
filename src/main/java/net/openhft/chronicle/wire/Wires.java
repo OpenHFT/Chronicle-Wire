@@ -259,7 +259,7 @@ public enum Wires {
 
     public static Wire acquireBinaryWire() {
         Wire wire = WireInternal.BINARY_WIRE_TL.get();
-        wire.bytes().clear();
+        wire.clear();
         return wire;
     }
 
