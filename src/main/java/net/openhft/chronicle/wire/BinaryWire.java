@@ -19,7 +19,9 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.ref.BinaryIntReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongReference;
+import net.openhft.chronicle.bytes.util.Bit8StringInterner;
 import net.openhft.chronicle.bytes.util.Compression;
+import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.*;
@@ -51,11 +53,8 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
  */
 public class BinaryWire extends AbstractWire implements Wire {
     private static final int END_OF_BYTES = -1;
-
-    static {
-        // make sure it has loaded.
-        WireInternal.INTERNER.valueCount();
-    }
+    private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
+    private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
 
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
@@ -403,14 +402,9 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @NotNull
     private <K> K readSmallField(int peekCode, Class<K> expectedClass) {
-        StringBuilder sb = Wires.acquireStringBuilder();
-        bytes.readSkip(1);
-        if (bytes.bytesStore() instanceof NativeBytesStore) {
-            AppendableUtil.parse8bit_SB1(bytes, sb, peekCode & 0x1f);
-        } else {
-            AppendableUtil.parse8bit(bytes, sb, peekCode & 0x1f);
-        }
-        return ObjectUtils.convertTo(expectedClass, WireInternal.INTERNER.intern(sb));
+        final String s = BIT8.intern(bytes, peekCode & 0x1F);
+
+        return ObjectUtils.convertTo(expectedClass, s);
     }
 
     @Nullable
@@ -1803,7 +1797,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     long end = bytes.readPosition() + len;
                     try {
                         bytes.readLimit(end);
-                        return UTF8_INTERNER.intern(bytes);
+                        return UTF8.intern(bytes);
                     } finally {
                         bytes.readLimit(limit);
                         bytes.readPosition(end);

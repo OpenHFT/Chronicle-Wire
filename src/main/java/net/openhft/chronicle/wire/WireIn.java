@@ -51,7 +51,6 @@ public interface WireIn extends WireCommon {
      */
     @NotNull
     default ValueIn readEventName(@NotNull StringBuilder name) {
-
         try {
             return read(name);
         } catch (Exception e) {

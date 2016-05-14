@@ -17,7 +17,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
@@ -37,7 +36,6 @@ import java.util.concurrent.TimeoutException;
  * Created by peter on 10/03/16.
  */
 public abstract class AbstractWire implements Wire {
-    protected static final UTF8StringInterner UTF8_INTERNER = new UTF8StringInterner(512);
     protected static final boolean ASSERTIONS;
 
     static {

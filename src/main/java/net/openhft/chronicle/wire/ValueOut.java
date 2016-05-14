@@ -329,7 +329,7 @@ public interface ValueOut {
         return wireOut();
     }
 
-    default <V> void object(Class<V> expectedType, V v) {
+    default <V> WireOut object(Class<V> expectedType, V v) {
         if (v instanceof WriteMarshallable)
             if (v.getClass() == expectedType)
                 marshallable((WriteMarshallable) v);
@@ -339,6 +339,7 @@ public interface ValueOut {
             untypedObject(v);
         else
             object(v);
+        return wireOut();
     }
 
     default <K, V> WireOut marshallable(Map<K, V> map) {

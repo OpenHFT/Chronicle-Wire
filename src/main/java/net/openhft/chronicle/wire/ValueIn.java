@@ -48,7 +48,8 @@ public interface ValueIn {
      * Text / Strings.
      */
     default <T> WireIn text(T t, @NotNull BiConsumer<T, String> ts) {
-        ts.accept(t, text());
+        final String text = text();
+        ts.accept(t, text);
         return wireIn();
     }
 
@@ -216,15 +217,15 @@ public interface ValueIn {
         return list;
     }
 
-    default <O, T extends ReadMarshallable, C extends Set<T>> WireIn set(O o, Function<O, T> tSupplier) {
+    default <O, T extends ReadMarshallable> WireIn set(O o, Function<O, T> tSupplier) {
         return collection(o, tSupplier);
     }
 
-    default <O, T extends ReadMarshallable, C extends List<T>> WireIn list(O o, Function<O, T> tSupplier) {
+    default <O, T extends ReadMarshallable> WireIn list(O o, Function<O, T> tSupplier) {
         return collection(o, tSupplier);
     }
 
-    default <O, T extends ReadMarshallable, C extends Collection<T>> WireIn collection(O o, Function<O, T> tSupplier) {
+    default <O, T extends ReadMarshallable> WireIn collection(O o, Function<O, T> tSupplier) {
         sequence(o, (o2, v) -> {
             while (v.hasNextSequenceItem()) {
                 T t = tSupplier.apply(o2);
