@@ -98,7 +98,7 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
                 if ((firstBytes & 0x80) == 0) {
                     System.out.println("TEXT_WIRE");
                     wireType = WireType.TEXT;
-                } else if (BinaryWireCode.isFieldCode(bytes.readPosition())) {
+                } else if (BinaryWireCode.isFieldCode(bytes.readByte(bytes.readPosition()))) {
                     System.out.println("FIELDLESS_BINARY");
                     wireType = WireType.FIELDLESS_BINARY;
                 } else {
