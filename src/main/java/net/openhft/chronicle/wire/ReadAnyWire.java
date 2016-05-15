@@ -89,8 +89,9 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
         public Wire acquireWire() {
             if (wire != null)
                 return wire;
-            if (bytes.readRemaining() >= 4) {
-                int firstBytes = bytes.readInt(bytes.readPosition());
+            if (bytes.readRemaining() >= 8) {
+                int firstBytes = bytes.readInt(bytes.readPosition()) |
+                        bytes.readInt(bytes.readPosition() + 4);
                 firstBytes |= firstBytes >> 16;
                 firstBytes |= firstBytes >> 8;
 
