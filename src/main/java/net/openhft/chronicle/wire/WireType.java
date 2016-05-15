@@ -167,12 +167,19 @@ public enum WireType implements Function<Bytes, Wire> {
         if (wire instanceof AbstractAnyWire)
             wire = ((AbstractAnyWire) wire).underlyingWire();
 
+        if (wire instanceof JSONWire)
+            return WireType.JSON;
+
         if (wire instanceof TextWire)
             return WireType.TEXT;
 
         if (wire instanceof BinaryWire) {
             BinaryWire binaryWire = (BinaryWire) wire;
             return binaryWire.fieldLess() ? FIELDLESS_BINARY : WireType.BINARY;
+        }
+
+        if (wire instanceof RawWire) {
+            return WireType.RAW;
         }
 
         throw new IllegalStateException("unknown type");

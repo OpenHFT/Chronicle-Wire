@@ -522,5 +522,10 @@ public class HashWire implements WireOut {
         public WireOut wireOut() {
             return HashWire.this;
         }
+
+        @Override
+        public void resetState() {
+
+        }
     }
 }

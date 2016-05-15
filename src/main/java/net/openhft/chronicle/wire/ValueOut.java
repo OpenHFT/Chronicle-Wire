@@ -561,4 +561,5 @@ public interface ValueOut {
         return wireOut();
     }
 
+    void resetState();
 }

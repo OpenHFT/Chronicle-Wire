@@ -615,6 +615,11 @@ public class RawWire extends AbstractWire implements Wire {
         public WireOut wireOut() {
             return RawWire.this;
         }
+
+        @Override
+        public void resetState() {
+
+        }
     }
 
     class RawValueIn implements ValueIn {
