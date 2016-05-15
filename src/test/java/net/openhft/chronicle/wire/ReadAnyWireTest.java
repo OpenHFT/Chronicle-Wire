@@ -54,11 +54,19 @@ public class ReadAnyWireTest {
     }
 
     @Test
+    public void testCreateReadAnyFirstJSONWire() {
+        final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+        final String expected = "world";
+        JSON.apply(bytes).write((() -> "hello")).text(expected);
+        Assert.assertEquals(expected, READ_ANY.apply(bytes).read((() -> "hello")).text());
+    }
+
+    @Test
     public void testCreateReadAnyFirstFIELDLESS_BINARYWire() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         final String expected = "world";
-        FIELDLESS_BINARY.apply(bytes).writeDocument(false, w -> w.write(() -> "hello").text(expected));
-        READ_ANY.apply(bytes).readDocument(null, w -> w.read(() -> "hello").text(expected, Assert::assertEquals));
+        FIELDLESS_BINARY.apply(bytes).write((() -> "hello")).text(expected);
+        Assert.assertEquals(expected, READ_ANY.apply(bytes).read((() -> "hello")).text());
     }
 }
 
