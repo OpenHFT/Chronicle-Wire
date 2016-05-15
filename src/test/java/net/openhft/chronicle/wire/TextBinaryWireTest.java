@@ -107,6 +107,9 @@ public class TextBinaryWireTest {
 
     @Test
     public void testConvertToNum() {
+        if (wireType == WireType.RAW)
+            return;
+
         Wire wire = createWire();
         wire.write("a").bool(false)
                 .write("b").bool(true)
