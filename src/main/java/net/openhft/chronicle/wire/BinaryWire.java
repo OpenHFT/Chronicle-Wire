@@ -149,18 +149,6 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case BinaryWireHighCode.CONTROL:
                 switch (peekCode) {
-                    case EVENT_OBJECT:
-                        bytes.readSkip(1);
-                        wire.startEvent();
-                        wire.getValueOut().leaf(true);
-                        consumePadding();
-                        peekCode = peekCode();
-                        if (peekCode == TYPE_PREFIX)
-                            copyOne(wire);
-                        copyOne(wire);
-                        wire.endEvent();
-                        break outerSwitch;
-
                     case PADDING:
                         bytes.readSkip(1);
                         break outerSwitch;
@@ -168,6 +156,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         bytes.readSkip(1);
                         bytes.readSkip(bytes.readUnsignedInt());
                         break outerSwitch;
+
                     case BYTES_LENGTH8: {
                         bytes.readSkip(1);
                         int len = bytes.readUnsignedByte();
@@ -385,7 +374,13 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public Wire readComment(@NotNull StringBuilder s) {
-        throw new UnsupportedOperationException();
+        if (peekCode() == COMMENT) {
+            bytes.readSkip(1);
+            bytes.readUtf8(s);
+        } else {
+            s.setLength(0);
+        }
+        return this;
     }
 
     @Nullable
@@ -418,8 +413,10 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @NotNull
     private <K> K readSmallField(int peekCode, Class<K> expectedClass) {
-        final String s = BIT8.intern(bytes, peekCode & 0x1F);
-
+        bytes.readSkip(1);
+        final int length = peekCode & 0x1F;
+        final String s = BIT8.intern(bytes, length);
+        bytes.readSkip(length);
         return ObjectUtils.convertTo(expectedClass, s);
     }
 
@@ -546,6 +543,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             case FIELD_ANCHOR:
                 bytes.readSkip(1);
                 return readFieldAnchor(sb);
+
             case EVENT_OBJECT:
                 valueIn.text(sb);
                 return sb;
@@ -730,7 +728,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         throw new UnsupportedOperationException(stringForCode(code));
     }
 
-    private Number readFloat0object(int code) {
+    private Number readFloat0bject(int code) {
         // TODO: in some places we have already called this before invoking the function,
         // so we should review them and optimize the calls to do the check only once
         if (code < 128 && code >= 0) {
@@ -985,6 +983,9 @@ public class BinaryWire extends AbstractWire implements Wire {
                         if (bytes.readUtf8(sb))
                             return sb;
                         return null;
+                    case EVENT_OBJECT:
+                        valueIn.text((StringBuilder) sb);
+                        return sb;
                     default:
                         return null;
                 }
@@ -2861,7 +2862,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                 case BinaryWireHighCode.FLOAT:
                     bytes.readSkip(1);
-                    return readFloat0object(code);
+                    return readFloat0bject(code);
 
                 case BinaryWireHighCode.INT:
                     bytes.readSkip(1);
@@ -2916,7 +2917,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                 case BinaryWireHighCode.FLOAT:
                     bytes.readSkip(1);
-                    readFloat0object(code);
+                    readFloat0bject(code);
                     return;
 
                 case BinaryWireHighCode.INT:

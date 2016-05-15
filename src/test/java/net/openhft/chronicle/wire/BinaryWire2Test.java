@@ -399,6 +399,19 @@ public class BinaryWire2Test {
     }
 
     @Test
+    public void testBytesArray() {
+        Wire wire = createWire();
+        for (int i = 0; i < 70000; i++) {
+            wire.clear();
+            final byte[] fromBytes = new byte[i];
+            wire.writeDocument(false, w -> w.write("bytes").bytes(fromBytes));
+            Wires.fromSizePrefixedBlobs(wire);
+            int finalI = i;
+            wire.readDocument(null, w -> assertEquals(finalI, w.read(() -> "bytes").bytes().length));
+        }
+    }
+
+    @Test
     public void testSmallArray() {
         Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("index")

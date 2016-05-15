@@ -490,7 +490,18 @@ public class TextWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public Wire readComment(@NotNull StringBuilder s) {
-        throw new UnsupportedOperationException();
+        consumeWhiteSpace();
+        if (peekCode() == '#') {
+            bytes.readSkip(1);
+            consumeWhiteSpace();
+            bytes.parseUtf8(s, StopCharTesters.CONTROL_STOP);
+        }
+        return this;
+    }
+
+    public void consumeWhiteSpace() {
+        while (Character.isWhitespace(peekCode()))
+            bytes.readSkip(1);
     }
 
     @Override
@@ -1849,7 +1860,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn int8(@NotNull T t, @NotNull ObjByteConsumer<T> tb) {
             consumePadding();
-            tb.accept(t, (byte) bytes.parseLong());
+            tb.accept(t, (byte) getALong());
             return TextWire.this;
         }
 
@@ -1857,7 +1868,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn uint8(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
             consumePadding();
-            ti.accept(t, (short) bytes.parseLong());
+            ti.accept(t, (short) getALong());
             return TextWire.this;
         }
 
@@ -1865,7 +1876,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn int16(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
             consumePadding();
-            ti.accept(t, (short) bytes.parseLong());
+            ti.accept(t, (short) getALong());
             return TextWire.this;
         }
 
@@ -1873,7 +1884,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn uint16(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
             consumePadding();
-            ti.accept(t, (int) bytes.parseLong());
+            ti.accept(t, (int) getALong());
             return TextWire.this;
         }
 
@@ -1881,15 +1892,35 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn int32(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
             consumePadding();
-            ti.accept(t, (int) bytes.parseLong());
+            ti.accept(t, (int) getALong());
             return TextWire.this;
+        }
+
+        long getALong() {
+            final int code = peekCode();
+            switch (code) {
+                case '"':
+                case '\'':
+                    bytes.readSkip(1);
+                    break;
+
+                case 't':
+                case 'T':
+                case 'f':
+                case 'F':
+                    return bool() ? 1 : 0;
+                case '{':
+                case '[':
+                    throw new IORuntimeException("Cannot read a " + (char) code + " as a number");
+            }
+            return bytes.parseLong();
         }
 
         @NotNull
         @Override
         public <T> WireIn uint32(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
             consumePadding();
-            tl.accept(t, bytes.parseLong());
+            tl.accept(t, getALong());
             return TextWire.this;
         }
 
@@ -1897,7 +1928,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn int64(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
             consumePadding();
-            tl.accept(t, bytes.parseLong());
+            tl.accept(t, getALong());
             return TextWire.this;
         }
 
@@ -2385,7 +2416,7 @@ public class TextWire extends AbstractWire implements Wire {
         public long int64() {
             consumePadding();
             valueIn.skipType();
-            long l = bytes.parseLong();
+            long l = getALong();
             checkRewind();
             return l;
         }
