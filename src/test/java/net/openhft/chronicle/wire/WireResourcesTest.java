@@ -15,35 +15,40 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.MappedBytes;
+import org.junit.Test;
+
 import java.io.File;
 import java.nio.file.Files;
-
-import net.openhft.chronicle.bytes.MappedBytes;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 public class WireResourcesTest {
 
-    @Ignore("Fails with: java.lang.IllegalStateException: Released")
     @Test
     public void testMappedBytesWireRelease() throws Exception {
         File tmp = Files.createTempFile("chronicle-", ".wire").toFile();
         tmp.deleteOnExit();
 
-        MappedBytes mb = MappedBytes.mappedBytes(tmp, 1024);
+        MappedBytes mb0;
+        try (MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024)) {
+            assertEquals(1, mb.refCount());
 
-        Wire wire = WireType.TEXT.apply(mb);
-        wire.startUse();
-        wire.headerNumber(1);
-        wire.writeFirstHeader();
-        wire.updateFirstHeader();
+            Wire wire = WireType.TEXT.apply(mb);
+            System.out.println(mb.refCount());
 
-        assertEquals(2, mb.mappedFile().refCount());
-        assertEquals(2, mb.refCount());
+            assert wire.startUse();
+            wire.headerNumber(1);
+            wire.writeFirstHeader();
+            wire.updateFirstHeader();
+            assert wire.endUse();
 
-        mb.release();
-        mb.release();
+            assertEquals(2, mb.mappedFile().refCount());
+            assertEquals(1, mb.refCount());
+
+            mb0 = mb;
+        }
+        assertEquals(0, mb0.mappedFile().refCount());
+        assertEquals(0, mb0.refCount());
     }
 }

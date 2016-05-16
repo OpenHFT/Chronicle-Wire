@@ -95,7 +95,7 @@ public interface WireCommon {
     void parent(Object parent);
 
     /**
-     * Used to check that the wrie is being used by only one thread
+     * Used to check that the wire is being used by only one thread
      *
      * @return true always, so it can be used in an assert line
      */
