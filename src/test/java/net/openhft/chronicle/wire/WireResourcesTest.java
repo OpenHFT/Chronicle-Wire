@@ -26,20 +26,24 @@ import static org.junit.Assert.assertEquals;
 public class WireResourcesTest {
 
     @Test
-    public void testMappedBytesWireRelease() throws Exception {
+    public void testMappedBytesClose() throws Exception {
         File tmp = Files.createTempFile("chronicle-", ".wire").toFile();
         tmp.deleteOnExit();
 
         MappedBytes mb0;
         try (MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024)) {
+            assertEquals(1, mb.mappedFile().refCount());
             assertEquals(1, mb.refCount());
 
             Wire wire = WireType.TEXT.apply(mb);
-            System.out.println(mb.refCount());
 
             assert wire.startUse();
-            wire.headerNumber(1);
-            wire.writeFirstHeader();
+            wire.headerNumber(0);
+
+            assertEquals(1, mb.mappedFile().refCount());
+            wire.writeFirstHeader(); // first touches the file.
+            assertEquals(2, mb.mappedFile().refCount());
+
             wire.updateFirstHeader();
             assert wire.endUse();
 
@@ -50,5 +54,34 @@ public class WireResourcesTest {
         }
         assertEquals(0, mb0.mappedFile().refCount());
         assertEquals(0, mb0.refCount());
+    }
+
+    @Test
+    public void testMappedBytesWireRelease() throws Exception {
+        File tmp = Files.createTempFile("chronicle-", ".wire").toFile();
+        tmp.deleteOnExit();
+
+        Wire wire;
+        try (MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024)) {
+            assertEquals(1, mb.mappedFile().refCount());
+            assertEquals(1, mb.refCount());
+
+            wire = WireType.TEXT.apply(mb);
+            wire.bytes().reserve();
+
+            assertEquals(1, mb.mappedFile().refCount());
+            assertEquals(2, mb.refCount());
+        } // not really closed as we have one reverse left.
+
+        assertEquals(1, wire.bytes().refCount());
+
+        assert wire.startUse();
+        wire.headerNumber(1);
+        wire.writeFirstHeader();
+        wire.updateFirstHeader();
+        assert wire.endUse();
+
+        wire.bytes().release();
+        assertEquals(0, wire.bytes().refCount());
     }
 }
