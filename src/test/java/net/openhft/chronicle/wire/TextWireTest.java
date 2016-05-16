@@ -29,6 +29,8 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.annotation.RetentionPolicy;
+import java.net.Socket;
+import java.nio.channels.SocketChannel;
 import java.security.InvalidAlgorithmParameterException;
 import java.time.*;
 import java.util.*;
@@ -41,6 +43,7 @@ import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
@@ -759,7 +762,7 @@ public class TextWireTest {
 
         Wire wire = createWire();
         wire.write().object(WireType.BINARY)
-                .write().object(WireType.TEXT)
+                .write().object(TEXT)
                 .write().object(WireType.RAW);
 
         assertEquals("\"\": !WireType BINARY\n" +
@@ -767,7 +770,7 @@ public class TextWireTest {
                 "\"\": !WireType RAW\n", bytes.toString());
 
         assertEquals(WireType.BINARY, wire.read().object(Object.class));
-        assertEquals(WireType.TEXT, wire.read().object(Object.class));
+        assertEquals(TEXT, wire.read().object(Object.class));
         assertEquals(WireType.RAW, wire.read().object(Object.class));
     }
 
@@ -1136,8 +1139,16 @@ public class TextWireTest {
         });
     }
 
+    @Test
+    public void writeUnserializable() throws IOException {
+        System.out.println(TEXT.asString(Thread.currentThread()));
+        Socket s = new Socket();
+        System.out.println(TEXT.asString(s));
+        SocketChannel sc = SocketChannel.open();
+        System.out.println(TEXT.asString(sc));
+    }
+
     enum BWKey implements WireKey {
         field1, field2, field3
     }
-
 }
