@@ -2821,15 +2821,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                         case UPDATED_ALIAS:
                             return typedMarshallable();
 
-                        case EVENT_OBJECT: {
-                            if (using == null) {
-                                strategy = SerializationStrategies.MAP;
-                                using = strategy.newInstance(null);
-                            }
-
-                            strategy.readUsing(using, valueIn);
-                            return ObjectUtils.convertTo(type, using);
-                        }
                     }
                     break;
                 case BinaryWireHighCode.SPECIAL:
@@ -2856,6 +2847,15 @@ public class BinaryWire extends AbstractWire implements Wire {
                                 throw new IORuntimeException(e);
                             }
                             return object(null, clazz2);
+                        }
+                        case EVENT_OBJECT: {
+                            if (using == null) {
+                                strategy = SerializationStrategies.MAP;
+                                using = strategy.newInstance(null);
+                            }
+
+                            strategy.readUsing(using, valueIn);
+                            return ObjectUtils.convertTo(type, using);
                         }
                     }
                     break;
