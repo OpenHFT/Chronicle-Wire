@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Created by daniel on 08/04/15.
  */
-public class TestMarshallable implements Marshallable {
+public class TestMarshallable extends AbstractMarshallable {
 
     private StringBuilder name = new StringBuilder();
     private int count;
@@ -54,20 +54,5 @@ public class TestMarshallable implements Marshallable {
 
     public void setCount(int count) {
         this.count = count;
-    }
-
-    @Override
-    public int hashCode() {
-        return HashWire.hash32(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof WriteMarshallable && toString().equals(obj.toString());
-    }
-
-    @Override
-    public String toString() {
-        return WireType.TEXT.asString(this);
     }
 }

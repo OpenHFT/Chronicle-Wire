@@ -22,12 +22,14 @@
 package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.core.annotation.NotNull;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.wire.AbstractMarshallable;
+import net.openhft.chronicle.wire.WireIn;
+import net.openhft.chronicle.wire.WireOut;
 
 /**
  * @author gadei
  */
-public class WireModel implements Marshallable {
+public class WireModel extends AbstractMarshallable {
     private long id;
     private int revision;
     private String key;
@@ -79,19 +81,4 @@ public class WireModel implements Marshallable {
         this.key = key;
     }
 
-    @Override
-    public int hashCode() {
-        return HashWire.hash32(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof WriteMarshallable &&
-                obj.toString().equals(toString());
-    }
-
-    @Override
-    public String toString() {
-        return WireType.TEXT.asString(this);
-    }
 }

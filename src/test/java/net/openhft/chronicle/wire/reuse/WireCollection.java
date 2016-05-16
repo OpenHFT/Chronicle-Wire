@@ -17,7 +17,8 @@
 package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.core.annotation.NotNull;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.wire.WireIn;
+import net.openhft.chronicle.wire.WireOut;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +27,7 @@ import java.util.Map;
  *
  * @author gadei
  */
-public class WireCollection extends WireModel implements Marshallable {
+public class WireCollection extends WireModel {
 
     private String reference;
     private String path;
@@ -119,21 +120,5 @@ public class WireCollection extends WireModel implements Marshallable {
 
     public void addCollection(WireCollection collection) {
         this.collections.put(collection.getReference(), collection);
-    }
-
-    @Override
-    public int hashCode() {
-        return HashWire.hash32(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof WriteMarshallable &&
-                obj.toString().equals(toString());
-    }
-
-    @Override
-    public String toString() {
-        return WireType.TEXT.asString(this);
     }
 }

@@ -17,10 +17,7 @@
 package net.openhft.chronicle.wire.reordered;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.wire.Marshallable;
-import net.openhft.chronicle.wire.WireIn;
-import net.openhft.chronicle.wire.WireOut;
-import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -29,7 +26,7 @@ import java.util.List;
 /**
  * Created by peter.lawrey on 01/02/2016.
  */
-public class OuterClass implements Marshallable {
+public class OuterClass extends AbstractMarshallable {
     final List<NestedClass> listAFree = new ArrayList<>();
     final List<NestedClass> listA = new ArrayList<>();
     final List<NestedClass> listBFree = new ArrayList<>();

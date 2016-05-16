@@ -17,20 +17,18 @@
 package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.core.annotation.NotNull;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.wire.WireIn;
+import net.openhft.chronicle.wire.WireOut;
 
 /**
  * @author Gadi Eichhorn
  */
-public class WireProperty extends WireModel implements Marshallable {
+public class WireProperty extends WireModel {
 
     private String reference;
     private String path;
     private String name;
     private String value;
-
-    public WireProperty() {
-    }
 
     public WireProperty(String reference, String path, String name, String value, long id, int revision, String key) {
         super(id, revision, key);
@@ -90,19 +88,4 @@ public class WireProperty extends WireModel implements Marshallable {
         this.value = value;
     }
 
-    @Override
-    public int hashCode() {
-        return HashWire.hash32(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof WriteMarshallable &&
-                obj.toString().equals(toString());
-    }
-
-    @Override
-    public String toString() {
-        return WireType.TEXT.asString(this);
-    }
 }

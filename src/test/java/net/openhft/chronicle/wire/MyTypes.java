@@ -15,28 +15,13 @@
  */
 package net.openhft.chronicle.wire;
 
-class MyTypes implements Marshallable {
+class MyTypes extends AbstractMarshallable {
     final StringBuilder text = new StringBuilder();
     boolean b;
     short s;
     double d;
     long l;
     int i;
-
-    @Override
-    public boolean equals(Object o) {
-        return Marshallable.$equals(this, o);
-    }
-
-    @Override
-    public int hashCode() {
-        return Marshallable.$hashCode(this);
-    }
-
-    @Override
-    public String toString() {
-        return Marshallable.$toString(this);
-    }
 
     enum Fields implements WireKey {
         B_FLAG, S_NUM, D_NUM, L_NUM, I_NUM, TEXT;
