@@ -23,6 +23,9 @@ import java.nio.file.Files;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * @author lburgazzoli
+ */
 public class WireResourcesTest {
 
     @Test
