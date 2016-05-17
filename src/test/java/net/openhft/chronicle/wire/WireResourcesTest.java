@@ -15,11 +15,13 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.MappedBytes;
-import org.junit.Test;
-
 import java.io.File;
 import java.nio.file.Files;
+
+import net.openhft.chronicle.bytes.MappedBytes;
+import net.openhft.chronicle.bytes.MappedFile;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -86,5 +88,32 @@ public class WireResourcesTest {
 
         wire.bytes().release();
         assertEquals(0, wire.bytes().refCount());
+    }
+
+    @Ignore("mh!!")
+    @Test
+    public void testMappedBytesWireRelease2() throws Exception {
+        File tmp = Files.createTempFile("chronicle-", ".wire").toFile();
+        tmp.deleteOnExit();
+
+        Wire wire = WireType.TEXT.apply(MappedBytes.mappedBytes(tmp, 64 * 1024));
+
+        assert wire.startUse();
+        wire.headerNumber(1);
+        wire.writeFirstHeader();
+        wire.updateFirstHeader();
+
+        assertEquals(1, wire.bytes().refCount());
+        assertEquals(2, mappedFile(wire).refCount()); // Shouldn't be 1 ?
+
+        assert wire.endUse();
+
+        wire.bytes().release();
+        assertEquals(0, wire.bytes().refCount());
+        assertEquals(0, mappedFile(wire).refCount()); // Shouldn't be 1 ?
+    }
+
+    protected MappedFile mappedFile(Wire wire) {
+        return ((MappedBytes)wire.bytes()).mappedFile();
     }
 }
