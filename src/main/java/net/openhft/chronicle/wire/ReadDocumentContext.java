@@ -64,7 +64,7 @@ public class ReadDocumentContext implements DocumentContext {
 
     @Override
     public void close() {
-        if (readLimit > 0) {
+        if (readLimit > 0 && wire != null) {
             final Bytes<?> bytes = wire.bytes();
             bytes.readLimit(readLimit);
             bytes.readPosition(readPosition);
