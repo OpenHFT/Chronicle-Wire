@@ -263,6 +263,9 @@ public abstract class AbstractWire implements Wire {
             throwLengthMismatch(length, actualLength);
         int header = length;
         if (metaData) header |= Wires.META_DATA;
+        if (header == Wires.UNKNOWN_LENGTH)
+            throw new UnsupportedOperationException("Data messages of 0 length are not supported.");
+
         if (ASSERTIONS) {
             if (!bytes.compareAndSwapInt(position, expectedHeader, header))
                 throwHeaderOverwritten(position, expectedHeader, bytes);
