@@ -1139,6 +1139,14 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
+        public WireOut bytesLiteral(@Nullable BytesStore fromBytes) {
+            long remaining = fromBytes.readRemaining();
+            writeLength(Maths.toInt32(remaining));
+            bytes.write(fromBytes);
+            return BinaryWire.this;
+        }
+
+        @Override
         public int compressedSize() {
             return compressedSize;
         }
@@ -1870,6 +1878,25 @@ public class BinaryWire extends AbstractWire implements Wire {
             toBytes.clear();
             bytes.readWithLength(length - 1, toBytes::write);
             return wireIn();
+        }
+
+        @NotNull
+        @Override
+        public WireIn bytesLiteral(@NotNull BytesOut toBytes) {
+            long length = readLength();
+            toBytes.clear();
+            toBytes.write(bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
+            return wireIn();
+        }
+
+        @Override
+        public BytesStore bytesLiteral() {
+            int length = Maths.toUInt31(readLength());
+            BytesStore toBytes = BytesStore.wrap(new byte[length]);
+            toBytes.write(0, bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
+            return toBytes;
         }
 
         @Nullable

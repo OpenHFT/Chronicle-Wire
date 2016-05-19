@@ -77,6 +77,10 @@ public interface ValueOut {
     @NotNull
     WireOut bytes(@Nullable BytesStore fromBytes);
 
+    default WireOut bytesLiteral(@Nullable BytesStore fromBytes) {
+        return bytes(fromBytes);
+    }
+
     @NotNull
     WireOut bytes(String type, @Nullable BytesStore fromBytes);
 

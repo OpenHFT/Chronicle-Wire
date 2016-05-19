@@ -83,6 +83,15 @@ public interface ValueIn {
     @NotNull
     WireIn bytes(@NotNull BytesOut toBytes);
 
+    @NotNull
+    default WireIn bytesLiteral(@NotNull BytesOut toBytes) {
+        return bytes(toBytes);
+    }
+
+    default BytesStore bytesLiteral() {
+        return bytesStore();
+    }
+
     @Nullable
     WireIn bytesSet(@NotNull PointerBytesStore toBytes);
 

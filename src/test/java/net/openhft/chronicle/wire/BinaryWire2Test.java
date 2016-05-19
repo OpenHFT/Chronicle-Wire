@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.time.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
@@ -401,7 +402,9 @@ public class BinaryWire2Test {
     @Test
     public void testBytesArray() {
         Wire wire = createWire();
-        for (int i = 0; i < 70000; i++) {
+        Random rand = new Random();
+        for (int i = 0; i < 70000; i += rand.nextInt(i + 1) + 1) {
+            System.out.println(i);
             wire.clear();
             final byte[] fromBytes = new byte[i];
             wire.writeDocument(false, w -> w.write("bytes").bytes(fromBytes));
@@ -493,4 +496,24 @@ public class BinaryWire2Test {
         });
     }
 
+    @Test
+    public void testBytesLiteral() {
+        Wire wire = new BinaryWire(Bytes.elasticByteBuffer());
+        wire.write("test").text("Hello World");
+
+        final BinaryWire wire1 = createWire();
+        wire1.writeDocument(false, (WireOut w) -> w.write(() -> "nested")
+                .bytesLiteral(wire.bytes()));
+
+        assertEquals("--- !!data #binary\n" +
+                "nested: {\n" +
+                "  test: Hello World\n" +
+                "}\n", Wires.fromSizePrefixedBlobs(wire1));
+
+        wire1.readDocument(null, w -> {
+            final BytesStore bytesStore = w.read(() -> "nested")
+                    .bytesLiteral();
+            assertEquals(wire.bytes(), bytesStore);
+        });
+    }
 }
