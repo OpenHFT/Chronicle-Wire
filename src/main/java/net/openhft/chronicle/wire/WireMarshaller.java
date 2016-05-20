@@ -49,7 +49,7 @@ public class WireMarshaller<T> {
         this.isLeaf = isLeaf;
     }
 
-    static <T> WireMarshaller<T> of(Class<T> tClass) {
+    public  static <T> WireMarshaller<T> of(Class<T> tClass) {
         Map<String, Field> map = new LinkedHashMap<>();
         getAllField(tClass, map);
         final FieldAccess[] fields = map.values().stream()
