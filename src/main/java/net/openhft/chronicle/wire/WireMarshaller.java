@@ -74,6 +74,17 @@ public class WireMarshaller<T> {
         }
     }
 
+    public void writeMarshallable(T t, Bytes bytes) {
+        for (FieldAccess field : fields) {
+            try {
+                field.getAsBytes(t, bytes);
+            } catch (IllegalAccessException e) {
+                throw new AssertionError(e);
+            }
+        }
+    }
+
+
     public void writeMarshallable(T t, WireOut out, T previous, boolean copy) {
         for (FieldAccess field : fields) {
             field.write(t, out, previous, copy);
