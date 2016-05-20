@@ -26,10 +26,13 @@ import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -39,6 +42,8 @@ import java.util.function.Supplier;
  * A selection of prebuilt wire types.
  */
 public enum WireType implements Function<Bytes, Wire> {
+
+
     TEXT {
         @NotNull
         @Override
@@ -61,6 +66,37 @@ public enum WireType implements Function<Bytes, Wire> {
         @Override
         public Wire apply(Bytes bytes) {
             return new BinaryWire(bytes);
+        }
+
+        @Override
+        public String asString(Object marshallable) {
+            return asHexString(marshallable);
+        }
+
+        @Override
+        public <T> T fromString(CharSequence cs) {
+            return fromHexString(cs);
+        }
+    }, DEFAULT_ZERO_BINARY {
+        @NotNull
+        @Override
+        public Wire apply(Bytes bytes) {
+
+            try {
+                Class<Wire> aClass = (Class) Class.forName("software.chronicle.wire.DefaultZeroWire");
+                final Constructor<Wire> declaredConstructor = aClass.getDeclaredConstructor(Bytes.class);
+                return declaredConstructor.newInstance(bytes);
+
+            } catch (Exception e) {
+                IllegalStateException licence = new IllegalStateException("A Chronicle Wire " +
+                        "Enterprise licence is" +
+                        " required to run this code because you are using DefaultZeroWire which " +
+                        "is a licence product." +
+                        "." +
+                        "Please contact sales@chronicle.software");
+                LOG.error("", licence);
+                throw licence;
+            }
         }
 
         @Override
@@ -140,6 +176,7 @@ public enum WireType implements Function<Bytes, Wire> {
         }
     };
 
+    private static final Logger LOG = LoggerFactory.getLogger(WireType.class);
     static final ThreadLocal<Bytes> bytesTL = ThreadLocal.withInitial(Bytes::allocateElasticDirect);
     static final ThreadLocal<Bytes> bytes2TL = ThreadLocal.withInitial(Bytes::allocateElasticDirect);
     private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
@@ -172,6 +209,11 @@ public enum WireType implements Function<Bytes, Wire> {
 
         if (wire instanceof TextWire)
             return WireType.TEXT;
+
+        // this must be above BinaryWire
+        if ("DefaultZeroWire".equals(wire.getClass().getSimpleName())) {
+            return DEFAULT_ZERO_BINARY;
+        }
 
         if (wire instanceof BinaryWire) {
             BinaryWire binaryWire = (BinaryWire) wire;
@@ -291,4 +333,6 @@ public enum WireType implements Function<Bytes, Wire> {
         Wire wire = apply(bytes);
         return wire.getValueIn().marshallableAsMap(String.class, Object.class);
     }
+
+
 }
