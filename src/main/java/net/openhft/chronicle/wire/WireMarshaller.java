@@ -33,20 +33,41 @@ import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
  * Created by peter on 16/03/16.
  */
 public class WireMarshaller<T> {
-    static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial(WireMarshaller::new);
+    static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial(tClass ->
+            Throwable.class.isAssignableFrom(tClass)
+                    ? WireMarshaller.ofThrowable(tClass)
+                    : WireMarshaller.of(tClass)
+    );
+
+    private final Class<T> tClass;
     private final FieldAccess[] fields;
     private final boolean isLeaf;
 
-    public WireMarshaller(Class<T> tClass) {
+    public WireMarshaller(Class<T> tClass, FieldAccess[] fields, boolean isLeaf) {
+        this.tClass = tClass;
+        this.fields = fields;
+        this.isLeaf = isLeaf;
+    }
+
+    static <T> WireMarshaller<T> of(Class<T> tClass) {
         Map<String, Field> map = new LinkedHashMap<>();
         getAllField(tClass, map);
-        fields = map.values().stream()
+        final FieldAccess[] fields = map.values().stream()
                 .map(FieldAccess::create).toArray(FieldAccess[]::new);
-        isLeaf = map.values().stream()
+        boolean isLeaf = map.values().stream()
                 .map(Field::getType).noneMatch(
                         c -> WireMarshaller.class.isAssignableFrom(c) ||
                                 isCollection(c));
-//        System.out.println(tClass + " leaf= " + isLeaf);
+        return new WireMarshaller<>(tClass, fields, isLeaf);
+    }
+
+    private static <T> WireMarshaller<T> ofThrowable(Class<T> tClass) {
+        Map<String, Field> map = new LinkedHashMap<>();
+        getAllField(tClass, map);
+        final FieldAccess[] fields = map.values().stream()
+                .map(FieldAccess::create).toArray(FieldAccess[]::new);
+        boolean isLeaf = false;
+        return new WireMarshaller<>(tClass, fields, isLeaf);
     }
 
     private static boolean isCollection(Class<?> c) {
@@ -393,7 +414,8 @@ public class WireMarshaller<T> {
                 ParameterizedType pType = (ParameterizedType) genericType;
                 Type type0 = pType.getActualTypeArguments()[0];
                 componentType = extractClass(type0);
-                isLeaf = WIRE_MARSHALLER_CL.get(componentType).isLeaf;
+                isLeaf = !Throwable.class.isAssignableFrom(componentType)
+                        && WIRE_MARSHALLER_CL.get(componentType).isLeaf;
             } else {
                 componentType = Object.class;
             }
