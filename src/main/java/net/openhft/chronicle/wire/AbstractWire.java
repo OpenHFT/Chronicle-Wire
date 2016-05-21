@@ -211,7 +211,12 @@ public abstract class AbstractWire implements Wire {
             bytes.writePositionRemaining(pos + Wires.SPB_HEADER_SIZE, maxlen);
             return pos;
         }
-        return writeHeader0(length, timeout, timeUnit);
+        try {
+            return writeHeader0(length, timeout, timeUnit);
+        } catch (TimeoutException e) {
+            bytes.writeInt(pos, 0);
+            return writeHeader0(length, timeout, timeUnit);
+        }
     }
 
     private long writeHeader0(int length, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {
@@ -220,9 +225,7 @@ public abstract class AbstractWire implements Wire {
         long pos = bytes.writePosition();
         if (pauser == BusyPauser.INSTANCE)
             pauser = new LongPauser(1_000, 1_000, 1, 10, TimeUnit.MILLISECONDS);
-//        long start = System.nanoTime();
         try {
-//            for (int i = 0; ; i++) {
             for (; ; ) {
                 if (bytes.compareAndSwapInt(pos, 0, Wires.NOT_COMPLETE | length)) {
                     bytes.writePosition(pos + Wires.SPB_HEADER_SIZE);
@@ -230,9 +233,6 @@ public abstract class AbstractWire implements Wire {
                     if (maxlen > bytes.writeRemaining())
                         throwNotEnoughSpace(maxlen, bytes);
                     bytes.writeLimit(bytes.writePosition() + maxlen);
-//                    long time =System.nanoTime() - start;
-//                    if (time > 20e3)
-//                        System.out.println(time/1000+" "+i);
                     return pos;
                 }
                 pauser.pause(timeout, timeUnit);
@@ -240,7 +240,7 @@ public abstract class AbstractWire implements Wire {
                 // two states where it is unable to continue.
                 if (header == Wires.END_OF_DATA)
                     throw new EOFException();
-                if (header == Wires.NOT_COMPLETE_UNKNOWN_LENGTH)
+                if (Wires.isNotComplete(header))
                     continue;
                 if (Wires.isData(header))
                     incrementHeaderNumber();
