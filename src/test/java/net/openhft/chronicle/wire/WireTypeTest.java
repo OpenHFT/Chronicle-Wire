@@ -80,7 +80,7 @@ public class WireTypeTest {
         tm.setName("name");
 
         for (WireType wt : WireType.values()) {
-            if (wt == WireType.RAW || wt == WireType.READ_ANY || wt == WireType.CSV)
+            if (wt == WireType.RAW || wt == WireType.READ_ANY || wt == WireType.CSV || wt == WireType.DEFAULT_ZERO_BINARY)
                 continue;
             String tmp = OS.getTarget() + "/testFromFile-" + System.nanoTime();
             wt.toFile(tmp, tm);
