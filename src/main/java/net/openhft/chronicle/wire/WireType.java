@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
 import net.openhft.chronicle.bytes.ref.TextLongReference;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.LicenceCheck;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -41,7 +42,7 @@ import java.util.function.Supplier;
 /**
  * A selection of prebuilt wire types.
  */
-public enum WireType implements Function<Bytes, Wire> {
+public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
 
     TEXT {
@@ -95,6 +96,20 @@ public enum WireType implements Function<Bytes, Wire> {
                         "." +
                         "Please contact sales@chronicle.software");
                 LOG.error("", licence);
+                throw licence;
+            }
+        }
+
+        public void licenceCheck() {
+            try {
+                Class e = Class.forName("software.chronicle.wire.DefaultZeroWire");
+                e.getDeclaredConstructor(new Class[]{Bytes.class});
+            } catch (Exception var4) {
+                IllegalStateException licence = new IllegalStateException("A Chronicle Wire " +
+                        "Enterprise licence is required to run this code because you are using " +
+                        "DefaultZeroWire which is a licence product. " +
+                        "Please contact sales@chronicle.software");
+                WireType.LOG.error("", licence);
                 throw licence;
             }
         }
