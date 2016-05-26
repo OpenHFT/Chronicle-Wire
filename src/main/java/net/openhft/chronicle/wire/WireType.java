@@ -125,7 +125,6 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                 isAvailable = false;
                 return false;
             }
-
         }
 
 
