@@ -104,7 +104,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
             final IllegalStateException licence = new IllegalStateException("A Chronicle Wire " +
                     "Enterprise licence is required to run this code because you are using " +
-                    "DefaultZeroWire which is a licence product. " +
+                    "DEFAULT_ZERO_BINARY which is a licence product. " +
                     "Please contact sales@chronicle.software");
             LOG.error("", licence);
             throw licence;
@@ -161,7 +161,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
             final IllegalStateException licence = new IllegalStateException("A Chronicle Wire " +
                     "Enterprise licence is required to run this code because you are using " +
-                    "DeltaWireWire which is a licence product. " +
+                    "DELTA_BINARY which is a licence product. " +
                     "Please contact sales@chronicle.software");
             LOG.error("", licence);
             throw licence;
