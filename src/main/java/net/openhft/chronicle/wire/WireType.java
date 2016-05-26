@@ -84,34 +84,111 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         public Wire apply(Bytes bytes) {
 
             try {
-                Class<Wire> aClass = (Class) Class.forName("software.chronicle.wire.DefaultZeroWire");
-                final Constructor<Wire> declaredConstructor = aClass.getDeclaredConstructor(Bytes.class);
-                return declaredConstructor.newInstance(bytes);
+                return (Wire) Class.forName("software.chronicle.wire.DefaultZeroWire")
+                        .getDeclaredConstructor(Bytes.class)
+                        .newInstance(bytes);
 
             } catch (Exception e) {
-                IllegalStateException licence = new IllegalStateException("A Chronicle Wire " +
-                        "Enterprise licence is" +
-                        " required to run this code because you are using DefaultZeroWire which " +
-                        "is a licence product." +
-                        "." +
-                        "Please contact sales@chronicle.software");
+                IllegalStateException licence = new IllegalStateException(
+                        "A Chronicle Wire Enterprise licence is required to run this code " +
+                                "because you are using DefaultZeroWire which is a licence product. " +
+                                "Please contact sales@chronicle.software");
                 LOG.error("", licence);
                 throw licence;
             }
         }
 
         public void licenceCheck() {
+            if (isAvailable())
+                return;
+
+            final IllegalStateException licence = new IllegalStateException("A Chronicle Wire " +
+                    "Enterprise licence is required to run this code because you are using " +
+                    "DefaultZeroWire which is a licence product. " +
+                    "Please contact sales@chronicle.software");
+            LOG.error("", licence);
+            throw licence;
+        }
+
+        private Boolean isAvailable;
+
+        public boolean isAvailable() {
+            if (isAvailable != null)
+                return isAvailable;
+
             try {
                 Class e = Class.forName("software.chronicle.wire.DefaultZeroWire");
                 e.getDeclaredConstructor(new Class[]{Bytes.class});
+                isAvailable = true;
+                return true;
             } catch (Exception var4) {
-                IllegalStateException licence = new IllegalStateException("A Chronicle Wire " +
-                        "Enterprise licence is required to run this code because you are using " +
-                        "DefaultZeroWire which is a licence product. " +
-                        "Please contact sales@chronicle.software");
-                WireType.LOG.error("", licence);
-                throw licence;
+                isAvailable = false;
+                return false;
             }
+
+        }
+
+
+        @Override
+        public String asString(Object marshallable) {
+            return asHexString(marshallable);
+        }
+
+        @Override
+        public <T> T fromString(CharSequence cs) {
+            return fromHexString(cs);
+        }
+    }, DELTA_BINARY {
+        @NotNull
+        @Override
+        public Wire apply(Bytes bytes) {
+
+            try {
+                Class<Wire> aClass = (Class) Class.forName("software.chronicle.wire.DeltaWire");
+                final Constructor<Wire> declaredConstructor = aClass.getDeclaredConstructor(Bytes.class);
+                return declaredConstructor.newInstance(bytes);
+
+            } catch (Exception e) {
+                licenceCheck();
+
+                // this should never happen
+                throw new RuntimeException(e);
+            }
+        }
+
+        public void licenceCheck() {
+            if (isAvailable())
+                return;
+
+            final IllegalStateException licence = new IllegalStateException("A Chronicle Wire " +
+                    "Enterprise licence is required to run this code because you are using " +
+                    "DeltaWireWire which is a licence product. " +
+                    "Please contact sales@chronicle.software");
+            LOG.error("", licence);
+            throw licence;
+        }
+
+
+        private Boolean isAvailable;
+
+        public boolean isAvailable() {
+
+            if (isAvailable != null)
+                return isAvailable;
+
+            try {
+                Class e = Class.forName("software.chronicle.wire.DeltaWire");
+                e.getDeclaredConstructor(new Class[]{Bytes.class});
+
+                //todo change to true once it becomes interoperable with Binnary Wire
+                isAvailable = false;
+
+                return isAvailable;
+            } catch (Exception var4) {
+                isAvailable = false;
+                return isAvailable;
+            }
+
         }
 
         @Override
@@ -191,9 +268,9 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         }
     };
 
-    private static final Logger LOG = LoggerFactory.getLogger(WireType.class);
     static final ThreadLocal<Bytes> bytesTL = ThreadLocal.withInitial(Bytes::allocateElasticDirect);
     static final ThreadLocal<Bytes> bytes2TL = ThreadLocal.withInitial(Bytes::allocateElasticDirect);
+    private static final Logger LOG = LoggerFactory.getLogger(WireType.class);
     private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
 
     static Bytes getBytes() {
@@ -224,6 +301,10 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
         if (wire instanceof TextWire)
             return WireType.TEXT;
+
+        if ("DeltaWire".equals(wire.getClass().getSimpleName())) {
+            return DELTA_BINARY;
+        }
 
         // this must be above BinaryWire
         if ("DefaultZeroWire".equals(wire.getClass().getSimpleName())) {
