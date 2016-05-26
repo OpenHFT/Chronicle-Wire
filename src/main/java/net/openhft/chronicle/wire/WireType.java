@@ -101,104 +101,18 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         }
 
         public void licenceCheck() {
-            if (isAvailable())
-                return;
-
-            final IllegalStateException licence = new IllegalStateException("A Chronicle Wire " +
-                    "Enterprise licence is required to run this code because you are using " +
-                    "DefaultZeroWire which is a licence product. " +
-                    "Please contact sales@chronicle.software");
-            LOG.error("", licence);
-            throw licence;
-        }
-
-
-        private Boolean isAvailable;
-
-        public boolean isAvailable() {
-            if (isAvailable != null)
-                return isAvailable;
-
             try {
                 Class e = Class.forName("software.chronicle.wire.DefaultZeroWire");
                 e.getDeclaredConstructor(new Class[]{Bytes.class});
-                isAvailable = true;
-                return true;
             } catch (Exception var4) {
-                isAvailable = false;
-                return false;
-            }
-
-        }
-
-
-        @Override
-        public String asString(Object marshallable) {
-            return asHexString(marshallable);
-        }
-
-        @Override
-        public <T> T fromString(CharSequence cs) {
-            return fromHexString(cs);
-        }
-    }, DELTA_BINARY {
-        @NotNull
-        @Override
-        public Wire apply(Bytes bytes) {
-
-            try {
-                Class<Wire> aClass = (Class) Class.forName("software.chronicle.wire.DeltaWire");
-                final Constructor<Wire> declaredConstructor = aClass.getDeclaredConstructor(Bytes.class);
-                return declaredConstructor.newInstance(bytes);
-
-            } catch (Exception e) {
                 IllegalStateException licence = new IllegalStateException("A Chronicle Wire " +
-                        "Enterprise licence is" +
-                        " required to run this code because you are using DeltaWire which " +
-                        "is a licence product." +
-                        "." +
+                        "Enterprise licence is required to run this code because you are using " +
+                        "DefaultZeroWire which is a licence product. " +
                         "Please contact sales@chronicle.software");
-                LOG.error("", licence);
+                WireType.LOG.error("", licence);
                 throw licence;
             }
         }
-
-        public void licenceCheck() {
-            if (isAvailable())
-                return;
-
-            final IllegalStateException licence = new IllegalStateException("A Chronicle Wire " +
-                    "Enterprise licence is required to run this code because you are using " +
-                    "DeltaWireWire which is a licence product. " +
-                    "Please contact sales@chronicle.software");
-            LOG.error("", licence);
-            throw licence;
-        }
-
-
-        private Boolean isAvailable;
-
-        public boolean isAvailable() {
-
-
-             if (isAvailable != null)
-                return isAvailable;
-
-            try {
-                Class e = Class.forName("software.chronicle.wire.DeltaWire");
-                e.getDeclaredConstructor(new Class[]{Bytes.class});
-
-                //todo change to true once it becomes interoperable with Binnary Wire
-                isAvailable = false;
-
-                return isAvailable;
-            } catch (Exception var4) {
-                isAvailable = false;
-                return isAvailable;
-            }
-
-        }
-
 
         @Override
         public String asString(Object marshallable) {
@@ -310,10 +224,6 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
         if (wire instanceof TextWire)
             return WireType.TEXT;
-
-        if ("DeltaWire".equals(wire.getClass().getSimpleName())) {
-            return DELTA_BINARY;
-        }
 
         // this must be above BinaryWire
         if ("DefaultZeroWire".equals(wire.getClass().getSimpleName())) {

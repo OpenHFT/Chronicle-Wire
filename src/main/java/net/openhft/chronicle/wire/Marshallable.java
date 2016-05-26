@@ -72,7 +72,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         Wires.writeMarshallable(this, wire);
     }
 
-    default <T extends Marshallable  & KeyMarshable> T deepCopy() {
+    default <T extends Marshallable & KeyedMarshallable> T deepCopy() {
         return (T) Wires.deepCopy(this);
     }
 
@@ -88,7 +88,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
     }
 
 
-  /*  static <T extends Marshallable & KeyMarshable> T deepCopy(T t) {
+  /*  static <T extends Marshallable & KeyedMarshallable> T deepCopy(T t) {
         return (T) Wires.deepCopy(t);
     }*/
 }
