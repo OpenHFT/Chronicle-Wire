@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Rob Austin.
  */
-public interface KeyMarshable {
+public interface KeyedMarshallable {
     default void writeKey(@NotNull Bytes bytes) {
         Wires.writeKey(this, bytes);
     }

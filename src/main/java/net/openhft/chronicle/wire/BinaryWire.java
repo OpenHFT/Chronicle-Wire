@@ -40,6 +40,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
@@ -88,7 +89,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @NotNull
     protected BinaryValueIn getBinaryValueIn() {
-        return new BinaryValueIn();
+        return new DeltaValueIn();
     }
 
     public void clear() {
@@ -552,8 +553,32 @@ public class BinaryWire extends AbstractWire implements Wire {
         return null;
     }
 
+    protected StringBuilder readFieldAnchor(StringBuilder sb) {
+        if (valueIn instanceof DeltaValueIn) {
+            DeltaValueIn in = (DeltaValueIn) valueIn;
+
+            int ref = Maths.toUInt31(bytes.readStopBit());
+            if (ref >= in.inField.length)
+                in.inField = Arrays.copyOf(in.inField, in.inField.length * 2);
+            bytes.readUtf8(sb);
+            in.inField[ref] = sb.toString();
+            return sb;
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
+
     @NotNull
     protected StringBuilder readFieldNumber(WireKey key, @NotNull StringBuilder sb, long fieldId) {
+        if (valueIn instanceof DeltaValueIn) {
+            DeltaValueIn in = (DeltaValueIn) valueIn;
+            if (fieldId >= 0 && fieldId < in.inField.length) {
+                String s = in.inField[(int) fieldId];
+                if (s != null)
+                    return sb.append(s);
+            }
+        }
+
         if (key == ANY_CODE_MATCH) {
             sb.append(fieldId);
             return sb;
@@ -564,10 +589,6 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         sb.append(key.name());
         return sb;
-    }
-
-    protected StringBuilder readFieldAnchor(StringBuilder sb) {
-        throw new UnsupportedOperationException();
     }
 
     @NotNull
@@ -2956,6 +2977,62 @@ public class BinaryWire extends AbstractWire implements Wire {
             text();
         }
     }
+
+    class DeltaValueIn extends BinaryWire.BinaryValueIn {
+        Marshallable[] inObjects = new Marshallable[128];
+        String[] inField = new String[128];
+
+        @Override
+        protected <T> T anchor() {
+            long ref = bytes.readStopBit();
+            if (ref >= inObjects.length)
+                inObjects = Arrays.copyOf(inObjects, inObjects.length * 2);
+            T t = (T) super.typedMarshallable0();
+            inObjects[Maths.toUInt31(ref)] = (Marshallable) t;
+            return t;
+        }
+
+        @Override
+        protected <T> T updateAlias() {
+            int ref = Maths.toUInt31(bytes.readStopBit());
+            Marshallable previous = inObjects[ref];
+            super.marshallable(previous, false);
+            return (T) previous;
+        }
+
+        @Override
+        public int int32(int previous) {
+            consumePadding();
+            int code = peekCode();
+            switch (code) {
+                case BinaryWireCode.PLUS_INT8:
+                    bytes.readSkip(1);
+                    return previous + bytes.readByte();
+                case BinaryWireCode.PLUS_INT16:
+                    bytes.readSkip(1);
+                    return previous + bytes.readShort();
+                default:
+                    return super.int32();
+            }
+        }
+
+        @Override
+        public long int64(long previous) {
+            consumePadding();
+            int code = peekCode();
+            switch (code) {
+                case BinaryWireCode.PLUS_INT8:
+                    bytes.readSkip(1);
+                    return previous + bytes.readByte();
+                case BinaryWireCode.PLUS_INT16:
+                    bytes.readSkip(1);
+                    return previous + bytes.readShort();
+                default:
+                    return super.int64();
+            }
+        }
+    }
+
 
 }
 
