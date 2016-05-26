@@ -15,7 +15,6 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
@@ -73,7 +72,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         Wires.writeMarshallable(this, wire);
     }
 
-    default <T extends Marshallable> T deepCopy() {
+    default <T extends Marshallable  & KeyMarshable> T deepCopy() {
         return (T) Wires.deepCopy(this);
     }
 
@@ -88,7 +87,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
                 (p, c) -> p == null ? c.deepCopy() : p.copyFrom(c));
     }
 
-    default void writeKey(Bytes bytes) {
-        Wires.writeKey(this, bytes);
-    }
+
+  /*  static <T extends Marshallable & KeyMarshable> T deepCopy(T t) {
+        return (T) Wires.deepCopy(t);
+    }*/
 }
