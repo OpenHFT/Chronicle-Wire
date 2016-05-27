@@ -73,6 +73,7 @@ public class WireTypeTest {
 */
     }
 
+
     @Test
     public void testFromFile() throws IOException {
         TestMarshallable tm = new TestMarshallable();
@@ -80,7 +81,12 @@ public class WireTypeTest {
         tm.setName("name");
 
         for (WireType wt : WireType.values()) {
-            if (wt == WireType.RAW || wt == WireType.READ_ANY || wt == WireType.CSV || wt == WireType.DEFAULT_ZERO_BINARY)
+
+            if (wt == WireType.RAW
+                    || wt == WireType.READ_ANY
+                    || wt == WireType.CSV
+                    || wt == WireType.DELTA_BINARY
+                    || wt == WireType.DEFAULT_ZERO_BINARY)
                 continue;
             String tmp = OS.getTarget() + "/testFromFile-" + System.nanoTime();
             wt.toFile(tmp, tm);
