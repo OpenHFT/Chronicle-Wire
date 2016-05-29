@@ -765,4 +765,44 @@ public class BinaryWireTest {
             return code;
         }
     }
+
+
+    private static class DTO extends AbstractMarshallable {
+        String text;
+
+        DTO(String text) {
+            this.text = text;
+        }
+    }
+
+    @Test
+    public void testUsingEvents() throws Exception {
+
+        final Wire w = WireType.BINARY.apply(Bytes.elasticByteBuffer());
+
+        try (DocumentContext dc = w.writingDocument(false)) {
+            dc.wire().writeEventName("hello1").typedMarshallable(new DTO("world1"));
+            dc.wire().writeEventName("hello2").typedMarshallable(new DTO("world2"));
+        }
+
+
+        try (DocumentContext dc = w.readingDocument()) {
+            StringBuilder sb = Wires.acquireStringBuilder();
+
+            ValueIn valueIn1 = dc.wire().readEventName(sb);
+            Assert.assertTrue("hello1".contentEquals(sb));
+
+            // the test will pass if you uncomment this, which I dont want to do
+            // valueIn1.typedMarshallable();
+
+            ValueIn valueIn = dc.wire().readEventName(sb);
+            Assert.assertTrue("hello2".contentEquals(sb));
+            DTO o = valueIn.typedMarshallable();
+
+            Assert.assertEquals("world2", o.text);
+
+
+        }
+
+    }
 }
