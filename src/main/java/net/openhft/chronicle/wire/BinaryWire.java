@@ -201,6 +201,23 @@ public class BinaryWire extends AbstractWire implements Wire {
                         });
 
                         break outerSwitch;
+                    case FIELD_ANCHOR: {
+                        bytes.readSkip(1);
+                        StringBuilder sb = Wires.acquireStringBuilder();
+                        readFieldAnchor(sb);
+                        wire.write(sb);
+                        break outerSwitch;
+                    }
+                    case ANCHOR:
+                    case UPDATED_ALIAS: {
+                        try {
+                            final Object o = valueIn.object();
+                            wire.getValueOut().object(o);
+                        } catch (IORuntimeException e) {
+                            throw new AssertionError(e);
+                        }
+                        break outerSwitch;
+                    }
                 }
                 unknownCode(wire);
                 break;
