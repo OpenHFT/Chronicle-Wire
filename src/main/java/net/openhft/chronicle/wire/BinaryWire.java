@@ -2112,6 +2112,13 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
+        @Override
+        public WireIn skipValue() {
+            bytes.readSkip(readLength());
+
+            return BinaryWire.this;
+        }
+
         @NotNull
         @Override
         public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag) {

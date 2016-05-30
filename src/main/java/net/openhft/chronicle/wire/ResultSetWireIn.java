@@ -287,6 +287,11 @@ public class ResultSetWireIn implements WireIn {
         }
 
         @Override
+        public WireIn skipValue() {
+            return ResultSetWireIn.this;
+        }
+
+        @Override
         public boolean bool() {
             try {
                 return key == null ? resultSet.getBoolean(index) : resultSet.getBoolean(key.name().toString());

@@ -122,6 +122,8 @@ public interface ValueIn {
      */
     long readLength();
 
+    WireIn skipValue();
+
     @NotNull
     <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag);
 

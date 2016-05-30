@@ -134,6 +134,11 @@ public class DefaultValueIn implements ValueIn {
         return 0;
     }
 
+    @Override
+    public WireIn skipValue() {
+        return wireIn();
+    }
+
     @NotNull
     @Override
     public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag) {

@@ -758,6 +758,11 @@ public class RawWire extends AbstractWire implements Wire {
             return bytes.readStopBit();
         }
 
+        @Override
+        public WireIn skipValue() {
+            throw new UnsupportedOperationException();
+        }
+
         @NotNull
         @Override
         public <T> WireIn int8(@NotNull T t, @NotNull ObjByteConsumer<T> tb) {

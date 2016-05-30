@@ -1756,43 +1756,52 @@ public class TextWire extends AbstractWire implements Wire {
         public long readLength() {
             long start = bytes.readPosition();
             try {
-                consumePadding();
-                int code = readCode();
-                switch (code) {
-                    case '{': {
-                        int count = 1;
-                        for (; ; ) {
-                            byte b = bytes.readByte();
-                            if (b == '{')
-                                count += 1;
-                            else if (b == '}') {
-                                count -= 1;
-                                if (count == 0)
-                                    return bytes.readPosition() - start;
-                            } else if (b == 0) {
-                                return bytes.readPosition() - start - 1;
-                            }
-                            // do nothing
-                        }
-                    }
-
-                    case '-': {
-                        for (; ; ) {
-                            byte b = bytes.readByte();
-                            if (b < ' ')
-                                return bytes.readLimit() - start - 1;
-                            // do nothing
-                        }
-                    }
-
-                    default:
-                        // TODO needs to be made much more efficient.
-                        bytes();
-                        return bytes.readPosition() - start;
-                }
+                skipValue();
+                return bytes.readPosition() - start;
             } finally {
                 bytes.readPosition(start);
             }
+        }
+
+        @Override
+        public WireIn skipValue() {
+            consumePadding();
+            int code = readCode();
+            switch (code) {
+                case '{': {
+                    int count = 1;
+                    for (; ; ) {
+                        byte b = bytes.readByte();
+                        if (b == '{')
+                            count += 1;
+                        else if (b == '}') {
+                            count -= 1;
+                            if (count == 0)
+                                return TextWire.this;
+                        } else if (b == 0) {
+                            bytes.readSkip(-1);
+                            return TextWire.this;
+                        }
+                        // do nothing
+                    }
+                }
+
+                case '-': {
+                    for (; ; ) {
+                        byte b = bytes.readByte();
+                        if (b < ' ') {
+                            bytes.readSkip(-1);
+                            return TextWire.this;
+                        }
+                        // do nothing
+                    }
+                }
+
+                default:
+                    // TODO needs to be made much more efficient.
+                    bytes();
+            }
+            return TextWire.this;
         }
 
         protected long readLengthMarshallable() {
