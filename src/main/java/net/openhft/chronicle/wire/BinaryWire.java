@@ -2107,6 +2107,12 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case BYTES_LENGTH32:
                     bytes.readSkip(1);
                     return bytes.readUnsignedInt();
+
+                case TYPE_PREFIX:
+                    bytes.readSkip(1);
+                    long len = bytes.readStopBit();
+                    bytes.readSkip(len);
+                    return readLength();
                 default:
                     return ANY_CODE_MATCH.code();
             }
@@ -2114,7 +2120,11 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         public WireIn skipValue() {
-            bytes.readSkip(readLength());
+            final long length = readLength();
+            if (length < 0)
+                object();
+            else
+                bytes.readSkip(length);
 
             return BinaryWire.this;
         }
