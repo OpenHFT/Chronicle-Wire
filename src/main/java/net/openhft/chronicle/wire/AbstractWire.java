@@ -267,9 +267,19 @@ public abstract class AbstractWire implements Wire {
             throw new UnsupportedOperationException("Data messages of 0 length are not supported.");
 
         if (ASSERTIONS) {
-            if (bytes.readVolatileInt(pos) != 0) {
-                throw new IllegalStateException("Data was written after the end of the message, zero out data before rewinding");
+            final int value = bytes.readVolatileInt(pos);
+            if (value != 0) {
+                String text;
+                long pos0 = bytes.readPosition();
+                try {
+                    bytes.readPosition(pos);
+                    text = bytes.toDebugString();
+                } finally {
+                    bytes.readPosition(pos0);
+                }
+                throw new IllegalStateException("Data was written after the end of the message, zero out data before rewinding " + text);
             }
+
             if (!bytes.compareAndSwapInt(position, expectedHeader, header))
                 throwHeaderOverwritten(position, expectedHeader, bytes);
         } else {
