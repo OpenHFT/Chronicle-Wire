@@ -776,7 +776,13 @@ public class BinaryWireTest {
             ValueIn valueIn2 = dc.wire().readEventName(sb);
             Assert.assertTrue("hello2".contentEquals(sb));
 
-            Assert.assertEquals("world2", o.text);
+            valueIn2.skipValue(); // if you change this to typed marshable it works
+
+            ValueIn valueIn3 = dc.wire().readEventName(sb);
+            Assert.assertTrue("hello3".contentEquals(sb));
+
+            DTO o = valueIn3.typedMarshallable();
+            Assert.assertEquals("world3", o.text);
         }
     }
 
