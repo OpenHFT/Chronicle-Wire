@@ -118,7 +118,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
             try {
                 Class e = Class.forName("software.chronicle.wire.DefaultZeroWire");
-                e.getDeclaredConstructor(new Class[]{Bytes.class});
+                e.getDeclaredConstructor(Bytes.class);
                 isAvailable = true;
                 return true;
             } catch (Exception var4) {
