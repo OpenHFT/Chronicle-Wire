@@ -178,10 +178,6 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             try {
                 Class e = Class.forName("software.chronicle.wire.DeltaWire");
                 e.getDeclaredConstructor(new Class[]{Bytes.class});
-
-                //todo change to true once it becomes interoperable with Binnary Wire
-                isAvailable = false;
-
                 return isAvailable;
             } catch (Exception var4) {
                 isAvailable = false;
