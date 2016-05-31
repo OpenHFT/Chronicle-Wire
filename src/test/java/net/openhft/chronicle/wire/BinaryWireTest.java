@@ -760,18 +760,21 @@ public class BinaryWireTest {
         try (DocumentContext dc = w.writingDocument(false)) {
             dc.wire().writeEventName("hello1").typedMarshallable(new DTO("world1"));
             dc.wire().writeEventName("hello2").typedMarshallable(new DTO("world2"));
+            dc.wire().writeEventName("hello3").typedMarshallable(new DTO("world3"));
         }
 
         try (DocumentContext dc = w.readingDocument()) {
+
+            System.out.println(Wires.fromSizePrefixedBlobs(dc));
+
             StringBuilder sb = Wires.acquireStringBuilder();
 
             ValueIn valueIn1 = dc.wire().readEventName(sb);
             Assert.assertTrue("hello1".contentEquals(sb));
             valueIn1.skipValue();
 
-            ValueIn valueIn = dc.wire().readEventName(sb);
+            ValueIn valueIn2 = dc.wire().readEventName(sb);
             Assert.assertTrue("hello2".contentEquals(sb));
-            DTO o = valueIn.typedMarshallable();
 
             Assert.assertEquals("world2", o.text);
         }
