@@ -1993,6 +1993,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 }
                 case NULL:
                     return null;
+
                 default:
                     cantRead(code);
                     throw new AssertionError();

@@ -267,7 +267,18 @@ public abstract class AbstractWire implements Wire {
             throw new UnsupportedOperationException("Data messages of 0 length are not supported.");
 
         if (ASSERTIONS) {
-            final int value = bytes.readVolatileInt(pos);
+            updateHeaderAssertions(position, pos, expectedHeader, header);
+        } else {
+            bytes.writeOrderedInt(position, header);
+        }
+        bytes.writeLimit(bytes.capacity());
+        if (!metaData)
+            incrementHeaderNumber();
+    }
+
+    void updateHeaderAssertions(long position, long pos, int expectedHeader, int header) throws StreamCorruptedException {
+        if (pos <= bytes.realCapacity() - 4) {
+            final int value = bytes.bytesStore().readVolatileInt(pos);
             if (value != 0) {
                 String text;
                 long pos0 = bytes.readPosition();
@@ -279,15 +290,10 @@ public abstract class AbstractWire implements Wire {
                 }
                 throw new IllegalStateException("Data was written after the end of the message, zero out data before rewinding " + text);
             }
-
-            if (!bytes.compareAndSwapInt(position, expectedHeader, header))
-                throwHeaderOverwritten(position, expectedHeader, bytes);
-        } else {
-            bytes.writeOrderedInt(position, header);
         }
-        bytes.writeLimit(bytes.capacity());
-        if (!metaData)
-            incrementHeaderNumber();
+
+        if (!bytes.compareAndSwapInt(position, expectedHeader, header))
+            throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(bytes.readVolatileInt(position)));
     }
 
     private void incrementHeaderNumber() {
