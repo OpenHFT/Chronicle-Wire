@@ -357,6 +357,7 @@ public class BinaryWire2Test {
                 "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n", asText.toString());
     }
 
+    @Ignore
     @Test
     public void testCompression() {
         for (String comp : "binary,gzip,lzw".split(",")) {
