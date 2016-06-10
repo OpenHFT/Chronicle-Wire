@@ -30,14 +30,21 @@ class WireObjectInput implements ObjectInput {
 
     @Override
     public int read(byte[] b) throws IOException {
-        throw new UnsupportedOperationException("TODO");
+        return read(b, 0, b.length);
     }
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        if (wire.bytes().readRemaining() <= 0)
+        final long remaining = wire.bytes().readRemaining();
+        if (remaining <= 0)
             throw new EOFException();
-        throw new UnsupportedOperationException("TODO");
+        if (len > remaining)
+            len = (int) remaining;
+        Bytes bytes = Bytes.wrapForWrite(b);
+        bytes.writePosition(off);
+        bytes.writeLimit(off + len);
+        wire.getValueIn().bytes(bytes);
+        return (int) (bytes.writePosition() - off);
     }
 
     @Override

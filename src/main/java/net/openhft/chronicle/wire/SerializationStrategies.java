@@ -167,7 +167,7 @@ public enum SerializationStrategies implements SerializationStrategy {
 
         @Override
         public Object newInstance(Class type) {
-            return new LinkedHashMap<>();
+            return SortedMap.class.isAssignableFrom(type) ? new TreeMap<>() : new LinkedHashMap<>();
         }
 
         @Override
@@ -198,7 +198,7 @@ public enum SerializationStrategies implements SerializationStrategy {
 
         @Override
         public Object newInstance(Class type) {
-            return new LinkedHashSet<>();
+            return SortedSet.class.isAssignableFrom(type) ? new TreeSet<>() : new LinkedHashSet<>();
         }
 
         @Override

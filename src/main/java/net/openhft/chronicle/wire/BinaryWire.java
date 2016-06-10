@@ -2940,6 +2940,21 @@ public class BinaryWire extends AbstractWire implements Wire {
                             strategy.readUsing(using, valueIn);
                             return ObjectUtils.convertTo(type, using);
                         }
+                        case TIME:
+                            return time();
+
+                        case DATE:
+                            return date();
+
+                        case DATE_TIME:
+                            return dateTime();
+
+                        case ZONED_DATE_TIME:
+                            return zonedDateTime();
+
+                        case TYPE_LITERAL:
+                            return typeLiteral();
+
                     }
                     break;
 

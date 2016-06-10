@@ -1154,6 +1154,11 @@ public class TextWire extends AbstractWire implements Wire {
             return TextWire.this;
         }
 
+        @Override
+        public ValueOut optionalTyped(Class aClass) {
+            return typePrefix(aClass);
+        }
+
         @NotNull
         @Override
         public ValueOut typePrefix(@NotNull CharSequence typeName) {

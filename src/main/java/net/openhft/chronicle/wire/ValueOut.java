@@ -412,19 +412,19 @@ public interface ValueOut {
             case "[java.lang.Object;":
                 return array(v -> Stream.of((Object[]) value).forEach(v::object), Object[].class);
             case "java.time.LocalTime":
-                return time((LocalTime) value);
+                return optionalTyped(LocalTime.class).time((LocalTime) value);
             case "java.time.LocalDate":
-                return date((LocalDate) value);
+                return optionalTyped(LocalDate.class).date((LocalDate) value);
             case "java.time.LocalDateTime":
-                return dateTime((LocalDateTime) value);
+                return optionalTyped(LocalDateTime.class).dateTime((LocalDateTime) value);
             case "java.time.ZonedDateTime":
-                return zonedDateTime((ZonedDateTime) value);
+                return optionalTyped(ZonedDateTime.class).zonedDateTime((ZonedDateTime) value);
             case "java.util.UUID":
-                return uuid((UUID) value);
+                return optionalTyped(UUID.class).uuid((UUID) value);
             case "java.math.BigInteger":
             case "java.math.BigDecimal":
             case "java.io.File":
-                return text(value.toString());
+                return optionalTyped(value.getClass()).text(value.toString());
         }
         if (value instanceof WriteMarshallable)
             return typedMarshallable((WriteMarshallable) value);
@@ -445,7 +445,7 @@ public interface ValueOut {
         if (value instanceof Collection) {
             if (value instanceof SortedSet)
                 typePrefix(SortedSet.class);
-            if (value instanceof Set)
+            else if (value instanceof Set)
                 typePrefix(Set.class);
             return sequence(v -> ((Collection) value).stream().forEach(v::object));
         } else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
@@ -461,6 +461,16 @@ public interface ValueOut {
                     " is unsupported, it must either be of type Marshallable, String or " +
                     "AutoBoxed primitive Object");
         }
+    }
+
+    /**
+     * Add an optional type i.e. if TEXT is used.
+     *
+     * @param aClass to write
+     * @return this
+     */
+    default ValueOut optionalTyped(Class aClass) {
+        return this;
     }
 
     @NotNull

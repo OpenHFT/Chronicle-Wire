@@ -27,9 +27,7 @@ import org.junit.runners.Parameterized;
 
 import java.lang.annotation.RetentionPolicy;
 import java.time.*;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
@@ -587,12 +585,21 @@ public class BinaryWireTest {
     public void testZonedDateTime() {
         Wire wire = createWire();
         ZonedDateTime now = ZonedDateTime.now();
+        final ZonedDateTime max = ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault());
+        final ZonedDateTime min = ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault());
         wire.write().zonedDateTime(now)
-                .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()))
-                .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()));
+                .write().zonedDateTime(max)
+                .write().zonedDateTime(min);
         wire.read().zonedDateTime(now, Assert::assertEquals)
-                .read().zonedDateTime(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()), Assert::assertEquals)
-                .read().zonedDateTime(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), Assert::assertEquals);
+                .read().zonedDateTime(max, Assert::assertEquals)
+                .read().zonedDateTime(min, Assert::assertEquals);
+
+        wire.write().object(now)
+                .write().object(max)
+                .write().object(min);
+        wire.read().object(Object.class, now, Assert::assertEquals)
+                .read().object(Object.class, max, Assert::assertEquals)
+                .read().object(Object.class, min, Assert::assertEquals);
     }
 
     @Test
@@ -786,6 +793,33 @@ public class BinaryWireTest {
         }
     }
 
+    @Test
+    public void testSortedSet() {
+        Wire wire = createWire();
+        SortedSet<String> set = new TreeSet<>();
+        set.add("one");
+        set.add("two");
+        set.add("three");
+        wire.write("a").object(set);
+
+        Object o = wire.read().object();
+        assertTrue(o instanceof SortedSet);
+        assertEquals(set, o);
+    }
+
+    @Test
+    public void testSortedMap() {
+        Wire wire = createWire();
+        SortedMap<String, Long> set = new TreeMap<>();
+        set.put("one", 1L);
+        set.put("two", 2L);
+        set.put("three", 3L);
+        wire.write("a").object(set);
+
+        Object o = wire.read().object();
+        assertTrue(o instanceof SortedMap);
+        assertEquals(set, o);
+    }
 
     enum BWKey implements WireKey {
         field1(1), field2(2), field3(3);
