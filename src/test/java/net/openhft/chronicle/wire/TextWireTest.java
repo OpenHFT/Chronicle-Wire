@@ -1148,6 +1148,16 @@ public class TextWireTest {
         System.out.println(TEXT.asString(sc));
     }
 
+    @Test
+    public void writeCharacter() {
+        Wire wire = createWire();
+        for (char ch : new char[]{0, '!', 'a', Character.MAX_VALUE}) {
+            wire.write().object(ch);
+            char ch2 = wire.read().object(char.class);
+            assertEquals(ch, ch2);
+        }
+    }
+
     enum BWKey implements WireKey {
         field1, field2, field3
     }

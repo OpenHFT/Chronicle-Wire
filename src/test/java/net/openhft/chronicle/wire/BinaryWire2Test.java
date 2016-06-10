@@ -24,10 +24,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.time.*;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
@@ -517,4 +514,24 @@ public class BinaryWire2Test {
             assertEquals(wire.bytes(), bytesStore);
         });
     }
+
+    @Test
+    public void testWriteMap() {
+        Wire wire = new BinaryWire(Bytes.elasticByteBuffer());
+
+        Map<String, Object> putMap = new HashMap<String, Object>();
+        putMap.put("TestKey", "TestValue");
+        putMap.put("TestKey2", 1.0);
+
+        wire.writeAllAsMap(String.class, Object.class, putMap);
+
+        Map<String, Object> newMap = new HashMap<String, Object>();
+
+        wire.readAllAsMap(String.class, Object.class, newMap);
+
+        Assert.assertEquals(putMap, newMap);
+
+    }
+
+
 }

@@ -252,18 +252,8 @@ public interface ValueIn {
 
     default <K, V> Map<K, V> marshallableAsMap(Class<K> kClass, Class<V> vClass, Map<K, V> map) {
         return marshallable(m -> {
-            readAllAsMap(kClass, vClass, map, m);
+            m.readAllAsMap(kClass, vClass, map);
         }) ? map : null;
-    }
-
-    default <K, V> Map<K, V> readAllAsMap(Class<K> kClass, Class<V> vClass, Map<K, V> map, WireIn m) {
-        while (m.hasMore()) {
-            final K k = m.readEvent(kClass);
-            final V v = m.getValueIn()
-                    .object(vClass);
-            map.put(k, v);
-        }
-        return map;
     }
 
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);

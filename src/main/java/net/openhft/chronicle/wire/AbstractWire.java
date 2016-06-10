@@ -211,12 +211,8 @@ public abstract class AbstractWire implements Wire {
             bytes.writePositionRemaining(pos + Wires.SPB_HEADER_SIZE, maxlen);
             return pos;
         }
-        try {
-            return writeHeader0(length, timeout, timeUnit);
-        } catch (TimeoutException e) {
-            bytes.writeInt(pos, 0);
-            return writeHeader0(length, timeout, timeUnit);
-        }
+
+        return writeHeader0(length, timeout, timeUnit);
     }
 
     private long writeHeader0(int length, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {
@@ -224,7 +220,7 @@ public abstract class AbstractWire implements Wire {
             throw new IllegalArgumentException();
         long pos = bytes.writePosition();
         if (pauser == BusyPauser.INSTANCE)
-            pauser = new LongPauser(1_000, 1_000, 1, 10, TimeUnit.MILLISECONDS);
+            pauser = new LongPauser(1_000, 500, 1, 10, TimeUnit.MILLISECONDS);
         try {
             for (; ; ) {
                 if (bytes.compareAndSwapInt(pos, 0, Wires.NOT_COMPLETE | length)) {

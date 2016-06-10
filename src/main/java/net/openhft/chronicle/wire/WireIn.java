@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.EOFException;
 import java.io.ObjectInput;
 import java.io.StreamCorruptedException;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -30,6 +31,15 @@ import java.util.concurrent.TimeoutException;
  * Created by peter.lawrey on 12/01/15.
  */
 public interface WireIn extends WireCommon {
+
+    default <K, V> Map<K, V> readAllAsMap(Class<K> kClass, Class<V> vClass, Map<K, V> map) {
+        while (hasMore()) {
+            final K k = readEvent(kClass);
+            final V v = getValueIn().object(vClass);
+            map.put(k, v);
+        }
+        return map;
+    }
 
     void copyTo(@NotNull WireOut wire);
 
@@ -78,6 +88,7 @@ public interface WireIn extends WireCommon {
      */
     @NotNull
     ValueIn getValueIn();
+
     ObjectInput objectInput();
 
     /*

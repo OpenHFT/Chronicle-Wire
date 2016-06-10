@@ -271,6 +271,46 @@ public enum SerializationStrategies implements SerializationStrategy {
         public BracketType bracketType() {
             return BracketType.SEQ;
         }
+    }, PRIM_ARRAY {
+        @Override
+        public Object readUsing(Object using, ValueIn in) {
+            PrimArrayWrapper wrapper = (PrimArrayWrapper) using;
+            final Class componentType = wrapper.type.getComponentType();
+            int i = 0, len = 0;
+            Object array = Array.newInstance(componentType, 0);
+            while (in.hasNextSequenceItem()) {
+                if (i >= len) {
+                    int len2 = len * 2 + 2;
+                    Object array2 = Array.newInstance(componentType, len2);
+                    System.arraycopy(array, 0, array2, 0, len);
+                    len = len2;
+                    array = array2;
+                }
+                Array.set(array, i++, in.object(componentType));
+            }
+            if (i < len) {
+                Object array2 = Array.newInstance(componentType, i);
+                System.arraycopy(array, 0, array2, 0, i);
+                array = array2;
+            }
+            wrapper.array = array;
+            return wrapper;
+        }
+
+        @Override
+        public Class type() {
+            return Object.class;
+        }
+
+        @Override
+        public Object newInstance(Class type) {
+            return new PrimArrayWrapper(type);
+        }
+
+        @Override
+        public BracketType bracketType() {
+            return BracketType.SEQ;
+        }
     };
 
 
@@ -294,6 +334,20 @@ public enum SerializationStrategies implements SerializationStrategy {
 
         @Override
         public Object[] readResolve() {
+            return array;
+        }
+    }
+
+    static class PrimArrayWrapper implements ReadResolvable<Object> {
+        final Class type;
+        Object array;
+
+        PrimArrayWrapper(Class type) {
+            this.type = type;
+        }
+
+        @Override
+        public Object readResolve() {
             return array;
         }
     }

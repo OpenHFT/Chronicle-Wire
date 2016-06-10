@@ -429,7 +429,7 @@ public enum Wires {
                     if (aClass.isArray()) {
                         final Class componentType = aClass.getComponentType();
                         if (componentType.isPrimitive())
-                            throw new UnsupportedOperationException();
+                            return SerializationStrategies.PRIM_ARRAY;
                         return SerializationStrategies.ARRAY;
                     }
                     if (Enum.class.isAssignableFrom(aClass))

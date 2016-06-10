@@ -1240,15 +1240,19 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer) {
+            boolean leaf = this.leaf;
             pushState();
             bytes.writeUnsignedByte('[');
-            newLine();
+            if (!leaf)
+                newLine();
             long pos = bytes.readPosition();
             writer.accept(t, this);
+            if (!leaf)
             addNewLine(pos);
 
             popState();
-            indent();
+            if (!leaf)
+                indent();
             bytes.writeUnsignedByte(']');
             endField();
             return wireOut();
@@ -2318,7 +2322,7 @@ public class TextWire extends AbstractWire implements Wire {
                 case '{':
                     return marshallableAsMap(kClass, vClass, usingMap);
                 case '?':
-                    return readAllAsMap(kClass, vClass, usingMap, wireIn());
+                    return readAllAsMap(kClass, vClass, usingMap);
             }
             return usingMap;
         }

@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.EOFException;
 import java.io.ObjectOutput;
 import java.io.StreamCorruptedException;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -212,4 +213,9 @@ public interface WireOut extends WireCommon {
 
     void endEvent();
 
+    default <K, V> void writeAllAsMap(Class<K> kClass, Class<V> vClass, Map<K, V> map) {
+        map.forEach((k, v) -> {
+            writeEvent(kClass, k).object(vClass, v);
+        });
+    }
 }

@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -373,6 +374,19 @@ public interface ValueOut {
         switch (value.getClass().getName()) {
             case "[B":
                 return typePrefix(byte[].class).bytes((byte[]) value);
+            case "[S":
+            case "[C":
+            case "[I":
+            case "[J":
+            case "[F":
+            case "[D":
+            case "[Z":
+                return typePrefix(value.getClass()).leaf(true).sequence(value, (v, out) -> {
+                    int len = Array.getLength(v);
+                    for (int i = 0; i < len; i++) {
+                        out.untypedObject(Array.get(v, i));
+                    }
+                });
             case "java.lang.String":
                 return text((String) value);
             case "java.lang.Byte":

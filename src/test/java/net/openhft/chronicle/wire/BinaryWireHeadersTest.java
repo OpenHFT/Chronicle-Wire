@@ -55,6 +55,17 @@ public class BinaryWireHeadersTest {
             wire2.updateHeader(position2, false);
         }
         assertEquals(10, wire2.headerNumber());
+    }
 
+    @Test(timeout = 3000, expected = TimeoutException.class)
+    public void testConcurrentHeaderNumbers() throws TimeoutException, EOFException, StreamCorruptedException {
+        BytesStore store = NativeBytesStore.elasticByteBuffer();
+        Wire wire = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
+        Wire wire2 = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
+        Wire wire3 = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
+
+        long position = wire.writeHeader(1, TimeUnit.SECONDS);
+
+        long position2 = wire2.writeHeader(100, TimeUnit.MILLISECONDS);
     }
 }
