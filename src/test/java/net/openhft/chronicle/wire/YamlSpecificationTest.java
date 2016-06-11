@@ -53,30 +53,30 @@ public class YamlSpecificationTest {
                 {"example2_1"},
                 {"example2_2"},
                 {"example2_3"},
-//                {"example2_4"} // TODO Fix map format
-//                {"example2_5"} // Not supported
-//                {"example2_6"} // TODO Fix map format
+//                {"example2_4"}, // TODO Fix map format
+//                {"example2_5"}, // Not supported
+//                {"example2_6"}, // TODO Fix map format
                 {"example2_7"},// TODO Fix for multiple ---
 //                {"example2_8"},// TODO Fix for multiple ---
                 {"example2_9"},
-//                {"example2_10"} // TODO FIx handling of anchors
-//                {"example2_11"} // Not supported
-//                {"example2_12"} // Not supported
-//                {"example2_13"} // Not supported
-//                {"example2_14"} // Not supported
-//                {"example2_15"} // Not supported
-//                {"example2_16"} // Not supported
-//                {"example2_17"} // TODO Fix handling of double single quote.
-//                {"example2_18"} // Not supported
+//                {"example2_10"}, // TODO FIx handling of anchors
+//                {"example2_11"}, // Not supported
+//                {"example2_12"}, // Not supported
+//                {"example2_13"}, // Not supported
+//                {"example2_14"}, // Not supported
+//                {"example2_15"}, // Not supported
+//                {"example2_16"}, // Not supported
+//                {"example2_17"}, // TODO Fix handling of double single quote.
+//                {"example2_18"}, // Not supported
 //                {"example2_19"}, // TODO fix handling of times.
 //                {"example2_20"}, // TODO fix handling of times.
                 {"example2_21"},
-//                {"example2_22"} // TODO fix handling of times.
-//                {"example2_23"} // Not supported
-//                {"example2_24"} // TODO FIx handling of anchors
-//                {"example2_25"} // TODO support set
-//                {"example2_26"} // TODO support omap
-//                {"example2_27"} // Not supported
+//                {"example2_22"}, // TODO fix handling of times.
+//                {"example2_23"}, // Not supported
+//                {"example2_24"}, // TODO FIx handling of anchors
+//                {"example2_25"}, // TODO support set
+//                {"example2_26"}, // TODO support omap
+//                {"example2_27"}, // Not supported
 //                {"example2_28"} // Not supported
         });
     }
