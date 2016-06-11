@@ -18,11 +18,10 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
-
-import java.io.IOException;
 
 enum CcyPair {
     EURUSD, GBPUSD, EURCHF;
@@ -104,15 +103,11 @@ class FXPrice implements BytesMarshallable {
 
     @Override
     public void writeMarshallable(BytesOut bytes) {
-        try {
             bytes.append(bidprice).append(',');
             bytes.append(offerprice).append(',');
             bytes.append(pair.name()).append(',');
             bytes.append(size).append(',');
             bytes.append(exchangeName).append('\n');
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
     }
 
     private <T extends Enum<T>> T parseEnum(BytesIn bytes, EnumInterner<T> interner) {

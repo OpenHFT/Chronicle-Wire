@@ -68,10 +68,10 @@ public class YamlSpecificationTest {
 //                {"example2_16"} // Not supported
 //                {"example2_17"} // TODO Fix handling of double single quote.
 //                {"example2_18"} // Not supported
-                {"example2_19"}, // TODO fix handling of times.
+//                {"example2_19"}, // TODO fix handling of times.
 //                {"example2_20"}, // TODO fix handling of times.
                 {"example2_21"},
-                {"example2_22"} // TODO fix handling of times.
+//                {"example2_22"} // TODO fix handling of times.
 //                {"example2_23"} // Not supported
 //                {"example2_24"} // TODO FIx handling of anchors
 //                {"example2_25"} // TODO support set

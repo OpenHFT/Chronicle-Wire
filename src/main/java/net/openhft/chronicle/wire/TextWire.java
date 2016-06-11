@@ -682,11 +682,7 @@ public class TextWire extends AbstractWire implements Wire {
         if (use8bit) {
             AppendableUtil.read8bitAndAppend(bytes, sb, testers);
         } else {
-            try {
-                AppendableUtil.readUTFAndAppend(bytes, sb, testers);
-            } catch (IOException e) {
-                throw new IORuntimeException(e);
-            }
+            AppendableUtil.readUTFAndAppend(bytes, sb, testers);
         }
     }
 
@@ -797,6 +793,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
         } else if (o instanceof WriteMarshallable) {
             valueOut.typedMarshallable((WriteMarshallable) o);
+
         } else {
             valueOut.object(o);
         }

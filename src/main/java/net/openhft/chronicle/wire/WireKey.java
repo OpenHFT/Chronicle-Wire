@@ -15,7 +15,6 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.core.annotation.ForceInline;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,7 +52,6 @@ public interface WireKey {
     @NotNull
     CharSequence name();
 
-    @ForceInline
     default int code() {
         return toCode(name());
     }
