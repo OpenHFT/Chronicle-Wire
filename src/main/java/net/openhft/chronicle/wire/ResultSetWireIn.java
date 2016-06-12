@@ -574,7 +574,6 @@ public class ResultSetWireIn implements WireIn {
             }
         }
 
-
         @Override
         public boolean isTyped() {
             throw new UnsupportedOperationException();

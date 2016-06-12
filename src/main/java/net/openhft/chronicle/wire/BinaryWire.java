@@ -210,12 +210,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     }
                     case ANCHOR:
                     case UPDATED_ALIAS: {
-                        try {
                             final Object o = valueIn.object();
                             wire.getValueOut().object(o);
-                        } catch (IORuntimeException e) {
-                            throw new AssertionError(e);
-                        }
                         break outerSwitch;
                     }
                 }
@@ -427,7 +423,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return null;
         }
     }
-
 
     @NotNull
     private <K> K readSmallField(int peekCode, Class<K> expectedClass) {
@@ -997,7 +992,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                             bytes.readSkip(-1);
                             valueIn.bytesStore((StringBuilder) sb);
                         } else {
-                            throw new AssertionError();
+                            throw new IllegalArgumentException("Expected a StringBuilder");
                         }
                         return sb;
                 }
@@ -1142,7 +1137,6 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             return BinaryWire.this;
         }
-
 
         @NotNull
         @Override
@@ -2461,7 +2455,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return code == TYPE_PREFIX;
         }
 
-
         @Nullable
         public <T> T typedMarshallable() throws IORuntimeException {
             pushState();
@@ -3082,7 +3075,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
     }
-
-
 }
+
 

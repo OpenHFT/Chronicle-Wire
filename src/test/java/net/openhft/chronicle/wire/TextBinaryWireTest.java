@@ -122,5 +122,5 @@ public class TextBinaryWireTest {
         wire.read(() -> "c").int32(2, assertEquals);
         wire.read(() -> "d").int32(3, assertEquals);
     }
-
 }
+

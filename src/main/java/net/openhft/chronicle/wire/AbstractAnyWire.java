@@ -186,7 +186,6 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         return wireAcquisition.acquireWire().writingDocument(metaData);
     }
 
-
     interface WireAcquisition {
 
         /**

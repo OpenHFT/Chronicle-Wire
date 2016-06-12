@@ -73,7 +73,6 @@ public class WireTypeTest {
 */
     }
 
-
     @Test
     public void testFromFile() throws IOException {
         TestMarshallable tm = new TestMarshallable();

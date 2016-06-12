@@ -44,7 +44,6 @@ import java.util.function.Supplier;
  */
 public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
-
     TEXT {
         @NotNull
         @Override
@@ -93,7 +92,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                         "A Chronicle Wire Enterprise licence is required to run this code " +
                                 "because you are using DefaultZeroWire which is a licence product. " +
                                 "Please contact sales@chronicle.software");
-                LOG.error("", licence);
+                LOG.warn("", licence);
                 throw licence;
             }
         }
@@ -106,7 +105,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                     "Enterprise licence is required to run this code because you are using " +
                     "DEFAULT_ZERO_BINARY which is a licence product. " +
                     "Please contact sales@chronicle.software");
-            LOG.error("", licence);
+            LOG.warn("", licence);
             throw licence;
         }
 
@@ -126,7 +125,6 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                 return false;
             }
         }
-
 
         @Override
         public String asString(Object marshallable) {
@@ -151,7 +149,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                 licenceCheck();
 
                 // this should never happen
-                throw new RuntimeException(e);
+                throw new AssertionError(e);
             }
         }
 
@@ -166,7 +164,6 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             LOG.error("", licence);
             throw licence;
         }
-
 
         private Boolean isAvailable;
 
@@ -427,6 +424,4 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         Wire wire = apply(bytes);
         return wire.getValueIn().marshallableAsMap(String.class, Object.class);
     }
-
-
 }

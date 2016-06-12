@@ -270,7 +270,8 @@ public class TextWire extends AbstractWire implements Wire {
                 parseUntil(sb, getEscapingEndOfText());
             }
             unescape(sb);
-        } catch (BufferUnderflowException ignored) {
+        } catch (BufferUnderflowException e) {
+            LOG.debug("", e);
         }
         //      consumePadding();
         return sb;
@@ -315,7 +316,8 @@ public class TextWire extends AbstractWire implements Wire {
                 parseUntil(sb, getEscapingEndOfText());
             }
             unescape(sb);
-        } catch (BufferUnderflowException ignored) {
+        } catch (BufferUnderflowException e) {
+            LOG.debug("", e);
         }
         //      consumePadding();
         return toExpected(expectedClass, sb);
@@ -1386,7 +1388,6 @@ public class TextWire extends AbstractWire implements Wire {
             }
         }
 
-
         protected void afterClose() {
             newLine();
             append(sep);
@@ -2299,7 +2300,6 @@ public class TextWire extends AbstractWire implements Wire {
             return object;
         }
 
-
         @Nullable
         public <T> T typedMarshallable() {
             return (T) objectWithInferredType(null, SerializationStrategies.ANY_NESTED, null);
@@ -2378,7 +2378,7 @@ public class TextWire extends AbstractWire implements Wire {
                                 final V v = r.read(() -> "value").typedMarshallable();
                                 usingMap.put(k, v);
                             } catch (Exception e) {
-                                LOG.error("", e);
+                                LOG.warn("", e);
                             }
                         }));
                     }
@@ -2540,28 +2540,28 @@ public class TextWire extends AbstractWire implements Wire {
                 ss = s.replace("_", "");
             try {
                 return Long.decode(ss);
-            } catch (NumberFormatException ignored) {
+            } catch (NumberFormatException fallback) {
             }
             try {
                 return Double.parseDouble(ss);
-            } catch (NumberFormatException ignored) {
+            } catch (NumberFormatException fallback) {
             }
             try {
                 if (s.length() == 7 && s.charAt(1) == ':')
                     return LocalTime.parse("0" + s);
                 if (s.length() == 8 && s.charAt(2) == ':')
                     return LocalTime.parse(s);
-            } catch (DateTimeParseException ignored) {
+            } catch (DateTimeParseException fallback) {
             }
             try {
                 if (s.length() == 10)
                     return LocalDate.parse(s);
-            } catch (DateTimeParseException ignored) {
+            } catch (DateTimeParseException fallback) {
             }
             try {
                 if (s.length() >= 22)
                     return ZonedDateTime.parse(s);
-            } catch (DateTimeParseException ignored) {
+            } catch (DateTimeParseException fallback) {
             }
             return s;
         }

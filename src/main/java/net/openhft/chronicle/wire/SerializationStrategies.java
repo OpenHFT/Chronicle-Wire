@@ -89,7 +89,6 @@ public enum SerializationStrategies implements SerializationStrategy {
             return Object.class;
         }
 
-
     },
     DEMARSHALLABLE {
         @Override
@@ -312,7 +311,6 @@ public enum SerializationStrategies implements SerializationStrategy {
             return BracketType.SEQ;
         }
     };
-
 
     @Override
     public Object newInstance(Class type) {

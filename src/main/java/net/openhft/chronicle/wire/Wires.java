@@ -107,7 +107,6 @@ public enum Wires {
         return WireInternal.fromSizePrefixedBlobs(bytes, position, limit - position);
     }
 
-
     public static String fromSizePrefixedBlobs(@NotNull DocumentContext dc) {
         return Wires.fromSizePrefixedBlobs(dc.wire().bytes(), dc.wire().bytes().readPosition() - 4);
     }

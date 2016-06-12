@@ -102,7 +102,6 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
 
         int one;
 
-
         @UsedViaReflection
         public DTO1(@NotNull WireIn wire) {
             readMarshallable(wire);
@@ -136,7 +135,6 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
         public DTO2(@NotNull WireIn wire) {
             readMarshallable(wire);
         }
-
 
         public DTO2(int one, int two, Object three) {
             this.one = one;
@@ -177,5 +175,5 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
             return this;
         }
     }
-
 }
+

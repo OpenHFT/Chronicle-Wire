@@ -80,5 +80,5 @@ public class WireModel extends AbstractMarshallable {
     public void setKey(String key) {
         this.key = key;
     }
-
 }
+

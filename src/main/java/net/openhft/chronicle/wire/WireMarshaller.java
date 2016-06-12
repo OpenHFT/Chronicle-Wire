@@ -18,7 +18,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.ClassLocal;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 
@@ -90,8 +89,12 @@ public class WireMarshaller<T> {
     }
 
     public void writeMarshallable(T t, WireOut out) {
-        for (FieldAccess field : fields) {
-            field.write(t, out);
+        try {
+            for (FieldAccess field : fields) {
+                field.write(t, out);
+            }
+        } catch (IllegalAccessException e) {
+            throw new AssertionError(e);
         }
     }
 
@@ -105,16 +108,23 @@ public class WireMarshaller<T> {
         }
     }
 
-
     public void writeMarshallable(T t, WireOut out, T previous, boolean copy) {
-        for (FieldAccess field : fields) {
-            field.write(t, out, previous, copy);
+        try {
+            for (FieldAccess field : fields) {
+                field.write(t, out, previous, copy);
+            }
+        } catch (IllegalAccessException e) {
+            throw new AssertionError(e);
         }
     }
 
     public void readMarshallable(T t, WireIn in, boolean overwrite) {
-        for (FieldAccess field : fields) {
-            field.read(t, in, overwrite);
+        try {
+            for (FieldAccess field : fields) {
+                field.read(t, in, overwrite);
+            }
+        } catch (IllegalAccessException e) {
+            throw new AssertionError(e);
         }
     }
 
@@ -210,26 +220,18 @@ public class WireMarshaller<T> {
                     '}';
         }
 
-        void write(Object o, WireOut out) {
-            try {
+        void write(Object o, WireOut out) throws IllegalAccessException {
                 ValueOut write = out.write(field.getName());
                 getValue(o, write, null);
-            } catch (IllegalAccessException e) {
-                throw new AssertionError(e);
-            }
         }
 
-        void write(Object o, WireOut out, Object previous, boolean copy) {
-            try {
+        void write(Object o, WireOut out, Object previous, boolean copy) throws IllegalAccessException {
                 if (sameValue(o, previous))
                     return;
                 ValueOut write = out.write(field.getName());
                 getValue(o, write, previous);
                 if (copy)
                     copy(o, previous);
-            } catch (IllegalAccessException e) {
-                throw new AssertionError(e);
-            }
         }
 
         protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
@@ -246,14 +248,10 @@ public class WireMarshaller<T> {
 
         protected abstract void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException;
 
-        void read(Object o, WireIn in, boolean overwrite) {
-            try {
+        void read(Object o, WireIn in, boolean overwrite) throws IllegalAccessException {
                 ValueIn read = in.read(key);
                 if (overwrite || !(read instanceof DefaultValueIn))
                     setValue(o, read, overwrite);
-            } catch (IllegalAccessException e) {
-                throw new AssertionError(e);
-            }
         }
 
         protected abstract void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException;
@@ -428,9 +426,7 @@ public class WireMarshaller<T> {
             return () -> {
                 try {
                     return (Collection) type.newInstance();
-                } catch (InstantiationException e) {
-                    throw new AssertionError(e);
-                } catch (IllegalAccessException e) {
+                } catch (InstantiationException | IllegalAccessException e) {
                     throw new AssertionError(e);
                 }
             };
@@ -454,7 +450,7 @@ public class WireMarshaller<T> {
                     try {
                         field.set(o, null);
                     } catch (IllegalAccessException e) {
-                        throw Jvm.rethrow(e);
+                        throw new AssertionError(e);
                     }
                 } else {
                     for (Object element : coll) {
@@ -467,8 +463,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        void read(Object o, WireIn in, boolean overwrite) {
-            try {
+        void read(Object o, WireIn in, boolean overwrite) throws IllegalAccessException {
                 ValueIn read = in.read(key);
                 Collection coll = (Collection) field.get(o);
                 if (coll == null) {
@@ -483,9 +478,6 @@ public class WireMarshaller<T> {
                 })) {
                     field.set(o, null);
                 }
-            } catch (IllegalAccessException e) {
-                throw new AssertionError(e);
-            }
         }
 
         @Override
@@ -549,8 +541,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        void read(Object o, WireIn in, boolean overwrite) {
-            try {
+        void read(Object o, WireIn in, boolean overwrite) throws IllegalAccessException {
                 ValueIn read = in.read(key);
                 Collection coll = (Collection) field.get(o);
                 if (coll == null) {
@@ -562,9 +553,6 @@ public class WireMarshaller<T> {
                 if (!read.sequence(coll, seqConsumer)) {
                     field.set(o, null);
                 }
-            } catch (IllegalAccessException e) {
-                throw new AssertionError(e);
-            }
         }
 
         @Override
@@ -609,9 +597,7 @@ public class WireMarshaller<T> {
         private Supplier<Map> newInstance() {
             try {
                 return (Supplier<Map>) type.newInstance();
-            } catch (InstantiationException e) {
-                throw new AssertionError(e);
-            } catch (IllegalAccessException e) {
+            } catch (InstantiationException | IllegalAccessException e) {
                 throw new AssertionError(e);
             }
         }
@@ -623,8 +609,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        void read(Object o, WireIn in, boolean overwrite) {
-            try {
+        void read(Object o, WireIn in, boolean overwrite) throws IllegalAccessException {
                 ValueIn read = in.read(key);
                 Map map = (Map) field.get(o);
                 if (map == null) {
@@ -635,9 +620,6 @@ public class WireMarshaller<T> {
                 }
                 if (read.marshallableAsMap(keyType, valueType, map) == null)
                     field.set(o, null);
-            } catch (IllegalAccessException e) {
-                throw new AssertionError(e);
-            }
         }
 
         @Override

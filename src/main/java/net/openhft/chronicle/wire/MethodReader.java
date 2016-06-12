@@ -118,7 +118,7 @@ public class MethodReader implements Closeable {
                     argArr[0] = v.object(msgClass);
                     m.invoke(o, argArr);
                 } catch (Exception i) {
-                    LOGGER.error("Failure to dispatch message: " + m.getName() + " " + argArr[0], i);
+                    LOGGER.warn("Failure to dispatch message: " + m.getName() + " " + argArr[0], i);
                 }
             });
 
@@ -127,7 +127,11 @@ public class MethodReader implements Closeable {
             try {
                 arg = (ReadMarshallable) msgClass.newInstance();
             } catch (Exception e) {
-                arg = (ReadMarshallable) OS.memory().allocateInstance(msgClass);
+                try {
+                    arg = (ReadMarshallable) OS.memory().allocateInstance(msgClass);
+                } catch (InstantiationException e1) {
+                    throw Jvm.rethrow(e1);
+                }
             }
             ReadMarshallable[] argArr = {arg};
             wireParser.register(m::getName, (s, v, $) -> {
@@ -138,7 +142,7 @@ public class MethodReader implements Closeable {
                     v.marshallable(argArr[0]);
                     m.invoke(o, argArr);
                 } catch (Exception i) {
-                    LOGGER.error("Failure to dispatch message: " + m.getName() + " " + argArr[0], i);
+                    LOGGER.warn("Failure to dispatch message: " + m.getName() + " " + argArr[0], i);
                 }
             });
         }
@@ -161,7 +165,7 @@ public class MethodReader implements Closeable {
                 v.sequence(args, sequenceReader);
                 m.invoke(o, args);
             } catch (Exception i) {
-                LOGGER.error("Failure to dispatch message: " + m.getName() + " " + Arrays.toString(args), i);
+                LOGGER.warn("Failure to dispatch message: " + m.getName() + " " + Arrays.toString(args), i);
             }
         });
     }

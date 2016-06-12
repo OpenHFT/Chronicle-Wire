@@ -34,16 +34,55 @@ public class ForwardAndBackwardCompatibilityTest {
         });
     }
 
+    @Test
+    public void backwardsCompatibility() throws Exception {
+        final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        CLASS_ALIASES.addAlias(DTO1.class, "DTO");
+
+        wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO1(1)));
+        System.out.println(Wires.fromSizePrefixedBlobs(wire));
+
+        CLASS_ALIASES.addAlias(DTO2.class, "DTO");
+
+        try (DocumentContext dc = wire.readingDocument()) {
+            if (!dc.isPresent())
+                Assert.fail();
+            DTO2 dto2 = dc.wire().getValueIn().typedMarshallable();
+            Assert.assertEquals(dto2.one, 1);
+            Assert.assertEquals(dto2.two, 0);
+            Assert.assertEquals(dto2.three, null);
+        }
+
+    }
+
+    @Test
+    public void forwardComparability() throws Exception {
+
+        final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        CLASS_ALIASES.addAlias(DTO2.class, "DTO");
+
+        wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO2(1, 2, 3)));
+        System.out.println(Wires.fromSizePrefixedBlobs(wire));
+
+        CLASS_ALIASES.addAlias(DTO1.class, "DTO");
+
+        try (DocumentContext dc = wire.readingDocument()) {
+            if (!dc.isPresent())
+                Assert.fail();
+            DTO1 dto1 = dc.wire().getValueIn().typedMarshallable();
+            Assert.assertEquals(dto1.one, 1);
+        }
+
+    }
 
     public static class DTO1 extends AbstractMarshallable implements Demarshallable {
+
+        int one;
 
         @UsedViaReflection
         public DTO1(@NotNull WireIn wire) {
             readMarshallable(wire);
         }
-
-
-        int one;
 
         public DTO1(int i) {
             this.one = i;
@@ -59,7 +98,6 @@ public class ForwardAndBackwardCompatibilityTest {
         }
     }
 
-
     public static class DTO2 extends AbstractMarshallable implements Demarshallable {
         Object three;
         int one;
@@ -70,7 +108,6 @@ public class ForwardAndBackwardCompatibilityTest {
         public DTO2(@NotNull WireIn wire) {
             readMarshallable(wire);
         }
-
 
         public DTO2(int one, int two, Object three) {
             this.one = one;
@@ -105,48 +142,5 @@ public class ForwardAndBackwardCompatibilityTest {
             return this;
         }
     }
-
-
-    @Test
-    public void backwardsCompatibility() throws Exception {
-        final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
-        CLASS_ALIASES.addAlias(DTO1.class, "DTO");
-
-        wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO1(1)));
-        System.out.println(Wires.fromSizePrefixedBlobs(wire));
-
-        CLASS_ALIASES.addAlias(DTO2.class, "DTO");
-
-        try (DocumentContext dc = wire.readingDocument()) {
-            if (!dc.isPresent())
-                Assert.fail();
-            DTO2 dto2 = dc.wire().getValueIn().typedMarshallable();
-            Assert.assertEquals(dto2.one, 1);
-            Assert.assertEquals(dto2.two, 0);
-            Assert.assertEquals(dto2.three, null);
-        }
-
-    }
-
-
-    @Test
-    public void forwardComparability() throws Exception {
-
-        final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
-        CLASS_ALIASES.addAlias(DTO2.class, "DTO");
-
-        wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO2(1, 2, 3)));
-        System.out.println(Wires.fromSizePrefixedBlobs(wire));
-
-        CLASS_ALIASES.addAlias(DTO1.class, "DTO");
-
-        try (DocumentContext dc = wire.readingDocument()) {
-            if (!dc.isPresent())
-                Assert.fail();
-            DTO1 dto1 = dc.wire().getValueIn().typedMarshallable();
-            Assert.assertEquals(dto1.one, 1);
-        }
-
-    }
-
 }
+

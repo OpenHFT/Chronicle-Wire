@@ -36,6 +36,4 @@ public interface ReadMarshallable {
      * @throws IORuntimeException the stream wasn't ordered or formatted as expected.
      */
     void readMarshallable(@NotNull WireIn wire) throws IORuntimeException;
-
-
 }

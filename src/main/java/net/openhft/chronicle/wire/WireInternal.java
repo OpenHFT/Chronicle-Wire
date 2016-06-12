@@ -292,7 +292,7 @@ public enum WireInternal {
                 try {
                     DETAILED_MESSAGE.set(finalThrowable, message);
                 } catch (IllegalAccessException e) {
-                    throw Jvm.rethrow(e);
+                    throw new AssertionError(e);
                 }
             }
             m.read(() -> "stackTrace").sequence(stes, (stes0, stackTrace) -> {

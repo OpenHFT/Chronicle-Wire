@@ -87,5 +87,5 @@ public class WireProperty extends WireModel {
     public void setValue(String value) {
         this.value = value;
     }
-
 }
+

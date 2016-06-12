@@ -465,7 +465,6 @@ public class BinaryWire2Test {
         wire.readDocument(null, w -> assertArrayEquals(four, (byte[]) w.read(() -> "four").object()));
     }
 
-
     @Test
     public void testObjectKeys() {
         Map<MyMarshallable, String> map = new LinkedHashMap<>();
@@ -532,6 +531,5 @@ public class BinaryWire2Test {
         Assert.assertEquals(putMap, newMap);
 
     }
-
-
 }
+

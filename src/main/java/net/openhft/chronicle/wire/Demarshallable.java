@@ -49,8 +49,10 @@ public interface Demarshallable {
     static <T extends Demarshallable> T newInstance(Class<T> clazz, WireIn wireIn) {
         try {
             return (T) DEMARSHALLABLES.get(clazz).newInstance(wireIn);
+
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
+
         } catch (Throwable e) {
             if (e instanceof InvocationTargetException)
                 e = e.getCause();

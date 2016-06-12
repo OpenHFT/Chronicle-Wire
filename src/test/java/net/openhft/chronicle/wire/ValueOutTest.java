@@ -105,5 +105,4 @@ public class ValueOutTest extends TestCase {
 
         }
     }
-
 }

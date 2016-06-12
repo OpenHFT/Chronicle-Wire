@@ -43,7 +43,7 @@ public interface WireKey {
         if (s.length() > 0 && Character.isDigit(s.charAt(0)))
             try {
                 return Integer.parseInt(s);
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException faillback) {
                 // ignored
             }
         return s.hashCode();

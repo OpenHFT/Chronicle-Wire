@@ -390,7 +390,7 @@ public class QueryWire extends TextWire {
         }
 
         @Override
-        public <T> Class<T> typeLiteral() {
+        public <T> Class<T> typeLiteral() throws IORuntimeException {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             textTo(sb);
             try {

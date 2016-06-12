@@ -54,7 +54,7 @@ public class Main {
             LOGGER.info("Engine started");
 
         } catch (Exception e) {
-            LOGGER.error("Error starting a component, stopping", e);
+            LOGGER.warn("Error starting a component, stopping", e);
             close(root);
         }
     }

@@ -996,7 +996,6 @@ public class RawWire extends AbstractWire implements Wire {
             return true;
         }
 
-
         @Override
         public <K extends ReadMarshallable, V extends ReadMarshallable> void typedMap(@NotNull Map<K, V> usingMap) {
             throw new UnsupportedOperationException("todo");

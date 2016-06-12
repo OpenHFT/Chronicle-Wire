@@ -75,5 +75,5 @@ public class MarshallableTest {
                 "d: 2.0\n", Wires.fromSizePrefixedBlobs(wire));
 
     }
-
 }
+
