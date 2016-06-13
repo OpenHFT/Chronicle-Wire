@@ -2108,6 +2108,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     long len = bytes.readStopBit();
                     bytes.readSkip(len);
                     return readLength();
+
                 default:
                     return ANY_CODE_MATCH.code();
             }
@@ -2630,6 +2631,17 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (this.isNull())
                 return false;
             pushState();
+            consumePadding();
+            int code = peekCode();
+            switch (code) {
+                case ANCHOR:
+                case UPDATED_ALIAS: {
+                    bytes.readSkip(1);
+                    Object o = code == ANCHOR ? anchor() : updateAlias();
+                    Wires.copyTo(o, object);
+                    return true;
+                }
+            }
             long length = readLength();
             if (length >= 0) {
                 long limit = bytes.readLimit();
@@ -2644,7 +2656,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     popState();
                 }
             } else {
-                throw new IORuntimeException("Length unknown");
+                throw new IORuntimeException("Length unknown " + length);
             }
             return true;
         }
@@ -2798,52 +2810,6 @@ public class BinaryWire extends AbstractWire implements Wire {
         private RuntimeException cantRead(int code) {
             throw new UnsupportedOperationException(stringForCode(code));
         }
-/*
-        @Nullable
-        Object object0(@Nullable Object using, @NotNull Class clazz) {
-
-            final int code = peekCode();
-            if (code == 0xBB) {
-                readCode();
-                return null;
-            }
-
-            if (clazz == Object.class) {
-                return object1(using, clazz);
-            }
-
-            if (ReadMarshallable.class.isAssignableFrom(clazz) && !clazz.isInterface()) {
-                final Object v;
-                if (using == null)
-                    v = ObjectUtils.newInstance(clazz);
-                else
-                    v = using;
-
-                marshallable((ReadMarshallable) v);
-                return readResolve(v);
-
-            } else if (CharSequence.class.isAssignableFrom(clazz)) {
-                if (StringBuilder.class.isAssignableFrom(clazz)) {
-                    StringBuilder builder = (using == null)
-                            ? WireInternal.acquireStringBuilder()
-                            : (StringBuilder) using;
-                    textTo(builder);
-                    return builder;
-                }
-                return text();
-
-            } else if (Map.class.isAssignableFrom(clazz)) {
-                final Map result = new LinkedHashMap();
-                marshallable(result, SerializationStrategies.MAP);
-                return result;
-
-            } else if (byte[].class.isAssignableFrom(clazz)) {
-                return bytes();
-
-            } else {
-                return objectWithInferredType(using, clazz);
-            }
-        }*/
 
         @Override
         public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type) {
