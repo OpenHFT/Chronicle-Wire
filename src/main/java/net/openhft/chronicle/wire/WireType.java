@@ -92,7 +92,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                         "A Chronicle Wire Enterprise licence is required to run this code " +
                                 "because you are using DefaultZeroWire which is a licence product. " +
                                 "Please contact sales@chronicle.software");
-                LOG.warn("", licence);
+                Jvm.warn().on(getClass(), licence);
                 throw licence;
             }
         }
@@ -105,7 +105,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                     "Enterprise licence is required to run this code because you are using " +
                     "DEFAULT_ZERO_BINARY which is a licence product. " +
                     "Please contact sales@chronicle.software");
-            LOG.warn("", licence);
+            Jvm.warn().on(getClass(), licence);
             throw licence;
         }
 

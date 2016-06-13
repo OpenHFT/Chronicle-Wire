@@ -20,6 +20,7 @@ import net.openhft.chronicle.bytes.ref.TextIntReference;
 import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
 import net.openhft.chronicle.bytes.ref.TextLongReference;
 import net.openhft.chronicle.bytes.util.Compression;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
@@ -271,7 +272,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
             unescape(sb);
         } catch (BufferUnderflowException e) {
-            LOG.debug("", e);
+            Jvm.debug().on(getClass(), e);
         }
         //      consumePadding();
         return sb;
@@ -317,7 +318,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
             unescape(sb);
         } catch (BufferUnderflowException e) {
-            LOG.debug("", e);
+            Jvm.debug().on(getClass(), e);
         }
         //      consumePadding();
         return toExpected(expectedClass, sb);
@@ -2378,7 +2379,7 @@ public class TextWire extends AbstractWire implements Wire {
                                 final V v = r.read(() -> "value").typedMarshallable();
                                 usingMap.put(k, v);
                             } catch (Exception e) {
-                                LOG.warn("", e);
+                                Jvm.warn().on(getClass(), e);
                             }
                         }));
                     }
