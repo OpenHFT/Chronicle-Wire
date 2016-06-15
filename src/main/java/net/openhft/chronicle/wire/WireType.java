@@ -165,24 +165,22 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             throw licence;
         }
 
-        private Boolean isAvailable;
+        private final boolean isAvailable = isAvailable0();
+
+        private boolean isAvailable0() {
+            boolean isAvailable;
+            try {
+                Class.forName("software.chronicle.wire.DeltaWire")
+                        .getDeclaredConstructor(Bytes.class);
+
+                return true;
+
+            } catch (Exception fallback) {
+                return false;
+            }
+        }
 
         public boolean isAvailable() {
-
-            if (isAvailable != null)
-                return isAvailable;
-
-            try {
-                Class e = Class.forName("software.chronicle.wire.DeltaWire");
-                e.getDeclaredConstructor(new Class[]{Bytes.class});
-
-                // todo remove this and add the true
-                return false;
-                // isAvailable = true;
-            } catch (Exception var4) {
-                isAvailable = false;
-            }
-
             return isAvailable;
         }
 
@@ -195,6 +193,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         public <T> T fromString(CharSequence cs) {
             return fromHexString(cs);
         }
+
     }, FIELDLESS_BINARY {
         @NotNull
         @Override
