@@ -3007,6 +3007,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         protected <T> T updateAlias() {
             int ref = Maths.toUInt31(bytes.readStopBit());
             Marshallable previous = inObjects[ref];
+            assert previous != null;
             super.marshallable(previous, false);
             return (T) previous;
         }
