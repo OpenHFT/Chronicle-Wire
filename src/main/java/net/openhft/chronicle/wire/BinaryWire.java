@@ -210,8 +210,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     }
                     case ANCHOR:
                     case UPDATED_ALIAS: {
-                            final Object o = valueIn.object();
-                            wire.getValueOut().object(o);
+                        final Object o = valueIn.object();
+                        wire.getValueOut().object(o);
                         break outerSwitch;
                     }
                 }
@@ -2940,9 +2940,11 @@ public class BinaryWire extends AbstractWire implements Wire {
             switch (code >> 4) {
                 case BinaryWireHighCode.CONTROL:
                     switch (code) {
+                        case BYTES_LENGTH8:
                         case BYTES_LENGTH16:
                         case BYTES_LENGTH32:
-                            bytesStore();
+                            long length = readLength();
+                            bytes.readSkip(length);
                             return;
                     }
                     break;
