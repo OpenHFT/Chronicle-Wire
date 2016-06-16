@@ -250,8 +250,17 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public void updateHeader(int length, long position, boolean metaData) throws StreamCorruptedException {
+
         long pos = bytes.writePosition();
         int actualLength = Maths.toUInt31(pos - position - 4);
+
+        // the reason we add padding is so that a message gets sent ( this is, mostly for queue as
+        // it cant handle a zero len message )
+        if (actualLength == 0) {
+            addPadding(1);
+            actualLength = 1;
+        }
+
         int expectedHeader = Wires.NOT_COMPLETE | length;
         if (length == Wires.UNKNOWN_LENGTH)
             length = actualLength;
@@ -272,7 +281,15 @@ public abstract class AbstractWire implements Wire {
             incrementHeaderNumber();
     }
 
+
     void updateHeaderAssertions(long position, long pos, int expectedHeader, int header) throws StreamCorruptedException {
+        checkNoDataAfterEnd(pos);
+
+        if (!bytes.compareAndSwapInt(position, expectedHeader, header))
+            throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(bytes.readVolatileInt(position)));
+    }
+
+    protected void checkNoDataAfterEnd(long pos) {
         if (pos <= bytes.realCapacity() - 4) {
             final int value = bytes.bytesStore().readVolatileInt(pos);
             if (value != 0) {
@@ -287,9 +304,6 @@ public abstract class AbstractWire implements Wire {
                 throw new IllegalStateException("Data was written after the end of the message, zero out data before rewinding " + text);
             }
         }
-
-        if (!bytes.compareAndSwapInt(position, expectedHeader, header))
-            throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(bytes.readVolatileInt(position)));
     }
 
     private void incrementHeaderNumber() {
