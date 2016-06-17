@@ -5,6 +5,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.ReadResolvable;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -165,7 +166,11 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         @Override
-        public Object newInstance(Class type) {
+        public Object newInstance(@Nullable Class type) {
+
+            if (type == null)
+                return new LinkedHashMap<>();
+
             return SortedMap.class.isAssignableFrom(type) ? new TreeMap<>() : new LinkedHashMap<>();
         }
 
