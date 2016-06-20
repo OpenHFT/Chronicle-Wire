@@ -485,6 +485,12 @@ public class HashWire implements WireOut {
 
         @NotNull
         @Override
+        public <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer) {
+            writer.accept(t, kls, this);
+            return HashWire.this;
+        }
+        @NotNull
+        @Override
         public WireOut marshallable(WriteMarshallable object) {
             object.writeMarshallable(HashWire.this);
             return HashWire.this;

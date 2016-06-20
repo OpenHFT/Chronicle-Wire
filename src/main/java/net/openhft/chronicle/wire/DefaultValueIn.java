@@ -311,6 +311,13 @@ public class DefaultValueIn implements ValueIn {
         return false;
     }
 
+    @NotNull
+    @Override
+    public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) {
+        assert wireKey.defaultValue() == null;
+        tReader.accept(t, kls, this);
+        return wireIn();
+    }
     @Override
     public <T> T applyToMarshallable(Function<WireIn, T> marshallableReader) {
         return (T) wireKey.defaultValue();

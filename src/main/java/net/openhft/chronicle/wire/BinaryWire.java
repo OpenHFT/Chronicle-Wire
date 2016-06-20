@@ -1505,6 +1505,19 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
+        public <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer) {
+            writeCode(BYTES_LENGTH32);
+            long position = bytes.writePosition();
+            bytes.writeInt(0);
+
+            writer.accept(t, kls, this);
+
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
+            return BinaryWire.this;
+        }
+
+        @NotNull
+        @Override
         public WireOut marshallable(@NotNull WriteMarshallable object) {
             writeCode(BYTES_LENGTH32);
             long position = bytes.writePosition();
@@ -2424,6 +2437,26 @@ public class BinaryWire extends AbstractWire implements Wire {
                 bytes.readPosition(limit2);
             }
             return true;
+        }
+
+        @NotNull
+        @Override
+        public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) {
+            consumePadding();
+            int code = readCode();
+            if (code != BYTES_LENGTH32)
+                cantRead(code);
+            final int length = bytes.readInt();
+            long limit = bytes.readLimit();
+            long limit2 = bytes.readPosition() + length;
+            bytes.readLimit(limit2);
+            try {
+                tReader.accept(t, kls, this);
+            } finally {
+                bytes.readLimit(limit);
+                bytes.readPosition(limit2);
+            }
+            return BinaryWire.this;
         }
 
         @Override

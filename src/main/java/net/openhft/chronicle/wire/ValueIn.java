@@ -211,6 +211,9 @@ public interface ValueIn {
         return sequence(t, tReader::readUsing);
     }
 
+    @NotNull
+    <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader);
+
     default <T> Set<T> set(Class<T> t) {
         return collection(LinkedHashSet::new, t);
     }
@@ -221,9 +224,9 @@ public interface ValueIn {
 
     default <T, C extends Collection<T>> C collection(Supplier<C> supplier, Class<T> t) {
         C list = supplier.get();
-        sequence(list, (s, v) -> {
+        sequence(list, t, (s, kls, v) -> {
             while (v.hasNextSequenceItem())
-                s.add(v.object(t));
+                s.add(v.object(kls));
         });
         return list;
     }
@@ -236,10 +239,10 @@ public interface ValueIn {
         return collection(o, tSupplier);
     }
 
-    default <O, T extends ReadMarshallable> WireIn collection(O o, Function<O, T> tSupplier) {
-        sequence(o, (o2, v) -> {
+    default <O, T extends ReadMarshallable, C extends Collection<T>> WireIn collection(O o, Function<O, T> tSupplier) {
+        sequence(o, tSupplier, (o2, ts, v) -> {
             while (v.hasNextSequenceItem()) {
-                T t = tSupplier.apply(o2);
+                T t = ts.apply(o2);
                 v.marshallable(t);
             }
         });
