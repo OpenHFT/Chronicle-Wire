@@ -236,6 +236,9 @@ public interface ValueOut {
     <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer);
 
     @NotNull
+    <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer);
+
+    @NotNull
     default WireOut array(@NotNull WriteValue writer, Class arrayType) {
         if (arrayType == String[].class) {
             typePrefix("String[] ");
@@ -321,14 +324,20 @@ public interface ValueOut {
     }
 
     default <V> WireOut list(List<V> coll, Class<V> assumedClass) {
-        return collection(coll, assumedClass);
+        sequence(coll, assumedClass, (s, kls, out) -> {
+            int size = s.size();
+            for (int i = 0; i < size; i++) {
+                out.leaf();
+                marshallable((WriteMarshallable) s.get(i));
+            }
+        });
+        return wireOut();
     }
 
     default <V> WireOut collection(Collection<V> coll, Class<V> assumedClass) {
-        sequence(coll, (s, out) -> {
+        sequence(coll, assumedClass, (s, kls, out) -> {
             for (V v : s) {
-                out.leaf();
-                object(assumedClass, v);
+                object(kls, v);
             }
         });
         return wireOut();

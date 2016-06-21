@@ -305,6 +305,23 @@ public class QueryWire extends TextWire {
             return QueryWire.this;
         }
 
+        @NotNull
+        @Override
+        public <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer) {
+            prependSeparator();
+            pushState();
+            bytes.appendUtf8("[");
+            sep = ",";
+            long pos = bytes.writePosition();
+            writer.accept(t, kls, this);
+            if (pos != bytes.writePosition())
+                bytes.appendUtf8(",");
+
+            popState();
+            bytes.appendUtf8("]");
+            elementSeparator();
+            return QueryWire.this;
+        }
         protected void popState() {
         }
 

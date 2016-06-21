@@ -556,6 +556,17 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
+        public <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer) {
+            long position = bytes.writePosition();
+            bytes.writeInt(0);
+
+            writer.accept(t, kls, this);
+
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
+            return RawWire.this;
+        }
+        @NotNull
+        @Override
         public WireOut marshallable(@NotNull WriteMarshallable object) {
             long position = bytes.writePosition();
             bytes.writeInt(0);
@@ -903,6 +914,12 @@ public class RawWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @NotNull
+        @Override
+        public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) {
             throw new UnsupportedOperationException("todo");
         }
 

@@ -1263,6 +1263,22 @@ public class TextWire extends AbstractWire implements Wire {
             return wireOut();
         }
 
+        @NotNull
+        @Override
+        public <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer) {
+            pushState();
+            bytes.writeUnsignedByte('[');
+            newLine();
+            long pos = bytes.readPosition();
+            writer.accept(t, kls, this);
+            addNewLine(pos);
+
+            popState();
+            indent();
+            bytes.writeUnsignedByte(']');
+            endField();
+            return wireOut();
+        }
         protected void addNewLine(long pos) {
             if (bytes.writePosition() > pos + 1)
                 bytes.writeUnsignedByte('\n');
@@ -2084,6 +2100,30 @@ public class TextWire extends AbstractWire implements Wire {
             return true;
         }
 
+        @NotNull
+        @Override
+        public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) {
+            consumePadding();
+            char code = (char) readCode();
+            if (code != '[')
+                throw new IORuntimeException("Unsupported type " + code + " (" + code + ")");
+
+            // this code was added to support empty sets
+            consumePadding();
+            code = (char) peekCode();
+            if (code == ']') {
+                readCode();
+                return TextWire.this;
+            }
+
+            tReader.accept(t, kls, TextWire.this.valueIn);
+
+            consumePadding();
+            code = (char) readCode();
+            if (code != ']')
+                throw new IORuntimeException("Expected a ] but got " + code + " (" + code + ")");
+            return TextWire.this;
+        }
         @Override
         public boolean hasNext() {
             consumePadding();

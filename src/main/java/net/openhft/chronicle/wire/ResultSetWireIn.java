@@ -507,6 +507,12 @@ public class ResultSetWireIn implements WireIn {
             throw new UnsupportedOperationException();
         }
 
+        @NotNull
+        @Override
+        public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) {
+            throw new UnsupportedOperationException();
+        }
+
         @Override
         public <T> T applyToMarshallable(Function<WireIn, T> marshallableReader) {
             throw new UnsupportedOperationException();
