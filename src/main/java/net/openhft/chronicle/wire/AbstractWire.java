@@ -246,6 +246,7 @@ public abstract class AbstractWire implements Wire {
                     throw new EOFException();
                 if (Wires.isNotComplete(header))
                     continue;
+
                 if (Wires.isData(header))
                     incrementHeaderNumber();
                 int len = Wires.lengthOf(header);
