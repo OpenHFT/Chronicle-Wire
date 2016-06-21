@@ -15,7 +15,9 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
 import java.io.ObjectOutput;
@@ -38,7 +40,8 @@ public interface WireOut extends WireCommon {
     ValueOut write();
 
     /**
-     * Always write a key.  For RAW types, this label with be in text.  To read this, use readEventName()
+     * Always write a key.  For RAW types, this label with be in text.  To read this, use
+     * readEventName()
      */
     @NotNull
     default ValueOut writeEventName(WireKey key) {
@@ -132,17 +135,20 @@ public interface WireOut extends WireCommon {
     }
 
     /**
-     * Write a new header, an unknown length, handling timeouts and the end of wire marker.
-     * This will increment the headerNumber as appropriate if successful
+     * Write a new header, an unknown length, handling timeouts and the end of wire marker. This
+     * will increment the headerNumber as appropriate if successful
      *
-     * @param timeout  throw a TimeoutException if the header could not be written in this time.
-     * @param timeUnit of the timeOut
+     * @param timeout      throw a TimeoutException if the header could not be written in this
+     *                     time.
+     * @param timeUnit     of the timeOut
+     * @param lastPosition
      * @return the position of the start of the header
      * @throws TimeoutException the underlying pauser timed out.
      * @throws EOFException     the end of wire marker was reached.
      */
-    default long writeHeader(long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {
-        return writeHeader(Wires.UNKNOWN_LENGTH, timeout, timeUnit);
+    default long writeHeader(long timeout, TimeUnit timeUnit, @Nullable final LongValue
+            lastPosition) throws TimeoutException, EOFException {
+        return writeHeader(Wires.UNKNOWN_LENGTH, timeout, timeUnit, lastPosition);
     }
 
     /**
@@ -157,22 +163,26 @@ public interface WireOut extends WireCommon {
     }
 
     /**
-     * Write a message of a known length, handling timeouts and the end of wire marker.
-     * This will increment the headerNumber as appropriate if successful
+     * Write a message of a known length, handling timeouts and the end of wire marker. This will
+     * increment the headerNumber as appropriate if successful
      *
-     * @param length   the maximum length of the message.
-     * @param timeout  throw a TimeoutException if the header could not be written in this time.
-     * @param timeUnit of the timeOut
+     * @param length       the maximum length of the message.
+     * @param timeout      throw a TimeoutException if the header could not be written in this
+     *                     time.
+     * @param timeUnit     of the timeOut
+     * @param lastPosition
      * @return the position of the start of the header
      * @throws TimeoutException the underlying pauser timed out.
      * @throws EOFException     the end of wire marker was reached.
      */
-    long writeHeader(int length, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException;
+    long writeHeader(int length, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition)
+            throws TimeoutException, EOFException;
 
     /**
      * Change the header from NOT_COMPLETE | length to metaData * META_DATA | length.
      *
-     * @param length   provided to make the header, note this can be larger than the message actually used.
+     * @param length   provided to make the header, note this can be larger than the message
+     *                 actually used.
      * @param position returned by writeHeader
      * @param metaData whether the message is meta data or not.
      * @throws StreamCorruptedException
@@ -180,10 +190,8 @@ public interface WireOut extends WireCommon {
     void updateHeader(int length, long position, boolean metaData) throws StreamCorruptedException;
 
     /**
-     * Start the first header, if there is none
-     * This will increment the headerNumber as appropriate if successful
-     * <p>
-     * Note: the file might contain other data and the caller has to check this.
+     * Start the first header, if there is none This will increment the headerNumber as appropriate
+     * if successful <p> Note: the file might contain other data and the caller has to check this.
      * </p>
      *
      * @return true if the header needs to be written, false if there is a data already
@@ -196,8 +204,8 @@ public interface WireOut extends WireCommon {
     void updateFirstHeader();
 
     /**
-     * Write the end of wire marker, unless one is already written.
-     * This will increment the headerNumber as appropriate if successful
+     * Write the end of wire marker, unless one is already written. This will increment the
+     * headerNumber as appropriate if successful
      *
      * @param timeout  throw TimeoutException if it could not write the marker in time.
      * @param timeUnit of the timeout

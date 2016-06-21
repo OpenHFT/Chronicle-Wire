@@ -20,6 +20,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.threads.BusyPauser;
 import net.openhft.chronicle.threads.LongPauser;
 import net.openhft.chronicle.threads.Pauser;
@@ -199,7 +200,7 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public long writeHeader(int length, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {
+    public long writeHeader(int length, long timeout, TimeUnit timeUnit, LongValue lastPosition) throws TimeoutException, EOFException {
         if (length < 0 || length > Wires.MAX_LENGTH)
             throw new IllegalArgumentException();
         long pos = bytes.writePosition();
@@ -212,13 +213,14 @@ public abstract class AbstractWire implements Wire {
             return pos;
         }
 
-        //   if (lastPosition == null)
-        return writeHeader0(length, timeout, timeUnit);
+    //    if (lastPosition == null)
+            return writeHeader0(length, timeout, timeUnit);
 
-        //  headerNumber = Long.MIN_VALUE;
-        //   bytes.writePosition(lastPosition.getValue());
-        //   return writeHeader0(length, timeout, timeUnit);
+     //   headerNumber = Long.MIN_VALUE;
+       // bytes.writePosition(lastPosition.getValue());
+      //  return writeHeader0(length, timeout, timeUnit);
     }
+
     private long writeHeader0(int length, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {
         if (length < 0 || length > Wires.MAX_LENGTH)
             throw new IllegalArgumentException();

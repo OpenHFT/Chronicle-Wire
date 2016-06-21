@@ -3027,7 +3027,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         String[] inField = new String[128];
 
         @Override
-        protected <T> T anchor() {
+         protected <T> T anchor() {
             long ref = bytes.readStopBit();
             if (ref >= inObjects.length)
                 inObjects = Arrays.copyOf(inObjects, inObjects.length * 2);
