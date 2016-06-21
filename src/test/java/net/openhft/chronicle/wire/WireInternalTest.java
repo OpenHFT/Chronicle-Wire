@@ -42,7 +42,7 @@ public class WireInternalTest {
                 }));
         out.writeDocument(false, wireOut -> wireOut.writeEventName(() -> "userid").text("peter"));
 
-        String actual = WireInternal.fromSizePrefixedBinaryToText(bytes);
+        String actual = Wires.fromSizePrefixedBlobs(bytes);
         assertEquals("--- !!meta-data #binary\n" +
                 "csp: \"csp://hello-world\"\n" +
                 "tid: 123456789\n" +

@@ -3029,6 +3029,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         protected <T> T anchor() {
             long ref = bytes.readStopBit();
+//            System.out.println("anchor " + ref + " inObjects " + Integer.toHexString(inObjects.hashCode()));
             if (ref >= inObjects.length)
                 inObjects = Arrays.copyOf(inObjects, inObjects.length * 2);
             T t = (T) super.typedMarshallable0();
@@ -3039,6 +3040,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         protected <T> T updateAlias() {
             int ref = Maths.toUInt31(bytes.readStopBit());
+//            System.out.println("update " + ref + " inObjects " + Integer.toHexString(inObjects.hashCode()));
             Marshallable previous = inObjects[ref];
             assert previous != null;
             super.marshallable(previous, false);

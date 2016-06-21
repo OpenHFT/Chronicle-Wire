@@ -183,13 +183,8 @@ public enum WireInternal {
         }
     }
 
-    @Deprecated
-    public static String fromSizePrefixedBinaryToText(@NotNull Bytes bytes) {
-        return Wires.fromSizePrefixedBlobs(bytes);
-    }
-
     @NotNull
-    static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position, long length) {
+    static String fromSizePrefixedBlobs(WireIn wireIn, @NotNull Bytes bytes, long position, long length) {
         StringBuilder sb = new StringBuilder();
 
         final long limit0 = bytes.readLimit();
@@ -244,7 +239,9 @@ public enum WireInternal {
                     long readPosition = bytes.readPosition();
                     try {
                         bytes.readLimit(readPosition + len);
-                        new BinaryWire(bytes).copyTo(textWire);
+                        if (wireIn == null)
+                            wireIn = new BinaryWire(bytes);
+                        wireIn.copyTo(textWire);
                     } catch (Exception e) {
                         bytes.readPosition(readPosition);
                         throw new IORuntimeException("Unable to parse\n" + bytes.toHexString(Integer.MAX_VALUE), e);
