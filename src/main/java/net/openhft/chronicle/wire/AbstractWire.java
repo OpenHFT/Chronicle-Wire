@@ -255,15 +255,13 @@ public abstract class AbstractWire implements Wire {
     @Override
     public void updateHeader(int length, long position, boolean metaData) throws StreamCorruptedException {
 
-        long pos = bytes.writePosition();
-        int actualLength = Maths.toUInt31(pos - position - 4);
-
         // the reason we add padding is so that a message gets sent ( this is, mostly for queue as
         // it cant handle a zero len message )
-        if (actualLength == 0) {
+        if (bytes.writePosition() == position + 4)
             addPadding(1);
-            actualLength = 1;
-        }
+
+        long pos = bytes.writePosition();
+        int actualLength = Maths.toUInt31(pos - position - 4);
 
         int expectedHeader = Wires.NOT_COMPLETE | length;
         if (length == Wires.UNKNOWN_LENGTH)
