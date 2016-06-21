@@ -97,24 +97,31 @@ public enum Wires {
      */
     public static String fromSizePrefixedBlobs(@NotNull Bytes bytes) {
         long position = bytes.readPosition();
-        return WireInternal.fromSizePrefixedBlobs(bytes, position, bytes.readRemaining());
+        return WireInternal.fromSizePrefixedBlobs(null, bytes, position, bytes.readRemaining());
     }
 
     public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position) {
         final long limit = bytes.readLimit();
         if (position > limit)
             return "";
-        return WireInternal.fromSizePrefixedBlobs(bytes, position, limit - position);
+        return WireInternal.fromSizePrefixedBlobs(null, bytes, position, limit - position);
     }
 
     public static String fromSizePrefixedBlobs(@NotNull DocumentContext dc) {
-        return Wires.fromSizePrefixedBlobs(dc.wire().bytes(), dc.wire().bytes().readPosition() - 4);
+        Wire wire = dc.wire();
+        Bytes<?> bytes = wire.bytes();
+        if (wire instanceof TextWire) {
+            return bytes.toString();
+        }
+        long headerPosition = bytes.readPosition() - 4;
+        int length = Wires.lengthOf(bytes.readInt(headerPosition));
+        return WireInternal.fromSizePrefixedBlobs(wire, bytes, headerPosition, length + 4);
     }
 
     public static String fromSizePrefixedBlobs(@NotNull WireIn wireIn) {
         final Bytes<?> bytes = wireIn.bytes();
         long position = bytes.readPosition();
-        return WireInternal.fromSizePrefixedBlobs(bytes, position, bytes.readRemaining());
+        return WireInternal.fromSizePrefixedBlobs(wireIn, bytes, position, bytes.readRemaining());
     }
 
     public static CharSequence asText(@NotNull WireIn wireIn) {
@@ -269,7 +276,7 @@ public enum Wires {
     }
 
     public static String fromSizePrefixedBlobs(Bytes<?> bytes, long position, long length) {
-        return WireInternal.fromSizePrefixedBlobs(bytes, position, length);
+        return WireInternal.fromSizePrefixedBlobs(null, bytes, position, length);
     }
 
     public static void readMarshallable(Object marshallable, WireIn wire, boolean overwrite) {

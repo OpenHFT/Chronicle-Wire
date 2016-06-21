@@ -339,7 +339,7 @@ To write in binary instead
         assert wire2.startUse();
 
         wire2.writeDocument(false, data);
-        System.out.println(WireInternal.fromSizePrefixedBinaryToText(bytes2));
+        System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
 
         Data data3 = new Data();
         assertTrue(wire2.readDocument(null, data3));
@@ -428,7 +428,7 @@ To write in binary instead
         assert wire2.startUse();
         wire2.writeDocument(false, w -> w.write(() -> "mydata")
                 .sequence(v -> Stream.of(data).forEach(v::object)));
-        System.out.println(WireInternal.fromSizePrefixedBinaryToText(bytes2));
+        System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
 
         List<Data> dataList2 = new ArrayList<>();
         assertTrue(wire2.readDocument(null, w -> w.read(() -> "mydata")
