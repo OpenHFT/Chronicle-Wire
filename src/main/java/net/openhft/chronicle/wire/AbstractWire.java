@@ -215,11 +215,11 @@ public abstract class AbstractWire implements Wire {
             return pos;
         }
 
-        if (lastPosition == null)
-            return writeHeader0(length, timeout, timeUnit);
+        if (lastPosition != null) {
+            headerNumber = Long.MIN_VALUE;
+            bytes.writePosition(lastPosition.getValue());
+        }
 
-    //    headerNumber = Long.MIN_VALUE;
-        bytes.writePosition(lastPosition.getValue());
         return writeHeader0(length, timeout, timeUnit);
     }
 
