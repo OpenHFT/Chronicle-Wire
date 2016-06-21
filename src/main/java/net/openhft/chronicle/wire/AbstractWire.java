@@ -25,6 +25,7 @@ import net.openhft.chronicle.threads.BusyPauser;
 import net.openhft.chronicle.threads.LongPauser;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
 import java.io.ObjectInput;
@@ -200,7 +201,8 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public long writeHeader(int length, long timeout, TimeUnit timeUnit, LongValue lastPosition) throws TimeoutException, EOFException {
+    public long writeHeader(int length, long timeout, TimeUnit timeUnit, @Nullable LongValue
+            lastPosition) throws TimeoutException, EOFException {
         if (length < 0 || length > Wires.MAX_LENGTH)
             throw new IllegalArgumentException();
         long pos = bytes.writePosition();
@@ -213,12 +215,12 @@ public abstract class AbstractWire implements Wire {
             return pos;
         }
 
-    //    if (lastPosition == null)
+        if (lastPosition == null)
             return writeHeader0(length, timeout, timeUnit);
 
-     //   headerNumber = Long.MIN_VALUE;
-       // bytes.writePosition(lastPosition.getValue());
-      //  return writeHeader0(length, timeout, timeUnit);
+    //    headerNumber = Long.MIN_VALUE;
+        bytes.writePosition(lastPosition.getValue());
+        return writeHeader0(length, timeout, timeUnit);
     }
 
     private long writeHeader0(int length, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {
