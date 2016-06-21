@@ -3027,7 +3027,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         String[] inField = new String[128];
 
         @Override
-        protected <T> T anchor() {
+         protected <T> T anchor() {
             long ref = bytes.readStopBit();
 //            System.out.println("anchor " + ref + " inObjects " + Integer.toHexString(inObjects.hashCode()));
             if (ref >= inObjects.length)

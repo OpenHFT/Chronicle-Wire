@@ -30,26 +30,26 @@ public class BinaryWireHeadersTest {
         assertEquals(0, wire.headerNumber()); // meta data doesn't count.
 
         for (int i = 0; i <= 3; i++) {
-            long position = wire2.writeHeader(1, TimeUnit.MILLISECONDS);
+            long position = wire2.writeHeader(1, TimeUnit.MILLISECONDS, null);
             assertEquals(i, wire2.headerNumber());
             wire2.getValueOut().text("hello world");
             wire2.updateHeader(position, false);
         }
         assertEquals(4, wire2.headerNumber());
         {
-            long position = wire2.writeHeader(1, TimeUnit.MILLISECONDS);
+            long position = wire2.writeHeader(1, TimeUnit.MILLISECONDS, null);
             wire2.getValueOut().text("hello world");
             wire2.updateHeader(position, true); // meta data doesn't count.
             assertEquals(4, wire2.headerNumber());
         }
 
         for (int i = 4; i <= 8; i += 2) {
-            long position = wire.writeHeader(1, TimeUnit.MILLISECONDS);
+            long position = wire.writeHeader(1, TimeUnit.MILLISECONDS, null);
             assertEquals(i, wire.headerNumber());
             wire.getValueOut().text("hello world");
             wire.updateHeader(position, false);
 
-            long position2 = wire2.writeHeader(1, TimeUnit.MILLISECONDS);
+            long position2 = wire2.writeHeader(1, TimeUnit.MILLISECONDS, null);
             assertEquals(i + 1, wire2.headerNumber());
             wire2.getValueOut().text("hello world");
             wire2.updateHeader(position2, false);
@@ -64,8 +64,8 @@ public class BinaryWireHeadersTest {
         Wire wire2 = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
         Wire wire3 = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
 
-        long position = wire.writeHeader(1, TimeUnit.SECONDS);
+        long position = wire.writeHeader(1, TimeUnit.SECONDS, null);
 
-        long position2 = wire2.writeHeader(100, TimeUnit.MILLISECONDS);
+        long position2 = wire2.writeHeader(100, TimeUnit.MILLISECONDS, null);
     }
 }
