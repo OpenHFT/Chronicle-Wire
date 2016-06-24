@@ -79,6 +79,8 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public Pauser pauser() {
+        if (pauser == BusyPauser.INSTANCE)
+            pauser = new LongPauser(1_000, 500, 1, 10, TimeUnit.MILLISECONDS);
         return pauser;
     }
 
@@ -227,8 +229,7 @@ public abstract class AbstractWire implements Wire {
         if (length < 0 || length > Wires.MAX_LENGTH)
             throw new IllegalArgumentException();
         long pos = bytes.writePosition();
-        if (pauser == BusyPauser.INSTANCE)
-            pauser = new LongPauser(1_000, 500, 1, 10, TimeUnit.MILLISECONDS);
+        pauser();
         try {
             for (; ; ) {
                 if (bytes.compareAndSwapInt(pos, 0, Wires.NOT_COMPLETE | length)) {

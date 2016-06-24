@@ -1,8 +1,6 @@
+package net.openhft.chronicle.wire;
+
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.wire.DocumentContext;
-import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.WireType;
-import net.openhft.chronicle.wire.Wires;
 import org.junit.Assert;
 import org.junit.Test;
 
