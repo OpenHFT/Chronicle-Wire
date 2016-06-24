@@ -153,7 +153,7 @@ public enum Wires {
     }
 
     public static boolean isNotComplete(int len) {
-        return (len & NOT_COMPLETE) != 0;
+        return (len & NOT_COMPLETE) != 0 || len == 0;
     }
 
     public static boolean isReadyData(int len) {
