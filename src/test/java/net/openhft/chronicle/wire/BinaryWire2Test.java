@@ -270,7 +270,7 @@ public class BinaryWire2Test {
         }
 
         assertEquals("--- !!meta-data #binary\n" +
-                "tid: 1234567890\n" +
+                "tid: !int 1234567890\n" +
                 "# position: 13\n" +
                 "--- !!data #binary\n" +
                 "data: !!UpdateEvent {\n" +
@@ -302,19 +302,19 @@ public class BinaryWire2Test {
     public void readDemarshallable() {
         Wire wire = createWire();
         try (DocumentContext $ = wire.writingDocument(true)) {
-            wire.getValueOut().typedMarshallable(new DemarshallableObject("test", 12345));
+            wire.getValueOut().typedMarshallable(new DemarshallableObject("test", 123456));
         }
 
         assertEquals("--- !!meta-data #binary\n" +
                 "!net.openhft.chronicle.wire.DemarshallableObject {\n" +
                 "  name: test,\n" +
-                "  value: !int 12345\n" +
+                "  value: !int 123456\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         try (DocumentContext $ = wire.readingDocument()) {
             DemarshallableObject dobj = wire.getValueIn().typedMarshallable();
             assertEquals("test", dobj.name);
-            assertEquals(12345, dobj.value);
+            assertEquals(123456, dobj.value);
         }
     }
 

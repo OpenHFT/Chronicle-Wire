@@ -675,11 +675,21 @@ public class BinaryWire extends AbstractWire implements Wire {
             case FIELD_NUMBER: {
                 bytes.readSkip(1);
                 long code2 = bytes.readStopBit();
+                if (valueIn instanceof DeltaValueIn) {
+                    final DeltaValueIn din = (DeltaValueIn) this.valueIn;
+                    if (code2 >= 0 && code2 < din.inField.length) {
+                        String name = din.inField[(int) code2];
+                        if (name != null) {
+                            wire.write(name);
+                            break;
+                        }
+                    }
+                }
                 wire.write(new WireKey() {
                     @NotNull
                     @Override
                     public String name() {
-                        return Integer.toString(code());
+                        return Long.toString(code2);
                     }
 
                     @Override
@@ -1582,53 +1592,69 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         void writeNumber(long l) {
-
-            if (l >= 0 && l <= 127) {
-                // used when the value is written directly into the code byte
-                bytes.writeUnsignedByte((int) l);
-                return;
-            }
-
-            if (l >= 0) {
-
-                if (l <= (1 << 8) - 1) {
+            switch (Long.numberOfLeadingZeros(l)) {
+                case 64:
+                case 63:
+                case 62:
+                case 61:
+                case 60:
+                case 59:
+                case 58:
+                case 57:
+                    // used when the value is written directly into the code byte
+                    bytes.writeUnsignedByte((int) l);
+                    return;
+                case 56:
                     super.uint8checked((short) l);
                     return;
-                }
-
-                if (l <= (1 << 16) - 1) {
+                case 55:
+                case 54:
+                case 53:
+                case 52:
+                case 51:
+                case 50:
+                case 49:
+                    super.fixedInt16((short) l);
+                    return;
+                case 48:
                     super.uint16checked((int) l);
                     return;
-                }
-
-                if (l <= (1L << 32L) - 1L) {
+                case 47:
+                case 46:
+                case 45:
+                case 44:
+                case 43:
+                case 42:
+                case 41:
+                case 40:
+                case 39:
+                case 38:
+                case 37:
+                case 36:
+                case 35:
+                case 34:
+                case 33:
+                    super.fixedInt32((int) l);
+                    return;
+                case 32:
                     super.uint32checked(l);
                     return;
-                }
+                case 0:
+                    if (l >= Byte.MIN_VALUE) {
+                        super.int8((byte) l);
+                        return;
+                    }
 
-                if ((long) (float) l == l) {
-                    super.float32(l);
-                    return;
-                }
+                    if (l >= Short.MIN_VALUE) {
+                        super.int16((short) l);
+                        return;
+                    }
 
-                super.int64(l);
-                return;
-
-            }
-
-            if (l >= Byte.MIN_VALUE && l <= Byte.MAX_VALUE) {
-                super.int8((byte) l);
-                return;
-            }
-
-            if (l >= Short.MIN_VALUE && l <= Short.MAX_VALUE) {
-                super.int16((short) l);
-                return;
-            }
-
-            if (l >= Integer.MIN_VALUE && l <= Integer.MAX_VALUE) {
-                super.int32((int) l);
-                return;
+                    if (l >= Integer.MIN_VALUE) {
+                        super.int32((int) l);
+                        return;
+                    }
+                    break;
             }
 
             if ((long) (float) l == l) {
@@ -3027,7 +3053,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         String[] inField = new String[128];
 
         @Override
-         protected <T> T anchor() {
+        protected <T> T anchor() {
             long ref = bytes.readStopBit();
 //            System.out.println("anchor " + ref + " inObjects " + Integer.toHexString(inObjects.hashCode()));
             if (ref >= inObjects.length)
