@@ -1592,22 +1592,34 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         void writeNumber(long l) {
-
-            if (l >= 0 && l <= 127) {
-                // used when the value is written directly into the code byte
-                bytes.writeUnsignedByte((int) l);
-                return;
-            }
-
             if (l >= 0) {
+                if (l <= 127) {
+                    // used when the value is written directly into the code byte
+                    bytes.writeUnsignedByte((int) l);
+                    return;
+                }
 
+                if (l <= Byte.MAX_VALUE) {
+                    super.int8((short) l);
+                    return;
+                }
                 if (l <= (1 << 8) - 1) {
                     super.uint8checked((short) l);
                     return;
                 }
 
+                if (l <= Short.MAX_VALUE) {
+                    super.int16((short) l);
+                    return;
+                }
+
                 if (l <= (1 << 16) - 1) {
                     super.uint16checked((int) l);
+                    return;
+                }
+
+                if (l <= Integer.MAX_VALUE) {
+                    super.int32((int) l);
                     return;
                 }
 
@@ -1623,20 +1635,19 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                 super.int64(l);
                 return;
-
             }
 
-            if (l >= Byte.MIN_VALUE && l <= Byte.MAX_VALUE) {
+            if (l >= Byte.MIN_VALUE) {
                 super.int8((byte) l);
                 return;
             }
 
-            if (l >= Short.MIN_VALUE && l <= Short.MAX_VALUE) {
+            if (l >= Short.MIN_VALUE) {
                 super.int16((short) l);
                 return;
             }
 
-            if (l >= Integer.MIN_VALUE && l <= Integer.MAX_VALUE) {
+            if (l >= Integer.MIN_VALUE) {
                 super.int32((int) l);
                 return;
             }

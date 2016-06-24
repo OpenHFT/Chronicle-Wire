@@ -45,7 +45,7 @@ public class WireInternalTest {
         String actual = Wires.fromSizePrefixedBlobs(bytes);
         assertEquals("--- !!meta-data #binary\n" +
                 "csp: \"csp://hello-world\"\n" +
-                "tid: 123456789\n" +
+                "tid: !int 123456789\n" +
                 "# position: 35\n" +
                 "--- !!data #binary\n" +
                 "reply: {\n" +
