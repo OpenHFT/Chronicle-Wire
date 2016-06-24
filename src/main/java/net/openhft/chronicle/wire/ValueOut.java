@@ -435,8 +435,13 @@ public interface ValueOut {
             case "java.io.File":
                 return optionalTyped(value.getClass()).text(value.toString());
         }
-        if (value instanceof WriteMarshallable)
+        if (value instanceof WriteMarshallable) {
+            if (value instanceof Enum) {
+                Jvm.warn().on(getClass(), "Treating " + value.getClass() + " as enum not WriteMarshallable");
+                return typedScalar(value);
+            }
             return typedMarshallable((WriteMarshallable) value);
+        }
         if (value instanceof BytesStore)
             return bytes((BytesStore) value);
         if (value instanceof CharSequence)

@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Externalizable;
 import java.io.File;
@@ -77,9 +78,9 @@ public enum Wires {
     static final StringBuilderPool SBP = new StringBuilderPool();
 
     static {
-        CLASS_STRATEGY_FUNCTIONS.add(new SerializeJavaLang());
-        CLASS_STRATEGY_FUNCTIONS.add(new SerializeMarshallables());
-        CLASS_STRATEGY_FUNCTIONS.add(new SerializeBytes());
+        CLASS_STRATEGY_FUNCTIONS.add(SerializeJavaLang.INSTANCE);
+        CLASS_STRATEGY_FUNCTIONS.add(SerializeMarshallables.INSTANCE);
+        CLASS_STRATEGY_FUNCTIONS.add(SerializeBytes.INSTANCE);
     }
 
     public static <T> T read(Class<T> tClass, ValueIn in) {
@@ -334,7 +335,8 @@ public enum Wires {
                 .isEqual(o1, o2);
     }
 
-    static class SerializeBytes implements Function<Class, SerializationStrategy> {
+    enum SerializeBytes implements Function<Class, SerializationStrategy> {
+        INSTANCE;
         @Override
         public SerializationStrategy apply(Class aClass) {
             switch (aClass.getName()) {
@@ -346,7 +348,8 @@ public enum Wires {
         }
     }
 
-    static class SerializeJavaLang implements Function<Class, SerializationStrategy> {
+    enum SerializeJavaLang implements Function<Class, SerializationStrategy> {
+        INSTANCE;
         @Override
         public SerializationStrategy apply(Class aClass) {
             switch (aClass.getName()) {
@@ -438,20 +441,31 @@ public enum Wires {
                             return SerializationStrategies.PRIM_ARRAY;
                         return SerializationStrategies.ARRAY;
                     }
-                    if (Enum.class.isAssignableFrom(aClass))
-                        return SerializationStrategies.ENUM;
+                    if (Enum.class.isAssignableFrom(aClass)) {
+                        final SerializationStrategy ss = SerializeMarshallables.getSerializationStrategy(aClass);
+                        return ss == null ? SerializationStrategies.ENUM : ss;
+                    }
                     return null;
             }
         }
     }
 
-    static class SerializeMarshallables implements Function<Class, SerializationStrategy> {
-        @Override
-        public SerializationStrategy apply(Class aClass) {
+    enum SerializeMarshallables implements Function<Class, SerializationStrategy> {
+        INSTANCE;
+
+        @Nullable
+        static SerializationStrategy getSerializationStrategy(Class aClass) {
             if (Demarshallable.class.isAssignableFrom(aClass))
                 return SerializationStrategies.DEMARSHALLABLE;
             if (ReadMarshallable.class.isAssignableFrom(aClass))
                 return SerializationStrategies.MARSHALLABLE;
+            return null;
+        }
+
+        @Override
+        public SerializationStrategy apply(Class aClass) {
+            SerializationStrategy x = getSerializationStrategy(aClass);
+            if (x != null) return x;
             if (Map.class.isAssignableFrom(aClass))
                 return SerializationStrategies.MAP;
             if (Set.class.isAssignableFrom(aClass))
