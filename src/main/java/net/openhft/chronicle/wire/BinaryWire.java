@@ -3051,6 +3051,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     class DeltaValueIn extends BinaryWire.BinaryValueIn {
         Marshallable[] inObjects = new Marshallable[128];
         String[] inField = new String[128];
+        byte[] inFieldHash = new byte[128];
 
         @Override
         protected <T> T anchor() {
