@@ -675,11 +675,21 @@ public class BinaryWire extends AbstractWire implements Wire {
             case FIELD_NUMBER: {
                 bytes.readSkip(1);
                 long code2 = bytes.readStopBit();
+                if (valueIn instanceof DeltaValueIn) {
+                    final DeltaValueIn din = (DeltaValueIn) this.valueIn;
+                    if (code2 >= 0 && code2 < din.inField.length) {
+                        String name = din.inField[(int) code2];
+                        if (name != null) {
+                            wire.write(name);
+                            break;
+                        }
+                    }
+                }
                 wire.write(new WireKey() {
                     @NotNull
                     @Override
                     public String name() {
-                        return Integer.toString(code());
+                        return Long.toString(code2);
                     }
 
                     @Override
