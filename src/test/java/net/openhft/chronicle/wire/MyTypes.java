@@ -23,6 +23,55 @@ class MyTypes extends AbstractMarshallable {
     long l;
     int i;
 
+    public void b(boolean b) {
+        this.b = b;
+    }
+
+    public boolean b() {
+        return this.b;
+    }
+
+    public void s(short s) {
+        this.s = s;
+    }
+
+    public short s() {
+        return this.s;
+    }
+
+    public void d(double d) {
+        this.d = d;
+    }
+
+    public double d() {
+        return this.d;
+    }
+
+    public void l(long l) {
+        this.l = l;
+    }
+
+    public long l() {
+        return this.l;
+    }
+
+    public void i(int i) {
+        this.i = i;
+    }
+
+    public int i() {
+        return this.i;
+    }
+
+    public CharSequence text() {
+        return text;
+    }
+
+    public void text(CharSequence value) {
+        text.setLength(0);
+        text.append(value);
+    }
+
     enum Fields implements WireKey {
         B_FLAG, S_NUM, D_NUM, L_NUM, I_NUM, TEXT;
 

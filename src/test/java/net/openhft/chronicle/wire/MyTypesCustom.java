@@ -35,8 +35,7 @@ class MyTypesCustom extends MyTypes implements Marshallable {
                 .read(Fields.D_NUM).float64(this, (o, x) -> o.d = x)
                 .read(Fields.L_NUM).int64(this, (o, x) -> o.l = x)
                 .read(Fields.I_NUM).int32(this, (o, x) -> o.i = x)
-                .read(Fields.TEXT).textTo(text)
-        ;
+                .read(Fields.TEXT).textTo(text);
     }
 
     enum Fields implements WireKey {
