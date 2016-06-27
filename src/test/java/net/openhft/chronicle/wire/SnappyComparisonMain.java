@@ -20,6 +20,8 @@ import org.xerial.snappy.Snappy;
 
 import java.io.IOException;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+
 /**
  * Created by peter on 01/12/15.
  */
@@ -42,7 +44,7 @@ public class SnappyComparisonMain {
         int saved = s.length() - Snappy.compress(s).length;
         long start = System.nanoTime();
         int count = 0;
-        byte[] bytes = s.getBytes();
+        byte[] bytes = s.getBytes(ISO_8859_1);
         while(System.nanoTime() < start + 5e9) {
             blackHole = Snappy.compress(bytes);
             count++;

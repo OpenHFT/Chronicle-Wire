@@ -34,6 +34,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
@@ -633,8 +634,8 @@ public class BinaryWireTest {
         for (int i = 0; i < 256; i++)
             allBytes[i] = (byte) i;
         wire.write().bytes(NoBytesStore.NO_BYTES)
-                .write().bytes(Bytes.wrapForRead("Hello".getBytes()))
-                .write().bytes(Bytes.wrapForRead("quotable, text".getBytes()))
+                .write().bytes(Bytes.wrapForRead("Hello".getBytes(ISO_8859_1)))
+                .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
                 .write()
                 .bytes(allBytes);
 //        System.out.println(bytes.toDebugString());

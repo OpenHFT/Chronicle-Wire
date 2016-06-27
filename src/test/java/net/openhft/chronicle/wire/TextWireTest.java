@@ -41,6 +41,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.WireType.TEXT;
@@ -556,8 +557,8 @@ public class TextWireTest {
         for (int i = 0; i < 256; i++)
             allBytes[i] = (byte) i;
         wire.write().bytes(NoBytesStore.NO_BYTES)
-                .write().bytes(Bytes.wrapForRead("Hello".getBytes()))
-                .write().bytes(Bytes.wrapForRead("quotable, text".getBytes()))
+                .write().bytes(Bytes.wrapForRead("Hello".getBytes(ISO_8859_1)))
+                .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
                 .write().bytes(allBytes);
         System.out.println(bytes.toString());
         NativeBytes allBytes2 = nativeBytes();
@@ -840,13 +841,13 @@ public class TextWireTest {
         final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
         String str = s + s + s + s;
 
-        wire.write().compress("snappy", Bytes.wrapForRead(str.getBytes()));
+        wire.write().compress("snappy", Bytes.wrapForRead(str.getBytes(ISO_8859_1)));
 
         Bytes ret = Bytes.allocateElasticDirect();
         wire.read().bytes(ret);
         byte[] returnBytes = new byte[(int) ret.readRemaining()];
         ret.read(returnBytes);
-        assertArrayEquals(str.getBytes(), returnBytes);
+        assertArrayEquals(str.getBytes(ISO_8859_1), returnBytes);
     }
 
     @Test
@@ -856,7 +857,7 @@ public class TextWireTest {
         final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
         String str = s + s + s + s;
 
-        byte[] bytes0 = str.getBytes();
+        byte[] bytes0 = str.getBytes(ISO_8859_1);
         wire.write().compress("snappy", Bytes.wrapForRead(bytes0));
 
         Bytes bytes = allocateElasticDirect();
@@ -870,7 +871,7 @@ public class TextWireTest {
         final String s = "xxxxxxxxxxx1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
         String str = s + s + s + s;
 
-        byte[] compressedBytes = str.getBytes();
+        byte[] compressedBytes = str.getBytes(ISO_8859_1);
         wire.write().compress("gzip", Bytes.wrapForRead(compressedBytes));
 
         Bytes bytes = allocateElasticDirect();
@@ -884,7 +885,7 @@ public class TextWireTest {
         final String s = "xxxxxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxx";
         String str = s + s + s + s;
 
-        byte[] compressedBytes = str.getBytes();
+        byte[] compressedBytes = str.getBytes(ISO_8859_1);
         wire.write().compress("lzw", Bytes.wrapForRead(compressedBytes));
 
         Bytes bytes = allocateElasticDirect();

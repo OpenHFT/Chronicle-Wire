@@ -26,6 +26,8 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+
 /**
  * @author Rob Austin.
  */
@@ -51,7 +53,7 @@ public class ValueOutTest extends TestCase {
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         assert wire.startUse();
-        final byte[] expected = "this is my byte array".getBytes();
+        final byte[] expected = "this is my byte array".getBytes(ISO_8859_1);
         wire.writeDocument(false, w ->
                 w.write().object(expected)
 
@@ -72,7 +74,7 @@ public class ValueOutTest extends TestCase {
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         assert wire.startUse();
-        final byte[] expected = "this is my byte array".getBytes();
+        final byte[] expected = "this is my byte array".getBytes(ISO_8859_1);
         wire.writeDocument(false, w -> w.write().object(expected));
 
         System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));

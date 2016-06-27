@@ -47,6 +47,7 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.*;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
@@ -1604,7 +1605,7 @@ public class TextWire extends AbstractWire implements Wire {
                         textTo(sb);
                         try {
                             //todo needs to be made efficient
-                            byte[] decodedBytes = Base64.getDecoder().decode(sb.toString().getBytes());
+                            byte[] decodedBytes = Base64.getDecoder().decode(sb.toString().getBytes(ISO_8859_1));
                             String csq = Snappy.uncompressString(decodedBytes);
                             ret = acquireStringBuilder().append(csq);
                         } catch (IOException e) {
@@ -1721,7 +1722,7 @@ public class TextWire extends AbstractWire implements Wire {
                     }
                 } else {
                     textTo(sb);
-                    bytesConsumer.readMarshallable(Bytes.wrapForRead(sb.toString().getBytes()));
+                    bytesConsumer.readMarshallable(Bytes.wrapForRead(sb.toString().getBytes(ISO_8859_1)));
                 }
                 return TextWire.this;
             } finally {
@@ -1763,7 +1764,7 @@ public class TextWire extends AbstractWire implements Wire {
                 } else {
                     textTo(sb);
                     // todo fix this.
-                    return sb.toString().getBytes();
+                    return sb.toString().getBytes(ISO_8859_1);
                 }
             } finally {
                 consumePadding(1);
