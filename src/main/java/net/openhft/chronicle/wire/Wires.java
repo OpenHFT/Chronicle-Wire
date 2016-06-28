@@ -146,7 +146,10 @@ public enum Wires {
     }
 
     public static int lengthOf(int len) {
-        return len & LENGTH_MASK;
+        final int len0 = len & LENGTH_MASK;
+        if (len0 > 1 << 20)
+            System.out.println("len: " + len0);
+        return len0;
     }
 
     public static boolean isReady(int len) {

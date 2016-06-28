@@ -1001,8 +1001,11 @@ public class BinaryWire extends AbstractWire implements Wire {
                         if (sb instanceof StringBuilder) {
                             bytes.readSkip(-1);
                             valueIn.bytesStore((StringBuilder) sb);
+                        } else if (sb instanceof Bytes) {
+                            bytes.readSkip(-1);
+                            valueIn.bytesStore((Bytes) sb);
                         } else {
-                            throw new IllegalArgumentException("Expected a StringBuilder");
+                            throw new IllegalArgumentException("Expected a StringBuilder or Bytes");
                         }
                         return sb;
                 }
