@@ -496,10 +496,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     protected int peekCode() {
-        if (bytes.readRemaining() < 1)
-            return END_OF_BYTES;
-        long pos = bytes.readPosition();
-        return bytes.readUnsignedByte(pos);
+        return bytes.peekUnsignedByte();
     }
 
     private StringBuilder readField(int peekCode, WireKey key, @NotNull StringBuilder sb, boolean missingOk) {
