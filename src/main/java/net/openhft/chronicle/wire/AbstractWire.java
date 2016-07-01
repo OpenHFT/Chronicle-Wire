@@ -105,8 +105,6 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public Wire headerNumber(long headerNumber) {
-        if (headerNumber == 0x6383B00000001L)
-            System.out.println("");
         this.headerNumber = headerNumber;
         return this;
     }
@@ -129,8 +127,6 @@ public abstract class AbstractWire implements Wire {
     @NotNull
     @Override
     public Bytes<?> bytes() {
-//        if (usedBy == null)
-//            throw new AssertionError(lastEnded);
         return bytes;
     }
 
@@ -337,8 +333,10 @@ public abstract class AbstractWire implements Wire {
     }
 
     private void incrementHeaderNumber() {
+        long headerNumberWas = headerNumber;
         if (headerNumber != Long.MIN_VALUE)
-            headerNumber++;
+            headerNumber(headerNumber + 1);
+
     }
 
     @Override
