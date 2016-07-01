@@ -53,10 +53,10 @@ public abstract class AbstractWire implements Wire {
     protected Pauser pauser = BusyPauser.INSTANCE;
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
     protected Object parent;
-    protected long headerNumber = Long.MIN_VALUE;
     volatile Thread usedBy;
     volatile Throwable usedHere, lastEnded;
     int usedCount = 0;
+    private long headerNumber = Long.MIN_VALUE;
     private boolean notCompleteIsNotPresent;
     private ObjectOutput objectOutput;
     private ObjectInput objectInput;
@@ -105,7 +105,7 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public Wire headerNumber(long headerNumber) {
-        if (headerNumber == 0)
+        if (headerNumber == 0x6383B00000001L)
             System.out.println("");
         this.headerNumber = headerNumber;
         return this;
