@@ -152,16 +152,16 @@ public enum Wires {
         return len0;
     }
 
-    public static boolean isReady(int len) {
-        return (len & NOT_COMPLETE) == 0;
+    public static boolean isReady(int header) {
+        return (header & NOT_COMPLETE) == 0 && header != 0;
     }
 
-    public static boolean isNotComplete(int len) {
-        return (len & NOT_COMPLETE) != 0 || len == 0;
+    public static boolean isNotComplete(int header) {
+        return (header & NOT_COMPLETE) != 0 || header == 0;
     }
 
-    public static boolean isReadyData(int len) {
-        return (len & (META_DATA | NOT_COMPLETE)) == 0;
+    public static boolean isReadyData(int header) {
+        return (header & (META_DATA | NOT_COMPLETE)) == 0;
     }
 
     @Deprecated
@@ -200,49 +200,10 @@ public enum Wires {
     }
 
     @ForceInline
-    public static <T extends ReadMarshallable> long readData(
-            @NotNull WireIn wireIn,
-            @NotNull T reader) {
-
-        // We assume that check on data readiness and type has been done by the
-        // caller
-        return readWire(wireIn, reader);
-    }
-
-    @ForceInline
     public static <T extends WriteMarshallable> long writeData(
             @NotNull WireOut wireOut,
             @NotNull T writer) {
         return WireInternal.writeData(wireOut, false, false, writer);
-    }
-
-    @ForceInline
-    public static <T extends WriteMarshallable> long writeMeta(
-            @NotNull WireOut wireOut,
-            @NotNull T writer) {
-
-        return WireInternal.writeData(wireOut, true, false, writer);
-    }
-
-    @ForceInline
-    public static <T extends ReadMarshallable> long readMeta(
-            @NotNull WireIn wireIn,
-            @NotNull T reader) {
-
-        // We assume that check on meta-data readiness and type has been done by
-        // the caller
-        return readWire(wireIn, reader);
-    }
-
-    @ForceInline
-    public static long readWire(@NotNull WireIn wireIn, @NotNull ReadMarshallable readMarshallable) {
-        final Bytes<?> bytes = wireIn.bytes();
-        final int header = bytes.readVolatileInt(bytes.readPosition());
-        final int len = Wires.lengthOf(header);
-
-        bytes.readSkip(4);
-
-        return readWire(wireIn, len, readMarshallable);
     }
 
     @ForceInline
@@ -340,6 +301,7 @@ public enum Wires {
 
     enum SerializeBytes implements Function<Class, SerializationStrategy> {
         INSTANCE;
+
         @Override
         public SerializationStrategy apply(Class aClass) {
             switch (aClass.getName()) {
@@ -353,6 +315,7 @@ public enum Wires {
 
     enum SerializeJavaLang implements Function<Class, SerializationStrategy> {
         INSTANCE;
+
         @Override
         public SerializationStrategy apply(Class aClass) {
             switch (aClass.getName()) {
