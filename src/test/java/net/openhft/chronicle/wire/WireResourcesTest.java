@@ -35,7 +35,7 @@ public class WireResourcesTest {
 
     private static void writeMessage(Wire wire) throws TimeoutException, EOFException, StreamCorruptedException {
         long pos = wire.writeHeader(1, TimeUnit.MILLISECONDS, null);
-        wire.bytes().writeSkip(32000);
+        wire.bytes().writeSkip(128000);
         wire.bytes().writeLong(1L);
         wire.updateHeader(pos, false);
     }
@@ -105,7 +105,7 @@ public class WireResourcesTest {
         File tmp = Files.createTempFile("chronicle-", ".wire").toFile();
         tmp.deleteOnExit();
 
-        MappedBytes t = MappedBytes.mappedBytes(tmp, 64 * 1024);
+        MappedBytes t = MappedBytes.mappedBytes(tmp, 256 * 1024);
         assertEquals(1, t.refCount());
         assertEquals(1, t.mappedFile().refCount());
         Wire wire = WireType.TEXT.apply(t);
@@ -124,7 +124,7 @@ public class WireResourcesTest {
         assertEquals(1, wire.bytes().refCount());
         assertEquals(2, mappedFile(wire).refCount());
 
-        wire.bytes().writeSkip(32000);
+        wire.bytes().writeSkip(128000);
         wire.updateFirstHeader();
         assert wire.endUse();
 
