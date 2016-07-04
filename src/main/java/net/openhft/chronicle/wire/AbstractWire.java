@@ -333,10 +333,8 @@ public abstract class AbstractWire implements Wire {
     }
 
     private void incrementHeaderNumber() {
-        long headerNumberWas = headerNumber;
         if (headerNumber != Long.MIN_VALUE)
             headerNumber(headerNumber + 1);
-
     }
 
     @Override
