@@ -100,11 +100,13 @@ public abstract class AbstractWire implements Wire {
     @Override
     public void clear() {
         bytes.clear();
-        headerNumber = Long.MIN_VALUE;
+        headerNumber(Long.MIN_VALUE);
     }
 
     @Override
     public Wire headerNumber(long headerNumber) {
+        if (headerNumber == Long.MIN_VALUE)
+            Thread.yield();
         this.headerNumber = headerNumber;
         return this;
     }
@@ -230,8 +232,12 @@ public abstract class AbstractWire implements Wire {
         }
 
         if (lastPosition != null) {
-            headerNumber = Long.MIN_VALUE;
-            bytes.writePosition(lastPosition.getValue());
+            long lastPositionValue = lastPosition.getValue();
+            // do we jump forward if there has been writes else where.
+            if (lastPositionValue > bytes.writePosition() + 1 << 20) {
+                headerNumber(Long.MIN_VALUE);
+                bytes.writePosition(lastPositionValue);
+            }
         }
 
         return writeHeader0(length, timeout, timeUnit);
