@@ -27,10 +27,7 @@ import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.EOFException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.StreamCorruptedException;
+import java.io.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -81,6 +78,14 @@ public abstract class AbstractWire implements Wire {
         throw new StreamCorruptedException("Wrote " + actualLength + " when " + length + " was set initially.");
     }
 
+    private static String exceptionStacktraceToString(Exception e) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos);
+        e.printStackTrace(ps);
+        ps.close();
+        return baos.toString();
+    }
+
     public boolean isInsideHeader() {
         return this.insideHeader;
     }
@@ -105,7 +110,15 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public Wire headerNumber(long headerNumber) {
+        if (headerNumber == Long.MIN_VALUE)
+            Thread.yield();
         this.headerNumber = headerNumber;
+
+          /*     if (headerNumber > 262100) {
+            System.out.println("thread=" + this.hashCode() + ",was=" + Long.toHexString(this
+                    .headerNumber) + "," +
+                    "is=" + Long.toHexString(headerNumber) + ",at=" + exceptionStacktraceToString(new RuntimeException()));
+*/
         return this;
     }
 
