@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.bytes.util.Bit8StringInterner;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.*;
@@ -3005,6 +3006,17 @@ public class BinaryWire extends AbstractWire implements Wire {
                             long length = readLength();
                             bytes.readSkip(length);
                             return;
+                        case ANCHOR:
+                        case UPDATED_ALIAS:
+                            valueIn.object();
+                            return;
+                        case FIELD_ANCHOR:
+                            bytes.readSkip(1);
+                            StringBuilder sb = Wires.acquireStringBuilder();
+                            readFieldAnchor(sb);
+                            return;
+                        default:
+                            Jvm.warn().on(getClass(), "reading control code as text");
                     }
                     break;
                 case BinaryWireHighCode.SPECIAL:
@@ -3069,6 +3081,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             int ref = Maths.toUInt31(bytes.readStopBit());
 //            System.out.println("update " + ref + " inObjects " + Integer.toHexString(inObjects.hashCode()));
             Marshallable previous = inObjects[ref];
+            if (previous == null)
+                System.out.println("");
             assert previous != null;
             super.marshallable(previous, false);
             return (T) previous;
