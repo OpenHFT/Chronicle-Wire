@@ -67,6 +67,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private final int compressedSize;
     private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
     private final ReadDocumentContext readContext = new ReadDocumentContext(this);
+    private final StringBuilder stringBuilder = new StringBuilder();
     DefaultValueIn defaultValueIn;
     private String compression;
 
@@ -81,6 +82,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         this.compressedSize = compressedSize;
         valueOut = getFixedBinaryValueOut(fixed);
         this.compression = compression;
+    }
+
+    StringBuilder acquireStringBuilder() {
+        stringBuilder.setLength(0);
+        return stringBuilder;
     }
 
     @NotNull
@@ -204,7 +210,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         break outerSwitch;
                     case FIELD_ANCHOR: {
                         bytes.uncheckedReadSkipOne();
-                        StringBuilder sb = Wires.acquireStringBuilder();
+                        StringBuilder sb = acquireStringBuilder();
                         readFieldAnchor(sb);
                         wire.write(sb);
                         break outerSwitch;
@@ -249,14 +255,14 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case BinaryWireHighCode.FIELD0:
             case BinaryWireHighCode.FIELD1:
-                StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, WireInternal.acquireStringBuilder(), false);
+                StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, acquireStringBuilder(), false);
                 wire.write(fsb);
                 break;
 
             case BinaryWireHighCode.STR0:
             case BinaryWireHighCode.STR1:
                 bytes.uncheckedReadSkipOne();
-                StringBuilder sb = readText(peekCode, WireInternal.acquireStringBuilder());
+                StringBuilder sb = readText(peekCode, acquireStringBuilder());
                 wire.getValueOut().text(sb);
                 break;
         }
@@ -310,16 +316,15 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public ValueIn read() {
-        readField(WireInternal.acquireStringBuilder(), ANY_CODE_MATCH);
+        readField(acquireStringBuilder(), ANY_CODE_MATCH);
         return valueIn;
     }
 
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
-        consumePadding();
         ValueInState curr = valueIn.curr();
-        StringBuilder sb = WireInternal.acquireStringBuilder();
+        StringBuilder sb = acquireStringBuilder();
         // did we save the position last time
         // so we could go back and parseOne an older field?
         if (curr.savedPosition() > 0) {
@@ -450,9 +455,8 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case FIELD_NAME_ANY:
             case EVENT_NAME:
-                StringBuilder sb = Wires.acquireStringBuilder();
                 bytes.uncheckedReadSkipOne();
-                bytes.read8bit(sb);
+                StringBuilder sb = read8bit();
                 return ObjectUtils.convertTo(expectedClass, WireInternal.INTERNER.intern(sb));
 
             case FIELD_ANCHOR:
@@ -465,6 +469,12 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         return null;
+    }
+
+    @Nullable
+    StringBuilder read8bit() {
+        StringBuilder sb = acquireStringBuilder();
+        return bytes.read8bit(sb) ? sb : null;
     }
 
     public void consumePadding() {
@@ -491,39 +501,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                 case COMMENT: {
                     bytes.uncheckedReadSkipOne();
-                    StringBuilder sb = WireInternal.acquireStringBuilder();
-                    bytes.readUtf8(sb);
-                    break;
-                }
-
-                default:
-                    return;
-            }
-        }
-    }
-
-    void consumePadding2(boolean consumeType) {
-        while (true) {
-            int code = peekCode();
-            switch (code) {
-                case PADDING:
-                    bytes.uncheckedReadSkipOne();
-                    break;
-
-                case PADDING32:
-                    bytes.uncheckedReadSkipOne();
-                    bytes.readSkip(bytes.readUnsignedInt());
-                    break;
-
-                case TYPE_PREFIX:
-                    if (!consumeType)
-                        return;
-                    // fall through
-
-                case COMMENT: {
-                    bytes.uncheckedReadSkipOne();
-                    StringBuilder sb = WireInternal.acquireStringBuilder();
-                    bytes.readUtf8(sb);
+                    readUtf8();
                     break;
                 }
 
@@ -648,8 +626,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         switch (peekCode) {
             case COMMENT: {
                 bytes.uncheckedReadSkipOne();
-                StringBuilder sb = WireInternal.acquireStringBuilder();
-                bytes.readUtf8(sb);
+                StringBuilder sb = readUtf8();
                 wire.writeComment(sb);
                 break;
             }
@@ -663,8 +640,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             case TYPE_PREFIX: {
                 long readPosition = bytes.readPosition();
                 bytes.uncheckedReadSkipOne();
-                StringBuilder sb = WireInternal.acquireStringBuilder();
-                bytes.readUtf8(sb);
+                StringBuilder sb = readUtf8();
                 if (StringUtils.isEqual("snappy", sb) || StringUtils.isEqual("gzip", sb) || StringUtils.isEqual("lzw", sb)) {
                     bytes.readPosition(readPosition);
                     wire.writeComment(sb);
@@ -677,15 +653,14 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case TYPE_LITERAL: {
                 bytes.uncheckedReadSkipOne();
-                StringBuilder sb = WireInternal.acquireStringBuilder();
-                bytes.readUtf8(sb);
+                StringBuilder sb = readUtf8();
                 wire.getValueOut().typeLiteral(sb);
                 break;
             }
 
             case EVENT_NAME:
             case FIELD_NAME_ANY:
-                StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, WireInternal.acquireStringBuilder(), false);
+                StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, acquireStringBuilder(), false);
                 wire.write(fsb);
                 break;
 
@@ -701,8 +676,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case STRING_ANY: {
                 bytes.uncheckedReadSkipOne();
-                StringBuilder sb1 = WireInternal.acquireStringBuilder();
-                bytes.readUtf8(sb1);
+                StringBuilder sb1 = readUtf8();
                 wire.getValueOut().text(sb1);
                 break;
             }
@@ -1034,10 +1008,10 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case BYTES_LENGTH16:
                     case BYTES_LENGTH32:
                         if (sb instanceof StringBuilder) {
-                            bytes.readSkip(-1);
+                            bytes.uncheckedReadSkipBackOne();
                             valueIn.bytesStore((StringBuilder) sb);
                         } else if (sb instanceof Bytes) {
-                            bytes.readSkip(-1);
+                            bytes.uncheckedReadSkipBackOne();
                             valueIn.bytesStore((Bytes) sb);
                         } else {
                             throw new IllegalArgumentException("Expected a StringBuilder or Bytes");
@@ -1085,10 +1059,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
-    private int readCode() {
-        if (bytes.readRemaining() < 1)
-            return END_OF_BYTES;
-        return bytes.readUnsignedByte();
+    int readCode() {
+        return bytes.uncheckedReadUnsignedByte();
     }
 
     @NotNull
@@ -1112,6 +1084,12 @@ public class BinaryWire extends AbstractWire implements Wire {
     @Override
     public BinaryLongArrayReference newLongArrayReference() {
         return new BinaryLongArrayReference();
+    }
+
+    @Nullable
+    StringBuilder readUtf8() {
+        StringBuilder sb = acquireStringBuilder();
+        return bytes.readUtf8(sb) ? sb : null;
     }
 
     enum AnyCodeMatch implements WireKey {
@@ -1866,7 +1844,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     break;
                 default:
                     if (code >= STRING_0 && code <= STRING_31) {
-                        StringBuilder sb = WireInternal.acquireStringBuilder();
+                        StringBuilder sb = acquireStringBuilder();
                         bytes.parseUtf8(sb, code & 0b11111);
                         s.accept(WireInternal.INTERNER.intern(sb));
 
@@ -1943,18 +1921,18 @@ public class BinaryWire extends AbstractWire implements Wire {
                 }
 
                 case TYPE_PREFIX: {
-                    StringBuilder sb = WireInternal.acquireStringBuilder();
-                    if (bytes.readUtf8(sb)) {
+                    StringBuilder sb = readUtf8();
+                    if (sb != null) {
                         byte[] bytes = Compression.uncompress(sb, this, ValueIn::bytes);
                         if (bytes != null)
                             return new String(bytes, StandardCharsets.UTF_8);
                     }
-                    StringBuilder text = readText(code, sb);
+                    StringBuilder text = readText(code, acquireStringBuilder());
                     return WireInternal.INTERNER.intern(text);
                 }
 
                 default: {
-                    StringBuilder text = readText(code, WireInternal.acquireStringBuilder());
+                    StringBuilder text = readText(code, acquireStringBuilder());
                     return text == null ? null : WireInternal.INTERNER.intern(text);
                 }
             }
@@ -1969,18 +1947,17 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return BinaryWire.this;
             }
             if (code == TYPE_PREFIX) {
-                StringBuilder sb = WireInternal.acquireStringBuilder();
-                if (bytes.readUtf8(sb)) {
-                    long length2 = readLength();
-                    int code2 = readCode();
-                    if (code2 != U8_ARRAY)
-                        cantRead(code);
-                    toBytes.clear();
-                    bytes.readWithLength(length2 - 1, b -> Compression.uncompress(sb, b, toBytes));
-                    return wireIn();
-                } else {
-                    throw new AssertionError();
-                }
+                StringBuilder sb = readUtf8();
+                assert sb != null;
+
+                long length2 = readLength();
+                int code2 = readCode();
+                if (code2 != U8_ARRAY)
+                    cantRead(code);
+                toBytes.clear();
+                bytes.readWithLength(length2 - 1, b -> Compression.uncompress(sb, b, toBytes));
+                return wireIn();
+
             }
             if (code != U8_ARRAY)
                 cantRead(code);
@@ -2055,8 +2032,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     return toBytes;
 
                 case TYPE_PREFIX: {
-                    StringBuilder sb = WireInternal.acquireStringBuilder();
-                    bytes.readUtf8(sb);
+                    StringBuilder sb = readUtf8();
                     byte[] bytes = Compression.uncompress(sb, this, ValueIn::bytes);
                     if (bytes != null)
                         return BytesStore.wrap(bytes);
@@ -2142,8 +2118,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
 
             if (code == TYPE_PREFIX) {
-                StringBuilder sb = WireInternal.acquireStringBuilder();
-                bytes.readUtf8(sb);
+                StringBuilder sb = readUtf8();
                 assert "byte[]".contentEquals(sb);
                 length = readLength();
                 code = readCode();
@@ -2170,7 +2145,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 switch (code) {
                     case BYTES_LENGTH8:
                         bytes.uncheckedReadSkipOne();
-                        return bytes.readUnsignedByte();
+                        return bytes.uncheckedReadUnsignedByte();
 
                     case BYTES_LENGTH16:
                         bytes.uncheckedReadSkipOne();
@@ -2354,8 +2329,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         private LocalTime readLocalTime() {
-            StringBuilder sb = WireInternal.acquireStringBuilder();
-            bytes.readUtf8(sb);
+            StringBuilder sb = readUtf8();
             return LocalTime.parse(sb);
         }
 
@@ -2365,8 +2339,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             consumePadding();
             int code = readCode();
             if (code == ZONED_DATE_TIME) {
-                StringBuilder sb = WireInternal.acquireStringBuilder();
-                bytes.readUtf8(sb);
+                StringBuilder sb = readUtf8();
                 tZonedDateTime.accept(t, ZonedDateTime.parse(sb));
 
             } else {
@@ -2381,8 +2354,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             consumePadding();
             int code = readCode();
             if (code == DATE) {
-                StringBuilder sb = WireInternal.acquireStringBuilder();
-                bytes.readUtf8(sb);
+                StringBuilder sb = readUtf8();
                 tLocalDate.accept(t, LocalDate.parse(sb));
 
             } else {
@@ -2588,8 +2560,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         protected <T> T typedMarshallable0() {
-            StringBuilder sb = WireInternal.acquireStringBuilder();
-            bytes.readUtf8(sb);
+            StringBuilder sb = readUtf8();
             // its possible that the object that you are allocating may not have a
             // default constructor
             final Class clazz;
@@ -2622,14 +2593,13 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         public Class typePrefix() {
-            StringBuilder sb = WireInternal.acquireStringBuilder();
             int code = peekCode();
-            if (code == TYPE_PREFIX) {
-                bytes.uncheckedReadSkipOne();
-                bytes.readUtf8(sb);
-            } else {
+            if (code != TYPE_PREFIX) {
                 return null;
             }
+            bytes.uncheckedReadSkipOne();
+            StringBuilder sb = readUtf8();
+
             try {
                 return classLookup().forName(sb);
             } catch (ClassNotFoundException e) {
@@ -2640,7 +2610,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
-            StringBuilder sb = WireInternal.acquireStringBuilder();
+            StringBuilder sb = acquireStringBuilder();
             int code = readCode();
             if (code == TYPE_PREFIX) {
                 bytes.readUtf8(sb);
@@ -2660,8 +2630,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) {
             int code = readCode();
             if (code == TYPE_LITERAL) {
-                StringBuilder sb = WireInternal.acquireStringBuilder();
-                bytes.readUtf8(sb);
+                StringBuilder sb = readUtf8();
                 classNameConsumer.accept(t, sb);
             } else if (code == NULL) {
                 classNameConsumer.accept(t, null);
@@ -2673,10 +2642,9 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         public <T> Class<T> typeLiteral() {
-            StringBuilder sb = WireInternal.acquireStringBuilder();
             int code = readCode();
             if (code == TYPE_LITERAL) {
-                bytes.readUtf8(sb);
+                StringBuilder sb = readUtf8();
                 try {
                     return classLookup().forName(sb);
                 } catch (ClassNotFoundException e) {
@@ -2797,7 +2765,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         private long readTextAsLong() throws IORuntimeException, BufferUnderflowException {
-            bytes.readSkip(-1);
+            bytes.uncheckedReadSkipBackOne();
             final String text = text();
             if (text == null)
                 throw new NullPointerException();
@@ -2809,7 +2777,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         private double readTextAsDouble() throws IORuntimeException, BufferUnderflowException {
-            bytes.readSkip(-1);
+            bytes.uncheckedReadSkipBackOne();
             final String text = text();
             if (text == null || text.length() == 0)
                 return Double.NaN;
@@ -2882,12 +2850,23 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         public long int64() {
-            consumePadding();
             int code = readCode();
-
-            if (code >> 4 == BinaryWireHighCode.FLOAT)
-                return (long) readFloat0(code);
-            return isText(code) ? readTextAsLong() : readInt0(code);
+            if (code == PADDING || code == PADDING32 || code == COMMENT) {
+                bytes.uncheckedReadSkipBackOne();
+                consumePadding();
+                code = readCode();
+            }
+            switch (code >> 4) {
+                case BinaryWireHighCode.FLOAT:
+                    return (long) readFloat0(code);
+                case BinaryWireHighCode.INT:
+                    return readInt0(code);
+                case BinaryWireHighCode.STR0:
+                case BinaryWireHighCode.STR1:
+                    return readTextAsLong();
+                default:
+                    throw cantRead(code);
+            }
         }
 
         @Override
@@ -2984,8 +2963,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                             return text();
                         case TYPE_PREFIX: {
                             readCode();
-                            StringBuilder sb = WireInternal.acquireStringBuilder();
-                            bytes.readUtf8(sb);
+                            StringBuilder sb = readUtf8();
                             final Class clazz2;
                             try {
                                 clazz2 = classLookup().forName(sb);
@@ -3056,8 +3034,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                             return;
                         case FIELD_ANCHOR:
                             bytes.readSkip(1);
-                            StringBuilder sb = Wires.acquireStringBuilder();
-                            readFieldAnchor(sb);
+                            readFieldAnchor(acquireStringBuilder());
                             return;
                         default:
                             Jvm.warn().on(getClass(), "reading control code as text");
@@ -3075,8 +3052,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                             return;
                         case TYPE_PREFIX: {
                             readCode();
-                            StringBuilder sb = WireInternal.acquireStringBuilder();
-                            bytes.readUtf8(sb);
+                            StringBuilder sb = readUtf8();
                             final Class clazz2;
                             try {
                                 clazz2 = classLookup().forName(sb);
