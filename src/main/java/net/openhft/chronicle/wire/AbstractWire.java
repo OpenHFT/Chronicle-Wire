@@ -105,8 +105,6 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public Wire headerNumber(long headerNumber) {
-        if (headerNumber == Long.MIN_VALUE)
-            Thread.yield();
         this.headerNumber = headerNumber;
         return this;
     }
