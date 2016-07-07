@@ -110,13 +110,14 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public Wire headerNumber(long headerNumber) {
-        this.headerNumber = headerNumber;
 
-          /*     if (headerNumber > 262100) {
-            System.out.println("thread=" + this.hashCode() + ",was=" + Long.toHexString(this
-                    .headerNumber) + "," +
-                    "is=" + Long.toHexString(headerNumber) + ",at=" + exceptionStacktraceToString(new RuntimeException()));
-*/
+      /*  assert checkThread();
+
+        System.out.println("thread=" + Thread.currentThread().getName() + ",pos=" + pos + ",was=" + Long.toHexString(this
+                .headerNumber) + ",isInsideHeader=" + isInsideHeader() +
+                "is=" + Long.toHexString(headerNumber) + ",at=" + exceptionStacktraceToString(new RuntimeException()))
+        ;*/
+        this.headerNumber = headerNumber;
         return this;
     }
 
@@ -276,10 +277,12 @@ public abstract class AbstractWire implements Wire {
                 if (isNotComplete(header))
                     continue;
 
-                if (isData(header))
-                    incrementHeaderNumber();
                 int len = lengthOf(header);
                 pos += len + SPB_HEADER_SIZE; // length of message plus length of header
+
+                if (isData(header))
+                    incrementHeaderNumber();
+
             }
         } finally {
             pauser.reset();
