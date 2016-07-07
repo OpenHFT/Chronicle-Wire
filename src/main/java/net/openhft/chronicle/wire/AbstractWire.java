@@ -329,7 +329,6 @@ public abstract class AbstractWire implements Wire {
             incrementHeaderNumber();
     }
 
-
     void updateHeaderAssertions(long position, long pos, int expectedHeader, int header) throws StreamCorruptedException {
         checkNoDataAfterEnd(pos);
 

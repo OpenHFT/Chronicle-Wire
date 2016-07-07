@@ -66,7 +66,6 @@ public interface WireIn extends WireCommon {
         } catch (Exception e) {
             throw new IORuntimeException("failed to parse bytes=" + bytes().toDebugString(128), e);
         }
-
     }
 
     /**

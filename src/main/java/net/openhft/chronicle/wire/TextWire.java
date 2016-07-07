@@ -1496,7 +1496,6 @@ public class TextWire extends AbstractWire implements Wire {
             bytes.writeUnsignedByte('\n');
             sep = EMPTY_AFTER_COMMENT;
         }
-
     }
 
     class TextValueIn implements ValueIn {

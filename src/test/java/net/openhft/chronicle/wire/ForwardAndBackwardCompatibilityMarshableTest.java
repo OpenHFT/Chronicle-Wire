@@ -52,7 +52,6 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
             Assert.assertEquals(dto2.two, 2);
             Assert.assertTrue("3".contentEquals(dto2.three));
         }
-
     }
 
     @Test
@@ -74,7 +73,6 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
             Assert.assertEquals(dto2.two, 0);
             Assert.assertEquals(dto2.three, null);
         }
-
     }
 
     @Test
@@ -95,7 +93,6 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
             dc.wire().getValueIn().marshallable(dto1);
             Assert.assertEquals(dto1.one, 1);
         }
-
     }
 
     public static class DTO1 extends AbstractMarshallable implements Demarshallable {

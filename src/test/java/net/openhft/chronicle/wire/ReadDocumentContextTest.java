@@ -115,7 +115,6 @@ public class ReadDocumentContextTest {
             assertFalse(dc.isMetaData());
             Assert.assertEquals("someText2", textWire.read(() -> "key2").text());
         }
-
     }
 
     @Test
@@ -160,7 +159,6 @@ public class ReadDocumentContextTest {
             assertFalse(dc.isMetaData());
             Assert.assertEquals("someText2", textWire.read(() -> "key2").text());
         }
-
     }
 
     @Test
@@ -205,6 +203,5 @@ public class ReadDocumentContextTest {
             assertFalse(dc.isMetaData());
             Assert.assertEquals("someText2", textWire.read(() -> "key2").text());
         }
-
     }
 }

@@ -117,6 +117,5 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
         public Bytes bytes() {
             return bytes;
         }
-
     }
 }

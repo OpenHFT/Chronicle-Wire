@@ -42,7 +42,6 @@ public class InnerMapTest {
             MyMarshable tm = dc.wire().read(() -> "marshable").typedMarshallable();
             Assert.assertEquals(asString, tm.toString());
         }
-
     }
 
     static class MyMarshable extends AbstractMarshallable implements Demarshallable {

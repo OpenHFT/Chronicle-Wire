@@ -251,6 +251,5 @@ public class CSVWire extends TextWire {
             consumePadding();
             return true;
         }
-
     }
 }
