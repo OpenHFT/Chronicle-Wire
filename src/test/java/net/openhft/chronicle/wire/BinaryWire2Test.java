@@ -325,11 +325,11 @@ public class BinaryWire2Test {
 
         wire.write("message").compress("snappy", str);
 
-        wire.bytes().readPosition(0);
+        wire.bytes().readPositionUnlimited(0);
         String str2 = wire.read(() -> "message").text();
         assertEquals(str, str2);
 
-        wire.bytes().readPosition(0);
+        wire.bytes().readPositionUnlimited(0);
         Bytes asText = Bytes.elasticByteBuffer();
         wire.copyTo(new TextWire(asText));
         assertEquals("message: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n", asText.toString());
@@ -371,7 +371,7 @@ public class BinaryWire2Test {
                 assertTrue(wire.bytes().readRemaining() + " >= " + str.length(),
                         wire.bytes().readRemaining() < str.length());
 
-            wire.bytes().readPosition(0);
+            wire.bytes().readPositionUnlimited(0);
             BytesStore bytesStore = wire.read()
                     .bytesStore();
             assert bytesStore != null;

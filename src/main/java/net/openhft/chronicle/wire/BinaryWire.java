@@ -123,9 +123,11 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @Override
     public DocumentContext readingDocument(long readLocation) {
-        final long readPosition = bytes().readPosition();
-        final long readLimit = bytes().readLimit();
-        bytes().readPosition(readLocation);
+        Bytes<?> bytes = bytes();
+        final long readPosition = bytes.readPosition();
+        final long readLimit = bytes.readLimit();
+        bytes.readPositionUnlimited(readLocation);
+
         readContext.start();
         readContext.closeReadLimit(readLimit);
         readContext.closeReadPosition(readPosition);
@@ -189,7 +191,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case U8_ARRAY:
                         bytes.uncheckedReadSkipOne();
                         wire.getValueOut().bytes(bytes);
-                        bytes.readPosition(bytes.readLimit());
+                        bytes.readPositionRemaining(bytes.readLimit(), 0);
                         break outerSwitch;
 
                     case I64_ARRAY:

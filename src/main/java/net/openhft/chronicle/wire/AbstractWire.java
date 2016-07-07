@@ -161,7 +161,8 @@ public abstract class AbstractWire implements Wire {
                 if (includeMetaData && isReadyMetaData(header))
                     return HeaderType.META_DATA;
 
-                bytes.readSkip(lengthOf(header) + SPB_HEADER_SIZE);
+                int bytesToSkip = lengthOf(header) + SPB_HEADER_SIZE;
+                bytes.readSkip(bytesToSkip);
             } else {
                 if (header == END_OF_DATA)
                     throw new EOFException();
