@@ -120,4 +120,8 @@ public interface WireCommon {
     default void notCompleteIsNotPresent(boolean notCompleteArePresent) {
         throw new UnsupportedOperationException();
     }
+
+    WireOut headerNumber(long headerNumber);
+
+    long headerNumber();
 }

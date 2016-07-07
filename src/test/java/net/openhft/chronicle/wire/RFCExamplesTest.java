@@ -53,7 +53,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         assertEquals("--- !!meta-data\n" +
                         "csp: ///service-lookup\n" +
                         "tid: 149873598325\n" +
-                        "# position: 45\n" +
+                        "# position: 45, header: 0\n" +
                         "--- !!data\n" +
                         "lookup: {\n" +
                         "  relativeUri: test,\n" +
@@ -100,19 +100,19 @@ put: [ 3, bye ]
         assertEquals("--- !!meta-data\n" +
                         "csp: //server1/test\n" +
                         "cid: 1\n" +
-                        "# position: 31\n" +
+                        "# position: 31, header: 0\n" +
                         "--- !!data\n" +
                         "put: {\n" +
                         "  key: 1,\n" +
                         "  value: hello\n" +
                         "}\n" +
-                        "# position: 69\n" +
+                        "# position: 69, header: 1\n" +
                         "--- !!data\n" +
                         "put: {\n" +
                         "  key: 2,\n" +
                         "  value: world\n" +
                         "}\n" +
-                        "# position: 107\n" +
+                        "# position: 107, header: 2\n" +
                         "--- !!data\n" +
                         "put: {\n" +
                         "  key: 3,\n" +
@@ -129,7 +129,7 @@ put: [ 3, bye ]
         clear(bytes);
         writeMessageTwo(bin);
 
-        System.out.println(Wires.fromSizePrefixedBlobs(bytes));
+//        System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("[pos: 0, rlim: 116, wlim: 8EiB, cap: 8EiB ] ‖" +
                 "\\u0018٠٠@Ãcspî//server1/testÃcid⒈" +
                 "\\u001A٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒈Åvalueåhello" +

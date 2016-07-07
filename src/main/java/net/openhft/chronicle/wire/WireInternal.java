@@ -189,6 +189,8 @@ public enum WireInternal {
 
         final long limit0 = bytes.readLimit();
         final long position0 = bytes.readPosition();
+        long headerNumber = -1;
+
         try {
             bytes.readPosition(position);
             long limit2 = Math.min(limit0, position + length);
@@ -202,8 +204,11 @@ public enum WireInternal {
                     sb.append("# ").append(bytes.readRemaining()).append(" bytes remaining\n");
                     break;
                 }
+                if (Wires.isData(header))
+                    headerNumber++;
+
                 if (start > 0) {
-                    sb.append("# position: ").append(start).append("\n");
+                    sb.append("# position: ").append(start).append(", header: ").append(headerNumber).append("\n");
                 }
 
                 int len = Wires.lengthOf(header);
@@ -214,6 +219,7 @@ public enum WireInternal {
                 String type = Wires.isData(header)
                         ? Wires.isReady(header) ? "!!data" : "!!not-ready-data!"
                         : Wires.isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
+
                 byte firstByte = bytes.readByte(bytes.readPosition());
                 boolean binary = firstByte < ' ' && firstByte != '\n';
 
@@ -241,6 +247,7 @@ public enum WireInternal {
                         bytes.readLimit(readPosition + len);
                         if (wireIn == null)
                             wireIn = new BinaryWire(bytes);
+
                         wireIn.copyTo(textWire);
                     } catch (Exception e) {
                         bytes.readPosition(readPosition);

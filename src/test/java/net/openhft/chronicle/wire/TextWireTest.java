@@ -1107,11 +1107,11 @@ public class TextWireTest {
         assertEquals("--- !!data\n" +
                         "nothing: !byte[] !!binary \n" +
                         "\n" +
-                        "# position: 32\n" +
+                        "# position: 32, header: 1\n" +
                         "--- !!data\n" +
                         "one: !byte[] !!binary AQ==\n" +
                         "\n" +
-                        "# position: 64\n" +
+                        "# position: 64, header: 2\n" +
                         "--- !!data\n" +
                         "four: !byte[] !!binary AQIDBA==\n" +
                         "\n"

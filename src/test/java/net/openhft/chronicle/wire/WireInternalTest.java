@@ -46,13 +46,13 @@ public class WireInternalTest {
         assertEquals("--- !!meta-data #binary\n" +
                 "csp: \"csp://hello-world\"\n" +
                 "tid: !int 123456789\n" +
-                "# position: 35\n" +
+                "# position: 35, header: 0\n" +
                 "--- !!data #binary\n" +
                 "reply: {\n" +
                 "  key: 1,\n" +
                 "  value: Hello World\n" +
                 "}\n" +
-                "# position: 73\n" +
+                "# position: 73, header: 1\n" +
                 "--- !!data #binary\n" +
                 "reply: [\n" +
                 "  key,\n" +
@@ -60,7 +60,7 @@ public class WireInternalTest {
                 "  value,\n" +
                 "  Hello World2\n" +
                 "]\n" +
-                "# position: 112\n" +
+                "# position: 112, header: 2\n" +
                 "--- !!data #binary\n" +
                 "userid: peter\n", actual);
     }

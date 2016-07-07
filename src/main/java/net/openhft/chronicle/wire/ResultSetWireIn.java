@@ -212,6 +212,16 @@ public class ResultSetWireIn implements WireIn {
     }
 
     @Override
+    public WireOut headerNumber(long headerNumber) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long headerNumber() {
+        return 0;
+    }
+
+    @Override
     public ObjectInput objectInput() {
         return new WireObjectInput(this);
     }

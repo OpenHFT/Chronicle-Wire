@@ -271,7 +271,7 @@ public class BinaryWire2Test {
 
         assertEquals("--- !!meta-data #binary\n" +
                 "tid: !int 1234567890\n" +
-                "# position: 13\n" +
+                "# position: 13, header: 0\n" +
                 "--- !!data #binary\n" +
                 "data: !!UpdateEvent {\n" +
                 "  assetName: /name,\n" +
@@ -451,15 +451,15 @@ public class BinaryWire2Test {
 
         assertEquals("--- !!data #binary\n" +
                         "nothing: !byte[] \"\"\n" +
-                        "# position: 23\n" +
+                        "# position: 23, header: 1\n" +
                         "--- !!data #binary\n" +
                         "one: !byte[] !!binary AQ==\n" +
                         "\n" +
-                        "# position: 43\n" +
+                        "# position: 43, header: 2\n" +
                         "--- !!data #binary\n" +
                         "four: !byte[] !!binary AQIDBA==\n" +
                         "\n"
-                , Wires.fromSizePrefixedBlobs(wire.bytes()));
+                , Wires.fromSizePrefixedBlobs(wire));
         wire.readDocument(null, w -> assertArrayEquals(new byte[0], (byte[]) w.read(() -> "nothing").object()));
         wire.readDocument(null, w -> assertArrayEquals(one, (byte[]) w.read(() -> "one").object()));
         wire.readDocument(null, w -> assertArrayEquals(four, (byte[]) w.read(() -> "four").object()));

@@ -96,9 +96,6 @@ public interface WireOut extends WireCommon {
         return this;
     }
 
-    WireOut headerNumber(long headerNumber);
-
-    long headerNumber();
 
     /**
      * This will reset the positions and the header number.
