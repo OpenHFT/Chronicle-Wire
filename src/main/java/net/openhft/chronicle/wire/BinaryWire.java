@@ -350,7 +350,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     protected ValueIn read2(@NotNull WireKey key, ValueInState curr, StringBuilder sb, CharSequence name) {
-        long position2 = bytes.readPosition();
+        long position2 = bytes.readLimit();
 
         // if not a match go back and look at old fields.
         for (int i = 0; i < curr.unexpectedSize(); i++) {
@@ -411,8 +411,10 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     private int peekCodeAfterPadding() {
         int peekCode = peekCode();
-        if (peekCode == PADDING || peekCode == PADDING32 || peekCode == COMMENT)
+        if (peekCode == PADDING || peekCode == PADDING32 || peekCode == COMMENT) {
             consumePadding(false);
+            peekCode = peekCode();
+        }
         return peekCode;
     }
 
@@ -864,7 +866,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         return (code & 128) == 0;
     }
 
-    private double readFloat(int code) {
+    double readFloat(int code) {
         if (code < 128)
             return code;
         switch (code >> 4) {
@@ -2309,6 +2311,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td) {
+            consumePadding(false);
             final int code = readCode();
             td.accept(t, readFloat(code));
             return BinaryWire.this;
@@ -2861,11 +2864,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     return (long) readFloat0(code);
                 case BinaryWireHighCode.INT:
                     return readInt0(code);
-                case BinaryWireHighCode.STR0:
-                case BinaryWireHighCode.STR1:
-                    return readTextAsLong();
                 default:
-                    throw cantRead(code);
+                    return readTextAsLong();
             }
         }
 

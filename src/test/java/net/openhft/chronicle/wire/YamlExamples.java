@@ -236,8 +236,10 @@ public class YamlExamples {
 
         Stats stats = new Stats();
         wire.read(Keys.name).textTo(stats.name);
-        wire.read(Keys.hr).int32(stats, (o, x) -> o.hr = x)
-                .read(Keys.avg).float64(stats, (o, x) -> o.avg = x)
+        wire.read(Keys.hr)
+                .int32(stats, (o, x) -> o.hr = x)
+                .read(Keys.avg)
+                .float64(stats, (o, x) -> o.avg = x)
                 .read(Keys.rbi).int64(stats, (o, x) -> o.rbi = x);
         wire.clear();
 
