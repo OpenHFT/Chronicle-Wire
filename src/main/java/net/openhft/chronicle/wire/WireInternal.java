@@ -208,7 +208,11 @@ public enum WireInternal {
                     headerNumber++;
 
                 if (start > 0) {
-                    sb.append("# position: ").append(start).append(", header: ").append(headerNumber).append("\n");
+                    sb.append("# position: ").append(start).append(", header: ");
+                    sb.append(headerNumber);
+                    if (Wires.isNotComplete(header))
+                        sb.append(" or ").append(headerNumber + 1);
+                    sb.append("\n");
                 }
 
                 int len = Wires.lengthOf(header);
