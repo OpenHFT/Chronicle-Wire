@@ -547,7 +547,7 @@ public class ResultSetWireIn implements WireIn {
         }
 
         @Override
-        public boolean marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
+        public Object marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
             throw new UnsupportedOperationException();
         }
 

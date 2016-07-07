@@ -344,9 +344,8 @@ public class DefaultValueIn implements ValueIn {
     }
 
     @Override
-    public boolean marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
-        assert wireKey.defaultValue() == null;
-        return false;
+    public Object marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
+        return wireKey.defaultValue();
     }
 
     @Override

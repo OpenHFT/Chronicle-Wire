@@ -988,10 +988,10 @@ public class RawWire extends AbstractWire implements Wire {
             throw new UnsupportedOperationException("todo");
         }
 
-        public boolean marshallable(@NotNull Object object, SerializationStrategy strategy) {
+        public Object marshallable(@NotNull Object object, SerializationStrategy strategy) {
             long length = bytes.readUnsignedInt();
             if (length == 0xFFFF_FFFF)
-                return false;
+                return null;
             if (length > bytes.readRemaining()) {
                 throw new IllegalStateException("Length was " + length
                         + " greater than remaining " + bytes.readRemaining());
@@ -1010,7 +1010,7 @@ public class RawWire extends AbstractWire implements Wire {
             } else {
                 strategy.readUsing(object, this);
             }
-            return true;
+            return object;
         }
 
         @Override

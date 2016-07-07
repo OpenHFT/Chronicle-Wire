@@ -28,6 +28,11 @@ public enum SerializationStrategies implements SerializationStrategy {
         public Class type() {
             return Marshallable.class;
         }
+
+        @Override
+        public Object newInstance(Class type) {
+            return type.isInterface() ? null : super.newInstance(type);
+        }
     },
     ANY_OBJECT {
         @Override

@@ -304,14 +304,14 @@ public interface ValueIn {
         });
     }
 
-    boolean marshallable(Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException;
+    Object marshallable(Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException;
 
     default boolean marshallable(@NotNull Serializable object) throws BufferUnderflowException, IORuntimeException {
-        return marshallable(object, SerializationStrategies.SERIALIZABLE);
+        return marshallable(object, SerializationStrategies.SERIALIZABLE) != null;
     }
 
     default boolean marshallable(@NotNull ReadMarshallable object) throws BufferUnderflowException, IORuntimeException {
-        return marshallable(object, SerializationStrategies.MARSHALLABLE);
+        return marshallable(object, SerializationStrategies.MARSHALLABLE) != null;
     }
 
     /**
@@ -421,7 +421,9 @@ public interface ValueIn {
                 if (using == null)
                     using = (E) strategy.newInstance(clazz);
 
-                return marshallable(using, strategy) ? readResolve(using) : null;
+                Object ret = marshallable(using, strategy);
+                return readResolve(ret);
+            
             case SEQ:
                 if (clazz == Object.class)
                     strategy = SerializationStrategies.LIST;

@@ -2709,9 +2709,9 @@ public class BinaryWire extends AbstractWire implements Wire {
             return false;
         }
 
-        public boolean marshallable(Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
+        public Object marshallable(Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
             if (this.isNull())
-                return false;
+                return null;
             pushState();
             consumePadding();
             int code = peekCode();
@@ -2720,8 +2720,11 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case UPDATED_ALIAS: {
                     bytes.uncheckedReadSkipOne();
                     Object o = code == ANCHOR ? anchor() : updateAlias();
+                    if (object == null || o.getClass() != object.getClass()) {
+                        return o instanceof Marshallable ? Wires.deepCopy((Marshallable) o) : o;
+                    }
                     Wires.copyTo(o, object);
-                    return true;
+                    return object;
                 }
             }
             long length = readLength();
@@ -2740,7 +2743,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             } else {
                 throw new IORuntimeException("Length unknown " + length);
             }
-            return true;
+            return object;
         }
 
         public Demarshallable demarshallable(@NotNull Class clazz) throws BufferUnderflowException, IORuntimeException {

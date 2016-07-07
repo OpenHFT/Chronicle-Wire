@@ -2255,12 +2255,12 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public boolean marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
+        public Object marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
             if (isNull())
-                return false;
+                return null;
             if (indentation() == 0) {
                 strategy.readUsing(object, this);
-                return true;
+                return object;
             }
             pushState();
             consumePadding();
@@ -2298,7 +2298,7 @@ public class TextWire extends AbstractWire implements Wire {
                         object + ",code='" + (char) code + "', bytes=" + Bytes.toString(bytes, 1024)
                 );
             consumePadding(1);
-            return true;
+            return object;
         }
 
         @NotNull
