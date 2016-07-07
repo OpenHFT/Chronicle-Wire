@@ -55,8 +55,8 @@ public class WriteDocumentContext implements DocumentContext {
     public void close() {
         Bytes bytes = wire().bytes();
         long position1 = bytes.writePosition();
-        if (position1 < position)
-            System.out.println("Message truncated from " + position + " to " + position1);
+//        if (position1 < position)
+//            System.out.println("Message truncated from " + position + " to " + position1);
         int length = metaDataBit | toIntU30(position1 - position - 4, "Document length %,d out of 30-bit int range.");
         if (!bytes.compareAndSwapInt(position, tmpHeader, length))
             throw new IllegalStateException("Header at " + position + " overwritten with " + Integer.toHexString(bytes.readInt(position)));

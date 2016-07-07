@@ -239,6 +239,7 @@ public abstract class AbstractWire implements Wire {
             if (maxlen > bytes.writeRemaining())
                 return throwNotEnoughSpace(maxlen, bytes);
             bytes.writePositionRemaining(pos + SPB_HEADER_SIZE, maxlen);
+//            System.out.println(Thread.currentThread()+" wpr pos: "+pos+" hdr "+headerNumber);
             return pos;
         }
 
@@ -248,6 +249,7 @@ public abstract class AbstractWire implements Wire {
             if (lastPositionValue > bytes.writePosition() + 1 << 20) {
                 headerNumber(Long.MIN_VALUE);
                 bytes.writePosition(lastPositionValue);
+//                System.out.println(Thread.currentThread()+" last pos: "+lastPositionValue+" hdr "+headerNumber);
             }
         }
 
@@ -259,6 +261,7 @@ public abstract class AbstractWire implements Wire {
             throw new IllegalArgumentException();
         long pos = bytes.writePosition();
         pauser();
+//        System.out.println(Thread.currentThread()+" wh0 pos: "+pos+" hdr "+(int) headerNumber);
         try {
             for (; ; ) {
                 if (bytes.compareAndSwapInt(pos, 0, NOT_COMPLETE | length)) {
@@ -283,6 +286,7 @@ public abstract class AbstractWire implements Wire {
 
                 if (isData(header))
                     incrementHeaderNumber();
+//                System.out.println(Thread.currentThread()+" wh0-iter pos: "+pos+" hdr "+(int) headerNumber);
 
             }
         } finally {
@@ -321,9 +325,8 @@ public abstract class AbstractWire implements Wire {
             bytes.writeOrderedInt(position, header);
         }
         bytes.writeLimit(bytes.capacity());
-        if (isData(header))
+        if (!metaData)
             incrementHeaderNumber();
-
     }
 
 

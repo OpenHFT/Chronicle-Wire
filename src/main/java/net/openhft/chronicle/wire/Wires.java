@@ -147,8 +147,8 @@ public enum Wires {
 
     public static int lengthOf(int len) {
         final int len0 = len & LENGTH_MASK;
-        if (len0 > 1 << 20)
-            System.out.println("len: " + len0);
+//        if (len0 > 1 << 20)
+//            System.out.println("len: " + len0);
         return len0;
     }
 
@@ -161,7 +161,7 @@ public enum Wires {
     }
 
     public static boolean isReadyData(int header) {
-        return (header & (META_DATA | NOT_COMPLETE)) == 0;
+        return ((header & (META_DATA | NOT_COMPLETE)) == 0) && (header != 0);
     }
 
     @Deprecated
