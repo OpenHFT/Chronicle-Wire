@@ -39,7 +39,7 @@ public class BinaryWire2Test {
     @NotNull
     private BinaryWire createWire() {
         bytes.clear();
-        BinaryWire wire = new BinaryWire(bytes, false, false, false, 32, "lzw");
+        BinaryWire wire = new BinaryWire(bytes, false, false, false, 32, "lzw", false);
         assert wire.startUse();
         return wire;
     }
@@ -325,11 +325,11 @@ public class BinaryWire2Test {
 
         wire.write("message").compress("snappy", str);
 
-        wire.bytes().readPositionUnlimited(0);
+        wire.bytes().readPosition(0);
         String str2 = wire.read(() -> "message").text();
         assertEquals(str, str2);
 
-        wire.bytes().readPositionUnlimited(0);
+        wire.bytes().readPosition(0);
         Bytes asText = Bytes.elasticByteBuffer();
         wire.copyTo(new TextWire(asText));
         assertEquals("message: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n", asText.toString());
@@ -360,7 +360,7 @@ public class BinaryWire2Test {
         for (String comp : "binary,gzip,lzw".split(",")) {
             bytes.clear();
 
-            Wire wire = new BinaryWire(bytes, false, false, false, 32, comp);
+            Wire wire = new BinaryWire(bytes, false, false, false, 32, comp, false);
             assert wire.startUse();
             String str = "xxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy2yyyyyyyyyyyyyyyyy";
             BytesStore bytes = BytesStore.from(str);
@@ -371,7 +371,7 @@ public class BinaryWire2Test {
                 assertTrue(wire.bytes().readRemaining() + " >= " + str.length(),
                         wire.bytes().readRemaining() < str.length());
 
-            wire.bytes().readPositionUnlimited(0);
+            wire.bytes().readPosition(0);
             BytesStore bytesStore = wire.read()
                     .bytesStore();
             assert bytesStore != null;

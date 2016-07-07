@@ -60,7 +60,7 @@ public class BinaryWirePerfTest {
         bytes.clear();
         Wire wire = testId == -1
                 ? new RawWire(bytes)
-                : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "lzw");
+                : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "lzw", false);
         assert wire.startUse();
         return wire;
     }

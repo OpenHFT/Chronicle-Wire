@@ -96,7 +96,7 @@ public class BinaryWireNumbersTest {
 
     public void test(@NotNull WriteValue expected, @NotNull WriteValue perform) {
         Bytes bytes1 = nativeBytes();
-        Wire wire1 = new BinaryWire(bytes1, true, false, false, Integer.MAX_VALUE, "binary");
+        Wire wire1 = new BinaryWire(bytes1, true, false, false, Integer.MAX_VALUE, "binary", false);
         assert wire1.startUse();
         expected.writeValue(wire1.write());
 

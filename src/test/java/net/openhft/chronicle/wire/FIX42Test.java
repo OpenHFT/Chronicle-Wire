@@ -112,7 +112,7 @@ public class FIX42Test {
         bytes.clear();
         Wire wire = testId < 0
                 ? new TextWire(bytes)
-                : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "binary");
+                : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "binary", true);
         assert wire.startUse();
         return wire;
     }

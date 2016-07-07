@@ -54,14 +54,14 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
  * This Wire is a binary translation of TextWire which is a sub set of YAML.
  */
 public class BinaryWire extends AbstractWire implements Wire {
-    private static final int END_OF_BYTES = -1;
+
     private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
     private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
 
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     private final FixedBinaryValueOut valueOut;
-    private final BinaryValueIn valueIn = getBinaryValueIn();
+    private final BinaryValueIn valueIn;
     private final boolean numericFields;
     private final boolean fieldLess;
     private final int compressedSize;
@@ -72,16 +72,21 @@ public class BinaryWire extends AbstractWire implements Wire {
     private String compression;
 
     public BinaryWire(Bytes bytes) {
-        this(bytes, false, false, false, Integer.MAX_VALUE, "binary");
+        this(bytes, false, false, false, Integer.MAX_VALUE, "binary", true);
     }
 
-    public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression) {
+    public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression, boolean supportDelta) {
         super(bytes, false);
         this.numericFields = numericFields;
         this.fieldLess = fieldLess;
         this.compressedSize = compressedSize;
         valueOut = getFixedBinaryValueOut(fixed);
         this.compression = compression;
+        valueIn = supportDelta ? new DeltaValueIn() : new BinaryValueIn();
+    }
+
+    public static BinaryWire binaryOnly(Bytes bytes) {
+        return new BinaryWire(bytes, false, false, false, Integer.MAX_VALUE, "binary", false);
     }
 
     StringBuilder acquireStringBuilder() {

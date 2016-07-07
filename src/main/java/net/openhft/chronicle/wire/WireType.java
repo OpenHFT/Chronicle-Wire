@@ -77,6 +77,22 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         public <T> T fromString(CharSequence cs) {
             return fromHexString(cs);
         }
+    }, BINARY_LIGHT {
+        @NotNull
+        @Override
+        public Wire apply(Bytes bytes) {
+            return BinaryWire.binaryOnly(bytes);
+        }
+
+        @Override
+        public String asString(Object marshallable) {
+            return asHexString(marshallable);
+        }
+
+        @Override
+        public <T> T fromString(CharSequence cs) {
+            return fromHexString(cs);
+        }
     }, DEFAULT_ZERO_BINARY {
         @NotNull
         @Override
@@ -198,7 +214,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         @NotNull
         @Override
         public Wire apply(Bytes bytes) {
-            return new BinaryWire(bytes, false, false, true, Integer.MAX_VALUE, "binary");
+            return new BinaryWire(bytes, false, false, true, Integer.MAX_VALUE, "binary", false);
         }
 
         @Override
@@ -214,7 +230,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         @NotNull
         @Override
         public Wire apply(Bytes bytes) {
-            return new BinaryWire(bytes, false, false, false, COMPRESSED_SIZE, "lzw");
+            return new BinaryWire(bytes, false, false, false, COMPRESSED_SIZE, "lzw", true);
         }
 
         @Override
