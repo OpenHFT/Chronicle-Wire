@@ -152,7 +152,7 @@ public abstract class AbstractWire implements Wire {
     public HeaderType readDataHeader(boolean includeMetaData) throws EOFException {
 
         for (; ; ) {
-            int header = bytes.readVolatileInt(bytes.readPosition());
+            int header = bytes.peekVolatileInt();
             if (isReady(header)) {
                 if (header == NOT_INITIALIZED)
                     return HeaderType.NONE;
@@ -173,7 +173,7 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public void readAndSetLength(long position) {
-        int header = bytes.readVolatileInt(bytes.readPosition());
+        int header = bytes.peekVolatileInt();
         if (isReady(header)) {
             if (header == NOT_INITIALIZED)
                 throw new IllegalStateException();
@@ -186,7 +186,7 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public void readMetaDataHeader() {
-        int header = bytes.readVolatileInt(bytes.readPosition());
+        int header = bytes.peekVolatileInt();
         if (isReady(header)) {
             if (header == NOT_INITIALIZED)
                 throw new IllegalStateException("Meta data not initialised");

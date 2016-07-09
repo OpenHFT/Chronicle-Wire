@@ -554,7 +554,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     private StringBuilder readSmallField(int peekCode, @NotNull StringBuilder sb) {
         bytes.uncheckedReadSkipOne();
-        if (bytes.bytesStore() instanceof NativeBytesStore) {
+        if (bytes.isDirectMemory()) {
             AppendableUtil.parse8bit_SB1(bytes, sb, peekCode & 0x1f);
         } else {
             AppendableUtil.parse8bit(bytes, sb, peekCode & 0x1f);

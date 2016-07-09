@@ -97,15 +97,14 @@ public enum Wires {
      * @return as String
      */
     public static String fromSizePrefixedBlobs(@NotNull Bytes bytes) {
-        long position = bytes.readPosition();
-        return WireInternal.fromSizePrefixedBlobs(null, bytes, position, bytes.readRemaining());
+        return WireDumper.of(bytes).asString();
     }
 
     public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position) {
         final long limit = bytes.readLimit();
         if (position > limit)
             return "";
-        return WireInternal.fromSizePrefixedBlobs(null, bytes, position, limit - position);
+        return WireDumper.of(bytes).asString(position, limit - position);
     }
 
     public static String fromSizePrefixedBlobs(@NotNull DocumentContext dc) {
@@ -116,13 +115,11 @@ public enum Wires {
         }
         long headerPosition = bytes.readPosition() - 4;
         int length = Wires.lengthOf(bytes.readInt(headerPosition));
-        return WireInternal.fromSizePrefixedBlobs(wire, bytes, headerPosition, length + 4);
+        return WireDumper.of(wire).asString(headerPosition, (long) (length + 4));
     }
 
     public static String fromSizePrefixedBlobs(@NotNull WireIn wireIn) {
-        final Bytes<?> bytes = wireIn.bytes();
-        long position = bytes.readPosition();
-        return WireInternal.fromSizePrefixedBlobs(wireIn, bytes, position, bytes.readRemaining());
+        return WireDumper.of(wireIn).asString();
     }
 
     public static CharSequence asText(@NotNull WireIn wireIn) {
@@ -241,7 +238,7 @@ public enum Wires {
     }
 
     public static String fromSizePrefixedBlobs(Bytes<?> bytes, long position, long length) {
-        return WireInternal.fromSizePrefixedBlobs(null, bytes, position, length);
+        return (null == null ? WireDumper.of((Bytes) bytes) : WireDumper.of((WireIn) null)).asString(position, length);
     }
 
     public static void readMarshallable(Object marshallable, WireIn wire, boolean overwrite) {

@@ -18,7 +18,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
@@ -180,104 +179,6 @@ public enum WireInternal {
             dataConsumer.readMarshallable(wireIn);
         } finally {
             bytes.readLimit(limit0);
-        }
-    }
-
-    @NotNull
-    static String fromSizePrefixedBlobs(WireIn wireIn, @NotNull Bytes bytes, long position, long length) {
-        StringBuilder sb = new StringBuilder();
-
-        final long limit0 = bytes.readLimit();
-        final long position0 = bytes.readPosition();
-        long headerNumber = -1;
-
-        try {
-            bytes.readPosition(position);
-            long limit2 = Math.min(limit0, position + length);
-            bytes.readLimit(limit2);
-            long missing = position + length - limit2;
-            while (bytes.readRemaining() >= 4) {
-                long start = bytes.readPosition();
-                int header = bytes.readInt();
-                if (header == 0) {
-                    sb.append("...\n");
-                    sb.append("# ").append(bytes.readRemaining()).append(" bytes remaining\n");
-                    break;
-                }
-                if (Wires.isReadyData(header))
-                    headerNumber++;
-
-                if (start > 0) {
-                    sb.append("# position: ").append(start).append(", header: ");
-                    sb.append(headerNumber);
-                    if (Wires.isNotComplete(header))
-                        sb.append(" or ").append(headerNumber + 1);
-                    sb.append("\n");
-                }
-
-                int len = Wires.lengthOf(header);
-                if (len > bytes.readRemaining()) {
-                    sb.append("#  has a 4 byte size prefix, ").append(len).append(" > ").append(bytes.readRemaining()).append(" len is ").append(Integer.toString(len));
-                    break;
-                }
-                String type = Wires.isData(header)
-                        ? Wires.isReady(header) ? "!!data" : "!!not-ready-data!"
-                        : Wires.isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
-
-                byte firstByte = bytes.readByte(bytes.readPosition());
-                boolean binary = firstByte < ' ' && firstByte != '\n';
-
-                sb.append("--- ").append(type).append(binary ? " #binary" : "");
-                if (missing > 0)
-                    sb.append(" # missing: ").append(missing);
-                if (len > bytes.readRemaining())
-                    sb.append(" # len: ").append(len).append(", remaining: ").append(bytes.readRemaining());
-                sb.append("\n");
-                if (len == 0) {
-                    sb.append("...\n");
-                    sb.append("# ").append(bytes.readRemaining()).append(" bytes remaining\n");
-                    break;
-                }
-
-                Bytes textBytes = bytes;
-
-                if (binary) {
-                    Bytes bytes2 = Bytes.elasticByteBuffer();
-                    TextWire textWire = new TextWire(bytes2);
-                    long readLimit = bytes.readLimit();
-
-                    long readPosition = bytes.readPosition();
-                    try {
-                        bytes.readLimit(readPosition + len);
-                        if (wireIn == null)
-                            wireIn = new BinaryWire(bytes);
-
-                        wireIn.copyTo(textWire);
-                    } catch (Exception e) {
-                        bytes.readPosition(readPosition);
-                        throw new IORuntimeException("Unable to parse\n" + bytes.toHexString(Integer.MAX_VALUE), e);
-                    } finally {
-                        bytes.readLimit(readLimit);
-                    }
-                    textBytes = bytes2;
-                    len = (int) textBytes.readRemaining();
-                }
-                try {
-                    for (int i = 0; i < len; i++) {
-                        int ch = textBytes.readUnsignedByte();
-                        sb.append((char) ch);
-                    }
-                } catch (Exception e) {
-                    sb.append(" ").append(e);
-                }
-                if (sb.charAt(sb.length() - 1) != '\n')
-                    sb.append('\n');
-            }
-
-            return sb.toString();
-        } finally {
-            bytes.readLimit(limit0);
-            bytes.readPosition(position0);
         }
     }
 
