@@ -229,31 +229,35 @@ public abstract class AbstractWire implements Wire {
                     "you have not nested the documents.");
 
         insideHeader = true;
+        try {
+            if (length < 0 || length > MAX_LENGTH)
+                throw new IllegalArgumentException();
+            long pos = bytes.writePosition();
 
-        if (length < 0 || length > MAX_LENGTH)
-            throw new IllegalArgumentException();
-        long pos = bytes.writePosition();
-
-        if (bytes.compareAndSwapInt(pos, 0, NOT_COMPLETE | length)) {
-            int maxlen = length == UNKNOWN_LENGTH ? MAX_LENGTH : length;
-            if (maxlen > bytes.writeRemaining())
-                return throwNotEnoughSpace(maxlen, bytes);
-            bytes.writePositionRemaining(pos + SPB_HEADER_SIZE, maxlen);
+            if (bytes.compareAndSwapInt(pos, 0, NOT_COMPLETE | length)) {
+                int maxlen = length == UNKNOWN_LENGTH ? MAX_LENGTH : length;
+                if (maxlen > bytes.writeRemaining())
+                    return throwNotEnoughSpace(maxlen, bytes);
+                bytes.writePositionRemaining(pos + SPB_HEADER_SIZE, maxlen);
 //            System.out.println(Thread.currentThread()+" wpr pos: "+pos+" hdr "+headerNumber);
-            return pos;
-        }
-
-        if (lastPosition != null) {
-            long lastPositionValue = lastPosition.getValue();
-            // do we jump forward if there has been writes else where.
-            if (lastPositionValue > bytes.writePosition() + 1 << 20) {
-                headerNumber(Long.MIN_VALUE);
-                bytes.writePosition(lastPositionValue);
-//                System.out.println(Thread.currentThread()+" last pos: "+lastPositionValue+" hdr "+headerNumber);
+                return pos;
             }
-        }
 
-        return writeHeader0(length, timeout, timeUnit);
+            if (lastPosition != null) {
+                long lastPositionValue = lastPosition.getValue();
+                // do we jump forward if there has been writes else where.
+                if (lastPositionValue > bytes.writePosition() + 1 << 20) {
+                    headerNumber(Long.MIN_VALUE);
+                    bytes.writePosition(lastPositionValue);
+//                System.out.println(Thread.currentThread()+" last pos: "+lastPositionValue+" hdr "+headerNumber);
+                }
+            }
+
+            return writeHeader0(length, timeout, timeUnit);
+        } catch (Throwable t) {
+            insideHeader = false;
+            throw t;
+        }
     }
 
     private long writeHeader0(int length, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {

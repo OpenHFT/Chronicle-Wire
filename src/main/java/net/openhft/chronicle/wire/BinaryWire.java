@@ -3111,7 +3111,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             int ref = Maths.toUInt31(bytes.readStopBit());
 //            System.out.println("update " + ref + " inObjects " + Integer.toHexString(inObjects.hashCode()));
             Marshallable previous = inObjects[ref];
-            assert previous != null;
+            if (previous == null)
+                throw new IllegalStateException("Unknown ref: " + ref);
             super.marshallable(previous, false);
             return (T) previous;
         }

@@ -1,7 +1,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.io.IORuntimeException;
 
 /**
  * Created by peter on 09/07/16.
@@ -43,6 +42,7 @@ public class WireDumper {
             while (bytes.readRemaining() >= 4) {
                 if (dumpOne(sb))
                     break;
+
             }
             if (missing > 0)
                 sb.append(" # missing: ").append(missing);
@@ -99,18 +99,22 @@ public class WireDumper {
         Bytes textBytes = bytes;
 
         if (binary) {
+            long readPosition = bytes.readPosition();
+            long readLimit = bytes.readLimit();
+            int sblen = sb.length();
             Bytes bytes2 = Bytes.elasticByteBuffer();
             TextWire textWire = new TextWire(bytes2);
-            long readLimit = bytes.readLimit();
-
-            long readPosition = bytes.readPosition();
             try {
                 bytes.readLimit(readPosition + len);
 
                 wireIn.copyTo(textWire);
             } catch (Exception e) {
-                bytes.readPosition(readPosition);
-                throw new IORuntimeException("Unable to parse\n" + bytes.toHexString(Integer.MAX_VALUE), e);
+                bytes.readPositionRemaining(readPosition, len);
+                sb.setLength(sblen);
+                sb.append(bytes.toHexString(readPosition, Integer.MAX_VALUE));
+                bytes.readPosition(readPosition + len);
+                return false;
+
             } finally {
                 bytes.readLimit(readLimit);
             }
