@@ -277,6 +277,7 @@ public abstract class AbstractWire implements Wire {
                     bytes.writeLimit(bytes.writePosition() + maxlen);
                     return pos;
                 }
+                bytes.readPositionRemaining(pos, 0);
                 pauser.pause(timeout, timeUnit);
                 int header = bytes.readVolatileInt(pos);
                 // two states where it is unable to continue.
