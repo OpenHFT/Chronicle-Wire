@@ -100,7 +100,7 @@ First you need to have a buffer to write to.  This can be a byte[], a ByteBuffer
 Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 ```
 
-Now you can choice which format you are using.  As the wire formats are themselves unbuffered, you can use them with the same buffer, but in general using one wire format is easier.
+Now you can choose which format you are using.  As the wire formats are themselves unbuffered, you can use them with the same buffer, but in general using one wire format is easier.
 ```java
 Wire wire = new TextWire(bytes);
 // or
