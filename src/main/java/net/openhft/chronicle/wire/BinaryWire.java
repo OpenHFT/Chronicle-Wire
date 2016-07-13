@@ -641,10 +641,17 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
 
             case TIME:
+                wire.getValueOut().time(getValueIn().time());
+                break;
             case DATE:
+                wire.getValueOut().date(getValueIn().date());
+                break;
             case DATE_TIME:
+                wire.getValueOut().dateTime(getValueIn().dateTime());
+                break;
             case ZONED_DATE_TIME:
-                throw new UnsupportedOperationException();
+                wire.getValueOut().zonedDateTime(getValueIn().zonedDateTime());
+                break;
 
             case TYPE_PREFIX: {
                 long readPosition = bytes.readPosition();

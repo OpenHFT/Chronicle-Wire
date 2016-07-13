@@ -82,8 +82,14 @@ public class WireDumper {
                 ? Wires.isReady(header) ? "!!data" : "!!not-ready-data!"
                 : Wires.isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
 
-        byte firstByte = bytes.readByte(bytes.readPosition());
-        boolean binary = firstByte < ' ' && firstByte != '\n';
+        boolean binary = false;
+        for (int i = 0; i < 4 && i < bytes.readRemaining(); i++) {
+            byte b = bytes.readByte(bytes.readPosition() + i);
+            if (b < ' ' && b != '\n') {
+                binary = true;
+                break;
+            }
+        }
 
         sb.append("--- ").append(type).append(binary ? " #binary" : "");
 
@@ -102,23 +108,31 @@ public class WireDumper {
             long readPosition = bytes.readPosition();
             long readLimit = bytes.readLimit();
             int sblen = sb.length();
-            Bytes bytes2 = Bytes.elasticByteBuffer();
-            TextWire textWire = new TextWire(bytes2);
+
+
             try {
+                byte firstByte = bytes.readByte(bytes.readPosition());
+                if (firstByte >= 0) {
+                    dumpAsHexadecimal(sb, len, readPosition, sblen);
+                    return false;
+                }
+
+                Bytes bytes2 = Bytes.elasticByteBuffer();
+                TextWire textWire = new TextWire(bytes2);
+
                 bytes.readLimit(readPosition + len);
 
                 wireIn.copyTo(textWire);
+
+                textBytes = bytes2;
             } catch (Exception e) {
-                bytes.readPositionRemaining(readPosition, len);
-                sb.setLength(sblen);
-                sb.append(bytes.toHexString(readPosition, Integer.MAX_VALUE));
-                bytes.readPosition(readPosition + len);
+                dumpAsHexadecimal(sb, len, readPosition, sblen);
                 return false;
 
             } finally {
                 bytes.readLimit(readLimit);
             }
-            textBytes = bytes2;
+
             len = (int) textBytes.readRemaining();
         }
         try {
@@ -132,5 +146,12 @@ public class WireDumper {
         if (sb.charAt(sb.length() - 1) != '\n')
             sb.append('\n');
         return false;
+    }
+
+    public void dumpAsHexadecimal(StringBuilder sb, int len, long readPosition, int sblen) {
+        bytes.readPositionRemaining(readPosition, len);
+        sb.setLength(sblen);
+        sb.append(bytes.toHexString(readPosition, Integer.MAX_VALUE));
+        bytes.readPosition(readPosition + len);
     }
 }
