@@ -98,7 +98,8 @@ public class ValueOutTest extends TestCase {
                     w.write().object(expected)
             );
 
-            System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
+            assertNotNull(
+                    Wires.fromSizePrefixedBlobs(wire.bytes()));
 
             wire.readDocument(null, w -> {
                 final byte[] actual = (byte[]) w.read().object();
