@@ -17,6 +17,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.io.IORuntimeException;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -77,6 +79,24 @@ public class JSONWireTest {
         assertEquals("", wire.bytes().toString());
     }
 
+    @Test
+    public void testMarshallableWithTwoLists() throws Exception {
+        Bytes bytes = Bytes.elasticByteBuffer();
+        JSONWire w = new JSONWire(bytes);
+
+        TwoLists lists = new TwoLists("hi", 5, 5);
+        w.writeEventName("hello_there").marshallable(lists);
+
+        TwoLists readLists = new TwoLists();
+
+        final StringBuilder sb = new StringBuilder();
+        ValueIn valueIn = w.readEventName(sb);
+        System.out.println(sb);
+
+        valueIn.marshallable(readLists);
+        System.out.println(readLists);
+    }
+
     private static class Item extends AbstractMarshallable {
         String name;
         long number1;
@@ -86,6 +106,41 @@ public class JSONWireTest {
             this.name = name;
             this.number1 = number1;
             this.number2 = number2;
+        }
+    }
+
+    private static class TwoLists implements Marshallable {
+        String name;
+        List<Item> list1;
+        List<Item> list2;
+
+        public TwoLists() {
+        }
+
+        public TwoLists(String name, long number1, double number2) {
+            this.name = name;
+            this.list1 = new ArrayList<>();
+            for (int i = 0; i < number1; i++) {
+                list1.add(new Item(name, i, i * 10));
+            }
+            this.list2 = new ArrayList<>();
+            for (int i = 0; i < number2; i++) {
+                list2.add(new Item(name, i, i * 10));
+            }
+        }
+
+        @Override
+        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
+            name = wire.read(() -> "name").text();
+            list1 = wire.read(() -> "list1").list(Item.class);
+            list2 = wire.read(() -> "list2").list(Item.class);
+        }
+
+        @Override
+        public void writeMarshallable(@NotNull WireOut wire) {
+            wire.write(() -> "name").text(name);
+            wire.write(() -> "list1").list(list1, Item.class);
+            wire.write(() -> "list2").list(list2, Item.class);
         }
     }
 }
