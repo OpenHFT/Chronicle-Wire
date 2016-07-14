@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
@@ -290,10 +291,14 @@ public abstract class AbstractWire implements Wire {
                 int len = lengthOf(header);
 
                 int nextHeader = lengthOf(bytes.readInt(pos + len + SPB_HEADER_SIZE));
-                if (nextHeader > 16 << 20) {
-                    int header3 = bytes.readVolatileInt(pos);
-                    assert header == header3;
-                    throw new AssertionError();
+                if (nextHeader > 1 << 10) {
+                    int header2 = bytes.readVolatileInt(pos);
+                    if (header2 != header) {
+                        Jvm.warn().on(getClass(), "At pos: " + pos +
+                                " header: " + header +
+                                " header2: " + header2);
+                        header = header2;
+                    }
                 }
                 pos += len + SPB_HEADER_SIZE; // length of message plus length of header
 
