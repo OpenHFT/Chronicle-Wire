@@ -2122,6 +2122,10 @@ public class TextWire extends AbstractWire implements Wire {
             code = (char) readCode();
             if (code != ']')
                 throw new IORuntimeException("Expected a ] but got " + code + " (" + code + ")");
+            consumePadding();
+            code = (char) peekCode();
+            if (code == ',')
+                readCode();
             return TextWire.this;
         }
         @Override

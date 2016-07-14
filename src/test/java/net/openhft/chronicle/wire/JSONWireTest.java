@@ -130,6 +130,11 @@ public class JSONWireTest {
         }
 
         @Override
+        public String toString() {
+            return Marshallable.$toString(this);
+        }
+
+        @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
             name = wire.read(() -> "name").text();
             list1 = wire.read(() -> "list1").list(Item.class);
