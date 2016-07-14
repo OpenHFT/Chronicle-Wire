@@ -137,11 +137,6 @@ public enum Wires {
         return SBP.acquireStringBuilder();
     }
 
-    @Deprecated
-    public static int lengthOf(long len) {
-        return lengthOf((int) len);
-    }
-
     public static int lengthOf(int len) {
         final int len0 = len & LENGTH_MASK;
 //        if (len0 > 1 << 20)

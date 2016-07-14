@@ -279,6 +279,7 @@ public abstract class AbstractWire implements Wire {
                 }
                 bytes.readPositionRemaining(pos, 0);
                 pauser.pause(timeout, timeUnit);
+
                 int header = bytes.readVolatileInt(pos);
                 // two states where it is unable to continue.
                 if (header == END_OF_DATA)
@@ -287,6 +288,13 @@ public abstract class AbstractWire implements Wire {
                     continue;
 
                 int len = lengthOf(header);
+
+                int nextHeader = lengthOf(bytes.readInt(pos + len + SPB_HEADER_SIZE));
+                if (nextHeader > 16 << 20) {
+                    int header3 = bytes.readVolatileInt(pos);
+                    assert header == header3;
+                    throw new AssertionError();
+                }
                 pos += len + SPB_HEADER_SIZE; // length of message plus length of header
 
                 if (isData(header))
@@ -335,10 +343,12 @@ public abstract class AbstractWire implements Wire {
     }
 
     void updateHeaderAssertions(long position, long pos, int expectedHeader, int header) throws StreamCorruptedException {
+//        int header0 = bytes.readVolatileInt(position);
         checkNoDataAfterEnd(pos);
 
         if (!bytes.compareAndSwapInt(position, expectedHeader, header))
             throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(bytes.readVolatileInt(position)));
+//        System.out.println("=== " + position+" "+header0+" > " + header);
     }
 
     protected void checkNoDataAfterEnd(long pos) {
