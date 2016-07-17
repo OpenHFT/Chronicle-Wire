@@ -73,6 +73,7 @@ public class MethodWriterInvocationHandler implements InvocationHandler {
                             v.object(finalParameterTypes[i], args[i]);
                     });
             }
+            wire.padToCacheAlign();
         }
         return ObjectUtils.defaultValue(method.getReturnType());
     }

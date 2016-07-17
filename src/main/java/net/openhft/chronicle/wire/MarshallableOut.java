@@ -55,7 +55,8 @@ public interface MarshallableOut {
      */
     default void writeMessage(WireKey key, Object value) throws UnrecoverableTimeoutException {
         try (DocumentContext dc = writingDocument()) {
-            dc.wire().write(key).object(value);
+            Wire wire = dc.wire();
+            wire.write(key).object(value);
         }
     }
 
@@ -66,7 +67,8 @@ public interface MarshallableOut {
      */
     default void writeDocument(WriteMarshallable writer) throws UnrecoverableTimeoutException {
         try (DocumentContext dc = writingDocument()) {
-            writer.writeMarshallable(dc.wire());
+            Wire wire = dc.wire();
+            writer.writeMarshallable(wire);
         }
     }
 
@@ -87,7 +89,8 @@ public interface MarshallableOut {
      */
     default <T> void writeDocument(T t, BiConsumer<ValueOut, T> writer) throws UnrecoverableTimeoutException {
         try (DocumentContext dc = writingDocument()) {
-            writer.accept(dc.wire().getValueOut(), t);
+            Wire wire = dc.wire();
+            writer.accept(wire.getValueOut(), t);
         }
     }
 
@@ -105,8 +108,10 @@ public interface MarshallableOut {
      */
     default void writeMap(Map<?, ?> map) throws UnrecoverableTimeoutException {
         try (DocumentContext dc = writingDocument()) {
+            Wire wire = dc.wire();
             for (Map.Entry<?, ?> entry : map.entrySet()) {
-                dc.wire().writeEvent(Object.class, entry.getKey()).object(Object.class, entry.getValue());
+                wire.writeEvent(Object.class, entry.getKey())
+                        .object(Object.class, entry.getValue());
             }
         }
     }

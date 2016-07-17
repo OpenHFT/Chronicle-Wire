@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -87,6 +88,15 @@ public interface WireOut extends WireCommon {
 
     @NotNull
     WireOut addPadding(int paddingToAdd);
+
+    default WireOut padToCacheAlign() {
+        Bytes<?> bytes = bytes();
+        int mod = (int) (bytes.address(bytes.writePosition()) & 63);
+        if (mod > 58)
+            addPadding(64 - mod);
+        return this;
+    }
+
 
     @NotNull
     default WireOut writeAlignTo(int alignment, int plus) {
