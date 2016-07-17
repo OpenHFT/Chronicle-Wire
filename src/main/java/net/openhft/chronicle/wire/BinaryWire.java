@@ -2850,7 +2850,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             final long value = isText(code) ? readTextAsLong() : readInt0(code);
 
             if (value > (1L << 32L) || value < 0)
-                throw new IllegalStateException();
+                throw new IllegalStateException("value " + value + " cannot be cast to an unsigned 16-bit int without loss of information");
 
             return (int) value;
 
@@ -2863,7 +2863,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             final long value = isText(code) ? readTextAsLong() : readInt0(code);
 
             if (value > Integer.MAX_VALUE || value < Integer.MIN_VALUE)
-                throw new IllegalStateException();
+                throw new IllegalStateException("value " + value + " cannot be cast to int without loss of information");
 
             return (int) value;
         }

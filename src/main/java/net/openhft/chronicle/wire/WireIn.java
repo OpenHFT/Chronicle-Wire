@@ -55,6 +55,10 @@ public interface WireIn extends WireCommon {
     @NotNull
     ValueIn read(@NotNull WireKey key);
 
+    default ValueIn read(String fieldName) {
+        return read(() -> fieldName);
+    }
+
     /**
      * Read a field, or string which is always written, even for formats which might drop the field
      * such as RAW.
