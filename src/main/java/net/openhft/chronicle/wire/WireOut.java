@@ -89,6 +89,11 @@ public interface WireOut extends WireCommon {
     @NotNull
     WireOut addPadding(int paddingToAdd);
 
+    /**
+     * If near the end of a cache line, pad it so a following 4-byte int value will not split a cache line.
+     *
+     * @return this
+     */
     default WireOut padToCacheAlign() {
         Bytes<?> bytes = bytes();
         int mod = (int) (bytes.address(bytes.writePosition()) & 63);
