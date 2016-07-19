@@ -830,14 +830,14 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         switch (code) {
             case INT8:
-            case PLUS_INT8:
                 return bytes.readByte();
             case UINT8:
+            case SET_LOW_INT8:
                 return bytes.readUnsignedByte();
             case INT16:
-            case PLUS_INT16:
                 return bytes.readShort();
             case UINT16:
+            case SET_LOW_INT16:
                 return bytes.readUnsignedShort();
             case INT32:
                 return bytes.readInt();
@@ -856,13 +856,13 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         switch (code) {
             case INT8:
-            case PLUS_INT8:
                 return bytes.readByte();
             case UINT8:
+            case SET_LOW_INT8:
                 return bytes.readUnsignedByte();
             case INT16:
-            case PLUS_INT16:
                 return bytes.readShort();
+            case SET_LOW_INT16:
             case UINT16:
                 return bytes.readUnsignedShort();
             case INT32:
@@ -3129,12 +3129,12 @@ public class BinaryWire extends AbstractWire implements Wire {
             consumePadding();
             int code = peekCode();
             switch (code) {
-                case BinaryWireCode.PLUS_INT8:
+                case BinaryWireCode.SET_LOW_INT8:
                     bytes.uncheckedReadSkipOne();
-                    return previous + bytes.readByte();
-                case BinaryWireCode.PLUS_INT16:
+                    return (previous & (~0 << 8)) | bytes.readUnsignedByte();
+                case BinaryWireCode.SET_LOW_INT16:
                     bytes.uncheckedReadSkipOne();
-                    return previous + bytes.readShort();
+                    return (previous & (~0 << 16)) | bytes.readUnsignedShort();
                 default:
                     return super.int32();
             }
@@ -3145,12 +3145,12 @@ public class BinaryWire extends AbstractWire implements Wire {
             consumePadding();
             int code = peekCode();
             switch (code) {
-                case BinaryWireCode.PLUS_INT8:
+                case BinaryWireCode.SET_LOW_INT8:
                     bytes.uncheckedReadSkipOne();
-                    return previous + bytes.readByte();
-                case BinaryWireCode.PLUS_INT16:
+                    return (previous & (~0L << 8)) | bytes.readUnsignedByte();
+                case BinaryWireCode.SET_LOW_INT16:
                     bytes.uncheckedReadSkipOne();
-                    return previous + bytes.readShort();
+                    return (previous & (~0L << 16)) | bytes.readUnsignedShort();
                 default:
                     return super.int64();
             }

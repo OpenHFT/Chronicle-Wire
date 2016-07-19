@@ -62,8 +62,8 @@ public enum BinaryWireCode {
     public static final int INT16 = 0xA5;
     public static final int INT32 = 0xA6;
     public static final int INT64 = 0xA7;
-    public static final int PLUS_INT8 = 0xA8;
-    public static final int PLUS_INT16 = 0xA9;
+    public static final int SET_LOW_INT8 = 0xA8;
+    public static final int SET_LOW_INT16 = 0xA9;
     //    public static final int FIXED_6 = 0xA9;
 //    public static final int FIXED_5 = 0xAA;
 //    public static final int FIXED_4 = 0xAB;
