@@ -168,5 +168,10 @@ public class JSONWire extends TextWire {
     }
 
     class JSONValueIn extends TextValueIn {
+        @Override
+        public String text() {
+            String text = super.text();
+            return text == null || text.equals("null") ? null : text;
+        }
     }
 }
