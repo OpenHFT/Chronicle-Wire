@@ -24,15 +24,26 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 
 /**
  * Created by peter.lawrey on 06/02/2016.
  */
 public class JSONWireTest {
+    @NotNull
+    private JSONWire getWire() {
+        return new JSONWire(Bytes.elasticByteBuffer());
+    }
+
+    @NotNull
+    private JSONWire getWire(String json) {
+        return new JSONWire(Bytes.from(json));
+    }
+
     @Test
     public void testListFormatting() {
-        JSONWire wire = new JSONWire(Bytes.elasticByteBuffer());
+        Wire wire = getWire();
 
         List<Item> items = new ArrayList<>();
         items.add(new Item("item1", 1235666L, 1.1231231));
@@ -52,8 +63,7 @@ public class JSONWireTest {
     public void testOpenBracket() {
         StringBuilder sb = new StringBuilder();
 
-        JSONWire wire1 = new JSONWire(Bytes.from("\"echo\":\"Hello\"\n" +
-                "\"echo2\":\"Hello2\"\n"));
+        Wire wire1 = getWire("\"echo\":\"Hello\"\n\"echo2\":\"Hello2\"\n");
         String text1 = wire1.readEventName(sb).text();
         assertEquals("echo", sb.toString());
         assertEquals("Hello", text1);
@@ -61,8 +71,7 @@ public class JSONWireTest {
         assertEquals("echo2", sb.toString());
         assertEquals("Hello2", text2);
 
-        JSONWire wire2 = new JSONWire(Bytes.from("{ \"echoB\":\"HelloB\" }\n" +
-                "{ \"echo2B\":\"Hello2B\" }\n"));
+        Wire wire2 = getWire("{ \"echoB\":\"HelloB\" }\n{ \"echo2B\":\"Hello2B\" }\n");
         String textB = wire2.readEventName(sb).text();
         assertEquals("echoB", sb.toString());
         assertEquals("HelloB", textB);
@@ -73,7 +82,7 @@ public class JSONWireTest {
 
     @Test
     public void testNoSpaces() {
-        JSONWire wire = new JSONWire(Bytes.from("\"echo\":\"\""));
+        Wire wire = getWire("\"echo\":\"\"");
         WireParser<Void> parser = new VanillaWireParser<>((s, v, $) -> System.out.println(s + " - " + v.text()));
         parser.parseOne(wire, null);
         assertEquals("", wire.bytes().toString());
@@ -81,20 +90,36 @@ public class JSONWireTest {
 
     @Test
     public void testMarshallableWithTwoLists() throws Exception {
-        Bytes bytes = Bytes.elasticByteBuffer();
-        JSONWire w = new JSONWire(bytes);
+        Wire wire = getWire();
 
-        TwoLists lists = new TwoLists("hi", 5, 5);
-        w.writeEventName("hello_there").marshallable(lists);
+        TwoLists lists1 = new TwoLists(null, 5, 5);
+        wire.writeEventName("two_lists").marshallable(lists1);
 
-        TwoLists readLists = new TwoLists();
+        TwoLists lists2 = new TwoLists();
 
         final StringBuilder sb = new StringBuilder();
-        ValueIn valueIn = w.readEventName(sb);
-        System.out.println(sb);
+        ValueIn valueIn = wire.readEventName(sb);
 
-        valueIn.marshallable(readLists);
-        System.out.println(readLists);
+        valueIn.marshallable(lists2);
+
+        // fails due to a trailing space if we don't call toString.
+        // assertEquals(lists1, lists2);
+        assertEquals(lists1.toString(), lists2.toString());
+    }
+
+    @Test
+    public void testNullString() throws Exception {
+        Wire w = getWire();
+
+        Item item1 = new Item(null, 1, 2);
+        w.write("item").marshallable(item1);
+
+        Item item2 = new Item();
+        w.read(() -> "item").marshallable(item2);
+
+        assertNull(item2.name);
+        assertEquals(item1, item2);
+        assertEquals(item1.toString(), item2.toString());
     }
 
     private static class Item extends AbstractMarshallable {
@@ -102,7 +127,10 @@ public class JSONWireTest {
         long number1;
         double number2;
 
-        public Item(String name, long number1, double number2) {
+        Item() {
+        }
+
+        Item(String name, long number1, double number2) {
             this.name = name;
             this.number1 = number1;
             this.number2 = number2;
@@ -114,10 +142,10 @@ public class JSONWireTest {
         List<Item> list1;
         List<Item> list2;
 
-        public TwoLists() {
+        TwoLists() {
         }
 
-        public TwoLists(String name, long number1, double number2) {
+        TwoLists(String name, long number1, double number2) {
             this.name = name;
             this.list1 = new ArrayList<>();
             for (int i = 0; i < number1; i++) {
