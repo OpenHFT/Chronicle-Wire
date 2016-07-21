@@ -45,7 +45,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>1.13.3</version>
+                <version>1.13.5</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -69,13 +69,13 @@
             <artifactId>annotations</artifactId>
         </dependency>
 
+        <!-- test dependencies -->
+
         <dependency>
             <groupId>org.xerial.snappy</groupId>
             <artifactId>snappy-java</artifactId>
             <optional>true</optional>
         </dependency>
-
-        <!-- test dependencies -->
 
         <dependency>
             <groupId>junit</groupId>
@@ -98,7 +98,6 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.15</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
