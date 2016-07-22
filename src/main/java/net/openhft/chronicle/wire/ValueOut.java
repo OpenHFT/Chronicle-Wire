@@ -535,6 +535,20 @@ public interface ValueOut {
                 return float64((Double) value);
             case "java.lang.Float":
                 return float32((Float) value);
+            case "java.time.LocalTime":
+                return time((LocalTime) value);
+            case "java.time.LocalDate":
+                return date((LocalDate) value);
+            case "java.time.LocalDateTime":
+                return dateTime((LocalDateTime) value);
+            case "java.time.ZonedDateTime":
+                return zonedDateTime((ZonedDateTime) value);
+            case "java.util.UUID":
+                return uuid((UUID) value);
+            case "java.math.BigInteger":
+            case "java.math.BigDecimal":
+            case "java.io.File":
+                return text(value.toString());
         }
         if (value instanceof Marshallable)
             return marshallable((Marshallable) value);

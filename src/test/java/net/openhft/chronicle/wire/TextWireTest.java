@@ -511,19 +511,38 @@ public class TextWireTest {
         ZonedDateTime now = ZonedDateTime.now();
         final ZonedDateTime max = ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault());
         final ZonedDateTime min = ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault());
-        wire.write().zonedDateTime(now)
+        wire.write()
+                .zonedDateTime(now)
                 .write().zonedDateTime(max)
                 .write().zonedDateTime(min);
+        assertEquals("\"\": \"" + now + "\"\n" +
+                "\"\": \"+999999999-12-31T23:59:59.999999999Z[Europe/London]\"\n" +
+                "\"\": \"-999999999-01-01T00:00-00:01:15[Europe/London]\"\n", wire.toString());
         wire.read().zonedDateTime(now, Assert::assertEquals)
                 .read().zonedDateTime(max, Assert::assertEquals)
                 .read().zonedDateTime(min, Assert::assertEquals);
 
+        wire.clear();
         wire.write().object(now)
                 .write().object(max)
                 .write().object(min);
+        assertEquals("\"\": !ZonedDateTime \"" + now + "\"\n" +
+                "\"\": !ZonedDateTime \"+999999999-12-31T23:59:59.999999999Z[Europe/London]\"\n" +
+                "\"\": !ZonedDateTime \"-999999999-01-01T00:00-00:01:15[Europe/London]\"\n", wire.toString());
         wire.read().object(Object.class, now, Assert::assertEquals)
                 .read().object(Object.class, max, Assert::assertEquals)
                 .read().object(Object.class, min, Assert::assertEquals);
+
+        wire.clear();
+        wire.write().object(ZonedDateTime.class, now)
+                .write().object(ZonedDateTime.class, max)
+                .write().object(ZonedDateTime.class, min);
+        assertEquals("\"\": \"" + now + "\"\n" +
+                "\"\": \"+999999999-12-31T23:59:59.999999999Z[Europe/London]\"\n" +
+                "\"\": \"-999999999-01-01T00:00-00:01:15[Europe/London]\"\n", wire.toString());
+        wire.read().object(ZonedDateTime.class, now, Assert::assertEquals)
+                .read().object(ZonedDateTime.class, max, Assert::assertEquals)
+                .read().object(ZonedDateTime.class, min, Assert::assertEquals);
     }
 
     @Test
@@ -1203,6 +1222,7 @@ public class TextWireTest {
         assertTrue(o instanceof SortedMap);
         assertEquals(set, o);
     }
+
     enum BWKey implements WireKey {
         field1, field2, field3
     }
