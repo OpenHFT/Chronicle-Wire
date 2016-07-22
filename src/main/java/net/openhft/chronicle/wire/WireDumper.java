@@ -109,7 +109,6 @@ public class WireDumper {
             long readLimit = bytes.readLimit();
             int sblen = sb.length();
 
-
             try {
                 byte firstByte = bytes.readByte(bytes.readPosition());
                 if (firstByte >= 0) {

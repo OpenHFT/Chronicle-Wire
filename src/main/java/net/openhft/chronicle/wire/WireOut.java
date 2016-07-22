@@ -102,7 +102,6 @@ public interface WireOut extends WireCommon {
         return this;
     }
 
-
     @NotNull
     default WireOut writeAlignTo(int alignment, int plus) {
         long mod = (bytes().writePosition() + plus) % alignment;
