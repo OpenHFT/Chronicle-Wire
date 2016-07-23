@@ -769,7 +769,7 @@ public class WireMarshaller<T> {
             if (previous == null)
                 write.int32(UNSAFE.getInt(o, offset));
             else
-                write.int32(UNSAFE.getInt(o, offset), field.getInt(previous));
+                write.int32(UNSAFE.getInt(o, offset), UNSAFE.getInt(previous, offset));
         }
 
         @Override
@@ -801,12 +801,16 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException {
-            write.float32(UNSAFE.getFloat(o, offset));
+            if (previous == null)
+                write.float32(UNSAFE.getFloat(o, offset));
+            else
+                write.float32(UNSAFE.getFloat(o, offset), UNSAFE.getFloat(previous, offset));
         }
 
         @Override
         protected void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException {
-            UNSAFE.putFloat(o, offset, read.float32());
+            final float v = overwrite ? read.float32() : read.float32(UNSAFE.getFloat(o, offset));
+            UNSAFE.putFloat(o, offset, v);
         }
 
         @Override
@@ -835,7 +839,7 @@ public class WireMarshaller<T> {
             if (previous == null)
                 write.int64(UNSAFE.getLong(o, offset));
             else
-                write.int64(UNSAFE.getLong(o, offset), field.getLong(previous));
+                write.int64(UNSAFE.getLong(o, offset), UNSAFE.getLong(previous, offset));
         }
 
         @Override
@@ -867,12 +871,16 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException {
-            write.float64(UNSAFE.getDouble(o, offset));
+            if (previous == null)
+                write.float64(UNSAFE.getDouble(o, offset));
+            else
+                write.float64(UNSAFE.getDouble(o, offset), UNSAFE.getDouble(previous, offset));
         }
 
         @Override
         protected void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException {
-            UNSAFE.putDouble(o, offset, read.float64());
+            final double v = overwrite ? read.float64() : read.float64(UNSAFE.getDouble(o, offset));
+            UNSAFE.putDouble(o, offset, v);
         }
 
         @Override

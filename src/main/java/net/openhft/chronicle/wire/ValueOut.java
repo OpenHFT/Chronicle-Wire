@@ -168,6 +168,16 @@ public interface ValueOut {
     WireOut float64(double d);
 
     @NotNull
+    default WireOut float32(float f, float previous) {
+        return float32(f);
+    }
+
+    @NotNull
+    default WireOut float64(double d, double previous) {
+        return float64(d);
+    }
+
+    @NotNull
     WireOut time(LocalTime localTime);
 
     @NotNull

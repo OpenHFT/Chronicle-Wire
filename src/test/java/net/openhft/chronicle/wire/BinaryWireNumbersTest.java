@@ -35,6 +35,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(value = Parameterized.class)
 public class BinaryWireNumbersTest {
     private static final float VAL1 = 12345678901234567.0f;
+    static int counter = 0;
     private final int len;
     private final WriteValue expected;
     private final WriteValue perform;
@@ -91,6 +92,8 @@ public class BinaryWireNumbersTest {
 
     @Test
     public void doTest() {
+        if (counter++ == 18)
+            Thread.yield();
         test(expected, perform);
     }
 

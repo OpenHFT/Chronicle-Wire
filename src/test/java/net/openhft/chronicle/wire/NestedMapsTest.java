@@ -179,15 +179,15 @@ public class NestedMapsTest {
                         "Åwords\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdog" +
                         "Çnumbers\\u0082⒎٠٠٠⒈⒉⒉⒊⒌⒏⒔" +
                         "Ämap1\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBB" +
-                        "Ämap2\\u0082&٠٠٠¹⒊one\\u0091٠٠٠٠٠٠ð?¹⒔two point two\\u0091\\u009A\\u0099\\u0099\\u0099\\u0099\\u0099⒈@‡" +
-                        "٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+                        "Ämap2\\u0082&٠٠٠¹⒊one\\u0091٠٠٠٠٠٠ð?¹⒔two point two\\u0091\\u009A\\u0099\\u0099\\u0099\\u0099\\u0099⒈@" +
+                        "‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
                 break;
             case FIELDLESS_BINARY:
                 assertEquals("[pos: 0, rlim: 125, wlim: 8EiB, cap: 8EiB ] ‖" +
                         "\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdog" +
                         "\\u0082⒎٠٠٠⒈⒉⒉⒊⒌⒏⒔\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBB" +
                         "\\u0082&٠٠٠¹⒊one\\u0091٠٠٠٠٠٠ð?¹⒔two point two\\u0091\\u009A\\u0099\\u0099\\u0099\\u0099\\u0099⒈@" +
-                        "‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+                        "‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
                 break;
         }
         Mapped m2 = new Mapped();

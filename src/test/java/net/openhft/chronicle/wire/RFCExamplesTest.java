@@ -73,7 +73,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         assertEquals("[pos: 0, rlim: 128, wlim: 8EiB, cap: 8EiB ] ‖" +
                 "#٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠" +
                 "U٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String" +
-                "‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+                "‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
 
         Wire raw = new RawWire(bytes);
         clear(bytes);
@@ -81,7 +81,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
 
         assertEquals("[pos: 0, rlim: 66, wlim: 8EiB, cap: 8EiB ] ‖" +
                 "\\u001A٠٠@⒘///service-lookupu\\u009F)å\"٠٠٠ ٠٠٠\\u001C٠٠٠⒋test⒊Map⒖٠٠٠⒎Integer⒍String" +
-                "‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+                "‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
 /*
 --- !!meta-data
 cid: 1
@@ -124,7 +124,7 @@ put: [ 3, bye ]
                 "\"٠٠٠put: {⒑  key: 1,⒑  value: hello⒑}⒑" +
                 "\"٠٠٠put: {⒑  key: 2,⒑  value: world⒑}⒑" +
                 " ٠٠٠put: {⒑  key: 3,⒑  value: bye⒑}⒑" +
-                "‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+                "‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
 
         clear(bytes);
         writeMessageTwo(bin);
@@ -135,7 +135,7 @@ put: [ 3, bye ]
                 "\\u001A٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒈Åvalueåhello" +
                 "\\u001A٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒉Åvalueåworld" +
                 "\\u0018٠٠٠Ãput\\u0082⒖٠٠٠Ãkey⒊Åvalueãbye" +
-                "‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+                "‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
 
         clear(bytes);
         writeMessageTwo(raw);
@@ -144,7 +144,7 @@ put: [ 3, bye ]
                 "⒙٠٠٠⒕٠٠٠⒈٠٠٠٠٠٠٠⒌hello" +
                 "⒙٠٠٠⒕٠٠٠⒉٠٠٠٠٠٠٠⒌world" +
                 "⒗٠٠٠⒓٠٠٠⒊٠٠٠٠٠٠٠⒊bye" +
-                "‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+                "‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
     }
 
     public void clear(Bytes bytes) {

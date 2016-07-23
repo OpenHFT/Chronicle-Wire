@@ -46,13 +46,13 @@ public enum BinaryWireCode {
 
     public static final int FLOAT32 = 0x90;
     public static final int FLOAT64 = 0x91;
-//        public static final int FIXED1 = 0x92;
-//        public static final int FIXED2 = 0x93;
-//        public static final int FIXED3 = 0x94;
-//        public static final int FIXED4 = 0x95;
-//        public static final int FIXED5 = 0x96;
-//        public static final int FIXED6 = 0x97;
-    // 0x9A - 0x9F
+    public static final int FLOAT_STOP_2 = 0x92;
+    public static final int FLOAT_STOP_4 = 0x94;
+    public static final int FLOAT_STOP_6 = 0x96;
+    public static final int FLOAT_SET_LOW_0 = 0x9A;
+    public static final int FLOAT_SET_LOW_2 = 0x9B;
+    public static final int FLOAT_SET_LOW_4 = 0x9C;
+    // 0x98 - 0x9F
 
     public static final int UUID = 0xA0;
     public static final int UINT8 = 0xA1;
@@ -64,7 +64,6 @@ public enum BinaryWireCode {
     public static final int INT64 = 0xA7;
     public static final int SET_LOW_INT8 = 0xA8;
     public static final int SET_LOW_INT16 = 0xA9;
-    //    public static final int FIXED_6 = 0xA9;
 //    public static final int FIXED_5 = 0xAA;
 //    public static final int FIXED_4 = 0xAB;
 //    public static final int FIXED_3 = 0xAC;

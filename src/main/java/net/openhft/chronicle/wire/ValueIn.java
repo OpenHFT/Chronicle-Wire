@@ -362,9 +362,17 @@ public interface ValueIn {
         return int64();
     }
 
+    float float32();
+
+    default float float32(float previous) {
+        return float32();
+    }
+
     double float64();
 
-    float float32();
+    default double float64(double previous) {
+        return float64();
+    }
 
     <T> Class<T> typeLiteral() throws IORuntimeException, BufferUnderflowException;
 

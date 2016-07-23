@@ -54,10 +54,9 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
  * This Wire is a binary translation of TextWire which is a sub set of YAML.
  */
 public class BinaryWire extends AbstractWire implements Wire {
-
     private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
     private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
-
+    static int SPEC = 16;
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     private final FixedBinaryValueOut valueOut;
@@ -778,20 +777,14 @@ public class BinaryWire extends AbstractWire implements Wire {
         switch (code) {
             case FLOAT32:
                 return bytes.readFloat();
+            case FLOAT_STOP_2:
+                return bytes.readStopBit() / 1e2;
+            case FLOAT_STOP_4:
+                return bytes.readStopBit() / 1e4;
+            case FLOAT_STOP_6:
+                return bytes.readStopBit() / 1e6;
             case FLOAT64:
                 return bytes.readDouble();
-/*            case FIXED1:
-                return bytes.readStopBit() / 1e1;
-            case FIXED2:
-                return bytes.readStopBit() / 1e2;
-            case FIXED3:
-                return bytes.readStopBit() / 1e3;
-            case FIXED4:
-                return bytes.readStopBit() / 1e4;
-            case FIXED5:
-                return bytes.readStopBit() / 1e5;
-            case FIXED6:
-                return bytes.readStopBit() / 1e6;*/
         }
         throw new UnsupportedOperationException(stringForCode(code));
     }
@@ -806,6 +799,12 @@ public class BinaryWire extends AbstractWire implements Wire {
         switch (code) {
             case FLOAT32:
                 return bytes.readFloat();
+            case FLOAT_STOP_2:
+                return bytes.readStopBit() / 1e2;
+            case FLOAT_STOP_4:
+                return bytes.readStopBit() / 1e4;
+            case FLOAT_STOP_6:
+                return bytes.readStopBit() / 1e6;
             case FLOAT64:
                 return bytes.readDouble();
 /*            case FIXED1:
@@ -1700,22 +1699,76 @@ public class BinaryWire extends AbstractWire implements Wire {
         void writeNumber(double l) {
 
             boolean canOnlyBeRepresentedAsFloatingPoint = ((long) l) != l;
+            if (canOnlyBeRepresentedAsFloatingPoint) {
 
-            if (l >= 0 && l <= 127 && !canOnlyBeRepresentedAsFloatingPoint) {
-                // used when the value is written directly into the code byte
-                bytes.writeUnsignedByte((int) l);
-                return;
-            }
-
-            if (l >= 0) {
-
-                if (l <= (1 << 8) - 1 && !canOnlyBeRepresentedAsFloatingPoint) {
-                    super.uint8checked((short) l);
+                if (((double) (float) l) == l) {
+                    super.float32((float) l);
                     return;
                 }
 
-                if (l <= (1 << 16) - 1 && !canOnlyBeRepresentedAsFloatingPoint) {
-                    super.uint16checked((int) l);
+                if (SPEC >= 18) {
+                    long l6 = Math.round(l * 1e6);
+                    if (l6 / 1e6 == l && l6 > (-1L << 35) && l6 < (1L << 42)) {
+                        long i2 = l6 / 10000;
+                        if (i2 / 1e2 == l) {
+                            writeCode(FLOAT_STOP_2).writeStopBit(i2);
+                            return;
+                        }
+
+                        long i4 = l6 / 100;
+                        if (i4 / 1e4 == l) {
+                            writeCode(FLOAT_STOP_4).writeStopBit(i4);
+                            return;
+                        }
+
+                        if (l6 / 1e6 == l) {
+                            writeCode(FLOAT_STOP_6).writeStopBit(l6);
+                            return;
+                        }
+                    }
+                }
+
+            } else {
+
+                if (l >= 0 && l <= 127) {
+                    // used when the value is written directly into the code byte
+                    bytes.writeUnsignedByte((int) l);
+                    return;
+                }
+
+                if (l >= 0) {
+
+                    if (l <= (1 << 8) - 1) {
+                        super.uint8checked((short) l);
+                        return;
+                    }
+
+                    if (l <= (1 << 16) - 1) {
+                        super.uint16checked((int) l);
+                        return;
+                    }
+
+                    if (((double) (float) l) == l) {
+                        super.float32((float) l);
+                        return;
+                    }
+
+                    if (l <= (1L << 32L) - 1) {
+                        super.uint32checked((int) l);
+                        return;
+                    }
+
+                    super.float64(l);
+                    return;
+                }
+
+                if (l >= Byte.MIN_VALUE && l <= Byte.MAX_VALUE) {
+                    super.int8((byte) l);
+                    return;
+                }
+
+                if (l >= Short.MIN_VALUE && l <= Short.MAX_VALUE) {
+                    super.int16((short) l);
                     return;
                 }
 
@@ -1724,37 +1777,12 @@ public class BinaryWire extends AbstractWire implements Wire {
                     return;
                 }
 
-                if (l <= (1L << 32L) - 1 && !canOnlyBeRepresentedAsFloatingPoint) {
-                    super.uint32checked((int) l);
+                if (l >= Integer.MIN_VALUE && l <= Integer.MAX_VALUE) {
+                    super.int32((int) l);
                     return;
                 }
-
-                super.float64(l);
-                return;
             }
-
-            if (l >= Byte.MIN_VALUE && l <= Byte.MAX_VALUE && !canOnlyBeRepresentedAsFloatingPoint) {
-                super.int8((byte) l);
-                return;
-            }
-
-            if (l >= Short.MIN_VALUE && l <= Short.MAX_VALUE && !canOnlyBeRepresentedAsFloatingPoint) {
-                super.int16((short) l);
-                return;
-            }
-
-            if (((double) (float) l) == l) {
-                super.float32((float) l);
-                return;
-            }
-
-            if (l >= Integer.MIN_VALUE && l <= Integer.MAX_VALUE && !canOnlyBeRepresentedAsFloatingPoint) {
-                super.int32((int) l);
-                return;
-            }
-
             super.float64(l);
-
         }
 
         @NotNull
@@ -3100,7 +3128,6 @@ public class BinaryWire extends AbstractWire implements Wire {
     class DeltaValueIn extends BinaryWire.BinaryValueIn {
         Marshallable[] inObjects = new Marshallable[128];
         String[] inField = new String[128];
-        byte[] inFieldHash = new byte[128];
 
         @Override
         protected <T> T anchor() {
@@ -3153,6 +3180,53 @@ public class BinaryWire extends AbstractWire implements Wire {
                     return (previous & (~0L << 16)) | bytes.readUnsignedShort();
                 default:
                     return super.int64();
+            }
+        }
+
+        @Override
+        public float float32(float previous) {
+            consumePadding();
+            int code = peekCode();
+            switch (code) {
+                case BinaryWireCode.FLOAT_SET_LOW_2:
+                    bytes.uncheckedReadSkipOne();
+                    final int i = bytes.readUnsignedByte();
+                    int fi = Math.round(previous * 100);
+                    fi = (fi & (~0 << 8)) | i;
+                    return fi / 100.0f;
+                default:
+                    return super.float32();
+            }
+        }
+
+        @Override
+        public double float64(double previous) {
+            consumePadding();
+            int code = peekCode();
+            switch (code) {
+                case BinaryWireCode.FLOAT_SET_LOW_0: {
+                    bytes.uncheckedReadSkipOne();
+                    final int i = bytes.readUnsignedByte();
+                    long fi = Math.round(previous);
+                    fi = (fi & (~0L << 8)) | i;
+                    return fi;
+                }
+                case BinaryWireCode.FLOAT_SET_LOW_2: {
+                    bytes.uncheckedReadSkipOne();
+                    final int i = bytes.readUnsignedByte();
+                    long fi = Math.round(previous * 100);
+                    fi = (fi & (~0L << 8)) | i;
+                    return fi / 100.0;
+                }
+                case BinaryWireCode.FLOAT_SET_LOW_4: {
+                    bytes.uncheckedReadSkipOne();
+                    final int i = bytes.readUnsignedByte();
+                    long fi = Math.round(previous * 10000);
+                    fi = (fi & (~0L << 8)) | i;
+                    return fi / 1e4;
+                }
+                default:
+                    return super.float64();
             }
         }
     }

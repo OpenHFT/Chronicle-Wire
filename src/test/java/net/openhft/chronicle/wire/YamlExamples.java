@@ -326,5 +326,6 @@ public class YamlExamples {
                     '}';
         }
     }
+
 }
 

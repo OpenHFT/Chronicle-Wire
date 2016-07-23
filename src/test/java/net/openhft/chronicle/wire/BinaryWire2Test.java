@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -35,6 +36,11 @@ import static org.junit.Assert.*;
 public class BinaryWire2Test {
     @NotNull
     Bytes bytes = nativeBytes();
+
+    @After
+    public void after() {
+        BinaryWire.SPEC = 16;
+    }
 
     @NotNull
     private BinaryWire createWire() {
@@ -529,7 +535,72 @@ public class BinaryWire2Test {
         wire.readAllAsMap(String.class, Object.class, newMap);
 
         Assert.assertEquals(putMap, newMap);
+    }
 
+    @Test
+    public void testWritingDecimals() {
+        BinaryWire.SPEC = 18;
+        Wire wire = new BinaryWire(nativeBytes());
+        final ValueOut out = wire.getValueOut();
+        final ValueIn in = wire.getValueIn();
+        // try all the values of 0.xxxxxx which will fit
+        Random rand = new Random();
+        final int runs = 100000;
+        for (int t = 0; t < runs; t++) {
+            long i = (rand.nextLong() >> -42) | 1; // make it odd.
+            if (i < 0) i >>= 7;
+            wire.clear();
+            double d = i / 1e6;
+            out.float64(d);
+            final double v = in.float64();
+            assertEquals(d, v, 0.0);
+            final long size = wire.bytes().readPosition();
+            assertTrue("i: " + i + ", size: " + size, size < 8);
+        }
+
+        for (int t = 0; t < runs; t++) {
+            long i = (rand.nextLong() >> -42) / 100 | 1; // make it odd.
+            if (i < 0) i >>= 7;
+            wire.clear();
+            double d = i / 1e4;
+            if (i == -13721782305L)
+                Thread.yield();
+            out.float64(d);
+            final double v = in.float64();
+            assertEquals(d, v, 0.0);
+            final long size = wire.bytes().readPosition();
+            assertTrue("i: " + i + ", size: " + size, size < 8);
+        }
+        // try all the values of 0.xx which will fit
+        for (int t = 0; t < runs; t++) {
+            long i = (rand.nextLong() >> -42) / 10000 | 1; // make it odd.
+            if (i < 0) i >>= 7;
+            wire.clear();
+            double d = i / 1e2;
+            out.float64(d);
+            final double v = in.float64();
+            assertEquals(d, v, 0.0);
+            final long size = wire.bytes().readPosition();
+            assertTrue("i: " + i + ", size: " + size, size < 8);
+        }
+    }
+
+    @Test
+    public void testWritingDecimals2() {
+        BinaryWire.SPEC = 18;
+        Wire wire = new BinaryWire(nativeBytes());
+        final ValueOut out = wire.getValueOut();
+        final ValueIn in = wire.getValueIn();
+
+        for (int t = 0; t < 200; t++) {
+            wire.clear();
+            double d = t / 1e2;
+            out.float64(d);
+            final double v = in.float64();
+            assertEquals(d, v, 0.0);
+            final long size = wire.bytes().readPosition();
+            System.out.println(d + " size: " + size);
+        }
     }
 }
 
