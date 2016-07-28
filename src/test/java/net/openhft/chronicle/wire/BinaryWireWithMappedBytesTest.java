@@ -63,6 +63,6 @@ public class BinaryWireWithMappedBytesTest {
         assertEquals(1, ((Byteable) a).bytesStore().refCount());
         System.out.println(a + " " + b + " " + c);
 
-        bytes.close();
+        bytes.release();
     }
 }

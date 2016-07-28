@@ -46,27 +46,27 @@ public class WireResourcesTest {
         tmp.deleteOnExit();
 
         MappedBytes mb0;
-        try (MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024)) {
-            assertEquals(1, mb.mappedFile().refCount());
-            assertEquals(1, mb.refCount());
+        MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024);
+        assertEquals(1, mb.mappedFile().refCount());
+        assertEquals(1, mb.refCount());
 
-            Wire wire = WireType.TEXT.apply(mb);
+        Wire wire = WireType.TEXT.apply(mb);
 
-            assert wire.startUse();
-            wire.headerNumber(0);
+        assert wire.startUse();
+        wire.headerNumber(0);
 
-            assertEquals(1, mb.mappedFile().refCount());
-            wire.writeFirstHeader(); // first touches the file.
-            assertEquals(2, mb.mappedFile().refCount());
+        assertEquals(1, mb.mappedFile().refCount());
+        wire.writeFirstHeader(); // first touches the file.
+        assertEquals(2, mb.mappedFile().refCount());
 
-            wire.updateFirstHeader();
-            assert wire.endUse();
+        wire.updateFirstHeader();
+        assert wire.endUse();
 
-            assertEquals(2, mb.mappedFile().refCount());
-            assertEquals(1, mb.refCount());
+        assertEquals(2, mb.mappedFile().refCount());
+        assertEquals(1, mb.refCount());
 
-            mb0 = mb;
-        }
+        mb0 = mb;
+        mb.release();
         assertEquals(0, mb0.mappedFile().refCount());
         assertEquals(0, mb0.refCount());
     }
@@ -77,16 +77,16 @@ public class WireResourcesTest {
         tmp.deleteOnExit();
 
         Wire wire;
-        try (MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024)) {
-            assertEquals(1, mb.mappedFile().refCount());
-            assertEquals(1, mb.refCount());
+        MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024);
+        assertEquals(1, mb.mappedFile().refCount());
+        assertEquals(1, mb.refCount());
 
-            wire = WireType.TEXT.apply(mb);
-            wire.bytes().reserve();
+        wire = WireType.TEXT.apply(mb);
+        wire.bytes().reserve();
 
-            assertEquals(1, mb.mappedFile().refCount());
-            assertEquals(2, mb.refCount());
-        } // not really closed as we have one reverse left.
+        assertEquals(1, mb.mappedFile().refCount());
+        assertEquals(2, mb.refCount());
+        mb.release();
 
         assertEquals(1, wire.bytes().refCount());
 
