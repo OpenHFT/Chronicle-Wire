@@ -79,7 +79,7 @@ public class WriteDocumentContext implements DocumentContext {
 
     @Override
     public long index() {
-        return 0;
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -43,7 +43,8 @@ public interface MarshallableOut {
     DocumentContext writingDocument() throws UnrecoverableTimeoutException;
 
     /**
-     * @return true is this output is configured to expect the history of the message to be written to.
+     * @return true is this output is configured to expect the history of the message to be written
+     * to.
      */
     boolean recordHistory();
 
@@ -121,7 +122,8 @@ public interface MarshallableOut {
      *
      * @param tClass     primary interface
      * @param additional any additional interfaces
-     * @return a proxy which implements the primary interface (additional interfaces have to be cast)
+     * @return a proxy which implements the primary interface (additional interfaces have to be
+     * cast)
      */
     default <T> T methodWriter(Class<T> tClass, Class... additional) {
         Class[] interfaces = ObjectUtils.addAll(tClass, additional);
