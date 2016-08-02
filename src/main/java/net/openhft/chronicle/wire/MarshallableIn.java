@@ -85,7 +85,7 @@ public interface MarshallableIn {
                 sb.setLength(0);
                 return false;
             }
-            dc.wire().getValueIn().text(sb);
+            dc.wire().bytes().parse8bit(sb, StopCharTesters.ALL);
         }
         return true;
     }
