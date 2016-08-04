@@ -59,6 +59,25 @@ public abstract class AbstractWire implements Wire {
     private ObjectOutput objectOutput;
     private ObjectInput objectInput;
 
+    /**
+     * The code used to stop keeping track of the index that it was just about to write, and just
+     * write the data if the appender was more than 1<<20 = 1MB behind, if the appender is less
+     * behind than 1MB then, it will cycle through each excerpt to keep track of the sequence number
+     * ( we call this the headerNumber ). Keeping track if you are very far behind is expensive (
+     * time wise ) as it has to walk up the queue, recording the number of messages it encounters to
+     * know what the index number is for the message it is about to write. This is not a problem if
+     * all the appenders are on the same thread, it never gets behind. So when you have a multi
+     * threaded appender, we look to see how far behind your appender is compare to the end of the
+     * queue which was written by another thread, if its far behind, we just write the data, and
+     * don’t update the headerNumber, the code later uses the built in indexing to work out what the
+     * header number is.
+     *
+     * As such I have expose this property so that you can tune it , you want to keep the number as
+     * large as possible, to a point where your write performance is no longer acceptable ( of
+     * appenders that have fallen behind )
+     */
+    private static long ignoreHeaderCountIfNumberOfBytesBehindExceeds = Integer.getInteger
+            ("ignoreHeaderCountIfNumberOfBytesBehindExceeds", 1 << 20);
     private boolean insideHeader;
 
     public AbstractWire(@NotNull Bytes bytes, boolean use8bit) {
@@ -247,7 +266,7 @@ public abstract class AbstractWire implements Wire {
             if (lastPosition != null) {
                 long lastPositionValue = lastPosition.getValue();
                 // do we jump forward if there has been writes else where.
-                if (lastPositionValue > bytes.writePosition() + 1 << 20) {
+                if (lastPositionValue > bytes.writePosition() + ignoreHeaderCountIfNumberOfBytesBehindExceeds) {
                     headerNumber(Long.MIN_VALUE);
                     bytes.writePosition(lastPositionValue);
 //                System.out.println(Thread.currentThread()+" last pos: "+lastPositionValue+" hdr "+headerNumber);
