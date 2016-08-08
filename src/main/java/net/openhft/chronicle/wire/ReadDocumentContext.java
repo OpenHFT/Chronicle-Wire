@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.Nullable;
 
 import static net.openhft.chronicle.wire.Wires.lengthOf;
 
@@ -29,7 +30,9 @@ public class ReadDocumentContext implements DocumentContext {
     private boolean metaData;
     private long readPosition, readLimit;
 
-    public ReadDocumentContext(Wire wire) {
+
+
+    public ReadDocumentContext(@Nullable Wire wire) {
         this.wire = (AbstractWire) wire;
     }
 
