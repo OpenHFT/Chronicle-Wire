@@ -18,8 +18,7 @@ package net.openhft.chronicle.wire;
 import java.io.IOException;
 
 /**
- * The defines the stand interface for writing and reading sequentially to/from a Bytes stream.
- * <p>
+ * The defines the stand interface for writing and reading sequentially to/from a Bytes stream. <p>
  * Created by peter.lawrey on 12/01/15.
  */
 public interface Wire extends WireIn, WireOut {
@@ -36,4 +35,5 @@ public interface Wire extends WireIn, WireOut {
     }
 
     Wire headerNumber(long headerNumber);
+
 }

@@ -128,8 +128,20 @@ public abstract class AbstractWire implements Wire {
         headerNumber(Long.MIN_VALUE);
     }
 
+    private Wire headerNumber(long position, long headerNumber) {
+        if (headNumberChecker != null)
+            headNumberChecker.checkHeaderNumber(headerNumber, position);
+
+        return headerNumber0(headerNumber);
+    }
+
     @Override
     public Wire headerNumber(long headerNumber) {
+        return headerNumber(bytes().writePosition(), headerNumber);
+    }
+
+
+    public Wire headerNumber0(long headerNumber) {
 
       /*  assert checkThread();
 
@@ -139,6 +151,12 @@ public abstract class AbstractWire implements Wire {
         ;*/
         this.headerNumber = headerNumber;
         return this;
+    }
+
+    private HeadNumberChecker headNumberChecker;
+
+    public void headNumberCheck(HeadNumberChecker headNumberChecker) {
+        this.headNumberChecker = headNumberChecker;
     }
 
     @Override
@@ -322,7 +340,7 @@ public abstract class AbstractWire implements Wire {
                 pos += len + SPB_HEADER_SIZE; // length of message plus length of header
 
                 if (isData(header))
-                    incrementHeaderNumber();
+                    incrementHeaderNumber(pos);
 //                System.out.println(Thread.currentThread()+" wh0-iter pos: "+pos+" hdr "+(int) headerNumber);
 
             }
@@ -363,7 +381,7 @@ public abstract class AbstractWire implements Wire {
         }
         bytes.writeLimit(bytes.capacity());
         if (!metaData)
-            incrementHeaderNumber();
+            incrementHeaderNumber(position);
     }
 
     void updateHeaderAssertions(long position, long pos, int expectedHeader, int header) throws StreamCorruptedException {
@@ -392,9 +410,9 @@ public abstract class AbstractWire implements Wire {
         }
     }
 
-    private void incrementHeaderNumber() {
+    private void incrementHeaderNumber(long pos) {
         if (headerNumber != Long.MIN_VALUE)
-            headerNumber(headerNumber + 1);
+            headerNumber(pos, headerNumber + 1);
     }
 
     @Override
