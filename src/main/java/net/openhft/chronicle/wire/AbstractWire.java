@@ -129,10 +129,13 @@ public abstract class AbstractWire implements Wire {
     }
 
     private Wire headerNumber(long position, long headerNumber) {
-        if (headNumberChecker != null)
-            headNumberChecker.checkHeaderNumber(headerNumber, position);
-
+        assert checkHeader(position, headerNumber);
         return headerNumber0(headerNumber);
+    }
+
+    private boolean checkHeader(long position, long headerNumber) {
+        return headNumberChecker == null
+                || headNumberChecker.checkHeaderNumber(headerNumber, position);
     }
 
     @Override
@@ -140,15 +143,7 @@ public abstract class AbstractWire implements Wire {
         return headerNumber(bytes().writePosition(), headerNumber);
     }
 
-
-    public Wire headerNumber0(long headerNumber) {
-
-      /*  assert checkThread();
-
-        System.out.println("thread=" + Thread.currentThread().getName() + ",pos=" + pos + ",was=" + Long.toHexString(this
-                .headerNumber) + ",isInsideHeader=" + isInsideHeader() +
-                "is=" + Long.toHexString(headerNumber) + ",at=" + exceptionStacktraceToString(new RuntimeException()))
-        ;*/
+    private Wire headerNumber0(long headerNumber) {
         this.headerNumber = headerNumber;
         return this;
     }
