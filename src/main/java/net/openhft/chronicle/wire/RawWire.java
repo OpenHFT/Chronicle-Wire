@@ -900,6 +900,16 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
+        public WireIn int32(@NotNull IntValue value) {
+            Byteable b = (Byteable) value;
+            long length = b.maxSize();
+            b.bytesStore(bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
+            return RawWire.this;
+        }
+
+        @NotNull
+        @Override
         public <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter) {
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
                 setter.accept(t, value = new BinaryIntReference());

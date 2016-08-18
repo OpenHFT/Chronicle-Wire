@@ -2049,6 +2049,18 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
+        public WireIn int32(@NotNull IntValue value) {
+            consumePadding();
+            Byteable b = (Byteable) value;
+            long length = b.maxSize();
+            b.bytesStore(bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
+            consumePadding(1);
+            return TextWire.this;
+        }
+
+        @NotNull
+        @Override
         public <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter) {
             if (!(value instanceof TextLongReference)) {
                 setter.accept(t, value = new TextLongReference());

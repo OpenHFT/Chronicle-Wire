@@ -287,6 +287,15 @@ public class DefaultValueIn implements ValueIn {
 
     @NotNull
     @Override
+    public WireIn int32(@NotNull IntValue value) {
+        Number o = (Number) wireKey.defaultValue();
+        if (o == null) o = 0;
+        value.setValue(o.intValue());
+        return wireIn();
+    }
+
+    @NotNull
+    @Override
     public <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter) {
         Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;

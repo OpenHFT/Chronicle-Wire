@@ -2480,6 +2480,22 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
+        public WireIn int32(IntValue value) {
+            consumePadding();
+            int code = readCode();
+            if (code != INT32)
+                cantRead(code);
+
+            Byteable b = (Byteable) value;
+            long length = b.maxSize();
+            b.bytesStore(bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
+            return BinaryWire.this;
+        }
+
+
+        @NotNull
+        @Override
         public <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter) {
             // if the value is null, then we will create a LongDirectReference to write the data
             // into and then call setter.accept(), this will then update the value

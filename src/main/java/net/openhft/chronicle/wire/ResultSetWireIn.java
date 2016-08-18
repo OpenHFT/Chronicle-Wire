@@ -501,6 +501,12 @@ public class ResultSetWireIn implements WireIn {
 
         @NotNull
         @Override
+        public WireIn int32(@NotNull IntValue value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @NotNull
+        @Override
         public <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter) {
             throw new UnsupportedOperationException();
         }

@@ -17,13 +17,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
-import net.openhft.chronicle.bytes.ref.BinaryLongReference;
-import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
-import net.openhft.chronicle.bytes.ref.TextLongReference;
+import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.LicenceCheck;
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
@@ -331,6 +329,10 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         }
 
         throw new IllegalStateException("unknown type");
+    }
+
+    public Supplier<IntValue> newIntReference() {
+        return BinaryIntReference::new;
     }
 
     public Supplier<LongValue> newLongReference() {
