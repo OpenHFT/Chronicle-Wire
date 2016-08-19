@@ -39,26 +39,6 @@ import static net.openhft.chronicle.wire.Wires.*;
  */
 public abstract class AbstractWire implements Wire {
     protected static final boolean ASSERTIONS;
-
-    static {
-        boolean assertions = false;
-        assert assertions = true;
-        ASSERTIONS = assertions;
-    }
-
-    protected final Bytes<?> bytes;
-    protected final boolean use8bit;
-    protected Pauser pauser = BusyPauser.INSTANCE;
-    protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
-    protected Object parent;
-    volatile Thread usedBy;
-    volatile Throwable usedHere, lastEnded;
-    int usedCount = 0;
-    private long headerNumber = Long.MIN_VALUE;
-    private boolean notCompleteIsNotPresent;
-    private ObjectOutput objectOutput;
-    private ObjectInput objectInput;
-
     /**
      * The code used to stop keeping track of the index that it was just about to write, and just
      * write the data if the appender was more than 1<<20 = 1MB behind, if the appender is less
@@ -78,7 +58,27 @@ public abstract class AbstractWire implements Wire {
      */
     private static long ignoreHeaderCountIfNumberOfBytesBehindExceeds = Integer.getInteger
             ("ignoreHeaderCountIfNumberOfBytesBehindExceeds", 1 << 20);
+
+    static {
+        boolean assertions = false;
+        assert assertions = true;
+        ASSERTIONS = assertions;
+    }
+
+    protected final Bytes<?> bytes;
+    protected final boolean use8bit;
+    protected Pauser pauser = BusyPauser.INSTANCE;
+    protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
+    protected Object parent;
+    volatile Thread usedBy;
+    volatile Throwable usedHere, lastEnded;
+    int usedCount = 0;
+    private long headerNumber = Long.MIN_VALUE;
+    private boolean notCompleteIsNotPresent;
+    private ObjectOutput objectOutput;
+    private ObjectInput objectInput;
     private boolean insideHeader;
+    private HeadNumberChecker headNumberChecker;
 
     public AbstractWire(@NotNull Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
@@ -147,8 +147,6 @@ public abstract class AbstractWire implements Wire {
         this.headerNumber = headerNumber;
         return this;
     }
-
-    private HeadNumberChecker headNumberChecker;
 
     public void headNumberCheck(HeadNumberChecker headNumberChecker) {
         this.headNumberChecker = headNumberChecker;
@@ -311,14 +309,17 @@ public abstract class AbstractWire implements Wire {
                     return pos;
                 }
                 bytes.readPositionRemaining(pos, 0);
-                pauser.pause(timeout, timeUnit);
 
                 int header = bytes.readVolatileInt(pos);
                 // two states where it is unable to continue.
                 if (header == END_OF_DATA)
                     throw new EOFException();
-                if (isNotComplete(header))
+                if (isNotComplete(header)) {
+                    pauser.pause(timeout, timeUnit);
                     continue;
+                }
+
+                pauser.reset();
 
                 int len = lengthOf(header);
 
@@ -438,13 +439,16 @@ public abstract class AbstractWire implements Wire {
                     bytes.writePosition(pos + SPB_HEADER_SIZE);
                     return;
                 }
-                pauser.pause(timeout, timeUnit);
+
                 int header = bytes.readVolatileInt(pos);
                 // two states where it is unable to continue.
                 if (header == END_OF_DATA)
                     return; // already written.
-                if (header == NOT_COMPLETE_UNKNOWN_LENGTH)
+                if (header == NOT_COMPLETE_UNKNOWN_LENGTH) {
+                    pauser.pause(timeout, timeUnit);
                     continue;
+                }
+                pauser.reset();
                 int len = lengthOf(header);
                 pos += len + SPB_HEADER_SIZE; // length of message plus length of header
             }
