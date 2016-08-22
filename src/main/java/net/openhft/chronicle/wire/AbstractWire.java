@@ -63,7 +63,7 @@ public abstract class AbstractWire implements Wire {
             ("ignoreHeaderCountIfNumberOfBytesBehindExceeds", 1 << 20);
 
     static {
-        boolean assertions;
+        boolean assertions = false;
         assert assertions = true;
         ASSERTIONS = assertions;
     }
