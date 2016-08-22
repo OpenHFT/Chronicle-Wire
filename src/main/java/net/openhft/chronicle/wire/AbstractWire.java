@@ -22,7 +22,6 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.threads.BusyPauser;
 import net.openhft.chronicle.threads.LongPauser;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
@@ -67,7 +66,7 @@ public abstract class AbstractWire implements Wire {
 
     protected final Bytes<?> bytes;
     protected final boolean use8bit;
-    protected Pauser pauser = BusyPauser.INSTANCE;
+    protected Pauser pauser = new LongPauser(1_000, 500, 1, 10, TimeUnit.MILLISECONDS);
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
     protected Object parent;
     volatile Thread usedBy;
@@ -112,8 +111,6 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public Pauser pauser() {
-        if (pauser == BusyPauser.INSTANCE)
-            pauser = new LongPauser(1_000, 500, 1, 10, TimeUnit.MILLISECONDS);
         return pauser;
     }
 
