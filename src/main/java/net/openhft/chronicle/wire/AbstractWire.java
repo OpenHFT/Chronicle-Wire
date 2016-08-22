@@ -27,7 +27,10 @@ import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
+import java.io.EOFException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.io.StreamCorruptedException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -95,14 +98,6 @@ public abstract class AbstractWire implements Wire {
 
     private static void throwLengthMismatch(int length, int actualLength) throws StreamCorruptedException {
         throw new StreamCorruptedException("Wrote " + actualLength + " when " + length + " was set initially.");
-    }
-
-    private static String exceptionStacktraceToString(Exception e) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(baos);
-        e.printStackTrace(ps);
-        ps.close();
-        return baos.toString();
     }
 
     public boolean isInsideHeader() {
