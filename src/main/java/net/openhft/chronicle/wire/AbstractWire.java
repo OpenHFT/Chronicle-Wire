@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.threads.BusyPauser;
 import net.openhft.chronicle.threads.LongPauser;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
@@ -62,19 +63,20 @@ public abstract class AbstractWire implements Wire {
             ("ignoreHeaderCountIfNumberOfBytesBehindExceeds", 1 << 20);
 
     static {
-        boolean assertions = false;
+        boolean assertions;
         assert assertions = true;
         ASSERTIONS = assertions;
     }
 
     protected final Bytes<?> bytes;
     protected final boolean use8bit;
-    protected Pauser pauser = new LongPauser(0, 2000, 5, 10, TimeUnit.MILLISECONDS);
+    protected Pauser pauser = BusyPauser.INSTANCE;
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
     protected Object parent;
     volatile Thread usedBy;
     volatile Throwable usedHere, lastEnded;
     int usedCount = 0;
+    private Pauser timedParser;
     private long headerNumber = Long.MIN_VALUE;
     private boolean notCompleteIsNotPresent;
     private ObjectOutput objectOutput;
@@ -92,12 +94,14 @@ public abstract class AbstractWire implements Wire {
         throw new IllegalStateException("not enough space to write " + maxlen + " was " + bytes.writeRemaining());
     }
 
-    private static void throwHeaderOverwritten(long position, int expectedHeader, Bytes<?> bytes) throws StreamCorruptedException {
-        throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(bytes.readVolatileInt(position)));
-    }
-
     private static void throwLengthMismatch(int length, int actualLength) throws StreamCorruptedException {
         throw new StreamCorruptedException("Wrote " + actualLength + " when " + length + " was set initially.");
+    }
+
+    private Pauser acquireTimedParser() {
+        return timedParser != null
+                ? timedParser
+                : (timedParser = new LongPauser(0, 2000, 5, 10, TimeUnit.MILLISECONDS));
     }
 
     public boolean isInsideHeader() {
@@ -234,9 +238,9 @@ public abstract class AbstractWire implements Wire {
             if (isReady(header)) {
                 break;
             }
-            pauser.pause(timeout, timeUnit);
+            acquireTimedParser().pause(timeout, timeUnit);
         }
-        pauser.reset();
+        resetTimedPauser();
         int len = lengthOf(header);
         if (!isReadyMetaData(header) || len > 64 << 10)
             throw new StreamCorruptedException("Unexpected magic number " + Integer.toHexString(header));
@@ -287,7 +291,7 @@ public abstract class AbstractWire implements Wire {
         if (length < 0 || length > MAX_LENGTH)
             throw new IllegalArgumentException();
         long pos = bytes.writePosition();
-        pauser();
+
 //        System.out.println(Thread.currentThread()+" wh0 pos: "+pos+" hdr "+(int) headerNumber);
         try {
             for (; ; ) {
@@ -307,11 +311,11 @@ public abstract class AbstractWire implements Wire {
                 if (header == END_OF_DATA)
                     throw new EOFException();
                 if (isNotComplete(header)) {
-                    pauser.pause(timeout, timeUnit);
+                    acquireTimedParser().pause(timeout, timeUnit);
                     continue;
                 }
 
-                pauser.reset();
+                acquireTimedParser().reset();
 
                 int len = lengthOf(header);
 
@@ -333,7 +337,7 @@ public abstract class AbstractWire implements Wire {
 
             }
         } finally {
-            pauser.reset();
+            resetTimedPauser();
         }
     }
 
@@ -425,6 +429,7 @@ public abstract class AbstractWire implements Wire {
     @Override
     public void writeEndOfWire(long timeout, TimeUnit timeUnit) throws TimeoutException {
         long pos = bytes.writePosition();
+
         try {
             for (; ; ) {
                 if (bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
@@ -437,16 +442,21 @@ public abstract class AbstractWire implements Wire {
                 if (header == END_OF_DATA)
                     return; // already written.
                 if (header == NOT_COMPLETE_UNKNOWN_LENGTH) {
-                    pauser.pause(timeout, timeUnit);
+                    acquireTimedParser().pause(timeout, timeUnit);
                     continue;
                 }
-                pauser.reset();
+                acquireTimedParser().reset();
                 int len = lengthOf(header);
                 pos += len + SPB_HEADER_SIZE; // length of message plus length of header
             }
         } finally {
-            pauser.reset();
+            resetTimedPauser();
         }
+    }
+
+    private void resetTimedPauser() {
+        if (timedParser != null)
+            timedParser.reset();
     }
 
     public Object parent() {
