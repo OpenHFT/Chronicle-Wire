@@ -69,7 +69,7 @@ public abstract class AbstractWire implements Wire {
 
     protected final Bytes<?> bytes;
     protected final boolean use8bit;
-    protected Pauser pauser = new LongPauser(1_000, 500, 1, 10, TimeUnit.MILLISECONDS);
+    protected Pauser pauser = new LongPauser(0, 2000, 5, 10, TimeUnit.MILLISECONDS);
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
     protected Object parent;
     volatile Thread usedBy;
