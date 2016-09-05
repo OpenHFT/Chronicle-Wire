@@ -135,4 +135,17 @@ public interface MarshallableOut {
     default <T> MethodWriterBuilder<T> methodWriterBuilder(Class<T> tClass) {
         return new MethodWriterBuilder<>(this, tClass);
     }
+
+    /**
+     * adds padding to align to cache lines.
+     *
+     * @return the state of padding
+     */
+    default AddPadding addPadding() {
+        return AddPadding.NEVER;
+    }
+
+    enum AddPadding {
+        ALWAYS, NEVER, SMART
+    }
 }
