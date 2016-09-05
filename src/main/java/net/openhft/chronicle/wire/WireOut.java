@@ -90,14 +90,15 @@ public interface WireOut extends WireCommon {
     WireOut addPadding(int paddingToAdd);
 
     /**
-     * If near the end of a cache line, pad it so a following 4-byte int value will not split a cache line.
+     * If near the end of a cache line, pad it so a following 4-byte int value will not split a
+     * cache line.
      *
      * @return this
      */
     default WireOut padToCacheAlign() {
         Bytes<?> bytes = bytes();
         int mod = (int) (bytes.address(bytes.writePosition()) & 63);
-        if (mod > 58)
+        if (mod > 60)
             addPadding(64 - mod);
         return this;
     }
@@ -129,16 +130,17 @@ public interface WireOut extends WireCommon {
     /**
      * This will increment the headerNumber as appropriate if successful
      *
-     * @param metaData
-     * @return
+     * @param metaData if {@code true} the document context will be used for writing meta data,
+     *                 otherwise data
+     * @return a document context used for witting
      */
     DocumentContext writingDocument(boolean metaData);
 
     /**
      * This will increment the headerNumber as appropriate if successful
      *
-     * @param metaData
-     * @param writer
+     * @param metaData {@code true} if the write should write metaData rather than data
+     * @param writer   writes bytes to the wire
      */
     default void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) {
         WireInternal.writeData(this, metaData, true, writer);
@@ -151,7 +153,7 @@ public interface WireOut extends WireCommon {
      * @param timeout      throw a TimeoutException if the header could not be written in this
      *                     time.
      * @param timeUnit     of the timeOut
-     * @param lastPosition
+     * @param lastPosition the last known position
      * @return the position of the start of the header
      * @throws TimeoutException the underlying pauser timed out.
      * @throws EOFException     the end of wire marker was reached.
@@ -166,7 +168,7 @@ public interface WireOut extends WireCommon {
      *
      * @param position returned by writeHeader
      * @param metaData whether the message is meta data or not.
-     * @throws StreamCorruptedException
+     * @throws StreamCorruptedException if the steam has become corrupted
      */
     default void updateHeader(long position, boolean metaData) throws StreamCorruptedException {
         updateHeader(Wires.UNKNOWN_LENGTH, position, metaData);
@@ -180,7 +182,7 @@ public interface WireOut extends WireCommon {
      * @param timeout      throw a TimeoutException if the header could not be written in this
      *                     time.
      * @param timeUnit     of the timeOut
-     * @param lastPosition
+     * @param lastPosition the last known position
      * @return the position of the start of the header
      * @throws TimeoutException the underlying pauser timed out.
      * @throws EOFException     the end of wire marker was reached.
@@ -195,7 +197,7 @@ public interface WireOut extends WireCommon {
      *                 actually used.
      * @param position returned by writeHeader
      * @param metaData whether the message is meta data or not.
-     * @throws StreamCorruptedException
+     * @throws StreamCorruptedException if the steam has become corrupted
      */
     void updateHeader(int length, long position, boolean metaData) throws StreamCorruptedException;
 
