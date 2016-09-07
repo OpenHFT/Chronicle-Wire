@@ -11,6 +11,7 @@ Chronicle Wire combines a number of concerns in a consistent manner.
 - High performance data exchange via binary formats. (Only include as much meta data as you need)
 
 === Why are these concerns conflated?
+
 Often you want to use these interchangeably.
 
 - configuration includes aliased type information.  This supports easy extension through adding new classes/versions and cross platform through type aliasing.
@@ -29,6 +30,7 @@ Chronicle Wire supports a separation of describing what data you want to store a
 
 A key aim of Wire is to support schema changes.  It should make reasonable 
     attempts to handle
+
 * optional fields
 * fields in a different order.
 * fields the consumer doesn't expect. Optionally parsing them or ignoring them.
@@ -37,6 +39,7 @@ A key aim of Wire is to support schema changes.  It should make reasonable
 * updating fixed length fields, atomically where possible via a "bound" data structure..
 
 It should also be as efficient as possible in the case where any or all of these are true
+
 * fields are in the order expected.
 * fields are the type expected.
 * fields names/numbers are not used.
@@ -50,7 +53,8 @@ Wire is designed to make it easy to convert from one wire format to another.
 Wire also support hybrid wire formats.  e.g. you can have one format embedded in another.
 
 == Support
-This library will require Java 8. Support for C++ and C\# planned.
+
+This library will require Java 8. Support for C++ and C# planned.
 
 == Text Formats
 
@@ -251,9 +255,9 @@ The documentation looks well thought out, and it is worth emulating.
 | Feature	| Wire Text | Wire Binary | Protobuf	| Cap'n Proto |	SBE	| FlatBuffers 
 |===============
 | Schema evolution |	yes | yes | yes | 	yes	| caveats |	yes 
-| Zero-copy | planned | yes | no	| yes	 | yes	 | yes 
-|Random-access reads | 	planned | yes | no	 | yes	 | no | 	yes 
-|Random-access writes | 	planned | yes | no	 | ?	 | no | 	? 
+| Zero-copy | yes | yes | no	| yes	 | yes	 | yes 
+|Random-access reads | 	yes | yes | no	 | yes	 | no | 	yes 
+|Random-access writes | 	yes | yes | no	 | ?	 | no | 	? 
 |Safe against malicious input	| 	yes | yes	| yes		| yes		| yes		| opt-in 	| upfront 
 |Reflection / generic algorithms	| 	yes | yes	| yes		| yes		| yes		| yes 
 |Initialization order	| any | any	| any	| 	any		| preorder		| bottom-up 
@@ -266,10 +270,10 @@ The documentation looks well thought out, and it is worth emulating.
 |Pointers take space on wire? | no | no		| no		| yes		| no		| yes 
 |C++	| planned | planned	| yes	| 	yes (C++11)*		| yes		| yes 
 |Java	 | Java 8 | Java 8	| yes	| 	yes*		| yes		| yes 
-|C\#	 | planned | planned	| yes	| 	yes*	| 	yes		| yes* 
+|C#	 | yes | yes	| yes	| 	yes*	| 	yes		| yes* 
 |Go | no | no		| yes	| 	yes		| no		| yes* 
-|Other languages	lots!	 | no | no | 6+ 	| others*		| no		| no 
-|Authors' preferred use case|	distributed  computing | financial / trading	| distributed  computing |	platforms /  sandboxing	| financial / trading	| games 
+|Other languages | no | no | 6+ 	| others*		| no		| no 
+|Authors' preferred use case |	distributed  computing | financial / trading	| distributed  computing |	platforms /  sandboxing	| financial / trading	| games 
 |===============
 
 Based on https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html
