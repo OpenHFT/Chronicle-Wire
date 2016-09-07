@@ -263,8 +263,8 @@ The documentation looks well thought out, and it is worth emulating.
 
 === Comparison with Cap'n'Proto
 
-| Feature	| Wire Text | Wire Binary | Protobuf	| Cap'n Proto |	SBE	| FlatBuffers 
 |===============
+| Feature	| Wire Text | Wire Binary | Protobuf	| Cap'n Proto |	SBE	| FlatBuffers 
 | Schema evolution |	yes | yes | yes | 	yes	| caveats |	yes 
 | Zero-copy | yes | yes | no	| yes	 | yes	 | yes 
 |Random-access reads | 	yes | yes | no	 | yes	 | no | 	yes 
@@ -286,6 +286,10 @@ The documentation looks well thought out, and it is worth emulating.
 |Other languages | no | no | 6+ 	| others*		| no		| no 
 |Authors' preferred use case |	distributed  computing | financial / trading	| distributed  computing |	platforms /  sandboxing	| financial / trading	| games 
 |===============
+
+NOTE: The Binary YAML format can be automatically converted to YAML without any knowledge of the schema as the messages are self describing.
+
+NOTE: You can parse all the expected fields (if any) and then parse any remaining fields. As YAML support object field "names" or keys these could be Strings or even Object as keys and values.
 
 Based on https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html
 
