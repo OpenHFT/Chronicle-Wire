@@ -101,13 +101,15 @@ To support wire format discovery, the first bytes should have the top bit set.
 First you need to have a buffer to write to.  This can be a byte[], a ByteBuffer, off heap memory, or even an address and length you have obtained from some other library.
 
 [souurce, java]
+----
 // Bytes which wraps a ByteBuffer which is resized as needed.
 Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
-
+----
 
 Now you can choose which format you are using.  As the wire formats are themselves unbuffered, you can use them with the same buffer, but in general using one wire format is easier.
 
 [souurce, java]
+----
 Wire wire = new TextWire(bytes);
 // or
 WireType wireType = WireType.TEXT;
@@ -118,31 +120,38 @@ Wire wire2 = new BinaryWire(bytes2);
 // or
 Bytes<ByteBuffer> bytes3 = Bytes.elasticByteBuffer();
 Wire wire3 = new RawWire(bytes3);
+----
 
 So now you can write to the wire with a simple document.
 
 [souurce, java]
+----
 wire.write(() -> "message").text("Hello World")
       .write(() -> "number").int64(1234567890L)
        .write(() -> "code").asEnum(TimeUnit.SECONDS)
       .write(() -> "price").float64(10.50);
 System.out.println(bytes);
+----
 
 prints
 
 [souurce, yaml]
+----
 message: Hello World
 number: 1234567890
 code: SECONDS
 price: 10.5
+----
 
 [souurce, java]
+----
 // the same code as for text wire
 wire2.write(() -> "message").text("Hello World")
         .write(() -> "number").int64(1234567890L)
         .write(() -> "code").asEnum(TimeUnit.SECONDS)
         .write(() -> "price").float64(10.50);
         System.out.println(bytes2.toHexString());
+----
 
 prints
 
@@ -157,12 +166,14 @@ Using the RawWire strips away all the meta data to reduce the size of the messag
 The down side is that we cannot easily see what the message contains.
 
 [souurce, java]
+----
         // the same code as for text wire
         wire3.write(() -> "message").text("Hello World")
                 .write(() -> "number").int64(1234567890L)
                 .write(() -> "code").asEnum(TimeUnit.SECONDS)
                 .write(() -> "price").float64(10.50);
         System.out.println(bytes3.toHexString());
+----
 
 prints in RawWire
 
