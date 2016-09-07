@@ -100,7 +100,7 @@ To support wire format discovery, the first bytes should have the top bit set.
 
 First you need to have a buffer to write to.  This can be a byte[], a ByteBuffer, off heap memory, or even an address and length you have obtained from some other library.
 
-[souurce, java]
+[souurce, Java]
 ----
 // Bytes which wraps a ByteBuffer which is resized as needed.
 Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -108,7 +108,7 @@ Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
 Now you can choose which format you are using.  As the wire formats are themselves unbuffered, you can use them with the same buffer, but in general using one wire format is easier.
 
-[souurce, java]
+[souurce, Java]
 ----
 Wire wire = new TextWire(bytes);
 // or
@@ -124,7 +124,7 @@ Wire wire3 = new RawWire(bytes3);
 
 So now you can write to the wire with a simple document.
 
-[souurce, java]
+[souurce, Java]
 ----
 wire.write(() -> "message").text("Hello World")
       .write(() -> "number").int64(1234567890L)
@@ -143,7 +143,7 @@ code: SECONDS
 price: 10.5
 ----
 
-[souurce, java]
+[souurce, Java]
 ----
 // the same code as for text wire
 wire2.write(() -> "message").text("Hello World")
@@ -165,7 +165,7 @@ prints
 Using the RawWire strips away all the meta data to reduce the size of the message, and improve speed. 
 The down side is that we cannot easily see what the message contains.
 
-[souurce, java]
+[souurce, Java]
 ----
         // the same code as for text wire
         wire3.write(() -> "message").text("Hello World")
@@ -189,7 +189,7 @@ For more examples see https://github.com/OpenHFT/Chronicle-Wire/blob/master/READ
 
 While serialized data can be updated by replacing a whole record, this might not be the most efficient option, nor thread safe. Wire offers the ability to bind a reference to a fixed value of a field and perform atomic operations on that field such as volatile read/write and compare-and-swap.
 
-[souurce, java]
+[souurce, Java]
 ----
    // field to cache the location and object used to reference a field.
    private LongValueReference counter = null;
@@ -390,5 +390,6 @@ Wire doesn't have pointer but it does have content lengths which are
    a useful hint for random access and robustness, but these are optional.
 
 ===  Platform support
+
 Wire is Java 8 only for now.  Future version may support Java 6, C++ and C\#
 
