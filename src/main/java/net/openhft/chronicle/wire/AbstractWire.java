@@ -431,8 +431,11 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public void writeEndOfWire(long timeout, TimeUnit timeUnit) throws TimeoutException {
-        long pos = bytes.writePosition();
+    public void writeEndOfWire(long timeout, TimeUnit timeUnit, @NotNull long lastPosition) throws
+            TimeoutException {
+
+        long pos = Math.max(lastPosition, bytes.writePosition());
+        headerNumber = Long.MIN_VALUE;
 
         try {
             for (; ; ) {

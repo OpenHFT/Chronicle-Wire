@@ -219,12 +219,13 @@ public interface WireOut extends WireCommon {
      * Write the end of wire marker, unless one is already written. This will increment the
      * headerNumber as appropriate if successful
      *
-     * @param timeout  throw TimeoutException if it could not write the marker in time.
-     * @param timeUnit of the timeout
+     * @param timeout      throw TimeoutException if it could not write the marker in time.
+     * @param timeUnit     of the timeout
+     * @param lastPosition the end of the wire
      * @throws TimeoutException timeout exceeded.
      */
 
-    void writeEndOfWire(long timeout, TimeUnit timeUnit) throws TimeoutException;
+    void writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) throws TimeoutException;
 
     /**
      * Start an event object, mostly for internal use.

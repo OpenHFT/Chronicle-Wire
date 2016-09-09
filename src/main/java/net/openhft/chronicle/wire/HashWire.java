@@ -212,9 +212,10 @@ public class HashWire implements WireOut {
     }
 
     @Override
-    public void writeEndOfWire(long timeout, TimeUnit timeUnit) throws TimeoutException {
+    public void writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) throws TimeoutException {
         throw new UnsupportedOperationException();
     }
+
 
     @NotNull
     @Override
@@ -490,6 +491,7 @@ public class HashWire implements WireOut {
             writer.accept(t, kls, this);
             return HashWire.this;
         }
+
         @NotNull
         @Override
         public WireOut marshallable(WriteMarshallable object) {
