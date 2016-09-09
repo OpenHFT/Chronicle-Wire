@@ -137,15 +137,27 @@ public interface MarshallableOut {
     }
 
     /**
-     * adds padding to align to cache lines.
+     * adds padding to align to cache lines. So that wire header messages don't straggle cache lines
      *
      * @return the state of padding
      */
-    default AddPadding addPadding() {
-        return AddPadding.NEVER;
+    default Padding padToCacheAlign() {
+        return Padding.NEVER;
     }
 
-    enum AddPadding {
-        ALWAYS, NEVER, SMART
+    enum Padding {
+        ALWAYS("always pads to cache lines"),
+        NEVER("never adds padding"),
+        SMART("adds padding to ensure new wire headers dont straggle cache lines, where " +
+                "possible to " +
+                "do so " +
+                "without " +
+                "breaking the" +
+                "existing " +
+                "message format specification");
+
+        Padding(String comment) {
+
+        }
     }
 }
