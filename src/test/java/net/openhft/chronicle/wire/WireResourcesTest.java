@@ -46,7 +46,7 @@ public class WireResourcesTest {
         tmp.deleteOnExit();
 
         MappedBytes mb0;
-        MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024, this);
+        MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024);
         assertEquals(1, mb.mappedFile().refCount());
         assertEquals(1, mb.refCount());
 
@@ -77,7 +77,7 @@ public class WireResourcesTest {
         tmp.deleteOnExit();
 
         Wire wire;
-        MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024, this);
+        MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024);
         assertEquals(1, mb.mappedFile().refCount());
         assertEquals(1, mb.refCount());
 
@@ -105,7 +105,7 @@ public class WireResourcesTest {
         File tmp = Files.createTempFile("chronicle-", ".wire").toFile();
         tmp.deleteOnExit();
 
-        MappedBytes t = MappedBytes.mappedBytes(tmp, 256 * 1024, this);
+        MappedBytes t = MappedBytes.mappedBytes(tmp, 256 * 1024);
         assertEquals(1, t.refCount());
         assertEquals(1, t.mappedFile().refCount());
         Wire wire = WireType.TEXT.apply(t);

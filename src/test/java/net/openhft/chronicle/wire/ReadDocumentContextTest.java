@@ -50,8 +50,7 @@ public class ReadDocumentContextTest {
     @Test
     public void testWritingNotCompleteDocumentShared() throws IOException {
 
-        MappedBytes b = MappedBytes.mappedBytes(File.createTempFile("delete", "me"), 64 << 10,
-                this);
+        MappedBytes b = MappedBytes.mappedBytes(File.createTempFile("delete", "me"), 64 << 10);
         assertTrue(b.sharedMemory());
         Wire wire = new TextWire(b);
         assertTrue(wire.notCompleteIsNotPresent());

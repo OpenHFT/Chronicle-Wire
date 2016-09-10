@@ -36,7 +36,7 @@ public class BinaryWireWithMappedBytesTest {
     public void testRefAtStart() throws FileNotFoundException {
         File file = new File(OS.TARGET, "testRefAtStart.map");
         file.delete();
-        MappedBytes bytes = MappedBytes.mappedBytes(file, 64 << 10, this);
+        MappedBytes bytes = MappedBytes.mappedBytes(file, 64 << 10);
         Wire wire = WireType.BINARY.apply(bytes);
         wire.write(() -> "int32").int32forBinding(1)
                 .write(() -> "int32b").int32forBinding(2)
