@@ -275,7 +275,7 @@ public abstract class AbstractWire implements Wire {
             }
 
             if (lastPosition != null) {
-                long lastPositionValue = lastPosition.getValue();
+                long lastPositionValue = lastPosition.getVolatileValue();
                 // do we jump forward if there has been writes else where.
                 if (lastPositionValue > bytes.writePosition() + ignoreHeaderCountIfNumberOfBytesBehindExceeds) {
                     headerNumber(Long.MIN_VALUE);
@@ -323,7 +323,7 @@ public abstract class AbstractWire implements Wire {
 
                 int len = lengthOf(header);
 
-                int nextHeader = lengthOf(bytes.readInt(pos + len + SPB_HEADER_SIZE));
+                int nextHeader = lengthOf(bytes.readVolatileInt(pos + len + SPB_HEADER_SIZE));
                 if (nextHeader > 1 << 10) {
                     int header2 = bytes.readVolatileInt(pos);
                     if (header2 != header) {
@@ -431,8 +431,11 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public void writeEndOfWire(long timeout, TimeUnit timeUnit) throws TimeoutException {
-        long pos = bytes.writePosition();
+    public void writeEndOfWire(long timeout, TimeUnit timeUnit, @NotNull long lastPosition) throws
+            TimeoutException {
+
+        long pos = Math.max(lastPosition, bytes.writePosition());
+        headerNumber = Long.MIN_VALUE;
 
         try {
             for (; ; ) {

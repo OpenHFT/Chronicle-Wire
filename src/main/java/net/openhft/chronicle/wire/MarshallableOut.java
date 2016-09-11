@@ -135,4 +135,29 @@ public interface MarshallableOut {
     default <T> MethodWriterBuilder<T> methodWriterBuilder(Class<T> tClass) {
         return new MethodWriterBuilder<>(this, tClass);
     }
+
+    /**
+     * adds padding to align to cache lines. So that wire header messages don't straggle cache lines
+     *
+     * @return the state of padding
+     */
+    default Padding padToCacheAlign() {
+        return Padding.NEVER;
+    }
+
+    enum Padding {
+        ALWAYS("always pads to cache lines"),
+        NEVER("never adds padding"),
+        SMART("adds padding to ensure new wire headers dont straggle cache lines, where " +
+                "possible to " +
+                "do so " +
+                "without " +
+                "breaking the" +
+                "existing " +
+                "message format specification");
+
+        Padding(String comment) {
+
+        }
+    }
 }

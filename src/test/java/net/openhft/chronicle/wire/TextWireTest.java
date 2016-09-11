@@ -509,8 +509,9 @@ public class TextWireTest {
     public void testZonedDateTime() {
         Wire wire = createWire();
         ZonedDateTime now = ZonedDateTime.now();
-        final ZonedDateTime max = ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault());
-        final ZonedDateTime min = ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault());
+        ZoneId zone = ZoneId.of("Europe/London");
+        final ZonedDateTime max = ZonedDateTime.of(LocalDateTime.MAX, zone);
+        final ZonedDateTime min = ZonedDateTime.of(LocalDateTime.MIN, zone);
         wire.write()
                 .zonedDateTime(now)
                 .write().zonedDateTime(max)
