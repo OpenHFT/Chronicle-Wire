@@ -266,9 +266,11 @@ public abstract class AbstractWire implements Wire {
             long pos = bytes.writePosition();
 
             if (bytes.compareAndSwapInt(pos, 0, NOT_COMPLETE | length)) {
+
                 int maxlen = length == UNKNOWN_LENGTH ? MAX_LENGTH : length;
-                if (maxlen > bytes.writeRemaining())
+                if (length != UNKNOWN_LENGTH && maxlen > bytes.writeRemaining())
                     return throwNotEnoughSpace(maxlen, bytes);
+
                 bytes.writePositionRemaining(pos + SPB_HEADER_SIZE, maxlen);
 //            System.out.println(Thread.currentThread()+" wpr pos: "+pos+" hdr "+headerNumber);
                 return pos;
