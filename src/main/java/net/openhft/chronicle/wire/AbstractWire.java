@@ -257,7 +257,9 @@ public abstract class AbstractWire implements Wire {
 
         if (insideHeader)
             throw new AssertionError("you cant put a header inside a header, check that " +
-                    "you have not nested the documents.");
+                    "you have not nested the documents. If you are using Chronicle-Queue please " +
+                    "ensure that you have a unique instance of the Appender per thread, in " +
+                    "other-words you can not share appenders across threads.");
 
         insideHeader = true;
         try {
