@@ -122,9 +122,9 @@ public class ResultSetWireIn implements WireIn {
     }
 
     @Override
-    public boolean hasMore() {
+    public boolean isEmpty() {
         try {
-            return index < metaData.getColumnCount();
+            return index >= metaData.getColumnCount();
         } catch (SQLException e) {
             throw Jvm.rethrow(e);
         }

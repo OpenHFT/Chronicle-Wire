@@ -521,13 +521,6 @@ public class TextWire extends AbstractWire implements Wire {
         return bytes;
     }
 
-    @Override
-    public boolean hasMore() {
-        consumePadding();
-
-        return bytes.readRemaining() > 0;
-    }
-
     @NotNull
     @Override
     public ValueOut write() {

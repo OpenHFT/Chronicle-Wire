@@ -123,13 +123,6 @@ public class CSVWire extends TextWire {
         return this;
     }
 
-    @Override
-    public boolean hasMore() {
-        consumePadding();
-
-        return bytes.readRemaining() > 0;
-    }
-
     class CSVValueOut extends TextValueOut {
 
     }

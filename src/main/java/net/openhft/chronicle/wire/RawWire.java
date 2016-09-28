@@ -173,11 +173,6 @@ public class RawWire extends AbstractWire implements Wire {
         return bytes;
     }
 
-    @Override
-    public boolean hasMore() {
-        return bytes.readRemaining() > 0;
-    }
-
     @NotNull
     @Override
     public WireIn readAlignTo(int alignment) {

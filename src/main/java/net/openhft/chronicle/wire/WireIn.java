@@ -103,9 +103,32 @@ public interface WireIn extends WireCommon {
     void clear();
 
     /**
+     * This consumes any padding before checking if readRemaining() &gt; 0
+     * <p>
+     * NOTE: This method only works inside a document. Call it just before a document and it won't know not to read the read in case there is padding.
+     *
      * @return if there is more data to be read in this document.
      */
-    boolean hasMore();
+    @Deprecated
+    default boolean hasMore() {
+        return isNotEmptyAfterPadding();
+    }
+
+    /**
+     * This consumes any padding before checking if readRemaining() &gt; 0
+     * <p>
+     * NOTE: This method only works inside a document. Call it just before a document and it won't know not to read the read in case there is padding.
+     *
+     * @return if there is more data to be read in this document.
+     */
+    default boolean isNotEmptyAfterPadding() {
+        consumePadding();
+        return !isEmpty();
+    }
+
+    default boolean isEmpty() {
+        return bytes().isEmpty();
+    }
 
     @NotNull
     default WireIn readAlignTo(int alignment) {

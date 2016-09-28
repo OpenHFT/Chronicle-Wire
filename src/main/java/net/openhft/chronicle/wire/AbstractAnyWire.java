@@ -122,11 +122,6 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
     }
 
     @Override
-    public boolean hasMore() {
-        return wireAcquisition.acquireWire().hasMore();
-    }
-
-    @Override
     public DocumentContext readingDocument() {
         return wireAcquisition.acquireWire().readingDocument();
     }

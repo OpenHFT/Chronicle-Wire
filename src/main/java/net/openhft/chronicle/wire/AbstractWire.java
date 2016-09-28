@@ -174,12 +174,6 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public boolean hasMore() {
-        consumePadding();
-        return bytes.readRemaining() > 0;
-    }
-
-    @Override
     public HeaderType readDataHeader(boolean includeMetaData) throws EOFException {
 
         for (; ; ) {
