@@ -51,7 +51,7 @@ public class MarshallableWireTest {
         WireType[] wireTypes = {WireType.TEXT, WireType.BINARY};
         Marshallable[] objects = {
                 new Nested(),
-                new Nested(new ScalarValues(), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap()),
+                new Nested(new ScalarValues(), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap(), new String[0]),
                 new ScalarValues(),
                 new ScalarValues(1),
                 new ScalarValues(10)
@@ -75,6 +75,8 @@ public class MarshallableWireTest {
 
         Object m2 = wire.getValueIn()
                 .object();
+        if (!m.equals(m2))
         assertEquals(m, m2);
     }
+
 }

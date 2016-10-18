@@ -38,9 +38,8 @@ public class WireMarshaller<T> {
                     ? WireMarshaller.ofThrowable(tClass)
                     : WireMarshaller.of(tClass)
     );
-
+    final FieldAccess[] fields;
     private final Class<T> tClass;
-    private final FieldAccess[] fields;
     private final boolean isLeaf;
 
     public WireMarshaller(Class<T> tClass, FieldAccess[] fields, boolean isLeaf) {
@@ -370,15 +369,48 @@ public class WireMarshaller<T> {
 
         @Override
         protected void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException {
-            read.sequence(o, (array, out) -> {
-                for (int i = 0, len = Array.getLength(array); i < len; i++)
-                    Array.set(array, i, out.object(componentType));
+            final Object arr = field.get(o);
+            if (read.isNull()) {
+                if (arr != null)
+                    field.set(o, null);
+                return;
+            }
+            List list = new ArrayList();
+            read.sequence(list, (l, in) -> {
+                while (in.hasNextSequenceItem())
+                    l.add(in.object(componentType));
             });
+            Object arr2 = Array.newInstance(componentType, list.size());
+            for (int i = 0; i < list.size(); i++)
+                Array.set(arr2, i, list.get(i));
+            field.set(o, arr2);
         }
 
         @Override
         public void getAsBytes(Object o, Bytes bytes) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isEqual(Object o1, Object o2) {
+            try {
+                Object a1 = field.get(o1);
+                Object a2 = field.get(o2);
+                if (a1 == null) return a2 == null;
+                if (a2 == null) return false;
+                if (a1.getClass() != a2.getClass())
+                    return false;
+                int len1 = Array.getLength(a1);
+                int len2 = Array.getLength(a2);
+                if (len1 != len2)
+                    return false;
+                for (int i = 0; i < len1; i++)
+                    if (!Objects.equals(Array.get(a1, i), Array.get(a2, i)))
+                        return false;
+                return true;
+            } catch (IllegalAccessException e) {
+                throw new AssertionError(e);
+            }
         }
     }
 

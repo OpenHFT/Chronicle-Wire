@@ -2264,8 +2264,10 @@ public class TextWire extends AbstractWire implements Wire {
 
         @Override
         public Object marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
-            if (isNull())
+            if (isNull()) {
+                consumePadding(1);
                 return null;
+            }
             if (indentation() == 0) {
                 strategy.readUsing(object, this);
                 return object;

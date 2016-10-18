@@ -31,14 +31,16 @@ public class Nested extends AbstractMarshallable {
     List<String> strings;
     Set<Integer> ints;
     Map<String, List<Double>> map;
+    String[] array;
 
     public Nested() {
     }
 
-    public Nested(ScalarValues values, List<String> strings, Set<Integer> ints, Map<String, List<Double>> map) {
+    public Nested(ScalarValues values, List<String> strings, Set<Integer> ints, Map<String, List<Double>> map, String[] array) {
         this.values = values;
         this.strings = strings;
         this.ints = ints;
         this.map = map;
+        this.array = array;
     }
 }

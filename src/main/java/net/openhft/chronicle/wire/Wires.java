@@ -75,12 +75,15 @@ public enum Wires {
         }
         return SerializationStrategies.ANY_OBJECT;
     });
+    static final ClassLocal<List<FieldInfo>> FIELD_INFOS = ClassLocal.withInitial(VanillaFieldInfo::lookupClass);
+
     static final StringBuilderPool SBP = new StringBuilderPool();
 
     static {
         CLASS_STRATEGY_FUNCTIONS.add(SerializeJavaLang.INSTANCE);
         CLASS_STRATEGY_FUNCTIONS.add(SerializeMarshallables.INSTANCE);
         CLASS_STRATEGY_FUNCTIONS.add(SerializeBytes.INSTANCE);
+        ClassAliasPool.CLASS_ALIASES.addAlias(VanillaFieldInfo.class, "FieldInfo");
     }
 
     public static <T> T read(Class<T> tClass, ValueIn in) {
@@ -291,6 +294,10 @@ public enum Wires {
                 .isEqual(o1, o2);
     }
 
+    public static List<FieldInfo> feildInfos(Class aClass) {
+        return FIELD_INFOS.get(aClass);
+    }
+
     enum SerializeBytes implements Function<Class, SerializationStrategy> {
         INSTANCE;
 
@@ -393,6 +400,8 @@ public enum Wires {
                     return ScalarStrategy.text(BigDecimal.class, BigDecimal::new);
 
                 default:
+                    if (aClass.isPrimitive())
+                        return SerializationStrategies.ANY_SCALAR;
                     if (aClass.isArray()) {
                         final Class componentType = aClass.getComponentType();
                         if (componentType.isPrimitive())

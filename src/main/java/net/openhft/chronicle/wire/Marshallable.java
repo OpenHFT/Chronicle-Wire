@@ -19,6 +19,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -85,6 +86,10 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         T t = (T) this;
         return map.merge(getKey.apply(t), t,
                 (p, c) -> p == null ? c.deepCopy() : p.copyFrom(c));
+    }
+
+    default List<FieldInfo> $fieldInfos() {
+        return Wires.feildInfos(getClass());
     }
 
   /*  static <T extends Marshallable & KeyedMarshallable> T deepCopy(T t) {
