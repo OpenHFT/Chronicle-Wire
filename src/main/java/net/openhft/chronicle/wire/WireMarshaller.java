@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.ClassLocal;
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 
@@ -820,7 +821,7 @@ public class WireMarshaller<T> {
 
         @Override
         protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
-            return UNSAFE.getFloat(o, offset) == UNSAFE.getFloat(o2, offset);
+            return Maths.same(UNSAFE.getFloat(o, offset), UNSAFE.getFloat(o2, offset));
         }
 
         @Override
@@ -890,7 +891,7 @@ public class WireMarshaller<T> {
 
         @Override
         protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
-            return UNSAFE.getDouble(o, offset) == UNSAFE.getDouble(o2, offset);
+            return Maths.same(UNSAFE.getDouble(o, offset), UNSAFE.getDouble(o2, offset));
         }
 
         @Override
