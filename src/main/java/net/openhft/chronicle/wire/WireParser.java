@@ -43,15 +43,7 @@ public interface WireParser<O> extends BiConsumer<WireIn, O> {
     default void accept(WireIn wireIn, O marshallableOut) {
         while (wireIn.bytes().readRemaining() > 0) {
             parseOne(wireIn, marshallableOut);
-            consume(wireIn, ',');
-            consume(wireIn, '}');
             wireIn.consumePadding();
-        }
-    }
-
-    default void consume(WireIn wireIn, char ch) {
-        if (wireIn.bytes().peekUnsignedByte() == ch) {
-            wireIn.bytes().readSkip(1);
         }
     }
 

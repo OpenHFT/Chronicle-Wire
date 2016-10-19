@@ -34,6 +34,7 @@ import java.util.function.BiConsumer;
  * Created by peter on 24/03/16.
  */
 public class MethodReader implements Closeable {
+    static final Object[] NO_ARGS = {};
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodReader.class);
     private final MarshallableIn in;
     private final WireParser<Void> wireParser;
@@ -66,7 +67,7 @@ public class MethodReader implements Closeable {
                 Class<?>[] parameterTypes = m.getParameterTypes();
                 switch (parameterTypes.length) {
                     case 0:
-
+                        addParseletForMethod(o, m);
                         break;
                     case 1:
                         addParseletForMethod(o, m, parameterTypes[0]);
@@ -146,6 +147,21 @@ public class MethodReader implements Closeable {
                 }
             });
         }
+    }
+
+    public void addParseletForMethod(Object o, Method m) {
+        m.setAccessible(true); // turn of security check to make a little faster
+        wireParser.register(m::getName, (s, v, $) -> {
+            try {
+                if (Jvm.isDebug())
+                    logMessage(s, v);
+
+                v.skipValue();
+                m.invoke(o, NO_ARGS);
+            } catch (Exception i) {
+                LOGGER.warn("Failure to dispatch message: " + m.getName() + "()");
+            }
+        });
     }
 
     public void addParseletForMethod(Object o, Method m, Class[] parameterTypes) {
