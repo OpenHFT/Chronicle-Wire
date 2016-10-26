@@ -115,7 +115,7 @@ public class BinaryWire2Test {
     }
 
     @Test
-    public void testDate() {
+    public void testLocalDate() {
         Wire wire = createWire();
         LocalDate now = LocalDate.now();
         wire.write().date(now)
@@ -125,6 +125,19 @@ public class BinaryWire2Test {
         wire.read().date(now, Assert::assertEquals)
                 .read().date(LocalDate.MAX, Assert::assertEquals)
                 .read().date(LocalDate.MIN, Assert::assertEquals);
+    }
+
+    @Test
+    public void testDate() {
+        Wire wire = createWire();
+
+        try (final DocumentContext dc = wire.writingDocument(true)) {
+            dc.wire().write().object(new Date(0));
+        }
+        try (final DocumentContext dc = wire.readingDocument()) {
+            System.out.println(Wires.fromSizePrefixedBlobs(dc));
+           Assert.assertEquals(0, dc.wire().read().object(Date.class).getTime());
+        }
     }
 
     @Test

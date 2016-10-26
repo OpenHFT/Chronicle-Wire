@@ -438,6 +438,9 @@ public interface ValueOut {
                 return optionalTyped(LocalDateTime.class).dateTime((LocalDateTime) value);
             case "java.time.ZonedDateTime":
                 return optionalTyped(ZonedDateTime.class).zonedDateTime((ZonedDateTime) value);
+            case "java.util.Date":
+                return typePrefix(value.getClass()).wireOut().write("time").int64(((Date)
+                        value).getTime());
             case "java.util.UUID":
                 return optionalTyped(UUID.class).uuid((UUID) value);
             case "java.math.BigInteger":

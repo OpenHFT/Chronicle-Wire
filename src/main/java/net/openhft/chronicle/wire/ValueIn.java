@@ -433,6 +433,15 @@ public interface ValueIn {
         if (brackets == BracketType.UNKNOWN)
             brackets = getBracketType();
 
+        if (clazz2 != null && Date.class.isAssignableFrom(clazz2)) {
+            final long time = wireIn().read("time").int64();
+            if (using instanceof Date) {
+                ((Date) using).setTime(time);
+                return using;
+            } else
+                return (E) new Date(time);
+        }
+
         switch (brackets) {
             case MAP:
                 if (clazz == Object.class)
@@ -442,7 +451,7 @@ public interface ValueIn {
 
                 Object ret = marshallable(using, strategy);
                 return readResolve(ret);
-            
+
             case SEQ:
                 if (clazz == Object.class)
                     strategy = SerializationStrategies.LIST;
