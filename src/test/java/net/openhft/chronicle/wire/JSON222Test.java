@@ -94,13 +94,15 @@ public class JSON222Test {
             } while (wire.isNotEmptyAfterPadding());
 
             if (fail) {
-                final File file2 = new File(this.file.getPath().replaceAll("/._", "/e-"));
+                final File file2 = new File(this.file.getPath().replaceAll("/._", "/e-").replaceAll("\\.json", ".yaml"));
+
 /*
                 System.out.println(file2 + "\n" + new String(bytes, "UTF-8") + "\n" + bytes2);
                 try (OutputStream out2 = new FileOutputStream(file2)) {
                     out2.write(bytes2.toByteArray());
                 }
 */
+
                 if (!file2.exists())
                     throw new AssertionError("Expected to fail\n" + bytes2);
                 byte[] bytes4 = new byte[(int) file2.length()];
