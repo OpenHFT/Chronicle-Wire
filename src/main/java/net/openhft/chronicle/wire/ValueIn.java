@@ -414,7 +414,8 @@ public interface ValueIn {
 
     @Nullable
     default Object object() {
-        return objectWithInferredType(null, SerializationStrategies.ANY_OBJECT, null);
+        final Object o = objectWithInferredType(null, SerializationStrategies.ANY_OBJECT, null);
+        return o;
     }
 
     @Nullable

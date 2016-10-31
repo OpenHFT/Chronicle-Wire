@@ -33,9 +33,12 @@ import java.util.concurrent.TimeoutException;
 public interface WireIn extends WireCommon {
 
     default <K, V> Map<K, V> readAllAsMap(Class<K> kClass, Class<V> vClass, Map<K, V> map) {
-        while (hasMore()) {
+        while (isNotEmptyAfterPadding()) {
+            long len = bytes().readRemaining();
             final K k = readEvent(kClass);
             final V v = getValueIn().object(vClass);
+            if (len == bytes().readRemaining())
+                break;
             map.put(k, v);
         }
         return map;

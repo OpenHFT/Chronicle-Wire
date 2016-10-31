@@ -1,0 +1,9 @@
+{
+  "hello": true,
+  "bye": false,
+  "foo": [
+    "one",
+    "two",
+    "three"
+  ]
+}

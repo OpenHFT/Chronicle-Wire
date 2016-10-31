@@ -80,7 +80,7 @@ public class ReadmePojoTest {
                 "  2,\n" +
                 "  3,\n" +
                 "  4\n" +
-                "]\n" +
+                "],\n" +
                 "inner: {\n" +
                 "  a: 1,\n" +
                 "  b: Hello World,\n" +

@@ -72,11 +72,12 @@ public class TextWire extends AbstractWire implements Wire {
     static final BytesStore EMPTY = BytesStore.from("");
     static final BytesStore SPACE = BytesStore.from(" ");
     static final BytesStore END_FIELD = NEW_LINE;
+    static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
 
     static {
-        for (char ch : "?0123456789+- \t\',#:{}[]|>!\0\b\\".toCharArray())
+        for (char ch : "?0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
-        for (char ch : "?,#:{}[]|>\0\b\\".toCharArray())
+        for (char ch : "?,#:{}[]|>\\".toCharArray())
             QUOTE_CHARS.set(ch);
         // make sure it has loaded.
         WireInternal.INTERNER.valueCount();
@@ -618,10 +619,22 @@ public class TextWire extends AbstractWire implements Wire {
                     bytes.appendUtf8("\\0");
                     break;
                 default:
-                    bytes.appendUtf8(ch);
+                    if (ch < ' ' || ch > 127)
+                        appendU4(ch);
+                    else
+                        bytes.appendUtf8(ch);
                     break;
             }
         }
+    }
+
+    private void appendU4(char ch) {
+        bytes.append('\\');
+        bytes.append('u');
+        bytes.append(HEXADECIMAL[ch >> 12]);
+        bytes.append(HEXADECIMAL[(ch >> 8) & 0xF]);
+        bytes.append(HEXADECIMAL[(ch >> 4) & 0xF]);
+        bytes.append(HEXADECIMAL[ch & 0xF]);
     }
 
     protected Quotes needsQuotes(@NotNull CharSequence s) {
@@ -629,15 +642,12 @@ public class TextWire extends AbstractWire implements Wire {
         if (s.length() == 0)
             return Quotes.DOUBLE;
 
-        if (STARTS_QUOTE_CHARS.get(s.charAt(0)))
+        if (STARTS_QUOTE_CHARS.get(s.charAt(0)) ||
+                Character.isWhitespace(s.charAt(s.length() - 1)))
             return Quotes.DOUBLE;
-        if (s.charAt(0) == '"')
-            return Quotes.SINGLE;
-        if (Character.isWhitespace(s.charAt(s.length() - 1)))
-            return Quotes.DOUBLE;
-        for (int i = 1; i < s.length(); i++) {
+        for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
-            if (QUOTE_CHARS.get(ch))
+            if (QUOTE_CHARS.get(ch) || ch < ' ' || ch > 127)
                 return Quotes.DOUBLE;
             if (ch == '"')
                 quotes = Quotes.SINGLE;
@@ -1094,7 +1104,11 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public WireOut float32(float f) {
             prependSeparator();
-            bytes.append(f);
+            double af = Math.abs(f);
+            if (af >= 1e-3 && af < 1e6)
+                bytes.append(f);
+            else
+                bytes.append(Float.toString(f));
             elementSeparator();
 
             return TextWire.this;
@@ -1104,7 +1118,11 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public WireOut float64(double d) {
             prependSeparator();
-            bytes.append(d);
+            double ad = Math.abs(d);
+            if (ad >= 1e-3 && ad < 1e9)
+                bytes.append(d);
+            else
+                bytes.append(Double.toString(d));
             elementSeparator();
 
             return TextWire.this;
@@ -1239,29 +1257,37 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer) {
+            startBlock('[');
             boolean leaf = this.leaf;
-            pushState();
-            bytes.writeUnsignedByte('[');
             if (!leaf)
                 newLine();
             long pos = bytes.readPosition();
             writer.accept(t, this);
             if (!leaf)
-            addNewLine(pos);
+                addNewLine(pos);
 
             popState();
             if (!leaf)
                 indent();
-            bytes.writeUnsignedByte(']');
-            endField();
+            endBlock(leaf, ']');
             return wireOut();
+        }
+
+        public void startBlock(char c) {
+            if (!sep.isEmpty()) {
+                append(sep);
+                indent();
+                sep = EMPTY;
+            }
+            pushState();
+            bytes.writeUnsignedByte(c);
         }
 
         @NotNull
         @Override
         public <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer) {
-            pushState();
-            bytes.writeUnsignedByte('[');
+            boolean leaf = this.leaf;
+            startBlock('[');
             newLine();
             long pos = bytes.readPosition();
             writer.accept(t, kls, this);
@@ -1269,10 +1295,15 @@ public class TextWire extends AbstractWire implements Wire {
 
             popState();
             indent();
-            bytes.writeUnsignedByte(']');
-            endField();
+            endBlock(leaf, ']');
             return wireOut();
         }
+
+        public void endBlock(boolean leaf, char c) {
+            bytes.writeUnsignedByte(c);
+            sep = this.leaf ? COMMA_SPACE : COMMA_NEW_LINE;
+        }
+
         protected void addNewLine(long pos) {
             if (bytes.writePosition() > pos + 1)
                 bytes.writeUnsignedByte('\n');
@@ -1299,14 +1330,13 @@ public class TextWire extends AbstractWire implements Wire {
         public WireOut marshallable(@NotNull WriteMarshallable object) {
             if (bytes.writePosition() == 0) {
                 object.writeMarshallable(TextWire.this);
+                if (bytes.writePosition() == 0)
+                    bytes.append("{}");
                 return TextWire.this;
             }
             boolean wasLeaf = leaf;
-            if (!wasLeaf)
-                pushState();
+            startBlock('{');
 
-            prependSeparator();
-            bytes.writeUnsignedByte('{');
             if (wasLeaf)
                 afterOpen();
             else
@@ -1315,7 +1345,10 @@ public class TextWire extends AbstractWire implements Wire {
             object.writeMarshallable(TextWire.this);
             BytesStore popSep = null;
             if (wasLeaf) {
+                if (sep.endsWith(' '))
+                    append(" ");
                 leaf = false;
+                popState();
             } else if (seps.size() > 0) {
                 popSep = seps.get(seps.size() - 1);
                 popState();
@@ -1329,7 +1362,8 @@ public class TextWire extends AbstractWire implements Wire {
             } else {
                 prependSeparator();
             }
-            bytes.writeUnsignedByte('}');
+            endBlock(leaf, '}');
+
             if (popSep != null)
                 sep = popSep;
             if (indentation == 0) {
@@ -1616,11 +1650,14 @@ public class TextWire extends AbstractWire implements Wire {
                 }
 
                 default: {
-                    if (bytes.readRemaining() > 0) {
+                    final long rem = bytes.readRemaining();
+                    if (rem > 0) {
                         if (a instanceof Bytes || use8bit)
                             bytes.parse8bit(a, getEscapingEndOfText());
                         else
                             bytes.parseUtf8(a, getEscapingEndOfText());
+                        if (rem == bytes.readRemaining())
+                            throw new IORuntimeException("Nothing to read at " + bytes.toDebugString(32));
                     } else {
                         AppendableUtil.setLength(a, 0);
                     }
@@ -2133,6 +2170,7 @@ public class TextWire extends AbstractWire implements Wire {
                 readCode();
             return TextWire.this;
         }
+
         @Override
         public boolean hasNext() {
             consumePadding();
@@ -2268,7 +2306,7 @@ public class TextWire extends AbstractWire implements Wire {
                 consumePadding(1);
                 return null;
             }
-            if (indentation() == 0) {
+            if (indentation() == 0 && peekCode() != '{') {
                 strategy.readUsing(object, this);
                 return object;
             }
@@ -2377,8 +2415,9 @@ public class TextWire extends AbstractWire implements Wire {
                     return marshallableAsMap(kClass, vClass, usingMap);
                 case '?':
                     return readAllAsMap(kClass, vClass, usingMap);
+                default:
+                    throw new IORuntimeException("Unexpected code " + (char) code);
             }
-            return usingMap;
         }
 
         @Nullable
@@ -2541,6 +2580,27 @@ public class TextWire extends AbstractWire implements Wire {
 
         public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) {
             consumePadding();
+            Object o = objectWithInferredType0(using, strategy, type);
+            consumePadding();
+            int code = peekCode();
+            if (code == ':') {
+                return readRestOfMap(using, o);
+            }
+            return o;
+        }
+
+        @NotNull
+        Object readRestOfMap(Object using, Object o) {
+            readCode();
+            consumePadding();
+            Object value = objectWithInferredType0(using, SerializationStrategies.ANY_OBJECT, Object.class);
+            Map map = using instanceof Map ? (Map) using : new LinkedHashMap();
+            map.put(o, value);
+            readAllAsMap(Object.class, Object.class, map);
+            return map;
+        }
+
+        Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class type) {
             int code = peekCode();
             switch (code) {
                 case '?':
@@ -2555,6 +2615,10 @@ public class TextWire extends AbstractWire implements Wire {
                     return readSequence(strategy.type());
                 case '{':
                     return valueIn.marshallableAsMap(Object.class, Object.class);
+                case ']':
+                    throw new IORuntimeException("Unexpected ] at " + bytes.toDebugString(32));
+                case '}':
+                    throw new IORuntimeException("Unexpected } at " + bytes.toDebugString(32));
                 case '0':
                 case '1':
                 case '2':
@@ -2570,7 +2634,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
 
             String text = valueIn.text();
-            if (Enum.class.isAssignableFrom(strategy.type()))
+            if (text == null || Enum.class.isAssignableFrom(strategy.type()))
                 return text;
             switch (text) {
                 case "true":

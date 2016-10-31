@@ -75,10 +75,10 @@ public class NestedMapsTest {
                         "    the,\n" +
                         "    lazy,\n" +
                         "    dog\n" +
-                        "  ]\n" +
+                        "  ],\n" +
                         "  numbers: [\n" +
                         "    1, 2, 2, 3, 5, 8, 13\n" +
-                        "  ]\n" +
+                        "  ],\n" +
                         "  map1: {\n" +
                         "    aye: AAA, bee: BBB\n" +
                         "  },\n" +
@@ -100,7 +100,7 @@ public class NestedMapsTest {
                         "    the,\n" +
                         "    lazy,\n" +
                         "    dog\n" +
-                        "  ]\n" +
+                        "  ],\n" +
                         "  numbers: [\n" +
                         "    1,\n" +
                         "    2,\n" +
@@ -109,11 +109,11 @@ public class NestedMapsTest {
                         "    5,\n" +
                         "    8,\n" +
                         "    13\n" +
-                        "  ]\n" +
+                        "  ],\n" +
                         "  map1: [\n" +
                         "    aye: AAA,\n" +
                         "    bee: BBB\n" +
-                        "  ]\n" +
+                        "  ],\n" +
                         "  map2: [\n" +
                         "    one: 1.0,\n" +
                         "    two point two: 2.2\n" +
@@ -122,7 +122,8 @@ public class NestedMapsTest {
                 break;
             case FIELDLESS_BINARY:
                 assertEquals("--- !!data #binary\n" +
-                        "mapped: !net.openhft.chronicle.wire.NestedMapsTest$Mapped [[\n" +
+                        "mapped: !net.openhft.chronicle.wire.NestedMapsTest$Mapped [\n" +
+                        "  [\n" +
                         "    A,\n" +
                         "    quick,\n" +
                         "    brown,\n" +
@@ -132,7 +133,8 @@ public class NestedMapsTest {
                         "    the,\n" +
                         "    lazy,\n" +
                         "    dog\n" +
-                        "  ][\n" +
+                        "  ],\n" +
+                        "  [\n" +
                         "    1,\n" +
                         "    2,\n" +
                         "    2,\n" +
@@ -140,10 +142,12 @@ public class NestedMapsTest {
                         "    5,\n" +
                         "    8,\n" +
                         "    13\n" +
-                        "  ][\n" +
+                        "  ],\n" +
+                        "  [\n" +
                         "    aye: AAA,\n" +
                         "    bee: BBB\n" +
-                        "  ][\n" +
+                        "  ],\n" +
+                        "  [\n" +
                         "    one: 1.0,\n" +
                         "    two point two: 2.2\n" +
                         "  ]\n" +
@@ -180,10 +184,10 @@ public class NestedMapsTest {
                         "  the,\n" +
                         "  lazy,\n" +
                         "  dog\n" +
-                        "]\n" +
+                        "],\n" +
                         "numbers: [\n" +
                         "  1, 2, 2, 3, 5, 8, 13\n" +
-                        "]\n" +
+                        "],\n" +
                         "map1: {\n" +
                         "  aye: AAA, bee: BBB\n" +
                         "}\n" +

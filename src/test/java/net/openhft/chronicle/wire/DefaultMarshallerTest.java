@@ -57,7 +57,7 @@ public class DefaultMarshallerTest {
                 "  nested: [\n" +
                 "    { str: hi, num: 111 },\n" +
                 "    { str: bye, num: 999 }\n" +
-                "  ]\n" +
+                "  ],\n" +
                 "  map: {\n" +
                 "    key: !DMNestedClass { str: value, num: 1 },\n" +
                 "    keyz: !DMNestedClass { str: valuez, num: 1111 }\n" +

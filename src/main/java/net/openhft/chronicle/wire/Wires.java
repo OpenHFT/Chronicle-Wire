@@ -294,7 +294,7 @@ public enum Wires {
                 .isEqual(o1, o2);
     }
 
-    public static List<FieldInfo> feildInfos(Class aClass) {
+    public static List<FieldInfo> fieldInfos(Class aClass) {
         return FIELD_INFOS.get(aClass);
     }
 

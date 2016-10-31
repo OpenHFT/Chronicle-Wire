@@ -1,0 +1,5 @@
+{
+  "hello": true,
+  "bye": false,
+  null: null
+}

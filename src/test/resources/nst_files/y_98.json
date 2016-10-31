@@ -1,0 +1,5 @@
+[
+  "hello",
+  "bye\n\r\t\b",
+  true
+]
