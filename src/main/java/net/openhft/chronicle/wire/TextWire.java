@@ -295,10 +295,13 @@ public class TextWire extends AbstractWire implements Wire {
                 consumePadding();
                 final K object = valueIn.object(expectedClass);
                 consumePadding();
-                ch = readCode();
-                if (ch != ':')
+                int ch2 = readCode();
+                if (ch2 != ':')
                     throw new IllegalStateException("Unexpected character after field " + ch + " '" + (char) ch + "'");
                 return object;
+
+            } else if (ch == '[') {
+                return valueIn.object(expectedClass);
 
             } else if (ch == '"' || ch == '\'') {
                 bytes.readSkip(1);
@@ -1648,6 +1651,9 @@ public class TextWire extends AbstractWire implements Wire {
                     }
                     break;
                 }
+
+                case -1:
+                    return "";
 
                 default: {
                     final long rem = bytes.readRemaining();

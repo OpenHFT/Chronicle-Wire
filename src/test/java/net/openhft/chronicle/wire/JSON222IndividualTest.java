@@ -59,6 +59,11 @@ public class JSON222IndividualTest {
                 "]", list);
     }
 
+    @Test
+    public void parseArrayKey() {
+        checkDeserialized("{5=[6], [7]=}", "{ '5': [ 6 ], [ 7 ] }\n");
+    }
+
     void checkSerialized(String expected, Object o) {
         Wire wire = new TextWire(Bytes.elasticByteBuffer());
         wire.getValueOut()
@@ -79,7 +84,8 @@ public class JSON222IndividualTest {
 
         try {
             Yaml yaml = new Yaml();
-            yaml.load(new StringReader(input));
+            Object o = yaml.load(new StringReader(input));
+            System.out.println(o);
         } catch (Exception e) {
             throw e;
         }

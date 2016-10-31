@@ -101,6 +101,8 @@ public class JSON222Test {
                     out2.write(bytes2.toByteArray());
                 }
 */
+                if (!file2.exists())
+                    throw new AssertionError("Expected to fail\n" + bytes2);
                 byte[] bytes4 = new byte[(int) file2.length()];
                 try (InputStream in = new FileInputStream(file2)) {
                     in.read(bytes4);

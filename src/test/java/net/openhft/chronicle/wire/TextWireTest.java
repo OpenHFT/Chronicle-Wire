@@ -191,7 +191,7 @@ public class TextWireTest {
         wire.read(BWKey.field1);
         // not a match
         wire.read(BWKey.field1);
-        assertEquals(1, bytes.readRemaining());
+        assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
     }
