@@ -16,12 +16,14 @@
 
 package net.openhft.chronicle.wire;
 
+import java.lang.reflect.Field;
+
 /**
  * Created by peter on 18/10/16.
  */
 public interface FieldInfo {
-    static FieldInfo fieldInfo(String name, Class type, BracketType bracketType) {
-        return new VanillaFieldInfo(name, type, bracketType);
+    static FieldInfo fieldInfo(String name, Class type, BracketType bracketType, Field field) {
+        return new VanillaFieldInfo(name, type, bracketType, field);
     }
 
     String name();
@@ -29,4 +31,8 @@ public interface FieldInfo {
     Class type();
 
     BracketType bracketType();
+
+    Object get(Object value);
+
+    void set(Object object, Object value);
 }

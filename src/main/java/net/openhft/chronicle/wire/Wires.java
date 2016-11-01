@@ -37,10 +37,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
@@ -75,7 +72,20 @@ public enum Wires {
         }
         return SerializationStrategies.ANY_OBJECT;
     });
-    static final ClassLocal<List<FieldInfo>> FIELD_INFOS = ClassLocal.withInitial(VanillaFieldInfo::lookupClass);
+
+    static class FieldInfoPair {
+        static final FieldInfoPair EMPTY = new FieldInfoPair(Collections.emptyList(), Collections.emptyMap());
+
+        final List<FieldInfo> list;
+        final Map<String, FieldInfo> map;
+
+        public FieldInfoPair(List<FieldInfo> list, Map<String, FieldInfo> map) {
+            this.list = list;
+            this.map = map;
+        }
+    }
+
+    static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(VanillaFieldInfo::lookupClass);
 
     static final StringBuilderPool SBP = new StringBuilderPool();
 
@@ -295,7 +305,11 @@ public enum Wires {
     }
 
     public static List<FieldInfo> fieldInfos(Class aClass) {
-        return FIELD_INFOS.get(aClass);
+        return FIELD_INFOS.get(aClass).list;
+    }
+
+    public static FieldInfo fieldInfo(Class aClass, String name) {
+        return FIELD_INFOS.get(aClass).map.get(name);
     }
 
     enum SerializeBytes implements Function<Class, SerializationStrategy> {

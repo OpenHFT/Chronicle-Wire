@@ -16,9 +16,14 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.util.ObjectUtils;
+
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 
@@ -30,28 +35,35 @@ public class VanillaFieldInfo extends AbstractMarshallable implements FieldInfo 
     private final String name;
     private final Class type;
     private final BracketType bracketType;
+    private final Class parent;
+    private transient Field field;
 
-    public VanillaFieldInfo(String name, Class type, BracketType bracketType) {
+    public VanillaFieldInfo(String name, Class type, BracketType bracketType, Field field) {
         this.name = name;
         this.type = type;
         this.bracketType = bracketType;
+        parent = field.getDeclaringClass();
+        this.field = field;
     }
 
-    public static List<FieldInfo> lookupClass(Class aClass) {
+    public static Wires.FieldInfoPair lookupClass(Class aClass) {
         final SerializationStrategy ss = Wires.CLASS_STRATEGY.get(aClass);
-        if (ss.bracketType() != BracketType.MAP)
-            return Collections.emptyList();
+        if (ss.bracketType() != BracketType.MAP) {
+            return Wires.FieldInfoPair.EMPTY;
+        }
 
         List<FieldInfo> fields = new ArrayList<>();
         final WireMarshaller marshaller = WIRE_MARSHALLER_CL.get(aClass);
-        for (WireMarshaller.FieldAccess field : marshaller.fields) {
-            final String name = field.field.getName();
-            final Class<?> type = field.field.getType();
+        for (WireMarshaller.FieldAccess fa : marshaller.fields) {
+            final String name = fa.field.getName();
+            final Class<?> type = fa.field.getType();
             final SerializationStrategy ss2 = Wires.CLASS_STRATEGY.get(type);
             final BracketType bracketType = ss2.bracketType();
-            fields.add(new VanillaFieldInfo(name, type, bracketType));
+            fields.add(new VanillaFieldInfo(name, type, bracketType, fa.field));
         }
-        return Collections.unmodifiableList(fields);
+        return new Wires.FieldInfoPair(
+                Collections.unmodifiableList(fields),
+                fields.stream().collect(Collectors.toMap(FieldInfo::name, f -> f)));
     }
 
     @Override
@@ -67,5 +79,34 @@ public class VanillaFieldInfo extends AbstractMarshallable implements FieldInfo 
     @Override
     public BracketType bracketType() {
         return bracketType;
+    }
+
+    @Override
+    public Object get(Object value) {
+        try {
+            return getField().get(value);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            Jvm.debug().on(VanillaFieldInfo.class, e);
+            return null;
+        }
+    }
+
+    @Override
+    public void set(Object object, Object value) {
+        Object value2 = ObjectUtils.convertTo(type, value);
+        try {
+            getField().set(object, value2);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    public Field getField() throws NoSuchFieldException {
+        if (field == null) {
+            field = parent.getDeclaredField(name);
+            field.setAccessible(true);
+        }
+        return field;
     }
 }
