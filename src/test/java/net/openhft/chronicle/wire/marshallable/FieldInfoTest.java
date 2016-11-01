@@ -54,163 +54,195 @@ public class FieldInfoTest {
                 "[!FieldInfo {\n" +
                         "  name: values,\n" +
                         "  type: !type net.openhft.chronicle.wire.marshallable.ScalarValues,\n" +
-                        "  bracketType: MAP\n" +
+                        "  bracketType: MAP,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.Nested\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: strings,\n" +
                         "  type: !type !seq,\n" +
-                        "  bracketType: SEQ\n" +
+                        "  bracketType: SEQ,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.Nested\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: ints,\n" +
                         "  type: !type !set,\n" +
-                        "  bracketType: SEQ\n" +
+                        "  bracketType: SEQ,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.Nested\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: map,\n" +
                         "  type: !type !map,\n" +
-                        "  bracketType: MAP\n" +
+                        "  bracketType: MAP,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.Nested\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: array,\n" +
                         "  type: !type String[],\n" +
-                        "  bracketType: SEQ\n" +
+                        "  bracketType: SEQ,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.Nested\n" +
                         "}\n" +
                         "]",
                 "[!FieldInfo {\n" +
                         "  name: flag,\n" +
                         "  type: !type boolean,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: b,\n" +
                         "  type: !type byte,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: s,\n" +
                         "  type: !type short,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: ch,\n" +
                         "  type: !type char,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: i,\n" +
                         "  type: !type int,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: f,\n" +
                         "  type: !type float,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: l,\n" +
                         "  type: !type long,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: d,\n" +
                         "  type: !type double,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: flag2,\n" +
                         "  type: !type java.lang.Boolean,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: b2,\n" +
                         "  type: !type byte,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: s2,\n" +
                         "  type: !type short,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: ch2,\n" +
                         "  type: !type Char,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: i2,\n" +
                         "  type: !type int,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: f2,\n" +
                         "  type: !type Float32,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: l2,\n" +
                         "  type: !type long,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: d2,\n" +
                         "  type: !type Float64,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: aClass,\n" +
                         "  type: !type type,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: policy,\n" +
                         "  type: !type java.lang.annotation.RetentionPolicy,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: text,\n" +
                         "  type: !type String,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: date,\n" +
                         "  type: !type Date,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: time,\n" +
                         "  type: !type Time,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: dateTime,\n" +
                         "  type: !type DateTime,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: zonedDateTime,\n" +
                         "  type: !type ZonedDateTime,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: uuid,\n" +
                         "  type: !type java.util.UUID,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: bi,\n" +
                         "  type: !type java.math.BigInteger,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: bd,\n" +
                         "  type: !type java.math.BigDecimal,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: file,\n" +
                         "  type: !type java.io.File,\n" +
-                        "  bracketType: NONE\n" +
+                        "  bracketType: NONE,\n" +
+                        "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         "]",
         };
