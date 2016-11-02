@@ -48,7 +48,8 @@ public class JSON222Test {
     @Parameterized.Parameters
     public static Collection<File[]> combinations() {
         List<File[]> list = new ArrayList<>();
-        for (File file : new File(OS.getTarget(), "../src/test/resources/nst_files").listFiles()) {
+        for (File file : new File(new File(OS.getTarget()).getParentFile(),
+                "src/test/resources/nst_files").listFiles()) {
             if (file.getName().contains("_")) {
                 File[] args = {file};
                 list.add(args);
@@ -94,7 +95,8 @@ public class JSON222Test {
             } while (wire.isNotEmptyAfterPadding());
 
             if (fail) {
-                final File file2 = new File(this.file.getPath().replaceAll("/._", "/e-").replaceAll("\\.json", ".yaml"));
+                String path = this.file.getPath();
+                final File file2 = new File(path.replaceAll("\\b._", "e-").replaceAll("\\.json", ".yaml"));
 
 /*
                 System.out.println(file2 + "\n" + new String(bytes, "UTF-8") + "\n" + bytes2);
@@ -109,7 +111,11 @@ public class JSON222Test {
                 try (InputStream in = new FileInputStream(file2)) {
                     in.read(bytes4);
                 }
-                assertEquals(new String(bytes4, "UTF-8"), bytes2.toString());
+                String expected = new String(bytes4, "UTF-8");
+                if (expected.contains("\r\n"))
+                    expected = expected.replaceAll("\r\n", "\n");
+                String actual = bytes2.toString();
+                assertEquals(expected, actual);
             }
 //            if (fail)
 //                throw new AssertionError("Expected to fail, was " + list);
