@@ -112,7 +112,7 @@ public class JSON222Test {
                     in.read(bytes4);
                 }
                 String expected = new String(bytes4, "UTF-8");
-                if (expected.contains("\r"))
+                if (expected.contains("\r\n"))
                     expected = expected.replaceAll("\r\n", "\n");
                 String actual = bytes2.toString();
                 assertEquals(expected, actual);

@@ -29,6 +29,8 @@ enum TextStopCharsTesters implements StopCharsTester {
                 // one character stop.
                 case '"':
                 case '#':
+                case '\0':
+                case '\r':
                 case '\n':
                 case '}':
                 case ']':
