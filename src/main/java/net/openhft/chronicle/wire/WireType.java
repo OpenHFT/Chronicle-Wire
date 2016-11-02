@@ -171,7 +171,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             if (isAvailable())
                 return;
 
-            final IllegalStateException licence = new IllegalStateException("A Chronicle Wire " +
+            final IllegalStateException licence = new IllegalStateException("A Chronicle-Wire-" +
                     "Enterprise licence is required to run this code because you are using " +
                     "DELTA_BINARY which is a licence product. " +
                     "Please contact sales@chronicle.software");
@@ -182,13 +182,10 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         private final boolean isAvailable = isAvailable0();
 
         private boolean isAvailable0() {
-            boolean isAvailable;
             try {
                 Class.forName("software.chronicle.wire.DeltaWire")
                         .getDeclaredConstructor(Bytes.class);
-
                 return true;
-
             } catch (Exception fallback) {
                 return false;
             }
