@@ -265,23 +265,23 @@ public enum Wires {
         return t;
     }
 
-    public static <T> T copyTo(Object marshallable, T t) {
+    public static <T> T copyTo(Object source, T target) {
         Wire wire = acquireBinaryWire();
-        if (marshallable instanceof WriteMarshallable)
-            ((WriteMarshallable) marshallable).writeMarshallable(wire);
+        if (source instanceof WriteMarshallable)
+            ((WriteMarshallable) source).writeMarshallable(wire);
         else
-            writeMarshallable(marshallable, wire);
-        if (t instanceof ReadMarshallable)
-            ((ReadMarshallable) t).readMarshallable(wire);
+            writeMarshallable(source, wire);
+        if (target instanceof ReadMarshallable)
+            ((ReadMarshallable) target).readMarshallable(wire);
         else
-            readMarshallable(t, wire, true);
-        return t;
+            readMarshallable(target, wire, true);
+        return target;
     }
 
-    public static <T> T project(Class<T> tClass, Object obj) {
-        T t = ObjectUtils.newInstance(tClass);
-        Wires.copyTo(obj, t);
-        return t;
+    public static <T> T project(Class<T> tClass, Object source) {
+        T target = ObjectUtils.newInstance(tClass);
+        Wires.copyTo(source, target);
+        return target;
     }
 
     public static boolean isEquals(Object o1, Object o2) {
