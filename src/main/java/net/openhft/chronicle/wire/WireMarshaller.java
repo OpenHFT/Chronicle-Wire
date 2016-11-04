@@ -33,7 +33,8 @@ import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
  * Created by peter on 16/03/16.
  */
 public class WireMarshaller<T> {
-    static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial(tClass ->
+   public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
+            (tClass ->
             Throwable.class.isAssignableFrom(tClass)
                     ? WireMarshaller.ofThrowable(tClass)
                     : WireMarshaller.of(tClass)
