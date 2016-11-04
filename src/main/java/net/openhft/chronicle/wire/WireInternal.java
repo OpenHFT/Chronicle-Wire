@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.nio.BufferUnderflowException;
 import java.util.ArrayList;
@@ -41,9 +42,10 @@ public enum WireInternal {
     static final StringInterner INTERNER = new StringInterner(128);
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
-    static final ThreadLocal<Bytes> BYTES_TL = ThreadLocal.withInitial(Bytes::allocateElasticDirect);
-    static final ThreadLocal<Wire> BINARY_WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.allocateElasticDirect()));
-    static final ThreadLocal<Bytes> ABYTES_TL = ThreadLocal.withInitial(Bytes::allocateElasticDirect);
+    static final ThreadLocal<WeakReference<Bytes>> BYTES_TL = new ThreadLocal<>();
+    static final ThreadLocal<WeakReference<Wire>> BINARY_WIRE_TL = new ThreadLocal<>();
+    static final ThreadLocal<WeakReference<Bytes>> ABYTES_TL = new ThreadLocal();
+
     static final StackTraceElement[] NO_STE = {};
     private static final Field DETAILED_MESSAGE = Jvm.getField(Throwable.class, "detailMessage");
     private static final Field STACK_TRACE = Jvm.getField(Throwable.class, "stackTrace");

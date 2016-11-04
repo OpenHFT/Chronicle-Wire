@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -38,6 +39,7 @@ import org.xerial.snappy.Snappy;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -62,9 +64,10 @@ public class TextWire extends AbstractWire implements Wire {
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
     static final BitSet QUOTE_CHARS = new BitSet();
     static final Logger LOG = LoggerFactory.getLogger(TextWire.class);
-    static final ThreadLocal<StopCharTester> ESCAPED_QUOTES = ThreadLocal.withInitial(StopCharTesters.QUOTES::escaping);
-    static final ThreadLocal<StopCharTester> ESCAPED_SINGLE_QUOTES = ThreadLocal.withInitial(() -> StopCharTesters.SINGLE_QUOTES.escaping());
-    static final ThreadLocal<StopCharsTester> ESCAPED_END_OF_TEXT = ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
+    static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(StopCharTesters.QUOTES::escaping);
+    static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_SINGLE_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(() -> StopCharTesters.SINGLE_QUOTES.escaping());
+    static final ThreadLocal<WeakReference<StopCharsTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
+
     static final BytesStore COMMA_SPACE = BytesStore.from(", ");
     static final BytesStore COMMA_NEW_LINE = BytesStore.from(",\n");
     static final BytesStore NEW_LINE = BytesStore.from("\n");
@@ -165,6 +168,14 @@ public class TextWire extends AbstractWire implements Wire {
         if (length != sb.length())
             throw new IllegalStateException("Length changed from " + length + " to " + sb.length() + " for " + sb);
         AppendableUtil.setLength(sb, end);
+    }
+
+    static StopCharTester getEscapingSingleQuotes() {
+        StopCharTester sct = ThreadLocalHelper.getTL(ESCAPED_SINGLE_QUOTES,
+                StopCharTesters.SINGLE_QUOTES::escaping);
+        // reset it.
+        sct.isStopChar(' ');
+        return sct;
     }
 
     @Override
@@ -335,21 +346,16 @@ public class TextWire extends AbstractWire implements Wire {
 
     @NotNull
     protected StopCharsTester getEscapingEndOfText() {
-        StopCharsTester escaping = ESCAPED_END_OF_TEXT.get();
+        StopCharsTester escaping = ThreadLocalHelper.getTL(ESCAPED_END_OF_TEXT,
+                TextStopCharsTesters.END_OF_TEXT::escaping);
         // reset it.
         escaping.isStopChar(' ', ' ');
         return escaping;
     }
 
     protected StopCharTester getEscapingQuotes() {
-        StopCharTester sct = ESCAPED_QUOTES.get();
-        // reset it.
-        sct.isStopChar(' ');
-        return sct;
-    }
-
-    private StopCharTester getEscapingSingleQuotes() {
-        StopCharTester sct = ESCAPED_SINGLE_QUOTES.get();
+        StopCharTester sct = ThreadLocalHelper.getTL(ESCAPED_QUOTES,
+                StopCharTesters.QUOTES::escaping);
         // reset it.
         sct.isStopChar(' ');
         return sct;

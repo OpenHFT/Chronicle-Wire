@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.LicenceCheck;
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -273,8 +274,6 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         }
     };
 
-    static final ThreadLocal<Bytes> bytesTL = ThreadLocal.withInitial(Bytes::allocateElasticDirect);
-    static final ThreadLocal<Bytes> bytes2TL = ThreadLocal.withInitial(Bytes::allocateElasticDirect);
     private static final Logger LOG = LoggerFactory.getLogger(WireType.class);
     private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
 
@@ -282,7 +281,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         // when in debug, the output becomes confused if you reuse the buffer.
         if (Jvm.isDebug())
             return Bytes.allocateElasticDirect();
-        Bytes bytes = bytesTL.get();
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::allocateElasticDirect);
         bytes.clear();
         return bytes;
     }
@@ -291,7 +290,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         // when in debug, the output becomes confused if you reuse the buffer.
         if (Jvm.isDebug())
             return Bytes.allocateElasticDirect();
-        Bytes bytes = bytes2TL.get();
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.ABYTES_TL, Bytes::allocateElasticDirect);
         bytes.clear();
         return bytes;
     }
