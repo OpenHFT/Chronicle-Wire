@@ -21,10 +21,12 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.StopCharTester;
 import net.openhft.chronicle.bytes.StopCharTesters;
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +35,7 @@ import java.util.List;
  */
 public class CSVWire extends TextWire {
 
-    static final ThreadLocal<StopCharTester> ESCAPED_END_OF_TEXT = ThreadLocal.withInitial(() -> StopCharTesters.COMMA_STOP.escaping());
+    private static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();
 
     private final List<String> header = new ArrayList<>();
 
@@ -57,6 +59,15 @@ public class CSVWire extends TextWire {
     }
 
     @NotNull
+    static StopCharTester getEscapingCSVEndOfText() {
+        StopCharTester escaping = ThreadLocalHelper.getTL(ESCAPED_END_OF_TEXT,
+                StopCharTesters.COMMA_STOP::escaping);
+        // reset it.
+        escaping.isStopChar(' ');
+        return escaping;
+    }
+
+    @NotNull
     @Override
     protected TextValueOut createValueOut() {
         return new CSVValueOut();
@@ -72,21 +83,6 @@ public class CSVWire extends TextWire {
     public StringBuilder readField(@NotNull StringBuilder sb) {
         valueIn.text(sb);
         return sb;
-    }
-
-    @NotNull
-    StopCharTester getEscapingCSVEndOfText() {
-        StopCharTester escaping = ESCAPED_END_OF_TEXT.get();
-        // reset it.
-        escaping.isStopChar(' ');
-        return escaping;
-    }
-
-    StopCharTester getEscapingSingleQuotes() {
-        StopCharTester sct = ESCAPED_SINGLE_QUOTES.get();
-        // reset it.
-        sct.isStopChar(' ');
-        return sct;
     }
 
     public void consumePadding() {
@@ -151,9 +147,9 @@ public class CSVWire extends TextWire {
                 case '\'': {
                     bytes.readSkip(1);
                     if (use8bit)
-                        bytes.parse8bit(a, getEscapingSingleQuotes());
+                        bytes.parse8bit(a, TextWire.getEscapingSingleQuotes());
                     else
-                        bytes.parseUtf8(a, getEscapingSingleQuotes());
+                        bytes.parseUtf8(a, TextWire.getEscapingSingleQuotes());
                     unescape(a);
                     int code = peekCode();
                     if (code == '\'')

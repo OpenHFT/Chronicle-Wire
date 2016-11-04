@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
+import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -72,21 +73,7 @@ public enum Wires {
         }
         return SerializationStrategies.ANY_OBJECT;
     });
-
-    static class FieldInfoPair {
-        static final FieldInfoPair EMPTY = new FieldInfoPair(Collections.emptyList(), Collections.emptyMap());
-
-        final List<FieldInfo> list;
-        final Map<String, FieldInfo> map;
-
-        public FieldInfoPair(List<FieldInfo> list, Map<String, FieldInfo> map) {
-            this.list = list;
-            this.map = map;
-        }
-    }
-
     static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(VanillaFieldInfo::lookupClass);
-
     static final StringBuilderPool SBP = new StringBuilderPool();
 
     static {
@@ -228,19 +215,19 @@ public enum Wires {
     }
 
     public static Bytes acquireBytes() {
-        Bytes bytes = WireInternal.BYTES_TL.get();
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::allocateElasticDirect);
         bytes.clear();
         return bytes;
     }
 
     public static Wire acquireBinaryWire() {
-        Wire wire = WireInternal.BINARY_WIRE_TL.get();
+        Wire wire = ThreadLocalHelper.getTL(WireInternal.BINARY_WIRE_TL, () -> new BinaryWire(acquireBytes()));
         wire.clear();
         return wire;
     }
 
     public static Bytes acquireAnotherBytes() {
-        Bytes bytes = WireInternal.ABYTES_TL.get();
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::allocateElasticDirect);
         bytes.clear();
         return bytes;
     }
@@ -458,6 +445,18 @@ public enum Wires {
             if (Serializable.class.isAssignableFrom(aClass))
                 return SerializationStrategies.ANY_NESTED;
             return null;
+        }
+    }
+
+    static class FieldInfoPair {
+        static final FieldInfoPair EMPTY = new FieldInfoPair(Collections.emptyList(), Collections.emptyMap());
+
+        final List<FieldInfo> list;
+        final Map<String, FieldInfo> map;
+
+        public FieldInfoPair(List<FieldInfo> list, Map<String, FieldInfo> map) {
+            this.list = list;
+            this.map = map;
         }
     }
 }
