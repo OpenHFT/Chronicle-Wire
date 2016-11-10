@@ -22,6 +22,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Rob Austin
@@ -96,5 +98,58 @@ public class UsingTestMarshallable {
                     "text=" + text +
                     '}';
         }
+    }
+
+
+    static class MarshableFilter extends AbstractMarshallable {
+        public final String columnName;
+        public final String filter;
+
+        public MarshableFilter(String columnName, String filter) {
+            this.columnName = columnName;
+            this.filter = filter;
+        }
+    }
+
+    static class MarshableOrderBy extends AbstractMarshallable {
+        public final String column;
+        public final boolean isAscending;
+
+        public MarshableOrderBy(String column, boolean isAscending) {
+            this.column = column;
+            this.isAscending = isAscending;
+        }
+    }
+
+    static class SortedFilter extends AbstractMarshallable {
+        public long fromIndex;
+        public List<MarshableOrderBy> marshableOrderBy = new ArrayList<>();
+        public List<MarshableFilter> marshableFilters = new ArrayList<>();
+    }
+
+
+    @Test
+    public void test() {
+
+        Wire wire = WireType.BINARY.apply(Wires.acquireBytes());
+        MarshableFilter expected = new MarshableFilter("hello", "world");
+
+        // write
+        {
+            SortedFilter sortedFilter = new SortedFilter();
+
+            boolean add = sortedFilter.marshableFilters.add(expected);
+            wire.write().marshallable(sortedFilter);
+        }
+
+
+        // read
+        {
+            SortedFilter sortedFilter = new SortedFilter();
+            wire.read().marshallable(sortedFilter);
+            Assert.assertEquals(1, sortedFilter.marshableFilters.size());
+            Assert.assertEquals(expected, sortedFilter.marshableFilters.get(0));
+        }
+
     }
 }
