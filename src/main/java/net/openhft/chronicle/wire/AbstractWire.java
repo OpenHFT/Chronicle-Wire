@@ -429,7 +429,7 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public void writeEndOfWire(long timeout, TimeUnit timeUnit, @NotNull long lastPosition) throws
+    public void writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) throws
             TimeoutException {
 
         long pos = Math.max(lastPosition, bytes.writePosition());
@@ -447,7 +447,11 @@ public abstract class AbstractWire implements Wire {
                 if (header == END_OF_DATA)
                     return; // already written.
                 if (header == NOT_COMPLETE_UNKNOWN_LENGTH) {
-                    acquireTimedParser().pause(timeout, timeUnit);
+                    try {
+                        acquireTimedParser().pause(timeout, timeUnit);
+                    } catch (TimeoutException e) {
+                        throw new TimeoutException("header: " + Integer.toHexString(header) + ", pos: " + pos);
+                    }
                     continue;
                 }
                 acquireTimedParser().reset();
