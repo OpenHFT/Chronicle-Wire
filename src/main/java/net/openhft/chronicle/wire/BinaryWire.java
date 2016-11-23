@@ -1748,7 +1748,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         return;
                     }
 
-                    if (((double) (float) l) == l) {
+                    if ((float) l == l) {
                         super.float32((float) l);
                         return;
                     }
@@ -1772,7 +1772,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     return;
                 }
 
-                if (((double) (float) l) == l) {
+                if ((float) l == l) {
                     super.float32((float) l);
                     return;
                 }
