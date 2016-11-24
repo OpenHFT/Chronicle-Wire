@@ -33,6 +33,36 @@ import static org.junit.Assert.assertNotNull;
  * Created by peter on 16/03/16.
  */
 public class DefaultMarshallerTest {
+
+    @Test
+    public void testDeserializeWithNestedArray() {
+        ClassAliasPool.CLASS_ALIASES.addAlias(NestedEnum.class);
+        DMOuterClassWithEmbeddedArray dmOuterClass = ObjectUtils.newInstance(DMOuterClassWithEmbeddedArray.class);
+
+        DMOuterClassWithEmbeddedArray oc = new DMOuterClassWithEmbeddedArray("words");
+        oc.enums = new NestedEnum[3];
+        oc.enums[0] = NestedEnum.ONE;
+        oc.enums[1] = NestedEnum.TWO;
+        oc.enums[2] = NestedEnum.THREE;
+
+        assertEquals("!net.openhft.chronicle.wire.DefaultMarshallerTest$DMOuterClassWithEmbeddedArray {\n" +
+                "  str: words,\n" +
+                "  enums: [\n" +
+                "    ONE,\n" +
+                "    TWO,\n" +
+                "    THREE\n" +
+                "  ]\n" +
+                "}\n", oc.toString());
+
+        Wire text = new TextWire(Bytes.elasticByteBuffer());
+        oc.writeMarshallable(text);
+
+        DMOuterClassWithEmbeddedArray oc2 = new DMOuterClassWithEmbeddedArray();
+        oc2.readMarshallable(text);
+
+        assertEquals(oc, oc2);
+    }
+
     @Test
     public void testDeserialize() {
         ClassAliasPool.CLASS_ALIASES.addAlias(DMNestedClass.class);
@@ -115,4 +145,31 @@ public class DefaultMarshallerTest {
             this.num = num;
         }
     }
+
+    static class DMOuterClassWithEmbeddedArray extends AbstractMarshallable {
+        String str;
+        NestedEnum[] enums;
+
+        DMOuterClassWithEmbeddedArray() {
+
+        }
+
+        DMOuterClassWithEmbeddedArray(String s) {
+            this.str = s;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return super.equals(o);
+        }
+
+    }
+
+    static enum NestedEnum {
+        ONE,
+        TWO,
+        THREE
+        ;
+    }
+
 }
