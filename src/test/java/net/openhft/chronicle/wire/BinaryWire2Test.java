@@ -17,6 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.util.Compressions;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Assert;
@@ -339,6 +340,9 @@ public class BinaryWire2Test {
 
     @Test
     public void testSnappyCompressWithSnappy() throws IOException {
+        if (!Compressions.Snappy.available())
+            return;
+
         Wire wire = createWire();
         String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
@@ -357,6 +361,9 @@ public class BinaryWire2Test {
     @Test
     @Ignore("Todo fix")
     public void testSnappyCompressWithSnappy2() throws IOException {
+        if (!Compressions.Snappy.available())
+            return;
+
         Wire wire = createWire();
         Bytes str = Bytes.from("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
