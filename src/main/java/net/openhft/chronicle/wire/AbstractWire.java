@@ -310,7 +310,7 @@ public abstract class AbstractWire implements Wire {
 
                 int header = bytes.readVolatileInt(pos);
                 // two states where it is unable to continue.
-                if (header == END_OF_DATA)
+                if (Wires.isEndOfFile(header))
                     throw new EOFException();
                 if (isNotComplete(header)) {
                     acquireTimedParser().pause(timeout, timeUnit);

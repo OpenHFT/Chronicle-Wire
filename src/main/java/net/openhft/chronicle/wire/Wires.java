@@ -299,6 +299,10 @@ public enum Wires {
         return FIELD_INFOS.get(aClass).map.get(name);
     }
 
+    public static boolean isEndOfFile(int num) {
+        return num == END_OF_DATA;
+    }
+
     enum SerializeBytes implements Function<Class, SerializationStrategy> {
         INSTANCE;
 

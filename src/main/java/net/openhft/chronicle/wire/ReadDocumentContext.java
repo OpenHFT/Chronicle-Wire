@@ -90,7 +90,7 @@ public class ReadDocumentContext implements DocumentContext {
         long position = bytes.readPosition();
 
         int header = bytes.readVolatileInt(position);
-        notComplete = Wires.isNotComplete(header);
+        notComplete = Wires.isNotComplete(header); // || isEndOfFile
         if (header == 0 || (wire.notCompleteIsNotPresent() && notComplete)) {
             return;
         }
