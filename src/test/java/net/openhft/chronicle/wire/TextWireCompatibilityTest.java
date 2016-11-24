@@ -34,8 +34,8 @@ public class TextWireCompatibilityTest {
     public static class SuperIncompatibleObject implements Marshallable {
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
-            Assert.assertEquals(1, wire.read(() -> "a").int32());
-            String missingValue = wire.read(() -> "c").text();
+            Assert.assertEquals(1, wire.read("a").int32());
+            String missingValue = wire.read("c").text();
             if (missingValue != null) {
                 System.err.println("expected null, had: <" + missingValue + ">");
             }
@@ -51,7 +51,7 @@ public class TextWireCompatibilityTest {
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
             super.readMarshallable(wire);
-            Assert.assertEquals(TextWireCompatibilityTest.class, wire.read(() -> "b").typeLiteral());
+            Assert.assertEquals(TextWireCompatibilityTest.class, wire.read("b").typeLiteral());
             Assert.assertNotNull(wire.read(() -> "object").object());
             Assert.assertNotNull(wire.read(() -> "object2").object());
         }
