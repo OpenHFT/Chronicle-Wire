@@ -11,7 +11,7 @@ import java.util.TreeMap;
 import static org.junit.Assert.assertEquals;
 
 
-public class MapMarshableTest {
+public class MapMarshallableTest {
 
     @Test
     public void test() {
@@ -38,5 +38,4 @@ public class MapMarshableTest {
         int two;
         int three;
     }
-
 }
