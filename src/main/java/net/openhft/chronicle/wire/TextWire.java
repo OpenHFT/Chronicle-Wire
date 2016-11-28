@@ -451,8 +451,13 @@ public class TextWire extends AbstractWire implements Wire {
             long position = bytes.readPosition();
             // at the current position look for the field.
             readField(sb);
-            if (sb.length() == 0 || StringUtils.isEqual(sb, name))
+            if (StringUtils.isEqual(sb, name))
                 return valueIn;
+            if (sb.length() == 0) {
+                if (curr.unexpectedSize() > 0)
+                    break;
+                return valueIn;
+            }
 
             // if no old field nor current field matches, set to default values.
             // we may come back and set the field later if we find it.

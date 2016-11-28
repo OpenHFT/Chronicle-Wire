@@ -85,7 +85,9 @@ public class WireDumper {
         if (start > 0) {
             sb.append("# position: ").append(start).append(", header: ");
             sb.append(headerNumber);
-            if (Wires.isNotComplete(header))
+            if (Wires.isEndOfFile(header))
+                sb.append(" EOF");
+            else if (Wires.isNotComplete(header))
                 sb.append(" or ").append(headerNumber + 1);
             sb.append("\n");
         }

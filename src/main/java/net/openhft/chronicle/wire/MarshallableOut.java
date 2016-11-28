@@ -38,9 +38,20 @@ public interface MarshallableOut {
      * }
      * </pre>
      *
-     * @return the DocumentContext
+     * WARNING : any data written inside the writingDocument(),  should be performed as quickly as
+     * possible  because a write lock is held  until the DocumentContext is closed by the
+     * try-with-resources,  this blocks other appenders and tailers.
+     * <pre>
+     * try (DocumentContext dc = appender.writingDocument()) {
+     *      // this should be performed as quickly as possible because a write lock is held until
+     * the
+     *      // DocumentContext is closed by the try-with-resources,  this blocks other appenders
+     *      and tailers.
+     * }
+     * </pre>
      */
     DocumentContext writingDocument() throws UnrecoverableTimeoutException;
+
 
     /**
      * @return true is this output is configured to expect the history of the message to be written

@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
+import net.openhft.chronicle.bytes.util.Compressions;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
@@ -857,6 +858,8 @@ public class TextWireTest {
     @Test
     @Ignore
     public void testSnappyCompression() throws IOException {
+        if (!Compressions.Snappy.available())
+            return;
         Wire wire = createWire();
         final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
         String str = s + s + s + s;
@@ -873,6 +876,9 @@ public class TextWireTest {
     @Test
     @Ignore
     public void testSnappyCompressionAsText() throws IOException {
+        if (!Compressions.Snappy.available())
+            return;
+
         Wire wire = createWire();
         final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
         String str = s + s + s + s;

@@ -56,7 +56,7 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
 public class BinaryWire extends AbstractWire implements Wire {
     private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
     private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
-    static int SPEC = 16;
+    static int SPEC = Integer.getInteger("BinaryWire.SPEC", 16);
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     private final FixedBinaryValueOut valueOut;
@@ -744,7 +744,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
-    private long readInt(int code) {
+    long readInt(int code) {
         if (code < 128)
             return code;
         switch (code >> 4) {
@@ -767,7 +767,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         throw new UnsupportedOperationException(stringForCode(code));
     }
 
-    private double readFloat0(int code) {
+    double readFloat0(int code) {
         // TODO: in some places we have already called this before invoking the function,
         // so we should review them and optimize the calls to do the check only once
         if (code < 128 && code >= 0) {
@@ -1748,7 +1748,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         return;
                     }
 
-                    if (((double) (float) l) == l) {
+                    if ((float) l == l) {
                         super.float32((float) l);
                         return;
                     }
@@ -1772,7 +1772,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     return;
                 }
 
-                if (((double) (float) l) == l) {
+                if ((float) l == l) {
                     super.float32((float) l);
                     return;
                 }
@@ -2942,7 +2942,20 @@ public class BinaryWire extends AbstractWire implements Wire {
         public float float32() {
             consumePadding();
             int code = readCode();
-            final double value = isText(code) ? readTextAsDouble() : readFloat0(code);
+            final double value;
+            switch (code >> 16) {
+                case BinaryWireHighCode.INT:
+                    value = readInt0(code);
+                    break;
+                case BinaryWireHighCode.FLOAT:
+                    value = readFloat0(code);
+                    break;
+                case BinaryWireHighCode.STR0:
+                case BinaryWireHighCode.STR1:
+                default:
+                    value = readTextAsDouble();
+                    break;
+            }
 
             if (Double.isFinite(value) && (value > Float.MAX_VALUE || value < -Float.MAX_VALUE))
                 throw new IllegalStateException("Cannot convert " + value + " to float");

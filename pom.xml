@@ -26,7 +26,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>chronicle-wire</artifactId>
-    <version>1.7.16-SNAPSHOT</version>
+    <version>1.7.19-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Wire</name>
     <description>Chronicle-Wire</description>
     <packaging>bundle</packaging>
@@ -44,7 +44,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>1.13.33-SNAPSHOT</version>
+                <version>1.13.39-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

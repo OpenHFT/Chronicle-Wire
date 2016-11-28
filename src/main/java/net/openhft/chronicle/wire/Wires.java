@@ -267,14 +267,8 @@ public enum Wires {
 
     public static <T> T copyTo(Object source, T target) {
         Wire wire = acquireBinaryWire();
-        if (source instanceof WriteMarshallable)
-            ((WriteMarshallable) source).writeMarshallable(wire);
-        else
-            writeMarshallable(source, wire);
-        if (target instanceof ReadMarshallable)
-            ((ReadMarshallable) target).readMarshallable(wire);
-        else
-            readMarshallable(target, wire, true);
+        wire.getValueOut().object(source);
+        wire.getValueIn().object(target, target.getClass());
         return target;
     }
 
@@ -297,6 +291,10 @@ public enum Wires {
 
     public static FieldInfo fieldInfo(Class aClass, String name) {
         return FIELD_INFOS.get(aClass).map.get(name);
+    }
+
+    public static boolean isEndOfFile(int num) {
+        return num == END_OF_DATA;
     }
 
     enum SerializeBytes implements Function<Class, SerializationStrategy> {
