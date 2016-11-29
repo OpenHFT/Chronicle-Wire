@@ -451,7 +451,7 @@ public class TextWire extends AbstractWire implements Wire {
             long position = bytes.readPosition();
             // at the current position look for the field.
             readField(sb);
-            if (StringUtils.isEqual(sb, name))
+            if (StringUtils.equalsCaseIgnore(sb, name))
                 return valueIn;
             if (sb.length() == 0) {
                 if (curr.unexpectedSize() > 0)
@@ -477,7 +477,7 @@ public class TextWire extends AbstractWire implements Wire {
         for (int i = 0; i < curr.unexpectedSize(); i++) {
             bytes.readPosition(curr.unexpected(i));
             readField(sb);
-            if (sb.length() == 0 || StringUtils.isEqual(sb, name)) {
+            if (sb.length() == 0 || StringUtils.equalsCaseIgnore(sb, name)) {
                 // if an old field matches, remove it, save the current position
                 curr.removeUnexpected(i);
                 curr.savedPosition(position2 + 1);
@@ -2503,7 +2503,7 @@ public class TextWire extends AbstractWire implements Wire {
             if (textTo(sb) == null)
                 throw new NullPointerException("value is null");
 
-            return StringUtils.equalsCaseIgnore(sb, "true");
+            return ObjectUtils.isTrue(sb);
         }
 
         public byte int8() {

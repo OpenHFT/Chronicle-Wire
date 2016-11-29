@@ -112,7 +112,6 @@ public interface WireIn extends WireCommon {
      *
      * @return if there is more data to be read in this document.
      */
-    @Deprecated
     default boolean hasMore() {
         return isNotEmptyAfterPadding();
     }
