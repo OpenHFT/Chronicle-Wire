@@ -564,6 +564,12 @@ public class TextWire extends AbstractWire implements Wire {
         return valueOut.write(expectedType, eventKey);
     }
 
+    @Override
+    public WireOut dropDefault(boolean dropDefault) {
+        valueOut.dropDefault = dropDefault;
+        return this;
+    }
+
     @NotNull
     @Override
     public ValueOut getValueOut() {
@@ -854,12 +860,16 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         protected BytesStore sep = BytesStore.empty();
         protected boolean leaf = false;
+        protected boolean dropDefault = false;
+        private String eventName;
 
         public void resetState() {
             indentation = 0;
             seps.clear();
             sep = empty();
             leaf = false;
+            dropDefault = false;
+            eventName = null;
         }
 
         void prependSeparator() {
@@ -911,6 +921,11 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut bool(@Nullable Boolean flag) {
+            if (dropDefault) {
+                if (flag == null)
+                    return wireOut();
+                writeSavedEventName();
+            }
             prependSeparator();
             append(flag == null ? nullOut() : flag ? "true" : "false");
             elementSeparator();
@@ -925,6 +940,11 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut text(@Nullable CharSequence s) {
+            if (dropDefault) {
+                if (s == null)
+                    return wireOut();
+                writeSavedEventName();
+            }
             prependSeparator();
             if (s == null) {
                 append(nullOut());
@@ -937,17 +957,12 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut int8(byte i8) {
-            prependSeparator();
-            bytes.append(i8);
-            elementSeparator();
-            return wireOut();
-        }
-
-        @NotNull
-        @Override
         public WireOut bytes(@Nullable BytesStore fromBytes) {
-
+            if (dropDefault) {
+                if (fromBytes == null)
+                    return wireOut();
+                writeSavedEventName();
+            }
             if (isText(fromBytes))
                 return text(fromBytes);
 
@@ -961,6 +976,9 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut rawBytes(@NotNull byte[] value) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
             prependSeparator();
             bytes.write(value);
             elementSeparator();
@@ -988,12 +1006,18 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut bytes(byte[] byteArray) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
             return bytes("!binary", byteArray);
         }
 
         @NotNull
         @Override
         public WireOut bytes(String type, byte[] byteArray) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
             prependSeparator();
             typePrefix(type);
             append(Base64.getEncoder().encodeToString(byteArray));
@@ -1006,6 +1030,9 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut bytes(String type, BytesStore bytesStore) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
             prependSeparator();
             typePrefix(type);
             append(Base64.getEncoder().encodeToString(bytesStore.toByteArray()));
@@ -1017,7 +1044,27 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
+        public WireOut int8(byte i8) {
+            if (dropDefault) {
+                if (i8 == 0)
+                    return wireOut();
+                writeSavedEventName();
+            }
+            prependSeparator();
+            bytes.append(i8);
+            elementSeparator();
+            return wireOut();
+        }
+
+        @NotNull
+        @Override
         public WireOut uint8checked(int u8) {
+            if (dropDefault) {
+                if (u8 == 0)
+                    return wireOut();
+                writeSavedEventName();
+            }
+
             prependSeparator();
             bytes.append(u8);
             elementSeparator();
@@ -1028,6 +1075,11 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int16(short i16) {
+            if (dropDefault) {
+                if (i16 == 0)
+                    return wireOut();
+                writeSavedEventName();
+            }
             prependSeparator();
             bytes.append(i16);
             elementSeparator();
@@ -1038,6 +1090,11 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut uint16checked(int u16) {
+            if (dropDefault) {
+                if (u16 == 0)
+                    return wireOut();
+                writeSavedEventName();
+            }
             prependSeparator();
             bytes.append(u16);
             elementSeparator();
@@ -1048,6 +1105,11 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut utf8(int codepoint) {
+            if (dropDefault) {
+                if (codepoint == 0)
+                    return wireOut();
+                writeSavedEventName();
+            }
             prependSeparator();
             StringBuilder sb = acquireStringBuilder();
             sb.appendCodePoint(codepoint);
@@ -1059,6 +1121,11 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int32(int i32) {
+            if (dropDefault) {
+                if (i32 == 0)
+                    return wireOut();
+                writeSavedEventName();
+            }
             prependSeparator();
             bytes.append(i32);
             elementSeparator();
@@ -1069,6 +1136,11 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut uint32checked(long u32) {
+            if (dropDefault) {
+                if (u32 == 0)
+                    return wireOut();
+                writeSavedEventName();
+            }
             prependSeparator();
             bytes.append(u32);
             elementSeparator();
@@ -1079,6 +1151,11 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int64(long i64) {
+            if (dropDefault) {
+                if (i64 == 0)
+                    return wireOut();
+                writeSavedEventName();
+            }
             prependSeparator();
             bytes.append(i64);
             elementSeparator();
@@ -1089,6 +1166,11 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int64_0x(long i64) {
+            if (dropDefault) {
+                if (i64 == 0)
+                    return wireOut();
+                writeSavedEventName();
+            }
             prependSeparator();
             bytes.writeUnsignedByte('0')
                     .writeUnsignedByte('x')
@@ -1101,6 +1183,9 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int64array(long capacity) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
             TextLongArrayReference.write(bytes, capacity);
             return TextWire.this;
         }
@@ -1108,6 +1193,9 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int64array(long capacity, @NotNull LongArrayValues values) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
             long pos = bytes.writePosition();
             TextLongArrayReference.write(bytes, capacity);
             ((Byteable) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
@@ -1117,6 +1205,11 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut float32(float f) {
+            if (dropDefault) {
+                if (f == 0)
+                    return wireOut();
+                writeSavedEventName();
+            }
             prependSeparator();
             double af = Math.abs(f);
             if (af >= 1e-3 && af < 1e6)
@@ -1131,6 +1224,11 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut float64(double d) {
+            if (dropDefault) {
+                if (d == 0)
+                    return wireOut();
+                writeSavedEventName();
+            }
             prependSeparator();
             double ad = Math.abs(d);
             if (ad >= 1e-3 && ad < 1e9)
@@ -1144,20 +1242,25 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut time(@NotNull LocalTime localTime) {
+        public WireOut time(LocalTime localTime) {
             return asText(localTime);
         }
 
         @NotNull
         @Override
-        public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
+        public WireOut zonedDateTime(ZonedDateTime zonedDateTime) {
+            if (dropDefault) {
+                if (zonedDateTime == null)
+                    return wireOut();
+                writeSavedEventName();
+            }
             final String s = zonedDateTime.toString();
             return s.endsWith("]") ? text(s) : asText(s);
         }
 
         @NotNull
         @Override
-        public WireOut date(@NotNull LocalDate localDate) {
+        public WireOut date(LocalDate localDate) {
             return asText(localDate);
         }
 
@@ -1169,6 +1272,11 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         private WireOut asText(Object stringable) {
+            if (dropDefault) {
+                if (stringable == null)
+                    return wireOut();
+                writeSavedEventName();
+            }
             if (stringable == null) {
                 nu11();
             } else {
@@ -1187,7 +1295,10 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public ValueOut typePrefix(@NotNull CharSequence typeName) {
+        public ValueOut typePrefix(CharSequence typeName) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
             prependSeparator();
             bytes.writeUnsignedByte('!');
             append(typeName);
@@ -1199,6 +1310,11 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, Class type) {
+            if (dropDefault) {
+                if (type == null)
+                    return wireOut();
+                writeSavedEventName();
+            }
             prependSeparator();
             append(TYPE);
             typeTranslator.accept(type, bytes);
@@ -1209,6 +1325,11 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut typeLiteral(@NotNull CharSequence type) {
+            if (dropDefault) {
+                if (type == null)
+                    return wireOut();
+                writeSavedEventName();
+            }
             prependSeparator();
             append(TYPE);
             escape(type);
@@ -1225,6 +1346,9 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int32forBinding(int value) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
             prependSeparator();
             TextIntReference.write(bytes, value);
             elementSeparator();
@@ -1234,6 +1358,9 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int32forBinding(int value, IntValue intValue) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
             if (!TextIntReference.class.isInstance(intValue))
                 throw new IllegalArgumentException();
             prependSeparator();
@@ -1248,6 +1375,9 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int64forBinding(long value) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
             prependSeparator();
             TextLongReference.write(bytes, value);
             elementSeparator();
@@ -1257,6 +1387,9 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int64forBinding(long value, LongValue longValue) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
             if (!TextLongReference.class.isInstance(longValue))
                 throw new IllegalArgumentException();
             prependSeparator();
@@ -1288,6 +1421,9 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         public void startBlock(char c) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
             if (!sep.isEmpty()) {
                 append(sep);
                 indent();
@@ -1331,6 +1467,7 @@ public class TextWire extends AbstractWire implements Wire {
             sep = seps.remove(seps.size() - 1);
             indentation--;
             leaf = false;
+            dropDefault = false;
         }
 
         protected void pushState() {
@@ -1342,6 +1479,9 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut marshallable(@NotNull WriteMarshallable object) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
             if (bytes.writePosition() == 0) {
                 object.writeMarshallable(TextWire.this);
                 if (bytes.writePosition() == 0)
@@ -1392,6 +1532,9 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut marshallable(@NotNull Serializable object) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
             if (bytes.writePosition() == 0) {
                 writeSerializable(object);
                 return TextWire.this;
@@ -1460,6 +1603,9 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut map(@NotNull final Map map) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
             marshallable(map, Object.class, Object.class, false);
             return TextWire.this;
         }
@@ -1482,6 +1628,9 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
             typePrefix(SEQ_MAP);
             map.forEach((k, v) -> sequence(w -> w.marshallable(m -> m
                     .write(() -> "key").typedMarshallable(k)
@@ -1495,31 +1644,59 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         public ValueOut write() {
-            append(sep);
-            writeTwo('"', '"');
-            endEvent();
+            if (dropDefault) {
+                eventName = "";
+            } else {
+                append(sep);
+                writeTwo('"', '"');
+                endEvent();
+            }
             return this;
         }
 
         @NotNull
         public ValueOut write(@NotNull WireKey key) {
-            return write(key.name());
+            if (dropDefault) {
+                eventName = key.name().toString();
+            } else {
+                write(key.name());
+            }
+            return this;
         }
 
         @NotNull
         public ValueOut write(@NotNull CharSequence name) {
-            prependSeparator();
-            escape(name);
-            fieldValueSeperator();
+            if (dropDefault) {
+                eventName = name.toString();
+            } else {
+                prependSeparator();
+                escape(name);
+                fieldValueSeperator();
+            }
             return this;
         }
 
         public ValueOut write(Class expectedType, @NotNull Object objectKey) {
-            prependSeparator();
-            startEvent();
-            object(expectedType, objectKey);
-            endEvent();
+            if (dropDefault) {
+                if (expectedType != String.class)
+                    throw new UnsupportedOperationException();
+                eventName = objectKey.toString();
+            } else {
+                prependSeparator();
+                startEvent();
+                object(expectedType, objectKey);
+                endEvent();
+            }
             return this;
+        }
+
+        private void writeSavedEventName() {
+            if (eventName == null)
+                return;
+            prependSeparator();
+            escape(eventName);
+            fieldValueSeperator();
+            eventName = null;
         }
 
         public void endEvent() {

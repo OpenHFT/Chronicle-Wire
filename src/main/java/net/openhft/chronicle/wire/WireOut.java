@@ -239,4 +239,8 @@ public interface WireOut extends WireCommon {
             writeEvent(kClass, k).object(vClass, v);
         });
     }
+
+    default WireOut dropDefault(boolean dropDefault) {
+        return this;
+    }
 }
