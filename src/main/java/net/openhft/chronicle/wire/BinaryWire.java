@@ -2183,9 +2183,9 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         public long readLength() {
-            int code = peekCode();
             // TODO handle non length types as well.
             for (; ; ) {
+                int code = peekCode();
                 switch (code) {
                     case BYTES_LENGTH8:
                         bytes.uncheckedReadSkipOne();
@@ -2203,16 +2203,19 @@ public class BinaryWire extends AbstractWire implements Wire {
                         bytes.uncheckedReadSkipOne();
                         long len = bytes.readStopBit();
                         bytes.readSkip(len);
-                        return readLength();
+                        break;
 
                     case PADDING:
                     case PADDING32:
                     case COMMENT:
                         consumePadding();
-                        continue;
+                        break;
+
+                    case -1:
+                        return 0;
 
                     default:
-                        return ANY_CODE_MATCH.code();
+                        return -1;
                 }
             }
         }

@@ -75,6 +75,7 @@ public class BinaryWireTest {
     public void after() {
         BinaryWire.SPEC = 16;
     }
+
     @Test
     public void testWrite() {
         Wire wire = createWire();
@@ -828,6 +829,25 @@ public class BinaryWireTest {
         Object o = wire.read().object();
         assertTrue(o instanceof SortedMap);
         assertEquals(set, o);
+    }
+
+    @Test
+    public void testSkipPadding() {
+        Wire wire = createWire();
+        for (int i = 1; i <= 128; i *= 2) {
+            wire.addPadding(i);
+            wire.getValueIn().skipValue();
+            assertEquals(0, wire.bytes().readRemaining());
+            wire.clear();
+        }
+        for (int i = 1; i <= 128; i *= 2) {
+            wire.addPadding(i);
+            int finalI = i;
+            wire.getValueOut().marshallable(w -> w.write("i").int32(finalI));
+            wire.getValueIn().skipValue();
+            assertEquals(0, wire.bytes().readRemaining());
+            wire.clear();
+        }
     }
 
     enum BWKey implements WireKey {
