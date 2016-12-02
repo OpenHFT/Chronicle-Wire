@@ -51,6 +51,10 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         return TEXT.fromFile(filename);
     }
 
+    static <T> T fromFile(Class<T> expectedType, String filename) throws IOException {
+        return TEXT.fromFile(expectedType, filename);
+    }
+
     static Map<String, Object> fromFileAsMap(String filename) throws IOException {
         return TEXT.fromFileAsMap(filename, Object.class);
     }

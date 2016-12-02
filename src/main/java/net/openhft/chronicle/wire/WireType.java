@@ -371,7 +371,11 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     }
 
     public <T> T fromFile(String filename) throws IOException {
-        return (T) (apply(Bytes.wrapForRead(IOTools.readFile(filename))).getValueIn().typedMarshallable());
+        return (T) fromFile(Marshallable.class, filename);
+    }
+
+    public <T> T fromFile(Class<T> expectedType, String filename) throws IOException {
+        return (T) (apply(Bytes.wrapForRead(IOTools.readFile(filename))).getValueIn().object(expectedType));
     }
 
     public <T> Map<String, T> fromFileAsMap(String filename, Class<T> tClass) throws IOException {
