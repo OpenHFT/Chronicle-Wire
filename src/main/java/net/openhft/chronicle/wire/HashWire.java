@@ -262,7 +262,7 @@ public class HashWire implements WireOut {
         @NotNull
         @Override
         public WireOut text(@Nullable CharSequence s) {
-            hash = hash * M1 + Maths.hash64(s);
+            hash = hash * M1 + (s == null ? 0 : Maths.hash64(s));
             return HashWire.this;
         }
 

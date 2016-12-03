@@ -33,12 +33,13 @@ import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
  * Created by peter on 16/03/16.
  */
 public class WireMarshaller<T> {
-   public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
+    private static final FieldAccess[] NO_FIELDS = {};
+    public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
             (tClass ->
-            Throwable.class.isAssignableFrom(tClass)
-                    ? WireMarshaller.ofThrowable(tClass)
-                    : WireMarshaller.of(tClass)
-    );
+                    Throwable.class.isAssignableFrom(tClass)
+                            ? WireMarshaller.ofThrowable(tClass)
+                            : WireMarshaller.of(tClass)
+            );
     final FieldAccess[] fields;
     private final Class<T> tClass;
     private final boolean isLeaf;
@@ -50,6 +51,9 @@ public class WireMarshaller<T> {
     }
 
     public static <T> WireMarshaller<T> of(Class<T> tClass) {
+        if (tClass.isInterface())
+            return new WireMarshaller<T>(tClass, NO_FIELDS, false);
+
         Map<String, Field> map = new LinkedHashMap<>();
         getAllField(tClass, map);
         final FieldAccess[] fields = map.values().stream()
@@ -59,6 +63,7 @@ public class WireMarshaller<T> {
                         c -> WireMarshaller.class.isAssignableFrom(c) ||
                                 isCollection(c));
         return new WireMarshaller<>(tClass, fields, isLeaf);
+
     }
 
     private static <T> WireMarshaller<T> ofThrowable(Class<T> tClass) {
@@ -77,7 +82,7 @@ public class WireMarshaller<T> {
     }
 
     public static void getAllField(Class clazz, Map<String, Field> map) {
-        if (clazz != Object.class)
+        if (clazz != Object.class && clazz != AbstractMarshallable.class)
             getAllField(clazz.getSuperclass(), map);
         for (Field field : clazz.getDeclaredFields()) {
             if ((field.getModifiers() & (Modifier.STATIC | Modifier.TRANSIENT)) != 0)
