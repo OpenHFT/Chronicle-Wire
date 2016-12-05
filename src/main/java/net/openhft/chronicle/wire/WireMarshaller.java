@@ -20,6 +20,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
 
 import java.lang.reflect.*;
@@ -149,6 +150,36 @@ public class WireMarshaller<T> {
                 return false;
         }
         return true;
+    }
+
+    public Object getField(Object o, String name) throws NoSuchFieldException {
+        try {
+            // TODO use a more optimal data structure
+            for (FieldAccess field : fields) {
+                if (field.field.getName().equals(name)) {
+                    return field.field.get(o);
+                }
+            }
+            throw new NoSuchFieldException(name);
+        } catch (IllegalAccessException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    public void setField(Object o, String name, Object value) throws NoSuchFieldException {
+        try {
+            // TODO use a more optimal data structure
+            for (FieldAccess field : fields) {
+                final Field field2 = field.field;
+                if (field2.getName().equals(name)) {
+                    value = ObjectUtils.convertTo(field2.getType(), value);
+                    field2.set(o, value);
+                }
+            }
+            throw new NoSuchFieldException(name);
+        } catch (IllegalAccessException e) {
+            throw new AssertionError(e);
+        }
     }
 
     static abstract class FieldAccess {

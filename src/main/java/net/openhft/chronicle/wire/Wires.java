@@ -297,6 +297,15 @@ public enum Wires {
         return num == END_OF_DATA;
     }
 
+    public static <T> T getField(Object o, String name, Class<T> tClass) throws NoSuchFieldException {
+        Object value = WireMarshaller.WIRE_MARSHALLER_CL.get(o.getClass()).getField(o, name);
+        return ObjectUtils.convertTo(tClass, value);
+    }
+
+    public static void setField(Object o, String name, Object value) throws NoSuchFieldException {
+        WireMarshaller.WIRE_MARSHALLER_CL.get(o.getClass()).setField(o, name, value);
+    }
+
     enum SerializeBytes implements Function<Class, SerializationStrategy> {
         INSTANCE;
 
