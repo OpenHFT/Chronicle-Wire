@@ -246,6 +246,14 @@ public enum Wires {
                 .writeMarshallable(marshallable, wire);
     }
 
+    public static void writeMarshallable(Object marshallable, WireOut wire, boolean writeDefault) {
+        WireMarshaller marshaller = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
+        if (writeDefault)
+            marshaller.writeMarshallable(marshallable, wire);
+        else
+            marshaller.writeMarshallable(marshallable, wire, marshaller.defaultValue(), false);
+    }
+
     public static void writeMarshallable(Object marshallable, WireOut wire, Object previous, boolean copy) {
         assert marshallable.getClass() == previous.getClass();
         WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass())

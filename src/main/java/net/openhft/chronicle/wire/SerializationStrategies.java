@@ -28,6 +28,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 /**
@@ -48,7 +49,7 @@ public enum SerializationStrategies implements SerializationStrategy {
 
         @Override
         public Object newInstance(Class type) {
-            return type.isInterface() ? null : super.newInstance(type);
+            return type.isInterface() || Modifier.isAbstract(type.getModifiers()) ? null : super.newInstance(type);
         }
     },
     ANY_OBJECT {

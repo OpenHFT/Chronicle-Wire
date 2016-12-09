@@ -44,11 +44,13 @@ public class WireMarshaller<T> {
     final FieldAccess[] fields;
     private final Class<T> tClass;
     private final boolean isLeaf;
+    private final T defaultValue;
 
     public WireMarshaller(Class<T> tClass, FieldAccess[] fields, boolean isLeaf) {
         this.tClass = tClass;
         this.fields = fields;
         this.isLeaf = isLeaf;
+        defaultValue = ObjectUtils.newInstance(tClass);
     }
 
     public static <T> WireMarshaller<T> of(Class<T> tClass) {
@@ -180,6 +182,10 @@ public class WireMarshaller<T> {
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
         }
+    }
+
+    public T defaultValue() {
+        return defaultValue;
     }
 
     static abstract class FieldAccess {

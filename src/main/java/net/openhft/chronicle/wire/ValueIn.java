@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
+import java.lang.reflect.Modifier;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.time.LocalDate;
@@ -425,7 +426,11 @@ public interface ValueIn {
             text();
             return null;
         }
-        if (clazz2 != null && (clazz == null || clazz.isAssignableFrom(clazz2) || ReadResolvable.class.isAssignableFrom(clazz2)))
+        if (clazz2 != null && (clazz == null
+                || clazz.isAssignableFrom(clazz2)
+                || ReadResolvable.class.isAssignableFrom(clazz2)
+                || clazz.isInterface()
+                || Modifier.isAbstract(clazz.getModifiers())))
             clazz = clazz2;
         if (clazz == null)
             clazz = Object.class;
@@ -449,6 +454,7 @@ public interface ValueIn {
                     strategy = SerializationStrategies.MAP;
                 if (using == null)
                     using = (E) strategy.newInstance(clazz);
+
 
                 Object ret = marshallable(using, strategy);
                 return readResolve(ret);
