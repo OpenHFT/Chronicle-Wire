@@ -50,7 +50,7 @@ public class WireMarshaller<T> {
         this.tClass = tClass;
         this.fields = fields;
         this.isLeaf = isLeaf;
-        defaultValue = ObjectUtils.newInstance(tClass);
+        defaultValue = ObjectUtils.isConcreteClass(tClass) ? ObjectUtils.newInstance(tClass) : null;
     }
 
     public static <T> WireMarshaller<T> of(Class<T> tClass) {

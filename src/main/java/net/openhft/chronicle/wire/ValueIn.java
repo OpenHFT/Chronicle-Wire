@@ -429,9 +429,9 @@ public interface ValueIn {
         if (clazz2 != null && (clazz == null
                 || clazz.isAssignableFrom(clazz2)
                 || ReadResolvable.class.isAssignableFrom(clazz2)
-                || clazz.isInterface()
-                || Modifier.isAbstract(clazz.getModifiers())))
+                || !ObjectUtils.isConcreteClass(clazz))) {
             clazz = clazz2;
+        }
         if (clazz == null)
             clazz = Object.class;
         SerializationStrategy strategy = Wires.CLASS_STRATEGY.get(clazz);
