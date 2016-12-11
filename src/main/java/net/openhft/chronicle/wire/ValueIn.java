@@ -26,7 +26,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
-import java.lang.reflect.Modifier;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.time.LocalDate;
@@ -431,6 +430,7 @@ public interface ValueIn {
                 || ReadResolvable.class.isAssignableFrom(clazz2)
                 || !ObjectUtils.isConcreteClass(clazz))) {
             clazz = clazz2;
+            using = null;
         }
         if (clazz == null)
             clazz = Object.class;

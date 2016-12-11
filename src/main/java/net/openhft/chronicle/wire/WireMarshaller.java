@@ -359,7 +359,8 @@ public class WireMarshaller<T> {
 
         protected void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException {
             try {
-                field.set(o, read.object(field.get(o), type));
+                Object using = ObjectUtils.isImmutable(type) == ObjectUtils.Immutability.NO ? field.get(o) : null;
+                field.set(o, read.object(using, type));
             } catch (Exception e) {
                 throw new IORuntimeException("Error reading " + field, e);
             }
