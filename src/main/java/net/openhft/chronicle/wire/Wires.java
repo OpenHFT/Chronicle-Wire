@@ -276,6 +276,7 @@ public enum Wires {
     public static <T> T copyTo(Object source, T target) {
         Wire wire = acquireBinaryWire();
         wire.getValueOut().object(source);
+        wire.getValueIn().typePrefix(); // drop the type prefix.
         wire.getValueIn().object(target, target.getClass());
         return target;
     }
