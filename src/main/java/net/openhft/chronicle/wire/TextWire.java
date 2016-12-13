@@ -132,17 +132,38 @@ public class TextWire extends AbstractWire implements Wire {
             if (ch == '\\' && i < length - 1) {
                 char ch3 = sb.charAt(++i);
                 switch (ch3) {
+                    case '0':
+                        ch = 0;
+                        break;
+                    case 'a':
+                        ch = 7;
+                        break;
                     case 'b':
                         ch = '\b';
                         break;
-                    case 'r':
-                        ch = '\r';
+                    case 't':
+                        ch = '\t';
                         break;
                     case 'n':
                         ch = '\n';
                         break;
-                    case 't':
-                        ch = '\t';
+                    case 'v':
+                        ch = 0xB;
+                        break;
+                    case 'f':
+                        ch = 0xC;
+                        break;
+                    case 'r':
+                        ch = '\r';
+                        break;
+                    case 'e':
+                        ch = 0x1B;
+                        break;
+                    case 'N':
+                        ch = 0x85;
+                        break;
+                    case '_':
+                        ch = 0xA0;
                         break;
                     case 'x':
                         ch = (char)
@@ -155,9 +176,6 @@ public class TextWire extends AbstractWire implements Wire {
                                         Character.getNumericValue(sb.charAt(++i)) * 256 +
                                         Character.getNumericValue(sb.charAt(++i)) * 16 +
                                         Character.getNumericValue(sb.charAt(++i)));
-                        break;
-                    case '0':
-                        ch = 0;
                         break;
                     default:
                         ch = ch3;
@@ -270,6 +288,16 @@ public class TextWire extends AbstractWire implements Wire {
                 bytes.readSkip(1);
 
                 parseUntil(sb, getEscapingQuotes());
+
+                consumePadding();
+                ch = readCode();
+                if (ch != ':')
+                    throw new UnsupportedOperationException("Expected a : at " + bytes.toDebugString() + " was " + (char) ch);
+
+            } else if (ch == '\'') {
+                bytes.readSkip(1);
+
+                parseUntil(sb, getEscapingSingleQuotes());
 
                 consumePadding();
                 ch = readCode();
@@ -606,6 +634,33 @@ public class TextWire extends AbstractWire implements Wire {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             switch (ch) {
+                case '\0':
+                    bytes.appendUtf8("\\0");
+                    break;
+                case 7:
+                    bytes.appendUtf8("\\a");
+                    break;
+                case '\b':
+                    bytes.appendUtf8("\\b");
+                    break;
+                case '\t':
+                    bytes.appendUtf8("\\t");
+                    break;
+                case '\n':
+                    bytes.appendUtf8("\\n");
+                    break;
+                case 0xB:
+                    bytes.appendUtf8("\\v");
+                    break;
+                case 0xC:
+                    bytes.appendUtf8("\\f");
+                    break;
+                case '\r':
+                    bytes.appendUtf8("\\r");
+                    break;
+                case 0x1B:
+                    bytes.appendUtf8("\\e");
+                    break;
                 case '"':
                     if (ch == quotes.q) {
                         bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);
@@ -623,29 +678,29 @@ public class TextWire extends AbstractWire implements Wire {
                 case '\\':
                     bytes.writeUnsignedByte('\\').writeUnsignedByte(ch);
                     break;
-                case '\b':
-                    bytes.appendUtf8("\\b");
+                case 0x85:
+                    bytes.appendUtf8("\\N");
                     break;
-                case '\t':
-                    bytes.appendUtf8("\\t");
-                    break;
-                case '\r':
-                    bytes.appendUtf8("\\r");
-                    break;
-                case '\n':
-                    bytes.appendUtf8("\\n");
-                    break;
-                case '\0':
-                    bytes.appendUtf8("\\0");
+                case 0xA0:
+                    bytes.appendUtf8("\\_");
                     break;
                 default:
-                    if (ch < ' ' || ch > 127)
+                    if (ch > 255)
                         appendU4(ch);
+                    else if (ch < ' ' || ch > 127)
+                        appendX2(ch);
                     else
                         bytes.appendUtf8(ch);
                     break;
             }
         }
+    }
+
+    private void appendX2(char ch) {
+        bytes.append('\\');
+        bytes.append('x');
+        bytes.append(HEXADECIMAL[(ch >> 4) & 0xF]);
+        bytes.append(HEXADECIMAL[ch & 0xF]);
     }
 
     private void appendU4(char ch) {

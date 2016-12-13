@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.ClassLocal;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -42,12 +43,10 @@ public class WireMarshaller<T> {
                             : WireMarshaller.of(tClass)
             );
     final FieldAccess[] fields;
-    private final Class<T> tClass;
     private final boolean isLeaf;
     private final T defaultValue;
 
     public WireMarshaller(Class<T> tClass, FieldAccess[] fields, boolean isLeaf) {
-        this.tClass = tClass;
         this.fields = fields;
         this.isLeaf = isLeaf;
         defaultValue = ObjectUtils.isConcreteClass(tClass) && !tClass.getName().startsWith("java") ? ObjectUtils.newInstance(tClass) : null;
@@ -90,10 +89,13 @@ public class WireMarshaller<T> {
         for (Field field : clazz.getDeclaredFields()) {
             if ((field.getModifiers() & (Modifier.STATIC | Modifier.TRANSIENT)) != 0)
                 continue;
-            if (field.getName().equals("this$0"))
-                throw new IllegalArgumentException("Found this$0, classes must be static or top level");
+            String name = field.getName();
+            if (name.equals("this$0")) {
+                Jvm.warn().on(WireMarshaller.class, "Found this$0, in " + clazz + " which will be ignored!");
+                continue;
+            }
             field.setAccessible(true);
-            map.put(field.getName(), field);
+            map.put(name, field);
         }
     }
 

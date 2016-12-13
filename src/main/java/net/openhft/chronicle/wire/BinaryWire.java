@@ -88,6 +88,14 @@ public class BinaryWire extends AbstractWire implements Wire {
         return new BinaryWire(bytes, false, false, false, Integer.MAX_VALUE, "binary", false);
     }
 
+    static boolean textable(BytesStore bytes) {
+        for (long pos = bytes.readPosition(); pos < bytes.readLimit(); pos++) {
+            if (bytes.readByte(pos) >= 127)
+                return false;
+        }
+        return true;
+    }
+
     StringBuilder acquireStringBuilder() {
         stringBuilder.setLength(0);
         return stringBuilder;
@@ -194,7 +202,10 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                     case U8_ARRAY:
                         bytes.uncheckedReadSkipOne();
-                        wire.getValueOut().bytes(bytes);
+                        if (textable(bytes))
+                            wire.getValueOut().text(bytes);
+                        else
+                            wire.getValueOut().bytes(bytes);
                         bytes.readPositionRemaining(bytes.readLimit(), 0);
                         break outerSwitch;
 
@@ -287,7 +298,15 @@ public class BinaryWire extends AbstractWire implements Wire {
                     valueOut.sequence(v -> copyTo(v.wireOut()));
                     break;
                 case NONE:
-                    valueOut.object(this.getValueIn().object());
+                    Object object = this.getValueIn().object();
+                    if (object instanceof BytesStore) {
+                        BytesStore bytes = (BytesStore) object;
+                        if (textable(bytes)) {
+                            valueOut.text(bytes);
+                            break;
+                        }
+                    }
+                    valueOut.object(object);
                     break;
             }
         } finally {

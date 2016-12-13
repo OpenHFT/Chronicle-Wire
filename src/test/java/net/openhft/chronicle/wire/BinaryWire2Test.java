@@ -472,23 +472,21 @@ public class BinaryWire2Test {
         wire.writeDocument(false, w -> w.write("nothing").object(new byte[0]));
         byte[] one = {1};
         wire.writeDocument(false, w -> w.write("one").object(one));
-        byte[] four = {1, 2, 3, 4};
-        wire.writeDocument(false, w -> w.write("four").object(four));
+        byte[] thirtytwo = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
+        wire.writeDocument(false, w -> w.write("four").object(thirtytwo));
 
         assertEquals("--- !!data #binary\n" +
                         "nothing: !byte[] \"\"\n" +
                         "# position: 23, header: 1\n" +
                         "--- !!data #binary\n" +
-                        "one: !byte[] !!binary AQ==\n" +
-                        "\n" +
+                        "one: !byte[] \"\\x01\"\n" +
                         "# position: 43, header: 2\n" +
                         "--- !!data #binary\n" +
-                        "four: !byte[] !!binary AQIDBA==\n" +
-                        "\n"
+                        "four: !byte[] \"\\0\\x01\\x02\\x03\\x04\\x05\\x06\\a\\b\\t\\n\\v\\f\\r\\x0E\\x0F\\x10\\x11\\x12\\x13\\x14\\x15\\x16\\x17\\x18\\x19\\x1A\\e\\x1C\\x1D\\x1E\\x1F \"\n"
                 , Wires.fromSizePrefixedBlobs(wire));
         wire.readDocument(null, w -> assertArrayEquals(new byte[0], (byte[]) w.read(() -> "nothing").object()));
         wire.readDocument(null, w -> assertArrayEquals(one, (byte[]) w.read(() -> "one").object()));
-        wire.readDocument(null, w -> assertArrayEquals(four, (byte[]) w.read(() -> "four").object()));
+        wire.readDocument(null, w -> assertArrayEquals(thirtytwo, (byte[]) w.read(() -> "four").object()));
     }
 
     @Test
