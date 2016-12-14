@@ -434,7 +434,7 @@ public class BinaryWire2Test {
             wire.writeDocument(false, w -> w.write("bytes").bytes(fromBytes));
             Wires.fromSizePrefixedBlobs(wire);
             int finalI = i;
-            wire.readDocument(null, w -> assertEquals(finalI, w.read(() -> "bytes").bytes().length));
+            wire.readDocument(null, w -> assertEquals(finalI, w.read("bytes").bytes().length));
         }
     }
 

@@ -59,6 +59,12 @@ public class MethodWriterBuilder<T> implements Supplier<T> {
         return this;
     }
 
+    // Builder terminology
+    public T build() {
+        return get();
+    }
+
+    // Supplier terminology
     @Override
     public T get() {
         Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
