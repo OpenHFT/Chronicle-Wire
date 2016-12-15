@@ -54,6 +54,49 @@ public class TextWireTest {
 
     Bytes bytes;
 
+
+    @Test
+    public void testFromString() {
+        Object w = WireType.TEXT.fromString("changedRow: {\n" +
+                "  row: [\n" +
+                "  ],\n" +
+                "  oldRow: {\n" +
+                "    volume: 26880400.0,\n" +
+                "    high: 108.3,\n" +
+                "    adjClose: 107.7,\n" +
+                "    low: 107.51,\n" +
+                "    close: 107.7,\n" +
+                "    key: !java.util.Date 1473116400000,\n" +
+                "    open: 107.9\n" +
+                "  }\n" +
+                "}");
+        Assert.assertTrue(w instanceof Map);
+    }
+
+
+    @Test
+    public void testWriteToBinaryAndTriesToConvertToText() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        Wire wire = WireType.BINARY.apply(b);
+        Map<String, String> data = Collections.singletonMap("key", "value");
+
+
+        HashMap map = new HashMap();
+        map.put("some", data);
+        map.put("some-other", data);
+
+        try (DocumentContext dc = wire.writingDocument()) {
+            wire.write("map").object(map);
+        }
+
+        final String textYaml = Wires.fromSizePrefixedBlobs(b);
+        System.out.println(textYaml);
+        Object o = WireType.TEXT.fromString(textYaml);
+        System.out.println(o);
+        Assert.assertTrue(o instanceof Map);
+    }
+
     @Test
     public void testWrite() {
         Wire wire = createWire();

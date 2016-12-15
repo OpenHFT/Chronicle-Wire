@@ -342,6 +342,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BracketType.MAP;
         switch (peekCode) {
             case FIELD_NAME_ANY:
+            case EVENT_NAME:
             case EVENT_OBJECT:
                 return BracketType.MAP;
             case U8_ARRAY:

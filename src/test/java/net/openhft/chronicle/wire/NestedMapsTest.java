@@ -110,14 +110,14 @@ public class NestedMapsTest {
                         "    8,\n" +
                         "    13\n" +
                         "  ],\n" +
-                        "  map1: [\n" +
+                        "  map1: {\n" +
                         "    aye: AAA,\n" +
                         "    bee: BBB\n" +
-                        "  ],\n" +
-                        "  map2: [\n" +
+                        "  },\n" +
+                        "  map2: {\n" +
                         "    one: 1.0,\n" +
                         "    two point two: 2.2\n" +
-                        "  ]\n" +
+                        "  }\n" +
                         "}\n", Wires.fromSizePrefixedBlobs(wire));
                 break;
             case FIELDLESS_BINARY:
@@ -143,14 +143,14 @@ public class NestedMapsTest {
                         "    8,\n" +
                         "    13\n" +
                         "  ],\n" +
-                        "  [\n" +
+                        "  {\n" +
                         "    aye: AAA,\n" +
                         "    bee: BBB\n" +
-                        "  ],\n" +
-                        "  [\n" +
+                        "  },\n" +
+                        "  {\n" +
                         "    one: 1.0,\n" +
                         "    two point two: 2.2\n" +
-                        "  ]\n" +
+                        "  }\n" +
                         "]\n", Wires.fromSizePrefixedBlobs(wire));
                 break;
         }
