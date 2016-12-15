@@ -29,10 +29,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Rob Austin.
@@ -62,7 +59,7 @@ public class WireTests {
 
     @Test
     public void testFromString() {
-        Wire w = WireType.TEXT.fromString("changedRow: {\n" +
+        Object w = WireType.TEXT.fromString("changedRow: {\n" +
                 "  row: [\n" +
                 "  ],\n" +
                 "  oldRow: {\n" +
@@ -75,7 +72,30 @@ public class WireTests {
                 "    open: 107.9\n" +
                 "  }\n" +
                 "}");
-        Assert.assertNotNull(w);
+        Assert.assertTrue(w instanceof Map);
+    }
+
+
+    @Test
+    public void testWriteToBinaryAndTriesToConvertToText() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        Wire wire = WireType.BINARY.apply(b);
+        Map<String, String> data = Collections.singletonMap("key", "value");
+
+
+        HashMap map = new HashMap();
+        map.put("some", data);
+        map.put("some-other", data);
+
+        try (DocumentContext dc = wire.writingDocument()) {
+            wire.write("map").object(map);
+        }
+
+        final String textYaml = Wires.fromSizePrefixedBlobs(b);
+        System.out.println(textYaml);
+        Object o = WireType.TEXT.fromString(textYaml);
+        Assert.assertTrue(o instanceof Map);
     }
 
 

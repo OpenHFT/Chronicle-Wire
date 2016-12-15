@@ -366,7 +366,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         Bytes bytes = getBytes2();
         bytes.appendUtf8(cs);
         Wire wire = apply(bytes);
-        return (T) wire.getValueIn()
+              return (T) wire.getValueIn()
                 .object();
     }
 

@@ -136,6 +136,10 @@ public interface WireOut extends WireCommon {
      */
     DocumentContext writingDocument(boolean metaData);
 
+    default DocumentContext writingDocument() {
+        return writingDocument(false);
+    }
+
     /**
      * This will increment the headerNumber as appropriate if successful
      *
