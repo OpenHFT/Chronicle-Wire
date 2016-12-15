@@ -62,18 +62,18 @@ public class WireTests {
 
     @Test
     public void testFromString() {
-        Wire w = WireType.BINARY.fromString("changedRow: {\n" +
+        Wire w = WireType.TEXT.fromString("changedRow: {\n" +
                 "  row: [\n" +
                 "  ],\n" +
-                "  oldRow: [\n" +
+                "  oldRow: {\n" +
                 "    volume: 26880400.0,\n" +
                 "    high: 108.3,\n" +
                 "    adjClose: 107.7,\n" +
                 "    low: 107.51,\n" +
                 "    close: 107.7,\n" +
-                "    key: !java.util.Date time: 1473116400000,\n" +
+                "    key: !java.util.Date 1473116400000,\n" +
                 "    open: 107.9\n" +
-                "  ]\n" +
+                "  }\n" +
                 "}");
         Assert.assertNotNull(w);
     }
@@ -83,8 +83,10 @@ public class WireTests {
     public void testDate() {
         final Bytes b = Bytes.elasticByteBuffer();
         final Wire wire = wireType.apply(b);
-        wire.getValueOut().object(new Date(0));
-        Assert.assertEquals(new Date(0), wire.getValueIn().object());
+        wire.getValueOut()
+                .object(new Date(0));
+        Assert.assertEquals(new Date(0), wire.getValueIn()
+                .object());
     }
 
 
@@ -139,19 +141,6 @@ public class WireTests {
 
         TestClass o = wire.read().typedMarshallable();
         Assert.assertEquals(Boolean.class, o.clazz());
-    }
-
-    static class TestClass extends AbstractMarshallable {
-
-        Class o;
-
-        TestClass(Class o) {
-            this.o = o;
-        }
-
-        Class clazz() {
-            return o;
-        }
     }
 
     @Test
@@ -209,6 +198,19 @@ public class WireTests {
                     "  some-other--new-data: 0\n" +
                     "}\n", wire.readingPeekYaml());
 
+        }
+    }
+
+    static class TestClass extends AbstractMarshallable {
+
+        Class o;
+
+        TestClass(Class o) {
+            this.o = o;
+        }
+
+        Class clazz() {
+            return o;
         }
     }
 }

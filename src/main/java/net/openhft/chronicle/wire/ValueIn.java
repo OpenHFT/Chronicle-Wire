@@ -439,8 +439,10 @@ public interface ValueIn {
         if (brackets == BracketType.UNKNOWN)
             brackets = getBracketType();
 
-        if (clazz2 != null && Date.class.isAssignableFrom(clazz2)) {
-            final long time = wireIn().read("time").int64();
+        if (clazz != null && Date.class.isAssignableFrom(clazz)) {
+            // skip the field if it is there.
+            wireIn().read();
+            final long time = int64();
             if (using instanceof Date) {
                 ((Date) using).setTime(time);
                 return using;
