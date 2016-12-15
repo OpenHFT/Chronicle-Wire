@@ -29,8 +29,7 @@ public class ReadDocumentContext implements DocumentContext {
     protected boolean present, notComplete;
     private boolean metaData;
     private long readPosition, readLimit;
-
-
+    long start = -1;
 
     public ReadDocumentContext(@Nullable Wire wire) {
         this.wire = (AbstractWire) wire;
@@ -67,19 +66,21 @@ public class ReadDocumentContext implements DocumentContext {
 
     @Override
     public void close() {
+        start = -1;
         if (readLimit > 0 && wire != null) {
             final Bytes<?> bytes = wire.bytes();
             bytes.readLimit(readLimit);
             bytes.readPosition(readPosition);
         }
-//        assert wire.endUse();
     }
 
     public void start() {
+
 //        assert wire.startUse();
         wire.getValueOut().resetState();
         readPosition = readLimit = -1;
         final Bytes<?> bytes = wire.bytes();
+        start = bytes.readPosition();
 
         present = false;
         if (bytes.readRemaining() < 4) {

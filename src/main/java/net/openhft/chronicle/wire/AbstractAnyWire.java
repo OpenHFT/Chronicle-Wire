@@ -181,6 +181,11 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         return wireAcquisition.acquireWire().writingDocument(metaData);
     }
 
+    public String readingPeekYaml() {
+        return wireAcquisition.acquireWire().readingPeekYaml();
+    }
+
+
     interface WireAcquisition {
 
         /**

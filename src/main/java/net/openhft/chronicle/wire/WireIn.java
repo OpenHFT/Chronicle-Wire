@@ -106,9 +106,9 @@ public interface WireIn extends WireCommon {
     void clear();
 
     /**
-     * This consumes any padding before checking if readRemaining() &gt; 0
-     * <p>
-     * NOTE: This method only works inside a document. Call it just before a document and it won't know not to read the read in case there is padding.
+     * This consumes any padding before checking if readRemaining() &gt; 0 <p> NOTE: This method
+     * only works inside a document. Call it just before a document and it won't know not to read
+     * the read in case there is padding.
      *
      * @return if there is more data to be read in this document.
      */
@@ -117,9 +117,9 @@ public interface WireIn extends WireCommon {
     }
 
     /**
-     * This consumes any padding before checking if readRemaining() &gt; 0
-     * <p>
-     * NOTE: This method only works inside a document. Call it just before a document and it won't know not to read the read in case there is padding.
+     * This consumes any padding before checking if readRemaining() &gt; 0 <p> NOTE: This method
+     * only works inside a document. Call it just before a document and it won't know not to read
+     * the read in case there is padding.
      *
      * @return if there is more data to be read in this document.
      */
@@ -169,7 +169,8 @@ public interface WireIn extends WireCommon {
     /**
      * Consume a header if one is available.
      *
-     * @return true, if a message can be read between readPosition and readLimit, else false if no header is ready.
+     * @return true, if a message can be read between readPosition and readLimit, else false if no
+     * header is ready.
      * @throws EOFException if the end of wire marker is reached.
      */
     default boolean readDataHeader() throws EOFException {
@@ -191,4 +192,6 @@ public interface WireIn extends WireCommon {
     enum HeaderType {
         NONE, DATA, META_DATA
     }
+
+    String readingPeekYaml();
 }

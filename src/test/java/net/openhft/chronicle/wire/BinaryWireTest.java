@@ -871,4 +871,5 @@ public class BinaryWireTest {
             this.text = text;
         }
     }
+
 }

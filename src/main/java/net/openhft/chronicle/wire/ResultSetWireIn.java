@@ -165,6 +165,11 @@ public class ResultSetWireIn implements WireIn {
     }
 
     @Override
+    public String readingPeekYaml() {
+        throw new UnsupportedOperationException("todo");
+    }
+
+    @Override
     public void classLookup(ClassLookup classLookup) {
         throw new UnsupportedOperationException();
     }

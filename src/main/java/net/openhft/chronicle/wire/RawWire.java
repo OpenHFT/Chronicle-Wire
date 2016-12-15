@@ -103,6 +103,13 @@ public class RawWire extends AbstractWire implements Wire {
 
     }
 
+    public String readingPeekYaml() {
+        long start = readContext.start;
+        if (start == -1)
+            return "";
+        return Wires.fromSizePrefixedBlobs(bytes, start);
+    }
+
     @Override
     public void copyTo(@NotNull WireOut wire) {
         if (wire instanceof RawWire) {

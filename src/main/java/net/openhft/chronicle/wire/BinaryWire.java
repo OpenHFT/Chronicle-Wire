@@ -146,6 +146,20 @@ public class BinaryWire extends AbstractWire implements Wire {
         return readContext;
     }
 
+    /**
+     * Typicality used for debugging, this method does not progress the read position and should
+     * only be used when inside a reading document.
+     *
+     * @return when readReading a document returns the current document as a YAML String, if you are
+     * not currently reading a document, and empty string will be return.
+     */
+    public String readingPeekYaml() {
+        long start = readContext.start;
+        if (start == -1)
+            return "";
+        return Wires.fromSizePrefixedBlobs(bytes, start);
+    }
+
     @Override
     public void copyTo(@NotNull WireOut wire) {
         while (bytes.readRemaining() > 0) {
@@ -2234,6 +2248,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         return 0;
 
                     default:
+                        System.out.println("code=" + code + ", bytes=" + bytes.toHexString());
                         return -1;
                 }
             }
@@ -2921,6 +2936,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return (int) value;
 
         }
+
 
         @Override
         public int int32() {

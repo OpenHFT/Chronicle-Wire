@@ -394,6 +394,13 @@ public class TextWire extends AbstractWire implements Wire {
         consumePadding(0);
     }
 
+    public String readingPeekYaml() {
+        long start = readContext.start;
+        if (start == -1)
+            return "";
+        return Wires.fromSizePrefixedBlobs(bytes, start);
+    }
+
     public void consumePadding(int commas) {
         for (; ; ) {
             int codePoint = peekCode();
