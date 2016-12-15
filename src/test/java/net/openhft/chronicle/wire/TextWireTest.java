@@ -93,8 +93,7 @@ public class TextWireTest {
         final String textYaml = Wires.fromSizePrefixedBlobs(b);
         System.out.println(textYaml);
         Object o = WireType.TEXT.fromString(textYaml);
-        System.out.println(o);
-        Assert.assertTrue(o instanceof Map);
+        Assert.assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString());
     }
 
     @Test
