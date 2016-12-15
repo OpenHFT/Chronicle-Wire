@@ -25,8 +25,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.lang.annotation.RetentionPolicy;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -54,6 +59,54 @@ public class WireTests {
         //      list.add(new Object[]{WireType.RAW});
         return list;
     }
+
+    @Test
+    public void test() {
+        WireType.BINARY.fromString("changedRow: {\n" +
+                "  row: [\n" +
+                "  ],\n" +
+                "  oldRow: [\n" +
+                "    volume: 26880400.0,\n" +
+                "    high: 108.3,\n" +
+                "    adjClose: 107.7,\n" +
+                "    low: 107.51,\n" +
+                "    close: 107.7,\n" +
+                "    key: !java.util.Date time: 1473116400000,\n" +
+                "    open: 107.9\n" +
+                "  ]\n" +
+                "}");
+    }
+
+
+    @Test
+    public void testDate() {
+        final Bytes b = Bytes.elasticByteBuffer();
+        final Wire wire = wireType.apply(b);
+        wire.getValueOut().object(new Date(0));
+        Assert.assertEquals(new Date(0), wire.getValueIn().object());
+    }
+
+
+    @Test
+    public void testLocalDateTime() {
+        final Bytes b = Bytes.elasticByteBuffer();
+        final Wire wire = wireType.apply(b);
+        LocalDateTime expected = LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
+        wire.getValueOut().object(expected);
+        Assert.assertEquals(expected, wire.getValueIn().object());
+    }
+
+
+
+    @Test
+    public void testZonedDateTime() {
+        final Bytes b = Bytes.elasticByteBuffer();
+        final Wire wire = wireType.apply(b);
+        ZonedDateTime expected = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
+        wire.getValueOut().object(expected);
+        Assert.assertEquals(expected, wire.getValueIn().object());
+    }
+
 
     @Test
     public void testWriteNull() {
