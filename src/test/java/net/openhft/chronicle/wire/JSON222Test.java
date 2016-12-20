@@ -48,8 +48,7 @@ public class JSON222Test {
     @Parameterized.Parameters
     public static Collection<File[]> combinations() {
         List<File[]> list = new ArrayList<>();
-        for (File file : new File(new File(OS.getTarget()).getParentFile(),
-                "src/test/resources/nst_files").listFiles()) {
+        for (File file : OS.findFile("OpenHFT", "Chronicle-Wire", "src/test/resources/nst_files").listFiles()) {
             if (file.getName().contains("_")) {
                 File[] args = {file};
                 list.add(args);

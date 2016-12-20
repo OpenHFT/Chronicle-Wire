@@ -480,4 +480,14 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         Wire wire = apply(bytes);
         return wire.getValueIn().marshallableAsMap(String.class, Object.class);
     }
+
+
+    @Override
+    public void licenceCheck() {
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return true;
+    }
 }

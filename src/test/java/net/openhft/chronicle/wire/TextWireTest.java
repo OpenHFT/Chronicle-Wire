@@ -54,7 +54,19 @@ public class TextWireTest {
 
     Bytes bytes;
 
+    @Test
+    public void licenseCheck() {
+        WireType.TEXT.licenceCheck();
+        assertTrue(WireType.TEXT.isAvailable());
 
+        try {
+            WireType.DELTA_BINARY.licenceCheck();
+            fail();
+        } catch (IllegalStateException expected) {
+            // expected
+        }
+        assertFalse(WireType.DELTA_BINARY.isAvailable());
+    }
     @Test
     public void testFromString() {
         Object w = WireType.TEXT.fromString("changedRow: {\n" +

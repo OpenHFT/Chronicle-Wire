@@ -17,6 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -27,6 +28,7 @@ import java.util.Collection;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
+@Ignore("Long running test")
 @RunWith(value = Parameterized.class)
 public class BinaryWirePerfTest {
     final int testId;
