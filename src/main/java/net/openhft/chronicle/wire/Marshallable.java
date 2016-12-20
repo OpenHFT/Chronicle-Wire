@@ -103,8 +103,4 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
     default List<FieldInfo> $fieldInfos() {
         return Wires.fieldInfos(getClass());
     }
-
-  /*  static <T extends Marshallable & KeyedMarshallable> T deepCopy(T t) {
-        return (T) Wires.deepCopy(t);
-    }*/
 }
