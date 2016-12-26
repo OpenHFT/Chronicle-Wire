@@ -67,6 +67,7 @@ public class TextWireTest {
         }
         assertFalse(WireType.DELTA_BINARY.isAvailable());
     }
+
     @Test
     public void testFromString() {
         Object w = WireType.TEXT.fromString("changedRow: {\n" +
@@ -83,6 +84,17 @@ public class TextWireTest {
                 "  }\n" +
                 "}");
         Assert.assertTrue(w instanceof Map);
+    }
+
+    @Test
+    public void testFromString2() {
+        for (int i = 0; i <= 256; i++) {
+            Wire w = WireType.TEXT.apply(Bytes.from(
+                    "data: 0x" + Integer.toHexString(i).toUpperCase() + ",\n" +
+                            "data2: 0x" + Integer.toHexString(i).toLowerCase()));
+            assertEquals(i, w.read("data").int64());
+            assertEquals(i, w.read("data2").int64());
+        }
     }
 
 
