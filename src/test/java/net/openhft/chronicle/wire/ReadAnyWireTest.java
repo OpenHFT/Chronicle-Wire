@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -41,7 +42,7 @@ public class ReadAnyWireTest {
     @Test
     public void testCreateReadAnyFirstTextWire() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
-        final String expected = "world";
+        @NotNull final String expected = "world";
         TEXT.apply(bytes).write((() -> "hello")).text(expected);
         Assert.assertEquals(expected, READ_ANY.apply(bytes).read((() -> "hello")).text());
     }
@@ -49,7 +50,7 @@ public class ReadAnyWireTest {
     @Test
     public void testCreateReadAnyFirstBinaryWire() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
-        final String expected = "world";
+        @NotNull final String expected = "world";
         BINARY.apply(bytes).write((() -> "hello")).text(expected);
         Assert.assertEquals(expected, READ_ANY.apply(bytes).read((() -> "hello")).text());
     }
@@ -57,7 +58,7 @@ public class ReadAnyWireTest {
     @Test
     public void testCreateReadAnyFirstJSONWire() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
-        final String expected = "world";
+        @NotNull final String expected = "world";
         JSON.apply(bytes).write((() -> "hello")).text(expected);
         Assert.assertEquals(expected, READ_ANY.apply(bytes).read((() -> "hello")).text());
     }
@@ -66,7 +67,7 @@ public class ReadAnyWireTest {
     @Ignore("TODO FIX")
     public void testCreateReadAnyFirstFIELDLESS_BINARYWire() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
-        final String expected = "world";
+        @NotNull final String expected = "world";
         FIELDLESS_BINARY.apply(bytes).write((() -> "hello")).text(expected);
         Assert.assertEquals(expected, READ_ANY.apply(bytes).read((() -> "hello")).text());
     }

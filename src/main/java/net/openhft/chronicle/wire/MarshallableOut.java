@@ -50,6 +50,7 @@ public interface MarshallableOut {
      * }
      * </pre>
      */
+    @NotNull
     DocumentContext writingDocument() throws UnrecoverableTimeoutException;
 
 
@@ -66,7 +67,7 @@ public interface MarshallableOut {
      * @param value to write with it.
      */
     default void writeMessage(WireKey key, Object value) throws UnrecoverableTimeoutException {
-        try (DocumentContext dc = writingDocument()) {
+        try (@NotNull DocumentContext dc = writingDocument()) {
             Wire wire = dc.wire();
             wire.write(key).object(value);
         }
@@ -77,8 +78,8 @@ public interface MarshallableOut {
      *
      * @param writer to write
      */
-    default void writeDocument(WriteMarshallable writer) throws UnrecoverableTimeoutException {
-        try (DocumentContext dc = writingDocument()) {
+    default void writeDocument(@NotNull WriteMarshallable writer) throws UnrecoverableTimeoutException {
+        try (@NotNull DocumentContext dc = writingDocument()) {
             Wire wire = dc.wire();
             writer.writeMarshallable(wire);
         }
@@ -88,7 +89,7 @@ public interface MarshallableOut {
      * @param marshallable to write to excerpt.
      */
     default void writeBytes(@NotNull WriteBytesMarshallable marshallable) throws UnrecoverableTimeoutException {
-        try (DocumentContext dc = writingDocument()) {
+        try (@NotNull DocumentContext dc = writingDocument()) {
             marshallable.writeMarshallable(dc.wire().bytes());
         }
     }
@@ -99,8 +100,8 @@ public interface MarshallableOut {
      * @param t      to write
      * @param writer using this code
      */
-    default <T> void writeDocument(T t, BiConsumer<ValueOut, T> writer) throws UnrecoverableTimeoutException {
-        try (DocumentContext dc = writingDocument()) {
+    default <T> void writeDocument(T t, @NotNull BiConsumer<ValueOut, T> writer) throws UnrecoverableTimeoutException {
+        try (@NotNull DocumentContext dc = writingDocument()) {
             Wire wire = dc.wire();
             writer.accept(wire.getValueOut(), t);
         }
@@ -109,8 +110,8 @@ public interface MarshallableOut {
     /**
      * @param text to write a message
      */
-    default void writeText(CharSequence text) throws UnrecoverableTimeoutException {
-        try (DocumentContext dc = writingDocument()) {
+    default void writeText(@NotNull CharSequence text) throws UnrecoverableTimeoutException {
+        try (@NotNull DocumentContext dc = writingDocument()) {
             dc.wire().bytes().append8bit(text);
         }
     }
@@ -118,10 +119,10 @@ public interface MarshallableOut {
     /**
      * Write a Map as a marshallable
      */
-    default void writeMap(Map<?, ?> map) throws UnrecoverableTimeoutException {
-        try (DocumentContext dc = writingDocument()) {
+    default void writeMap(@NotNull Map<?, ?> map) throws UnrecoverableTimeoutException {
+        try (@NotNull DocumentContext dc = writingDocument()) {
             Wire wire = dc.wire();
-            for (Map.Entry<?, ?> entry : map.entrySet()) {
+            for (@NotNull Map.Entry<?, ?> entry : map.entrySet()) {
                 wire.writeEvent(Object.class, entry.getKey())
                         .object(Object.class, entry.getValue());
             }
@@ -136,13 +137,15 @@ public interface MarshallableOut {
      * @return a proxy which implements the primary interface (additional interfaces have to be
      * cast)
      */
-    default <T> T methodWriter(Class<T> tClass, Class... additional) {
+    @NotNull
+    default <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
         Class[] interfaces = ObjectUtils.addAll(tClass, additional);
 
         //noinspection unchecked
         return (T) Proxy.newProxyInstance(tClass.getClassLoader(), interfaces, new MethodWriterInvocationHandler(this));
     }
 
+    @NotNull
     default <T> MethodWriterBuilder<T> methodWriterBuilder(Class<T> tClass) {
         return new MethodWriterBuilder<>(this, tClass);
     }
@@ -152,6 +155,7 @@ public interface MarshallableOut {
      *
      * @return the state of padding
      */
+    @NotNull
     default Padding padToCacheAlign() {
         return Padding.NEVER;
     }

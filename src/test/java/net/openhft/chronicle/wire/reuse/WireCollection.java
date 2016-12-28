@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire.reuse;
 import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,10 +30,15 @@ import java.util.Map;
  */
 public class WireCollection extends WireModel {
 
+    @Nullable
     private String reference;
+    @Nullable
     private String path;
+    @Nullable
     private String name;
+    @Nullable
     private Map<String, WireProperty> properties = new HashMap<>();
+    @Nullable
     private Map<String, WireCollection> collections = new HashMap<>();
 
     public WireCollection() {
@@ -70,6 +76,7 @@ public class WireCollection extends WireModel {
         }
     }
 
+    @Nullable
     public String getReference() {
         return reference;
     }
@@ -78,6 +85,7 @@ public class WireCollection extends WireModel {
         this.reference = reference;
     }
 
+    @Nullable
     public String getPath() {
         return path;
     }
@@ -86,6 +94,7 @@ public class WireCollection extends WireModel {
         this.path = path;
     }
 
+    @Nullable
     public String getName() {
         return name;
     }
@@ -98,6 +107,7 @@ public class WireCollection extends WireModel {
         properties.clear();
     }
 
+    @Nullable
     public Map<String, WireProperty> getProperties() {
         return properties;
     }
@@ -106,10 +116,11 @@ public class WireCollection extends WireModel {
         this.properties = properties;
     }
 
-    public void addProperty(WireProperty property) {
+    public void addProperty(@org.jetbrains.annotations.NotNull WireProperty property) {
         this.properties.put(property.getReference(), property);
     }
 
+    @Nullable
     public Map<String, WireCollection> getCollections() {
         return collections;
     }
@@ -118,7 +129,7 @@ public class WireCollection extends WireModel {
         this.collections = collections;
     }
 
-    public void addCollection(WireCollection collection) {
+    public void addCollection(@org.jetbrains.annotations.NotNull WireCollection collection) {
         this.collections.put(collection.getReference(), collection);
     }
 }

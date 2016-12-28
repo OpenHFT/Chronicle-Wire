@@ -50,14 +50,16 @@ import java.util.function.*;
  * Created by peter on 06/04/16.
  */
 public class ResultSetWireIn implements WireIn {
+    @NotNull
     private final ResultSet resultSet;
     private final ResultSetMetaData metaData;
     private final ValueIn valueIn = new RSValueIn();
+    @Nullable
     private WireKey key;
     private int index = 0;
     private Object parent;
 
-    public ResultSetWireIn(ResultSet resultSet) throws SQLException {
+    public ResultSetWireIn(@NotNull ResultSet resultSet) throws SQLException {
         this.resultSet = resultSet;
         metaData = resultSet.getMetaData();
     }
@@ -130,11 +132,13 @@ public class ResultSetWireIn implements WireIn {
         }
     }
 
+    @NotNull
     @Override
     public DocumentContext readingDocument() {
         throw new UnsupportedOperationException("TODO");
     }
 
+    @NotNull
     @Override
     public DocumentContext readingDocument(long readLocation) {
         throw new UnsupportedOperationException("TODO");
@@ -144,6 +148,7 @@ public class ResultSetWireIn implements WireIn {
     public void consumePadding() {
     }
 
+    @NotNull
     @Override
     public HeaderType readDataHeader(boolean includeMetaData) throws EOFException {
         throw new UnsupportedOperationException();
@@ -164,6 +169,7 @@ public class ResultSetWireIn implements WireIn {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public String readingPeekYaml() {
         throw new UnsupportedOperationException("todo");
@@ -174,6 +180,7 @@ public class ResultSetWireIn implements WireIn {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public ClassLookup classLookup() {
         throw new UnsupportedOperationException();
@@ -184,6 +191,7 @@ public class ResultSetWireIn implements WireIn {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public Pauser pauser() {
         throw new UnsupportedOperationException();
@@ -233,6 +241,7 @@ public class ResultSetWireIn implements WireIn {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public WireOut headerNumber(long headerNumber) {
         throw new UnsupportedOperationException();
@@ -243,6 +252,7 @@ public class ResultSetWireIn implements WireIn {
         return 0;
     }
 
+    @NotNull
     @Override
     public ObjectInput objectInput() {
         return new WireObjectInput(this);
@@ -318,6 +328,7 @@ public class ResultSetWireIn implements WireIn {
             throw new UnsupportedOperationException();
         }
 
+        @NotNull
         @Override
         public WireIn skipValue() {
             return ResultSetWireIn.this;
@@ -551,6 +562,7 @@ public class ResultSetWireIn implements WireIn {
             throw new UnsupportedOperationException();
         }
 
+        @NotNull
         @Override
         public <T> T applyToMarshallable(Function<WireIn, T> marshallableReader) {
             throw new UnsupportedOperationException();
@@ -574,6 +586,7 @@ public class ResultSetWireIn implements WireIn {
             throw new UnsupportedOperationException();
         }
 
+        @NotNull
         @Override
         public Object marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
             throw new UnsupportedOperationException();
@@ -590,11 +603,13 @@ public class ResultSetWireIn implements WireIn {
             throw new UnsupportedOperationException();
         }
 
+        @NotNull
         @Override
         public <T> Class<T> typeLiteral() throws IORuntimeException, BufferUnderflowException {
             throw new UnsupportedOperationException();
         }
 
+        @NotNull
         @Override
         public BracketType getBracketType() {
             return BracketType.NONE;

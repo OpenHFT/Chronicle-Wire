@@ -18,6 +18,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -83,15 +85,15 @@ public class YamlSpecificationTest {
 
     @Test
     public void decodeAs() throws IOException {
-        byte[] byteArr = getBytes(input + ".yaml");
+        @Nullable byte[] byteArr = getBytes(input + ".yaml");
         Bytes bytes = Bytes.wrapForRead(byteArr);
-        TextWire tw = new TextWire(bytes);
-        Bytes bytes2 = Bytes.allocateElasticDirect();
-        TextWire tw2 = new TextWire(bytes2);
+        @NotNull TextWire tw = new TextWire(bytes);
+        @NotNull Bytes bytes2 = Bytes.allocateElasticDirect();
+        @NotNull TextWire tw2 = new TextWire(bytes2);
 
-        Object o = tw.readObject();
+        @Nullable Object o = tw.readObject();
         tw2.writeObject(o);
-        byte[] byteArr2 = getBytes(input + ".out.yaml");
+        @Nullable byte[] byteArr2 = getBytes(input + ".out.yaml");
         if (byteArr2 == null)
             byteArr2 = byteArr;
         String expected = Bytes.wrapForRead(byteArr2).toString().replace("\r\n", "\n");
@@ -99,11 +101,12 @@ public class YamlSpecificationTest {
         assertEquals(input, expected, actual);
     }
 
+    @Nullable
     public byte[] getBytes(String file) throws IOException {
         InputStream is = getClass().getResourceAsStream("/specification/" + file);
         if (is == null) return null;
         int len = is.available();
-        byte[] byteArr = new byte[len];
+        @NotNull byte[] byteArr = new byte[len];
         is.read(byteArr);
         return byteArr;
     }

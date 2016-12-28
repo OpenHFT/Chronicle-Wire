@@ -20,6 +20,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.Closeable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,20 +39,21 @@ public class MethodReader implements Closeable {
     static final Object[] NO_ARGS = {};
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodReader.class);
     private final MarshallableIn in;
+    @NotNull
     private final WireParser<Void> wireParser;
     private boolean closeIn = false, closed;
 
-    public MethodReader(MarshallableIn in, Object... objects) {
+    public MethodReader(MarshallableIn in, @NotNull Object... objects) {
         this.in = in;
-        WireParselet defaultParselet = (s, v, $) ->
+        @NotNull WireParselet defaultParselet = (s, v, $) ->
                 LOGGER.warn("Unknown message " + s + ' ' + v.text());
         if (objects[0] instanceof WireParselet)
             defaultParselet = (WireParselet) objects[0];
         wireParser = WireParser.wireParser(defaultParselet);
 
-        Set<String> methodsHandled = new HashSet<>();
-        for (Object o : objects) {
-            for (Method m : o.getClass().getMethods()) {
+        @NotNull Set<String> methodsHandled = new HashSet<>();
+        for (@NotNull Object o : objects) {
+            for (@NotNull Method m : o.getClass().getMethods()) {
                 if (Modifier.isStatic(m.getModifiers()))
                     continue;
 
@@ -85,8 +88,8 @@ public class MethodReader implements Closeable {
         }
     }
 
-    static void logMessage(CharSequence s, ValueIn v) {
-        String name = s.toString();
+    static void logMessage(@NotNull CharSequence s, @NotNull ValueIn v) {
+        @NotNull String name = s.toString();
         String rest;
 
         if (v.wireIn() instanceof BinaryWire) {
@@ -101,16 +104,17 @@ public class MethodReader implements Closeable {
         LOGGER.debug("read " + name + " - " + rest);
     }
 
+    @NotNull
     public MethodReader closeIn(boolean closeIn) {
         this.closeIn = closeIn;
         return this;
     }
 
-    public void addParseletForMethod(Object o, Method m, Class<?> parameterType) {
+    public void addParseletForMethod(Object o, @NotNull Method m, Class<?> parameterType) {
         Class msgClass = parameterType;
         m.setAccessible(true); // turn of security check to make a little faster
         if (msgClass.isInterface() || !ReadMarshallable.class.isAssignableFrom(msgClass)) {
-            Object[] argArr = {null};
+            @NotNull Object[] argArr = {null};
             wireParser.register(m::getName, (s, v, $) -> {
                 try {
                     if (Jvm.isDebug())
@@ -134,7 +138,7 @@ public class MethodReader implements Closeable {
                     throw Jvm.rethrow(e1);
                 }
             }
-            ReadMarshallable[] argArr = {arg};
+            @NotNull ReadMarshallable[] argArr = {arg};
             wireParser.register(m::getName, (s, v, $) -> {
                 try {
                     if (Jvm.isDebug())
@@ -149,7 +153,7 @@ public class MethodReader implements Closeable {
         }
     }
 
-    public void addParseletForMethod(Object o, Method m) {
+    public void addParseletForMethod(Object o, @NotNull Method m) {
         m.setAccessible(true); // turn of security check to make a little faster
         wireParser.register(m::getName, (s, v, $) -> {
             try {
@@ -164,12 +168,12 @@ public class MethodReader implements Closeable {
         });
     }
 
-    public void addParseletForMethod(Object o, Method m, Class[] parameterTypes) {
+    public void addParseletForMethod(Object o, @NotNull Method m, @NotNull Class[] parameterTypes) {
         m.setAccessible(true); // turn of security check to make a little faster
-        Object[] args = new Object[parameterTypes.length];
-        BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
+        @NotNull Object[] args = new Object[parameterTypes.length];
+        @NotNull BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
             int i = 0;
-            for (Class clazz : parameterTypes) {
+            for (@NotNull Class clazz : parameterTypes) {
                 a[i++] = v.object(clazz);
             }
         };

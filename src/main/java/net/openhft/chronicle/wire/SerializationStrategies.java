@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.ReadResolvable;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Externalizable;
@@ -36,33 +37,39 @@ import java.util.*;
  */
 public enum SerializationStrategies implements SerializationStrategy {
     MARSHALLABLE {
+        @NotNull
         @Override
-        public Object readUsing(Object o, ValueIn in) {
+        public Object readUsing(@NotNull Object o, @NotNull ValueIn in) {
             ((ReadMarshallable) o).readMarshallable(in.wireIn());
             return o;
         }
 
+        @NotNull
         @Override
         public Class type() {
             return Marshallable.class;
         }
 
+        @Nullable
         @Override
-        public Object newInstance(Class type) {
+        public Object newInstance(@NotNull Class type) {
             return type.isInterface() || Modifier.isAbstract(type.getModifiers()) ? null : super.newInstance(type);
         }
     },
     ANY_OBJECT {
+        @Nullable
         @Override
-        public Object readUsing(Object o, ValueIn in) {
+        public Object readUsing(Object o, @NotNull ValueIn in) {
             return in.objectWithInferredType(o, ANY_NESTED, null);
         }
 
+        @NotNull
         @Override
         public Class type() {
             return Object.class;
         }
 
+        @NotNull
         @Override
         public BracketType bracketType() {
             return BracketType.UNKNOWN;
@@ -70,44 +77,52 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
 
     ANY_SCALAR {
+        @Nullable
         @Override
-        public Object readUsing(Object o, ValueIn in) {
+        public Object readUsing(Object o, @NotNull ValueIn in) {
             return in.objectWithInferredType(o, ANY_NESTED, null);
         }
 
+        @NotNull
         @Override
         public Class type() {
             return Object.class;
         }
 
+        @NotNull
         @Override
         public BracketType bracketType() {
             return BracketType.NONE;
         }
     },
     ENUM {
+        @Nullable
         @Override
-        public Object readUsing(Object o, ValueIn in) {
+        public Object readUsing(Object o, @NotNull ValueIn in) {
             return in.objectWithInferredType(o, ANY_NESTED, null);
         }
 
+        @NotNull
         @Override
         public Class type() {
             return Enum.class;
         }
 
+        @NotNull
         @Override
         public BracketType bracketType() {
             return BracketType.NONE;
         }
     },
     ANY_NESTED {
+        @NotNull
         @Override
-        public Object readUsing(Object o, ValueIn in) {
+        public Object readUsing(@NotNull Object o, @NotNull ValueIn in) {
             Wires.readMarshallable(o, in.wireIn(), true);
             return o;
         }
 
+        @NotNull
         @Override
         public Class type() {
             return Object.class;
@@ -115,20 +130,23 @@ public enum SerializationStrategies implements SerializationStrategy {
 
     },
     DEMARSHALLABLE {
+        @NotNull
         @Override
-        public Object readUsing(Object using, ValueIn in) {
-            final DemarshallableWrapper wrapper = (DemarshallableWrapper) using;
+        public Object readUsing(Object using, @NotNull ValueIn in) {
+            @NotNull final DemarshallableWrapper wrapper = (DemarshallableWrapper) using;
             wrapper.demarshallable = Demarshallable.newInstance(wrapper.type, in.wireIn());
             return wrapper;
         }
 
+        @NotNull
         @Override
         public Class type() {
             return Demarshallable.class;
         }
 
+        @NotNull
         @Override
-        public Object newInstance(Class type) {
+        public Object newInstance(@NotNull Class type) {
             return new DemarshallableWrapper(type);
         }
     },
@@ -142,27 +160,31 @@ public enum SerializationStrategies implements SerializationStrategy {
             return o;
         }
 
+        @NotNull
         @Override
         public Class type() {
             return Serializable.class;
         }
     },
     EXTERNALIZABLE {
+        @NotNull
         @Override
-        public Object readUsing(Object o, ValueIn in) {
+        public Object readUsing(@NotNull Object o, @NotNull ValueIn in) {
             try {
                 ((Externalizable) o).readExternal(in.wireIn().objectInput());
-            } catch (IOException | ClassNotFoundException e) {
+            } catch (@NotNull IOException | ClassNotFoundException e) {
                 throw new IORuntimeException(e);
             }
             return o;
         }
 
+        @NotNull
         @Override
         public Class type() {
             return Externalizable.class;
         }
 
+        @NotNull
         @Override
         public BracketType bracketType() {
             return BracketType.SEQ;
@@ -170,9 +192,9 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
     MAP {
         @Override
-        public Object readUsing(Object o, ValueIn in) {
-            Map<Object, Object> map = (Map<Object, Object>) o;
-            final WireIn wireIn = in.wireIn();
+        public Object readUsing(Object o, @NotNull ValueIn in) {
+            @NotNull Map<Object, Object> map = (Map<Object, Object>) o;
+            @NotNull final WireIn wireIn = in.wireIn();
             long pos = wireIn.bytes().readPosition();
             while (in.hasNext()) {
                 Object key = wireIn.readEvent(Object.class);
@@ -188,6 +210,7 @@ public enum SerializationStrategies implements SerializationStrategy {
             return o;
         }
 
+        @NotNull
         @Override
         public Object newInstance(@Nullable Class type) {
 
@@ -197,6 +220,7 @@ public enum SerializationStrategies implements SerializationStrategy {
             return SortedMap.class.isAssignableFrom(type) ? new TreeMap<>() : new LinkedHashMap<>();
         }
 
+        @NotNull
         @Override
         public Class type() {
             return Map.class;
@@ -204,13 +228,13 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
     SET {
         @Override
-        public Object readUsing(Object o, ValueIn in) {
-            Set<Object> set = (Set<Object>) o;
-            final WireIn wireIn = in.wireIn();
-            final Bytes<?> bytes = wireIn.bytes();
+        public Object readUsing(Object o, @NotNull ValueIn in) {
+            @NotNull Set<Object> set = (Set<Object>) o;
+            @NotNull final WireIn wireIn = in.wireIn();
+            @NotNull final Bytes<?> bytes = wireIn.bytes();
             long pos = bytes.readPosition();
             while (in.hasNextSequenceItem()) {
-                final Object object = in.object();
+                @Nullable final Object object = in.object();
                 set.add(object);
 
                 // make sure we are progressing.
@@ -223,16 +247,19 @@ public enum SerializationStrategies implements SerializationStrategy {
             return o;
         }
 
+        @NotNull
         @Override
-        public Object newInstance(Class type) {
+        public Object newInstance(@NotNull Class type) {
             return SortedSet.class.isAssignableFrom(type) ? new TreeSet<>() : new LinkedHashSet<>();
         }
 
+        @NotNull
         @Override
         public Class type() {
             return Set.class;
         }
 
+        @NotNull
         @Override
         public BracketType bracketType() {
             return BracketType.SEQ;
@@ -240,9 +267,9 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
     LIST {
         @Override
-        public Object readUsing(Object o, ValueIn in) {
-            List<Object> list = (List<Object>) o;
-            final WireIn wireIn = in.wireIn();
+        public Object readUsing(Object o, @NotNull ValueIn in) {
+            @NotNull List<Object> list = (List<Object>) o;
+            @NotNull final WireIn wireIn = in.wireIn();
             long pos = wireIn.bytes().readPosition();
             while (in.hasNextSequenceItem()) {
                 list.add(in.object());
@@ -257,51 +284,59 @@ public enum SerializationStrategies implements SerializationStrategy {
             return o;
         }
 
+        @NotNull
         @Override
         public Object newInstance(Class type) {
             return new ArrayList<>();
         }
 
+        @NotNull
         @Override
         public Class type() {
             return List.class;
         }
 
+        @NotNull
         @Override
         public BracketType bracketType() {
             return BracketType.SEQ;
         }
     },
     ARRAY {
+        @NotNull
         @Override
-        public Object readUsing(Object using, ValueIn in) {
-            ArrayWrapper wrapper = (ArrayWrapper) using;
+        public Object readUsing(Object using, @NotNull ValueIn in) {
+            @NotNull ArrayWrapper wrapper = (ArrayWrapper) using;
             final Class componentType = wrapper.type.getComponentType();
-            List list = new ArrayList<>();
+            @NotNull List list = new ArrayList<>();
             while (in.hasNextSequenceItem())
                 list.add(in.object(componentType));
             wrapper.array = list.toArray((Object[]) Array.newInstance(componentType, list.size()));
             return wrapper;
         }
 
+        @NotNull
         @Override
         public Class type() {
             return Object[].class;
         }
 
+        @NotNull
         @Override
-        public Object newInstance(Class type) {
+        public Object newInstance(@NotNull Class type) {
             return new ArrayWrapper(type);
         }
 
+        @NotNull
         @Override
         public BracketType bracketType() {
             return BracketType.SEQ;
         }
     }, PRIM_ARRAY {
+        @NotNull
         @Override
-        public Object readUsing(Object using, ValueIn in) {
-            PrimArrayWrapper wrapper = (PrimArrayWrapper) using;
+        public Object readUsing(Object using, @NotNull ValueIn in) {
+            @NotNull PrimArrayWrapper wrapper = (PrimArrayWrapper) using;
             final Class componentType = wrapper.type.getComponentType();
             int i = 0, len = 0;
             Object array = Array.newInstance(componentType, 0);
@@ -324,37 +359,43 @@ public enum SerializationStrategies implements SerializationStrategy {
             return wrapper;
         }
 
+        @NotNull
         @Override
         public Class type() {
             return Object.class;
         }
 
+        @NotNull
         @Override
-        public Object newInstance(Class type) {
+        public Object newInstance(@NotNull Class type) {
             return new PrimArrayWrapper(type);
         }
 
+        @NotNull
         @Override
         public BracketType bracketType() {
             return BracketType.SEQ;
         }
     };
 
+    @Nullable
     @Override
     public Object newInstance(Class type) {
         return ObjectUtils.newInstance(type);
     }
 
+    @NotNull
     @Override
     public BracketType bracketType() {
         return BracketType.MAP;
     }
 
     static class ArrayWrapper implements ReadResolvable<Object[]> {
+        @NotNull
         final Class type;
         Object[] array;
 
-        ArrayWrapper(Class type) {
+        ArrayWrapper(@NotNull Class type) {
             this.type = type;
         }
 
@@ -365,10 +406,11 @@ public enum SerializationStrategies implements SerializationStrategy {
     }
 
     static class PrimArrayWrapper implements ReadResolvable<Object> {
+        @NotNull
         final Class type;
         Object array;
 
-        PrimArrayWrapper(Class type) {
+        PrimArrayWrapper(@NotNull Class type) {
             this.type = type;
         }
 
@@ -379,10 +421,11 @@ public enum SerializationStrategies implements SerializationStrategy {
     }
 
     static class DemarshallableWrapper implements ReadResolvable<Demarshallable> {
+        @NotNull
         final Class type;
         Demarshallable demarshallable;
 
-        DemarshallableWrapper(Class type) {
+        DemarshallableWrapper(@NotNull Class type) {
             this.type = type;
         }
 

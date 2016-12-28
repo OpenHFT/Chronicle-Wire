@@ -32,11 +32,12 @@ import java.util.concurrent.TimeoutException;
  */
 public interface WireIn extends WireCommon {
 
-    default <K, V> Map<K, V> readAllAsMap(Class<K> kClass, Class<V> vClass, Map<K, V> map) {
+    @NotNull
+    default <K, V> Map<K, V> readAllAsMap(Class<K> kClass, @NotNull Class<V> vClass, @NotNull Map<K, V> map) {
         while (isNotEmptyAfterPadding()) {
             long len = bytes().readRemaining();
             final K k = readEvent(kClass);
-            final V v = getValueIn().object(vClass);
+            @Nullable final V v = getValueIn().object(vClass);
             if (len == bytes().readRemaining())
                 break;
             map.put(k, v);
@@ -58,6 +59,7 @@ public interface WireIn extends WireCommon {
     @NotNull
     ValueIn read(@NotNull WireKey key);
 
+    @NotNull
     default ValueIn read(String fieldName) {
         return read(() -> fieldName);
     }
@@ -150,7 +152,7 @@ public interface WireIn extends WireCommon {
         return WireInternal.readData(position, this, metaDataConsumer, dataConsumer);
     }
 
-    default void rawReadData(ReadMarshallable marshallable) {
+    default void rawReadData(@NotNull ReadMarshallable marshallable) {
         WireInternal.rawReadData(this, marshallable);
     }
 

@@ -29,8 +29,8 @@ import java.util.Map;
 public interface WireKey {
 
     static boolean checkKeys(@NotNull WireKey[] keys) {
-        Map<Integer, WireKey> codes = new HashMap<>();
-        for (WireKey key : keys) {
+        @NotNull Map<Integer, WireKey> codes = new HashMap<>();
+        for (@NotNull WireKey key : keys) {
             WireKey pkey = codes.put(key.code(), key);
             if (pkey != null)
                 throw new AssertionError(pkey + " and " + key + " have the same code " + key.code());
@@ -38,8 +38,8 @@ public interface WireKey {
         return true;
     }
 
-    static int toCode(CharSequence cs) {
-        String s = cs.toString();
+    static int toCode(@NotNull CharSequence cs) {
+        @NotNull String s = cs.toString();
         if (s.length() > 0 && Character.isDigit(s.charAt(0)))
             try {
                 return Integer.parseInt(s);
@@ -57,7 +57,7 @@ public interface WireKey {
     }
 
     default Type type() {
-        Object o = defaultValue();
+        @Nullable Object o = defaultValue();
         return o == null ? Void.class : o.getClass();
     }
 

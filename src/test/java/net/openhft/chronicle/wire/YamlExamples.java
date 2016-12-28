@@ -51,7 +51,7 @@ public class YamlExamples {
         valueOut.sequenceEnd();
 */
         // to read this.
-        List<String> names = new ArrayList<>();
+        @NotNull List<String> names = new ArrayList<>();
         wire.read(Keys.list).sequence(names, (l, valueIn) -> {
             while (valueIn.hasNext()) {
                 l.add(valueIn.text());
@@ -219,7 +219,7 @@ public class YamlExamples {
 
     @Test
     public void testMappedObject() {
-        Wire wire = new BinaryWire(nativeBytes());
+        @NotNull Wire wire = new BinaryWire(nativeBytes());
 /*
         name: Mark McGwire
         hr:   65    # Home runs
@@ -234,7 +234,7 @@ public class YamlExamples {
                 .write(Keys.rbi).int64(147)
                 .writeComment("Runs Batted In");
 
-        Stats stats = new Stats();
+        @NotNull Stats stats = new Stats();
         wire.read(Keys.name).textTo(stats.name);
         wire.read(Keys.hr)
                 .int32(stats, (o, x) -> o.hr = x)

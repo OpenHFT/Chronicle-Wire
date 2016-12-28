@@ -40,11 +40,11 @@ public class FloatDtoTest {
 
     @Test
     public void test() {
-        final Value value = new Value(99, 2000f);
+        @NotNull final Value value = new Value(99, 2000f);
         final Bytes bytes = Wires.acquireBytes();
         final Wire w = WireType.BINARY.apply(bytes);
         w.write().marshallable(value);
-        Value object1 = new Value(0, 0.0f);
+        @NotNull Value object1 = new Value(0, 0.0f);
         w.read().marshallable(object1);
     }
 

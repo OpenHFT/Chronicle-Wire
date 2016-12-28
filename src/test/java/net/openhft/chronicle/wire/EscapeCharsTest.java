@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -33,15 +34,17 @@ import static org.junit.Assert.assertEquals;
  */
 @RunWith(value = Parameterized.class)
 public class EscapeCharsTest {
+    @NotNull
     final Character ch;
 
-    public EscapeCharsTest(Character ch) {
+    public EscapeCharsTest(@NotNull Character ch) {
         this.ch = ch;
     }
 
+    @NotNull
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
-        List<Object[]> list = new ArrayList<>();
+        @NotNull List<Object[]> list = new ArrayList<>();
         for (char i = 0; i < 260; i++) {
             list.add(new Object[]{i});
         }
@@ -50,15 +53,15 @@ public class EscapeCharsTest {
 
     @Test
     public void testEscaped() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write("" + ch).text("" + ch);
         wire.write("" + ch + ch).text("" + ch + ch);
 
-        StringBuilder sb = new StringBuilder();
-        String s = wire.read(sb).text();
+        @NotNull StringBuilder sb = new StringBuilder();
+        @Nullable String s = wire.read(sb).text();
         assertEquals("key " + ch, "" + ch, sb.toString());
         assertEquals("value " + ch, "" + ch, s);
-        String ss = wire.read(sb).text();
+        @Nullable String ss = wire.read(sb).text();
         assertEquals("key " + ch + ch, "" + ch + ch, sb.toString());
         assertEquals("value " + ch + ch, "" + ch + ch, ss);
     }

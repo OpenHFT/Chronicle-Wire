@@ -20,6 +20,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
@@ -35,7 +36,7 @@ import java.util.function.Supplier;
  */
 public class DeferredTypeWire extends AbstractAnyWire implements Wire {
 
-    public DeferredTypeWire(Bytes bytes, Supplier<WireType> wireTypeSupplier) {
+    public DeferredTypeWire(@NotNull Bytes bytes, Supplier<WireType> wireTypeSupplier) {
         super(bytes, new DeferredTypeWireAcquisition(bytes, wireTypeSupplier));
     }
 
@@ -65,6 +66,7 @@ public class DeferredTypeWire extends AbstractAnyWire implements Wire {
     static class DeferredTypeWireAcquisition implements WireAcquisition {
         private final Bytes bytes;
         private final Supplier<WireType> wireTypeSupplier;
+        @Nullable
         private Wire wire = null;
         private WireType wireType;
 
@@ -73,11 +75,13 @@ public class DeferredTypeWire extends AbstractAnyWire implements Wire {
             this.wireTypeSupplier = wireTypeSupplier;
         }
 
+        @NotNull
         @Override
         public Supplier<WireType> underlyingType() {
             return () -> wireType;
         }
 
+        @Nullable
         public Wire acquireWire() {
             if (wire != null)
                 return wire;
@@ -93,6 +97,7 @@ public class DeferredTypeWire extends AbstractAnyWire implements Wire {
 
         }
 
+        @Nullable
         @Override
         public ClassLookup classLookup() {
             return null;

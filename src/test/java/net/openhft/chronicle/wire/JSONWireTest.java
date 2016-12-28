@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -37,21 +38,21 @@ public class JSONWireTest {
     }
 
     @NotNull
-    private JSONWire getWire(String json) {
+    private JSONWire getWire(@NotNull String json) {
         return new JSONWire(Bytes.from(json));
     }
 
     @Test
     public void testListFormatting() {
-        Wire wire = getWire();
+        @NotNull Wire wire = getWire();
 
-        List<Item> items = new ArrayList<>();
+        @NotNull List<Item> items = new ArrayList<>();
         items.add(new Item("item1", 1235666L, 1.1231231));
         items.add(new Item("item2", 2235666L, 1.0987987));
         items.add(new Item("item3", 3235666L, 1.12312));
         items.add(new Item("item4", 4235666L, 1.51231));
 
-        WireOut out = wire.writeEventName(() -> "myEvent").list(items, Item.class);
+        @NotNull WireOut out = wire.writeEventName(() -> "myEvent").list(items, Item.class);
 
         assertEquals("\"myEvent\":[{\"name\":\"item1\",\"number1\":1235666,\"number2\":1.1231231},\n" +
                 "{\"name\":\"item2\",\"number1\":2235666,\"number2\":1.0987987},\n" +
@@ -61,44 +62,44 @@ public class JSONWireTest {
 
     @Test
     public void testOpenBracket() {
-        StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder();
 
-        Wire wire1 = getWire("\"echo\":\"Hello\"\n\"echo2\":\"Hello2\"\n");
-        String text1 = wire1.readEventName(sb).text();
+        @NotNull Wire wire1 = getWire("\"echo\":\"Hello\"\n\"echo2\":\"Hello2\"\n");
+        @Nullable String text1 = wire1.readEventName(sb).text();
         assertEquals("echo", sb.toString());
         assertEquals("Hello", text1);
-        String text2 = wire1.readEventName(sb).text();
+        @Nullable String text2 = wire1.readEventName(sb).text();
         assertEquals("echo2", sb.toString());
         assertEquals("Hello2", text2);
 
-        Wire wire2 = getWire("{ \"echoB\":\"HelloB\" }\n{ \"echo2B\":\"Hello2B\" }\n");
-        String textB = wire2.readEventName(sb).text();
+        @NotNull Wire wire2 = getWire("{ \"echoB\":\"HelloB\" }\n{ \"echo2B\":\"Hello2B\" }\n");
+        @Nullable String textB = wire2.readEventName(sb).text();
         assertEquals("echoB", sb.toString());
         assertEquals("HelloB", textB);
-        String textB2 = wire2.readEventName(sb).text();
+        @Nullable String textB2 = wire2.readEventName(sb).text();
         assertEquals("echo2B", sb.toString());
         assertEquals("Hello2B", textB2);
     }
 
     @Test
     public void testNoSpaces() {
-        Wire wire = getWire("\"echo\":\"\"");
-        WireParser<Void> parser = new VanillaWireParser<>((s, v, $) -> System.out.println(s + " - " + v.text()));
+        @NotNull Wire wire = getWire("\"echo\":\"\"");
+        @NotNull WireParser<Void> parser = new VanillaWireParser<>((s, v, $) -> System.out.println(s + " - " + v.text()));
         parser.parseOne(wire, null);
         assertEquals("", wire.bytes().toString());
     }
 
     @Test
     public void testMarshallableWithTwoLists() throws Exception {
-        Wire wire = getWire();
+        @NotNull Wire wire = getWire();
 
-        TwoLists lists1 = new TwoLists(null, 5, 5);
+        @NotNull TwoLists lists1 = new TwoLists(null, 5, 5);
         wire.writeEventName("two_lists").marshallable(lists1);
 
-        TwoLists lists2 = new TwoLists();
+        @NotNull TwoLists lists2 = new TwoLists();
 
-        final StringBuilder sb = new StringBuilder();
-        ValueIn valueIn = wire.readEventName(sb);
+        @NotNull final StringBuilder sb = new StringBuilder();
+        @NotNull ValueIn valueIn = wire.readEventName(sb);
 
         valueIn.marshallable(lists2);
 
@@ -109,12 +110,12 @@ public class JSONWireTest {
 
     @Test
     public void testNullString() throws Exception {
-        Wire w = getWire();
+        @NotNull Wire w = getWire();
 
-        Item item1 = new Item(null, 1, 2);
+        @NotNull Item item1 = new Item(null, 1, 2);
         w.write("item").marshallable(item1);
 
-        Item item2 = new Item();
+        @NotNull Item item2 = new Item();
         w.read(() -> "item").marshallable(item2);
 
         assertNull(item2.name);

@@ -19,6 +19,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -78,7 +79,7 @@ public class BinaryWireTest {
 
     @Test
     public void testWrite() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write();
         wire.write();
         wire.write();
@@ -96,7 +97,7 @@ public class BinaryWireTest {
     @NotNull
     private BinaryWire createWire() {
         bytes.clear();
-        BinaryWire wire = new BinaryWire(bytes, fixed, numericField, fieldLess, compressedSize, "lzw", false);
+        @NotNull BinaryWire wire = new BinaryWire(bytes, fixed, numericField, fieldLess, compressedSize, "lzw", false);
         assert wire.startUse();
         return wire;
     }
@@ -107,7 +108,7 @@ public class BinaryWireTest {
 
     @Test
     public void testWrite1() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write(BWKey.field1);
         wire.write(BWKey.field2);
         wire.write(BWKey.field3);
@@ -136,10 +137,10 @@ public class BinaryWireTest {
 
     @Test
     public void testWrite2() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write(() -> "Hello");
         wire.write(() -> "World");
-        String name = "Long field name which is more than 32 characters, Bye";
+        @NotNull String name = "Long field name which is more than 32 characters, Bye";
         wire.write(() -> name);
         checkWire(wire, "[pos: 0, rlim: 67, wlim: 8EiB, cap: 8EiB ] ‖ÅHelloÅWorld·5" + name + "‡٠٠٠٠٠٠٠٠",
                 "[pos: 0, rlim: 67, wlim: 8EiB, cap: 8EiB ] ‖ÅHelloÅWorld·5" + name + "‡٠٠٠٠٠٠٠٠",
@@ -154,7 +155,7 @@ public class BinaryWireTest {
 
     @Test
     public void testRead() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
         wire.write(() -> "Test");
@@ -172,7 +173,7 @@ public class BinaryWireTest {
 
     @Test
     public void testRead1() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
         wire.write(() -> "Test");
@@ -192,14 +193,14 @@ public class BinaryWireTest {
 
     @Test
     public void testRead2() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
-        String name1 = "Long field name which is more than 32 characters, Bye";
+        @NotNull String name1 = "Long field name which is more than 32 characters, Bye";
         wire.write(() -> name1);
 
         // ok as blank matches anything
-        StringBuilder name = new StringBuilder();
+        @NotNull StringBuilder name = new StringBuilder();
         wire.read(name);
         assertEquals(0, name.length());
 
@@ -218,7 +219,7 @@ public class BinaryWireTest {
 
     @Test
     public void int8() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().int8((byte) 1);
         wire.write(BWKey.field1).int8((byte) 2);
         wire.write(() -> "Test").int8((byte) 3);
@@ -232,7 +233,7 @@ public class BinaryWireTest {
         checkAsText123(wire, fixed ? "!byte " : "");
 
         // ok as blank matches anything
-        AtomicInteger i = new AtomicInteger();
+        @NotNull AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().int8(i, AtomicInteger::set);
             assertEquals(e, i.get());
@@ -275,7 +276,7 @@ public class BinaryWireTest {
 
     @Test
     public void int16() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().int16((short) 1);
         wire.write(BWKey.field1).int16((short) 2);
         wire.write(() -> "Test").int16((short) 3);
@@ -289,7 +290,7 @@ public class BinaryWireTest {
         checkAsText123(wire, fixed ? "!short " : "");
 
         // ok as blank matches anything
-        AtomicInteger i = new AtomicInteger();
+        @NotNull AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().int16(i, AtomicInteger::set);
             assertEquals(e, i.get());
@@ -302,7 +303,7 @@ public class BinaryWireTest {
 
     @Test
     public void uint8() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().uint8(1);
         wire.write(BWKey.field1).uint8(2);
         wire.write(() -> "Test").uint8(3);
@@ -316,7 +317,7 @@ public class BinaryWireTest {
         checkAsText123(wire, fixed ? "!int " : "");
 
         // ok as blank matches anything
-        AtomicInteger i = new AtomicInteger();
+        @NotNull AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().uint8(i, AtomicInteger::set);
             assertEquals(e, i.get());
@@ -329,7 +330,7 @@ public class BinaryWireTest {
 
     @Test
     public void uint16() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().uint16(1);
         wire.write(BWKey.field1).uint16(2);
         wire.write(() -> "Test").uint16(3);
@@ -343,7 +344,7 @@ public class BinaryWireTest {
         checkAsText123(wire, fixed ? "!int " : "");
 
         // ok as blank matches anything
-        AtomicInteger i = new AtomicInteger();
+        @NotNull AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().uint16(i, AtomicInteger::set);
             assertEquals(e, i.get());
@@ -356,7 +357,7 @@ public class BinaryWireTest {
 
     @Test
     public void uint32() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().uint32(1);
         wire.write(BWKey.field1).uint32(2);
         wire.write(() -> "Test").uint32(3);
@@ -370,7 +371,7 @@ public class BinaryWireTest {
         checkAsText123(wire);
 
         // ok as blank matches anything
-        AtomicLong i = new AtomicLong();
+        @NotNull AtomicLong i = new AtomicLong();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().uint32(i, AtomicLong::set);
             assertEquals(e, i.get());
@@ -383,7 +384,7 @@ public class BinaryWireTest {
 
     @Test
     public void int32() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().int32(1);
         wire.write(BWKey.field1).int32(2);
         wire.write(() -> "Test").int32(3);
@@ -397,7 +398,7 @@ public class BinaryWireTest {
         checkAsText123(wire, fixed ? "!int " : "");
 
         // ok as blank matches anything
-        AtomicInteger i = new AtomicInteger();
+        @NotNull AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().int32(i, AtomicInteger::set);
             assertEquals(e, i.get());
@@ -410,7 +411,7 @@ public class BinaryWireTest {
 
     @Test
     public void int64() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().int64(1);
         wire.write(BWKey.field1).int64(2);
         wire.write(() -> "Test").int64(3);
@@ -424,7 +425,7 @@ public class BinaryWireTest {
         checkAsText123(wire);
 
         // ok as blank matches anything
-        AtomicLong i = new AtomicLong();
+        @NotNull AtomicLong i = new AtomicLong();
         LongStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().int64(i, AtomicLong::set);
             assertEquals(e, i.get());
@@ -437,7 +438,7 @@ public class BinaryWireTest {
 
     @Test
     public void float64() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().float64(1);
         wire.write(BWKey.field1).float64(2);
         wire.write(() -> "Test").float64(3);
@@ -462,7 +463,7 @@ public class BinaryWireTest {
                 f = d;
             }
         }
-        Floater n = new Floater();
+        @NotNull Floater n = new Floater();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().float64(n, Floater::set);
             assertEquals(e, n.f, 0.0);
@@ -476,9 +477,9 @@ public class BinaryWireTest {
 
     @Test
     public void text() {
-        String name = "Long field name which is more than 32 characters, Bye";
+        @NotNull String name = "Long field name which is more than 32 characters, Bye";
 
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().text("Hello");
         wire.write(BWKey.field1).text("world");
         wire.write(() -> "Test").text(name);
@@ -500,7 +501,7 @@ public class BinaryWireTest {
                         "\"" + name + "\"\n");
 
         // ok as blank matches anything
-        StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder();
         Stream.of("Hello", "world", name).forEach(e -> {
             wire.read().textTo(sb);
             assertEquals(e, sb.toString());
@@ -513,10 +514,10 @@ public class BinaryWireTest {
 
     @Test
     public void type() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().typePrefix("MyType");
         wire.write(BWKey.field1).typePrefix("AlsoMyType");
-        String name1 = "com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState";
+        @NotNull String name1 = "com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState";
         wire.write(() -> "Test").typePrefix(name1);
         checkWire(wire, "[pos: 0, rlim: 158, wlim: 8EiB, cap: 8EiB ] ‖À¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
                 "[pos: 0, rlim: 158, wlim: 8EiB, cap: 8EiB ] ‖À¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
@@ -541,7 +542,7 @@ public class BinaryWireTest {
 
     @Test
     public void testBool() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().bool(false)
                 .write().bool(true)
                 .write().bool(null);
@@ -552,7 +553,7 @@ public class BinaryWireTest {
 
     @Test
     public void testFloat32() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().float32(0.0F)
                 .write().float32(Float.NaN)
                 .write().float32(Float.POSITIVE_INFINITY)
@@ -567,7 +568,7 @@ public class BinaryWireTest {
 
     @Test
     public void testTime() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         LocalTime now = LocalTime.of(12, 54, 4, 612 * 1000000);
         wire.write().time(now)
                 .write().time(LocalTime.MAX)
@@ -590,7 +591,7 @@ public class BinaryWireTest {
 
     @Test
     public void testZonedDateTime() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         ZonedDateTime now = ZonedDateTime.now();
         final ZonedDateTime max = ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault());
         final ZonedDateTime min = ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault());
@@ -611,7 +612,7 @@ public class BinaryWireTest {
 
     @Test
     public void testDate() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         LocalDate now = LocalDate.now();
         wire.write().date(now)
                 .write().date(LocalDate.MAX)
@@ -623,7 +624,7 @@ public class BinaryWireTest {
 
     @Test
     public void testUuid() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         UUID uuid = UUID.randomUUID();
         wire.write().uuid(uuid)
                 .write().uuid(new UUID(0, 0))
@@ -635,8 +636,8 @@ public class BinaryWireTest {
 
     @Test
     public void testBytes() {
-        Wire wire = createWire();
-        byte[] allBytes = new byte[256];
+        @NotNull Wire wire = createWire();
+        @NotNull byte[] allBytes = new byte[256];
         for (int i = 0; i < 256; i++)
             allBytes[i] = (byte) i;
         wire.write().bytes(NoBytesStore.NO_BYTES)
@@ -645,7 +646,7 @@ public class BinaryWireTest {
                 .write()
                 .bytes(allBytes);
 //        System.out.println(bytes.toDebugString());
-        NativeBytes allBytes2 = nativeBytes();
+        @NotNull NativeBytes allBytes2 = nativeBytes();
         wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
                 .read().bytes(b -> assertEquals("Hello", b.toString()))
                 .read().bytes(b -> assertEquals("quotable, text", b.toString()))
@@ -658,8 +659,8 @@ public class BinaryWireTest {
     public void testWriteMarshallable() {
         BinaryWire.SPEC = 18;
 
-        Wire wire = createWire();
-        MyTypesCustom mtA = new MyTypesCustom();
+        @NotNull Wire wire = createWire();
+        @NotNull MyTypesCustom mtA = new MyTypesCustom();
         mtA.b = true;
         mtA.d = 123.456;
         mtA.i = -12345789;
@@ -668,7 +669,7 @@ public class BinaryWireTest {
 
         wire.write(() -> "A").marshallable(mtA);
 
-        MyTypesCustom mtB = new MyTypesCustom();
+        @NotNull MyTypesCustom mtB = new MyTypesCustom();
         mtB.b = false;
         mtB.d = 123.4567;
         mtB.i = -123457890;
@@ -685,7 +686,7 @@ public class BinaryWireTest {
                 "[pos: 0, rlim: 112, wlim: 8EiB, cap: 8EiB ] ‖ºA\\u00823٠٠٠º٠±º⒈¥90º⒉\\u0091w¾\\u009F\\u001A/Ý^@º⒊§٠٠٠٠٠٠٠٠º⒋¦C\\u009ECÿº⒌ëHello WorldºB\\u0082/٠٠٠º٠°º⒈¥Ò⒋º⒉\\u0091S⒌£\\u0092:Ý^@º⒊§٠٠٠٠٠٠٠٠º⒋¦\\u009E.¤øº⒌çBye now‡٠٠٠٠٠٠٠٠",
                 "[pos: 0, rlim: 58, wlim: 8EiB, cap: 8EiB ] ‖\\u0082\\u001A٠٠٠±¥90\\u0094\\u0080\u00ADK٠¦C\\u009ECÿëHello World\\u0082\\u0016٠٠٠°¥Ò⒋\\u0094\\u0087\u00ADK٠¦\\u009E.¤øçBye now‡٠٠٠٠٠٠٠٠",
                 "[pos: 0, rlim: 84, wlim: 8EiB, cap: 8EiB ] ‖\\u0082'٠٠٠±¥90\\u0091w¾\\u009F\\u001A/Ý^@§٠٠٠٠٠٠٠٠¦C\\u009ECÿëHello World\\u0082#٠٠٠°¥Ò⒋\\u0091S⒌£\\u0092:Ý^@§٠٠٠٠٠٠٠٠¦\\u009E.¤øçBye now‡٠٠٠٠٠٠٠٠");
-        MyTypesCustom mt2 = new MyTypesCustom();
+        @NotNull MyTypesCustom mt2 = new MyTypesCustom();
         wire.read(() -> "A").marshallable(mt2);
         assertEquals(mt2, mtA);
 
@@ -695,32 +696,32 @@ public class BinaryWireTest {
 
     @Test
     public void writeNull() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().object(null);
         wire.write().object(null);
         wire.write().object(null);
         wire.write().object(null);
 
-        Object o = wire.read().object(Object.class);
+        @Nullable Object o = wire.read().object(Object.class);
         assertEquals(null, o);
-        String s = wire.read().object(String.class);
+        @Nullable String s = wire.read().object(String.class);
         assertEquals(null, s);
-        RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
+        @Nullable RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
         assertEquals(null, rp);
-        Circle c = wire.read().object(Circle.class);
+        @Nullable Circle c = wire.read().object(Circle.class);
         assertEquals(null, c);
     }
 
     @Test
     public void testLongString() {
-        Wire wire = createWire();
-        char[] chars = new char[128];
+        @NotNull Wire wire = createWire();
+        @NotNull char[] chars = new char[128];
         for (int i = 0; i < Character.MAX_VALUE; i++) {
             if (!Character.isValidCodePoint(i))
                 continue;
             wire.clear();
             Arrays.fill(chars, (char) i);
-            String s = new String(chars);
+            @NotNull String s = new String(chars);
             wire.writeDocument(false, w -> w.write(() -> "message").text(s));
 
 //            System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
@@ -730,21 +731,21 @@ public class BinaryWireTest {
 
     @Test
     public void testArrays() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
 
-        Object[] noObjects = {};
+        @NotNull Object[] noObjects = {};
         wire.write("a").object(noObjects);
 
         System.out.println(wire.asText());
-        Object[] object = wire.read()
+        @Nullable Object[] object = wire.read()
                 .object(Object[].class);
         assertEquals(0, object.length);
 
-        Object[] threeObjects = {"abc", "def", "ghi"};
+        @NotNull Object[] threeObjects = {"abc", "def", "ghi"};
         wire.write("b").object(threeObjects);
         System.out.println(wire.asText());
 
-        Object[] object2 = wire.read()
+        @Nullable Object[] object2 = wire.read()
                 .object(Object[].class);
         assertEquals(3, object2.length);
         assertEquals("[abc, def, ghi]", Arrays.toString(object2));
@@ -753,19 +754,19 @@ public class BinaryWireTest {
     @Test
     @Ignore("TODO FIX")
     public void testArrays2() {
-        Wire wire = createWire();
-        Object[] a1 = new Object[0];
+        @NotNull Wire wire = createWire();
+        @NotNull Object[] a1 = new Object[0];
         wire.write("empty").object(a1);
-        Object[] a2 = {1L};
+        @NotNull Object[] a2 = {1L};
         wire.write("one").object(a2);
-        Object[] a3 = {"Hello", 123, 10.1};
+        @NotNull Object[] a3 = {"Hello", 123, 10.1};
         wire.write("three").object(Object[].class, a3);
 
-        Object o1 = wire.read().object(Object[].class);
+        @Nullable Object o1 = wire.read().object(Object[].class);
         assertArrayEquals(a1, (Object[]) o1);
-        Object o2 = wire.read().object(Object[].class);
+        @Nullable Object o2 = wire.read().object(Object[].class);
         assertArrayEquals(a2, (Object[]) o2);
-        Object o3 = wire.read().object(Object[].class);
+        @Nullable Object o3 = wire.read().object(Object[].class);
         assertArrayEquals(a3, (Object[]) o3);
     }
 
@@ -786,54 +787,54 @@ public class BinaryWireTest {
 
             StringBuilder sb = Wires.acquireStringBuilder();
 
-            ValueIn valueIn1 = dc.wire().readEventName(sb);
+            @NotNull ValueIn valueIn1 = dc.wire().readEventName(sb);
             Assert.assertTrue("hello1".contentEquals(sb));
             valueIn1.skipValue();
 
-            ValueIn valueIn2 = dc.wire().readEventName(sb);
+            @NotNull ValueIn valueIn2 = dc.wire().readEventName(sb);
             Assert.assertTrue("hello2".contentEquals(sb));
 
             valueIn2.skipValue(); // if you change this to typed marshable it works
 
-            ValueIn valueIn3 = dc.wire().readEventName(sb);
+            @NotNull ValueIn valueIn3 = dc.wire().readEventName(sb);
             Assert.assertTrue("hello3".contentEquals(sb));
 
-            DTO o = valueIn3.typedMarshallable();
+            @Nullable DTO o = valueIn3.typedMarshallable();
             Assert.assertEquals("world3", o.text);
         }
     }
 
     @Test
     public void testSortedSet() {
-        Wire wire = createWire();
-        SortedSet<String> set = new TreeSet<>();
+        @NotNull Wire wire = createWire();
+        @NotNull SortedSet<String> set = new TreeSet<>();
         set.add("one");
         set.add("two");
         set.add("three");
         wire.write("a").object(set);
 
-        Object o = wire.read().object();
+        @Nullable Object o = wire.read().object();
         assertTrue(o instanceof SortedSet);
         assertEquals(set, o);
     }
 
     @Test
     public void testSortedMap() {
-        Wire wire = createWire();
-        SortedMap<String, Long> set = new TreeMap<>();
+        @NotNull Wire wire = createWire();
+        @NotNull SortedMap<String, Long> set = new TreeMap<>();
         set.put("one", 1L);
         set.put("two", 2L);
         set.put("three", 3L);
         wire.write("a").object(set);
 
-        Object o = wire.read().object();
+        @Nullable Object o = wire.read().object();
         assertTrue(o instanceof SortedMap);
         assertEquals(set, o);
     }
 
     @Test
     public void testSkipPadding() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         for (int i = 1; i <= 128; i *= 2) {
             wire.addPadding(i);
             wire.getValueIn().skipValue();

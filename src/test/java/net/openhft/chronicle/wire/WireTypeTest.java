@@ -20,6 +20,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -36,7 +38,7 @@ public class WireTypeTest {
 
     @Test
     public void testAsString() {
-        TestMarshallable tm = new TestMarshallable();
+        @NotNull TestMarshallable tm = new TestMarshallable();
         tm.setCount(1);
         tm.setName("name");
         assertEquals("!TestMarshallable {\n" +
@@ -52,16 +54,16 @@ public class WireTypeTest {
 
     @Test
     public void testFromString() {
-        String asText = "!TestMarshallable {\n" +
+        @NotNull String asText = "!TestMarshallable {\n" +
                 "  name: name,\n" +
                 "  count: 1\n" +
                 "}\n";
-        TestMarshallable tm = new TestMarshallable();
+        @NotNull TestMarshallable tm = new TestMarshallable();
         tm.setCount(1);
         tm.setName("name");
         assertEquals(tm, WireType.TEXT.fromString(asText));
 
-        String asBinary = "00000000 B6 10 54 65 73 74 4D 61  72 73 68 61 6C 6C 61 62 ··TestMa rshallab\n" +
+        @NotNull String asBinary = "00000000 B6 10 54 65 73 74 4D 61  72 73 68 61 6C 6C 61 62 ··TestMa rshallab\n" +
                 "00000010 6C 65 82 11 00 00 00 C4  6E 61 6D 65 E4 6E 61 6D le······ name·nam\n" +
                 "00000020 65 C5 63 6F 75 6E 74 01                          e·count·         \n";
         assertEquals(tm, WireType.BINARY.fromString(asBinary));
@@ -75,11 +77,11 @@ public class WireTypeTest {
 
     @Test
     public void testFromFile() throws IOException {
-        TestMarshallable tm = new TestMarshallable();
+        @NotNull TestMarshallable tm = new TestMarshallable();
         tm.setCount(1);
         tm.setName("name");
 
-        for (WireType wt : WireType.values()) {
+        for (@NotNull WireType wt : WireType.values()) {
 
             if (wt == WireType.RAW
                     || wt == WireType.READ_ANY
@@ -87,9 +89,9 @@ public class WireTypeTest {
                     || wt == WireType.DELTA_BINARY
                     || wt == WireType.DEFAULT_ZERO_BINARY)
                 continue;
-            String tmp = OS.getTarget() + "/testFromFile-" + System.nanoTime();
+            @NotNull String tmp = OS.getTarget() + "/testFromFile-" + System.nanoTime();
             wt.toFile(tmp, tm);
-            Object o;
+            @Nullable Object o;
             if (wt == WireType.JSON)
                 o = wt.apply(Bytes.wrapForRead(IOTools.readFile(tmp))).getValueIn().object(TestMarshallable.class);
             else

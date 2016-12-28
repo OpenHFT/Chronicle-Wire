@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -33,12 +34,12 @@ public class CSVWireTest {
 
     @Test
     public void testFrom() {
-        Wire wire = CSVWire.from(
+        @NotNull Wire wire = CSVWire.from(
                 "heading1, heading2,heading3\n" +
                         "data1, data2, \"data three\"\n" +
                         "row2, row2b, row2c\n");
         assertTrue(wire.hasMore());
-        StringBuilder row = new StringBuilder();
+        @NotNull StringBuilder row = new StringBuilder();
         wire.readEventName(row).marshallable(w -> {
             assertEquals("data1", row.toString());
             wire.read(() -> "heading2").text(this, (o, s) -> assertEquals("data2", s))
@@ -55,7 +56,7 @@ public class CSVWireTest {
 
     @Test
     public void tstFrom2() {
-        Wire wire = CSVWire.from(
+        @NotNull Wire wire = CSVWire.from(
                 "Symbol,Company,Price,Change,ChangePercent,Day's Volume\n" +
                         "III,3i Group,479.4,12,2.44,2387043\n" +
                         "3IN,3i Infrastructure,164.7,0.1,0.06,429433\n" +
@@ -65,7 +66,7 @@ public class CSVWireTest {
 
     @Test
     public void tstFrom3() throws IOException {
-        Map<String, EndOfDayShort> map = WireType.CSV.fromFileAsMap("CSVWireTest.csv", EndOfDayShort.class);
+        @NotNull Map<String, EndOfDayShort> map = WireType.CSV.fromFileAsMap("CSVWireTest.csv", EndOfDayShort.class);
         assertEquals("{III=!net.openhft.chronicle.wire.EndOfDayShort {\n" +
                 "  name: \"3i Group\",\n" +
                 "  price: 479.4,\n" +
@@ -90,8 +91,8 @@ public class CSVWireTest {
                 "}", map.toString());
     }
 
-    public void doTestWire(Wire wire) {
-        StringBuilder row = new StringBuilder();
+    public void doTestWire(@NotNull Wire wire) {
+        @NotNull StringBuilder row = new StringBuilder();
         assertTrue(wire.hasMore());
         wire.readEventName(row).marshallable(w -> {
             assertEquals("III", row.toString());

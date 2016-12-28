@@ -17,6 +17,7 @@
 
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,7 +33,7 @@ public class ProjectTest {
 
     @Test
     public void testProject() throws Exception {
-        Dto1 dto1 = new Dto1();
+        @NotNull Dto1 dto1 = new Dto1();
         dto1.m.put("some", "data");
         dto1.anotherField = "someString";
         dto1.someValue = 1;
@@ -46,6 +47,7 @@ public class ProjectTest {
     }
 
     static class Dto1 extends AbstractMarshallable {
+        @NotNull
         Map m = new HashMap<>();
         String anotherField;
         long someValue;
@@ -54,6 +56,7 @@ public class ProjectTest {
     static class Dto2 extends AbstractMarshallable {
         long someValue;
         String anotherField;
+        @NotNull
         Map m = new HashMap<>();
     }
 
@@ -65,6 +68,7 @@ public class ProjectTest {
             return name;
         }
 
+        @NotNull
         public Inner name(String name) {
             this.name = name;
             return this;
@@ -79,6 +83,7 @@ public class ProjectTest {
             return inner;
         }
 
+        @NotNull
         public Outer inner(Inner inner) {
             this.inner = inner;
             return this;
@@ -92,6 +97,7 @@ public class ProjectTest {
             return name2;
         }
 
+        @NotNull
         public Simple name2(String name2) {
             this.name2 = name2;
             return this;
@@ -99,14 +105,16 @@ public class ProjectTest {
     }
 
 
+    @NotNull
     @Rule
     public TestName name = new TestName();
 
 
+    @NotNull
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
 
-        final List<Object[]> list = new ArrayList<>();
+        @NotNull final List<Object[]> list = new ArrayList<>();
         list.add(new Object[]{WireType.BINARY});
         list.add(new Object[]{WireType.TEXT});
         //      list.add(new Object[]{WireType.RAW});
@@ -117,8 +125,8 @@ public class ProjectTest {
     @Test
     public void testProjectWithNestedMarshallable() {
 
-        final Simple simple = new Simple();
-        final Inner inner = new Inner();
+        @NotNull final Simple simple = new Simple();
+        @NotNull final Inner inner = new Inner();
         inner.name("some data");
         simple.inner(inner);
         simple.name2("hello");

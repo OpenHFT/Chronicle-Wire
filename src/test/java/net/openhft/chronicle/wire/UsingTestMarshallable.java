@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,15 +34,15 @@ public class UsingTestMarshallable {
     @Test
     public void testConverMarshallableToTextName() {
 
-        TestMarshallable testMarshallable = new TestMarshallable();
+        @NotNull TestMarshallable testMarshallable = new TestMarshallable();
         testMarshallable.setName("hello world");
 
         Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer();
 
-        ByteBuffer byteBuffer = byteBufferBytes.underlyingObject();
+        @Nullable ByteBuffer byteBuffer = byteBufferBytes.underlyingObject();
         System.out.println(byteBuffer.getClass());
 
-        Wire textWire = new TextWire(byteBufferBytes);
+        @NotNull Wire textWire = new TextWire(byteBufferBytes);
         textWire.bytes().readPosition();
 
         textWire.writeDocument(false, d -> d.write(() -> "any-key").marshallable(testMarshallable));
@@ -63,15 +64,15 @@ public class UsingTestMarshallable {
     public void testMarshall() {
 
         Bytes bytes = Bytes.elasticByteBuffer();
-        Wire wire = new BinaryWire(bytes);
+        @NotNull Wire wire = new BinaryWire(bytes);
 
-        MyMarshallable x = new MyMarshallable();
+        @NotNull MyMarshallable x = new MyMarshallable();
         x.text.append("text");
 
         wire.write(() -> "key").typedMarshallable(x);
 
-        final ValueIn read = wire.read(() -> "key");
-        final MyMarshallable result = read.typedMarshallable();
+        @NotNull final ValueIn read = wire.read(() -> "key");
+        @Nullable final MyMarshallable result = read.typedMarshallable();
 
         System.out.println(result.toString());
 
@@ -80,6 +81,7 @@ public class UsingTestMarshallable {
 
     public static class MyMarshallable implements Marshallable {
 
+        @NotNull
         public StringBuilder text = new StringBuilder();
 
         @Override
@@ -92,6 +94,7 @@ public class UsingTestMarshallable {
             wire.write(() -> "262").text(text);
         }
 
+        @NotNull
         @Override
         public String toString() {
             return "X{" +
@@ -102,20 +105,23 @@ public class UsingTestMarshallable {
 
 
     static class MarshableFilter extends AbstractMarshallable {
+        @NotNull
         public final String columnName;
+        @NotNull
         public final String filter;
 
-        public MarshableFilter(String columnName, String filter) {
+        public MarshableFilter(@NotNull String columnName, @NotNull String filter) {
             this.columnName = columnName;
             this.filter = filter;
         }
     }
 
     static class MarshableOrderBy extends AbstractMarshallable {
+        @NotNull
         public final String column;
         public final boolean isAscending;
 
-        public MarshableOrderBy(String column, boolean isAscending) {
+        public MarshableOrderBy(@NotNull String column, boolean isAscending) {
             this.column = column;
             this.isAscending = isAscending;
         }
@@ -123,7 +129,9 @@ public class UsingTestMarshallable {
 
     static class SortedFilter extends AbstractMarshallable {
         public long fromIndex;
+        @NotNull
         public List<MarshableOrderBy> marshableOrderBy = new ArrayList<>();
+        @NotNull
         public List<MarshableFilter> marshableFilters = new ArrayList<>();
     }
 
@@ -132,11 +140,11 @@ public class UsingTestMarshallable {
     public void test() {
 
         Wire wire = WireType.BINARY.apply(Wires.acquireBytes());
-        MarshableFilter expected = new MarshableFilter("hello", "world");
+        @NotNull MarshableFilter expected = new MarshableFilter("hello", "world");
 
         // write
         {
-            SortedFilter sortedFilter = new SortedFilter();
+            @NotNull SortedFilter sortedFilter = new SortedFilter();
 
             boolean add = sortedFilter.marshableFilters.add(expected);
             wire.write().marshallable(sortedFilter);
@@ -145,7 +153,7 @@ public class UsingTestMarshallable {
 
         // read
         {
-            SortedFilter sortedFilter = new SortedFilter();
+            @NotNull SortedFilter sortedFilter = new SortedFilter();
             wire.read().marshallable(sortedFilter);
             Assert.assertEquals(1, sortedFilter.marshableFilters.size());
             Assert.assertEquals(expected, sortedFilter.marshableFilters.get(0));

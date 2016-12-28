@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,8 +50,8 @@ public class StrangeTextCombination {
 
     @Test
     public void testPrependedSpace() {
-        final String prependedSpace = " hello world";
-        final Wire wire = wireFactory();
+        @NotNull final String prependedSpace = " hello world";
+        @NotNull final Wire wire = wireFactory();
         wire.write().text(prependedSpace);
 
         Assert.assertEquals(prependedSpace, wire.read().text());
@@ -59,8 +60,8 @@ public class StrangeTextCombination {
 
     @Test
     public void testPostpendedSpace() {
-        final String postpendedSpace = "hello world ";
-        final Wire wire = wireFactory();
+        @NotNull final String postpendedSpace = "hello world ";
+        @NotNull final Wire wire = wireFactory();
         wire.write().text(postpendedSpace);
 
         Assert.assertEquals(postpendedSpace, wire.read().text());
@@ -68,80 +69,80 @@ public class StrangeTextCombination {
 
     @Test
     public void testSlashQuoteTest() {
-        final String expected = "\\\" ";
-        final Wire wire = wireFactory();
+        @NotNull final String expected = "\\\" ";
+        @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
         Assert.assertEquals(expected, wire.read().text());
     }
 
     @Test
     public void testYaml() {
-        final String expected = "!String{chars:hello world}";
-        final Wire wire = wireFactory();
+        @NotNull final String expected = "!String{chars:hello world}";
+        @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
         Assert.assertEquals(expected, wire.read().text());
     }
 
     @Test
     public void testString() {
-        final String expected = "!String";
-        final Wire wire = wireFactory();
+        @NotNull final String expected = "!String";
+        @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
         Assert.assertEquals(expected, wire.read().text());
     }
 
     @Test
     public void testBinary() {
-        final String expected = "!binary";
-        final Wire wire = wireFactory();
+        @NotNull final String expected = "!binary";
+        @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
         Assert.assertEquals(expected, wire.read().text());
     }
 
     @Test
     public void testBinaryWithSpace() {
-        final String expected = " !binary";
-        final Wire wire = wireFactory();
+        @NotNull final String expected = " !binary";
+        @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
         Assert.assertEquals(expected, wire.read().text());
     }
 
     @Test
     public void testEmpty() {
-        final String expected = "";
-        final Wire wire = wireFactory();
+        @NotNull final String expected = "";
+        @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
         Assert.assertEquals(expected, wire.read().text());
     }
 
     @Test
     public void testNull() {
-        final String expected = null;
-        final Wire wire = wireFactory();
+        @Nullable final String expected = null;
+        @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
         Assert.assertEquals(expected, wire.read().text());
     }
 
     @Test
     public void testNewLine() {
-        final String expected = "\n";
-        final Wire wire = wireFactory();
+        @NotNull final String expected = "\n";
+        @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
         Assert.assertEquals(expected, wire.read().text());
     }
 
     @Test
     public void testUnicode() {
-        final String expected = "\u0000";
-        final Wire wire = wireFactory();
+        @NotNull final String expected = "\u0000";
+        @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
         Assert.assertEquals(expected, wire.read().text());
     }
 
     @Test
     public void testXML() {
-        final String expected = "<name>rob austin</name>";
-        final Wire wire = wireFactory();
+        @NotNull final String expected = "<name>rob austin</name>";
+        @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
         Assert.assertEquals(expected, wire.read().text());
     }

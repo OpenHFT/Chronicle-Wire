@@ -84,6 +84,7 @@ public class OuterClass extends AbstractMarshallable {
         this.wireType = wireType;
     }
 
+    @NotNull
     public List<NestedClass> getListA() {
         return listA;
     }
@@ -100,6 +101,7 @@ public class OuterClass extends AbstractMarshallable {
         return nc;
     }
 
+    @NotNull
     public List<NestedClass> getListB() {
         return listB;
     }

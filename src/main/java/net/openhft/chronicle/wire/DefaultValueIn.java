@@ -47,14 +47,14 @@ public class DefaultValueIn implements ValueIn {
     @Nullable
     @Override
     public String text() {
-        Object o = wireKey.defaultValue();
+        @Nullable Object o = wireKey.defaultValue();
         return o == null ? null : o.toString();
     }
 
     @Nullable
     @Override
     public StringBuilder textTo(@NotNull StringBuilder sb) {
-        Object o = wireKey.defaultValue();
+        @Nullable Object o = wireKey.defaultValue();
         if (o == null)
             return null;
         sb.append(o);
@@ -64,7 +64,7 @@ public class DefaultValueIn implements ValueIn {
     @Nullable
     @Override
     public Bytes textTo(@NotNull Bytes bytes) {
-        Object o = wireKey.defaultValue();
+        @Nullable Object o = wireKey.defaultValue();
         if (o == null)
             return null;
         bytes.write((BytesStore) o);
@@ -74,10 +74,10 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public WireIn bytes(@NotNull BytesOut toBytes) {
-        Object o = wireKey.defaultValue();
+        @Nullable Object o = wireKey.defaultValue();
         if (o == null)
             return wireIn();
-        BytesStore bytes = (BytesStore) o;
+        @NotNull BytesStore bytes = (BytesStore) o;
         toBytes.write(bytes);
         return wireIn();
     }
@@ -85,21 +85,21 @@ public class DefaultValueIn implements ValueIn {
     @Nullable
     @Override
     public WireIn bytesSet(@NotNull PointerBytesStore toBytes) {
-        Object o = wireKey.defaultValue();
+        @Nullable Object o = wireKey.defaultValue();
         if (o == null) {
             toBytes.set(NoBytesStore.NO_PAGE, 0);
             return wireIn();
         }
-        BytesStore bytes = (BytesStore) o;
+        @NotNull BytesStore bytes = (BytesStore) o;
         toBytes.set(bytes.address(0), bytes.realCapacity());
         return wireIn();
     }
 
     @NotNull
     @Override
-    public WireIn bytesMatch(@NotNull BytesStore compareBytes, BooleanConsumer consumer) {
-        Object o = wireKey.defaultValue();
-        BytesStore bytes = (BytesStore) o;
+    public WireIn bytesMatch(@NotNull BytesStore compareBytes, @NotNull BooleanConsumer consumer) {
+        @Nullable Object o = wireKey.defaultValue();
+        @NotNull BytesStore bytes = (BytesStore) o;
         consumer.accept(compareBytes.contentEquals(bytes));
         return wireIn();
     }
@@ -107,12 +107,12 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public WireIn bytes(@NotNull ReadBytesMarshallable wireInConsumer) {
-        Object o = wireKey.defaultValue();
+        @Nullable Object o = wireKey.defaultValue();
         if (o == null) {
             wireInConsumer.readMarshallable(Wires.NO_BYTES);
             return wireIn();
         }
-        BytesStore bytes = (BytesStore) o;
+        @Nullable BytesStore bytes = (BytesStore) o;
         wireInConsumer.readMarshallable(bytes.bytesForRead());
         return wireIn();
     }
@@ -134,6 +134,7 @@ public class DefaultValueIn implements ValueIn {
         return 0;
     }
 
+    @NotNull
     @Override
     public WireIn skipValue() {
         return wireIn();
@@ -142,7 +143,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag) {
-        Boolean o = (Boolean) wireKey.defaultValue();
+        @Nullable Boolean o = (Boolean) wireKey.defaultValue();
         tFlag.accept(t, o);
         return wireIn();
     }
@@ -150,7 +151,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn int8(@NotNull T t, @NotNull ObjByteConsumer<T> tb) {
-        Number o = (Number) wireKey.defaultValue();
+        @NotNull Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         tb.accept(t, o.byteValue());
         return wireIn();
@@ -159,7 +160,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn uint8(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
-        Number o = (Number) wireKey.defaultValue();
+        @NotNull Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         ti.accept(t, o.shortValue());
         return wireIn();
@@ -168,7 +169,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn int16(@NotNull T t, @NotNull ObjShortConsumer<T> ti) {
-        Number o = (Number) wireKey.defaultValue();
+        @NotNull Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         ti.accept(t, o.shortValue());
         return wireIn();
@@ -177,7 +178,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn uint16(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
-        Number o = (Number) wireKey.defaultValue();
+        @NotNull Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         ti.accept(t, o.intValue());
         return wireIn();
@@ -186,7 +187,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn int32(@NotNull T t, @NotNull ObjIntConsumer<T> ti) {
-        Number o = (Number) wireKey.defaultValue();
+        @Nullable Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         ti.accept(t, o.intValue());
         return wireIn();
@@ -195,7 +196,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn uint32(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
-        Number o = (Number) wireKey.defaultValue();
+        @NotNull Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         tl.accept(t, o.longValue());
         return wireIn();
@@ -204,7 +205,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn int64(@NotNull T t, @NotNull ObjLongConsumer<T> tl) {
-        Number o = (Number) wireKey.defaultValue();
+        @NotNull Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         tl.accept(t, o.longValue());
         return wireIn();
@@ -213,7 +214,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn float32(@NotNull T t, @NotNull ObjFloatConsumer<T> tf) {
-        Number o = (Number) wireKey.defaultValue();
+        @NotNull Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         tf.accept(t, o.floatValue());
         return wireIn();
@@ -222,7 +223,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td) {
-        Number o = (Number) wireKey.defaultValue();
+        @NotNull Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         td.accept(t, o.doubleValue());
         return wireIn();
@@ -231,7 +232,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime) {
-        LocalTime o = (LocalTime) wireKey.defaultValue();
+        @Nullable LocalTime o = (LocalTime) wireKey.defaultValue();
         setLocalTime.accept(t, o);
         return wireIn();
     }
@@ -239,7 +240,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime) {
-        ZonedDateTime o = (ZonedDateTime) wireKey.defaultValue();
+        @Nullable ZonedDateTime o = (ZonedDateTime) wireKey.defaultValue();
         tZonedDateTime.accept(t, o);
         return wireIn();
     }
@@ -247,7 +248,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate) {
-        LocalDate o = (LocalDate) wireKey.defaultValue();
+        @NotNull LocalDate o = (LocalDate) wireKey.defaultValue();
         tLocalDate.accept(t, o);
         return wireIn();
     }
@@ -265,7 +266,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn uuid(@NotNull T t, @NotNull BiConsumer<T, UUID> tuuid) {
-        UUID o = (UUID) wireKey.defaultValue();
+        @NotNull UUID o = (UUID) wireKey.defaultValue();
         tuuid.accept(t, o);
         return wireIn();
     }
@@ -279,7 +280,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public WireIn int64(@NotNull LongValue value) {
-        Number o = (Number) wireKey.defaultValue();
+        @NotNull Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         value.setValue(o.longValue());
         return wireIn();
@@ -288,7 +289,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public WireIn int32(@NotNull IntValue value) {
-        Number o = (Number) wireKey.defaultValue();
+        @Nullable Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         value.setValue(o.intValue());
         return wireIn();
@@ -297,7 +298,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter) {
-        Number o = (Number) wireKey.defaultValue();
+        @NotNull Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         value.setValue(o.longValue());
         setter.accept(t, value);
@@ -307,7 +308,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter) {
-        Number o = (Number) wireKey.defaultValue();
+        @NotNull Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         value.setValue(o.intValue());
         setter.accept(t, value);
@@ -327,6 +328,7 @@ public class DefaultValueIn implements ValueIn {
         tReader.accept(t, kls, this);
         return wireIn();
     }
+    @Nullable
     @Override
     public <T> T applyToMarshallable(Function<WireIn, T> marshallableReader) {
         return (T) wireKey.defaultValue();
@@ -352,6 +354,7 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    @Nullable
     @Override
     public Object marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
         return wireKey.defaultValue();
@@ -378,58 +381,60 @@ public class DefaultValueIn implements ValueIn {
 
     @Override
     public byte int8() {
-        Number o = (Number) wireKey.defaultValue();
+        @Nullable Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         return o.byteValue();
     }
 
     @Override
     public short int16() {
-        Number o = (Number) wireKey.defaultValue();
+        @NotNull Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         return o.shortValue();
     }
 
     @Override
     public int uint16() {
-        Number o = (Number) wireKey.defaultValue();
+        @Nullable Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         return o.intValue();
     }
 
     @Override
     public int int32() {
-        Number o = (Number) wireKey.defaultValue();
+        @NotNull Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         return o.intValue();
     }
 
     @Override
     public long int64() {
-        Number o = (Number) wireKey.defaultValue();
+        @NotNull Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         return o.longValue();
     }
 
     @Override
     public double float64() {
-        Number o = (Number) wireKey.defaultValue();
+        @NotNull Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         return o.doubleValue();
     }
 
     @Override
     public float float32() {
-        Number o = (Number) wireKey.defaultValue();
+        @NotNull Number o = (Number) wireKey.defaultValue();
         if (o == null) o = 0;
         return o.floatValue();
     }
 
+    @Nullable
     @Override
     public <T> Class<T> typeLiteral() throws IORuntimeException, BufferUnderflowException {
         return (Class<T>) wireKey.defaultValue();
     }
 
+    @NotNull
     @Override
     public BracketType getBracketType() {
         return BracketType.NONE;
@@ -452,7 +457,7 @@ public class DefaultValueIn implements ValueIn {
 
     @Override
     public Class typePrefix() {
-        Object o = wireKey.defaultValue();
+        @Nullable Object o = wireKey.defaultValue();
         if (o == null) return void.class;
         return o.getClass();
     }

@@ -2,6 +2,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -36,11 +38,11 @@ public class WireBug37Test {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            MarshallableObj that = (MarshallableObj) o;
+            @Nullable MarshallableObj that = (MarshallableObj) o;
 
             return builder.toString().equals(that.builder.toString());
         }
@@ -50,6 +52,7 @@ public class WireBug37Test {
             return builder.toString().hashCode();
         }
 
+        @NotNull
         @Override
         public String toString() {
             return builder.toString();
@@ -58,12 +61,12 @@ public class WireBug37Test {
 
     @Test
     public void testNewlineInString() {
-        final WireType wireType = WireType.TEXT;
-        final String exampleString = "hello\nworld";
+        @NotNull final WireType wireType = WireType.TEXT;
+        @NotNull final String exampleString = "hello\nworld";
 
-        final MarshallableObj obj1 = new MarshallableObj();
-        final MarshallableObj obj2 = new MarshallableObj();
-        final MarshallableObj obj3 = new MarshallableObj();
+        @NotNull final MarshallableObj obj1 = new MarshallableObj();
+        @NotNull final MarshallableObj obj2 = new MarshallableObj();
+        @NotNull final MarshallableObj obj3 = new MarshallableObj();
 
         obj1.append(exampleString);
         obj2.append(exampleString);

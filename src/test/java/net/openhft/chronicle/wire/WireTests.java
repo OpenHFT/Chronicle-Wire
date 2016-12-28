@@ -17,6 +17,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,6 +45,7 @@ public class WireTests {
 
     private final WireType wireType;
 
+    @NotNull
     @Rule
     public TestName name = new TestName();
 
@@ -50,10 +53,11 @@ public class WireTests {
         this.wireType = wireType;
     }
 
+    @NotNull
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
 
-        final List<Object[]> list = new ArrayList<>();
+        @NotNull final List<Object[]> list = new ArrayList<>();
         list.add(new Object[]{WireType.BINARY});
         list.add(new Object[]{WireType.TEXT});
         //      list.add(new Object[]{WireType.RAW});
@@ -101,42 +105,42 @@ public class WireTests {
         wire.write().object(null);
         wire.write().object(null);
 
-        Object o = wire.read().object(Object.class);
+        @Nullable Object o = wire.read().object(Object.class);
         Assert.assertEquals(null, o);
-        String s = wire.read().object(String.class);
+        @Nullable String s = wire.read().object(String.class);
         Assert.assertEquals(null, s);
-        RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
+        @Nullable RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
         Assert.assertEquals(null, rp);
-        Circle c = wire.read().object(Circle.class);  // this fails without the check.
+        @Nullable Circle c = wire.read().object(Circle.class);  // this fails without the check.
         Assert.assertEquals(null, c);
     }
 
     @Test
     public void testClassTypedMarshallableObject() throws Exception {
 
-        TestClass testClass = new TestClass(Boolean.class);
+        @NotNull TestClass testClass = new TestClass(Boolean.class);
 
         final Bytes b = Bytes.elasticByteBuffer();
         final Wire wire = wireType.apply(b);
         wire.write().typedMarshallable(testClass);
 
-        TestClass o = wire.read().typedMarshallable();
+        @Nullable TestClass o = wire.read().typedMarshallable();
         Assert.assertEquals(Boolean.class, o.clazz());
     }
 
     @Test
     public void testReadingPeekYaml() {
         Bytes b = Bytes.elasticByteBuffer();
-        BinaryWire wire = (BinaryWire) WireType.BINARY.apply(b);
+        @NotNull BinaryWire wire = (BinaryWire) WireType.BINARY.apply(b);
         Assert.assertEquals("", wire.readingPeekYaml());
-        try (DocumentContext dc = wire.writingDocument(false)) {
+        try (@NotNull DocumentContext dc = wire.writingDocument(false)) {
             dc.wire().write("some-data").marshallable(m -> {
                 m.write("some-other-data").int64(0);
                 Assert.assertEquals("", wire.readingPeekYaml());
             });
         }
 
-        try (DocumentContext dc = wire.writingDocument(false)) {
+        try (@NotNull DocumentContext dc = wire.writingDocument(false)) {
             dc.wire().write("some-new").marshallable(m -> {
                 m.write("some-other--new-data").int64(0);
                 Assert.assertEquals("", wire.readingPeekYaml());
@@ -144,7 +148,7 @@ public class WireTests {
         }
         Assert.assertEquals("", wire.readingPeekYaml());
 
-        try (DocumentContext dc = wire.readingDocument()) {
+        try (@NotNull DocumentContext dc = wire.readingDocument()) {
             Assert.assertEquals("--- !!data #binary\n" +
                     "some-data: {\n" +
                     "  some-other-data: 0\n" +
@@ -159,14 +163,14 @@ public class WireTests {
         Assert.assertEquals("", wire.readingPeekYaml());
 
 
-        try (DocumentContext dc = wire.writingDocument(false)) {
+        try (@NotNull DocumentContext dc = wire.writingDocument(false)) {
             dc.wire().write("some-data").marshallable(m -> {
                 m.write("some-other-data").int64(0);
                 Assert.assertEquals("", wire.readingPeekYaml());
             });
         }
 
-        try (DocumentContext dc = wire.readingDocument()) {
+        try (@NotNull DocumentContext dc = wire.readingDocument()) {
             Assert.assertEquals("# position: 36, header: 0\n" +
                     "--- !!data #binary\n" +
                     "some-new: {\n" +

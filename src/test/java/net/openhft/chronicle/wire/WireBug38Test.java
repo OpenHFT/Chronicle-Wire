@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -37,11 +38,11 @@ public class WireBug38Test {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            MarshallableObj that = (MarshallableObj) o;
+            @Nullable MarshallableObj that = (MarshallableObj) o;
 
             return builder.toString().equals(that.builder.toString());
         }
@@ -51,6 +52,7 @@ public class WireBug38Test {
             return builder.toString().hashCode();
         }
 
+        @NotNull
         @Override
         public String toString() {
             return builder.toString();
@@ -60,6 +62,7 @@ public class WireBug38Test {
     static class Outer implements Marshallable {
         private final MarshallableObj obj = new MarshallableObj();
 
+        @NotNull
         MarshallableObj getObj() {
             return obj;
         }
@@ -75,11 +78,11 @@ public class WireBug38Test {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            Outer outer = (Outer) o;
+            @Nullable Outer outer = (Outer) o;
 
             return obj.equals(outer.obj);
         }
@@ -92,11 +95,11 @@ public class WireBug38Test {
 
     @Test
     public void testNestedObj() {
-        final WireType wireType = WireType.TEXT;
-        final String exampleString = "{";
+        @NotNull final WireType wireType = WireType.TEXT;
+        @NotNull final String exampleString = "{";
 
-        final Outer obj1 = new Outer();
-        final Outer obj2 = new Outer();
+        @NotNull final Outer obj1 = new Outer();
+        @NotNull final Outer obj2 = new Outer();
 
         obj1.getObj().append(exampleString);
 

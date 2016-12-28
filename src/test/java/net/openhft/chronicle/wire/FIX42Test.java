@@ -110,7 +110,7 @@ public class FIX42Test {
     @NotNull
     private Wire createWire() {
         bytes.clear();
-        Wire wire = testId < 0
+        @NotNull Wire wire = testId < 0
                 ? new TextWire(bytes)
                 : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "binary", true);
         assert wire.startUse();
@@ -119,8 +119,8 @@ public class FIX42Test {
 
     @Test
     public void dump() {
-        Wire wire = createWire();
-        MarketDataSnapshot mds = new MarketDataSnapshot("EURUSD", 1.1187, 1.1179);
+        @NotNull Wire wire = createWire();
+        @NotNull MarketDataSnapshot mds = new MarketDataSnapshot("EURUSD", 1.1187, 1.1179);
         mds.writeMarshallable(wire);
         System.out.println(wire.getClass().getSimpleName() + ", fixed=" + fixed + ", numericField=" + numericField + ", fieldLess=" + fieldLess);
         if (wire instanceof TextWire)

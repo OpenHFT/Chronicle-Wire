@@ -98,15 +98,15 @@ public class BinaryWireNumbersTest {
     }
 
     public void test(@NotNull WriteValue expected, @NotNull WriteValue perform) {
-        Bytes bytes1 = nativeBytes();
-        Wire wire1 = new BinaryWire(bytes1, true, false, false, Integer.MAX_VALUE, "binary", false);
+        @NotNull Bytes bytes1 = nativeBytes();
+        @NotNull Wire wire1 = new BinaryWire(bytes1, true, false, false, Integer.MAX_VALUE, "binary", false);
         assert wire1.startUse();
         expected.writeValue(wire1.write());
 
         assertEquals("Length for fixed length doesn't match for " + TextWire.asText(wire1), len, bytes1.readRemaining());
 
-        Bytes bytes2 = nativeBytes();
-        Wire wire2 = new BinaryWire(bytes2);
+        @NotNull Bytes bytes2 = nativeBytes();
+        @NotNull Wire wire2 = new BinaryWire(bytes2);
         perform.writeValue(wire2.write());
 
         assertEquals("Lengths for variable length expected " + bytes1

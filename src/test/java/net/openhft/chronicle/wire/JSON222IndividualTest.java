@@ -17,6 +17,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
@@ -50,7 +52,7 @@ public class JSON222IndividualTest {
 
     @Test
     public void nestedSeq() {
-        List list = Arrays.asList(3L, Arrays.asList(4L));
+        @NotNull List list = Arrays.asList(3L, Arrays.asList(4L));
         checkSerialized("[\n" +
                 "  3,\n" +
                 "  [\n" +
@@ -64,13 +66,13 @@ public class JSON222IndividualTest {
         checkDeserialized("{5=[6], [7]=}", "{ '5': [ 6 ], [ 7 ] }\n");
     }
 
-    void checkSerialized(String expected, Object o) {
-        Wire wire = new TextWire(Bytes.elasticByteBuffer());
+    void checkSerialized(@NotNull String expected, Object o) {
+        @NotNull Wire wire = new TextWire(Bytes.elasticByteBuffer());
         wire.getValueOut()
                 .object(o);
 
         try {
-            Yaml yaml = new Yaml();
+            @NotNull Yaml yaml = new Yaml();
             yaml.load(new StringReader(expected));
         } catch (Exception e) {
             throw e;
@@ -79,17 +81,17 @@ public class JSON222IndividualTest {
         assertEquals(expected, wire.toString());
     }
 
-    void checkDeserialized(String expected, String input) {
-        Wire wire = new TextWire(Bytes.from(input));
+    void checkDeserialized(String expected, @NotNull String input) {
+        @NotNull Wire wire = new TextWire(Bytes.from(input));
 
         try {
-            Yaml yaml = new Yaml();
+            @NotNull Yaml yaml = new Yaml();
             Object o = yaml.load(new StringReader(input));
             System.out.println(o);
         } catch (Exception e) {
             throw e;
         }
-        Object o = wire.getValueIn()
+        @Nullable Object o = wire.getValueIn()
                 .object();
 
         assertEquals(expected, o.toString());

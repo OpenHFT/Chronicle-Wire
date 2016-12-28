@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,7 +65,7 @@ public class ForwardAndBackwardCompatibilityTest {
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
                 Assert.fail();
-            DTO2 dto2 = dc.wire().getValueIn().typedMarshallable();
+            @Nullable DTO2 dto2 = dc.wire().getValueIn().typedMarshallable();
             Assert.assertEquals(dto2.one, 1);
             Assert.assertEquals(dto2.two, 0);
             Assert.assertEquals(dto2.three, null);
@@ -85,7 +86,7 @@ public class ForwardAndBackwardCompatibilityTest {
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
                 Assert.fail();
-            DTO1 dto1 = dc.wire().getValueIn().typedMarshallable();
+            @Nullable DTO1 dto1 = dc.wire().getValueIn().typedMarshallable();
             Assert.assertEquals(dto1.one, 1);
         }
     }
@@ -107,6 +108,7 @@ public class ForwardAndBackwardCompatibilityTest {
             return one;
         }
 
+        @NotNull
         public DTO1 one(int one) {
             this.one = one;
             return this;
@@ -134,6 +136,7 @@ public class ForwardAndBackwardCompatibilityTest {
             return three;
         }
 
+        @NotNull
         public DTO2 three(Object three) {
             this.three = three;
             return this;
@@ -143,6 +146,7 @@ public class ForwardAndBackwardCompatibilityTest {
             return one;
         }
 
+        @NotNull
         public DTO2 one(int one) {
             this.one = one;
             return this;
@@ -152,6 +156,7 @@ public class ForwardAndBackwardCompatibilityTest {
             return two;
         }
 
+        @NotNull
         public DTO2 two(int two) {
             this.two = two;
             return this;

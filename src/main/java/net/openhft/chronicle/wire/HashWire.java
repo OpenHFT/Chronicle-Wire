@@ -60,7 +60,7 @@ public class HashWire implements WireOut {
     }
 
     public static long hash64(Object value) {
-        HashWire hashWire = new HashWire();
+        @NotNull HashWire hashWire = new HashWire();
         hashWire.getValueOut().object(value);
         return hashWire.hash64();
     }
@@ -70,7 +70,7 @@ public class HashWire implements WireOut {
     }
 
     public static int hash32(Object value) {
-        HashWire hashWire = new HashWire();
+        @NotNull HashWire hashWire = new HashWire();
         hashWire.getValueOut().object(value);
         return hashWire.hash32();
     }
@@ -89,6 +89,7 @@ public class HashWire implements WireOut {
         hash = 0;
     }
 
+    @Nullable
     @Override
     public Object parent() {
         return null;
@@ -127,19 +128,20 @@ public class HashWire implements WireOut {
 
     @NotNull
     @Override
-    public ValueOut write(WireKey key) {
+    public ValueOut write(@NotNull WireKey key) {
         return write(key.name());
     }
 
     @NotNull
     @Override
-    public ValueOut write(CharSequence name) {
+    public ValueOut write(@NotNull CharSequence name) {
         hash += K0 + name.hashCode() * M0;
         return valueOut;
     }
 
+    @NotNull
     @Override
-    public ValueOut writeEvent(Class ignored, Object eventKey) {
+    public ValueOut writeEvent(Class ignored, @NotNull Object eventKey) {
         hash += K0 + eventKey.hashCode() * M0;
         return valueOut;
     }
@@ -158,6 +160,7 @@ public class HashWire implements WireOut {
         return valueOut;
     }
 
+    @NotNull
     @Override
     public ObjectOutput objectOutput() {
         return new WireObjectOutput(this);
@@ -175,6 +178,7 @@ public class HashWire implements WireOut {
         return this;
     }
 
+    @NotNull
     @Override
     public WireOut headerNumber(long headerNumber) {
         throw new UnsupportedOperationException();
@@ -185,6 +189,7 @@ public class HashWire implements WireOut {
         return 0;
     }
 
+    @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
         throw new UnsupportedOperationException("todo");
@@ -241,6 +246,7 @@ public class HashWire implements WireOut {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public Pauser pauser() {
         return BusyPauser.INSTANCE;
@@ -400,35 +406,35 @@ public class HashWire implements WireOut {
 
         @NotNull
         @Override
-        public WireOut time(LocalTime localTime) {
+        public WireOut time(@NotNull LocalTime localTime) {
             hash = hash * M1 + localTime.hashCode() * M2;
             return HashWire.this;
         }
 
         @NotNull
         @Override
-        public WireOut zonedDateTime(ZonedDateTime zonedDateTime) {
+        public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
             hash = hash * M1 + zonedDateTime.hashCode() * M2;
             return HashWire.this;
         }
 
         @NotNull
         @Override
-        public WireOut date(LocalDate localDate) {
+        public WireOut date(@NotNull LocalDate localDate) {
             hash = hash * M1 + localDate.hashCode() * M2;
             return HashWire.this;
         }
 
         @NotNull
         @Override
-        public WireOut dateTime(LocalDateTime localDateTime) {
+        public WireOut dateTime(@NotNull LocalDateTime localDateTime) {
             hash = hash * M1 + localDateTime.hashCode() * M2;
             return HashWire.this;
         }
 
         @NotNull
         @Override
-        public ValueOut typePrefix(CharSequence typeName) {
+        public ValueOut typePrefix(@NotNull CharSequence typeName) {
             hash = hash * M1 + typeName.hashCode() * M2;
             return this;
         }
@@ -449,7 +455,7 @@ public class HashWire implements WireOut {
 
         @NotNull
         @Override
-        public WireOut uuid(UUID uuid) {
+        public WireOut uuid(@NotNull UUID uuid) {
             hash = hash * M1 + uuid.hashCode() * M2;
             return HashWire.this;
         }
@@ -480,35 +486,35 @@ public class HashWire implements WireOut {
 
         @NotNull
         @Override
-        public <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer) {
+        public <T> WireOut sequence(T t, @NotNull BiConsumer<T, ValueOut> writer) {
             writer.accept(t, this);
             return HashWire.this;
         }
 
         @NotNull
         @Override
-        public <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer) {
+        public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) {
             writer.accept(t, kls, this);
             return HashWire.this;
         }
 
         @NotNull
         @Override
-        public WireOut marshallable(WriteMarshallable object) {
+        public WireOut marshallable(@NotNull WriteMarshallable object) {
             object.writeMarshallable(HashWire.this);
             return HashWire.this;
         }
 
         @NotNull
         @Override
-        public WireOut marshallable(Serializable object) {
+        public WireOut marshallable(@NotNull Serializable object) {
             Wires.writeMarshallable(object, HashWire.this);
             return HashWire.this;
         }
 
         @NotNull
         @Override
-        public WireOut map(Map map) {
+        public WireOut map(@NotNull Map map) {
             hash = hash * M1 + map.hashCode() * M2;
             return HashWire.this;
         }

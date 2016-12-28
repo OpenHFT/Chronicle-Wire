@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.util.Compressions;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -70,7 +71,7 @@ public class TextWireTest {
 
     @Test
     public void testFromString() {
-        Object w = WireType.TEXT.fromString("changedRow: {\n" +
+        @Nullable Object w = WireType.TEXT.fromString("changedRow: {\n" +
                 "  row: [\n" +
                 "  ],\n" +
                 "  oldRow: {\n" +
@@ -103,10 +104,10 @@ public class TextWireTest {
 
         Bytes b = Bytes.elasticByteBuffer();
         Wire wire = WireType.BINARY.apply(b);
-        Map<String, String> data = Collections.singletonMap("key", "value");
+        @NotNull Map<String, String> data = Collections.singletonMap("key", "value");
 
 
-        HashMap map = new HashMap();
+        @NotNull HashMap map = new HashMap();
         map.put("some", data);
         map.put("some-other", data);
 
@@ -116,13 +117,13 @@ public class TextWireTest {
 
         final String textYaml = Wires.fromSizePrefixedBlobs(b);
         System.out.println(textYaml);
-        Object o = WireType.TEXT.fromString(textYaml);
+        @Nullable Object o = WireType.TEXT.fromString(textYaml);
         Assert.assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString());
     }
 
     @Test
     public void testWrite() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write();
         wire.write();
         wire.write();
@@ -137,13 +138,13 @@ public class TextWireTest {
 
     @Test
     public void testSimpleBool() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
 
         wire.write(() -> "F").bool(false);
         wire.write(() -> "T").bool(true);
         assertEquals("F: false\n" +
                 "T: true\n", wire.toString());
-        String expected = "{F=false, T=true}";
+        @NotNull String expected = "{F=false, T=true}";
         expectWithSnakeYaml(expected, wire);
 
         assertEquals(false, wire.read(() -> "F").bool());
@@ -152,16 +153,16 @@ public class TextWireTest {
 
     @Test
     public void testLeadingSpace() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().text(" leadingspace");
         assertEquals(" leadingspace", wire.read().text());
     }
 
     private void expectWithSnakeYaml(String expected, @NotNull Wire wire) {
         String s = wire.toString();
-        Object load = null;
+        @Nullable Object load = null;
         try {
-            Yaml yaml = new Yaml();
+            @NotNull Yaml yaml = new Yaml();
             load = yaml.load(new StringReader(s));
         } catch (Exception e) {
             System.out.println(s);
@@ -172,7 +173,7 @@ public class TextWireTest {
 
     @Test
     public void testInt64() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         long expected = 1234567890123456789L;
         wire.write(() -> "VALUE").int64(expected);
         expectWithSnakeYaml("{VALUE=1234567890123456789}", wire);
@@ -181,7 +182,7 @@ public class TextWireTest {
 
     @Test
     public void testInt16() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         short expected = 12345;
         wire.write(() -> "VALUE").int64(expected);
         expectWithSnakeYaml("{VALUE=12345}", wire);
@@ -190,14 +191,14 @@ public class TextWireTest {
 
     @Test(expected = IllegalStateException.class)
     public void testInt16TooLarge() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write(() -> "VALUE").int64(Long.MAX_VALUE);
         wire.read(() -> "VALUE").int16();
     }
 
     @Test
     public void testInt32() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         int expected = 1;
         wire.write(() -> "VALUE").int64(expected);
         wire.write(() -> "VALUE2").int64(expected);
@@ -209,14 +210,14 @@ public class TextWireTest {
 
     @Test(expected = IllegalStateException.class)
     public void testInt32TooLarge() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write(() -> "VALUE").int64(Integer.MAX_VALUE);
         wire.read(() -> "VALUE").int16();
     }
 
     @Test
     public void testWrite1() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write(BWKey.field1);
         wire.write(BWKey.field2);
         wire.write(BWKey.field3);
@@ -225,7 +226,7 @@ public class TextWireTest {
 
     @Test
     public void testWrite2() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write(() -> "Hello");
         wire.write(() -> "World");
         wire.write(() -> "Long field name which is more than 32 characters, Bye");
@@ -234,7 +235,7 @@ public class TextWireTest {
 
     @Test
     public void testRead() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
         wire.write(() -> "Test");
@@ -248,7 +249,7 @@ public class TextWireTest {
 
     @Test
     public void testRead1() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
         wire.write(() -> "Test");
@@ -265,14 +266,14 @@ public class TextWireTest {
 
     @Test
     public void testRead2() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
-        String name1 = "Long field name which is more than 32 characters, Bye";
+        @NotNull String name1 = "Long field name which is more than 32 characters, Bye";
         wire.write(() -> name1);
 
         // ok as blank matches anything
-        StringBuilder name = new StringBuilder();
+        @NotNull StringBuilder name = new StringBuilder();
         wire.read(name);
         assertEquals(0, name.length());
 
@@ -289,7 +290,7 @@ public class TextWireTest {
 
     @Test
     public void int8() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().int8(1);
         wire.write(BWKey.field1).int8(2);
         wire.write(() -> "Test").int8(3);
@@ -299,7 +300,7 @@ public class TextWireTest {
                 "Test: 3\n", wire.toString());
 
         // ok as blank matches anything
-        AtomicInteger i = new AtomicInteger();
+        @NotNull AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().int8(i, AtomicInteger::set);
             assertEquals(e, i.get());
@@ -312,7 +313,7 @@ public class TextWireTest {
 
     @Test
     public void int16() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().int16(1);
         wire.write(BWKey.field1).int16(2);
         wire.write(() -> "Test").int16(3);
@@ -322,7 +323,7 @@ public class TextWireTest {
                 "Test: 3\n", wire.toString());
 
         // ok as blank matches anything
-        AtomicInteger i = new AtomicInteger();
+        @NotNull AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().int16(i, AtomicInteger::set);
             assertEquals(e, i.get());
@@ -335,7 +336,7 @@ public class TextWireTest {
 
     @Test
     public void uint8() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().uint8(1);
         wire.write(BWKey.field1).uint8(2);
         wire.write(() -> "Test").uint8(3);
@@ -345,7 +346,7 @@ public class TextWireTest {
                 "Test: 3\n", wire.toString());
 
         // ok as blank matches anything
-        AtomicInteger i = new AtomicInteger();
+        @NotNull AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().uint8(i, AtomicInteger::set);
             assertEquals(e, i.get());
@@ -358,7 +359,7 @@ public class TextWireTest {
 
     @Test
     public void uint16() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().uint16(1);
         wire.write(BWKey.field1).uint16(2);
         wire.write(() -> "Test").uint16(3);
@@ -368,7 +369,7 @@ public class TextWireTest {
                 "Test: 3\n", wire.toString());
 
         // ok as blank matches anything
-        AtomicInteger i = new AtomicInteger();
+        @NotNull AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().uint16(i, AtomicInteger::set);
             assertEquals(e, i.get());
@@ -381,7 +382,7 @@ public class TextWireTest {
 
     @Test
     public void uint32() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().uint32(1);
         wire.write(BWKey.field1).uint32(2);
         wire.write(() -> "Test").uint32(3);
@@ -391,7 +392,7 @@ public class TextWireTest {
                 "Test: 3\n", wire.toString());
 
         // ok as blank matches anything
-        AtomicLong i = new AtomicLong();
+        @NotNull AtomicLong i = new AtomicLong();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().uint32(i, AtomicLong::set);
             assertEquals(e, i.get());
@@ -404,7 +405,7 @@ public class TextWireTest {
 
     @Test
     public void int32() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().int32(1);
         wire.write(BWKey.field1).int32(2);
         wire.write(() -> "Test").int32(3);
@@ -414,7 +415,7 @@ public class TextWireTest {
                 "Test: 3\n", wire.toString());
 
         // ok as blank matches anything
-        AtomicInteger i = new AtomicInteger();
+        @NotNull AtomicInteger i = new AtomicInteger();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().int32(i, AtomicInteger::set);
             assertEquals(e, i.get());
@@ -427,7 +428,7 @@ public class TextWireTest {
 
     @Test
     public void int64() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().int64(1);
         wire.write(BWKey.field1).int64(2);
         wire.write(() -> "Test").int64(3);
@@ -437,7 +438,7 @@ public class TextWireTest {
                 "Test: 3\n", wire.toString());
 
         // ok as blank matches anything
-        AtomicLong i = new AtomicLong();
+        @NotNull AtomicLong i = new AtomicLong();
         LongStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().int64(i, AtomicLong::set);
             assertEquals(e, i.get());
@@ -450,7 +451,7 @@ public class TextWireTest {
 
     @Test
     public void float64() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().float64(1);
         wire.write(BWKey.field1).float64(2);
         wire.write(() -> "Test").float64(3);
@@ -467,7 +468,7 @@ public class TextWireTest {
                 f = d;
             }
         }
-        Floater n = new Floater();
+        @NotNull Floater n = new Floater();
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().float64(n, Floater::set);
             assertEquals(e, n.f, 0.0);
@@ -480,10 +481,10 @@ public class TextWireTest {
 
     @Test
     public void text() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().text("Hello");
         wire.write(BWKey.field1).text("world");
-        String name = "Long field name which is more than 32 characters, \\ \nBye";
+        @NotNull String name = "Long field name which is more than 32 characters, \\ \nBye";
 
         wire.write(() -> "Test")
                 .text(name);
@@ -494,7 +495,7 @@ public class TextWireTest {
                 "Test: \"Long field name which is more than 32 characters, \\\\ \\nBye\"\n", wire.toString());
 
         // ok as blank matches anything
-        StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder();
         Stream.of("Hello", "world", name).forEach(e -> {
             assertNotNull(wire.read().textTo(sb));
             assertEquals(e, sb.toString());
@@ -507,10 +508,10 @@ public class TextWireTest {
 
     @Test
     public void type() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().typePrefix("MyType");
         wire.write(BWKey.field1).typePrefix("AlsoMyType");
-        String name1 = "com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState";
+        @NotNull String name1 = "com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState";
         wire.write(() -> "Test").typePrefix(name1);
         wire.writeComment("");
         // TODO fix how types are serialized.
@@ -520,7 +521,7 @@ public class TextWireTest {
                 "Test: !" + name1 + " # \n", wire.toString());
 
         // ok as blank matches anything
-        StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder();
         Stream.of("MyType", "AlsoMyType", name1).forEach(e -> {
             wire.read().typePrefix(e, Assert::assertEquals);
         });
@@ -532,7 +533,7 @@ public class TextWireTest {
 
     @Test
     public void testBool() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().bool(false)
                 .write().bool(true)
                 .write().bool(null);
@@ -543,7 +544,7 @@ public class TextWireTest {
 
     @Test
     public void testFloat32() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().float32(0.0F)
                 .write().float32(Float.NaN)
                 .write().float32(Float.POSITIVE_INFINITY)
@@ -558,7 +559,7 @@ public class TextWireTest {
 
     @Test
     public void testTime() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         LocalTime now = LocalTime.now();
         wire.write().time(now)
                 .write().time(LocalTime.MAX)
@@ -574,7 +575,7 @@ public class TextWireTest {
 
     @Test
     public void testZonedDateTime() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         ZonedDateTime now = ZonedDateTime.now();
         ZoneId zone = ZoneId.of("Europe/London");
         final ZonedDateTime max = ZonedDateTime.of(LocalDateTime.MAX, zone);
@@ -615,7 +616,7 @@ public class TextWireTest {
 
     @Test
     public void testDate() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         LocalDate now = LocalDate.now();
         wire.write().date(now)
                 .write().date(LocalDate.MAX)
@@ -627,7 +628,7 @@ public class TextWireTest {
 
     @Test
     public void testUuid() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         UUID uuid = UUID.randomUUID();
         wire.write().uuid(uuid)
                 .write().uuid(new UUID(0, 0))
@@ -639,8 +640,8 @@ public class TextWireTest {
 
     @Test
     public void testBytes() {
-        Wire wire = createWire();
-        byte[] allBytes = new byte[256];
+        @NotNull Wire wire = createWire();
+        @NotNull byte[] allBytes = new byte[256];
         for (int i = 0; i < 256; i++)
             allBytes[i] = (byte) i;
         wire.write().bytes(NoBytesStore.NO_BYTES)
@@ -648,7 +649,7 @@ public class TextWireTest {
                 .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
                 .write().bytes(allBytes);
         System.out.println(bytes.toString());
-        NativeBytes allBytes2 = nativeBytes();
+        @NotNull NativeBytes allBytes2 = nativeBytes();
         wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
                 .read().bytes(b -> assertEquals("Hello", b.toString()))
                 .read().bytes(b -> assertEquals("quotable, text", b.toString()))
@@ -658,8 +659,8 @@ public class TextWireTest {
 
     @Test
     public void testWriteMarshallable() {
-        Wire wire = createWire();
-        MyTypesCustom mtA = new MyTypesCustom();
+        @NotNull Wire wire = createWire();
+        @NotNull MyTypesCustom mtA = new MyTypesCustom();
         mtA.b = true;
         mtA.d = 123.456;
         mtA.i = -12345789;
@@ -668,7 +669,7 @@ public class TextWireTest {
 
         wire.write(() -> "A").marshallable(mtA);
 
-        MyTypesCustom mtB = new MyTypesCustom();
+        @NotNull MyTypesCustom mtB = new MyTypesCustom();
         mtB.b = false;
         mtB.d = 123.4567;
         mtB.i = -123457890;
@@ -695,7 +696,7 @@ public class TextWireTest {
         expectWithSnakeYaml("{A={B_FLAG=true, S_NUM=12345, D_NUM=123.456, L_NUM=0, I_NUM=-12345789, TEXT=Hello World}, " +
                 "B={B_FLAG=false, S_NUM=1234, D_NUM=123.4567, L_NUM=0, I_NUM=-123457890, TEXT=Bye now}}", wire);
 
-        MyTypesCustom mt2 = new MyTypesCustom();
+        @NotNull MyTypesCustom mt2 = new MyTypesCustom();
         wire.read(() -> "A").marshallable(mt2);
         assertEquals(mt2, mtA);
 
@@ -705,14 +706,14 @@ public class TextWireTest {
 
     @Test
     public void testWriteMarshallableAndFieldLength() {
-        Wire wire = createWire();
-        MyTypesCustom mtA = new MyTypesCustom();
+        @NotNull Wire wire = createWire();
+        @NotNull MyTypesCustom mtA = new MyTypesCustom();
         mtA.b = true;
         mtA.d = 123.456;
         mtA.i = -12345789;
         mtA.s = (short) 12345;
 
-        ValueOut write = wire.write(() -> "A");
+        @NotNull ValueOut write = wire.write(() -> "A");
 
         long start = wire.bytes().writePosition() + 1; // including one space for "sep".
         write.marshallable(mtA);
@@ -720,7 +721,7 @@ public class TextWireTest {
 
         expectWithSnakeYaml("{A={B_FLAG=true, S_NUM=12345, D_NUM=123.456, L_NUM=0, I_NUM=-12345789, TEXT=}}", wire);
 
-        ValueIn read = wire.read(() -> "A");
+        @NotNull ValueIn read = wire.read(() -> "A");
 
         long len = read.readLength();
 
@@ -729,10 +730,10 @@ public class TextWireTest {
 
     @Test
     public void testMapReadAndWriteStrings() {
-        final Bytes bytes = nativeBytes();
-        final Wire wire = new TextWire(bytes);
+        @NotNull final Bytes bytes = nativeBytes();
+        @NotNull final Wire wire = new TextWire(bytes);
 
-        final Map<String, String> expected = new LinkedHashMap<>();
+        @NotNull final Map<String, String> expected = new LinkedHashMap<>();
 
         expected.put("hello", "world");
         expected.put("hello1", "world1");
@@ -752,7 +753,7 @@ public class TextWireTest {
                         "  hello2: world2\n" +
                         "}\n",
                 Wires.fromSizePrefixedBlobs(bytes));
-        final Map<String, String> actual = new LinkedHashMap<>();
+        @NotNull final Map<String, String> actual = new LinkedHashMap<>();
         wire.readDocument(null, c -> c.read(() -> "example").map(actual));
         assertEquals(expected, actual);
     }
@@ -760,10 +761,10 @@ public class TextWireTest {
     @Test
     @Ignore
     public void testMapReadAndWriteIntegers() {
-        final Bytes bytes = nativeBytes();
-        final Wire wire = new TextWire(bytes);
+        @NotNull final Bytes bytes = nativeBytes();
+        @NotNull final Wire wire = new TextWire(bytes);
 
-        final Map<Integer, Integer> expected = new HashMap<>();
+        @NotNull final Map<Integer, Integer> expected = new HashMap<>();
 
         expected.put(1, 2);
         expected.put(2, 2);
@@ -784,19 +785,19 @@ public class TextWireTest {
                 "  ? !!int 3:\n" +
                 "  : !!int 3\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(bytes));
-        final Map<Integer, Integer> actual = new HashMap<>();
+        @NotNull final Map<Integer, Integer> actual = new HashMap<>();
         wire.readDocument(null, c -> {
-            Map m = c.read(() -> "example").map(Integer.class, Integer.class, actual);
+            @Nullable Map m = c.read(() -> "example").map(Integer.class, Integer.class, actual);
             assertEquals(m, expected);
         });
     }
 
     @Test
     public void testMapReadAndWriteMarshable() {
-        final Bytes bytes = nativeBytes();
-        final Wire wire = new TextWire(bytes);
+        @NotNull final Bytes bytes = nativeBytes();
+        @NotNull final Wire wire = new TextWire(bytes);
 
-        final Map<MyMarshallable, MyMarshallable> expected = new LinkedHashMap<>();
+        @NotNull final Map<MyMarshallable, MyMarshallable> expected = new LinkedHashMap<>();
 
         expected.put(new MyMarshallable("aKey"), new MyMarshallable("aValue"));
         expected.put(new MyMarshallable("aKey2"), new MyMarshallable("aValue2"));
@@ -809,7 +810,7 @@ public class TextWireTest {
                         "  ? { MyField: aKey2 }: { MyField: aValue2 }\n" +
                         "}\n",
                 Wires.fromSizePrefixedBlobs(bytes));
-        final Map<MyMarshallable, MyMarshallable> actual = new LinkedHashMap<>();
+        @NotNull final Map<MyMarshallable, MyMarshallable> actual = new LinkedHashMap<>();
 
         wire.readDocument(null, c -> c.read(() -> "example")
                 .map(
@@ -822,11 +823,11 @@ public class TextWireTest {
 
     @Test
     public void testException() {
-        Exception e = new InvalidAlgorithmParameterException("Reference cannot be null") {
+        @NotNull Exception e = new InvalidAlgorithmParameterException("Reference cannot be null") {
             @NotNull
             @Override
             public StackTraceElement[] getStackTrace() {
-                StackTraceElement[] stack = {
+                @NotNull StackTraceElement[] stack = {
                         new StackTraceElement("net.openhft.chronicle.wire.TextWireTest", "testException", "TextWireTest.java", 783),
                         new StackTraceElement("net.openhft.chronicle.wire.TextWireTest", "runTestException", "TextWireTest.java", 73),
                         new StackTraceElement("sun.reflect.NativeMethodAccessorImpl", "invoke0", "NativeMethodAccessorImpl.java", -2)
@@ -834,8 +835,8 @@ public class TextWireTest {
                 return stack;
             }
         };
-        final Bytes bytes = nativeBytes();
-        final Wire wire = new TextWire(bytes);
+        @NotNull final Bytes bytes = nativeBytes();
+        @NotNull final Wire wire = new TextWire(bytes);
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception").object(e));
 
         assertEquals("--- !!data\n" +
@@ -857,7 +858,7 @@ public class TextWireTest {
     public void testEnum() {
         ClassAliasPool.CLASS_ALIASES.addAlias(WireType.class, "WireType");
 
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().object(WireType.BINARY)
                 .write().object(TEXT)
                 .write().object(WireType.RAW);
@@ -873,20 +874,20 @@ public class TextWireTest {
 
     @Test
     public void testArrays() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
 
-        Object[] noObjects = {};
+        @NotNull Object[] noObjects = {};
         wire.write("a").object(noObjects);
 
         assertEquals("a: [\n" +
                 "]", wire.toString());
 
-        Object[] object = wire.read().object(Object[].class);
+        @Nullable Object[] object = wire.read().object(Object[].class);
         assertEquals(0, object.length);
 
         wire.clear();
 
-        Object[] threeObjects = {"abc", "def", "ghi"};
+        @NotNull Object[] threeObjects = {"abc", "def", "ghi"};
         wire.write("b").object(threeObjects);
 
         assertEquals("b: [\n" +
@@ -895,7 +896,7 @@ public class TextWireTest {
                 "  ghi\n" +
                 "]", wire.toString());
 
-        Object[] object2 = wire.read()
+        @Nullable Object[] object2 = wire.read()
                 .object(Object[].class);
         assertEquals(3, object2.length);
         assertEquals("[abc, def, ghi]", Arrays.toString(object2));
@@ -903,21 +904,21 @@ public class TextWireTest {
 
     @Test
     public void testArrays2() {
-        Wire wire = createWire();
-        Object[] a1 = new Object[0];
+        @NotNull Wire wire = createWire();
+        @NotNull Object[] a1 = new Object[0];
         wire.write("empty").object(a1);
-        Object[] a2 = {1L};
+        @NotNull Object[] a2 = {1L};
         wire.write("one").object(a2);
-        Object[] a3 = {"Hello", 123, 10.1};
+        @NotNull Object[] a3 = {"Hello", 123, 10.1};
         wire.write("three").object(Object[].class, a3);
 
         System.out.println(wire);
-        Object o1 = wire.read()
+        @Nullable Object o1 = wire.read()
                 .object(Object[].class);
         assertArrayEquals(a1, (Object[]) o1);
-        Object o2 = wire.read().object(Object[].class);
+        @Nullable Object o2 = wire.read().object(Object[].class);
         assertArrayEquals(a2, (Object[]) o2);
-        Object o3 = wire.read().object(Object[].class);
+        @Nullable Object o3 = wire.read().object(Object[].class);
         assertArrayEquals(a3, (Object[]) o3);
     }
 
@@ -926,15 +927,15 @@ public class TextWireTest {
     public void testSnappyCompression() throws IOException {
         if (!Compressions.Snappy.available())
             return;
-        Wire wire = createWire();
-        final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-        String str = s + s + s + s;
+        @NotNull Wire wire = createWire();
+        @NotNull final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        @NotNull String str = s + s + s + s;
 
         wire.write().compress("snappy", Bytes.wrapForRead(str.getBytes(ISO_8859_1)));
 
-        Bytes ret = Bytes.allocateElasticDirect();
+        @NotNull Bytes ret = Bytes.allocateElasticDirect();
         wire.read().bytes(ret);
-        byte[] returnBytes = new byte[(int) ret.readRemaining()];
+        @NotNull byte[] returnBytes = new byte[(int) ret.readRemaining()];
         ret.read(returnBytes);
         assertArrayEquals(str.getBytes(ISO_8859_1), returnBytes);
     }
@@ -945,63 +946,63 @@ public class TextWireTest {
         if (!Compressions.Snappy.available())
             return;
 
-        Wire wire = createWire();
-        final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-        String str = s + s + s + s;
+        @NotNull Wire wire = createWire();
+        @NotNull final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        @NotNull String str = s + s + s + s;
 
-        byte[] bytes0 = str.getBytes(ISO_8859_1);
+        @NotNull byte[] bytes0 = str.getBytes(ISO_8859_1);
         wire.write().compress("snappy", Bytes.wrapForRead(bytes0));
 
-        Bytes bytes = allocateElasticDirect();
+        @NotNull Bytes bytes = allocateElasticDirect();
         wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
 
     @Test
     public void testGZIPCompressionAsText() throws IOException {
-        Wire wire = createWire();
-        final String s = "xxxxxxxxxxx1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-        String str = s + s + s + s;
+        @NotNull Wire wire = createWire();
+        @NotNull final String s = "xxxxxxxxxxx1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        @NotNull String str = s + s + s + s;
 
-        byte[] compressedBytes = str.getBytes(ISO_8859_1);
+        @NotNull byte[] compressedBytes = str.getBytes(ISO_8859_1);
         wire.write().compress("gzip", Bytes.wrapForRead(compressedBytes));
 
-        Bytes bytes = allocateElasticDirect();
+        @NotNull Bytes bytes = allocateElasticDirect();
         wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
 
     @Test
     public void testLZWCompressionAsText() throws IOException {
-        Wire wire = createWire();
-        final String s = "xxxxxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxx";
-        String str = s + s + s + s;
+        @NotNull Wire wire = createWire();
+        @NotNull final String s = "xxxxxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxx";
+        @NotNull String str = s + s + s + s;
 
-        byte[] compressedBytes = str.getBytes(ISO_8859_1);
+        @NotNull byte[] compressedBytes = str.getBytes(ISO_8859_1);
         wire.write().compress("lzw", Bytes.wrapForRead(compressedBytes));
 
-        Bytes bytes = allocateElasticDirect();
+        @NotNull Bytes bytes = allocateElasticDirect();
         wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
 
     @Test
     public void testStringArrays() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
 
-        String[] noObjects = {};
+        @NotNull String[] noObjects = {};
         wire.write().object(noObjects);
 
-        String[] object = wire.read().object(String[].class);
+        @Nullable String[] object = wire.read().object(String[].class);
         assertEquals(0, object.length);
 
         // TODO we shouldn't need to create a new wire.
         wire = createWire();
 
-        String[] threeObjects = {"abc", "def", "ghi"};
+        @NotNull String[] threeObjects = {"abc", "def", "ghi"};
         wire.write().object(threeObjects);
 
-        String[] object2 = wire.read()
+        @Nullable String[] object2 = wire.read()
                 .object(String[].class);
         assertEquals(3, object2.length);
         assertEquals("[abc, def, ghi]", Arrays.toString(object2));
@@ -1009,21 +1010,21 @@ public class TextWireTest {
 
     @Test
     public void testStringList() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
 
-        List<String> noObjects = new ArrayList();
+        @NotNull List<String> noObjects = new ArrayList();
         wire.write().object(noObjects);
 
-        List<String> list = wire.read().object(List.class);
+        @Nullable List<String> list = wire.read().object(List.class);
         assertEquals(0, list.size());
 
         // TODO we shouldn't need to create a new wire.
         wire = createWire();
 
-        List<String> threeObjects = Arrays.asList("abc", "def", "ghi");
+        @NotNull List<String> threeObjects = Arrays.asList("abc", "def", "ghi");
         wire.write().object(threeObjects);
 
-        List<String> list2 = wire.read()
+        @Nullable List<String> list2 = wire.read()
                 .object(List.class);
         assertEquals(3, list2.size());
         assertEquals("[abc, def, ghi]", list2.toString());
@@ -1031,21 +1032,21 @@ public class TextWireTest {
 
     @Test
     public void testStringSet() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
 
-        Set<String> noObjects = new HashSet();
+        @NotNull Set<String> noObjects = new HashSet();
         wire.write().object(noObjects);
 
-        Set<String> list = wire.read().object(Set.class);
+        @Nullable Set<String> list = wire.read().object(Set.class);
         assertEquals(0, list.size());
 
         // TODO we shouldn't need to create a new wire.
         wire = createWire();
 
-        Set<String> threeObjects = new HashSet(Arrays.asList(new String[]{"abc", "def", "ghi"}));
+        @NotNull Set<String> threeObjects = new HashSet(Arrays.asList(new String[]{"abc", "def", "ghi"}));
         wire.write().object(threeObjects);
 
-        Set<String> list2 = wire.read()
+        @Nullable Set<String> list2 = wire.read()
                 .object(Set.class);
         assertEquals(3, list2.size());
         assertEquals("[abc, def, ghi]", list2.toString());
@@ -1054,12 +1055,12 @@ public class TextWireTest {
     @Test
     @Ignore
     public void testStringMap() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
 
-        Map<String, String> noObjects = new HashMap();
+        @NotNull Map<String, String> noObjects = new HashMap();
         wire.write().object(noObjects);
 
-        Map<String, String> map = wire.read().object(Map.class);
+        @Nullable Map<String, String> map = wire.read().object(Map.class);
         assertEquals(0, map.size());
 
 //        // TODO we shouldn't need to create a new wire.
@@ -1076,7 +1077,7 @@ public class TextWireTest {
 
     @Test
     public void testNestedDecode() {
-        String s = "cluster: {\n" +
+        @NotNull String s = "cluster: {\n" +
                 "  host1: {\n" +
                 "     hostId: 1,\n" +
 //                "     name: one,\n" +
@@ -1101,9 +1102,9 @@ public class TextWireTest {
         results.accept("host2", 2);
         results.accept("host4", 4);
         replay(results);
-        TextWire wire = TextWire.from(s);
+        @NotNull TextWire wire = TextWire.from(s);
         wire.read(() -> "cluster").marshallable(v -> {
-                    StringBuilder sb = new StringBuilder();
+                    @NotNull StringBuilder sb = new StringBuilder();
                     while (wire.hasMore()) {
                         wire.readEventName(sb).marshallable(m -> {
                             m.read(() -> "hostId").int32(sb.toString(), results);
@@ -1116,30 +1117,30 @@ public class TextWireTest {
 
     @Test
     public void writeNull() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.write().object(null);
         wire.write().object(null);
         wire.write().object(null);
         wire.write().object(null);
 
-        Object o = wire.read().object(Object.class);
+        @Nullable Object o = wire.read().object(Object.class);
         assertEquals(null, o);
-        String s = wire.read().object(String.class);
+        @Nullable String s = wire.read().object(String.class);
         assertEquals(null, s);
-        RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
+        @Nullable RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
         assertEquals(null, rp);
-        Circle c = wire.read().object(Circle.class);
+        @Nullable Circle c = wire.read().object(Circle.class);
         assertEquals(null, c);
     }
 
     @Test
     public void testAllChars() {
-        Wire wire = createWire();
-        char[] chars = new char[256];
+        @NotNull Wire wire = createWire();
+        @NotNull char[] chars = new char[256];
         for (int i = 0; i < 1024; i++) {
             wire.clear();
             Arrays.fill(chars, (char) i);
-            String s = new String(chars);
+            @NotNull String s = new String(chars);
             wire.writeDocument(false, w -> w.write(() -> "message").text(s));
 
             wire.readDocument(null, w -> w.read(() -> "message").text(s, Assert::assertEquals));
@@ -1148,7 +1149,7 @@ public class TextWireTest {
 
     @Test
     public void readDemarshallable() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         try (DocumentContext $ = wire.writingDocument(true)) {
             wire.getValueOut().typedMarshallable(new DemarshallableObject("test", 12345));
         }
@@ -1160,7 +1161,7 @@ public class TextWireTest {
                 "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         try (DocumentContext $ = wire.readingDocument()) {
-            DemarshallableObject dobj = wire.getValueIn()
+            @Nullable DemarshallableObject dobj = wire.getValueIn()
                     .typedMarshallable();
             assertEquals("test", dobj.name);
             assertEquals(12345, dobj.value);
@@ -1169,9 +1170,9 @@ public class TextWireTest {
 
     @Test
     public void testByteArrayValueWithRealBytesNegative() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
 
-        final byte[] expected = {-1, -2, -3, -4, -5, -6, -7};
+        @NotNull final byte[] expected = {-1, -2, -3, -4, -5, -6, -7};
         wire.writeDocument(false, wir -> wir.writeEventName(() -> "put").leaf()
                 .marshallable(w -> w.write(() -> "key")
                         .text("1")
@@ -1189,11 +1190,11 @@ public class TextWireTest {
 
     @Test
     public void testByteArray() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("nothing").object(new byte[0]));
-        byte[] one = {1};
+        @NotNull byte[] one = {1};
         wire.writeDocument(false, w -> w.write("one").object(one));
-        byte[] four = {1, 2, 3, 4};
+        @NotNull byte[] four = {1, 2, 3, 4};
         wire.writeDocument(false, w -> w.write("four").object(four));
 
         assertEquals("--- !!data\n" +
@@ -1215,12 +1216,12 @@ public class TextWireTest {
 
     @Test
     public void testObjectKeys() {
-        Map<MyMarshallable, String> map = new LinkedHashMap<>();
+        @NotNull Map<MyMarshallable, String> map = new LinkedHashMap<>();
         map.put(new MyMarshallable("key1"), "value1");
         map.put(new MyMarshallable("key2"), "value2");
 
-        Wire wire = createWire();
-        final MyMarshallable parent = new MyMarshallable("parent");
+        @NotNull Wire wire = createWire();
+        @NotNull final MyMarshallable parent = new MyMarshallable("parent");
         wire.writeDocument(false, w -> w.writeEvent(MyMarshallable.class, parent).object(map));
 
         assertEquals("--- !!data\n" +
@@ -1235,7 +1236,7 @@ public class TextWireTest {
             assertEquals(parent.toString(), mm.toString());
             parent.equals(mm);
             assertEquals(parent, mm);
-            final Map map2 = w.getValueIn()
+            @Nullable final Map map2 = w.getValueIn()
                     .object(Map.class);
             assertEquals(map, map2);
         });
@@ -1244,7 +1245,7 @@ public class TextWireTest {
     @Test
     public void writeUnserializable() throws IOException {
         System.out.println(TEXT.asString(Thread.currentThread()));
-        Socket s = new Socket();
+        @NotNull Socket s = new Socket();
         System.out.println(TEXT.asString(s));
         SocketChannel sc = SocketChannel.open();
         System.out.println(TEXT.asString(sc));
@@ -1252,7 +1253,7 @@ public class TextWireTest {
 
     @Test
     public void writeCharacter() {
-        Wire wire = createWire();
+        @NotNull Wire wire = createWire();
         for (char ch : new char[]{0, '!', 'a', Character.MAX_VALUE}) {
             wire.write().object(ch);
             char ch2 = wire.read().object(char.class);
@@ -1262,8 +1263,8 @@ public class TextWireTest {
 
     @Test
     public void testSortedSet() {
-        Wire wire = createWire();
-        SortedSet<String> set = new TreeSet<>();
+        @NotNull Wire wire = createWire();
+        @NotNull SortedSet<String> set = new TreeSet<>();
         set.add("one");
         set.add("two");
         set.add("three");
@@ -1273,15 +1274,15 @@ public class TextWireTest {
                 "  three,\n" +
                 "  two\n" +
                 "]", wire.toString());
-        Object o = wire.read().object();
+        @Nullable Object o = wire.read().object();
         assertTrue(o instanceof SortedSet);
         assertEquals(set, o);
     }
 
     @Test
     public void testSortedMap() {
-        Wire wire = createWire();
-        SortedMap<String, Long> set = new TreeMap<>();
+        @NotNull Wire wire = createWire();
+        @NotNull SortedMap<String, Long> set = new TreeMap<>();
         set.put("one", 1L);
         set.put("two", 2L);
         set.put("three", 3L);
@@ -1291,7 +1292,7 @@ public class TextWireTest {
                 "  three: 3,\n" +
                 "  two: 2\n" +
                 "}\n", wire.toString());
-        Object o = wire.read().object();
+        @Nullable Object o = wire.read().object();
         assertTrue(o instanceof SortedMap);
         assertEquals(set, o);
     }

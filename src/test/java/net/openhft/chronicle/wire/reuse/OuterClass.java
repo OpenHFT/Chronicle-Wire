@@ -86,6 +86,7 @@ public class OuterClass implements Marshallable {
         this.wireType = wireType;
     }
 
+    @NotNull
     public List<NestedClass> getListA() {
         return listA;
     }
@@ -102,6 +103,7 @@ public class OuterClass implements Marshallable {
         return nc;
     }
 
+    @NotNull
     public List<NestedClass> getListB() {
         return listB;
     }
@@ -118,6 +120,7 @@ public class OuterClass implements Marshallable {
         return nc;
     }
 
+    @NotNull
     @Override
     public String toString() {
         return "OuterClass{" +

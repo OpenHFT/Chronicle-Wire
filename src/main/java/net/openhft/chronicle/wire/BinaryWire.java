@@ -60,6 +60,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     private final FixedBinaryValueOut valueOut;
+    @NotNull
     private final BinaryValueIn valueIn;
     private final boolean numericFields;
     private final boolean fieldLess;
@@ -70,11 +71,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     DefaultValueIn defaultValueIn;
     private String compression;
 
-    public BinaryWire(Bytes bytes) {
+    public BinaryWire(@NotNull Bytes bytes) {
         this(bytes, false, false, false, Integer.MAX_VALUE, "binary", true);
     }
 
-    public BinaryWire(Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression, boolean supportDelta) {
+    public BinaryWire(@NotNull Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression, boolean supportDelta) {
         super(bytes, false);
         this.numericFields = numericFields;
         this.fieldLess = fieldLess;
@@ -84,11 +85,12 @@ public class BinaryWire extends AbstractWire implements Wire {
         valueIn = supportDelta ? new DeltaValueIn() : new BinaryValueIn();
     }
 
-    public static BinaryWire binaryOnly(Bytes bytes) {
+    @NotNull
+    public static BinaryWire binaryOnly(@NotNull Bytes bytes) {
         return new BinaryWire(bytes, false, false, false, Integer.MAX_VALUE, "binary", false);
     }
 
-    static boolean textable(BytesStore bytes) {
+    static boolean textable(@NotNull BytesStore bytes) {
         for (long pos = bytes.readPosition(); pos < bytes.readLimit(); pos++) {
             if (bytes.readByte(pos) >= 127)
                 return false;
@@ -96,6 +98,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         return true;
     }
 
+    @NotNull
     StringBuilder acquireStringBuilder() {
         stringBuilder.setLength(0);
         return stringBuilder;
@@ -121,21 +124,24 @@ public class BinaryWire extends AbstractWire implements Wire {
         return fieldLess;
     }
 
+    @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
         writeContext.start(metaData);
         return writeContext;
     }
 
+    @NotNull
     @Override
     public DocumentContext readingDocument() {
         readContext.start();
         return readContext;
     }
 
+    @NotNull
     @Override
     public DocumentContext readingDocument(long readLocation) {
-        Bytes<?> bytes = bytes();
+        @NotNull Bytes<?> bytes = bytes();
         final long readPosition = bytes.readPosition();
         final long readLimit = bytes.readLimit();
         bytes.readPositionUnlimited(readLocation);
@@ -241,14 +247,14 @@ public class BinaryWire extends AbstractWire implements Wire {
                         break outerSwitch;
                     case FIELD_ANCHOR: {
                         bytes.uncheckedReadSkipOne();
-                        StringBuilder sb = acquireStringBuilder();
+                        @NotNull StringBuilder sb = acquireStringBuilder();
                         readFieldAnchor(sb);
                         wire.write(sb);
                         break outerSwitch;
                     }
                     case ANCHOR:
                     case UPDATED_ALIAS: {
-                        final Object o = valueIn.object();
+                        @Nullable final Object o = valueIn.object();
                         wire.getValueOut().object(o);
                         break outerSwitch;
                     }
@@ -286,14 +292,14 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case BinaryWireHighCode.FIELD0:
             case BinaryWireHighCode.FIELD1:
-                StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, acquireStringBuilder(), false);
+                @Nullable StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, acquireStringBuilder(), false);
                 wire.write(fsb);
                 break;
 
             case BinaryWireHighCode.STR0:
             case BinaryWireHighCode.STR1:
                 bytes.uncheckedReadSkipOne();
-                StringBuilder sb = readText(peekCode, acquireStringBuilder());
+                @Nullable StringBuilder sb = readText(peekCode, acquireStringBuilder());
                 wire.getValueOut().text(sb);
                 break;
         }
@@ -303,7 +309,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         long lim = bytes.readLimit();
         try {
             bytes.readLimit(bytes.readPosition() + len);
-            final ValueOut valueOut = wire.getValueOut();
+            @NotNull final ValueOut valueOut = wire.getValueOut();
             switch (getBracketTypeNext()) {
                 case MAP:
                     valueOut.marshallable(this::copyTo);
@@ -312,9 +318,9 @@ public class BinaryWire extends AbstractWire implements Wire {
                     valueOut.sequence(v -> copyTo(v.wireOut()));
                     break;
                 case NONE:
-                    Object object = this.getValueIn().object();
+                    @Nullable Object object = this.getValueIn().object();
                     if (object instanceof BytesStore) {
-                        BytesStore bytes = (BytesStore) object;
+                        @Nullable BytesStore bytes = (BytesStore) object;
                         if (textable(bytes)) {
                             valueOut.text(bytes);
                             break;
@@ -332,11 +338,13 @@ public class BinaryWire extends AbstractWire implements Wire {
         wire.writeComment("# " + stringForCode(bytes.readUnsignedByte()));
     }
 
+    @NotNull
     private BracketType getBracketTypeNext() {
         int peekCode = peekCode();
         return getBracketTypeFor(peekCode);
     }
 
+    @NotNull
     BracketType getBracketTypeFor(int peekCode) {
         if (peekCode >= FIELD_NAME0 && peekCode <= FIELD_NAME31)
             return BracketType.MAP;
@@ -364,14 +372,14 @@ public class BinaryWire extends AbstractWire implements Wire {
     @Override
     public ValueIn read(@NotNull WireKey key) {
         ValueInState curr = valueIn.curr();
-        StringBuilder sb = acquireStringBuilder();
+        @NotNull StringBuilder sb = acquireStringBuilder();
         // did we save the position last time
         // so we could go back and parseOne an older field?
         if (curr.savedPosition() > 0) {
             bytes.readPosition(curr.savedPosition() - 1);
             curr.savedPosition(0L);
         }
-        CharSequence name = key.name();
+        @NotNull CharSequence name = key.name();
         while (bytes.readRemaining() > 0) {
             long position = bytes.readPosition();
             // at the current position look for the field.
@@ -389,7 +397,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         return read2(key, curr, sb, name);
     }
 
-    protected ValueIn read2(@NotNull WireKey key, ValueInState curr, StringBuilder sb, CharSequence name) {
+    protected ValueIn read2(@NotNull WireKey key, @NotNull ValueInState curr, @NotNull StringBuilder sb, CharSequence name) {
         long position2 = bytes.readLimit();
 
         // if not a match go back and look at old fields.
@@ -444,7 +452,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @Nullable
-    private StringBuilder readField(@NotNull StringBuilder name, WireKey key) {
+    private StringBuilder readField(@NotNull StringBuilder name, @NotNull WireKey key) {
         int peekCode = peekCodeAfterPadding();
         return readField(peekCode, key, name, true);
     }
@@ -458,8 +466,9 @@ public class BinaryWire extends AbstractWire implements Wire {
         return peekCode;
     }
 
+    @Nullable
     @Override
-    public <K> K readEvent(Class<K> expectedClass) {
+    public <K> K readEvent(@NotNull Class<K> expectedClass) {
         int peekCode = peekCodeAfterPadding();
         switch (peekCode >> 4) {
             case BinaryWireHighCode.END_OF_STREAM:
@@ -488,7 +497,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @Nullable
-    private <K> K readSpecialField(int peekCode, Class<K> expectedClass) {
+    private <K> K readSpecialField(int peekCode, @NotNull Class<K> expectedClass) {
         switch (peekCode) {
             case FIELD_NUMBER:
                 bytes.uncheckedReadSkipOne();
@@ -498,7 +507,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             case FIELD_NAME_ANY:
             case EVENT_NAME:
                 bytes.uncheckedReadSkipOne();
-                StringBuilder sb = read8bit();
+                @Nullable StringBuilder sb = read8bit();
                 return ObjectUtils.convertTo(expectedClass, WireInternal.INTERNER.intern(sb));
 
             case FIELD_ANCHOR:
@@ -515,7 +524,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @Nullable
     StringBuilder read8bit() {
-        StringBuilder sb = acquireStringBuilder();
+        @NotNull StringBuilder sb = acquireStringBuilder();
         return bytes.read8bit(sb) ? sb : null;
     }
 
@@ -557,7 +566,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         return bytes.peekUnsignedByte();
     }
 
-    private StringBuilder readField(int peekCode, WireKey key, @NotNull StringBuilder sb, boolean missingOk) {
+    private StringBuilder readField(int peekCode, @NotNull WireKey key, @NotNull StringBuilder sb, boolean missingOk) {
         sb.setLength(0);
         switch (peekCode >> 4) {
             case BinaryWireHighCode.END_OF_STREAM:
@@ -596,7 +605,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @Nullable
-    private StringBuilder readSpecialField(int peekCode, WireKey key, @NotNull StringBuilder sb) {
+    private StringBuilder readSpecialField(int peekCode, @NotNull WireKey key, @NotNull StringBuilder sb) {
         switch (peekCode) {
             case FIELD_NUMBER:
                 bytes.uncheckedReadSkipOne();
@@ -620,9 +629,10 @@ public class BinaryWire extends AbstractWire implements Wire {
         return null;
     }
 
-    protected StringBuilder readFieldAnchor(StringBuilder sb) {
+    @NotNull
+    protected StringBuilder readFieldAnchor(@NotNull StringBuilder sb) {
         if (valueIn instanceof DeltaValueIn) {
-            DeltaValueIn in = (DeltaValueIn) valueIn;
+            @NotNull DeltaValueIn in = (DeltaValueIn) valueIn;
 
             int ref = Maths.toUInt31(bytes.readStopBit());
             if (ref >= in.inField.length)
@@ -636,9 +646,9 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @NotNull
-    protected StringBuilder readFieldNumber(WireKey key, @NotNull StringBuilder sb, long fieldId) {
+    protected StringBuilder readFieldNumber(@NotNull WireKey key, @NotNull StringBuilder sb, long fieldId) {
         if (valueIn instanceof DeltaValueIn) {
-            DeltaValueIn in = (DeltaValueIn) valueIn;
+            @NotNull DeltaValueIn in = (DeltaValueIn) valueIn;
             if (fieldId >= 0 && fieldId < in.inField.length) {
                 String s = in.inField[(int) fieldId];
                 if (s != null)
@@ -668,7 +678,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         switch (peekCode) {
             case COMMENT: {
                 bytes.uncheckedReadSkipOne();
-                StringBuilder sb = readUtf8();
+                @Nullable StringBuilder sb = readUtf8();
                 wire.writeComment(sb);
                 break;
             }
@@ -689,7 +699,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             case TYPE_PREFIX: {
                 long readPosition = bytes.readPosition();
                 bytes.uncheckedReadSkipOne();
-                StringBuilder sb = readUtf8();
+                @Nullable StringBuilder sb = readUtf8();
                 if (StringUtils.isEqual("snappy", sb) || StringUtils.isEqual("gzip", sb) || StringUtils.isEqual("lzw", sb)) {
                     bytes.readPosition(readPosition);
                     wire.writeComment(sb);
@@ -702,14 +712,14 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case TYPE_LITERAL: {
                 bytes.uncheckedReadSkipOne();
-                StringBuilder sb = readUtf8();
+                @Nullable StringBuilder sb = readUtf8();
                 wire.getValueOut().typeLiteral(sb);
                 break;
             }
 
             case EVENT_NAME:
             case FIELD_NAME_ANY:
-                StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, acquireStringBuilder(), false);
+                @Nullable StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, acquireStringBuilder(), false);
                 wire.write(fsb);
                 break;
 
@@ -725,7 +735,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case STRING_ANY: {
                 bytes.uncheckedReadSkipOne();
-                StringBuilder sb1 = readUtf8();
+                @Nullable StringBuilder sb1 = readUtf8();
                 wire.getValueOut().text(sb1);
                 break;
             }
@@ -734,7 +744,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 bytes.uncheckedReadSkipOne();
                 long code2 = bytes.readStopBit();
                 if (valueIn instanceof DeltaValueIn) {
-                    final DeltaValueIn din = (DeltaValueIn) this.valueIn;
+                    @NotNull final DeltaValueIn din = (DeltaValueIn) this.valueIn;
                     if (code2 >= 0 && code2 < din.inField.length) {
                         String name = din.inField[(int) code2];
                         if (name != null) {
@@ -1137,7 +1147,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @Nullable
     StringBuilder readUtf8() {
-        StringBuilder sb = acquireStringBuilder();
+        @NotNull StringBuilder sb = acquireStringBuilder();
         return bytes.readUtf8(sb) ? sb : null;
     }
 
@@ -1165,6 +1175,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
         public WireOut nu11() {
             writeCode(NULL);
@@ -1245,6 +1256,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        @NotNull
         @Override
         public WireOut bytesLiteral(@Nullable BytesStore fromBytes) {
             long remaining = fromBytes.readRemaining();
@@ -1267,7 +1279,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut rawBytes(byte[] value) {
+        public WireOut rawBytes(@NotNull byte[] value) {
             typePrefix(byte[].class);
             writeLength(Maths.toInt32(value.length + 1));
             writeCode(U8_ARRAY);
@@ -1316,7 +1328,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut bytes(String type, byte[] fromBytes) {
+        public WireOut bytes(String type, @NotNull byte[] fromBytes) {
             typePrefix(type);
             return bytes(fromBytes);
         }
@@ -1506,7 +1518,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(Class type) {
+        public WireOut typeLiteral(@Nullable Class type) {
             if (type == null)
                 nu11();
             else
@@ -1567,7 +1579,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer) {
+        public <T> WireOut sequence(T t, @NotNull BiConsumer<T, ValueOut> writer) {
             writeCode(BYTES_LENGTH32);
             long position = bytes.writePosition();
             bytes.writeInt(0);
@@ -1580,7 +1592,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer) {
+        public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) {
             writeCode(BYTES_LENGTH32);
             long position = bytes.writePosition();
             bytes.writeInt(0);
@@ -1896,6 +1908,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return stack.curr();
         }
 
+        @NotNull
         @Override
         public BracketType getBracketType() {
             consumePadding();
@@ -1922,7 +1935,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     break;
                 default:
                     if (code >= STRING_0 && code <= STRING_31) {
-                        StringBuilder sb = acquireStringBuilder();
+                        @NotNull StringBuilder sb = acquireStringBuilder();
                         bytes.parseUtf8(sb, code & 0b11111);
                         s.accept(WireInternal.INTERNER.intern(sb));
 
@@ -1948,7 +1961,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return null;
 
             } else {
-                StringBuilder text = readText(code, sb);
+                @Nullable StringBuilder text = readText(code, sb);
                 if (text == null)
                     cantRead(code);
                 return sb;
@@ -1965,7 +1978,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return null;
 
             } else {
-                Bytes text = readText(code, bytes);
+                @Nullable Bytes text = readText(code, bytes);
                 if (text == null)
                     cantRead(code);
                 return bytes;
@@ -1999,18 +2012,18 @@ public class BinaryWire extends AbstractWire implements Wire {
                 }
 
                 case TYPE_PREFIX: {
-                    StringBuilder sb = readUtf8();
+                    @Nullable StringBuilder sb = readUtf8();
                     if (sb != null) {
-                        byte[] bytes = Compression.uncompress(sb, this, ValueIn::bytes);
+                        @Nullable byte[] bytes = Compression.uncompress(sb, this, ValueIn::bytes);
                         if (bytes != null)
                             return new String(bytes, StandardCharsets.UTF_8);
                     }
-                    StringBuilder text = readText(code, acquireStringBuilder());
+                    @Nullable StringBuilder text = readText(code, acquireStringBuilder());
                     return WireInternal.INTERNER.intern(text);
                 }
 
                 default: {
-                    StringBuilder text = readText(code, acquireStringBuilder());
+                    @Nullable StringBuilder text = readText(code, acquireStringBuilder());
                     return text == null ? null : WireInternal.INTERNER.intern(text);
                 }
             }
@@ -2025,7 +2038,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return BinaryWire.this;
             }
             if (code == TYPE_PREFIX) {
-                StringBuilder sb = readUtf8();
+                @Nullable StringBuilder sb = readUtf8();
                 assert sb != null;
 
                 long length2 = readLength();
@@ -2054,10 +2067,11 @@ public class BinaryWire extends AbstractWire implements Wire {
             return wireIn();
         }
 
+        @NotNull
         @Override
         public BytesStore bytesLiteral() {
             int length = Maths.toUInt31(readLength());
-            BytesStore toBytes = BytesStore.wrap(new byte[length]);
+            @NotNull BytesStore toBytes = BytesStore.wrap(new byte[length]);
             toBytes.write(0, bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
             return toBytes;
@@ -2104,14 +2118,14 @@ public class BinaryWire extends AbstractWire implements Wire {
             switch (code) {
                 case I64_ARRAY:
                 case U8_ARRAY:
-                    BytesStore toBytes = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
+                    @NotNull BytesStore toBytes = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
                     toBytes.write(0, bytes, bytes.readPosition(), length);
                     bytes.readSkip(length);
                     return toBytes;
 
                 case TYPE_PREFIX: {
-                    StringBuilder sb = readUtf8();
-                    byte[] bytes = Compression.uncompress(sb, this, ValueIn::bytes);
+                    @Nullable StringBuilder sb = readUtf8();
+                    @Nullable byte[] bytes = Compression.uncompress(sb, this, ValueIn::bytes);
                     if (bytes != null)
                         return BytesStore.wrap(bytes);
                     throw new UnsupportedOperationException("Unsupported type " + sb);
@@ -2196,7 +2210,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
 
             if (code == TYPE_PREFIX) {
-                StringBuilder sb = readUtf8();
+                @Nullable StringBuilder sb = readUtf8();
                 assert "byte[]".contentEquals(sb);
                 length = readLength();
                 code = readCode();
@@ -2204,7 +2218,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             if (code != U8_ARRAY)
                 cantRead(code);
-            byte[] bytes2 = new byte[Maths.toUInt31(length - 1)];
+            @NotNull byte[] bytes2 = new byte[Maths.toUInt31(length - 1)];
             bytes.readWithLength(length - 1, b -> b.read(bytes2));
             return bytes2;
         }
@@ -2255,6 +2269,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
+        @NotNull
         @Override
         public WireIn skipValue() {
             final long length = readLength();
@@ -2412,7 +2427,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         private LocalTime readLocalTime() {
-            StringBuilder sb = readUtf8();
+            @Nullable StringBuilder sb = readUtf8();
             return LocalTime.parse(sb);
         }
 
@@ -2422,7 +2437,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             consumePadding();
             int code = readCode();
             if (code == ZONED_DATE_TIME) {
-                StringBuilder sb = readUtf8();
+                @Nullable StringBuilder sb = readUtf8();
                 tZonedDateTime.accept(t, ZonedDateTime.parse(sb));
 
             } else {
@@ -2437,7 +2452,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             consumePadding();
             int code = readCode();
             if (code == DATE) {
-                StringBuilder sb = readUtf8();
+                @Nullable StringBuilder sb = readUtf8();
                 tLocalDate.accept(t, LocalDate.parse(sb));
 
             } else {
@@ -2456,6 +2471,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return hasNext();
         }
 
+        @NotNull
         @Override
         public UUID uuid() {
             consumePadding();
@@ -2490,7 +2506,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (code == I64_ARRAY) {
                 if (!(values instanceof BinaryLongArrayReference))
                     setter.accept(t, values = new BinaryLongArrayReference());
-                Byteable b = (Byteable) values;
+                @Nullable Byteable b = (Byteable) values;
                 long length = BinaryLongArrayReference.peakLength(bytes, bytes.readPosition());
                 b.bytesStore(bytes, bytes.readPosition(), length);
                 bytes.readSkip(length);
@@ -2509,7 +2525,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (code != INT64)
                 cantRead(code);
 
-            Byteable b = (Byteable) value;
+            @NotNull Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
@@ -2524,7 +2540,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (code != INT32)
                 cantRead(code);
 
-            Byteable b = (Byteable) value;
+            @NotNull Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
@@ -2553,7 +2569,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 4) {
                 setter.accept(t, value = new BinaryIntReference());
             }
-            Byteable b = (Byteable) value;
+            @NotNull Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
@@ -2658,8 +2674,9 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
+        @Nullable
         protected <T> T typedMarshallable0() {
-            StringBuilder sb = readUtf8();
+            @Nullable StringBuilder sb = readUtf8();
             // its possible that the object that you are allocating may not have a
             // default constructor
             final Class clazz;
@@ -2682,10 +2699,12 @@ public class BinaryWire extends AbstractWire implements Wire {
             return readResolve(m);
         }
 
+        @NotNull
         protected <T> T updateAlias() {
             throw new UnsupportedOperationException("Used by DeltaWire");
         }
 
+        @NotNull
         protected <T> T anchor() {
             throw new UnsupportedOperationException("Used by DeltaWire");
         }
@@ -2697,7 +2716,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return null;
             }
             bytes.uncheckedReadSkipOne();
-            StringBuilder sb = readUtf8();
+            @Nullable StringBuilder sb = readUtf8();
 
             try {
                 return classLookup().forName(sb);
@@ -2709,7 +2728,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
-            StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder sb = acquireStringBuilder();
             int code = readCode();
             if (code == TYPE_PREFIX) {
                 bytes.readUtf8(sb);
@@ -2729,7 +2748,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) {
             int code = readCode();
             if (code == TYPE_LITERAL) {
-                StringBuilder sb = readUtf8();
+                @Nullable StringBuilder sb = readUtf8();
                 classNameConsumer.accept(t, sb);
             } else if (code == NULL) {
                 classNameConsumer.accept(t, null);
@@ -2739,11 +2758,12 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        @Nullable
         @Override
         public <T> Class<T> typeLiteral() {
             int code = readCode();
             if (code == TYPE_LITERAL) {
-                StringBuilder sb = readUtf8();
+                @Nullable StringBuilder sb = readUtf8();
                 try {
                     return classLookup().forName(sb);
                 } catch (ClassNotFoundException e) {
@@ -2798,7 +2818,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             return false;
         }
 
-        public Object marshallable(Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
+        @Nullable
+        public Object marshallable(@Nullable Object object, @NotNull SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
             if (this.isNull())
                 return null;
             pushState();
@@ -2808,7 +2829,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case ANCHOR:
                 case UPDATED_ALIAS: {
                     bytes.uncheckedReadSkipOne();
-                    Object o = code == ANCHOR ? anchor() : updateAlias();
+                    @NotNull Object o = code == ANCHOR ? anchor() : updateAlias();
                     if (object == null || o.getClass() != object.getClass()) {
                         return o instanceof Marshallable ? Wires.deepCopy((Marshallable) o) : o;
                     }
@@ -2835,6 +2856,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return object;
         }
 
+        @Nullable
         public Demarshallable demarshallable(@NotNull Class clazz) throws BufferUnderflowException, IORuntimeException {
             if (this.isNull())
                 return null;
@@ -2868,7 +2890,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         private long readTextAsLong() throws IORuntimeException, BufferUnderflowException {
             bytes.uncheckedReadSkipBackOne();
-            final String text = text();
+            @Nullable final String text = text();
             if (text == null)
                 throw new NullPointerException();
             try {
@@ -2880,7 +2902,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         private double readTextAsDouble() throws IORuntimeException, BufferUnderflowException {
             bytes.uncheckedReadSkipBackOne();
-            final String text = text();
+            @Nullable final String text = text();
             if (text == null || text.length() == 0)
                 return Double.NaN;
             return Double.parseDouble(text);
@@ -3008,7 +3030,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type) {
+        public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) {
             int code = peekCode();
             if ((code & 0x80) == 0) {
                 bytes.uncheckedReadSkipOne();
@@ -3049,7 +3071,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                             long length = bytes.readRemaining();
                             if (length == 0)
                                 return BytesStore.empty();
-                            BytesStore toBytes = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
+                            @NotNull BytesStore toBytes = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
                             toBytes.write(0, bytes, bytes.readPosition(), length);
                             bytes.readSkip(length);
                             return toBytes;
@@ -3076,7 +3098,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                             return text();
                         case TYPE_PREFIX: {
                             readCode();
-                            StringBuilder sb = readUtf8();
+                            @Nullable StringBuilder sb = readUtf8();
                             final Class clazz2;
                             try {
                                 clazz2 = classLookup().forName(sb);
@@ -3165,7 +3187,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                             return;
                         case TYPE_PREFIX: {
                             readCode();
-                            StringBuilder sb = readUtf8();
+                            @Nullable StringBuilder sb = readUtf8();
                             final Class clazz2;
                             try {
                                 clazz2 = classLookup().forName(sb);
@@ -3194,20 +3216,24 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     class DeltaValueIn extends BinaryWire.BinaryValueIn {
+        @NotNull
         Marshallable[] inObjects = new Marshallable[128];
+        @NotNull
         String[] inField = new String[128];
 
+        @NotNull
         @Override
         protected <T> T anchor() {
             long ref = bytes.readStopBit();
 //            System.out.println("anchor " + ref + " inObjects " + Integer.toHexString(inObjects.hashCode()));
             if (ref >= inObjects.length)
                 inObjects = Arrays.copyOf(inObjects, inObjects.length * 2);
-            T t = (T) super.typedMarshallable0();
+            @NotNull T t = (T) super.typedMarshallable0();
             inObjects[Maths.toUInt31(ref)] = (Marshallable) t;
             return t;
         }
 
+        @NotNull
         @Override
         protected <T> T updateAlias() {
             int ref = Maths.toUInt31(bytes.readStopBit());

@@ -18,6 +18,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ObjectUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -38,7 +40,7 @@ public class VanillaFieldInfo extends AbstractMarshallable implements FieldInfo 
     private final Class parent;
     private transient Field field;
 
-    public VanillaFieldInfo(String name, Class type, BracketType bracketType, Field field) {
+    public VanillaFieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
         this.name = name;
         this.type = type;
         this.bracketType = bracketType;
@@ -46,15 +48,16 @@ public class VanillaFieldInfo extends AbstractMarshallable implements FieldInfo 
         this.field = field;
     }
 
+    @NotNull
     public static Wires.FieldInfoPair lookupClass(Class aClass) {
         final SerializationStrategy ss = Wires.CLASS_STRATEGY.get(aClass);
         if (ss.bracketType() != BracketType.MAP) {
             return Wires.FieldInfoPair.EMPTY;
         }
 
-        List<FieldInfo> fields = new ArrayList<>();
+        @NotNull List<FieldInfo> fields = new ArrayList<>();
         final WireMarshaller marshaller = WIRE_MARSHALLER_CL.get(aClass);
-        for (WireMarshaller.FieldAccess fa : marshaller.fields) {
+        for (@NotNull WireMarshaller.FieldAccess fa : marshaller.fields) {
             final String name = fa.field.getName();
             final Class<?> type = fa.field.getType();
             final SerializationStrategy ss2 = Wires.CLASS_STRATEGY.get(type);
@@ -81,11 +84,12 @@ public class VanillaFieldInfo extends AbstractMarshallable implements FieldInfo 
         return bracketType;
     }
 
+    @Nullable
     @Override
     public Object get(Object value) {
         try {
             return getField().get(value);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+        } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
             Jvm.debug().on(VanillaFieldInfo.class, e);
             return null;
@@ -97,7 +101,7 @@ public class VanillaFieldInfo extends AbstractMarshallable implements FieldInfo 
         Object value2 = ObjectUtils.convertTo(type, value);
         try {
             getField().set(object, value2);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+        } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
             throw new AssertionError(e);
         }
     }

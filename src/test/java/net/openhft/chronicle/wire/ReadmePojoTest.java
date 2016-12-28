@@ -17,6 +17,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -35,37 +37,37 @@ public class ReadmePojoTest {
 
     @Test
     public void testFromString() throws IOException {
-        MyPojos mps = new MyPojos("test-list");
+        @NotNull MyPojos mps = new MyPojos("test-list");
         mps.myPojos.add(new MyPojo("text1", 1, 1.1));
         mps.myPojos.add(new MyPojo("text2", 2, 2.2));
 
         System.out.println(mps);
-        MyPojos mps2 = Marshallable.fromString(mps.toString());
+        @Nullable MyPojos mps2 = Marshallable.fromString(mps.toString());
         assertEquals(mps, mps2);
 
-        String text = "!MyPojos {\n" +
+        @NotNull String text = "!MyPojos {\n" +
                 "  name: test-list,\n" +
                 "  myPojos: [\n" +
                 "    { text: text1, num: 1, factor: 1.1 },\n" +
                 "    { text: text2, num: 2, factor: 2.2 }\n" +
                 "  ]\n" +
                 "}\n";
-        MyPojos mps3 = Marshallable.fromString(text);
+        @Nullable MyPojos mps3 = Marshallable.fromString(text);
         assertEquals(mps, mps3);
 
-        MyPojos mps4 = Marshallable.fromFile("my-pojos.yaml");
+        @NotNull MyPojos mps4 = Marshallable.fromFile("my-pojos.yaml");
         assertEquals(mps, mps4);
     }
 
     @Test
     public void testMapDump() throws IOException {
-        Map<String, Object> map = new LinkedHashMap<>();
+        @NotNull Map<String, Object> map = new LinkedHashMap<>();
         map.put("text", "words");
         map.put("number", 1);
         map.put("factor", 1.1);
         map.put("list", Arrays.asList(1L, 2L, 3L, 4L));
 
-        Map<String, Object> inner = new LinkedHashMap<>();
+        @NotNull Map<String, Object> inner = new LinkedHashMap<>();
         inner.put("a", 1L);
         inner.put("b", "Hello World");
         inner.put("c", "bye");
@@ -86,7 +88,7 @@ public class ReadmePojoTest {
                 "  b: Hello World,\n" +
                 "  c: bye\n" +
                 "}\n", text);
-        Map<String, Object> map2 = TEXT.asMap(text);
+        @Nullable Map<String, Object> map2 = TEXT.asMap(text);
         assertEquals(map, map2);
     }
 
@@ -104,6 +106,7 @@ public class ReadmePojoTest {
 
     static class MyPojos extends AbstractMarshallable {
         String name;
+        @NotNull
         List<MyPojo> myPojos = new ArrayList<>();
 
         public MyPojos(String name) {

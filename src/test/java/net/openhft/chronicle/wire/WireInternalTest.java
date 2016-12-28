@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -26,7 +27,7 @@ public class WireInternalTest {
     @Test
     public void testFromSizePrefixedBinaryToText() {
         Bytes bytes = Bytes.elasticByteBuffer();
-        Wire out = new BinaryWire(bytes);
+        @NotNull Wire out = new BinaryWire(bytes);
         out.writeDocument(true, w -> w
                 .write(() -> "csp").text("csp://hello-world")
                 .write(() -> "tid").int64(123456789));

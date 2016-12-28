@@ -46,6 +46,7 @@ public class NestedClass implements Marshallable {
         this.number = number;
     }
 
+    @NotNull
     @Override
     public String toString() {
         return "NestedClass{" +

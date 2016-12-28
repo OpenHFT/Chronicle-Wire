@@ -18,36 +18,44 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by peter on 09/07/16.
  */
 public class WireDumper {
+    @Nullable
     private final WireIn wireIn;
+    @NotNull
     private final Bytes bytes;
     private long headerNumber = -1;
 
-    private WireDumper(WireIn wireIn, Bytes bytes) {
+    private WireDumper(@Nullable WireIn wireIn, @NotNull Bytes bytes) {
         if (wireIn == null)
             wireIn = new BinaryWire(bytes);
         this.wireIn = wireIn;
         this.bytes = bytes;
     }
 
-    public static WireDumper of(WireIn wireIn) {
+    @NotNull
+    public static WireDumper of(@NotNull WireIn wireIn) {
         return new WireDumper(wireIn, wireIn.bytes());
     }
 
-    public static WireDumper of(Bytes bytes) {
+    @NotNull
+    public static WireDumper of(@NotNull Bytes bytes) {
         return new WireDumper(new BinaryWire(bytes), bytes);
     }
 
+    @NotNull
     public String asString() {
         return asString(bytes.readPosition(), bytes.readRemaining());
     }
 
+    @NotNull
     public String asString(long position, long length) {
-        StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder();
         final long limit0 = bytes.readLimit();
         final long position0 = bytes.readPosition();
 
@@ -71,7 +79,7 @@ public class WireDumper {
         return sb.toString();
     }
 
-    public boolean dumpOne(StringBuilder sb) {
+    public boolean dumpOne(@NotNull StringBuilder sb) {
         long start = bytes.readPosition();
         int header = bytes.readInt();
         if (header == 0) {
@@ -97,7 +105,7 @@ public class WireDumper {
             sb.append("#  has a 4 byte size prefix, ").append(len).append(" > ").append(bytes.readRemaining()).append(" len is ").append(Integer.toString(len));
             return true;
         }
-        String type = Wires.isData(header)
+        @NotNull String type = Wires.isData(header)
                 ? Wires.isReady(header) ? "!!data" : "!!not-ready-data!"
                 : Wires.isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
 
@@ -136,7 +144,7 @@ public class WireDumper {
                 }
 
                 Bytes bytes2 = Bytes.elasticByteBuffer();
-                TextWire textWire = new TextWire(bytes2);
+                @NotNull TextWire textWire = new TextWire(bytes2);
 
                 bytes.readLimit(readPosition + len);
 
@@ -166,7 +174,7 @@ public class WireDumper {
         return false;
     }
 
-    public void dumpAsHexadecimal(StringBuilder sb, int len, long readPosition, int sblen) {
+    public void dumpAsHexadecimal(@NotNull StringBuilder sb, int len, long readPosition, int sblen) {
         bytes.readPositionRemaining(readPosition, len);
         sb.setLength(sblen);
         sb.append(bytes.toHexString(readPosition, Integer.MAX_VALUE));

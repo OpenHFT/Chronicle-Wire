@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,7 +26,7 @@ public class TextWireCompatibilityTest {
 
     @Test
     public void testAddFieldsInTheMiddle() {
-        TextWire wire = new TextWire(Bytes.elasticHeapByteBuffer(100));
+        @NotNull TextWire wire = new TextWire(Bytes.elasticHeapByteBuffer(100));
         wire.getValueOut().object(new SubIncompatibleObject());
         System.out.println(wire.toString());
         Assert.assertNotNull(wire.getValueIn().object());
@@ -35,7 +36,7 @@ public class TextWireCompatibilityTest {
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
             Assert.assertEquals(1, wire.read("a").int32());
-            String missingValue = wire.read("c").text();
+            @Nullable String missingValue = wire.read("c").text();
             if (missingValue != null) {
                 System.err.println("expected null, had: <" + missingValue + ">");
             }

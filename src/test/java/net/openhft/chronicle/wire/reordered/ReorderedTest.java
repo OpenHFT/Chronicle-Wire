@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire.reordered;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -79,8 +80,8 @@ public class ReorderedTest {
         wire.writeEventName(() -> "test2").marshallable(outerClass2);
 
         System.out.println(bytes.readByte(0) < 0 ? bytes.toHexString() : bytes.toString());
-        StringBuilder sb = new StringBuilder();
-        OuterClass outerClass0 = new OuterClass();
+        @NotNull StringBuilder sb = new StringBuilder();
+        @NotNull OuterClass outerClass0 = new OuterClass();
 
         wire.readEventName(sb).marshallable(outerClass0);
         assertEquals("test1", sb.toString());

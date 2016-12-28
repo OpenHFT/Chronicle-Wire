@@ -18,6 +18,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -33,6 +35,7 @@ class WireObjectInput implements ObjectInput {
         this.wire = wire;
     }
 
+    @Nullable
     @Override
     public Object readObject() throws ClassNotFoundException, IOException {
         return wire.getValueIn().object();
@@ -46,7 +49,7 @@ class WireObjectInput implements ObjectInput {
     }
 
     @Override
-    public int read(byte[] b) throws IOException {
+    public int read(@NotNull byte[] b) throws IOException {
         return read(b, 0, b.length);
     }
 
@@ -66,7 +69,7 @@ class WireObjectInput implements ObjectInput {
 
     @Override
     public long skip(long n) throws IOException {
-        final Bytes<?> bytes = wire.bytes();
+        @NotNull final Bytes<?> bytes = wire.bytes();
         final long maxRewind = bytes.start() - bytes.readPosition();
         long len = Math.max(maxRewind, Math.min(bytes.readRemaining(), n));
         bytes.readSkip(len);
@@ -167,11 +170,13 @@ class WireObjectInput implements ObjectInput {
         return wire.getValueIn().float64();
     }
 
+    @NotNull
     @Override
     public String readLine() throws IOException {
         return readUTF();
     }
 
+    @NotNull
     @Override
     public String readUTF() throws IOException {
         if (wire.bytes().readRemaining() <= 0)

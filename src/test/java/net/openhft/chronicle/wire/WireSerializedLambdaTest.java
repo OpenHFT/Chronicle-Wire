@@ -20,6 +20,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.SerializableFunction;
 import net.openhft.chronicle.core.util.SerializableUpdater;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -40,10 +42,10 @@ public class WireSerializedLambdaTest {
     }
     @Test
     public void testIsLambda() {
-        Function<String, String> fun = (Function<String, String> & Serializable) String::toUpperCase;
+        @NotNull Function<String, String> fun = (Function<String, String> & Serializable) String::toUpperCase;
         assertTrue(WireSerializedLambda.isSerializableLambda(fun.getClass()));
         int a = 5;
-        SerializableFunction<Integer, Integer> fun2 = i -> i + a;
+        @NotNull SerializableFunction<Integer, Integer> fun2 = i -> i + a;
         assertTrue(WireSerializedLambda.isSerializableLambda(fun2.getClass()));
         SerializableUpdater<AtomicInteger> upd = AtomicInteger::incrementAndGet;
         assertTrue(WireSerializedLambda.isSerializableLambda(upd.getClass()));
@@ -52,7 +54,7 @@ public class WireSerializedLambdaTest {
 
     @Test
     public void testTextWire() {
-        Wire wire = new TextWire(Bytes.elasticByteBuffer());
+        @NotNull Wire wire = new TextWire(Bytes.elasticByteBuffer());
         SerializableFunction<String, String> fun = String::toUpperCase;
 
         wire.write(() -> "one").object(fun)
@@ -77,21 +79,21 @@ public class WireSerializedLambdaTest {
                 "two: !Fun ADD_A\n" +
                 "three: !Updat INCR\n", wire.bytes().toString());
 
-        Function<String, String> function = wire.read(() -> "one").object(Function.class);
+        @Nullable Function<String, String> function = wire.read(() -> "one").object(Function.class);
         assertEquals("HELLO", function.apply("hello"));
 
-        Function<String, String> function2 = wire.read(() -> "two").object(Function.class);
+        @Nullable Function<String, String> function2 = wire.read(() -> "two").object(Function.class);
         assertEquals("helloA", function2.apply("hello"));
 
-        Consumer<AtomicLong> updater = wire.read(() -> "three").object(Consumer.class);
-        AtomicLong aLong = new AtomicLong();
+        @Nullable Consumer<AtomicLong> updater = wire.read(() -> "three").object(Consumer.class);
+        @NotNull AtomicLong aLong = new AtomicLong();
         updater.accept(aLong);
         assertEquals(1, aLong.get());
     }
 
     @Test
     public void testBinaryWire() {
-        Wire wire = new BinaryWire(Bytes.elasticByteBuffer());
+        @NotNull Wire wire = new BinaryWire(Bytes.elasticByteBuffer());
         assert wire.startUse();
         SerializableFunction<String, String> fun = String::toUpperCase;
         wire.write(() -> "one").object(fun)
@@ -113,14 +115,14 @@ public class WireSerializedLambdaTest {
                 "Ãtwo¶⒊FunåADD_A" +
                 "Åthree¶⒌UpdatäDECR‡", wire.bytes().toDebugString(348));
 
-        Function<String, String> function = wire.read().object(Function.class);
+        @Nullable Function<String, String> function = wire.read().object(Function.class);
         assertEquals("HELLO", function.apply("hello"));
 
-        Function<String, String> function2 = wire.read(() -> "two").object(Function.class);
+        @Nullable Function<String, String> function2 = wire.read(() -> "two").object(Function.class);
         assertEquals("helloA", function2.apply("hello"));
 
-        Consumer<AtomicLong> updater = wire.read(() -> "three").object(Consumer.class);
-        AtomicLong aLong = new AtomicLong();
+        @Nullable Consumer<AtomicLong> updater = wire.read(() -> "three").object(Consumer.class);
+        @NotNull AtomicLong aLong = new AtomicLong();
         updater.accept(aLong);
         assertEquals(-1, aLong.get());
     }

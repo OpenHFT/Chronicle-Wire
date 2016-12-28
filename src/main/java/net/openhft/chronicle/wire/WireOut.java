@@ -95,8 +95,9 @@ public interface WireOut extends WireCommon {
      *
      * @return this
      */
+    @NotNull
     default WireOut padToCacheAlign() {
-        Bytes<?> bytes = bytes();
+        @NotNull Bytes<?> bytes = bytes();
         int mod = (int) (bytes.address(bytes.writePosition()) & 63);
         if (mod > 60)
             addPadding(64 - mod);
@@ -238,7 +239,7 @@ public interface WireOut extends WireCommon {
 
     void endEvent();
 
-    default <K, V> void writeAllAsMap(Class<K> kClass, Class<V> vClass, Map<K, V> map) {
+    default <K, V> void writeAllAsMap(Class<K> kClass, Class<V> vClass, @NotNull Map<K, V> map) {
         map.forEach((k, v) -> {
             writeEvent(kClass, k).object(vClass, v);
         });

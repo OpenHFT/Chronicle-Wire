@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Created by peter.lawrey on 02/02/2016.
  */
@@ -24,6 +26,7 @@ class ValueInState {
     private static final long[] EMPTY_ARRAY = {};
     private long savedPosition;
     private int unexpectedSize;
+    @NotNull
     private long[] unexpected = EMPTY_ARRAY;
 
     public void reset() {
@@ -34,7 +37,7 @@ class ValueInState {
     public void addUnexpected(long position) {
         if (unexpectedSize >= unexpected.length) {
             int newSize = unexpected.length * 3 / 2 + 8;
-            long[] unexpected2 = new long[newSize];
+            @NotNull long[] unexpected2 = new long[newSize];
             System.arraycopy(unexpected, 0, unexpected2, 0, unexpected.length);
             unexpected = unexpected2;
         }

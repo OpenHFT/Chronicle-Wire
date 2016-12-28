@@ -20,6 +20,8 @@ package net.openhft.chronicle.wire.map;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -41,20 +43,21 @@ public class MapWireTest {
         this.m = m;
     }
 
+    @NotNull
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
-        List<Object[]> list = new ArrayList<>();
-        WireType[] wireTypes = {WireType.TEXT, WireType.BINARY};
+        @NotNull List<Object[]> list = new ArrayList<>();
+        @NotNull WireType[] wireTypes = {WireType.TEXT, WireType.BINARY};
         for (WireType wt : wireTypes) {
             for (int i = 0; i < Character.MAX_VALUE; i += 128) {
-                Map<Integer, String> map = new LinkedHashMap<>();
+                @NotNull Map<Integer, String> map = new LinkedHashMap<>();
                 for (int ch = i; ch < i + 128; ch++) {
                     if (Character.isValidCodePoint(ch)) {
                         final String s = Character.toString((char) ch);
                         map.put(i, s);
                     }
                 }
-                Object[] test = {wt, map};
+                @NotNull Object[] test = {wt, map};
                 list.add(test);
             }
         }
@@ -69,7 +72,7 @@ public class MapWireTest {
                 .marshallable(m);
 //        System.out.println(wire);
 
-        Map m2 = wire.getValueIn()
+        @Nullable Map m2 = wire.getValueIn()
                 .marshallableAsMap(Object.class, Object.class);
         assertEquals(m, m2);
     }

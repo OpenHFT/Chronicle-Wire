@@ -21,6 +21,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -45,11 +47,12 @@ public class MarshallableWireTest {
         this.m = m;
     }
 
+    @NotNull
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
-        List<Object[]> list = new ArrayList<>();
-        WireType[] wireTypes = {WireType.TEXT, WireType.BINARY};
-        Marshallable[] objects = {
+        @NotNull List<Object[]> list = new ArrayList<>();
+        @NotNull WireType[] wireTypes = {WireType.TEXT, WireType.BINARY};
+        @NotNull Marshallable[] objects = {
                 new Nested(),
                 new Nested(new ScalarValues(), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap(), new String[0]),
                 new ScalarValues(),
@@ -58,7 +61,7 @@ public class MarshallableWireTest {
         };
         for (WireType wt : wireTypes) {
             for (Marshallable object : objects) {
-                Object[] test = {wt, object};
+                @NotNull Object[] test = {wt, object};
                 list.add(test);
             }
         }
@@ -73,7 +76,7 @@ public class MarshallableWireTest {
         wire.getValueOut().object(m);
         System.out.println(wire);
 
-        Object m2 = wire.getValueIn()
+        @Nullable Object m2 = wire.getValueIn()
                 .object();
         if (!m.equals(m2))
         assertEquals(m, m2);

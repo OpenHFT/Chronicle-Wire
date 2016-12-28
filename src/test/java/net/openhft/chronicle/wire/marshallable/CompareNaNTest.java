@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.wire.AbstractMarshallable;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -27,24 +28,24 @@ import static org.junit.Assert.assertEquals;
 public class CompareNaNTest {
     @Test
     public void testPrim() {
-        PrimDTO a = new PrimDTO(Double.NaN, Float.NaN);
-        PrimDTO b = new PrimDTO(Double.NaN, Float.NaN);
+        @NotNull PrimDTO a = new PrimDTO(Double.NaN, Float.NaN);
+        @NotNull PrimDTO b = new PrimDTO(Double.NaN, Float.NaN);
         assertEquals(a.toString(), b.toString());
         assertEquals(a, b);
     }
 
     @Test
     public void testWrapDTO() {
-        WrapDTO a = new WrapDTO(Double.NaN, Float.NaN);
-        WrapDTO b = new WrapDTO(Double.NaN, Float.NaN);
+        @NotNull WrapDTO a = new WrapDTO(Double.NaN, Float.NaN);
+        @NotNull WrapDTO b = new WrapDTO(Double.NaN, Float.NaN);
         assertEquals(a.toString(), b.toString());
         assertEquals(a, b);
     }
 
     @Test
     public void testObjectWrapDTO() {
-        ObjectWrapDTO a = new ObjectWrapDTO(Double.NaN, Float.NaN);
-        ObjectWrapDTO b = new ObjectWrapDTO(Double.NaN, Float.NaN);
+        @NotNull ObjectWrapDTO a = new ObjectWrapDTO(Double.NaN, Float.NaN);
+        @NotNull ObjectWrapDTO b = new ObjectWrapDTO(Double.NaN, Float.NaN);
         assertEquals(a.toString(), b.toString());
         assertEquals(a, b);
     }

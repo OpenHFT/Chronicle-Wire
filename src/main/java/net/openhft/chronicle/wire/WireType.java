@@ -28,6 +28,7 @@ import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     TEXT {
         @NotNull
         @Override
-        public Wire apply(Bytes bytes) {
+        public Wire apply(@NotNull Bytes bytes) {
             return new TextWire(bytes);
         }
 
@@ -62,22 +63,23 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             return TextLongArrayReference::new;
         }
 
+        @Nullable
         @Override
-        public <T> T fromString(CharSequence cs) {
+        public <T> T fromString(@NotNull CharSequence cs) {
             Bytes bytes = getBytes2();
             bytes.appendUtf8(cs);
             if (bytes.startsWith(PREABLE)) {
                 truncatePreable(bytes);
             }
-            Wire wire = apply(bytes);
+            @NotNull Wire wire = apply(bytes);
             //noinspection unchecked
             return (T) wire.getValueIn().object();
         }
 
-        public void truncatePreable(Bytes bytes) {
+        public void truncatePreable(@NotNull Bytes bytes) {
             bytes.readSkip(4);
             long pos = bytes.readPosition();
-            String word = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
+            @NotNull String word = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
             switch (word) {
                 case "!!data":
                 case "!!data-not-ready":
@@ -96,13 +98,15 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             return new BinaryWire(bytes);
         }
 
+        @NotNull
         @Override
         public String asString(Object marshallable) {
             return asHexString(marshallable);
         }
 
+        @Nullable
         @Override
-        public <T> T fromString(CharSequence cs) {
+        public <T> T fromString(@NotNull CharSequence cs) {
             return fromHexString(cs);
         }
     },
@@ -113,13 +117,15 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             return BinaryWire.binaryOnly(bytes);
         }
 
+        @NotNull
         @Override
         public String asString(Object marshallable) {
             return asHexString(marshallable);
         }
 
+        @Nullable
         @Override
-        public <T> T fromString(CharSequence cs) {
+        public <T> T fromString(@NotNull CharSequence cs) {
             return fromHexString(cs);
         }
     },
@@ -134,7 +140,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                         .newInstance(bytes);
 
             } catch (Exception e) {
-                IllegalStateException licence = new IllegalStateException(
+                @NotNull IllegalStateException licence = new IllegalStateException(
                         "A Chronicle Wire Enterprise licence is required to run this code " +
                                 "because you are using DefaultZeroWire which is a licence product. " +
                                 "Please contact sales@chronicle.software");
@@ -147,7 +153,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             if (isAvailable())
                 return;
 
-            final IllegalStateException licence = new IllegalStateException("A Chronicle Wire " +
+            @NotNull final IllegalStateException licence = new IllegalStateException("A Chronicle Wire " +
                     "Enterprise licence is required to run this code because you are using " +
                     "DEFAULT_ZERO_BINARY which is a licence product. " +
                     "Please contact sales@chronicle.software");
@@ -172,13 +178,15 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             }
         }
 
+        @NotNull
         @Override
         public String asString(Object marshallable) {
             return asHexString(marshallable);
         }
 
+        @Nullable
         @Override
-        public <T> T fromString(CharSequence cs) {
+        public <T> T fromString(@NotNull CharSequence cs) {
             return fromHexString(cs);
         }
     },
@@ -188,7 +196,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         public Wire apply(Bytes bytes) {
 
             try {
-                @SuppressWarnings("unchecked")
+                @NotNull @SuppressWarnings("unchecked")
                 Class<Wire> aClass = (Class) Class.forName("software.chronicle.wire.DeltaWire");
                 final Constructor<Wire> declaredConstructor = aClass.getDeclaredConstructor(Bytes.class);
                 return declaredConstructor.newInstance(bytes);
@@ -205,7 +213,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             if (isAvailable())
                 return;
 
-            final IllegalStateException licence = new IllegalStateException("A Chronicle-Wire-" +
+            @NotNull final IllegalStateException licence = new IllegalStateException("A Chronicle-Wire-" +
                     "Enterprise licence is required to run this code because you are using " +
                     "DELTA_BINARY which is a licence product. " +
                     "Please contact sales@chronicle.software");
@@ -229,13 +237,15 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             return isAvailable;
         }
 
+        @NotNull
         @Override
         public String asString(Object marshallable) {
             return asHexString(marshallable);
         }
 
+        @Nullable
         @Override
-        public <T> T fromString(CharSequence cs) {
+        public <T> T fromString(@NotNull CharSequence cs) {
             return fromHexString(cs);
         }
 
@@ -247,13 +257,15 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             return new BinaryWire(bytes, false, false, true, Integer.MAX_VALUE, "binary", false);
         }
 
+        @NotNull
         @Override
         public String asString(Object marshallable) {
             return asHexString(marshallable);
         }
 
+        @Nullable
         @Override
-        public <T> T fromString(CharSequence cs) {
+        public <T> T fromString(@NotNull CharSequence cs) {
             return fromHexString(cs);
         }
     },
@@ -264,13 +276,15 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             return new BinaryWire(bytes, false, false, false, COMPRESSED_SIZE, "lzw", true);
         }
 
+        @NotNull
         @Override
         public String asString(Object marshallable) {
             return asHexString(marshallable);
         }
 
+        @Nullable
         @Override
-        public <T> T fromString(CharSequence cs) {
+        public <T> T fromString(@NotNull CharSequence cs) {
             return fromHexString(cs);
         }
     },
@@ -284,17 +298,19 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     RAW {
         @NotNull
         @Override
-        public Wire apply(Bytes bytes) {
+        public Wire apply(@NotNull Bytes bytes) {
             return new RawWire(bytes);
         }
 
+        @NotNull
         @Override
         public String asString(Object marshallable) {
             return asHexString(marshallable);
         }
 
+        @Nullable
         @Override
-        public <T> T fromString(CharSequence cs) {
+        public <T> T fromString(@NotNull CharSequence cs) {
             return fromHexString(cs);
         }
     },
@@ -306,6 +322,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         }
     },
     READ_ANY {
+        @NotNull
         @Override
         public Wire apply(@NotNull Bytes bytes) {
             return new ReadAnyWire(bytes);
@@ -334,6 +351,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         return bytes;
     }
 
+    @NotNull
     public static WireType valueOf(Wire wire) {
 
         if (wire instanceof AbstractAnyWire)
@@ -355,7 +373,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         }
 
         if (wire instanceof BinaryWire) {
-            BinaryWire binaryWire = (BinaryWire) wire;
+            @NotNull BinaryWire binaryWire = (BinaryWire) wire;
             return binaryWire.fieldLess() ? FIELDLESS_BINARY : WireType.BINARY;
         }
 
@@ -386,7 +404,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     private Bytes asBytes(Object marshallable) {
         Bytes bytes = getBytes();
         Wire wire = apply(bytes);
-        final ValueOut valueOut = wire.getValueOut();
+        @NotNull final ValueOut valueOut = wire.getValueOut();
 
         if (marshallable instanceof WriteMarshallable)
             valueOut.typedMarshallable((WriteMarshallable) marshallable);
@@ -401,7 +419,8 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         return bytes;
     }
 
-    public <T> T fromString(CharSequence cs) {
+    @Nullable
+    public <T> T fromString(@NotNull CharSequence cs) {
         Bytes bytes = getBytes2();
         bytes.appendUtf8(cs);
         Wire wire = apply(bytes);
@@ -409,18 +428,21 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         return (T) wire.getValueIn().object();
     }
 
+    @NotNull
     public <T> T fromFile(String filename) throws IOException {
         return (T) fromFile(Marshallable.class, filename);
     }
 
-    public <T> T fromFile(Class<T> expectedType, String filename) throws IOException {
+    @Nullable
+    public <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
         return (T) (apply(Bytes.wrapForRead(IOTools.readFile(filename))).getValueIn().object(expectedType));
     }
 
-    public <T> Map<String, T> fromFileAsMap(String filename, Class<T> tClass) throws IOException {
-        Map<String, T> map = new LinkedHashMap<>();
+    @NotNull
+    public <T> Map<String, T> fromFileAsMap(String filename, @NotNull Class<T> tClass) throws IOException {
+        @NotNull Map<String, T> map = new LinkedHashMap<>();
         Wire wire = apply(Bytes.wrapForRead(IOTools.readFile(filename)));
-        StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder();
         while (wire.hasMore()) {
             wire.readEventName(sb)
                     .object(tClass, map, (m, o) -> m.put(sb.toString(), o));
@@ -428,21 +450,21 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         return map;
     }
 
-    public <T extends Marshallable> void toFileAsMap(String filename, Map<String, T> map) throws IOException {
+    public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map) throws IOException {
         toFileAsMap(filename, map, false);
     }
 
-    public <T extends Marshallable> void toFileAsMap(String filename, Map<String, T> map, boolean compact) throws IOException {
+    public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map, boolean compact) throws IOException {
         Bytes bytes = getBytes();
         Wire wire = apply(bytes);
-        for (Map.Entry<String, T> entry : map.entrySet()) {
-            ValueOut valueOut = wire.writeEventName(entry::getKey);
+        for (@NotNull Map.Entry<String, T> entry : map.entrySet()) {
+            @NotNull ValueOut valueOut = wire.writeEventName(entry::getKey);
             valueOut.leaf(compact).marshallable(entry.getValue());
         }
         String tempFilename = IOTools.tempName(filename);
         IOTools.writeFile(tempFilename, bytes.toByteArray());
-        File file2 = new File(tempFilename);
-        File dest = new File(filename);
+        @NotNull File file2 = new File(tempFilename);
+        @NotNull File dest = new File(filename);
         if (!file2.renameTo(dest)) {
             if (dest.delete() && file2.renameTo(dest))
                 return;
@@ -451,30 +473,33 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         }
     }
 
-    public <T> void toFile(String filename, WriteMarshallable marshallable) throws IOException {
+    public <T> void toFile(@NotNull String filename, WriteMarshallable marshallable) throws IOException {
         Bytes bytes = getBytes();
         Wire wire = apply(bytes);
         wire.getValueOut().typedMarshallable(marshallable);
         String tempFilename = IOTools.tempName(filename);
         IOTools.writeFile(tempFilename, bytes.toByteArray());
-        File file2 = new File(tempFilename);
+        @NotNull File file2 = new File(tempFilename);
         if (!file2.renameTo(new File(filename))) {
             file2.delete();
             throw new IOException("Failed to rename " + tempFilename + " to " + filename);
         }
     }
 
+    @NotNull
     String asHexString(Object marshallable) {
         Bytes bytes = asBytes(marshallable);
         return bytes.toHexString();
     }
 
-    <T> T fromHexString(CharSequence s) {
+    @Nullable
+    <T> T fromHexString(@NotNull CharSequence s) {
         Wire wire = apply(Bytes.fromHexString(s.toString()));
         return wire.getValueIn().typedMarshallable();
     }
 
-    public Map<String, Object> asMap(CharSequence cs) {
+    @Nullable
+    public Map<String, Object> asMap(@NotNull CharSequence cs) {
         Bytes bytes = getBytes2();
         bytes.appendUtf8(cs);
         Wire wire = apply(bytes);

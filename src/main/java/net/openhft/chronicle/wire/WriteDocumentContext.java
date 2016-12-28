@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
@@ -34,7 +35,7 @@ public class WriteDocumentContext implements DocumentContext {
     }
 
     public void start(boolean metaData) {
-        Bytes<?> bytes = wire().bytes();
+        @NotNull Bytes<?> bytes = wire().bytes();
         this.position = bytes.writePosition();
         metaDataBit = metaData ? Wires.META_DATA : 0;
         tmpHeader = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
@@ -53,7 +54,7 @@ public class WriteDocumentContext implements DocumentContext {
 
     @Override
     public void close() {
-        Bytes bytes = wire().bytes();
+        @NotNull Bytes bytes = wire().bytes();
         long position1 = bytes.writePosition();
 //        if (position1 < position)
 //            System.out.println("Message truncated from " + position + " to " + position1);

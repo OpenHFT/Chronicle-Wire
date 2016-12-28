@@ -17,6 +17,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.util.ObjectUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -27,7 +29,7 @@ import static org.junit.Assert.assertEquals;
 public class OverrideAValueTest {
     @Test
     public void testDontTouchImmutables() {
-        NumberHolder nh = Marshallable.fromString("!" + NumberHolder.class.getName() + " { num: 2 } ");
+        @Nullable NumberHolder nh = Marshallable.fromString("!" + NumberHolder.class.getName() + " { num: 2 } ");
         assertEquals(1, NumberHolder.ONE.intValue());
         assertEquals(2, nh.num.intValue());
     }
@@ -35,7 +37,7 @@ public class OverrideAValueTest {
     @Test
     public void testDontTouchImmutables2() {
         ObjectUtils.immutabile(NumberHolder.class, true);
-        ObjectHolder oh = Marshallable.fromString("!" + ObjectHolder.class.getName() + " { nh: !" + NumberHolder.class.getName() + " { num: 3 } } ");
+        @Nullable ObjectHolder oh = Marshallable.fromString("!" + ObjectHolder.class.getName() + " { nh: !" + NumberHolder.class.getName() + " { num: 3 } } ");
         assertEquals(1, NumberHolder.ONE.intValue());
         assertEquals(1, ObjectHolder.NH.num.intValue());
         assertEquals(3, oh.nh.num.intValue());
@@ -43,7 +45,7 @@ public class OverrideAValueTest {
 
     @Test
     public void testAllowClassChange() {
-        ParentHolder ph = Marshallable.fromString("!" + ParentHolder.class.getName() + " { object: !" + SubClass.class.getName() + " { name: bob, value: 3.3 } } ");
+        @Nullable ParentHolder ph = Marshallable.fromString("!" + ParentHolder.class.getName() + " { object: !" + SubClass.class.getName() + " { name: bob, value: 3.3 } } ");
         assertEquals("!net.openhft.chronicle.wire.OverrideAValueTest$ParentHolder {\n" +
                 "  object: !net.openhft.chronicle.wire.OverrideAValueTest$SubClass {\n" +
                 "    name: bob,\n" +
@@ -55,16 +57,19 @@ public class OverrideAValueTest {
     static class NumberHolder extends AbstractMarshallable {
         @SuppressWarnings("UnnecessaryBoxing")
         public static final Integer ONE = new Integer(1);
+        @NotNull
         Integer num = ONE;
     }
 
     static class ObjectHolder extends AbstractMarshallable {
         @SuppressWarnings("UnnecessaryBoxing")
         public static final NumberHolder NH = new NumberHolder();
+        @NotNull
         NumberHolder nh = NH;
     }
 
     static class ParentClass extends AbstractMarshallable {
+        @NotNull
         String name = "name";
     }
 

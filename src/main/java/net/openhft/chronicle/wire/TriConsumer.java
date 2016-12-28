@@ -17,6 +17,8 @@
 
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Objects;
 
 /**
@@ -27,7 +29,8 @@ import java.util.Objects;
 interface TriConsumer<T, U, V> {
     void accept(T t, U u, V v);
 
-    default TriConsumer<T, U, V> andThen(TriConsumer<? super T, ? super U, ? super V> after) {
+    @NotNull
+    default TriConsumer<T, U, V> andThen(@NotNull TriConsumer<? super T, ? super U, ? super V> after) {
         Objects.requireNonNull(after);
 
         return (t, u, v) -> {

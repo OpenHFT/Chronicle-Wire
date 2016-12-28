@@ -57,11 +57,11 @@ public class RawWire extends AbstractWire implements Wire {
     StringBuilder lastSB;
     private boolean ready;
 
-    public RawWire(Bytes bytes) {
+    public RawWire(@NotNull Bytes bytes) {
         this(bytes, true);
     }
 
-    public RawWire(Bytes bytes, boolean use8bit) {
+    public RawWire(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
     }
 
@@ -75,18 +75,21 @@ public class RawWire extends AbstractWire implements Wire {
         return classLookup;
     }
 
+    @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
         writeContext.start(metaData);
         return writeContext;
     }
 
+    @NotNull
     @Override
     public DocumentContext readingDocument() {
         readContext.start();
         return readContext;
     }
 
+    @NotNull
     @Override
     public DocumentContext readingDocument(long readLocation) {
         final long readPosition = bytes().readPosition();
@@ -145,8 +148,9 @@ public class RawWire extends AbstractWire implements Wire {
         return valueIn;
     }
 
+    @Nullable
     @Override
-    public <K> K readEvent(Class<K> expectedClass) {
+    public <K> K readEvent(@NotNull Class<K> expectedClass) {
         return (K) valueIn.object(expectedClass);
     }
 
@@ -331,7 +335,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut bytes(String type, byte[] bytesArr) {
+        public WireOut bytes(String type, @NotNull byte[] bytesArr) {
             typePrefix(type);
             return bytes(bytesArr);
         }
@@ -476,7 +480,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut dateTime(LocalDateTime localDateTime) {
+        public WireOut dateTime(@NotNull LocalDateTime localDateTime) {
             date(localDateTime.toLocalDate());
             time(localDateTime.toLocalTime());
             return RawWire.this;
@@ -546,7 +550,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer) {
+        public <T> WireOut sequence(T t, @NotNull BiConsumer<T, ValueOut> writer) {
             long position = bytes.writePosition();
             bytes.writeInt(0);
 
@@ -558,7 +562,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer) {
+        public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) {
             long position = bytes.writePosition();
             bytes.writeInt(0);
 
@@ -707,7 +711,7 @@ public class RawWire extends AbstractWire implements Wire {
             toBytes.clear();
 
             long length = readLength();
-            Bytes<?> bytes = wireIn().bytes();
+            @NotNull Bytes<?> bytes = wireIn().bytes();
 
             toBytes.write((BytesStore) bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
@@ -724,7 +728,7 @@ public class RawWire extends AbstractWire implements Wire {
         @Override
         public WireIn bytesMatch(@NotNull BytesStore compareBytes, @NotNull BooleanConsumer consumer) {
             long length = readLength();
-            Bytes<?> bytes = wireIn().bytes();
+            @NotNull Bytes<?> bytes = wireIn().bytes();
 
             if (length == compareBytes.readRemaining()) {
                 consumer.accept(bytes.equalBytes(compareBytes, length));
@@ -771,6 +775,7 @@ public class RawWire extends AbstractWire implements Wire {
             return bytes.readStopBit();
         }
 
+        @NotNull
         @Override
         public WireIn skipValue() {
             throw new UnsupportedOperationException();
@@ -873,7 +878,7 @@ public class RawWire extends AbstractWire implements Wire {
             if (!(values instanceof Byteable)) {
                 values = new BinaryLongArrayReference();
             }
-            Byteable b = (Byteable) values;
+            @Nullable Byteable b = (Byteable) values;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
@@ -893,7 +898,7 @@ public class RawWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireIn int64(@Nullable LongValue value) {
-            Byteable b = (Byteable) value;
+            @Nullable Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
@@ -903,7 +908,7 @@ public class RawWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireIn int32(@NotNull IntValue value) {
-            Byteable b = (Byteable) value;
+            @NotNull Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
@@ -916,7 +921,7 @@ public class RawWire extends AbstractWire implements Wire {
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
                 setter.accept(t, value = new BinaryIntReference());
             }
-            Byteable b = (Byteable) value;
+            @Nullable Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
@@ -1000,7 +1005,8 @@ public class RawWire extends AbstractWire implements Wire {
             throw new UnsupportedOperationException("todo");
         }
 
-        public Object marshallable(@NotNull Object object, SerializationStrategy strategy) {
+        @Nullable
+        public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy) {
             long length = bytes.readUnsignedInt();
             if (length == 0xFFFF_FFFF)
                 return null;
@@ -1081,6 +1087,7 @@ public class RawWire extends AbstractWire implements Wire {
             return false;
         }
 
+        @NotNull
         @Override
         public BracketType getBracketType() {
             throw new IllegalArgumentException("Only scalar or nested types supported");

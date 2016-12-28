@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by peter on 27/03/16.
@@ -26,15 +27,18 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
     public static final int MESSAGE_HISTORY_LENGTH = 20;
     private static final ThreadLocal<MessageHistory> THREAD_LOCAL =
             ThreadLocal.withInitial((java.util.function.Supplier<MessageHistory>) () -> {
-                VanillaMessageHistory veh = new VanillaMessageHistory();
+                @NotNull VanillaMessageHistory veh = new VanillaMessageHistory();
                 veh.addSourceDetails(true);
                 return veh;
             });
 
     private int sources;
+    @NotNull
     private int[] sourceIdArray = new int[MESSAGE_HISTORY_LENGTH];
+    @NotNull
     private long[] sourceIndexArray = new long[MESSAGE_HISTORY_LENGTH];
     private int timings;
+    @NotNull
     private long[] timingsArray = new long[MESSAGE_HISTORY_LENGTH * 2];
     private boolean addSourceDetails = false;
 
@@ -95,9 +99,9 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
             }
         });
         if (addSourceDetails) {
-            Object o = wire.parent();
+            @Nullable Object o = wire.parent();
             if (o instanceof SourceContext) {
-                SourceContext dc = (SourceContext) o;
+                @Nullable SourceContext dc = (SourceContext) o;
                 addSource(dc.sourceId(), dc.index());
             }
 

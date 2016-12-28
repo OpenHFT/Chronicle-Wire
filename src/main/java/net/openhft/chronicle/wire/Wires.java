@@ -66,7 +66,7 @@ public enum Wires {
     public static final int SPB_HEADER_SIZE = 4;
     public static final List<Function<Class, SerializationStrategy>> CLASS_STRATEGY_FUNCTIONS = new CopyOnWriteArrayList<>();
     public static final ClassLocal<SerializationStrategy> CLASS_STRATEGY = ClassLocal.withInitial(c -> {
-        for (Function<Class, SerializationStrategy> func : CLASS_STRATEGY_FUNCTIONS) {
+        for (@NotNull Function<Class, SerializationStrategy> func : CLASS_STRATEGY_FUNCTIONS) {
             final SerializationStrategy strategy = func.apply(c);
             if (strategy != null)
                 return strategy;
@@ -109,7 +109,7 @@ public enum Wires {
 
     public static String fromSizePrefixedBlobs(@NotNull DocumentContext dc) {
         Wire wire = dc.wire();
-        Bytes<?> bytes = wire.bytes();
+        @NotNull Bytes<?> bytes = wire.bytes();
         if (wire instanceof TextWire) {
             return bytes.toString();
         }
@@ -183,7 +183,7 @@ public enum Wires {
         return (int) l;
     }
 
-    public static boolean acquireLock(BytesStore store, long position) {
+    public static boolean acquireLock(@NotNull BytesStore store, long position) {
         return store.compareAndSwapInt(position, NOT_INITIALIZED, NOT_COMPLETE);
     }
 
@@ -200,7 +200,7 @@ public enum Wires {
 
     @ForceInline
     public static long readWire(@NotNull WireIn wireIn, long size, @NotNull ReadMarshallable readMarshallable) {
-        final Bytes<?> bytes = wireIn.bytes();
+        @NotNull final Bytes<?> bytes = wireIn.bytes();
         final long limit0 = bytes.readLimit();
         final long limit = bytes.readPosition() + size;
         try {
@@ -236,17 +236,17 @@ public enum Wires {
         return (null == null ? WireDumper.of((Bytes) bytes) : WireDumper.of((WireIn) null)).asString(position, length);
     }
 
-    public static void readMarshallable(Object marshallable, WireIn wire, boolean overwrite) {
+    public static void readMarshallable(@NotNull Object marshallable, WireIn wire, boolean overwrite) {
         WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass())
                 .readMarshallable(marshallable, wire, overwrite);
     }
 
-    public static void writeMarshallable(Object marshallable, WireOut wire) {
+    public static void writeMarshallable(@NotNull Object marshallable, WireOut wire) {
         WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass())
                 .writeMarshallable(marshallable, wire);
     }
 
-    public static void writeMarshallable(Object marshallable, WireOut wire, boolean writeDefault) {
+    public static void writeMarshallable(@NotNull Object marshallable, WireOut wire, boolean writeDefault) {
         WireMarshaller marshaller = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
         if (writeDefault)
             marshaller.writeMarshallable(marshallable, wire);
@@ -254,26 +254,28 @@ public enum Wires {
             marshaller.writeMarshallable(marshallable, wire, marshaller.defaultValue(), false);
     }
 
-    public static void writeMarshallable(Object marshallable, WireOut wire, Object previous, boolean copy) {
+    public static void writeMarshallable(@NotNull Object marshallable, WireOut wire, @NotNull Object previous, boolean copy) {
         assert marshallable.getClass() == previous.getClass();
         WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass())
                 .writeMarshallable(marshallable, wire, previous, copy);
     }
 
-    public static void writeKey(Object marshallable, Bytes bytes) {
+    public static void writeKey(@NotNull Object marshallable, Bytes bytes) {
         WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass())
                 .writeKey(marshallable, bytes);
     }
 
-    public static <T extends Marshallable> T deepCopy(T marshallable) {
+    @NotNull
+    public static <T extends Marshallable> T deepCopy(@NotNull T marshallable) {
         Wire wire = acquireBinaryWire();
         marshallable.writeMarshallable(wire);
-        T t = (T) ObjectUtils.newInstance(marshallable.getClass());
+        @NotNull T t = (T) ObjectUtils.newInstance(marshallable.getClass());
         t.readMarshallable(wire);
         return t;
     }
 
-    public static <T> T copyTo(Object source, T target) {
+    @NotNull
+    public static <T> T copyTo(Object source, @NotNull T target) {
         Wire wire = acquireBinaryWire();
         wire.getValueOut().object(source);
         wire.getValueIn().typePrefix(); // drop the type prefix.
@@ -287,13 +289,14 @@ public enum Wires {
         return target;
     }
 
-    public static boolean isEquals(Object o1, Object o2) {
+    public static boolean isEquals(@NotNull Object o1, @NotNull Object o2) {
         if (o1.getClass() != o2.getClass())
             return false;
         return WireMarshaller.WIRE_MARSHALLER_CL.get(o1.getClass())
                 .isEqual(o1, o2);
     }
 
+    @NotNull
     public static List<FieldInfo> fieldInfos(Class aClass) {
         return FIELD_INFOS.get(aClass).list;
     }
@@ -306,12 +309,12 @@ public enum Wires {
         return num == END_OF_DATA;
     }
 
-    public static <T> T getField(Object o, String name, Class<T> tClass) throws NoSuchFieldException {
+    public static <T> T getField(@NotNull Object o, String name, Class<T> tClass) throws NoSuchFieldException {
         Object value = WireMarshaller.WIRE_MARSHALLER_CL.get(o.getClass()).getField(o, name);
         return ObjectUtils.convertTo(tClass, value);
     }
 
-    public static void setField(Object o, String name, Object value) throws NoSuchFieldException {
+    public static void setField(@NotNull Object o, String name, Object value) throws NoSuchFieldException {
         WireMarshaller.WIRE_MARSHALLER_CL.get(o.getClass()).setField(o, name, value);
     }
 
@@ -319,7 +322,7 @@ public enum Wires {
         INSTANCE;
 
         @Override
-        public SerializationStrategy apply(Class aClass) {
+        public SerializationStrategy apply(@NotNull Class aClass) {
             switch (aClass.getName()) {
                 case "net.openhft.chronicle.bytes.BytesStore":
                     return ScalarStrategy.of(BytesStore.class, (o, in) -> in.bytesStore());
@@ -333,7 +336,7 @@ public enum Wires {
         INSTANCE;
 
         @Override
-        public SerializationStrategy apply(Class aClass) {
+        public SerializationStrategy apply(@NotNull Class aClass) {
             switch (aClass.getName()) {
                 case "[B":
                     return ScalarStrategy.of(byte[].class, (o, in) -> in.bytes());
@@ -374,7 +377,7 @@ public enum Wires {
                 case "java.lang.Character":
                     return ScalarStrategy.of(Character.class, (o, in) -> {
                         //noinspection unchecked
-                        final String text = in.text();
+                        @Nullable final String text = in.text();
                         if (text == null || text.length() == 0)
                             return null;
                         return text.charAt(0);
@@ -426,7 +429,7 @@ public enum Wires {
                         return SerializationStrategies.ARRAY;
                     }
                     if (Enum.class.isAssignableFrom(aClass)) {
-                        final SerializationStrategy ss = SerializeMarshallables.getSerializationStrategy(aClass);
+                        @Nullable final SerializationStrategy ss = SerializeMarshallables.getSerializationStrategy(aClass);
                         return ss == null ? SerializationStrategies.ENUM : ss;
                     }
                     return null;
@@ -438,7 +441,7 @@ public enum Wires {
         INSTANCE;
 
         @Nullable
-        static SerializationStrategy getSerializationStrategy(Class aClass) {
+        static SerializationStrategy getSerializationStrategy(@NotNull Class aClass) {
             if (Demarshallable.class.isAssignableFrom(aClass))
                 return SerializationStrategies.DEMARSHALLABLE;
             if (ReadMarshallable.class.isAssignableFrom(aClass))
@@ -447,8 +450,8 @@ public enum Wires {
         }
 
         @Override
-        public SerializationStrategy apply(Class aClass) {
-            SerializationStrategy x = getSerializationStrategy(aClass);
+        public SerializationStrategy apply(@NotNull Class aClass) {
+            @Nullable SerializationStrategy x = getSerializationStrategy(aClass);
             if (x != null) return x;
             if (Map.class.isAssignableFrom(aClass))
                 return SerializationStrategies.MAP;
@@ -467,10 +470,12 @@ public enum Wires {
     static class FieldInfoPair {
         static final FieldInfoPair EMPTY = new FieldInfoPair(Collections.emptyList(), Collections.emptyMap());
 
+        @NotNull
         final List<FieldInfo> list;
+        @NotNull
         final Map<String, FieldInfo> map;
 
-        public FieldInfoPair(List<FieldInfo> list, Map<String, FieldInfo> map) {
+        public FieldInfoPair(@NotNull List<FieldInfo> list, @NotNull Map<String, FieldInfo> map) {
             this.list = list;
             this.map = map;
         }

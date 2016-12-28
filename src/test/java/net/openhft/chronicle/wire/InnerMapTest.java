@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,7 +34,7 @@ public class InnerMapTest {
 
     @Test
     public void testMyInnnerMap() {
-        MyMarshable myMarshable = new MyMarshable().name("rob");
+        @NotNull MyMarshable myMarshable = new MyMarshable().name("rob");
         myMarshable.commission().put("hello", 123.4);
         myMarshable.nested = new MyNested("text");
 
@@ -49,14 +50,14 @@ public class InnerMapTest {
                 "}\n", asString);
 
         Bytes b = Bytes.elasticByteBuffer();
-        Wire w = new BinaryWire(b);     // works with text fails with binary
+        @NotNull Wire w = new BinaryWire(b);     // works with text fails with binary
 
         try (DocumentContext dc = w.writingDocument(false)) {
             dc.wire().write("marshable").typedMarshallable(myMarshable);
         }
 
         try (DocumentContext dc = w.readingDocument()) {
-            MyMarshable tm = dc.wire().read(() -> "marshable").typedMarshallable();
+            @Nullable MyMarshable tm = dc.wire().read(() -> "marshable").typedMarshallable();
             Assert.assertEquals(asString, tm.toString());
         }
     }
@@ -83,6 +84,7 @@ public class InnerMapTest {
             return commission;
         }
 
+        @NotNull
         public MyMarshable name(String name) {
             this.name = name;
             return this;

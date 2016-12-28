@@ -35,7 +35,7 @@ public class RFCExamplesTest {
      */
     @Test
     public void testPuts() {
-        Bytes bytes = Bytes.allocateElasticDirect();
+        @NotNull Bytes bytes = Bytes.allocateElasticDirect();
 /*
 --- !!meta-data
 csp:///service-lookup
@@ -43,10 +43,10 @@ tid: 1426502826520
 --- !!data
 lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
  */
-        Bytes ebytes = Bytes.expect("(\0\0@csp:///service-lookup\n" +
+        @NotNull Bytes ebytes = Bytes.expect("(\0\0@csp:///service-lookup\n" +
                 "tid: 149873598325\n" +
                 "F\0\0\0lookup: { relativeUri: test, view: !Map types: [ !Integer, !String ] }");
-        Wire text = new TextWire(bytes);
+        @NotNull Wire text = new TextWire(bytes);
         writeMessageOne(text);
 
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));
@@ -65,7 +65,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
                         "}\n",
                 Wires.fromSizePrefixedBlobs(bytes));
 
-        Wire bin = new BinaryWire(bytes);
+        @NotNull Wire bin = new BinaryWire(bytes);
         clear(bytes);
         writeMessageOne(bin);
 
@@ -75,7 +75,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
                 "U٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String" +
                 "‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
 
-        Wire raw = new RawWire(bytes);
+        @NotNull Wire raw = new RawWire(bytes);
         clear(bytes);
         writeMessageOne(raw);
 
@@ -147,7 +147,7 @@ put: [ 3, bye ]
                 "‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
     }
 
-    public void clear(Bytes bytes) {
+    public void clear(@NotNull Bytes bytes) {
         bytes.clear();
         bytes.zeroOut(0, bytes.realCapacity());
     }
@@ -170,7 +170,7 @@ put: [ 3, bye ]
         wire.writeDocument(true, out ->
                 out.write(() -> "csp").text("//server1/test")
                         .write(() -> "cid").int64(1));
-        String[] words = ",hello,world,bye".split(",");
+        @NotNull String[] words = ",hello,world,bye".split(",");
         for (int i = 1; i < words.length; i++) {
             int n = i;
             wire.writeDocument(false, out ->

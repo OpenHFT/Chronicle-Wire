@@ -18,6 +18,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -45,14 +47,15 @@ public class PrimArraysTest {
         this.asText = asText;
     }
 
+    @NotNull
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
-        List<Object[]> list = new ArrayList<>();
+        @NotNull List<Object[]> list = new ArrayList<>();
         for (WireType wt : new WireType[]{
                 WireType.TEXT,
                 WireType.BINARY
         }) {
-            final Object[] objects = {
+            @NotNull final Object[] objects = {
                     new boolean[]{true, false},
                     "test: !boolean[] [true, false]",
                     "test: !boolean[] []",
@@ -97,7 +100,7 @@ public class PrimArraysTest {
         if (wireType == WireType.TEXT)
             assertEquals(asText, wire.toString());
 
-        Object array2 = wire.read().object();
+        @Nullable Object array2 = wire.read().object();
         assertEquals(array.getClass(), array2.getClass());
         assertEquals(Array.getLength(array), Array.getLength(array));
         for (int i = 0, len = Array.getLength(array); i < len; i++)

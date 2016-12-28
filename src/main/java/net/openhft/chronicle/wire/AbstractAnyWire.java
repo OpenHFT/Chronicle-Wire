@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
@@ -34,13 +35,15 @@ import java.util.function.Supplier;
  */
 public abstract class AbstractAnyWire extends AbstractWire implements Wire {
 
+    @NotNull
     protected final WireAcquisition wireAcquisition;
 
-    public AbstractAnyWire(Bytes bytes, @NotNull WireAcquisition wa) {
+    public AbstractAnyWire(@NotNull Bytes bytes, @NotNull WireAcquisition wa) {
         super(bytes, false);
         this.wireAcquisition = wa;
     }
 
+    @Nullable
     public Wire underlyingWire() {
         return wireAcquisition.acquireWire();
     }
@@ -193,6 +196,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
          */
         Supplier<WireType> underlyingType();
 
+        @Nullable
         Wire acquireWire();
 
         void classLookup(ClassLookup classLookup);

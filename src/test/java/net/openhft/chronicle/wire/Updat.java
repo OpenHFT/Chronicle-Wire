@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.util.SerializableUpdater;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -26,13 +27,13 @@ import java.util.concurrent.atomic.AtomicLong;
 public enum Updat implements SerializableUpdater<AtomicLong> {
     INCR {
         @Override
-        public void accept(AtomicLong aLong) {
+        public void accept(@NotNull AtomicLong aLong) {
             aLong.incrementAndGet();
         }
     },
     DECR {
         @Override
-        public void accept(AtomicLong aLong) {
+        public void accept(@NotNull AtomicLong aLong) {
             aLong.decrementAndGet();
         }
     }

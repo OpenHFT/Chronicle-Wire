@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ObjectOutput;
 import java.util.List;
@@ -35,7 +36,7 @@ class WireObjectOutput implements ObjectOutput {
 
     @Override
     public void writeObject(Object obj) {
-        final ValueOut valueOut = wire.getValueOut();
+        @NotNull final ValueOut valueOut = wire.getValueOut();
         if (obj instanceof Map)
             valueOut.typePrefix(Map.class);
         else if (obj instanceof List)

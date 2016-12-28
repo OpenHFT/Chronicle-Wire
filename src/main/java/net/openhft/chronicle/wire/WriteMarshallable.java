@@ -30,7 +30,7 @@ public interface WriteMarshallable extends WriteValue {
      */
     void writeMarshallable(@NotNull WireOut wire);
 
-    default void writeValue(ValueOut out) {
+    default void writeValue(@NotNull ValueOut out) {
         out.marshallable(this);
     }
 }

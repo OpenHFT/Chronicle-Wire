@@ -18,6 +18,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -42,16 +44,16 @@ public class ReadmeChapter1Test {
 Now you can choice which format you are using.  As the wire formats are themselves unbuffered, you can use them with the same buffer, but in general using one wire format is easier.
 ```java
  */
-        Wire wire = new TextWire(bytes);
+        @NotNull Wire wire = new TextWire(bytes);
         // or
-        WireType wireType = WireType.TEXT;
+        @NotNull WireType wireType = WireType.TEXT;
         Wire wireB = wireType.apply(bytes);
         // or
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
-        Wire wire2 = new BinaryWire(bytes2);
+        @NotNull Wire wire2 = new BinaryWire(bytes2);
         // or
         Bytes<ByteBuffer> bytes3 = Bytes.elasticByteBuffer();
-        Wire wire3 = new RawWire(bytes3);
+        @NotNull Wire wire3 = new RawWire(bytes3);
 /*
 ```
 So now you can write to the wire with a simple document.
@@ -84,7 +86,7 @@ price: 10.5
         System.out.println(bytes2.toHexString());
 
 // to obtain the underlying ByteBuffer to write to a Channel
-        ByteBuffer byteBuffer = bytes2.underlyingObject();
+        @Nullable ByteBuffer byteBuffer = bytes2.underlyingObject();
         byteBuffer.position(0);
         byteBuffer.limit(bytes2.length());
 /*
@@ -128,13 +130,13 @@ prints in RawWire
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
-        Wire wire = new TextWire(bytes);
+        @NotNull Wire wire = new TextWire(bytes);
 
-        Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
+        @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         data.writeMarshallable(wire);
         System.out.println(bytes);
 
-        Data data2 = new Data();
+        @NotNull Data data2 = new Data();
         data2.readMarshallable(wire);
         System.out.println(data2);
 
@@ -153,12 +155,12 @@ To write in binary instead
 ```java
 */
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
-        Wire wire2 = new BinaryWire(bytes2);
+        @NotNull Wire wire2 = new BinaryWire(bytes2);
 
         data.writeMarshallable(wire2);
         System.out.println(bytes2.toHexString());
 
-        Data data3 = new Data();
+        @NotNull Data data3 = new Data();
         data3.readMarshallable(wire2);
         System.out.println(data3);
 /*
@@ -183,13 +185,13 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
-        Wire wire = new TextWire(bytes);
+        @NotNull Wire wire = new TextWire(bytes);
 
-        Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
+        @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         wire.write(() -> "mydata").marshallable(data);
         System.out.println(bytes);
 
-        Data data2 = new Data();
+        @NotNull Data data2 = new Data();
         wire.read(() -> "mydata").marshallable(data2);
         System.out.println(data2);
 
@@ -210,12 +212,12 @@ To write in binary instead
 ```java
 */
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
-        Wire wire2 = new BinaryWire(bytes2);
+        @NotNull Wire wire2 = new BinaryWire(bytes2);
 
         wire2.write(() -> "mydata").marshallable(data);
         System.out.println(bytes2.toHexString());
 
-        Data data3 = new Data();
+        @NotNull Data data3 = new Data();
         wire2.read(() -> "mydata").marshallable(data3);
         System.out.println(data3);
 /*
@@ -242,15 +244,15 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
-        Wire wire = new TextWire(bytes);
+        @NotNull Wire wire = new TextWire(bytes);
 
         ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
 
-        Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
+        @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         wire.write(() -> "mydata").object(data);
         System.out.println(bytes);
 
-        Data data2 = wire.read(() -> "mydata").object(Data.class);
+        @Nullable Data data2 = wire.read(() -> "mydata").object(Data.class);
         System.out.println(data2);
 
 /*
@@ -270,12 +272,12 @@ To write in binary instead
 ```java
 */
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
-        Wire wire2 = new BinaryWire(bytes2);
+        @NotNull Wire wire2 = new BinaryWire(bytes2);
 
         wire2.write(() -> "mydata").object(data);
         System.out.println(bytes2.toHexString());
 
-        Data data3 = wire2.read(() -> "mydata").object(Data.class);
+        @Nullable Data data3 = wire2.read(() -> "mydata").object(Data.class);
         System.out.println(data3);
 /*
 ```
@@ -307,15 +309,15 @@ The benefits of using this approach ares that
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
-        Wire wire = new TextWire(bytes);
+        @NotNull Wire wire = new TextWire(bytes);
 
         ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
 
-        Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
+        @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         wire.writeDocument(false, data);
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));
 
-        Data data2 = new Data();
+        @NotNull Data data2 = new Data();
         assertTrue(wire.readDocument(null, data2));
         System.out.println(data2);
 
@@ -335,13 +337,13 @@ To write in binary instead
 ```java
 */
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
-        Wire wire2 = new BinaryWire(bytes2);
+        @NotNull Wire wire2 = new BinaryWire(bytes2);
         assert wire2.startUse();
 
         wire2.writeDocument(false, data);
         System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
 
-        Data data3 = new Data();
+        @NotNull Data data3 = new Data();
         assertTrue(wire2.readDocument(null, data3));
         System.out.println(data3);
 /*
@@ -369,11 +371,11 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
-        Wire wire = new TextWire(bytes);
+        @NotNull Wire wire = new TextWire(bytes);
 
         ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
 
-        Data[] data = {
+        @NotNull Data[] data = {
                 new Data("Hello World", 98765, TimeUnit.HOURS, 1.5),
                 new Data("G'Day All", 1212121, TimeUnit.MINUTES, 12.34),
                 new Data("Howyall", 1234567890L, TimeUnit.SECONDS, 1000)
@@ -382,7 +384,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
                 .sequence(v -> Stream.of(data).forEach(v::object)));
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));
 
-        List<Data> dataList = new ArrayList<>();
+        @NotNull List<Data> dataList = new ArrayList<>();
         assertTrue(wire.readDocument(null, w -> w.read(() -> "mydata")
                 .sequence(dataList, (l, v) -> {
                     while (v.hasNextSequenceItem())
@@ -424,13 +426,13 @@ To write in binary instead
 ```java
 */
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
-        Wire wire2 = new BinaryWire(bytes2);
+        @NotNull Wire wire2 = new BinaryWire(bytes2);
         assert wire2.startUse();
         wire2.writeDocument(false, w -> w.write(() -> "mydata")
                 .sequence(v -> Stream.of(data).forEach(v::object)));
         System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
 
-        List<Data> dataList2 = new ArrayList<>();
+        @NotNull List<Data> dataList2 = new ArrayList<>();
         assertTrue(wire2.readDocument(null, w -> w.read(() -> "mydata")
                 .sequence(dataList2, (l, v) -> {
                     while (v.hasNextSequenceItem())
@@ -480,16 +482,16 @@ Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
-        Wire wire = new TextWire(bytes);
+        @NotNull Wire wire = new TextWire(bytes);
         ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
 
-        Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
+        @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         wire.getValueOut().object(data);
         System.out.println(bytes);
 
-        Object o = wire.getValueIn().object(Object.class);
+        @Nullable Object o = wire.getValueIn().object(Object.class);
         if (o instanceof Data) {
-            Data data2 = (Data) o;
+            @Nullable Data data2 = (Data) o;
             System.out.println(data2);
         }
 
@@ -510,14 +512,14 @@ To write in binary instead
 ```java
 */
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
-        Wire wire2 = new BinaryWire(bytes2);
+        @NotNull Wire wire2 = new BinaryWire(bytes2);
 
         wire2.getValueOut().object(data);
         System.out.println(bytes2.toHexString());
 
-        Object o2 = wire2.getValueIn().object(Object.class);
+        @Nullable Object o2 = wire2.getValueIn().object(Object.class);
         if (o2 instanceof Data) {
-            Data data2 = (Data) o2;
+            @NotNull Data data2 = (Data) o2;
             System.out.println(data2);
         }
 /*

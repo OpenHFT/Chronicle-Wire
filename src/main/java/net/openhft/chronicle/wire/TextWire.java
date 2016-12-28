@@ -94,14 +94,15 @@ public class TextWire extends AbstractWire implements Wire {
     protected long lineStart = 0;
     DefaultValueIn defaultValueIn;
 
-    public TextWire(Bytes bytes, boolean use8bit) {
+    public TextWire(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
     }
 
-    public TextWire(Bytes bytes) {
+    public TextWire(@NotNull Bytes bytes) {
         this(bytes, false);
     }
 
+    @NotNull
     public static TextWire fromFile(String name) throws IOException {
         return new TextWire(Bytes.wrapForRead(IOTools.readFile(name)), true);
     }
@@ -115,7 +116,7 @@ public class TextWire extends AbstractWire implements Wire {
         assert wire.startUse();
         try {
             long pos = wire.bytes().readPosition();
-            TextWire tw = new TextWire(nativeBytes());
+            @NotNull TextWire tw = new TextWire(nativeBytes());
             wire.copyTo(tw);
             wire.bytes().readPosition(pos);
             return tw.toString();
@@ -206,18 +207,21 @@ public class TextWire extends AbstractWire implements Wire {
         return classLookup;
     }
 
+    @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
         writeContext.start(metaData);
         return writeContext;
     }
 
+    @NotNull
     @Override
     public DocumentContext readingDocument() {
         readContext.start();
         return readContext;
     }
 
+    @NotNull
     @Override
     public DocumentContext readingDocument(long readLocation) {
         final long readPosition = bytes().readPosition();
@@ -264,6 +268,7 @@ public class TextWire extends AbstractWire implements Wire {
         return valueIn;
     }
 
+    @NotNull
     private StringBuilder acquireStringBuilder() {
         StringUtils.setCount(sb, 0);
         return sb;
@@ -319,10 +324,11 @@ public class TextWire extends AbstractWire implements Wire {
         return sb;
     }
 
+    @Nullable
     @Override
-    public <K> K readEvent(Class<K> expectedClass) {
+    public <K> K readEvent(@NotNull Class<K> expectedClass) {
         consumePadding(0);
-        StringBuilder sb = acquireStringBuilder();
+        @NotNull StringBuilder sb = acquireStringBuilder();
         try {
             int ch = peekCode();
             // 10xx xxxx, 1111 xxxx
@@ -332,7 +338,7 @@ public class TextWire extends AbstractWire implements Wire {
             } else if (ch == '?') {
                 bytes.readSkip(1);
                 consumePadding();
-                final K object = valueIn.object(expectedClass);
+                @Nullable final K object = valueIn.object(expectedClass);
                 consumePadding();
                 int ch2 = readCode();
                 if (ch2 != ':')
@@ -474,14 +480,14 @@ public class TextWire extends AbstractWire implements Wire {
     public ValueIn read(@NotNull WireKey key) {
         consumePadding();
         ValueInState curr = valueIn.curr();
-        StringBuilder sb = acquireStringBuilder();
+        @NotNull StringBuilder sb = acquireStringBuilder();
         // did we save the position last time
         // so we could go back and parseOne an older field?
         if (curr.savedPosition() > 0) {
             bytes.readPosition(curr.savedPosition() - 1);
             curr.savedPosition(0L);
         }
-        CharSequence name = key.name();
+        @NotNull CharSequence name = key.name();
         while (bytes.readRemaining() > 0) {
             long position = bytes.readPosition();
             // at the current position look for the field.
@@ -505,7 +511,7 @@ public class TextWire extends AbstractWire implements Wire {
         return read2(key, curr, sb, name);
     }
 
-    protected ValueIn read2(@NotNull WireKey key, ValueInState curr, StringBuilder sb, CharSequence name) {
+    protected ValueIn read2(@NotNull WireKey key, @NotNull ValueInState curr, @NotNull StringBuilder sb, CharSequence name) {
         long position2 = bytes.readPosition();
 
         // if not a match go back and look at old fields.
@@ -599,6 +605,7 @@ public class TextWire extends AbstractWire implements Wire {
         return valueOut.write(expectedType, eventKey);
     }
 
+    @NotNull
     @Override
     public WireOut dropDefault(boolean dropDefault) {
         valueOut.dropDefault = dropDefault;
@@ -627,7 +634,7 @@ public class TextWire extends AbstractWire implements Wire {
     }
 
     void escape(@NotNull CharSequence s) {
-        Quotes quotes = needsQuotes(s);
+        @NotNull Quotes quotes = needsQuotes(s);
         if (quotes == Quotes.NONE) {
             escape0(s, quotes);
             return;
@@ -637,7 +644,7 @@ public class TextWire extends AbstractWire implements Wire {
         bytes.writeUnsignedByte(quotes.q);
     }
 
-    protected void escape0(@NotNull CharSequence s, Quotes quotes) {
+    protected void escape0(@NotNull CharSequence s, @NotNull Quotes quotes) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             switch (ch) {
@@ -719,8 +726,9 @@ public class TextWire extends AbstractWire implements Wire {
         bytes.append(HEXADECIMAL[ch & 0xF]);
     }
 
+    @NotNull
     protected Quotes needsQuotes(@NotNull CharSequence s) {
-        Quotes quotes = Quotes.NONE;
+        @NotNull Quotes quotes = Quotes.NONE;
         if (s.length() == 0)
             return Quotes.DOUBLE;
 
@@ -755,18 +763,18 @@ public class TextWire extends AbstractWire implements Wire {
         return new TextLongArrayReference();
     }
 
-    public void parseWord(StringBuilder sb) {
+    public void parseWord(@NotNull StringBuilder sb) {
         parseUntil(sb, StopCharTesters.SPACE_STOP);
     }
 
-    public void parseUntil(StringBuilder sb, StopCharTester testers) {
+    public void parseUntil(@NotNull StringBuilder sb, @NotNull StopCharTester testers) {
         if (use8bit)
             bytes.parse8bit(sb, testers);
         else
             bytes.parseUtf8(sb, testers);
     }
 
-    public void parseUntil(StringBuilder sb, StopCharsTester testers) {
+    public void parseUntil(@NotNull StringBuilder sb, @NotNull StopCharsTester testers) {
         sb.setLength(0);
         if (use8bit) {
             AppendableUtil.read8bitAndAppend(bytes, sb, testers);
@@ -775,26 +783,28 @@ public class TextWire extends AbstractWire implements Wire {
         }
     }
 
-    public void append(CharSequence cs) {
+    public void append(@NotNull CharSequence cs) {
         if (use8bit)
             bytes.append8bit(cs);
         else
             bytes.appendUtf8(cs);
     }
 
-    public void append(CharSequence cs, int offset, int length) {
+    public void append(@NotNull CharSequence cs, int offset, int length) {
         if (use8bit)
             bytes.append8bit(cs, offset, offset + length);
         else
             bytes.appendUtf8(cs, offset, length);
     }
 
+    @Nullable
     public Object readObject() {
         consumePadding();
         consumeDocumentStart();
         return readObject(0);
     }
 
+    @Nullable
     Object readObject(int indentation) {
         consumePadding();
         int code = peekCode();
@@ -822,16 +832,19 @@ public class TextWire extends AbstractWire implements Wire {
         return Maths.toInt32(bytes.readPosition() - lineStart);
     }
 
+    @Nullable
     private Object readTypedObject() {
         return valueIn.object(Object.class);
     }
 
+    @NotNull
     private List readList() {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     List readList(int indentation, Class elementType) {
-        List<Object> objects = new ArrayList<>();
+        @NotNull List<Object> objects = new ArrayList<>();
         while (peekCode() == '-') {
             if (indentation() < indentation)
                 break;
@@ -843,7 +856,7 @@ public class TextWire extends AbstractWire implements Wire {
             if (lineStart == ls) {
                 objects.add(valueIn.objectWithInferredType(null, SerializationStrategies.ANY_OBJECT, elementType));
             } else {
-                Object e = readObject(indentation);
+                @Nullable Object e = readObject(indentation);
                 if (e != NoObject.NO_OBJECT)
                     objects.add(e);
             }
@@ -853,18 +866,19 @@ public class TextWire extends AbstractWire implements Wire {
         return objects;
     }
 
+    @NotNull
     private Map readMap(int indentation, Class valueType) {
-        Map map = new LinkedHashMap<>();
+        @NotNull Map map = new LinkedHashMap<>();
         StringBuilder sb = WireInternal.acquireAnotherStringBuilder(acquireStringBuilder());
         consumePadding();
         while (bytes.readRemaining() > 0) {
             if (indentation() < indentation || bytes.readRemaining() == 0)
                 break;
             read(sb);
-            String key = WireInternal.INTERNER.intern(sb);
+            @Nullable String key = WireInternal.INTERNER.intern(sb);
             if (key.equals("..."))
                 break;
-            Object value = valueIn.objectWithInferredType(null, SerializationStrategies.ANY_OBJECT, valueType);
+            @Nullable Object value = valueIn.objectWithInferredType(null, SerializationStrategies.ANY_OBJECT, valueType);
             map.put(key, value);
             consumePadding(1);
         }
@@ -877,7 +891,7 @@ public class TextWire extends AbstractWire implements Wire {
                 writeObject(o2, 2);
             }
         } else if (o instanceof Map) {
-            for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) o).entrySet()) {
+            for (@NotNull Map.Entry<Object, Object> entry : ((Map<Object, Object>) o).entrySet()) {
                 write(() -> entry.getKey().toString()).object(entry.getValue());
             }
         } else if (o instanceof WriteMarshallable) {
@@ -918,11 +932,13 @@ public class TextWire extends AbstractWire implements Wire {
 
     class TextValueOut implements ValueOut {
         protected int indentation = 0;
+        @NotNull
         protected List<BytesStore> seps = new ArrayList<>(4);
         @NotNull
         protected BytesStore sep = BytesStore.empty();
         protected boolean leaf = false;
         protected boolean dropDefault = false;
+        @Nullable
         private String eventName;
 
         public void resetState() {
@@ -948,6 +964,7 @@ public class TextWire extends AbstractWire implements Wire {
             return this;
         }
 
+        @NotNull
         @Override
         public ValueOut leaf(boolean leaf) {
             this.leaf = leaf;
@@ -1029,7 +1046,7 @@ public class TextWire extends AbstractWire implements Wire {
                 return text(fromBytes);
 
             int length = Maths.toInt32(fromBytes.readRemaining());
-            byte[] byteArray = new byte[length];
+            @NotNull byte[] byteArray = new byte[length];
             fromBytes.copyTo(byteArray);
 
             return bytes(byteArray);
@@ -1076,7 +1093,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut bytes(String type, byte[] byteArray) {
+        public WireOut bytes(@NotNull String type, byte[] byteArray) {
             if (dropDefault) {
                 writeSavedEventName();
             }
@@ -1091,7 +1108,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut bytes(String type, BytesStore bytesStore) {
+        public WireOut bytes(@NotNull String type, @NotNull BytesStore bytesStore) {
             if (dropDefault) {
                 writeSavedEventName();
             }
@@ -1173,7 +1190,7 @@ public class TextWire extends AbstractWire implements Wire {
                 writeSavedEventName();
             }
             prependSeparator();
-            StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder sb = acquireStringBuilder();
             sb.appendCodePoint(codepoint);
             text(sb);
             sep = empty();
@@ -1310,7 +1327,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut zonedDateTime(ZonedDateTime zonedDateTime) {
+        public WireOut zonedDateTime(@Nullable ZonedDateTime zonedDateTime) {
             if (dropDefault) {
                 if (zonedDateTime == null)
                     return wireOut();
@@ -1333,7 +1350,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         @NotNull
-        private WireOut asText(Object stringable) {
+        private WireOut asText(@Nullable Object stringable) {
             if (dropDefault) {
                 if (stringable == null)
                     return wireOut();
@@ -1350,6 +1367,7 @@ public class TextWire extends AbstractWire implements Wire {
             return TextWire.this;
         }
 
+        @NotNull
         @Override
         public ValueOut optionalTyped(Class aClass) {
             return typePrefix(aClass);
@@ -1357,7 +1375,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public ValueOut typePrefix(CharSequence typeName) {
+        public ValueOut typePrefix(@NotNull CharSequence typeName) {
             if (dropDefault) {
                 writeSavedEventName();
             }
@@ -1465,7 +1483,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer) {
+        public <T> WireOut sequence(T t, @NotNull BiConsumer<T, ValueOut> writer) {
             startBlock('[');
             boolean leaf = this.leaf;
             if (!leaf)
@@ -1497,7 +1515,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer) {
+        public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) {
             boolean leaf = this.leaf;
             startBlock('[');
             newLine();
@@ -1559,7 +1577,7 @@ public class TextWire extends AbstractWire implements Wire {
                 newLine();
 
             object.writeMarshallable(TextWire.this);
-            BytesStore popSep = null;
+            @Nullable BytesStore popSep = null;
             if (wasLeaf) {
                 if (sep.endsWith(' '))
                     append(" ");
@@ -1613,7 +1631,7 @@ public class TextWire extends AbstractWire implements Wire {
                 newLine();
 
             writeSerializable(object);
-            BytesStore popSep = null;
+            @Nullable BytesStore popSep = null;
             if (wasLeaf) {
                 leaf = false;
             } else if (seps.size() > 0) {
@@ -1738,6 +1756,7 @@ public class TextWire extends AbstractWire implements Wire {
             return this;
         }
 
+        @NotNull
         public ValueOut write(Class expectedType, @NotNull Object objectKey) {
             if (dropDefault) {
                 if (expectedType != String.class)
@@ -1798,16 +1817,17 @@ public class TextWire extends AbstractWire implements Wire {
             return stack.curr();
         }
 
+        @Nullable
         @Override
         public String text() {
-            CharSequence cs = textTo0(acquireStringBuilder());
+            @Nullable CharSequence cs = textTo0(acquireStringBuilder());
             return cs == null ? null : WireInternal.INTERNER.intern(cs);
         }
 
         @Nullable
         @Override
         public StringBuilder textTo(@NotNull StringBuilder sb) {
-            CharSequence cs = textTo0(sb);
+            @Nullable CharSequence cs = textTo0(sb);
             if (cs == null)
                 return null;
             if (cs != sb) {
@@ -1820,7 +1840,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Nullable
         @Override
         public Bytes textTo(@NotNull Bytes bytes) {
-            CharSequence cs = textTo0(bytes);
+            @Nullable CharSequence cs = textTo0(bytes);
             if (cs == null)
                 return null;
             if (cs != bytes) {
@@ -1830,6 +1850,7 @@ public class TextWire extends AbstractWire implements Wire {
             return bytes;
         }
 
+        @NotNull
         @Override
         public BracketType getBracketType() {
             consumePadding();
@@ -1847,7 +1868,7 @@ public class TextWire extends AbstractWire implements Wire {
         <ACS extends Appendable & CharSequence> CharSequence textTo0(@NotNull ACS a) {
             consumePadding();
             int ch = peekCode();
-            CharSequence ret = a;
+            @Nullable CharSequence ret = a;
 
             switch (ch) {
                 case '{': {
@@ -1875,7 +1896,7 @@ public class TextWire extends AbstractWire implements Wire {
 
                 case '!': {
                     bytes.readSkip(1);
-                    StringBuilder sb = acquireStringBuilder();
+                    @NotNull StringBuilder sb = acquireStringBuilder();
                     parseWord(sb);
                     if (StringUtils.isEqual(sb, "!null")) {
                         textTo(sb);
@@ -1933,7 +1954,7 @@ public class TextWire extends AbstractWire implements Wire {
             return ret;
         }
 
-        private <ACS extends Appendable & CharSequence> void readText(@NotNull ACS a, StopCharTester quotes) {
+        private <ACS extends Appendable & CharSequence> void readText(@NotNull ACS a, @NotNull StopCharTester quotes) {
             bytes.readSkip(1);
             if (use8bit)
                 bytes.parse8bit(a, quotes);
@@ -1985,12 +2006,12 @@ public class TextWire extends AbstractWire implements Wire {
             consumePadding();
             try {
                 // TODO needs to be made much more efficient.
-                StringBuilder sb = acquireStringBuilder();
+                @NotNull StringBuilder sb = acquireStringBuilder();
                 if (peekCode() == '!') {
                     bytes.readSkip(1);
                     parseWord(sb);
-                    byte[] uncompressed = Compression.uncompress(sb, TextWire.this, t -> {
-                        StringBuilder sb2 = acquireStringBuilder();
+                    @Nullable byte[] uncompressed = Compression.uncompress(sb, TextWire.this, t -> {
+                        @NotNull StringBuilder sb2 = acquireStringBuilder();
                         AppendableUtil.setLength(sb2, 0);
                         t.parseWord(sb2);
                         byte[] decode = Base64.getDecoder().decode(sb2.toString());
@@ -2020,7 +2041,7 @@ public class TextWire extends AbstractWire implements Wire {
             consumePadding();
             try {
                 // TODO needs to be made much more efficient.
-                StringBuilder sb = acquireStringBuilder();
+                @NotNull StringBuilder sb = acquireStringBuilder();
                 if (peekCode() == '!') {
                     bytes.readSkip(1);
                     parseWord(sb);
@@ -2030,8 +2051,8 @@ public class TextWire extends AbstractWire implements Wire {
                         parseWord(sb);
                     }
 
-                    byte[] bytes = Compression.uncompress(sb, this, t -> {
-                        StringBuilder sb0 = acquireStringBuilder();
+                    @Nullable byte[] bytes = Compression.uncompress(sb, this, t -> {
+                        @NotNull StringBuilder sb0 = acquireStringBuilder();
                         AppendableUtil.setLength(sb0, 0);
                         parseWord(sb0);
                         return Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb));
@@ -2073,6 +2094,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
         }
 
+        @NotNull
         @Override
         public WireIn skipValue() {
             consumePadding();
@@ -2149,7 +2171,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         private void consumeValue() {
             consumePadding();
-            StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder sb = acquireStringBuilder();
             if (peekCode() == '!') {
                 bytes.readSkip(1);
                 parseWord(sb);
@@ -2165,7 +2187,7 @@ public class TextWire extends AbstractWire implements Wire {
         public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag) {
             consumePadding();
 
-            StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder sb = acquireStringBuilder();
             if (textTo(sb) == null) {
                 tFlag.accept(t, null);
                 return TextWire.this;
@@ -2271,7 +2293,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime) {
             consumePadding();
-            StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder sb = acquireStringBuilder();
             textTo(sb);
             setLocalTime.accept(t, LocalTime.parse(WireInternal.INTERNER.intern(sb)));
             return TextWire.this;
@@ -2281,7 +2303,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime) {
             consumePadding();
-            StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder sb = acquireStringBuilder();
             textTo(sb);
             tZonedDateTime.accept(t, ZonedDateTime.parse(WireInternal.INTERNER.intern(sb)));
             return TextWire.this;
@@ -2291,7 +2313,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate) {
             consumePadding();
-            StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder sb = acquireStringBuilder();
             textTo(sb);
             tLocalDate.accept(t, LocalDate.parse(WireInternal.INTERNER.intern(sb)));
             return TextWire.this;
@@ -2301,7 +2323,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn uuid(@NotNull T t, @NotNull BiConsumer<T, UUID> tuuid) {
             consumePadding();
-            StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder sb = acquireStringBuilder();
             textTo(sb);
             tuuid.accept(t, UUID.fromString(WireInternal.INTERNER.intern(sb)));
             return TextWire.this;
@@ -2314,7 +2336,7 @@ public class TextWire extends AbstractWire implements Wire {
             if (!(values instanceof TextLongArrayReference)) {
                 setter.accept(t, values = new TextLongArrayReference());
             }
-            Byteable b = (Byteable) values;
+            @NotNull Byteable b = (Byteable) values;
             long length = TextLongArrayReference.peakLength(bytes, bytes.readPosition());
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
@@ -2325,7 +2347,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public WireIn int64(@Nullable LongValue value) {
             consumePadding();
-            Byteable b = (Byteable) value;
+            @NotNull Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
@@ -2337,7 +2359,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public WireIn int32(@NotNull IntValue value) {
             consumePadding();
-            Byteable b = (Byteable) value;
+            @NotNull Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
@@ -2361,7 +2383,7 @@ public class TextWire extends AbstractWire implements Wire {
             if (!(value instanceof TextIntReference)) {
                 setter.accept(t, value = new TextIntReference());
             }
-            Byteable b = (Byteable) value;
+            @Nullable Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
@@ -2376,7 +2398,7 @@ public class TextWire extends AbstractWire implements Wire {
             char code = (char) readCode();
             if (code == '!') {
                 bytes.readSkip(-1);
-                final Class typePrefix = typePrefix();
+                @Nullable final Class typePrefix = typePrefix();
                 if (typePrefix == void.class) {
                     text();
                     return false;
@@ -2482,7 +2504,7 @@ public class TextWire extends AbstractWire implements Wire {
         public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
             consumePadding();
             int code = peekCode();
-            StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder sb = acquireStringBuilder();
             sb.setLength(0);
             if (code == -1) {
                 sb.append("java.lang.Object");
@@ -2501,7 +2523,7 @@ public class TextWire extends AbstractWire implements Wire {
             if (code == '!') {
                 readCode();
 
-                StringBuilder sb = acquireStringBuilder();
+                @NotNull StringBuilder sb = acquireStringBuilder();
                 sb.setLength(0);
                 parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
                 try {
@@ -2534,7 +2556,7 @@ public class TextWire extends AbstractWire implements Wire {
             if (!peekStringIgnoreCase("type "))
                 throw new UnsupportedOperationException(stringForCode(code));
             bytes.readSkip("type ".length());
-            StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder sb = acquireStringBuilder();
             parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             classNameConsumer.accept(t, sb);
             return TextWire.this;
@@ -2547,7 +2569,7 @@ public class TextWire extends AbstractWire implements Wire {
             if (!peekStringIgnoreCase("type "))
                 throw new UnsupportedOperationException(stringForCode(code));
             bytes.readSkip("type ".length());
-            StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder sb = acquireStringBuilder();
             parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             try {
                 return classLookup().forName(sb);
@@ -2556,8 +2578,9 @@ public class TextWire extends AbstractWire implements Wire {
             }
         }
 
+        @Nullable
         @Override
-        public Object marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
+        public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
             if (isNull()) {
                 consumePadding(1);
                 return null;
@@ -2655,14 +2678,14 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public <K, V> Map<K, V> map(@NotNull final Class<K> kClass,
                                     @NotNull final Class<V> vClass,
-                                    Map<K, V> usingMap) {
+                                    @Nullable Map<K, V> usingMap) {
             consumePadding();
             if (usingMap == null)
                 usingMap = new LinkedHashMap<>();
             else
                 usingMap.clear();
 
-            StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder sb = acquireStringBuilder();
             int code = peekCode();
             switch (code) {
                 case '!':
@@ -2677,9 +2700,9 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         @Nullable
-        private <K, V> Map<K, V> typedMap(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap, StringBuilder sb) {
+        private <K, V> Map<K, V> typedMap(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap, @NotNull StringBuilder sb) {
             parseUntil(sb, StopCharTesters.SPACE_STOP);
-            String str = WireInternal.INTERNER.intern(sb);
+            @Nullable String str = WireInternal.INTERNER.intern(sb);
 
             if (("!!null").contentEquals(sb)) {
                 text();
@@ -2692,9 +2715,9 @@ public class TextWire extends AbstractWire implements Wire {
                     throw new IORuntimeException("Unsupported start of sequence : " + (char) start);
                 do {
                     marshallable(r -> {
-                        final K k = r.read(() -> "key")
+                        @Nullable final K k = r.read(() -> "key")
                                 .object(kClazz);
-                        final V v = r.read(() -> "value")
+                        @Nullable final V v = r.read(() -> "value")
                                 .object(vClass);
                         usingMap.put(k, v);
                     });
@@ -2711,17 +2734,17 @@ public class TextWire extends AbstractWire implements Wire {
             consumePadding();
             usingMap.clear();
 
-            StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder sb = acquireStringBuilder();
             if (peekCode() == '!') {
                 parseUntil(sb, StopCharTesters.SPACE_STOP);
-                String str = WireInternal.INTERNER.intern(sb);
+                @Nullable String str = WireInternal.INTERNER.intern(sb);
                 if (SEQ_MAP.contentEquals(sb)) {
                     while (hasNext()) {
                         sequence(this, (o, s) -> s.marshallable(r -> {
                             try {
-                                @SuppressWarnings("unchecked")
+                                @Nullable @SuppressWarnings("unchecked")
                                 final K k = r.read(() -> "key").typedMarshallable();
-                                @SuppressWarnings("unchecked")
+                                @Nullable @SuppressWarnings("unchecked")
                                 final V v = r.read(() -> "value").typedMarshallable();
                                 usingMap.put(k, v);
                             } catch (Exception e) {
@@ -2738,7 +2761,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public boolean bool() {
             consumePadding();
-            StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder sb = acquireStringBuilder();
             if (textTo(sb) == null)
                 throw new NullPointerException("value is null");
 
@@ -2801,7 +2824,7 @@ public class TextWire extends AbstractWire implements Wire {
         private void skipType() {
             long peek = bytes.peekUnsignedByte();
             if (peek == '!') {
-                StringBuilder sb = acquireStringBuilder();
+                @NotNull StringBuilder sb = acquireStringBuilder();
                 parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
                 consumePadding();
             }
@@ -2836,7 +2859,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) {
             consumePadding();
-            Object o = objectWithInferredType0(using, strategy, type);
+            @Nullable Object o = objectWithInferredType0(using, strategy, type);
             consumePadding();
             int code = peekCode();
             if (code == ':') {
@@ -2849,13 +2872,14 @@ public class TextWire extends AbstractWire implements Wire {
         Object readRestOfMap(Object using, Object o) {
             readCode();
             consumePadding();
-            Object value = objectWithInferredType0(using, SerializationStrategies.ANY_OBJECT, Object.class);
-            Map map = using instanceof Map ? (Map) using : new LinkedHashMap();
+            @Nullable Object value = objectWithInferredType0(using, SerializationStrategies.ANY_OBJECT, Object.class);
+            @NotNull Map map = using instanceof Map ? (Map) using : new LinkedHashMap();
             map.put(o, value);
             readAllAsMap(Object.class, Object.class, map);
             return map;
         }
 
+        @Nullable
         Object objectWithInferredType0(Object using, @NotNull SerializationStrategy strategy, Class type) {
             int code = peekCode();
             switch (code) {
@@ -2889,7 +2913,7 @@ public class TextWire extends AbstractWire implements Wire {
                     return valueIn.readNumber();
             }
 
-            String text = valueIn.text();
+            @Nullable String text = valueIn.text();
             if (text == null || Enum.class.isAssignableFrom(strategy.type()))
                 return text;
             switch (text) {
@@ -2902,9 +2926,10 @@ public class TextWire extends AbstractWire implements Wire {
             }
         }
 
+        @Nullable
         protected Object readNumber() {
-            String s = text();
-            String ss = s;
+            @Nullable String s = text();
+            @Nullable String ss = s;
             if (s == null || s.length() > 40)
                 return s;
 
@@ -2942,7 +2967,7 @@ public class TextWire extends AbstractWire implements Wire {
         private Object readSequence(@NotNull Class clazz) {
             if (clazz == Object[].class || clazz == Object.class) {
                 //todo should this use reflection so that all array types can be handled
-                List<Object> list = new ArrayList<>();
+                @NotNull List<Object> list = new ArrayList<>();
                 sequence(list, (l, v) -> {
                     while (v.hasNextSequenceItem()) {
                         l.add(v.object(Object.class));
@@ -2950,7 +2975,7 @@ public class TextWire extends AbstractWire implements Wire {
                 });
                 return clazz == Object[].class ? list.toArray() : list;
             } else if (clazz == String[].class) {
-                List<String> list = new ArrayList<>();
+                @NotNull List<String> list = new ArrayList<>();
                 sequence(list, (l, v) -> {
                     while (v.hasNextSequenceItem()) {
                         l.add(v.text());
@@ -2958,7 +2983,7 @@ public class TextWire extends AbstractWire implements Wire {
                 });
                 return list.toArray(new String[0]);
             } else if (clazz == List.class) {
-                List<String> list = new ArrayList<>();
+                @NotNull List<String> list = new ArrayList<>();
                 sequence(list, (l, v) -> {
                     while (v.hasNextSequenceItem()) {
                         l.add(v.text());
@@ -2966,7 +2991,7 @@ public class TextWire extends AbstractWire implements Wire {
                 });
                 return list;
             } else if (clazz == Set.class) {
-                Set<String> list = new HashSet<>();
+                @NotNull Set<String> list = new HashSet<>();
                 sequence(list, (l, v) -> {
                     while (v.hasNextSequenceItem()) {
                         l.add(v.text());
@@ -2981,7 +3006,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         private Object typedObject() {
             readCode();
-            StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder sb = acquireStringBuilder();
             parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
             if (StringUtils.isEqual(sb, "!null")) {
                 text();

@@ -21,6 +21,7 @@
  */
 package net.openhft.chronicle.wire.reuse;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 
 import java.util.Random;
@@ -37,19 +38,21 @@ public class WireUtils {
 
     private static final Random rand = new Random();
 
+    @NotNull
     public static WireProperty randomWireProperty(int i) {
         return new WireProperty("reference" + i, "@:" + i, "name" + i, UUID.randomUUID().toString().replace("-", ""), rand.nextLong(), rand.nextInt(), UUID.randomUUID().toString());
     }
 
+    @NotNull
     public static WireCollection randomWireCollection() {
-        WireCollection collection = new WireCollection("reference", "@", "name", 234234234, 23, UUID.randomUUID().toString());
+        @NotNull WireCollection collection = new WireCollection("reference", "@", "name", 234234234, 23, UUID.randomUUID().toString());
 
         IntStream.range(1, 10).forEach((i) -> {
             collection.addProperty(randomWireProperty(i));
         });
 
         IntStream.range(1, 4).forEach((i) -> {
-            WireCollection c = new WireCollection("reference" + i, "@:" + i, "name" + i, rand.nextLong(), rand.nextInt(), UUID.randomUUID().toString());
+            @NotNull WireCollection c = new WireCollection("reference" + i, "@:" + i, "name" + i, rand.nextLong(), rand.nextInt(), UUID.randomUUID().toString());
             collection.addCollection(c);
             IntStream.range(1, 4).forEach((k) -> {
                 c.addProperty(new WireProperty("reference" + k, "@:" + i + "-" + k, "name" + k, UUID.randomUUID().toString().replace("-", ""), rand.nextLong(), rand.nextInt(), UUID.randomUUID().toString()));
@@ -59,13 +62,13 @@ public class WireUtils {
         return collection;
     }
 
-    public static void compareWireModel(WireModel a, WireModel b) {
+    public static void compareWireModel(@NotNull WireModel a, @NotNull WireModel b) {
         assertEquals(a.getId(), b.getId());
         assertEquals(a.getRevision(), b.getRevision());
         assertEquals(a.getKey(), b.getKey());
     }
 
-    public static void compareWireProperty(WireProperty a, WireProperty b) {
+    public static void compareWireProperty(@NotNull WireProperty a, @NotNull WireProperty b) {
         compareWireModel(a, b);
         assertEquals(a.getReference(), b.getReference());
         assertEquals(a.getValue(), b.getValue());
@@ -73,7 +76,7 @@ public class WireUtils {
         assertEquals(a.getPath(), b.getPath());
     }
 
-    public static void compareWireCollection(WireCollection a, WireCollection b) {
+    public static void compareWireCollection(@NotNull WireCollection a, @NotNull WireCollection b) {
         compareWireModel(a, b);
         assertEquals(a.getReference(), b.getReference());
         assertEquals(a.getName(), b.getName());

@@ -16,12 +16,15 @@
 
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.reflect.Field;
 
 /**
  * Created by peter on 18/10/16.
  */
 public interface FieldInfo {
+    @NotNull
     static FieldInfo fieldInfo(String name, Class type, BracketType bracketType, Field field) {
         return new VanillaFieldInfo(name, type, bracketType, field);
     }

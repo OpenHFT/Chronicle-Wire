@@ -22,15 +22,16 @@ import org.jetbrains.annotations.NotNull;
  * Created by peter on 27/01/16.
  */
 public class DemarshallableObject implements Demarshallable, WriteMarshallable {
+    @NotNull
     final String name;
     final int value;
 
-    public DemarshallableObject(String name, int value) {
+    public DemarshallableObject(@NotNull String name, int value) {
         this.name = name;
         this.value = value;
     }
 
-    public DemarshallableObject(WireIn wire) {
+    public DemarshallableObject(@NotNull WireIn wire) {
         this.name = wire.read(() -> "name").text();
         this.value = wire.read(() -> "value").int32();
     }

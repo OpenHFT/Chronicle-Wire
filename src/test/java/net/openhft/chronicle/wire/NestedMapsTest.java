@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -50,7 +51,7 @@ public class NestedMapsTest {
 
     @Test
     public void testMapped() {
-        Mapped m = new Mapped();
+        @NotNull Mapped m = new Mapped();
         addAll(m.words, "A quick brown fox jumps over the lazy dog".split(" "));
         addAll(m.numbers, 1, 2, 2, 3, 5, 8, 13);
         m.map1.put("aye", "AAA");
@@ -154,14 +155,14 @@ public class NestedMapsTest {
                         "]\n", Wires.fromSizePrefixedBlobs(wire));
                 break;
         }
-        Mapped m2 = new Mapped();
+        @NotNull Mapped m2 = new Mapped();
         assertTrue(wire.readDocument(null, w -> w.read(() -> "mapped").marshallable(m2)));
         assertEquals(m, m2);
     }
 
     @Test
     public void testMappedTopLevel() {
-        Mapped m = new Mapped();
+        @NotNull Mapped m = new Mapped();
         addAll(m.words, "A quick brown fox jumps over the lazy dog".split(" "));
         addAll(m.numbers, 1, 2, 2, 3, 5, 8, 13);
         m.map1.put("aye", "AAA");
@@ -211,7 +212,7 @@ public class NestedMapsTest {
                         "‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
                 break;
         }
-        Mapped m2 = new Mapped();
+        @NotNull Mapped m2 = new Mapped();
         m2.readMarshallable(wire);
         assertEquals(m, m2);
     }

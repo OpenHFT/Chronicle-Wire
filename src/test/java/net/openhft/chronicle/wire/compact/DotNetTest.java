@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 /**
@@ -37,8 +38,8 @@ public class DotNetTest {
                 "000080: 35 61 31 38 2D 61 62 34 39 2D 34 65 39 37 2D 39\n" +
                 "000096: 66 65 38 2D 65 37 36 30 32 38 38 31 34 34 64 39\n");
         System.out.println(bytes.toHexString());
-        Wire wire = new BinaryWire(bytes);
-        Bytes text = Bytes.allocateElasticDirect();
+        @NotNull Wire wire = new BinaryWire(bytes);
+        @NotNull Bytes text = Bytes.allocateElasticDirect();
         wire.copyTo(new TextWire(text));
         System.out.println(text);
     }

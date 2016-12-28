@@ -15,6 +15,8 @@
  */
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
+
 class MyTypes extends AbstractMarshallable {
     final StringBuilder text = new StringBuilder();
     boolean b;
@@ -63,6 +65,7 @@ class MyTypes extends AbstractMarshallable {
         return this.i;
     }
 
+    @NotNull
     public CharSequence text() {
         return text;
     }

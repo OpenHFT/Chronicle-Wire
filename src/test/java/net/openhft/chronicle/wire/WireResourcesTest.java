@@ -17,6 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.bytes.MappedFile;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.EOFException;
@@ -33,7 +34,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class WireResourcesTest {
 
-    private static void writeMessage(Wire wire) throws TimeoutException, EOFException, StreamCorruptedException {
+    private static void writeMessage(@NotNull Wire wire) throws TimeoutException, EOFException, StreamCorruptedException {
         long pos = wire.writeHeader(1, TimeUnit.MILLISECONDS, null);
         wire.bytes().writeSkip(128000);
         wire.bytes().writeLong(1L);
@@ -46,7 +47,7 @@ public class WireResourcesTest {
         tmp.deleteOnExit();
 
         MappedBytes mb0;
-        MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024);
+        @NotNull MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024);
         assertEquals(1, mb.mappedFile().refCount());
         assertEquals(1, mb.refCount());
 
@@ -77,7 +78,7 @@ public class WireResourcesTest {
         tmp.deleteOnExit();
 
         Wire wire;
-        MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024);
+        @NotNull MappedBytes mb = MappedBytes.mappedBytes(tmp, 64 * 1024);
         assertEquals(1, mb.mappedFile().refCount());
         assertEquals(1, mb.refCount());
 
@@ -105,7 +106,7 @@ public class WireResourcesTest {
         File tmp = Files.createTempFile("chronicle-", ".wire").toFile();
         tmp.deleteOnExit();
 
-        MappedBytes t = MappedBytes.mappedBytes(tmp, 256 * 1024);
+        @NotNull MappedBytes t = MappedBytes.mappedBytes(tmp, 256 * 1024);
         assertEquals(1, t.refCount());
         assertEquals(1, t.mappedFile().refCount());
         Wire wire = WireType.TEXT.apply(t);
@@ -154,7 +155,7 @@ public class WireResourcesTest {
         assertEquals(0, mappedFile(wire).refCount());
     }
 
-    protected MappedFile mappedFile(Wire wire) {
+    protected MappedFile mappedFile(@NotNull Wire wire) {
         return ((MappedBytes) wire.bytes()).mappedFile();
     }
 }

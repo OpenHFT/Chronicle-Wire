@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
@@ -25,20 +26,20 @@ import static org.junit.Assert.*;
 public class MarshallableTest {
     @Test
     public void testBytesMarshallable() {
-        Marshallable m = new MyTypes();
+        @NotNull Marshallable m = new MyTypes();
 
-        Bytes bytes = nativeBytes();
+        @NotNull Bytes bytes = nativeBytes();
         assertTrue(bytes.isElastic());
-        TextWire wire = new TextWire(bytes);
+        @NotNull TextWire wire = new TextWire(bytes);
         m.writeMarshallable(wire);
 
         m.readMarshallable(wire);
     }
     @Test
     public void testEquals() {
-        final Bytes bytes = nativeBytes();
+        @NotNull final Bytes bytes = nativeBytes();
         assertTrue(bytes.isElastic());
-        final MyTypes source = new MyTypes();
+        @NotNull final MyTypes source = new MyTypes();
         //change default value fields in order to let destination to be changed from its default values too
         source.b(true);
         source.s((short) 1);
@@ -46,9 +47,9 @@ public class MarshallableTest {
         source.l(1L);
         source.i(1);
         source.text("a");
-        final Marshallable destination = new MyTypes();
+        @NotNull final Marshallable destination = new MyTypes();
         assertNotEquals(source, destination);
-        final TextWire wire = new TextWire(bytes);
+        @NotNull final TextWire wire = new TextWire(bytes);
         source.writeMarshallable(wire);
         destination.readMarshallable(wire);
         assertEquals(source, destination);

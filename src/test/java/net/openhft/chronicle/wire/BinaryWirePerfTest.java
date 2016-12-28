@@ -60,7 +60,7 @@ public class BinaryWirePerfTest {
     @NotNull
     private Wire createBytes() {
         bytes.clear();
-        Wire wire = testId == -1
+        @NotNull Wire wire = testId == -1
                 ? new RawWire(bytes)
                 : new BinaryWire(bytes, fixed, numericField, fieldLess, Integer.MAX_VALUE, "lzw", false);
         assert wire.startUse();
@@ -70,8 +70,8 @@ public class BinaryWirePerfTest {
     @Test
     public void wirePerf() throws StreamCorruptedException {
         System.out.println("Custom TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
-        Wire wire = createBytes();
-        MyTypesCustom a = new MyTypesCustom();
+        @NotNull Wire wire = createBytes();
+        @NotNull MyTypesCustom a = new MyTypesCustom();
         for (int t = 0; t < 3; t++) {
             a.text.setLength(0);
             a.text.append("Hello World");
@@ -79,7 +79,7 @@ public class BinaryWirePerfTest {
         }
 
         System.out.println("Reflective TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
-        MyTypes b = new MyTypes();
+        @NotNull MyTypes b = new MyTypes();
         for (int t = 0; t < 3; t++) {
             b.text.setLength(0);
             b.text.append("Hello World");
@@ -108,8 +108,8 @@ public class BinaryWirePerfTest {
     @Test
     public void wirePerfInts() {
         System.out.println("TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
-        Wire wire = createBytes();
-        MyType2 a = new MyType2();
+        @NotNull Wire wire = createBytes();
+        @NotNull MyType2 a = new MyType2();
         for (int t = 0; t < 3; t++) {
             wirePerf0(wire, a, new MyType2(), t);
         }

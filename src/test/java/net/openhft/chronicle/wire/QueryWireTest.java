@@ -42,7 +42,7 @@ public class QueryWireTest {
 
     @Test
     public void readWriteQuery() {
-        QueryWire wire = createWire();
+        @NotNull QueryWire wire = createWire();
         wire.write(() -> "bool").bool(true)
                 .write(() -> "int").int64(12345)
                 .write(() -> "text").text("Hello World")
@@ -53,8 +53,8 @@ public class QueryWireTest {
                 .read(() -> "int").int64(this, (o, i) -> assertEquals(12345, i))
                 .read(() -> "text").text(this, (o, s) -> assertEquals("Hello World", s))
                 .read(() -> "float").float64(this, (o, f) -> assertEquals(12.345, f, 0.0));
-        WireParser wp = WireParser.wireParser((s, v, o) -> System.err.println(s + " " + v.text()));
-        List<Object> results = new ArrayList<>();
+        @NotNull WireParser wp = WireParser.wireParser((s, v, o) -> System.err.println(s + " " + v.text()));
+        @NotNull List<Object> results = new ArrayList<>();
         wp.register(() -> "bool", (s, v, o) -> v.bool(results, List::add));
         wp.register(() -> "int", (s, v, o) -> v.int64(results, List::add));
         wp.register(() -> "text", (s, v, o) -> v.text(results, List::add));

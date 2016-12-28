@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class TestMarshallable extends AbstractMarshallable {
 
+    @NotNull
     private StringBuilder name = new StringBuilder();
     private int count;
 
@@ -39,6 +40,7 @@ public class TestMarshallable extends AbstractMarshallable {
 
     }
 
+    @NotNull
     public StringBuilder getName() {
         return name;
     }

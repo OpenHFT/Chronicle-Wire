@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by peter on 30/06/15.
@@ -85,6 +86,7 @@ public interface WireCommon {
      *
      * @return the parent or null if none was assigned.
      */
+    @Nullable
     Object parent();
 
     /**

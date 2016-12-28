@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.NativeBytesStore;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.EOFException;
@@ -35,9 +36,9 @@ import static org.junit.Assert.assertTrue;
 public class BinaryWireHeadersTest {
     @Test
     public void testHeaderNumbers() throws TimeoutException, EOFException, StreamCorruptedException {
-        BytesStore store = NativeBytesStore.elasticByteBuffer();
-        Wire wire = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
-        Wire wire2 = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
+        @NotNull BytesStore store = NativeBytesStore.elasticByteBuffer();
+        @NotNull Wire wire = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
+        @NotNull Wire wire2 = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
 
         assertEquals(0, wire.headerNumber());
         assertTrue(wire.writeFirstHeader());
@@ -76,10 +77,10 @@ public class BinaryWireHeadersTest {
 
     @Test(timeout = 3000, expected = TimeoutException.class)
     public void testConcurrentHeaderNumbers() throws TimeoutException, EOFException, StreamCorruptedException {
-        BytesStore store = NativeBytesStore.elasticByteBuffer();
-        Wire wire = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
-        Wire wire2 = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
-        Wire wire3 = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
+        @NotNull BytesStore store = NativeBytesStore.elasticByteBuffer();
+        @NotNull Wire wire = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
+        @NotNull Wire wire2 = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
+        @NotNull Wire wire3 = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
 
         long position = wire.writeHeader(1, TimeUnit.SECONDS, null);
 

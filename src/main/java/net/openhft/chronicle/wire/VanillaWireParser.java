@@ -39,6 +39,7 @@ public class VanillaWireParser<O> implements WireParser<O> {
         return defaultConsumer;
     }
 
+    @NotNull
     @Override
     public VanillaWireParser<O> register(@NotNull WireKey key, WireParselet<O> valueInConsumer) {
         namedConsumer.put(key.name(), valueInConsumer);

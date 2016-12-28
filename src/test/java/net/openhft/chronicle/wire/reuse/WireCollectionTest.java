@@ -23,6 +23,7 @@ import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.Wires;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -90,7 +91,7 @@ public class WireCollectionTest {
         wire.writeDocument(true, collection);
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));
 
-        WireCollection results = new WireCollection();
+        @NotNull WireCollection results = new WireCollection();
         wire.readDocument(results, null);
 
         assertEquals(collection.toString(), results.toString());

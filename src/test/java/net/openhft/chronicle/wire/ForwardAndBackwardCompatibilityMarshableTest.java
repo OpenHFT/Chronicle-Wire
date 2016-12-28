@@ -63,7 +63,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
                 Assert.fail();
-            DTO2 dto2 = new DTO2();
+            @NotNull DTO2 dto2 = new DTO2();
             dto2.readMarshallable(dc.wire());
             Assert.assertEquals(dto2.one, 1);
             Assert.assertEquals(dto2.two, 2);
@@ -84,7 +84,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
                 Assert.fail();
-            DTO2 dto2 = new DTO2();
+            @NotNull DTO2 dto2 = new DTO2();
             dc.wire().getValueIn().marshallable(dto2);
             Assert.assertEquals(dto2.one, 1);
             Assert.assertEquals(dto2.two, 0);
@@ -106,7 +106,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
                 Assert.fail();
-            DTO1 dto1 = new DTO1();
+            @NotNull DTO1 dto1 = new DTO1();
             dc.wire().getValueIn().marshallable(dto1);
             Assert.assertEquals(dto1.one, 1);
         }
@@ -133,6 +133,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
             return one;
         }
 
+        @NotNull
         public DTO1 one(int one) {
             this.one = one;
             return this;
@@ -150,7 +151,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
             readMarshallable(wire);
         }
 
-        public DTO2(int one, int two, Object three) {
+        public DTO2(int one, int two, @NotNull Object three) {
             this.one = one;
             this.two = two;
             StringUtils.setCount(this.three, 0);
@@ -161,11 +162,13 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
 
         }
 
+        @NotNull
         public Object three() {
             return three;
         }
 
-        public DTO2 three(Object three) {
+        @NotNull
+        public DTO2 three(@NotNull Object three) {
             StringUtils.setCount(this.three, 0);
             this.three.append(three.toString());
             return this;
@@ -175,6 +178,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
             return one;
         }
 
+        @NotNull
         public DTO2 one(int one) {
             this.one = one;
             return this;
@@ -184,6 +188,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
             return two;
         }
 
+        @NotNull
         public DTO2 two(int two) {
             this.two = two;
             return this;

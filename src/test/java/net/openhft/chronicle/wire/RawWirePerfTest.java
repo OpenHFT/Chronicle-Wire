@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 /**
@@ -23,7 +24,7 @@ import org.junit.Test;
 public class RawWirePerfTest {
     @Test
     public void testRawPerf() {
-        BinaryWirePerfTest test = new BinaryWirePerfTest(-1, true, false, true);
+        @NotNull BinaryWirePerfTest test = new BinaryWirePerfTest(-1, true, false, true);
 //        test.wirePerf();
         test.wirePerfInts();
     }

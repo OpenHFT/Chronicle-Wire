@@ -2,6 +2,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -15,12 +17,12 @@ import static org.junit.Assert.assertNotNull;
 public class WireBug39Test {
     @Test
     public void testBinaryEncoding() {
-        final WireType wireType = WireType.BINARY;
-        final String exampleString = "\uD83E\uDDC0 extra";
+        @NotNull final WireType wireType = WireType.BINARY;
+        @NotNull final String exampleString = "\uD83E\uDDC0 extra";
 
-        final MarshallableObj obj1 = new MarshallableObj();
-        final MarshallableObj obj2 = new MarshallableObj();
-        final MarshallableObj obj3 = new MarshallableObj();
+        @NotNull final MarshallableObj obj1 = new MarshallableObj();
+        @NotNull final MarshallableObj obj2 = new MarshallableObj();
+        @NotNull final MarshallableObj obj3 = new MarshallableObj();
 
         obj1.append(exampleString);
         obj2.append(exampleString);
@@ -61,11 +63,11 @@ public class WireBug39Test {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            MarshallableObj that = (MarshallableObj) o;
+            @NotNull MarshallableObj that = (MarshallableObj) o;
 
             return builder.toString().equals(that.builder.toString());
         }
@@ -75,6 +77,7 @@ public class WireBug39Test {
             return builder.toString().hashCode();
         }
 
+        @NotNull
         @Override
         public String toString() {
             return builder.toString();

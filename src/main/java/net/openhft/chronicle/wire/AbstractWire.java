@@ -67,6 +67,7 @@ public abstract class AbstractWire implements Wire {
         ASSERTIONS = assertions;
     }
 
+    @NotNull
     protected final Bytes<?> bytes;
     protected final boolean use8bit;
 
@@ -92,7 +93,7 @@ public abstract class AbstractWire implements Wire {
         notCompleteIsNotPresent = bytes.sharedMemory();
     }
 
-    private static long throwNotEnoughSpace(int maxlen, Bytes<?> bytes) {
+    private static long throwNotEnoughSpace(int maxlen, @NotNull Bytes<?> bytes) {
         throw new IllegalStateException("not enough space to write " + maxlen + " was " + bytes.writeRemaining());
     }
 
@@ -100,6 +101,7 @@ public abstract class AbstractWire implements Wire {
         throw new StreamCorruptedException("Wrote " + actualLength + " when " + length + " was set initially.");
     }
 
+    @NotNull
     private Pauser acquireTimedParser() {
         return timedParser != null
                 ? timedParser
@@ -130,6 +132,7 @@ public abstract class AbstractWire implements Wire {
         headerNumber(Long.MIN_VALUE);
     }
 
+    @NotNull
     private Wire headerNumber(long position, long headerNumber) {
         assert checkHeader(position, headerNumber);
         return headerNumber0(headerNumber);
@@ -140,11 +143,13 @@ public abstract class AbstractWire implements Wire {
                 || headNumberChecker.checkHeaderNumber(headerNumber, position);
     }
 
+    @NotNull
     @Override
     public Wire headerNumber(long headerNumber) {
         return headerNumber(bytes().writePosition(), headerNumber);
     }
 
+    @NotNull
     private Wire headerNumber0(long headerNumber) {
         this.headerNumber = headerNumber;
         return this;
@@ -175,6 +180,7 @@ public abstract class AbstractWire implements Wire {
         return bytes;
     }
 
+    @NotNull
     @Override
     public HeaderType readDataHeader(boolean includeMetaData) throws EOFException {
 

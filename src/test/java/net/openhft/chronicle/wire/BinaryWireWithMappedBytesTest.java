@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongValue;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.File;
@@ -34,16 +35,16 @@ import static org.junit.Assert.assertEquals;
 public class BinaryWireWithMappedBytesTest {
     @Test
     public void testRefAtStart() throws FileNotFoundException {
-        File file = new File(OS.TARGET, "testRefAtStart.map");
+        @NotNull File file = new File(OS.TARGET, "testRefAtStart.map");
         file.delete();
-        MappedBytes bytes = MappedBytes.mappedBytes(file, 64 << 10);
+        @NotNull MappedBytes bytes = MappedBytes.mappedBytes(file, 64 << 10);
         Wire wire = WireType.BINARY.apply(bytes);
         wire.write(() -> "int32").int32forBinding(1)
                 .write(() -> "int32b").int32forBinding(2)
                 .write(() -> "int64").int64forBinding(3);
-        IntValue a = wire.newIntReference();
-        IntValue b = wire.newIntReference();
-        LongValue c = wire.newLongReference();
+        @NotNull IntValue a = wire.newIntReference();
+        @NotNull IntValue b = wire.newIntReference();
+        @NotNull LongValue c = wire.newLongReference();
         wire.read().int32(a, null, (o, i) -> {
         });
         wire.read().int32(b, null, (o, i) -> {

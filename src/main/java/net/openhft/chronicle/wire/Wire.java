@@ -15,6 +15,8 @@
  */
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 
 /**
@@ -22,8 +24,8 @@ import java.io.IOException;
  * Created by peter.lawrey on 12/01/15.
  */
 public interface Wire extends WireIn, WireOut {
-    static Wire fromFile(String name) throws IOException {
-        String ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
+    static Wire fromFile(@NotNull String name) throws IOException {
+        @NotNull String ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
         switch (ext) {
             case "csv":
                 return CSVWire.fromFile(name);

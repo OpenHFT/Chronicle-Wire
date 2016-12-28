@@ -39,7 +39,7 @@ public enum YamlLogging {
         showServerReads = showServerWrites = clientWrites = clientReads = flag;
     }
 
-    public static void setAll(YamlLoggingLevel level) {
+    public static void setAll(@NotNull YamlLoggingLevel level) {
         showServerReads = showServerWrites = clientWrites = clientReads = level.isSet();
     }
 
@@ -47,7 +47,7 @@ public enum YamlLogging {
         return clientReads;
     }
 
-    public static void writeMessage(String s) {
+    public static void writeMessage(@NotNull String s) {
         writeMessage = s;
     }
 
@@ -59,6 +59,7 @@ public enum YamlLogging {
         return clientWrites;
     }
 
+    @NotNull
     public static String writeMessage() {
         return writeMessage;
     }

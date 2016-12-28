@@ -49,6 +49,7 @@ public class CSVWire extends TextWire {
         this(bytes, false);
     }
 
+    @NotNull
     public static CSVWire fromFile(String name) throws IOException {
         return new CSVWire(Bytes.wrapForRead(IOTools.readFile(name)), true);
     }

@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
@@ -23,7 +24,7 @@ public class WireBug35Test {
             seq.marshallable(obj -> obj.write(() -> "key").text("value"));
         });
 
-        final String text = wire.asText().toString();
+        @NotNull final String text = wire.asText().toString();
         Object load = new Yaml().load(text);
 
         assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());

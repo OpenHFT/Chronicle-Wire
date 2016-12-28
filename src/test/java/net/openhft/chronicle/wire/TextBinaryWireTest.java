@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,7 +58,7 @@ public class TextBinaryWireTest {
 
     @Test
     public void testValueOf() {
-        WireType wt = WireType.valueOf(createWire());
+        @NotNull WireType wt = WireType.valueOf(createWire());
         assertEquals(wireType, wt);
     }
 
@@ -82,7 +83,7 @@ public class TextBinaryWireTest {
         if (wireType == WireType.TEXT || wireType == WireType.BINARY) {
             Wire wire = createWire();
             wire.writeComment("This is a comment");
-            StringBuilder sb = new StringBuilder();
+            @NotNull StringBuilder sb = new StringBuilder();
             wire.readComment(sb);
             assertEquals("This is a comment", sb.toString());
         }
@@ -114,7 +115,7 @@ public class TextBinaryWireTest {
 
         assertEquals((Long) 1L, wire.readEvent(Long.class));
         assertEquals("class", wire.getValueIn().text());
-        StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder();
         wire.readEventName(sb);
         assertEquals("2", sb.toString());
         assertEquals("runtime", wire.getValueIn().text());
@@ -133,7 +134,7 @@ public class TextBinaryWireTest {
                 .write("c").float32(2.0f)
                 .write("d").float64(3.0);
 
-        final ObjIntConsumer<Integer> assertEquals = (expected, actual) -> Assert.assertEquals((long) expected, actual);
+        @NotNull final ObjIntConsumer<Integer> assertEquals = (expected, actual) -> Assert.assertEquals((long) expected, actual);
         wire.read(() -> "a").int32(0, assertEquals);
         wire.read(() -> "b").int32(1, assertEquals);
         wire.read(() -> "c").int32(2, assertEquals);

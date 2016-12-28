@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.wire.FieldInfo;
 import net.openhft.chronicle.wire.Marshallable;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -43,14 +44,15 @@ public class FieldInfoTest {
         this.m = m;
     }
 
+    @NotNull
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
-        List<Object[]> list = new ArrayList<>();
-        Marshallable[] objects = {
+        @NotNull List<Object[]> list = new ArrayList<>();
+        @NotNull Marshallable[] objects = {
                 new Nested(new ScalarValues(), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap(), "".split("")),
                 new ScalarValues(1),
         };
-        String[] fields = {
+        @NotNull String[] fields = {
                 "[!FieldInfo {\n" +
                         "  name: values,\n" +
                         "  type: !type net.openhft.chronicle.wire.marshallable.ScalarValues,\n" +
@@ -249,7 +251,7 @@ public class FieldInfoTest {
         for (int i = 0; i < objects.length; i++) {
             Marshallable object = objects[i];
             String fi = fields[i];
-            Object[] test = {object, fi};
+            @NotNull Object[] test = {object, fi};
             list.add(test);
         }
         return list;
@@ -257,7 +259,7 @@ public class FieldInfoTest {
 
     @Test
     public void fieldInfo() {
-        List<FieldInfo> infos = m.$fieldInfos();
+        @NotNull List<FieldInfo> infos = m.$fieldInfos();
         assertEquals(fieldInfos, infos.toString());
     }
 }

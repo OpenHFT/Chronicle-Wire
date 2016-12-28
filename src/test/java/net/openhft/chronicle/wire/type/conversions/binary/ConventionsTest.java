@@ -33,7 +33,7 @@ public class ConventionsTest {
     @Test
     public void testTypeConversionsMaxValue() throws NoSuchFieldException, IllegalAccessException {
 
-        for (Class type : new Class[]{String.class, Integer.class, Long.class, Short
+        for (@NotNull Class type : new Class[]{String.class, Integer.class, Long.class, Short
                 .class, Byte
                 .class, Float.class, Double.class}) {
             Object extected;
@@ -52,7 +52,7 @@ public class ConventionsTest {
     @Test
     public void testTypeConversionsMinValue() throws IllegalAccessException, NoSuchFieldException {
 
-        for (Class type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
+        for (@NotNull Class type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
                 .class, Float.class, Double.class}) {
             Object extected;
             if (Number.class.isAssignableFrom(type)) {
@@ -70,10 +70,10 @@ public class ConventionsTest {
     @Test
     public void testTypeConversionsSmallNumber() {
 
-        for (Class type : new Class[]{String.class, Integer.class, Long.class, Short
+        for (@NotNull Class type : new Class[]{String.class, Integer.class, Long.class, Short
                 .class, Byte.class}) {
 
-            Object extected = "123"; // small number
+            @NotNull Object extected = "123"; // small number
             Assert.assertEquals("type=" + type, extected, String.valueOf(test(extected, type)));
         }
 
@@ -85,7 +85,7 @@ public class ConventionsTest {
     @Test
     public void testTypeConversionsConvertViaString() throws NoSuchFieldException, IllegalAccessException {
 
-        for (Class type : new Class[]{Integer.class, Long.class, Short.class, Byte
+        for (@NotNull Class type : new Class[]{Integer.class, Long.class, Short.class, Byte
                 .class}) {
             Object extected;
             if (Number.class.isAssignableFrom(type)) {
@@ -95,8 +95,8 @@ public class ConventionsTest {
                 extected = 123;
             }
 
-            final Object value = test(extected, String.class);
-            final Object actual = test(value, extected.getClass());
+            @Nullable final Object value = test(extected, String.class);
+            @Nullable final Object actual = test(value, extected.getClass());
 
             Assert.assertEquals("type=" + type, extected, actual);
         }
@@ -114,7 +114,7 @@ public class ConventionsTest {
     @Nullable
     public <T> T test(Object source, @NotNull Class<T> destinationType) {
 
-        final BinaryWire wire = new BinaryWire(Bytes.elasticByteBuffer());
+        @NotNull final BinaryWire wire = new BinaryWire(Bytes.elasticByteBuffer());
 
         if (source instanceof String)
             wire.getValueOut().text((String) source);

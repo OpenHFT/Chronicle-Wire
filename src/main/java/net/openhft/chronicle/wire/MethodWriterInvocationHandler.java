@@ -18,6 +18,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.ObjectUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -28,19 +30,21 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by peter on 25/03/16.
  */
 public class MethodWriterInvocationHandler implements InvocationHandler {
+    @NotNull
     private final MarshallableOut appender;
     private final Map<Method, Class[]> parameterMap = new ConcurrentHashMap<>();
     private boolean recordHistory;
     private Closeable closeable;
 
-    MethodWriterInvocationHandler(MarshallableOut appender) {
+    MethodWriterInvocationHandler(@NotNull MarshallableOut appender) {
         this.appender = appender;
         recordHistory = appender.recordHistory();
     }
 
     // Note the Object[] passed in creates an object on every call.
+    @Nullable
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, @NotNull Method method, Object[] args) throws Throwable {
         Class<?> declaringClass = method.getDeclaringClass();
         if (declaringClass == Object.class) {
             return method.invoke(this, args);
@@ -48,7 +52,7 @@ public class MethodWriterInvocationHandler implements InvocationHandler {
             Closeable.closeQuietly(closeable);
             return null;
         }
-        try (DocumentContext context = appender.writingDocument()) {
+        try (@NotNull DocumentContext context = appender.writingDocument()) {
             Wire wire = context.wire();
 
             if (recordHistory) {

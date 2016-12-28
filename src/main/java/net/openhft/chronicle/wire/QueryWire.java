@@ -40,7 +40,7 @@ public class QueryWire extends TextWire {
     final QueryValueOut valueOut = new QueryValueOut();
     final ValueIn valueIn = new QueryValueIn();
 
-    public QueryWire(Bytes bytes) {
+    public QueryWire(@NotNull Bytes bytes) {
         super(bytes);
     }
 
@@ -289,7 +289,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer) {
+        public <T> WireOut sequence(T t, @NotNull BiConsumer<T, ValueOut> writer) {
             prependSeparator();
             pushState();
             bytes.appendUtf8("[");
@@ -307,7 +307,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer) {
+        public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) {
             prependSeparator();
             pushState();
             bytes.appendUtf8("[");

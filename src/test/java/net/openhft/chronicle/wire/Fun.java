@@ -17,12 +17,14 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.util.SerializableFunction;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by peter on 23/06/15.
  */
 public enum Fun implements SerializableFunction<String, String> {
     ADD_A {
+        @NotNull
         @Override
         public String apply(String s) {
             return s + "A";

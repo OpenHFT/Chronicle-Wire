@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -30,13 +31,13 @@ public class EnumTest {
 
     @Test
     public void testEnum() {
-        TextWire wire = new TextWire(Bytes.elasticByteBuffer());
+        @NotNull TextWire wire = new TextWire(Bytes.elasticByteBuffer());
         wire.write("test")
                 .object(TestEnum.INSTANCE);
         assertEquals("test: !net.openhft.chronicle.wire.EnumTest$TestEnum INSTANCE\n", wire.toString());
-        TextWire wire2 = new TextWire(Bytes.from("test: !net.openhft.chronicle.wire.EnumTest$TestEnum {\n" +
+        @NotNull TextWire wire2 = new TextWire(Bytes.from("test: !net.openhft.chronicle.wire.EnumTest$TestEnum {\n" +
                 "}\n"));
-        Object enumObject = wire2.read(() -> "test")
+        @Nullable Object enumObject = wire2.read(() -> "test")
                 .object();
         Assert.assertTrue(enumObject == TestEnum.INSTANCE);
     }
@@ -52,6 +53,7 @@ public class EnumTest {
         public void writeMarshallable(@NotNull WireOut wire) {
         }
 
+        @NotNull
         @Override
         public EnumTest.TestEnum readResolve() {
             return INSTANCE;

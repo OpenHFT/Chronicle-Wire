@@ -50,7 +50,7 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
         try {
             Method writeReplace = lambda.getClass().getDeclaredMethod("writeReplace");
             writeReplace.setAccessible(true);
-            SerializedLambda sl = (SerializedLambda) writeReplace.invoke(lambda);
+            @NotNull SerializedLambda sl = (SerializedLambda) writeReplace.invoke(lambda);
 /*
                 public SerializedLambda(Class<?> capturingClass,
                             String functionalInterfaceClass,
@@ -106,7 +106,7 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
 
     @Override
     public Object readResolve() {
-        SerializedLambda sl = new SerializedLambda(capturingClass, functionalInterfaceClass,
+        @NotNull SerializedLambda sl = new SerializedLambda(capturingClass, functionalInterfaceClass,
                 functionalInterfaceMethodName, functionalInterfaceMethodSignature,
                 implMethodKind, implClass, implMethodName, implMethodSignature,
                 instantiatedMethodType, capturedArgs.toArray());

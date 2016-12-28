@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.xerial.snappy.Snappy;
 
 import java.io.IOException;
@@ -26,6 +28,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  * Created by peter on 01/12/15.
  */
 public class SnappyComparisonMain {
+    @Nullable
     static volatile byte[] blackHole = null;
 
     public static void main(String... args) throws IOException {
@@ -36,15 +39,15 @@ public class SnappyComparisonMain {
     }
 
     private static void test(int length) throws IOException {
-        StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder();
         while (sb.length() < length)
             sb.append(Integer.toBinaryString(sb.length()));
-        String s = sb.toString();
+        @NotNull String s = sb.toString();
         System.out.println(s.length() + " compressed to " + Snappy.compress(s).length);
         int saved = s.length() - Snappy.compress(s).length;
         long start = System.nanoTime();
         int count = 0;
-        byte[] bytes = s.getBytes(ISO_8859_1);
+        @NotNull byte[] bytes = s.getBytes(ISO_8859_1);
         while(System.nanoTime() < start + 5e9) {
             blackHole = Snappy.compress(bytes);
             count++;

@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.wire.AbstractMarshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author gadei
@@ -32,6 +33,7 @@ import net.openhft.chronicle.wire.WireOut;
 public class WireModel extends AbstractMarshallable {
     private long id;
     private int revision;
+    @Nullable
     private String key;
 
     public WireModel() {
@@ -73,6 +75,7 @@ public class WireModel extends AbstractMarshallable {
         this.revision = revision;
     }
 
+    @Nullable
     public String getKey() {
         return key;
     }

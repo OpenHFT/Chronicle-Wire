@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
@@ -45,7 +46,7 @@ public class JSONWire extends TextWire {
 
     public static String asText(@NotNull Wire wire) {
         long pos = wire.bytes().readPosition();
-        JSONWire tw = new JSONWire(nativeBytes());
+        @NotNull JSONWire tw = new JSONWire(nativeBytes());
         wire.copyTo(tw);
         wire.bytes().readPosition(pos);
 
@@ -69,6 +70,7 @@ public class JSONWire extends TextWire {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     protected Quotes needsQuotes(@NotNull CharSequence s) {
         for (int i = 0; i < s.length(); i++) {
@@ -170,7 +172,7 @@ public class JSONWire extends TextWire {
     class JSONValueIn extends TextValueIn {
         @Override
         public String text() {
-            String text = super.text();
+            @Nullable String text = super.text();
             return text == null || text.equals("null") ? null : text;
         }
     }
