@@ -16,10 +16,13 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.annotation.NotNull;
+import net.openhft.chronicle.core.io.IORuntimeException;
+
 /**
  * Created by peter on 16/03/16.
  */
-public abstract class AbstractMarshallable implements Marshallable {
+public abstract class AbstractMarshallableCfg extends AbstractMarshallable {
     @Override
     public boolean equals(Object o) {
         return Marshallable.$equals(this, o);
@@ -33,5 +36,14 @@ public abstract class AbstractMarshallable implements Marshallable {
     @Override
     public String toString() {
         return Marshallable.$toString(this);
+    }
+
+    public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
+        Wires.readMarshallable(this, wire, false);
+    }
+
+    @Override
+    public void writeMarshallable(@NotNull WireOut wire) {
+        Wires.writeMarshallable(this, wire, false);
     }
 }
