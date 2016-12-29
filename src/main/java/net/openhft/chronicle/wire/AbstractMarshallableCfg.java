@@ -23,20 +23,6 @@ import net.openhft.chronicle.core.io.IORuntimeException;
  * Created by peter on 16/03/16.
  */
 public abstract class AbstractMarshallableCfg extends AbstractMarshallable {
-    @Override
-    public boolean equals(Object o) {
-        return Marshallable.$equals(this, o);
-    }
-
-    @Override
-    public int hashCode() {
-        return Marshallable.$hashCode(this);
-    }
-
-    @Override
-    public String toString() {
-        return Marshallable.$toString(this);
-    }
 
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
         Wires.readMarshallable(this, wire, false);
