@@ -1799,6 +1799,7 @@ public class TextWire extends AbstractWire implements Wire {
 
     class TextValueIn implements ValueIn {
         final ValueInStack stack = new ValueInStack();
+        int sequenceLimit = 0;
 
         @Override
         public void resetState() {
@@ -2395,9 +2396,9 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
             consumePadding();
-            char code = (char) readCode();
+
+            char code = (char) peekCode();
             if (code == '!') {
-                bytes.readSkip(-1);
                 @Nullable final Class typePrefix = typePrefix();
                 if (typePrefix == void.class) {
                     text();
@@ -2406,16 +2407,21 @@ public class TextWire extends AbstractWire implements Wire {
                 consumePadding();
                 code = (char) readCode();
             }
-            if (code != '[') {
-                throw new IORuntimeException("Unsupported type " + code + " (" + code + ")");
+            if (code == '[') {
+                bytes.readSkip(1);
+                sequenceLimit = Integer.MAX_VALUE;
+            } else {
+                sequenceLimit = 1;
             }
 
             tReader.accept(t, TextWire.this.valueIn);
 
-            consumePadding(1);
-            code = (char) readCode();
-            if (code != ']')
-                throw new IORuntimeException("Expected a ] but got " + code + " (" + code + ")");
+            if (code == '[') {
+                consumePadding(1);
+                char code2 = (char) readCode();
+                if (code2 != ']')
+                    throw new IORuntimeException("Expected a ] but got " + code2 + " (" + code2 + ")");
+            }
             consumePadding(1);
             return true;
         }
@@ -2424,28 +2430,32 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) {
             consumePadding();
-            char code = (char) readCode();
-            if (code != '[')
-                throw new IORuntimeException("Unsupported type " + code + " (" + code + ")");
+            char code = (char) peekCode();
+
+            if (code == '[') {
+                bytes.readSkip(1);
+                sequenceLimit = Integer.MAX_VALUE;
+            } else {
+                sequenceLimit = 1;
+            }
 
             // this code was added to support empty sets
             consumePadding();
-            code = (char) peekCode();
-            if (code == ']') {
+            char code2 = (char) peekCode();
+            if (code2 == ']') {
                 readCode();
                 return TextWire.this;
             }
 
             tReader.accept(t, kls, TextWire.this.valueIn);
 
-            consumePadding();
-            code = (char) readCode();
-            if (code != ']')
-                throw new IORuntimeException("Expected a ] but got " + code + " (" + code + ")");
-            consumePadding();
-            code = (char) peekCode();
-            if (code == ',')
-                readCode();
+            if (code == '[') {
+                consumePadding();
+                char code3 = (char) readCode();
+                if (code3 != ']')
+                    throw new IORuntimeException("Expected a ] but got " + code3 + " (" + code3 + ")");
+            }
+            consumePadding(1);
             return TextWire.this;
         }
 
@@ -2457,6 +2467,8 @@ public class TextWire extends AbstractWire implements Wire {
 
         @Override
         public boolean hasNextSequenceItem() {
+            if (sequenceLimit-- <= 0)
+                return false;
             consumePadding();
             int ch = peekCode();
             if (ch == ',') {
@@ -2580,7 +2592,8 @@ public class TextWire extends AbstractWire implements Wire {
 
         @Nullable
         @Override
-        public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
+        public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy)
+                throws BufferUnderflowException, IORuntimeException {
             if (isNull()) {
                 consumePadding(1);
                 return null;
@@ -2610,7 +2623,7 @@ public class TextWire extends AbstractWire implements Wire {
                 bytes.readLimit(newLimit);
                 bytes.readSkip(1); // skip the {
                 consumePadding();
-                strategy.readUsing(object, this);
+                object = strategy.readUsing(object, this);
 
             } finally {
                 bytes.readLimit(limit);

@@ -1297,7 +1297,26 @@ public class TextWireTest {
         assertEquals(set, o);
     }
 
+    @Test
+    public void testStringArray() {
+        @NotNull Wire wire = createWire();
+        wire.bytes().append("!" + StringArray.class.getName() + " { strings: [ a, b, c ] }");
+        StringArray sa = wire.getValueIn()
+                .object(StringArray.class);
+        assertEquals("[a, b, c]", Arrays.toString(sa.strings));
+
+        @NotNull Wire wire2 = createWire();
+        wire2.bytes().append("!" + StringArray.class.getName() + " { strings: abc }");
+        StringArray sa2 = wire2.getValueIn()
+                .object(StringArray.class);
+        assertEquals("[abc]", Arrays.toString(sa2.strings));
+    }
+
     enum BWKey implements WireKey {
         field1, field2, field3
+    }
+
+    static class StringArray implements Marshallable {
+        String[] strings;
     }
 }
