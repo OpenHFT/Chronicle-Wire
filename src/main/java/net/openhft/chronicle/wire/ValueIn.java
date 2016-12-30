@@ -16,6 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.*;
@@ -472,6 +473,9 @@ public interface ValueIn {
                     strategy = SerializationStrategies.MAP;
                 if (using == null)
                     using = (E) strategy.newInstance(clazz);
+
+                if (using == null)
+                    Jvm.warn().on(ValueIn.class, "failed to create instance of clazz=" + clazz);
 
 
                 @Nullable Object ret = marshallable(using, strategy);
