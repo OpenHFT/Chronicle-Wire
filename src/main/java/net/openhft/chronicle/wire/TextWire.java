@@ -2541,6 +2541,7 @@ public class TextWire extends AbstractWire implements Wire {
                 try {
                     return classLookup().forName(sb);
                 } catch (ClassNotFoundException e) {
+                    Jvm.warn().on(getClass(), "Unable to find " + sb + " " + e);
                     return null;
                 }
             }
