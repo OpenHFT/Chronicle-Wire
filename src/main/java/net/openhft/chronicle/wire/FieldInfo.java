@@ -37,5 +37,21 @@ public interface FieldInfo {
 
     Object get(Object value);
 
-    void set(Object object, Object value);
+    long getLong(Object value);
+
+    int getInt(Object value);
+
+    char getChar(Object value);
+
+    double getDouble(Object value);
+
+    void set(Object object, Object value) throws IllegalArgumentException;
+
+    void set(Object object, char value) throws IllegalArgumentException;
+
+    void set(Object object, int value) throws IllegalArgumentException;
+
+    void set(Object object, long value) throws IllegalArgumentException;
+
+    void set(Object object, double value) throws IllegalArgumentException;
 }

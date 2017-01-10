@@ -97,12 +97,92 @@ public class VanillaFieldInfo extends AbstractMarshallable implements FieldInfo 
     }
 
     @Override
-    public void set(Object object, Object value) {
+    public long getLong(Object value) {
+        try {
+            return getField().getLong(value);
+        } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            Jvm.debug().on(VanillaFieldInfo.class, e);
+            return Long.MIN_VALUE;
+        }
+    }
+
+    @Override
+    public int getInt(Object value) {
+        try {
+            return getField().getInt(value);
+        } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            Jvm.debug().on(VanillaFieldInfo.class, e);
+            return Integer.MIN_VALUE;
+        }
+    }
+
+    @Override
+    public char getChar(Object value) {
+        try {
+            return getField().getChar(value);
+        } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            Jvm.debug().on(VanillaFieldInfo.class, e);
+            return Character.MAX_VALUE;
+        }
+    }
+
+    @Override
+    public double getDouble(Object value) {
+        try {
+            return getField().getDouble(value);
+        } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            Jvm.debug().on(VanillaFieldInfo.class, e);
+            return Double.NaN;
+        }
+    }
+
+    @Override
+    public void set(Object object, Object value) throws IllegalArgumentException {
         Object value2 = ObjectUtils.convertTo(type, value);
         try {
             getField().set(object, value2);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
-            throw new AssertionError(e);
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    @Override
+    public void set(Object object, int value) throws IllegalArgumentException {
+        try {
+            getField().setInt(object, value);
+        } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    @Override
+    public void set(Object object, char value) throws IllegalArgumentException {
+        try {
+            getField().setChar(object, value);
+        } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    @Override
+    public void set(Object object, long value) throws IllegalArgumentException {
+        try {
+            getField().setLong(object, value);
+        } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    @Override
+    public void set(Object object, double value) throws IllegalArgumentException {
+        try {
+            getField().setDouble(object, value);
+        } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalArgumentException(e);
         }
     }
 
