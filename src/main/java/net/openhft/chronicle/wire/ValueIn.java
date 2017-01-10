@@ -207,14 +207,12 @@ public interface ValueIn {
         return ret;
     }
 
-
     @NotNull
     default IntValue int32ForBinding(@Nullable LongValue value) {
         @NotNull IntValue ret = wireIn().newIntReference();
         int32(ret);
         return ret;
     }
-
 
     @NotNull
     <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter);
@@ -288,7 +286,8 @@ public interface ValueIn {
     <T> T typedMarshallable() throws IORuntimeException;
 
     @Nullable
-    default <T> T typedMarshallable(@NotNull Function<Class, ReadMarshallable> marshallableFunction) throws IORuntimeException {
+    default <T> T typedMarshallable(@NotNull Function<Class, ReadMarshallable> marshallableFunction)
+            throws IORuntimeException {
         @Nullable final Class aClass = typePrefix();
         if (ReadMarshallable.class.isAssignableFrom(aClass)) {
             final ReadMarshallable marshallable = marshallableFunction.apply(aClass);
@@ -302,7 +301,8 @@ public interface ValueIn {
     <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts);
 
     @NotNull
-    <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) throws IORuntimeException, BufferUnderflowException;
+    <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer)
+            throws IORuntimeException, BufferUnderflowException;
 
     @NotNull
     default <T> WireIn typeLiteral(T t, @NotNull BiConsumer<T, Class> classConsumer) throws IORuntimeException {
@@ -329,7 +329,8 @@ public interface ValueIn {
     }
 
     @Nullable
-    Object marshallable(Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException;
+    Object marshallable(Object object, SerializationStrategy strategy)
+            throws BufferUnderflowException, IORuntimeException;
 
     default boolean marshallable(@NotNull Serializable object) throws BufferUnderflowException, IORuntimeException {
         return marshallable(object, SerializationStrategies.SERIALIZABLE) != null;
@@ -447,7 +448,8 @@ public interface ValueIn {
                 || ReadResolvable.class.isAssignableFrom(clazz2)
                 || !ObjectUtils.isConcreteClass(clazz))) {
             clazz = clazz2;
-            using = null;
+            if (!clazz.isInstance(using))
+                using = null;
         }
         if (clazz == null)
             clazz = Object.class;
@@ -476,7 +478,6 @@ public interface ValueIn {
 
                 if (using == null)
                     Jvm.warn().on(ValueIn.class, "failed to create instance of clazz=" + clazz);
-
 
                 @Nullable Object ret = marshallable(using, strategy);
                 return readResolve(ret);

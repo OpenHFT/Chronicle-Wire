@@ -364,7 +364,8 @@ public class WireMarshaller<T> {
             type = field.getType();
         }
 
-        protected void getValue(@NotNull Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
+        protected void getValue(@NotNull Object o, @NotNull ValueOut write, Object previous)
+                throws IllegalAccessException {
             if (isLeaf != null)
                 write.leaf(isLeaf);
             assert o != null;
@@ -694,11 +695,13 @@ public class WireMarshaller<T> {
 
         @NotNull
         private Supplier<Map> newInstance() {
-            try {
-                return (Supplier<Map>) type.newInstance();
-            } catch (@NotNull InstantiationException | IllegalAccessException e) {
-                throw new AssertionError(e);
-            }
+            return () -> {
+                try {
+                    return (Map) type.newInstance();
+                } catch (@NotNull InstantiationException | IllegalAccessException e) {
+                    throw new AssertionError(e);
+                }
+            };
         }
 
         @Override
@@ -865,7 +868,8 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous)
+                throws IllegalAccessException {
             if (previous == null)
                 write.int32(UNSAFE.getInt(o, offset));
             else
@@ -900,7 +904,8 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous)
+                throws IllegalAccessException {
             if (previous == null)
                 write.float32(UNSAFE.getFloat(o, offset));
             else
@@ -935,7 +940,8 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous)
+                throws IllegalAccessException {
             if (previous == null)
                 write.int64(UNSAFE.getLong(o, offset));
             else
@@ -970,7 +976,8 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous)
+                throws IllegalAccessException {
             if (previous == null)
                 write.float64(UNSAFE.getDouble(o, offset));
             else

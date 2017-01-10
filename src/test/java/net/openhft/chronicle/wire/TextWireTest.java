@@ -70,6 +70,29 @@ public class TextWireTest {
     }
 
     @Test
+    public void writeObjectWithTreeMap() {
+        @NotNull Wire wire = createWire();
+        ObjectWithTreeMap value = new ObjectWithTreeMap();
+        value.map.put("hello", "world");
+        wire.write().object(value);
+
+        System.out.println(wire);
+
+        ObjectWithTreeMap value2 = new ObjectWithTreeMap();
+        wire.read().object(value2, ObjectWithTreeMap.class);
+        assertEquals("{hello=world}", value2.map.toString());
+
+        wire.bytes().readPosition(0);
+        ObjectWithTreeMap value3 = new ObjectWithTreeMap();
+        wire.read().object(value3, Object.class);
+        assertEquals("{hello=world}", value3.map.toString());
+
+        wire.bytes().readPosition(0);
+        ObjectWithTreeMap value4 = wire.read().object(ObjectWithTreeMap.class);
+        assertEquals("{hello=world}", value4.map.toString());
+    }
+
+    @Test
     public void testFromString() {
         @Nullable Object w = WireType.TEXT.fromString("changedRow: {\n" +
                 "  row: [\n" +
@@ -98,14 +121,12 @@ public class TextWireTest {
         }
     }
 
-
     @Test
     public void testWriteToBinaryAndTriesToConvertToText() {
 
         Bytes b = Bytes.elasticByteBuffer();
         Wire wire = WireType.BINARY.apply(b);
         @NotNull Map<String, String> data = Collections.singletonMap("key", "value");
-
 
         @NotNull HashMap map = new HashMap();
         map.put("some", data);

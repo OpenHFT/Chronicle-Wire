@@ -77,6 +77,27 @@ public class BinaryWire2Test {
     }
 
     @Test
+    public void writeObjectWithTreeMap() {
+        @NotNull Wire wire = createWire();
+        ObjectWithTreeMap value = new ObjectWithTreeMap();
+        value.map.put("hello", "world");
+        wire.write().object(value);
+//        System.out.println(Bytes.);
+        ObjectWithTreeMap value2 = new ObjectWithTreeMap();
+        wire.read().object(value2, ObjectWithTreeMap.class);
+        assertEquals("{hello=world}", value2.map.toString());
+
+        wire.bytes().readPosition(0);
+        ObjectWithTreeMap value3 = new ObjectWithTreeMap();
+        wire.read().object(value3, Object.class);
+        assertEquals("{hello=world}", value3.map.toString());
+
+        wire.bytes().readPosition(0);
+        ObjectWithTreeMap value4 = wire.read().object(ObjectWithTreeMap.class);
+        assertEquals("{hello=world}", value4.map.toString());
+    }
+
+    @Test
     public void testFloat32() {
         @NotNull Wire wire = createWire();
         wire.write().float32(0.0F)
@@ -138,7 +159,7 @@ public class BinaryWire2Test {
         }
         try (final DocumentContext dc = wire.readingDocument()) {
             System.out.println(Wires.fromSizePrefixedBlobs(dc));
-           Assert.assertEquals(0, dc.wire().read().object(Date.class).getTime());
+            Assert.assertEquals(0, dc.wire().read().object(Date.class).getTime());
         }
     }
 
