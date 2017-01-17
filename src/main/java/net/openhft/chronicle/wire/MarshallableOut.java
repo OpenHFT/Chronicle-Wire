@@ -26,7 +26,7 @@ import java.util.function.BiConsumer;
 
 /**
  * Created by peter.lawrey on 06/02/2016.
- *
+ * <p>
  * Anything you can write Marshallable objects to.
  */
 public interface MarshallableOut {
@@ -37,7 +37,7 @@ public interface MarshallableOut {
      *      dc.wire().write("message").text("Hello World");
      * }
      * </pre>
-     *
+     * <p>
      * WARNING : any data written inside the writingDocument(),  should be performed as quickly as
      * possible  because a write lock is held  until the DocumentContext is closed by the
      * try-with-resources,  this blocks other appenders and tailers.
@@ -52,7 +52,6 @@ public interface MarshallableOut {
      */
     @NotNull
     DocumentContext writingDocument() throws UnrecoverableTimeoutException;
-
 
     /**
      * @return true is this output is configured to expect the history of the message to be written

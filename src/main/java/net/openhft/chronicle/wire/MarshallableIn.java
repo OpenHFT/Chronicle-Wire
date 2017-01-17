@@ -89,6 +89,8 @@ public interface MarshallableIn {
             }
             StringBuilder sb = Wires.acquireStringBuilder();
             dc.wire().bytes().parse8bit(sb, StopCharTesters.ALL);
+            while (sb.length() > 0 && sb.charAt(sb.length() - 1) == 0)
+                sb.setLength(sb.length() - 1);
             return WireInternal.INTERNER.intern(sb);
         }
     }
