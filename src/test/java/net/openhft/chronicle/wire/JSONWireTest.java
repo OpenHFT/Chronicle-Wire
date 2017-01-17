@@ -132,10 +132,11 @@ public class JSONWireTest {
         w.write("somebytes").text(bs);
 
         Wire w2 = WireType.JSON.apply(w.bytes());
+        assertEquals("\"a\":123,\"somebytes\":\"blablabla\"", w2.toString());
 
         Bytes bb = Bytes.elasticByteBuffer();
         assertEquals(123, w2.read("a").int64());
-        
+
         w2.read("somebytes").text(bb);
         assertEquals(bs, bb);
     }
