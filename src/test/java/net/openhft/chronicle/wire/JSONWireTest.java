@@ -128,19 +128,16 @@ public class JSONWireTest {
         @NotNull Wire w = getWire();
 
         Bytes bs = Bytes.from("blablabla");
-        w.write("anint").int64(123);
+        w.write("a").int64(123);
         w.write("somebytes").text(bs);
-
-        System.out.println(w.bytes());
-
 
         Wire w2 = WireType.JSON.apply(w.bytes());
 
         Bytes bb = Bytes.elasticByteBuffer();
-        long x = w2.read("anint").int64();
-        System.out.println(x);
+        assertEquals(123, w2.read("a").int64());
+        
         w2.read("somebytes").text(bb);
-        System.out.println(bb);
+        assertEquals(bs, bb);
     }
 
     private static class Item extends AbstractMarshallable {
