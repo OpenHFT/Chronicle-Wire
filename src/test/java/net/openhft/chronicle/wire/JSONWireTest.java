@@ -123,6 +123,23 @@ public class JSONWireTest {
         assertEquals(item1.toString(), item2.toString());
     }
 
+    @Test
+    public void testBytes() throws Exception {
+        @NotNull Wire w = getWire();
+
+        Bytes bs = Bytes.from("blablabla");
+        w.write("a").int64(123);
+        w.write("somebytes").text(bs);
+
+        Wire w2 = WireType.JSON.apply(w.bytes());
+
+        Bytes bb = Bytes.elasticByteBuffer();
+        assertEquals(123, w2.read("a").int64());
+        
+        w2.read("somebytes").text(bb);
+        assertEquals(bs, bb);
+    }
+
     private static class Item extends AbstractMarshallable {
         String name;
         long number1;
