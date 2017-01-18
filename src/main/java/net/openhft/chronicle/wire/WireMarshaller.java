@@ -64,9 +64,11 @@ public class WireMarshaller<T> {
         @NotNull Map<String, Field> map = new LinkedHashMap<>();
         getAllField(tClass, map);
         final FieldAccess[] fields = map.values().stream()
-                .map(FieldAccess::create).toArray(FieldAccess[]::new);
+                .map(FieldAccess::create)
+                .toArray(FieldAccess[]::new);
         boolean isLeaf = map.values().stream()
-                .map(Field::getType).noneMatch(
+                .map(Field::getType)
+                .noneMatch(
                         c -> WireMarshaller.class.isAssignableFrom(c) ||
                                 isCollection(c));
         return new WireMarshaller<>(tClass, fields, isLeaf);
