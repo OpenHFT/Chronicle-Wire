@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.LicenceCheck;
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -397,6 +398,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     }
 
     public String asString(Object marshallable) {
+
         Bytes bytes = asBytes(marshallable);
         return bytes.toString();
     }
@@ -414,8 +416,10 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             wire.getValueOut().sequence((Iterable) marshallable);
         else if (marshallable instanceof Serializable)
             valueOut.typedMarshallable((Serializable) marshallable);
-        else
-            bytes.appendUtf8(marshallable.toString());
+        else {
+            valueOut.typedMarshallable(ClassAliasPool.CLASS_ALIASES.nameFor(marshallable.getClass()),
+                    w -> Wires.writeMarshallable(marshallable, w));
+        }
         return bytes;
     }
 
@@ -450,11 +454,13 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         return map;
     }
 
-    public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map) throws IOException {
+    public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map)
+            throws IOException {
         toFileAsMap(filename, map, false);
     }
 
-    public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map, boolean compact) throws IOException {
+    public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map, boolean compact)
+            throws IOException {
         Bytes bytes = getBytes();
         Wire wire = apply(bytes);
         for (@NotNull Map.Entry<String, T> entry : map.entrySet()) {
@@ -505,7 +511,6 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         Wire wire = apply(bytes);
         return wire.getValueIn().marshallableAsMap(String.class, Object.class);
     }
-
 
     @Override
     public void licenceCheck() {
