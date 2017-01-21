@@ -39,6 +39,7 @@ public class WireSerializedLambdaTest {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(Fun.class);
         ClassAliasPool.CLASS_ALIASES.addAlias(Update.class);
+        ClassAliasPool.CLASS_ALIASES.addAlias(WireSerializedLambda.class, "SerializedLambda");
     }
     @Test
     public void testIsLambda() {
@@ -100,7 +101,7 @@ public class WireSerializedLambdaTest {
                 .write(() -> "two").object(Fun.ADD_A)
                 .write(() -> "three").object(Update.DECR);
 
-        assertEquals("[pos: 0, rlim: 348, wlim: 8EiB, cap: 8EiB ] ‖" +
+        assertEquals("[pos: 0, rlim: 349, wlim: 8EiB, cap: 8EiB ] ‖" +
                 "Ãone¶⒗SerializedLambda\\u0082 ⒈٠٠" +
                 "Âcc¼3net.openhft.chronicle.wire.WireSerializedLambdaTest" +
                 "Ãfic¸4net/openhft/chronicle/core/util/SerializableFunction" +
@@ -113,7 +114,7 @@ public class WireSerializedLambdaTest {
                 "Ãimt¸&(Ljava/lang/String;)Ljava/lang/String;" +
                 "Âca\\u0082٠٠٠٠" +
                 "Ãtwo¶⒊FunåADD_A" +
-                "Åthree¶⒌UpdatäDECR‡", wire.bytes().toDebugString(348));
+                "Åthree¶⒍UpdateäDECR‡", wire.bytes().toDebugString(349));
 
         @Nullable Function<String, String> function = wire.read().object(Function.class);
         assertEquals("HELLO", function.apply("hello"));

@@ -2547,7 +2547,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
-
         @NotNull
         @Override
         public <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter) {
@@ -2721,6 +2720,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             try {
                 return classLookup().forName(sb);
             } catch (ClassNotFoundException e) {
+                Jvm.warn().on(BinaryWire.this.getClass(), "Unable to find class " + sb);
                 return null;
             }
         }
@@ -2779,11 +2779,13 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public boolean marshallable(@NotNull ReadMarshallable object) throws BufferUnderflowException, IORuntimeException {
+        public boolean marshallable(@NotNull ReadMarshallable object)
+                throws BufferUnderflowException, IORuntimeException {
             return marshallable(object, true);
         }
 
-        public boolean marshallable(@NotNull ReadMarshallable object, boolean overwrite) throws BufferUnderflowException, IORuntimeException {
+        public boolean marshallable(@NotNull ReadMarshallable object, boolean overwrite)
+                throws BufferUnderflowException, IORuntimeException {
             if (this.isNull())
                 return false;
             pushState();
@@ -2819,7 +2821,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Nullable
-        public Object marshallable(@Nullable Object object, @NotNull SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
+        public Object marshallable(@Nullable Object object, @NotNull SerializationStrategy strategy)
+                throws BufferUnderflowException, IORuntimeException {
             if (this.isNull())
                 return null;
             pushState();
@@ -2959,7 +2962,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return (int) value;
 
         }
-
 
         @Override
         public int int32() {
