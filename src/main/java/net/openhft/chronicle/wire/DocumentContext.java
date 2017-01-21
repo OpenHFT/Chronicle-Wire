@@ -33,6 +33,7 @@ public interface DocumentContext extends Closeable, SourceContext {
      *
      * @param metaData write as metaData instead of data if true.
      */
+    @Deprecated
     void metaData(boolean metaData);
 
     /**

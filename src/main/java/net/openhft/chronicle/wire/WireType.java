@@ -24,7 +24,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.LicenceCheck;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -338,18 +337,14 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         // when in debug, the output becomes confused if you reuse the buffer.
         if (Jvm.isDebug())
             return Bytes.allocateElasticDirect();
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::allocateElasticDirect);
-        bytes.clear();
-        return bytes;
+        return Wires.acquireBytes();
     }
 
     static Bytes getBytes2() {
         // when in debug, the output becomes confused if you reuse the buffer.
         if (Jvm.isDebug())
             return Bytes.allocateElasticDirect();
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.ABYTES_TL, Bytes::allocateElasticDirect);
-        bytes.clear();
-        return bytes;
+        return Wires.acquireAnotherBytes();
     }
 
     @NotNull

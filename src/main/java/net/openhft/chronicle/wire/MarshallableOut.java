@@ -51,7 +51,11 @@ public interface MarshallableOut {
      * </pre>
      */
     @NotNull
-    DocumentContext writingDocument() throws UnrecoverableTimeoutException;
+    default DocumentContext writingDocument() throws UnrecoverableTimeoutException {
+        return writingDocument(false);
+    }
+
+    DocumentContext writingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
     /**
      * @return true is this output is configured to expect the history of the message to be written

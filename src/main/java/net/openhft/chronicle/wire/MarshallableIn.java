@@ -71,7 +71,10 @@ public interface MarshallableIn {
         try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent())
                 return false;
-            using.write(dc.wire().bytes());
+            Bytes<?> bytes = dc.wire().bytes();
+            long len = Math.min(using.writeRemaining(), bytes.readRemaining());
+            using.write(bytes, bytes.readPosition(), len);
+            bytes.readSkip(len);
         }
         return true;
     }
