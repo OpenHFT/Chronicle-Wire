@@ -27,7 +27,6 @@ public abstract class AbstractMarshallable implements Marshallable {
 
     @Override
     public int hashCode() {
-        assert false;
         return Marshallable.$hashCode(this);
     }
 
