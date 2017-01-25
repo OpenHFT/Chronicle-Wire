@@ -73,6 +73,7 @@ public class ReadDocumentContext implements DocumentContext {
             bytes.readLimit(readLimit);
             bytes.readPosition(readPosition);
         }
+        wire = null;
         present = false;
     }
 
