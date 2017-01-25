@@ -28,9 +28,9 @@ import static net.openhft.chronicle.wire.Wires.lengthOf;
 public class ReadDocumentContext implements DocumentContext {
     protected AbstractWire wire;
     protected boolean present, notComplete;
+    long start = -1;
     private boolean metaData;
     private long readPosition, readLimit;
-    long start = -1;
 
     public ReadDocumentContext(@Nullable Wire wire) {
         this.wire = (AbstractWire) wire;
@@ -73,6 +73,7 @@ public class ReadDocumentContext implements DocumentContext {
             bytes.readLimit(readLimit);
             bytes.readPosition(readPosition);
         }
+        present = false;
     }
 
     public void start() {
