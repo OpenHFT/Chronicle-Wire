@@ -18,14 +18,25 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.StopCharTester;
 
+import java.util.BitSet;
+
 /**
  * Created by peter on 16/08/15.
  */
 enum TextStopCharTesters implements StopCharTester {
     END_OF_TYPE {
+        BitSet EOW = new BitSet();
+        {
+            for (int i = 0; i < 127; i++)
+                if (!Character.isJavaIdentifierPart(i))
+                    EOW.set(i);
+            EOW.clear('.');
+            EOW.clear('$');
+        }
+
         @Override
         public boolean isStopChar(int ch) {
-            return ch == '"' || ch == '#' || ch == '\n' || ch == ':' || ch == ',' || ch == ' ' || ch == '}';
+            return EOW.get(ch);
         }
     }
 }

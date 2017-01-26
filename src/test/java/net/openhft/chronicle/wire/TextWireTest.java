@@ -660,6 +660,22 @@ public class TextWireTest {
     }
 
     @Test
+    public void testTypeWithoutSpace() {
+        @NotNull Wire wire = createWire();
+        wire.bytes().append("A: !").append(MyTypes.class.getName()).append("{}");
+
+        @NotNull MyTypes mt = (MyTypes) wire.read(() -> "A").object();
+        assertEquals("!net.openhft.chronicle.wire.MyTypes {\n" +
+                "  text: !!null \"\",\n" +
+                "  b: false,\n" +
+                "  s: 0,\n" +
+                "  d: 0.0,\n" +
+                "  l: 0,\n" +
+                "  i: 0\n" +
+                "}\n", mt.toString());
+    }
+
+    @Test
     public void testBytes() {
         @NotNull Wire wire = createWire();
         @NotNull byte[] allBytes = new byte[256];
