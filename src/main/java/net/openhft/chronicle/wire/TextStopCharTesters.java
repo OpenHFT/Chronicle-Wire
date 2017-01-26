@@ -30,6 +30,9 @@ enum TextStopCharTesters implements StopCharTester {
             for (int i = 0; i < 127; i++)
                 if (!Character.isJavaIdentifierPart(i))
                     EOW.set(i);
+            EOW.clear('['); // not in spec
+            EOW.clear(']'); // not in spec
+            EOW.clear('!');
             EOW.clear('.');
             EOW.clear('$');
         }

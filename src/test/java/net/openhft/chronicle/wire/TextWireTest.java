@@ -547,7 +547,7 @@ public class TextWireTest {
             wire.read().typePrefix(e, Assert::assertEquals);
         });
 
-        assertEquals(3, bytes.readRemaining());
+        assertEquals(0, bytes.readRemaining());
         // check it's safe to read too much.
         wire.read();
     }

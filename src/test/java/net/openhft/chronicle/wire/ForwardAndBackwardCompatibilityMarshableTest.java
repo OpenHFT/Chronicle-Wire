@@ -107,8 +107,9 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
             if (!dc.isPresent())
                 Assert.fail();
             @NotNull DTO1 dto1 = new DTO1();
-            dc.wire().getValueIn().marshallable(dto1);
-            Assert.assertEquals(dto1.one, 1);
+            dc.wire().getValueIn()
+                    .marshallable(dto1);
+            Assert.assertEquals(1, dto1.one);
         }
     }
 

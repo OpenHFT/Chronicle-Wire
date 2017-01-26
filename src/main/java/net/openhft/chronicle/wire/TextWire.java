@@ -2525,6 +2525,7 @@ public class TextWire extends AbstractWire implements Wire {
 
                 parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
                 bytes.readSkip(-1);
+                consumePadding();
             }
             return this;
         }
