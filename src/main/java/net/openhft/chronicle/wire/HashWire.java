@@ -196,7 +196,7 @@ public class HashWire implements WireOut {
     }
 
     @Override
-    public long writeHeader(int length, long timeout, TimeUnit timeUnit, LongValue lastPosition) throws TimeoutException, EOFException {
+    public long writeHeader(int length, int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition) throws TimeoutException, EOFException {
         throw new UnsupportedOperationException();
     }
 

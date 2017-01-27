@@ -192,7 +192,12 @@ public interface WireOut extends WireCommon {
      * @throws TimeoutException the underlying pauser timed out.
      * @throws EOFException     the end of wire marker was reached.
      */
-    long writeHeader(int length, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition)
+    default long writeHeader(int length, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition)
+            throws TimeoutException, EOFException {
+        return writeHeader(length, 1 << 30, timeout, timeUnit, lastPosition);
+    }
+
+    long writeHeader(int length, int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition)
             throws TimeoutException, EOFException;
 
     /**

@@ -32,6 +32,7 @@ enum TextStopCharTesters implements StopCharTester {
                     EOW.set(i);
             EOW.clear('['); // not in spec
             EOW.clear(']'); // not in spec
+            EOW.clear('-'); // not in spec
             EOW.clear('!');
             EOW.clear('.');
             EOW.clear('$');
