@@ -21,6 +21,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.ByteBuffer;
+
 /**
  * Created by peter on 09/07/16.
  */
@@ -64,11 +66,13 @@ public class WireDumper {
             long limit2 = Math.min(limit0, position + length);
             bytes.readLimit(limit2);
             long missing = position + length - limit2;
+            Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
             while (bytes.readRemaining() >= 4) {
-                if (dumpOne(sb))
+                if (dumpOne(sb, bytes2))
                     break;
 
             }
+            bytes2.release();
             if (missing > 0)
                 sb.append(" # missing: ").append(missing);
         } catch (Throwable t) {
@@ -80,11 +84,15 @@ public class WireDumper {
     }
 
     public boolean dumpOne(@NotNull StringBuilder sb) {
-        long start = bytes.readPosition();
-        int header = bytes.readInt();
+        return dumpOne(sb, null);
+    }
+
+    public boolean dumpOne(@NotNull StringBuilder sb, Bytes<ByteBuffer> buffer) {
+        long start = this.bytes.readPosition();
+        int header = this.bytes.readInt();
         if (header == 0) {
             sb.append("...\n");
-            sb.append("# ").append(bytes.readRemaining()).append(" bytes remaining\n");
+            sb.append("# ").append(this.bytes.readRemaining()).append(" bytes remaining\n");
             return true;
         }
         if (Wires.isReadyData(header))
@@ -101,8 +109,8 @@ public class WireDumper {
         }
 
         int len = Wires.lengthOf(header);
-        if (len > bytes.readRemaining()) {
-            sb.append("#  has a 4 byte size prefix, ").append(len).append(" > ").append(bytes.readRemaining()).append(" len is ").append(Integer.toString(len));
+        if (len > this.bytes.readRemaining()) {
+            sb.append("#  has a 4 byte size prefix, ").append(len).append(" > ").append(this.bytes.readRemaining()).append(" len is ").append(Integer.toString(len));
             return true;
         }
         @NotNull String type = Wires.isData(header)
@@ -110,8 +118,8 @@ public class WireDumper {
                 : Wires.isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
 
         boolean binary = false;
-        for (int i = 0; i < 4 && i < bytes.readRemaining(); i++) {
-            byte b = bytes.readByte(bytes.readPosition() + i);
+        for (int i = 0; i < 4 && i < this.bytes.readRemaining(); i++) {
+            byte b = this.bytes.readByte(this.bytes.readPosition() + i);
             if (b < ' ' && b != '\n') {
                 binary = true;
                 break;
@@ -120,33 +128,33 @@ public class WireDumper {
 
         sb.append("--- ").append(type).append(binary ? " #binary" : "");
 
-        if (len > bytes.readRemaining())
-            sb.append(" # len: ").append(len).append(", remaining: ").append(bytes.readRemaining());
+        if (len > this.bytes.readRemaining())
+            sb.append(" # len: ").append(len).append(", remaining: ").append(this.bytes.readRemaining());
         sb.append("\n");
         if (len == 0) {
             sb.append("...\n");
-            sb.append("# ").append(bytes.readRemaining()).append(" bytes remaining\n");
+            sb.append("# ").append(this.bytes.readRemaining()).append(" bytes remaining\n");
             return true;
         }
 
-        Bytes textBytes = bytes;
+        Bytes textBytes = this.bytes;
 
         if (binary) {
-            long readPosition = bytes.readPosition();
-            long readLimit = bytes.readLimit();
+            long readPosition = this.bytes.readPosition();
+            long readLimit = this.bytes.readLimit();
             int sblen = sb.length();
 
             try {
-                byte firstByte = bytes.readByte(bytes.readPosition());
+                byte firstByte = this.bytes.readByte(this.bytes.readPosition());
                 if (firstByte >= 0) {
                     dumpAsHexadecimal(sb, len, readPosition, sblen);
                     return false;
                 }
 
-                Bytes bytes2 = Bytes.elasticByteBuffer();
+                Bytes bytes2 = buffer == null ? Bytes.elasticByteBuffer() : buffer.clear();
                 @NotNull TextWire textWire = new TextWire(bytes2);
 
-                bytes.readLimit(readPosition + len);
+                this.bytes.readLimit(readPosition + len);
 
                 wireIn.copyTo(textWire);
 
@@ -156,7 +164,7 @@ public class WireDumper {
                 return false;
 
             } finally {
-                bytes.readLimit(readLimit);
+                this.bytes.readLimit(readLimit);
             }
 
             len = (int) textBytes.readRemaining();
