@@ -94,7 +94,7 @@ public abstract class AbstractWire implements Wire {
     }
 
     private static long throwNotEnoughSpace(int maxlen, @NotNull Bytes<?> bytes) {
-        throw new IllegalStateException("not enough space to write " + maxlen + " was " + bytes.writeRemaining());
+        throw new IllegalStateException("not enough space to write " + maxlen + " was " + bytes.writeRemaining() + " limit " + bytes.writeLimit() + " type " + bytes.getClass());
     }
 
     private static void throwLengthMismatch(int length, int actualLength) throws StreamCorruptedException {
@@ -254,7 +254,7 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public long writeHeader(int length, long timeout, TimeUnit timeUnit, @Nullable LongValue
+    public long writeHeader(int length, int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue
             lastPosition) throws TimeoutException, EOFException {
 
         if (insideHeader)
@@ -265,14 +265,14 @@ public abstract class AbstractWire implements Wire {
 
         insideHeader = true;
         try {
-            if (length < 0 || length > MAX_LENGTH)
+            if (length < 0 || length > safeLength)
                 throw new IllegalArgumentException();
             long pos = bytes.writePosition();
 
             if (bytes.compareAndSwapInt(pos, 0, NOT_COMPLETE | length)) {
 
-                int maxlen = length == UNKNOWN_LENGTH ? MAX_LENGTH : length;
-                if (length != UNKNOWN_LENGTH && maxlen > bytes.writeRemaining())
+                int maxlen = length == UNKNOWN_LENGTH ? safeLength : length;
+                if (length != safeLength && maxlen > bytes.writeRemaining())
                     return throwNotEnoughSpace(maxlen, bytes);
 
                 bytes.writePositionRemaining(pos + SPB_HEADER_SIZE, maxlen);
@@ -290,15 +290,15 @@ public abstract class AbstractWire implements Wire {
                 }
             }
 
-            return writeHeader0(length, timeout, timeUnit);
+            return writeHeader0(length, safeLength, timeout, timeUnit);
         } catch (Throwable t) {
             insideHeader = false;
             throw t;
         }
     }
 
-    private long writeHeader0(int length, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {
-        if (length < 0 || length > MAX_LENGTH)
+    private long writeHeader0(int length, int safeLength, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {
+        if (length < 0 || length > safeLength)
             throw new IllegalArgumentException();
         long pos = bytes.writePosition();
 
@@ -308,7 +308,7 @@ public abstract class AbstractWire implements Wire {
                 if (bytes.compareAndSwapInt(pos, 0, NOT_COMPLETE | length)) {
 
                     bytes.writePosition(pos + SPB_HEADER_SIZE);
-                    int maxlen = length == UNKNOWN_LENGTH ? MAX_LENGTH : length;
+                    int maxlen = length == UNKNOWN_LENGTH ? safeLength : length;
                     if (maxlen > bytes.writeRemaining())
                         throwNotEnoughSpace(maxlen, bytes);
                     bytes.writeLimit(bytes.writePosition() + maxlen);
