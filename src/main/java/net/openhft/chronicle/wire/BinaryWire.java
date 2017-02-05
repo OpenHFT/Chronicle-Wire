@@ -292,7 +292,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case BinaryWireHighCode.FIELD0:
             case BinaryWireHighCode.FIELD1:
-                @Nullable StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, acquireStringBuilder(), false);
+                @Nullable StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH.name(), ANY_CODE_MATCH.code(), acquireStringBuilder(), false);
                 wire.write(fsb);
                 break;
 
@@ -363,14 +363,25 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @NotNull
     @Override
+    public ValueIn read(String fieldName) {
+        read(fieldName, fieldName.hashCode(), null);
+        return valueIn;
+    }
+
+    @NotNull
+    @Override
     public ValueIn read() {
-        readField(acquireStringBuilder(), ANY_CODE_MATCH);
+        readField(acquireStringBuilder(), null, ANY_CODE_MATCH.code());
         return valueIn;
     }
 
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
+        return read(key.name(), key.code(), key.defaultValue());
+    }
+
+    private ValueIn read(CharSequence keyName, int keyCode, Object defaultValue) {
         ValueInState curr = valueIn.curr();
         @NotNull StringBuilder sb = acquireStringBuilder();
         // did we save the position last time
@@ -379,12 +390,11 @@ public class BinaryWire extends AbstractWire implements Wire {
             bytes.readPosition(curr.savedPosition() - 1);
             curr.savedPosition(0L);
         }
-        @NotNull CharSequence name = key.name();
         while (bytes.readRemaining() > 0) {
             long position = bytes.readPosition();
             // at the current position look for the field.
-            readField(sb, key);
-            if (sb.length() == 0 || StringUtils.isEqual(sb, name))
+            readField(sb, keyName, keyCode);
+            if (sb.length() == 0 || StringUtils.isEqual(sb, keyName))
                 return valueIn;
 
             // if no old field nor current field matches, set to default values.
@@ -394,16 +404,16 @@ public class BinaryWire extends AbstractWire implements Wire {
             consumePadding();
         }
 
-        return read2(key, curr, sb, name);
+        return read2(keyName, keyCode, defaultValue, curr, sb, keyName);
     }
 
-    protected ValueIn read2(@NotNull WireKey key, @NotNull ValueInState curr, @NotNull StringBuilder sb, CharSequence name) {
+    protected ValueIn read2(CharSequence keyName, int keyCode, Object defaultValue, @NotNull ValueInState curr, @NotNull StringBuilder sb, CharSequence name) {
         long position2 = bytes.readLimit();
 
         // if not a match go back and look at old fields.
         for (int i = 0; i < curr.unexpectedSize(); i++) {
             bytes.readPosition(curr.unexpected(i));
-            readField(sb, key);
+            readField(sb, keyName, keyCode);
             if (sb.length() == 0 || StringUtils.isEqual(sb, name)) {
                 // if an old field matches, remove it, save the current position
                 curr.removeUnexpected(i);
@@ -415,21 +425,21 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         if (defaultValueIn == null)
             defaultValueIn = new DefaultValueIn(this);
-        defaultValueIn.wireKey = key;
+        defaultValueIn.defaultValue = defaultValue;
         return defaultValueIn;
     }
 
     @NotNull
     @Override
     public ValueIn readEventName(@NotNull StringBuilder name) {
-        readField(name, ANY_CODE_MATCH);
+        readField(name, null, ANY_CODE_MATCH.code());
         return valueIn;
     }
 
     @NotNull
     @Override
     public ValueIn read(@NotNull StringBuilder name) {
-        readField(name, ANY_CODE_MATCH);
+        readField(name, null, ANY_CODE_MATCH.code());
         return valueIn;
     }
 
@@ -452,9 +462,9 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @Nullable
-    private StringBuilder readField(@NotNull StringBuilder name, @NotNull WireKey key) {
+    private StringBuilder readField(@NotNull StringBuilder name, CharSequence keyName, int keyCode) {
         int peekCode = peekCodeAfterPadding();
-        return readField(peekCode, key, name, true);
+        return readField(peekCode, keyName, keyCode, name, true);
     }
 
     private int peekCodeAfterPadding() {
@@ -566,7 +576,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         return bytes.peekUnsignedByte();
     }
 
-    private StringBuilder readField(int peekCode, @NotNull WireKey key, @NotNull StringBuilder sb, boolean missingOk) {
+    private StringBuilder readField(int peekCode, CharSequence keyName, int keyCode, @NotNull StringBuilder sb, boolean missingOk) {
         sb.setLength(0);
         switch (peekCode >> 4) {
             case BinaryWireHighCode.END_OF_STREAM:
@@ -574,7 +584,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case BinaryWireHighCode.CONTROL:
             case BinaryWireHighCode.SPECIAL:
-                return readSpecialField(peekCode, key, sb);
+                return readSpecialField(peekCode, keyName, keyCode, sb);
 
             case BinaryWireHighCode.FIELD0:
             case BinaryWireHighCode.FIELD1:
@@ -605,12 +615,12 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @Nullable
-    private StringBuilder readSpecialField(int peekCode, @NotNull WireKey key, @NotNull StringBuilder sb) {
+    private StringBuilder readSpecialField(int peekCode, CharSequence keyName, int keyCode, @NotNull StringBuilder sb) {
         switch (peekCode) {
             case FIELD_NUMBER:
                 bytes.uncheckedReadSkipOne();
                 long fieldId = bytes.readStopBit();
-                return readFieldNumber(key, sb, fieldId);
+                return readFieldNumber(keyName, keyCode, sb, fieldId);
             case FIELD_NAME_ANY:
             case EVENT_NAME:
                 bytes.uncheckedReadSkipOne();
@@ -646,7 +656,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @NotNull
-    protected StringBuilder readFieldNumber(@NotNull WireKey key, @NotNull StringBuilder sb, long fieldId) {
+    protected StringBuilder readFieldNumber(CharSequence keyName, int keyCode, @NotNull StringBuilder sb, long fieldId) {
         if (valueIn instanceof DeltaValueIn) {
             @NotNull DeltaValueIn in = (DeltaValueIn) valueIn;
             if (fieldId >= 0 && fieldId < in.inField.length) {
@@ -656,15 +666,15 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
-        if (key == ANY_CODE_MATCH) {
+        if (keyCode == ANY_CODE_MATCH.code()) {
             sb.append(fieldId);
             return sb;
         }
-        int codeMatch = key.code();
+        int codeMatch = keyCode;
         if (fieldId != codeMatch)
             return sb;
 
-        sb.append(key.name());
+        sb.append(keyName);
         return sb;
     }
 
@@ -719,7 +729,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case EVENT_NAME:
             case FIELD_NAME_ANY:
-                @Nullable StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH, acquireStringBuilder(), false);
+                @Nullable StringBuilder fsb = readField(peekCode, null, ANY_CODE_MATCH.code(), acquireStringBuilder(), true);
                 wire.write(fsb);
                 break;
 
@@ -2023,7 +2033,10 @@ public class BinaryWire extends AbstractWire implements Wire {
                 }
 
                 default: {
-                    @Nullable StringBuilder text = readText(code, acquireStringBuilder());
+                    StringBuilder sb = acquireStringBuilder();
+                    @Nullable StringBuilder text = ((code & 0xE0) == 0xE0)
+                            ? getStringBuilder(code, sb)
+                            : readText(code, sb);
                     return text == null ? null : WireInternal.INTERNER.intern(text);
                 }
             }

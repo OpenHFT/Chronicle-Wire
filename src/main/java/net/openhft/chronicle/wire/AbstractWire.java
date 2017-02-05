@@ -257,11 +257,10 @@ public abstract class AbstractWire implements Wire {
     public long writeHeader(int length, int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue
             lastPosition) throws TimeoutException, EOFException {
 
-        if (insideHeader)
-            throw new AssertionError("you cant put a header inside a header, check that " +
+        assert !insideHeader : "you cant put a header inside a header, check that " +
                     "you have not nested the documents. If you are using Chronicle-Queue please " +
                     "ensure that you have a unique instance of the Appender per thread, in " +
-                    "other-words you can not share appenders across threads.");
+                "other-words you can not share appenders across threads.";
 
         insideHeader = true;
         try {
@@ -289,7 +288,6 @@ public abstract class AbstractWire implements Wire {
 //                System.out.println(Thread.currentThread()+" last pos: "+lastPositionValue+" hdr "+headerNumber);
                 }
             }
-
             return writeHeader0(length, safeLength, timeout, timeUnit);
         } catch (Throwable t) {
             insideHeader = false;

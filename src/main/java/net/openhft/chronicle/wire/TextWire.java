@@ -478,6 +478,10 @@ public class TextWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
+        return read(key.name(), key.code(), key.defaultValue());
+    }
+
+    private ValueIn read(CharSequence keyName, int keyCode, Object defaultValue) {
         consumePadding();
         ValueInState curr = valueIn.curr();
         @NotNull StringBuilder sb = acquireStringBuilder();
@@ -487,12 +491,11 @@ public class TextWire extends AbstractWire implements Wire {
             bytes.readPosition(curr.savedPosition() - 1);
             curr.savedPosition(0L);
         }
-        @NotNull CharSequence name = key.name();
         while (bytes.readRemaining() > 0) {
             long position = bytes.readPosition();
             // at the current position look for the field.
             readField(sb);
-            if (StringUtils.equalsCaseIgnore(sb, name))
+            if (StringUtils.equalsCaseIgnore(sb, keyName))
                 return valueIn;
             if (sb.length() == 0) {
                 if (curr.unexpectedSize() > 0)
@@ -508,10 +511,10 @@ public class TextWire extends AbstractWire implements Wire {
             consumePadding(1);
         }
 
-        return read2(key, curr, sb, name);
+        return read2(keyName, keyCode, defaultValue, curr, sb, keyName);
     }
 
-    protected ValueIn read2(@NotNull WireKey key, @NotNull ValueInState curr, @NotNull StringBuilder sb, CharSequence name) {
+    protected ValueIn read2(CharSequence keyName, int keyCode, Object defaultValue, @NotNull ValueInState curr, @NotNull StringBuilder sb, CharSequence name) {
         long position2 = bytes.readPosition();
 
         // if not a match go back and look at old fields.
@@ -529,7 +532,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         if (defaultValueIn == null)
             defaultValueIn = new DefaultValueIn(this);
-        defaultValueIn.wireKey = key;
+        defaultValueIn.defaultValue = defaultValue;
         return defaultValueIn;
     }
 

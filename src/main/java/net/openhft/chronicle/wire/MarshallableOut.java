@@ -82,7 +82,7 @@ public interface MarshallableOut {
      * @param writer to write
      */
     default void writeDocument(@NotNull WriteMarshallable writer) throws UnrecoverableTimeoutException {
-        try (@NotNull DocumentContext dc = writingDocument()) {
+        try (@NotNull DocumentContext dc = writingDocument(false)) {
             Wire wire = dc.wire();
             writer.writeMarshallable(wire);
         }
