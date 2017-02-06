@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -494,6 +495,8 @@ public interface ValueOut {
             return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), value.getClass());
         } else if (value instanceof Serializable) {
             return typedMarshallable((Serializable) value);
+        } else if (value instanceof ByteBuffer) {
+            return object(BytesStore.wrap((ByteBuffer) value));
         } else {
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +
