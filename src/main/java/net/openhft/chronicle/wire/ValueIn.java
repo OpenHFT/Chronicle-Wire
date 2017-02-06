@@ -453,7 +453,7 @@ public interface ValueIn {
         }
         if (clazz == null)
             clazz = Object.class;
-        SerializationStrategy strategy = Wires.CLASS_STRATEGY.get(clazz);
+        SerializationStrategy<E> strategy = Wires.CLASS_STRATEGY.get(clazz);
         BracketType brackets = strategy.bracketType();
         if (brackets == BracketType.UNKNOWN)
             brackets = getBracketType();
@@ -488,7 +488,7 @@ public interface ValueIn {
                 if (using == null)
                     using = (E) strategy.newInstance(clazz);
 
-                return sequence(using, strategy) ? readResolve(using) : null;
+                return sequence(using, strategy::readUsing) ? readResolve(using) : null;
 
             case NONE:
                 @NotNull final E e = (E) strategy.readUsing(using, this);

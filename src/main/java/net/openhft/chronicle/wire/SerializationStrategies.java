@@ -235,14 +235,13 @@ public enum SerializationStrategies implements SerializationStrategy {
             long pos = bytes.readPosition();
             while (in.hasNextSequenceItem()) {
                 @Nullable final Object object = in.object();
-                set.add(object);
-
                 // make sure we are progressing.
                 long pos2 = bytes.readPosition();
                 if (pos2 <= pos)
                     if (!Jvm.isDebug())
                         throw new IllegalStateException(bytes.toDebugString());
                 pos = pos2;
+                set.add(object);
             }
             return o;
         }

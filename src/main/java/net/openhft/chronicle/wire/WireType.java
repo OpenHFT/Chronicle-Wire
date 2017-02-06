@@ -66,7 +66,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         @Nullable
         @Override
         public <T> T fromString(@NotNull CharSequence cs) {
-            Bytes bytes = getBytes2();
+            Bytes bytes = Bytes.allocateElasticDirect(cs.length());
             bytes.appendUtf8(cs);
             if (bytes.startsWith(PREABLE)) {
                 truncatePreable(bytes);
