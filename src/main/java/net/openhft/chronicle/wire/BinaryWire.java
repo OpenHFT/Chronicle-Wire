@@ -364,7 +364,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public ValueIn read(String fieldName) {
-        read(fieldName, fieldName.hashCode(), null);
+        read(fieldName, fieldName.hashCode(), null, Function.identity());
         return valueIn;
     }
 
@@ -378,10 +378,10 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
-        return read(key.name(), key.code(), key.defaultValue());
+        return read(key.name(), key.code(), key, WireKey::defaultValue);
     }
 
-    private ValueIn read(CharSequence keyName, int keyCode, Object defaultValue) {
+    private <T> ValueIn read(CharSequence keyName, int keyCode, T defaultSource, Function<T, Object> defaultLookup) {
         ValueInState curr = valueIn.curr();
         @NotNull StringBuilder sb = acquireStringBuilder();
         // did we save the position last time
@@ -404,10 +404,16 @@ public class BinaryWire extends AbstractWire implements Wire {
             consumePadding();
         }
 
-        return read2(keyName, keyCode, defaultValue, curr, sb, keyName);
+        return read2(keyName, keyCode, defaultSource, defaultLookup, curr, sb, keyName);
     }
 
-    protected ValueIn read2(CharSequence keyName, int keyCode, Object defaultValue, @NotNull ValueInState curr, @NotNull StringBuilder sb, CharSequence name) {
+    protected <T> ValueIn read2(CharSequence keyName,
+                                int keyCode,
+                                T defaultSource,
+                                Function<T, Object> defaultLookup,
+                                @NotNull ValueInState curr,
+                                @NotNull StringBuilder sb,
+                                CharSequence name) {
         long position2 = bytes.readLimit();
 
         // if not a match go back and look at old fields.
@@ -425,7 +431,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         if (defaultValueIn == null)
             defaultValueIn = new DefaultValueIn(this);
-        defaultValueIn.defaultValue = defaultValue;
+        defaultValueIn.defaultValue = defaultLookup.apply(defaultSource);
         return defaultValueIn;
     }
 
