@@ -33,6 +33,10 @@ public class ReadDocumentContext implements DocumentContext {
     private boolean metaData;
     private long readPosition, readLimit;
 
+    public ReadDocumentContext(@Nullable Wire wire) {
+        this(wire, wire != null && wire.getValueIn() instanceof BinaryWire.DeltaValueIn);
+    }
+
     public ReadDocumentContext(@Nullable Wire wire, boolean ensureFullRead) {
         this.wire = (AbstractWire) wire;
         this.ensureFullRead = ensureFullRead;
