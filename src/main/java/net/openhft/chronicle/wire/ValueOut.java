@@ -648,5 +648,9 @@ public interface ValueOut {
         return wireOut();
     }
 
+    default void resetBetweenDocuments() {
+        resetState();
+    }
+
     void resetState();
 }

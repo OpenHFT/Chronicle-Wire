@@ -78,7 +78,7 @@ public enum WireInternal {
 
     public static long writeData(@NotNull WireOut wireOut, boolean metaData, boolean notComplete,
                                  @NotNull WriteMarshallable writer) {
-        wireOut.getValueOut().resetState();
+        wireOut.getValueOut().resetBetweenDocuments();
         assert wireOut.startUse();
         long position;
         try {
