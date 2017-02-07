@@ -89,7 +89,7 @@ public class TextWire extends AbstractWire implements Wire {
     protected final TextValueOut valueOut = createValueOut();
     protected final TextValueIn valueIn = createValueIn();
     private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
-    private final ReadDocumentContext readContext = new ReadDocumentContext(this);
+    private final ReadDocumentContext readContext = new ReadDocumentContext(this, false);
     private final StringBuilder sb = new StringBuilder();
     protected long lineStart = 0;
     DefaultValueIn defaultValueIn;

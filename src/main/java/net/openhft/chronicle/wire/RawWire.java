@@ -49,7 +49,7 @@ public class RawWire extends AbstractWire implements Wire {
     private final RawValueOut valueOut = new RawValueOut();
     private final RawValueIn valueIn = new RawValueIn();
     private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
-    private final ReadDocumentContext readContext = new ReadDocumentContext(this);
+    private final ReadDocumentContext readContext = new ReadDocumentContext(this, false);
     boolean use8bit;
     private ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
     @Nullable
@@ -571,6 +571,7 @@ public class RawWire extends AbstractWire implements Wire {
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
             return RawWire.this;
         }
+
         @NotNull
         @Override
         public WireOut marshallable(@NotNull WriteMarshallable object) {

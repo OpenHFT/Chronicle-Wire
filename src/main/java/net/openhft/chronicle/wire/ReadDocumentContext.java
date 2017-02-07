@@ -27,13 +27,15 @@ import static net.openhft.chronicle.wire.Wires.lengthOf;
  */
 public class ReadDocumentContext implements DocumentContext {
     protected AbstractWire wire;
+    private final boolean ensureFullRead;
     protected boolean present, notComplete;
     long start = -1;
     private boolean metaData;
     private long readPosition, readLimit;
 
-    public ReadDocumentContext(@Nullable Wire wire) {
+    public ReadDocumentContext(@Nullable Wire wire, boolean ensureFullRead) {
         this.wire = (AbstractWire) wire;
+        this.ensureFullRead = ensureFullRead;
     }
 
     @Override
@@ -67,6 +69,13 @@ public class ReadDocumentContext implements DocumentContext {
 
     @Override
     public void close() {
+
+        if (ensureFullRead) {
+            while (wire.hasMore()) {
+                wire.read().skipValue();
+            }
+        }
+
         start = -1;
         if (readLimit > 0 && wire != null) {
             @NotNull final Bytes<?> bytes = wire.bytes();
