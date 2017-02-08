@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,18 +75,29 @@ public class ReadDocumentContext implements DocumentContext {
     @Override
     public void close() {
 
-        if (ensureFullRead) {
-            while (wire.hasMore()) {
-                wire.read().skipValue();
+        if (ensureFullRead && wire.hasMore()) {
+
+            // we have to read back from the start as close may have been called in the middle of reading a value
+            wire.bytes().readPosition(start+4);
+
+            try {
+                while (wire.hasMore()) {
+                    wire.read().skipValue();
+                }
+            } catch (Exception e) {
+                Jvm.warn().on(getClass(), e);
             }
         }
 
         start = -1;
-        if (readLimit > 0 && wire != null) {
+        if (readLimit > 0 && wire != null)
+
+        {
             @NotNull final Bytes<?> bytes = wire.bytes();
             bytes.readLimit(readLimit);
             bytes.readPosition(readPosition);
         }
+
         present = false;
     }
 
