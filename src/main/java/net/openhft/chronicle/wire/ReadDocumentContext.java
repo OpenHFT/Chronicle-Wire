@@ -77,7 +77,7 @@ public class ReadDocumentContext implements DocumentContext {
 
         if (ensureFullRead && wire.hasMore()) {
 
-            // we have to read back from the start as close may have been called in the middle of reading a value
+            // we have to read back from the start, as close may have been called in the middle of reading a value
             wire.bytes().readPosition(start+4);
 
             try {
