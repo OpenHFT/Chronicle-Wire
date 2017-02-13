@@ -112,8 +112,6 @@ public class ReadDocumentContext implements DocumentContext {
     }
 
     public void start() {
-
-//        assert wire.startUse();
         wire.getValueOut().resetBetweenDocuments();
         readPosition = readLimit = -1;
         @NotNull final Bytes<?> bytes = wire.bytes();
