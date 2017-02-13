@@ -72,16 +72,10 @@ public class ReadDocumentContext implements DocumentContext {
         return wire;
     }
 
-    @Override
-    public boolean isClosed() {
-        return start == -1;
-    }
 
     @Override
     public void close() {
 
-        if (isClosed())
-            return;
 
         AbstractWire wire0 = this.wire;
         if (ensureFullRead && wire0 != null && wire0.hasMore()) {
