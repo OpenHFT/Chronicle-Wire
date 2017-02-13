@@ -84,23 +84,20 @@ public class ReadDocumentContext implements DocumentContext {
                 // we have to read back from the start, as close may have been called in
                 // the middle of reading a value
                 wire0.bytes().readPosition(start);
+                wire0.bytes().writeSkip(4);
+                while (wire0.hasMore()) {
 
-                //   System.out.println(Wires.fromSizePrefixedBlobs(wire0));
+                    final StringBuilder value = Wires.acquireStringBuilder();
+                    final ValueIn read = wire0.read();
 
-                try (DocumentContext dc = wire0.readingDocument()) {
-                    while (dc.wire().hasMore()) {
-
-                        final StringBuilder value = Wires.acquireStringBuilder();
-                        ValueIn read = dc.wire().read();
-
-                        if (read.isTyped()) {
-                            read.skipValue();
-                        } else
-                            read.text(value);
-                    }
+                    if (read.isTyped()) {
+                        read.skipValue();
+                    } else
+                        read.text(value);  // todo remove this and use skipValue
                 }
-            } catch (Throwable e) {
-                Jvm.warn().on(getClass(), e);
+
+            } catch (Exception e) {
+                Jvm.debug().on(getClass(), e);
             }
         }
 
