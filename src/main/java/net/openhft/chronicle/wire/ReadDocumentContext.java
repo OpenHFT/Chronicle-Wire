@@ -85,6 +85,8 @@ public class ReadDocumentContext implements DocumentContext {
                 // the middle of reading a value
                 wire0.bytes().readPosition(start);
 
+                //   System.out.println(Wires.fromSizePrefixedBlobs(wire0));
+
                 try (DocumentContext dc = wire0.readingDocument()) {
                     while (dc.wire().hasMore()) {
 
