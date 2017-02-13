@@ -75,23 +75,30 @@ public class ReadDocumentContext implements DocumentContext {
 
     @Override
     public void close() {
-
+        long readLimit = this.readLimit;
+        long readPosition = this.readPosition;
 
         AbstractWire wire0 = this.wire;
-        if (ensureFullRead && wire0 != null && wire0.hasMore()) {
-            long pos = wire0.bytes().readPosition();
+        if (ensureFullRead && wire0 != null && !wire0.isEmpty()) {
             try {
                 // we have to read back from the start, as close may have been called in
                 // the middle of reading a value
-                wire0.bytes().readPosition(start + 4);
+                wire0.bytes().readPosition(start);
 
-                while (wire0.hasMore()) {
-                    wire0.read().skipValue();
+                try (DocumentContext dc = wire0.readingDocument()) {
+                    while (dc.wire().hasMore()) {
+
+                        final StringBuilder value = Wires.acquireStringBuilder();
+                        ValueIn read = dc.wire().read();
+
+                        if (read.isTyped()) {
+                            read.skipValue();
+                        } else
+                            read.text(value);
+                    }
                 }
             } catch (Throwable e) {
                 Jvm.warn().on(getClass(), e);
-            } finally {
-                wire0.bytes().readPosition(pos);
             }
         }
 

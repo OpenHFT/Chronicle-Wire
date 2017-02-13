@@ -96,6 +96,28 @@ public class WireTests {
 
 
     @Test
+    public void testSkipValueWithNumbersAndStrings() {
+
+        final Bytes b = Bytes.elasticByteBuffer();
+        final Wire wire = wireType.apply(b);
+
+        wire.write("value1").text("text");
+        wire.write("number").int64(125);
+
+        StringBuilder field;
+
+        field = new StringBuilder();
+        wire.read(field).skipValue();
+        System.out.println("read field=" + field.toString());
+
+        field = new StringBuilder();
+        wire.read(field).skipValue();
+        System.out.println("read field=" + field.toString());
+
+    }
+
+
+    @Test
     public void testWriteNull() {
 
         final Bytes b = Bytes.elasticByteBuffer();
