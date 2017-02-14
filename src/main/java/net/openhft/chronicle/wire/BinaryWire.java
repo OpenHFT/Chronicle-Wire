@@ -2252,41 +2252,69 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public long readLength() {
             // TODO handle non length types as well.
-            for (; ; ) {
-                int code = peekCode();
-                switch (code) {
-                    case BYTES_LENGTH8:
-                        bytes.uncheckedReadSkipOne();
-                        return bytes.uncheckedReadUnsignedByte();
 
-                    case BYTES_LENGTH16:
-                        bytes.uncheckedReadSkipOne();
-                        return bytes.readUnsignedShort();
+            int code = peekCode();
+            switch (code) {
 
-                    case BYTES_LENGTH32:
-                        bytes.uncheckedReadSkipOne();
-                        return bytes.readUnsignedInt();
+                case BYTES_LENGTH8:
+                    bytes.uncheckedReadSkipOne();
+                    return bytes.uncheckedReadUnsignedByte();
 
-                    case TYPE_PREFIX:
-                        bytes.uncheckedReadSkipOne();
-                        long len = bytes.readStopBit();
-                        bytes.readSkip(len);
-                        break;
+                case BYTES_LENGTH16:
+                    bytes.uncheckedReadSkipOne();
+                    return bytes.readUnsignedShort();
 
-                    case PADDING:
-                    case PADDING32:
-                    case COMMENT:
-                        consumePadding();
-                        break;
+                case BYTES_LENGTH32:
+                    bytes.uncheckedReadSkipOne();
+                    return bytes.readUnsignedInt();
 
-                    case -1:
-                        return 0;
+                case TYPE_PREFIX:
+                    bytes.uncheckedReadSkipOne();
+                    long len = bytes.readStopBit();
+                    bytes.readSkip(len);
+                    return readLength();
+                case FALSE:
+                case TRUE:
+                case UINT8:
+                case INT8:
+                case FLOAT_SET_LOW_0:
+                case FLOAT_SET_LOW_2:
+                case FLOAT_SET_LOW_4:
+                    return 1;
+                case UINT16:
+                case INT16:
+                    return 2;
+                case FLOAT32:
+                case UINT32:
+                case INT32:
+                    return 4;
+                case FLOAT64:
+                case INT64:
+                    return 8;
 
-                    default:
-                        System.out.println("code=" + code + ", bytes=" + bytes.toHexString());
-                        return -1;
+                case PADDING:
+                case PADDING32:
+                case COMMENT:
+                    consumePadding();
+                    return readLength();
+
+                case FLOAT_STOP_2:
+                case FLOAT_STOP_4:
+                case FLOAT_STOP_6: {
+                    if (bytes.readRemaining() > 1) {
+                        byte b = bytes.readByte(bytes.readPosition() + 1);
+                        return b >= 0 ? 1 : -1;
+                    }
+                    return 1;
                 }
+                case -1:
+                    return 0;
+
+                default:
+                    //System.out.println("code=" + code + ", bytes=" + bytes.toHexString());
+                    return -1;
             }
+
         }
 
         @NotNull
