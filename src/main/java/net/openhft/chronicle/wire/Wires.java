@@ -108,14 +108,19 @@ public enum Wires {
     }
 
     public static String fromSizePrefixedBlobs(@NotNull DocumentContext dc) {
+
+        if (!dc.isPresent())
+            return "";
+        
         Wire wire = dc.wire();
         @NotNull Bytes<?> bytes = wire.bytes();
         if (wire instanceof TextWire) {
             return bytes.toString();
         }
-        long headerPosition = bytes.readPosition() - 4;
+        long headerPosition =   (dc instanceof ReadDocumentContext) ?  ((ReadDocumentContext) dc).start : bytes.readPosition() - 4;
         int length = Wires.lengthOf(bytes.readInt(headerPosition));
         return WireDumper.of(wire).asString(headerPosition, (long) (length + 4));
+
     }
 
     public static String fromSizePrefixedBlobs(@NotNull WireIn wireIn) {
