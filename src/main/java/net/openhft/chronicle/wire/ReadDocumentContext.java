@@ -80,19 +80,8 @@ public class ReadDocumentContext implements DocumentContext {
 
         AbstractWire wire0 = this.wire;
 
-        if (isPresent() && ensureFullRead && wire0.hasMore()) {
-            try {
-                // we have to read back from the start, as close may have been called in
-                // the middle of reading a value
-                wire0.bytes().readPosition(start);
-                wire0.bytes().readSkip(4);
-                while (wire0.hasMore()) {
-                    wire0.read().skipValue();
-                }
-            } catch (Exception e) {
-                Jvm.warn().on(getClass(), e);
-            }
-        }
+        if (isPresent() && ensureFullRead && wire0.hasMore())
+            deltaWireRead(wire0);
 
         start = -1;
         if (readLimit > 0 && wire0 != null) {
@@ -102,6 +91,26 @@ public class ReadDocumentContext implements DocumentContext {
         }
 
         present = false;
+    }
+
+    /**
+     * if the whole of the document was not read by the call-site code, it has to be full re-read again because delta wire
+     * requires that every message is read, in-order to do the deltaing
+     *
+     * @param wire0
+     */
+    public void deltaWireRead(AbstractWire wire0) {
+        try {
+            // we have to read back from the start, as close may have been called in
+            // the middle of reading a value
+            wire0.bytes().readPosition(start);
+            wire0.bytes().readSkip(4);
+            while (wire0.hasMore()) {
+                wire0.read().skipValue();
+            }
+        } catch (Exception e) {
+            Jvm.warn().on(getClass(), e);
+        }
     }
 
     public void start() {
