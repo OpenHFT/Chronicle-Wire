@@ -104,6 +104,10 @@ public class ReadDocumentContext implements DocumentContext {
             // we have to read back from the start, as close may have been called in
             // the middle of reading a value
             wire0.bytes().readPosition(start);
+            if (wire0.bytes().readRemaining() < 4) {
+                Jvm.warn().on(getClass(), "corrupt message");
+                return;
+            }
             wire0.bytes().readSkip(4);
             while (wire0.hasMore()) {
                 wire0.read().skipValue();
