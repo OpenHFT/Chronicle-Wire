@@ -80,7 +80,7 @@ public class ReadDocumentContext implements DocumentContext {
 
         AbstractWire wire0 = this.wire;
 
-        if (isPresent() && ensureFullRead && wire0.hasMore())
+        if (isPresent() && ensureFullRead && wire0.hasMore() && start > -1)
             deltaWireRead(wire0);
 
         start = -1;
@@ -103,12 +103,7 @@ public class ReadDocumentContext implements DocumentContext {
         try {
             // we have to read back from the start, as close may have been called in
             // the middle of reading a value
-            wire0.bytes().readPosition(start);
-            if (wire0.bytes().readRemaining() < 4) {
-                Jvm.warn().on(getClass(), "corrupt message");
-                return;
-            }
-            wire0.bytes().readSkip(4);
+            wire0.bytes().readPosition(start + 4);
             while (wire0.hasMore()) {
                 wire0.read().skipValue();
             }
