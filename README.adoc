@@ -3,7 +3,7 @@ Peter Lawrey
 
 == Purpose
 
-Chronicle Wire combines a number of concerns in a consistent manner.
+Chronicle Wire combines a number of concerns in a consistent manner;
 
 - Application configuration. (Using YAML)
 - Data serialization (YAML, binary YAML, JSON, Raw binary data, CSV)
@@ -14,13 +14,13 @@ Chronicle Wire combines a number of concerns in a consistent manner.
 
 Often you want to use these interchangeably.
 
-- configuration includes aliased type information.  This supports easy extension through adding new classes/versions and cross platform through type aliasing.
-- by supporting types, a configuration file can bootstrap itself. You control how the configuration file is decoded. https://github.com/OpenHFT/Chronicle-Engine/blob/master/demo/src/main/resources/engine.yaml[engine.yaml]
-- to send the configuration of a server to a client or visa-versa.
-- to store the configuration of a data store in it's header.
-- in configuration be able to create any object or component.
-- save a configuration after you have changed it.
-- to be able to share data in memory between processes in a thread safe manner.
+- Configuration includes aliased type information.  This supports easy extension through adding new classes/versions and cross platform through type aliasing.
+- By supporting types, a configuration file can bootstrap itself. You control how the configuration file is decoded. https://github.com/OpenHFT/Chronicle-Engine/blob/master/demo/src/main/resources/engine.yaml[engine.yaml]
+- To send the configuration of a server to a client or visa-versa.
+- To store the configuration of a data store in it's header.
+- In configuration, to be able to create any object or component.
+- Save a configuration after you have changed it.
+- To be able to share data in memory between processes in a thread safe manner.
 
 === Design
 
@@ -29,16 +29,16 @@ Chronicle Wire supports a separation of describing what data you want to store a
    Wire handles a variety of formatting options for a wide range of formats.
 
 A key aim of Wire is to support schema changes.  It should make reasonable 
-    attempts to handle
+    attempts to handle:
 
-* optional fields
-* fields in a different order.
-* fields the consumer doesn't expect. Optionally parsing them or ignoring them.
-* more or less data than expected (in field-less formats) 
-* reading a different type to the one written
-* updating fixed length fields, atomically where possible via a "bound" data structure..
+* optional fields,
+* fields in a different order,
+* fields the consumer doesn't expect. Optionally parsing them or ignoring them,
+* more or less data than expected (in field-less formats),
+* reading a different type to the one written,
+* updating fixed length fields, atomically where possible via a "bound" data structure.
 
-It should also be as efficient as possible in the case where any or all of these are true
+It should also be as efficient as possible in the case where any or all of these are true:
 
 * fields are in the order expected.
 * fields are the type expected.
@@ -50,7 +50,7 @@ Wire is designed to make it easy to convert from one wire format to another.
   e.g. you can use fixed width binary data in memory for performance and variable width or text over the network.
   Different TCP connection could use different formats.
   
-Wire also support hybrid wire formats.  e.g. you can have one format embedded in another.
+Wire also supports hybrid wire formats.  e.g. you can have one format embedded in another.
 
 == Support
 
@@ -65,9 +65,10 @@ The text formats include
 * XML (planned)
 * FIX (proposed)
 
-Options include
+Options include:
+
 * field names (e.g. JSON) or field numbers (e.g. FIX)
-* optional fields with a default values can be dropped.
+* optional fields with default values that can be dropped.
 * zero copy access to fields. (planned)
 * thread safe operations in text. (planned)
 
@@ -76,16 +77,18 @@ To support wire format discovery, the first byte should be in the ASCII range,
     
 == Binary Formats
 
-The binary formats include
-* Binary YAML
-* Delta compressing Binary YAML (Chronicle-Wire-Enterprise)
-* typed data without fields.
-* raw untyped fieldless data
-* BSON (Binary JSon) (planned)
+The binary formats include:
 
-Options for Binary format
-* field names or field numbers
-* variable width
+* binary YAML.
+* delta compressing Binary YAML. (Chronicle-Wire-Enterprise)
+* typed data without fields.
+* raw untyped fieldless data.
+* BSON (Binary JSon). (planned)
+
+Options for Binary format:
+
+* field names or field numbers.
+* variable width.
 * optional fields with a default value can be dropped.
 * fixed width data with zero copy support.
 * thread safe operations.
@@ -219,12 +222,12 @@ Wire is built on top of the Bytes library, however Bytes in turn can wrap
 
 == Uses
 
-Wire will be used for
+Wire will be used for:
 
-* file headers
+* file headers.
 * TCP connection headers where the optimal Wire format actually used can be negotiated.
 * message/excerpt contents.
-* the next version of Chronicle Queue
+* the next version of Chronicle Queue.
 * the API for marshalling generated data types.
 
 == Similar projects
@@ -233,18 +236,18 @@ Wire will be used for
 
 Simple Binary Encoding is designed to do what it says.
     It's simple, it's binary and it supports C++ and Java.  It is 
-    designed to be more efficient replacement for FIX. It is not limited to FIX 
+    designed to be a more efficient replacement for FIX. It is not limited to FIX 
     protocols and can be easily extended by updating an XML schema.
     
-XML when it first started didn't use XML for it's own schema files, and it not
+XML, when it first started, didn't use XML for it's own schema files, and it's not
    insignificant that SBE doesn't use SBE for it's schema either.  This is because it is
-   not trying to be human readable, it has XML which though standard isn't designed
+   not trying to be human readable. It has XML which, though standard, isn't designed
    to be particularly human readable either.  Peter Lawrey thinks it's a limitation that it doesn't
    naturally lend itself to a human readable form.
    
-The encoding SBE uses is similar to binary with field numbers and fixed width types.  
-   SBE assumes the field types which can be more compact than Wire's most similar option 
-   (though not as compact as others)
+The encoding SBE uses is similar to binary, with field numbers and fixed width types.  
+   SBE assumes the field types, which can be more compact than Wire's most similar option 
+   (though not as compact as others).
    
 SBE has support for schema changes provided the type of a field doesn't change.
    
@@ -253,8 +256,8 @@ SBE has support for schema changes provided the type of a field doesn't change.
 Message Pack is a packed binary wire format which also supports JSON for 
     human readability and compatibility. It has many similarities to the binary 
     (and JSON) formats of this library.  c.f. Wire is designed to be human readable first, 
-    based on YAML, and has a range of options to make it more efficient, 
-    the most extreme being fixed position binary.
+    based on YAML, and has a range of options to make it more efficient.
+    The most extreme being fixed position binary.
     
  Msgpack has support for embedded binary, whereas Wire has support for
     comments and hints to improve rendering for human consumption.
@@ -289,29 +292,30 @@ The documentation looks well thought out, and it is worth emulating.
 
 NOTE: The Binary YAML format can be automatically converted to YAML without any knowledge of the schema as the messages are self describing.
 
-NOTE: You can parse all the expected fields (if any) and then parse any remaining fields. As YAML support object field "names" or keys these could be Strings or even Object as keys and values.
+NOTE: You can parse all the expected fields (if any) and then parse any remaining fields. As YAML supports object field "names" or keys, these could be Strings or even Object as keys and values.
 
 Based on https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html
 
 Note: It not clear what padding which doesn't take up space on the wire means.
 
-== Design notes
+== Design notes.
 
 See https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html for a comparison to other encoders.
 
 === Schema evolution.
 
-Wire optionally supports;
-- field name changes
-- field order changes.
-- capturing or ignoring unexpected fields.
-- setting of fields to the default if not available.
-- raw messages can be longer or short than expected.
+Wire optionally supports:
 
-The more flexibility, the large the overhead in term of CPU and memory.  
+- field name changes,
+- field order changes,
+- capturing or ignoring unexpected fields,
+- setting of fields to the default, if not available,
+- raw messages can be longer or shorter than expected.
+
+The more flexibility, the larger the overhead in terms of CPU and memory.  
 Wire allows you to dynamically pick the optimal configuration and convert between these options.
 
-=== Zero copy
+=== Zero copy.
 
 Wire supports zero copy random access to fields and direct copy from in memory to the network.
 It also support translation from one wire format to another e.g. switching between fixed length data and variable length data.
@@ -329,26 +333,26 @@ You can access a random field in memory
 | variable length text | no random access 
 |===============
 
-Wire References are relative to the start of the data contained to allow loading in an arbitrary point in memory.
+Wire References are relative to the start of the data contained, to allow loading in an arbitrary point in memory.
 
-=== Safe against malicious input
+=== Safe against malicious input.
 
 Wire has built in tiers of bounds checks to prevent accidental read/writing corrupting the data. 
    It is not complete enough for a security review.
    
-=== Reflection / generic algorithms
+=== Reflection / generic algorithms.
 
-Wire support generic reading and writing of an arbitrary stream. This can be used in combination with predetermined fields.
-   e.g. you can read the fields you know about and asked it to provide the fields you didn't.
+Wire supports generic reading and writing of an arbitrary stream. This can be used in combination with predetermined fields.
+   e.g. you can read the fields you know about and ask it to provide the fields you didn't.
    You can also give generic field names like keys to a map as YAML does.
 
-=== Initialization order
+=== Initialization order.
 
  Wire can handle unknown information like lengths by using padding.  
     It will go back and fill in any data which it wasn't aware of as it was writing the data.
-    e.g. when it writes an object it doesn't know how long it is going to be so it add padding at the start.  
+    e.g. when it writes an object it doesn't know how long it is going to be so it adds padding at the start.  
     Once the object has been written it goes back and overwrites the length. 
-    It can also hand cases where the length was more than needed known as packing.
+    It can also hand cases where the length was more than needed- known as packing.
 
 === Unknown field retention?
 
@@ -360,9 +364,9 @@ Note: there are times when you want to skip/copy an entire field or message with
 === Object-maximumLimit RPC system.
 
 Wire supports references based on a name, number or UUID.  
-   This is useful when including a reference to an object the reader should lookup via another means.
+   This is useful when including a reference to an object the reader should look up via other means.
    
-A common case if when you have a proxy to a remote object and you want to pass or return this in an RPC call.
+- A common case, if when you have a proxy to a remote object and you want to pass or return this in an RPC call.
 
 === Schema language
 
@@ -370,14 +374,14 @@ Wire's schema is not externalised from the code, however it is planned to use YA
 
 === Usable as mutable state
 
-Wire supports storing an applications internal state. 
+Wire supports storing an application's internal state. 
     This will not allow it to grow or shrink. You can't free any of it without copying 
     the pieces you need and discarding the original copy.
     
 === Padding takes space on the wire.
 
 The Wire format chosen determines if there is any padding on the wire. 
-    If you copy the in memory data directly it's format doesn't change. 
+    If you copy the in memory data directly, it's format doesn't change. 
     If you want to drop padding you can copy the message to a wire format without padding.
     You can decide whether the original padding is to be preserved or not if turned back into a format with padding.
 
@@ -386,7 +390,7 @@ We could look at supporting Cap'n'Proto's zero byte removal compression.
 === Unset fields take space on the wire?
 
 Wire supports fields with and without optional fields and automatic means of removing them.  
-    It doesn't support automatically adding them back in as information has been lost.
+    It doesn't support automatically adding them back in, as information has been lost.
 
 === Pointers take space on the wire.
 

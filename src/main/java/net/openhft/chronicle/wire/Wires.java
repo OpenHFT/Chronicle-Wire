@@ -109,7 +109,7 @@ public enum Wires {
 
     public static String fromSizePrefixedBlobs(@NotNull DocumentContext dc) {
         Wire wire = dc.wire();
-        @NotNull Bytes<?> bytes = wire.bytes();
+        Bytes<?> bytes = wire.bytes();
         if (wire instanceof TextWire) {
             return bytes.toString();
         }
