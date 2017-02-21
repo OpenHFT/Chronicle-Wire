@@ -113,7 +113,19 @@ public enum Wires {
         if (wire instanceof TextWire) {
             return bytes.toString();
         }
-        long headerPosition = bytes.readPosition() - 4;
+
+        long headerPosition;
+
+        if (dc instanceof ReadDocumentContext) {
+            long start = ((ReadDocumentContext) dc).lastStart;
+            if (start != -1)
+                headerPosition = start;
+            else
+                headerPosition = bytes.readPosition() - 4;
+        } else
+            headerPosition = bytes.readPosition() - 4;
+
+
         int length = Wires.lengthOf(bytes.readInt(headerPosition));
         return WireDumper.of(wire).asString(headerPosition, (long) (length + 4));
     }
