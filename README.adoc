@@ -1,7 +1,5 @@
 = Wire Format abstraction library
 Peter Lawrey 
-
-=== Purpose
 :toc: manual
 :css-signature: demo
 :toc-placement: preamble
