@@ -324,9 +324,10 @@ It also support translation from one wire format to another e.g. switching betwe
 
 You can access a random field in memory
    e.g. in 2 TB file, page in/pull into CPU cache, only the data relating to you read or write.
-   
-| format | access style 
+
+[options="header"]
 |===============
+| format | access style 
 | fixed length binary | random access without parsing first 
 | variable length binary | random access with partial parsing. i.e. you can skip large portions 
 | fixed length text | random access with parsing 
