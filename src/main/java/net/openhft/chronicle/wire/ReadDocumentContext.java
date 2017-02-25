@@ -82,13 +82,12 @@ public class ReadDocumentContext implements DocumentContext {
 
         AbstractWire wire0 = this.wire;
         if (ensureFullRead && wire0 != null && wire0.hasMore()) {
-            long readPosition1 = wire0.bytes().readPosition();
-            long readLimit1 = wire0.bytes().readLimit();
+           long readPosition1 = wire0.bytes().readPosition();
             try {
                 // we have to read back from the start, as close may have been called in
                 // the middle of reading a value
                 wire0.bytes().readPosition(start);
-                wire0.bytes().writeSkip(4);
+                wire0.bytes().readSkip(4);
                 while (wire0.hasMore()) {
                     final ValueIn read = wire0.read();
                     if (read.isTyped()) {
@@ -99,7 +98,6 @@ public class ReadDocumentContext implements DocumentContext {
             } catch (Exception e) {
                 Jvm.debug().on(getClass(), e);
             } finally {
-                wire0.bytes().readLimit(readLimit1);
                 wire0.bytes().readPosition(readPosition1);
             }
         }
