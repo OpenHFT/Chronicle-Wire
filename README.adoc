@@ -1,6 +1,10 @@
 = Wire Format abstraction library
 Peter Lawrey
 
+:toc: manual
+:css-signature: demo
+:toc-placement: preamble
+
 == Purpose
 
 Chronicle Wire combines a number of concerns in a consistent manner;
