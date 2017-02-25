@@ -4,8 +4,6 @@ Peter Lawrey
 :css-signature: demo
 :toc-placement: preamble
 
-== Purpose
-
 Chronicle Wire combines a number of concerns in a consistent manner;
 
 - Application configuration. (Using YAML)
