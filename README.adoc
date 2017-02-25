@@ -1,9 +1,10 @@
 = Wire Format abstraction library
-Peter Lawrey
+Peter Lawrey 
+:toc: manual
+:css-signature: demo
+:toc-placement: preamble
 
-== Purpose
-
-Chronicle Wire combines a number of concerns in a consistent manner;
+The purpose of Chronicle Wire is to combine a number of concerns in a consistent manner:
 
 - Application configuration. (Using YAML)
 - Data serialization (YAML, binary YAML, JSON, Raw binary data, CSV)
