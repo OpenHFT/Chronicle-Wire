@@ -11,6 +11,10 @@ The purpose of Chronicle Wire is to combine a number of concerns in a consistent
 - Accessing off heap memory in a thread safe manner. (Bind to shared off heap memory)
 - High performance data exchange via binary formats. (Only include as much meta data as you need)
 
+== Design
+
+Chronicle Wire uses Chronicle Bytes for bytes manipulation and Chronicle Core for low level JVM access.
+
 === Why are these concerns conflated?
 
 Often you want to use these interchangeably.
@@ -23,7 +27,7 @@ Often you want to use these interchangeably.
 - Save a configuration after you have changed it.
 - To be able to share data in memory between processes in a thread safe manner.
 
-=== Design
+=== Features
 
 Chronicle Wire supports a separation of describing what data you want to store and retrieve
    and how it should be rendered/parsed.
