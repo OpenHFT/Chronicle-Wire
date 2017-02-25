@@ -4,7 +4,7 @@ Peter Lawrey
 :css-signature: demo
 :toc-placement: preamble
 
-Chronicle Wire combines a number of concerns in a consistent manner;
+The purpose of Chronicle Wire is to combine a number of concerns in a consistent manner:
 
 - Application configuration. (Using YAML)
 - Data serialization (YAML, binary YAML, JSON, Raw binary data, CSV)
