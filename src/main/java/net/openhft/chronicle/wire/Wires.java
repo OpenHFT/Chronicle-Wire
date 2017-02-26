@@ -116,17 +116,31 @@ public enum Wires {
 
         long headerPosition;
 
-        if (dc instanceof ReadDocumentContext) {
-            long start = ((ReadDocumentContext) dc).lastStart;
-            if (start != -1)
-                headerPosition = start;
-            else
+        long length;
+        if ("BufferedTailer".equals(dc.getClass().getSimpleName())) {
+            length = wire.bytes().readLimit() ;
+            int metaDataBit = dc.isMetaData() ? Wires.META_DATA : 0;
+            int header = metaDataBit | toIntU30(length, "Document length %,d out of 30-bit int range.");
+
+            final Bytes b = acquireBytes();
+            b.writeOrderedInt(header);
+            b.write(((ReadDocumentContext) dc).wire.bytes, 0, ((ReadDocumentContext) dc).wire.bytes.readLimit());
+            return WireDumper.of(WireType.valueOf(wire).apply(b)).asString(0, length + 4);
+
+        } else {
+            if (dc instanceof ReadDocumentContext) {
+                long start = ((ReadDocumentContext) dc).lastStart;
+                if (start != -1)
+                    headerPosition = start;
+                else
+                    headerPosition = bytes.readPosition() - 4;
+            } else
                 headerPosition = bytes.readPosition() - 4;
-        } else
-            headerPosition = bytes.readPosition() - 4;
 
 
-        int length = Wires.lengthOf(bytes.readInt(headerPosition));
+            length = Wires.lengthOf(bytes.readInt(headerPosition));
+        }
+
         return WireDumper.of(wire).asString(headerPosition, (long) (length + 4));
     }
 
