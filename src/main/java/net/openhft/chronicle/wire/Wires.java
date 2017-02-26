@@ -59,7 +59,8 @@ public enum Wires {
     public static final int NOT_COMPLETE_UNKNOWN_LENGTH = NOT_COMPLETE | UNKNOWN_LENGTH;
     // value to use when no more data is possible e.g. on a roll.
     public static final int END_OF_DATA = NOT_COMPLETE | META_DATA | UNKNOWN_LENGTH;
-
+    private static Bytes tempBytes = Bytes.elasticByteBuffer();
+    private static Wire tempWire;
     public static final int NOT_INITIALIZED = 0x0;
     public static final Bytes<?> NO_BYTES = new VanillaBytes<>(BytesStore.empty());
     public static final WireIn EMPTY = new BinaryWire(NO_BYTES);
@@ -118,14 +119,20 @@ public enum Wires {
 
         long length;
         if ("BufferedTailer".equals(dc.getClass().getSimpleName())) {
-            length = wire.bytes().readLimit() ;
+            length = wire.bytes().readLimit();
             int metaDataBit = dc.isMetaData() ? Wires.META_DATA : 0;
             int header = metaDataBit | toIntU30(length, "Document length %,d out of 30-bit int range.");
 
-            final Bytes b = acquireBytes();
-            b.writeOrderedInt(header);
-            b.write(((ReadDocumentContext) dc).wire.bytes, 0, ((ReadDocumentContext) dc).wire.bytes.readLimit());
-            return WireDumper.of(WireType.valueOf(wire).apply(b)).asString(0, length + 4);
+            tempBytes.clear();
+            tempBytes.writeOrderedInt(header);
+            tempBytes.write(((ReadDocumentContext) dc).wire.bytes, 0, ((ReadDocumentContext) dc).wire.bytes.readLimit());
+
+            final WireType wireType = WireType.valueOf(wire);
+
+            if (wireType != WireType.valueOf(tempWire))
+                tempWire = wireType.apply(tempBytes);
+
+            return WireDumper.of(tempWire).asString(0, length + 4);
 
         } else {
             if (dc instanceof ReadDocumentContext) {
