@@ -347,9 +347,12 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         return Wires.acquireAnotherBytes();
     }
 
-    @NotNull
-    public static WireType valueOf(Wire wire) {
+    @Nullable
+    public static WireType valueOf(@Nullable Wire wire) {
 
+        if (wire == null)
+            return null;
+        
         if (wire instanceof AbstractAnyWire)
             wire = ((AbstractAnyWire) wire).underlyingWire();
 
