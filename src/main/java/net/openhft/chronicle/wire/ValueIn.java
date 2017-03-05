@@ -289,6 +289,7 @@ public interface ValueIn {
     default <T> T typedMarshallable(@NotNull Function<Class, ReadMarshallable> marshallableFunction)
             throws IORuntimeException {
         @Nullable final Class aClass = typePrefix();
+
         if (ReadMarshallable.class.isAssignableFrom(aClass)) {
             final ReadMarshallable marshallable = marshallableFunction.apply(aClass);
             marshallable(marshallable);

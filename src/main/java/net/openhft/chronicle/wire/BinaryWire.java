@@ -2756,6 +2756,26 @@ public class BinaryWire extends AbstractWire implements Wire {
             throw new UnsupportedOperationException("Used by DeltaWire");
         }
 
+        @Nullable
+        public <T> T typedMarshallable(@NotNull Function<Class, ReadMarshallable> marshallableFunction)
+                throws IORuntimeException {
+
+            int code = peekCode();
+            if (code != TYPE_PREFIX)
+                // todo get delta wire to support Function<Class, ReadMarshallable> correctly
+                return typedMarshallable();
+
+            @Nullable final Class aClass = typePrefix();
+
+            if (ReadMarshallable.class.isAssignableFrom(aClass)) {
+                final ReadMarshallable marshallable = marshallableFunction.apply(aClass);
+                marshallable(marshallable);
+                return (T) marshallable;
+            }
+            return (T) object(null, aClass);
+        }
+
+
         @Override
         public Class typePrefix() {
             int code = peekCode();
