@@ -594,7 +594,10 @@ public interface ValueOut {
     @NotNull
     default WireOut typedScalar(@NotNull Object value) {
         typePrefix(ClassAliasPool.CLASS_ALIASES.nameFor(value.getClass()));
-        if (!(value instanceof CharSequence))
+
+        if (value instanceof Enum)
+            value = ((Enum) value).name();
+        else if (!(value instanceof CharSequence))
             value = value.toString();
 
         text((CharSequence) value);
