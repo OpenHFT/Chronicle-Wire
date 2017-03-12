@@ -66,11 +66,13 @@ public enum WireInternal {
         return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(cs);
     }
 
-    public static StringBuilder acquireStringBuilder() {
+    // these might be used internally so not safe for end users.
+    static StringBuilder acquireStringBuilder() {
         return SBP.acquireStringBuilder();
     }
 
-    public static StringBuilder acquireAnotherStringBuilder(CharSequence cs) {
+    // these might be used internally so not safe for end users.
+    static StringBuilder acquireAnotherStringBuilder(CharSequence cs) {
         StringBuilder sb = ASBP.acquireStringBuilder();
         assert sb != cs;
         return sb;

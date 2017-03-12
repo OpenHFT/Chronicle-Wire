@@ -21,7 +21,9 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import net.minidev.json.JSONObject;
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesMarshallable;
+import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
@@ -217,7 +219,7 @@ public class Data implements Marshallable, BytesMarshallable, Externalizable {
     }
 
     @Override
-    public void readMarshallable(Bytes<?> bytes) {
+    public void readMarshallable(BytesIn bytes) {
         price = bytes.readStopBitDouble();
         longInt = bytes.readStopBit();
         smallInt = (int) bytes.readStopBit();
@@ -228,7 +230,7 @@ public class Data implements Marshallable, BytesMarshallable, Externalizable {
     }
 
     @Override
-    public void writeMarshallable(Bytes bytes) {
+    public void writeMarshallable(BytesOut bytes) {
         bytes.writeStopBit(price)
                 .writeStopBit(longInt)
                 .writeStopBit(smallInt)

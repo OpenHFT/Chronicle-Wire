@@ -17,7 +17,9 @@
 package net.openhft.chronicle.wire.benchmarks;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesMarshallable;
+import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
@@ -120,7 +122,7 @@ public class Data2 implements Marshallable, BytesMarshallable {
     }
 
     @Override
-    public void readMarshallable(Bytes<?> bytes) {
+    public void readMarshallable(BytesIn bytes) {
         price = bytes.readDouble();
         longInt = bytes.readLong();
         smallInt = bytes.readInt();
@@ -131,7 +133,7 @@ public class Data2 implements Marshallable, BytesMarshallable {
     }
 
     @Override
-    public void writeMarshallable(Bytes bytes) {
+    public void writeMarshallable(BytesOut bytes) {
         bytes.writeDouble(price)
                 .writeLong(longInt)
                 .writeInt(smallInt)
