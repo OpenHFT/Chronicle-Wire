@@ -709,7 +709,14 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         public WireIn bytes(@NotNull BytesOut toBytes) {
-            toBytes.clear();
+            return bytes(toBytes, true);
+        }
+
+
+        @Override
+        public WireIn bytes(@NotNull BytesOut toBytes, boolean clearBytes) {
+            if (clearBytes)
+                toBytes.clear();
 
             long length = readLength();
             @NotNull Bytes<?> bytes = wireIn().bytes();
