@@ -168,4 +168,9 @@ public class ReadDocumentContext implements DocumentContext {
         this.start = start;
         this.lastStart = start;
     }
+
+    @Override
+    public String toString() {
+        return Wires.fromSizePrefixedBlobs(this);
+    }
 }
