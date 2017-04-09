@@ -59,8 +59,6 @@ public enum Wires {
     public static final int NOT_COMPLETE_UNKNOWN_LENGTH = NOT_COMPLETE | UNKNOWN_LENGTH;
     // value to use when no more data is possible e.g. on a roll.
     public static final int END_OF_DATA = NOT_COMPLETE | META_DATA | UNKNOWN_LENGTH;
-    private static Bytes tempBytes = Bytes.elasticByteBuffer();
-    private static Wire tempWire;
     public static final int NOT_INITIALIZED = 0x0;
     public static final Bytes<?> NO_BYTES = new VanillaBytes<>(BytesStore.empty());
     public static final WireIn EMPTY = new BinaryWire(NO_BYTES);
@@ -76,8 +74,11 @@ public enum Wires {
     });
     static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(VanillaFieldInfo::lookupClass);
     static final StringBuilderPool SBP = new StringBuilderPool();
+    private static Bytes tempBytes = Bytes.elasticByteBuffer();
+    private static Wire tempWire;
 
     static {
+        CLASS_STRATEGY_FUNCTIONS.add(SerializeEnum.INSTANCE);
         CLASS_STRATEGY_FUNCTIONS.add(SerializeJavaLang.INSTANCE);
         CLASS_STRATEGY_FUNCTIONS.add(SerializeMarshallables.INSTANCE);
         CLASS_STRATEGY_FUNCTIONS.add(SerializeBytes.INSTANCE);
@@ -362,6 +363,22 @@ public enum Wires {
                 default:
                     return null;
             }
+        }
+    }
+
+    enum SerializeEnum implements Function<Class, SerializationStrategy> {
+        INSTANCE;
+
+        @Nullable
+        static SerializationStrategy getSerializationStrategy(@NotNull Class aClass) {
+            if (Enum.class.isAssignableFrom(aClass))
+                return SerializationStrategies.ENUM;
+            return null;
+        }
+
+        @Override
+        public SerializationStrategy apply(@NotNull Class aClass) {
+            return getSerializationStrategy(aClass);
         }
     }
 

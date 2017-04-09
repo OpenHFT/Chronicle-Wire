@@ -364,7 +364,7 @@ public interface ValueOut {
 
     @NotNull
     default <V> WireOut object(Class<V> expectedType, V v) {
-        if (v instanceof WriteMarshallable)
+        if (v instanceof WriteMarshallable && !(v instanceof Enum))
             if (v.getClass() == expectedType)
                 marshallable((WriteMarshallable) v);
             else
@@ -580,10 +580,10 @@ public interface ValueOut {
             case "java.io.File":
                 return text(value.toString());
         }
-        if (value instanceof Marshallable)
-            return marshallable((Marshallable) value);
         if (value instanceof Enum)
             return text(((Enum) value).name());
+        if (value instanceof Marshallable)
+            return marshallable((Marshallable) value);
         if (Object[].class.isAssignableFrom(value.getClass())) {
             @NotNull Class type = (Class) value.getClass().getComponentType();
             return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), Object[].class);
