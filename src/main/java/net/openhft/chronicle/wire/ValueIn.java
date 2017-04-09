@@ -87,6 +87,13 @@ public interface ValueIn {
     @NotNull
     WireIn bytes(@NotNull BytesOut toBytes);
 
+
+    default WireIn bytes(@NotNull BytesOut toBytes, boolean clearBytes) {
+        if (clearBytes)
+            toBytes.clear();
+        return bytes(toBytes);
+    }
+
     @NotNull
     default WireIn bytesLiteral(@NotNull BytesOut toBytes) {
         return bytes(toBytes);

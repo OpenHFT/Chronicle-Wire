@@ -288,8 +288,14 @@ public class ResultSetWireIn implements WireIn {
         @NotNull
         @Override
         public WireIn bytes(@NotNull BytesOut bytes) {
-            bytes.clear();
-            bytes.appendUtf8(text());
+            return bytes(bytes, false);
+        }
+
+        @Override
+        public WireIn bytes(@NotNull BytesOut toBytes, boolean clearBytes) {
+            if (clearBytes)
+                toBytes.clear();
+            toBytes.appendUtf8(text());
             return wireIn();
         }
 

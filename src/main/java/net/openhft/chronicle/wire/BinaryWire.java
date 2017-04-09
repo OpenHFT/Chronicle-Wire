@@ -2051,6 +2051,11 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         public WireIn bytes(@NotNull BytesOut toBytes) {
+            return bytes(toBytes, true);
+        }
+
+        @Override
+        public WireIn bytes(@NotNull BytesOut toBytes, boolean clearBytes) {
             long length = readLength();
             int code = readCode();
             if (code == NULL) {
@@ -2065,14 +2070,16 @@ public class BinaryWire extends AbstractWire implements Wire {
                 int code2 = readCode();
                 if (code2 != U8_ARRAY)
                     cantRead(code);
-                toBytes.clear();
+                if (clearBytes)
+                    toBytes.clear();
                 bytes.readWithLength(length2 - 1, b -> Compression.uncompress(sb, b, toBytes));
                 return wireIn();
 
             }
             if (code != U8_ARRAY)
                 cantRead(code);
-            toBytes.clear();
+            if (clearBytes)
+                toBytes.clear();
             bytes.readWithLength(length - 1, toBytes::write);
             return wireIn();
         }
