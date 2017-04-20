@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.util.ReadResolvable;
 import net.openhft.chronicle.wire.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +13,9 @@ import java.util.function.Supplier;
 
 import static org.junit.Assert.assertSame;
 
+/**
+ * @author greg allen
+ */
 @RunWith(Parameterized.class)
 public class EnumWireTest {
     private final Function<Bytes, Wire> createWire;
@@ -48,7 +52,7 @@ public class EnumWireTest {
 
     private <T extends Marshallable> T roundTrip(Supplier<T> supplier) {
         Wire wire = serialise(createWire, supplier.get());
-        System.out.println(wire.bytes());
+//        System.out.println(wire.bytes());
         T deserialized = supplier.get();
         deserialized.readMarshallable(wire);
         return deserialized;
@@ -62,12 +66,11 @@ public class EnumWireTest {
         NO_MARSH;
     }
 
-    enum MarshAndResolve implements Marshallable/*, ReadResolvable<MarshAndResolve>*/ {
-        MARSH_AND_RESOLVE;
+    static class MarshAndResolve implements Marshallable, ReadResolvable<MarshAndResolve> {
+        static final MarshAndResolve MARSH_AND_RESOLVE = new MarshAndResolve();
 
-        // not support yet but harmless
         public MarshAndResolve readResolve() {
-            return values()[ordinal()];
+            return MARSH_AND_RESOLVE;
         }
     }
 
