@@ -62,6 +62,15 @@ public interface ValueIn {
         return wireIn();
     }
 
+    default char character() {
+        @Nullable CharSequence cs = textTo(Wires.acquireBytes());
+        if (cs == null || cs.length() == 0)
+            return '\u0000';
+
+        return cs.charAt(0);
+    }
+
+
     @NotNull
     default WireIn text(@NotNull Bytes sdo) {
         sdo.clear();
