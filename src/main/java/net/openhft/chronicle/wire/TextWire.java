@@ -2762,10 +2762,8 @@ public class TextWire extends AbstractWire implements Wire {
                     while (hasNext()) {
                         sequence(this, (o, s) -> s.marshallable(r -> {
                             try {
-                                @Nullable @SuppressWarnings("unchecked")
-                                final K k = r.read(() -> "key").typedMarshallable();
-                                @Nullable @SuppressWarnings("unchecked")
-                                final V v = r.read(() -> "value").typedMarshallable();
+                                @Nullable @SuppressWarnings("unchecked") final K k = r.read(() -> "key").typedMarshallable();
+                                @Nullable @SuppressWarnings("unchecked") final V v = r.read(() -> "value").typedMarshallable();
                                 usingMap.put(k, v);
                             } catch (Exception e) {
                                 Jvm.warn().on(getClass(), e);
@@ -2932,6 +2930,12 @@ public class TextWire extends AbstractWire implements Wire {
                 case '+':
                     return valueIn.readNumber();
             }
+
+            if (using instanceof Bytes)
+                return valueIn.textTo((Bytes) using);
+
+            if (using instanceof StringBuilder)
+                return valueIn.textTo((StringBuilder) using);
 
             @Nullable String text = valueIn.text();
             if (text == null || Enum.class.isAssignableFrom(strategy.type()))

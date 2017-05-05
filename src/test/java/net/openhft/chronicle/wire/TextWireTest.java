@@ -1350,11 +1350,33 @@ public class TextWireTest {
         assertEquals("[abc]", Arrays.toString(sa2.strings));
     }
 
+    @Test
+    public void testSetBytesAfterDeserialization() {
+        BytesWrapper bw = Marshallable.fromString("!net.openhft.chronicle.wire.TextWireTest$BytesWrapper {\n" +
+                "  bytes: \"\"\n" +
+                "}\n");
+        bw.bytes("");
+        bw.bytes("hi");
+        bw.bytes("hello");
+        assertEquals("!net.openhft.chronicle.wire.TextWireTest$BytesWrapper {\n" +
+                "  bytes: hello\n" +
+                "}\n", bw.toString());
+    }
+
     enum BWKey implements WireKey {
         field1, field2, field3
     }
 
     static class StringArray implements Marshallable {
         String[] strings;
+    }
+
+    static class BytesWrapper extends AbstractMarshallable {
+        Bytes bytes = allocateElasticDirect();
+
+        public void bytes(CharSequence cs) {
+            bytes.clear();
+            bytes.append(cs);
+        }
     }
 }
