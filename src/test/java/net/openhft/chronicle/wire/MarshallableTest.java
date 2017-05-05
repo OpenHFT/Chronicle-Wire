@@ -18,12 +18,30 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
 public class MarshallableTest {
+    @Test(expected = IllegalArgumentException.class)
+    public void testEmptyFromString() {
+        Marshallable.fromString("");
+    }
+
+    @Ignore("Undefined behaviour")
+    @Test(expected = IllegalArgumentException.class)
+    public void testFromString2() {
+        Object o = Marshallable.fromString("\"");
+    }
+
+    @Ignore("Undefined behaviour")
+    @Test(expected = IllegalArgumentException.class)
+    public void testFromString3() {
+        Object o = Marshallable.fromString("'");
+    }
+
     @Test
     public void testBytesMarshallable() {
         @NotNull Marshallable m = new MyTypes();
@@ -35,6 +53,7 @@ public class MarshallableTest {
 
         m.readMarshallable(wire);
     }
+
     @Test
     public void testEquals() {
         @NotNull final Bytes bytes = nativeBytes();

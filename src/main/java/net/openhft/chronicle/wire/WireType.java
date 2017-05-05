@@ -352,7 +352,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
         if (wire == null)
             return null;
-        
+
         if (wire instanceof AbstractAnyWire)
             wire = ((AbstractAnyWire) wire).underlyingWire();
 
@@ -423,6 +423,8 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
     @Nullable
     public <T> T fromString(@NotNull CharSequence cs) {
+        if (cs.length() == 0)
+            throw new IllegalArgumentException("cannot deserialize an empty string");
         Bytes bytes = getBytes2();
         bytes.appendUtf8(cs);
         Wire wire = apply(bytes);

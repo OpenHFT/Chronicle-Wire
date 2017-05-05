@@ -99,7 +99,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         @Nullable
         @Override
         public Object readUsing(Object o, @NotNull ValueIn in) {
-            return in.objectWithInferredType(o, ANY_NESTED, null);
+            return in.text();
         }
 
         @NotNull
