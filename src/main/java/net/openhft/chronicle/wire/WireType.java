@@ -38,8 +38,13 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A selection of prebuilt wire types.
@@ -440,6 +445,37 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     @Nullable
     public <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
         return (T) (apply(Bytes.wrapForRead(IOTools.readFile(filename))).getValueIn().object(expectedType));
+    }
+
+    public <T> Stream<T> streamFromFile(String filename) throws IOException {
+        return streamFromFile((Class) Marshallable.class, filename);
+    }
+
+    public <T> Stream<T> streamFromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
+        Wire wire = apply(Bytes.wrapForRead(IOTools.readFile(filename)));
+        ValueIn valueIn = wire.getValueIn();
+        return StreamSupport.stream(
+                new Spliterators.AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED | Spliterator.IMMUTABLE) {
+                    @Override
+                    public boolean tryAdvance(Consumer<? super T> action) {
+                        if (valueIn.hasNext()) {
+                            action.accept(valueIn.object(expectedType));
+                            if (wire instanceof TextWire) {
+                                wire.consumePadding();
+                                Bytes<?> bytes = wire.bytes();
+                                if (bytes.peekUnsignedByte() == '-' &&
+                                        bytes.peekUnsignedByte(bytes.readPosition() + 1) == '-' &&
+                                        bytes.peekUnsignedByte(bytes.readPosition() + 2) == '-') {
+                                    bytes.readSkip(3);
+                                    while (bytes.peekUnsignedByte() == '-')
+                                        bytes.readSkip(1);
+                                }
+                            }
+                            return true;
+                        }
+                        return false;
+                    }
+                }, false);
     }
 
     @NotNull

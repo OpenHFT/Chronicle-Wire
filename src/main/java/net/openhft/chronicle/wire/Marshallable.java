@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static net.openhft.chronicle.wire.WireType.READ_ANY;
 import static net.openhft.chronicle.wire.WireType.TEXT;
@@ -57,6 +58,16 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
     @Nullable
     static <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
         return TEXT.fromFile(expectedType, filename);
+    }
+
+    @NotNull
+    static <T> Stream<T> streamFromFile(String filename) throws IOException {
+        return TEXT.streamFromFile(filename);
+    }
+
+    @Nullable
+    static <T> Stream<T> streamFromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
+        return TEXT.streamFromFile(expectedType, filename);
     }
 
     @NotNull
