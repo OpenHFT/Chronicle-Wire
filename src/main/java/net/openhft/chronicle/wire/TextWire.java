@@ -23,7 +23,6 @@ import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.*;
@@ -104,7 +103,7 @@ public class TextWire extends AbstractWire implements Wire {
 
     @NotNull
     public static TextWire fromFile(String name) throws IOException {
-        return new TextWire(Bytes.wrapForRead(IOTools.readFile(name)), true);
+        return new TextWire(BytesUtil.readFile(name), true);
     }
 
     @NotNull

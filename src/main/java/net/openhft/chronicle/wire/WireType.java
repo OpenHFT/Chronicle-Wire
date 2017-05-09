@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.StopCharTesters;
 import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.core.Jvm;
@@ -444,7 +445,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
     @Nullable
     public <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
-        return (T) (apply(Bytes.wrapForRead(IOTools.readFile(filename))).getValueIn().object(expectedType));
+        return (T) (apply(BytesUtil.readFile(filename)).getValueIn().object(expectedType));
     }
 
     public <T> Stream<T> streamFromFile(String filename) throws IOException {
@@ -452,7 +453,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     }
 
     public <T> Stream<T> streamFromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
-        Wire wire = apply(Bytes.wrapForRead(IOTools.readFile(filename)));
+        Wire wire = apply(BytesUtil.readFile(filename));
         ValueIn valueIn = wire.getValueIn();
         return StreamSupport.stream(
                 new Spliterators.AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED | Spliterator.IMMUTABLE) {
@@ -481,7 +482,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     @NotNull
     public <T> Map<String, T> fromFileAsMap(String filename, @NotNull Class<T> tClass) throws IOException {
         @NotNull Map<String, T> map = new LinkedHashMap<>();
-        Wire wire = apply(Bytes.wrapForRead(IOTools.readFile(filename)));
+        Wire wire = apply(BytesUtil.readFile(filename));
         @NotNull StringBuilder sb = new StringBuilder();
         while (wire.hasMore()) {
             wire.readEventName(sb)

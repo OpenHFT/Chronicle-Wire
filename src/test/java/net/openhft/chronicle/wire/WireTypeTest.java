@@ -16,9 +16,8 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -93,7 +92,7 @@ public class WireTypeTest {
             wt.toFile(tmp, tm);
             @Nullable Object o;
             if (wt == WireType.JSON)
-                o = wt.apply(Bytes.wrapForRead(IOTools.readFile(tmp))).getValueIn().object(TestMarshallable.class);
+                o = wt.apply(BytesUtil.readFile(tmp)).getValueIn().object(TestMarshallable.class);
             else
                 o = wt.fromFile(tmp);
 

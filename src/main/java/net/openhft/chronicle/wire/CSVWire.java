@@ -16,11 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.AppendableUtil;
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.StopCharTester;
-import net.openhft.chronicle.bytes.StopCharTesters;
-import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,7 +47,7 @@ public class CSVWire extends TextWire {
 
     @NotNull
     public static CSVWire fromFile(String name) throws IOException {
-        return new CSVWire(Bytes.wrapForRead(IOTools.readFile(name)), true);
+        return new CSVWire(BytesUtil.readFile(name), true);
     }
 
     @NotNull
