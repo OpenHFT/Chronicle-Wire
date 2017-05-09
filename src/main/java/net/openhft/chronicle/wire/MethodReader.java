@@ -21,10 +21,10 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -130,7 +130,9 @@ public class MethodReader implements Closeable {
         } else {
             ReadMarshallable arg;
             try {
-                arg = (ReadMarshallable) msgClass.newInstance();
+                Constructor constructor = msgClass.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                arg = (ReadMarshallable) constructor.newInstance();
             } catch (Exception e) {
                 try {
                     arg = (ReadMarshallable) OS.memory().allocateInstance(msgClass);

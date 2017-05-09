@@ -845,6 +845,12 @@ public class WireMarshaller<T> {
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
             String text = read.text();
+            if (text == null || text.length() < 1) {
+                if (overwrite)
+                    text = "\0";
+                else
+                    return;
+            }
             UNSAFE.putChar(o, offset, text.charAt(0));
         }
 
