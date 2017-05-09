@@ -43,9 +43,6 @@ tid: 1426502826520
 --- !!data
 lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
  */
-        @NotNull Bytes ebytes = Bytes.expect("(\0\0@csp:///service-lookup\n" +
-                "tid: 149873598325\n" +
-                "F\0\0\0lookup: { relativeUri: test, view: !Map types: [ !Integer, !String ] }");
         @NotNull Wire text = new TextWire(bytes);
         writeMessageOne(text);
 
