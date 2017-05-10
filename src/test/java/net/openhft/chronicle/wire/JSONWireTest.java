@@ -17,9 +17,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.After;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -58,6 +60,8 @@ public class JSONWireTest {
                 "{\"name\":\"item2\",\"number1\":2235666,\"number2\":1.0987987},\n" +
                 "{\"name\":\"item3\",\"number1\":3235666,\"number2\":1.12312},\n" +
                 "{\"name\":\"item4\",\"number1\":4235666,\"number2\":1.51231}]", out.toString());
+
+        wire.bytes().release();
     }
 
     @Test
@@ -106,6 +110,8 @@ public class JSONWireTest {
         // fails due to a trailing space if we don't call toString.
         // assertEquals(lists1, lists2);
         assertEquals(lists1.toString(), lists2.toString());
+
+        wire.bytes().release();
     }
 
     @Test
@@ -121,6 +127,8 @@ public class JSONWireTest {
         assertNull(item2.name);
         assertEquals(item1, item2);
         assertEquals(item1.toString(), item2.toString());
+
+        w.bytes().release();
     }
 
     @Test
@@ -139,6 +147,14 @@ public class JSONWireTest {
 
         w2.read("somebytes").text(bb);
         assertEquals(bs, bb);
+
+        w2.bytes().release();
+        bb.release();
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 
     private static class Item extends AbstractMarshallable {

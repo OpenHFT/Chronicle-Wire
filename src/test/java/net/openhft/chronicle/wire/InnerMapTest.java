@@ -18,9 +18,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -60,6 +62,13 @@ public class InnerMapTest {
             @Nullable MyMarshable tm = dc.wire().read(() -> "marshable").typedMarshallable();
             Assert.assertEquals(asString, tm.toString());
         }
+
+        b.release();
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 
     static class MyMarshable extends AbstractMarshallable implements Demarshallable {

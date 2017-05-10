@@ -17,9 +17,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -62,6 +64,8 @@ public class DefaultMarshallerTest {
         oc2.readMarshallable(text);
 
         assertEquals(oc, oc2);
+
+        text.bytes().release();
     }
 
     @Test
@@ -102,6 +106,19 @@ public class DefaultMarshallerTest {
         oc2.readMarshallable(text);
 
         assertEquals(oc, oc2);
+
+        text.bytes().release();
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
+    static enum NestedEnum {
+        ONE,
+        TWO,
+        THREE;
     }
 
     static class DMOuterClass extends AbstractMarshallable {
@@ -166,13 +183,6 @@ public class DefaultMarshallerTest {
             return super.equals(o);
         }
 
-    }
-
-    static enum NestedEnum {
-        ONE,
-        TWO,
-        THREE
-        ;
     }
 
 }

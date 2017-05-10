@@ -17,10 +17,12 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -94,6 +96,7 @@ public class JSON222Test {
                 list.add(object);
                 out.getValueOut().object(object);
 
+                bytes3.release();
             } while (wire.isNotEmptyAfterPadding());
 
             if (fail) {
@@ -124,6 +127,8 @@ public class JSON222Test {
         } catch (Exception e) {
             if (!fail)
                 throw new AssertionError(e);
+        } finally {
+            bytes2.release();
         }
     }
 
@@ -134,5 +139,10 @@ public class JSON222Test {
         } catch (Exception e) {
             throw e;
         }
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 }

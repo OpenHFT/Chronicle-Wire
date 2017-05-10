@@ -17,11 +17,13 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Byteable;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Test;
 
 import java.io.File;
@@ -65,5 +67,10 @@ public class BinaryWireWithMappedBytesTest {
         System.out.println(a + " " + b + " " + c);
 
         bytes.release();
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 }

@@ -18,9 +18,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,6 +71,8 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
             Assert.assertEquals(dto2.two, 2);
             Assert.assertTrue("3".contentEquals(dto2.three));
         }
+
+        wire.bytes().release();
     }
 
     @Test
@@ -90,6 +94,8 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
             Assert.assertEquals(dto2.two, 0);
             Assert.assertEquals(dto2.three, null);
         }
+
+        wire.bytes().release();
     }
 
     @Test
@@ -111,6 +117,13 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
                     .marshallable(dto1);
             Assert.assertEquals(1, dto1.one);
         }
+
+        wire.bytes().release();
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 
     public static class DTO1 extends AbstractMarshallable implements Demarshallable {

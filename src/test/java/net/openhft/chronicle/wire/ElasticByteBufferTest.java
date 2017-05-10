@@ -18,8 +18,10 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -49,5 +51,13 @@ public class ElasticByteBufferTest {
 
         @NotNull String s = stringBuilder.toString();
         Assert.assertTrue(s.contains("some value of more than ten characters"));
+
+        byteBufferBytes.release();
     }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
 }

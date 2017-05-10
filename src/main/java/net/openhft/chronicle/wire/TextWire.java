@@ -57,7 +57,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  */
 public class TextWire extends AbstractWire implements Wire {
 
-    public static final BytesStore TYPE = BytesStore.wrap("!type ");
+    public static final BytesStore TYPE = BytesStore.from("!type ");
     static final String SEQ_MAP = "!seqmap";
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
