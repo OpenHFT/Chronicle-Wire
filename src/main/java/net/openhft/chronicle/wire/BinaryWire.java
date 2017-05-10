@@ -2731,6 +2731,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Nullable
         protected <T> T typedMarshallable0() {
             @Nullable StringBuilder sb = readUtf8();
+            if (sb == null)
+                return null;
             // its possible that the object that you are allocating may not have a
             // default constructor
             final Class clazz;
