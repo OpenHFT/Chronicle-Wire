@@ -98,6 +98,8 @@ public class MethodReader implements Closeable {
             v.wireIn().copyTo(new TextWire(bytes));
             v.wireIn().bytes().readPosition(pos);
             rest = bytes.toString();
+            bytes.release();
+            
         } else {
             rest = v.toString();
         }

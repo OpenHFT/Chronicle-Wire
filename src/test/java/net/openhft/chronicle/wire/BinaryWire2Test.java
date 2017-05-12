@@ -17,6 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.util.Compressions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,6 +43,11 @@ public class BinaryWire2Test {
     @After
     public void after() {
         BinaryWire.SPEC = 16;
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 
     @NotNull
@@ -187,6 +193,9 @@ public class BinaryWire2Test {
         writeMessage(twire);
 
         System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
+
+        wire.bytes().release();
+        twire.bytes().release();
     }
 
     private void writeMessage(@NotNull WireOut wire) {
@@ -215,6 +224,9 @@ public class BinaryWire2Test {
         writeMessageContext(twire);
 
         System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
+
+        wire.bytes().release();
+        twire.bytes().release();
     }
 
     private void writeMessageContext(@NotNull WireOut wire) {
@@ -378,6 +390,9 @@ public class BinaryWire2Test {
         Bytes asText = Bytes.elasticByteBuffer();
         wire.copyTo(new TextWire(asText));
         assertEquals("message: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n", asText.toString());
+
+        wire.bytes().release();
+        asText.release();
     }
 
     @Test
@@ -558,6 +573,8 @@ public class BinaryWire2Test {
                     .bytesLiteral();
             assertEquals(wire.bytes(), bytesStore);
         });
+
+        wire.bytes().release();
     }
 
     @Test
@@ -575,6 +592,8 @@ public class BinaryWire2Test {
         wire.readAllAsMap(String.class, Object.class, newMap);
 
         Assert.assertEquals(putMap, newMap);
+
+        wire.bytes().release();
     }
 
     @Test

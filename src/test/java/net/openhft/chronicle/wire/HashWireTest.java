@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.BytesUtil;
+import org.junit.After;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -38,4 +40,10 @@ public class HashWireTest {
                 }));
         assertFalse(h == 0);
     }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
 }

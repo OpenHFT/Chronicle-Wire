@@ -18,8 +18,10 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Test;
 
 import java.io.EOFException;
@@ -34,6 +36,12 @@ import static org.junit.Assert.assertTrue;
  * Created by Peter on 04/05/2016.
  */
 public class BinaryWireHeadersTest {
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
     @Test
     public void testHeaderNumbers() throws TimeoutException, EOFException, StreamCorruptedException {
         @NotNull BytesStore store = NativeBytesStore.elasticByteBuffer();
@@ -73,6 +81,9 @@ public class BinaryWireHeadersTest {
             wire2.updateHeader(position2, false);
         }
         assertEquals(10, wire2.headerNumber());
+
+        wire.bytes().release();
+        wire2.bytes().release();
     }
 
     @Test(timeout = 3000, expected = TimeoutException.class)
@@ -80,10 +91,14 @@ public class BinaryWireHeadersTest {
         @NotNull BytesStore store = NativeBytesStore.elasticByteBuffer();
         @NotNull Wire wire = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
         @NotNull Wire wire2 = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
-        @NotNull Wire wire3 = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
+        try {
+            long position = wire.writeHeader(1, TimeUnit.SECONDS, null);
 
-        long position = wire.writeHeader(1, TimeUnit.SECONDS, null);
+            long position2 = wire2.writeHeader(100, TimeUnit.MILLISECONDS, null);
 
-        long position2 = wire2.writeHeader(100, TimeUnit.MILLISECONDS, null);
+        } finally {
+            wire.bytes().release();
+            wire2.bytes().release();
+        }
     }
 }

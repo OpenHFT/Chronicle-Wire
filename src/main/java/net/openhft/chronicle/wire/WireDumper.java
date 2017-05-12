@@ -61,24 +61,25 @@ public class WireDumper {
         final long limit0 = bytes.readLimit();
         final long position0 = bytes.readPosition();
 
+        Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         try {
             bytes.readPosition(position);
             long limit2 = Math.min(limit0, position + length);
             bytes.readLimit(limit2);
+
             long missing = position + length - limit2;
-            Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
             while (bytes.readRemaining() >= 4) {
                 if (dumpOne(sb, bytes2))
                     break;
 
             }
-            bytes2.release();
             if (missing > 0)
                 sb.append(" # missing: ").append(missing);
         } catch (Throwable t) {
             sb.append(" ").append(t);
         } finally {
             bytes.readPositionRemaining(position0, limit0 - position0);
+            bytes2.release();
         }
         return sb.toString();
     }

@@ -68,17 +68,22 @@ public class JSON222IndividualTest {
 
     void checkSerialized(@NotNull String expected, Object o) {
         @NotNull Wire wire = new TextWire(Bytes.elasticByteBuffer());
-        wire.getValueOut()
-                .object(o);
-
         try {
-            @NotNull Yaml yaml = new Yaml();
-            yaml.load(new StringReader(expected));
-        } catch (Exception e) {
-            throw e;
-        }
+            wire.getValueOut()
+                    .object(o);
 
-        assertEquals(expected, wire.toString());
+            try {
+                @NotNull Yaml yaml = new Yaml();
+                yaml.load(new StringReader(expected));
+            } catch (Exception e) {
+                throw e;
+            }
+
+            assertEquals(expected, wire.toString());
+
+        } finally {
+            wire.bytes().release();
+        }
     }
 
     void checkDeserialized(String expected, @NotNull String input) {
@@ -95,5 +100,7 @@ public class JSON222IndividualTest {
                 .object();
 
         assertEquals(expected, o.toString());
+
+        wire.bytes().release();
     }
 }

@@ -23,6 +23,8 @@ import net.openhft.chronicle.core.pool.EnumInterner;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 enum CcyPair {
     EURUSD, GBPUSD, EURCHF;
 
@@ -47,7 +49,10 @@ public class CSVBytesMarshallableTest {
             fxPrice.readMarshallable(bytes);
             fxPrice.writeMarshallable(bytes2);
         }
-        System.out.println(bytes2);
+        assertEquals("1.09029,1.090305,EURUSD,2,EBS\n" +
+                "1.50935,1.50936,GBPUSD,5,RTRS\n" +
+                "1.0906,1.09065,EURCHF,3,EBS\n", bytes2.toString());
+        bytes2.release();
     }
 
     // wire marshalling.
@@ -77,6 +82,8 @@ public class CSVBytesMarshallableTest {
         System.out.println();
         System.out.println(wt);
         System.out.println(binary ? bytes2.toHexString() : bytes2.toString());
+
+        bytes2.release();
     }
 }
 
@@ -103,11 +110,11 @@ class FXPrice implements BytesMarshallable {
 
     @Override
     public void writeMarshallable(@NotNull BytesOut bytes) {
-            bytes.append(bidprice).append(',');
-            bytes.append(offerprice).append(',');
-            bytes.append(pair.name()).append(',');
-            bytes.append(size).append(',');
-            bytes.append(exchangeName).append('\n');
+        bytes.append(bidprice).append(',');
+        bytes.append(offerprice).append(',');
+        bytes.append(pair.name()).append(',');
+        bytes.append(size).append(',');
+        bytes.append(exchangeName).append('\n');
     }
 
     private <T extends Enum<T>> T parseEnum(@NotNull BytesIn bytes, @NotNull EnumInterner<T> interner) {

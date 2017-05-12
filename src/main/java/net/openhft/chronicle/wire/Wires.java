@@ -74,8 +74,6 @@ public enum Wires {
     });
     static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(VanillaFieldInfo::lookupClass);
     static final StringBuilderPool SBP = new StringBuilderPool();
-    private static Bytes tempBytes = Bytes.elasticByteBuffer();
-    private static Wire tempWire;
 
     static {
         CLASS_STRATEGY_FUNCTIONS.add(SerializeEnum.INSTANCE);
@@ -124,16 +122,21 @@ public enum Wires {
             int metaDataBit = dc.isMetaData() ? Wires.META_DATA : 0;
             int header = metaDataBit | toIntU30(length, "Document length %,d out of 30-bit int range.");
 
-            tempBytes.clear();
-            tempBytes.writeOrderedInt(header);
-            tempBytes.write(((ReadDocumentContext) dc).wire.bytes, 0, ((ReadDocumentContext) dc).wire.bytes.readLimit());
+            Bytes tempBytes = Bytes.allocateElasticDirect();
+            try {
+                tempBytes.writeOrderedInt(header);
+                tempBytes.write(((ReadDocumentContext) dc).wire.bytes, 0, ((ReadDocumentContext) dc).wire.bytes.readLimit());
 
-            final WireType wireType = WireType.valueOf(wire);
+                final WireType wireType = WireType.valueOf(wire);
 
-            if (wireType != WireType.valueOf(tempWire))
-                tempWire = wireType.apply(tempBytes);
+                assert wireType != null;
+                Wire tempWire = wireType.apply(tempBytes);
 
-            return WireDumper.of(tempWire).asString(0, length + 4);
+                return WireDumper.of(tempWire).asString(0, length + 4);
+
+            } finally {
+                tempBytes.release();
+            }
 
         } else {
             if (dc instanceof ReadDocumentContext) {

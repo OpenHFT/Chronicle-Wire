@@ -18,7 +18,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
+import org.junit.After;
 import org.junit.Test;
+
+import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -29,12 +33,20 @@ import static org.junit.Assert.fail;
 public class DefaultZeroLicenceTest {
     @Test
     public void testLicenceCheck() {
+        Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         try {
-            WireType.DEFAULT_ZERO_BINARY.apply(Bytes.elasticByteBuffer());
+            WireType.DEFAULT_ZERO_BINARY.apply(bytes);
             fail();
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage().contains(
                     "A Chronicle Wire Enterprise licence is required to run this code"));
+        } finally {
+            bytes.release();
         }
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 }

@@ -17,7 +17,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -74,4 +76,8 @@ public class MarshallableTest {
         assertEquals(source, destination);
     }
 
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
 }

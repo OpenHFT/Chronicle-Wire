@@ -16,6 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import org.jetbrains.annotations.NotNull;
@@ -802,6 +803,7 @@ public class BinaryWireTest {
             @Nullable DTO o = valueIn3.typedMarshallable();
             Assert.assertEquals("world3", o.text);
         }
+        w.bytes().release();
     }
 
     @Test
@@ -849,6 +851,11 @@ public class BinaryWireTest {
             assertEquals(0, wire.bytes().readRemaining());
             wire.clear();
         }
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 
     enum BWKey implements WireKey {
