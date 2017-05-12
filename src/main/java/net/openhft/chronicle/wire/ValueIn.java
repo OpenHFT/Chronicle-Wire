@@ -63,7 +63,7 @@ public interface ValueIn {
     }
 
     default char character() {
-        @Nullable CharSequence cs = textTo(Wires.acquireBytes());
+        @Nullable CharSequence cs = textTo( Wires.acquireStringBuilder());
         if (cs == null || cs.length() == 0)
             return '\u0000';
 
