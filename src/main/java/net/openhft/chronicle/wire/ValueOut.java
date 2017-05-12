@@ -64,6 +64,11 @@ public interface ValueOut {
     }
 
     @NotNull
+    default WireOut text(char c) {
+        return text(Wires.acquireStringBuilder().append(c));
+    }
+
+    @NotNull
     default WireOut text(@Nullable BytesStore s) {
         return text((CharSequence) s);
     }
