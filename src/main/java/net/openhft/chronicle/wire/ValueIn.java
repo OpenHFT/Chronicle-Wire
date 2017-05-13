@@ -492,6 +492,8 @@ public interface ValueIn {
                     strategy = SerializationStrategies.MAP;
                 if (using == null)
                     using = (E) strategy.newInstance(clazz);
+                if (Throwable.class.isAssignableFrom(clazz))
+                    return (E) WireInternal.throwable(this, false, (Throwable) using);
 
                 if (using == null)
                     Jvm.warn().on(ValueIn.class, "failed to create instance of clazz=" + clazz);

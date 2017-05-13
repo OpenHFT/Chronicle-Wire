@@ -565,10 +565,10 @@ public class WireMarshaller<T> {
             if (coll == null) {
                 coll = collectionSupplier.get();
                 field.set(o, coll);
-            } else {
-                coll.clear();
             }
             if (!read.sequence(coll, (c, in2) -> {
+                if (!c.isEmpty())
+                    c.clear();
                 while (in2.hasNextSequenceItem())
                     c.add(in2.object(componentType));
             })) {
@@ -645,7 +645,7 @@ public class WireMarshaller<T> {
             if (coll == null) {
                 coll = collectionSupplier.get();
                 field.set(o, coll);
-            } else {
+            } else if (!coll.isEmpty()) {
                 coll.clear();
             }
             if (!read.sequence(coll, seqConsumer)) {
@@ -719,7 +719,7 @@ public class WireMarshaller<T> {
             if (map == null) {
                 map = collectionSupplier.get();
                 field.set(o, map);
-            } else {
+            } else if (!map.isEmpty()) {
                 map.clear();
             }
             if (read.marshallableAsMap(keyType, valueType, map) == null)

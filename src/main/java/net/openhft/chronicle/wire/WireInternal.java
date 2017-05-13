@@ -193,14 +193,16 @@ public enum WireInternal {
 
     public static Throwable throwable(@NotNull ValueIn valueIn, boolean appendCurrentStack) {
         @Nullable Class type = valueIn.typePrefix();
-        @Nullable String preMessage = null;
         Throwable throwable = ObjectUtils.newInstance((Class<Throwable>) type);
 
-        @Nullable final String finalPreMessage = preMessage;
+        return throwable(valueIn, appendCurrentStack, throwable);
+    }
+
+    protected static Throwable throwable(@NotNull ValueIn valueIn, boolean appendCurrentStack, Throwable throwable) {
         final Throwable finalThrowable = throwable;
         @NotNull final List<StackTraceElement> stes = new ArrayList<>();
         valueIn.marshallable(m -> {
-            @Nullable final String message = merge(finalPreMessage, m.read(() -> "message").text());
+            @Nullable final String message = m.read(() -> "message").text();
 
             if (message != null) {
                 try {

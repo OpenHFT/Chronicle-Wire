@@ -606,20 +606,23 @@ public interface ValueOut {
 
     @NotNull
     default WireOut throwable(@NotNull Throwable t) {
-        typedMarshallable(t.getClass().getName(), (WireOut w) ->
-                w.write(() -> "message").text(t.getMessage())
-                        .write(() -> "stackTrace").sequence(w3 -> {
-                    StackTraceElement[] stes = t.getStackTrace();
-                    int last = Jvm.trimLast(0, stes);
-                    for (int i = 0; i < last; i++) {
-                        StackTraceElement ste = stes[i];
-                        w3.leaf().marshallable(w4 ->
-                                w4.write(() -> "class").text(ste.getClassName())
-                                        .write(() -> "method").text(ste.getMethodName())
-                                        .write(() -> "file").text(ste.getFileName())
-                                        .write(() -> "line").int32(ste.getLineNumber()));
-                    }
-                }));
+        typedMarshallable(t.getClass().getName(), (WireOut w) -> {
+            w.write(() -> "message").text(t.getMessage())
+                    .write(() -> "stackTrace").sequence(w3 -> {
+                StackTraceElement[] stes = t.getStackTrace();
+                int last = Jvm.trimLast(0, stes);
+                for (int i = 0; i < last; i++) {
+                    StackTraceElement ste = stes[i];
+                    w3.leaf().marshallable(w4 ->
+                            w4.write(() -> "class").text(ste.getClassName())
+                                    .write(() -> "method").text(ste.getMethodName())
+                                    .write(() -> "file").text(ste.getFileName())
+                                    .write(() -> "line").int32(ste.getLineNumber()));
+                }
+            });
+            if (t.getCause() != null)
+                w.write("cause").throwable(t.getCause());
+        });
         return wireOut();
     }
 
