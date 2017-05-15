@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.Resettable;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.*;
@@ -2417,6 +2418,46 @@ public class TextWire extends AbstractWire implements Wire {
             }
 
             tReader.accept(t, TextWire.this.valueIn);
+
+            if (code == '[') {
+                consumePadding(1);
+                char code2 = (char) readCode();
+                if (code2 != ']')
+                    throw new IORuntimeException("Expected a ] but got " + code2 + " (" + code2 + ")");
+            }
+            consumePadding(1);
+            return true;
+        }
+
+        public <T> boolean sequence(List<T> list, List<T> buffer, Supplier<T> bufferAdd) {
+            list.clear();
+            consumePadding();
+
+            char code = (char) peekCode();
+            if (code == '!') {
+                @Nullable final Class typePrefix = typePrefix();
+                if (typePrefix == void.class) {
+                    text();
+                    return false;
+                }
+                consumePadding();
+                code = (char) readCode();
+            }
+            if (code == '[') {
+                bytes.readSkip(1);
+                sequenceLimit = Integer.MAX_VALUE;
+            } else {
+                sequenceLimit = 1;
+            }
+
+            while (hasNextSequenceItem()) {
+                int size = list.size();
+                if (buffer.size() <= size) buffer.add(bufferAdd.get());
+
+                final T t = buffer.get(size);
+                if (t instanceof Resettable) ((Resettable) t).reset();
+                list.add(object(t, t.getClass()));
+            }
 
             if (code == '[') {
                 consumePadding(1);

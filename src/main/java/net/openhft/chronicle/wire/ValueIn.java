@@ -64,13 +64,12 @@ public interface ValueIn {
     }
 
     default char character() {
-        @Nullable CharSequence cs = textTo( Wires.acquireStringBuilder());
+        @Nullable CharSequence cs = textTo(Wires.acquireStringBuilder());
         if (cs == null || cs.length() == 0)
             return '\u0000';
 
         return cs.charAt(0);
     }
-
 
     @NotNull
     default WireIn text(@NotNull Bytes sdo) {
@@ -247,17 +246,16 @@ public interface ValueIn {
      */
     default <T> boolean sequence(List<T> list, List<T> buffer, Supplier<T> bufferAdd) {
         list.clear();
-        if (!hasNextSequenceItem())
-            return false;
-        while (hasNextSequenceItem()) {
-            int size = list.size();
-            if (buffer.size() <= size) buffer.add(bufferAdd.get());
+        return sequence(list, (l, v) -> {
+            while (hasNextSequenceItem()) {
+                int size = l.size();
+                if (buffer.size() <= size) buffer.add(bufferAdd.get());
 
-            final T t = buffer.get(size);
-            if (t instanceof Resettable) ((Resettable) t).reset();
-            list.add(object(t, t.getClass()));
-        }
-        return true;
+                final T t = buffer.get(size);
+                if (t instanceof Resettable) ((Resettable) t).reset();
+                l.add(object(t, t.getClass()));
+            }
+        });
     }
 
     @NotNull
