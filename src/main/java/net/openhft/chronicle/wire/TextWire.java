@@ -1313,10 +1313,16 @@ public class TextWire extends AbstractWire implements Wire {
             }
             prependSeparator();
             double ad = Math.abs(d);
-            if (ad >= 1e-3 && ad < 1e9)
-                bytes.append(d);
-            else
+            if (ad >= 1e-3 && ad < 1e15) {
+                if ((int) (ad / 1e6) * 1e6 == ad)
+                    bytes.append((int) (ad / 1e6)).append("e6");
+                else if ((int) (ad / 1e3) * 1e3 == ad)
+                    bytes.append((int) (ad / 1e3)).append("e3");
+                else
+                    bytes.append(d);
+            } else {
                 bytes.append(Double.toString(d));
+            }
             elementSeparator();
 
             return TextWire.this;
