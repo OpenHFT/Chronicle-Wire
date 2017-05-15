@@ -199,6 +199,18 @@ public class WireMarshaller<T> {
         return defaultValue;
     }
 
+    public void reset(T o) {
+        try {
+            for (FieldAccess field : fields) {
+                field.copy(defaultValue, o);
+            }
+
+        } catch (IllegalAccessException e) {
+            // should never happen as the types should match.
+            throw new AssertionError(e);
+        }
+    }
+
     static abstract class FieldAccess {
         @NotNull
         final Field field;

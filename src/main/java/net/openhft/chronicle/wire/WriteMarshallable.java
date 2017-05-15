@@ -15,10 +15,11 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.io.Resettable;
 import org.jetbrains.annotations.NotNull;
 
 @FunctionalInterface
-public interface WriteMarshallable extends WriteValue {
+public interface WriteMarshallable extends WriteValue, Resettable {
     WriteMarshallable EMPTY = wire -> {
         // nothing
     };

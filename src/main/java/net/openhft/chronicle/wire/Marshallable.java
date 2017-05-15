@@ -124,4 +124,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
     default List<FieldInfo> $fieldInfos() {
         return Wires.fieldInfos(getClass());
     }
+
+    default void reset() {
+        Wires.reset(this);
+    }
 }
