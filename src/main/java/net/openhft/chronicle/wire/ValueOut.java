@@ -69,6 +69,11 @@ public interface ValueOut {
     }
 
     @NotNull
+    default WireOut character(char c) {
+        return text(c);
+    }
+
+    @NotNull
     default WireOut text(@Nullable BytesStore s) {
         return text((CharSequence) s);
     }

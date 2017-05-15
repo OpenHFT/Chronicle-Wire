@@ -88,14 +88,7 @@ public interface ValueIn {
     Bytes textTo(@NotNull Bytes bytes);
 
     @NotNull
-    @Deprecated
-    default WireIn bytes(@NotNull Bytes toBytes) {
-        return bytes((BytesOut) toBytes);
-    }
-
-    @NotNull
     WireIn bytes(@NotNull BytesOut toBytes);
-
 
     default WireIn bytes(@NotNull BytesOut toBytes, boolean clearBytes) {
         if (clearBytes)
@@ -241,6 +234,28 @@ public interface ValueIn {
 
     default <T> boolean sequence(@NotNull T t, @NotNull SerializationStrategy<T> tReader) {
         return sequence(t, tReader::readUsing);
+    }
+
+    /**
+     * sequence to use when using a cached buffer
+     *
+     * @param list      of items to populate
+     * @param buffer    of objects of the same type to reuse
+     * @param bufferAdd supplier to call when the buffer needs extending
+     * @return true if there is any data.
+     */
+    default <T> boolean sequence(List<T> list, List<T> buffer, Supplier<T> bufferAdd) {
+        list.clear();
+        if (!hasNextSequenceItem())
+            return false;
+        while (hasNextSequenceItem()) {
+            int size = list.size();
+            if (buffer.size() <= size) buffer.add(bufferAdd.get());
+
+            final T t = buffer.get(size);
+            list.add(object(t, t.getClass()));
+        }
+        return true;
     }
 
     @NotNull
