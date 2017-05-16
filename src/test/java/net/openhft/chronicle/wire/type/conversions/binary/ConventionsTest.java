@@ -24,6 +24,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 
 /**
  * Created by Rob Austin
@@ -114,44 +115,49 @@ public class ConventionsTest {
     @Nullable
     public <T> T test(Object source, @NotNull Class<T> destinationType) {
 
-        @NotNull final BinaryWire wire = new BinaryWire(Bytes.elasticByteBuffer());
+        Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+        try {
+            @NotNull final BinaryWire wire = new BinaryWire(bytes);
 
-        if (source instanceof String)
-            wire.getValueOut().text((String) source);
-        else if (source instanceof Long)
-            wire.getValueOut().int64((Long) source);
-        else if (source instanceof Integer)
-            wire.getValueOut().int32((Integer) source);
-        else if (source instanceof Short)
-            wire.getValueOut().int16((Short) source);
-        else if (source instanceof Byte)
-            wire.getValueOut().int8((Byte) source);
-        else if (source instanceof Float)
-            wire.getValueOut().float32((Float) source);
-        else if (source instanceof Double)
-            wire.getValueOut().float64((Double) source);
+            if (source instanceof String)
+                wire.getValueOut().text((String) source);
+            else if (source instanceof Long)
+                wire.getValueOut().int64((Long) source);
+            else if (source instanceof Integer)
+                wire.getValueOut().int32((Integer) source);
+            else if (source instanceof Short)
+                wire.getValueOut().int16((Short) source);
+            else if (source instanceof Byte)
+                wire.getValueOut().int8((Byte) source);
+            else if (source instanceof Float)
+                wire.getValueOut().float32((Float) source);
+            else if (source instanceof Double)
+                wire.getValueOut().float64((Double) source);
 
-        if (String.class.isAssignableFrom(destinationType))
-            return (T) wire.getValueIn().text();
+            if (String.class.isAssignableFrom(destinationType))
+                return (T) wire.getValueIn().text();
 
-        if (Long.class.isAssignableFrom(destinationType))
-            return (T) (Long) wire.getValueIn().int64();
+            if (Long.class.isAssignableFrom(destinationType))
+                return (T) (Long) wire.getValueIn().int64();
 
-        if (Integer.class.isAssignableFrom(destinationType))
-            return (T) (Integer) wire.getValueIn().int32();
+            if (Integer.class.isAssignableFrom(destinationType))
+                return (T) (Integer) wire.getValueIn().int32();
 
-        if (Short.class.isAssignableFrom(destinationType))
-            return (T) (Short) wire.getValueIn().int16();
+            if (Short.class.isAssignableFrom(destinationType))
+                return (T) (Short) wire.getValueIn().int16();
 
-        if (Byte.class.isAssignableFrom(destinationType))
-            return (T) (Byte) wire.getValueIn().int8();
+            if (Byte.class.isAssignableFrom(destinationType))
+                return (T) (Byte) wire.getValueIn().int8();
 
-        if (Float.class.isAssignableFrom(destinationType))
-            return (T) (Float) wire.getValueIn().float32();
+            if (Float.class.isAssignableFrom(destinationType))
+                return (T) (Float) wire.getValueIn().float32();
 
-        if (Double.class.isAssignableFrom(destinationType))
-            return (T) (Double) wire.getValueIn().float64();
+            if (Double.class.isAssignableFrom(destinationType))
+                return (T) (Double) wire.getValueIn().float64();
 
-        throw new UnsupportedOperationException("");
+            throw new UnsupportedOperationException("");
+        } finally {
+            bytes.release();
+        }
     }
 }

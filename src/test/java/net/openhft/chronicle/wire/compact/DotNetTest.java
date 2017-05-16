@@ -42,5 +42,7 @@ public class DotNetTest {
         @NotNull Bytes text = Bytes.allocateElasticDirect();
         wire.copyTo(new TextWire(text));
         System.out.println(text);
+
+        bytes.release();
     }
 }

@@ -17,9 +17,11 @@
 package net.openhft.chronicle.wire.reordered;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -90,6 +92,8 @@ public class ReorderedTest {
         wire.readEventName(sb).marshallable(outerClass0);
         assertEquals("test2", sb.toString());
         assertEquals(outerClass2.toString().replace(',', '\n'), outerClass0.toString().replace(',', '\n'));
+
+        bytes.release();
     }
 
     @Test
@@ -107,5 +111,13 @@ public class ReorderedTest {
             assertEquals(i, wire.read(() -> "a").int32());
             assertEquals(i * 11, wire.read(() -> "b").int32());
         }
+
+        bytes.release();
     }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
 }
