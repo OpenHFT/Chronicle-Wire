@@ -17,9 +17,11 @@
 
 package net.openhft.chronicle.wire.marshallable;
 
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.wire.FieldInfo;
 import net.openhft.chronicle.wire.Marshallable;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -261,5 +263,10 @@ public class FieldInfoTest {
     public void fieldInfo() {
         @NotNull List<FieldInfo> infos = m.$fieldInfos();
         assertEquals(fieldInfos, infos.toString());
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 }

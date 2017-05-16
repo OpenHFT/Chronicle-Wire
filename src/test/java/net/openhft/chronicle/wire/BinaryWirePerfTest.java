@@ -16,7 +16,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -176,6 +178,11 @@ public class BinaryWirePerfTest {
             ;
         }
 
+        @After
+        public void checkRegisteredBytes() {
+            BytesUtil.checkRegisteredBytes();
+        }
+
         enum Fields implements WireKey {
             I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X;
 
@@ -184,5 +191,6 @@ public class BinaryWirePerfTest {
                 return ordinal();
             }
         }
+
     }
 }

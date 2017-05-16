@@ -18,7 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -219,6 +221,11 @@ public class NestedMapsTest {
         assertEquals(m, m2);
 
         bytes.release();
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 
     static class Mapped extends AbstractMarshallable {

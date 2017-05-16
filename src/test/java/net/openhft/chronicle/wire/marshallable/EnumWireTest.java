@@ -1,8 +1,10 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import net.openhft.chronicle.wire.*;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -53,9 +55,18 @@ public class EnumWireTest {
     private <T extends Marshallable> T roundTrip(Supplier<T> supplier) {
         Wire wire = serialise(createWire, supplier.get());
 //        System.out.println(wire.bytes());
-        T deserialized = supplier.get();
-        deserialized.readMarshallable(wire);
-        return deserialized;
+        try {
+            T deserialized = supplier.get();
+            deserialized.readMarshallable(wire);
+            return deserialized;
+        } finally {
+            wire.bytes().release();
+        }
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 
     enum Marsh implements Marshallable {

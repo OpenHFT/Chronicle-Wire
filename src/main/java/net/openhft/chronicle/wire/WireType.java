@@ -468,11 +468,11 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                 new Spliterators.AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED | Spliterator.IMMUTABLE) {
                     @Override
                     public boolean tryAdvance(Consumer<? super T> action) {
+                        Bytes<?> bytes = wire.bytes();
                         if (valueIn.hasNext()) {
                             action.accept(valueIn.object(expectedType));
                             if (wire instanceof TextWire) {
                                 wire.consumePadding();
-                                Bytes<?> bytes = wire.bytes();
                                 if (bytes.peekUnsignedByte() == '-' &&
                                         bytes.peekUnsignedByte(bytes.readPosition() + 1) == '-' &&
                                         bytes.peekUnsignedByte(bytes.readPosition() + 2) == '-') {
@@ -483,6 +483,8 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                             }
                             return true;
                         }
+                        if (bytes.refCount() > 0)
+                            bytes.release();
                         return false;
                     }
                 }, false);
@@ -546,8 +548,13 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
     @Nullable
     <T> T fromHexString(@NotNull CharSequence s) {
-        Wire wire = apply(Bytes.fromHexString(s.toString()));
-        return wire.getValueIn().typedMarshallable();
+        Bytes bytes = Bytes.fromHexString(s.toString());
+        try {
+            Wire wire = apply(bytes);
+            return wire.getValueIn().typedMarshallable();
+        } finally {
+            bytes.release();
+        }
     }
 
     @Nullable

@@ -857,11 +857,10 @@ public class BinaryWireTest {
     public void checkRegisteredBytes() {
         BytesUtil.checkRegisteredBytes();
     }
-
     enum BWKey implements WireKey {
         field1(1), field2(2), field3(3);
-        private final int code;
 
+        private final int code;
         BWKey(int code) {
             this.code = code;
         }
@@ -870,14 +869,16 @@ public class BinaryWireTest {
         public int code() {
             return code;
         }
+
     }
 
     private static class DTO extends AbstractMarshallable {
-        String text;
 
+        String text;
         DTO(String text) {
             this.text = text;
         }
+
     }
 
 }

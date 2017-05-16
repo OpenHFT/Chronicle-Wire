@@ -65,7 +65,9 @@ BinaryWire, fixed=true, numericField=false, fieldLess=true
  */
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -127,6 +129,11 @@ public class FIX42Test {
             System.out.println(wire.bytes());
         else
             System.out.println(wire.bytes().toHexString());
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 
     static class MarketDataSnapshot implements WriteMarshallable {

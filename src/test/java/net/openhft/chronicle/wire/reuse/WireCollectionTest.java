@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.wire.BinaryWire;
@@ -96,5 +97,10 @@ public class WireCollectionTest {
 
         assertEquals(collection.toString(), results.toString());
         WireUtils.compareWireCollection(collection, results);
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 }

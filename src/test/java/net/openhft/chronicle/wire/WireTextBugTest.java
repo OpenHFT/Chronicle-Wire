@@ -56,6 +56,9 @@ public class WireTextBugTest {
                 .object(Object.class);
         @Nullable Bug b2 = (Bug) o;
         System.out.println("b2 = " + b2);
+
+        encodeWire.bytes().release();
+        decodeWire.bytes().release();
     }
 
     static class Bug extends AbstractMarshallable {
