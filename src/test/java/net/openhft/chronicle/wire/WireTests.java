@@ -17,8 +17,10 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -72,6 +74,8 @@ public class WireTests {
                 .object(new Date(0));
         Assert.assertEquals(new Date(0), wire.getValueIn()
                 .object());
+
+        b.release();
     }
 
 
@@ -82,6 +86,8 @@ public class WireTests {
         LocalDateTime expected = LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
         wire.getValueOut().object(expected);
         Assert.assertEquals(expected, wire.getValueIn().object());
+
+        b.release();
     }
 
 
@@ -92,6 +98,8 @@ public class WireTests {
         ZonedDateTime expected = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
         wire.getValueOut().object(expected);
         Assert.assertEquals(expected, wire.getValueIn().object());
+
+        b.release();
     }
 
 
@@ -114,6 +122,7 @@ public class WireTests {
         wire.read(field).skipValue();
         System.out.println("read field=" + field.toString());
 
+        b.release();
     }
 
 
@@ -135,6 +144,8 @@ public class WireTests {
         Assert.assertEquals(null, rp);
         @Nullable Circle c = wire.read().object(Circle.class);  // this fails without the check.
         Assert.assertEquals(null, c);
+
+        b.release();
     }
 
     @Test
@@ -148,6 +159,8 @@ public class WireTests {
 
         @Nullable TestClass o = wire.read().typedMarshallable();
         Assert.assertEquals(Boolean.class, o.clazz());
+
+        b.release();
     }
 
     @Test
@@ -184,7 +197,6 @@ public class WireTests {
         }
         Assert.assertEquals("", wire.readingPeekYaml());
 
-
         try (@NotNull DocumentContext dc = wire.writingDocument(false)) {
             dc.wire().write("some-data").marshallable(m -> {
                 m.write("some-other-data").int64(0);
@@ -206,6 +218,13 @@ public class WireTests {
                     "}\n", wire.readingPeekYaml());
 
         }
+
+        b.release();
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 
     static class TestClass extends AbstractMarshallable {

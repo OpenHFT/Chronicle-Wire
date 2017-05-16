@@ -27,6 +27,16 @@ public class TextSkipValueTest {
     public static Collection<Object[]> combinations() {
         List<Object[]> list = new ArrayList<>();
         for (String s : new String[]{
+                "? { MyField: parent }: {\n" +
+                        "  ? !type { MyField: key1 }: value1,\n" +
+                        "  ? !type { MyField: key2 }: value2\n" +
+                        "},\n" +
+                        "end",
+                "example: {\n" +
+                        "  ? { MyField: aKey }: { MyField: aValue },\n" +
+                        "  ? { MyField: aKey2 }: { MyField: aValue2 }\n" +
+                        "},\n" +
+                        "end",
                 "a: [ !Type { b: 'a, a', bb: aa }, !Type { c: 1.0, d: x } ]\n" +
                         "end",
                 "a: [ { b: 'a, a', bb: aa }, { c: 1.0, d: x } ]\n" +

@@ -73,13 +73,17 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         @Override
         public <T> T fromString(@NotNull CharSequence cs) {
             Bytes bytes = Bytes.allocateElasticDirect(cs.length());
-            bytes.appendUtf8(cs);
-            if (bytes.startsWith(PREABLE)) {
-                truncatePreable(bytes);
+            try {
+                bytes.appendUtf8(cs);
+                if (bytes.startsWith(PREABLE)) {
+                    truncatePreable(bytes);
+                }
+                @NotNull Wire wire = apply(bytes);
+                //noinspection unchecked
+                return (T) wire.getValueIn().object();
+            } finally {
+                bytes.release();
             }
-            @NotNull Wire wire = apply(bytes);
-            //noinspection unchecked
-            return (T) wire.getValueIn().object();
         }
 
         public void truncatePreable(@NotNull Bytes bytes) {
@@ -445,7 +449,12 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
     @Nullable
     public <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
-        return (T) (apply(BytesUtil.readFile(filename)).getValueIn().object(expectedType));
+        Bytes bytes = BytesUtil.readFile(filename);
+        try {
+            return (T) (apply(bytes).getValueIn().object(expectedType));
+        } finally {
+            bytes.release();
+        }
     }
 
     public <T> Stream<T> streamFromFile(String filename) throws IOException {

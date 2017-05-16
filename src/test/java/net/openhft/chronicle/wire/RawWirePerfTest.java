@@ -15,7 +15,9 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Test;
 
 /**
@@ -27,5 +29,10 @@ public class RawWirePerfTest {
         @NotNull BinaryWirePerfTest test = new BinaryWirePerfTest(-1, true, false, true);
 //        test.wirePerf();
         test.wirePerfInts();
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 }

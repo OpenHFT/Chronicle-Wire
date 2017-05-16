@@ -55,6 +55,7 @@ public class UsingTestMarshallable {
         System.out.println(value);
 
         //  Assert.assertTrue(replace.length() > 1);
+        byteBufferBytes.release();
     }
 
     /**
@@ -77,6 +78,32 @@ public class UsingTestMarshallable {
         System.out.println(result.toString());
 
         Assert.assertEquals("text", result.text.toString());
+
+        bytes.release();
+    }
+
+    @Test
+    public void test() {
+
+        Wire wire = WireType.BINARY.apply(Wires.acquireBytes());
+        @NotNull MarshableFilter expected = new MarshableFilter("hello", "world");
+
+        // write
+        {
+            @NotNull SortedFilter sortedFilter = new SortedFilter();
+
+            boolean add = sortedFilter.marshableFilters.add(expected);
+            wire.write().marshallable(sortedFilter);
+        }
+
+        // read
+        {
+            @NotNull SortedFilter sortedFilter = new SortedFilter();
+            wire.read().marshallable(sortedFilter);
+            Assert.assertEquals(1, sortedFilter.marshableFilters.size());
+            Assert.assertEquals(expected, sortedFilter.marshableFilters.get(0));
+        }
+
     }
 
     public static class MyMarshallable implements Marshallable {
@@ -102,7 +129,6 @@ public class UsingTestMarshallable {
                     '}';
         }
     }
-
 
     static class MarshableFilter extends AbstractMarshallable {
         @NotNull
@@ -133,31 +159,5 @@ public class UsingTestMarshallable {
         public List<MarshableOrderBy> marshableOrderBy = new ArrayList<>();
         @NotNull
         public List<MarshableFilter> marshableFilters = new ArrayList<>();
-    }
-
-
-    @Test
-    public void test() {
-
-        Wire wire = WireType.BINARY.apply(Wires.acquireBytes());
-        @NotNull MarshableFilter expected = new MarshableFilter("hello", "world");
-
-        // write
-        {
-            @NotNull SortedFilter sortedFilter = new SortedFilter();
-
-            boolean add = sortedFilter.marshableFilters.add(expected);
-            wire.write().marshallable(sortedFilter);
-        }
-
-
-        // read
-        {
-            @NotNull SortedFilter sortedFilter = new SortedFilter();
-            wire.read().marshallable(sortedFilter);
-            Assert.assertEquals(1, sortedFilter.marshableFilters.size());
-            Assert.assertEquals(expected, sortedFilter.marshableFilters.get(0));
-        }
-
     }
 }

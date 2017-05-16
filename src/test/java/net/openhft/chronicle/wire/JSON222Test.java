@@ -77,13 +77,13 @@ public class JSON222Test {
         @NotNull TextWire out = new TextWire(bytes2);
 
         boolean fail = file.getName().startsWith("n");
+        Bytes bytes3 = Bytes.elasticByteBuffer();
         try {
             @NotNull List list = new ArrayList();
             do {
                 @Nullable final Object object = wire.getValueIn()
                         .object();
 
-                Bytes bytes3 = Bytes.elasticByteBuffer();
                 @NotNull TextWire out3 = new TextWire(bytes3);
                 out3.getValueOut()
                         .object(object);
@@ -96,7 +96,7 @@ public class JSON222Test {
                 list.add(object);
                 out.getValueOut().object(object);
 
-                bytes3.release();
+
             } while (wire.isNotEmptyAfterPadding());
 
             if (fail) {
@@ -129,6 +129,7 @@ public class JSON222Test {
                 throw new AssertionError(e);
         } finally {
             bytes2.release();
+            bytes3.release();
         }
     }
 

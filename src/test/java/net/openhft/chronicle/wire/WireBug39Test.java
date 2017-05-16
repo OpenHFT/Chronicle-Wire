@@ -38,6 +38,8 @@ public class WireBug39Test {
         obj3.readMarshallable(wireType.apply(Bytes.from(output)));
 
         assertEquals("obj2.equals(obj3): ", obj1, obj2);
+
+        bytes.release();
     }
 
     class MarshallableObj implements Marshallable {

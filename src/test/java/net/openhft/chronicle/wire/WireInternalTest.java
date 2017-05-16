@@ -64,5 +64,7 @@ public class WireInternalTest {
                 "# position: 112, header: 2\n" +
                 "--- !!data #binary\n" +
                 "userid: peter\n", actual);
+
+        bytes.release();
     }
 }

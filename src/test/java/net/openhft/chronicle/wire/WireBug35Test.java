@@ -28,5 +28,7 @@ public class WireBug35Test {
         Object load = new Yaml().load(text);
 
         assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
+
+        bytes.release();
     }
 }

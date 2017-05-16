@@ -90,6 +90,8 @@ public class WireSerializedLambdaTest {
         @NotNull AtomicLong aLong = new AtomicLong();
         updater.accept(aLong);
         assertEquals(1, aLong.get());
+
+        wire.bytes().release();
     }
 
     @Test
@@ -126,5 +128,7 @@ public class WireSerializedLambdaTest {
         @NotNull AtomicLong aLong = new AtomicLong();
         updater.accept(aLong);
         assertEquals(-1, aLong.get());
+
+        wire.bytes().release();
     }
 }

@@ -15,6 +15,28 @@ import static org.junit.Assert.assertNotNull;
  * Created by dsmith on 11/11/16.
  */
 public class WireBug38Test {
+    @Test
+    public void testNestedObj() {
+        @NotNull final WireType wireType = WireType.TEXT;
+        @NotNull final String exampleString = "{";
+
+        @NotNull final Outer obj1 = new Outer();
+        @NotNull final Outer obj2 = new Outer();
+
+        obj1.getObj().append(exampleString);
+
+        final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+        obj1.writeMarshallable(wireType.apply(bytes));
+
+        final String output = bytes.toString();
+        System.out.println("output: [" + output + "]");
+
+        obj2.readMarshallable(wireType.apply(Bytes.from(output)));
+
+        assertEquals(obj1, obj2);
+        bytes.release();
+    }
+
     static class MarshallableObj implements Marshallable {
         private final StringBuilder builder = new StringBuilder();
 
@@ -91,26 +113,5 @@ public class WireBug38Test {
         public int hashCode() {
             return obj.hashCode();
         }
-    }
-
-    @Test
-    public void testNestedObj() {
-        @NotNull final WireType wireType = WireType.TEXT;
-        @NotNull final String exampleString = "{";
-
-        @NotNull final Outer obj1 = new Outer();
-        @NotNull final Outer obj2 = new Outer();
-
-        obj1.getObj().append(exampleString);
-
-        final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
-        obj1.writeMarshallable(wireType.apply(bytes));
-
-        final String output = bytes.toString();
-        System.out.println("output: [" + output + "]");
-
-        obj2.readMarshallable(wireType.apply(Bytes.from(output)));
-
-        assertEquals(obj1, obj2);
     }
 }

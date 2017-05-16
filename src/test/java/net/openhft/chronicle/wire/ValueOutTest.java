@@ -18,8 +18,10 @@ package net.openhft.chronicle.wire;
 
 import junit.framework.TestCase;
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,6 +71,7 @@ public class ValueOutTest extends TestCase {
 
         });
 
+        wire.bytes().release();
     }
 
     @Test
@@ -86,6 +89,7 @@ public class ValueOutTest extends TestCase {
             Assert.assertArrayEquals(expected, actual);
         });
 
+        wire.bytes().release();
     }
 
     @Test
@@ -109,5 +113,12 @@ public class ValueOutTest extends TestCase {
             });
 
         }
+
+        wire.bytes().release();
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 }

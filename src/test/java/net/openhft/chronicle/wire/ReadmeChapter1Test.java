@@ -118,6 +118,9 @@ prints in RawWire
 00000020 00 00 25 40                                      ··%@
 ```
 */
+        bytes.release();
+        bytes2.release();
+        bytes3.release();
     }
 
     @Test
@@ -175,6 +178,8 @@ prints
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ```
 */
+        bytes.release();
+        bytes2.release();
     }
 
     @Test
@@ -233,6 +238,8 @@ prints
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ```
 */
+        bytes.release();
+        bytes2.release();
     }
 
     @Test
@@ -293,6 +300,9 @@ prints
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ```
 */
+
+        bytes.release();
+        bytes2.release();
     }
 
     @Test
@@ -359,6 +369,8 @@ price: 10.5
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ```
 */
+        bytes.release();
+        bytes2.release();
     }
 
     @Test
@@ -470,6 +482,8 @@ Data{message='G'Day All', number=1212121, timeUnit=MINUTES, price=12.34}
 Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
 ```
 */
+        bytes.release();
+        bytes2.release();
     }
 
     @Test
@@ -535,6 +549,8 @@ prints
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ```
 */
+        bytes.release();
+        bytes2.release();
     }
 }
 /*

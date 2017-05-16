@@ -140,6 +140,8 @@ public class TextWireTest {
         System.out.println(textYaml);
         @Nullable Object o = WireType.TEXT.fromString(textYaml);
         Assert.assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString());
+
+        b.release();
     }
 
     @Test
@@ -149,6 +151,8 @@ public class TextWireTest {
         wire.write();
         wire.write();
         assertEquals("\"\": \"\": \"\": ", wire.toString());
+
+        wire.bytes().release();
     }
 
     @NotNull
@@ -856,6 +860,8 @@ public class TextWireTest {
                         actual));
 
         assertEquals(expected, actual);
+
+        wire.bytes().release();
     }
 
     @Test
@@ -1277,6 +1283,8 @@ public class TextWireTest {
                     .object(Map.class);
             assertEquals(map, map2);
         });
+
+        wire.bytes().release();
     }
 
     @Test

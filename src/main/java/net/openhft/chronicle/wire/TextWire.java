@@ -2165,6 +2165,12 @@ public class TextWire extends AbstractWire implements Wire {
                     break;
                 case ']':
                     break;
+                case '?':
+                    bytes.readSkip(1);
+                    consumeAny();
+                    if (peekCode() == ':')
+                        consumeAny();
+                    break;
                 case '"':
                 case '\'':
                 default:

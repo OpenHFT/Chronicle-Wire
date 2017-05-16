@@ -18,7 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,8 +60,11 @@ public class TextBinaryWireTest {
 
     @Test
     public void testValueOf() {
-        @NotNull WireType wt = WireType.valueOf(createWire());
+        Wire wire = createWire();
+        @NotNull WireType wt = WireType.valueOf(wire);
         assertEquals(wireType, wt);
+        wire.bytes().release();
+
     }
 
     public Wire createWire() {
@@ -76,6 +81,7 @@ public class TextBinaryWireTest {
         try (DocumentContext dc = wire.readingDocument(position)) {
             assertEquals("text", dc.wire().read(() -> "message").text());
         }
+        wire.bytes().release();
     }
 
     @Test
@@ -86,6 +92,8 @@ public class TextBinaryWireTest {
             @NotNull StringBuilder sb = new StringBuilder();
             wire.readComment(sb);
             assertEquals("This is a comment", sb.toString());
+
+            wire.bytes().release();
         }
     }
 
@@ -102,6 +110,8 @@ public class TextBinaryWireTest {
         assertEquals("runtime", wire.getValueIn().text());
 
         assertNull(wire.readEvent(RetentionPolicy.class));
+
+        wire.bytes().release();
     }
 
     @Test
@@ -121,6 +131,8 @@ public class TextBinaryWireTest {
         assertEquals("runtime", wire.getValueIn().text());
 
         assertNull(wire.readEvent(RetentionPolicy.class));
+
+        wire.bytes().release();
     }
 
     @Test
@@ -139,6 +151,13 @@ public class TextBinaryWireTest {
         wire.read(() -> "b").int32(1, assertEquals);
         wire.read(() -> "c").int32(2, assertEquals);
         wire.read(() -> "d").int32(3, assertEquals);
+
+        wire.bytes().release();
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 }
 
