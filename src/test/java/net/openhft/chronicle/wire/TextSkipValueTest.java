@@ -29,6 +29,13 @@ public class TextSkipValueTest {
     public static Collection<Object[]> combinations() {
         List<Object[]> list = new ArrayList<>();
         for (String s : new String[]{
+                "cluster1: {\n" +
+                        "  context:  !EngineClusterContext  { }\n" +
+                        "  host1: {\n" +
+                        "     hostId: 1\n" +
+                        "  },\n" +
+                        "},\n" +
+                        "end",
                 "? { MyField: parent }: {\n" +
                         "  ? !type { MyField: key1 }: value1,\n" +
                         "  ? !type { MyField: key2 }: value2\n" +

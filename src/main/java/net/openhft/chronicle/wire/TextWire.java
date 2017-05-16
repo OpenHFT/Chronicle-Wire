@@ -2131,10 +2131,12 @@ public class TextWire extends AbstractWire implements Wire {
                     bytes.readSkip(1);
                     for (; ; ) {
                         consumeAny();
-                        if (peekCode() == ',')
-                            readCode();
-                        else
+                        int code2 = peekCode();
+                        if (code2 == '}' || code2 <= 0) {
                             break;
+                        } else if (code2 == ',') {
+                            readCode();
+                        }
                     }
                     consumePadding();
                     code = readCode();
