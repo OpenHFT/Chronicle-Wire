@@ -22,6 +22,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -192,5 +194,12 @@ public class VanillaFieldInfo extends AbstractMarshallable implements FieldInfo 
             field.setAccessible(true);
         }
         return field;
+    }
+
+    @Override
+    public Class genericType(int index) {
+        ParameterizedType genericType = (ParameterizedType) field.getGenericType();
+        Type type = genericType.getActualTypeArguments()[index];
+        return (Class) type;
     }
 }

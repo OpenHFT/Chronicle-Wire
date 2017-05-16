@@ -54,4 +54,6 @@ public interface FieldInfo {
     void set(Object object, long value) throws IllegalArgumentException;
 
     void set(Object object, double value) throws IllegalArgumentException;
+
+    Class genericType(int index);
 }

@@ -2107,75 +2107,78 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireIn skipValue() {
-            consumePadding();
-            int code = readCode();
-            switch (code) {
-                case '{': {
-                    int count = 1;
-                    for (; ; ) {
-                        byte b = bytes.readByte();
-                        if (b == '{')
-                            count += 1;
-                        else if (b == '}') {
-                            count -= 1;
-                            if (count == 0)
-                                return TextWire.this;
-                        } else if (b == 0) {
-                            bytes.readSkip(-1);
-                            return TextWire.this;
-                        }
-                        // do nothing
-                    }
-                }
-
-                case '-': {
-                    for (; ; ) {
-                        byte b = bytes.readByte();
-                        if (b < ' ') {
-                            bytes.readSkip(-1);
-                            return TextWire.this;
-                        }
-                        // do nothing
-                    }
-                }
-
-                default:
-                    // TODO needs to be made much more efficient.
-                    bytes();
-            }
+            consumeAny();
+            if (peekCode() == ',')
+                bytes.readSkip(1);
             return TextWire.this;
         }
 
         protected long readLengthMarshallable() {
             long start = bytes.readPosition();
             try {
-                consumePadding();
-                int code = peekCode();
-                switch (code) {
-                    case '{': {
-                        bytes.readSkip(1);
-                        int count = 1;
-                        for (; ; ) {
-                            int b = bytes.readByte();
-                            if (b == '{') {
-                                count += 1;
-                            } else if (b == '}') {
-                                count -= 1;
-                                if (count == 0)
-                                    return bytes.readPosition() - start;
-                            } else if (b == 0) {
-                                return bytes.readPosition() - start - 1;
-                            }
-                            // do nothing
-                        }
-                    }
-
-                    default:
-                        consumeValue();
-                        return bytes.readPosition() - start;
-                }
+                consumeAny();
+                return bytes.readPosition() - start;
             } finally {
                 bytes.readPosition(start);
+            }
+        }
+
+        protected void consumeAny() {
+            consumePadding();
+            int code = peekCode();
+            switch (code) {
+                case '{': {
+                    bytes.readSkip(1);
+                    for (; ; ) {
+                        consumeAny();
+                        if (peekCode() == ',')
+                            readCode();
+                        else
+                            break;
+                    }
+                    consumePadding();
+                    code = readCode();
+                    if (code != '}') {
+                        bytes.readSkip(-1);
+                        throw new IllegalStateException("Expected a } was " + bytes);
+                    }
+                    break;
+                }
+                case '[': {
+                    bytes.readSkip(1);
+                    for (; ; ) {
+                        consumeAny();
+                        if (peekCode() == ',')
+                            readCode();
+                        else
+                            break;
+                    }
+                    consumePadding();
+                    code = readCode();
+                    if (code != ']') {
+                        bytes.readSkip(-1);
+                        throw new IllegalStateException("Expected a ] was " + bytes);
+                    }
+                    break;
+                }
+                case '}':
+                    break;
+                case ']':
+                    break;
+                case '"':
+                case '\'':
+                default:
+                    consumeValue();
+                    if (peekBack() == ',') {
+                        bytes.readSkip(-1);
+                        break;
+                    }
+                    consumePadding();
+                    if (peekCode() == ':') {
+                        readCode();
+                        consumeAny();
+                    }
+                    break;
             }
         }
 
@@ -2185,7 +2188,7 @@ public class TextWire extends AbstractWire implements Wire {
             if (peekCode() == '!') {
                 bytes.readSkip(1);
                 parseWord(sb);
-                parseWord(sb);
+                consumeAny();
 
             } else {
                 textTo(sb);

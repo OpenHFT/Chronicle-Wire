@@ -82,12 +82,27 @@ public class CSVWire extends TextWire {
         return sb;
     }
 
+    public void consumePaddingStart() {
+        for (; ; ) {
+            int codePoint = peekCode();
+            if (codePoint == '#') {
+                while (readCode() >= ' ') ;
+                continue;
+            }
+            if (Character.isWhitespace(codePoint)) {
+                if (codePoint == '\n' || codePoint == '\r')
+                    this.lineStart = bytes.readPosition() + 1;
+                bytes.readSkip(1);
+            } else {
+                break;
+            }
+        }
+    }
+
     public void consumePadding() {
         for (; ; ) {
             int codePoint = peekCode();
-            if (Character.isWhitespace(codePoint) || codePoint == ',') {
-                if (codePoint == '\n' || codePoint == '\r')
-                    this.lineStart = bytes.readPosition() + 1;
+            if (Character.isWhitespace(codePoint) && codePoint >= ' ') {
                 bytes.readSkip(1);
             } else {
                 break;
@@ -122,6 +137,12 @@ public class CSVWire extends TextWire {
 
     class CSVValueIn extends TextValueIn {
 
+        @Override
+        public boolean hasNext() {
+            consumePaddingStart();
+            return bytes.readRemaining() > 0;
+        }
+
         @Nullable
         <ACS extends Appendable & CharSequence> ACS textTo0(@NotNull ACS a) {
             consumePadding();
@@ -137,6 +158,9 @@ public class CSVWire extends TextWire {
                     unescape(a);
                     int code = peekCode();
                     if (code == '"')
+                        readCode();
+                    code = peekCode();
+                    if (code == ',')
                         readCode();
                     break;
 
