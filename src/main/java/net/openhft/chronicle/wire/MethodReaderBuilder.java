@@ -4,8 +4,8 @@ package net.openhft.chronicle.wire;
  * Created by peter on 17/05/2017.
  */
 public class MethodReaderBuilder {
-    final MarshallableIn in;
-    boolean ignoreDefaults;
+    private final MarshallableIn in;
+    private boolean ignoreDefaults;
 
     // TODO add support for filtering.
 
