@@ -16,7 +16,6 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -27,7 +26,6 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Created by peter.lawrey on 10/02/2016.
@@ -100,12 +98,5 @@ public class WireTypeTest {
 
             assertEquals(tm, o);
         }
-    }
-
-    @Test
-    public void fromFileInJar() throws IOException {
-        Bytes bytes = BytesUtil.readFile("/net/openhft/chronicle/core/onoes/Google.properties");
-        long n = bytes.indexOf(Bytes.from("Apache License"));
-        assertTrue(n > 0);
     }
 }
