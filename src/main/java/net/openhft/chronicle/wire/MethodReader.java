@@ -43,7 +43,7 @@ public class MethodReader implements Closeable {
     private final WireParser<Void> wireParser;
     private boolean closeIn = false, closed;
 
-    public MethodReader(MarshallableIn in, @NotNull Object... objects) {
+    public MethodReader(MarshallableIn in, boolean ignoreDefault, @NotNull Object... objects) {
         this.in = in;
         @NotNull WireParselet defaultParselet = (s, v, $) ->
                 LOGGER.warn("Unknown message " + s + ' ' + v.text());
@@ -55,6 +55,8 @@ public class MethodReader implements Closeable {
         for (@NotNull Object o : objects) {
             for (@NotNull Method m : o.getClass().getMethods()) {
                 if (Modifier.isStatic(m.getModifiers()))
+                    continue;
+                if (ignoreDefault && m.getDeclaringClass().isInterface())
                     continue;
 
                 try {
