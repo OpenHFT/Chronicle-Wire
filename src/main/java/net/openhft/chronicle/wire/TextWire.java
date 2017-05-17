@@ -38,6 +38,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Proxy;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -86,7 +87,7 @@ public class TextWire extends AbstractWire implements Wire {
     protected final TextValueOut valueOut = createValueOut();
     protected final TextValueIn valueIn = createValueIn();
     private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
-    private final ReadDocumentContext readContext = new ReadDocumentContext(this, false);
+    private final TextReadDocumentContext readContext = new TextReadDocumentContext(this);
     private final StringBuilder sb = new StringBuilder();
     protected long lineStart = 0;
     DefaultValueIn defaultValueIn;
@@ -192,6 +193,18 @@ public class TextWire extends AbstractWire implements Wire {
         // reset it.
         sct.isStopChar(' ');
         return sct;
+    }
+
+    public <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
+        Class[] interfaces = ObjectUtils.addAll(tClass, additional);
+
+        //noinspection unchecked
+        return (T) Proxy.newProxyInstance(tClass.getClassLoader(), interfaces, new TextMethodWriterInvocationHandler(this));
+    }
+
+    @NotNull
+    public <T> MethodWriterBuilder<T> methodWriterBuilder(Class<T> tClass) {
+        return new MethodWriterBuilder<>(tClass, new TextMethodWriterInvocationHandler(this));
     }
 
     @Override
@@ -398,10 +411,7 @@ public class TextWire extends AbstractWire implements Wire {
     }
 
     public String readingPeekYaml() {
-        long start = readContext.start;
-        if (start == -1)
-            return "";
-        return Wires.fromSizePrefixedBlobs(bytes, start);
+        throw new UnsupportedOperationException();
     }
 
     public void consumePadding(int commas) {

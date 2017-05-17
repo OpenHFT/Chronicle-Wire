@@ -1,0 +1,10 @@
+method1: {
+  field1: hello,
+  field2: 1.23
+}
+---
+method2: {
+  field1: world,
+  field2: 1e6
+}
+---

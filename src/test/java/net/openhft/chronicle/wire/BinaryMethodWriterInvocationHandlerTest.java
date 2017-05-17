@@ -28,7 +28,7 @@ import static org.easymock.EasyMock.*;
 /**
  * Created by peter on 23/04/16.
  */
-public class MethodWriterInvocationHandlerTest {
+public class BinaryMethodWriterInvocationHandlerTest {
 
     @Test
     public void testOnClose() throws Exception {
@@ -40,7 +40,7 @@ public class MethodWriterInvocationHandlerTest {
         expect(out.recordHistory()).andReturn(true);
         replay(out);
 
-        @NotNull MethodWriterInvocationHandler handler = new MethodWriterInvocationHandler(out);
+        @NotNull BinaryMethodWriterInvocationHandler handler = new BinaryMethodWriterInvocationHandler(out);
         handler.onClose(closeable);
 
         try (@NotNull Closeable close = (Closeable) Proxy.newProxyInstance(Closeable.class.getClassLoader(), new Class[]{Closeable.class}, handler)) {

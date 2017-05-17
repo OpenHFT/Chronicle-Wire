@@ -147,12 +147,12 @@ public interface MarshallableOut {
         Class[] interfaces = ObjectUtils.addAll(tClass, additional);
 
         //noinspection unchecked
-        return (T) Proxy.newProxyInstance(tClass.getClassLoader(), interfaces, new MethodWriterInvocationHandler(this));
+        return (T) Proxy.newProxyInstance(tClass.getClassLoader(), interfaces, new BinaryMethodWriterInvocationHandler(this));
     }
 
     @NotNull
     default <T> MethodWriterBuilder<T> methodWriterBuilder(Class<T> tClass) {
-        return new MethodWriterBuilder<>(this, tClass);
+        return new MethodWriterBuilder<>(tClass, new BinaryMethodWriterInvocationHandler(this));
     }
 
     /**
