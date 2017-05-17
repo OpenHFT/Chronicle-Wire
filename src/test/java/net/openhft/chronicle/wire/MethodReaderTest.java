@@ -22,7 +22,7 @@ interface MockMethods {
 public class MethodReaderTest {
     @Test
     public void readMethods() throws IOException {
-        Wire wire = new TextWire(BytesUtil.readFile("methods-in.yaml"));
+        Wire wire = new TextWire(BytesUtil.readFile("methods-in.yaml")).useTextDocuments();
         Wire wire2 = new TextWire(Bytes.allocateElasticDirect());
         // expected
         Bytes expected = BytesUtil.readFile("methods-in.yaml");
