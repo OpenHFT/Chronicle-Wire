@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Created by peter on 24/12/15.
  */
-public class TextReadDocumentContext implements DocumentContext {
+public class TextReadDocumentContext implements ReadDocumentContext {
     public static final BytesStore MSG_SEP = BytesStore.from("---");
     protected TextWire wire;
     protected boolean present, notComplete;

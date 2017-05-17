@@ -25,8 +25,8 @@ public class TextMethodTester<T> {
     }
 
     public TextMethodTester run() throws IOException {
-        Wire wire = new TextWire(BytesUtil.readFile(input));
-        Wire wire2 = new TextWire(Bytes.allocateElasticDirect());
+        Wire wire = new TextWire(BytesUtil.readFile(input)).useTextDocuments();
+        Wire wire2 = new TextWire(Bytes.allocateElasticDirect()).useTextDocuments();
         // expected
         expected = BytesUtil.readFile(output).toString().trim().replace("\r", "");
         T writer = wire2.methodWriter(outputClass);

@@ -125,7 +125,7 @@ public enum Wires {
             Bytes tempBytes = Bytes.allocateElasticDirect();
             try {
                 tempBytes.writeOrderedInt(header);
-                tempBytes.write(((ReadDocumentContext) dc).wire.bytes, 0, ((ReadDocumentContext) dc).wire.bytes.readLimit());
+                tempBytes.write(((BinaryReadDocumentContext) dc).wire.bytes, 0, ((BinaryReadDocumentContext) dc).wire.bytes.readLimit());
 
                 final WireType wireType = WireType.valueOf(wire);
 
@@ -139,8 +139,8 @@ public enum Wires {
             }
 
         } else {
-            if (dc instanceof ReadDocumentContext) {
-                long start = ((ReadDocumentContext) dc).lastStart;
+            if (dc instanceof BinaryReadDocumentContext) {
+                long start = ((BinaryReadDocumentContext) dc).lastStart;
                 if (start != -1)
                     headerPosition = start;
                 else

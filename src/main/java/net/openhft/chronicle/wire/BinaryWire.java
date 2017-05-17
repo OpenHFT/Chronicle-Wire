@@ -66,7 +66,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private final boolean fieldLess;
     private final int compressedSize;
     private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
-    private final ReadDocumentContext readContext;
+    private final BinaryReadDocumentContext readContext;
     private final StringBuilder stringBuilder = new StringBuilder();
     DefaultValueIn defaultValueIn;
     private String compression;
@@ -83,7 +83,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         valueOut = getFixedBinaryValueOut(fixed);
         this.compression = compression;
         valueIn = supportDelta ? new DeltaValueIn() : new BinaryValueIn();
-        readContext = new ReadDocumentContext(this, supportDelta);
+        readContext = new BinaryReadDocumentContext(this, supportDelta);
     }
 
     @NotNull

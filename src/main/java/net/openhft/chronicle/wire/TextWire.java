@@ -86,11 +86,11 @@ public class TextWire extends AbstractWire implements Wire {
 
     protected final TextValueOut valueOut = createValueOut();
     protected final TextValueIn valueIn = createValueIn();
-    private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
-    private final TextReadDocumentContext readContext = new TextReadDocumentContext(this);
     private final StringBuilder sb = new StringBuilder();
     protected long lineStart = 0;
     DefaultValueIn defaultValueIn;
+    private WriteDocumentContext writeContext;
+    private ReadDocumentContext readContext;
 
     public TextWire(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
@@ -220,6 +220,8 @@ public class TextWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
+        if (writeContext == null)
+            writeContext = new WriteDocumentContext(this);
         writeContext.start(metaData);
         return writeContext;
     }
@@ -227,8 +229,19 @@ public class TextWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public DocumentContext readingDocument() {
-        readContext.start();
+        initReadContext();
         return readContext;
+    }
+
+    protected void initReadContext() {
+        if (readContext == null)
+            readContext = new BinaryReadDocumentContext(this, false);
+        readContext.start();
+    }
+
+    public TextWire useTextDocuments() {
+        readContext = new TextReadDocumentContext(this);
+        return this;
     }
 
     @NotNull
@@ -237,7 +250,7 @@ public class TextWire extends AbstractWire implements Wire {
         final long readPosition = bytes().readPosition();
         final long readLimit = bytes().readLimit();
         bytes().readPosition(readLocation);
-        readContext.start();
+        initReadContext();
         readContext.closeReadLimit(readLimit);
         readContext.closeReadPosition(readPosition);
         return readContext;
