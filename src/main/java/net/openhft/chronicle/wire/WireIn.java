@@ -30,7 +30,7 @@ import java.util.concurrent.TimeoutException;
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream. <p>
  * Created by peter.lawrey on 12/01/15.
  */
-public interface WireIn extends WireCommon {
+public interface WireIn extends WireCommon, MarshallableIn {
 
     @NotNull
     default <K, V> Map<K, V> readAllAsMap(Class<K> kClass, @NotNull Class<V> vClass, @NotNull Map<K, V> map) {
@@ -191,9 +191,9 @@ public interface WireIn extends WireCommon {
         return Wires.asText(this);
     }
 
+    String readingPeekYaml();
+
     enum HeaderType {
         NONE, DATA, META_DATA
     }
-
-    String readingPeekYaml();
 }

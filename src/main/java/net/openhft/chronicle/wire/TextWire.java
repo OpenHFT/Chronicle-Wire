@@ -32,8 +32,6 @@ import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
 
 import java.io.Externalizable;
@@ -63,7 +61,6 @@ public class TextWire extends AbstractWire implements Wire {
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
     static final BitSet QUOTE_CHARS = new BitSet();
-    static final Logger LOG = LoggerFactory.getLogger(TextWire.class);
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(StopCharTesters.QUOTES::escaping);
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_SINGLE_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(() -> StopCharTesters.SINGLE_QUOTES.escaping());
     static final ThreadLocal<WeakReference<StopCharsTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
@@ -2130,13 +2127,16 @@ public class TextWire extends AbstractWire implements Wire {
                 case '{': {
                     bytes.readSkip(1);
                     for (; ; ) {
+                        long pos = bytes.readPosition();
                         consumeAny();
                         int code2 = peekCode();
-                        if (code2 == '}' || code2 <= 0) {
+                        if (code2 == '}' || code2 == ']' || code2 <= 0) {
                             break;
                         } else if (code2 == ',') {
                             readCode();
                         }
+                        if (bytes.readPosition() == pos)
+                            throw new IllegalStateException("Stuck at pos " + pos + " " + bytes);
                     }
                     consumePadding();
                     code = readCode();
@@ -2149,11 +2149,14 @@ public class TextWire extends AbstractWire implements Wire {
                 case '[': {
                     bytes.readSkip(1);
                     for (; ; ) {
+                        long pos = bytes.readPosition();
                         consumeAny();
                         if (peekCode() == ',')
                             readCode();
                         else
                             break;
+                        if (bytes.readPosition() == pos)
+                            throw new IllegalStateException("Stuck at pos " + pos + " " + bytes);
                     }
                     consumePadding();
                     code = readCode();

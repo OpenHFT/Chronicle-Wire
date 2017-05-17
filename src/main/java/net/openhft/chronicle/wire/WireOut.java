@@ -32,7 +32,7 @@ import java.util.concurrent.TimeoutException;
  * <p/>
  * Created by peter.lawrey on 12/01/15.
  */
-public interface WireOut extends WireCommon {
+public interface WireOut extends WireCommon, MarshallableOut {
 
     /**
      * Write an empty filed marker

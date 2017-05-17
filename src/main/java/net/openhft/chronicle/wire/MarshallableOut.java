@@ -58,10 +58,12 @@ public interface MarshallableOut {
     DocumentContext writingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
     /**
-     * @return true is this output is configured to expect the history of the message to be written
+     * @return true if this output is configured to expect the history of the message to be written
      * to.
      */
-    boolean recordHistory();
+    default boolean recordHistory() {
+        return false;
+    }
 
     /**
      * Wrie a key and value which could be a scalar or a marshallable.
@@ -159,7 +161,7 @@ public interface MarshallableOut {
      * @return the state of padding
      */
     @NotNull
-    default Padding padToCacheAlign() {
+    default Padding padToCacheAlignMode() {
         return Padding.NEVER;
     }
 
