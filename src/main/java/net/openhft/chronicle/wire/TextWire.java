@@ -2698,6 +2698,11 @@ public class TextWire extends AbstractWire implements Wire {
             int code = peekCode();
             if (code == '!') {
                 typePrefix(null, (o, x) -> { /* sets acquireStringBuilder(); */});
+
+            } else if (code == ',') {
+                Jvm.warn().on(getClass(), "Expected a {} but was blank for type " + object.getClass());
+                return object;
+
             } else if (code != '{') {
                 throw new IORuntimeException("Unsupported type " + stringForCode(code));
             }

@@ -557,6 +557,21 @@ public class TextWireTest {
     }
 
     @Test
+    public void testTypeWithEmpty() {
+        ClassAliasPool.CLASS_ALIASES.addAlias(NestedA.class, NestedB.class);
+        NestedA a = Marshallable.fromString("!NestedA {\n" +
+                "  b: !NestedB,\n" +
+                "  value: 12345\n" +
+                "}");
+        assertEquals("!NestedA {\n" +
+                "  b: {\n" +
+                "    field1: 0.0\n" +
+                "  },\n" +
+                "  value: 0\n" +
+                "}\n", a.toString());
+    }
+
+    @Test
     public void testBool() {
         @NotNull Wire wire = createWire();
         wire.write().bool(false)
@@ -1415,6 +1430,15 @@ public class TextWireTest {
 
     enum BWKey implements WireKey {
         field1, field2, field3
+    }
+
+    static class NestedA extends AbstractMarshallable {
+        NestedB b;
+        long value;
+    }
+
+    static class NestedB extends AbstractMarshallable {
+        double field1;
     }
 
     static class StringArray implements Marshallable {
