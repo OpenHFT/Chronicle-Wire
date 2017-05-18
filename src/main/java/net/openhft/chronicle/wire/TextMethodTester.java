@@ -14,6 +14,7 @@ public class TextMethodTester<T> {
     private final Class<T> outputClass;
     private final String output;
     private final Function<T, Object> componentFunction;
+    private String setup;
     private String expected;
     private String actual;
 
@@ -24,13 +25,35 @@ public class TextMethodTester<T> {
         this.componentFunction = componentFunction;
     }
 
+    public String setup() {
+        return setup;
+    }
+
+    public TextMethodTester setup(String setup) {
+        this.setup = setup;
+        return this;
+    }
+
     public TextMethodTester run() throws IOException {
-        Wire wire = new TextWire(BytesUtil.readFile(input)).useTextDocuments();
+
         Wire wire2 = new TextWire(Bytes.allocateElasticDirect()).useTextDocuments();
-        // expected
-        expected = BytesUtil.readFile(output).toString().trim().replace("\r", "");
         T writer = wire2.methodWriter(outputClass);
         Object component = componentFunction.apply(writer);
+
+        if (setup != null) {
+            Wire wire0 = new TextWire(BytesUtil.readFile(setup)).useTextDocuments();
+
+            MethodReader reader0 = wire0.methodReader(component);
+            while (reader0.readOne()) {
+                wire2.bytes().clear();
+            }
+            wire2.bytes().clear();
+        }
+
+        Wire wire = new TextWire(BytesUtil.readFile(input)).useTextDocuments();
+
+        // expected
+        expected = BytesUtil.readFile(output).toString().trim().replace("\r", "");
         MethodReader reader = wire.methodReader(component);
         while (reader.readOne()) {
             while (wire2.bytes().peekUnsignedByte(wire2.bytes().writePosition() - 1) == ' ')
