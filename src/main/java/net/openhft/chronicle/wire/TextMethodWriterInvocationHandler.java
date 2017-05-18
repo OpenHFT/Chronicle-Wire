@@ -74,8 +74,7 @@ public class TextMethodWriterInvocationHandler implements MethodWriterInvocation
                         v.object(finalParameterTypes[i], args[i]);
                 });
         }
-        wire.padToCacheAlign();
-
+        wire.getValueOut().resetBetweenDocuments();
         return ObjectUtils.defaultValue(method.getReturnType());
     }
 
