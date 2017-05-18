@@ -17,7 +17,7 @@ public class TextMethodTesterTest {
                 MockMethodsImpl::new,
                 MockMethods.class,
                 "methods-in.yaml")
-                .setup("methods-in.yaml") // calls made here are ignored.
+                .setup("methods-in.yaml") // calls made here are not validated in the output.
                 .run();
         assertEquals(test.expected(), test.actual());
     }
