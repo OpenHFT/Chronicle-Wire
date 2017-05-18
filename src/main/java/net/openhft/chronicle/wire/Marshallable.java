@@ -125,7 +125,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         return Wires.fieldInfos(getClass());
     }
 
-    default void reset() {
-        Wires.reset(this);
-    }
+    // breaks Chronicle FIX
+//    default void reset() {
+//        Wires.reset(this);
+//    }
 }
