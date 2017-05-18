@@ -41,6 +41,11 @@ public class TextMethodTester<T> {
         return afterRun;
     }
 
+    public TextMethodTester afterRun(Function<String, String> afterRun) {
+        this.afterRun = afterRun;
+        return this;
+    }
+
     public TextMethodTester run() throws IOException {
 
         Wire wire2 = new TextWire(Bytes.allocateElasticDirect()).useTextDocuments();
