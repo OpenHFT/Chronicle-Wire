@@ -14,7 +14,10 @@ public class TextMethodTester<T> {
     private final Class<T> outputClass;
     private final String output;
     private final Function<T, Object> componentFunction;
+
     private String setup;
+    private Function<String, String> afterRun;
+
     private String expected;
     private String actual;
 
@@ -32,6 +35,10 @@ public class TextMethodTester<T> {
     public TextMethodTester setup(String setup) {
         this.setup = setup;
         return this;
+    }
+
+    public Function<String, String> afterRun() {
+        return afterRun;
     }
 
     public TextMethodTester run() throws IOException {
@@ -61,6 +68,10 @@ public class TextMethodTester<T> {
             wire2.bytes().append("---\n");
         }
         actual = wire2.toString().trim();
+        if (afterRun != null) {
+            expected = afterRun.apply(expected);
+            actual = afterRun.apply(actual);
+        }
         return this;
     }
 

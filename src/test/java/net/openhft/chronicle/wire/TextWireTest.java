@@ -572,6 +572,15 @@ public class TextWireTest {
     }
 
     @Test
+    public void testSingleQuote() {
+        NestedA a = Marshallable.fromString("!NestedA {\n" +
+                "  b: !NestedB,\n" +
+                "  value: 12345\n" +
+                "}");
+
+    }
+
+    @Test
     public void testBool() {
         @NotNull Wire wire = createWire();
         wire.write().bool(false)
