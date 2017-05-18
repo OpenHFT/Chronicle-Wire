@@ -68,8 +68,6 @@ public class TextMethodTester<T> {
         expected = BytesUtil.readFile(output).toString().trim().replace("\r", "");
         MethodReader reader = wire.methodReader(component);
         while (reader.readOne()) {
-            while (wire2.bytes().peekUnsignedByte(wire2.bytes().writePosition() - 1) == ' ')
-                wire2.bytes().writeSkip(-1);
             wire2.bytes().append("---\n");
         }
         actual = wire2.toString().trim();
