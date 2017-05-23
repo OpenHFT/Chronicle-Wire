@@ -30,6 +30,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     private final boolean ensureFullRead;
     public long start = -1;
     public long lastStart = -1;
+    @Nullable
     protected AbstractWire wire;
     protected boolean present, notComplete;
     private boolean metaData;
@@ -68,6 +69,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         this.readLimit = readLimit;
     }
 
+    @Nullable
     @Override
     public Wire wire() {
         return wire;

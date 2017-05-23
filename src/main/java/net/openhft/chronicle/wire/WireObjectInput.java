@@ -54,7 +54,7 @@ class WireObjectInput implements ObjectInput {
     }
 
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(@NotNull byte[] b, int off, int len) throws IOException {
         final long remaining = wire.bytes().readRemaining();
         if (remaining <= 0)
             throw new EOFException();

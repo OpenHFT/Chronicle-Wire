@@ -106,6 +106,7 @@ public class RawWire extends AbstractWire implements Wire {
 
     }
 
+    @NotNull
     public String readingPeekYaml() {
         long start = readContext.start;
         if (start == -1)
@@ -713,6 +714,7 @@ public class RawWire extends AbstractWire implements Wire {
         }
 
 
+        @NotNull
         @Override
         public WireIn bytes(@NotNull BytesOut toBytes, boolean clearBytes) {
             if (clearBytes)

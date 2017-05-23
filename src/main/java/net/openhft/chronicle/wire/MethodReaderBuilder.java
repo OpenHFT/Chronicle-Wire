@@ -1,5 +1,7 @@
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Created by peter on 17/05/2017.
  */
@@ -17,11 +19,13 @@ public class MethodReaderBuilder {
         return ignoreDefaults;
     }
 
+    @NotNull
     public MethodReaderBuilder ignoreDefaults(boolean ignoreDefaults) {
         this.ignoreDefaults = ignoreDefaults;
         return this;
     }
 
+    @NotNull
     public MethodReader build(Object... impls) {
         return new MethodReader(in, ignoreDefaults, impls);
     }

@@ -173,6 +173,7 @@ public class JSONWireTest {
     }
 
     private static class TwoLists implements Marshallable {
+        @Nullable
         String name;
         List<Item> list1;
         List<Item> list2;

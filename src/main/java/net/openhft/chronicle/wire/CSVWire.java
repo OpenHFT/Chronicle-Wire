@@ -35,13 +35,13 @@ public class CSVWire extends TextWire {
 
     private final List<String> header = new ArrayList<>();
 
-    public CSVWire(Bytes bytes, boolean use8bit) {
+    public CSVWire(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
         while (lineStart == 0)
             header.add(valueIn.text());
     }
 
-    public CSVWire(Bytes bytes) {
+    public CSVWire(@NotNull Bytes bytes) {
         this(bytes, false);
     }
 

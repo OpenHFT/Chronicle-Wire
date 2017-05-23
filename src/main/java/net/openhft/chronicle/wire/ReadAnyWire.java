@@ -33,7 +33,7 @@ import java.util.function.Supplier;
  */
 public class ReadAnyWire extends AbstractAnyWire implements Wire {
 
-    public ReadAnyWire(Bytes bytes) {
+    public ReadAnyWire(@NotNull Bytes bytes) {
         super(bytes, new ReadAnyWireAcquisition(bytes));
     }
 

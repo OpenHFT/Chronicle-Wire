@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.StopCharTester;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.BitSet;
 
@@ -25,6 +26,7 @@ import java.util.BitSet;
  */
 enum TextStopCharTesters implements StopCharTester {
     END_OF_TYPE {
+        @NotNull
         BitSet EOW = new BitSet();
         {
             for (int i = 0; i < 127; i++)

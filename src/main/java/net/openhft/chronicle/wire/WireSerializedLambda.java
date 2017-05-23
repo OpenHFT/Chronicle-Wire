@@ -104,6 +104,7 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
 
     }
 
+    @NotNull
     @Override
     public Object readResolve() {
         @NotNull SerializedLambda sl = new SerializedLambda(capturingClass, functionalInterfaceClass,

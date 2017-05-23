@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +26,7 @@ public class TextSkipValueTest {
         this.input = input;
     }
 
+    @NotNull
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         List<Object[]> list = new ArrayList<>();

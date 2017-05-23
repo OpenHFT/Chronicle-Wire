@@ -1455,9 +1455,10 @@ public class TextWireTest {
     }
 
     static class BytesWrapper extends AbstractMarshallable {
+        @NotNull
         Bytes bytes = allocateElasticDirect();
 
-        public void bytes(CharSequence cs) {
+        public void bytes(@NotNull CharSequence cs) {
             bytes.clear();
             bytes.append(cs);
         }

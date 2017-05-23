@@ -48,6 +48,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         return wireAcquisition.acquireWire();
     }
 
+    @NotNull
     public Supplier<WireType> underlyingType() {
         return wireAcquisition.underlyingType();
     }
@@ -75,6 +76,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         return wireAcquisition.acquireWire().read(name);
     }
 
+    @Nullable
     @Override
     public <K> K readEvent(Class<K> expectedClass) {
         return wireAcquisition.acquireWire().readEvent(expectedClass);
@@ -124,6 +126,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         wireAcquisition.acquireWire();
     }
 
+    @NotNull
     @Override
     public DocumentContext readingDocument() {
         return wireAcquisition.acquireWire().readingDocument();
@@ -194,6 +197,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         /**
          * @return the type of wire for example Text or Binary
          */
+        @NotNull
         Supplier<WireType> underlyingType();
 
         @Nullable
@@ -201,6 +205,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
 
         void classLookup(ClassLookup classLookup);
 
+        @Nullable
         ClassLookup classLookup();
     }
 }

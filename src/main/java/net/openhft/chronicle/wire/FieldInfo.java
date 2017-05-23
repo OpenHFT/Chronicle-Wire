@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 
@@ -25,7 +26,7 @@ import java.lang.reflect.Field;
  */
 public interface FieldInfo {
     @NotNull
-    static FieldInfo fieldInfo(String name, Class type, BracketType bracketType, Field field) {
+    static FieldInfo fieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
         return new VanillaFieldInfo(name, type, bracketType, field);
     }
 
@@ -35,6 +36,7 @@ public interface FieldInfo {
 
     BracketType bracketType();
 
+    @Nullable
     Object get(Object value);
 
     long getLong(Object value);

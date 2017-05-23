@@ -123,6 +123,7 @@ public interface WireCommon {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     WireOut headerNumber(long headerNumber);
 
     long headerNumber();

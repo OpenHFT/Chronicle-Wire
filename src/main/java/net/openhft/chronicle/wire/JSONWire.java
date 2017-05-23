@@ -31,11 +31,11 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 public class JSONWire extends TextWire {
     static final BytesStore COMMA = BytesStore.from(",");
 
-    public JSONWire(Bytes bytes, boolean use8bit) {
+    public JSONWire(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
     }
 
-    public JSONWire(Bytes bytes) {
+    public JSONWire(@NotNull Bytes bytes) {
         this(bytes, false);
     }
 

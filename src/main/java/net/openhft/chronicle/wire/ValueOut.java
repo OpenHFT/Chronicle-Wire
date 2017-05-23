@@ -59,6 +59,7 @@ public interface ValueOut {
         return text((CharSequence) s);
     }
 
+    @NotNull
     default WireOut nu11() {
         return text((CharSequence) null);
     }
@@ -89,6 +90,7 @@ public interface ValueOut {
     @NotNull
     WireOut bytes(@Nullable BytesStore fromBytes);
 
+    @NotNull
     default WireOut bytesLiteral(@Nullable BytesStore fromBytes) {
         return bytes(fromBytes);
     }
@@ -639,6 +641,7 @@ public interface ValueOut {
     @NotNull
     WireOut wireOut();
 
+    @NotNull
     default WireOut compress(@NotNull String compression, @Nullable Bytes uncompressedBytes) {
         if (uncompressedBytes == null)
             return nu11();
@@ -656,7 +659,7 @@ public interface ValueOut {
 
     @NotNull
     @Deprecated
-    default WireOut compress(String compression, @Nullable String str) {
+    default WireOut compress(@NotNull String compression, @Nullable String str) {
         if (str == null || str.length() < SMALL_MESSAGE)
             return text(str);
         // replace with compress(String compression, Bytes compressedBytes)

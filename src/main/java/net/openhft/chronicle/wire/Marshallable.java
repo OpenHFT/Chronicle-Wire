@@ -85,6 +85,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         return READ_ANY.fromHexString(cs);
     }
 
+    @Nullable
     default <T> T getField(String name, Class<T> tClass) throws NoSuchFieldException {
         return Wires.getField(this, name, tClass);
     }

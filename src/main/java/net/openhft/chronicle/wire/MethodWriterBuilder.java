@@ -34,7 +34,7 @@ public class MethodWriterBuilder<T> implements Supplier<T> {
     private final MethodWriterInvocationHandler handler;
     private ClassLoader classLoader;
 
-    public MethodWriterBuilder(@NotNull Class<T> tClass, MethodWriterInvocationHandler handler) {
+    public MethodWriterBuilder(@NotNull Class<T> tClass, @NotNull MethodWriterInvocationHandler handler) {
         interfaces.add(Closeable.class);
         interfaces.add(tClass);
         classLoader = tClass.getClassLoader();

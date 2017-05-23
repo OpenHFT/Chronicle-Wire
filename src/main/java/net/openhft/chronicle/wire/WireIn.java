@@ -89,6 +89,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
      * @param expectedClass to use as a hint, or Object.class if no hint available.
      * @return an instance of expectedClass
      */
+    @Nullable
     <K> K readEvent(Class<K> expectedClass);
 
     /**
@@ -162,6 +163,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
      *
      * @return the document context
      */
+    @NotNull
     DocumentContext readingDocument();
 
     DocumentContext readingDocument(long readLocation);
@@ -179,6 +181,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
         return readDataHeader(false) == HeaderType.DATA;
     }
 
+    @NotNull
     HeaderType readDataHeader(boolean includeMetaData) throws EOFException;
 
     void readAndSetLength(long position);
@@ -187,6 +190,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
 
     void readMetaDataHeader();
 
+    @Nullable
     default CharSequence asText() {
         return Wires.asText(this);
     }

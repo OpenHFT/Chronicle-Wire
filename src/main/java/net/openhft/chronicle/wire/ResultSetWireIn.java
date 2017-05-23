@@ -101,6 +101,7 @@ public class ResultSetWireIn implements WireIn {
         return valueIn;
     }
 
+    @Nullable
     @Override
     public <K> K readEvent(Class<K> expectedClass) {
         try {
@@ -291,6 +292,7 @@ public class ResultSetWireIn implements WireIn {
             return bytes(bytes, false);
         }
 
+        @NotNull
         @Override
         public WireIn bytes(@NotNull BytesOut toBytes, boolean clearBytes) {
             if (clearBytes)

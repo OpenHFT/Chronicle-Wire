@@ -36,6 +36,7 @@ public interface Wire extends WireIn, WireOut {
         }
     }
 
+    @NotNull
     Wire headerNumber(long headerNumber);
 
 }

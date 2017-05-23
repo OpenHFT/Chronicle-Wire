@@ -398,6 +398,7 @@ public enum SerializationStrategies implements SerializationStrategy {
             this.type = type;
         }
 
+        @NotNull
         @Override
         public Object[] readResolve() {
             return array;
@@ -413,6 +414,7 @@ public enum SerializationStrategies implements SerializationStrategy {
             this.type = type;
         }
 
+        @NotNull
         @Override
         public Object readResolve() {
             return array;
@@ -428,6 +430,7 @@ public enum SerializationStrategies implements SerializationStrategy {
             this.type = type;
         }
 
+        @NotNull
         @Override
         public Demarshallable readResolve() {
             return demarshallable;

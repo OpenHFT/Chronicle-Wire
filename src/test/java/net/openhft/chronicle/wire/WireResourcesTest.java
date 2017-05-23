@@ -155,6 +155,7 @@ public class WireResourcesTest {
         assertEquals(0, mappedFile(wire).refCount());
     }
 
+    @NotNull
     protected MappedFile mappedFile(@NotNull Wire wire) {
         return ((MappedBytes) wire.bytes()).mappedFile();
     }

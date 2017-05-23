@@ -4,6 +4,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import net.openhft.chronicle.wire.*;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +32,7 @@ public class EnumWireTest {
         return Arrays.asList(TextWire::new, BinaryWire::new, RawWire::new);
     }
 
-    private static Wire serialise(Function<Bytes, Wire> createWire, Marshallable person) {
+    private static Wire serialise(@NotNull Function<Bytes, Wire> createWire, @NotNull Marshallable person) {
         Wire wire = createWire.apply(Bytes.elasticByteBuffer());
         person.writeMarshallable(wire);
         return wire;
@@ -52,7 +53,7 @@ public class EnumWireTest {
         assertSame(MarshAndResolve.MARSH_AND_RESOLVE, roundTrip(Person3::new).field);
     }
 
-    private <T extends Marshallable> T roundTrip(Supplier<T> supplier) {
+    private <T extends Marshallable> T roundTrip(@NotNull Supplier<T> supplier) {
         Wire wire = serialise(createWire, supplier.get());
 //        System.out.println(wire.bytes());
         try {
@@ -80,20 +81,24 @@ public class EnumWireTest {
     static class MarshAndResolve implements Marshallable, ReadResolvable<MarshAndResolve> {
         static final MarshAndResolve MARSH_AND_RESOLVE = new MarshAndResolve();
 
+        @NotNull
         public MarshAndResolve readResolve() {
             return MARSH_AND_RESOLVE;
         }
     }
 
     static class Person1 extends AbstractMarshallable {
+        @NotNull
         private Marsh field = Marsh.MARSH;
     }
 
     static class Person2 extends AbstractMarshallable {
+        @NotNull
         private NoMarsh field = NoMarsh.NO_MARSH;
     }
 
     static class Person3 extends AbstractMarshallable {
+        @NotNull
         private MarshAndResolve field = MarshAndResolve.MARSH_AND_RESOLVE;
     }
 }

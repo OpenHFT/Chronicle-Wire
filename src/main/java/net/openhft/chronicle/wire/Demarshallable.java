@@ -47,7 +47,7 @@ public interface Demarshallable {
     };
 
     @NotNull
-    static <T extends Demarshallable> T newInstance(Class<T> clazz, WireIn wireIn) {
+    static <T extends Demarshallable> T newInstance(@NotNull Class<T> clazz, WireIn wireIn) {
         try {
             return (T) DEMARSHALLABLES.get(clazz).newInstance(wireIn);
 

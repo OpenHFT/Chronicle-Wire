@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class TextReadDocumentContext implements ReadDocumentContext {
     public static final BytesStore MSG_SEP = BytesStore.from("---");
+    @Nullable
     protected TextWire wire;
     protected boolean present, notComplete;
 
@@ -60,6 +61,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         this.readLimit = readLimit;
     }
 
+    @Nullable
     @Override
     public Wire wire() {
         return wire;

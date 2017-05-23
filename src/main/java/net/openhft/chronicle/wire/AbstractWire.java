@@ -73,7 +73,9 @@ public abstract class AbstractWire implements Wire {
 
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
     protected Object parent;
+    @Nullable
     volatile Thread usedBy;
+    @Nullable
     volatile Throwable usedHere, lastEnded;
     int usedCount = 0;
     private Pauser pauser;

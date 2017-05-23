@@ -66,6 +66,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private final boolean fieldLess;
     private final int compressedSize;
     private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
+    @NotNull
     private final BinaryReadDocumentContext readContext;
     private final StringBuilder stringBuilder = new StringBuilder();
     DefaultValueIn defaultValueIn;
@@ -160,6 +161,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @return when readReading a document returns the current document as a YAML String, if you are
      * not currently reading a document, and empty string will be return.
      */
+    @NotNull
     public String readingPeekYaml() {
         long start = readContext.start;
         if (start == -1)
@@ -364,7 +366,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @NotNull
     @Override
-    public ValueIn read(String fieldName) {
+    public ValueIn read(@NotNull String fieldName) {
         read(fieldName, fieldName.hashCode(), null, Function.identity());
         return valueIn;
     }
@@ -382,7 +384,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         return read(key.name(), key.code(), key, WireKey::defaultValue);
     }
 
-    private <T> ValueIn read(CharSequence keyName, int keyCode, T defaultSource, Function<T, Object> defaultLookup) {
+    private <T> ValueIn read(CharSequence keyName, int keyCode, T defaultSource, @NotNull Function<T, Object> defaultLookup) {
         ValueInState curr = valueIn.curr();
         @NotNull StringBuilder sb = acquireStringBuilder();
         // did we save the position last time
@@ -411,7 +413,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     protected <T> ValueIn read2(CharSequence keyName,
                                 int keyCode,
                                 T defaultSource,
-                                Function<T, Object> defaultLookup,
+                                @NotNull Function<T, Object> defaultLookup,
                                 @NotNull ValueInState curr,
                                 @NotNull StringBuilder sb,
                                 CharSequence name) {
@@ -2054,6 +2056,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return bytes(toBytes, true);
         }
 
+        @NotNull
         @Override
         public WireIn bytes(@NotNull BytesOut toBytes, boolean clearBytes) {
             long length = readLength();

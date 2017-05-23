@@ -137,6 +137,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      */
     DocumentContext writingDocument(boolean metaData);
 
+    @NotNull
     default DocumentContext writingDocument() {
         return writingDocument(false);
     }
@@ -250,6 +251,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
         });
     }
 
+    @NotNull
     default WireOut dropDefault(boolean dropDefault) {
         return this;
     }

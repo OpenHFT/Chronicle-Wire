@@ -104,7 +104,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     BINARY {
         @NotNull
         @Override
-        public Wire apply(Bytes bytes) {
+        public Wire apply(@NotNull Bytes bytes) {
             return new BinaryWire(bytes);
         }
 
@@ -123,7 +123,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     BINARY_LIGHT {
         @NotNull
         @Override
-        public Wire apply(Bytes bytes) {
+        public Wire apply(@NotNull Bytes bytes) {
             return BinaryWire.binaryOnly(bytes);
         }
 
@@ -263,7 +263,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     FIELDLESS_BINARY {
         @NotNull
         @Override
-        public Wire apply(Bytes bytes) {
+        public Wire apply(@NotNull Bytes bytes) {
             return new BinaryWire(bytes, false, false, true, Integer.MAX_VALUE, "binary", false);
         }
 
@@ -282,7 +282,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     COMPRESSED_BINARY {
         @NotNull
         @Override
-        public Wire apply(Bytes bytes) {
+        public Wire apply(@NotNull Bytes bytes) {
             return new BinaryWire(bytes, false, false, false, COMPRESSED_SIZE, "lzw", true);
         }
 
@@ -301,7 +301,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     JSON {
         @NotNull
         @Override
-        public Wire apply(Bytes bytes) {
+        public Wire apply(@NotNull Bytes bytes) {
             return new JSONWire(bytes);
         }
     },
@@ -327,7 +327,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     CSV {
         @NotNull
         @Override
-        public Wire apply(Bytes bytes) {
+        public Wire apply(@NotNull Bytes bytes) {
             return new CSVWire(bytes);
         }
     },
@@ -343,6 +343,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     private static final Logger LOG = LoggerFactory.getLogger(WireType.class);
     private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
 
+    @Nullable
     static Bytes getBytes() {
         // when in debug, the output becomes confused if you reuse the buffer.
         if (Jvm.isDebug())
@@ -350,6 +351,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         return Wires.acquireBytes();
     }
 
+    @Nullable
     static Bytes getBytes2() {
         // when in debug, the output becomes confused if you reuse the buffer.
         if (Jvm.isDebug())
@@ -411,6 +413,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         return bytes.toString();
     }
 
+    @Nullable
     private Bytes asBytes(Object marshallable) {
         Bytes bytes = getBytes();
         Wire wire = apply(bytes);
@@ -457,17 +460,19 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         }
     }
 
+    @NotNull
     public <T> Stream<T> streamFromFile(String filename) throws IOException {
         return streamFromFile((Class) Marshallable.class, filename);
     }
 
+    @NotNull
     public <T> Stream<T> streamFromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
         Wire wire = apply(BytesUtil.readFile(filename));
         ValueIn valueIn = wire.getValueIn();
         return StreamSupport.stream(
                 new Spliterators.AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED | Spliterator.IMMUTABLE) {
                     @Override
-                    public boolean tryAdvance(Consumer<? super T> action) {
+                    public boolean tryAdvance(@NotNull Consumer<? super T> action) {
                         Bytes<?> bytes = wire.bytes();
                         if (valueIn.hasNext()) {
                             action.accept(valueIn.object(expectedType));

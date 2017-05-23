@@ -56,6 +56,7 @@ class ScalarStrategy<T> implements SerializationStrategy<T> {
         return BracketType.NONE;
     }
 
+    @NotNull
     @Override
     public T newInstance(Class type) {
         return ObjectUtils.newInstance(this.type);

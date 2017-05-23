@@ -288,14 +288,14 @@ public class HashWire implements WireOut {
 
         @NotNull
         @Override
-        public WireOut bytes(String type, @Nullable BytesStore fromBytes) {
+        public WireOut bytes(@NotNull String type, @Nullable BytesStore fromBytes) {
             hash = hash * M1 + Maths.hash64(type) ^ Maths.hash64(fromBytes);
             return HashWire.this;
         }
 
         @NotNull
         @Override
-        public WireOut rawBytes(byte[] value) {
+        public WireOut rawBytes(@NotNull byte[] value) {
             hash = hash * M1 + Maths.hash64(Bytes.wrapForRead(value));
             return HashWire.this;
         }
@@ -309,14 +309,14 @@ public class HashWire implements WireOut {
 
         @NotNull
         @Override
-        public WireOut bytes(byte[] fromBytes) {
+        public WireOut bytes(@NotNull byte[] fromBytes) {
             hash = hash * M1 + Maths.hash64(Bytes.wrapForRead(fromBytes));
             return HashWire.this;
         }
 
         @NotNull
         @Override
-        public WireOut bytes(String type, byte[] fromBytes) {
+        public WireOut bytes(@NotNull String type, @NotNull byte[] fromBytes) {
             hash = hash * M1 + Maths.hash64(type) ^ Maths.hash64(Bytes.wrapForRead(fromBytes));
             return HashWire.this;
 

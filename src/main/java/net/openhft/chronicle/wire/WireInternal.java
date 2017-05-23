@@ -62,7 +62,7 @@ public enum WireInternal {
     }
 
     @NotNull
-    public static <E extends Enum<E>> E internEnum(Class<E> eClass, CharSequence cs) {
+    public static <E extends Enum<E>> E internEnum(@NotNull Class<E> eClass, @NotNull CharSequence cs) {
         return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(cs);
     }
 

@@ -186,6 +186,7 @@ public class TextWire extends AbstractWire implements Wire {
         AppendableUtil.setLength(sb, end);
     }
 
+    @Nullable
     static StopCharTester getEscapingSingleQuotes() {
         StopCharTester sct = ThreadLocalHelper.getTL(ESCAPED_SINGLE_QUOTES,
                 StopCharTesters.SINGLE_QUOTES::escaping);
@@ -194,6 +195,7 @@ public class TextWire extends AbstractWire implements Wire {
         return sct;
     }
 
+    @NotNull
     public <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
         Class[] interfaces = ObjectUtils.addAll(tClass, additional);
 
@@ -202,7 +204,7 @@ public class TextWire extends AbstractWire implements Wire {
     }
 
     @NotNull
-    public <T> MethodWriterBuilder<T> methodWriterBuilder(Class<T> tClass) {
+    public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
         return new MethodWriterBuilder<>(tClass, new TextMethodWriterInvocationHandler(this));
     }
 
@@ -238,6 +240,7 @@ public class TextWire extends AbstractWire implements Wire {
         readContext.start();
     }
 
+    @NotNull
     public TextWire useTextDocuments() {
         readContext = new TextReadDocumentContext(this);
         return this;
@@ -396,6 +399,7 @@ public class TextWire extends AbstractWire implements Wire {
         return toExpected(expectedClass, sb);
     }
 
+    @Nullable
     private <K> K toExpected(Class<K> expectedClass, StringBuilder sb) {
         return ObjectUtils.convertTo(expectedClass, WireInternal.INTERNER.intern(sb));
     }
@@ -409,6 +413,7 @@ public class TextWire extends AbstractWire implements Wire {
         return escaping;
     }
 
+    @Nullable
     protected StopCharTester getEscapingQuotes() {
         StopCharTester sct = ThreadLocalHelper.getTL(ESCAPED_QUOTES,
                 StopCharTesters.QUOTES::escaping);
@@ -422,6 +427,7 @@ public class TextWire extends AbstractWire implements Wire {
         consumePadding(0);
     }
 
+    @NotNull
     public String readingPeekYaml() {
         throw new UnsupportedOperationException();
     }
@@ -500,7 +506,7 @@ public class TextWire extends AbstractWire implements Wire {
         return read(key.name(), key.code(), key.defaultValue());
     }
 
-    private ValueIn read(CharSequence keyName, int keyCode, Object defaultValue) {
+    private ValueIn read(@NotNull CharSequence keyName, int keyCode, Object defaultValue) {
         consumePadding();
         ValueInState curr = valueIn.curr();
         @NotNull StringBuilder sb = acquireStringBuilder();
@@ -533,7 +539,7 @@ public class TextWire extends AbstractWire implements Wire {
         return read2(keyName, keyCode, defaultValue, curr, sb, keyName);
     }
 
-    protected ValueIn read2(CharSequence keyName, int keyCode, Object defaultValue, @NotNull ValueInState curr, @NotNull StringBuilder sb, CharSequence name) {
+    protected ValueIn read2(CharSequence keyName, int keyCode, Object defaultValue, @NotNull ValueInState curr, @NotNull StringBuilder sb, @NotNull CharSequence name) {
         long position2 = bytes.readPosition();
 
         // if not a match go back and look at old fields.
@@ -2471,7 +2477,7 @@ public class TextWire extends AbstractWire implements Wire {
             return true;
         }
 
-        public <T> boolean sequence(List<T> list, List<T> buffer, Supplier<T> bufferAdd) {
+        public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) {
             list.clear();
             consumePadding();
 

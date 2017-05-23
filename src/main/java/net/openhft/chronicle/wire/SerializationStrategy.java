@@ -17,6 +17,7 @@
 
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -38,9 +39,11 @@ public interface SerializationStrategy<T> {
     @Nullable
     T readUsing(T using, ValueIn in);
 
+    @Nullable
     T newInstance(Class<T> type);
 
     Class<T> type();
 
+    @NotNull
     BracketType bracketType();
 }

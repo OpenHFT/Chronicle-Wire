@@ -49,6 +49,7 @@ public interface WireParser<O> extends BiConsumer<WireIn, O> {
 
     WireParselet<O> lookup(CharSequence name);
 
+    @NotNull
     VanillaWireParser<O> register(WireKey key, WireParselet<O> valueInConsumer);
 
     WireParselet<O> lookup(int number);

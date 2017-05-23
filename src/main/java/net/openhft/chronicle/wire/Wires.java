@@ -83,7 +83,8 @@ public enum Wires {
         ClassAliasPool.CLASS_ALIASES.addAlias(VanillaFieldInfo.class, "FieldInfo");
     }
 
-    public static <T> T read(Class<T> tClass, ValueIn in) {
+    @Nullable
+    public static <T> T read(@NotNull Class<T> tClass, ValueIn in) {
         final SerializationStrategy<T> strategy = CLASS_STRATEGY.get(tClass);
         return strategy.read(in, tClass);
     }
@@ -158,6 +159,7 @@ public enum Wires {
         return WireDumper.of(wireIn).asString();
     }
 
+    @Nullable
     public static CharSequence asText(@NotNull WireIn wireIn) {
         long pos = wireIn.bytes().readPosition();
         try {
@@ -250,39 +252,42 @@ public enum Wires {
         return bytes.readPosition();
     }
 
+    @Nullable
     public static Bytes acquireBytes() {
         Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::allocateElasticDirect);
         bytes.clear();
         return bytes;
     }
 
+    @Nullable
     public static Wire acquireBinaryWire() {
         Wire wire = ThreadLocalHelper.getTL(WireInternal.BINARY_WIRE_TL, () -> new BinaryWire(acquireBytes()));
         wire.clear();
         return wire;
     }
 
+    @Nullable
     public static Bytes acquireAnotherBytes() {
         Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::allocateElasticDirect);
         bytes.clear();
         return bytes;
     }
 
-    public static String fromSizePrefixedBlobs(Bytes<?> bytes, long position, long length) {
+    public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, long position, long length) {
         return WireDumper.of(bytes).asString(position, length);
     }
 
-    public static void readMarshallable(@NotNull Object marshallable, WireIn wire, boolean overwrite) {
+    public static void readMarshallable(@NotNull Object marshallable, @NotNull WireIn wire, boolean overwrite) {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
         wm.readMarshallable(marshallable, wire, overwrite);
     }
 
-    public static void writeMarshallable(@NotNull Object marshallable, WireOut wire) {
+    public static void writeMarshallable(@NotNull Object marshallable, @NotNull WireOut wire) {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
         wm.writeMarshallable(marshallable, wire);
     }
 
-    public static void writeMarshallable(@NotNull Object marshallable, WireOut wire, boolean writeDefault) {
+    public static void writeMarshallable(@NotNull Object marshallable, @NotNull WireOut wire, boolean writeDefault) {
         WireMarshaller marshaller = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
         if (writeDefault)
             marshaller.writeMarshallable(marshallable, wire);
@@ -290,7 +295,7 @@ public enum Wires {
             marshaller.writeMarshallable(marshallable, wire, marshaller.defaultValue(), false);
     }
 
-    public static void writeMarshallable(@NotNull Object marshallable, WireOut wire, @NotNull Object previous, boolean copy) {
+    public static void writeMarshallable(@NotNull Object marshallable, @NotNull WireOut wire, @NotNull Object previous, boolean copy) {
         assert marshallable.getClass() == previous.getClass();
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
         wm.writeMarshallable(marshallable, wire, previous, copy);
@@ -319,6 +324,7 @@ public enum Wires {
         return target;
     }
 
+    @NotNull
     public static <T> T project(Class<T> tClass, Object source) {
         T target = ObjectUtils.newInstance(tClass);
         Wires.copyTo(source, target);
@@ -333,11 +339,11 @@ public enum Wires {
     }
 
     @NotNull
-    public static List<FieldInfo> fieldInfos(Class aClass) {
+    public static List<FieldInfo> fieldInfos(@NotNull Class aClass) {
         return FIELD_INFOS.get(aClass).list;
     }
 
-    public static FieldInfo fieldInfo(Class aClass, String name) {
+    public static FieldInfo fieldInfo(@NotNull Class aClass, String name) {
         return FIELD_INFOS.get(aClass).map.get(name);
     }
 
@@ -345,6 +351,7 @@ public enum Wires {
         return num == END_OF_DATA;
     }
 
+    @Nullable
     public static <T> T getField(@NotNull Object o, String name, Class<T> tClass) throws NoSuchFieldException {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(o.getClass());
         Object value = wm.getField(o, name);
@@ -356,7 +363,7 @@ public enum Wires {
         wm.setField(o, name, value);
     }
 
-    public static void reset(Object o) {
+    public static void reset(@NotNull Object o) {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(o.getClass());
         wm.reset(o);
     }
@@ -385,6 +392,7 @@ public enum Wires {
             return null;
         }
 
+        @Nullable
         @Override
         public SerializationStrategy apply(@NotNull Class aClass) {
             return getSerializationStrategy(aClass);

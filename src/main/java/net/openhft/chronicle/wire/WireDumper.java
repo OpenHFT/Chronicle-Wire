@@ -88,7 +88,7 @@ public class WireDumper {
         return dumpOne(sb, null);
     }
 
-    public boolean dumpOne(@NotNull StringBuilder sb, Bytes<ByteBuffer> buffer) {
+    public boolean dumpOne(@NotNull StringBuilder sb, @Nullable Bytes<ByteBuffer> buffer) {
         long start = this.bytes.readPosition();
         int header = this.bytes.readInt();
         if (header == 0) {

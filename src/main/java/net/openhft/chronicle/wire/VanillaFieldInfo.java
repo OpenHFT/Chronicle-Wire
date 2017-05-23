@@ -51,7 +51,7 @@ public class VanillaFieldInfo extends AbstractMarshallable implements FieldInfo 
     }
 
     @NotNull
-    public static Wires.FieldInfoPair lookupClass(Class aClass) {
+    public static Wires.FieldInfoPair lookupClass(@NotNull Class aClass) {
         final SerializationStrategy ss = Wires.CLASS_STRATEGY.get(aClass);
         if (ss.bracketType() != BracketType.MAP) {
             return Wires.FieldInfoPair.EMPTY;
@@ -196,6 +196,7 @@ public class VanillaFieldInfo extends AbstractMarshallable implements FieldInfo 
         return field;
     }
 
+    @NotNull
     @Override
     public Class genericType(int index) {
         ParameterizedType genericType = (ParameterizedType) field.getGenericType();

@@ -2,6 +2,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
@@ -39,6 +41,7 @@ public class TextMethodTester<T> {
         return retainLast;
     }
 
+    @NotNull
     public TextMethodTester retainLast(String... retainLast) {
         this.retainLast = retainLast;
         return this;
@@ -48,6 +51,7 @@ public class TextMethodTester<T> {
         return setup;
     }
 
+    @NotNull
     public TextMethodTester setup(String setup) {
         this.setup = setup;
         return this;
@@ -57,11 +61,13 @@ public class TextMethodTester<T> {
         return afterRun;
     }
 
+    @NotNull
     public TextMethodTester afterRun(Function<String, String> afterRun) {
         this.afterRun = afterRun;
         return this;
     }
 
+    @NotNull
     public TextMethodTester run() throws IOException {
 
         Wire wire2 = new TextWire(Bytes.allocateElasticDirect()).useTextDocuments();
@@ -130,12 +136,13 @@ public class TextMethodTester<T> {
         return this;
     }
 
-    private void consumeDocumentSeperator(Wire wireOut) {
+    private void consumeDocumentSeperator(@NotNull Wire wireOut) {
         if (wireOut.bytes().peekUnsignedByte() == '-') {
             wireOut.bytes().readSkip(3);
         }
     }
 
+    @NotNull
     private T cachedMethodWriter(T writer0) {
         Class[] interfaces = {outputClass};
         return (T) Proxy.newProxyInstance(outputClass.getClassLoader(), interfaces, new CachedInvocationHandler(writer0));
@@ -167,8 +174,9 @@ public class TextMethodTester<T> {
             this.writer0 = writer0;
         }
 
+        @Nullable
         @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        public Object invoke(Object proxy, @NotNull Method method, @Nullable Object[] args) throws Throwable {
             if (method.getDeclaringClass() == Object.class) {
                 return method.invoke(this, args);
             }

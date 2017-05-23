@@ -135,6 +135,7 @@ public interface ValueIn {
      */
     long readLength();
 
+    @NotNull
     WireIn skipValue();
 
     @NotNull
@@ -243,7 +244,7 @@ public interface ValueIn {
      * @param bufferAdd supplier to call when the buffer needs extending
      * @return true if there is any data.
      */
-    default <T> boolean sequence(List<T> list, List<T> buffer, Supplier<T> bufferAdd) {
+    default <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) {
         list.clear();
         return sequence(list, (l, v) -> {
             while (hasNextSequenceItem()) {
@@ -312,6 +313,7 @@ public interface ValueIn {
         }) ? map : null;
     }
 
+    @Nullable
     <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
 
     @Nullable
@@ -433,6 +435,7 @@ public interface ValueIn {
         return float64();
     }
 
+    @Nullable
     <T> Class<T> typeLiteral() throws IORuntimeException, BufferUnderflowException;
 
     default Throwable throwable(boolean appendCurrentStack) {
@@ -534,6 +537,7 @@ public interface ValueIn {
         }
     }
 
+    @NotNull
     BracketType getBracketType();
 
     boolean isNull();
@@ -554,6 +558,7 @@ public interface ValueIn {
     @Nullable
     Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type);
 
+    @NotNull
     default UUID uuid() {
         return UUID.fromString(text());
     }
