@@ -53,7 +53,12 @@ public class WireMarshaller<T> {
     public WireMarshaller(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
         this.fields = fields;
         this.isLeaf = isLeaf;
-        defaultValue = ObjectUtils.isConcreteClass(tClass) && !tClass.getName().startsWith("java") ? ObjectUtils.newInstance(tClass) : null;
+        defaultValue = ObjectUtils.isConcreteClass(tClass)
+                && !tClass.getName().startsWith("java")
+                && !tClass.isEnum()
+                && !tClass.isArray()
+                ? ObjectUtils.newInstance(tClass) :
+                null;
     }
 
     @NotNull
