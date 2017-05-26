@@ -142,10 +142,10 @@ public class WireMarshaller<T> {
         }
     }
 
-    public void readMarshallable(T t, @NotNull WireIn in, boolean overwrite) {
+    public void readMarshallable(T t, @NotNull WireIn in, T defaults, boolean overwrite) {
         try {
             for (@NotNull FieldAccess field : fields) {
-                field.read(t, in, overwrite);
+                field.read(t, in, defaults, overwrite);
             }
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
@@ -324,10 +324,13 @@ public class WireMarshaller<T> {
 
         protected abstract void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException;
 
-        void read(Object o, @NotNull WireIn in, boolean overwrite) throws IllegalAccessException {
+        void read(Object o, @NotNull WireIn in, Object defaults, boolean overwrite) throws IllegalAccessException {
             @NotNull ValueIn read = in.read(key);
-            if (overwrite || !(read instanceof DefaultValueIn))
+            if (read instanceof DefaultValueIn) {
+                if (overwrite) copy(defaults, o);
+            } else {
                 setValue(o, read, overwrite);
+            }
         }
 
         protected abstract void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException;
@@ -394,6 +397,7 @@ public class WireMarshaller<T> {
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
             try {
                 @Nullable Object using = ObjectUtils.isImmutable(type) == ObjectUtils.Immutability.NO ? field.get(o) : null;
+
                 field.set(o, read.object(using, type));
             } catch (Exception e) {
                 throw new IORuntimeException("Error reading " + field, e);
@@ -576,7 +580,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        void read(Object o, @NotNull WireIn in, boolean overwrite) throws IllegalAccessException {
+        void read(Object o, @NotNull WireIn in, Object defaults, boolean overwrite) throws IllegalAccessException {
             @NotNull ValueIn read = in.read(key);
             Collection coll = (Collection) field.get(o);
             if (coll == null) {
@@ -656,7 +660,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        void read(Object o, @NotNull WireIn in, boolean overwrite) throws IllegalAccessException {
+        void read(Object o, @NotNull WireIn in, Object defaults, boolean overwrite) throws IllegalAccessException {
             @NotNull ValueIn read = in.read(key);
             Collection coll = (Collection) field.get(o);
             if (coll == null) {
@@ -730,7 +734,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        void read(Object o, @NotNull WireIn in, boolean overwrite) throws IllegalAccessException {
+        void read(Object o, @NotNull WireIn in, Object defaults, boolean overwrite) throws IllegalAccessException {
             @NotNull ValueIn read = in.read(key);
             Map map = (Map) field.get(o);
             if (map == null) {

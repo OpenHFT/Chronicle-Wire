@@ -279,7 +279,7 @@ public enum Wires {
 
     public static void readMarshallable(@NotNull Object marshallable, @NotNull WireIn wire, boolean overwrite) {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
-        wm.readMarshallable(marshallable, wire, overwrite);
+        wm.readMarshallable(marshallable, wire, wm.defaultValue(), overwrite);
     }
 
     public static void writeMarshallable(@NotNull Object marshallable, @NotNull WireOut wire) {
