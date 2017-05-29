@@ -92,7 +92,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
             dc.wire().getValueIn().marshallable(dto2);
             Assert.assertEquals(dto2.one, 1);
             Assert.assertEquals(dto2.two, 0);
-            Assert.assertEquals(dto2.three, null);
+
         }
 
         wire.bytes().release();
