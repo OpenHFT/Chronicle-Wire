@@ -22,7 +22,7 @@ import net.openhft.chronicle.bytes.StopCharsTester;
  * Created by peter on 16/08/15.
  */
 enum TextStopCharsTesters implements StopCharsTester {
-    END_OF_TEXT {
+    STRICT_END_OF_TEXT {
         @Override
         public boolean isStopChar(int ch, int ch2) throws IllegalStateException {
             switch (ch) {

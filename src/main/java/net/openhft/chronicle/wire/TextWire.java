@@ -63,7 +63,8 @@ public class TextWire extends AbstractWire implements Wire {
     static final BitSet QUOTE_CHARS = new BitSet();
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(StopCharTesters.QUOTES::escaping);
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_SINGLE_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(() -> StopCharTesters.SINGLE_QUOTES.escaping());
-    static final ThreadLocal<WeakReference<StopCharsTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
+    static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
+    static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
 
     static final BytesStore COMMA_SPACE = BytesStore.from(", ");
     static final BytesStore COMMA_NEW_LINE = BytesStore.from(",\n");
@@ -90,9 +91,15 @@ public class TextWire extends AbstractWire implements Wire {
     DefaultValueIn defaultValueIn;
     private WriteDocumentContext writeContext;
     private ReadDocumentContext readContext;
+    private boolean strict = false;
+
+    public TextWire(@NotNull Bytes bytes, boolean use8bit, boolean strict) {
+        super(bytes, use8bit);
+        this.strict = strict;
+    }
 
     public TextWire(@NotNull Bytes bytes, boolean use8bit) {
-        super(bytes, use8bit);
+        this(bytes, use8bit, false);
     }
 
     public TextWire(@NotNull Bytes bytes) {
@@ -339,7 +346,7 @@ public class TextWire extends AbstractWire implements Wire {
                 return sb;
 
             } else {
-                parseUntil(sb, getEscapingEndOfText());
+                parseText(sb);
             }
             unescape(sb);
         } catch (BufferUnderflowException e) {
@@ -389,7 +396,7 @@ public class TextWire extends AbstractWire implements Wire {
                 return null;
 
             } else {
-                parseUntil(sb, getEscapingEndOfText());
+                parseText(sb);
             }
             unescape(sb);
         } catch (BufferUnderflowException e) {
@@ -399,15 +406,31 @@ public class TextWire extends AbstractWire implements Wire {
         return toExpected(expectedClass, sb);
     }
 
+    private void parseText(StringBuilder sb) {
+        if (strict)
+            parseUntil(sb, getStrictEscapingEndOfText());
+        else
+            parseUntil(sb, getEscapingEndOfText());
+    }
+
     @Nullable
     private <K> K toExpected(Class<K> expectedClass, StringBuilder sb) {
         return ObjectUtils.convertTo(expectedClass, WireInternal.INTERNER.intern(sb));
     }
 
     @NotNull
-    protected StopCharsTester getEscapingEndOfText() {
-        StopCharsTester escaping = ThreadLocalHelper.getTL(ESCAPED_END_OF_TEXT,
-                TextStopCharsTesters.END_OF_TEXT::escaping);
+    protected StopCharTester getEscapingEndOfText() {
+        StopCharTester escaping = ThreadLocalHelper.getTL(ESCAPED_END_OF_TEXT,
+                TextStopCharTesters.END_OF_TEXT::escaping);
+        // reset it.
+        escaping.isStopChar(' ');
+        return escaping;
+    }
+
+    @NotNull
+    protected StopCharsTester getStrictEscapingEndOfText() {
+        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT,
+                TextStopCharsTesters.STRICT_END_OF_TEXT::escaping);
         // reset it.
         escaping.isStopChar(' ', ' ');
         return escaping;
@@ -1964,10 +1987,11 @@ public class TextWire extends AbstractWire implements Wire {
                 default: {
                     final long rem = bytes.readRemaining();
                     if (rem > 0) {
-                        if (a instanceof Bytes || use8bit)
-                            bytes.parse8bit(a, getEscapingEndOfText());
-                        else
-                            bytes.parseUtf8(a, getEscapingEndOfText());
+                        if (a instanceof Bytes || use8bit) {
+                            bytes.parse8bit(a, getStrictEscapingEndOfText());
+                        } else {
+                            bytes.parseUtf8(a, getStrictEscapingEndOfText());
+                        }
                         if (rem == bytes.readRemaining())
                             throw new IORuntimeException("Nothing to read at " + bytes.toDebugString(32));
                     } else {

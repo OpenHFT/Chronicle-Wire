@@ -82,12 +82,14 @@ public class WireTests {
     @Test
     public void testLocalDateTime() {
         final Bytes b = Bytes.elasticByteBuffer();
-        final Wire wire = wireType.apply(b);
-        LocalDateTime expected = LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
-        wire.getValueOut().object(expected);
-        Assert.assertEquals(expected, wire.getValueIn().object());
-
-        b.release();
+        try {
+            final Wire wire = wireType.apply(b);
+            LocalDateTime expected = LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
+            wire.getValueOut().object(expected);
+            Assert.assertEquals(expected, wire.getValueIn().object());
+        } finally {
+            b.release();
+        }
     }
 
 

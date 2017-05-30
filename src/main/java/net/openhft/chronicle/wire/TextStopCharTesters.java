@@ -44,5 +44,25 @@ enum TextStopCharTesters implements StopCharTester {
         public boolean isStopChar(int ch) {
             return EOW.get(ch);
         }
+    },
+    END_OF_TEXT {
+        @Override
+        public boolean isStopChar(int ch) throws IllegalStateException {
+            switch (ch) {
+                // one character stop.
+                case '"':
+                case '#':
+                case '\0':
+                case '\r':
+                case '\n':
+                case '}':
+                case ']':
+                case ':':
+                case ',':
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 }
