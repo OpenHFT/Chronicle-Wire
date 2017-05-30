@@ -694,7 +694,7 @@ public class TextWireTest {
 
         @NotNull MyTypes mt = (MyTypes) wire.read(() -> "A").object();
         assertEquals("!net.openhft.chronicle.wire.MyTypes {\n" +
-                "  text: !!null \"\",\n" +
+                "  text: \"\",\n" +
                 "  b: false,\n" +
                 "  s: 0,\n" +
                 "  d: 0.0,\n" +
