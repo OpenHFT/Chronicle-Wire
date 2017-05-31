@@ -16,6 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import net.openhft.chronicle.bytes.util.Compressions;
@@ -23,6 +24,7 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -701,6 +703,77 @@ public class TextWireTest {
                 "  l: 0,\n" +
                 "  i: 0\n" +
                 "}\n", mt.toString());
+    }
+
+    @Test
+    public void testNANValue() {
+        @NotNull Wire wire = createWire();
+        wire.bytes().append(
+                "A: NaN,\n" +
+                        "A2: NaN ,\n" +
+                        "A3: Infinity,\n" +
+                        "A4: -Infinity,\n" +
+                        "A5: NaN\n" +
+                        "B: 1.23\n");
+        assertEquals(Double.NaN, wire.read("A").float64(), 0);
+        assertEquals(Double.NaN, wire.read("A2").float64(), 0);
+        assertEquals(Double.POSITIVE_INFINITY, wire.read("A3").float64(), 0);
+        assertEquals(Double.NEGATIVE_INFINITY, wire.read("A4").float64(), 0);
+        assertEquals(Double.NaN, wire.read("A5").float64(), 0);
+        assertEquals(1.23, wire.read("B").float64(), 0);
+    }
+
+    @Test
+    public void testABCDBytes() {
+        @NotNull Wire wire = createWire();
+        wire.bytes().append(
+                "A: \"hi\",\n" +
+                        "B: 'hi',\n" +
+                        "C: hi,\n" +
+                        "D: bye,\n");
+        ABCD abcd = new ABCD();
+
+        try {
+            for (int i = 0; i < 5; i++) {
+                wire.bytes().readPosition(0);
+                assertEquals("!net.openhft.chronicle.wire.TextWireTest$ABCD {\n" +
+                        "  A: hi,\n" +
+                        "  B: hi,\n" +
+                        "  C: hi,\n" +
+                        "  D: bye\n" +
+                        "}\n", wire.getValueIn()
+                        .object(abcd, ABCD.class)
+                        .toString());
+            }
+        } finally {
+            abcd.release();
+
+            WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(ABCD.class);
+            ABCD abcd0 = (ABCD) wm.defaultValue();
+            abcd0.release();
+        }
+    }
+
+    @Test
+    public void testABCStringBuilder() {
+
+        @NotNull Wire wire = createWire();
+        wire.bytes().append(
+                "A: \"hi\",\n" +
+                        "B: 'hi',\n" +
+                        "C: hi,\n");
+        ABC abc = new ABC();
+
+        for (int i = 0; i < 5; i++) {
+            wire.bytes().readPosition(0);
+            assertEquals("!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
+                    "  A: hi,\n" +
+                    "  B: hi,\n" +
+                    "  C: hi\n" +
+                    "}\n", wire.getValueIn()
+                    .object(abc, ABC.class)
+                    .toString());
+        }
     }
 
     @Test
@@ -1437,8 +1510,33 @@ public class TextWireTest {
         assertEquals(10e6, dw5.d, 0);
     }
 
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
     enum BWKey implements WireKey {
         field1, field2, field3
+    }
+
+    static class ABCD extends AbstractMarshallable {
+        Bytes A = Bytes.allocateElasticDirect();
+        Bytes B = Bytes.allocateDirect(64);
+        Bytes C = Bytes.elasticByteBuffer();
+        Bytes D = Bytes.elasticHeapByteBuffer(1);
+
+        void release() {
+            A.release();
+            B.release();
+            C.release();
+            D.release();
+        }
+    }
+
+    static class ABC extends AbstractMarshallable {
+        StringBuilder A = new StringBuilder();
+        StringBuilder B = new StringBuilder();
+        StringBuilder C = new StringBuilder();
     }
 
     static class NestedA extends AbstractMarshallable {
@@ -1471,5 +1569,4 @@ public class TextWireTest {
             this.d = d;
         }
     }
-
 }

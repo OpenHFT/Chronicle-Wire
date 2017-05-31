@@ -880,7 +880,12 @@ public class TextWire extends AbstractWire implements Wire {
     }
 
     private int indentation() {
-        return Maths.toInt32(bytes.readPosition() - lineStart);
+        long pos = bytes.readPosition();
+        if (pos < lineStart) {
+            lineStart = pos;
+            return 0;
+        }
+        return Maths.toInt32(pos - lineStart);
     }
 
     @Nullable
@@ -1885,6 +1890,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Nullable
         @Override
         public StringBuilder textTo(@NotNull StringBuilder sb) {
+            sb.setLength(0);
             @Nullable CharSequence cs = textTo0(sb);
             if (cs == null)
                 return null;
@@ -1898,6 +1904,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Nullable
         @Override
         public Bytes textTo(@NotNull Bytes bytes) {
+            bytes.clear();
             @Nullable CharSequence cs = textTo0(bytes);
             if (cs == null)
                 return null;
