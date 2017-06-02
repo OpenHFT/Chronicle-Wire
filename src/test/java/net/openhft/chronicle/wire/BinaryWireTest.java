@@ -438,6 +438,27 @@ public class BinaryWireTest {
     }
 
     @Test
+    public void testFloat64s() {
+        @NotNull Wire wire = createWire();
+        for (double d : new double[]{
+                2.358662e9,
+                Double.POSITIVE_INFINITY, Double.NaN,
+                3, 3 << 6, 3 << 7, 3 << 8, 3 << 14, 3 << 15, 1 + (3L << 29), 1 + (3L << 30), 1 + (3L << 31), 3L << 52, 3L << 53
+        }) {
+            wire.clear();
+
+            wire.write("p")
+                    .float64(d)
+                    .write("n").float64(-d)
+                    .write("t").text("hi");
+
+            assertEquals(d, wire.read("p").float64(), 0);
+            assertEquals(-d, wire.read("n").float64(), 0);
+            assertEquals("hi", wire.read("t").text());
+        }
+    }
+
+    @Test
     public void float64() {
         @NotNull Wire wire = createWire();
         wire.write().float64(1);
@@ -857,10 +878,12 @@ public class BinaryWireTest {
     public void checkRegisteredBytes() {
         BytesUtil.checkRegisteredBytes();
     }
+
     enum BWKey implements WireKey {
         field1(1), field2(2), field3(3);
 
         private final int code;
+
         BWKey(int code) {
             this.code = code;
         }
@@ -875,6 +898,7 @@ public class BinaryWireTest {
     private static class DTO extends AbstractMarshallable {
 
         String text;
+
         DTO(String text) {
             this.text = text;
         }

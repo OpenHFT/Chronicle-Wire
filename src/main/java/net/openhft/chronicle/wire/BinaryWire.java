@@ -1819,7 +1819,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     }
 
                     if (l <= (1L << 32L) - 1) {
-                        super.uint32checked((int) l);
+                        super.uint32checked((long) l);
                         return;
                     }
 
