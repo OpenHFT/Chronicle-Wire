@@ -20,6 +20,7 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import net.openhft.chronicle.bytes.util.Compressions;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
@@ -1515,6 +1516,66 @@ public class TextWireTest {
         BytesUtil.checkRegisteredBytes();
     }
 
+    @Test
+    public void testNestedList() {
+        NestedList nl = Marshallable.fromString("!" + NestedList.class.getName() + " {\n" +
+                "  name: name,\n" +
+                "  listA: [ { a: 1, b: 1.2 } ],\n" +
+                "  listB: [ { a: 1, b: 1.2 }, { a: 3, b: 2.3 } ]," +
+                "  num: 128\n" +
+                "}\n");
+        String expected = "!net.openhft.chronicle.wire.TextWireTest$NestedList {\n" +
+                "  name: name,\n" +
+                "  listA: [\n" +
+                "    { a: 1, b: 1.2 }\n" +
+                "  ],\n" +
+                "  listB: [\n" +
+                "    { a: 1, b: 1.2 },\n" +
+                "    { a: 3, b: 2.3 }\n" +
+                "  ],\n" +
+                "  num: 128\n" +
+                "}\n";
+        assertEquals(expected, nl.toString());
+
+        OUTER:
+        for (int i = 0; i < 64; i++) {
+            Set<Integer> set = new HashSet<>();
+
+            String cs = "!net.openhft.chronicle.wire.TextWireTest$NestedList {\n";
+            int z = i;
+            for (int j = 0; j < 4; j++) {
+                if (!set.add(z & 3))
+                    continue OUTER;
+                switch (z & 3) {
+                    case 0:
+                        cs += "  name: name,\n";
+                        break;
+
+                    case 1:
+                        cs += "  listA: [\n" +
+                                "    { a: 1, b: 1.2 }\n" +
+                                "  ],\n";
+                        break;
+
+                    case 2:
+                        cs += "  listB: [\n" +
+                                "    { a: 1, b: 1.2 },\n" +
+                                "    { a: 3, b: 2.3 }\n" +
+                                "  ],\n";
+                        break;
+
+                    case 3:
+                        cs += "  num: 128,\n";
+                        break;
+                }
+                z /= 4;
+            }
+            cs += "}\n";
+            NestedList nl2 = Marshallable.fromString(cs);
+            assertEquals(expected, nl2.toString());
+        }
+    }
+
     enum BWKey implements WireKey {
         field1, field2, field3
     }
@@ -1568,5 +1629,27 @@ public class TextWireTest {
         public DoubleWrapper(double d) {
             this.d = d;
         }
+    }
+
+    static class NestedList extends AbstractMarshallable {
+        String name;
+        List<NestedItem> listA = new ArrayList<>();
+        List<NestedItem> listB = new ArrayList<>();
+        transient List<NestedItem> listA2 = new ArrayList<>();
+        transient List<NestedItem> listB2 = new ArrayList<>();
+        int num;
+
+        @Override
+        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
+            name = wire.read("name").text();
+            wire.read("listA").sequence(listA, listA2, NestedItem::new);
+            wire.read("listB").sequence(listB, listB2, NestedItem::new);
+            num = wire.read("num").int32();
+        }
+    }
+
+    static class NestedItem extends AbstractMarshallable {
+        int a;
+        double b;
     }
 }
