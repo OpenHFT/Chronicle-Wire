@@ -306,12 +306,18 @@ public interface ValueOut {
         return leaf ? leaf() : this;
     }
 
+    /**
+     * To be used when you know it is a typed marshallable object. e.g. an Enum is not, it's a scalar. If you are not sure, use the object(x) method.
+     *
+     * @param marshallable to write
+     * @return the original wire
+     */
     @NotNull
-    default WireOut typedMarshallable(@Nullable WriteMarshallable object) {
-        if (object == null)
+    default WireOut typedMarshallable(@Nullable WriteMarshallable marshallable) {
+        if (marshallable == null)
             return nu11();
-        typePrefix(object.getClass());
-        return marshallable(object);
+        typePrefix(marshallable.getClass());
+        return marshallable(marshallable);
     }
 
     @NotNull

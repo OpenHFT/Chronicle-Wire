@@ -1576,6 +1576,32 @@ public class TextWireTest {
         }
     }
 
+    @Test
+    public void testArrayTypes() {
+        Wire wire = createWire();
+        wire.bytes().append("a: !type byte[], b: !type String[], c: hi");
+
+        assertEquals(String[].class, wire.read("b").typeLiteral());
+        assertEquals(byte[].class, wire.read("a").typeLiteral());
+        assertEquals("hi", wire.read("c").text());
+    }
+
+    @Test
+    public void readMarshallableAsEnum() {
+        Wire wire = createWire();
+        ClassAliasPool.CLASS_ALIASES.addAlias(TWTSingleton.class);
+        wire.bytes().append("a: !TWTSingleton { },\n" +
+                "b: !TWTSingleton {\n" +
+                "}\n");
+        assertEquals(TWTSingleton.INSTANCE, wire.read("a").object());
+        assertEquals(TWTSingleton.INSTANCE, wire.read("b").object());
+
+    }
+
+    enum TWTSingleton {
+        INSTANCE;
+    }
+
     enum BWKey implements WireKey {
         field1, field2, field3
     }

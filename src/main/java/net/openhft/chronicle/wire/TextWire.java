@@ -2151,13 +2151,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @Override
         public long readLength() {
-            long start = bytes.readPosition();
-            try {
-                skipValue();
-                return bytes.readPosition() - start;
-            } finally {
-                bytes.readPosition(start);
-            }
+            return readLengthMarshallable();
         }
 
         @NotNull
@@ -2232,8 +2226,10 @@ public class TextWire extends AbstractWire implements Wire {
                 case '?':
                     bytes.readSkip(1);
                     consumeAny();
-                    if (peekCode() == ':')
+                    if (peekCode() == ':') {
+                        bytes.readSkip(1);
                         consumeAny();
+                    }
                     break;
                 case '"':
                 case '\'':
@@ -2258,11 +2254,19 @@ public class TextWire extends AbstractWire implements Wire {
             if (peekCode() == '!') {
                 bytes.readSkip(1);
                 parseWord(sb);
-                consumeAny();
+                if (StringUtils.isEqual(sb, "type")) {
+                    consumeType();
+                } else {
+                    consumeAny();
+                }
 
             } else {
                 textTo(sb);
             }
+        }
+
+        private void consumeType() {
+            parseUntil(sb, StopCharTesters.COMMA_SPACE_STOP);
         }
 
         @NotNull

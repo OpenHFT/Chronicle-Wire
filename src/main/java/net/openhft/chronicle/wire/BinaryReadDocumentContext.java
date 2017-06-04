@@ -92,8 +92,9 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
                     final ValueIn read = wire0.read();
                     if (read.isTyped()) {
                         read.skipValue();
-                    } else
+                    } else {
                         read.text(Wires.acquireStringBuilder());  // todo remove this and use skipValue
+                    }
                 }
             } catch (Exception e) {
                 Jvm.debug().on(getClass(), e);
