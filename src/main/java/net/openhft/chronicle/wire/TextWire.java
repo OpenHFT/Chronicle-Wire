@@ -1308,7 +1308,7 @@ public class TextWire extends AbstractWire implements Wire {
             prependSeparator();
             bytes.append(i64);
             elementSeparator();
-            if (TextWire.this.addTimeStamps && !leaf && 1_000_000_000_000L < i64 && i64 < 2_000_000_000_000L) {
+            if (TextWire.this.addTimeStamps && !leaf && 1_000_000_000_000L < i64 && i64 < 3_000_000_000_000L) {
                 bytes.append(", # ");
                 bytes.appendDateMillis(i64);
                 bytes.append("T");
