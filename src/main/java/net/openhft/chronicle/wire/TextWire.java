@@ -92,14 +92,10 @@ public class TextWire extends AbstractWire implements Wire {
     private WriteDocumentContext writeContext;
     private ReadDocumentContext readContext;
     private boolean strict = false;
-
-    public TextWire(@NotNull Bytes bytes, boolean use8bit, boolean strict) {
-        super(bytes, use8bit);
-        this.strict = strict;
-    }
+    private boolean addTimeStamps = false;
 
     public TextWire(@NotNull Bytes bytes, boolean use8bit) {
-        this(bytes, use8bit, false);
+        super(bytes, use8bit);
     }
 
     public TextWire(@NotNull Bytes bytes) {
@@ -200,6 +196,24 @@ public class TextWire extends AbstractWire implements Wire {
         // reset it.
         sct.isStopChar(' ');
         return sct;
+    }
+
+    public boolean strict() {
+        return strict;
+    }
+
+    public TextWire strict(boolean strict) {
+        this.strict = strict;
+        return this;
+    }
+
+    public boolean addTimeStamps() {
+        return addTimeStamps;
+    }
+
+    public TextWire addTimeStamps(boolean addTimeStamps) {
+        this.addTimeStamps = addTimeStamps;
+        return this;
     }
 
     @NotNull
@@ -1294,6 +1308,13 @@ public class TextWire extends AbstractWire implements Wire {
             prependSeparator();
             bytes.append(i64);
             elementSeparator();
+            if (TextWire.this.addTimeStamps && !leaf && 1_000_000_000_000L < i64 && i64 < 2_000_000_000_000L) {
+                bytes.append(", # ");
+                bytes.appendDateMillis(i64);
+                bytes.append("T");
+                bytes.appendTimeMillis(i64);
+                sep = NEW_LINE;
+            }
 
             return TextWire.this;
         }

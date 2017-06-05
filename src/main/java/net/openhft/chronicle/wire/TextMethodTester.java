@@ -81,7 +81,7 @@ public class TextMethodTester<T> {
     @NotNull
     public TextMethodTester run() throws IOException {
 
-        Wire wire2 = new TextWire(Bytes.allocateElasticDirect()).useTextDocuments();
+        Wire wire2 = new TextWire(Bytes.allocateElasticDirect()).useTextDocuments().addTimeStamps(true);
         T writer0 = wire2.methodWriter(outputClass);
         T writer = retainLast == null ? writer0 : cachedMethodWriter(writer0);
         Object component = componentFunction.apply(writer);
