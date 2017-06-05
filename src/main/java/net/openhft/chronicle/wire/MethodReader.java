@@ -42,6 +42,8 @@ public class MethodReader implements Closeable {
     @NotNull
     private final WireParser<Void> wireParser;
     private boolean closeIn = false, closed;
+    private String method;
+    private Object args;
 
     public MethodReader(MarshallableIn in, boolean ignoreDefault, @NotNull Object... objects) {
         this.in = in;
@@ -117,9 +119,12 @@ public class MethodReader implements Closeable {
     public void addParseletForMethod(Object o, @NotNull Method m, Class<?> parameterType) {
         Class msgClass = parameterType;
         m.setAccessible(true); // turn of security check to make a little faster
+        String name = m.getName();
         if (msgClass.isInterface() || !ReadMarshallable.class.isAssignableFrom(msgClass)) {
             @NotNull Object[] argArr = {null};
             wireParser.register(m::getName, (s, v, $) -> {
+                method = name;
+                MethodReader.this.args = argArr;
                 try {
                     if (Jvm.isDebug())
                         logMessage(s, v);
@@ -127,7 +132,7 @@ public class MethodReader implements Closeable {
                     argArr[0] = v.object(msgClass);
                     m.invoke(o, argArr);
                 } catch (Exception i) {
-                    LOGGER.warn("Failure to dispatch message: " + m.getName() + " " + argArr[0], i);
+                    Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], i);
                 }
             });
 
@@ -146,6 +151,8 @@ public class MethodReader implements Closeable {
             }
             @NotNull ReadMarshallable[] argArr = {arg};
             wireParser.register(m::getName, (s, v, $) -> {
+                method = name;
+                MethodReader.this.args = argArr;
                 try {
                     if (Jvm.isDebug())
                         logMessage(s, v);
@@ -153,7 +160,7 @@ public class MethodReader implements Closeable {
                     v.marshallable(argArr[0]);
                     m.invoke(o, argArr);
                 } catch (Exception i) {
-                    LOGGER.warn("Failure to dispatch message: " + m.getName() + " " + argArr[0], i);
+                    Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], i);
                 }
             });
         }
@@ -161,7 +168,10 @@ public class MethodReader implements Closeable {
 
     public void addParseletForMethod(Object o, @NotNull Method m) {
         m.setAccessible(true); // turn of security check to make a little faster
+        String name = m.getName();
         wireParser.register(m::getName, (s, v, $) -> {
+            method = name;
+            args = NO_ARGS;
             try {
                 if (Jvm.isDebug())
                     logMessage(s, v);
@@ -169,7 +179,7 @@ public class MethodReader implements Closeable {
                 v.skipValue();
                 m.invoke(o, NO_ARGS);
             } catch (Exception i) {
-                LOGGER.warn("Failure to dispatch message: " + m.getName() + "()");
+                Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + "()");
             }
         });
     }
@@ -183,7 +193,10 @@ public class MethodReader implements Closeable {
                 a[i++] = v.object(clazz);
             }
         };
+        String name = m.getName();
         wireParser.register(m::getName, (s, v, $) -> {
+            method = name;
+            MethodReader.this.args = args;
             try {
                 if (Jvm.isDebug())
                     logMessage(s, v);
@@ -191,7 +204,7 @@ public class MethodReader implements Closeable {
                 v.sequence(args, sequenceReader);
                 m.invoke(o, args);
             } catch (Exception i) {
-                LOGGER.warn("Failure to dispatch message: " + m.getName() + " " + Arrays.toString(args), i);
+                Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + Arrays.toString(args), i);
             }
         });
     }
@@ -221,5 +234,13 @@ public class MethodReader implements Closeable {
     @Override
     public boolean isClosed() {
         return closed;
+    }
+
+    public String method() {
+        return method.toString();
+    }
+
+    public Object args() {
+        return args;
     }
 }

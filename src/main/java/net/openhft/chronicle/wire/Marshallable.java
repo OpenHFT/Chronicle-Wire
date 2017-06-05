@@ -109,6 +109,8 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         return (T) Wires.deepCopy(this);
     }
 
+    /* this method does the opposite of what the name suggests */
+    @Deprecated
     @NotNull
     default <T extends Marshallable> T copyFrom(@NotNull T t) {
         return Wires.copyTo(this, t);
