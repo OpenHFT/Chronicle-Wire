@@ -1473,39 +1473,48 @@ public class TextWireTest {
     public void testDoubleEngineering() {
         ClassAliasPool.CLASS_ALIASES.addAlias(DoubleWrapper.class, "D");
         assertEquals("!D {\n" +
-                "  d: 1.0\n" +
+                "  d: 1.0,\n" +
+                "  n: -1.0\n" +
                 "}\n", new DoubleWrapper(1.0).toString());
         assertEquals("!D {\n" +
-                "  d: 11.0\n" +
+                "  d: 11.0,\n" +
+                "  n: -11.0\n" +
                 "}\n", new DoubleWrapper(11.0).toString());
         assertEquals("!D {\n" +
-                "  d: 101.0\n" +
+                "  d: 101.0,\n" +
+                "  n: -101.0\n" +
                 "}\n", new DoubleWrapper(101.0).toString());
         assertEquals("!D {\n" +
-                "  d: 1e3\n" +
-                "}\n", new DoubleWrapper(1e3).toString());
+                "  d: 1e3,\n" +
+                "  n: -1e3\n" +
+                "}\n", new DoubleWrapper(1e3)
+                .toString());
         DoubleWrapper dw = Marshallable.fromString(new DoubleWrapper(1e3).toString());
         assertEquals(1e3, dw.d, 0);
         assertEquals("!D {\n" +
-                "  d: 10e3\n" +
+                "  d: 10e3,\n" +
+                "  n: -10e3\n" +
                 "}\n", new DoubleWrapper(10e3).toString());
         DoubleWrapper dw2 = Marshallable.fromString(new DoubleWrapper(10e3).toString());
         assertEquals(10e3, dw2.d, 0);
 
         assertEquals("!D {\n" +
-                "  d: 100e3\n" +
+                "  d: 100e3,\n" +
+                "  n: -100e3\n" +
                 "}\n", new DoubleWrapper(100e3).toString());
         DoubleWrapper dw3 = Marshallable.fromString(new DoubleWrapper(100e3).toString());
         assertEquals(100e3, dw3.d, 0);
 
         assertEquals("!D {\n" +
-                "  d: 1e6\n" +
+                "  d: 1e6,\n" +
+                "  n: -1e6\n" +
                 "}\n", new DoubleWrapper(1e6).toString());
         DoubleWrapper dw4 = Marshallable.fromString(new DoubleWrapper(1e6).toString());
         assertEquals(1e6, dw4.d, 0);
 
         assertEquals("!D {\n" +
-                "  d: 10e6\n" +
+                "  d: 10e6,\n" +
+                "  n: -10e6\n" +
                 "}\n", new DoubleWrapper(10e6).toString());
         DoubleWrapper dw5 = Marshallable.fromString(new DoubleWrapper(10e6).toString());
         assertEquals(10e6, dw5.d, 0);
@@ -1576,6 +1585,32 @@ public class TextWireTest {
         }
     }
 
+    @Test
+    public void testArrayTypes() {
+        Wire wire = createWire();
+        wire.bytes().append("a: !type byte[], b: !type String[], c: hi");
+
+        assertEquals(String[].class, wire.read("b").typeLiteral());
+        assertEquals(byte[].class, wire.read("a").typeLiteral());
+        assertEquals("hi", wire.read("c").text());
+    }
+
+    @Test
+    public void readMarshallableAsEnum() {
+        Wire wire = createWire();
+        ClassAliasPool.CLASS_ALIASES.addAlias(TWTSingleton.class);
+        wire.bytes().append("a: !TWTSingleton { },\n" +
+                "b: !TWTSingleton {\n" +
+                "}\n");
+        assertEquals(TWTSingleton.INSTANCE, wire.read("a").object());
+        assertEquals(TWTSingleton.INSTANCE, wire.read("b").object());
+
+    }
+
+    enum TWTSingleton {
+        INSTANCE;
+    }
+
     enum BWKey implements WireKey {
         field1, field2, field3
     }
@@ -1625,9 +1660,11 @@ public class TextWireTest {
 
     static class DoubleWrapper extends AbstractMarshallable {
         double d;
+        double n;
 
         public DoubleWrapper(double d) {
             this.d = d;
+            this.n = -d;
         }
     }
 

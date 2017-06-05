@@ -45,8 +45,8 @@ public class TextSkipValueTest {
                         "},\n" +
                         "end",
                 "? { MyField: parent }: {\n" +
-                        "  ? !type { MyField: key1 }: value1,\n" +
-                        "  ? !type { MyField: key2 }: value2\n" +
+                        "  ? !sometype { MyField: key1 }: value1,\n" +
+                        "  ? !sometype { MyField: key2 }: value2\n" +
                         "},\n" +
                         "end",
                 "example: {\n" +
