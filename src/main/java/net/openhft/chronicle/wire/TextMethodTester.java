@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
@@ -22,6 +23,7 @@ public class TextMethodTester<T> {
     private final Class<T> outputClass;
     private final String output;
     private final Function<T, Object> componentFunction;
+    private BiConsumer<MethodReader, T> exceptionHandlerSetup;
 
     private String setup;
     private Function<String, String> afterRun;
@@ -64,6 +66,15 @@ public class TextMethodTester<T> {
     @NotNull
     public TextMethodTester afterRun(Function<String, String> afterRun) {
         this.afterRun = afterRun;
+        return this;
+    }
+
+    public BiConsumer<MethodReader, T> exceptionHandlerSetup() {
+        return exceptionHandlerSetup;
+    }
+
+    public TextMethodTester exceptionHandlerSetup(BiConsumer<MethodReader, T> exceptionHandlerSetup) {
+        this.exceptionHandlerSetup = exceptionHandlerSetup;
         return this;
     }
 
@@ -113,6 +124,8 @@ public class TextMethodTester<T> {
             expected = expected2.toString().trim();
         }
         MethodReader reader = wire.methodReader(component);
+        if (exceptionHandlerSetup != null)
+            exceptionHandlerSetup.accept(reader, writer);
         long pos = wire2.bytes().writePosition();
         while (reader.readOne()) {
             if (retainLast == null || pos != wire2.bytes().writePosition())
