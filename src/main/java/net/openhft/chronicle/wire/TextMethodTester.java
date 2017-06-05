@@ -74,11 +74,14 @@ public class TextMethodTester<T> {
         T writer0 = wire2.methodWriter(outputClass);
         T writer = retainLast == null ? writer0 : cachedMethodWriter(writer0);
         Object component = componentFunction.apply(writer);
+        Object[] components = component instanceof Object[]
+                ? (Object[]) component
+                : new Object[]{component};
 
         if (setup != null) {
             Wire wire0 = new TextWire(BytesUtil.readFile(setup)).useTextDocuments();
 
-            MethodReader reader0 = wire0.methodReader(component);
+            MethodReader reader0 = wire0.methodReader(components);
             while (reader0.readOne()) {
                 wire2.bytes().clear();
             }
@@ -98,6 +101,7 @@ public class TextMethodTester<T> {
                 StringBuilder event = new StringBuilder();
                 long start = wireOut.bytes().readPosition();
                 Map<String, Object> m = wireOut.read(event).marshallableAsMap(String.class, Object.class);
+                assert m != null;
                 StringBuilder key = new StringBuilder(event);
                 for (String s : retainLast) {
                     key.append(",").append(m.get(s));
@@ -112,7 +116,8 @@ public class TextMethodTester<T> {
             }
             expected = expected2.toString().trim();
         }
-        MethodReader reader = wire.methodReader(component);
+        MethodReader reader = wire.methodReader(components);
+
         long pos = wire2.bytes().writePosition();
         while (reader.readOne()) {
             if (retainLast == null || pos != wire2.bytes().writePosition())
