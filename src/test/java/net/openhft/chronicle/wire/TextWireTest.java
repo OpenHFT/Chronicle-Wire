@@ -1506,7 +1506,7 @@ public class TextWireTest {
         assertEquals(100e3, dw3.d, 0);
 
         assertEquals("!D {\n" +
-                "  d: 1e6," +
+                "  d: 1e6,\n" +
                 "  n: -1e6\n" +
                 "}\n", new DoubleWrapper(1e6).toString());
         DoubleWrapper dw4 = Marshallable.fromString(new DoubleWrapper(1e6).toString());
