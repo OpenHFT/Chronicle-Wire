@@ -164,7 +164,7 @@ public enum Wires {
         long pos = wireIn.bytes().readPosition();
         try {
             Bytes bytes = acquireBytes();
-            wireIn.copyTo(new TextWire(bytes));
+            wireIn.copyTo(new TextWire(bytes).addTimeStamps(true));
             return bytes;
         } finally {
             wireIn.bytes().readPosition(pos);
