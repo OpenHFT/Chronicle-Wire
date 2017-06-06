@@ -30,6 +30,7 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
 
@@ -63,19 +64,16 @@ public class WireMarshaller<T> {
 
     @NotNull
     public static <T> WireMarshaller<T> of(@NotNull Class<T> tClass) {
-        if (tClass.isInterface())
-            return new WireMarshaller<T>(tClass, NO_FIELDS, false);
+        if (tClass.isInterface() || tClass.isEnum())
+            return new WireMarshaller<T>(tClass, NO_FIELDS, true);
 
         @NotNull Map<String, Field> map = new LinkedHashMap<>();
         getAllField(tClass, map);
         final FieldAccess[] fields = map.values().stream()
                 .map(FieldAccess::create)
                 .toArray(FieldAccess[]::new);
-        boolean isLeaf = map.values().stream()
-                .map(Field::getType)
-                .noneMatch(
-                        c -> WireMarshaller.class.isAssignableFrom(c) ||
-                                isCollection(c));
+        boolean isLeaf = !Stream.of(fields).anyMatch(
+                c -> isCollection(c.field.getType()) && Boolean.FALSE.equals(c.isLeaf));
         return new WireMarshaller<>(tClass, fields, isLeaf);
 
     }
@@ -593,7 +591,14 @@ public class WireMarshaller<T> {
                 while (in2.hasNextSequenceItem())
                     c.add(in2.object(componentType));
             })) {
-                field.set(o, null);
+                Collection defaultColl = (Collection) field.get(defaults);
+                if (defaultColl == null) {
+                    field.set(o, null);
+                } else {
+                    coll.clear();
+                    if (!defaultColl.isEmpty())
+                        coll.addAll(defaultColl);
+                }
             }
         }
 

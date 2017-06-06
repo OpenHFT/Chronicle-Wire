@@ -20,6 +20,7 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import net.openhft.chronicle.bytes.util.Compressions;
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
@@ -39,6 +40,7 @@ import java.nio.channels.SocketChannel;
 import java.security.InvalidAlgorithmParameterException;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.ObjIntConsumer;
@@ -1607,6 +1609,29 @@ public class TextWireTest {
 
     }
 
+    @Test
+    public void nestedWithEnumSet() {
+        Wire wire = createWire();
+        NestedWithEnumSet n = new NestedWithEnumSet();
+        n.list.add(new WithEnumSet("none"));
+        n.list.add(new WithEnumSet("one", EnumSet.of(TimeUnit.DAYS)));
+        n.list.add(new WithEnumSet("two", EnumSet.of(TimeUnit.DAYS, TimeUnit.HOURS)));
+        wire.write("hello")
+                .object(NestedWithEnumSet.class, n);
+        assertEquals("hello: {\n" +
+                "  list: [\n" +
+                "    { name: none },\n" +
+                "    { name: one, timeUnits: [DAYS]},\n" +
+                "    { name: two, timeUnits: [HOURS, DAYS]}\n" +
+                "  ]\n" +
+                "}\n", wire.toString());
+
+        NestedWithEnumSet a = wire.read("hello")
+                .object(NestedWithEnumSet.class);
+        assertEquals(n.toString(), a.toString());
+        assertEquals(n, a);
+    }
+
     enum TWTSingleton {
         INSTANCE;
     }
@@ -1688,5 +1713,32 @@ public class TextWireTest {
     static class NestedItem extends AbstractMarshallable {
         int a;
         double b;
+    }
+
+    static class NestedWithEnumSet extends AbstractMarshallable {
+        List<WithEnumSet> list = new ArrayList<>();
+    }
+
+    static class WithEnumSet extends AbstractMarshallable {
+        String name;
+        Set<TimeUnit> timeUnits = EnumSet.noneOf(TimeUnit.class);
+
+        @UsedViaReflection
+        WithEnumSet() {
+        }
+
+        public WithEnumSet(String name) {
+            this.name = name;
+        }
+
+        public WithEnumSet(String name, Set<TimeUnit> timeUnits) {
+            this.name = name;
+            this.timeUnits = timeUnits;
+        }
+
+        @Override
+        public void writeMarshallable(@NotNull WireOut wire) {
+            Wires.writeMarshallable(this, wire, false);
+        }
     }
 }

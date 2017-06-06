@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -383,11 +384,11 @@ public interface ValueOut {
     @NotNull
     default <V> WireOut object(Class<V> expectedType, V v) {
         if (v instanceof WriteMarshallable && !(v instanceof Enum))
-            if (v.getClass() == expectedType)
+            if (ObjectUtils.matchingClass(expectedType, v.getClass()))
                 marshallable((WriteMarshallable) v);
             else
                 typedMarshallable((WriteMarshallable) v);
-        else if (v != null && v.getClass() == expectedType)
+        else if (v != null && ObjectUtils.matchingClass(expectedType, v.getClass()))
             untypedObject(v);
         else
             object(v);
