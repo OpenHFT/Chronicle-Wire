@@ -237,7 +237,7 @@ public class MethodReader implements Closeable {
     }
 
     public String method() {
-        return method.toString();
+        return method;
     }
 
     public Object args() {
