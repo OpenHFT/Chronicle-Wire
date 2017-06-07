@@ -116,6 +116,10 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         return Wires.copyTo(this, t);
     }
 
+    default <T extends Marshallable> T copyTo(@NotNull T t) {
+        return Wires.copyTo(this, t);
+    }
+
     default <K, T extends Marshallable> T mergeToMap(@NotNull Map<K, T> map, @NotNull Function<T, K> getKey) {
         @NotNull @SuppressWarnings("unchecked")
         T t = (T) this;
