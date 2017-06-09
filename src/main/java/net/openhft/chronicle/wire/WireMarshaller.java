@@ -73,7 +73,8 @@ public class WireMarshaller<T> {
                 .map(FieldAccess::create)
                 .toArray(FieldAccess[]::new);
         boolean isLeaf = !Stream.of(fields).anyMatch(
-                c -> isCollection(c.field.getType()) && !Boolean.TRUE.equals(c.isLeaf));
+                c -> (isCollection(c.field.getType()) && !Boolean.TRUE.equals(c.isLeaf))
+                        || WriteMarshallable.class.isAssignableFrom(c.field.getType()));
         return new WireMarshaller<>(tClass, fields, isLeaf);
 
     }
