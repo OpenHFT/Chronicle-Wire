@@ -20,6 +20,11 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import org.junit.After;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.junit.Assert.assertFalse;
 
 /**
@@ -46,4 +51,27 @@ public class HashWireTest {
         BytesUtil.checkRegisteredBytes();
     }
 
+    @Test
+    public void testHashWithMap() {
+        new Field("hi").hashCode();
+    }
+
+    enum Required {
+        A
+    }
+
+    enum EnumValue {
+        A
+    }
+
+    static class Field extends AbstractMarshallable implements Cloneable {
+        private final String name;
+        private final Map<String, Required> required = new HashMap<>();
+        private final List<EnumValue> values = new ArrayList<>();
+        private boolean used = false;
+
+        public Field(String name) {
+            this.name = name;
+        }
+    }
 }
