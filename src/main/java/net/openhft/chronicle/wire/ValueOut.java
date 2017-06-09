@@ -382,7 +382,7 @@ public interface ValueOut {
     }
 
     @NotNull
-    default <V> WireOut object(Class<V> expectedType, V v) {
+    default <V> WireOut object(@NotNull Class<V> expectedType, V v) {
         if (v instanceof WriteMarshallable && !(v instanceof Enum))
             if (ObjectUtils.matchingClass(expectedType, v.getClass()))
                 marshallable((WriteMarshallable) v);
@@ -397,11 +397,11 @@ public interface ValueOut {
 
     @NotNull
     default <K, V> WireOut marshallable(Map<K, V> map) {
-        return marshallable(map, null, null, true);
+        return marshallable(map, (Class) Object.class, (Class) Object.class, true);
     }
 
     @NotNull
-    default <K, V> WireOut marshallable(@Nullable Map<K, V> map, Class<K> kClass, Class<V> vClass, boolean leaf) {
+    default <K, V> WireOut marshallable(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) {
         if (map == null) {
             nu11();
             return wireOut();
