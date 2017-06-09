@@ -300,6 +300,20 @@ public interface ValueOut {
     WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map);
 
     @NotNull
+    @Deprecated
+    default ValueOut leaf() {
+        swapLeaf(true);
+        return this;
+    }
+
+    @NotNull
+    @Deprecated
+    default ValueOut leaf(boolean leaf) {
+        swapLeaf(leaf);
+        return this;
+    }
+
+    @NotNull
     default boolean swapLeaf(boolean isLeaf) {
         return false;
     }
