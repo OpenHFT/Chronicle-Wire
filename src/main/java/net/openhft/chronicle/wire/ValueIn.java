@@ -16,7 +16,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.*;
@@ -515,7 +514,7 @@ public interface ValueIn {
                     return (E) WireInternal.throwable(this, false, (Throwable) using);
 
                 if (using == null)
-                    Jvm.warn().on(ValueIn.class, "failed to create instance of clazz=" + clazz);
+                    throw new IllegalStateException("failed to create instance of clazz=" + clazz + " is it aliased?");
 
                 @Nullable Object ret = marshallable(using, strategy);
                 return readResolve(ret);
