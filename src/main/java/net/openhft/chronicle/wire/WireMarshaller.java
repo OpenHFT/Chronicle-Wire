@@ -735,7 +735,7 @@ public class WireMarshaller<T> {
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
             @NotNull Map map = (Map) field.get(o);
-            write.marshallable(map);
+            write.marshallable(map, keyType, valueType, Boolean.TRUE.equals(isLeaf));
         }
 
         @Override
