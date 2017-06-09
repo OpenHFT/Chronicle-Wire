@@ -162,12 +162,6 @@ public class QueryWire extends TextWire {
             }
         }
 
-        @NotNull
-        @Override
-        public ValueOut leaf() {
-            return this;
-        }
-
         public void elementSeparator() {
             sep = "&";
         }

@@ -300,11 +300,8 @@ public interface ValueOut {
     WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map);
 
     @NotNull
-    ValueOut leaf();
-
-    @NotNull
-    default ValueOut leaf(boolean leaf) {
-        return leaf ? leaf() : this;
+    default boolean swapLeaf(boolean isLeaf) {
+        return false;
     }
 
     /**
@@ -364,8 +361,9 @@ public interface ValueOut {
         sequence(coll, assumedClass, (s, kls, out) -> {
             int size = s.size();
             for (int i = 0; i < size; i++) {
-                out.leaf();
+                boolean wasLeaf = out.swapLeaf(true);
                 marshallable((WriteMarshallable) s.get(i));
+                out.swapLeaf(wasLeaf);
             }
         });
         return wireOut();
@@ -409,8 +407,10 @@ public interface ValueOut {
 
         marshallable(m -> {
             for (@NotNull Map.Entry<K, V> entry : map.entrySet()) {
-                m.writeEvent(kClass, entry.getKey()).leaf(leaf)
-                        .object(vClass, entry.getValue());
+                ValueOut valueOut = m.writeEvent(kClass, entry.getKey());
+                boolean wasLeaf = valueOut.swapLeaf(leaf);
+                valueOut.object(vClass, entry.getValue());
+                valueOut.swapLeaf(wasLeaf);
             }
         });
         return wireOut();
@@ -431,12 +431,17 @@ public interface ValueOut {
             case "[F":
             case "[D":
             case "[Z":
-                return typePrefix(value.getClass()).leaf(true).sequence(value, (v, out) -> {
+                ValueOut valueOut = typePrefix(value.getClass());
+                boolean wasLeaf = valueOut.swapLeaf(true);
+                valueOut.sequence(value, (v, out) -> {
                     int len = Array.getLength(v);
                     for (int i = 0; i < len; i++) {
                         out.untypedObject(Array.get(v, i));
                     }
                 });
+                valueOut.swapLeaf(wasLeaf);
+                return wireOut();
+
             case "java.lang.String":
                 return text((String) value);
             case "java.lang.Byte":
@@ -632,7 +637,7 @@ public interface ValueOut {
                 int last = Jvm.trimLast(0, stes);
                 for (int i = 0; i < last; i++) {
                     StackTraceElement ste = stes[i];
-                    w3.leaf().marshallable(w4 ->
+                    w3.marshallable(w4 ->
                             w4.write(() -> "class").text(ste.getClassName())
                                     .write(() -> "method").text(ste.getMethodName())
                                     .write(() -> "file").text(ste.getFileName())
@@ -679,4 +684,5 @@ public interface ValueOut {
     }
 
     void resetState();
+
 }

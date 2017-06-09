@@ -528,12 +528,6 @@ public class HashWire implements WireOut {
 
         @NotNull
         @Override
-        public ValueOut leaf() {
-            return this;
-        }
-
-        @NotNull
-        @Override
         public WireOut wireOut() {
             return HashWire.this;
         }

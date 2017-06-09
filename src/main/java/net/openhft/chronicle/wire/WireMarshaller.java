@@ -73,7 +73,7 @@ public class WireMarshaller<T> {
                 .map(FieldAccess::create)
                 .toArray(FieldAccess[]::new);
         boolean isLeaf = !Stream.of(fields).anyMatch(
-                c -> isCollection(c.field.getType()) && Boolean.FALSE.equals(c.isLeaf));
+                c -> isCollection(c.field.getType()) && !Boolean.TRUE.equals(c.isLeaf));
         return new WireMarshaller<>(tClass, fields, isLeaf);
 
     }
@@ -212,6 +212,10 @@ public class WireMarshaller<T> {
             // should never happen as the types should match.
             throw new AssertionError(e);
         }
+    }
+
+    public boolean isLeaf() {
+        return isLeaf;
     }
 
     static abstract class FieldAccess {
@@ -386,10 +390,13 @@ public class WireMarshaller<T> {
 
         protected void getValue(@NotNull Object o, @NotNull ValueOut write, Object previous)
                 throws IllegalAccessException {
+            Boolean wasLeaf = null;
             if (isLeaf != null)
-                write.leaf(isLeaf);
+                wasLeaf = write.swapLeaf(isLeaf);
             assert o != null;
             write.object(type, field.get(o));
+            if (wasLeaf != null)
+                write.swapLeaf(wasLeaf);
         }
 
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
@@ -558,7 +565,6 @@ public class WireMarshaller<T> {
                 if (coll instanceof RandomAccess) {
                     @NotNull List list = (List) coll;
                     for (int i = 0, len = list.size(); i < len; i++) {
-                        if (Boolean.TRUE.equals(isLeaf)) out.leaf();
                         out.object(componentType, list.get(i));
                     }
                 } else if (coll == null) {
@@ -569,7 +575,6 @@ public class WireMarshaller<T> {
                     }
                 } else {
                     for (Object element : coll) {
-                        if (Boolean.TRUE.equals(isLeaf)) out.leaf();
                         out.object(componentType, element);
                     }
                 }

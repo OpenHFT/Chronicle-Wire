@@ -518,7 +518,9 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         Wire wire = apply(bytes);
         for (@NotNull Map.Entry<String, T> entry : map.entrySet()) {
             @NotNull ValueOut valueOut = wire.writeEventName(entry::getKey);
-            valueOut.leaf(compact).marshallable(entry.getValue());
+            boolean wasLeaf = valueOut.swapLeaf(compact);
+            valueOut.marshallable(entry.getValue());
+            valueOut.swapLeaf(wasLeaf);
         }
         String tempFilename = IOTools.tempName(filename);
         IOTools.writeFile(tempFilename, bytes.toByteArray());

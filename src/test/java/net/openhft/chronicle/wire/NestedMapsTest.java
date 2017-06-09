@@ -80,13 +80,21 @@ public class NestedMapsTest {
                         "    dog\n" +
                         "  ],\n" +
                         "  numbers: [\n" +
-                        "    1, 2, 2, 3, 5, 8, 13\n" +
+                        "    1,\n" +
+                        "    2,\n" +
+                        "    2,\n" +
+                        "    3,\n" +
+                        "    5,\n" +
+                        "    8,\n" +
+                        "    13\n" +
                         "  ],\n" +
                         "  map1: {\n" +
-                        "    aye: AAA, bee: BBB\n" +
+                        "    aye: AAA,\n" +
+                        "    bee: BBB\n" +
                         "  },\n" +
                         "  map2: {\n" +
-                        "    one: 1.0, two point two: 2.2\n" +
+                        "    one: 1.0,\n" +
+                        "    two point two: 2.2\n" +
                         "  }\n" +
                         "}\n", Wires.fromSizePrefixedBlobs(wire));
                 break;
@@ -118,7 +126,7 @@ public class NestedMapsTest {
                         "    bee: BBB\n" +
                         "  },\n" +
                         "  map2: {\n" +
-                        "    one: 1.0,\n" +
+                        "    one: 1,\n" +
                         "    two point two: 2.2\n" +
                         "  }\n" +
                         "}\n", Wires.fromSizePrefixedBlobs(wire));
@@ -151,7 +159,7 @@ public class NestedMapsTest {
                         "    bee: BBB\n" +
                         "  },\n" +
                         "  {\n" +
-                        "    one: 1.0,\n" +
+                        "    one: 1,\n" +
                         "    two point two: 2.2\n" +
                         "  }\n" +
                         "]\n", Wires.fromSizePrefixedBlobs(wire));
@@ -191,29 +199,28 @@ public class NestedMapsTest {
                         "  dog\n" +
                         "],\n" +
                         "numbers: [\n" +
-                        "  1, 2, 2, 3, 5, 8, 13\n" +
+                        "  1,\n" +
+                        "  2,\n" +
+                        "  2,\n" +
+                        "  3,\n" +
+                        "  5,\n" +
+                        "  8,\n" +
+                        "  13\n" +
                         "],\n" +
                         "map1: {\n" +
-                        "  aye: AAA, bee: BBB\n" +
+                        "  aye: AAA,\n" +
+                        "  bee: BBB\n" +
                         "}\n" +
                         "map2: {\n" +
-                        "  one: 1.0, two point two: 2.2\n" +
+                        "  one: 1.0,\n" +
+                        "  two point two: 2.2\n" +
                         "}\n", wire.toString());
                 break;
             case BINARY:
-                assertEquals("[pos: 0, rlim: 149, wlim: 8EiB, cap: 8EiB ] ‖" +
-                        "Åwords\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdog" +
-                        "Çnumbers\\u0082⒎٠٠٠⒈⒉⒉⒊⒌⒏⒔" +
-                        "Ämap1\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBB" +
-                        "Ämap2\\u0082&٠٠٠¹⒊one\\u0091٠٠٠٠٠٠ð?¹⒔two point two\\u0091\\u009A\\u0099\\u0099\\u0099\\u0099\\u0099⒈@" +
-                        "‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+                assertEquals("[pos: 0, rlim: 141, wlim: 8EiB, cap: 8EiB ] ‖Åwords\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdogÇnumbers\\u0082⒎٠٠٠⒈⒉⒉⒊⒌⒏⒔Ämap1\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBBÄmap2\\u0082\\u001E٠٠٠¹⒊one⒈¹⒔two point two\\u0091\\u009A\\u0099\\u0099\\u0099\\u0099\\u0099⒈@‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
                 break;
             case FIELDLESS_BINARY:
-                assertEquals("[pos: 0, rlim: 125, wlim: 8EiB, cap: 8EiB ] ‖" +
-                        "\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdog" +
-                        "\\u0082⒎٠٠٠⒈⒉⒉⒊⒌⒏⒔\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBB" +
-                        "\\u0082&٠٠٠¹⒊one\\u0091٠٠٠٠٠٠ð?¹⒔two point two\\u0091\\u009A\\u0099\\u0099\\u0099\\u0099\\u0099⒈@" +
-                        "‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+                assertEquals("[pos: 0, rlim: 117, wlim: 8EiB, cap: 8EiB ] ‖\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdog\\u0082⒎٠٠٠⒈⒉⒉⒊⒌⒏⒔\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBB\\u0082\\u001E٠٠٠¹⒊one⒈¹⒔two point two\\u0091\\u009A\\u0099\\u0099\\u0099\\u0099\\u0099⒈@‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
                 break;
         }
         @NotNull Mapped m2 = new Mapped();

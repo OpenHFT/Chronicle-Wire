@@ -241,10 +241,11 @@ public class BinaryWire extends AbstractWire implements Wire {
                             for (long i = 0; i < len2; i++) {
                                 long v = bytes.readLong();
                                 if (i == used) {
-                                    o.leaf(true);
+                                    o.swapLeaf(true);
                                 }
                                 o.int64(v);
                             }
+                            o.swapLeaf(false);
                         });
 
                         break outerSwitch;
@@ -745,10 +746,11 @@ public class BinaryWire extends AbstractWire implements Wire {
             case EVENT_OBJECT:
                 bytes.uncheckedReadSkipOne();
                 wire.startEvent();
-                wire.getValueOut().leaf(true);
+                boolean wasLeaf = wire.getValueOut().swapLeaf(true);
                 if (peekCode() == TYPE_PREFIX)
                     copyOne(wire);
                 copyOne(wire);
+                wire.getValueOut().swapLeaf(wasLeaf);
                 wire.endEvent();
                 break;
 
@@ -1179,11 +1181,6 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     protected class FixedBinaryValueOut implements ValueOut {
-        @NotNull
-        @Override
-        public ValueOut leaf() {
-            return this;
-        }
 
         @NotNull
         @Override

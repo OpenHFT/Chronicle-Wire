@@ -666,8 +666,12 @@ public class TextWire extends AbstractWire implements Wire {
             return writeEventName((WireKey) eventKey);
         if (eventKey instanceof CharSequence)
             return writeEventName((CharSequence) eventKey);
-        valueOut.leaf(true);
-        return valueOut.write(expectedType, eventKey);
+        boolean wasLeft = valueOut.swapLeaf(true);
+        try {
+            return valueOut.write(expectedType, eventKey);
+        } finally {
+            valueOut.swapLeaf(wasLeft);
+        }
     }
 
     @NotNull
@@ -1029,16 +1033,12 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public ValueOut leaf() {
-            leaf = true;
-            return this;
-        }
-
-        @NotNull
-        @Override
-        public ValueOut leaf(boolean leaf) {
-            this.leaf = leaf;
-            return this;
+        public boolean swapLeaf(boolean isLeaf) {
+            try {
+                return leaf;
+            } finally {
+                leaf = isLeaf;
+            }
         }
 
         @NotNull
@@ -1643,6 +1643,11 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut marshallable(@NotNull WriteMarshallable object) {
+            WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(object.getClass());
+            boolean wasLeaf0 = leaf;
+            if (indentation > 1 && wm.isLeaf())
+                leaf = true;
+
             if (dropDefault) {
                 writeSavedEventName();
             }
@@ -1681,6 +1686,8 @@ public class TextWire extends AbstractWire implements Wire {
                 prependSeparator();
             }
             endBlock(leaf, '}');
+
+            leaf = wasLeaf0;
 
             if (popSep != null)
                 sep = popSep;
