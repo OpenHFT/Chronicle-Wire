@@ -28,7 +28,7 @@ public class WiresTest {
 
         base1.base.clear().append("value1");
 
-        Assert.assertEquals("value2", base2.base.toString());
+        Assert.assertEquals("", base2.base.toString());
 
     }
 
