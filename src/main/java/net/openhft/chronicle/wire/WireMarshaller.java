@@ -26,8 +26,26 @@ import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.NavigableSet;
+import java.util.Objects;
+import java.util.RandomAccess;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -50,16 +68,13 @@ public class WireMarshaller<T> {
     private final boolean isLeaf;
     @Nullable
     private final T defaultValue;
+    private final Class<T> typeClass;
 
     public WireMarshaller(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
         this.fields = fields;
         this.isLeaf = isLeaf;
-        defaultValue = ObjectUtils.isConcreteClass(tClass)
-                && !tClass.getName().startsWith("java")
-                && !tClass.isEnum()
-                && !tClass.isArray()
-                ? ObjectUtils.newInstance(tClass) :
-                null;
+        defaultValue = defaultValueForType(tClass);
+        typeClass = tClass;
     }
 
     @NotNull
@@ -205,8 +220,17 @@ public class WireMarshaller<T> {
 
     public void reset(T o) {
         try {
+            T cachedNewInstance = null;
             for (FieldAccess field : fields) {
-                field.copy(defaultValue, o);
+                if (field.isMutableField) {
+                    if (cachedNewInstance == null) {
+                        cachedNewInstance = defaultValueForType(typeClass);
+                    }
+                    field.copy(cachedNewInstance, o);
+                } else {
+                    field.copy(defaultValue, o);
+                }
+
             }
 
         } catch (IllegalAccessException e) {
@@ -219,12 +243,22 @@ public class WireMarshaller<T> {
         return isLeaf;
     }
 
+    private static <T> T defaultValueForType(final @NotNull Class<T> tClass) {
+        return ObjectUtils.isConcreteClass(tClass)
+                && !tClass.getName().startsWith("java")
+                && !tClass.isEnum()
+                && !tClass.isArray()
+                ? ObjectUtils.newInstance(tClass) :
+                null;
+    }
+
     static abstract class FieldAccess {
         @NotNull
         final Field field;
         final long offset;
         @NotNull
         final WireKey key;
+        final boolean isMutableField;
         Boolean isLeaf;
 
         FieldAccess(@NotNull Field field) {
@@ -236,7 +270,7 @@ public class WireMarshaller<T> {
             offset = UNSAFE.objectFieldOffset(field);
             key = field::getName;
             this.isLeaf = isLeaf;
-//            System.out.println(field + " isLeaf=" + isLeaf);
+            this.isMutableField = field.getDeclaredAnnotation(MutableField.class) != null;
         }
 
         @Nullable
