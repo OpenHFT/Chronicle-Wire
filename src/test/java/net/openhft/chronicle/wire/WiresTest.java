@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -8,6 +9,10 @@ import org.junit.Test;
  * Created by rob on 14/06/2017.
  */
 public class WiresTest {
+
+    private final BytesContainer container1 = new BytesContainer();
+    private final BytesContainer container2 = new BytesContainer();
+
     public static class BytesContainer {
         @MutableField
         Bytes bytesField = Bytes.elasticByteBuffer();
@@ -18,12 +23,16 @@ public class WiresTest {
         StringBuilder stringBuilder = new StringBuilder();
     }
 
+    @After
+    public void after() throws Exception {
+        container1.bytesField.release();
+        container2.bytesField.release();
+    }
+
     @Test
     public void resetShouldClearBytes() {
-        BytesContainer container1 = new BytesContainer();
         container1.bytesField.clear().append("value1");
 
-        BytesContainer container2 = new BytesContainer();
         container2.bytesField.clear().append("value2");
 
         Wires.reset(container1);
