@@ -202,8 +202,12 @@ public class TextMethodTester<T> {
                 StringBuilder key = new StringBuilder();
                 key.append(method.getName());
                 Marshallable m = (Marshallable) args[0];
-                for (String s : retainLast) {
-                    key.append(",").append(m.getField(s, Object.class));
+                try {
+                    for (String s : retainLast) {
+                        key.append(",").append(m.getField(s, Object.class));
+                    }
+                } catch (NoSuchFieldException e) {
+                    // move on
                 }
                 args[0] = m.deepCopy();
                 cache.put(key.toString(), new Invocation(method, args));
