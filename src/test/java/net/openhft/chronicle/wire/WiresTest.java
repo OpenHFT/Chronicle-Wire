@@ -18,6 +18,10 @@ public class WiresTest {
         Bytes bytesField = Bytes.elasticByteBuffer();
     }
 
+    public static class BytesContainerMarshallable extends AbstractMarshallable {
+        Bytes bytesField = Bytes.elasticByteBuffer();
+    }
+
     public static class StringBuilderContainer {
         @MutableField
         StringBuilder stringBuilder = new StringBuilder();
@@ -59,5 +63,18 @@ public class WiresTest {
         container1.stringBuilder.append("value1");
 
         Assert.assertEquals("", container2.stringBuilder.toString());
+    }
+
+    @Test
+    public void copyToShouldMutateBytes() {
+        BytesContainerMarshallable container1 = new BytesContainerMarshallable();
+        container1.bytesField.append("1");
+        container1.bytesField.append("2");
+        BytesContainerMarshallable container2 = new BytesContainerMarshallable();
+        Bytes container2Bytes = container2.bytesField;
+        Wires.copyTo(container1, container2);
+        Assert.assertEquals(container2Bytes, container2.bytesField);
+        Assert.assertEquals("12", container2.bytesField.toString());
+        container2.bytesField.append("123");
     }
 }

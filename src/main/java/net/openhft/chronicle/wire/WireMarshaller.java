@@ -304,6 +304,8 @@ public class WireMarshaller<T> {
                     return new StringFieldAccess(field);
                 case "java.lang.StringBuilder":
                     return new StringBuilderFieldAccess(field);
+                case "net.openhft.chronicle.bytes.Bytes":
+                    return new BytesFieldAccess(field);
                 default:
                     @Nullable Boolean isLeaf = null;
                     if (WireMarshaller.class.isAssignableFrom(type))
@@ -466,6 +468,32 @@ public class WireMarshaller<T> {
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
             bytes.writeUtf8((String) UNSAFE.getObject(o, offset));
+        }
+    }
+
+    static class BytesFieldAccess extends FieldAccess {
+        BytesFieldAccess(@NotNull Field field) {
+            super(field, false);
+        }
+
+        protected void getValue(@NotNull Object o, @NotNull ValueOut write, Object previous)
+                throws IllegalAccessException {
+            Bytes bytesField = (Bytes) field.get(o);
+            write.bytes(bytesField);
+        }
+
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+            @NotNull Bytes bytes = (Bytes) UNSAFE.getObject(o, offset);
+            if (bytes == null)
+                UNSAFE.putObject(o, offset, Bytes.elasticByteBuffer());
+            if (read.textTo(bytes) == null)
+                UNSAFE.putObject(o, offset, null);
+        }
+
+        @Override
+        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
+            Bytes bytesField = (Bytes) field.get(o);
+            bytes.write(bytesField);
         }
     }
 
