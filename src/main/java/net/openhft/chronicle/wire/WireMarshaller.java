@@ -469,6 +469,11 @@ public class WireMarshaller<T> {
         public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
             bytes.writeUtf8((String) UNSAFE.getObject(o, offset));
         }
+
+        @Override
+        protected void copy(Object from, Object to) throws IllegalAccessException {
+            super.copy(from, to);
+        }
     }
 
     static class BytesFieldAccess extends FieldAccess {
@@ -485,7 +490,7 @@ public class WireMarshaller<T> {
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
             @NotNull Bytes bytes = (Bytes) UNSAFE.getObject(o, offset);
             if (bytes == null)
-                UNSAFE.putObject(o, offset, Bytes.elasticByteBuffer());
+                UNSAFE.putObject(o, offset, bytes = Bytes.elasticByteBuffer());
             if (read.textTo(bytes) == null)
                 UNSAFE.putObject(o, offset, null);
         }
@@ -494,6 +499,21 @@ public class WireMarshaller<T> {
         public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
             Bytes bytesField = (Bytes) field.get(o);
             bytes.write(bytesField);
+        }
+
+        @Override
+        protected void copy(Object from, Object to) throws IllegalAccessException {
+            Bytes fromBytes = (Bytes) UNSAFE.getObject(from, offset);
+            Bytes toBytes = (Bytes) UNSAFE.getObject(to, offset);
+            if (fromBytes == null) {
+                UNSAFE.putObject(to, offset, null);
+                return;
+
+            } else if (toBytes == null) {
+                UNSAFE.putObject(to, offset, toBytes = Bytes.elasticByteBuffer());
+            }
+            toBytes.clear();
+            toBytes.write(fromBytes);
         }
     }
 
