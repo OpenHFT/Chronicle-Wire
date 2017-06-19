@@ -115,6 +115,9 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
     }
 
     public void addTiming(long l) {
+        if (timings >= timingsArray.length) {
+            throw new IllegalStateException("Have exceeded message history size: " + this.toString());
+        }
         timingsArray[timings++] = l;
     }
 
