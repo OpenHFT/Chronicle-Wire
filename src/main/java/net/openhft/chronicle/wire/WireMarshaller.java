@@ -205,6 +205,7 @@ public class WireMarshaller<T> {
                 if (field2.getName().equals(name)) {
                     value = ObjectUtils.convertTo(field2.getType(), value);
                     field2.set(o, value);
+                    return;
                 }
             }
             throw new NoSuchFieldException(name);
