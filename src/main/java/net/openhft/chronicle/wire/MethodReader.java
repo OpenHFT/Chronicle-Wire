@@ -48,7 +48,7 @@ public class MethodReader implements Closeable {
     public MethodReader(MarshallableIn in, boolean ignoreDefault, @NotNull Object... objects) {
         this.in = in;
         @NotNull WireParselet defaultParselet = (s, v, $) ->
-                LOGGER.warn("Unknown message " + s + ' ' + v.text());
+                LOGGER.debug("Unknown method-name='" + s + "' " + v.text());
         if (objects[0] instanceof WireParselet)
             defaultParselet = (WireParselet) objects[0];
         wireParser = WireParser.wireParser(defaultParselet);
