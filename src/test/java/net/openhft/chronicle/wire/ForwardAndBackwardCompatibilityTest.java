@@ -63,6 +63,8 @@ public class ForwardAndBackwardCompatibilityTest {
         System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");
+        if (wire instanceof TextWire)
+            ((TextWire) wire).useBinaryDocuments();
 
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
@@ -86,6 +88,8 @@ public class ForwardAndBackwardCompatibilityTest {
         System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
         CLASS_ALIASES.addAlias(DTO1.class, "DTO");
+        if (wire instanceof TextWire)
+            ((TextWire) wire).useBinaryDocuments();
 
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())

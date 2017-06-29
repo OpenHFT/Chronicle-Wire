@@ -257,8 +257,14 @@ public class TextWire extends AbstractWire implements Wire {
 
     protected void initReadContext() {
         if (readContext == null)
-            readContext = new BinaryReadDocumentContext(this, false);
+            readContext = new TextReadDocumentContext(this);
         readContext.start();
+    }
+
+    @NotNull
+    public TextWire useBinaryDocuments() {
+        readContext = new BinaryReadDocumentContext(this, false);
+        return this;
     }
 
     @NotNull

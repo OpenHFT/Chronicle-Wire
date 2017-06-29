@@ -90,7 +90,7 @@ public class TextMethodTester<T> {
                 : new Object[]{component};
 
         if (setup != null) {
-            Wire wire0 = new TextWire(BytesUtil.readFile(setup)).useTextDocuments();
+            Wire wire0 = new TextWire(BytesUtil.readFile(setup));
 
             MethodReader reader0 = wire0.methodReader(components);
             while (reader0.readOne()) {
@@ -99,7 +99,7 @@ public class TextMethodTester<T> {
             wire2.bytes().clear();
         }
 
-        Wire wire = new TextWire(BytesUtil.readFile(input)).useTextDocuments();
+        Wire wire = new TextWire(BytesUtil.readFile(input));
 
         // expected
         if (retainLast == null) {
@@ -130,11 +130,8 @@ public class TextMethodTester<T> {
         MethodReader reader = wire.methodReader(components);
         if (exceptionHandlerSetup != null)
             exceptionHandlerSetup.accept(reader, writer);
-        long pos = wire2.bytes().writePosition();
         while (reader.readOne()) {
-            if (retainLast == null || pos != wire2.bytes().writePosition())
-                wire2.bytes().append("---\n");
-            pos = wire2.bytes().writePosition();
+            // keep going.
         }
         if (retainLast != null) {
             CachedInvocationHandler invocationHandler =

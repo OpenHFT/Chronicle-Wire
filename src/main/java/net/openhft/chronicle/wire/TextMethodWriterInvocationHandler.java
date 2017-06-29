@@ -75,6 +75,7 @@ public class TextMethodWriterInvocationHandler implements MethodWriterInvocation
                 });
         }
         wire.getValueOut().resetBetweenDocuments();
+        wire.bytes().append("---\n");
         return ObjectUtils.defaultValue(method.getReturnType());
     }
 

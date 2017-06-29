@@ -13,20 +13,6 @@ public class WiresTest {
     private final BytesContainer container1 = new BytesContainer();
     private final BytesContainer container2 = new BytesContainer();
 
-    public static class BytesContainer {
-        @MutableField
-        Bytes bytesField = Bytes.elasticByteBuffer();
-    }
-
-    public static class BytesContainerMarshallable extends AbstractMarshallable {
-        Bytes bytesField = Bytes.elasticByteBuffer();
-    }
-
-    public static class StringBuilderContainer {
-        @MutableField
-        StringBuilder stringBuilder = new StringBuilder();
-    }
-
     @After
     public void after() throws Exception {
         container1.bytesField.release();
@@ -76,5 +62,19 @@ public class WiresTest {
         Assert.assertEquals(container2Bytes, container2.bytesField);
         Assert.assertEquals("12", container2.bytesField.toString());
         container2.bytesField.append("123");
+    }
+
+    public static class BytesContainer {
+        @MutableField
+        Bytes bytesField = Bytes.elasticHeapByteBuffer(64);
+    }
+
+    public static class BytesContainerMarshallable extends AbstractMarshallable {
+        Bytes bytesField = Bytes.elasticHeapByteBuffer(64);
+    }
+
+    public static class StringBuilderContainer {
+        @MutableField
+        StringBuilder stringBuilder = new StringBuilder();
     }
 }

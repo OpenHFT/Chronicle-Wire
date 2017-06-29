@@ -62,6 +62,7 @@ public class MethodReader implements Closeable {
                     continue;
 
                 try {
+                    // skip Object defined methods.
                     Object.class.getMethod(m.getName(), m.getParameterTypes());
                     continue;
                 } catch (NoSuchMethodException e) {
@@ -129,7 +130,7 @@ public class MethodReader implements Closeable {
                     if (Jvm.isDebug())
                         logMessage(s, v);
 
-                    argArr[0] = v.object(msgClass);
+                    argArr[0] = v.object(argArr[0], msgClass);
                     m.invoke(o, argArr);
                 } catch (Exception i) {
                     Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], i);
@@ -157,7 +158,7 @@ public class MethodReader implements Closeable {
                     if (Jvm.isDebug())
                         logMessage(s, v);
 
-                    v.marshallable(argArr[0]);
+                    argArr[0] = v.object(argArr[0], msgClass);
                     m.invoke(o, argArr);
                 } catch (Exception i) {
                     Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], i);
