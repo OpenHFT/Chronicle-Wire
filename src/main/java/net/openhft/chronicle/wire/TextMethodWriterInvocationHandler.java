@@ -29,6 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by peter on 25/03/16.
  */
 public class TextMethodWriterInvocationHandler implements MethodWriterInvocationHandler {
+    // TODO remove this hack for TextMethodTester
+    static boolean ENABLE_EOD = true;
     @NotNull
     private final TextWire wire;
     private final Map<Method, Class[]> parameterMap = new ConcurrentHashMap<>();
@@ -75,7 +77,8 @@ public class TextMethodWriterInvocationHandler implements MethodWriterInvocation
                 });
         }
         wire.getValueOut().resetBetweenDocuments();
-        wire.bytes().append("---\n");
+        if (ENABLE_EOD)
+            wire.bytes().append("---\n");
         return ObjectUtils.defaultValue(method.getReturnType());
     }
 

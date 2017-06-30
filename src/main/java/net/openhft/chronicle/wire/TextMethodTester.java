@@ -130,17 +130,29 @@ public class TextMethodTester<T> {
         MethodReader reader = wire.methodReader(components);
         if (exceptionHandlerSetup != null)
             exceptionHandlerSetup.accept(reader, writer);
-        while (reader.readOne()) {
-            // keep going.
-        }
-        if (retainLast != null) {
-            CachedInvocationHandler invocationHandler =
-                    (CachedInvocationHandler) Proxy.getInvocationHandler(writer);
-            try {
-                invocationHandler.flush();
-            } catch (Exception e) {
-                throw new IOException(e);
+//        long pos = wire2.bytes().writePosition();
+        TextMethodWriterInvocationHandler.ENABLE_EOD = false;
+        try {
+            while (reader.readOne()) {
+//                if (pos != wire2.bytes().writePosition())
+                if (retainLast == null)
+                    wire2.bytes().append("---\n");
+//                pos = wire2.bytes().writePosition();
             }
+            if (retainLast != null)
+                wire2.bytes().clear();
+
+            if (retainLast != null) {
+                CachedInvocationHandler invocationHandler =
+                        (CachedInvocationHandler) Proxy.getInvocationHandler(writer);
+                try {
+                    invocationHandler.flush();
+                } catch (Exception e) {
+                    throw new IOException(e);
+                }
+            }
+        } finally {
+            TextMethodWriterInvocationHandler.ENABLE_EOD = true;
         }
         actual = wire2.toString().trim();
         if (afterRun != null) {
