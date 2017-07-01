@@ -31,6 +31,7 @@ public class TextMethodTester<T> {
     private String expected;
     private String actual;
     private String[] retainLast;
+    private MethodInterceptorFactory methodInterceptorFactory;
 
     public TextMethodTester(String input, Function<T, Object> componentFunction, Class<T> outputClass, String output) {
         this.input = input;
@@ -82,7 +83,7 @@ public class TextMethodTester<T> {
     public TextMethodTester run() throws IOException {
 
         Wire wire2 = new TextWire(Bytes.allocateElasticDirect()).useTextDocuments().addTimeStamps(true);
-        T writer0 = wire2.methodWriter(outputClass);
+        T writer0 = wire2.methodWriterBuilder(outputClass).methodInterceptorFactory(methodInterceptorFactory).build();
         T writer = retainLast == null ? writer0 : cachedMethodWriter(writer0);
         Object component = componentFunction.apply(writer);
         Object[] components = component instanceof Object[]
@@ -180,6 +181,11 @@ public class TextMethodTester<T> {
 
     public String actual() {
         return actual;
+    }
+
+    public TextMethodTester methodInterceptorFactory(MethodInterceptorFactory methodInterceptorFactory) {
+        this.methodInterceptorFactory = methodInterceptorFactory;
+        return this;
     }
 
     static class Invocation {
