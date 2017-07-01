@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -160,8 +161,10 @@ public class MethodReader implements Closeable {
 
                     argArr[0] = v.object(argArr[0], msgClass);
                     m.invoke(o, argArr);
-                } catch (Exception i) {
-                    Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], i);
+                } catch (InvocationTargetException e) {
+                    Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], e.getCause());
+                } catch (Throwable t) {
+                    Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], t);
                 }
             });
         }
