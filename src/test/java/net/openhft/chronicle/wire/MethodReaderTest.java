@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.stream.IntStream;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
@@ -55,25 +56,99 @@ public class MethodReaderTest {
         }
         assertFalse(reader.readOne());
         String expected = "subs top[!net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
-                "  field1: one\n" +
+                "  field1: one,\n" +
+                "  value: a\n" +
                 "}\n" +
                 "]\n" +
                 "subs top[!net.openhft.chronicle.wire.MethodReaderTest$MRT2 {\n" +
                 "  field1: one,\n" +
+                "  value: a,\n" +
                 "  field2: two\n" +
                 "}\n" +
                 "]\n" +
                 "subs mid[!net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
-                "  field1: \"1\"\n" +
+                "  field1: \"1\",\n" +
+                "  value: a\n" +
                 "}\n" +
                 "]\n" +
                 "subs mid[!net.openhft.chronicle.wire.MethodReaderTest$MRT2 {\n" +
                 "  field1: \"1\",\n" +
+                "  value: a,\n" +
                 "  field2: \"2\"\n" +
                 "}\n" +
                 "]\n";
         String actual = sw.toString().replace("\r", "");
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void methodInterceptor() {
+        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        MRTListener writer = wire.methodWriterBuilder(MRTListener.class)
+                .methodInterceptorFactory(m -> a -> IntStream.range(0, a.length).forEach(i -> ((MRT1) a[i]).value = "x"))
+                .build();
+        writer.top(new MRT1("one"));
+        writer.top(new MRT2("one", "two"));
+        writer.mid(new MRT1("1"));
+        writer.mid(new MRT2("1", "2"));
+
+        assertEquals("top: !net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
+                "  field1: one,\n" +
+                "  value: x\n" +
+                "}\n" +
+                "---\n" +
+                "top: !net.openhft.chronicle.wire.MethodReaderTest$MRT2 {\n" +
+                "  field1: one,\n" +
+                "  value: x,\n" +
+                "  field2: two\n" +
+                "}\n" +
+                "---\n" +
+                "mid: {\n" +
+                "  field1: \"1\",\n" +
+                "  value: x\n" +
+                "}\n" +
+                "---\n" +
+                "mid: !net.openhft.chronicle.wire.MethodReaderTest$MRT2 {\n" +
+                "  field1: \"1\",\n" +
+                "  value: x,\n" +
+                "  field2: \"2\"\n" +
+                "}\n" +
+                "---\n", wire.toString());
+    }
+
+    @Test
+    public void methodInterceptorNull() {
+        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        MRTListener writer = wire.methodWriterBuilder(MRTListener.class)
+                .methodInterceptorFactory(m -> null)
+                .build();
+        writer.top(new MRT1("one"));
+        writer.top(new MRT2("one", "two"));
+        writer.mid(new MRT1("1"));
+        writer.mid(new MRT2("1", "2"));
+
+        assertEquals("top: !net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
+                "  field1: one,\n" +
+                "  value: a\n" +
+                "}\n" +
+                "---\n" +
+                "top: !net.openhft.chronicle.wire.MethodReaderTest$MRT2 {\n" +
+                "  field1: one,\n" +
+                "  value: a,\n" +
+                "  field2: two\n" +
+                "}\n" +
+                "---\n" +
+                "mid: {\n" +
+                "  field1: \"1\",\n" +
+                "  value: a\n" +
+                "}\n" +
+                "---\n" +
+                "mid: !net.openhft.chronicle.wire.MethodReaderTest$MRT2 {\n" +
+                "  field1: \"1\",\n" +
+                "  value: a,\n" +
+                "  field2: \"2\"\n" +
+                "}\n" +
+                "---\n", wire.toString());
     }
 
     interface MRTListener {
@@ -88,6 +163,7 @@ public class MethodReaderTest {
 
     static class MRT1 extends AbstractMarshallable implements MRTInterface {
         final String field1;
+        String value = "a";
 
         MRT1(String field1) {
             this.field1 = field1;
