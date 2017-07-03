@@ -108,7 +108,7 @@ public class TextMethodTester<T> {
         } else {
             Wire wireOut = new TextWire(BytesUtil.readFile(output));
             Map<String, String> events = new TreeMap<>();
-            consumeDocumentSeperator(wireOut);
+            consumeDocumentSeparator(wireOut);
             while (wireOut.hasMore()) {
                 StringBuilder event = new StringBuilder();
                 long start = wireOut.bytes().readPosition();
@@ -120,7 +120,7 @@ public class TextMethodTester<T> {
                 }
                 long end = wireOut.bytes().readPosition();
                 events.put(key.toString(), wireOut.bytes().subBytes(start, end - start).toString().trim());
-                consumeDocumentSeperator(wireOut);
+                consumeDocumentSeparator(wireOut);
             }
             StringBuilder expected2 = new StringBuilder();
             for (String s : events.values()) {
@@ -163,7 +163,7 @@ public class TextMethodTester<T> {
         return this;
     }
 
-    private void consumeDocumentSeperator(@NotNull Wire wireOut) {
+    private void consumeDocumentSeparator(@NotNull Wire wireOut) {
         if (wireOut.bytes().peekUnsignedByte() == '-') {
             wireOut.bytes().readSkip(3);
         }
