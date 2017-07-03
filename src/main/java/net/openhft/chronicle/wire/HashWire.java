@@ -221,7 +221,6 @@ public class HashWire implements WireOut {
         throw new UnsupportedOperationException();
     }
 
-
     @NotNull
     @Override
     public Bytes<?> bytes() {

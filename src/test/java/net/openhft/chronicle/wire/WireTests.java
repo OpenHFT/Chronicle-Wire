@@ -78,7 +78,6 @@ public class WireTests {
         b.release();
     }
 
-
     @Test
     public void testLocalDateTime() {
         final Bytes b = Bytes.elasticByteBuffer();
@@ -92,7 +91,6 @@ public class WireTests {
         }
     }
 
-
     @Test
     public void testZonedDateTime() {
         final Bytes b = Bytes.elasticByteBuffer();
@@ -103,7 +101,6 @@ public class WireTests {
 
         b.release();
     }
-
 
     @Test
     public void testSkipValueWithNumbersAndStrings() {
@@ -126,7 +123,6 @@ public class WireTests {
 
         b.release();
     }
-
 
     @Test
     public void testWriteNull() {

@@ -53,7 +53,6 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
         bytes.clear();
     }
 
-
     @NotNull
     @Override
     public Bytes<?> bytes() {

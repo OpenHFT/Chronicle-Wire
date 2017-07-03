@@ -2784,7 +2784,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return (T) object(null, aClass);
         }
 
-
         @Override
         public Class typePrefix() {
             int code = peekCode();

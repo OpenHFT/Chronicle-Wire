@@ -87,8 +87,6 @@ public abstract class AbstractWire implements Wire {
     private boolean insideHeader;
     private HeadNumberChecker headNumberChecker;
 
-
-
     public AbstractWire(@NotNull Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
         this.use8bit = use8bit;
