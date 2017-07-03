@@ -74,6 +74,9 @@ public class TextBinaryWireTest {
     @Test
     public void readingDocumentLocation() {
         Wire wire = createWire();
+        if (wire instanceof TextWire)
+            ((TextWire) wire).useBinaryDocuments();
+
         wire.writeDocument(true, w -> w.write("header").text("data"));
         long position = wire.bytes().writePosition();
         wire.writeDocument(false, w -> w.write("message").text("text"));

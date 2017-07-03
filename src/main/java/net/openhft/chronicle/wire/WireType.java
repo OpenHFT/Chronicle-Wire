@@ -56,7 +56,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         @NotNull
         @Override
         public Wire apply(@NotNull Bytes bytes) {
-            return new TextWire(bytes);
+            return new TextWire(bytes).useBinaryDocuments();
         }
 
         @Override

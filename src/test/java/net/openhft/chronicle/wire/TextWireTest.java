@@ -1294,7 +1294,7 @@ public class TextWireTest {
 
     @Test
     public void readDemarshallable() {
-        @NotNull Wire wire = createWire();
+        @NotNull Wire wire = createWire().useBinaryDocuments();
         try (DocumentContext $ = wire.writingDocument(true)) {
             wire.getValueOut().typedMarshallable(new DemarshallableObject("test", 12345));
         }
