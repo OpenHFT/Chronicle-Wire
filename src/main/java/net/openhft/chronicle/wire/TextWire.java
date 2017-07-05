@@ -1040,11 +1040,12 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public boolean swapLeaf(boolean isLeaf) {
-            try {
+            if (isLeaf == leaf)
                 return leaf;
-            } finally {
-                leaf = isLeaf;
-            }
+            leaf = isLeaf;
+            if (!isLeaf && sep.startsWith(','))
+                elementSeparator();
+            return !leaf;
         }
 
         @NotNull
