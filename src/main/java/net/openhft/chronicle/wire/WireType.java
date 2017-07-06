@@ -352,6 +352,11 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     }
 
     @Nullable
+    static Bytes getBytesForToString() {
+        return Wires.acquireBytesForToString();
+    }
+
+    @Nullable
     static Bytes getBytes2() {
         // when in debug, the output becomes confused if you reuse the buffer.
         if (Jvm.isDebug())
@@ -415,7 +420,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
     @Nullable
     private Bytes asBytes(Object marshallable) {
-        Bytes bytes = getBytes();
+        Bytes bytes = getBytesForToString();
         Wire wire = apply(bytes);
         @NotNull final ValueOut valueOut = wire.getValueOut();
 

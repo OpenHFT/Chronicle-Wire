@@ -260,6 +260,13 @@ public enum Wires {
     }
 
     @Nullable
+    static Bytes acquireBytesForToString() {
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL, Bytes::allocateElasticDirect);
+        bytes.clear();
+        return bytes;
+    }
+
+    @Nullable
     public static Wire acquireBinaryWire() {
         Wire wire = ThreadLocalHelper.getTL(WireInternal.BINARY_WIRE_TL, () -> new BinaryWire(acquireBytes()));
         wire.clear();

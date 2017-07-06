@@ -26,26 +26,8 @@ import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.NavigableSet;
-import java.util.Objects;
-import java.util.RandomAccess;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.lang.reflect.*;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -124,6 +106,15 @@ public class WireMarshaller<T> {
             field.setAccessible(true);
             map.put(name, field);
         }
+    }
+
+    private static <T> T defaultValueForType(final @NotNull Class<T> tClass) {
+        return ObjectUtils.isConcreteClass(tClass)
+                && !tClass.getName().startsWith("java")
+                && !tClass.isEnum()
+                && !tClass.isArray()
+                ? ObjectUtils.newInstance(tClass) :
+                null;
     }
 
     public void writeMarshallable(T t, @NotNull WireOut out) {
@@ -242,15 +233,6 @@ public class WireMarshaller<T> {
 
     public boolean isLeaf() {
         return isLeaf;
-    }
-
-    private static <T> T defaultValueForType(final @NotNull Class<T> tClass) {
-        return ObjectUtils.isConcreteClass(tClass)
-                && !tClass.getName().startsWith("java")
-                && !tClass.isEnum()
-                && !tClass.isArray()
-                ? ObjectUtils.newInstance(tClass) :
-                null;
     }
 
     static abstract class FieldAccess {
@@ -590,12 +572,37 @@ public class WireMarshaller<T> {
         final Supplier<Collection> collectionSupplier;
         private final Class componentType;
         private final Class<?> type;
+        private BiConsumer<Object, ValueOut> sequenceGetter;
 
         public CollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class componentType, Class<?> type) {
             super(field, isLeaf);
             this.collectionSupplier = collectionSupplier == null ? newInstance() : collectionSupplier;
             this.componentType = componentType;
             this.type = type;
+            sequenceGetter = (o, out) -> {
+                Collection coll;
+                try {
+                    coll = (Collection) field.get(o);
+                } catch (IllegalAccessException e) {
+                    throw new AssertionError(e);
+                }
+                if (coll instanceof RandomAccess) {
+                    @NotNull List list = (List) coll;
+                    for (int i = 0, len = list.size(); i < len; i++) {
+                        out.object(componentType, list.get(i));
+                    }
+                } else if (coll == null) {
+                    try {
+                        field.set(coll, null);
+                    } catch (IllegalAccessException e) {
+                        throw new AssertionError(e);
+                    }
+                } else {
+                    for (Object element : coll) {
+                        out.object(componentType, element);
+                    }
+                }
+            };
         }
 
         @NotNull
@@ -645,25 +652,7 @@ public class WireMarshaller<T> {
                 write.nu11();
                 return;
             }
-            write.sequence(c, (coll, out) -> {
-                if (coll instanceof RandomAccess) {
-                    @NotNull List list = (List) coll;
-                    for (int i = 0, len = list.size(); i < len; i++) {
-                        out.object(componentType, list.get(i));
-                    }
-                } else if (coll == null) {
-                    try {
-                        field.set(o, null);
-                    } catch (IllegalAccessException e) {
-                        throw new AssertionError(e);
-                    }
-                } else {
-                    for (Object element : coll) {
-                        out.object(componentType, element);
-                    }
-                }
-            });
-
+            write.sequence(o, sequenceGetter);
         }
 
         @Override
