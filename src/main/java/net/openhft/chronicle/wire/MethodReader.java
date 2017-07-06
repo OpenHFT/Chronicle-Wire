@@ -156,9 +156,11 @@ public class MethodReader implements Closeable {
                 method = name;
                 MethodReader.this.args = argArr;
                 try {
-                    if (Jvm.isDebug())
+                    if (Jvm.isDebug() && LOGGER.isDebugEnabled())
                         logMessage(s, v);
 
+                    if (v instanceof TextWire.TextValueIn)
+                        Thread.yield();
                     argArr[0] = v.object(argArr[0], msgClass);
                     m.invoke(o, argArr);
                 } catch (InvocationTargetException e) {

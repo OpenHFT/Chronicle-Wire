@@ -368,15 +368,15 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public ValueIn read(@NotNull String fieldName) {
-        read(fieldName, fieldName.hashCode(), null, Function.identity());
-        return valueIn;
+        return read(fieldName, fieldName.hashCode(), null, Function.identity());
     }
 
     @NotNull
     @Override
     public ValueIn read() {
-        readField(acquireStringBuilder(), null, ANY_CODE_MATCH.code());
-        return valueIn;
+        return readField(acquireStringBuilder(), null, ANY_CODE_MATCH.code()) == null
+                ? acquireDefaultValueIn()
+                : valueIn;
     }
 
     @NotNull
@@ -433,24 +433,28 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
         bytes.readPosition(position2);
 
+        acquireDefaultValueIn();
+        defaultValueIn.defaultValue = defaultLookup.apply(defaultSource);
+        return defaultValueIn;
+    }
+
+    private DefaultValueIn acquireDefaultValueIn() {
         if (defaultValueIn == null)
             defaultValueIn = new DefaultValueIn(this);
-        defaultValueIn.defaultValue = defaultLookup.apply(defaultSource);
+        defaultValueIn.defaultValue = null;
         return defaultValueIn;
     }
 
     @NotNull
     @Override
     public ValueIn readEventName(@NotNull StringBuilder name) {
-        readField(name, null, ANY_CODE_MATCH.code());
-        return valueIn;
+        return readField(name, null, ANY_CODE_MATCH.code()) == null ? acquireDefaultValueIn() : valueIn;
     }
 
     @NotNull
     @Override
     public ValueIn read(@NotNull StringBuilder name) {
-        readField(name, null, ANY_CODE_MATCH.code());
-        return valueIn;
+        return readField(name, null, ANY_CODE_MATCH.code()) == null ? acquireDefaultValueIn() : valueIn;
     }
 
     @NotNull
@@ -1906,6 +1910,11 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     protected class BinaryValueIn implements ValueIn {
         final ValueInStack stack = new ValueInStack();
+
+        @Nullable
+        public <E> E object(@Nullable E using, @Nullable Class clazz) {
+            return Wires.object0(this, using, clazz);
+        }
 
         @Override
         public void resetState() {

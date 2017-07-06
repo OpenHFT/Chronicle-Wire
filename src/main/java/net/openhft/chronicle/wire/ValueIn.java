@@ -35,8 +35,6 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.*;
 
-import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
-
 /**
  * Read in data after reading a field.
  */
@@ -473,67 +471,7 @@ public interface ValueIn {
 
     @Nullable
     default <E> E object(@Nullable E using, @Nullable Class clazz) {
-        @Nullable final Class clazz2 = typePrefix();
-        if (clazz2 == void.class) {
-            text();
-            return null;
-        }
-        if (clazz2 != null && (clazz == null
-                || clazz.isAssignableFrom(clazz2)
-                || ReadResolvable.class.isAssignableFrom(clazz2)
-                || !ObjectUtils.isConcreteClass(clazz))) {
-            clazz = clazz2;
-            if (!clazz.isInstance(using))
-                using = null;
-        }
-        if (clazz == null)
-            clazz = Object.class;
-        SerializationStrategy<E> strategy = Wires.CLASS_STRATEGY.get(clazz);
-        BracketType brackets = strategy.bracketType();
-        if (brackets == BracketType.UNKNOWN)
-            brackets = getBracketType();
-
-        if (clazz != null && Date.class.isAssignableFrom(clazz)) {
-            // skip the field if it is there.
-            wireIn().read();
-            final long time = int64();
-            if (using instanceof Date) {
-                ((Date) using).setTime(time);
-                return using;
-            } else
-                return (E) new Date(time);
-        }
-
-        switch (brackets) {
-            case MAP:
-                if (clazz == Object.class)
-                    strategy = SerializationStrategies.MAP;
-                if (using == null)
-                    using = (E) strategy.newInstance(clazz);
-                if (Throwable.class.isAssignableFrom(clazz))
-                    return (E) WireInternal.throwable(this, false, (Throwable) using);
-
-                if (using == null)
-                    throw new IllegalStateException("failed to create instance of clazz=" + clazz + " is it aliased?");
-
-                @Nullable Object ret = marshallable(using, strategy);
-                return readResolve(ret);
-
-            case SEQ:
-                if (clazz == Object.class)
-                    strategy = SerializationStrategies.LIST;
-                if (using == null)
-                    using = (E) strategy.newInstance(clazz);
-
-                return sequence(using, strategy::readUsing) ? readResolve(using) : null;
-
-            case NONE:
-                @NotNull final E e = (E) strategy.readUsing(using, this);
-                return (E) ObjectUtils.convertTo(clazz, e);
-
-            default:
-                throw new AssertionError();
-        }
+        return Wires.object0(this, using, clazz);
     }
 
     @NotNull
