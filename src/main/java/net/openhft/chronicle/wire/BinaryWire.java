@@ -374,7 +374,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public ValueIn read() {
-        return readField(acquireStringBuilder(), null, ANY_CODE_MATCH.code()) == null
+        readField(acquireStringBuilder(), null, ANY_CODE_MATCH.code());
+        return bytes.readRemaining() <= 0
                 ? acquireDefaultValueIn()
                 : valueIn;
     }
@@ -1767,7 +1768,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             boolean canOnlyBeRepresentedAsFloatingPoint = ((long) l) != l;
             if (canOnlyBeRepresentedAsFloatingPoint) {
 
-                if (((double) (float) l) == l) {
+                if (((double) (float) l) == l || Double.isNaN(l)) {
                     super.float32((float) l);
                     return;
                 }
