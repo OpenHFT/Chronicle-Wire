@@ -1764,92 +1764,109 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         void writeNumber(double l) {
-
             boolean canOnlyBeRepresentedAsFloatingPoint = ((long) l) != l;
             if (canOnlyBeRepresentedAsFloatingPoint) {
 
-                if (((double) (float) l) == l || Double.isNaN(l)) {
-                    super.float32((float) l);
-                    return;
-                }
-
-                if (SPEC >= 18) {
-                    long l6 = Math.round(l * 1e6);
-                    if (l6 / 1e6 == l && l6 > (-1L << 35) && l6 < (1L << 42)) {
-                        long i2 = l6 / 10000;
-                        if (i2 / 1e2 == l) {
-                            writeCode(FLOAT_STOP_2).writeStopBit(i2);
-                            return;
-                        }
-
-                        long i4 = l6 / 100;
-                        if (i4 / 1e4 == l) {
-                            writeCode(FLOAT_STOP_4).writeStopBit(i4);
-                            return;
-                        }
-
-                        if (l6 / 1e6 == l) {
-                            writeCode(FLOAT_STOP_6).writeStopBit(l6);
-                            return;
-                        }
-                    }
-                }
+                if (writeAsFloat(l)) return;
 
             } else {
 
-                if (l >= 0 && l <= 127) {
-                    // used when the value is written directly into the code byte
-                    bytes.writeUnsignedByte((int) l);
-                    return;
-                }
-
-                if (l >= 0) {
-
-                    if (l <= (1 << 8) - 1) {
-                        super.uint8checked((short) l);
-                        return;
-                    }
-
-                    if (l <= (1 << 16) - 1) {
-                        super.uint16checked((int) l);
-                        return;
-                    }
-
-                    if ((float) l == l) {
-                        super.float32((float) l);
-                        return;
-                    }
-
-                    if (l <= (1L << 32L) - 1) {
-                        super.uint32checked((long) l);
-                        return;
-                    }
-
-                    super.float64(l);
-                    return;
-                }
-
-                if (l >= Byte.MIN_VALUE && l <= Byte.MAX_VALUE) {
-                    super.int8((byte) l);
-                    return;
-                }
-
-                if (l >= Short.MIN_VALUE && l <= Short.MAX_VALUE) {
-                    super.int16((short) l);
-                    return;
-                }
-
-                if ((float) l == l) {
-                    super.float32((float) l);
-                    return;
-                }
-
-                if (l >= Integer.MIN_VALUE && l <= Integer.MAX_VALUE) {
-                    super.int32((int) l);
-                    return;
-                }
+                if (writeAsIntOrFloat(l)) return;
             }
             super.float64(l);
+        }
+
+        private boolean writeAsIntOrFloat(double l) {
+            if (l >= 0) {
+                return writeAsPositive(l);
+            }
+
+            if (l >= Byte.MIN_VALUE && l <= Byte.MAX_VALUE) {
+                super.int8((byte) l);
+                return true;
+            }
+
+            if (l >= Short.MIN_VALUE && l <= Short.MAX_VALUE) {
+                super.int16((short) l);
+                return true;
+            }
+
+            if ((float) l == l) {
+                super.float32((float) l);
+                return true;
+            }
+
+            if (l >= Integer.MIN_VALUE && l <= Integer.MAX_VALUE) {
+                super.int32((int) l);
+                return true;
+            }
+            return false;
+        }
+
+        private boolean writeAsPositive(double l) {
+            if (l <= 127) {
+                // used when the value is written directly into the code byte
+                bytes.writeUnsignedByte((int) l);
+                return true;
+            }
+
+            if (l <= (1 << 8) - 1) {
+                super.uint8checked((short) l);
+                return true;
+            }
+
+            if (l <= (1 << 16) - 1) {
+                super.uint16checked((int) l);
+                return true;
+            }
+
+            if ((float) l == l) {
+                super.float32((float) l);
+                return true;
+            }
+
+            if (l <= (1L << 32L) - 1) {
+                super.uint32checked((long) l);
+                return true;
+            }
+
+            super.float64(l);
+            return true;
+        }
+
+        private boolean writeAsFloat(double l) {
+            if (((double) (float) l) == l || Double.isNaN(l)) {
+                super.float32((float) l);
+                return true;
+            }
+
+            if (SPEC >= 18) {
+                long l6 = Math.round(l * 1e6);
+                if (l6 / 1e6 == l && l6 > (-1L << 35) && l6 < (1L << 42)) {
+                    if (writeAsFixedPoint(l, l6)) return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean writeAsFixedPoint(double l, long l6) {
+            long i2 = l6 / 10000;
+            if (i2 / 1e2 == l) {
+                writeCode(FLOAT_STOP_2).writeStopBit(i2);
+                return true;
+            }
+
+            long i4 = l6 / 100;
+            if (i4 / 1e4 == l) {
+                writeCode(FLOAT_STOP_4).writeStopBit(i4);
+                return true;
+            }
+
+            if (l6 / 1e6 == l) {
+                writeCode(FLOAT_STOP_6).writeStopBit(l6);
+                return true;
+            }
+            return false;
         }
 
         @NotNull

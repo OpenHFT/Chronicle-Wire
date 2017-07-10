@@ -26,7 +26,7 @@ import java.util.Objects;
  */
 
 @FunctionalInterface
-interface TriConsumer<T, U, V> {
+public interface TriConsumer<T, U, V> {
     void accept(T t, U u, V v);
 
     @NotNull
