@@ -64,6 +64,16 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
     }
 
     @Override
+    public int lastSourceId() {
+        return sources <= 0 ? -1 : sourceIdArray[sources - 1];
+    }
+
+    @Override
+    public long lastSourceIndex() {
+        return sources <= 0 ? -1 : sourceIndexArray[sources - 1];
+    }
+
+    @Override
     public int timings() {
         return timings;
     }
