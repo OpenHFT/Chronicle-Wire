@@ -43,6 +43,7 @@ public enum WireInternal {
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
     static final ThreadLocal<WeakReference<Bytes>> BYTES_TL = new ThreadLocal<>();
+    static final ThreadLocal<WeakReference<Bytes>> BYTES_F2S_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Wire>> BINARY_WIRE_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Bytes>> ABYTES_TL = new ThreadLocal();
 

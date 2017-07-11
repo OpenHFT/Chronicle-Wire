@@ -568,6 +568,7 @@ public class BinaryWireTest {
         wire.write().bool(false)
                 .write().bool(true)
                 .write().bool(null);
+        System.out.println(wire);
         wire.read().bool(false, Assert::assertEquals)
                 .read().bool(true, Assert::assertEquals)
                 .read().bool(null, Assert::assertEquals);
@@ -667,7 +668,7 @@ public class BinaryWireTest {
                 .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
                 .write()
                 .bytes(allBytes);
-//        System.out.println(bytes.toDebugString());
+        System.out.println(bytes.toDebugString());
         @NotNull NativeBytes allBytes2 = nativeBytes();
         wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
                 .read().bytes(b -> assertEquals("Hello", b.toString()))

@@ -62,6 +62,9 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
         wire.writeDocument(false, w -> new DTO2(1, 2, "3").writeMarshallable(w));
         System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
+        if (wire instanceof TextWire)
+            ((TextWire) wire).useBinaryDocuments();
+
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
                 Assert.fail();
@@ -84,7 +87,8 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
         System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");
-
+        if (wire instanceof TextWire)
+            ((TextWire) wire).useBinaryDocuments();
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
                 Assert.fail();
@@ -109,6 +113,8 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
 
         CLASS_ALIASES.addAlias(DTO1.class, "DTO");
 
+        if (wire instanceof TextWire)
+            ((TextWire) wire).useBinaryDocuments();
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
                 Assert.fail();

@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.ObjectUtils;
+import net.openhft.chronicle.core.util.ReadResolvable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,6 +42,8 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
+
+import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 
 /**
  * Created by peter on 31/08/15.
@@ -260,6 +263,13 @@ public enum Wires {
     }
 
     @Nullable
+    static Bytes acquireBytesForToString() {
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL, Bytes::allocateElasticDirect);
+        bytes.clear();
+        return bytes;
+    }
+
+    @Nullable
     public static Wire acquireBinaryWire() {
         Wire wire = ThreadLocalHelper.getTL(WireInternal.BINARY_WIRE_TL, () -> new BinaryWire(acquireBytes()));
         wire.clear();
@@ -366,6 +376,85 @@ public enum Wires {
     public static void reset(@NotNull Object o) {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(o.getClass());
         wm.reset(o);
+    }
+
+    @Nullable
+    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz) {
+        @Nullable final Class clazz2 = in.typePrefix();
+        if (clazz2 == void.class) {
+            in.text();
+            return null;
+        }
+        if (clazz2 != null && (clazz == null
+                || clazz.isAssignableFrom(clazz2)
+                || ReadResolvable.class.isAssignableFrom(clazz2)
+                || !ObjectUtils.isConcreteClass(clazz))) {
+            clazz = clazz2;
+            if (!clazz.isInstance(using))
+                using = null;
+        }
+        if (clazz == null)
+            clazz = Object.class;
+        SerializationStrategy<E> strategy = CLASS_STRATEGY.get(clazz);
+        BracketType brackets = strategy.bracketType();
+        if (brackets == BracketType.UNKNOWN)
+            brackets = in.getBracketType();
+
+        if (Date.class.isAssignableFrom(clazz))
+            return objectDate(in, using);
+
+        switch (brackets) {
+            case MAP:
+                return objectMap(in, using, clazz, strategy);
+
+            case SEQ:
+                return objectSequence(in, using, clazz, strategy);
+
+            case NONE:
+                @NotNull final E e = (E) strategy.readUsing(using, in);
+                return (E) ObjectUtils.convertTo(clazz, e);
+
+            default:
+                throw new AssertionError();
+        }
+    }
+
+    @Nullable
+    public static <E> E objectSequence(ValueIn in, @Nullable E using, @Nullable Class clazz, SerializationStrategy<E> strategy) {
+        if (clazz == Object.class)
+            strategy = SerializationStrategies.LIST;
+        if (using == null)
+            using = (E) strategy.newInstance(clazz);
+
+        return in.sequence(using, strategy::readUsing) ? readResolve(using) : null;
+    }
+
+    @Nullable
+    public static <E> E objectMap(ValueIn in, @Nullable E using, @Nullable Class clazz, SerializationStrategy<E> strategy) {
+        if (clazz == Object.class)
+            strategy = SerializationStrategies.MAP;
+        if (using == null)
+            using = (E) strategy.newInstance(clazz);
+        if (Throwable.class.isAssignableFrom(clazz))
+            return (E) WireInternal.throwable(in, false, (Throwable) using);
+
+        if (using == null)
+            throw new IllegalStateException("failed to create instance of clazz=" + clazz + " is it aliased?");
+
+        @Nullable Object ret = in.marshallable(using, strategy);
+        return readResolve(ret);
+    }
+
+    @NotNull
+    public static <E> E objectDate(ValueIn in, @Nullable E using) {
+        // skip the field if it is there.
+        in.wireIn().read();
+        final long time = in.int64();
+        if (using instanceof Date) {
+            ((Date) using).setTime(time);
+            return using;
+        } else
+            return (E) new Date(time);
     }
 
     enum SerializeBytes implements Function<Class, SerializationStrategy> {

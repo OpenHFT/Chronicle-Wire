@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -37,7 +38,7 @@ import java.util.function.BiConsumer;
  */
 public class MethodReader implements Closeable {
     static final Object[] NO_ARGS = {};
-    private static final Logger LOGGER = LoggerFactory.getLogger(MethodReader.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(MethodReader.class);
     private final MarshallableIn in;
     @NotNull
     private final WireParser<Void> wireParser;
@@ -45,10 +46,8 @@ public class MethodReader implements Closeable {
     private String method;
     private Object args;
 
-    public MethodReader(MarshallableIn in, boolean ignoreDefault, @NotNull Object... objects) {
+    public MethodReader(MarshallableIn in, boolean ignoreDefault, WireParselet defaultParselet, @NotNull Object... objects) {
         this.in = in;
-        @NotNull WireParselet defaultParselet = (s, v, $) ->
-                LOGGER.warn("Unknown message " + s + ' ' + v.text());
         if (objects[0] instanceof WireParselet)
             defaultParselet = (WireParselet) objects[0];
         wireParser = WireParser.wireParser(defaultParselet);
@@ -62,6 +61,7 @@ public class MethodReader implements Closeable {
                     continue;
 
                 try {
+                    // skip Object defined methods.
                     Object.class.getMethod(m.getName(), m.getParameterTypes());
                     continue;
                 } catch (NoSuchMethodException e) {
@@ -129,7 +129,7 @@ public class MethodReader implements Closeable {
                     if (Jvm.isDebug())
                         logMessage(s, v);
 
-                    argArr[0] = v.object(msgClass);
+                    argArr[0] = v.object(argArr[0], msgClass);
                     m.invoke(o, argArr);
                 } catch (Exception i) {
                     Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], i);
@@ -154,13 +154,15 @@ public class MethodReader implements Closeable {
                 method = name;
                 MethodReader.this.args = argArr;
                 try {
-                    if (Jvm.isDebug())
+                    if (Jvm.isDebug() && LOGGER.isDebugEnabled())
                         logMessage(s, v);
 
-                    v.marshallable(argArr[0]);
+                    argArr[0] = v.object(argArr[0], msgClass);
                     m.invoke(o, argArr);
-                } catch (Exception i) {
-                    Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], i);
+                } catch (InvocationTargetException e) {
+                    Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], e.getCause());
+                } catch (Throwable t) {
+                    Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], t);
                 }
             });
         }
@@ -215,10 +217,11 @@ public class MethodReader implements Closeable {
      * @return true if there was a message, or false if not.
      */
     public boolean readOne() {
-        MessageHistory.get().reset();
+        MessageHistory history = MessageHistory.get();
         try (DocumentContext context = in.readingDocument()) {
             if (!context.isData())
                 return false;
+            history.reset(context.sourceId(), context.index());
             wireParser.accept(context.wire(), null);
         }
         return true;

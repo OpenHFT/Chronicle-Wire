@@ -18,7 +18,7 @@ package net.openhft.chronicle.wire;
 /* This test prints
 
 TextWire, fixed=false, numericField=false, fieldLess=false
-Symbol: EURUSD
+symbol: EURUSD
 NoMDEntries: 2
 MDEntryType: 52
 MDEntryPx: 1.1187

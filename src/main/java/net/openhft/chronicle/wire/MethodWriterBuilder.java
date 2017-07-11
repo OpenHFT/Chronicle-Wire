@@ -29,6 +29,7 @@ import java.util.function.Supplier;
  * Created by peter on 28/03/16.
  */
 public class MethodWriterBuilder<T> implements Supplier<T> {
+
     private final List<Class> interfaces = new ArrayList<>();
     @NotNull
     private final MethodWriterInvocationHandler handler;
@@ -62,6 +63,11 @@ public class MethodWriterBuilder<T> implements Supplier<T> {
     @NotNull
     public MethodWriterBuilder<T> onClose(Closeable closeable) {
         handler.onClose(closeable);
+        return this;
+    }
+
+    public MethodWriterBuilder<T> methodInterceptorFactory(MethodInterceptorFactory methodInterceptorFactory) {
+        handler.methodInterceptorFactory(methodInterceptorFactory);
         return this;
     }
 

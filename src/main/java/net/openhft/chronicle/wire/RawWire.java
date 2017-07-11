@@ -279,11 +279,6 @@ public class RawWire extends AbstractWire implements Wire {
     }
 
     class RawValueOut implements ValueOut {
-        @NotNull
-        @Override
-        public ValueOut leaf() {
-            return this;
-        }
 
         @NotNull
         @Override
@@ -712,7 +707,6 @@ public class RawWire extends AbstractWire implements Wire {
         public WireIn bytes(@NotNull BytesOut toBytes) {
             return bytes(toBytes, true);
         }
-
 
         @NotNull
         @Override

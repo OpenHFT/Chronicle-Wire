@@ -116,6 +116,15 @@ public class BinaryWire2Test {
     }
 
     @Test
+    public void testNaN() {
+        @NotNull Wire wire = createWire();
+        wire.getValueOut()
+                .float64(Double.NaN);
+        assertEquals(5, wire.bytes().readRemaining());
+        assertTrue(Double.isNaN(wire.getValueIn().float64()));
+    }
+
+    @Test
     public void testTime() {
         @NotNull Wire wire = createWire();
         LocalTime now = LocalTime.now();

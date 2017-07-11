@@ -11,7 +11,6 @@ import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
 
-
 public class MapMarshallableTest {
 
     @Test

@@ -27,4 +27,6 @@ public interface MethodWriterInvocationHandler extends InvocationHandler {
     void recordHistory(boolean recordHistory);
 
     void onClose(Closeable closeable);
+
+    void methodInterceptorFactory(MethodInterceptorFactory methodInterceptorFactory);
 }

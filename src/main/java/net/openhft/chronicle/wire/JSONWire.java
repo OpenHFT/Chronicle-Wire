@@ -149,7 +149,6 @@ public class JSONWire extends TextWire {
 
         @Override
         protected void addNewLine(long pos) {
-
         }
 
         @Override

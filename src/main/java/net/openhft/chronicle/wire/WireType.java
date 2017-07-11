@@ -56,7 +56,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         @NotNull
         @Override
         public Wire apply(@NotNull Bytes bytes) {
-            return new TextWire(bytes);
+            return new TextWire(bytes).useBinaryDocuments();
         }
 
         @Override
@@ -352,6 +352,11 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     }
 
     @Nullable
+    static Bytes getBytesForToString() {
+        return Wires.acquireBytesForToString();
+    }
+
+    @Nullable
     static Bytes getBytes2() {
         // when in debug, the output becomes confused if you reuse the buffer.
         if (Jvm.isDebug())
@@ -415,7 +420,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
     @Nullable
     private Bytes asBytes(Object marshallable) {
-        Bytes bytes = getBytes();
+        Bytes bytes = getBytesForToString();
         Wire wire = apply(bytes);
         @NotNull final ValueOut valueOut = wire.getValueOut();
 
@@ -518,7 +523,9 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         Wire wire = apply(bytes);
         for (@NotNull Map.Entry<String, T> entry : map.entrySet()) {
             @NotNull ValueOut valueOut = wire.writeEventName(entry::getKey);
-            valueOut.leaf(compact).marshallable(entry.getValue());
+            boolean wasLeaf = valueOut.swapLeaf(compact);
+            valueOut.marshallable(entry.getValue());
+            valueOut.swapLeaf(wasLeaf);
         }
         String tempFilename = IOTools.tempName(filename);
         IOTools.writeFile(tempFilename, bytes.toByteArray());

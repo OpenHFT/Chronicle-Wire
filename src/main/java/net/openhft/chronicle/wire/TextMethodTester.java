@@ -31,6 +31,7 @@ public class TextMethodTester<T> {
     private String expected;
     private String actual;
     private String[] retainLast;
+    private MethodInterceptorFactory methodInterceptorFactory;
 
     public TextMethodTester(String input, Function<T, Object> componentFunction, Class<T> outputClass, String output) {
         this.input = input;
@@ -82,7 +83,7 @@ public class TextMethodTester<T> {
     public TextMethodTester run() throws IOException {
 
         Wire wire2 = new TextWire(Bytes.allocateElasticDirect()).useTextDocuments().addTimeStamps(true);
-        T writer0 = wire2.methodWriter(outputClass);
+        T writer0 = wire2.methodWriterBuilder(outputClass).methodInterceptorFactory(methodInterceptorFactory).build();
         T writer = retainLast == null ? writer0 : cachedMethodWriter(writer0);
         Object component = componentFunction.apply(writer);
         Object[] components = component instanceof Object[]
@@ -90,7 +91,7 @@ public class TextMethodTester<T> {
                 : new Object[]{component};
 
         if (setup != null) {
-            Wire wire0 = new TextWire(BytesUtil.readFile(setup)).useTextDocuments();
+            Wire wire0 = new TextWire(BytesUtil.readFile(setup));
 
             MethodReader reader0 = wire0.methodReader(components);
             while (reader0.readOne()) {
@@ -99,7 +100,7 @@ public class TextMethodTester<T> {
             wire2.bytes().clear();
         }
 
-        Wire wire = new TextWire(BytesUtil.readFile(input)).useTextDocuments();
+        Wire wire = new TextWire(BytesUtil.readFile(input));
 
         // expected
         if (retainLast == null) {
@@ -107,7 +108,7 @@ public class TextMethodTester<T> {
         } else {
             Wire wireOut = new TextWire(BytesUtil.readFile(output));
             Map<String, String> events = new TreeMap<>();
-            consumeDocumentSeperator(wireOut);
+            consumeDocumentSeparator(wireOut);
             while (wireOut.hasMore()) {
                 StringBuilder event = new StringBuilder();
                 long start = wireOut.bytes().readPosition();
@@ -119,7 +120,7 @@ public class TextMethodTester<T> {
                 }
                 long end = wireOut.bytes().readPosition();
                 events.put(key.toString(), wireOut.bytes().subBytes(start, end - start).toString().trim());
-                consumeDocumentSeperator(wireOut);
+                consumeDocumentSeparator(wireOut);
             }
             StringBuilder expected2 = new StringBuilder();
             for (String s : events.values()) {
@@ -130,20 +131,29 @@ public class TextMethodTester<T> {
         MethodReader reader = wire.methodReader(components);
         if (exceptionHandlerSetup != null)
             exceptionHandlerSetup.accept(reader, writer);
-        long pos = wire2.bytes().writePosition();
-        while (reader.readOne()) {
-            if (retainLast == null || pos != wire2.bytes().writePosition())
-                wire2.bytes().append("---\n");
-            pos = wire2.bytes().writePosition();
-        }
-        if (retainLast != null) {
-            CachedInvocationHandler invocationHandler =
-                    (CachedInvocationHandler) Proxy.getInvocationHandler(writer);
-            try {
-                invocationHandler.flush();
-            } catch (Exception e) {
-                throw new IOException(e);
+//        long pos = wire2.bytes().writePosition();
+        TextMethodWriterInvocationHandler.ENABLE_EOD = false;
+        try {
+            while (reader.readOne()) {
+//                if (pos != wire2.bytes().writePosition())
+                if (retainLast == null)
+                    wire2.bytes().append("---\n");
+//                pos = wire2.bytes().writePosition();
             }
+            if (retainLast != null)
+                wire2.bytes().clear();
+
+            if (retainLast != null) {
+                CachedInvocationHandler invocationHandler =
+                        (CachedInvocationHandler) Proxy.getInvocationHandler(writer);
+                try {
+                    invocationHandler.flush();
+                } catch (Exception e) {
+                    throw new IOException(e);
+                }
+            }
+        } finally {
+            TextMethodWriterInvocationHandler.ENABLE_EOD = true;
         }
         actual = wire2.toString().trim();
         if (afterRun != null) {
@@ -153,7 +163,7 @@ public class TextMethodTester<T> {
         return this;
     }
 
-    private void consumeDocumentSeperator(@NotNull Wire wireOut) {
+    private void consumeDocumentSeparator(@NotNull Wire wireOut) {
         if (wireOut.bytes().peekUnsignedByte() == '-') {
             wireOut.bytes().readSkip(3);
         }
@@ -171,6 +181,11 @@ public class TextMethodTester<T> {
 
     public String actual() {
         return actual;
+    }
+
+    public TextMethodTester methodInterceptorFactory(MethodInterceptorFactory methodInterceptorFactory) {
+        this.methodInterceptorFactory = methodInterceptorFactory;
+        return this;
     }
 
     static class Invocation {
@@ -202,8 +217,12 @@ public class TextMethodTester<T> {
                 StringBuilder key = new StringBuilder();
                 key.append(method.getName());
                 Marshallable m = (Marshallable) args[0];
-                for (String s : retainLast) {
-                    key.append(",").append(m.getField(s, Object.class));
+                try {
+                    for (String s : retainLast) {
+                        key.append(",").append(m.getField(s, Object.class));
+                    }
+                } catch (NoSuchFieldException e) {
+                    // move on
                 }
                 args[0] = m.deepCopy();
                 cache.put(key.toString(), new Invocation(method, args));

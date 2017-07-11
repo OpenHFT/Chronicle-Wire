@@ -263,6 +263,83 @@ public interface ValueOut {
     @NotNull
     <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer);
 
+    default <T, K> WireOut sequenceWithLength(T t, int length, ObjectIntObjectConsumer<T, ValueOut> writer) {
+        boolean b = swapLeaf(true);
+        WireOut sequence = sequence(t, length, (TriConsumer<T, Integer, ValueOut>) writer::accept);
+        swapLeaf(b);
+        return sequence;
+    }
+
+    default WireOut array(Bytes[] array, int length) {
+        return sequenceWithLength(array, length, (a, len, out) -> {
+            for (int i = 0; i < len; i++)
+                out.bytes(a[i]);
+        });
+    }
+
+    default WireOut array(double[] array, int length) {
+        return sequenceWithLength(array, length, (a, len, out) -> {
+            for (int i = 0; i < len; i++)
+                out.float64(a[i]);
+        });
+    }
+
+    /**
+     * This write values relative to the first one using 6 digit precision
+     *
+     * @param array  to write
+     * @param length to write
+     * @return this
+     */
+    default WireOut arrayDelta(double[] array, int length) {
+        return sequenceWithLength(array, length, (a, len, out) -> {
+            if (len <= 0) return;
+            out.float64(a[0]);
+            double a0 = a[0];
+            if (Double.isNaN(a0)) a0 = 0.0;
+            for (int i = 1; i < len; i++)
+                out.float64(Maths.round6(a[i] - a0));
+        });
+    }
+
+    default WireOut array(boolean[] array, int length) {
+        return sequenceWithLength(array, length, (a, len, out) -> {
+            for (int i = 0; i < len; i++)
+                out.bool(a[i]);
+        });
+    }
+
+    default WireOut array(long[] array, int length) {
+        return sequenceWithLength(array, length, (a, len, out) -> {
+            for (int i = 0; i < len; i++)
+                out.int64(a[i]);
+        });
+    }
+
+    default WireOut arrayDelta(long[] array, int length) {
+        return sequenceWithLength(array, length, (a, len, out) -> {
+            if (len <= 0) return;
+            out.int64(a[0]);
+            long a0 = a[0];
+            for (int i = 1; i < len; i++)
+                out.int64(a[i] - a0);
+        });
+    }
+
+    default WireOut array(int[] array, int length) {
+        return sequenceWithLength(array, length, (a, len, out) -> {
+            for (int i = 0; i < len; i++)
+                out.int32(a[i]);
+        });
+    }
+
+    default WireOut array(byte[] array, int length) {
+        return sequenceWithLength(array, length, (a, len, out) -> {
+            for (int i = 0; i < len; i++)
+                out.int8(a[i]);
+        });
+    }
+
     @NotNull
     default WireOut array(@NotNull WriteValue writer, @NotNull Class arrayType) {
         if (arrayType == String[].class) {
@@ -300,11 +377,22 @@ public interface ValueOut {
     WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map);
 
     @NotNull
-    ValueOut leaf();
+    @Deprecated
+    default ValueOut leaf() {
+        swapLeaf(true);
+        return this;
+    }
 
     @NotNull
+    @Deprecated
     default ValueOut leaf(boolean leaf) {
-        return leaf ? leaf() : this;
+        swapLeaf(leaf);
+        return this;
+    }
+
+    @NotNull
+    default boolean swapLeaf(boolean isLeaf) {
+        return false;
     }
 
     /**
@@ -364,8 +452,9 @@ public interface ValueOut {
         sequence(coll, assumedClass, (s, kls, out) -> {
             int size = s.size();
             for (int i = 0; i < size; i++) {
-                out.leaf();
+                boolean wasLeaf = out.swapLeaf(true);
                 marshallable((WriteMarshallable) s.get(i));
+                out.swapLeaf(wasLeaf);
             }
         });
         return wireOut();
@@ -382,7 +471,7 @@ public interface ValueOut {
     }
 
     @NotNull
-    default <V> WireOut object(Class<V> expectedType, V v) {
+    default <V> WireOut object(@NotNull Class<V> expectedType, V v) {
         if (v instanceof WriteMarshallable && !(v instanceof Enum))
             if (ObjectUtils.matchingClass(expectedType, v.getClass()))
                 marshallable((WriteMarshallable) v);
@@ -397,11 +486,11 @@ public interface ValueOut {
 
     @NotNull
     default <K, V> WireOut marshallable(Map<K, V> map) {
-        return marshallable(map, null, null, true);
+        return marshallable(map, (Class) Object.class, (Class) Object.class, true);
     }
 
     @NotNull
-    default <K, V> WireOut marshallable(@Nullable Map<K, V> map, Class<K> kClass, Class<V> vClass, boolean leaf) {
+    default <K, V> WireOut marshallable(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) {
         if (map == null) {
             nu11();
             return wireOut();
@@ -409,8 +498,10 @@ public interface ValueOut {
 
         marshallable(m -> {
             for (@NotNull Map.Entry<K, V> entry : map.entrySet()) {
-                m.writeEvent(kClass, entry.getKey()).leaf(leaf)
-                        .object(vClass, entry.getValue());
+                ValueOut valueOut = m.writeEvent(kClass, entry.getKey());
+                boolean wasLeaf = valueOut.swapLeaf(leaf);
+                valueOut.object(vClass, entry.getValue());
+                valueOut.swapLeaf(wasLeaf);
             }
         });
         return wireOut();
@@ -431,12 +522,17 @@ public interface ValueOut {
             case "[F":
             case "[D":
             case "[Z":
-                return typePrefix(value.getClass()).leaf(true).sequence(value, (v, out) -> {
+                ValueOut valueOut = typePrefix(value.getClass());
+                boolean wasLeaf = valueOut.swapLeaf(true);
+                valueOut.sequence(value, (v, out) -> {
                     int len = Array.getLength(v);
                     for (int i = 0; i < len; i++) {
                         out.untypedObject(Array.get(v, i));
                     }
                 });
+                valueOut.swapLeaf(wasLeaf);
+                return wireOut();
+
             case "java.lang.String":
                 return text((String) value);
             case "java.lang.Byte":
@@ -632,7 +728,7 @@ public interface ValueOut {
                 int last = Jvm.trimLast(0, stes);
                 for (int i = 0; i < last; i++) {
                     StackTraceElement ste = stes[i];
-                    w3.leaf().marshallable(w4 ->
+                    w3.marshallable(w4 ->
                             w4.write(() -> "class").text(ste.getClassName())
                                     .write(() -> "method").text(ste.getMethodName())
                                     .write(() -> "file").text(ste.getFileName())
@@ -679,4 +775,5 @@ public interface ValueOut {
     }
 
     void resetState();
+
 }

@@ -109,9 +109,28 @@ public class JSONWireTest {
 
         // fails due to a trailing space if we don't call toString.
         // assertEquals(lists1, lists2);
-        assertEquals(lists1.toString(), lists2.toString());
-
-        wire.bytes().release();
+//        assertEquals(lists1.toString(), lists2.toString());
+        try {
+            assertEquals("!net.openhft.chronicle.wire.JSONWireTest$TwoLists {\n" +
+                    "  name: !!null \"\",\n" +
+                    "  list1: [\n" +
+                    "    { name: !!null \"\", number1: 0, number2: 0.0 },\n" +
+                    "    { name: !!null \"\", number1: 1, number2: 10.0 },\n" +
+                    "    { name: !!null \"\", number1: 2, number2: 20.0 },\n" +
+                    "    { name: !!null \"\", number1: 3, number2: 30.0 },\n" +
+                    "    { name: !!null \"\", number1: 4, number2: 40.0 }\n" +
+                    "  ],\n" +
+                    "  list2: [\n" +
+                    "    { name: !!null \"\", number1: 0, number2: 0.0 },\n" +
+                    "    { name: !!null \"\", number1: 1, number2: 10.0 },\n" +
+                    "    { name: !!null \"\", number1: 2, number2: 20.0 },\n" +
+                    "    { name: !!null \"\", number1: 3, number2: 30.0 },\n" +
+                    "    { name: !!null \"\", number1: 4, number2: 40.0 }\n" +
+                    "  ]\n" +
+                    "}\n", lists1.toString());
+        } finally {
+            wire.bytes().release();
+        }
     }
 
     @Test

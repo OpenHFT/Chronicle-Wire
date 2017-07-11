@@ -53,7 +53,7 @@ public abstract class AbstractWire implements Wire {
      * queue which was written by another thread, if its far behind, we just write the data, and
      * don’t update the headerNumber, the code later uses the built in indexing to work out what the
      * header number is.
-     *
+     * <p>
      * As such I have expose this property so that you can tune it , you want to keep the number as
      * large as possible, to a point where your write performance is no longer acceptable ( of
      * appenders that have fallen behind )
@@ -86,8 +86,6 @@ public abstract class AbstractWire implements Wire {
     private ObjectInput objectInput;
     private boolean insideHeader;
     private HeadNumberChecker headNumberChecker;
-
-
 
     public AbstractWire(@NotNull Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
@@ -260,8 +258,8 @@ public abstract class AbstractWire implements Wire {
             lastPosition) throws TimeoutException, EOFException {
 
         assert !insideHeader : "you cant put a header inside a header, check that " +
-                    "you have not nested the documents. If you are using Chronicle-Queue please " +
-                    "ensure that you have a unique instance of the Appender per thread, in " +
+                "you have not nested the documents. If you are using Chronicle-Queue please " +
+                "ensure that you have a unique instance of the Appender per thread, in " +
                 "other-words you can not share appenders across threads.";
 
         insideHeader = true;
@@ -457,8 +455,13 @@ public abstract class AbstractWire implements Wire {
                 if (header == NOT_COMPLETE_UNKNOWN_LENGTH) {
                     try {
                         acquireTimedParser().pause(timeout, timeUnit);
+
                     } catch (TimeoutException e) {
-                        throw new TimeoutException("header: " + Integer.toHexString(header) + ", pos: " + pos);
+                        boolean success = bytes.compareAndSwapInt(pos, header, END_OF_DATA);
+                        Jvm.warn().on(getClass(), "resetting header after timeout, " +
+                                "header: " + Integer.toHexString(header) +
+                                ", pos: " + pos +
+                                ", success: " + success);
                     }
                     continue;
                 }

@@ -38,7 +38,7 @@ public class ReadDocumentContextTest {
 
         Bytes b = Bytes.elasticByteBuffer();
         assertFalse(b.sharedMemory());
-        @NotNull Wire wire = new TextWire(b);
+        @NotNull Wire wire = new TextWire(b).useBinaryDocuments();
         assertFalse(wire.notCompleteIsNotPresent());
 
         try (DocumentContext dc = wire.readingDocument()) {
@@ -72,7 +72,7 @@ public class ReadDocumentContextTest {
 
         @NotNull MappedBytes b = MappedBytes.mappedBytes(File.createTempFile("delete", "me"), 64 << 10);
         assertTrue(b.sharedMemory());
-        @NotNull Wire wire = new TextWire(b);
+        @NotNull Wire wire = new TextWire(b).useBinaryDocuments();
         assertTrue(wire.notCompleteIsNotPresent());
 
         try (DocumentContext dc = wire.readingDocument()) {
@@ -117,7 +117,7 @@ public class ReadDocumentContextTest {
 
         Bytes b = Bytes.elasticByteBuffer();
 
-        @NotNull TextWire textWire = new TextWire(b);
+        @NotNull TextWire textWire = new TextWire(b).useBinaryDocuments();
 
         textWire.writeDocument(true, w -> {
         });
@@ -145,7 +145,7 @@ public class ReadDocumentContextTest {
 
         Bytes b = Bytes.elasticByteBuffer();
 
-        @NotNull TextWire textWire = new TextWire(b);
+        @NotNull TextWire textWire = new TextWire(b).useBinaryDocuments();
 
         textWire.writeDocument(true, w -> w.write("key").text("someText"));
         textWire.writeDocument(true, w -> w.write("key").text("someText"));
@@ -191,7 +191,7 @@ public class ReadDocumentContextTest {
 
         Bytes b = Bytes.elasticByteBuffer();
 
-        @NotNull TextWire textWire = new TextWire(b);
+        @NotNull TextWire textWire = new TextWire(b).useBinaryDocuments();
 
         textWire.writeDocument(true, w -> w.write("key").text("someText"));
         textWire.writeDocument(true, w -> w.write("key").text("someText"));

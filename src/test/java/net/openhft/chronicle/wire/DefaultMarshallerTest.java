@@ -94,8 +94,8 @@ public class DefaultMarshallerTest {
                 "    { str: bye, num: 999 }\n" +
                 "  ],\n" +
                 "  map: {\n" +
-                "    key: !DMNestedClass { str: value, num: 1 },\n" +
-                "    keyz: !DMNestedClass { str: valuez, num: 1111 }\n" +
+                "    key: { str: value, num: 1 },\n" +
+                "    keyz: { str: valuez, num: 1111 }\n" +
                 "  }\n" +
                 "}\n", oc.toString());
 

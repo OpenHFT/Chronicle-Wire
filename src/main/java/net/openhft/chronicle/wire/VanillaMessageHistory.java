@@ -55,8 +55,22 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
     }
 
     @Override
-    public void reset() {
-        sources = timings = 0;
+    public void reset(int sourceId, long sourceIndex) {
+        sources = 1;
+        sourceIdArray[0] = sourceId;
+        sourceIndexArray[0] = sourceIndex;
+        timings = 1;
+        timingsArray[0] = System.nanoTime();
+    }
+
+    @Override
+    public int lastSourceId() {
+        return sources <= 0 ? -1 : sourceIdArray[sources - 1];
+    }
+
+    @Override
+    public long lastSourceIndex() {
+        return sources <= 0 ? -1 : sourceIndexArray[sources - 1];
     }
 
     @Override
@@ -115,6 +129,9 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
     }
 
     public void addTiming(long l) {
+        if (timings >= timingsArray.length) {
+            throw new IllegalStateException("Have exceeded message history size: " + this.toString());
+        }
         timingsArray[timings++] = l;
     }
 

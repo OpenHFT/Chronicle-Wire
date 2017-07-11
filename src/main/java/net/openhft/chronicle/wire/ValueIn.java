@@ -16,7 +16,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.*;
@@ -35,8 +34,6 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.*;
-
-import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 
 /**
  * Read in data after reading a field.
@@ -261,7 +258,94 @@ public interface ValueIn {
     }
 
     @NotNull
-    <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader);
+    <T, K> WireIn sequence(@NotNull T t, K k, @NotNull TriConsumer<T, K, ValueIn> tReader);
+
+    default <T> int sequenceWithLength(@NotNull T t, @NotNull ToIntBiFunction<ValueIn, T> tReader) {
+        int[] length = {0};
+        sequence(t, (tt, in) -> length[0] = tReader.applyAsInt(in, tt));
+        return length[0];
+    }
+
+    default int array(Bytes[] array) {
+        return sequenceWithLength(array, (in, a) -> {
+            int i = 0;
+            while (in.hasNextSequenceItem() && i < a.length) {
+                if (a[i] == null)
+                    a[i] = Bytes.elasticHeapByteBuffer(32);
+                bytes(a[i++]);
+            }
+            return i;
+        });
+    }
+
+    default int array(double[] array) {
+        return sequenceWithLength(array, (in, a) -> {
+            int i = 0;
+            while (in.hasNextSequenceItem() && i < a.length)
+                a[i++] = in.float64();
+            return i;
+        });
+    }
+
+    default int arrayDelta(double[] array) {
+        return sequenceWithLength(array, (in, a) -> {
+            if (!in.hasNextSequenceItem() || a.length == 0)
+                return 0;
+            double a0 = a[0] = in.float64();
+            int i = 1;
+            while (in.hasNextSequenceItem() && i < a.length)
+                a[i++] = in.float64() + a0;
+            return i;
+        });
+    }
+
+    default int array(boolean[] array) {
+        return sequenceWithLength(array, (in, a) -> {
+            int i = 0;
+            while (in.hasNextSequenceItem() && i < a.length)
+                a[i++] = in.bool();
+            return i;
+        });
+    }
+
+    default int array(long[] array) {
+        return sequenceWithLength(array, (in, a) -> {
+            int i = 0;
+            while (in.hasNextSequenceItem() && i < a.length)
+                a[i++] = in.int64();
+            return i;
+        });
+    }
+
+    default int arrayDelta(long[] array) {
+        return sequenceWithLength(array, (in, a) -> {
+            if (!in.hasNextSequenceItem() || a.length == 0)
+                return 0;
+            long a0 = a[0] = in.int64();
+            int i = 1;
+            while (in.hasNextSequenceItem() && i < a.length)
+                a[i++] = in.int64() + a0;
+            return i;
+        });
+    }
+
+    default int array(int[] array) {
+        return sequenceWithLength(array, (in, a) -> {
+            int i = 0;
+            while (in.hasNextSequenceItem() && i < a.length)
+                a[i++] = in.int32();
+            return i;
+        });
+    }
+
+    default int array(byte[] array) {
+        return sequenceWithLength(array, (in, a) -> {
+            int i = 0;
+            while (in.hasNextSequenceItem() && i < a.length)
+                a[i++] = in.int8();
+            return i;
+        });
+    }
 
     default <T> Set<T> set(Class<T> t) {
         return collection(LinkedHashSet::new, t);
@@ -474,67 +558,7 @@ public interface ValueIn {
 
     @Nullable
     default <E> E object(@Nullable E using, @Nullable Class clazz) {
-        @Nullable final Class clazz2 = typePrefix();
-        if (clazz2 == void.class) {
-            text();
-            return null;
-        }
-        if (clazz2 != null && (clazz == null
-                || clazz.isAssignableFrom(clazz2)
-                || ReadResolvable.class.isAssignableFrom(clazz2)
-                || !ObjectUtils.isConcreteClass(clazz))) {
-            clazz = clazz2;
-            if (!clazz.isInstance(using))
-                using = null;
-        }
-        if (clazz == null)
-            clazz = Object.class;
-        SerializationStrategy<E> strategy = Wires.CLASS_STRATEGY.get(clazz);
-        BracketType brackets = strategy.bracketType();
-        if (brackets == BracketType.UNKNOWN)
-            brackets = getBracketType();
-
-        if (clazz != null && Date.class.isAssignableFrom(clazz)) {
-            // skip the field if it is there.
-            wireIn().read();
-            final long time = int64();
-            if (using instanceof Date) {
-                ((Date) using).setTime(time);
-                return using;
-            } else
-                return (E) new Date(time);
-        }
-
-        switch (brackets) {
-            case MAP:
-                if (clazz == Object.class)
-                    strategy = SerializationStrategies.MAP;
-                if (using == null)
-                    using = (E) strategy.newInstance(clazz);
-                if (Throwable.class.isAssignableFrom(clazz))
-                    return (E) WireInternal.throwable(this, false, (Throwable) using);
-
-                if (using == null)
-                    Jvm.warn().on(ValueIn.class, "failed to create instance of clazz=" + clazz);
-
-                @Nullable Object ret = marshallable(using, strategy);
-                return readResolve(ret);
-
-            case SEQ:
-                if (clazz == Object.class)
-                    strategy = SerializationStrategies.LIST;
-                if (using == null)
-                    using = (E) strategy.newInstance(clazz);
-
-                return sequence(using, strategy::readUsing) ? readResolve(using) : null;
-
-            case NONE:
-                @NotNull final E e = (E) strategy.readUsing(using, this);
-                return (E) ObjectUtils.convertTo(clazz, e);
-
-            default:
-                throw new AssertionError();
-        }
+        return Wires.object0(this, using, clazz);
     }
 
     @NotNull

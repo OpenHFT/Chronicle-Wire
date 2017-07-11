@@ -221,7 +221,6 @@ public class HashWire implements WireOut {
         throw new UnsupportedOperationException();
     }
 
-
     @NotNull
     @Override
     public Bytes<?> bytes() {
@@ -524,12 +523,6 @@ public class HashWire implements WireOut {
         public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map) {
             hash = hash * M1 + map.hashCode() * M2;
             return HashWire.this;
-        }
-
-        @NotNull
-        @Override
-        public ValueOut leaf() {
-            return this;
         }
 
         @NotNull

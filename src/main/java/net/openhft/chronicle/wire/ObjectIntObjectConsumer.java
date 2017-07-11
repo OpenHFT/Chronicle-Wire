@@ -17,25 +17,11 @@
 
 package net.openhft.chronicle.wire;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Objects;
-
 /**
  * Created by skidder on 5/6/16.
  */
 
 @FunctionalInterface
-public interface TriConsumer<T, U, V> {
-    void accept(T t, U u, V v);
-
-    @NotNull
-    default TriConsumer<T, U, V> andThen(@NotNull TriConsumer<? super T, ? super U, ? super V> after) {
-        Objects.requireNonNull(after);
-
-        return (t, u, v) -> {
-            accept(t, u, v);
-            after.accept(t, u, v);
-        };
-    }
+public interface ObjectIntObjectConsumer<T, V> {
+    void accept(T t, int u, V v);
 }

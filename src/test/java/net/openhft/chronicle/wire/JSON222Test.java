@@ -96,7 +96,6 @@ public class JSON222Test {
                 list.add(object);
                 out.getValueOut().object(object);
 
-
             } while (wire.isNotEmptyAfterPadding());
 
             if (fail) {

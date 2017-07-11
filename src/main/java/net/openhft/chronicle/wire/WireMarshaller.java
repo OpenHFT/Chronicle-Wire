@@ -50,16 +50,13 @@ public class WireMarshaller<T> {
     private final boolean isLeaf;
     @Nullable
     private final T defaultValue;
+    private final Class<T> typeClass;
 
     public WireMarshaller(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
         this.fields = fields;
         this.isLeaf = isLeaf;
-        defaultValue = ObjectUtils.isConcreteClass(tClass)
-                && !tClass.getName().startsWith("java")
-                && !tClass.isEnum()
-                && !tClass.isArray()
-                ? ObjectUtils.newInstance(tClass) :
-                null;
+        defaultValue = defaultValueForType(tClass);
+        typeClass = tClass;
     }
 
     @NotNull
@@ -73,7 +70,8 @@ public class WireMarshaller<T> {
                 .map(FieldAccess::create)
                 .toArray(FieldAccess[]::new);
         boolean isLeaf = !Stream.of(fields).anyMatch(
-                c -> isCollection(c.field.getType()) && Boolean.FALSE.equals(c.isLeaf));
+                c -> (isCollection(c.field.getType()) && !Boolean.TRUE.equals(c.isLeaf))
+                        || WriteMarshallable.class.isAssignableFrom(c.field.getType()));
         return new WireMarshaller<>(tClass, fields, isLeaf);
 
     }
@@ -108,6 +106,15 @@ public class WireMarshaller<T> {
             field.setAccessible(true);
             map.put(name, field);
         }
+    }
+
+    private static <T> T defaultValueForType(final @NotNull Class<T> tClass) {
+        return ObjectUtils.isConcreteClass(tClass)
+                && !tClass.getName().startsWith("java")
+                && !tClass.isEnum()
+                && !tClass.isArray()
+                ? ObjectUtils.newInstance(tClass) :
+                null;
     }
 
     public void writeMarshallable(T t, @NotNull WireOut out) {
@@ -189,6 +196,7 @@ public class WireMarshaller<T> {
                 if (field2.getName().equals(name)) {
                     value = ObjectUtils.convertTo(field2.getType(), value);
                     field2.set(o, value);
+                    return;
                 }
             }
             throw new NoSuchFieldException(name);
@@ -204,8 +212,17 @@ public class WireMarshaller<T> {
 
     public void reset(T o) {
         try {
+            T cachedNewInstance = null;
             for (FieldAccess field : fields) {
-                field.copy(defaultValue, o);
+                if (field.isMutableField) {
+                    if (cachedNewInstance == null) {
+                        cachedNewInstance = defaultValueForType(typeClass);
+                    }
+                    field.copy(cachedNewInstance, o);
+                } else {
+                    field.copy(defaultValue, o);
+                }
+
             }
 
         } catch (IllegalAccessException e) {
@@ -214,12 +231,17 @@ public class WireMarshaller<T> {
         }
     }
 
+    public boolean isLeaf() {
+        return isLeaf;
+    }
+
     static abstract class FieldAccess {
         @NotNull
         final Field field;
         final long offset;
         @NotNull
         final WireKey key;
+        final boolean isMutableField;
         Boolean isLeaf;
 
         FieldAccess(@NotNull Field field) {
@@ -231,7 +253,7 @@ public class WireMarshaller<T> {
             offset = UNSAFE.objectFieldOffset(field);
             key = field::getName;
             this.isLeaf = isLeaf;
-//            System.out.println(field + " isLeaf=" + isLeaf);
+            this.isMutableField = field.getDeclaredAnnotation(MutableField.class) != null;
         }
 
         @Nullable
@@ -265,6 +287,8 @@ public class WireMarshaller<T> {
                     return new StringFieldAccess(field);
                 case "java.lang.StringBuilder":
                     return new StringBuilderFieldAccess(field);
+                case "net.openhft.chronicle.bytes.Bytes":
+                    return new BytesFieldAccess(field);
                 default:
                     @Nullable Boolean isLeaf = null;
                     if (WireMarshaller.class.isAssignableFrom(type))
@@ -386,10 +410,13 @@ public class WireMarshaller<T> {
 
         protected void getValue(@NotNull Object o, @NotNull ValueOut write, Object previous)
                 throws IllegalAccessException {
+            Boolean wasLeaf = null;
             if (isLeaf != null)
-                write.leaf(isLeaf);
+                wasLeaf = write.swapLeaf(isLeaf);
             assert o != null;
             write.object(type, field.get(o));
+            if (wasLeaf != null)
+                write.swapLeaf(wasLeaf);
         }
 
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
@@ -424,6 +451,52 @@ public class WireMarshaller<T> {
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
             bytes.writeUtf8((String) UNSAFE.getObject(o, offset));
+        }
+
+        @Override
+        protected void copy(Object from, Object to) throws IllegalAccessException {
+            super.copy(from, to);
+        }
+    }
+
+    static class BytesFieldAccess extends FieldAccess {
+        BytesFieldAccess(@NotNull Field field) {
+            super(field, false);
+        }
+
+        protected void getValue(@NotNull Object o, @NotNull ValueOut write, Object previous)
+                throws IllegalAccessException {
+            Bytes bytesField = (Bytes) field.get(o);
+            write.bytes(bytesField);
+        }
+
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+            @NotNull Bytes bytes = (Bytes) UNSAFE.getObject(o, offset);
+            if (bytes == null)
+                UNSAFE.putObject(o, offset, bytes = Bytes.elasticByteBuffer());
+            if (read.textTo(bytes) == null)
+                UNSAFE.putObject(o, offset, null);
+        }
+
+        @Override
+        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
+            Bytes bytesField = (Bytes) field.get(o);
+            bytes.write(bytesField);
+        }
+
+        @Override
+        protected void copy(Object from, Object to) throws IllegalAccessException {
+            Bytes fromBytes = (Bytes) UNSAFE.getObject(from, offset);
+            Bytes toBytes = (Bytes) UNSAFE.getObject(to, offset);
+            if (fromBytes == null) {
+                UNSAFE.putObject(to, offset, null);
+                return;
+
+            } else if (toBytes == null) {
+                UNSAFE.putObject(to, offset, toBytes = Bytes.elasticByteBuffer());
+            }
+            toBytes.clear();
+            toBytes.write(fromBytes);
         }
     }
 
@@ -499,12 +572,37 @@ public class WireMarshaller<T> {
         final Supplier<Collection> collectionSupplier;
         private final Class componentType;
         private final Class<?> type;
+        private BiConsumer<Object, ValueOut> sequenceGetter;
 
         public CollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class componentType, Class<?> type) {
             super(field, isLeaf);
             this.collectionSupplier = collectionSupplier == null ? newInstance() : collectionSupplier;
             this.componentType = componentType;
             this.type = type;
+            sequenceGetter = (o, out) -> {
+                Collection coll;
+                try {
+                    coll = (Collection) field.get(o);
+                } catch (IllegalAccessException e) {
+                    throw new AssertionError(e);
+                }
+                if (coll instanceof RandomAccess) {
+                    @NotNull List list = (List) coll;
+                    for (int i = 0, len = list.size(); i < len; i++) {
+                        out.object(componentType, list.get(i));
+                    }
+                } else if (coll == null) {
+                    try {
+                        field.set(coll, null);
+                    } catch (IllegalAccessException e) {
+                        throw new AssertionError(e);
+                    }
+                } else {
+                    for (Object element : coll) {
+                        out.object(componentType, element);
+                    }
+                }
+            };
         }
 
         @NotNull
@@ -554,27 +652,7 @@ public class WireMarshaller<T> {
                 write.nu11();
                 return;
             }
-            write.sequence(c, (coll, out) -> {
-                if (coll instanceof RandomAccess) {
-                    @NotNull List list = (List) coll;
-                    for (int i = 0, len = list.size(); i < len; i++) {
-                        if (Boolean.TRUE.equals(isLeaf)) out.leaf();
-                        out.object(componentType, list.get(i));
-                    }
-                } else if (coll == null) {
-                    try {
-                        field.set(o, null);
-                    } catch (IllegalAccessException e) {
-                        throw new AssertionError(e);
-                    }
-                } else {
-                    for (Object element : coll) {
-                        if (Boolean.TRUE.equals(isLeaf)) out.leaf();
-                        out.object(componentType, element);
-                    }
-                }
-            });
-
+            write.sequence(o, sequenceGetter);
         }
 
         @Override
@@ -735,7 +813,7 @@ public class WireMarshaller<T> {
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
             @NotNull Map map = (Map) field.get(o);
-            write.marshallable(map);
+            write.marshallable(map, keyType, valueType, Boolean.TRUE.equals(isLeaf));
         }
 
         @Override
