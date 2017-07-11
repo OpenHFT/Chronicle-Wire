@@ -2101,6 +2101,7 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireIn bytes(@NotNull BytesOut toBytes) {
+            toBytes.clear();
             return bytes(b -> toBytes.write((BytesStore) b));
         }
 
