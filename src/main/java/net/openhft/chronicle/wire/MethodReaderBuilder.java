@@ -21,8 +21,18 @@ public class MethodReaderBuilder {
         return (s, v, $) -> {
             MessageHistory history = MessageHistory.get();
             long sourceIndex = history.lastSourceIndex();
-            MethodReader.LOGGER.debug("Unknown method-name='" + s + "' " + v.text() + " from " + history.lastSourceId() + " at " + Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex);
+            v.skipValue();
+            if (s.length() == 0)
+                MethodReader.LOGGER.warn(errorMsg(s, history, sourceIndex));
+            else if (MethodReader.LOGGER.isDebugEnabled())
+                MethodReader.LOGGER.debug(errorMsg(s, history, sourceIndex));
         };
+    }
+
+    @NotNull
+    private static String errorMsg(CharSequence s, MessageHistory history, long sourceIndex) {
+        String s1 = "Unknown method-name='" + s + "' from " + history.lastSourceId() + " at " + Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex;
+        return s1;
     }
 
     public boolean ignoreDefaults() {
