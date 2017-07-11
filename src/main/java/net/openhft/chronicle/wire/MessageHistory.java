@@ -48,5 +48,5 @@ public interface MessageHistory extends Marshallable {
 
     long sourceIndex(int n);
 
-    void reset();
+    void reset(int sourceId, long sourceIndex);
 }

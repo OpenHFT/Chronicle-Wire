@@ -219,10 +219,11 @@ public class MethodReader implements Closeable {
      * @return true if there was a message, or false if not.
      */
     public boolean readOne() {
-        MessageHistory.get().reset();
+        MessageHistory history = MessageHistory.get();
         try (DocumentContext context = in.readingDocument()) {
             if (!context.isData())
                 return false;
+            history.reset(context.sourceId(), context.index());
             wireParser.accept(context.wire(), null);
         }
         return true;

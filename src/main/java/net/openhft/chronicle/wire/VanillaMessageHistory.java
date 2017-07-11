@@ -55,8 +55,12 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
     }
 
     @Override
-    public void reset() {
-        sources = timings = 0;
+    public void reset(int sourceId, long sourceIndex) {
+        sources = 1;
+        sourceIdArray[0] = sourceId;
+        sourceIndexArray[0] = sourceIndex;
+        timings = 1;
+        timingsArray[0] = System.nanoTime();
     }
 
     @Override
