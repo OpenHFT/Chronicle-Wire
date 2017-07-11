@@ -8,16 +8,21 @@ import org.jetbrains.annotations.NotNull;
 public class MethodReaderBuilder {
     private final MarshallableIn in;
     private boolean ignoreDefaults;
-    private WireParselet defaultParselet = (s, v, $) -> {
-        MessageHistory history = MessageHistory.get();
-        long sourceIndex = history.lastSourceIndex();
-        MethodReader.LOGGER.debug("Unknown method-name='" + s + "' " + v.text() + " from " + history.lastSourceId() + " at " + Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex);
-    };
-
-    // TODO add support for filtering.
+    private WireParselet defaultParselet = createDefaultParselet();
 
     public MethodReaderBuilder(MarshallableIn in) {
         this.in = in;
+    }
+
+    // TODO add support for filtering.
+
+    @NotNull
+    static WireParselet createDefaultParselet() {
+        return (s, v, $) -> {
+            MessageHistory history = MessageHistory.get();
+            long sourceIndex = history.lastSourceIndex();
+            MethodReader.LOGGER.debug("Unknown method-name='" + s + "' " + v.text() + " from " + history.lastSourceId() + " at " + Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex);
+        };
     }
 
     public boolean ignoreDefaults() {
