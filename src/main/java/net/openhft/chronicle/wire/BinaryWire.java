@@ -2699,6 +2699,25 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
+        public <T> int sequenceWithLength(@NotNull T t, @NotNull ToIntBiFunction<ValueIn, T> tReader) {
+            consumePadding();
+            int code = readCode();
+            if (code != BYTES_LENGTH32)
+                cantRead(code);
+            final int length = bytes.readInt();
+            long limit = bytes.readLimit();
+            long limit2 = bytes.readPosition() + length;
+            bytes.readLimit(limit2);
+            try {
+                return tReader.applyAsInt(this, t);
+            } finally {
+                bytes.readLimit(limit);
+                bytes.readPosition(limit2);
+            }
+        }
+
+
+        @Override
         public <T> T applyToMarshallable(@NotNull Function<WireIn, T> marshallableReader) {
             consumePadding();
             pushState();

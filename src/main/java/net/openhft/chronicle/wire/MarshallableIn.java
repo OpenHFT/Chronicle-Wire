@@ -147,7 +147,8 @@ public interface MarshallableIn {
      */
     @NotNull
     default MethodReader methodReader(Object... objects) {
-        return new MethodReader(this, false, objects);
+        return new MethodReader(this, false, (s, v, $) ->
+                MethodReader.LOGGER.debug("Unknown method-name='" + s + "' " + v.text()), objects);
     }
 
     @NotNull

@@ -258,7 +258,94 @@ public interface ValueIn {
     }
 
     @NotNull
-    <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader);
+    <T, K> WireIn sequence(@NotNull T t, K k, @NotNull TriConsumer<T, K, ValueIn> tReader);
+
+    default <T> int sequenceWithLength(@NotNull T t, @NotNull ToIntBiFunction<ValueIn, T> tReader) {
+        int[] length = {0};
+        sequence(t, (tt, in) -> length[0] = tReader.applyAsInt(in, tt));
+        return length[0];
+    }
+
+    default int array(Bytes[] array) {
+        return sequenceWithLength(array, (in, a) -> {
+            int i = 0;
+            while (in.hasNextSequenceItem() && i < a.length) {
+                if (a[i] == null)
+                    a[i] = Bytes.elasticHeapByteBuffer(32);
+                bytes(a[i++]);
+            }
+            return i;
+        });
+    }
+
+    default int array(double[] array) {
+        return sequenceWithLength(array, (in, a) -> {
+            int i = 0;
+            while (in.hasNextSequenceItem() && i < a.length)
+                a[i++] = in.float64();
+            return i;
+        });
+    }
+
+    default int arrayDelta(double[] array) {
+        return sequenceWithLength(array, (in, a) -> {
+            if (!in.hasNextSequenceItem() || a.length == 0)
+                return 0;
+            double a0 = a[0] = in.float64();
+            int i = 1;
+            while (in.hasNextSequenceItem() && i < a.length)
+                a[i++] = in.float64() + a0;
+            return i;
+        });
+    }
+
+    default int array(boolean[] array) {
+        return sequenceWithLength(array, (in, a) -> {
+            int i = 0;
+            while (in.hasNextSequenceItem() && i < a.length)
+                a[i++] = in.bool();
+            return i;
+        });
+    }
+
+    default int array(long[] array) {
+        return sequenceWithLength(array, (in, a) -> {
+            int i = 0;
+            while (in.hasNextSequenceItem() && i < a.length)
+                a[i++] = in.int64();
+            return i;
+        });
+    }
+
+    default int arrayDelta(long[] array) {
+        return sequenceWithLength(array, (in, a) -> {
+            if (!in.hasNextSequenceItem() || a.length == 0)
+                return 0;
+            long a0 = a[0] = in.int64();
+            int i = 1;
+            while (in.hasNextSequenceItem() && i < a.length)
+                a[i++] = in.int64() + a0;
+            return i;
+        });
+    }
+
+    default int array(int[] array) {
+        return sequenceWithLength(array, (in, a) -> {
+            int i = 0;
+            while (in.hasNextSequenceItem() && i < a.length)
+                a[i++] = in.int32();
+            return i;
+        });
+    }
+
+    default int array(byte[] array) {
+        return sequenceWithLength(array, (in, a) -> {
+            int i = 0;
+            while (in.hasNextSequenceItem() && i < a.length)
+                a[i++] = in.int8();
+            return i;
+        });
+    }
 
     default <T> Set<T> set(Class<T> t) {
         return collection(LinkedHashSet::new, t);

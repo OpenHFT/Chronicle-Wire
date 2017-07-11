@@ -38,7 +38,7 @@ import java.util.function.BiConsumer;
  */
 public class MethodReader implements Closeable {
     static final Object[] NO_ARGS = {};
-    private static final Logger LOGGER = LoggerFactory.getLogger(MethodReader.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(MethodReader.class);
     private final MarshallableIn in;
     @NotNull
     private final WireParser<Void> wireParser;
@@ -46,10 +46,8 @@ public class MethodReader implements Closeable {
     private String method;
     private Object args;
 
-    public MethodReader(MarshallableIn in, boolean ignoreDefault, @NotNull Object... objects) {
+    public MethodReader(MarshallableIn in, boolean ignoreDefault, WireParselet defaultParselet, @NotNull Object... objects) {
         this.in = in;
-        @NotNull WireParselet defaultParselet = (s, v, $) ->
-                LOGGER.debug("Unknown method-name='" + s + "' " + v.text());
         if (objects[0] instanceof WireParselet)
             defaultParselet = (WireParselet) objects[0];
         wireParser = WireParser.wireParser(defaultParselet);

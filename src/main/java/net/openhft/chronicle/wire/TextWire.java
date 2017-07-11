@@ -1609,13 +1609,20 @@ public class TextWire extends AbstractWire implements Wire {
         public <T, K> WireOut sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) {
             boolean leaf = this.leaf;
             startBlock('[');
-            newLine();
+            if (leaf)
+                sep = SPACE;
+            else
+                newLine();
             long pos = bytes.readPosition();
             writer.accept(t, kls, this);
-            addNewLine(pos);
+            if (leaf)
+                addSpace(pos);
+            else
+                addNewLine(pos);
 
             popState();
-            indent();
+            if (!leaf)
+                indent();
             endBlock(leaf, ']');
             return wireOut();
         }
@@ -1628,6 +1635,11 @@ public class TextWire extends AbstractWire implements Wire {
         protected void addNewLine(long pos) {
             if (bytes.writePosition() > pos + 1)
                 bytes.writeUnsignedByte('\n');
+        }
+
+        protected void addSpace(long pos) {
+            if (bytes.writePosition() > pos + 1)
+                bytes.writeUnsignedByte(' ');
         }
 
         protected void newLine() {

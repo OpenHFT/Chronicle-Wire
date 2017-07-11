@@ -263,6 +263,83 @@ public interface ValueOut {
     @NotNull
     <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer);
 
+    default <T, K> WireOut sequenceWithLength(T t, int length, ObjectIntObjectConsumer<T, ValueOut> writer) {
+        boolean b = swapLeaf(true);
+        WireOut sequence = sequence(t, length, (TriConsumer<T, Integer, ValueOut>) writer::accept);
+        swapLeaf(b);
+        return sequence;
+    }
+
+    default WireOut array(Bytes[] array, int length) {
+        return sequenceWithLength(array, length, (a, len, out) -> {
+            for (int i = 0; i < len; i++)
+                out.bytes(a[i]);
+        });
+    }
+
+    default WireOut array(double[] array, int length) {
+        return sequenceWithLength(array, length, (a, len, out) -> {
+            for (int i = 0; i < len; i++)
+                out.float64(a[i]);
+        });
+    }
+
+    /**
+     * This write values relative to the first one using 6 digit precision
+     *
+     * @param array  to write
+     * @param length to write
+     * @return this
+     */
+    default WireOut arrayDelta(double[] array, int length) {
+        return sequenceWithLength(array, length, (a, len, out) -> {
+            if (len <= 0) return;
+            out.float64(a[0]);
+            double a0 = a[0];
+            if (Double.isNaN(a0)) a0 = 0.0;
+            for (int i = 1; i < len; i++)
+                out.float64(Maths.round6(a[i] - a0));
+        });
+    }
+
+    default WireOut array(boolean[] array, int length) {
+        return sequenceWithLength(array, length, (a, len, out) -> {
+            for (int i = 0; i < len; i++)
+                out.bool(a[i]);
+        });
+    }
+
+    default WireOut array(long[] array, int length) {
+        return sequenceWithLength(array, length, (a, len, out) -> {
+            for (int i = 0; i < len; i++)
+                out.int64(a[i]);
+        });
+    }
+
+    default WireOut arrayDelta(long[] array, int length) {
+        return sequenceWithLength(array, length, (a, len, out) -> {
+            if (len <= 0) return;
+            out.int64(a[0]);
+            long a0 = a[0];
+            for (int i = 1; i < len; i++)
+                out.int64(a[i] - a0);
+        });
+    }
+
+    default WireOut array(int[] array, int length) {
+        return sequenceWithLength(array, length, (a, len, out) -> {
+            for (int i = 0; i < len; i++)
+                out.int32(a[i]);
+        });
+    }
+
+    default WireOut array(byte[] array, int length) {
+        return sequenceWithLength(array, length, (a, len, out) -> {
+            for (int i = 0; i < len; i++)
+                out.int8(a[i]);
+        });
+    }
+
     @NotNull
     default WireOut array(@NotNull WriteValue writer, @NotNull Class arrayType) {
         if (arrayType == String[].class) {

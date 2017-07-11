@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 public class MethodReaderBuilder {
     private final MarshallableIn in;
     private boolean ignoreDefaults;
+    private WireParselet defaultParselet = (s, v, $) ->
+            MethodReader.LOGGER.debug("Unknown method-name='" + s + "' " + v.text());
 
     // TODO add support for filtering.
 
@@ -25,8 +27,17 @@ public class MethodReaderBuilder {
         return this;
     }
 
+    public WireParselet defaultParselet() {
+        return defaultParselet;
+    }
+
+    public MethodReaderBuilder defaultParselet(WireParselet defaultParselet) {
+        this.defaultParselet = defaultParselet;
+        return this;
+    }
+
     @NotNull
     public MethodReader build(Object... impls) {
-        return new MethodReader(in, ignoreDefaults, impls);
+        return new MethodReader(in, ignoreDefaults, defaultParselet, impls);
     }
 }
