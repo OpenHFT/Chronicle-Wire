@@ -15,6 +15,8 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiConsumer;
@@ -41,9 +43,15 @@ public interface WireParser<O> extends BiConsumer<WireIn, O> {
 
     @Override
     default void accept(@NotNull WireIn wireIn, O marshallableOut) {
-        while (wireIn.bytes().readRemaining() > 0) {
+        Bytes<?> bytes = wireIn.bytes();
+        while (bytes.readRemaining() > 0) {
+            long start = bytes.readPosition();
             parseOne(wireIn, marshallableOut);
             wireIn.consumePadding();
+            if (bytes.readPosition() == start) {
+                Jvm.warn().on(getClass(), "Failed to progress reading " + bytes.readRemaining() + " bytes left.");
+                break;
+            }
         }
     }
 
