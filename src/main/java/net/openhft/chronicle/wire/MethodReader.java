@@ -103,7 +103,7 @@ public class MethodReader implements Closeable {
             v.wireIn().bytes().readPosition(pos);
             rest = bytes.toString();
             bytes.release();
-            
+
         } else {
             rest = v.toString();
         }
@@ -160,7 +160,11 @@ public class MethodReader implements Closeable {
                     argArr[0] = v.object(argArr[0], msgClass);
                     m.invoke(o, argArr);
                 } catch (InvocationTargetException e) {
-                    Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], e.getCause());
+                    Throwable cause = e.getCause();
+                    if (cause instanceof IllegalArgumentException)
+                        Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0] + " " + cause);
+                    else
+                        Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], cause);
                 } catch (Throwable t) {
                     Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], t);
                 }
