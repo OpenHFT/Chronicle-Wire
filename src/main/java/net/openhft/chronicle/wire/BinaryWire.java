@@ -100,6 +100,12 @@ public class BinaryWire extends AbstractWire implements Wire {
         return true;
     }
 
+    static boolean isDigit(char c) {
+        // use underflow to make digits below '0' large.
+        c -= '0';
+        return c <= 9;
+    }
+
     @NotNull
     StringBuilder acquireStringBuilder() {
         stringBuilder.setLength(0);
@@ -833,6 +839,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case BinaryWireHighCode.INT:
                 return readInt0(code);
+
         }
         throw new UnsupportedOperationException(stringForCode(code));
     }
@@ -840,7 +847,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     double readFloat0(int code) {
         // TODO: in some places we have already called this before invoking the function,
         // so we should review them and optimize the calls to do the check only once
-        if (code < 128 && code >= 0) {
+        if ((code & 0x80) == 0) {
             return code;
         }
 
@@ -1060,7 +1067,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     private void writeField0(@NotNull CharSequence name, int len) {
-        if (len > 0 && Character.isDigit(name.charAt(0))) {
+        if (len > 0 && isDigit(name.charAt(0))) {
             try {
                 writeField(Integer.parseInt(name.toString()));
                 return;
@@ -1139,6 +1146,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             case BinaryWireHighCode.STR0:
             case BinaryWireHighCode.STR1:
                 return getStringBuilder(code, sb);
+
             default:
                 throw new UnsupportedOperationException("code=0x" + String.format("%02X ", code).trim());
         }
@@ -1761,6 +1769,66 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
 
             super.int64(l);
+        }
+
+        void writeNumber(int l) {
+            switch (Integer.numberOfLeadingZeros(l) + 32) {
+                case 64:
+                case 63:
+                case 62:
+                case 61:
+                case 60:
+                case 59:
+                case 58:
+                case 57:
+                    // used when the value is written directly into the code byte
+                    bytes.writeUnsignedByte(l);
+                    return;
+                case 56:
+                    super.uint8checked((short) l);
+                    return;
+                case 55:
+                case 54:
+                case 53:
+                case 52:
+                case 51:
+                case 50:
+                case 49:
+                    super.fixedInt16((short) l);
+                    return;
+                case 48:
+                    super.uint16checked(l);
+                    return;
+                case 47:
+                case 46:
+                case 45:
+                case 44:
+                case 43:
+                case 42:
+                case 41:
+                case 40:
+                case 39:
+                case 38:
+                case 37:
+                case 36:
+                case 35:
+                case 34:
+                case 33:
+                    super.fixedInt32(l);
+                    return;
+                case 32:
+                    if (l >= Byte.MIN_VALUE) {
+                        super.int8((byte) l);
+                        return;
+                    }
+
+                    if (l >= Short.MIN_VALUE) {
+                        super.int16((short) l);
+                        return;
+                    }
+
+                    super.int32(l);
+            }
         }
 
         void writeNumber(double l) {
@@ -3105,6 +3173,9 @@ public class BinaryWire extends AbstractWire implements Wire {
                 consumePadding();
                 code = readCode();
             }
+            if ((code & 0x80) == 0)
+                return code;
+
             switch (code >> 4) {
                 case BinaryWireHighCode.FLOAT:
                     return (long) readFloat0(code);
