@@ -185,7 +185,7 @@ public class MethodReader implements Closeable {
                 v.skipValue();
                 m.invoke(o, NO_ARGS);
             } catch (Exception i) {
-                Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + "()");
+                Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + "()", i);
             }
         });
     }
