@@ -700,7 +700,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @NotNull
-    private <ACS extends Appendable & CharSequence> ACS getStringBuilder(int code, @NotNull ACS sb) {
+    <ACS extends Appendable & CharSequence> ACS getStringBuilder(int code, @NotNull ACS sb) {
         bytes.parseUtf8(sb, code & 0x1f);
         return sb;
     }
@@ -3099,7 +3099,12 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         private long readTextAsLong() throws IORuntimeException, BufferUnderflowException {
             bytes.uncheckedReadSkipBackOne();
-            @Nullable final String text = text();
+            @Nullable String text;
+            try {
+                text = text();
+            } catch (Exception e) {
+                text = null;
+            }
             if (text == null)
                 throw new NullPointerException();
             try {
@@ -3111,7 +3116,12 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         private double readTextAsDouble() throws IORuntimeException, BufferUnderflowException {
             bytes.uncheckedReadSkipBackOne();
-            @Nullable final String text = text();
+            @Nullable String text;
+            try {
+                text = text();
+            } catch (BufferUnderflowException e) {
+                text = null;
+            }
             if (text == null || text.length() == 0)
                 return Double.NaN;
             return Double.parseDouble(text);
