@@ -66,7 +66,6 @@ public class WiresTest {
     }
 
     public static class BytesContainer {
-        @MutableField
         Bytes bytesField = Bytes.elasticHeapByteBuffer(64);
     }
 
@@ -75,7 +74,6 @@ public class WiresTest {
     }
 
     public static class StringBuilderContainer {
-        @MutableField
         StringBuilder stringBuilder = new StringBuilder();
     }
 
