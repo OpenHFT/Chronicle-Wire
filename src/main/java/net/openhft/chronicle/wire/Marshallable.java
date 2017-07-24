@@ -51,6 +51,11 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         return TEXT.fromString(cs);
     }
 
+    @Nullable
+    static <T> T fromString(@NotNull Class<T> tClass, @NotNull CharSequence cs) {
+        return TEXT.fromString(tClass, cs);
+    }
+
     @NotNull
     static <T> T fromFile(String filename) throws IOException {
         return TEXT.fromFile(filename);
