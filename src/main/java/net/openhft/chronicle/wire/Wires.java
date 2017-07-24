@@ -737,6 +737,14 @@ public enum Wires {
                     }
                     break;
             }
+            if (args == null || args.length == 0) {
+                Class returnType = method.getReturnType();
+                return ObjectUtils.convertTo(returnType, fields.get(method.getName()));
+            }
+            if (args.length == 1) {
+                fields.put(method.getName(), args[0]);
+                return proxy;
+            }
             throw new UnsupportedOperationException(method.toString());
         }
     }
