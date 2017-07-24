@@ -2927,7 +2927,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             try {
                 return classLookup().forName(sb);
             } catch (ClassNotFoundException e) {
-                return Wires.tupleFor(tClass, sb.toString());
+                return Wires.dtoInterface(tClass) ? Wires.tupleFor(tClass, sb.toString()) : null;
             }
         }
 

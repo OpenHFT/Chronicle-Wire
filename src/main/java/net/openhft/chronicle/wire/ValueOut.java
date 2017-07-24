@@ -405,7 +405,9 @@ public interface ValueOut {
     default WireOut typedMarshallable(@Nullable WriteMarshallable marshallable) {
         if (marshallable == null)
             return nu11();
-        typePrefix(Wires.typeNameFor(marshallable));
+        String typeName = Wires.typeNameFor(marshallable);
+        if (typeName != null)
+            typePrefix(typeName);
         return marshallable(marshallable);
     }
 

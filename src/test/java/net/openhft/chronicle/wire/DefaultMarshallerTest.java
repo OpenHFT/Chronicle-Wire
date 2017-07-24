@@ -57,7 +57,7 @@ public class DefaultMarshallerTest {
                 "  ]\n" +
                 "}\n", oc.toString());
 
-        @NotNull Wire text = new TextWire(Bytes.elasticByteBuffer());
+        @NotNull Wire text = new TextWire(Bytes.elasticHeapByteBuffer(128));
         oc.writeMarshallable(text);
 
         @NotNull DMOuterClassWithEmbeddedArray oc2 = new DMOuterClassWithEmbeddedArray();
@@ -99,7 +99,7 @@ public class DefaultMarshallerTest {
                 "  }\n" +
                 "}\n", oc.toString());
 
-        @NotNull Wire text = new TextWire(Bytes.elasticByteBuffer());
+        @NotNull Wire text = new TextWire(Bytes.elasticHeapByteBuffer(64));
         oc.writeMarshallable(text);
 
         @NotNull DMOuterClass oc2 = new DMOuterClass();

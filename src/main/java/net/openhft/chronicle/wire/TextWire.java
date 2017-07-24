@@ -2745,7 +2745,7 @@ public class TextWire extends AbstractWire implements Wire {
                     return Wires.tupleFor(tClass, sb.toString());
                 }
             }
-            return null;
+            return Wires.dtoInterface(tClass) ? Wires.tupleFor(tClass, null) : null;
         }
 
         @Override

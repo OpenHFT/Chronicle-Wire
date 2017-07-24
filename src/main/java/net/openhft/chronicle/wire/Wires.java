@@ -677,6 +677,10 @@ public enum Wires {
         return (T) MARSHALLABLE_FUNCTION.get(tClass).apply(typeName);
     }
 
+    public static boolean dtoInterface(Class clazz) {
+        return clazz != null && clazz.isInterface() && !clazz.getPackage().getName().startsWith("java");
+    }
+
     static class TupleInvocationHandler implements InvocationHandler {
         final String typeName;
         final Map<String, Object> fields = new LinkedHashMap<>();

@@ -161,6 +161,31 @@ public class MethodReaderTest {
 
     }
 
+    @Test
+    public void testUnknownClass() {
+        Wire wire2 = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        MRTListener writer2 = wire2.methodWriter(MRTListener.class);
+
+        String text = "top: !UnknownClass {\n" +
+                "  one: 1,\n" +
+                "  two: 2.2,\n" +
+                "  three: words\n" +
+                "}\n" +
+                "---\n" +
+                "top: {\n" +
+                "  one: 11,\n" +
+                "  two: 22.2,\n" +
+                "  three: many words\n" +
+                "}\n" +
+                "---\n";
+        Wire wire = new TextWire(Bytes.from(text));
+        MethodReader reader = wire.methodReader(writer2);
+        assertTrue(reader.readOne());
+        assertTrue(reader.readOne());
+        assertFalse(reader.readOne());
+        assertEquals(text, wire2.toString());
+    }
+
     static class MRT1 extends AbstractMarshallable implements MRTInterface {
         final String field1;
         String value = "a";
