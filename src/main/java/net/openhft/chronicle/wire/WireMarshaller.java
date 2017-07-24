@@ -212,17 +212,8 @@ public class WireMarshaller<T> {
 
     public void reset(T o) {
         try {
-            T cachedNewInstance = null;
             for (FieldAccess field : fields) {
-                if (field.isMutableField) {
-                    if (cachedNewInstance == null) {
-                        cachedNewInstance = defaultValueForType(typeClass);
-                    }
-                    field.copy(cachedNewInstance, o);
-                } else {
-                    field.copy(defaultValue, o);
-                }
-
+                field.copy(defaultValue, o);
             }
 
         } catch (IllegalAccessException e) {
@@ -241,7 +232,6 @@ public class WireMarshaller<T> {
         final long offset;
         @NotNull
         final WireKey key;
-        final boolean isMutableField;
         Boolean isLeaf;
 
         FieldAccess(@NotNull Field field) {
@@ -253,7 +243,6 @@ public class WireMarshaller<T> {
             offset = UNSAFE.objectFieldOffset(field);
             key = field::getName;
             this.isLeaf = isLeaf;
-            this.isMutableField = field.getDeclaredAnnotation(MutableField.class) != null;
         }
 
         @Nullable
@@ -368,38 +357,6 @@ public class WireMarshaller<T> {
         }
     }
 
-    static class StringBuilderFieldAccess extends FieldAccess {
-
-        public StringBuilderFieldAccess(@NotNull Field field) {
-            super(field, true);
-        }
-
-        @Override
-        protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
-            @NotNull CharSequence cs = (CharSequence) UNSAFE.getObject(o, offset);
-            write.text(cs);
-        }
-
-        @Override
-        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
-            @NotNull StringBuilder sb = (StringBuilder) UNSAFE.getObject(o, offset);
-            if (sb == null)
-                UNSAFE.putObject(o, offset, sb = new StringBuilder());
-            if (read.textTo(sb) == null)
-                UNSAFE.putObject(o, offset, null);
-        }
-
-        @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
-            bytes.writeUtf8((CharSequence) UNSAFE.getObject(o, offset));
-        }
-
-        @Override
-        protected boolean sameValue(Object o1, Object o2) throws IllegalAccessException {
-            return StringUtils.isEqual((StringBuilder) field.get(o1), (StringBuilder) field.get(o2));
-        }
-    }
-
     static class ObjectFieldAccess extends FieldAccess {
         private final Class type;
 
@@ -456,6 +413,54 @@ public class WireMarshaller<T> {
         @Override
         protected void copy(Object from, Object to) throws IllegalAccessException {
             super.copy(from, to);
+        }
+    }
+
+    static class StringBuilderFieldAccess extends FieldAccess {
+
+        public StringBuilderFieldAccess(@NotNull Field field) {
+            super(field, true);
+        }
+
+        @Override
+        protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
+            @NotNull CharSequence cs = (CharSequence) UNSAFE.getObject(o, offset);
+            write.text(cs);
+        }
+
+        @Override
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+            @NotNull StringBuilder sb = (StringBuilder) UNSAFE.getObject(o, offset);
+            if (sb == null)
+                UNSAFE.putObject(o, offset, sb = new StringBuilder());
+            if (read.textTo(sb) == null)
+                UNSAFE.putObject(o, offset, null);
+        }
+
+        @Override
+        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
+            bytes.writeUtf8((CharSequence) UNSAFE.getObject(o, offset));
+        }
+
+        @Override
+        protected boolean sameValue(Object o1, Object o2) throws IllegalAccessException {
+            return StringUtils.isEqual((StringBuilder) field.get(o1), (StringBuilder) field.get(o2));
+        }
+
+        @Override
+        protected void copy(Object from, Object to) throws IllegalAccessException {
+            final StringBuilder fromSequence = (StringBuilder) UNSAFE.getObject(from, offset);
+            StringBuilder toSequence = (StringBuilder) UNSAFE.getObject(to, offset);
+
+            if (fromSequence == null) {
+                UNSAFE.putObject(to, offset, null);
+                return;
+            } else if (toSequence == null) {
+                UNSAFE.putObject(to, offset, toSequence = new StringBuilder());
+            }
+
+            toSequence.setLength(0);
+            toSequence.append(fromSequence);
         }
     }
 
