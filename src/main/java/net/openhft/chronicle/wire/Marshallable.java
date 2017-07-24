@@ -16,6 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -130,6 +131,10 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
     @NotNull
     default List<FieldInfo> $fieldInfos() {
         return Wires.fieldInfos(getClass());
+    }
+
+    default String getClassName() {
+        return ClassAliasPool.CLASS_ALIASES.nameFor(getClass());
     }
 
     // breaks Chronicle FIX

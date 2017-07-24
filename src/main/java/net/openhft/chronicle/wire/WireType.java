@@ -24,7 +24,6 @@ import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.LicenceCheck;
 import net.openhft.chronicle.core.io.IOTools;
-import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -413,7 +412,6 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     }
 
     public String asString(Object marshallable) {
-
         Bytes bytes = asBytes(marshallable);
         return bytes.toString();
     }
@@ -433,7 +431,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         else if (marshallable instanceof Serializable)
             valueOut.typedMarshallable((Serializable) marshallable);
         else {
-            valueOut.typedMarshallable(ClassAliasPool.CLASS_ALIASES.nameFor(marshallable.getClass()),
+            valueOut.typedMarshallable(Wires.typeNameFor(marshallable),
                     w -> Wires.writeMarshallable(marshallable, w));
         }
         return bytes;

@@ -2729,6 +2729,26 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         @Override
+        public Object typePrefixOrObject(Class tClass) {
+            consumePadding();
+            int code = peekCode();
+            if (code == '!') {
+                readCode();
+
+                @NotNull StringBuilder sb = acquireStringBuilder();
+                sb.setLength(0);
+                parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
+                bytes.readSkip(-1);
+                try {
+                    return classLookup().forName(sb);
+                } catch (ClassNotFoundException e) {
+                    return Wires.tupleFor(tClass, sb.toString());
+                }
+            }
+            return null;
+        }
+
+        @Override
         public boolean isTyped() {
             consumePadding();
             int code = peekCode();

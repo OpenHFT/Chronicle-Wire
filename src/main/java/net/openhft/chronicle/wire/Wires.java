@@ -33,6 +33,10 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Externalizable;
 import java.io.File;
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -44,6 +48,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
+import static net.openhft.chronicle.wire.WireType.TEXT;
 
 /**
  * Created by peter on 31/08/15.
@@ -378,46 +383,18 @@ public enum Wires {
         wm.reset(o);
     }
 
-    @Nullable
-    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz) {
-        @Nullable final Class clazz2 = in.typePrefix();
-        if (clazz2 == void.class) {
-            in.text();
-            return null;
+    static final ClassLocal<Function<String, Marshallable>> MARSHALLABLE_FUNCTION = ClassLocal.withInitial(tClass -> {
+        Class[] interfaces = {Marshallable.class, tClass};
+        if (tClass == Marshallable.class)
+            interfaces = new Class[]{Marshallable.class};
+        Class<?> proxyClass = Proxy.getProxyClass(tClass.getClassLoader(), interfaces);
+        try {
+            Constructor<?> constructor = proxyClass.getConstructor(InvocationHandler.class);
+            return typeName -> newInstance(constructor, typeName);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
         }
-        if (clazz2 != null && (clazz == null
-                || clazz.isAssignableFrom(clazz2)
-                || ReadResolvable.class.isAssignableFrom(clazz2)
-                || !ObjectUtils.isConcreteClass(clazz))) {
-            clazz = clazz2;
-            if (!clazz.isInstance(using))
-                using = null;
-        }
-        if (clazz == null)
-            clazz = Object.class;
-        SerializationStrategy<E> strategy = CLASS_STRATEGY.get(clazz);
-        BracketType brackets = strategy.bracketType();
-        if (brackets == BracketType.UNKNOWN)
-            brackets = in.getBracketType();
-
-        if (Date.class.isAssignableFrom(clazz))
-            return objectDate(in, using);
-
-        switch (brackets) {
-            case MAP:
-                return objectMap(in, using, clazz, strategy);
-
-            case SEQ:
-                return objectSequence(in, using, clazz, strategy);
-
-            case NONE:
-                @NotNull final E e = (E) strategy.readUsing(using, in);
-                return (E) ObjectUtils.convertTo(clazz, e);
-
-            default:
-                throw new AssertionError();
-        }
-    }
+    });
 
     @Nullable
     public static <E> E objectSequence(ValueIn in, @Nullable E using, @Nullable Class clazz, SerializationStrategy<E> strategy) {
@@ -455,6 +432,51 @@ public enum Wires {
             return using;
         } else
             return (E) new Date(time);
+    }
+
+    @Nullable
+    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz) {
+        Object o = in.typePrefixOrObject(clazz);
+        if (o != null && !(o instanceof Class)) {
+            return (E) in.marshallable(o, SerializationStrategies.MARSHALLABLE);
+        }
+        @Nullable final Class clazz2 = (Class) o;
+        if (clazz2 == void.class) {
+            in.text();
+            return null;
+        }
+        if (clazz2 != null && (clazz == null
+                || clazz.isAssignableFrom(clazz2)
+                || ReadResolvable.class.isAssignableFrom(clazz2)
+                || !ObjectUtils.isConcreteClass(clazz))) {
+            clazz = clazz2;
+            if (!clazz.isInstance(using))
+                using = null;
+        }
+        if (clazz == null)
+            clazz = Object.class;
+        SerializationStrategy<E> strategy = CLASS_STRATEGY.get(clazz);
+        BracketType brackets = strategy.bracketType();
+        if (brackets == BracketType.UNKNOWN)
+            brackets = in.getBracketType();
+
+        if (Date.class.isAssignableFrom(clazz))
+            return objectDate(in, using);
+
+        switch (brackets) {
+            case MAP:
+                return objectMap(in, using, clazz, strategy);
+
+            case SEQ:
+                return objectSequence(in, using, clazz, strategy);
+
+            case NONE:
+                @NotNull final E e = (E) strategy.readUsing(using, in);
+                return (E) ObjectUtils.convertTo(clazz, e);
+
+            default:
+                throw new AssertionError();
+        }
     }
 
     enum SerializeBytes implements Function<Class, SerializationStrategy> {
@@ -634,6 +656,155 @@ public enum Wires {
         public FieldInfoPair(@NotNull List<FieldInfo> list, @NotNull Map<String, FieldInfo> map) {
             this.list = list;
             this.map = map;
+        }
+    }
+
+    public static String typeNameFor(@NotNull Object value) {
+        return value instanceof Marshallable ? ((Marshallable) value).getClassName() : ClassAliasPool.CLASS_ALIASES.nameFor(value.getClass());
+    }
+
+    static Marshallable newInstance(Constructor constructor, String typeName) {
+        try {
+            return (Marshallable) constructor.newInstance(new TupleInvocationHandler(typeName));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public static <T> T tupleFor(Class<T> tClass, String typeName) {
+        if (tClass == null || tClass == Object.class)
+            tClass = (Class<T>) Marshallable.class;
+        return (T) MARSHALLABLE_FUNCTION.get(tClass).apply(typeName);
+    }
+
+    static class TupleInvocationHandler implements InvocationHandler {
+        final String typeName;
+        final Map<String, Object> fields = new LinkedHashMap<>();
+
+        private TupleInvocationHandler(String typeName) {
+            this.typeName = typeName;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            switch (method.getName()) {
+                case "toString":
+                    if (args == null || args.length == 0)
+                        return TEXT.asString(proxy);
+                    break;
+                case "readMarshallable":
+                    if (args.length == 1) {
+                        WireIn in = (WireIn) args[0];
+                        while (in.hasMore()) {
+                            fields.put(in.readEvent(String.class), in.getValueIn().object());
+                        }
+                        return null;
+                    }
+                    break;
+                case "writeMarshallable":
+                    if (args.length == 1) {
+                        WireOut out = (WireOut) args[0];
+                        for (Map.Entry<String, Object> entry : fields.entrySet()) {
+                            out.write(entry.getKey()).object(entry.getValue());
+                        }
+                        return null;
+                    }
+                    break;
+                case "getField":
+                    if (args.length == 2) {
+                        Object value = fields.get(args[0]);
+                        return ObjectUtils.convertTo((Class) args[1], value);
+                    }
+                    break;
+                case "setField":
+                    if (args.length == 2) {
+                        fields.put(args[0].toString(), args[1]);
+                        return null;
+                    }
+                    break;
+                case "getClassName":
+                    if (args == null || args.length == 0)
+                        return typeName;
+                    break;
+                case "$fieldInfos":
+                    if (args == null || args.length == 0) {
+                        List<FieldInfo> fieldInfos = new ArrayList<>();
+                        for (Map.Entry<String, Object> entry : fields.entrySet()) {
+                            Class<?> valueClass = entry.getValue().getClass();
+                            fieldInfos.add(new TupleFieldInfo(entry.getKey(), valueClass));
+                        }
+                        return typeName;
+                    }
+                    break;
+            }
+            throw new UnsupportedOperationException(method.toString());
+        }
+    }
+
+    static class TupleFieldInfo extends AbstractFieldInfo {
+        public TupleFieldInfo(String name, Class type) {
+            super(type, SerializeMarshallables.getSerializationStrategy(type).bracketType(), name);
+        }
+
+        private Map<String, Object> getMap(Object o) {
+            TupleInvocationHandler invocationHandler = (TupleInvocationHandler) Proxy.getInvocationHandler(o);
+            return invocationHandler.fields;
+        }
+
+        @Nullable
+        @Override
+        public Object get(Object value) {
+            return getMap(value).get(name);
+        }
+
+        @Override
+        public long getLong(Object value) {
+            return ObjectUtils.convertTo(Long.class, get(value));
+        }
+
+        @Override
+        public int getInt(Object value) {
+            return ObjectUtils.convertTo(Integer.class, get(value));
+        }
+
+        @Override
+        public char getChar(Object value) {
+            return ObjectUtils.convertTo(Character.class, get(value));
+        }
+
+        @Override
+        public double getDouble(Object value) {
+            return ObjectUtils.convertTo(Double.class, get(value));
+        }
+
+        @Override
+        public void set(Object object, Object value) throws IllegalArgumentException {
+            getMap(value).put(name, value);
+        }
+
+        @Override
+        public void set(Object object, char value) throws IllegalArgumentException {
+            set(name, (Object) value);
+        }
+
+        @Override
+        public void set(Object object, int value) throws IllegalArgumentException {
+            set(name, (Object) value);
+        }
+
+        @Override
+        public void set(Object object, long value) throws IllegalArgumentException {
+            set(name, (Object) value);
+        }
+
+        @Override
+        public void set(Object object, double value) throws IllegalArgumentException {
+            set(name, (Object) value);
+        }
+
+        @Override
+        public Class genericType(int index) {
+            return Object.class;
         }
     }
 }

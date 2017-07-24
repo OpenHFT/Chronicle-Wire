@@ -577,6 +577,10 @@ public interface ValueIn {
     @Nullable
     Class typePrefix();
 
+    default Object typePrefixOrObject(Class tClass) {
+        return typePrefix();
+    }
+
     void resetState();
 
     @Nullable

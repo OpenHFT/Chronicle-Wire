@@ -2915,6 +2915,22 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
+        @Override
+        public Object typePrefixOrObject(Class tClass) {
+            int code = peekCode();
+            if (code != TYPE_PREFIX) {
+                return null;
+            }
+            bytes.uncheckedReadSkipOne();
+            @Nullable StringBuilder sb = readUtf8();
+
+            try {
+                return classLookup().forName(sb);
+            } catch (ClassNotFoundException e) {
+                return Wires.tupleFor(tClass, sb.toString());
+            }
+        }
+
         @NotNull
         @Override
         public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {

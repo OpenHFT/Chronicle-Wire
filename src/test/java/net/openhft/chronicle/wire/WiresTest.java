@@ -2,8 +2,9 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by rob on 14/06/2017.
@@ -30,7 +31,7 @@ public class WiresTest {
 
         container1.bytesField.clear().append("value1");
 
-        Assert.assertEquals("", container2.bytesField.toString());
+        assertEquals("", container2.bytesField.toString());
     }
 
     @Test
@@ -48,7 +49,7 @@ public class WiresTest {
 
         container1.stringBuilder.append("value1");
 
-        Assert.assertEquals("", container2.stringBuilder.toString());
+        assertEquals("", container2.stringBuilder.toString());
     }
 
     @Test
@@ -59,8 +60,8 @@ public class WiresTest {
         BytesContainerMarshallable container2 = new BytesContainerMarshallable();
         Bytes container2Bytes = container2.bytesField;
         Wires.copyTo(container1, container2);
-        Assert.assertEquals(container2Bytes, container2.bytesField);
-        Assert.assertEquals("12", container2.bytesField.toString());
+        assertEquals(container2Bytes, container2.bytesField);
+        assertEquals("12", container2.bytesField.toString());
         container2.bytesField.append("123");
     }
 
@@ -76,5 +77,21 @@ public class WiresTest {
     public static class StringBuilderContainer {
         @MutableField
         StringBuilder stringBuilder = new StringBuilder();
+    }
+
+    @Test
+    public void unknownType() throws NoSuchFieldException {
+        Marshallable marshallable = Wires.tupleFor(Marshallable.class, "UnknownType");
+        marshallable.setField("one", 1);
+        marshallable.setField("two", 2.2);
+        marshallable.setField("three", "three");
+        String toString = marshallable.toString();
+        assertEquals("!UnknownType {\n" +
+                "  one: !int 1,\n" +
+                "  two: 2.2,\n" +
+                "  three: three\n" +
+                "}\n", toString);
+        Object o = Marshallable.fromString(toString);
+        assertEquals(toString, o.toString());
     }
 }

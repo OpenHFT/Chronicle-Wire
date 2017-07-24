@@ -405,7 +405,7 @@ public interface ValueOut {
     default WireOut typedMarshallable(@Nullable WriteMarshallable marshallable) {
         if (marshallable == null)
             return nu11();
-        typePrefix(marshallable.getClass());
+        typePrefix(Wires.typeNameFor(marshallable));
         return marshallable(marshallable);
     }
 
@@ -708,7 +708,7 @@ public interface ValueOut {
 
     @NotNull
     default WireOut typedScalar(@NotNull Object value) {
-        typePrefix(ClassAliasPool.CLASS_ALIASES.nameFor(value.getClass()));
+        typePrefix(Wires.typeNameFor(value));
 
         if (value instanceof Enum)
             value = ((Enum) value).name();

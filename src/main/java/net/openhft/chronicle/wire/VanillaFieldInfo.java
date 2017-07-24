@@ -34,18 +34,13 @@ import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 /**
  * Created by peter on 18/10/16.
  */
-public class VanillaFieldInfo extends AbstractMarshallable implements FieldInfo {
+public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
 
-    private final String name;
-    private final Class type;
-    private final BracketType bracketType;
     private final Class parent;
     private transient Field field;
 
     public VanillaFieldInfo(String name, Class type, BracketType bracketType, @NotNull Field field) {
-        this.name = name;
-        this.type = type;
-        this.bracketType = bracketType;
+        super(type, bracketType, name);
         parent = field.getDeclaringClass();
         this.field = field;
     }
@@ -69,21 +64,6 @@ public class VanillaFieldInfo extends AbstractMarshallable implements FieldInfo 
         return new Wires.FieldInfoPair(
                 Collections.unmodifiableList(fields),
                 fields.stream().collect(Collectors.toMap(FieldInfo::name, f -> f)));
-    }
-
-    @Override
-    public String name() {
-        return name;
-    }
-
-    @Override
-    public Class type() {
-        return type;
-    }
-
-    @Override
-    public BracketType bracketType() {
-        return bracketType;
     }
 
     @Nullable
