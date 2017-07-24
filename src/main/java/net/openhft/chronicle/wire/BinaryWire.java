@@ -3097,16 +3097,16 @@ public class BinaryWire extends AbstractWire implements Wire {
             throw new UnsupportedOperationException("todo");
         }
 
-        private long readTextAsLong() throws IORuntimeException, BufferUnderflowException {
+        private long readTextAsLong(long otherwise) throws IORuntimeException, BufferUnderflowException {
             bytes.uncheckedReadSkipBackOne();
             @Nullable String text;
             try {
                 text = text();
             } catch (Exception e) {
-                text = null;
+                return otherwise;
             }
-            if (text == null)
-                throw new NullPointerException();
+            if (text == null || text.length() == 0)
+                return otherwise;
             try {
                 return Long.parseLong(text);
             } catch (NumberFormatException e) {
@@ -3120,7 +3120,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             try {
                 text = text();
             } catch (BufferUnderflowException e) {
-                text = null;
+                return Double.NaN;
             }
             if (text == null || text.length() == 0)
                 return Double.NaN;
@@ -3147,7 +3147,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         public byte int8() {
             consumePadding();
             int code = readCode();
-            final long value = isText(code) ? readTextAsLong() : readInt0(code);
+            final long value = isText(code) ? readTextAsLong(Byte.MIN_VALUE) : readInt0(code);
 
             if (value > Byte.MAX_VALUE || value < Byte.MIN_VALUE)
                 throw new IllegalStateException();
@@ -3159,7 +3159,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         public short int16() {
             consumePadding();
             int code = readCode();
-            final long value = isText(code) ? readTextAsLong() : readInt0(code);
+            final long value = isText(code) ? readTextAsLong(Short.MIN_VALUE) : readInt0(code);
             if (value > Short.MAX_VALUE || value < Short.MIN_VALUE)
                 throw new IllegalStateException();
             return (short) value;
@@ -3170,7 +3170,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             consumePadding();
             int code = readCode();
 
-            final long value = isText(code) ? readTextAsLong() : readInt0(code);
+            final long value = isText(code) ? readTextAsLong(0) : readInt0(code);
 
             if (value > (1L << 32L) || value < 0)
                 throw new IllegalStateException("value " + value + " cannot be cast to an unsigned 16-bit int without loss of information");
@@ -3183,7 +3183,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         public int int32() {
             consumePadding();
             int code = readCode();
-            final long value = isText(code) ? readTextAsLong() : readInt0(code);
+            final long value = isText(code) ? readTextAsLong(Integer.MIN_VALUE) : readInt0(code);
 
             if (value > Integer.MAX_VALUE || value < Integer.MIN_VALUE)
                 throw new IllegalStateException("value " + value + " cannot be cast to int without loss of information");
@@ -3208,7 +3208,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case BinaryWireHighCode.INT:
                     return readInt0(code);
                 default:
-                    return readTextAsLong();
+                    return readTextAsLong(Long.MIN_VALUE);
             }
         }
 
@@ -3238,9 +3238,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                     value = readTextAsDouble();
                     break;
             }
-
-            if (Double.isFinite(value) && (value > Float.MAX_VALUE || value < -Float.MAX_VALUE))
-                throw new IllegalStateException("Cannot convert " + value + " to float");
 
             return (float) value;
         }
