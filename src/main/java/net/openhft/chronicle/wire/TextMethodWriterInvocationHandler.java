@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
@@ -38,7 +39,11 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
     protected void handleInvoke(Method method, Object[] args) {
         handleInvoke(method, args, wire);
         wire.getValueOut().resetBetweenDocuments();
-        if (ENABLE_EOD)
-            wire.bytes().append("---\n");
+        if (ENABLE_EOD) {
+            Bytes<?> bytes = wire.bytes();
+            if (bytes.peekUnsignedByte(bytes.writePosition() - 1) >= ' ')
+                bytes.append('\n');
+            bytes.append("---\n");
+        }
     }
 }

@@ -136,8 +136,13 @@ public class TextMethodTester<T> {
         try {
             while (reader.readOne()) {
 //                if (pos != wire2.bytes().writePosition())
-                if (retainLast == null)
-                    wire2.bytes().append("---\n");
+                if (retainLast == null) {
+                    Bytes<?> bytes = wire2.bytes();
+                    int last = bytes.peekUnsignedByte(bytes.writePosition() - 1);
+                    if (last >= ' ')
+                        bytes.append('\n');
+                    bytes.append("---\n");
+                }
 //                pos = wire2.bytes().writePosition();
             }
             if (retainLast != null)
