@@ -34,6 +34,7 @@ public class MethodWriterBuilder<T> implements Supplier<T> {
     @NotNull
     private final MethodWriterInvocationHandler handler;
     private ClassLoader classLoader;
+    private String genericEvent = "";
 
     public MethodWriterBuilder(@NotNull Class<T> tClass, @NotNull MethodWriterInvocationHandler handler) {
         interfaces.add(Closeable.class);
@@ -84,5 +85,16 @@ public class MethodWriterBuilder<T> implements Supplier<T> {
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
         //noinspection unchecked
         return (T) Proxy.newProxyInstance(classLoader, interfacesArr, handler);
+    }
+
+    /**
+     * A generic event treats the first argument and the eventName
+     *
+     * @param genericEvent name
+     * @return this
+     */
+    public MethodWriterBuilder<T> genericEvent(String genericEvent) {
+        handler.genericEvent(genericEvent);
+        return this;
     }
 }

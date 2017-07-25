@@ -39,6 +39,7 @@ import java.util.function.BiConsumer;
 public class MethodReader implements Closeable {
     static final Object[] NO_ARGS = {};
     static final Logger LOGGER = LoggerFactory.getLogger(MethodReader.class);
+    public static final String HISTORY = "history";
     private final MarshallableIn in;
     @NotNull
     private final WireParser<Void> wireParser;
@@ -85,8 +86,8 @@ public class MethodReader implements Closeable {
                 }
             }
         }
-        if (wireParser.lookup("history") == null) {
-            wireParser.register(() -> "history", (s, v, $) -> {
+        if (wireParser.lookup(HISTORY) == null) {
+            wireParser.register(() -> HISTORY, (s, v, $) -> {
                 v.marshallable(MessageHistory.get());
             });
         }

@@ -39,6 +39,7 @@ public abstract class AbstractMethodWriterInvocationHandler implements MethodWri
     private Closeable closeable;
     private Map<Method, Consumer<Object[]>> methodConsumerMap;
     private Function<Method, Consumer<Object[]>> methodFactoryLambda;
+    protected String genericEvent = "";
 
     // Note the Object[] passed in creates an object on every call.
     @Nullable
@@ -62,14 +63,28 @@ public abstract class AbstractMethodWriterInvocationHandler implements MethodWri
         return ObjectUtils.defaultValue(method.getReturnType());
     }
 
+    @Override
+    public void genericEvent(String genericEvent) {
+        this.genericEvent = genericEvent;
+    }
+
     protected abstract void handleInvoke(Method method, Object[] args);
 
     protected void handleInvoke(@NotNull Method method, Object[] args, Wire wire) {
         if (recordHistory) {
-            wire.write("history").marshallable(MessageHistory.get());
+            wire.write(MethodReader.HISTORY)
+                    .marshallable(MessageHistory.get());
         }
-        ValueOut valueOut = wire
-                .writeEventName(method.getName());
+        String methodName = method.getName();
+        if (methodName.equals(genericEvent)) {
+            writeGenericEvent(wire, method, args);
+            return;
+        }
+        writeEvent(wire, method, methodName, args);
+    }
+
+    private void writeEvent(Wire wire, @NotNull Method method, String methodName, Object[] args) {
+        ValueOut valueOut = wire.writeEventName(methodName);
         Class[] parameterTypes = parameterMap.computeIfAbsent(method, Method::getParameterTypes);
         switch (parameterTypes.length) {
             case 0:
@@ -82,6 +97,25 @@ public abstract class AbstractMethodWriterInvocationHandler implements MethodWri
                 final Class[] finalParameterTypes = parameterTypes;
                 valueOut.sequence(args, (a, v) -> {
                     for (int i = 0; i < finalParameterTypes.length; i++)
+                        v.object(finalParameterTypes[i], a[i]);
+                });
+        }
+    }
+
+    private void writeGenericEvent(Wire wire, @NotNull Method method, Object[] args) {
+        ValueOut valueOut = wire.writeEventName(args[0].toString());
+        Class[] parameterTypes = parameterMap.computeIfAbsent(method, Method::getParameterTypes);
+        switch (parameterTypes.length) {
+            case 1:
+                valueOut.text("");
+                break;
+            case 2:
+                valueOut.object(parameterTypes[1], args[1]);
+                break;
+            default:
+                final Class[] finalParameterTypes = parameterTypes;
+                valueOut.sequence(args, (a, v) -> {
+                    for (int i = 1; i < finalParameterTypes.length; i++)
                         v.object(finalParameterTypes[i], a[i]);
                 });
         }
