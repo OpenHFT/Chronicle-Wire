@@ -84,13 +84,13 @@ public class BinaryWireTest {
         wire.write();
         wire.write();
         wire.write();
-        checkWire(wire, "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] 〷ÀÀÀ‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] 〷ÀÀÀ‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] 〷ÀÀÀ‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] 〷ÀÀÀ‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] 〷ÀÀÀ‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] 〷‡",
-                "[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] 〷‡");
+        checkWire(wire, "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁÀÀÀ‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁÀÀÀ‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁÀÀÀ‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁÀÀÀ‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁÀÀÀ‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ǁ‡",
+                "[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ǁ‡");
 
         assertEquals(fieldLess ? "" : "\"\": \"\": \"\": ", TextWire.asText(wire));
     }
@@ -113,13 +113,13 @@ public class BinaryWireTest {
         wire.write(BWKey.field1);
         wire.write(BWKey.field2);
         wire.write(BWKey.field3);
-        checkWire(wire, "[pos: 0, rlim: 21, wlim: 8EiB, cap: 8EiB ] 〷Æfield1Æfield2Æfield3‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 21, wlim: 8EiB, cap: 8EiB ] 〷Æfield1Æfield2Æfield3‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 21, wlim: 8EiB, cap: 8EiB ] 〷Æfield1Æfield2Æfield3‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] 〷º⒈º⒉º⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] 〷º⒈º⒉º⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] 〷‡",
-                "[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] 〷‡");
+        checkWire(wire, "[pos: 0, rlim: 21, wlim: 8EiB, cap: 8EiB ] ǁÆfield1Æfield2Æfield3‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 21, wlim: 8EiB, cap: 8EiB ] ǁÆfield1Æfield2Æfield3‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 21, wlim: 8EiB, cap: 8EiB ] ǁÆfield1Æfield2Æfield3‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] ǁº⒈º⒉º⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] ǁº⒈º⒉º⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ǁ‡",
+                "[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ǁ‡");
         checkAsText(wire,
                 "field1: field2: field3: ",
                 "\"1\": \"2\": \"3\": ",
@@ -143,13 +143,13 @@ public class BinaryWireTest {
         wire.write(() -> "World");
         @NotNull String name = "Long field name which is more than 32 characters, Bye";
         wire.write(() -> name);
-        checkWire(wire, "[pos: 0, rlim: 67, wlim: 8EiB, cap: 8EiB ] 〷ÅHelloÅWorld·5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 67, wlim: 8EiB, cap: 8EiB ] 〷ÅHelloÅWorld·5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 67, wlim: 8EiB, cap: 8EiB ] 〷ÅHelloÅWorld·5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 17, wlim: 8EiB, cap: 8EiB ] 〷º²Ñ\\u0098!ºòÖø'º´Íýå\\u0083٠" + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 17, wlim: 8EiB, cap: 8EiB ] 〷º²Ñ\\u0098!ºòÖø'º´Íýå\\u0083٠" + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] 〷‡",
-                "[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] 〷‡");
+        checkWire(wire, "[pos: 0, rlim: 67, wlim: 8EiB, cap: 8EiB ] ǁÅHelloÅWorld·5" + name + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 67, wlim: 8EiB, cap: 8EiB ] ǁÅHelloÅWorld·5" + name + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 67, wlim: 8EiB, cap: 8EiB ] ǁÅHelloÅWorld·5" + name + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 17, wlim: 8EiB, cap: 8EiB ] ǁº²Ñ\\u0098!ºòÖø'º´Íýå\\u0083٠" + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 17, wlim: 8EiB, cap: 8EiB ] ǁº²Ñ\\u0098!ºòÖø'º´Íýå\\u0083٠" + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ǁ‡",
+                "[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ǁ‡");
         assertEquals(numericField ? "\"69609650\": \"83766130\": \"-1019176629\": " :
                 fieldLess ? "" : "Hello: World: \"" + name + "\": ", TextWire.asText(wire));
     }
@@ -224,13 +224,13 @@ public class BinaryWireTest {
         wire.write().int8((byte) 1);
         wire.write(BWKey.field1).int8((byte) 2);
         wire.write(() -> "Test").int8((byte) 3);
-        checkWire(wire, "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] 〷À⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] 〷À⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 19, wlim: 8EiB, cap: 8EiB ] 〷À¤⒈Æfield1¤⒉ÄTest¤⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 11, wlim: 8EiB, cap: 8EiB ] 〷À⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 14, wlim: 8EiB, cap: 8EiB ] 〷À¤⒈º⒈¤⒉º²ñ\\u009E⒈¤⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] 〷⒈⒉⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] 〷¤⒈¤⒉¤⒊‡٠٠٠٠٠٠٠٠");
+        checkWire(wire, "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 19, wlim: 8EiB, cap: 8EiB ] ǁÀ¤⒈Æfield1¤⒉ÄTest¤⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 11, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 14, wlim: 8EiB, cap: 8EiB ] ǁÀ¤⒈º⒈¤⒉º²ñ\\u009E⒈¤⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] ǁ¤⒈¤⒉¤⒊‡٠٠٠٠٠٠٠٠");
         checkAsText123(wire, fixed ? "!byte " : "");
 
         // ok as blank matches anything
@@ -281,13 +281,13 @@ public class BinaryWireTest {
         wire.write().int16((short) 1);
         wire.write(BWKey.field1).int16((short) 2);
         wire.write(() -> "Test").int16((short) 3);
-        checkWire(wire, "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] 〷À⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] 〷À⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 22, wlim: 8EiB, cap: 8EiB ] 〷À¥⒈٠Æfield1¥⒉٠ÄTest¥⒊٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 11, wlim: 8EiB, cap: 8EiB ] 〷À⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 17, wlim: 8EiB, cap: 8EiB ] 〷À¥⒈٠º⒈¥⒉٠º²ñ\\u009E⒈¥⒊٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] 〷⒈⒉⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 9, wlim: 8EiB, cap: 8EiB ] 〷¥⒈٠¥⒉٠¥⒊٠‡٠٠٠٠٠٠٠٠");
+        checkWire(wire, "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 22, wlim: 8EiB, cap: 8EiB ] ǁÀ¥⒈٠Æfield1¥⒉٠ÄTest¥⒊٠‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 11, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 17, wlim: 8EiB, cap: 8EiB ] ǁÀ¥⒈٠º⒈¥⒉٠º²ñ\\u009E⒈¥⒊٠‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 9, wlim: 8EiB, cap: 8EiB ] ǁ¥⒈٠¥⒉٠¥⒊٠‡٠٠٠٠٠٠٠٠");
         checkAsText123(wire, fixed ? "!short " : "");
 
         // ok as blank matches anything
@@ -308,13 +308,13 @@ public class BinaryWireTest {
         wire.write().uint8(1);
         wire.write(BWKey.field1).uint8(2);
         wire.write(() -> "Test").uint8(3);
-        checkWire(wire, "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] 〷À⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] 〷À⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 19, wlim: 8EiB, cap: 8EiB ] 〷À¡⒈Æfield1¡⒉ÄTest¡⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 11, wlim: 8EiB, cap: 8EiB ] 〷À⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 14, wlim: 8EiB, cap: 8EiB ] 〷À¡⒈º⒈¡⒉º²ñ\\u009E⒈¡⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] 〷⒈⒉⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] 〷¡⒈¡⒉¡⒊‡٠٠٠٠٠٠٠٠");
+        checkWire(wire, "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 19, wlim: 8EiB, cap: 8EiB ] ǁÀ¡⒈Æfield1¡⒉ÄTest¡⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 11, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 14, wlim: 8EiB, cap: 8EiB ] ǁÀ¡⒈º⒈¡⒉º²ñ\\u009E⒈¡⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] ǁ¡⒈¡⒉¡⒊‡٠٠٠٠٠٠٠٠");
         checkAsText123(wire, fixed ? "!int " : "");
 
         // ok as blank matches anything
@@ -335,13 +335,13 @@ public class BinaryWireTest {
         wire.write().uint16(1);
         wire.write(BWKey.field1).uint16(2);
         wire.write(() -> "Test").uint16(3);
-        checkWire(wire, "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] 〷À⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] 〷À⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 22, wlim: 8EiB, cap: 8EiB ] 〷À¢⒈٠Æfield1¢⒉٠ÄTest¢⒊٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 11, wlim: 8EiB, cap: 8EiB ] 〷À⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 17, wlim: 8EiB, cap: 8EiB ] 〷À¢⒈٠º⒈¢⒉٠º²ñ\\u009E⒈¢⒊٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] 〷⒈⒉⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 9, wlim: 8EiB, cap: 8EiB ] 〷¢⒈٠¢⒉٠¢⒊٠‡٠٠٠٠٠٠٠٠");
+        checkWire(wire, "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 22, wlim: 8EiB, cap: 8EiB ] ǁÀ¢⒈٠Æfield1¢⒉٠ÄTest¢⒊٠‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 11, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 17, wlim: 8EiB, cap: 8EiB ] ǁÀ¢⒈٠º⒈¢⒉٠º²ñ\\u009E⒈¢⒊٠‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 9, wlim: 8EiB, cap: 8EiB ] ǁ¢⒈٠¢⒉٠¢⒊٠‡٠٠٠٠٠٠٠٠");
         checkAsText123(wire, fixed ? "!int " : "");
 
         // ok as blank matches anything
@@ -362,13 +362,13 @@ public class BinaryWireTest {
         wire.write().uint32(1);
         wire.write(BWKey.field1).uint32(2);
         wire.write(() -> "Test").uint32(3);
-        checkWire(wire, "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] 〷À⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] 〷À⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 28, wlim: 8EiB, cap: 8EiB ] 〷À£⒈٠٠٠Æfield1£⒉٠٠٠ÄTest£⒊٠٠٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 11, wlim: 8EiB, cap: 8EiB ] 〷À⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 23, wlim: 8EiB, cap: 8EiB ] 〷À£⒈٠٠٠º⒈£⒉٠٠٠º²ñ\\u009E⒈£⒊٠٠٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] 〷⒈⒉⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 15, wlim: 8EiB, cap: 8EiB ] 〷£⒈٠٠٠£⒉٠٠٠£⒊٠٠٠‡٠٠٠٠٠٠٠٠");
+        checkWire(wire, "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 28, wlim: 8EiB, cap: 8EiB ] ǁÀ£⒈٠٠٠Æfield1£⒉٠٠٠ÄTest£⒊٠٠٠‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 11, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 23, wlim: 8EiB, cap: 8EiB ] ǁÀ£⒈٠٠٠º⒈£⒉٠٠٠º²ñ\\u009E⒈£⒊٠٠٠‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 15, wlim: 8EiB, cap: 8EiB ] ǁ£⒈٠٠٠£⒉٠٠٠£⒊٠٠٠‡٠٠٠٠٠٠٠٠");
         checkAsText123(wire);
 
         // ok as blank matches anything
@@ -389,13 +389,13 @@ public class BinaryWireTest {
         wire.write().int32(1);
         wire.write(BWKey.field1).int32(2);
         wire.write(() -> "Test").int32(3);
-        checkWire(wire, "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] 〷À⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] 〷À⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 28, wlim: 8EiB, cap: 8EiB ] 〷À¦⒈٠٠٠Æfield1¦⒉٠٠٠ÄTest¦⒊٠٠٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 11, wlim: 8EiB, cap: 8EiB ] 〷À⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 23, wlim: 8EiB, cap: 8EiB ] 〷À¦⒈٠٠٠º⒈¦⒉٠٠٠º²ñ\\u009E⒈¦⒊٠٠٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] 〷⒈⒉⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 15, wlim: 8EiB, cap: 8EiB ] 〷¦⒈٠٠٠¦⒉٠٠٠¦⒊٠٠٠‡٠٠٠٠٠٠٠٠");
+        checkWire(wire, "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 28, wlim: 8EiB, cap: 8EiB ] ǁÀ¦⒈٠٠٠Æfield1¦⒉٠٠٠ÄTest¦⒊٠٠٠‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 11, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 23, wlim: 8EiB, cap: 8EiB ] ǁÀ¦⒈٠٠٠º⒈¦⒉٠٠٠º²ñ\\u009E⒈¦⒊٠٠٠‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 15, wlim: 8EiB, cap: 8EiB ] ǁ¦⒈٠٠٠¦⒉٠٠٠¦⒊٠٠٠‡٠٠٠٠٠٠٠٠");
         checkAsText123(wire, fixed ? "!int " : "");
 
         // ok as blank matches anything
@@ -416,13 +416,13 @@ public class BinaryWireTest {
         wire.write().int64(1);
         wire.write(BWKey.field1).int64(2);
         wire.write(() -> "Test").int64(3);
-        checkWire(wire, "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] 〷À⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] 〷À⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 40, wlim: 8EiB, cap: 8EiB ] 〷À§⒈٠٠٠٠٠٠٠Æfield1§⒉٠٠٠٠٠٠٠ÄTest§⒊٠٠٠٠٠٠٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 11, wlim: 8EiB, cap: 8EiB ] 〷À⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 35, wlim: 8EiB, cap: 8EiB ] 〷À§⒈٠٠٠٠٠٠٠º⒈§⒉٠٠٠٠٠٠٠º²ñ\\u009E⒈§⒊٠٠٠٠٠٠٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] 〷⒈⒉⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 27, wlim: 8EiB, cap: 8EiB ] 〷§⒈٠٠٠٠٠٠٠§⒉٠٠٠٠٠٠٠§⒊٠٠٠٠٠٠٠‡٠٠٠٠٠٠٠٠");
+        checkWire(wire, "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 40, wlim: 8EiB, cap: 8EiB ] ǁÀ§⒈٠٠٠٠٠٠٠Æfield1§⒉٠٠٠٠٠٠٠ÄTest§⒊٠٠٠٠٠٠٠‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 11, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 35, wlim: 8EiB, cap: 8EiB ] ǁÀ§⒈٠٠٠٠٠٠٠º⒈§⒉٠٠٠٠٠٠٠º²ñ\\u009E⒈§⒊٠٠٠٠٠٠٠‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 27, wlim: 8EiB, cap: 8EiB ] ǁ§⒈٠٠٠٠٠٠٠§⒉٠٠٠٠٠٠٠§⒊٠٠٠٠٠٠٠‡٠٠٠٠٠٠٠٠");
         checkAsText123(wire);
 
         // ok as blank matches anything
@@ -464,13 +464,13 @@ public class BinaryWireTest {
         wire.write().float64(1);
         wire.write(BWKey.field1).float64(2);
         wire.write(() -> "Test").float64(3);
-        checkWire(wire, "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] 〷À⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] 〷À⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 40, wlim: 8EiB, cap: 8EiB ] 〷À\\u0091٠٠٠٠٠٠ð?Æfield1\\u0091٠٠٠٠٠٠٠@ÄTest\\u0091٠٠٠٠٠٠⒏@‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 11, wlim: 8EiB, cap: 8EiB ] 〷À⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 35, wlim: 8EiB, cap: 8EiB ] 〷À\\u0091٠٠٠٠٠٠ð?º⒈\\u0091٠٠٠٠٠٠٠@º²ñ\\u009E⒈\\u0091٠٠٠٠٠٠⒏@‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] 〷⒈⒉⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 27, wlim: 8EiB, cap: 8EiB ] 〷\\u0091٠٠٠٠٠٠ð?\\u0091٠٠٠٠٠٠٠@\\u0091٠٠٠٠٠٠⒏@‡٠٠٠٠٠٠٠٠");
+        checkWire(wire, "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 16, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 40, wlim: 8EiB, cap: 8EiB ] ǁÀ\\u0091٠٠٠٠٠٠ð?Æfield1\\u0091٠٠٠٠٠٠٠@ÄTest\\u0091٠٠٠٠٠٠⒏@‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 11, wlim: 8EiB, cap: 8EiB ] ǁÀ⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 35, wlim: 8EiB, cap: 8EiB ] ǁÀ\\u0091٠٠٠٠٠٠ð?º⒈\\u0091٠٠٠٠٠٠٠@º²ñ\\u009E⒈\\u0091٠٠٠٠٠٠⒏@‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 27, wlim: 8EiB, cap: 8EiB ] ǁ\\u0091٠٠٠٠٠٠ð?\\u0091٠٠٠٠٠٠٠@\\u0091٠٠٠٠٠٠⒏@‡٠٠٠٠٠٠٠٠");
         if (wire.getValueOut() instanceof BinaryWire.BinaryValueOut)
             checkAsText123(wire);
         else
@@ -505,13 +505,13 @@ public class BinaryWireTest {
         wire.write().text("Hello");
         wire.write(BWKey.field1).text("world");
         wire.write(() -> "Test").text(name);
-        checkWire(wire, "[pos: 0, rlim: 80, wlim: 8EiB, cap: 8EiB ] 〷ÀåHelloÆfield1åworldÄTest¸5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 80, wlim: 8EiB, cap: 8EiB ] 〷ÀåHelloÆfield1åworldÄTest¸5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 80, wlim: 8EiB, cap: 8EiB ] 〷ÀåHelloÆfield1åworldÄTest¸5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 75, wlim: 8EiB, cap: 8EiB ] 〷ÀåHelloº⒈åworldº²ñ\\u009E⒈¸5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 75, wlim: 8EiB, cap: 8EiB ] 〷ÀåHelloº⒈åworldº²ñ\\u009E⒈¸5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 67, wlim: 8EiB, cap: 8EiB ] 〷åHelloåworld¸5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 67, wlim: 8EiB, cap: 8EiB ] 〷åHelloåworld¸5" + name + "‡٠٠٠٠٠٠٠٠");
+        checkWire(wire, "[pos: 0, rlim: 80, wlim: 8EiB, cap: 8EiB ] ǁÀåHelloÆfield1åworldÄTest¸5" + name + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 80, wlim: 8EiB, cap: 8EiB ] ǁÀåHelloÆfield1åworldÄTest¸5" + name + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 80, wlim: 8EiB, cap: 8EiB ] ǁÀåHelloÆfield1åworldÄTest¸5" + name + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 75, wlim: 8EiB, cap: 8EiB ] ǁÀåHelloº⒈åworldº²ñ\\u009E⒈¸5" + name + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 75, wlim: 8EiB, cap: 8EiB ] ǁÀåHelloº⒈åworldº²ñ\\u009E⒈¸5" + name + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 67, wlim: 8EiB, cap: 8EiB ] ǁåHelloåworld¸5" + name + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 67, wlim: 8EiB, cap: 8EiB ] ǁåHelloåworld¸5" + name + "‡٠٠٠٠٠٠٠٠");
         checkAsText(wire, "\"\": Hello\n" +
                         "field1: world\n" +
                         "Test: \"" + name + "\"\n",
@@ -541,13 +541,13 @@ public class BinaryWireTest {
         wire.write(BWKey.field1).typePrefix("AlsoMyType");
         @NotNull String name1 = "com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState";
         wire.write(() -> "Test").typePrefix(name1);
-        checkWire(wire, "[pos: 0, rlim: 158, wlim: 8EiB, cap: 8EiB ] 〷À¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 158, wlim: 8EiB, cap: 8EiB ] 〷À¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 158, wlim: 8EiB, cap: 8EiB ] 〷À¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 153, wlim: 8EiB, cap: 8EiB ] 〷À¶⒍MyTypeº⒈¶⒑AlsoMyTypeº²ñ\\u009E⒈¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 153, wlim: 8EiB, cap: 8EiB ] 〷À¶⒍MyTypeº⒈¶⒑AlsoMyTypeº²ñ\\u009E⒈¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 145, wlim: 8EiB, cap: 8EiB ] 〷¶⒍MyType¶⒑AlsoMyType¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 145, wlim: 8EiB, cap: 8EiB ] 〷¶⒍MyType¶⒑AlsoMyType¶{" + name1 + "‡٠٠٠٠٠٠٠٠");
+        checkWire(wire, "[pos: 0, rlim: 158, wlim: 8EiB, cap: 8EiB ] ǁÀ¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 158, wlim: 8EiB, cap: 8EiB ] ǁÀ¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 158, wlim: 8EiB, cap: 8EiB ] ǁÀ¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 153, wlim: 8EiB, cap: 8EiB ] ǁÀ¶⒍MyTypeº⒈¶⒑AlsoMyTypeº²ñ\\u009E⒈¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 153, wlim: 8EiB, cap: 8EiB ] ǁÀ¶⒍MyTypeº⒈¶⒑AlsoMyTypeº²ñ\\u009E⒈¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 145, wlim: 8EiB, cap: 8EiB ] ǁ¶⒍MyType¶⒑AlsoMyType¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 145, wlim: 8EiB, cap: 8EiB ] ǁ¶⒍MyType¶⒑AlsoMyType¶{" + name1 + "‡٠٠٠٠٠٠٠٠");
         checkAsText(wire, "\"\": !MyType field1: !AlsoMyType Test: !" + name1 + " ",
                 "\"\": !MyType \"1\": !AlsoMyType \"2603186\": !" + name1 + " ",
                 "!MyType !AlsoMyType !" + name1 + " ");
@@ -702,13 +702,13 @@ public class BinaryWireTest {
 
         //        System.out.println(wire.bytes().toDebugString(400));
         checkWire(wire,
-                "[pos: 0, rlim: 134, wlim: 8EiB, cap: 8EiB ] 〷ÁA\\u0082>٠٠٠ÆB_FLAG±ÅS_NUM¥90ÅD_NUM\\u0094\\u0080\u00ADKÅL_NUM٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082:٠٠٠ÆB_FLAG°ÅS_NUM¥Ò⒋ÅD_NUM\\u0094\\u0087\u00ADKÅL_NUM٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 134, wlim: 8EiB, cap: 8EiB ] 〷ÁA\\u0082>٠٠٠ÆB_FLAG±ÅS_NUM¥90ÅD_NUM\\u0094\\u0080\u00ADKÅL_NUM٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082:٠٠٠ÆB_FLAG°ÅS_NUM¥Ò⒋ÅD_NUM\\u0094\\u0087\u00ADKÅL_NUM٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 160, wlim: 8EiB, cap: 8EiB ] 〷ÁA\\u0082K٠٠٠ÆB_FLAG±ÅS_NUM¥90ÅD_NUM\\u0091w¾\\u009F\\u001A/Ý^@ÅL_NUM§٠٠٠٠٠٠٠٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082G٠٠٠ÆB_FLAG°ÅS_NUM¥Ò⒋ÅD_NUM\\u0091S⒌£\\u0092:Ý^@ÅL_NUM§٠٠٠٠٠٠٠٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 86, wlim: 8EiB, cap: 8EiB ] 〷ºA\\u0082&٠٠٠º٠±º⒈¥90º⒉\\u0094\\u0080\u00ADKº⒊٠º⒋¦C\\u009ECÿº⒌ëHello WorldºB\\u0082\"٠٠٠º٠°º⒈¥Ò⒋º⒉\\u0094\\u0087\u00ADKº⒊٠º⒋¦\\u009E.¤øº⒌çBye now‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 112, wlim: 8EiB, cap: 8EiB ] 〷ºA\\u00823٠٠٠º٠±º⒈¥90º⒉\\u0091w¾\\u009F\\u001A/Ý^@º⒊§٠٠٠٠٠٠٠٠º⒋¦C\\u009ECÿº⒌ëHello WorldºB\\u0082/٠٠٠º٠°º⒈¥Ò⒋º⒉\\u0091S⒌£\\u0092:Ý^@º⒊§٠٠٠٠٠٠٠٠º⒋¦\\u009E.¤øº⒌çBye now‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 58, wlim: 8EiB, cap: 8EiB ] 〷\\u0082\\u001A٠٠٠±¥90\\u0094\\u0080\u00ADK٠¦C\\u009ECÿëHello World\\u0082\\u0016٠٠٠°¥Ò⒋\\u0094\\u0087\u00ADK٠¦\\u009E.¤øçBye now‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 84, wlim: 8EiB, cap: 8EiB ] 〷\\u0082'٠٠٠±¥90\\u0091w¾\\u009F\\u001A/Ý^@§٠٠٠٠٠٠٠٠¦C\\u009ECÿëHello World\\u0082#٠٠٠°¥Ò⒋\\u0091S⒌£\\u0092:Ý^@§٠٠٠٠٠٠٠٠¦\\u009E.¤øçBye now‡٠٠٠٠٠٠٠٠");
+                "[pos: 0, rlim: 134, wlim: 8EiB, cap: 8EiB ] ǁÁA\\u0082>٠٠٠ÆB_FLAG±ÅS_NUM¥90ÅD_NUM\\u0094\\u0080\u00ADKÅL_NUM٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082:٠٠٠ÆB_FLAG°ÅS_NUM¥Ò⒋ÅD_NUM\\u0094\\u0087\u00ADKÅL_NUM٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 134, wlim: 8EiB, cap: 8EiB ] ǁÁA\\u0082>٠٠٠ÆB_FLAG±ÅS_NUM¥90ÅD_NUM\\u0094\\u0080\u00ADKÅL_NUM٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082:٠٠٠ÆB_FLAG°ÅS_NUM¥Ò⒋ÅD_NUM\\u0094\\u0087\u00ADKÅL_NUM٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 160, wlim: 8EiB, cap: 8EiB ] ǁÁA\\u0082K٠٠٠ÆB_FLAG±ÅS_NUM¥90ÅD_NUM\\u0091w¾\\u009F\\u001A/Ý^@ÅL_NUM§٠٠٠٠٠٠٠٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082G٠٠٠ÆB_FLAG°ÅS_NUM¥Ò⒋ÅD_NUM\\u0091S⒌£\\u0092:Ý^@ÅL_NUM§٠٠٠٠٠٠٠٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 86, wlim: 8EiB, cap: 8EiB ] ǁºA\\u0082&٠٠٠º٠±º⒈¥90º⒉\\u0094\\u0080\u00ADKº⒊٠º⒋¦C\\u009ECÿº⒌ëHello WorldºB\\u0082\"٠٠٠º٠°º⒈¥Ò⒋º⒉\\u0094\\u0087\u00ADKº⒊٠º⒋¦\\u009E.¤øº⒌çBye now‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 112, wlim: 8EiB, cap: 8EiB ] ǁºA\\u00823٠٠٠º٠±º⒈¥90º⒉\\u0091w¾\\u009F\\u001A/Ý^@º⒊§٠٠٠٠٠٠٠٠º⒋¦C\\u009ECÿº⒌ëHello WorldºB\\u0082/٠٠٠º٠°º⒈¥Ò⒋º⒉\\u0091S⒌£\\u0092:Ý^@º⒊§٠٠٠٠٠٠٠٠º⒋¦\\u009E.¤øº⒌çBye now‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 58, wlim: 8EiB, cap: 8EiB ] ǁ\\u0082\\u001A٠٠٠±¥90\\u0094\\u0080\u00ADK٠¦C\\u009ECÿëHello World\\u0082\\u0016٠٠٠°¥Ò⒋\\u0094\\u0087\u00ADK٠¦\\u009E.¤øçBye now‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 84, wlim: 8EiB, cap: 8EiB ] ǁ\\u0082'٠٠٠±¥90\\u0091w¾\\u009F\\u001A/Ý^@§٠٠٠٠٠٠٠٠¦C\\u009ECÿëHello World\\u0082#٠٠٠°¥Ò⒋\\u0091S⒌£\\u0092:Ý^@§٠٠٠٠٠٠٠٠¦\\u009E.¤øçBye now‡٠٠٠٠٠٠٠٠");
         @NotNull MyTypesCustom mt2 = new MyTypesCustom();
         wire.read(() -> "A").marshallable(mt2);
         assertEquals(mt2, mtA);
