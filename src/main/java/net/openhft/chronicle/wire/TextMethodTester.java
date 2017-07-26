@@ -24,6 +24,7 @@ public class TextMethodTester<T> {
     private final String output;
     private final Function<T, Object> componentFunction;
     private BiConsumer<MethodReader, T> exceptionHandlerSetup;
+    private String genericEvent;
 
     private String setup;
     private Function<String, String> afterRun;
@@ -79,11 +80,22 @@ public class TextMethodTester<T> {
         return this;
     }
 
+    public String genericEvent() {
+        return genericEvent;
+    }
+
+    public TextMethodTester genericEvent(String genericEvent) {
+        this.genericEvent = genericEvent;
+        return this;
+    }
+
     @NotNull
     public TextMethodTester run() throws IOException {
 
         Wire wire2 = new TextWire(Bytes.allocateElasticDirect()).useTextDocuments().addTimeStamps(true);
-        T writer0 = wire2.methodWriterBuilder(outputClass).methodInterceptorFactory(methodInterceptorFactory).build();
+        MethodWriterBuilder<T> methodWriterBuilder = wire2.methodWriterBuilder(outputClass).methodInterceptorFactory(methodInterceptorFactory);
+        if (genericEvent != null) methodWriterBuilder.genericEvent(genericEvent);
+        T writer0 = methodWriterBuilder.build();
         T writer = retainLast == null ? writer0 : cachedMethodWriter(writer0);
         Object component = componentFunction.apply(writer);
         Object[] components = component instanceof Object[]
