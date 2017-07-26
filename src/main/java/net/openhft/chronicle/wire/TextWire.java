@@ -335,11 +335,14 @@ public class TextWire extends AbstractWire implements Wire {
             if (ch > 0x80 && ((ch & 0xC0) == 0x80 || (ch & 0xF0) == 0xF0)) {
                 throw new IllegalStateException("Attempting to read binary as TextWire ch=" + Integer.toHexString(ch));
             }
+            if (ch < 0 || ch == '!' || ch == '[' || ch == '{') {
+                sb.setLength(0);
+                return sb;
+            }
             if (ch == '?') {
                 bytes.readSkip(1);
                 consumePadding();
                 ch = peekCode();
-
             }
             if (ch == '"') {
                 bytes.readSkip(1);

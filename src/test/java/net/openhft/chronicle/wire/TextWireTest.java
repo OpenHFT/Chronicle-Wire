@@ -61,6 +61,14 @@ public class TextWireTest {
     Bytes bytes;
 
     @Test
+    public void testTypeInsteadOfField() {
+        Wire wire = new TextWire(Bytes.from("!!null \"\""));
+        StringBuilder sb = new StringBuilder();
+        wire.read(sb).object(Object.class);
+        assertEquals(0, sb.length());
+    }
+
+    @Test
     public void licenseCheck() {
         WireType.TEXT.licenceCheck();
         assertTrue(WireType.TEXT.isAvailable());
