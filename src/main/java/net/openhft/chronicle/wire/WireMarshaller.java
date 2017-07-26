@@ -507,22 +507,26 @@ public class WireMarshaller<T> {
 
     static class ArrayFieldAccess extends FieldAccess {
         private final Class componentType;
+        private final Class objectType;
 
         ArrayFieldAccess(@NotNull Field field) {
             super(field);
             componentType = field.getType().getComponentType();
+            objectType = ObjectUtils.primToWrapper(componentType);
         }
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
             Object arr = field.get(o);
+            boolean leaf = write.swapLeaf(true);
             if (arr == null)
                 write.nu11();
             else
                 write.sequence(arr, (array, out) -> {
                     for (int i = 0, len = Array.getLength(array); i < len; i++)
-                        out.object(componentType, Array.get(array, i));
+                        out.object(objectType, Array.get(array, i));
                 });
+            write.swapLeaf(leaf);
         }
 
         @Override
