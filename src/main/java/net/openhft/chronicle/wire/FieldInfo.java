@@ -37,15 +37,15 @@ public interface FieldInfo {
     BracketType bracketType();
 
     @Nullable
-    Object get(Object value);
+    Object get(Object object);
 
-    long getLong(Object value);
+    long getLong(Object object);
 
-    int getInt(Object value);
+    int getInt(Object object);
 
-    char getChar(Object value);
+    char getChar(Object object);
 
-    double getDouble(Object value);
+    double getDouble(Object object);
 
     void set(Object object, Object value) throws IllegalArgumentException;
 

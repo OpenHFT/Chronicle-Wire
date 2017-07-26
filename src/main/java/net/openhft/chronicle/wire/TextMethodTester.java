@@ -93,7 +93,8 @@ public class TextMethodTester<T> {
     public TextMethodTester run() throws IOException {
 
         Wire wire2 = new TextWire(Bytes.allocateElasticDirect()).useTextDocuments().addTimeStamps(true);
-        MethodWriterBuilder<T> methodWriterBuilder = wire2.methodWriterBuilder(outputClass).methodInterceptorFactory(methodInterceptorFactory);
+        MethodWriterBuilder<T> methodWriterBuilder = wire2.methodWriterBuilder(outputClass)
+                .methodInterceptorFactory(methodInterceptorFactory);
         if (genericEvent != null) methodWriterBuilder.genericEvent(genericEvent);
         T writer0 = methodWriterBuilder.build();
         T writer = retainLast == null ? writer0 : cachedMethodWriter(writer0);

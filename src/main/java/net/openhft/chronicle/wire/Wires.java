@@ -641,7 +641,7 @@ public enum Wires {
                 return SerializationStrategies.EXTERNALIZABLE;
             if (Serializable.class.isAssignableFrom(aClass))
                 return SerializationStrategies.ANY_NESTED;
-            return null;
+            return SerializationStrategies.ANY_SCALAR;
         }
     }
 
@@ -690,8 +690,15 @@ public enum Wires {
         }
 
         @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
             switch (method.getName()) {
+                case "deepCopy":
+                    if (args == null || args.length == 0) {
+                        TupleInvocationHandler h2 = new TupleInvocationHandler(typeName);
+                        h2.fields.putAll(fields);
+                        return proxy.getClass().getDeclaredConstructor(InvocationHandler.class).newInstance(h2);
+                    }
+                    break;
                 case "toString":
                     if (args == null || args.length == 0)
                         return TEXT.asString(proxy);
@@ -737,7 +744,7 @@ public enum Wires {
                             Class<?> valueClass = entry.getValue().getClass();
                             fieldInfos.add(new TupleFieldInfo(entry.getKey(), valueClass));
                         }
-                        return typeName;
+                        return fieldInfos;
                     }
                     break;
             }
@@ -755,7 +762,7 @@ public enum Wires {
 
     static class TupleFieldInfo extends AbstractFieldInfo {
         public TupleFieldInfo(String name, Class type) {
-            super(type, SerializeMarshallables.getSerializationStrategy(type).bracketType(), name);
+            super(type, SerializeMarshallables.INSTANCE.apply(type).bracketType(), name);
         }
 
         private Map<String, Object> getMap(Object o) {
@@ -765,33 +772,33 @@ public enum Wires {
 
         @Nullable
         @Override
-        public Object get(Object value) {
-            return getMap(value).get(name);
+        public Object get(Object object) {
+            return getMap(object).get(name);
         }
 
         @Override
-        public long getLong(Object value) {
-            return ObjectUtils.convertTo(Long.class, get(value));
+        public long getLong(Object object) {
+            return ObjectUtils.convertTo(Long.class, get(object));
         }
 
         @Override
-        public int getInt(Object value) {
-            return ObjectUtils.convertTo(Integer.class, get(value));
+        public int getInt(Object object) {
+            return ObjectUtils.convertTo(Integer.class, get(object));
         }
 
         @Override
-        public char getChar(Object value) {
-            return ObjectUtils.convertTo(Character.class, get(value));
+        public char getChar(Object object) {
+            return ObjectUtils.convertTo(Character.class, get(object));
         }
 
         @Override
-        public double getDouble(Object value) {
-            return ObjectUtils.convertTo(Double.class, get(value));
+        public double getDouble(Object object) {
+            return ObjectUtils.convertTo(Double.class, get(object));
         }
 
         @Override
         public void set(Object object, Object value) throws IllegalArgumentException {
-            getMap(value).put(name, value);
+            getMap(object).put(name, value);
         }
 
         @Override
