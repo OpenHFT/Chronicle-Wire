@@ -716,7 +716,11 @@ public enum Wires {
                     if (args.length == 1) {
                         WireOut out = (WireOut) args[0];
                         for (Map.Entry<String, Object> entry : fields.entrySet()) {
-                            out.write(entry.getKey()).object(entry.getValue());
+                            String key = entry.getKey();
+                            Object value = entry.getValue();
+                            if (value != null) {
+                                out.write(key).object(value);
+                            }
                         }
                         return null;
                     }
