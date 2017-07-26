@@ -103,7 +103,7 @@ public class WireSerializedLambdaTest {
                 .write(() -> "two").object(Fun.ADD_A)
                 .write(() -> "three").object(Update.DECR);
 
-        assertEquals("[pos: 0, rlim: 349, wlim: 8EiB, cap: 8EiB ] ‖" +
+        assertEquals("[pos: 0, rlim: 349, wlim: 8EiB, cap: 8EiB ] 〷" +
                 "Ãone¶⒗SerializedLambda\\u0082 ⒈٠٠" +
                 "Âcc¼3net.openhft.chronicle.wire.WireSerializedLambdaTest" +
                 "Ãfic¸4net/openhft/chronicle/core/util/SerializableFunction" +

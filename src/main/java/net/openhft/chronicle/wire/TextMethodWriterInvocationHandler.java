@@ -39,10 +39,10 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
     protected void handleInvoke(Method method, Object[] args) {
         handleInvoke(method, args, wire);
         wire.getValueOut().resetBetweenDocuments();
+        Bytes<?> bytes = wire.bytes();
+        if (bytes.peekUnsignedByte(bytes.writePosition() - 1) >= ' ')
+            bytes.append('\n');
         if (ENABLE_EOD) {
-            Bytes<?> bytes = wire.bytes();
-            if (bytes.peekUnsignedByte(bytes.writePosition() - 1) >= ' ')
-                bytes.append('\n');
             bytes.append("---\n");
         }
     }

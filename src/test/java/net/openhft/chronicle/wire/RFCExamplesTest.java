@@ -67,7 +67,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         writeMessageOne(bin);
 
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));
-        assertEquals("[pos: 0, rlim: 128, wlim: 8EiB, cap: 8EiB ] ‖" +
+        assertEquals("[pos: 0, rlim: 128, wlim: 8EiB, cap: 8EiB ] 〷" +
                 "#٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠" +
                 "U٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String" +
                 "‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
@@ -76,7 +76,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         clear(bytes);
         writeMessageOne(raw);
 
-        assertEquals("[pos: 0, rlim: 66, wlim: 8EiB, cap: 8EiB ] ‖" +
+        assertEquals("[pos: 0, rlim: 66, wlim: 8EiB, cap: 8EiB ] 〷" +
                 "\\u001A٠٠@⒘///service-lookupu\\u009F)å\"٠٠٠ ٠٠٠\\u001C٠٠٠⒋test⒊Map⒖٠٠٠⒎Integer⒍String" +
                 "‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
 /*
@@ -116,7 +116,7 @@ put: [ 3, bye ]
                         "  value: bye\n" +
                         "}\n",
                 Wires.fromSizePrefixedBlobs(bytes));
-        assertEquals("[pos: 0, rlim: 143, wlim: 8EiB, cap: 8EiB ] ‖" +
+        assertEquals("[pos: 0, rlim: 143, wlim: 8EiB, cap: 8EiB ] 〷" +
                 "\\u001B٠٠@csp: //server1/test⒑cid: 1⒑" +
                 "\"٠٠٠put: {⒑  key: 1,⒑  value: hello⒑}⒑" +
                 "\"٠٠٠put: {⒑  key: 2,⒑  value: world⒑}⒑" +
@@ -127,7 +127,7 @@ put: [ 3, bye ]
         writeMessageTwo(bin);
 
 //        System.out.println(Wires.fromSizePrefixedBlobs(bytes));
-        assertEquals("[pos: 0, rlim: 116, wlim: 8EiB, cap: 8EiB ] ‖" +
+        assertEquals("[pos: 0, rlim: 116, wlim: 8EiB, cap: 8EiB ] 〷" +
                 "\\u0018٠٠@Ãcspî//server1/testÃcid⒈" +
                 "\\u001A٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒈Åvalueåhello" +
                 "\\u001A٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒉Åvalueåworld" +
@@ -136,7 +136,7 @@ put: [ 3, bye ]
 
         clear(bytes);
         writeMessageTwo(raw);
-        assertEquals("[pos: 0, rlim: 91, wlim: 8EiB, cap: 8EiB ] ‖" +
+        assertEquals("[pos: 0, rlim: 91, wlim: 8EiB, cap: 8EiB ] 〷" +
                 "\\u0017٠٠@⒕//server1/test⒈٠٠٠٠٠٠٠" +
                 "⒙٠٠٠⒕٠٠٠⒈٠٠٠٠٠٠٠⒌hello" +
                 "⒙٠٠٠⒕٠٠٠⒉٠٠٠٠٠٠٠⒌world" +
