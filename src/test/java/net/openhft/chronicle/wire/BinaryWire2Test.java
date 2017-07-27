@@ -239,11 +239,11 @@ public class BinaryWire2Test {
     }
 
     private void writeMessageContext(@NotNull WireOut wire) {
-        try (DocumentContext _ = wire.writingDocument(true)) {
+        try (DocumentContext dc = wire.writingDocument(true)) {
             wire.write("csp").text("//path/service")
                     .write("tid").int64(123456789);
         }
-        try (DocumentContext _ = wire.writingDocument(false)) {
+        try (DocumentContext dc = wire.writingDocument(false)) {
             wire.write("entrySet").sequence(s -> {
                 s.marshallable(m -> m
                         .write("key").text("key-1")
@@ -320,11 +320,11 @@ public class BinaryWire2Test {
     @Test
     public void fieldAfterNullContext() {
         @NotNull Wire wire = createWire();
-        try (DocumentContext _ = wire.writingDocument(true)) {
+        try (DocumentContext dc = wire.writingDocument(true)) {
             wire.write("tid").int64(1234567890L);
         }
 
-        try (DocumentContext _ = wire.writingDocument(false)) {
+        try (DocumentContext dc = wire.writingDocument(false)) {
             wire.write("data").typedMarshallable("!UpdateEvent",
                     v -> v.write("assetName").text("/name")
                             .write("key").object("test")
