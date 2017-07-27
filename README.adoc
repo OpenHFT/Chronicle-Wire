@@ -431,7 +431,7 @@ You can access a random field in memory, For example, in a 2TB file, page in/pul
 |===============
 | format | access style 
 | fixed-length binary | random access without parsing first
-| variable-length binary | random access with partial parsing. i.e. you can skip large portions
+| variable-length binary | random access with partial parsing allowing you to skip large portions
 | fixed-length text | random access with parsing
 | variable-length text | no random access
 |===============
