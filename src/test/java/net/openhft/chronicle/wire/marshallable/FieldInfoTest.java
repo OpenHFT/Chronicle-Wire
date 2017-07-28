@@ -183,7 +183,7 @@ public class FieldInfoTest {
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +
                         ", !FieldInfo {\n" +
-                        "  name: aClass,\n" +
+                        "  name: eClass,\n" +
                         "  type: !type type,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
