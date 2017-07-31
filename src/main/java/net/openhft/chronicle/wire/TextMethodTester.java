@@ -32,7 +32,8 @@ public class TextMethodTester<T> {
     private String expected;
     private String actual;
     private String[] retainLast;
-    private MethodInterceptorFactory methodInterceptorFactory;
+    private MethodWriterListener methodWriterListener;
+    private MethodReaderInterceptor methodReaderInterceptor;
 
     public TextMethodTester(String input, Function<T, Object> componentFunction, Class<T> outputClass, String output) {
         this.input = input;
@@ -94,7 +95,7 @@ public class TextMethodTester<T> {
 
         Wire wire2 = new TextWire(Bytes.allocateElasticDirect()).useTextDocuments().addTimeStamps(true);
         MethodWriterBuilder<T> methodWriterBuilder = wire2.methodWriterBuilder(outputClass)
-                .methodInterceptorFactory(methodInterceptorFactory);
+                .methodWriterListener(methodWriterListener);
         if (genericEvent != null) methodWriterBuilder.genericEvent(genericEvent);
         T writer0 = methodWriterBuilder.build();
         T writer = retainLast == null ? writer0 : cachedMethodWriter(writer0);
@@ -106,7 +107,9 @@ public class TextMethodTester<T> {
         if (setup != null) {
             Wire wire0 = new TextWire(BytesUtil.readFile(setup));
 
-            MethodReader reader0 = wire0.methodReader(components);
+            MethodReader reader0 = wire0.methodReaderBuilder()
+                    .methodReaderInterceptor(methodReaderInterceptor)
+                    .build(components);
             while (reader0.readOne()) {
                 wire2.bytes().clear();
             }
@@ -141,7 +144,9 @@ public class TextMethodTester<T> {
             }
             expected = expected2.toString().trim();
         }
-        MethodReader reader = wire.methodReader(components);
+        MethodReader reader = wire.methodReaderBuilder()
+                .methodReaderInterceptor(methodReaderInterceptor)
+                .build(components);
         if (exceptionHandlerSetup != null)
             exceptionHandlerSetup.accept(reader, writer);
 //        long pos = wire2.bytes().writePosition();
@@ -201,8 +206,14 @@ public class TextMethodTester<T> {
         return actual;
     }
 
-    public TextMethodTester methodInterceptorFactory(MethodInterceptorFactory methodInterceptorFactory) {
-        this.methodInterceptorFactory = methodInterceptorFactory;
+
+    public TextMethodTester<T> methodWriterListener(MethodWriterListener methodWriterListener) {
+        this.methodWriterListener = methodWriterListener;
+        return this;
+    }
+
+    public TextMethodTester<T> methodReaderInterceptor(MethodReaderInterceptor methodReaderInterceptor) {
+        this.methodReaderInterceptor = methodReaderInterceptor;
         return this;
     }
 

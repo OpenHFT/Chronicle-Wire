@@ -22,11 +22,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static net.openhft.chronicle.wire.MethodReader.NO_ARGS;
 
@@ -37,9 +34,8 @@ public abstract class AbstractMethodWriterInvocationHandler implements MethodWri
     private final Map<Method, Class[]> parameterMap = new ConcurrentHashMap<>();
     protected boolean recordHistory;
     private Closeable closeable;
-    private Map<Method, Consumer<Object[]>> methodConsumerMap;
-    private Function<Method, Consumer<Object[]>> methodFactoryLambda;
     protected String genericEvent = "";
+    private MethodWriterListener methodWriterListener;
 
     // Note the Object[] passed in creates an object on every call.
     @Nullable
@@ -54,11 +50,8 @@ public abstract class AbstractMethodWriterInvocationHandler implements MethodWri
         }
         if (args == null)
             args = NO_ARGS;
-        if (methodFactoryLambda != null) {
-            Consumer<Object[]> consumer = methodConsumerMap.computeIfAbsent(method, methodFactoryLambda);
-            if (consumer != null)
-                consumer.accept(args);
-        }
+        if (methodWriterListener != null)
+            methodWriterListener.onWrite(method.getName(), args);
         handleInvoke(method, args);
         return ObjectUtils.defaultValue(method.getReturnType());
     }
@@ -130,11 +123,7 @@ public abstract class AbstractMethodWriterInvocationHandler implements MethodWri
     }
 
     @Override
-    public void methodInterceptorFactory(MethodInterceptorFactory methodInterceptorFactory) {
-        methodConsumerMap = new LinkedHashMap<>();
-        if (methodInterceptorFactory == null)
-            methodFactoryLambda = null;
-        else
-            methodFactoryLambda = methodInterceptorFactory::create;
+    public void methodWriterListener(MethodWriterListener methodWriterListener) {
+        this.methodWriterListener = methodWriterListener;
     }
 }

@@ -9,6 +9,7 @@ public class MethodReaderBuilder {
     private final MarshallableIn in;
     private boolean ignoreDefaults;
     private WireParselet defaultParselet = createDefaultParselet();
+    private MethodReaderInterceptor methodReaderInterceptor;
 
     public MethodReaderBuilder(MarshallableIn in) {
         this.in = in;
@@ -56,6 +57,11 @@ public class MethodReaderBuilder {
 
     @NotNull
     public MethodReader build(Object... impls) {
-        return new MethodReader(in, ignoreDefaults, defaultParselet, impls);
+        return new MethodReader(in, ignoreDefaults, defaultParselet, methodReaderInterceptor, impls);
+    }
+
+    public MethodReaderBuilder methodReaderInterceptor(MethodReaderInterceptor methodReaderInterceptor) {
+        this.methodReaderInterceptor = methodReaderInterceptor;
+        return this;
     }
 }

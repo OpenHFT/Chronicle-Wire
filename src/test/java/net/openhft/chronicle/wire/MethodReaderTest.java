@@ -85,7 +85,7 @@ public class MethodReaderTest {
     public void methodInterceptor() {
         Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
         MRTListener writer = wire.methodWriterBuilder(MRTListener.class)
-                .methodInterceptorFactory(m -> a -> IntStream.range(0, a.length).forEach(i -> ((MRT1) a[i]).value = "x"))
+                .methodWriterListener((m, a) -> IntStream.range(0, a.length).forEach(i -> ((MRT1) a[i]).value = "x"))
                 .build();
         writer.top(new MRT1("one"));
         writer.top(new MRT2("one", "two"));
@@ -120,7 +120,6 @@ public class MethodReaderTest {
     public void methodInterceptorNull() {
         Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
         MRTListener writer = wire.methodWriterBuilder(MRTListener.class)
-                .methodInterceptorFactory(m -> null)
                 .build();
         writer.top(new MRT1("one"));
         writer.top(new MRT2("one", "two"));

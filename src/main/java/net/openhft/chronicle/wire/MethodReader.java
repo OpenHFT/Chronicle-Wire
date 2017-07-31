@@ -44,11 +44,11 @@ public class MethodReader implements Closeable {
     @NotNull
     private final WireParser<Void> wireParser;
     private boolean closeIn = false, closed;
-    private String method;
-    private Object args;
+    private MethodReaderInterceptor methodReaderInterceptor;
 
-    public MethodReader(MarshallableIn in, boolean ignoreDefault, WireParselet defaultParselet, @NotNull Object... objects) {
+    public MethodReader(MarshallableIn in, boolean ignoreDefault, WireParselet defaultParselet, MethodReaderInterceptor methodReaderInterceptor, @NotNull Object... objects) {
         this.in = in;
+        this.methodReaderInterceptor = methodReaderInterceptor;
         if (objects[0] instanceof WireParselet)
             defaultParselet = (WireParselet) objects[0];
         wireParser = WireParser.wireParser(defaultParselet);
@@ -117,6 +117,14 @@ public class MethodReader implements Closeable {
         return this;
     }
 
+    private static Object actualInvoke(Method method, Object o, Object[] objects) throws InvocationTargetException {
+        try {
+            return method.invoke(o, objects);
+        } catch (IllegalAccessException iae) {
+            throw Jvm.rethrow(iae);
+        }
+    }
+
     public void addParseletForMethod(Object o, @NotNull Method m, Class<?> parameterType) {
         Class msgClass = parameterType;
         m.setAccessible(true); // turn of security check to make a little faster
@@ -124,14 +132,12 @@ public class MethodReader implements Closeable {
         if (msgClass.isInterface() || !ReadMarshallable.class.isAssignableFrom(msgClass)) {
             @NotNull Object[] argArr = {null};
             wireParser.register(m::getName, (s, v, $) -> {
-                method = name;
-                MethodReader.this.args = argArr;
                 try {
                     if (Jvm.isDebug())
                         logMessage(s, v);
 
                     argArr[0] = v.object(argArr[0], msgClass);
-                    m.invoke(o, argArr);
+                    invoke(o, m, argArr);
                 } catch (Exception i) {
                     Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], i);
                 }
@@ -152,20 +158,12 @@ public class MethodReader implements Closeable {
             }
             @NotNull ReadMarshallable[] argArr = {arg};
             wireParser.register(m::getName, (s, v, $) -> {
-                method = name;
-                MethodReader.this.args = argArr;
                 try {
                     if (Jvm.isDebug() && LOGGER.isDebugEnabled())
                         logMessage(s, v);
 
                     argArr[0] = v.object(argArr[0], msgClass);
-                    m.invoke(o, argArr);
-                } catch (InvocationTargetException e) {
-                    Throwable cause = e.getCause();
-                    if (cause instanceof IllegalArgumentException)
-                        Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0] + " " + cause);
-                    else
-                        Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], cause);
+                    invoke(o, m, argArr);
                 } catch (Throwable t) {
                     Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], t);
                 }
@@ -177,14 +175,13 @@ public class MethodReader implements Closeable {
         m.setAccessible(true); // turn of security check to make a little faster
         String name = m.getName();
         wireParser.register(m::getName, (s, v, $) -> {
-            method = name;
-            args = NO_ARGS;
             try {
                 if (Jvm.isDebug())
                     logMessage(s, v);
 
                 v.skipValue();
-                m.invoke(o, NO_ARGS);
+
+                invoke(o, m, NO_ARGS);
             } catch (Exception i) {
                 Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + "()", i);
             }
@@ -202,18 +199,34 @@ public class MethodReader implements Closeable {
         };
         String name = m.getName();
         wireParser.register(m::getName, (s, v, $) -> {
-            method = name;
-            MethodReader.this.args = args;
             try {
                 if (Jvm.isDebug())
                     logMessage(s, v);
 
                 v.sequence(args, sequenceReader);
-                m.invoke(o, args);
+
+                invoke(o, m, args);
             } catch (Exception i) {
                 Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + Arrays.toString(args), i);
             }
         });
+    }
+
+    private void invoke(Object o, @NotNull Method m, Object[] args) throws IllegalAccessException {
+        try {
+            if (methodReaderInterceptor != null)
+                methodReaderInterceptor.intercept(m, o, args, MethodReader::actualInvoke);
+            else
+                m.invoke(o, args);
+
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            Throwable cause = e.getCause();
+            String msg = "Failure to dispatch message: " + m.getName() + " " + Arrays.asList(args);
+            if (cause instanceof IllegalArgumentException)
+                Jvm.warn().on(o.getClass(), msg + " " + cause);
+            else
+                Jvm.warn().on(o.getClass(), msg, cause);
+        }
     }
 
     /**
@@ -244,11 +257,7 @@ public class MethodReader implements Closeable {
         return closed;
     }
 
-    public String method() {
-        return method;
-    }
-
-    public Object args() {
-        return args;
+    public MethodReaderInterceptor methodReaderInterceptor() {
+        return methodReaderInterceptor;
     }
 }
