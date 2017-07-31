@@ -23,10 +23,17 @@ import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.IOException;
+
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
 public class MarshallableTest {
+    @Test(expected = IOException.class)
+    public void fromFile() throws IOException {
+        fail("Got " + Marshallable.fromFile("empty-file.yaml"));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testEmptyFromString() {
         Marshallable.fromString("");

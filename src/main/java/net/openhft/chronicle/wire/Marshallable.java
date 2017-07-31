@@ -76,16 +76,19 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         return TEXT.streamFromFile(expectedType, filename);
     }
 
+    @Deprecated
     @NotNull
     static Map<String, Object> fromFileAsMap(String filename) throws IOException {
         return TEXT.fromFileAsMap(filename, Object.class);
     }
 
+    @Deprecated
     @NotNull
     static <V> Map<String, V> fromFileAsMap(String filename, @NotNull Class<V> valueClass) throws IOException {
         return TEXT.fromFileAsMap(filename, valueClass);
     }
 
+    @Deprecated
     @Nullable
     static Map<String, Object> fromHexString(@NotNull CharSequence cs) {
         return READ_ANY.fromHexString(cs);

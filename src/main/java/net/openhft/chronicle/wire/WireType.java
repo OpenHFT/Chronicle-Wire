@@ -33,9 +33,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Spliterator;
@@ -45,6 +47,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import static net.openhft.chronicle.core.io.IOTools.*;
 
 /**
  * A selection of prebuilt wire types.
@@ -458,7 +462,17 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
     @Nullable
     public <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
-        Bytes bytes = BytesUtil.readFile(filename);
+        File file = new File(filename);
+        URL url = null;
+        if (!file.exists()) {
+            url = urlFor(filename);
+            file = new File(url.getFile());
+        }
+        //: MappedFile.readOnly(file).acquireBytesForRead(0);
+
+        Bytes bytes = Bytes.wrapForRead(readAsBytes(url == null ? new FileInputStream(file) : open(url)));
+        if (bytes.readRemaining() == 0)
+            throw new IOException("File " + file + " was empty");
         try {
             return (T) (apply(bytes).getValueIn().object(expectedType));
         } finally {
