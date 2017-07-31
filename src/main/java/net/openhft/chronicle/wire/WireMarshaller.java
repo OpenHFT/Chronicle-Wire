@@ -20,7 +20,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -377,12 +376,18 @@ public class WireMarshaller<T> {
         }
 
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+            long pos = read.wireIn().bytes().readPosition();
             try {
                 @Nullable Object using = ObjectUtils.isImmutable(type) == ObjectUtils.Immutability.NO ? field.get(o) : null;
+                Object object = read.object(using, type);
+                field.set(o, object);
 
-                field.set(o, read.object(using, type));
             } catch (Exception e) {
-                throw new IORuntimeException("Error reading " + field, e);
+                read.wireIn().bytes().readPosition(pos);
+                Object object = read.object();
+                Jvm.warn().on(getClass(), "Unable to parse field: " + field.getName() + ", as a marshallable as it is " + object);
+                if (overwrite)
+                    field.set(o, ObjectUtils.defaultValue(field.getType()));
             }
         }
 

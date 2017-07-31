@@ -3021,6 +3021,13 @@ public class TextWire extends AbstractWire implements Wire {
         public long int64() {
             consumePadding();
             valueIn.skipType();
+            switch (peekCode()) {
+                case '[':
+                case '{':
+                    Jvm.warn().on(getClass(), "Unable to read " + valueIn.object() + " as a long.");
+                    return 0;
+            }
+
             long l = getALong();
             checkRewind();
             return l;
@@ -3036,6 +3043,12 @@ public class TextWire extends AbstractWire implements Wire {
         public double float64() {
             consumePadding();
             valueIn.skipType();
+            switch (peekCode()) {
+                case '[':
+                case '{':
+                    Jvm.warn().on(getClass(), "Unable to read " + valueIn.object() + " as a double.");
+                    return 0;
+            }
             final double v = bytes.parseDouble();
             checkRewind();
             return v;
