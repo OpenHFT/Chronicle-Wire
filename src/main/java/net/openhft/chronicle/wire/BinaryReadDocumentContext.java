@@ -89,11 +89,17 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
                 wire0.bytes().readPosition(start);
                 wire0.bytes().readSkip(4);
                 while (wire0.hasMore()) {
+                    final long remaining = wire0.bytes().readRemaining();
                     final ValueIn read = wire0.read();
                     if (read.isTyped()) {
                         read.skipValue();
                     } else {
                         read.text(Wires.acquireStringBuilder());  // todo remove this and use skipValue
+                    }
+
+                    if (wire0.bytes().readRemaining() == remaining) {
+                        // stopped making progress, exit loop
+                        break;
                     }
                 }
             } catch (Exception e) {
