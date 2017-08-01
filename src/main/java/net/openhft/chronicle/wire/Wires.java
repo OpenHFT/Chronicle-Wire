@@ -20,6 +20,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
 import net.openhft.chronicle.core.ClassLocal;
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -692,6 +693,16 @@ public enum Wires {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
             switch (method.getName()) {
+                case "hashCode":
+                    if (args == null || args.length == 0) {
+                        return Maths.agitate(typeName.hashCode() * 1019L + fields.hashCode() * 10191L);
+                    }
+                    break;
+                case "equals":
+                    if (args != null && args.length == 1) {
+                        return equals0(proxy, args[0]);
+                    }
+                    break;
                 case "deepCopy":
                     if (args == null || args.length == 0) {
                         TupleInvocationHandler h2 = new TupleInvocationHandler(typeName);
@@ -761,6 +772,24 @@ public enum Wires {
                 return proxy;
             }
             throw new UnsupportedOperationException(method.toString());
+        }
+
+        @NotNull
+        private Object equals0(Object proxy, Object o) {
+            if (proxy == o)
+                return true;
+            if (!(o instanceof Marshallable))
+                return false;
+            Marshallable m = (Marshallable) o;
+            if (!m.getClassName().equals(typeName))
+                return false;
+            if (!Proxy.isProxyClass(m.getClass()))
+                return false;
+            InvocationHandler invocationHandler = Proxy.getInvocationHandler(m);
+            if (!(invocationHandler instanceof TupleInvocationHandler))
+                return false;
+            TupleInvocationHandler tih = (TupleInvocationHandler) invocationHandler;
+            return fields.equals(tih.fields);
         }
     }
 

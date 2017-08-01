@@ -3405,14 +3405,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                             return;
                         case TYPE_PREFIX: {
                             readCode();
-                            @Nullable StringBuilder sb = readUtf8();
-                            final Class clazz2;
-                            try {
-                                clazz2 = classLookup().forName(sb);
-                            } catch (ClassNotFoundException e) {
-                                throw new IORuntimeException(e);
-                            }
-                            object(null, clazz2);
+                            readUtf8();
+                            consumeNext();
                             return;
                         }
                     }

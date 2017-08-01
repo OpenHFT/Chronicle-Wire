@@ -150,10 +150,24 @@ public class MethodReaderTest {
                 "---\n", wire.toString());
     }
 
-    interface MRTListener {
-        void top(MRTInterface mrti);
+    @Test
+    public void testNestedUnknownClass() {
+        Wire wire2 = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
-        void mid(MRT1 mrt1);
+        String text = "unknown: {\n" +
+                "  u: !UnknownClass2 {\n" +
+                "    one: 1,\n" +
+                "    two: 2.2,\n" +
+                "    three: words\n" +
+                "  }\n" +
+                "}\n" +
+                "---\n";
+        Wire wire = new TextWire(Bytes.from(text));
+        MethodReader reader = wire.methodReader(writer2);
+        assertTrue(reader.readOne());
+        assertFalse(reader.readOne());
+        assertEquals(text, wire2.toString());
     }
 
     interface MRTInterface {
@@ -183,6 +197,18 @@ public class MethodReaderTest {
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
         assertEquals(text, wire2.toString());
+    }
+
+    interface MRTListener {
+        void top(MRTInterface mrti);
+
+        void mid(MRT1 mrt1);
+
+        void unknown(NestedUnknown unknown);
+    }
+
+    static class NestedUnknown extends AbstractMarshallable {
+        Marshallable u;
     }
 
     static class MRT1 extends AbstractMarshallable implements MRTInterface {
