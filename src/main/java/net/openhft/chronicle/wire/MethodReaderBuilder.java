@@ -2,7 +2,7 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 
-/**
+/*
  * Created by peter on 17/05/2017.
  */
 public class MethodReaderBuilder {
@@ -32,8 +32,7 @@ public class MethodReaderBuilder {
 
     @NotNull
     private static String errorMsg(CharSequence s, MessageHistory history, long sourceIndex) {
-        String s1 = "Unknown method-name='" + s + "' from " + history.lastSourceId() + " at " + Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex;
-        return s1;
+        return "Unknown method-name='" + s + "' from " + history.lastSourceId() + " at " + Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex;
     }
 
     public boolean ignoreDefaults() {

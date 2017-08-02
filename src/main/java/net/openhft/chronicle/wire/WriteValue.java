@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
-/**
+/*
  * Created by peter on 26/12/15.
  */
 public interface WriteValue {

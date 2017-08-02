@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.wire.benchmarks;
 
-/**
+/*
  * Created by peter on 12/08/15.
  */
 public enum Side {

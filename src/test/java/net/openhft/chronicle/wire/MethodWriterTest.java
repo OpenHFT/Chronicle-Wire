@@ -10,7 +10,7 @@ import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
+/*
  * Created by peter on 17/05/2017.
  */
 public class MethodWriterTest {

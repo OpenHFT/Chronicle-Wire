@@ -2,7 +2,7 @@ package net.openhft.chronicle.wire;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
-/**
+/*
  * Created by peter.lawrey@chronicle.software on 24/07/2017
  */
 public abstract class AbstractFieldInfo implements FieldInfo {

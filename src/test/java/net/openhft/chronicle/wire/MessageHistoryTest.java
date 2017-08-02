@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.fail;
 
-/**
+/*
  * Created by jerry on 19/06/17.
  */
 public class MessageHistoryTest {

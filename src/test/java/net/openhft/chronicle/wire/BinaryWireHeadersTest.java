@@ -32,7 +32,7 @@ import java.util.concurrent.TimeoutException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
+/*
  * Created by Peter on 04/05/2016.
  */
 public class BinaryWireHeadersTest {

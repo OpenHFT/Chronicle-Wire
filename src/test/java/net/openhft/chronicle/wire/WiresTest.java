@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/**
+/*
  * Created by rob on 14/06/2017.
  */
 public class WiresTest {

@@ -694,8 +694,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             sb.append(fieldId);
             return sb;
         }
-        int codeMatch = keyCode;
-        if (fieldId != codeMatch)
+        if (fieldId != keyCode)
             return sb;
 
         sb.append(keyName);

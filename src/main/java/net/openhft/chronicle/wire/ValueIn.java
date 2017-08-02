@@ -392,9 +392,7 @@ public interface ValueIn {
 
     @Nullable
     default <K, V> Map<K, V> marshallableAsMap(Class<K> kClass, @NotNull Class<V> vClass, @NotNull Map<K, V> map) {
-        return marshallable(m -> {
-            m.readAllAsMap(kClass, vClass, map);
-        }) ? map : null;
+        return marshallable(m -> m.readAllAsMap(kClass, vClass, map)) ? map : null;
     }
 
     @Nullable

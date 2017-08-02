@@ -2138,8 +2138,7 @@ public class TextWire extends AbstractWire implements Wire {
                         @NotNull StringBuilder sb2 = acquireStringBuilder();
                         AppendableUtil.setLength(sb2, 0);
                         t.parseWord(sb2);
-                        byte[] decode = Base64.getDecoder().decode(sb2.toString());
-                        return decode;
+                        return Base64.getDecoder().decode(sb2.toString());
                     });
                     if (uncompressed != null) {
                         bytesConsumer.readMarshallable(Bytes.wrapForRead(uncompressed));
@@ -2693,6 +2692,7 @@ public class TextWire extends AbstractWire implements Wire {
                 code = readCode();
                 popState();
                 if (code != '}')
+                    //noinspection ThrowFromFinallyBlock
                     throw new IORuntimeException("Unterminated { while reading marshallable "
                             + "bytes=" + Bytes.toString(bytes)
                     );
@@ -3192,10 +3192,12 @@ public class TextWire extends AbstractWire implements Wire {
             try {
                 return Long.decode(ss);
             } catch (NumberFormatException fallback) {
+                // fallback
             }
             try {
                 return Double.parseDouble(ss);
             } catch (NumberFormatException fallback) {
+                // fallback
             }
             try {
                 if (s.length() == 7 && s.charAt(1) == ':')
@@ -3203,16 +3205,19 @@ public class TextWire extends AbstractWire implements Wire {
                 if (s.length() == 8 && s.charAt(2) == ':')
                     return LocalTime.parse(s);
             } catch (DateTimeParseException fallback) {
+                // fallback
             }
             try {
                 if (s.length() == 10)
                     return LocalDate.parse(s);
             } catch (DateTimeParseException fallback) {
+                // fallback
             }
             try {
                 if (s.length() >= 22)
                     return ZonedDateTime.parse(s);
             } catch (DateTimeParseException fallback) {
+                // fallback
             }
             return s;
         }

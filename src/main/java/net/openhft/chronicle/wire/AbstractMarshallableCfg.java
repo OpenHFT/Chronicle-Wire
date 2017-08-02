@@ -19,7 +19,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.core.io.IORuntimeException;
 
-/**
+/*
  * Created by peter on 16/03/16.
  */
 public abstract class AbstractMarshallableCfg extends AbstractMarshallable {

@@ -21,7 +21,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-/**
+/*
  * Created by peter on 24/12/15.
  */
 public class TextReadDocumentContext implements ReadDocumentContext {

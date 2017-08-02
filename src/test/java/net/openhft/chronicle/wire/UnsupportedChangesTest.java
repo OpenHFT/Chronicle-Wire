@@ -9,7 +9,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-/**
+/*
  * Created by peter.lawrey@chronicle.software on 31/07/2017
  */
 public class UnsupportedChangesTest {

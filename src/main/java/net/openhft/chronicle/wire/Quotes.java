@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
-/**
+/*
  * Created by peter on 31/08/15.
  */
 enum Quotes {

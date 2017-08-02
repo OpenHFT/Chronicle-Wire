@@ -27,7 +27,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
+/*
  * Created by peter on 22/04/16.
  * <p>
  * Anything you can read marshallable object from.

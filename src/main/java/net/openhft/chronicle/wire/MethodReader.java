@@ -33,7 +33,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-/**
+/*
  * Created by peter on 24/03/16.
  */
 public class MethodReader implements Closeable {
@@ -87,9 +87,7 @@ public class MethodReader implements Closeable {
             }
         }
         if (wireParser.lookup(HISTORY) == null) {
-            wireParser.register(() -> HISTORY, (s, v, $) -> {
-                v.marshallable(MessageHistory.get());
-            });
+            wireParser.register(() -> HISTORY, (s, v, $) -> v.marshallable(MessageHistory.get()));
         }
     }
 
@@ -126,17 +124,16 @@ public class MethodReader implements Closeable {
     }
 
     public void addParseletForMethod(Object o, @NotNull Method m, Class<?> parameterType) {
-        Class msgClass = parameterType;
         m.setAccessible(true); // turn of security check to make a little faster
         String name = m.getName();
-        if (msgClass.isInterface() || !ReadMarshallable.class.isAssignableFrom(msgClass)) {
+        if (parameterType.isInterface() || !ReadMarshallable.class.isAssignableFrom(parameterType)) {
             @NotNull Object[] argArr = {null};
             wireParser.register(m::getName, (s, v, $) -> {
                 try {
                     if (Jvm.isDebug())
                         logMessage(s, v);
 
-                    argArr[0] = v.object(argArr[0], msgClass);
+                    argArr[0] = v.object(argArr[0], parameterType);
                     invoke(o, m, argArr);
                 } catch (Exception i) {
                     Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], i);
@@ -146,12 +143,12 @@ public class MethodReader implements Closeable {
         } else {
             ReadMarshallable arg;
             try {
-                Constructor constructor = msgClass.getDeclaredConstructor();
+                Constructor constructor = ((Class) parameterType).getDeclaredConstructor();
                 constructor.setAccessible(true);
                 arg = (ReadMarshallable) constructor.newInstance();
             } catch (Exception e) {
                 try {
-                    arg = (ReadMarshallable) OS.memory().allocateInstance(msgClass);
+                    arg = (ReadMarshallable) OS.memory().allocateInstance((Class) parameterType);
                 } catch (InstantiationException e1) {
                     throw Jvm.rethrow(e1);
                 }
@@ -162,7 +159,7 @@ public class MethodReader implements Closeable {
                     if (Jvm.isDebug() && LOGGER.isDebugEnabled())
                         logMessage(s, v);
 
-                    argArr[0] = v.object(argArr[0], msgClass);
+                    argArr[0] = v.object(argArr[0], parameterType);
                     invoke(o, m, argArr);
                 } catch (Throwable t) {
                     Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], t);

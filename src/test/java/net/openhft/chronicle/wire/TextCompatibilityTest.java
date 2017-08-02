@@ -34,7 +34,7 @@ import java.util.List;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
 
-/**
+/*
  * Created by peter on 18/05/17.
  */
 @RunWith(value = Parameterized.class)

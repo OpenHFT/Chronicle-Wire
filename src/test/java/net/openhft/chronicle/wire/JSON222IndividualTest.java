@@ -29,7 +29,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-/**
+/*
  * Created by peter on 31/10/16.
  */
 public class JSON222IndividualTest {

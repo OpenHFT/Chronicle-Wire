@@ -30,7 +30,7 @@ import java.util.Collection;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
 
-/**
+/*
  * Created by peter on 25/05/15.
  */
 

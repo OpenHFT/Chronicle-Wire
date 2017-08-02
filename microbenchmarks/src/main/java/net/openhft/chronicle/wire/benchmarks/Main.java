@@ -50,7 +50,7 @@ enum DataFields implements WireKey {
 @interface PrintAsText {
 }
 
-/**
+/*
  * Created by peter on 11/08/15.
  */
 @State(Scope.Thread)

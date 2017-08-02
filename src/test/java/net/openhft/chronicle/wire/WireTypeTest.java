@@ -27,7 +27,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-/**
+/*
  * Created by peter.lawrey on 10/02/2016.
  */
 public class WireTypeTest {

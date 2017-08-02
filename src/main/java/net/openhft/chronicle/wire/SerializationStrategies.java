@@ -32,7 +32,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
-/**
+/*
  * Created by peter on 10/05/16.
  */
 public enum SerializationStrategies implements SerializationStrategy {

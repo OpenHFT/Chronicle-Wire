@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
+/*
  * Created by peter on 23/06/15.
  */
 public enum Update implements SerializableUpdater<AtomicLong> {

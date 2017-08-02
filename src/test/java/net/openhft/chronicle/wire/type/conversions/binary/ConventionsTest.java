@@ -26,7 +26,7 @@ import org.junit.Test;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 
-/**
+/*
  * Created by Rob Austin
  */
 public class ConventionsTest {

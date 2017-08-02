@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 
-/**
+/*
  * Created by peter on 18/10/16.
  */
 public interface FieldInfo {

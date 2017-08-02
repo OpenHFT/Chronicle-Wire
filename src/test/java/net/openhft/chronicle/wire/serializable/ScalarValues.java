@@ -29,7 +29,7 @@ import java.util.UUID;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
-/**
+/*
  * Created by peter on 09/05/16.
  */
 public class ScalarValues implements Serializable {

@@ -20,7 +20,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-/**
+/*
  * Created by peter on 27/03/16.
  */
 public class VanillaMessageHistory extends AbstractMarshallable implements MessageHistory {

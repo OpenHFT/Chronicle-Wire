@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static net.openhft.chronicle.wire.MethodReader.NO_ARGS;
 
-/**
+/*
  * Created by peter on 25/03/16.
  */
 public abstract class AbstractMethodWriterInvocationHandler implements MethodWriterInvocationHandler {

@@ -33,7 +33,7 @@ import java.util.Collection;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
-/**
+/*
  * Created by rob on 03/05/2016.
  */
 

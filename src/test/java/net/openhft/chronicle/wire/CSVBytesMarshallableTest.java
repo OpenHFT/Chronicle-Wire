@@ -31,7 +31,7 @@ enum CcyPair {
     static final EnumInterner<CcyPair> INTERNER = new EnumInterner<>(CcyPair.class);
 }
 
-/**
+/*
  * Created by peter.lawrey on 03/12/2015.
  */
 public class CSVBytesMarshallableTest {

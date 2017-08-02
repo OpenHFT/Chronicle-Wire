@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-/**
+/*
  * Created by peter on 06/10/15.
  */
 public class GenerateFIXWireKey {

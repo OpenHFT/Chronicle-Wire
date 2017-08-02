@@ -24,7 +24,7 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-/**
+/*
  * Created by peter.lawrey on 06/02/2016.
  * <p>
  * Anything you can write Marshallable objects to.

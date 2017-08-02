@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
+/*
  * Created by peter.lawrey on 01/02/2016.
  */
 public class OuterClass implements Marshallable {

@@ -1,6 +1,6 @@
 package net.openhft.chronicle.wire;
 
-/**
+/*
  * Created by peter on 17/05/2017.
  */
 public interface ReadDocumentContext extends DocumentContext {

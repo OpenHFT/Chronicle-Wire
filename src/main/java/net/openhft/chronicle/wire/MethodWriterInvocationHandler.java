@@ -20,7 +20,7 @@ import net.openhft.chronicle.core.io.Closeable;
 
 import java.lang.reflect.InvocationHandler;
 
-/**
+/*
  * Created by peter on 17/05/2017.
  */
 public interface MethodWriterInvocationHandler extends InvocationHandler {

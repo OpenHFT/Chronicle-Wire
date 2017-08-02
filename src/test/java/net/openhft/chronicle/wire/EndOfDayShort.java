@@ -18,7 +18,7 @@ package net.openhft.chronicle.wire;
 
 import java.io.Serializable;
 
-/**
+/*
  * Created by peter on 27/08/15.
  */
 public class EndOfDayShort extends AbstractMarshallable implements Serializable {

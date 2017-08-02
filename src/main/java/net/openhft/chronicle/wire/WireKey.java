@@ -22,7 +22,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
+/*
  * Created by peter.lawrey on 1/10/15.
  */
 @FunctionalInterface

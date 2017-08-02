@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.*;
 
-/**
+/*
  * Created by peter on 06/04/16.
  */
 public class ResultSetWireIn implements WireIn {

@@ -34,7 +34,7 @@ import java.util.function.ObjIntConsumer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-/**
+/*
  * Created by peter on 14/05/16.
  */
 @RunWith(value = Parameterized.class)

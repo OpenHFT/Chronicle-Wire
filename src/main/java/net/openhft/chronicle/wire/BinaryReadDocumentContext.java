@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import static net.openhft.chronicle.wire.Wires.lengthOf;
 
-/**
+/*
  * Created by peter on 24/12/15.
  */
 public class BinaryReadDocumentContext implements ReadDocumentContext {

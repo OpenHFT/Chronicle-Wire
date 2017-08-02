@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
-/**
+/*
  * Created by peter on 27/03/16.
  */
 public interface MessageHistory extends Marshallable {

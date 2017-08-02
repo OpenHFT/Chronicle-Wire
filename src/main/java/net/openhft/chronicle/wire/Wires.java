@@ -51,13 +51,13 @@ import java.util.function.Function;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
-/**
+/*
  * Created by peter on 31/08/15.
  */
 public enum Wires {
     ;
     public static final int LENGTH_MASK = -1 >>> 2;
-    public static final int NOT_COMPLETE = 1 << 31;
+    public static final int NOT_COMPLETE = 0x8000_0000;
     @Deprecated
     public static final int NOT_READY = NOT_COMPLETE;
     public static final int META_DATA = 1 << 30;

@@ -33,7 +33,7 @@ import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 
-/**
+/*
  * Created by peter.lawrey on 01/02/2016.
  */
 @RunWith(value = Parameterized.class)

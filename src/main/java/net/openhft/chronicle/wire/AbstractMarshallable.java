@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
-/**
+/*
  * Created by peter on 16/03/16.
  */
 public abstract class AbstractMarshallable implements Marshallable {

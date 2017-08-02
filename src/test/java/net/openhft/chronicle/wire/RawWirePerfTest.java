@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Test;
 
-/**
+/*
  * Created by peter.lawrey on 19/01/15.
  */
 public class RawWirePerfTest {

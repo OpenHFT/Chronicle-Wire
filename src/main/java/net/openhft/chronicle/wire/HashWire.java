@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 
-/**
+/*
  * Created by peter.lawrey on 05/02/2016.
  */
 public class HashWire implements WireOut {

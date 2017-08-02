@@ -33,7 +33,7 @@ import java.util.*;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
-/**
+/*
  * Created by peter.lawrey on 06/02/15.
  */
 public class BinaryWire2Test {

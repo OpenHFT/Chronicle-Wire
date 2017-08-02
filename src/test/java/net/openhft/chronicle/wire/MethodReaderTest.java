@@ -19,7 +19,7 @@ interface MockMethods {
     void method2(MockDto dto);
 }
 
-/**
+/*
  * Created by peter on 17/05/2017.
  */
 public class MethodReaderTest {

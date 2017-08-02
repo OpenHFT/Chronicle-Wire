@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
 
-/**
+/*
  * Created by peter on 26/05/2017.
  */
 public class WithDefaultsTest {

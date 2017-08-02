@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
 
-/**
+/*
  * Created by peter on 16/03/16.
  */
 public class WireMarshaller<T> {
@@ -49,26 +49,25 @@ public class WireMarshaller<T> {
     private final boolean isLeaf;
     @Nullable
     private final T defaultValue;
-    private final Class<T> typeClass;
 
     public WireMarshaller(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
         this.fields = fields;
         this.isLeaf = isLeaf;
         defaultValue = defaultValueForType(tClass);
-        typeClass = tClass;
+        Class<T> typeClass = tClass;
     }
 
     @NotNull
     public static <T> WireMarshaller<T> of(@NotNull Class<T> tClass) {
         if (tClass.isInterface() || tClass.isEnum())
-            return new WireMarshaller<T>(tClass, NO_FIELDS, true);
+            return new WireMarshaller<>(tClass, NO_FIELDS, true);
 
         @NotNull Map<String, Field> map = new LinkedHashMap<>();
         getAllField(tClass, map);
         final FieldAccess[] fields = map.values().stream()
                 .map(FieldAccess::create)
                 .toArray(FieldAccess[]::new);
-        boolean isLeaf = !Stream.of(fields).anyMatch(
+        boolean isLeaf = Stream.of(fields).noneMatch(
                 c -> (isCollection(c.field.getType()) && !Boolean.TRUE.equals(c.isLeaf))
                         || WriteMarshallable.class.isAssignableFrom(c.field.getType()));
         return new WireMarshaller<>(tClass, fields, isLeaf);

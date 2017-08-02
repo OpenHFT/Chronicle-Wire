@@ -19,7 +19,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.Nullable;
 
-/**
+/*
  * Created by peter on 24/12/15.
  */
 public interface DocumentContext extends Closeable, SourceContext {

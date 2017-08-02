@@ -6,7 +6,7 @@ import net.openhft.chronicle.wire.WireOut;
 import net.openhft.chronicle.wire.Wires;
 import org.jetbrains.annotations.NotNull;
 
-/**
+/*
  * Created by peter on 26/05/2017.
  */
 public class WithDefaults extends AbstractMarshallable {

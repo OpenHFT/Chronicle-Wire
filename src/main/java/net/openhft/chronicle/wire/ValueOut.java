@@ -603,7 +603,7 @@ public interface ValueOut {
                 typePrefix(SortedSet.class);
             else if (value instanceof Set)
                 typePrefix(Set.class);
-            return sequence(v -> ((Collection) value).stream().forEach(v::object));
+            return sequence(v -> ((Collection) value).forEach(v::object));
         } else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
             WireSerializedLambda.write(value, this);
             return wireOut();

@@ -248,9 +248,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
     void endEvent();
 
     default <K, V> void writeAllAsMap(Class<K> kClass, Class<V> vClass, @NotNull Map<K, V> map) {
-        map.forEach((k, v) -> {
-            writeEvent(kClass, k).object(vClass, v);
-        });
+        map.forEach((k, v) -> writeEvent(kClass, k).object(vClass, v));
     }
 
     @NotNull

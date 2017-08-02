@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
+/*
  * Created by peter on 09/05/16.
  */
 public class Nested extends AbstractMarshallable {

@@ -31,7 +31,7 @@ import java.util.List;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
 
-/**
+/*
  * Created by peter on 13/12/16.
  */
 @RunWith(value = Parameterized.class)

@@ -25,7 +25,7 @@ import java.lang.reflect.Proxy;
 
 import static org.easymock.EasyMock.*;
 
-/**
+/*
  * Created by peter on 23/04/16.
  */
 public class BinaryMethodWriterInvocationHandlerTest {

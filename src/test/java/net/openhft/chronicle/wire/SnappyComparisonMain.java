@@ -24,7 +24,7 @@ import java.io.IOException;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
-/**
+/*
  * Created by peter on 01/12/15.
  */
 public class SnappyComparisonMain {

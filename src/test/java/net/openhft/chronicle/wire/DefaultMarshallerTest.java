@@ -32,7 +32,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-/**
+/*
  * Created by peter on 16/03/16.
  */
 public class DefaultMarshallerTest {
