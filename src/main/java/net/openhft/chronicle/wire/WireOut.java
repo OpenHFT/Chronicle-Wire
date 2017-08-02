@@ -135,8 +135,10 @@ public interface WireOut extends WireCommon, MarshallableOut {
      *                 otherwise data
      * @return a document context used for witting
      */
+    @Override
     DocumentContext writingDocument(boolean metaData);
 
+    @Override
     @NotNull
     default DocumentContext writingDocument() {
         return writingDocument(false);

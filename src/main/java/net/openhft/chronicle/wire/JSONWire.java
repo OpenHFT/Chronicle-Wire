@@ -81,6 +81,7 @@ public class JSONWire extends TextWire {
         return Quotes.NONE;
     }
 
+    @Override
     void escape(@NotNull CharSequence s) {
         bytes.writeUnsignedByte('"');
         if (needsQuotes(s) == Quotes.NONE) {
@@ -128,21 +129,26 @@ public class JSONWire extends TextWire {
             return this;
         }
 
+        @Override
         public void elementSeparator() {
             sep = COMMA;
         }
 
+        @Override
         protected void popState() {
         }
 
+        @Override
         protected void pushState() {
             leaf = true;
         }
 
+        @Override
         protected void afterOpen() {
             sep = EMPTY;
         }
 
+        @Override
         protected void afterClose() {
 
         }
@@ -160,10 +166,12 @@ public class JSONWire extends TextWire {
             sep = COMMA;
         }
 
+        @Override
         protected void fieldValueSeperator() {
             bytes.writeUnsignedByte(':');
         }
 
+        @Override
         public void writeComment(@NotNull CharSequence s) {
         }
     }

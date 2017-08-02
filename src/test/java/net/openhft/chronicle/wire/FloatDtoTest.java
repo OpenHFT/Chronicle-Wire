@@ -29,6 +29,7 @@ public class FloatDtoTest {
             this.uiid = uiid;
         }
 
+        @Override
         public void writeKey(@NotNull Bytes bytes) {
             WIRE_MARSHALLER_CL.get(Key.class).writeKey(this, bytes);
         }

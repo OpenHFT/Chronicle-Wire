@@ -364,6 +364,7 @@ public class WireMarshaller<T> {
             type = field.getType();
         }
 
+        @Override
         protected void getValue(@NotNull Object o, @NotNull ValueOut write, Object previous)
                 throws IllegalAccessException {
             Boolean wasLeaf = null;
@@ -375,6 +376,7 @@ public class WireMarshaller<T> {
                 write.swapLeaf(wasLeaf);
         }
 
+        @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
             long pos = read.wireIn().bytes().readPosition();
             try {
@@ -402,10 +404,12 @@ public class WireMarshaller<T> {
             super(field, false);
         }
 
+        @Override
         protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
             write.text((String) UNSAFE.getObject(o, offset));
         }
 
+        @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
             UNSAFE.putObject(o, offset, read.text());
         }
@@ -474,12 +478,14 @@ public class WireMarshaller<T> {
             super(field, false);
         }
 
+        @Override
         protected void getValue(@NotNull Object o, @NotNull ValueOut write, Object previous)
                 throws IllegalAccessException {
             Bytes bytesField = (Bytes) field.get(o);
             write.bytes(bytesField);
         }
 
+        @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
             @NotNull Bytes bytes = (Bytes) UNSAFE.getObject(o, offset);
             if (bytes == null)

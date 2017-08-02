@@ -106,6 +106,7 @@ public class RawWire extends AbstractWire implements Wire {
 
     }
 
+    @Override
     @NotNull
     public String readingPeekYaml() {
         long start = readContext.start;
@@ -703,6 +704,7 @@ public class RawWire extends AbstractWire implements Wire {
                 return bytes.readUtf8(s) ? s : null;
         }
 
+        @Override
         @NotNull
         public WireIn bytes(@NotNull BytesOut toBytes) {
             return bytes(toBytes, true);
@@ -744,6 +746,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         }
 
+        @Override
         @NotNull
         public WireIn bytes(@NotNull ReadBytesMarshallable bytesConsumer) {
             long length = readLength();
@@ -1009,6 +1012,7 @@ public class RawWire extends AbstractWire implements Wire {
             throw new UnsupportedOperationException("todo");
         }
 
+        @Override
         @Nullable
         public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy) {
             long length = bytes.readUnsignedInt();

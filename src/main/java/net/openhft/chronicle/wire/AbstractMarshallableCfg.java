@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
  */
 public abstract class AbstractMarshallableCfg extends AbstractMarshallable {
 
+    @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
         Wires.readMarshallable(this, wire, false);
     }

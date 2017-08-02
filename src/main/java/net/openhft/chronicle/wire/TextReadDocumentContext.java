@@ -53,10 +53,12 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         return present;
     }
 
+    @Override
     public void closeReadPosition(long readPosition) {
         this.readPosition = readPosition;
     }
 
+    @Override
     public void closeReadLimit(long readLimit) {
         this.readLimit = readLimit;
     }
@@ -79,6 +81,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         present = false;
     }
 
+    @Override
     public void start() {
         wire.getValueOut().resetBetweenDocuments();
         @NotNull final Bytes<?> bytes = wire.bytes();

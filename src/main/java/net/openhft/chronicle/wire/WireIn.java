@@ -106,6 +106,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     @NotNull
     WireIn readComment(@NotNull StringBuilder sb);
 
+    @Override
     void clear();
 
     /**
@@ -163,6 +164,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
      *
      * @return the document context
      */
+    @Override
     @NotNull
     DocumentContext readingDocument();
 

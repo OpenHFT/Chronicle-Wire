@@ -81,6 +81,7 @@ public class EnumWireTest {
     static class MarshAndResolve implements Marshallable, ReadResolvable<MarshAndResolve> {
         static final MarshAndResolve MARSH_AND_RESOLVE = new MarshAndResolve();
 
+        @Override
         @NotNull
         public MarshAndResolve readResolve() {
             return MARSH_AND_RESOLVE;

@@ -479,10 +479,12 @@ public abstract class AbstractWire implements Wire {
             timedParser.reset();
     }
 
+    @Override
     public Object parent() {
         return parent;
     }
 
+    @Override
     public void parent(Object parent) {
         this.parent = parent;
     }
@@ -514,20 +516,24 @@ public abstract class AbstractWire implements Wire {
         return true;
     }
 
+    @Override
     public boolean notCompleteIsNotPresent() {
         return notCompleteIsNotPresent;
     }
 
+    @Override
     public void notCompleteIsNotPresent(boolean notCompleteIsNotPresent) {
         this.notCompleteIsNotPresent = notCompleteIsNotPresent;
     }
 
+    @Override
     public ObjectOutput objectOutput() {
         if (objectOutput == null)
             objectOutput = new WireObjectOutput(this);
         return objectOutput;
     }
 
+    @Override
     public ObjectInput objectInput() {
         if (objectInput == null)
             objectInput = new WireObjectInput(this);

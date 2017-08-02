@@ -56,6 +56,7 @@ public class QueryWire extends TextWire {
         return new QueryValueIn();
     }
 
+    @Override
     @NotNull
     protected StringBuilder readField(@NotNull StringBuilder sb) {
         consumePadding();
@@ -65,6 +66,7 @@ public class QueryWire extends TextWire {
         return sb;
     }
 
+    @Override
     @ForceInline
     public void consumePadding() {
         int codePoint = peekCode();
@@ -153,6 +155,7 @@ public class QueryWire extends TextWire {
         @Nullable
         CharSequence fieldName = null;
 
+        @Override
         void prependSeparator() {
             bytes.appendUtf8(sep);
             sep = "";
@@ -162,6 +165,7 @@ public class QueryWire extends TextWire {
             }
         }
 
+        @Override
         public void elementSeparator() {
             sep = "&";
         }
@@ -316,9 +320,12 @@ public class QueryWire extends TextWire {
             elementSeparator();
             return QueryWire.this;
         }
+
+        @Override
         protected void popState() {
         }
 
+        @Override
         protected void pushState() {
         }
 
@@ -352,17 +359,20 @@ public class QueryWire extends TextWire {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         @NotNull
         public ValueOut write() {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         @NotNull
         public ValueOut write(@NotNull WireKey key) {
             fieldName = key.name();
             return this;
         }
 
+        @Override
         @NotNull
         public ValueOut write(@NotNull CharSequence name) {
             fieldName = name;
@@ -392,6 +402,7 @@ public class QueryWire extends TextWire {
             return a;
         }
 
+        @Override
         @NotNull
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) {
             StringBuilder sb = WireInternal.acquireStringBuilder();

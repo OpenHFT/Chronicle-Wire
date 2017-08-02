@@ -122,6 +122,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         return new DeltaValueIn();
     }
 
+    @Override
     public void clear() {
         bytes.clear();
         valueIn.resetState();
@@ -167,6 +168,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @return when readReading a document returns the current document as a YAML String, if you are
      * not currently reading a document, and empty string will be return.
      */
+    @Override
     @NotNull
     public String readingPeekYaml() {
         long start = readContext.start;
@@ -559,6 +561,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         return bytes.read8bit(sb) ? sb : null;
     }
 
+    @Override
     public void consumePadding() {
         consumePadding(false);
     }
@@ -1188,6 +1191,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     enum AnyCodeMatch implements WireKey {
         ANY_CODE_MATCH;
 
+        @Override
         public int code() {
             return Integer.MIN_VALUE;
         }
@@ -1317,6 +1321,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        @Override
         @NotNull
         public ValueOut writeLength(long length) {
             if (length < 0) {
@@ -1368,6 +1373,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return fixedInt8(i8);
         }
 
+        @Override
         @NotNull
         public WireOut fixedInt8(byte i8) {
             writeCode(INT8).writeByte(i8);
@@ -1387,6 +1393,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return fixedInt16(i16);
         }
 
+        @Override
         @NotNull
         public WireOut fixedInt16(short i16) {
             writeCode(INT16).writeShort(i16);
@@ -1414,6 +1421,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return fixedInt32(i32);
         }
 
+        @Override
         @NotNull
         public WireOut fixedInt32(int i32) {
             writeCode(INT32).writeInt(i32);
@@ -1439,6 +1447,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return fixedInt64(i64);
         }
 
+        @Override
         @NotNull
         public WireOut fixedInt64(long i64) {
             writeCode(INT64).writeLong(i64);
@@ -1485,6 +1494,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return fixedFloat32(f);
         }
 
+        @Override
         @NotNull
         public WireOut fixedFloat32(float f) {
             writeCode(FLOAT32).writeFloat(f);
@@ -1497,6 +1507,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return fixedFloat64(d);
         }
 
+        @Override
         @NotNull
         public WireOut fixedFloat64(double d) {
             writeCode(FLOAT64).writeDouble(d);
@@ -1684,6 +1695,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        @Override
         public void resetState() {
 
         }
@@ -1997,6 +2009,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     protected class BinaryValueIn implements ValueIn {
         final ValueInStack stack = new ValueInStack();
 
+        @Override
         @Nullable
         public <E> E object(@Nullable E using, @Nullable Class clazz) {
             return Wires.object0(this, using, clazz);
@@ -2143,6 +2156,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
+        @Override
         @NotNull
         public WireIn bytes(@NotNull BytesOut toBytes) {
             return bytes(toBytes, true);
@@ -2199,6 +2213,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return toBytes;
         }
 
+        @Override
         @Nullable
         public WireIn bytesSet(@NotNull PointerBytesStore toBytes) {
             long length = readLength();
@@ -2233,6 +2248,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         }
 
+        @Override
         @Nullable
         public BytesStore bytesStore() {
             long length = readLength() - 1;
@@ -2301,6 +2317,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             bytes.readSkip(length);
         }
 
+        @Override
         @NotNull
         public WireIn bytes(@NotNull ReadBytesMarshallable bytesConsumer) {
             long length = readLength() - 1;
@@ -2815,6 +2832,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return code == TYPE_PREFIX;
         }
 
+        @Override
         @Nullable
         public <T> T typedMarshallable() throws IORuntimeException {
             pushState();
@@ -2879,6 +2897,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             throw new UnsupportedOperationException("Used by DeltaWire");
         }
 
+        @Override
         @Nullable
         public <T> T typedMarshallable(@NotNull Function<Class, ReadMarshallable> marshallableFunction)
                 throws IORuntimeException {
@@ -3017,6 +3036,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return true;
         }
 
+        @Override
         public boolean isNull() {
             consumePadding(true);
             if (peekCode() == NULL) {
@@ -3026,6 +3046,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return false;
         }
 
+        @Override
         @Nullable
         public Object marshallable(@Nullable Object object, @NotNull SerializationStrategy strategy)
                 throws BufferUnderflowException, IORuntimeException {

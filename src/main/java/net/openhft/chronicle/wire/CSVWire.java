@@ -76,6 +76,7 @@ public class CSVWire extends TextWire {
         return new CSVValueIn();
     }
 
+    @Override
     @NotNull
     public StringBuilder readField(@NotNull StringBuilder sb) {
         valueIn.text(sb);
@@ -99,6 +100,7 @@ public class CSVWire extends TextWire {
         }
     }
 
+    @Override
     public void consumePadding() {
         for (; ; ) {
             int codePoint = peekCode();
@@ -143,6 +145,7 @@ public class CSVWire extends TextWire {
             return bytes.readRemaining() > 0;
         }
 
+        @Override
         @Nullable
         <ACS extends Appendable & CharSequence> ACS textTo0(@NotNull ACS a) {
             consumePadding();
@@ -204,6 +207,7 @@ public class CSVWire extends TextWire {
             return a;
         }
 
+        @Override
         protected long readLengthMarshallable() {
             long start = bytes.readPosition();
             try {

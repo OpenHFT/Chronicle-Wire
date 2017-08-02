@@ -216,6 +216,7 @@ public class TextWire extends AbstractWire implements Wire {
         return this;
     }
 
+    @Override
     @NotNull
     public <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
         Class[] interfaces = ObjectUtils.addAll(tClass, additional);
@@ -224,6 +225,7 @@ public class TextWire extends AbstractWire implements Wire {
         return (T) Proxy.newProxyInstance(tClass.getClassLoader(), interfaces, new TextMethodWriterInvocationHandler(this));
     }
 
+    @Override
     @NotNull
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
         return new MethodWriterBuilder<>(tClass, new TextMethodWriterInvocationHandler(this));
@@ -473,6 +475,7 @@ public class TextWire extends AbstractWire implements Wire {
         consumePadding(0);
     }
 
+    @Override
     @NotNull
     public String readingPeekYaml() {
         throw new UnsupportedOperationException();
@@ -996,6 +999,7 @@ public class TextWire extends AbstractWire implements Wire {
             bytes.writeUnsignedByte(' ');
     }
 
+    @Override
     public void startEvent() {
         valueOut.prependSeparator();
         writeTwo('?', ' ');
@@ -1024,6 +1028,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Nullable
         private String eventName;
 
+        @Override
         public void resetState() {
             indentation = 0;
             seps.clear();
@@ -2119,6 +2124,7 @@ public class TextWire extends AbstractWire implements Wire {
             });
         }
 
+        @Override
         @NotNull
         public WireIn bytes(@NotNull ReadBytesMarshallable bytesConsumer) {
             consumePadding();
@@ -2154,6 +2160,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
         }
 
+        @Override
         @Nullable
         public byte[] bytes() {
             consumePadding();
@@ -2564,6 +2571,7 @@ public class TextWire extends AbstractWire implements Wire {
             return true;
         }
 
+        @Override
         public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) {
             list.clear();
             consumePadding();
@@ -2891,6 +2899,7 @@ public class TextWire extends AbstractWire implements Wire {
             return object;
         }
 
+        @Override
         @Nullable
         public <T> T typedMarshallable() {
             return (T) objectWithInferredType(null, SerializationStrategies.ANY_NESTED, null);
@@ -2988,6 +2997,7 @@ public class TextWire extends AbstractWire implements Wire {
             return ObjectUtils.isTrue(sb);
         }
 
+        @Override
         public byte int8() {
             long l = int64();
             if (l > Byte.MAX_VALUE || l < Byte.MIN_VALUE)
@@ -2995,6 +3005,7 @@ public class TextWire extends AbstractWire implements Wire {
             return (byte) l;
         }
 
+        @Override
         public short int16() {
             long l = int64();
             if (l > Short.MAX_VALUE || l < Short.MIN_VALUE)
@@ -3002,6 +3013,7 @@ public class TextWire extends AbstractWire implements Wire {
             return (short) l;
         }
 
+        @Override
         public int int32() {
             long l = int64();
             if (l > Integer.MAX_VALUE || l < Integer.MIN_VALUE)
@@ -3009,6 +3021,7 @@ public class TextWire extends AbstractWire implements Wire {
             return (int) l;
         }
 
+        @Override
         public int uint16() {
             long l = int64();
             if (l > Integer.MAX_VALUE || l < 0)
@@ -3077,6 +3090,7 @@ public class TextWire extends AbstractWire implements Wire {
          * @return true if !!null "", if {@code true} reads the !!null "" up to the next STOP, if
          * {@code false} no  data is read  ( data is only peaked if {@code false} )
          */
+        @Override
         public boolean isNull() {
             consumePadding();
 
@@ -3090,6 +3104,7 @@ public class TextWire extends AbstractWire implements Wire {
             return false;
         }
 
+        @Override
         public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class type) {
             consumePadding();
             @Nullable Object o = objectWithInferredType0(using, strategy, type);

@@ -16,14 +16,17 @@ public abstract class AbstractFieldInfo implements FieldInfo {
         this.name = name;
     }
 
+    @Override
     public String name() {
         return name;
     }
 
+    @Override
     public Class type() {
         return type;
     }
 
+    @Override
     public BracketType bracketType() {
         return bracketType;
     }

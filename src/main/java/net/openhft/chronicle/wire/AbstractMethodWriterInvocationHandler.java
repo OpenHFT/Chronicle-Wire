@@ -114,10 +114,12 @@ public abstract class AbstractMethodWriterInvocationHandler implements MethodWri
         }
     }
 
+    @Override
     public void recordHistory(boolean recordHistory) {
         this.recordHistory = recordHistory;
     }
 
+    @Override
     public void onClose(Closeable closeable) {
         this.closeable = closeable;
     }

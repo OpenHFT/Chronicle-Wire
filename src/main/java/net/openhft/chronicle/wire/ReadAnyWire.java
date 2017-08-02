@@ -89,6 +89,7 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
             return () -> wireType;
         }
 
+        @Override
         @Nullable
         public Wire acquireWire() {
             if (wire != null)

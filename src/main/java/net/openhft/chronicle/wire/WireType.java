@@ -162,6 +162,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             }
         }
 
+        @Override
         public void licenceCheck() {
             if (isAvailable())
                 return;
@@ -176,6 +177,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
         private Boolean isAvailable;
 
+        @Override
         public boolean isAvailable() {
             if (isAvailable != null)
                 return isAvailable;
@@ -222,6 +224,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             }
         }
 
+        @Override
         public void licenceCheck() {
             if (isAvailable())
                 return;
@@ -246,6 +249,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             }
         }
 
+        @Override
         public boolean isAvailable() {
             return isAvailable;
         }
