@@ -771,7 +771,7 @@ public class WireMarshaller<T> {
             } else if (!coll.isEmpty()) {
                 coll.clear();
             }
-            if (!read.sequence(coll, seqConsumer)) {
+            if (overwrite && !read.sequence(coll, seqConsumer)) {
                 field.set(o, null);
             }
         }
