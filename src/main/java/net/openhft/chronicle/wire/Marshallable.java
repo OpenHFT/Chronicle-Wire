@@ -56,11 +56,26 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         return TEXT.fromString(tClass, cs);
     }
 
+    /**
+     * Reads the file from the current working directory, or the class path.
+     *
+     * @param filename or path to read
+     * @return the marshallable object
+     * @throws IOException
+     */
     @NotNull
     static <T> T fromFile(String filename) throws IOException {
         return TEXT.fromFile(filename);
     }
 
+    /**
+     * Reads the file from the current working directory, or the class path.
+     *
+     * @param filename     or path to read
+     * @param expectedType to deserialize as
+     * @return the marshallable object
+     * @throws IOException
+     */
     @Nullable
     static <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
         return TEXT.fromFile(expectedType, filename);
