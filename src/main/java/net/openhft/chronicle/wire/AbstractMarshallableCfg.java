@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.core.io.IORuntimeException;
 
@@ -32,5 +33,10 @@ public abstract class AbstractMarshallableCfg extends AbstractMarshallable {
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
         Wires.writeMarshallable(this, wire, false);
+    }
+
+    @Override
+    public void unexpectedField(Object event, ValueIn valueIn) {
+        Jvm.warn().on(getClass(), "Field " + event + " ignored, was " + valueIn.object());
     }
 }
