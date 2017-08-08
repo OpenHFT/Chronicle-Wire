@@ -102,7 +102,7 @@ public class TextWireTest {
         return map.entrySet().stream().map(Object::toString).collect(Collectors.joining("\n"));
     }
 
-    static class TwoFields extends AbstractMarshallable {
+    static class TwoFields extends AbstractMarshallableCfg {
         String b;
         int d;
         int notThere;
