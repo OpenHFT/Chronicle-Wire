@@ -44,6 +44,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.ObjIntConsumer;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -68,6 +69,51 @@ public class TextWireTest {
         assertEquals(0, sb.length());
     }
 
+    @Test
+    public void handleUnexpectedFields() {
+        TwoFields tf = Marshallable.fromString("!" + TwoFields.class.getName() + " {" +
+                "a: 1,\n" +
+                "b: two,\n" +
+                "c: three,\n" +
+                "d: 44,\n" +
+                "e: also,\n" +
+                "f: at the end\n" +
+                "}");
+        assertEquals("a=1\n" +
+                        "c=three\n" +
+                        "e=also\n" +
+                        "f=at the end",
+                asProperties(tf.others));
+
+        TwoFields tf2 = Marshallable.fromString("!" + TwoFields.class.getName() + " {" +
+                "a: 1,\n" +
+                "b: two,\n" +
+                "c: three,\n" +
+                "d: 44,\n" +
+                "e: also,\n" +
+                "}");
+        assertEquals("a=1\n" +
+                        "c=three\n" +
+                        "e=also",
+                asProperties(tf2.others));
+    }
+
+    public String asProperties(Map<String, Object> map) {
+        return map.entrySet().stream().map(Object::toString).collect(Collectors.joining("\n"));
+    }
+
+    static class TwoFields extends AbstractMarshallable {
+        String b;
+        int d;
+        int notThere;
+
+        transient Map<String, Object> others = new LinkedHashMap<>();
+
+        @Override
+        public void unexpectedField(Object event, ValueIn valueIn) {
+            others.put(event.toString(), valueIn.object());
+        }
+    }
     @Test
     public void licenseCheck() {
         WireType.TEXT.licenceCheck();

@@ -1962,6 +1962,8 @@ public class TextWire extends AbstractWire implements Wire {
         public Bytes textTo(@NotNull Bytes bytes) {
             bytes.clear();
             @Nullable CharSequence cs = textTo0(bytes);
+            consumePadding(1);
+
             if (cs == null)
                 return null;
             if (cs != bytes) {
@@ -2061,11 +2063,12 @@ public class TextWire extends AbstractWire implements Wire {
                         AppendableUtil.setLength(a, 0);
                     }
                     // trim trailing spaces.
-                    while (a.length() > 0)
+                    while (a.length() > 0) {
                         if (Character.isWhitespace(a.charAt(a.length() - 1)))
                             AppendableUtil.setLength(a, a.length() - 1);
                         else
                             break;
+                    }
                     break;
                 }
             }
@@ -2236,45 +2239,11 @@ public class TextWire extends AbstractWire implements Wire {
             int code = peekCode();
             switch (code) {
                 case '{': {
-                    bytes.readSkip(1);
-                    for (; ; ) {
-                        long pos = bytes.readPosition();
-                        consumeAny();
-                        int code2 = peekCode();
-                        if (code2 == '}' || code2 == ']' || code2 <= 0) {
-                            break;
-                        } else if (code2 == ',') {
-                            readCode();
-                        }
-                        if (bytes.readPosition() == pos)
-                            throw new IllegalStateException("Stuck at pos " + pos + " " + bytes);
-                    }
-                    consumePadding();
-                    code = readCode();
-                    if (code != '}') {
-                        bytes.readSkip(-1);
-                        throw new IllegalStateException("Expected a } was " + bytes);
-                    }
+                    consumeMap();
                     break;
                 }
                 case '[': {
-                    bytes.readSkip(1);
-                    for (; ; ) {
-                        long pos = bytes.readPosition();
-                        consumeAny();
-                        if (peekCode() == ',')
-                            readCode();
-                        else
-                            break;
-                        if (bytes.readPosition() == pos)
-                            throw new IllegalStateException("Stuck at pos " + pos + " " + bytes);
-                    }
-                    consumePadding();
-                    code = readCode();
-                    if (code != ']') {
-                        bytes.readSkip(-1);
-                        throw new IllegalStateException("Expected a ] was " + bytes);
-                    }
+                    consumeSeq();
                     break;
                 }
                 case '}':
@@ -2303,6 +2272,50 @@ public class TextWire extends AbstractWire implements Wire {
                         consumeAny();
                     }
                     break;
+            }
+        }
+
+        private void consumeSeq() {
+            int code;
+            bytes.readSkip(1);
+            for (; ; ) {
+                long pos = bytes.readPosition();
+                consumeAny();
+                if (peekCode() == ',')
+                    readCode();
+                else
+                    break;
+                if (bytes.readPosition() == pos)
+                    throw new IllegalStateException("Stuck at pos " + pos + " " + bytes);
+            }
+            consumePadding();
+            code = readCode();
+            if (code != ']') {
+                bytes.readSkip(-1);
+                throw new IllegalStateException("Expected a ] was " + bytes);
+            }
+        }
+
+        private void consumeMap() {
+            int code;
+            bytes.readSkip(1);
+            for (; ; ) {
+                long pos = bytes.readPosition();
+                consumeAny();
+                int code2 = peekCode();
+                if (code2 == '}' || code2 == ']' || code2 <= 0) {
+                    break;
+                } else if (code2 == ',') {
+                    readCode();
+                }
+                if (bytes.readPosition() == pos)
+                    throw new IllegalStateException("Stuck at pos " + pos + " " + bytes);
+            }
+            consumePadding();
+            code = readCode();
+            if (code != '}') {
+                bytes.readSkip(-1);
+                throw new IllegalStateException("Expected a } was " + bytes);
             }
         }
 

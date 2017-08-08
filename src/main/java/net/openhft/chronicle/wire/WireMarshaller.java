@@ -44,6 +44,7 @@ public class WireMarshaller<T> {
                             ? WireMarshaller.ofThrowable(tClass)
                             : WireMarshaller.of(tClass)
             );
+    public static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     @NotNull
     final FieldAccess[] fields;
     private final boolean isLeaf;
@@ -54,7 +55,6 @@ public class WireMarshaller<T> {
         this.fields = fields;
         this.isLeaf = isLeaf;
         defaultValue = defaultValueForType(tClass);
-        Class<T> typeClass = tClass;
     }
 
     @NotNull
@@ -70,8 +70,18 @@ public class WireMarshaller<T> {
         boolean isLeaf = Stream.of(fields).noneMatch(
                 c -> (isCollection(c.field.getType()) && !Boolean.TRUE.equals(c.isLeaf))
                         || WriteMarshallable.class.isAssignableFrom(c.field.getType()));
-        return new WireMarshaller<>(tClass, fields, isLeaf);
+        return overridesUnexpectedFields(tClass)
+                ? new WireMarshallerForUnexpectedFields<>(tClass, fields, isLeaf)
+                : new WireMarshaller<>(tClass, fields, isLeaf);
+    }
 
+    private static <T> boolean overridesUnexpectedFields(Class<T> tClass) {
+        try {
+            Method method = tClass.getMethod("unexpectedField", UNEXPECTED_FIELDS_PARAMETER_TYPES);
+            return method.getDeclaringClass() != ReadMarshallable.class;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
     }
 
     @NotNull
@@ -148,7 +158,8 @@ public class WireMarshaller<T> {
     public void readMarshallable(T t, @NotNull WireIn in, T defaults, boolean overwrite) {
         try {
             for (@NotNull FieldAccess field : fields) {
-                field.read(t, in, defaults, overwrite);
+                ValueIn vin = in.read(field.key);
+                field.readValue(t, defaults, vin, overwrite);
             }
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
@@ -333,8 +344,7 @@ public class WireMarshaller<T> {
 
         protected abstract void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException;
 
-        void read(Object o, @NotNull WireIn in, Object defaults, boolean overwrite) throws IllegalAccessException {
-            @NotNull ValueIn read = in.read(key);
+        protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
             if (read instanceof DefaultValueIn) {
                 if (overwrite) copy(defaults, o);
             } else {
@@ -674,9 +684,23 @@ public class WireMarshaller<T> {
             write.sequence(o, sequenceGetter);
         }
 
+        protected void copy(Object from, Object to) throws IllegalAccessException {
+            Collection fromColl = (Collection) field.get(from);
+            if (fromColl == null) {
+                field.set(to, null);
+                return;
+            }
+            Collection coll = (Collection) field.get(to);
+            if (coll == null) {
+                coll = collectionSupplier.get();
+                field.set(to, coll);
+            }
+            coll.clear();
+            coll.addAll(fromColl);
+        }
+
         @Override
-        void read(Object o, @NotNull WireIn in, Object defaults, boolean overwrite) throws IllegalAccessException {
-            @NotNull ValueIn read = in.read(key);
+        protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
             Collection coll = (Collection) field.get(o);
             if (coll == null) {
                 coll = collectionSupplier.get();
@@ -762,8 +786,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        void read(Object o, @NotNull WireIn in, Object defaults, boolean overwrite) throws IllegalAccessException {
-            @NotNull ValueIn read = in.read(key);
+        protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
             Collection coll = (Collection) field.get(o);
             if (coll == null) {
                 coll = collectionSupplier.get();
@@ -835,9 +858,26 @@ public class WireMarshaller<T> {
             write.marshallable(map, keyType, valueType, Boolean.TRUE.equals(isLeaf));
         }
 
+        protected void copy(Object from, Object to) throws IllegalAccessException {
+            Map fromMap = (Map) field.get(from);
+            if (fromMap == null) {
+                field.set(to, null);
+                return;
+            }
+
+            Map map = (Map) field.get(to);
+            if (map == null) {
+                map = collectionSupplier.get();
+                field.set(to, map);
+            } else if (!map.isEmpty()) {
+                map.clear();
+            }
+            map.clear();
+            map.putAll(fromMap);
+        }
+
         @Override
-        void read(Object o, @NotNull WireIn in, Object defaults, boolean overwrite) throws IllegalAccessException {
-            @NotNull ValueIn read = in.read(key);
+        protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
             Map map = (Map) field.get(o);
             if (map == null) {
                 map = collectionSupplier.get();

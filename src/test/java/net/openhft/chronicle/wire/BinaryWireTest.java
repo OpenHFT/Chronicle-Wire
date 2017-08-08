@@ -75,7 +75,7 @@ public class BinaryWireTest {
 
     @After
     public void after() {
-        BinaryWire.SPEC = 16;
+//        BinaryWire.SPEC = 16;
     }
 
     @Test
@@ -680,7 +680,7 @@ public class BinaryWireTest {
 
     @Test
     public void testWriteMarshallable() {
-        BinaryWire.SPEC = 18;
+//        BinaryWire.SPEC = 18;
 
         @NotNull Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();

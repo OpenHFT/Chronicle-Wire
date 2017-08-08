@@ -49,7 +49,7 @@ public class ForwardAndBackwardCompatibilityTest {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {WireType.TEXT},
+//                {WireType.TEXT},
                 {WireType.BINARY}
         });
     }
@@ -79,7 +79,7 @@ public class ForwardAndBackwardCompatibilityTest {
     }
 
     @Test
-    public void forwardComparability() throws Exception {
+    public void forwardComparability() {
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");

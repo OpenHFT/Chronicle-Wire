@@ -56,7 +56,7 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
 public class BinaryWire extends AbstractWire implements Wire {
     private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
     private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
-    static int SPEC = Integer.getInteger("BinaryWire.SPEC", 16);
+    static int SPEC = Integer.getInteger("BinaryWire.SPEC", 18);
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     private final FixedBinaryValueOut valueOut;
@@ -2372,6 +2372,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             // TODO handle non length types as well.
 
             int code = peekCode();
+            if ((code & 0x80) == 0)
+                return 1;
             switch (code) {
 
                 case BYTES_LENGTH8:
@@ -2393,22 +2395,24 @@ public class BinaryWire extends AbstractWire implements Wire {
                     return readLength();
                 case FALSE:
                 case TRUE:
+                case NULL:
+                    return 1;
                 case UINT8:
                 case INT8:
                 case FLOAT_SET_LOW_0:
                 case FLOAT_SET_LOW_2:
                 case FLOAT_SET_LOW_4:
-                    return 1;
+                    return 1 + 1;
                 case UINT16:
                 case INT16:
-                    return 2;
+                    return 1 + 2;
                 case FLOAT32:
                 case UINT32:
                 case INT32:
-                    return 4;
+                    return 1 + 4;
                 case FLOAT64:
                 case INT64:
-                    return 8;
+                    return 1 + 8;
 
                 case PADDING:
                 case PADDING32:
@@ -2419,16 +2423,42 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case FLOAT_STOP_2:
                 case FLOAT_STOP_4:
                 case FLOAT_STOP_6: {
-                    if (bytes.readRemaining() > 1) {
-                        byte b = bytes.readByte(bytes.readPosition() + 1);
-                        return b >= 0 ? 1 : -1;
+                    long pos = bytes.readPosition() + 1;
+                    while (pos < bytes.readLimit()) {
+                        if (bytes.readUnsignedByte(pos++) < 0x80)
+                            break;
                     }
-                    return 1;
+                    return pos - bytes.readPosition();
                 }
+
+                case UUID:
+                    return 1 + 8 + 8;
+
+                case INT64_0x:
+                    return 1 + 8;
+
+                case DATE:
+                case TIME:
+                case DATE_TIME:
+                case ZONED_DATE_TIME:
+                case TYPE_LITERAL:
+                case STRING_ANY: {
+                    long pos0 = bytes.readPosition();
+                    try {
+                        bytes.uncheckedReadSkipOne();
+                        long len2 = bytes.readStopBit();
+                        return bytes.readPosition() - pos0 + len2;
+                    } finally {
+                        bytes.readPosition(pos0);
+                    }
+                }
+
                 case -1:
                     return 0;
 
                 default:
+                    if (code >= STRING_0)
+                        return code + (1 - STRING_0);
                     //System.out.println("code=" + code + ", bytes=" + bytes.toHexString());
                     return -1;
             }

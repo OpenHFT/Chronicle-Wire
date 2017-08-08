@@ -27,8 +27,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.time.*;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
@@ -42,7 +44,7 @@ public class BinaryWire2Test {
 
     @After
     public void after() {
-        BinaryWire.SPEC = 16;
+//        BinaryWire.SPEC = 16;
     }
 
     @After
@@ -56,6 +58,99 @@ public class BinaryWire2Test {
         @NotNull BinaryWire wire = new BinaryWire(bytes, false, false, false, 32, "lzw", false);
         assert wire.startUse();
         return wire;
+    }
+
+    @Test
+    public void testReadLength() {
+        Map<Integer, String> wireCodes = new TreeMap<>();
+        for (Field field : BinaryWireCode.class.getDeclaredFields()) {
+            if (field.getType() == int.class)
+                try {
+                    wireCodes.put(field.getInt(null), field.getName());
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+        }
+        wireCodes.remove(BinaryWireCode.FIELD_ANCHOR); // TODO
+        wireCodes.remove(BinaryWireCode.ANCHOR); // TODO
+        wireCodes.remove(BinaryWireCode.UPDATED_ALIAS); // TODO
+        wireCodes.remove(BinaryWireCode.U8_ARRAY); // should always be nested
+        wireCodes.remove(BinaryWireCode.I64_ARRAY); // should always be nested
+        wireCodes.remove(BinaryWireCode.FIELD_NAME_ANY); // should always be nested
+        wireCodes.remove(BinaryWireCode.FIELD_NAME0); // should always be nested
+        wireCodes.remove(BinaryWireCode.FIELD_NAME31); // should always be nested
+        wireCodes.remove(BinaryWireCode.EVENT_OBJECT); // should always be nested
+        wireCodes.remove(BinaryWireCode.EVENT_NAME); // should always be nested
+        wireCodes.remove(BinaryWireCode.FIELD_NUMBER); // should always be nested
+
+        wireCodes.remove(BinaryWireCode.PADDING32); // should always be consumed
+        wireCodes.remove(BinaryWireCode.PADDING); // should always be consumed
+        wireCodes.remove(BinaryWireCode.COMMENT); // should always be consumed
+        wireCodes.remove(BinaryWireCode.HINT); // should always be consumed
+        wireCodes.remove(BinaryWireCode.FLOAT_SET_LOW_0); // used by Delta Wire
+        wireCodes.remove(BinaryWireCode.FLOAT_SET_LOW_2); // used by Delta Wire
+        wireCodes.remove(BinaryWireCode.FLOAT_SET_LOW_4); // used by Delta Wire
+        wireCodes.remove(BinaryWireCode.SET_LOW_INT8); // used by Delta Wire
+        wireCodes.remove(BinaryWireCode.SET_LOW_INT16); // used by Delta Wire
+
+        List<Consumer<ValueOut>> writeValue = Arrays.asList(
+                v -> v.bool(false),
+                v -> v.bool(true),
+                v -> v.time(LocalTime.MAX),
+                v -> v.date(LocalDate.MIN),
+                v -> v.dateTime(LocalDateTime.MIN),
+                v -> v.zonedDateTime(ZonedDateTime.now()),
+                v -> v.typedMarshallable(w -> {
+                }),
+                v -> v.set(new TreeSet<>()),
+                v -> v.object(null),
+                v -> v.text(""),
+                v -> v.text("0123456789012345678901234567890"),
+                v -> v.text("0123456789012345678901234567890a"),
+                v -> v.typeLiteral(String.class),
+
+                v -> v.bytes(new byte[1]),
+                v -> v.bytes(new byte[257]),
+                v -> v.bytes(new byte[65540]),
+                v -> v.array(new long[4], 4),
+                v -> v.float64(0.01),
+                v -> v.float64(2.01),
+                v -> v.float64(1e-4),
+                v -> v.float64(2.001),
+                v -> v.float64(1e-6),
+                v -> v.float64(2.00001),
+                v -> v.float64(1001, 1000),
+                v -> v.float64(1000.01, 1000),
+                v -> v.uint8(1),
+                v -> v.uint8(130),
+                v -> v.int8(-120),
+                v -> v.uint16(257),
+                v -> v.uint32((1 << 15) + 1),
+                v -> v.uint32((1 << 16) + 1),
+                v -> v.uint32(Integer.MAX_VALUE + 1L),
+                v -> v.int64(Long.MIN_VALUE + 1),
+                v -> v.int64_0x(Integer.MAX_VALUE + 1L),
+                v -> v.float32((float) Math.PI),
+                v -> v.float64(Math.PI),
+                v -> v.uuid(UUID.randomUUID())
+        );
+        Wire wire = createWire();
+        Wire wire2 = new TextWire(Bytes.elasticHeapByteBuffer(32));
+
+        for (Consumer<ValueOut> value : writeValue) {
+            wire.clear();
+            wire2.clear();
+            value.accept(wire.getValueOut());
+            wireCodes.remove(wire.bytes().peekUnsignedByte());
+            value.accept(wire2.getValueOut());
+            wire.bytes().writeByte((byte) 0);
+            long readLength = wire.getValueIn().readLength();
+            assertEquals(wire2.toString(), wire.bytes().readRemaining() - 1, readLength);
+        }
+        if (!wireCodes.isEmpty()) {
+            System.err.println("Untested codes");
+            wireCodes.forEach((k, v) -> System.err.println(v + "= " + Integer.toHexString(k)));
+        }
     }
 
     @Test
@@ -607,7 +702,7 @@ public class BinaryWire2Test {
 
     @Test
     public void testWritingDecimals() {
-        BinaryWire.SPEC = 18;
+//        BinaryWire.SPEC = 18;
         @NotNull Wire wire = new BinaryWire(nativeBytes());
         @NotNull final ValueOut out = wire.getValueOut();
         @NotNull final ValueIn in = wire.getValueIn();
@@ -655,7 +750,7 @@ public class BinaryWire2Test {
 
     @Test
     public void testWritingDecimals2() {
-        BinaryWire.SPEC = 18;
+//        BinaryWire.SPEC = 18;
         @NotNull Wire wire = new BinaryWire(nativeBytes());
         @NotNull final ValueOut out = wire.getValueOut();
         @NotNull final ValueIn in = wire.getValueIn();
