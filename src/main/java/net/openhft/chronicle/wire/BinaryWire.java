@@ -2184,11 +2184,14 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return wireIn();
 
             }
-            if (code != U8_ARRAY)
-                cantRead(code);
             if (clearBytes)
                 toBytes.clear();
-            bytes.readWithLength(length - 1, toBytes::write);
+            if (code == U8_ARRAY) {
+                bytes.readWithLength(length - 1, toBytes::write);
+            } else {
+                bytes.uncheckedReadSkipBackOne();
+                textTo((Bytes) toBytes);
+            }
             return wireIn();
         }
 

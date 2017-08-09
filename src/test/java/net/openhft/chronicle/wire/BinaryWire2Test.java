@@ -19,6 +19,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.util.Compressions;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.After;
@@ -698,6 +699,26 @@ public class BinaryWire2Test {
         Assert.assertEquals(putMap, newMap);
 
         wire.bytes().release();
+    }
+
+    @Test
+    public void testreadBytes() {
+        @NotNull Wire wire = new BinaryWire(nativeBytes());
+
+        wire.write("a").typePrefix(BytesHolder.class).marshallable(w -> w.write("bytes").text("Hello World"));
+
+        BytesHolder bh2 = new BytesHolder();
+        wire.read("a").object(bh2, BytesHolder.class);
+        assertEquals("Hello World", bh2.bytes.toString());
+    }
+
+    static class BytesHolder extends AbstractMarshallable {
+        final Bytes bytes = Bytes.elasticHeapByteBuffer(64);
+
+        @Override
+        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
+            wire.read("bytes").bytes(bytes);
+        }
     }
 
     @Test

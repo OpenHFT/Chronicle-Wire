@@ -55,8 +55,30 @@ public class MethodWriterTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void testDefault() {
+        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        HasDefault writer = wire.methodWriter(HasDefault.class);
+        writer.callsMethod("hello,world,bye");
+        assertEquals("method: [\n" +
+                "  hello,\n" +
+                "  world,\n" +
+                "  bye\n" +
+                "]\n" +
+                "---\n", wire.toString());
+
+    }
+
     interface Event {
         void event(String eventName, Object o);
+    }
+
+    public interface HasDefault {
+        default void callsMethod(String args) {
+            method(args.split(","));
+        }
+
+        void method(String... args);
     }
 }
 
