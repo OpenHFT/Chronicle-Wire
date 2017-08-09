@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -152,8 +153,12 @@ public class TextMethodTester<T> {
 //        long pos = wire2.bytes().writePosition();
         TextMethodWriterInvocationHandler.ENABLE_EOD = false;
         try {
+            long pos = -1;
             while (reader.readOne()) {
-//                if (pos != wire2.bytes().writePosition())
+                if (pos == wire.bytes().readPosition()) {
+                    Jvm.warn().on(getClass(), "Bailing out of malformed message");
+                    break;
+                }
                 if (retainLast == null) {
                     Bytes<?> bytes = wire2.bytes();
                     int last = bytes.peekUnsignedByte(bytes.writePosition() - 1);
@@ -161,7 +166,7 @@ public class TextMethodTester<T> {
                         bytes.append('\n');
                     bytes.append("---\n");
                 }
-//                pos = wire2.bytes().writePosition();
+                pos = wire2.bytes().readPosition();
             }
             if (retainLast != null)
                 wire2.bytes().clear();

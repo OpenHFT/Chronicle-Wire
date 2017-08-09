@@ -65,6 +65,7 @@ public class TextWire extends AbstractWire implements Wire {
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_SINGLE_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(() -> StopCharTesters.SINGLE_QUOTES.escaping());
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
     static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
+    static final ThreadLocal<WeakReference<StopCharsTester>> ESCAPED_END_EVENT_NAME = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
 
     static final BytesStore COMMA_SPACE = BytesStore.from(", ");
     static final BytesStore COMMA_NEW_LINE = BytesStore.from(",\n");
@@ -371,7 +372,7 @@ public class TextWire extends AbstractWire implements Wire {
                 return sb;
 
             } else {
-                parseText(sb);
+                parseUntil(sb, getEscapingEndOfText());
             }
             unescape(sb);
         } catch (BufferUnderflowException e) {
@@ -421,7 +422,7 @@ public class TextWire extends AbstractWire implements Wire {
                 return null;
 
             } else {
-                parseText(sb);
+                parseUntil(sb, getEscapingEndOfText());
             }
             unescape(sb);
         } catch (BufferUnderflowException e) {
@@ -456,6 +457,15 @@ public class TextWire extends AbstractWire implements Wire {
     protected StopCharsTester getStrictEscapingEndOfText() {
         StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT,
                 TextStopCharsTesters.STRICT_END_OF_TEXT::escaping);
+        // reset it.
+        escaping.isStopChar(' ', ' ');
+        return escaping;
+    }
+
+    @NotNull
+    protected StopCharsTester getEscapingEndEventName() {
+        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT,
+                TextStopCharsTesters.END_EVENT_NAME::escaping);
         // reset it.
         escaping.isStopChar(' ', ' ');
         return escaping;
