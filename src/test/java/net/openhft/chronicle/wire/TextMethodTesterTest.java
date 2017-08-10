@@ -7,7 +7,7 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 
 /*
- * Created by peter on 17/05/2017.
+ * Created by Peter Lawrey on 17/05/2017.
  */
 public class TextMethodTesterTest {
     @Test

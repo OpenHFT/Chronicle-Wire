@@ -27,7 +27,7 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 /*
- * Created by peter on 27/08/15.
+ * Created by Peter Lawrey on 27/08/15.
  */
 @Ignore("TODO FIX")
 public class CSVWireTest {

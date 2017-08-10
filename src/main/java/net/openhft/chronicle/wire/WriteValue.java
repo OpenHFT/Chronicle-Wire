@@ -17,7 +17,7 @@
 package net.openhft.chronicle.wire;
 
 /*
- * Created by peter on 26/12/15.
+ * Created by Peter Lawrey on 26/12/15.
  */
 public interface WriteValue {
     void writeValue(ValueOut out);

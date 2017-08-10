@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 
 /*
- * Created by peter on 24/03/16.
+ * Created by Peter Lawrey on 24/03/16.
  */
 public class MethodReader implements Closeable {
     static final Object[] NO_ARGS = {};

@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 
 /*
- * Created by peter on 08/05/2017.
+ * Created by Peter Lawrey on 08/05/2017.
  */
 public class WiresFromFileTest {
     @Test

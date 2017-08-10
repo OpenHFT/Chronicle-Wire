@@ -21,7 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /*
- * Created by peter on 06/10/15.
+ * Created by Peter Lawrey on 06/10/15.
  */
 public class GenerateFIXWireKey {
     public static void main(String[] args) throws IOException {

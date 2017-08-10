@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
 /*
- * Created by peter on 24/12/15.
+ * Created by Peter Lawrey on 24/12/15.
  */
 public class WriteDocumentContext implements DocumentContext {
     protected Wire wire;

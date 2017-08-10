@@ -28,7 +28,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
 
 /*
- * Created by peter on 17/03/16.
+ * Created by Peter Lawrey on 17/03/16.
  */
 public class ReadmePojoTest {
     static {

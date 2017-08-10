@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
 
 /*
- * Created by peter on 16/03/16.
+ * Created by Peter Lawrey on 16/03/16.
  */
 public class WireMarshaller<T> {
     private static final FieldAccess[] NO_FIELDS = {};

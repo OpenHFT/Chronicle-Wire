@@ -34,7 +34,7 @@ import java.util.Collection;
 import static org.junit.Assert.assertEquals;
 
 /*
- * Created by peter on 25/08/15.
+ * Created by Peter Lawrey on 25/08/15.
  */
 @RunWith(Parameterized.class)
 public class YamlSpecificationTest {

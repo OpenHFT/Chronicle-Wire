@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;
 
 /*
- * Created by peter on 25/03/16.
+ * Created by Peter Lawrey on 25/03/16.
  */
 public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
     @NotNull

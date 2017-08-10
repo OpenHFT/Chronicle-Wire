@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 /*
- * Created by peter on 14/05/16.
+ * Created by Peter Lawrey on 14/05/16.
  */
 public class DotNetTest {
     @Test

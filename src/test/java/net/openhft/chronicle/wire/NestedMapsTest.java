@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /*
- * Created by peter on 21/04/16.
+ * Created by Peter Lawrey on 21/04/16.
  */
 @RunWith(value = Parameterized.class)
 public class NestedMapsTest {

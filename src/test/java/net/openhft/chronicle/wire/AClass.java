@@ -18,7 +18,7 @@
 package net.openhft.chronicle.wire;
 
 /*
- * Created by peter on 07/05/16.
+ * Created by Peter Lawrey on 07/05/16.
  */
 class AClass extends AbstractMarshallable {
     int id;

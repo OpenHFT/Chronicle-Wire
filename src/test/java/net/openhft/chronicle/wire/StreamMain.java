@@ -24,7 +24,7 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /*
- * Created by peter on 30/06/15.
+ * Created by Peter Lawrey on 30/06/15.
  */
 public class StreamMain {
     public static void main(String[] args) {

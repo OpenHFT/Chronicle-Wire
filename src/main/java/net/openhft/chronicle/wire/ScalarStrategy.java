@@ -25,7 +25,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /*
- * Created by peter on 10/05/16.
+ * Created by Peter Lawrey on 10/05/16.
  */
 class ScalarStrategy<T> implements SerializationStrategy<T> {
     @NotNull

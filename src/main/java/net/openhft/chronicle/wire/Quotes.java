@@ -17,7 +17,7 @@
 package net.openhft.chronicle.wire;
 
 /*
- * Created by peter on 31/08/15.
+ * Created by Peter Lawrey on 31/08/15.
  */
 enum Quotes {
     NONE(' '), SINGLE('\''), DOUBLE('"');

@@ -6,7 +6,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /*
- * Created by peter on 16/05/2017.
+ * Created by Peter Lawrey on 16/05/2017.
  */
 public class ThreeSequenceTest {
     @Test

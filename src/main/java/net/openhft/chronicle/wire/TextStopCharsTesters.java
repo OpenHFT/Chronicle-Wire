@@ -19,7 +19,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.StopCharsTester;
 
 /*
- * Created by peter on 16/08/15.
+ * Created by Peter Lawrey on 16/08/15.
  */
 enum TextStopCharsTesters implements StopCharsTester {
     STRICT_END_OF_TEXT {

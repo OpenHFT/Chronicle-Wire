@@ -37,7 +37,7 @@ import java.util.concurrent.TimeoutException;
 import static net.openhft.chronicle.wire.Wires.*;
 
 /*
- * Created by peter on 10/03/16.
+ * Created by Peter Lawrey on 10/03/16.
  */
 public abstract class AbstractWire implements Wire {
     protected static final boolean ASSERTIONS;

@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import static net.openhft.chronicle.wire.Wires.lengthOf;
 
 /*
- * Created by peter on 24/12/15.
+ * Created by Peter Lawrey on 24/12/15.
  */
 public class BinaryReadDocumentContext implements ReadDocumentContext {
     private final boolean ensureFullRead;

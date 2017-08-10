@@ -6,7 +6,7 @@ import net.openhft.chronicle.wire.Wires;
 import org.jetbrains.annotations.NotNull;
 
 /*
- * Created by peter on 16/05/2017.
+ * Created by Peter Lawrey on 16/05/2017.
  */
 class Rung extends AbstractMarshallable {
     double price, qty;

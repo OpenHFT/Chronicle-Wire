@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /*
- * Created by peter on 27/03/16.
+ * Created by Peter Lawrey on 27/03/16.
  */
 public class VanillaMessageHistory extends AbstractMarshallable implements MessageHistory {
     public static final int MESSAGE_HISTORY_LENGTH = 20;

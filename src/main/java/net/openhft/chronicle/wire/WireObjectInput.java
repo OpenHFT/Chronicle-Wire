@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 
 /*
- * Created by peter on 09/05/16.
+ * Created by Peter Lawrey on 09/05/16.
  */
 class WireObjectInput implements ObjectInput {
     private final WireIn wire;

@@ -27,7 +27,7 @@ import uk.co.real_logic.agrona.concurrent.UnsafeBuffer;
 import java.nio.ByteBuffer;
 
 /*
- * Created by peter on 13/08/15.
+ * Created by Peter Lawrey on 13/08/15.
  */
 public class ExampleUsingGeneratedStub {
     public static void main(String[] args) {

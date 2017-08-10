@@ -34,7 +34,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 /*
- * Created by peter on 10/06/16.
+ * Created by Peter Lawrey on 10/06/16.
  */
 @RunWith(value = Parameterized.class)
 public class PrimArraysTest {

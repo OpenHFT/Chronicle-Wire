@@ -7,7 +7,7 @@ import net.openhft.chronicle.wire.Wires;
 import org.jetbrains.annotations.NotNull;
 
 /*
- * Created by peter on 26/05/2017.
+ * Created by Peter Lawrey on 26/05/2017.
  */
 public class WithDefaults extends AbstractMarshallable {
     Bytes bytes = Bytes.fromString("Hello");

@@ -36,7 +36,7 @@ import java.io.ObjectOutput;
 import java.nio.ByteBuffer;
 
 /*
- * Created by peter on 12/08/15.
+ * Created by Peter Lawrey on 12/08/15.
  */
 public class Data implements Marshallable, BytesMarshallable, Externalizable {
     int smallInt = 0;

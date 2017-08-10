@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 /*
- * Created by peter on 14/05/16.
+ * Created by Peter Lawrey on 14/05/16.
  */
 @RunWith(value = Parameterized.class)
 public class TextBinaryWireTest {

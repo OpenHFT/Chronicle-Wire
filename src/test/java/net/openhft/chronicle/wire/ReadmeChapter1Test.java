@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertTrue;
 
 /*
- * Created by peter on 15/08/15.
+ * Created by Peter Lawrey on 15/08/15.
  */
 public class ReadmeChapter1Test {
     @Test

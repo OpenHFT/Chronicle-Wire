@@ -15,7 +15,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 /*
- * Created by peter on 16/05/2017.
+ * Created by Peter Lawrey on 16/05/2017.
  */
 @RunWith(value = Parameterized.class)
 public class TextSkipValueTest {

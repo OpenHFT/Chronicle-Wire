@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /*
- * Created by peter on 25/03/16.
+ * Created by Peter Lawrey on 25/03/16.
  */
 public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvocationHandler implements MethodWriterInvocationHandler {
     private final Map<Method, Class[]> parameterMap = new ConcurrentHashMap<>();

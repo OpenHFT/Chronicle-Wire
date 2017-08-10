@@ -18,7 +18,7 @@
 package net.openhft.chronicle.wire;
 
 /*
- * Created by peter on 11/05/16.
+ * Created by Peter Lawrey on 11/05/16.
  */
 public enum BracketType {
     UNKNOWN, NONE, MAP, SEQ

@@ -52,7 +52,7 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
 /*
- * Created by peter on 31/08/15.
+ * Created by Peter Lawrey on 31/08/15.
  */
 public enum Wires {
     ;

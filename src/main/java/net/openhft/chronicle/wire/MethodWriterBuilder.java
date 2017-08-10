@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /*
- * Created by peter on 28/03/16.
+ * Created by Peter Lawrey on 28/03/16.
  */
 public class MethodWriterBuilder<T> implements Supplier<T> {
 

@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /*
- * Created by peter on 30/06/15.
+ * Created by Peter Lawrey on 30/06/15.
  */
 public interface WireCommon {
 

@@ -17,7 +17,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /*
- * Created by peter on 17/05/2017.
+ * Created by Peter Lawrey on 17/05/2017.
  */
 public class TextMethodTester<T> {
     private final String input;

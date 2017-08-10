@@ -25,7 +25,7 @@ import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
 
 /*
- * Created by peter on 12/08/15.
+ * Created by Peter Lawrey on 12/08/15.
  */
 public class Data2 implements Marshallable, BytesMarshallable {
     int smallInt = 0;

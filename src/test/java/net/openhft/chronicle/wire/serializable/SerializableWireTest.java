@@ -37,7 +37,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 /*
- * Created by peter on 09/05/16.
+ * Created by Peter Lawrey on 09/05/16.
  */
 @RunWith(value = Parameterized.class)
 public class SerializableWireTest {

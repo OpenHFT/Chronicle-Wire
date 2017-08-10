@@ -33,7 +33,7 @@ import java.util.function.Function;
 import static org.junit.Assert.*;
 
 /*
- * Created by peter on 23/06/15.
+ * Created by Peter Lawrey on 23/06/15.
  */
 public class WireSerializedLambdaTest {
     static {

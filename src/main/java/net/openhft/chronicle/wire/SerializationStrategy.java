@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /*
- * Created by peter on 10/05/16.
+ * Created by Peter Lawrey on 10/05/16.
  */
 public interface SerializationStrategy<T> {
     @Nullable

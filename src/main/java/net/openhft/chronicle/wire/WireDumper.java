@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.ByteBuffer;
 
 /*
- * Created by peter on 09/07/16.
+ * Created by Peter Lawrey on 09/07/16.
  */
 public class WireDumper {
     @Nullable

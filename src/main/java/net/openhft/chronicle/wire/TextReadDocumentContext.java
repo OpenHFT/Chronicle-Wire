@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /*
- * Created by peter on 24/12/15.
+ * Created by Peter Lawrey on 24/12/15.
  */
 public class TextReadDocumentContext implements ReadDocumentContext {
     public static final BytesStore MSG_SEP = BytesStore.from("---");
