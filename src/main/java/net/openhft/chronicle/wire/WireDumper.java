@@ -78,7 +78,8 @@ public class WireDumper {
         } catch (Throwable t) {
             sb.append(" ").append(t);
         } finally {
-            bytes.readPositionRemaining(position0, limit0 - position0);
+            bytes.readLimit(limit0);
+            bytes.readPosition(position0);
             bytes2.release();
         }
         return sb.toString();
