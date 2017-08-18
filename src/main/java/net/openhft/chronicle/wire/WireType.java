@@ -491,7 +491,13 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
     @NotNull
     public <T> Stream<T> streamFromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
-        Wire wire = apply(BytesUtil.readFile(filename));
+        Bytes b = BytesUtil.readFile(filename);
+        return streamFromBytes(expectedType, b);
+    }
+
+    @NotNull
+    public <T> Stream<T> streamFromBytes(@NotNull Class<T> expectedType, Bytes b) {
+        Wire wire = apply(b);
         ValueIn valueIn = wire.getValueIn();
         return StreamSupport.stream(
                 new Spliterators.AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED | Spliterator.IMMUTABLE) {
