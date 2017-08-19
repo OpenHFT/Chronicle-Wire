@@ -230,6 +230,22 @@ public class NestedMapsTest {
         bytes.release();
     }
 
+    @Test
+    public void testMapReadAndWrite() {
+        Bytes bytes = Bytes.elasticByteBuffer();
+        Wire wire = wireType.apply(bytes);
+
+        @NotNull final Map<Integer, Integer> expected = new HashMap<>();
+        expected.put(1, 2);
+        expected.put(2, 2);
+        expected.put(3, 3);
+
+        wire.writeMap(expected);
+        @NotNull final Map<Integer, Integer> actual = wire.readMap();
+        bytes.release();
+        assertEquals(expected, actual);
+    }
+
     @After
     public void checkRegisteredBytes() {
         BytesUtil.checkRegisteredBytes();

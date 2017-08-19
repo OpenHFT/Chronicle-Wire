@@ -396,11 +396,19 @@ public class TextWire extends AbstractWire implements Wire {
             } else if (ch == '?') {
                 bytes.readSkip(1);
                 consumePadding();
-                @Nullable final K object = valueIn.object(expectedClass);
+                @Nullable final K object;
+                // if we don't know what type of key we are looking for, and it is not being defined with !
+                // then we force it to be String as otherwise valueIn.object gets confused and gives us back a Map
+                int ch3 = peekCode();
+                if (ch3 != '!' && expectedClass == Object.class) {
+                    object = (K) valueIn.object(String.class);
+                } else {
+                    object = valueIn.object(expectedClass);
+                }
                 consumePadding();
                 int ch2 = readCode();
                 if (ch2 != ':')
-                    throw new IllegalStateException("Unexpected character after field " + ch + " '" + (char) ch + "'");
+                    throw new IllegalStateException("Unexpected character after field " + ch + " '" + (char) ch2 + "'");
                 return object;
 
             } else if (ch == '[') {

@@ -954,6 +954,34 @@ public class TextWireTest {
     }
 
     @Test
+    public void testMapInMap() {
+        String pos = "positionServerConfig: {\n" +
+                "  ladderNamesForCcyPairs: {\n" +
+                "    AUDUSD: AUDUSD-EBS_LIVE_LDN,\n" +
+                "    USDPLN: USDPLN-CNX\n" +
+                "  },\n" +
+                "  dollarRateStaleTimeoutInSeconds: 10\n" +
+                "}";
+        Map<String, Object> fromString = Marshallable.fromString(pos);
+        assertEquals("{positionServerConfig={ladderNamesForCcyPairs={AUDUSD=AUDUSD-EBS_LIVE_LDN, USDPLN=USDPLN-CNX}, dollarRateStaleTimeoutInSeconds=10}}",
+                fromString.toString());
+    }
+
+    @Test
+    public void testMapInMapWithQuestionMarks() {
+        String pos = "positionServerConfig: {\n" +
+                "  ladderNamesForCcyPairs: {\n" +
+                "    ? AUDUSD: AUDUSD-EBS_LIVE_LDN,\n" +
+                "    ? USDPLN: USDPLN-CNX\n" +
+                "  },\n" +
+                "  dollarRateStaleTimeoutInSeconds: 10\n" +
+                "}";
+        Map<String, Object> fromString = Marshallable.fromString(pos);
+        assertEquals("{positionServerConfig={ladderNamesForCcyPairs={AUDUSD=AUDUSD-EBS_LIVE_LDN, USDPLN=USDPLN-CNX}, dollarRateStaleTimeoutInSeconds=10}}",
+                fromString.toString());
+    }
+
+    @Test
     @Ignore
     public void testMapReadAndWriteIntegers() {
         @NotNull final Bytes bytes = nativeBytes();
@@ -961,7 +989,7 @@ public class TextWireTest {
 
         @NotNull final Map<Integer, Integer> expected = new HashMap<>();
 
-        expected.put(1, 2);
+        expected.put(1, 11);
         expected.put(2, 2);
         expected.put(3, 3);
 
@@ -969,26 +997,30 @@ public class TextWireTest {
             o.write(() -> "example").map(expected);
         });
 
-        expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
-
         assertEquals("--- !!data\n" +
-                "example: !!map {" +
-                "  ? !!int 1\n" +
-                "  : !! int 1\n" +
-                "  ? !!int 2\n" +
-                "  : !!int 2\n" +
-                "  ? !!int 3:\n" +
-                "  : !!int 3\n" +
+                "example: {\n" +
+                "  ? !int 1: !int 11,\n" +
+                "  ? !int 2: !int 2,\n" +
+                "  ? !int 3: !int 3\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(bytes));
         @NotNull final Map<Integer, Integer> actual = new HashMap<>();
         wire.readDocument(null, c -> {
             @Nullable Map m = c.read(() -> "example").map(Integer.class, Integer.class, actual);
             assertEquals(m, expected);
         });
+
+        wire.bytes().readPosition(0);
+        // skip the length
+        wire.bytes().readSkip(4);
+        // TODO: snakeyaml doesn't like !int
+        // Can't construct a java object for !int; exception=Invalid tag: !int
+        //   in 'reader', line 2, column 5:
+        //     ? !int 1: !int 11,
+        //       ^
+        expectWithSnakeYaml("{1=11, 2=2, 3=3}", wire);
     }
 
     @Test
-    @Ignore("TODO FIX")
     public void testMapReadAndWriteMarshable() {
         @NotNull final Bytes bytes = nativeBytes();
         @NotNull final Wire wire = new TextWire(bytes);
@@ -1830,4 +1862,8 @@ public class TextWireTest {
         }
     }
 
+    private static class PositionServerConfig extends AbstractMarshallable {
+        private Map<CcyPair, String> ladderNamesForCcyPairs = new HashMap<>();
+        private int dollarRateStaleTimeoutInSeconds;
+    }
 }
