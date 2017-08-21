@@ -955,29 +955,27 @@ public class TextWireTest {
 
     @Test
     public void testMapInMap() {
-        String pos = "positionServerConfig: {\n" +
-                "  ladderNamesForCcyPairs: {\n" +
-                "    AUDUSD: AUDUSD-EBS_LIVE_LDN,\n" +
-                "    USDPLN: USDPLN-CNX\n" +
+        String pos = "WithMap: {\n" +
+                "  innerMap: {\n" +
+                "    AUDUSD: AUDUSD1,\n" +
+                "    USDPLN: USDPLN1\n" +
                 "  },\n" +
-                "  dollarRateStaleTimeoutInSeconds: 10\n" +
                 "}";
         Map<String, Object> fromString = Marshallable.fromString(pos);
-        assertEquals("{positionServerConfig={ladderNamesForCcyPairs={AUDUSD=AUDUSD-EBS_LIVE_LDN, USDPLN=USDPLN-CNX}, dollarRateStaleTimeoutInSeconds=10}}",
+        assertEquals("{WithMap={innerMap={AUDUSD=AUDUSD1, USDPLN=USDPLN1}}}",
                 fromString.toString());
     }
 
     @Test
     public void testMapInMapWithQuestionMarks() {
-        String pos = "positionServerConfig: {\n" +
-                "  ladderNamesForCcyPairs: {\n" +
-                "    ? AUDUSD: AUDUSD-EBS_LIVE_LDN,\n" +
-                "    ? USDPLN: USDPLN-CNX\n" +
+        String pos = "WithMap: {\n" +
+                "  innerMap: {\n" +
+                "    ? AUDUSD: AUDUSD1,\n" +
+                "    ? USDPLN: USDPLN1\n" +
                 "  },\n" +
-                "  dollarRateStaleTimeoutInSeconds: 10\n" +
                 "}";
         Map<String, Object> fromString = Marshallable.fromString(pos);
-        assertEquals("{positionServerConfig={ladderNamesForCcyPairs={AUDUSD=AUDUSD-EBS_LIVE_LDN, USDPLN=USDPLN-CNX}, dollarRateStaleTimeoutInSeconds=10}}",
+        assertEquals("{WithMap={innerMap={AUDUSD=AUDUSD1, USDPLN=USDPLN1}}}",
                 fromString.toString());
     }
 
@@ -1862,8 +1860,7 @@ public class TextWireTest {
         }
     }
 
-    private static class PositionServerConfig extends AbstractMarshallable {
-        private Map<CcyPair, String> ladderNamesForCcyPairs = new HashMap<>();
-        private int dollarRateStaleTimeoutInSeconds;
+    private static class WithMap extends AbstractMarshallable {
+        private Map<CcyPair, String> innerMap = new HashMap<>();
     }
 }
