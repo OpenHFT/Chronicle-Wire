@@ -59,12 +59,13 @@ public class MethodWriterTest {
     public void testDefault() {
         Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
         HasDefault writer = wire.methodWriter(HasDefault.class);
+
+        // MethodWriter records an invocation on the default method
+        // callsMethod of the _proxy_, not the interface
+        // this should work for replaying events back through a MethodReader.
+        // Change made in Chronicle-Core https://github.com/OpenHFT/Chronicle-Core/commit/86c532d20a304c990cb2a82ebd84ffb355660fd3
         writer.callsMethod("hello,world,bye");
-        assertEquals("method: [\n" +
-                "  hello,\n" +
-                "  world,\n" +
-                "  bye\n" +
-                "]\n" +
+        assertEquals("callsMethod: \"hello,world,bye\"\n" +
                 "---\n", wire.toString());
 
     }
