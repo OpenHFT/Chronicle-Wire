@@ -69,8 +69,10 @@ public class MethodReader implements Closeable {
                     // not an Object method.
                 }
 
-                if (!methodsHandled.add(m.getName()))
+                if (!methodsHandled.add(m.getName())) {
+                    Jvm.warn().on(getClass(), "Unable to support overloaded methods, ignoring one of " + m.getName());
                     continue;
+                }
 
                 Class<?>[] parameterTypes = m.getParameterTypes();
                 switch (parameterTypes.length) {
@@ -87,7 +89,7 @@ public class MethodReader implements Closeable {
             }
         }
         if (wireParser.lookup(HISTORY) == null) {
-            wireParser.register(() -> HISTORY, (s, v, $) -> v.marshallable(MessageHistory.get()));
+            wireParser.registerOnce(() -> HISTORY, (s, v, $) -> v.marshallable(MessageHistory.get()));
         }
     }
 
@@ -128,7 +130,7 @@ public class MethodReader implements Closeable {
         String name = m.getName();
         if (parameterType.isInterface() || !ReadMarshallable.class.isAssignableFrom(parameterType)) {
             @NotNull Object[] argArr = {null};
-            wireParser.register(m::getName, (s, v, $) -> {
+            wireParser.registerOnce(m::getName, (s, v, $) -> {
                 try {
                     if (Jvm.isDebug())
                         logMessage(s, v);
@@ -154,7 +156,7 @@ public class MethodReader implements Closeable {
                 }
             }
             @NotNull ReadMarshallable[] argArr = {arg};
-            wireParser.register(m::getName, (s, v, $) -> {
+            wireParser.registerOnce(m::getName, (s, v, $) -> {
                 try {
                     if (Jvm.isDebug() && LOGGER.isDebugEnabled())
                         logMessage(s, v);
@@ -171,7 +173,7 @@ public class MethodReader implements Closeable {
     public void addParseletForMethod(Object o, @NotNull Method m) {
         m.setAccessible(true); // turn of security check to make a little faster
         String name = m.getName();
-        wireParser.register(m::getName, (s, v, $) -> {
+        wireParser.registerOnce(m::getName, (s, v, $) -> {
             try {
                 if (Jvm.isDebug())
                     logMessage(s, v);
@@ -195,7 +197,7 @@ public class MethodReader implements Closeable {
             }
         };
         String name = m.getName();
-        wireParser.register(m::getName, (s, v, $) -> {
+        wireParser.registerOnce(m::getName, (s, v, $) -> {
             try {
                 if (Jvm.isDebug())
                     logMessage(s, v);

@@ -58,6 +58,17 @@ public interface WireParser<O> extends BiConsumer<WireIn, O> {
     WireParselet<O> lookup(CharSequence name);
 
     @NotNull
+    default VanillaWireParser<O> registerOnce(WireKey key, WireParselet<O> valueInConsumer) {
+        CharSequence name = key.name();
+        if (lookup(name) != null) {
+            Jvm.warn().on(getClass(), "Unable to register multiple methods for " + name + " ignoring one.");
+        } else {
+            register(key, valueInConsumer);
+        }
+        return (VanillaWireParser<O>) this;
+    }
+
+    @NotNull
     VanillaWireParser<O> register(WireKey key, WireParselet<O> valueInConsumer);
 
     WireParselet<O> lookup(int number);

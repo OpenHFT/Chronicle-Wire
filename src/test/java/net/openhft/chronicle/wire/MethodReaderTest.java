@@ -2,11 +2,14 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.core.onoes.ExceptionKey;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import static junit.framework.TestCase.assertFalse;
@@ -199,6 +202,24 @@ public class MethodReaderTest {
         assertEquals(text, wire2.toString());
     }
 
+    @Test
+    public void testOverloaded() {
+        Map<ExceptionKey, Integer> map = Jvm.recordExceptions();
+        try {
+            Wire wire2 = new TextWire(Bytes.elasticHeapByteBuffer(32));
+            Overloaded writer2 = wire2.methodWriter(Overloaded.class);
+            Wire wire = new TextWire(Bytes.from("method: [ ]\n"));
+            MethodReader reader = wire.methodReader(writer2);
+//            reader.readOne();
+
+            String s = map.keySet().toString();
+            assertTrue(s, s.contains("Unable to support overloaded methods, ignoring one of method"));
+        } finally {
+            Jvm.resetExceptionHandlers();
+        }
+
+    }
+
     interface MRTListener {
         void top(MRTInterface mrti);
 
@@ -227,6 +248,12 @@ public class MethodReaderTest {
             super(field1);
             this.field2 = field2;
         }
+    }
+
+    interface Overloaded {
+        void method();
+
+        void method(MockDto dto);
     }
 }
 
