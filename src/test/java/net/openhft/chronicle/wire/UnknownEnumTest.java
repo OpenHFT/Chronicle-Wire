@@ -23,14 +23,14 @@ public class UnknownEnumTest {
         YesNo yesNo = wire.read("value").asEnum(YesNo.class);
 
         Wire wire2 = createWire();
-        wire.write("value").asEnum(yesNo);
+        wire2.write("value").asEnum(yesNo);
 
-        String maybe = wire.read("value").text();
+        String maybe = wire2.read("value").text();
         assertEquals("Maybe", maybe);
 
     }
 
-    enum YesNo implements DynamicEnum<YesNo> {
+    enum YesNo implements DynamicEnum {
         Yes,
         No
     }
