@@ -1551,8 +1551,11 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull CharSequence type) {
-            writeCode(TYPE_LITERAL).writeUtf8(type);
+        public WireOut typeLiteral(CharSequence type) {
+            if (type == null)
+                nu11();
+            else
+                writeCode(TYPE_LITERAL).writeUtf8(type);
             return BinaryWire.this;
         }
 

@@ -209,7 +209,7 @@ public interface ValueOut {
 
     @NotNull
     default ValueOut typePrefix(Class type) {
-        return typePrefix(ClassAliasPool.CLASS_ALIASES.nameFor(type));
+        return type == null ? this : typePrefix(ClassAliasPool.CLASS_ALIASES.nameFor(type));
     }
 
     @NotNull
@@ -219,10 +219,10 @@ public interface ValueOut {
     }
 
     @NotNull
-    WireOut typeLiteral(@NotNull CharSequence type);
+    WireOut typeLiteral(@Nullable CharSequence type);
 
     @NotNull
-    WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @NotNull Class type);
+    WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @Nullable Class type);
 
     @NotNull
     WireOut uuid(UUID uuid);
