@@ -1544,7 +1544,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public ValueOut typePrefix(CharSequence typeName) {
-            writeCode(TYPE_PREFIX).writeUtf8(typeName);
+            if (typeName != null)
+                writeCode(TYPE_PREFIX).writeUtf8(typeName);
             return this;
         }
 
