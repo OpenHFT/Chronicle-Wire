@@ -49,7 +49,8 @@ public interface Demarshallable {
     @NotNull
     static <T extends Demarshallable> T newInstance(@NotNull Class<T> clazz, WireIn wireIn) {
         try {
-            return (T) DEMARSHALLABLES.get(clazz).newInstance(wireIn);
+            Constructor<Demarshallable> constructor = DEMARSHALLABLES.get(clazz);
+            return (T) constructor.newInstance(wireIn);
 
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);

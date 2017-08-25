@@ -36,6 +36,14 @@ public class WireTypeTest {
     }
 
     @Test
+    public void testNameFor() {
+        ClassAliasPool.CLASS_ALIASES.addAlias(WireType.class);
+        for (WireType wireType : WireType.values()) {
+            assertEquals("WireType", Wires.typeNameFor(wireType));
+        }
+    }
+
+    @Test
     public void testAsString() {
         @NotNull TestMarshallable tm = new TestMarshallable();
         tm.setCount(1);

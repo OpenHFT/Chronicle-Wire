@@ -65,6 +65,7 @@ public abstract class AbstractWire implements Wire {
         boolean assertions = false;
         assert assertions = true;
         ASSERTIONS = assertions;
+        WireInternal.addAliases();
     }
 
     @NotNull

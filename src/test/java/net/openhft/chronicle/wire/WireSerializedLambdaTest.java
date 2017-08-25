@@ -39,7 +39,6 @@ public class WireSerializedLambdaTest {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(Fun.class);
         ClassAliasPool.CLASS_ALIASES.addAlias(Update.class);
-        ClassAliasPool.CLASS_ALIASES.addAlias(WireSerializedLambda.class, "SerializedLambda");
     }
     @Test
     public void testIsLambda() {

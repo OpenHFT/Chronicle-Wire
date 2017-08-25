@@ -60,6 +60,12 @@ public enum WireInternal {
         ClassAliasPool.CLASS_ALIASES.addAlias(SerializablePredicate.class, "Predicate");
         ClassAliasPool.CLASS_ALIASES.addAlias(SerializableUpdater.class, "Updater");
         ClassAliasPool.CLASS_ALIASES.addAlias(SerializableUpdaterWithArg.class, "UpdaterWithArg");
+        ClassAliasPool.CLASS_ALIASES.addAlias(VanillaFieldInfo.class, "FieldInfo");
+        ClassAliasPool.CLASS_ALIASES.addAlias(WireSerializedLambda.class, "SerializedLambda");
+    }
+
+    static void addAliases() {
+        // static init block does the work.
     }
 
     @NotNull

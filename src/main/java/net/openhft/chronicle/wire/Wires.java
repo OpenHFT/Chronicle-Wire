@@ -89,7 +89,7 @@ public enum Wires {
         CLASS_STRATEGY_FUNCTIONS.add(SerializeJavaLang.INSTANCE);
         CLASS_STRATEGY_FUNCTIONS.add(SerializeMarshallables.INSTANCE);
         CLASS_STRATEGY_FUNCTIONS.add(SerializeBytes.INSTANCE);
-        ClassAliasPool.CLASS_ALIASES.addAlias(VanillaFieldInfo.class, "FieldInfo");
+        WireInternal.addAliases();
     }
 
     @Nullable
