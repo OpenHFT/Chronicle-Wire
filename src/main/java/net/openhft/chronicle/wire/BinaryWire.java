@@ -1544,14 +1544,18 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public ValueOut typePrefix(CharSequence typeName) {
-            writeCode(TYPE_PREFIX).writeUtf8(typeName);
+            if (typeName != null)
+                writeCode(TYPE_PREFIX).writeUtf8(typeName);
             return this;
         }
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull CharSequence type) {
-            writeCode(TYPE_LITERAL).writeUtf8(type);
+        public WireOut typeLiteral(CharSequence type) {
+            if (type == null)
+                nu11();
+            else
+                writeCode(TYPE_LITERAL).writeUtf8(type);
             return BinaryWire.this;
         }
 
@@ -2974,11 +2978,9 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
             bytes.uncheckedReadSkipOne();
             @Nullable StringBuilder sb = readUtf8();
-            if (sb == null)
-                Jvm.warn().on(BinaryWire.this.getClass(), "Unable to read as string for type " + bytes.toHexString(64));
 
             try {
-                return classLookup().forName(sb);
+                return sb == null ? null : classLookup().forName(sb);
             } catch (ClassNotFoundException e) {
                 return Wires.dtoInterface(tClass) ? Wires.tupleFor(tClass, sb.toString()) : null;
             }
