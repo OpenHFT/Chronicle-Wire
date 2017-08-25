@@ -2974,6 +2974,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
             bytes.uncheckedReadSkipOne();
             @Nullable StringBuilder sb = readUtf8();
+            if (sb == null)
+                Jvm.warn().on(BinaryWire.this.getClass(), "Unable to read as string for type " + bytes.toHexString(64));
 
             try {
                 return classLookup().forName(sb);
