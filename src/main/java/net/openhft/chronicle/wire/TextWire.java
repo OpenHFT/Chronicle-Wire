@@ -299,10 +299,10 @@ public class TextWire extends AbstractWire implements Wire {
     }
 
     public String toString() {
-        if (bytes.readRemaining() > (1024 * 128)) {
+        if (bytes.readRemaining() > (1024 * 1024)) {
             final long l = bytes.readLimit();
             try {
-                bytes.readLimit(bytes.readPosition() + (1024 * 128));
+                bytes.readLimit(bytes.readPosition() + (1024 * 1024));
                 return bytes.toString() + "..";
             } finally {
                 bytes.readLimit(l);
