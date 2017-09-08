@@ -96,6 +96,18 @@ public class TextWireTest {
                         "c=three\n" +
                         "e=also",
                 asProperties(tf2.others));
+
+        TwoFields tf3 = Marshallable.fromString("!" + TwoFields.class.getName() + " {" +
+                "A: 1,\n" +
+                "B: two,\n" +
+                "C: three,\n" +
+                "D: 44,\n" +
+                "E: also,\n" +
+                "}");
+        assertEquals("a=1\n" +
+                        "c=three\n" +
+                        "e=also",
+                asProperties(tf3.others));
     }
 
     public String asProperties(Map<String, Object> map) {

@@ -10,7 +10,7 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
         super(tClass, fields, isLeaf);
         fieldMap = new CharSequenceObjectMap<>(fields.length * 3 / 2);
         for (FieldAccess field : fields) {
-            fieldMap.put(field.key.name(), field);
+            fieldMap.put(field.key.name().toString().toLowerCase(), field);
         }
     }
 
@@ -33,6 +33,11 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
                 } else {
                     next = -1;
                     field = fieldMap.get(sb);
+                    if (field == null) {
+                        for (int i = 0; i < sb.length(); i++)
+                            sb.setCharAt(i, Character.toLowerCase(sb.charAt(i)));
+                        field = fieldMap.get(sb);
+                    }
                 }
                 if (field == null) {
                     if (rm == null)
