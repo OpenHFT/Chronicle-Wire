@@ -1,0 +1,22 @@
+method3: [
+  {
+    field1: hello,
+    field2: 1.23
+  },
+  {
+    field1: world,
+    field2: 1e6
+  }
+]
+---
+method3: [
+  {
+    field1: gidday,
+    field2: 1
+  },
+  {
+    field1: mate,
+    field2: 2
+  }
+]
+---

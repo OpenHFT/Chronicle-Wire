@@ -29,6 +29,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -94,6 +95,10 @@ public class MethodReader implements Closeable {
     }
 
     static void logMessage(@NotNull CharSequence s, @NotNull ValueIn v) {
+        if (! LOGGER.isDebugEnabled()) {
+            return;
+        }
+
         @NotNull String name = s.toString();
         String rest;
 
@@ -135,6 +140,7 @@ public class MethodReader implements Closeable {
                     if (Jvm.isDebug())
                         logMessage(s, v);
 
+                    prepareArg(argArr[0]);
                     argArr[0] = v.object(argArr[0], parameterType);
                     invoke(o, m, argArr);
                 } catch (Exception i) {
@@ -158,15 +164,22 @@ public class MethodReader implements Closeable {
             @NotNull ReadMarshallable[] argArr = {arg};
             wireParser.registerOnce(m::getName, (s, v, $) -> {
                 try {
-                    if (Jvm.isDebug() && LOGGER.isDebugEnabled())
+                    if (Jvm.isDebug())
                         logMessage(s, v);
 
+                    prepareArg(argArr[0]);
                     argArr[0] = v.object(argArr[0], parameterType);
                     invoke(o, m, argArr);
                 } catch (Throwable t) {
                     Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], t);
                 }
             });
+        }
+    }
+
+    private void prepareArg(Object arg) {
+        if (arg instanceof Collection<?>) {
+            ((Collection<?>)arg).clear();
         }
     }
 
@@ -193,6 +206,7 @@ public class MethodReader implements Closeable {
         @NotNull BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
             int i = 0;
             for (@NotNull Class clazz : parameterTypes) {
+                prepareArg(a[i]);
                 a[i++] = v.object(clazz);
             }
         };

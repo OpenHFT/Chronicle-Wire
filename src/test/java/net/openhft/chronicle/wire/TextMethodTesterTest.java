@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -38,5 +39,10 @@ class MockMethodsImpl implements MockMethods {
     @Override
     public void method2(MockDto dto) {
         out.method2(dto);
+    }
+
+    @Override
+    public void method3(List<MockDto> dtos) {
+        out.method3(dtos);
     }
 }

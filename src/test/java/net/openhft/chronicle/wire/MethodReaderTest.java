@@ -9,7 +9,10 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.stream.IntStream;
 
 import static junit.framework.TestCase.assertFalse;
@@ -20,6 +23,8 @@ interface MockMethods {
     void method1(MockDto dto);
 
     void method2(MockDto dto);
+
+    void method3(List<MockDto> dtos);
 }
 
 /*
@@ -41,6 +46,22 @@ public class MethodReaderTest {
         }
         assertFalse(reader.readOne());
         assertEquals(expected.toString().trim().replace("\r", ""), wire2.toString().trim());
+    }
+
+    @Test
+    public void readMethodsCollections() throws IOException, InterruptedException {
+        Wire wire = new TextWire(BytesUtil.readFile("methods-collections-in.yaml")).useTextDocuments();
+        Wire wire2 = new TextWire(Bytes.allocateElasticDirect());
+        BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
+        MockMethods mocker = Mocker.queuing(MockMethods.class, "", queue);
+        MethodReader reader = wire.methodReader(mocker);
+        for (int i = 0; i < 2; i++) {
+            assertTrue(reader.readOne());
+        }
+        assertFalse(reader.readOne());
+        assertEquals(2, queue.size());
+        queue.take();
+        assertEquals("method3[[{field1=gidday, field2=1}, {field1=mate, field2=2}]]", queue.take());
     }
 
     @Test
