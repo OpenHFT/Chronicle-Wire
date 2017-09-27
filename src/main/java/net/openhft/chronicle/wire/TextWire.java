@@ -1342,15 +1342,37 @@ public class TextWire extends AbstractWire implements Wire {
             bytes.append(i64);
             elementSeparator();
             // 2001 to 2100 best effort basis.
-            if (TextWire.this.addTimeStamps && !leaf && 1_000_000_000_000L < i64 && i64 < 4_111_000_000_000L) {
+            boolean addTimeStamp = TextWire.this.addTimeStamps && !leaf;
+            if (addTimeStamp) {
+                addTimeStamp(i64);
+            }
+
+            return TextWire.this;
+        }
+
+        public void addTimeStamp(long i64) {
+            if ((long) 1e12 < i64 && i64 < (long) 4.111e12) {
                 bytes.append(", # ");
                 bytes.appendDateMillis(i64);
                 bytes.append("T");
                 bytes.appendTimeMillis(i64);
                 sep = NEW_LINE;
+            } else if ((long) 1e18 < i64 && i64 < (long) 4.111e18) {
+                long millis = i64 / 1_000_000;
+                long nanos = i64 % 1_000_000;
+                bytes.append(", # ");
+                bytes.appendDateMillis(millis);
+                bytes.append("T");
+                bytes.appendTimeMillis(millis);
+                bytes.append((char) ('0' + nanos / 100000));
+                bytes.append((char) ('0' + nanos / 100000 % 10));
+                bytes.append((char) ('0' + nanos / 10000 % 10));
+                bytes.append((char) ('0' + nanos / 1000 % 10));
+                bytes.append((char) ('0' + nanos / 100 % 10));
+                bytes.append((char) ('0' + nanos / 10 % 10));
+                bytes.append((char) ('0' + nanos % 10));
+                sep = NEW_LINE;
             }
-
-            return TextWire.this;
         }
 
         @NotNull
