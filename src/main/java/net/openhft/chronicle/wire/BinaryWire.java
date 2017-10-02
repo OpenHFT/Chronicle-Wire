@@ -868,6 +868,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         throw new UnsupportedOperationException(stringForCode(code));
     }
 
+    // TODO: boxes and creates garbage
     private Number readFloat0bject(int code) {
         // TODO: in some places we have already called this before invoking the function,
         // so we should review them and optimize the calls to do the check only once
@@ -928,6 +929,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         throw new UnsupportedOperationException(stringForCode(code));
     }
 
+    // TODO: boxes and creates garbage
     Number readInt0object(int code) {
         if (isSmallInt(code))
             return code;
@@ -3471,13 +3473,63 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                 case BinaryWireHighCode.FLOAT:
                     bytes.uncheckedReadSkipOne();
-                    readFloat0bject(code);
-                    return;
+                    if (code < 128 && code >= 0) {
+                        return;
+                    }
+
+                    // copy/pasted from readFloat0bject so as to avoid auto-boxing
+                    switch (code) {
+                        case FLOAT32:
+                            bytes.readFloat();
+                            return;
+                        case FLOAT_STOP_2:
+                            bytes.readStopBit();
+                            return;
+                        case FLOAT_STOP_4:
+                            bytes.readStopBit();
+                            return;
+                        case FLOAT_STOP_6:
+                            bytes.readStopBit();
+                            return;
+                        case FLOAT64:
+                            bytes.readDouble();
+                            return;
+                    }
+                    throw new UnsupportedOperationException(stringForCode(code));
 
                 case BinaryWireHighCode.INT:
                     bytes.uncheckedReadSkipOne();
-                    readInt0object(code);
-                    return;
+                    // copy/pasted from readInt0object so as to avoid auto-boxing
+                    if (isSmallInt(code))
+                        return;
+
+                    switch (code) {
+                        case INT8:
+                            bytes.readByte();
+                            return;
+                        case UINT8:
+                        case SET_LOW_INT8:
+                            bytes.readUnsignedByte();
+                            return;
+                        case INT16:
+                            bytes.readShort();
+                            return;
+                        case SET_LOW_INT16:
+                        case UINT16:
+                            bytes.readUnsignedShort();
+                            return;
+                        case INT32:
+                            bytes.readInt();
+                            return;
+                        case UINT32:
+                            bytes.readUnsignedInt();
+                            return;
+                        case INT64:
+                        case INT64_0x:
+                            bytes.readLong();
+                            return;
+                    }
+                    throw new UnsupportedOperationException(stringForCode(code));
             }
             // assume it a String
             text();
