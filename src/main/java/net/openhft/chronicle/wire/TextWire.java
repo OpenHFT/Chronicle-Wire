@@ -313,7 +313,12 @@ public class TextWire extends AbstractWire implements Wire {
 
     @Override
     public void copyTo(@NotNull WireOut wire) {
-        wire.bytes().write(bytes, bytes().readPosition(), bytes().readLimit());
+        if (wire instanceof TextWire) {
+            wire.bytes().write(bytes, bytes().readPosition(), bytes().readLimit());
+        } else {
+            // TODO: implement copying
+            throw new UnsupportedOperationException("Not implemented yet. Can only copy TextWire format to the same format");
+        }
     }
 
     @NotNull
