@@ -18,7 +18,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -30,21 +29,24 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-@Ignore("TODO: fix copying for both TextWire and BinaryWire")
 @RunWith(value = Parameterized.class)
 public class CopyTest {
     private final WireType from, to;
+    private boolean withType;
 
-    public CopyTest(WireType from, WireType to) {
+    public CopyTest(WireType from, WireType to, boolean withType) {
         this.from = from;
         this.to = to;
+        this.withType = withType;
     }
 
     @Parameterized.Parameters
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
-                new Object[] {WireType.TEXT, WireType.BINARY},
-                new Object[] {WireType.BINARY, WireType.TEXT}
+//                new Object[] {WireType.TEXT, WireType.BINARY, true}, // not supported yet
+//                new Object[] {WireType.TEXT, WireType.BINARY, false}, // not supported yet
+                new Object[]{WireType.BINARY, WireType.TEXT, true},
+                new Object[]{WireType.BINARY, WireType.TEXT, false}
         );
     }
 
@@ -56,10 +58,17 @@ public class CopyTest {
         Wire wireTo = to.apply(bytesTo);
 
         AClass a = create();
-        wireFrom.getValueOut().marshallable(a);
+        if (withType)
+            wireFrom.getValueOut().object(a);
+        else
+            wireFrom.getValueOut().marshallable(a);
 
         wireFrom.copyTo(wireTo);
-        AClass b = (AClass) wireTo.getValueIn().object();
+        AClass b;
+        if (withType)
+            b = (AClass) wireTo.getValueIn().object();
+        else
+            b = wireTo.getValueIn().object(AClass.class);
 
         assertEquals(a, b);
     }
@@ -68,7 +77,7 @@ public class CopyTest {
         AClass aClass = new AClass();
         aClass.map = new HashMap<>();
         aClass.map.put(CcyPair.EURUSD, "eurusd");
-        aClass.array = new String[] { "hello", "there" };
+        aClass.array = new String[]{"hello", "there"};
         aClass.intValue = 11;
         aClass.value = 123.4;
         return aClass;
