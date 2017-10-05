@@ -25,8 +25,29 @@ import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.NavigableSet;
+import java.util.Objects;
+import java.util.RandomAccess;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -259,6 +280,26 @@ public class WireMarshaller<T> {
             Class<?> type = field.getType();
             if (type.isArray())
                 return new ArrayFieldAccess(field);
+            if (EnumSet.class.isAssignableFrom(type)) {
+                Type genericType = field.getGenericType();
+                if (genericType instanceof ParameterizedType) {
+                    @NotNull ParameterizedType pType = (ParameterizedType) genericType;
+                    Type type0 = pType.getActualTypeArguments()[0];
+                    final Class componentType = extractClass(type0);
+                    boolean isLeaf = !Throwable.class.isAssignableFrom(componentType)
+                            && WIRE_MARSHALLER_CL.get(componentType).isLeaf;
+                    try {
+                        final Method method = Class.class.getDeclaredMethod("enumConstantDirectory");
+                        method.setAccessible(true);
+                        final Map<String, ? extends Enum> values = (Map<String, ? extends Enum>) method.invoke(componentType);
+                        return new EnumSetFieldAccess(field, isLeaf, values.values().toArray(), componentType);
+                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }
+                }
+                throw new RuntimeException("Could not get enum constant directory");
+            }
             if (Collection.class.isAssignableFrom(type))
                 return CollectionFieldAccess.of(field);
             if (Map.class.isAssignableFrom(type))
@@ -593,6 +634,97 @@ public class WireMarshaller<T> {
             } catch (IllegalAccessException e) {
                 throw new AssertionError(e);
             }
+        }
+    }
+
+    static class EnumSetFieldAccess extends FieldAccess {
+        private final Object[] values;
+        private final BiConsumer<Object, ValueOut> sequenceGetter;
+        private final Class componentType;
+        private final Supplier<EnumSet> enumSetSupplier;
+
+        EnumSetFieldAccess(@NotNull final Field field, final Boolean isLeaf, final Object[] values, final Class componentType) {
+            super(field, isLeaf);
+            this.values = values;
+            this.componentType = componentType;
+            this.enumSetSupplier = () -> EnumSet.noneOf(this.componentType);
+            this.sequenceGetter = (o, out) -> {
+                EnumSet coll;
+                try {
+                    coll = (EnumSet) this.field.get(o);
+                } catch (IllegalAccessException e) {
+                    throw new AssertionError(e);
+                }
+
+                for (int i = this.values.length - 1; i != -1; i--) {
+                    if (coll.contains(this.values[i])) {
+                        out.object(this.componentType, this.values[i]);
+                    }
+                }
+            };
+        }
+
+        @Override
+        protected void getValue(final Object o, final ValueOut write, final Object previous) throws IllegalAccessException {
+            @NotNull Collection c = (Collection) field.get(o);
+            if (c == null) {
+                write.nu11();
+                return;
+            }
+            write.sequence(o, sequenceGetter);
+        }
+
+        protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
+            EnumSet coll = (EnumSet) field.get(o);
+            if (coll == null) {
+                coll = enumSetSupplier.get();
+                field.set(o, coll);
+            }
+            if (!read.sequence(coll, (c, in2) -> {
+                if (!c.isEmpty())
+                    c.clear();
+                while (in2.hasNextSequenceItem())
+                    c.add(in2.object(componentType));
+            })) {
+                Collection defaultColl = (Collection) field.get(defaults);
+                if (defaultColl == null) {
+                    field.set(o, null);
+                } else {
+                    coll.clear();
+                    if (!defaultColl.isEmpty())
+                        coll.addAll(defaultColl);
+                }
+            }
+        }
+
+        @Override
+        protected void copy(final Object from, final Object to) throws IllegalAccessException {
+            EnumSet fromColl = (EnumSet) field.get(from);
+            if (fromColl == null) {
+                field.set(to, null);
+                return;
+            }
+            EnumSet coll = (EnumSet) field.get(to);
+            if (coll == null) {
+                coll = enumSetSupplier.get();
+                field.set(to, coll);
+            }
+            coll.clear();
+            for (int i = this.values.length - 1; i != -1; i--) {
+                if (fromColl.contains(this.values[i])) {
+                    coll.add(this.values[i]);
+                }
+            }
+        }
+
+        @Override
+        protected void setValue(final Object o, final ValueIn read, final boolean overwrite) throws IllegalAccessException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void getAsBytes(final Object o, final Bytes bytes) throws IllegalAccessException {
+            throw new UnsupportedOperationException();
         }
     }
 
