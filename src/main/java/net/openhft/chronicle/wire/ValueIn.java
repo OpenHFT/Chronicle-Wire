@@ -244,7 +244,7 @@ public interface ValueIn {
     default <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) {
         list.clear();
         return sequence(list, (l, v) -> {
-            while (hasNextSequenceItem()) {
+            while (v.hasNextSequenceItem()) {
                 int size = l.size();
                 if (buffer.size() <= size) buffer.add(bufferAdd.get());
 
