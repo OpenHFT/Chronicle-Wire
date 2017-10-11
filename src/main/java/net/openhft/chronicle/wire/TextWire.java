@@ -15,7 +15,17 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.AppendableUtil;
+import net.openhft.chronicle.bytes.Byteable;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesOut;
+import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.bytes.PointerBytesStore;
+import net.openhft.chronicle.bytes.ReadBytesMarshallable;
+import net.openhft.chronicle.bytes.StopCharTester;
+import net.openhft.chronicle.bytes.StopCharTesters;
+import net.openhft.chronicle.bytes.StopCharsTester;
 import net.openhft.chronicle.bytes.ref.TextIntReference;
 import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
 import net.openhft.chronicle.bytes.ref.TextLongReference;
@@ -25,7 +35,13 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
-import net.openhft.chronicle.core.util.*;
+import net.openhft.chronicle.core.util.BooleanConsumer;
+import net.openhft.chronicle.core.util.ObjBooleanConsumer;
+import net.openhft.chronicle.core.util.ObjByteConsumer;
+import net.openhft.chronicle.core.util.ObjFloatConsumer;
+import net.openhft.chronicle.core.util.ObjShortConsumer;
+import net.openhft.chronicle.core.util.ObjectUtils;
+import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -44,8 +60,21 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.*;
-import java.util.function.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.BitSet;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.ObjDoubleConsumer;
+import java.util.function.ObjIntConsumer;
+import java.util.function.ObjLongConsumer;
+import java.util.function.Supplier;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
@@ -2883,7 +2912,8 @@ public class TextWire extends AbstractWire implements Wire {
                 return object;
 
             } else if (code != '{') {
-                throw new IORuntimeException("Unsupported type " + stringForCode(code));
+                consumeValue();
+                throw new IORuntimeException("Could not determine type for value " + sb + " of type " + object);
             }
 
             final long len = readLengthMarshallable();
