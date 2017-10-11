@@ -16,10 +16,12 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.BytesMarshallable;
+
 /*
  * Created by Peter Lawrey on 16/03/16.
  */
-public abstract class AbstractMarshallable implements Marshallable {
+public abstract class AbstractMarshallable implements Marshallable, BytesMarshallable {
     @Override
     public boolean equals(Object o) {
         return Marshallable.$equals(this, o);
