@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
  * <p>
  * Invoked before writing out this method and args
  */
+@FunctionalInterface
 public interface MethodWriterListener {
     void onWrite(String name, Object[] args);
 }

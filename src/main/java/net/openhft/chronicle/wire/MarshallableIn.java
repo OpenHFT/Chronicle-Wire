@@ -32,6 +32,7 @@ import java.util.Map;
  * <p>
  * Anything you can read marshallable object from.
  */
+@FunctionalInterface
 public interface MarshallableIn {
     @NotNull
     DocumentContext readingDocument();

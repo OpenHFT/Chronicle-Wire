@@ -70,10 +70,12 @@ public class MethodWriterTest {
 
     }
 
+    @FunctionalInterface
     interface Event {
         void event(String eventName, Object o);
     }
 
+    @FunctionalInterface
     public interface HasDefault {
         default void callsMethod(String args) {
             method(args.split(","));

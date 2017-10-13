@@ -29,6 +29,7 @@ import java.util.function.BiConsumer;
  * <p>
  * Anything you can write Marshallable objects to.
  */
+@FunctionalInterface
 public interface MarshallableOut {
     /**
      * Start a document which is completed when DocumentContext.close() is called. You can use a
