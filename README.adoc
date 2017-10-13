@@ -333,10 +333,57 @@ public void testUnknownClass() {
 }
 ----
 
+=== Filtering with MethodReaders
 
-== Uses of Chronical Wire
+To support filtering, you need to make sure the first of multiple arguments can be used to filter the method call.
+If you have only one argument now, you may need to add an additional argument to support efficient filtering.
 
-Chronical Wire can be used for:
+What this facility does is call an implementation of `MethodFilterOnFirstArg` to see if the rest of the method call should be parsed. e.g. say today you have
+
+[source, Java]
+---
+interface MyInterface {
+    void method(ExpensiveDto dto);
+}
+----
+
+This can be migrated to
+
+[source, Java]
+---
+interface MyInterface extends MethodFilterOnFirstArg<String> {
+    @Deprecated
+    void method(ExpensiveDto dto);
+
+    void method2(String filter, ExpensiveDto dto);
+}
+----
+
+Where the implementation can look like this
+
+[source, Java]
+---
+class MyInterfaceImpl extends MyInterface {
+    public void method(ExpensiveDto dto) {
+       // something
+    }
+
+    public void method2(String filter, ExpensiveDto dto) {
+        method(dto);
+    }
+
+    public boolean ignoreMethodBasedOnFirstArg(String methodName, String filter) {
+        return someConditionOn(methodName, filter);
+    }
+}
+----
+
+For an example, see `net.openhft.chronicle.wire.MethodFilterOnFirstArgTest`
+
+
+== Uses of Chronicle Wire
+
+Chronicle Wire can be used for:
 
 * file headers
 * TCP connection headers; where the optimal wire format taht is actually used can be negotiated

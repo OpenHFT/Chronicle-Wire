@@ -1,0 +1,48 @@
+method1: {
+  field1: hello,
+  field2: 1.23
+}
+---
+ignoreMethodBasedOnFirstArg: [
+  method2,
+  false
+]
+method2: [
+  false,
+  {
+    field1: world,
+    field2: 1e6
+  }
+]
+---
+ignoreMethodBasedOnFirstArg: [
+  method2,
+  true
+]
+---
+ignoreMethodBasedOnFirstArg: [
+  method3,
+  !net.openhft.chronicle.wire.MockDto {
+    field1: world,
+    field2: 1e6
+  }
+]
+method3: [
+  {
+    field1: world,
+    field2: 1e6
+  },
+  {
+    field1: world,
+    field2: 1e6
+  }
+]
+---
+ignoreMethodBasedOnFirstArg: [
+  method3,
+  !net.openhft.chronicle.wire.MockDto {
+    field1: world,
+    field2: 0.0
+  }
+]
+---

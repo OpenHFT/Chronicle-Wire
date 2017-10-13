@@ -47,6 +47,8 @@ public class MethodReader implements Closeable {
     private boolean closeIn = false, closed;
     private MethodReaderInterceptor methodReaderInterceptor;
 
+    static final Object IGNORED = new Object(); // object used to flag that the call should be ignored.
+
     public MethodReader(MarshallableIn in, boolean ignoreDefault, WireParselet defaultParselet, MethodReaderInterceptor methodReaderInterceptor, @NotNull Object... objects) {
         this.in = in;
         this.methodReaderInterceptor = methodReaderInterceptor;
@@ -55,11 +57,20 @@ public class MethodReader implements Closeable {
         wireParser = WireParser.wireParser(defaultParselet);
 
         @NotNull Set<String> methodsHandled = new HashSet<>();
+        MethodFilterOnFirstArg methodFilterOnFirstArg = null;
         for (@NotNull Object o : objects) {
+            if (o instanceof MethodFilterOnFirstArg) {
+                if (methodFilterOnFirstArg != null)
+                    Jvm.warn().on(getClass(), "Multiple filters on first arg not supported, only the first one is applied.");
+                else
+                    methodFilterOnFirstArg = (MethodFilterOnFirstArg) o;
+            }
             for (@NotNull Method m : o.getClass().getMethods()) {
                 if (Modifier.isStatic(m.getModifiers()))
                     continue;
                 if (ignoreDefault && m.getDeclaringClass().isInterface())
+                    continue;
+                if ("ignoreMethodBasedOnFirstArg".equals(m.getName()))
                     continue;
 
                 try {
@@ -84,7 +95,10 @@ public class MethodReader implements Closeable {
                         addParseletForMethod(o, m, parameterTypes[0]);
                         break;
                     default:
-                        addParseletForMethod(o, m, parameterTypes);
+                        if (methodFilterOnFirstArg == null)
+                            addParseletForMethod(o, m, parameterTypes);
+                        else
+                            addParseletForMethod(o, m, parameterTypes, methodFilterOnFirstArg);
                         break;
                 }
             }
@@ -92,28 +106,6 @@ public class MethodReader implements Closeable {
         if (wireParser.lookup(HISTORY) == null) {
             wireParser.registerOnce(() -> HISTORY, (s, v, $) -> v.marshallable(MessageHistory.get()));
         }
-    }
-
-    static void logMessage(@NotNull CharSequence s, @NotNull ValueIn v) {
-        if (! LOGGER.isDebugEnabled()) {
-            return;
-        }
-
-        @NotNull String name = s.toString();
-        String rest;
-
-        if (v.wireIn() instanceof BinaryWire) {
-            Bytes bytes = Bytes.elasticByteBuffer((int) (v.wireIn().bytes().readRemaining() * 3 / 2 + 64));
-            long pos = v.wireIn().bytes().readPosition();
-            v.wireIn().copyTo(new TextWire(bytes));
-            v.wireIn().bytes().readPosition(pos);
-            rest = bytes.toString();
-            bytes.release();
-
-        } else {
-            rest = v.toString();
-        }
-        LOGGER.debug("read " + name + " - " + rest);
     }
 
     @NotNull
@@ -177,10 +169,26 @@ public class MethodReader implements Closeable {
         }
     }
 
-    private void prepareArg(Object arg) {
-        if (arg instanceof Collection<?>) {
-            ((Collection<?>)arg).clear();
+    static void logMessage(@NotNull CharSequence s, @NotNull ValueIn v) {
+        if (!LOGGER.isDebugEnabled()) {
+            return;
         }
+
+        @NotNull String name = s.toString();
+        String rest;
+
+        if (v.wireIn() instanceof BinaryWire) {
+            Bytes bytes = Bytes.elasticByteBuffer((int) (v.wireIn().bytes().readRemaining() * 3 / 2 + 64));
+            long pos = v.wireIn().bytes().readPosition();
+            v.wireIn().copyTo(new TextWire(bytes));
+            v.wireIn().bytes().readPosition(pos);
+            rest = bytes.toString();
+            bytes.release();
+
+        } else {
+            rest = v.toString();
+        }
+        LOGGER.debug("read " + name + " - " + rest);
     }
 
     public void addParseletForMethod(Object o, @NotNull Method m) {
@@ -198,6 +206,12 @@ public class MethodReader implements Closeable {
                 Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + "()", i);
             }
         });
+    }
+
+    private void prepareArg(Object arg) {
+        if (arg instanceof Collection<?>) {
+            ((Collection<?>) arg).clear();
+        }
     }
 
     public void addParseletForMethod(Object o, @NotNull Method m, @NotNull Class[] parameterTypes) {
@@ -218,6 +232,43 @@ public class MethodReader implements Closeable {
 
                 v.sequence(args, sequenceReader);
 
+                invoke(o, m, args);
+            } catch (Exception i) {
+                Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + Arrays.toString(args), i);
+            }
+        });
+    }
+
+    public void addParseletForMethod(Object o, @NotNull Method m, @NotNull Class[] parameterTypes, MethodFilterOnFirstArg methodFilterOnFirstArg) {
+        m.setAccessible(true); // turn of security check to make a little faster
+        @NotNull Object[] args = new Object[parameterTypes.length];
+        @NotNull BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
+            int i = 0;
+            boolean ignored = false;
+            for (@NotNull Class clazz : parameterTypes) {
+                prepareArg(a[i]);
+                if (ignored)
+                    v.skipValue();
+                else
+                    a[i] = v.object(clazz);
+                if (i == 0) {
+                    if (methodFilterOnFirstArg.ignoreMethodBasedOnFirstArg(m.getName(), a[0])) {
+                        a[0] = IGNORED;
+                        ignored = true;
+                    }
+                }
+                i++;
+            }
+        };
+        String name = m.getName();
+        wireParser.registerOnce(m::getName, (s, v, $) -> {
+            try {
+                if (Jvm.isDebug())
+                    logMessage(s, v);
+
+                v.sequence(args, sequenceReader);
+                if (args[0] == IGNORED)
+                    return;
                 invoke(o, m, args);
             } catch (Exception i) {
                 Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + Arrays.toString(args), i);
