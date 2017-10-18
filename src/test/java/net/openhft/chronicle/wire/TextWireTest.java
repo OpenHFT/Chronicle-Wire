@@ -1595,29 +1595,29 @@ public class TextWireTest {
         DoubleWrapper dw = Marshallable.fromString(new DoubleWrapper(1e3).toString());
         assertEquals(1e3, dw.d, 0);
         assertEquals("!D {\n" +
-                "  d: 10e3,\n" +
-                "  n: -10e3\n" +
+                "  d: 10E3,\n" +
+                "  n: -10E3\n" +
                 "}\n", new DoubleWrapper(10e3).toString());
         DoubleWrapper dw2 = Marshallable.fromString(new DoubleWrapper(10e3).toString());
         assertEquals(10e3, dw2.d, 0);
 
         assertEquals("!D {\n" +
-                "  d: 100e3,\n" +
-                "  n: -100e3\n" +
+                "  d: 100E3,\n" +
+                "  n: -100E3\n" +
                 "}\n", new DoubleWrapper(100e3).toString());
         DoubleWrapper dw3 = Marshallable.fromString(new DoubleWrapper(100e3).toString());
         assertEquals(100e3, dw3.d, 0);
 
         assertEquals("!D {\n" +
-                "  d: 1e6,\n" +
-                "  n: -1e6\n" +
+                "  d: 1E6,\n" +
+                "  n: -1E6\n" +
                 "}\n", new DoubleWrapper(1e6).toString());
         DoubleWrapper dw4 = Marshallable.fromString(new DoubleWrapper(1e6).toString());
         assertEquals(1e6, dw4.d, 0);
 
         assertEquals("!D {\n" +
-                "  d: 10e6,\n" +
-                "  n: -10e6\n" +
+                "  d: 10E6,\n" +
+                "  n: -10E6\n" +
                 "}\n", new DoubleWrapper(10e6).toString());
         DoubleWrapper dw5 = Marshallable.fromString(new DoubleWrapper(10e6).toString());
         assertEquals(10e6, dw5.d, 0);
