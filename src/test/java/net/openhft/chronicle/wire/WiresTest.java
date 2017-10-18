@@ -98,7 +98,7 @@ public class WiresTest {
         String text = "!FourValues {\n" +
                 "  string: Hello,\n" +
                 "  num: 123,\n" +
-                "  big: 1e6,\n" +
+                "  big: 1E6,\n" +
                 "  also: extra\n" +
                 "}\n";
         ThreeValues tv = Marshallable.fromString(ThreeValues.class, text);

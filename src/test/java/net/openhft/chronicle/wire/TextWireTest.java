@@ -1588,8 +1588,8 @@ public class TextWireTest {
                 "  n: -101.0\n" +
                 "}\n", new DoubleWrapper(101.0).toString());
         assertEquals("!D {\n" +
-                "  d: 1e3,\n" +
-                "  n: -1e3\n" +
+                "  d: 1E3,\n" +
+                "  n: -1E3\n" +
                 "}\n", new DoubleWrapper(1e3)
                 .toString());
         DoubleWrapper dw = Marshallable.fromString(new DoubleWrapper(1e3).toString());
