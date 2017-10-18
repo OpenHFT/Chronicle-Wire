@@ -1477,7 +1477,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
             prependSeparator();
             double ad = Math.abs(d);
-            if (ad >= 1e-3 && ad < 1e15) {
+            if (ad >= 1e-7 && ad < 1e15) {
                 if ((int) (ad / 1e6) * 1e6 == ad)
                     bytes.append((int) (d / 1e6)).append("e6");
                 else if ((int) (ad / 1e3) * 1e3 == ad)
