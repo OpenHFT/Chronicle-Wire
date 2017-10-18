@@ -11,7 +11,7 @@ method2: [
   false,
   {
     field1: world,
-    field2: 1e6
+    field2: 1E6
   }
 ]
 ---
@@ -24,17 +24,17 @@ ignoreMethodBasedOnFirstArg: [
   method3,
   !net.openhft.chronicle.wire.MockDto {
     field1: world,
-    field2: 1e6
+    field2: 1E6
   }
 ]
 method3: [
   {
     field1: world,
-    field2: 1e6
+    field2: 1E6
   },
   {
     field1: world,
-    field2: 1e6
+    field2: 1E6
   }
 ]
 ---

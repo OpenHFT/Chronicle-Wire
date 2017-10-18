@@ -5,6 +5,6 @@ method1: {
 ---
 method2: {
   field1: world,
-  field2: 1e6
+  field2: 1E6
 }
 ---
