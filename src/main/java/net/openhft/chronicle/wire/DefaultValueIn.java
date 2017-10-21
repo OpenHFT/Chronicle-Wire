@@ -29,6 +29,7 @@ import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
@@ -318,6 +319,11 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
+        return false;
+    }
+
+    @Override
+    public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) {
         return false;
     }
 

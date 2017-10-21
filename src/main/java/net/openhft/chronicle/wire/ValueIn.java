@@ -229,9 +229,33 @@ public interface ValueIn {
     @NotNull
     <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader);
 
+
+    interface Reader {
+        <T> void accept(ValueIn valueIn, List<T> list, List<T> buffer, Supplier<T> bufferAdd);
+    }
+
+    <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0);
+
     default <T> boolean sequence(@NotNull T t, @NotNull SerializationStrategy<T> tReader) {
         return sequence(t, tReader::readUsing);
     }
+
+
+    default <T> void reader0(ValueIn v, List<T> list, List<T> buffer, Supplier<T> bufferAdd) {
+        while (v.hasNextSequenceItem()) {
+            int size = list.size();
+            if (buffer.size() <= size) {
+                buffer.add(bufferAdd.get());
+            }
+
+            final Object t = buffer.get(size);
+            // todo fix
+            //                if (t instanceof Resettable) ((Resettable) t).reset();
+            if (t instanceof Marshallable) Wires.reset(t);
+            list.add((T) v.object(t, t.getClass()));
+        }
+    }
+
 
     /**
      * sequence to use when using a cached buffer
@@ -241,21 +265,13 @@ public interface ValueIn {
      * @param bufferAdd supplier to call when the buffer needs extending
      * @return true if there is any data.
      */
-    default <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) {
+    default <T> boolean sequence(@NotNull List<T> list,
+                                 @NotNull List<T> buffer,
+                                 @NotNull Supplier<T> bufferAdd) {
         list.clear();
-        return sequence(list, (l, v) -> {
-            while (v.hasNextSequenceItem()) {
-                int size = l.size();
-                if (buffer.size() <= size) buffer.add(bufferAdd.get());
-
-                final T t = buffer.get(size);
-                // todo fix
-//                if (t instanceof Resettable) ((Resettable) t).reset();
-                if (t instanceof Marshallable) Wires.reset(t);
-                l.add(object(t, t.getClass()));
-            }
-        });
+        return sequence(list, buffer, bufferAdd, this::reader0);
     }
+
 
     @NotNull
     <T, K> WireIn sequence(@NotNull T t, K k, @NotNull TriConsumer<T, K, ValueIn> tReader);

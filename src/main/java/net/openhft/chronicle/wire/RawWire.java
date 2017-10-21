@@ -38,6 +38,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
@@ -938,6 +939,11 @@ public class RawWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @Override
+        public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) {
             throw new UnsupportedOperationException("todo");
         }
 
