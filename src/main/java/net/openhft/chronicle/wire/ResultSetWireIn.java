@@ -40,6 +40,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -563,6 +564,12 @@ public class ResultSetWireIn implements WireIn {
         public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) {
+            throw new UnsupportedOperationException();
+        }
+
 
         @NotNull
         @Override

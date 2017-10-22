@@ -42,6 +42,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
@@ -2794,6 +2795,30 @@ public class BinaryWire extends AbstractWire implements Wire {
             bytes.readLimit(limit2);
             try {
                 tReader.accept(t, this);
+            } finally {
+                bytes.readLimit(limit);
+                bytes.readPosition(limit2);
+            }
+            return true;
+        }
+
+
+        @Override
+        public <T> boolean sequence(List<T> list,
+                                    @NotNull List<T> buffer,
+                                    Supplier<T> bufferAdd,
+                                    Reader tReader) {
+            if (isNull())
+                return false;
+            long length = readLength();
+            if (length < 0)
+                throw cantRead(peekCode());
+
+            long limit = bytes.readLimit();
+            long limit2 = bytes.readPosition() + length;
+            bytes.readLimit(limit2);
+            try {
+                tReader.accept(this, list, buffer, bufferAdd);
             } finally {
                 bytes.readLimit(limit);
                 bytes.readPosition(limit2);

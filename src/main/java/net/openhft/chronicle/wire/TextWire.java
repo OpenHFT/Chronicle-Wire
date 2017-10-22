@@ -2643,8 +2643,14 @@ public class TextWire extends AbstractWire implements Wire {
             return true;
         }
 
+
+        public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) {
+         return    sequence(list, buffer, bufferAdd);
+        }
+
         @Override
         public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) {
+
             list.clear();
             consumePadding();
 
@@ -2689,6 +2695,8 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) {
+
+
             consumePadding();
             char code = (char) peekCode();
 
