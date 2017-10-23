@@ -132,7 +132,6 @@ public class MethodReader implements Closeable {
                     if (Jvm.isDebug())
                         logMessage(s, v);
 
-                    prepareArg(argArr[0]);
                     argArr[0] = v.object(checkRecycle(argArr[0]), parameterType);
                     invoke(o, m, argArr);
                 } catch (Exception i) {
@@ -159,7 +158,6 @@ public class MethodReader implements Closeable {
                     if (Jvm.isDebug())
                         logMessage(s, v);
 
-                    prepareArg(argArr[0]);
                     argArr[0] = v.object(checkRecycle(argArr[0]), parameterType);
                     invoke(o, m, argArr);
                 } catch (Throwable t) {
@@ -208,11 +206,6 @@ public class MethodReader implements Closeable {
         });
     }
 
-    private void prepareArg(Object arg) {
-        if (arg instanceof Collection<?>) {
-            ((Collection<?>) arg).clear();
-        }
-    }
 
     public void addParseletForMethod(Object o, @NotNull Method m, @NotNull Class[] parameterTypes) {
         m.setAccessible(true); // turn of security check to make a little faster
@@ -220,7 +213,6 @@ public class MethodReader implements Closeable {
         @NotNull BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
             int i = 0;
             for (@NotNull Class clazz : parameterTypes) {
-                prepareArg(a[i]);
                 a[i] = v.object(checkRecycle(a[i]), clazz);
                 i++;
             }
@@ -241,6 +233,10 @@ public class MethodReader implements Closeable {
     }
 
     private <T> T checkRecycle(T o) {
+        if (o instanceof Collection<?>) {
+            ((Collection<?>) o).clear();
+            return o;
+        }
         return o instanceof Marshallable ? o : null;
     }
 
@@ -251,7 +247,6 @@ public class MethodReader implements Closeable {
             int i = 0;
             boolean ignored = false;
             for (@NotNull Class clazz : parameterTypes) {
-                prepareArg(a[i]);
                 if (ignored)
                     v.skipValue();
                 else
