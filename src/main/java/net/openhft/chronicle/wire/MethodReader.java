@@ -221,7 +221,11 @@ public class MethodReader implements Closeable {
             int i = 0;
             for (@NotNull Class clazz : parameterTypes) {
                 prepareArg(a[i]);
-                a[i] = v.object(a[i], clazz);
+                try {
+                    a[i] = v.object(a[i], clazz);
+                } catch (ClassCastException e) {
+                    a[i++] = v.object(clazz);
+                }
                 i++;
             }
         };
