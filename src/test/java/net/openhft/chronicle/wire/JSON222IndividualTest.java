@@ -17,8 +17,10 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.After;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
@@ -102,5 +104,10 @@ public class JSON222IndividualTest {
         assertEquals(expected, o.toString());
 
         wire.bytes().release();
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 }

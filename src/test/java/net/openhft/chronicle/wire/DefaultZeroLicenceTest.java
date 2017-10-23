@@ -31,6 +31,7 @@ import static org.junit.Assert.fail;
  * @author Rob Austin.
  */
 public class DefaultZeroLicenceTest {
+
     @Test
     public void testLicenceCheck() {
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
