@@ -268,8 +268,10 @@ public class MethodReader implements Closeable {
                     logMessage(s, v);
 
                 v.sequence(args, sequenceReader);
-                if (args[0] == IGNORED)
+                if (args[0] == IGNORED) {
+                    args[0] = null;
                     return;
+                }
                 invoke(o, m, args);
             } catch (Exception i) {
                 Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + Arrays.toString(args), i);
