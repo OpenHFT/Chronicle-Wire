@@ -305,13 +305,20 @@ public enum SerializationStrategies implements SerializationStrategy {
         @NotNull
         @Override
         public Object readUsing(Object using, @NotNull ValueIn in) {
-            @NotNull ArrayWrapper wrapper = (ArrayWrapper) using;
-            final Class componentType = wrapper.type.getComponentType();
-            @NotNull List list = new ArrayList<>();
-            while (in.hasNextSequenceItem())
-                list.add(in.object(componentType));
-            wrapper.array = list.toArray((Object[]) Array.newInstance(componentType, list.size()));
-            return wrapper;
+            if (using instanceof ArrayWrapper) {
+                @NotNull ArrayWrapper wrapper = (ArrayWrapper) using;
+                final Class componentType = wrapper.type.getComponentType();
+                @NotNull List list = new ArrayList<>();
+                while (in.hasNextSequenceItem())
+                    list.add(in.object(componentType));
+                wrapper.array = list.toArray((Object[]) Array.newInstance(componentType, list.size()));
+                return wrapper;
+            } else {
+                @NotNull List list = new ArrayList<>();
+                while (in.hasNextSequenceItem())
+                    list.add(in.object());
+                return list.toArray();
+            }
         }
 
         @NotNull

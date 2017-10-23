@@ -133,7 +133,7 @@ public class MethodReader implements Closeable {
                         logMessage(s, v);
 
                     prepareArg(argArr[0]);
-                    argArr[0] = v.object(argArr[0], parameterType);
+                    argArr[0] = v.object(checkRecycle(argArr[0]), parameterType);
                     invoke(o, m, argArr);
                 } catch (Exception i) {
                     Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], i);
@@ -160,7 +160,7 @@ public class MethodReader implements Closeable {
                         logMessage(s, v);
 
                     prepareArg(argArr[0]);
-                    argArr[0] = v.object(argArr[0], parameterType);
+                    argArr[0] = v.object(checkRecycle(argArr[0]), parameterType);
                     invoke(o, m, argArr);
                 } catch (Throwable t) {
                     Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], t);
@@ -221,7 +221,7 @@ public class MethodReader implements Closeable {
             int i = 0;
             for (@NotNull Class clazz : parameterTypes) {
                 prepareArg(a[i]);
-                a[i] = v.object(a[i], clazz);
+                a[i] = v.object(checkRecycle(a[i]), clazz);
                 i++;
             }
         };
@@ -240,6 +240,10 @@ public class MethodReader implements Closeable {
         });
     }
 
+    private <T> T checkRecycle(T o) {
+        return o instanceof Marshallable ? o : null;
+    }
+
     public void addParseletForMethod(Object o, @NotNull Method m, @NotNull Class[] parameterTypes, MethodFilterOnFirstArg methodFilterOnFirstArg) {
         m.setAccessible(true); // turn of security check to make a little faster
         @NotNull Object[] args = new Object[parameterTypes.length];
@@ -251,7 +255,7 @@ public class MethodReader implements Closeable {
                 if (ignored)
                     v.skipValue();
                 else
-                    a[i] = v.object(a[i], clazz);
+                    a[i] = v.object(checkRecycle(a[i]), clazz);
                 if (i == 0) {
                     if (methodFilterOnFirstArg.ignoreMethodBasedOnFirstArg(m.getName(), a[0])) {
                         a[0] = IGNORED;
