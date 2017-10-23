@@ -221,15 +221,10 @@ public class MethodReader implements Closeable {
             int i = 0;
             for (@NotNull Class clazz : parameterTypes) {
                 prepareArg(a[i]);
-                try {
-                    a[i] = v.object(a[i], clazz);
-                } catch (ClassCastException e) {
-                    a[i++] = v.object(clazz);
-                }
+                a[i] = v.object(a[i], clazz);
                 i++;
             }
         };
-
         String name = m.getName();
         wireParser.registerOnce(m::getName, (s, v, $) -> {
             try {
