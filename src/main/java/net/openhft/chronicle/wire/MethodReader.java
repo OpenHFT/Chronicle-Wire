@@ -221,7 +221,8 @@ public class MethodReader implements Closeable {
             int i = 0;
             for (@NotNull Class clazz : parameterTypes) {
                 prepareArg(a[i]);
-                a[i++] = v.object(clazz);
+                a[i] = v.object(a[i], clazz);
+                i++;
             }
         };
         String name = m.getName();
@@ -250,7 +251,7 @@ public class MethodReader implements Closeable {
                 if (ignored)
                     v.skipValue();
                 else
-                    a[i] = v.object(clazz);
+                    a[i] = v.object(a[i], clazz);
                 if (i == 0) {
                     if (methodFilterOnFirstArg.ignoreMethodBasedOnFirstArg(m.getName(), a[0])) {
                         a[0] = IGNORED;
