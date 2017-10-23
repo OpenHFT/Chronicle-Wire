@@ -229,6 +229,7 @@ public class MethodReader implements Closeable {
                 i++;
             }
         };
+
         String name = m.getName();
         wireParser.registerOnce(m::getName, (s, v, $) -> {
             try {
