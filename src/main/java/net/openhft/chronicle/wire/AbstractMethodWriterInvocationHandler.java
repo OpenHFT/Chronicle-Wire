@@ -24,12 +24,13 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 
 /*
  * Created by Peter Lawrey on 25/03/16.
  */
 public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvocationHandler implements MethodWriterInvocationHandler {
-    private final Map<Method, Class[]> parameterMap = new ConcurrentHashMap<>();
+    private final Map<Method, ParameterHolderSequenceWriter> parameterMap = new ConcurrentHashMap<>();
 
     protected boolean recordHistory;
     protected String genericEvent = "";
@@ -72,39 +73,31 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
 
     private void writeEvent(Wire wire, @NotNull Method method, String methodName, Object[] args) {
         ValueOut valueOut = wire.writeEventName(methodName);
-        Class[] parameterTypes = parameterMap.computeIfAbsent(method, Method::getParameterTypes);
-        switch (parameterTypes.length) {
+        ParameterHolderSequenceWriter phsw = parameterMap.computeIfAbsent(method, ParameterHolderSequenceWriter::new);
+        switch (args.length) {
             case 0:
                 valueOut.text("");
                 break;
             case 1:
-                valueOut.object(parameterTypes[0], args[0]);
+                valueOut.object(phsw.parameterTypes[0], args[0]);
                 break;
             default:
-                final Class[] finalParameterTypes = parameterTypes;
-                valueOut.sequence(args, (a, v) -> {
-                    for (int i = 0; i < finalParameterTypes.length; i++)
-                        v.object(finalParameterTypes[i], a[i]);
-                });
+                valueOut.sequence(args, phsw.from0);
         }
     }
 
     private void writeGenericEvent(Wire wire, @NotNull Method method, Object[] args) {
         ValueOut valueOut = wire.writeEventName(args[0].toString());
-        Class[] parameterTypes = parameterMap.computeIfAbsent(method, Method::getParameterTypes);
-        switch (parameterTypes.length) {
+        ParameterHolderSequenceWriter phsw = parameterMap.computeIfAbsent(method, ParameterHolderSequenceWriter::new);
+        switch (args.length) {
             case 1:
                 valueOut.text("");
                 break;
             case 2:
-                valueOut.object(parameterTypes[1], args[1]);
+                valueOut.object(phsw.parameterTypes[1], args[1]);
                 break;
             default:
-                final Class[] finalParameterTypes = parameterTypes;
-                valueOut.sequence(args, (a, v) -> {
-                    for (int i = 1; i < finalParameterTypes.length; i++)
-                        v.object(finalParameterTypes[i], a[i]);
-                });
+                valueOut.sequence(args, phsw.from1);
         }
     }
 
@@ -116,5 +109,24 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     @Override
     public void methodWriterListener(MethodWriterListener methodWriterListener) {
         this.methodWriterListener = methodWriterListener;
+    }
+
+    // lambda was causing garbage
+    private static class ParameterHolderSequenceWriter {
+        final Class[] parameterTypes;
+        final BiConsumer<Object[], ValueOut> from0;
+        final BiConsumer<Object[], ValueOut> from1;
+
+        private ParameterHolderSequenceWriter(Method method) {
+            this.parameterTypes = method.getParameterTypes();
+            this.from0 = (a, v) -> {
+                for (int i = 0; i < parameterTypes.length; i++)
+                    v.object(parameterTypes[i], a[i]);
+            };
+            this.from1 = (a, v) -> {
+                for (int i = 1; i < parameterTypes.length; i++)
+                    v.object(parameterTypes[i], a[i]);
+            };
+        }
     }
 }
