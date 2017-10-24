@@ -43,22 +43,32 @@ public class BytesMarshallableTest {
         Wire wire = createWire();
         PrimDto dto1 = PrimDto.init(1);
         wire.write("prim").marshallable(dto1);
+        ScalarDto sdto1 = ScalarDto.init(1);
+        wire.write("scalar").marshallable(sdto1);
 
         String expected = "Unknown wire type";
         switch (wireType) {
             case TEXT:
-                expected = "[pos: 0, rlim: 100, wlim: 8EiB, cap: 8EiB ] ǁprim: {⒑  flag: true,⒑  s8: 1,⒑  ch: \"\\x01\",⒑  s16: 1,⒑  s32: 1,⒑  s64: 1,⒑  f32: 1.0,⒑  f64: 1.0⒑}⒑‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠";
+                expected = "[pos: 0, rlim: 159, wlim: 8EiB, cap: 8EiB ] ǁprim: {⒑  flag: true,⒑  s8: 1,⒑  ch: \"\\x01\",⒑  s16: 1,⒑  s32: 1,⒑  s64: 1,⒑  f32: 1.0,⒑  f64: 1.0⒑}⒑scalar: {⒑  text: Hello1,⒑  buffer: bye 1,⒑  bytes: hi 1⒑}⒑‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠";
                 break;
             case BINARY_LIGHT:
-                expected = "[pos: 0, rlim: 40, wlim: 8EiB, cap: 8EiB ] ǁÄprim\\u0082\\u001E٠٠٠Y⒈⒈⒈⒈٠⒈٠٠٠⒈٠٠٠٠٠٠٠٠٠\\u0080?٠٠٠٠٠٠ð?‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠";
+                expected = "[pos: 0, rlim: 70, wlim: 8EiB, cap: 8EiB ] ǁÄprim\\u0082\\u001E٠٠٠Y⒈⒈⒈⒈٠⒈٠٠٠⒈٠٠٠٠٠٠٠٠٠\\u0080?٠٠٠٠٠٠ð?Æscalar\\u0082⒙٠٠٠⒍Hello1⒌bye 1⒋hi 1‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠";
                 break;
         }
         assertEquals(expected, wire.bytes().toDebugString());
 
         PrimDto dto2 = new PrimDto();
-        wire.read("prim").marshallable(dto2);
-        assertEquals(dto1, dto2);
+        ScalarDto sdto2 = new ScalarDto();
 
+        for (int i = 0; i < 2; i++) {
+            wire.bytes().readPosition(0);
+
+            wire.read("prim").marshallable(dto2);
+            assertEquals(dto1, dto2);
+
+            wire.read("scalar").marshallable(sdto2);
+            assertEquals(sdto1, sdto2);
+        }
     }
 
     @Test
@@ -66,23 +76,36 @@ public class BytesMarshallableTest {
         Wire wire = createWire();
         PrimDto2 dto1 = PrimDto2.init(1);
         wire.write("prim").marshallable(dto1);
+        ScalarDto2 sdto1 = ScalarDto2.init(1);
+        wire.write("scalar").marshallable(sdto1);
 
         String expected = "Unknown wire type";
         switch (wireType) {
             case TEXT:
-                expected = "[pos: 0, rlim: 100, wlim: 8EiB, cap: 8EiB ] ǁprim: {⒑  flag: true,⒑  s8: 1,⒑  ch: \"\\x01\",⒑  s16: 1,⒑  s32: 1,⒑  s64: 1,⒑  f32: 1.0,⒑  f64: 1.0⒑}⒑‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠";
+                expected = "[pos: 0, rlim: 159, wlim: 8EiB, cap: 8EiB ] ǁprim: {⒑  flag: true,⒑  s8: 1,⒑  ch: \"\\x01\",⒑  s16: 1,⒑  s32: 1,⒑  s64: 1,⒑  f32: 1.0,⒑  f64: 1.0⒑}⒑scalar: {⒑  text: Hello1,⒑  buffer: bye 1,⒑  bytes: hi 1⒑}⒑‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠";
                 break;
             case BINARY_LIGHT:
-                expected = "[pos: 0, rlim: 20, wlim: 8EiB, cap: 8EiB ] ǁÄprim\\u0082⒑٠٠٠Y⒈⒈⒈⒈⒈\\u009F|\\u009F|‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠";
+                expected = "[pos: 0, rlim: 50, wlim: 8EiB, cap: 8EiB ] ǁÄprim\\u0082⒑٠٠٠Y⒈⒈⒈⒈⒈\\u009F|\\u009F|Æscalar\\u0082⒙٠٠٠⒍Hello1⒌bye 1⒋hi 1‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠";
                 break;
         }
         assertEquals(expected, wire.bytes().toDebugString());
 
         PrimDto2 dto2 = new PrimDto2();
-        wire.read("prim").marshallable(dto2);
-        assertEquals(dto1, dto2);
+        ScalarDto2 sdto2 = new ScalarDto2();
+
+        for (int i = 0; i < 2; i++) {
+            wire.bytes().readPosition(0);
+
+            wire.read("prim").marshallable(dto2);
+            assertEquals(dto1, dto2);
+
+            wire.read("scalar").marshallable(sdto2);
+            assertEquals(sdto1, sdto2);
+        }
 
         ClassAliasPool.CLASS_ALIASES.addAlias(PrimDto2.class);
+        ClassAliasPool.CLASS_ALIASES.addAlias(ScalarDto2.class);
+
         assertEquals("!PrimDto2 {\n" +
                 "  flag: true,\n" +
                 "  s8: 1,\n" +
@@ -92,7 +115,12 @@ public class BytesMarshallableTest {
                 "  s64: 1,\n" +
                 "  f32: 1.0,\n" +
                 "  f64: 1.0\n" +
-                "}\n", dto1.toString());
+                "}\n", dto2.toString());
+        assertEquals("!ScalarDto2 {\n" +
+                "  text: Hello1,\n" +
+                "  buffer: bye 1,\n" +
+                "  bytes: hi 1\n" +
+                "}\n", sdto2.toString());
     }
 
     static class PrimDto extends AbstractBytesMarshallable {
@@ -149,6 +177,46 @@ public class BytesMarshallableTest {
             bytes.writeStopBit(s64);
             bytes.writeStopBit(f32);
             bytes.writeStopBit(f64);
+        }
+    }
+
+    static class ScalarDto extends AbstractBytesMarshallable {
+        String text;
+        StringBuilder buffer;
+        Bytes bytes;
+
+        static ScalarDto init(int i) {
+            return init(i, new ScalarDto());
+        }
+
+        static <D extends ScalarDto> D init(int i, D d) {
+            d.text = "Hello" + i;
+            d.buffer = new StringBuilder("bye " + i);
+            d.bytes = Bytes.elasticHeapByteBuffer(8).append("hi ").append(i);
+            return d;
+        }
+    }
+
+    static class ScalarDto2 extends ScalarDto {
+
+        static ScalarDto2 init(int i) {
+            return init(i, new ScalarDto2());
+        }
+
+        @Override
+        public void readMarshallable(BytesIn in) throws IORuntimeException {
+            text = in.read8bit();
+            if (buffer == null) buffer = new StringBuilder();
+            in.read8bit(buffer);
+            if (bytes == null) bytes = Bytes.elasticHeapByteBuffer(8);
+            in.read8bit(bytes);
+        }
+
+        @Override
+        public void writeMarshallable(BytesOut out) {
+            out.write8bit(text);
+            out.write8bit(buffer);
+            out.write8bit(bytes);
         }
     }
 }
