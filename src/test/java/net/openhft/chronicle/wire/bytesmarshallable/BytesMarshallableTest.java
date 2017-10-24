@@ -34,15 +34,17 @@ public class BytesMarshallableTest {
         );
     }
 
-    Wire createWire() {
+    private Wire createWire() {
         return wireType.apply(Bytes.elasticHeapByteBuffer(64));
     }
 
     @Test
     public void primitiveDto() {
         Wire wire = createWire();
+
         PrimDto dto1 = PrimDto.init(1);
         wire.write("prim").marshallable(dto1);
+
         ScalarDto sdto1 = ScalarDto.init(1);
         wire.write("scalar").marshallable(sdto1);
 
@@ -74,8 +76,10 @@ public class BytesMarshallableTest {
     @Test
     public void primitiveDto2() {
         Wire wire = createWire();
+
         PrimDto2 dto1 = PrimDto2.init(1);
         wire.write("prim").marshallable(dto1);
+
         ScalarDto2 sdto1 = ScalarDto2.init(1);
         wire.write("scalar").marshallable(sdto1);
 
@@ -84,6 +88,7 @@ public class BytesMarshallableTest {
             case TEXT:
                 expected = "[pos: 0, rlim: 159, wlim: 8EiB, cap: 8EiB ] ǁprim: {⒑  flag: true,⒑  s8: 1,⒑  ch: \"\\x01\",⒑  s16: 1,⒑  s32: 1,⒑  s64: 1,⒑  f32: 1.0,⒑  f64: 1.0⒑}⒑scalar: {⒑  text: Hello1,⒑  buffer: bye 1,⒑  bytes: hi 1⒑}⒑‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠";
                 break;
+
             case BINARY_LIGHT:
                 expected = "[pos: 0, rlim: 50, wlim: 8EiB, cap: 8EiB ] ǁÄprim\\u0082⒑٠٠٠Y⒈⒈⒈⒈⒈\\u009F|\\u009F|Æscalar\\u0082⒙٠٠٠⒍Hello1⒌bye 1⒋hi 1‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠";
                 break;
@@ -116,6 +121,7 @@ public class BytesMarshallableTest {
                 "  f32: 1.0,\n" +
                 "  f64: 1.0\n" +
                 "}\n", dto2.toString());
+
         assertEquals("!ScalarDto2 {\n" +
                 "  text: Hello1,\n" +
                 "  buffer: bye 1,\n" +
