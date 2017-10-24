@@ -63,6 +63,7 @@ public abstract class AbstractWire implements Wire {
 
     static {
         boolean assertions = false;
+        // enable our class assertions if java assertions are turned on
         assert assertions = true;
         ASSERTIONS = assertions;
         WireInternal.addAliases();
