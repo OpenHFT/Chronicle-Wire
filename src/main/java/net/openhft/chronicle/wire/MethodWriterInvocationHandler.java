@@ -28,7 +28,12 @@ public interface MethodWriterInvocationHandler extends InvocationHandler {
 
     void onClose(Closeable closeable);
 
-    void methodWriterListener(MethodWriterListener methodWriterListener);
+    // MethodWriterInterceptor is more flexible
+    default void methodWriterListener(MethodWriterListener methodWriterListener) {
+        methodWriterInterceptor(MethodWriterInterceptor.of(methodWriterListener));
+    }
+
+    void methodWriterInterceptor(MethodWriterInterceptor methodWriterInterceptor);
 
     void genericEvent(String genericEvent);
 }

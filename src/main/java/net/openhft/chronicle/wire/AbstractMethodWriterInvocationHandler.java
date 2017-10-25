@@ -34,7 +34,7 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
 
     protected boolean recordHistory;
     protected String genericEvent = "";
-    private MethodWriterListener methodWriterListener;
+    private MethodWriterInterceptor methodWriterInterceptor;
     // Note the Object[] passed in creates an object on every call.
 
 
@@ -44,10 +44,10 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
 
     @Override
     protected Object doInvoke(Object proxy, Method method, Object[] args) {
-        if (methodWriterListener != null)
-            methodWriterListener.onWrite(method.getName(), args);
-
-        handleInvoke(method, args);
+        if (methodWriterInterceptor != null)
+            methodWriterInterceptor.intercept(method, args, this::handleInvoke);
+        else
+            handleInvoke(method, args);
         return ObjectUtils.defaultValue(method.getReturnType());
     }
 
@@ -107,8 +107,8 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     }
 
     @Override
-    public void methodWriterListener(MethodWriterListener methodWriterListener) {
-        this.methodWriterListener = methodWriterListener;
+    public void methodWriterInterceptor(MethodWriterInterceptor methodWriterInterceptor) {
+        this.methodWriterInterceptor = methodWriterInterceptor;
     }
 
     // lambda was causing garbage
