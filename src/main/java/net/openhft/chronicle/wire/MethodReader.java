@@ -301,14 +301,13 @@ public class MethodReader implements Closeable {
      * @return true if there was a message, or false if no more data is available.
      */
     public boolean readOne() {
-        MessageHistory history = MessageHistory.get();
         for (; ; ) {
             try (DocumentContext context = in.readingDocument()) {
-
                 if (!context.isPresent())
                     return false;
                 if (!context.isData())
                     continue;
+                MessageHistory history = MessageHistory.get();
                 history.reset(context.sourceId(), context.index());
                 wireParser.accept(context.wire(), null);
             }
