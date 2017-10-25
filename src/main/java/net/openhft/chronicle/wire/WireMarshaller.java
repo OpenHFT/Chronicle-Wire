@@ -648,20 +648,8 @@ public class WireMarshaller<T> {
             this.values = values;
             this.componentType = componentType;
             this.enumSetSupplier = () -> EnumSet.noneOf(this.componentType);
-            this.sequenceGetter = (o, out) -> {
-                EnumSet coll;
-                try {
-                    coll = (EnumSet) this.field.get(o);
-                } catch (IllegalAccessException e) {
-                    throw new AssertionError(e);
-                }
-
-                for (int i = this.values.length - 1; i != -1; i--) {
-                    if (coll.contains(this.values[i])) {
-                        out.object(this.componentType, this.values[i]);
-                    }
-                }
-            };
+            this.sequenceGetter = (o, out) -> sequenceGetter(o,
+                    out, this.values, this.field, this.componentType);
         }
 
         @Override
@@ -725,6 +713,25 @@ public class WireMarshaller<T> {
         @Override
         public void getAsBytes(final Object o, final Bytes bytes) throws IllegalAccessException {
             throw new UnsupportedOperationException();
+        }
+
+        private void sequenceGetter(Object o,
+                                    ValueOut out,
+                                    Object[] values,
+                                    Field field,
+                                    Class componentType) {
+            EnumSet coll;
+            try {
+                coll = (EnumSet) field.get(o);
+            } catch (IllegalAccessException e) {
+                throw new AssertionError(e);
+            }
+
+            for (int i = values.length - 1; i != -1; i--) {
+                if (coll.contains(values[i])) {
+                    out.object(componentType, values[i]);
+                }
+            }
         }
     }
 
