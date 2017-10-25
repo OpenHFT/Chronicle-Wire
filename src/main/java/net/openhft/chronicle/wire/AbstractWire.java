@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.LongValue;
@@ -354,6 +355,12 @@ public abstract class AbstractWire implements Wire {
     @Override
     public void updateHeader(int length, long position, boolean metaData) throws
             StreamCorruptedException {
+        if (position == 0) {
+            // this should never happen so blow up
+            IllegalStateException ex = new IllegalStateException("Attempt to write to position 0");
+            Slf4jExceptionHandler.WARN.on(getClass(), "Attempt to update header at position 0", ex);
+            throw ex;
+        }
 
         // the reason we add padding is so that a message gets sent ( this is, mostly for queue as
         // it cant handle a zero len message )
