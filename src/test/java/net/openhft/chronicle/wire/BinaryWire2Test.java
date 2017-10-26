@@ -178,6 +178,7 @@ public class BinaryWire2Test {
         assertEquals("Hello", b.toString());
     }
 
+
     @Test
     public void writeObjectWithTreeMap() {
         @NotNull Wire wire = createWire();

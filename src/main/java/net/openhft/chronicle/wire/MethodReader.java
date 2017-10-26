@@ -132,8 +132,7 @@ public class MethodReader implements Closeable {
                     if (Jvm.isDebug())
                         logMessage(s, v);
 
-                    prepareArg(argArr[0]);
-                    argArr[0] = v.object(argArr[0], parameterType);
+                    argArr[0] = v.object(checkRecycle(argArr[0]), parameterType);
                     invoke(o, m, argArr);
                 } catch (Exception i) {
                     Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], i);
@@ -159,8 +158,7 @@ public class MethodReader implements Closeable {
                     if (Jvm.isDebug())
                         logMessage(s, v);
 
-                    prepareArg(argArr[0]);
-                    argArr[0] = v.object(argArr[0], parameterType);
+                    argArr[0] = v.object(checkRecycle(argArr[0]), parameterType);
                     invoke(o, m, argArr);
                 } catch (Throwable t) {
                     Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], t);
@@ -208,11 +206,6 @@ public class MethodReader implements Closeable {
         });
     }
 
-    private void prepareArg(Object arg) {
-        if (arg instanceof Collection<?>) {
-            ((Collection<?>) arg).clear();
-        }
-    }
 
     public void addParseletForMethod(Object o, @NotNull Method m, @NotNull Class[] parameterTypes) {
         m.setAccessible(true); // turn of security check to make a little faster
@@ -220,8 +213,8 @@ public class MethodReader implements Closeable {
         @NotNull BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
             int i = 0;
             for (@NotNull Class clazz : parameterTypes) {
-                prepareArg(a[i]);
-                a[i++] = v.object(clazz);
+                a[i] = v.object(checkRecycle(a[i]), clazz);
+                i++;
             }
         };
         String name = m.getName();
@@ -239,6 +232,14 @@ public class MethodReader implements Closeable {
         });
     }
 
+    private <T> T checkRecycle(T o) {
+        if (o instanceof Collection<?>) {
+            ((Collection<?>) o).clear();
+            return o;
+        }
+        return o instanceof Marshallable ? o : null;
+    }
+
     public void addParseletForMethod(Object o, @NotNull Method m, @NotNull Class[] parameterTypes, MethodFilterOnFirstArg methodFilterOnFirstArg) {
         m.setAccessible(true); // turn of security check to make a little faster
         @NotNull Object[] args = new Object[parameterTypes.length];
@@ -246,11 +247,10 @@ public class MethodReader implements Closeable {
             int i = 0;
             boolean ignored = false;
             for (@NotNull Class clazz : parameterTypes) {
-                prepareArg(a[i]);
                 if (ignored)
                     v.skipValue();
                 else
-                    a[i] = v.object(clazz);
+                    a[i] = v.object(checkRecycle(a[i]), clazz);
                 if (i == 0) {
                     if (methodFilterOnFirstArg.ignoreMethodBasedOnFirstArg(m.getName(), a[0])) {
                         a[0] = IGNORED;
@@ -267,8 +267,10 @@ public class MethodReader implements Closeable {
                     logMessage(s, v);
 
                 v.sequence(args, sequenceReader);
-                if (args[0] == IGNORED)
+                if (args[0] == IGNORED) {
+                    args[0] = null;
                     return;
+                }
                 invoke(o, m, args);
             } catch (Exception i) {
                 Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + Arrays.toString(args), i);
@@ -299,14 +301,13 @@ public class MethodReader implements Closeable {
      * @return true if there was a message, or false if no more data is available.
      */
     public boolean readOne() {
-        MessageHistory history = MessageHistory.get();
         for (; ; ) {
             try (DocumentContext context = in.readingDocument()) {
-
                 if (!context.isPresent())
                     return false;
                 if (!context.isData())
                     continue;
+                MessageHistory history = MessageHistory.get();
                 history.reset(context.sourceId(), context.index());
                 wireParser.accept(context.wire(), null);
             }

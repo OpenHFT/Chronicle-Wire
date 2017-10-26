@@ -29,22 +29,22 @@ import java.util.function.Function;
  */
 class ScalarStrategy<T> implements SerializationStrategy<T> {
     @NotNull
-    final BiFunction<T, ValueIn, T> read;
+    final BiFunction<? super T, ValueIn, T> read;
     private final Class<T> type;
 
-    ScalarStrategy(Class<T> type, @NotNull BiFunction<T, ValueIn, T> read) {
+    ScalarStrategy(Class<T> type, @NotNull BiFunction<? super T, ValueIn, T> read) {
         this.type = type;
         this.read = read;
     }
 
     @NotNull
-    static <T> ScalarStrategy<T> of(Class<T> clazz, @NotNull BiFunction<T, ValueIn, T> read) {
+    static <T> ScalarStrategy<T> of(Class<T> clazz, @NotNull BiFunction<? super T, ValueIn, T> read) {
         return new ScalarStrategy<>(clazz, read);
     }
 
     @Nullable
     static <T> ScalarStrategy<T> text(Class<T> clazz, @NotNull Function<String, T> func) {
-        return new ScalarStrategy<>(clazz, (o, in) -> {
+        return new ScalarStrategy<>(clazz, (Object o, ValueIn in) -> {
             @Nullable String text = in.text();
             return text == null ? null : func.apply(text);
         });

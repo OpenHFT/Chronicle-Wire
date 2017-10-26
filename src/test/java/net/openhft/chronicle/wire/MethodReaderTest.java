@@ -69,17 +69,24 @@ public class MethodReaderTest {
         Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
         MRTListener writer = wire.methodWriter(MRTListener.class);
         writer.top(new MRT1("one"));
+        writer.method2("one", new MRT1("one"));
         writer.top(new MRT2("one", "two"));
         writer.mid(new MRT1("1"));
+        writer.method2("1", new MRT1("1"));
         writer.mid(new MRT2("1", "2"));
 
         StringWriter sw = new StringWriter();
         MethodReader reader = wire.methodReader(Mocker.logging(MRTListener.class, "subs ", sw));
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 6; i++) {
             assertTrue(reader.readOne());
         }
         assertFalse(reader.readOne());
         String expected = "subs top[!net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
+                "  field1: one,\n" +
+                "  value: a\n" +
+                "}\n" +
+                "]\n" +
+                "subs method2[one, !net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +
                 "  value: a\n" +
                 "}\n" +
@@ -91,6 +98,11 @@ public class MethodReaderTest {
                 "}\n" +
                 "]\n" +
                 "subs mid[!net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
+                "  field1: \"1\",\n" +
+                "  value: a\n" +
+                "}\n" +
+                "]\n" +
+                "subs method2[1, !net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
                 "  field1: \"1\",\n" +
                 "  value: a\n" +
                 "}\n" +
@@ -245,6 +257,8 @@ public class MethodReaderTest {
         void top(MRTInterface mrti);
 
         void mid(MRT1 mrt1);
+
+        void method2(String key, MRT1 mrt);
 
         void unknown(NestedUnknown unknown);
     }

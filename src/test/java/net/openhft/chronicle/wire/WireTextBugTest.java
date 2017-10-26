@@ -32,9 +32,11 @@ package net.openhft.chronicle.wire;/*
  */
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.After;
 
 /**
  * @author Rob Austin
@@ -71,5 +73,11 @@ public class WireTextBugTest {
         public void setClOrdID(String aClOrdID) {
             clOrdID = aClOrdID;
         }
+    }
+
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 }

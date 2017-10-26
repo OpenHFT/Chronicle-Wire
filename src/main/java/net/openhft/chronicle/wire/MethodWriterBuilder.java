@@ -68,6 +68,12 @@ public class MethodWriterBuilder<T> implements Supplier<T> {
     }
 
     @NotNull
+    public MethodWriterBuilder<T> methodWriterInterceptor(MethodWriterInterceptor methodWriterInterceptor) {
+        handler.methodWriterInterceptor(methodWriterInterceptor);
+        return this;
+    }
+
+    @NotNull
     public MethodWriterBuilder<T> onClose(Closeable closeable) {
         handler.onClose(closeable);
         return this;

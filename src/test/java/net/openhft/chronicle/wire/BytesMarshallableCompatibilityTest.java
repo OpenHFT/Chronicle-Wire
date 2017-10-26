@@ -4,8 +4,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -19,7 +17,7 @@ public final class BytesMarshallableCompatibilityTest {
         container.label = "non-deterministic";
         container.truth = Boolean.TRUE;
 
-        final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+        final Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
 
         container.writeMarshallable(bytes);
 

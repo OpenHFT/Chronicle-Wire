@@ -52,9 +52,9 @@ public class CopyTest {
 
     @Test
     public void testCopy() {
-        Bytes bytesFrom = Bytes.elasticByteBuffer();
+        Bytes bytesFrom = Bytes.elasticHeapByteBuffer(64);
         Wire wireFrom = from.apply(bytesFrom);
-        Bytes bytesTo = Bytes.elasticByteBuffer();
+        Bytes bytesTo = Bytes.elasticHeapByteBuffer(64);
         Wire wireTo = to.apply(bytesTo);
 
         AClass a = create();
