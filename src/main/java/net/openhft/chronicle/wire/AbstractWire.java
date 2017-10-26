@@ -355,10 +355,10 @@ public abstract class AbstractWire implements Wire {
     @Override
     public void updateHeader(int length, long position, boolean metaData) throws
             StreamCorruptedException {
-        if (position == 0) {
+        if (position <= 0) {
             // this should never happen so blow up
-            IllegalStateException ex = new IllegalStateException("Attempt to write to position 0");
-            Slf4jExceptionHandler.WARN.on(getClass(), "Attempt to update header at position 0", ex);
+            IllegalStateException ex = new IllegalStateException("Attempt to write to position="+position);
+            Slf4jExceptionHandler.WARN.on(getClass(), "Attempt to update header at position="+position, ex);
             throw ex;
         }
 
