@@ -711,8 +711,9 @@ public class WireMarshaller<T> {
         private void addAll(EnumSet c, ValueIn in2) {
             if (!c.isEmpty())
                 c.clear();
-            while (in2.hasNextSequenceItem())
-                c.add(in2.object(componentType));
+            while (in2.hasNextSequenceItem()) {
+                c.add(in2.asEnum(componentType));
+            }
         }
     }
 
