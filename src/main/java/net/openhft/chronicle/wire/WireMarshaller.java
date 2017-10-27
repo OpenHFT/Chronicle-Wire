@@ -518,7 +518,7 @@ public class WireMarshaller<T> {
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
             @NotNull Bytes bytes = (Bytes) UNSAFE.getObject(o, offset);
             if (bytes == null)
-                UNSAFE.putObject(o, offset, bytes = Bytes.elasticByteBuffer());
+                UNSAFE.putObject(o, offset, bytes = Bytes.elasticHeapByteBuffer(128));
             if (read.textTo(bytes) == null)
                 UNSAFE.putObject(o, offset, null);
         }

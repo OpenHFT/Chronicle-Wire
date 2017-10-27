@@ -357,8 +357,8 @@ public abstract class AbstractWire implements Wire {
             StreamCorruptedException {
         if (position <= 0) {
             // this should never happen so blow up
-            IllegalStateException ex = new IllegalStateException("Attempt to write to position="+position);
-            Slf4jExceptionHandler.WARN.on(getClass(), "Attempt to update header at position="+position, ex);
+            IllegalStateException ex = new IllegalStateException("Attempt to write to position=" + position);
+            Slf4jExceptionHandler.WARN.on(getClass(), "Attempt to update header at position=" + position, ex);
             throw ex;
         }
 
@@ -434,6 +434,8 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public void updateFirstHeader() {
+        // header should use wire format so can add padding for cache alignment
+        padToCacheAlign();
         long pos = bytes.writePosition();
         long actualLength = pos - SPB_HEADER_SIZE;
         if (actualLength >= 1 << 30)
