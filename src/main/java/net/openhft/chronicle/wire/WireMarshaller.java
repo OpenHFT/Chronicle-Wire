@@ -647,12 +647,7 @@ public class WireMarshaller<T> {
                 coll = enumSetSupplier.get();
                 field.set(o, coll);
             }
-            if (!read.sequence(coll, (c, in2) -> {
-                if (!c.isEmpty())
-                    c.clear();
-                while (in2.hasNextSequenceItem())
-                    c.add(in2.object(componentType));
-            })) {
+            if (!read.sequence(coll, this::addAll)) {
                 Collection defaultColl = (Collection) field.get(defaults);
                 if (defaultColl == null) {
                     field.set(o, null);
@@ -711,6 +706,13 @@ public class WireMarshaller<T> {
                     out.object(componentType, values[i]);
                 }
             }
+        }
+
+        private void addAll(EnumSet c, ValueIn in2) {
+            if (!c.isEmpty())
+                c.clear();
+            while (in2.hasNextSequenceItem())
+                c.add(in2.object(componentType));
         }
     }
 
