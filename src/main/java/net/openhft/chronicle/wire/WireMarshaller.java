@@ -621,6 +621,7 @@ public class WireMarshaller<T> {
         private final BiConsumer<Object, ValueOut> sequenceGetter;
         private final Class componentType;
         private final Supplier<EnumSet> enumSetSupplier;
+        private BiConsumer<EnumSet, ValueIn> addAll;
 
         EnumSetFieldAccess(@NotNull final Field field, final Boolean isLeaf, final Object[] values, final Class componentType) {
             super(field, isLeaf);
@@ -629,6 +630,7 @@ public class WireMarshaller<T> {
             this.enumSetSupplier = () -> EnumSet.noneOf(this.componentType);
             this.sequenceGetter = (o, out) -> sequenceGetter(o,
                     out, this.values, this.field, this.componentType);
+            this.addAll = this::addAll;
         }
 
         @Override
@@ -647,7 +649,8 @@ public class WireMarshaller<T> {
                 coll = enumSetSupplier.get();
                 field.set(o, coll);
             }
-            if (!read.sequence(coll, this::addAll)) {
+
+            if (!read.sequence(coll, addAll)) {
                 Collection defaultColl = (Collection) field.get(defaults);
                 if (defaultColl == null) {
                     field.set(o, null);
