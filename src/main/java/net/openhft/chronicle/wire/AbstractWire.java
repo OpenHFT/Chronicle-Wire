@@ -302,7 +302,7 @@ public abstract class AbstractWire implements Wire {
         if (length < 0 || length > safeLength)
             throw new IllegalArgumentException();
         long pos = bytes.writePosition();
-
+        resetTimedPauser();
 //        System.out.println(Thread.currentThread()+" wh0 pos: "+pos+" hdr "+(int) headerNumber);
         try {
             for (; ; ) {
