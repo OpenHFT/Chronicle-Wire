@@ -35,17 +35,19 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     protected boolean recordHistory;
     protected String genericEvent = "";
     private MethodWriterInterceptor methodWriterInterceptor;
+    private BiConsumer<Method, Object[]> handleInvoke;
     // Note the Object[] passed in creates an object on every call.
 
 
     public AbstractMethodWriterInvocationHandler() {
         super(HashMap::new);
+        this.handleInvoke = this::handleInvoke;
     }
 
     @Override
     protected Object doInvoke(Object proxy, Method method, Object[] args) {
         if (methodWriterInterceptor != null)
-            methodWriterInterceptor.intercept(method, args, this::handleInvoke);
+            methodWriterInterceptor.intercept(method, args, this.handleInvoke);
         else
             handleInvoke(method, args);
         return ObjectUtils.defaultValue(method.getReturnType());

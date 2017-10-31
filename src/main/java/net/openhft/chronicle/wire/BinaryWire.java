@@ -2014,6 +2014,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     protected class BinaryValueIn implements ValueIn {
         final ValueInStack stack = new ValueInStack();
+        final Reader reader0field = this::reader0;
 
         @Override
         @Nullable
@@ -2802,6 +2803,13 @@ public class BinaryWire extends AbstractWire implements Wire {
             return true;
         }
 
+        @Override
+        public <T> boolean sequence(@NotNull List<T> list,
+                                    @NotNull List<T> buffer,
+                                    @NotNull Supplier<T> bufferAdd) {
+            list.clear();
+            return sequence(list, buffer, bufferAdd, reader0field);
+        }
 
         @Override
         public <T> boolean sequence(List<T> list,
