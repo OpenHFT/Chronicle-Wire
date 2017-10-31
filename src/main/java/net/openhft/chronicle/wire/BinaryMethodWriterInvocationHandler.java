@@ -19,22 +19,28 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
+import java.util.function.Supplier;
 
 /*
  * Created by Peter Lawrey on 25/03/16.
  */
 public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
     @NotNull
-    private final MarshallableOut appender;
+    private final Supplier<MarshallableOut> marshallableOutSupplier;
 
-    BinaryMethodWriterInvocationHandler(@NotNull MarshallableOut appender) {
-        this.appender = appender;
-        recordHistory = appender.recordHistory();
+    BinaryMethodWriterInvocationHandler(@NotNull MarshallableOut marshallableOut) {
+        this(() -> marshallableOut);
+    }
+
+    public BinaryMethodWriterInvocationHandler(Supplier<MarshallableOut> marshallableOutSupplier) {
+        this.marshallableOutSupplier = marshallableOutSupplier;
+        recordHistory = marshallableOutSupplier.get().recordHistory();
     }
 
     @Override
     protected void handleInvoke(Method method, Object[] args) {
-        try (@NotNull DocumentContext context = appender.writingDocument()) {
+        MarshallableOut marshallableOut = this.marshallableOutSupplier.get();
+        try (@NotNull DocumentContext context = marshallableOut.writingDocument()) {
             Wire wire = context.wire();
 
             handleInvoke(method, args, wire);
