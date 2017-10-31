@@ -383,23 +383,20 @@ public abstract class AbstractWire implements Wire {
         assert insideHeader;
         insideHeader = false;
 
-        if (ASSERTIONS) {
-            updateHeaderAssertions(position, pos, expectedHeader, header);
-        } else {
-            bytes.writeOrderedInt(position, header);
-        }
+        updateHeaderAssertions(position, pos, expectedHeader, header);
+
         bytes.writeLimit(bytes.capacity());
         if (!metaData)
             incrementHeaderNumber(position);
     }
 
     void updateHeaderAssertions(long position, long pos, int expectedHeader, int header) throws StreamCorruptedException {
-//        int header0 = bytes.readVolatileInt(position);
-        checkNoDataAfterEnd(pos);
+        if (ASSERTIONS) {
+            checkNoDataAfterEnd(pos);
+        }
 
         if (!bytes.compareAndSwapInt(position, expectedHeader, header))
             throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(bytes.readVolatileInt(position)));
-//        System.out.println("=== " + position+" "+header0+" > " + header);
     }
 
     protected void checkNoDataAfterEnd(long pos) {
