@@ -68,6 +68,7 @@ public class MethodReaderTest {
     public void testSubclasses() {
         Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
         MRTListener writer = wire.methodWriter(MRTListener.class);
+        writer.timed(1234567890L);
         writer.top(new MRT1("one"));
         writer.method2("one", new MRT1("one"));
         writer.top(new MRT2("one", "two"));
@@ -77,11 +78,12 @@ public class MethodReaderTest {
 
         StringWriter sw = new StringWriter();
         MethodReader reader = wire.methodReader(Mocker.logging(MRTListener.class, "subs ", sw));
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 7; i++) {
             assertTrue(reader.readOne());
         }
         assertFalse(reader.readOne());
-        String expected = "subs top[!net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
+        String expected = "subs timed[1234567890]\n" +
+                "subs top[!net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +
                 "  value: a\n" +
                 "}\n" +
@@ -121,14 +123,17 @@ public class MethodReaderTest {
     public void methodInterceptor() {
         Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
         MRTListener writer = wire.methodWriterBuilder(MRTListener.class)
-                .methodWriterListener((m, a) -> IntStream.range(0, a.length).forEach(i -> ((MRT1) a[i]).value = "x"))
+                .methodWriterListener((m, a) -> IntStream.range(0, a.length).filter(i -> a[i] instanceof MRT1).forEach(i -> ((MRT1) a[i]).value = "x"))
                 .build();
+        writer.timed(1234567890L);
         writer.top(new MRT1("one"));
         writer.top(new MRT2("one", "two"));
         writer.mid(new MRT1("1"));
         writer.mid(new MRT2("1", "2"));
 
-        assertEquals("top: !net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
+        assertEquals("timed: 1234567890\n" +
+                "---\n" +
+                "top: !net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +
                 "  value: x\n" +
                 "}\n" +
@@ -254,6 +259,8 @@ public class MethodReaderTest {
     }
 
     interface MRTListener {
+        void timed(long time);
+
         void top(MRTInterface mrti);
 
         void mid(MRT1 mrt1);

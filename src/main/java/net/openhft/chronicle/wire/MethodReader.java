@@ -24,6 +24,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -38,16 +40,15 @@ import java.util.function.BiConsumer;
  * Created by Peter Lawrey on 24/03/16.
  */
 public class MethodReader implements Closeable {
+    public static final String HISTORY = "history";
     static final Object[] NO_ARGS = {};
     static final Logger LOGGER = LoggerFactory.getLogger(MethodReader.class);
-    public static final String HISTORY = "history";
+    static final Object IGNORED = new Object(); // object used to flag that the call should be ignored.
     private final MarshallableIn in;
     @NotNull
     private final WireParser<Void> wireParser;
     private boolean closeIn = false, closed;
     private MethodReaderInterceptor methodReaderInterceptor;
-
-    static final Object IGNORED = new Object(); // object used to flag that the call should be ignored.
 
     public MethodReader(MarshallableIn in, boolean ignoreDefault, WireParselet defaultParselet, MethodReaderInterceptor methodReaderInterceptor, @NotNull Object... objects) {
         this.in = in;
@@ -108,12 +109,6 @@ public class MethodReader implements Closeable {
         }
     }
 
-    @NotNull
-    public MethodReader closeIn(boolean closeIn) {
-        this.closeIn = closeIn;
-        return this;
-    }
-
     private static Object actualInvoke(Method method, Object o, Object[] objects) throws InvocationTargetException {
         try {
             return method.invoke(o, objects);
@@ -122,10 +117,78 @@ public class MethodReader implements Closeable {
         }
     }
 
+    private static void invokeMethodWithOneLong(Object o, @NotNull Method m, String name, MethodHandle mh, Object[] argArr, CharSequence s, ValueIn v, MethodReaderInterceptor methodReaderInterceptor) {
+        try {
+            if (Jvm.isDebug())
+                logMessage(s, v);
+
+            long arg = v.int64();
+            try {
+                if (methodReaderInterceptor != null) {
+                    argArr[0] = arg;
+                    methodReaderInterceptor.intercept(m, o, argArr, MethodReader::actualInvoke);
+
+                } else {
+                    mh.invokeExact(arg);
+                }
+
+            } catch (Throwable e) {
+                Throwable cause = e.getCause();
+                String msg = "Failure to dispatch message: " + m.getName() + " " + Arrays.asList(argArr);
+                if (cause instanceof IllegalArgumentException)
+                    Jvm.warn().on(o.getClass(), msg + " " + cause);
+                else
+                    Jvm.warn().on(o.getClass(), msg, cause);
+            }
+        } catch (Exception i) {
+            Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], i);
+        }
+    }
+
+    static void logMessage(@NotNull CharSequence s, @NotNull ValueIn v) {
+        if (!LOGGER.isDebugEnabled()) {
+            return;
+        }
+
+        @NotNull String name = s.toString();
+        String rest;
+
+        if (v.wireIn() instanceof BinaryWire) {
+            Bytes bytes = Bytes.elasticByteBuffer((int) (v.wireIn().bytes().readRemaining() * 3 / 2 + 64));
+            long pos = v.wireIn().bytes().readPosition();
+            v.wireIn().copyTo(new TextWire(bytes));
+            v.wireIn().bytes().readPosition(pos);
+            rest = bytes.toString();
+            bytes.release();
+
+        } else {
+            rest = v.toString();
+        }
+        LOGGER.debug("read " + name + " - " + rest);
+    }
+
+    @NotNull
+    public MethodReader closeIn(boolean closeIn) {
+        this.closeIn = closeIn;
+        return this;
+    }
+
+    // one arg
     public void addParseletForMethod(Object o, @NotNull Method m, Class<?> parameterType) {
         m.setAccessible(true); // turn of security check to make a little faster
         String name = m.getName();
-        if (parameterType.isInterface() || !ReadMarshallable.class.isAssignableFrom(parameterType)) {
+        if (parameterType == long.class) {
+            try {
+                MethodHandle mh = MethodHandles.lookup().unreflect(m).bindTo(o);
+                @NotNull Object[] argArr = {null};
+                wireParser.registerOnce(m::getName, (s, v, $) -> {
+                    invokeMethodWithOneLong(o, m, name, mh, argArr, s, v, methodReaderInterceptor);
+                });
+            } catch (IllegalAccessException e) {
+                Jvm.warn().on(o.getClass(), "Unable to unreflect " + m, e);
+            }
+
+        } else if (parameterType.isInterface() || !ReadMarshallable.class.isAssignableFrom(parameterType)) {
             @NotNull Object[] argArr = {null};
             wireParser.registerOnce(m::getName, (s, v, $) -> {
                 try {
@@ -167,28 +230,7 @@ public class MethodReader implements Closeable {
         }
     }
 
-    static void logMessage(@NotNull CharSequence s, @NotNull ValueIn v) {
-        if (!LOGGER.isDebugEnabled()) {
-            return;
-        }
-
-        @NotNull String name = s.toString();
-        String rest;
-
-        if (v.wireIn() instanceof BinaryWire) {
-            Bytes bytes = Bytes.elasticByteBuffer((int) (v.wireIn().bytes().readRemaining() * 3 / 2 + 64));
-            long pos = v.wireIn().bytes().readPosition();
-            v.wireIn().copyTo(new TextWire(bytes));
-            v.wireIn().bytes().readPosition(pos);
-            rest = bytes.toString();
-            bytes.release();
-
-        } else {
-            rest = v.toString();
-        }
-        LOGGER.debug("read " + name + " - " + rest);
-    }
-
+    // no args
     public void addParseletForMethod(Object o, @NotNull Method m) {
         m.setAccessible(true); // turn of security check to make a little faster
         String name = m.getName();
