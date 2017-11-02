@@ -2169,6 +2169,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return bytes(toBytes, true);
         }
 
+
         @NotNull
         @Override
         public WireIn bytes(@NotNull BytesOut toBytes, boolean clearBytes) {
@@ -2188,7 +2189,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     cantRead(code);
                 if (clearBytes)
                     toBytes.clear();
-                bytes.readWithLength(length2 - 1, b -> Compression.uncompress(sb, b, toBytes));
+
+                bytes.readWithLength0(length2 - 1, (b, sb1, toBytes1) -> Compression.uncompress(sb1, b, toBytes1), sb, toBytes);
                 return wireIn();
 
             }
