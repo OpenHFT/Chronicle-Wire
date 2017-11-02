@@ -48,6 +48,16 @@ public interface MessageHistory extends Marshallable {
 
     long sourceIndex(int n);
 
+    /**
+     * clear all data
+     */
+    void reset();
+
+    /**
+     * reset for a given source prior to reading a new message in
+     * @param sourceId
+     * @param sourceIndex
+     */
     void reset(int sourceId, long sourceIndex);
 
     int lastSourceId();
