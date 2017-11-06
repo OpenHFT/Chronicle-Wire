@@ -54,13 +54,13 @@ public class MethodReaderBuilder {
         return this;
     }
 
-    @NotNull
-    public MethodReader build(Object... impls) {
-        return new MethodReader(in, ignoreDefaults, defaultParselet, methodReaderInterceptor, impls);
-    }
-
     public MethodReaderBuilder methodReaderInterceptor(MethodReaderInterceptor methodReaderInterceptor) {
         this.methodReaderInterceptor = methodReaderInterceptor;
         return this;
+    }
+
+    @NotNull
+    public MethodReader build(Object... impls) {
+        return new MethodReader(in, ignoreDefaults, defaultParselet, methodReaderInterceptor, impls);
     }
 }
