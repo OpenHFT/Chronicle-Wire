@@ -39,7 +39,7 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
  */
 public enum WireInternal {
     ;
-    static final StringInterner INTERNER = new StringInterner(128);
+    static final StringInterner INTERNER = new StringInterner(Integer.getInteger("wire.interner.size", 4096));
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
     static final ThreadLocal<WeakReference<Bytes>> BYTES_TL = new ThreadLocal<>();
