@@ -1125,7 +1125,7 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
-            @NotNull StringBuilder sb = new StringBuilder();
+            @NotNull StringBuilder sb = Wires.acquireStringBuilder();
             sb.append(UNSAFE.getChar(o, offset));
             write.text(sb);
         }
