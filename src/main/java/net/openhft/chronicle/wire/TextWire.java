@@ -2183,7 +2183,7 @@ public class TextWire extends AbstractWire implements Wire {
                 long capacity = bytes.readRemaining();
                 Bytes<Void> bytes2 = Bytes.allocateDirect(capacity);
                 bytes2.write((BytesStore) bytes);
-                toBytes.set(bytes2.address(bytes2.start()), capacity);
+                toBytes.set(bytes2.addressForRead(bytes2.start()), capacity);
             });
         }
 

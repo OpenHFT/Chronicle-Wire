@@ -92,7 +92,7 @@ public class DefaultValueIn implements ValueIn {
             return wireIn();
         }
         @NotNull BytesStore bytes = (BytesStore) o;
-        toBytes.set(bytes.address(0), bytes.realCapacity());
+        toBytes.set(bytes.addressForRead(0), bytes.realCapacity());
         return wireIn();
     }
 

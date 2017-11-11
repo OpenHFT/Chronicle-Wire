@@ -634,7 +634,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         if (bytes.isDirectMemory()) {
             AppendableUtil.parse8bit_SB1(bytes, sb, peekCode & 0x1f);
         } else {
-            AppendableUtil.parse8bit(bytes, sb, peekCode & 0x1f);
+            try {
+                AppendableUtil.parse8bit(bytes, sb, peekCode & 0x1f);
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
         }
         return sb;
     }
@@ -2236,7 +2240,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
             if (code != U8_ARRAY)
                 cantRead(code);
-            long startAddr = bytes.address(bytes.readPosition());
+            long startAddr = bytes.addressForRead(bytes.readPosition());
             toBytes.set(startAddr, length - 1);
             bytes.readSkip(length - 1);
             return wireIn();

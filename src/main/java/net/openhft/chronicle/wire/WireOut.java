@@ -99,7 +99,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
     default WireOut padToCacheAlign() {
         @NotNull Bytes<?> bytes = bytes();
         try {
-            int mod = (int) (bytes.address(bytes.writePosition()) & 63);
+            int mod = (int) (bytes.addressForRead(bytes.writePosition()) & 63);
             if (mod > 60)
                 addPadding(64 - mod);
         } catch (IllegalArgumentException ignored) {
