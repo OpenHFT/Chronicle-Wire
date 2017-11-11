@@ -1391,7 +1391,7 @@ public class TextWire extends AbstractWire implements Wire {
             prependSeparator();
             bytes.writeUnsignedByte('0')
                     .writeUnsignedByte('x')
-                    .appendBase(i64, 16);
+                    .appendBase16(i64);
             elementSeparator();
 
             return TextWire.this;

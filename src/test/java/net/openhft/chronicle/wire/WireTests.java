@@ -69,18 +69,24 @@ public class WireTests {
     @Test
     public void testHexLongNegativeTest() {
         final Bytes b = Bytes.elasticByteBuffer();
-        final int expectedLong = -1;  /// CHANGE TO A POSITIVE NUMBER AND IT WORKS
+        final long expectedLong1 = -1;
+        final long expectedLong2 = Long.MIN_VALUE;
         try {
             final Wire wire = wireType.apply(b);
 
             try (DocumentContext dc = wire.writingDocument()) {
-                dc.wire().write("x").int64_0x(expectedLong);
+                dc.wire().write("w")
+                        .int64_0x(expectedLong1);
+                dc.wire().write("x")
+                        .int64_0x(expectedLong2);
                 dc.wire().write("y").typeLiteral(String.class);
             }
 
             try (DocumentContext dc = wire.readingDocument()) {
+                long w = dc.wire().read("w").int64();
+                Assert.assertEquals(expectedLong1, w);
                 long x = dc.wire().read("x").int64();
-                Assert.assertEquals(expectedLong, x);
+                Assert.assertEquals(expectedLong2, x);
                 Class<Object> y = dc.wire().read("y").typeLiteral();
                 Assert.assertEquals(String.class, y);
             }
