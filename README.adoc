@@ -11,6 +11,12 @@ The purpose of Chronicle Wire is to combine a number of concerns in a consistent
 - Accessing off-heap memory in a thread-safe manner. (Bind to shared off-heap memory)
 - High performance data exchange via binary formats. Only include as much meta data as you need.
 
+== Version 
+
+[#image-maven]
+[caption="", link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire]
+image::https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire/badge.svg[]
+
 == Design
 
 Chronicle Wire uses Chronicle Bytes for bytes manipulation, and Chronicle Core for low level JVM access.
