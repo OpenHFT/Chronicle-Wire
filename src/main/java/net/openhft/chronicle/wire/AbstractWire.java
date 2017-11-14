@@ -23,7 +23,7 @@ import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.threads.LongPauser;
+import net.openhft.chronicle.threads.BusyTimedPauser;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -108,7 +108,7 @@ public abstract class AbstractWire implements Wire {
     private Pauser acquireTimedParser() {
         return timedParser != null
                 ? timedParser
-                : (timedParser = new LongPauser(0, 2000, 5, 10, TimeUnit.MILLISECONDS));
+                : (timedParser = new BusyTimedPauser());
     }
 
     public boolean isInsideHeader() {
@@ -254,7 +254,7 @@ public abstract class AbstractWire implements Wire {
         } finally {
             resetTimedPauser();
         }
-        
+
         int len = lengthOf(header);
         if (!isReadyMetaData(header) || len > 64 << 10)
             throw new StreamCorruptedException("Unexpected magic number " + Integer.toHexString(header));
