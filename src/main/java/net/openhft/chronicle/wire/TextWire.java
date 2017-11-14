@@ -501,7 +501,7 @@ public class TextWire extends AbstractWire implements Wire {
     @Override
     @NotNull
     public String readingPeekYaml() {
-        throw new UnsupportedOperationException();
+       return "todo";
     }
 
     public void consumePadding(int commas) {
@@ -2375,7 +2375,7 @@ public class TextWire extends AbstractWire implements Wire {
             code = readCode();
             if (code != '}') {
                 bytes.readSkip(-1);
-                throw new IllegalStateException("Expected a } was " + bytes);
+                throw new IllegalStateException("Expected a } was " + code);
             }
         }
 

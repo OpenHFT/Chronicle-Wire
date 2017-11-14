@@ -242,14 +242,19 @@ public abstract class AbstractWire implements Wire {
     @Override
     public void readFirstHeader(long timeout, TimeUnit timeUnit) throws TimeoutException, StreamCorruptedException {
         int header;
-        for (; ; ) {
-            header = bytes.readVolatileInt(0L);
-            if (isReady(header)) {
-                break;
+        try {
+            for (; ; ) {
+                header = bytes.readVolatileInt(0L);
+                if (isReady(header)) {
+                    break;
+                }
+                acquireTimedParser().pause(timeout, timeUnit);
             }
-            acquireTimedParser().pause(timeout, timeUnit);
+
+        } finally {
+            resetTimedPauser();
         }
-        resetTimedPauser();
+        
         int len = lengthOf(header);
         if (!isReadyMetaData(header) || len > 64 << 10)
             throw new StreamCorruptedException("Unexpected magic number " + Integer.toHexString(header));
