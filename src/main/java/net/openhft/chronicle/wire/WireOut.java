@@ -165,14 +165,14 @@ public interface WireOut extends WireCommon, MarshallableOut {
      *                       time.
      * @param timeUnit       of the timeOut
      * @param lastPosition   the last known position
-     * @param seqAndPosition
+     * @param sequence
      * @return the position of the start of the header
      * @throws TimeoutException the underlying pauser timed out.
      * @throws EOFException     the end of wire marker was reached.
      */
     default long writeHeader(long timeout, TimeUnit timeUnit, @Nullable final LongValue
-            lastPosition, LongValue seqAndPosition) throws TimeoutException, EOFException {
-        return writeHeader(Wires.UNKNOWN_LENGTH, timeout, timeUnit, lastPosition, seqAndPosition);
+            lastPosition, Sequence  sequence) throws TimeoutException, EOFException {
+        return writeHeader(Wires.UNKNOWN_LENGTH, timeout, timeUnit, lastPosition, sequence);
     }
 
     /**
@@ -199,12 +199,12 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @throws TimeoutException the underlying pauser timed out.
      * @throws EOFException     the end of wire marker was reached.
      */
-    default long writeHeader(int length, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, LongValue seqAndPosition)
+    default long writeHeader(int length, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, Sequence sequence)
             throws TimeoutException, EOFException {
-        return writeHeader(length, 1 << 30, timeout, timeUnit, lastPosition, seqAndPosition);
+        return writeHeader(length, 1 << 30, timeout, timeUnit, lastPosition, sequence);
     }
 
-    long writeHeader(int length, int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, LongValue seqAndPosition)
+    long writeHeader(int length, int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, Sequence sequence)
             throws TimeoutException, EOFException;
 
     /**

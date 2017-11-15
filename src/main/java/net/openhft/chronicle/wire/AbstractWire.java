@@ -266,8 +266,12 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public long writeHeader(int length, int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue
-            lastPosition, LongValue seqAndPosition) throws TimeoutException, EOFException {
+    public long writeHeader(int length,
+                            int safeLength,
+                            long timeout,
+                            TimeUnit timeUnit,
+                            @Nullable LongValue lastPosition,
+                            @Nullable Sequence sequence) throws TimeoutException, EOFException {
 
         assert !insideHeader : "you cant put a header inside a header, check that " +
                 "you have not nested the documents. If you are using Chronicle-Queue please " +
