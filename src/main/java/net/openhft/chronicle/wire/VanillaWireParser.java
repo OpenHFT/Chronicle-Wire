@@ -29,14 +29,23 @@ public class VanillaWireParser<O> implements WireParser<O> {
     private final Map<CharSequence, WireParselet<O>> namedConsumer = new TreeMap<>(CharSequenceComparator.INSTANCE);
     private final Map<Integer, WireParselet<O>> numberedConsumer = new HashMap<>();
     private final WireParselet<O> defaultConsumer;
+    private final StringBuilder sb = new StringBuilder(128);
 
     public VanillaWireParser(WireParselet<O> defaultConsumer) {
         this.defaultConsumer = defaultConsumer;
     }
 
     @Override
-    public WireParselet getDefaultConsumer() {
+    public WireParselet<O> getDefaultConsumer() {
         return defaultConsumer;
+    }
+
+    public void parseOne(@NotNull WireIn wireIn, O out) {
+        @NotNull ValueIn valueIn = wireIn.readEventName(sb);
+        WireParselet<O> consumer = lookup(sb);
+        if (consumer == null)
+            consumer = getDefaultConsumer();
+        consumer.accept(sb, valueIn, out);
     }
 
     @NotNull

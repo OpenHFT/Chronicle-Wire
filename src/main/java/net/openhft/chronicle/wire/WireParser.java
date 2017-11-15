@@ -32,14 +32,7 @@ public interface WireParser<O> extends BiConsumer<WireIn, O> {
 
     WireParselet<O> getDefaultConsumer();
 
-    default void parseOne(@NotNull WireIn wireIn, O out) {
-        StringBuilder sb = WireInternal.SBP.acquireStringBuilder();
-        @NotNull ValueIn valueIn = wireIn.readEventName(sb);
-        WireParselet<O> consumer = lookup(sb);
-        if (consumer == null)
-            consumer = getDefaultConsumer();
-        consumer.accept(sb, valueIn, out);
-    }
+    void parseOne(@NotNull WireIn wireIn, O out);
 
     @Override
     default void accept(@NotNull WireIn wireIn, O marshallableOut) {
