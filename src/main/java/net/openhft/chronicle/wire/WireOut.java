@@ -161,17 +161,18 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * Write a new header, an unknown length, handling timeouts and the end of wire marker. This
      * will increment the headerNumber as appropriate if successful
      *
-     * @param timeout      throw a TimeoutException if the header could not be written in this
-     *                     time.
-     * @param timeUnit     of the timeOut
-     * @param lastPosition the last known position
+     * @param timeout        throw a TimeoutException if the header could not be written in this
+     *                       time.
+     * @param timeUnit       of the timeOut
+     * @param lastPosition   the last known position
+     * @param seqAndPosition
      * @return the position of the start of the header
      * @throws TimeoutException the underlying pauser timed out.
      * @throws EOFException     the end of wire marker was reached.
      */
     default long writeHeader(long timeout, TimeUnit timeUnit, @Nullable final LongValue
-            lastPosition) throws TimeoutException, EOFException {
-        return writeHeader(Wires.UNKNOWN_LENGTH, timeout, timeUnit, lastPosition);
+            lastPosition, LongValue seqAndPosition) throws TimeoutException, EOFException {
+        return writeHeader(Wires.UNKNOWN_LENGTH, timeout, timeUnit, lastPosition, seqAndPosition);
     }
 
     /**
@@ -198,12 +199,12 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @throws TimeoutException the underlying pauser timed out.
      * @throws EOFException     the end of wire marker was reached.
      */
-    default long writeHeader(int length, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition)
+    default long writeHeader(int length, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, LongValue seqAndPosition)
             throws TimeoutException, EOFException {
-        return writeHeader(length, 1 << 30, timeout, timeUnit, lastPosition);
+        return writeHeader(length, 1 << 30, timeout, timeUnit, lastPosition, seqAndPosition);
     }
 
-    long writeHeader(int length, int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition)
+    long writeHeader(int length, int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, LongValue seqAndPosition)
             throws TimeoutException, EOFException;
 
     /**
