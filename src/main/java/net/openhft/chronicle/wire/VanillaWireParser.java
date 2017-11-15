@@ -16,6 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.util.CharSequenceComparator;
+import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -30,9 +31,12 @@ public class VanillaWireParser<O> implements WireParser<O> {
     private final Map<Integer, WireParselet<O>> numberedConsumer = new HashMap<>();
     private final WireParselet<O> defaultConsumer;
     private final StringBuilder sb = new StringBuilder(128);
+    private final StringBuilder lastEventName = new StringBuilder(128);
+    private WireParselet<O> lastParslet = null;
 
     public VanillaWireParser(WireParselet<O> defaultConsumer) {
         this.defaultConsumer = defaultConsumer;
+        lastEventName.appendCodePoint(0xFFFF);
     }
 
     @Override
@@ -42,10 +46,22 @@ public class VanillaWireParser<O> implements WireParser<O> {
 
     public void parseOne(@NotNull WireIn wireIn, O out) {
         @NotNull ValueIn valueIn = wireIn.readEventName(sb);
-        WireParselet<O> consumer = lookup(sb);
-        if (consumer == null)
-            consumer = getDefaultConsumer();
-        consumer.accept(sb, valueIn, out);
+        WireParselet<O> parslet;
+        // on the assumption most messages are the same as the last,
+        // save having to lookup a TreeMap.
+        if (StringUtils.isEqual(sb, lastEventName)) {
+            parslet = lastParslet;
+
+        } else {
+            parslet = lookup(sb);
+            if (parslet == null)
+                parslet = getDefaultConsumer();
+        }
+
+        parslet.accept(sb, valueIn, out);
+        lastEventName.setLength(0);
+        lastEventName.append(sb);
+        lastParslet = parslet;
     }
 
     @NotNull
