@@ -23,7 +23,7 @@ import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.threads.BusyTimedPauser ;
+import net.openhft.chronicle.threads.BusyTimedPauser;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -212,11 +212,15 @@ public abstract class AbstractWire implements Wire {
         int header = bytes.peekVolatileInt();
         if (isReady(header)) {
             if (header == NOT_INITIALIZED)
-                throw new IllegalStateException();
+                throwISE();
             long start = position + SPB_HEADER_SIZE;
             bytes.readPositionRemaining(start, lengthOf(header));
             return;
         }
+        throwISE();
+    }
+
+    private void throwISE() {
         throw new IllegalStateException();
     }
 
@@ -305,7 +309,7 @@ public abstract class AbstractWire implements Wire {
 
     private long writeHeader0(int length, int safeLength, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {
         if (length < 0 || length > safeLength)
-            throw new IllegalArgumentException();
+            throwISE();
         long pos = bytes.writePosition();
         resetTimedPauser();
 //        System.out.println(Thread.currentThread()+" wh0 pos: "+pos+" hdr "+(int) headerNumber);
