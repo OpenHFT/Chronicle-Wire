@@ -201,6 +201,11 @@ public class HashWire implements WireOut {
     }
 
     @Override
+    public long tryWriteHeader(int length, int safeLength) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void updateHeader(int length, long position, boolean metaData) throws
             StreamCorruptedException {
         throw new UnsupportedOperationException();

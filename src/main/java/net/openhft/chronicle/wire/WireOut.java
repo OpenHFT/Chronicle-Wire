@@ -33,6 +33,7 @@ import java.util.concurrent.TimeoutException;
  * Created by peter.lawrey on 12/01/15.
  */
 public interface WireOut extends WireCommon, MarshallableOut {
+    long TRY_WRITE_HEADER_FAILED = 0xFFFF_FFFF_FFFF_FFFFL;
 
     /**
      * Write an empty filed marker
@@ -206,6 +207,14 @@ public interface WireOut extends WireCommon, MarshallableOut {
 
     long writeHeader(int length, int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, Sequence sequence)
             throws TimeoutException, EOFException;
+
+    /**
+     * Makes a single attempt to try and write the header.
+     * @param length       the maximum length of the message.
+     * @param safeLength   if length is unknown (0) then assume this safe length
+     * @return TRY_WRITE_HEADER_FAILED if it failed, otherwise the position of the start of the header
+     */
+    long tryWriteHeader(int length, int safeLength);
 
     /**
      * Change the header from NOT_COMPLETE | length to metaData * META_DATA | length.

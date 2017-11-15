@@ -41,6 +41,10 @@ import static net.openhft.chronicle.wire.Wires.*;
  * Created by Peter Lawrey on 10/03/16.
  */
 public abstract class AbstractWire implements Wire {
+    public static final String INSIDE_HEADER_MESSAGE = "you cant put a header inside a header, check that " +
+            "you have not nested the documents. If you are using Chronicle-Queue please " +
+            "ensure that you have a unique instance of the Appender per thread, in " +
+            "other-words you can not share appenders across threads.";
     protected static final boolean ASSERTIONS;
     /**
      * The code used to stop keeping track of the index that it was just about to write, and just
@@ -280,20 +284,9 @@ public abstract class AbstractWire implements Wire {
 
         insideHeader = true;
         try {
-            if (length < 0 || length > safeLength)
-                throw new IllegalArgumentException();
-            long pos = bytes.writePosition();
-
-            if (bytes.compareAndSwapInt(pos, 0, NOT_COMPLETE | length)) {
-
-                int maxlen = length == UNKNOWN_LENGTH ? safeLength : length;
-                if (length != safeLength && maxlen > bytes.writeRemaining())
-                    return throwNotEnoughSpace(maxlen, bytes);
-
-                bytes.writePositionRemaining(pos + SPB_HEADER_SIZE, maxlen);
-//            System.out.println(Thread.currentThread()+" wpr pos: "+pos+" hdr "+headerNumber);
-                return pos;
-            }
+            long tryPos = tryWriteHeader0(length, safeLength);
+            if (tryPos != TRY_WRITE_HEADER_FAILED)
+                return tryPos;
 
             if (lastPosition != null) {
                 long lastPositionValue = lastPosition.getVolatileValue();
@@ -309,6 +302,40 @@ public abstract class AbstractWire implements Wire {
             insideHeader = false;
             throw t;
         }
+    }
+
+    @Override
+    public long tryWriteHeader(int length, int safeLength) {
+
+        assert !insideHeader : INSIDE_HEADER_MESSAGE;
+
+        insideHeader = true;
+        try {
+            long tryPos = tryWriteHeader0(length, safeLength);
+            insideHeader = (tryPos != TRY_WRITE_HEADER_FAILED);
+            return tryPos;
+        } catch (Throwable t) {
+            insideHeader = false;
+            throw t;
+        }
+    }
+
+    private long tryWriteHeader0(int length, int safeLength) {
+        if (length < 0 || length > safeLength)
+            throw new IllegalArgumentException();
+        long pos = bytes.writePosition();
+
+        if (bytes.compareAndSwapInt(pos, 0, NOT_COMPLETE | length)) {
+
+            int maxlen = length == UNKNOWN_LENGTH ? safeLength : length;
+            if (length != safeLength && maxlen > bytes.writeRemaining())
+                return throwNotEnoughSpace(maxlen, bytes);
+
+            bytes.writePositionRemaining(pos + SPB_HEADER_SIZE, maxlen);
+//            System.out.println(Thread.currentThread()+" wpr pos: "+pos+" hdr "+headerNumber);
+            return pos;
+        }
+        return TRY_WRITE_HEADER_FAILED;
     }
 
     private long writeHeader0(int length, int safeLength, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {
