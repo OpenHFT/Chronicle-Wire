@@ -244,7 +244,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 
 ## Write a message with a thread safe size prefix.
 
-The benefits of using this approach ares that
+The benefits of using this approach are that
  - the reader can block until the message is complete.
  - if you have concurrent writers, they will block unless the size if know in which case it skip the message(s) still being written.
  
