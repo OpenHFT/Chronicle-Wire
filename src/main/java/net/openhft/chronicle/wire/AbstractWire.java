@@ -47,7 +47,7 @@ public abstract class AbstractWire implements Wire {
             "other-words you can not share appenders across threads.";
     protected static final boolean ASSERTIONS;
     /**
-     * The code used to stop keeping track of the index that it was just about to write, and just
+     * This code is used to stop keeping track of the index that it was just about to write, and just
      * write the data if the appender was more than 1<<20 = 1MB behind, if the appender is less
      * behind than 1MB then, it will cycle through each excerpt to keep track of the sequence number
      * ( we call this the headerNumber ). Keeping track if you are very far behind is expensive (
@@ -283,18 +283,19 @@ public abstract class AbstractWire implements Wire {
                 "other-words you can not share appenders across threads.";
 
         insideHeader = true;
+
+
         try {
             long tryPos = tryWriteHeader0(length, safeLength);
             if (tryPos != TRY_WRITE_HEADER_FAILED)
                 return tryPos;
 
+            resetTimedPauser();
             if (lastPosition != null) {
                 long lastPositionValue = lastPosition.getVolatileValue();
                 // do we jump forward if there has been writes else where.
-                if (lastPositionValue > bytes.writePosition() + ignoreHeaderCountIfNumberOfBytesBehindExceeds) {
-                    headerNumber(Long.MIN_VALUE);
-                    bytes.writePosition(lastPositionValue);
-//                System.out.println(Thread.currentThread()+" last pos: "+lastPositionValue+" hdr "+headerNumber);
+                if (lastPositionValue > bytes.writePosition()) {
+                    tryMoveToEndOfQueue(lastPosition, sequence, lastPositionValue, timeout, timeUnit);
                 }
             }
             return writeHeader0(length, safeLength, timeout, timeUnit);
@@ -302,6 +303,55 @@ public abstract class AbstractWire implements Wire {
             insideHeader = false;
             throw t;
         }
+    }
+
+    private void tryMoveToEndOfQueue(@NotNull LongValue lastPosition,
+                                     @Nullable Sequence sequence,
+                                     long lastPositionValue, long timeout, TimeUnit timeUnit) {
+        try {
+
+            int tries = 128;
+            for (int i = 0; i < tries; i++) {
+
+                if (sequence == null)
+                    break;
+
+                long sequence1 = sequence.getSequence(lastPositionValue);
+
+                if (sequence1 < this.headerNumber)
+                    break;
+
+                if (sequence1 == -1) {
+
+                    if (lastPositionValue > bytes.writePosition() + ignoreHeaderCountIfNumberOfBytesBehindExceeds) {
+                        headerNumber(Long.MIN_VALUE);
+                        bytes.writePosition(lastPositionValue);
+                    }
+
+                    break;
+                }
+
+                if (sequence1 != Long.MIN_VALUE) {
+                     headerNumber(sequence.toIndex(headerNumber, sequence1 - 1));
+                     bytes.writePosition(lastPositionValue);
+                    break;
+                }
+
+
+                if (i == tries - 1) {
+                    if (lastPositionValue > bytes.writePosition() + ignoreHeaderCountIfNumberOfBytesBehindExceeds) {
+                        headerNumber(Long.MIN_VALUE);
+                        bytes.writePosition(lastPositionValue);
+                    }
+                    break;
+                }
+
+                lastPositionValue = lastPosition.getVolatileValue();
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -342,7 +392,7 @@ public abstract class AbstractWire implements Wire {
         if (length < 0 || length > safeLength)
             throwISE();
         long pos = bytes.writePosition();
-        resetTimedPauser();
+
 //        System.out.println(Thread.currentThread()+" wh0 pos: "+pos+" hdr "+(int) headerNumber);
         try {
             for (; ; ) {
