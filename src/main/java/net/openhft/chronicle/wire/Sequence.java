@@ -10,10 +10,10 @@ public interface Sequence {
      * Long.MIN_VALUE will be return if a sequence number can not be found  ( so retry )
      * or -1 if you sould not retry
      *
-     * @param writePosition the last write position, expected to be the end of queue
+     * @param forWritePosition the last write position, expected to be the end of queue
      * @return Long.MIN_VALUE if the sequence for this write position can not be found
      */
-    long getSequence(long writePosition);
+    long getSequence(long forWritePosition);
 
     /**
      * sets the sequence number for a writePosition
