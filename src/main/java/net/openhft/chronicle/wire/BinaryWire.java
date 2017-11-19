@@ -29,6 +29,7 @@ import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.core.values.TwoLongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -1485,6 +1486,17 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
+        public WireOut int128forBinding(long value, long value2) {
+            writeAlignTo(16, 1);
+            writeCode(I64_ARRAY);
+            bytes.writeLong(value);
+            bytes.writeLong(value2);
+            return BinaryWire.this;
+        }
+
+
+        @NotNull
+        @Override
         public WireOut int64array(long capacity, @NotNull LongArrayValues values) {
             writeAlignTo(8, 1);
             writeCode(I64_ARRAY);
@@ -2729,6 +2741,24 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
             return BinaryWire.this;
         }
+
+        @NotNull
+        @Override
+        public WireIn int128(@NotNull TwoLongValue value) {
+            consumePadding();
+            int code = readCode();
+            if (code == I64_ARRAY) {
+                @Nullable Byteable b = (Byteable) value;
+                long length = BinaryLongArrayReference.peakLength(bytes, bytes.readPosition());
+                b.bytesStore(bytes, bytes.readPosition(), length);
+                bytes.readSkip(length);
+
+            } else {
+                cantRead(code);
+            }
+            return BinaryWire.this;
+        }
+
 
         @NotNull
         @Override

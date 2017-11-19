@@ -237,6 +237,11 @@ public interface ValueOut {
     WireOut int64forBinding(long value);
 
     @NotNull
+    default WireOut int128forBinding(long value, long value2) {
+        throw new UnsupportedOperationException();
+    }
+
+    @NotNull
     WireOut int64forBinding(long value, @NotNull LongValue longValue);
 
     @NotNull

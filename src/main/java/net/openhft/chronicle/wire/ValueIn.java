@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.core.values.TwoLongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -199,6 +200,11 @@ public interface ValueIn {
 
     @NotNull
     <T> WireIn int64array(@Nullable LongArrayValues values, T t, @NotNull BiConsumer<T, LongArrayValues> setter);
+
+    @NotNull
+    default WireIn int128(@NotNull TwoLongValue value) {
+        throw new UnsupportedOperationException();
+    }
 
     @NotNull
     WireIn int64(@NotNull LongValue value);
