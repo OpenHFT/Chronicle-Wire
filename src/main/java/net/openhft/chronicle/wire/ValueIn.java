@@ -17,6 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.Resettable;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
@@ -255,9 +256,7 @@ public interface ValueIn {
             }
 
             final Object t = buffer.get(size);
-            // todo fix
-            //                if (t instanceof Resettable) ((Resettable) t).reset();
-            if (t instanceof Marshallable) Wires.reset(t);
+            if (t instanceof Resettable) ((Resettable) t).reset();
             list.add((T) v.object(t, t.getClass()));
         }
     }
