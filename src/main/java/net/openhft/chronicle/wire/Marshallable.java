@@ -160,8 +160,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable {
         return ClassAliasPool.CLASS_ALIASES.nameFor(getClass());
     }
 
-    // breaks Chronicle FIX
-//    default void reset() {
-//        Wires.reset(this);
-//    }
+    default void reset() {
+        Wires.reset(this);
+    }
 }
