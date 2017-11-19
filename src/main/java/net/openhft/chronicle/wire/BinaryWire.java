@@ -247,17 +247,25 @@ public class BinaryWire extends AbstractWire implements Wire {
                         bytes.uncheckedReadSkipOne();
                         long len2 = bytes.readLong();
                         long used = bytes.readLong();
-                        wire.getValueOut().sequence(o -> {
-                            wire.writeComment("length: " + len2 + ", used: " + used);
-                            for (long i = 0; i < len2; i++) {
-                                long v = bytes.readLong();
-                                if (i == used) {
-                                    o.swapLeaf(true);
+                        if (len2 == used && len2 <= 2)
+                            wire.getValueOut().sequence(o -> {
+                                for (long i = 0; i < len2; i++) {
+                                    long v = bytes.readLong();
+                                    o.int64(v);
                                 }
-                                o.int64(v);
-                            }
-                            o.swapLeaf(false);
-                        });
+                            });
+                        else
+                            wire.getValueOut().sequence(o -> {
+                                wire.writeComment("length: " + len2 + ", used: " + used);
+                                for (long i = 0; i < len2; i++) {
+                                    long v = bytes.readLong();
+                                    if (i == used) {
+                                        o.swapLeaf(true);
+                                    }
+                                    o.int64(v);
+                                }
+                                o.swapLeaf(false);
+                            });
 
                         break outerSwitch;
                     case FIELD_ANCHOR: {
