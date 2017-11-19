@@ -204,7 +204,7 @@ Chronicle Wire offers the ability to bind a reference to a fixed value of a fiel
 [source, Java]
 ----
    // field to cache the location and object used to reference a field.
-   private LongValueReference counter = null;
+   private LongValue counter = null;
     
    // find the field and bind an approritae wrapper for the wire format.
    wire.read(COUNTER).int64(counter, x -> counter = x);
