@@ -21,6 +21,7 @@ import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.core.values.TwoLongValue;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -69,6 +70,14 @@ public interface WireCommon {
      */
     @NotNull
     LongValue newLongReference();
+
+    /**
+     * @return a LongValue which appropriate for this wire.
+     */
+    @NotNull
+    default TwoLongValue newTwoLongReference() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * @return a LongArrayValue which appropriate for this wire.

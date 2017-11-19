@@ -19,6 +19,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.ref.BinaryIntReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongReference;
+import net.openhft.chronicle.bytes.ref.BinaryTwoLongReference;
 import net.openhft.chronicle.bytes.util.Bit8StringInterner;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
@@ -1179,6 +1180,12 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @NotNull
     @Override
+    public TwoLongValue newTwoLongReference() {
+        return new BinaryTwoLongReference();
+    }
+
+    @NotNull
+    @Override
     public IntValue newIntReference() {
         return new BinaryIntReference();
     }
@@ -1489,6 +1496,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         public WireOut int128forBinding(long value, long value2) {
             writeAlignTo(16, 1);
             writeCode(I64_ARRAY);
+            bytes.writeLong(2);
+            bytes.writeLong(2);
             bytes.writeLong(value);
             bytes.writeLong(value2);
             return BinaryWire.this;
@@ -2750,7 +2759,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (code == I64_ARRAY) {
                 @Nullable Byteable b = (Byteable) value;
                 long length = BinaryLongArrayReference.peakLength(bytes, bytes.readPosition());
-                b.bytesStore(bytes, bytes.readPosition(), length);
+                b.bytesStore(bytes, bytes.readPosition() + 8 /* capacity */ + 8 /* used */, length - 2 * 8);
                 bytes.readSkip(length);
 
             } else {
