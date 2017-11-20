@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesComment;
 import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
@@ -126,13 +127,17 @@ public class WireMarshaller<T> {
     }
 
     public void writeMarshallable(T t, @NotNull WireOut out) {
+        BytesComment bytes = out.bytesComment();
+        bytes.indent(+1);
         try {
             for (@NotNull FieldAccess field : fields) {
+                bytes.comment(field.field.getName());
                 field.write(t, out);
             }
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
         }
+        bytes.indent(-1);
     }
 
     public void writeMarshallable(T t, Bytes bytes) {

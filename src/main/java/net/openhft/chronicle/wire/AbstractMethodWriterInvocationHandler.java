@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.util.AbstractInvocationHandler;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +38,7 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     private MethodWriterInterceptor methodWriterInterceptor;
     private BiConsumer<Method, Object[]> handleInvoke;
     // Note the Object[] passed in creates an object on every call.
-
+    private boolean useMethodIds;
 
     public AbstractMethodWriterInvocationHandler() {
         super(HashMap::new);
@@ -74,33 +75,42 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     }
 
     private void writeEvent(Wire wire, @NotNull Method method, String methodName, Object[] args) {
-        ValueOut valueOut = wire.writeEventName(methodName);
+        writeEvent0(wire, method, args, methodName, 0);
+    }
+
+    private void writeGenericEvent(Wire wire, @NotNull Method method, Object[] args) {
+        String methodName = args[0].toString();
+        writeEvent0(wire, method, args, methodName, 1);
+    }
+
+    private void writeEvent0(Wire wire, @NotNull Method method, Object[] args, String methodName, int oneParam) {
         ParameterHolderSequenceWriter phsw = parameterMap.computeIfAbsent(method, ParameterHolderSequenceWriter::new);
-        switch (args.length) {
+        Bytes<?> bytes = wire.bytes();
+        if (bytes.retainsComments())
+            bytes.comment(methodName);
+        ValueOut valueOut = useMethodIds && phsw.methodId >= 0
+                ? wire.writeEventId((int) phsw.methodId)
+                : wire.writeEventName(methodName);
+        switch (args.length - oneParam) {
             case 0:
                 valueOut.text("");
                 break;
             case 1:
-                valueOut.object(phsw.parameterTypes[0], args[0]);
+                Object arg = args[oneParam];
+                if (bytes.retainsComments())
+                    addComment(bytes, arg);
+                valueOut.object(phsw.parameterTypes[oneParam], arg);
                 break;
             default:
-                valueOut.sequence(args, phsw.from0);
+                valueOut.sequence(args, oneParam == 0 ? phsw.from0 : phsw.from1);
         }
     }
 
-    private void writeGenericEvent(Wire wire, @NotNull Method method, Object[] args) {
-        ValueOut valueOut = wire.writeEventName(args[0].toString());
-        ParameterHolderSequenceWriter phsw = parameterMap.computeIfAbsent(method, ParameterHolderSequenceWriter::new);
-        switch (args.length) {
-            case 1:
-                valueOut.text("");
-                break;
-            case 2:
-                valueOut.object(phsw.parameterTypes[1], args[1]);
-                break;
-            default:
-                valueOut.sequence(args, phsw.from1);
-        }
+    private void addComment(Bytes<?> bytes, Object arg) {
+        if (arg instanceof Marshallable)
+            bytes.comment(arg.getClass().getSimpleName());
+        else
+            bytes.comment(String.valueOf(arg));
     }
 
     @Override
@@ -113,22 +123,8 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
         this.methodWriterInterceptor = methodWriterInterceptor;
     }
 
-    // lambda was causing garbage
-    private static class ParameterHolderSequenceWriter {
-        final Class[] parameterTypes;
-        final BiConsumer<Object[], ValueOut> from0;
-        final BiConsumer<Object[], ValueOut> from1;
-
-        private ParameterHolderSequenceWriter(Method method) {
-            this.parameterTypes = method.getParameterTypes();
-            this.from0 = (a, v) -> {
-                for (int i = 0; i < parameterTypes.length; i++)
-                    v.object(parameterTypes[i], a[i]);
-            };
-            this.from1 = (a, v) -> {
-                for (int i = 1; i < parameterTypes.length; i++)
-                    v.object(parameterTypes[i], a[i]);
-            };
-        }
+    @Override
+    public void useMethodIds(boolean useMethodIds) {
+        this.useMethodIds = useMethodIds;
     }
 }

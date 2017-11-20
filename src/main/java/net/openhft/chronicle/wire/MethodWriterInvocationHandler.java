@@ -36,4 +36,7 @@ public interface MethodWriterInvocationHandler extends InvocationHandler {
     void methodWriterInterceptor(MethodWriterInterceptor methodWriterInterceptor);
 
     void genericEvent(String genericEvent);
+
+    void useMethodIds(boolean useMethodIds);
+
 }

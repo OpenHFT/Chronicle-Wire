@@ -104,4 +104,9 @@ public class MethodWriterBuilder<T> implements Supplier<T> {
         handler.genericEvent(genericEvent);
         return this;
     }
+
+    public MethodWriterBuilder<T> useMethodIds(boolean useMethodIds) {
+        handler.useMethodIds(useMethodIds);
+        return this;
+    }
 }

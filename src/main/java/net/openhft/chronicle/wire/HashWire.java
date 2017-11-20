@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesComment;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -47,7 +48,7 @@ import java.util.function.BiConsumer;
 /*
  * Created by peter.lawrey on 05/02/2016.
  */
-public class HashWire implements WireOut {
+public class HashWire implements WireOut, BytesComment {
     private static final int K0 = 0x6d0f27bd;
     private static final int M0 = 0x5bc80bad;
     private static final int M1 = 0xea7585d7;
@@ -231,6 +232,11 @@ public class HashWire implements WireOut {
     @Override
     public Bytes<?> bytes() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public BytesComment<?> bytesComment() {
+        return this;
     }
 
     @NotNull

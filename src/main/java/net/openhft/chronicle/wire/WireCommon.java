@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesComment;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -58,6 +59,11 @@ public interface WireCommon {
      */
     @NotNull
     Bytes<?> bytes();
+
+    /**
+     * @return the bytes90 but only for comment
+     */
+    BytesComment<?> bytesComment();
 
     /**
      * @return an IntValue which appropriate for this wire.

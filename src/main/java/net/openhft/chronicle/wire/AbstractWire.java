@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesComment;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
@@ -189,6 +190,11 @@ public abstract class AbstractWire implements Wire {
     @NotNull
     @Override
     public Bytes<?> bytes() {
+        return bytes;
+    }
+
+    @Override
+    public BytesComment<?> bytesComment() {
         return bytes;
     }
 

@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.HexDumpBytes;
 import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.wire.Wires.toIntU30;
@@ -36,6 +37,7 @@ public class WriteDocumentContext implements DocumentContext {
 
     public void start(boolean metaData) {
         @NotNull Bytes<?> bytes = wire().bytes();
+        bytes.comment("msg-length");
         this.position = bytes.writePosition();
         metaDataBit = metaData ? Wires.META_DATA : 0;
         tmpHeader = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
@@ -58,7 +60,10 @@ public class WriteDocumentContext implements DocumentContext {
         long position1 = bytes.writePosition();
 //        if (position1 < position)
 //            System.out.println("Message truncated from " + position + " to " + position1);
-        int length = metaDataBit | toIntU30(position1 - position - 4, "Document length %,d out of 30-bit int range.");
+        long length0 = position1 - position - 4;
+        if (length0 > Integer.MAX_VALUE && bytes instanceof HexDumpBytes)
+            length0 = (int) length0;
+        int length = metaDataBit | toIntU30(length0, "Document length %,d out of 30-bit int range.");
         if (!bytes.compareAndSwapInt(position, tmpHeader, length))
             throw new IllegalStateException("Header at " + position + " overwritten with " + Integer.toHexString(bytes.readInt(position)));
 

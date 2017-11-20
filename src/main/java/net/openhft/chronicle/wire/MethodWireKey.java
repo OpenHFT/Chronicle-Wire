@@ -14,7 +14,7 @@ public class MethodWireKey extends AbstractMarshallable implements WireKey {
     @NotNull
     @Override
     public String name() {
-        return name;
+        return name == null ? Integer.toString(code) : name;
     }
 
     @Override

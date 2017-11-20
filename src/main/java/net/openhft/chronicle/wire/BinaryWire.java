@@ -1012,6 +1012,12 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @Override
+    public ValueOut writeEventId(int methodId) {
+        writeCode(FIELD_NUMBER).writeStopBit(methodId);
+        return valueOut;
+    }
+
+    @Override
     public void startEvent() {
         writeCode(EVENT_OBJECT);
     }
@@ -1701,7 +1707,10 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             object.writeMarshallable(BinaryWire.this);
 
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
+            long length = bytes.writePosition() - position - 4;
+            if (length > Integer.MAX_VALUE && bytes instanceof HexDumpBytes)
+                length = (int) length;
+            bytes.writeOrderedInt(position, Maths.toInt32(length, "Document length %,d out of 32-bit int range."));
             return BinaryWire.this;
         }
 

@@ -50,7 +50,7 @@ import java.util.function.*;
 /*
  * Created by Peter Lawrey on 06/04/16.
  */
-public class ResultSetWireIn implements WireIn {
+public class ResultSetWireIn implements WireIn, BytesComment {
     @NotNull
     private final ResultSet resultSet;
     private final ResultSetMetaData metaData;
@@ -209,6 +209,11 @@ public class ResultSetWireIn implements WireIn {
     @Override
     public Bytes<?> bytes() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public BytesComment<?> bytesComment() {
+        return this;
     }
 
     @NotNull

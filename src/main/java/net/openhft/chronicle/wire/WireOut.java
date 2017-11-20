@@ -65,6 +65,10 @@ public interface WireOut extends WireCommon, MarshallableOut {
         return getValueOut();
     }
 
+    default ValueOut writeEventId(int methodId) {
+        return write(new MethodWireKey(null, methodId));
+    }
+
     /**
      * Write a key for wires that support fields.
      */
@@ -100,7 +104,10 @@ public interface WireOut extends WireCommon, MarshallableOut {
     default WireOut padToCacheAlign() {
         @NotNull Bytes<?> bytes = bytes();
         try {
-            int mod = (int) (bytes.addressForRead(bytes.writePosition()) & 63);
+            long offset = bytes.writePosition();
+            if (bytes.start() != 0)
+                offset = bytes.addressForRead(offset);
+            int mod = (int) (offset & 63);
             if (mod > 60)
                 addPadding(64 - mod);
         } catch (IllegalArgumentException ignored) {
@@ -162,17 +169,17 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * Write a new header, an unknown length, handling timeouts and the end of wire marker. This
      * will increment the headerNumber as appropriate if successful
      *
-     * @param timeout        throw a TimeoutException if the header could not be written in this
-     *                       time.
-     * @param timeUnit       of the timeOut
-     * @param lastPosition   the last known position
+     * @param timeout      throw a TimeoutException if the header could not be written in this
+     *                     time.
+     * @param timeUnit     of the timeOut
+     * @param lastPosition the last known position
      * @param sequence
      * @return the position of the start of the header
      * @throws TimeoutException the underlying pauser timed out.
      * @throws EOFException     the end of wire marker was reached.
      */
     default long writeHeader(long timeout, TimeUnit timeUnit, @Nullable final LongValue
-            lastPosition, Sequence  sequence) throws TimeoutException, EOFException {
+            lastPosition, Sequence sequence) throws TimeoutException, EOFException {
         return writeHeader(Wires.UNKNOWN_LENGTH, timeout, timeUnit, lastPosition, sequence);
     }
 
@@ -210,8 +217,9 @@ public interface WireOut extends WireCommon, MarshallableOut {
 
     /**
      * Makes a single attempt to try and write the header.
-     * @param length       the maximum length of the message.
-     * @param safeLength   if length is unknown (0) then assume this safe length
+     *
+     * @param length     the maximum length of the message.
+     * @param safeLength if length is unknown (0) then assume this safe length
      * @return TRY_WRITE_HEADER_FAILED if it failed, otherwise the position of the start of the header
      */
     long tryWriteHeader(int length, int safeLength);
@@ -268,4 +276,5 @@ public interface WireOut extends WireCommon, MarshallableOut {
     default WireOut dropDefault(boolean dropDefault) {
         return this;
     }
+
 }
