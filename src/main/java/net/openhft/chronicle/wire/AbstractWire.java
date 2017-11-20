@@ -69,7 +69,7 @@ public abstract class AbstractWire implements Wire {
     /**
      * See comments on tryMoveToEndOfQueue
      */
-     private static boolean disableFastForwardHeaderNumber = Boolean.getBoolean("disableFastForwardHeaderNumber");
+    private static boolean disableFastForwardHeaderNumber = Boolean.getBoolean("disableFastForwardHeaderNumber");
 
     static {
         boolean assertions = false;
@@ -346,24 +346,28 @@ public abstract class AbstractWire implements Wire {
             int maxAttempts = 128;
             for (int attempt = 0; attempt < maxAttempts; attempt++) {
 
-                long sequence1 = sequence.getSequence(lastPositionValue);
+                long lastSequence = sequence.getSequence(lastPositionValue);
 
-                if (sequence1 == Sequence.NOT_FOUND) {
+                if (lastSequence == Sequence.NOT_FOUND) {
                     fastForwardDontWriteHeaderNumber(lastPositionValue);
                     break;
                 }
 
-                if (sequence1 != Sequence.NOT_FOUND_RETRY) {
-                    long newHeaderNumber = sequence.toIndex(headerNumber, sequence1 - 1);
+                if (lastSequence != Sequence.NOT_FOUND_RETRY) {
 
-                    if (newHeaderNumber > this.headerNumber)
-                        continue;
+                    long currentSequence = sequence.toSequenceNumber(headerNumber);
 
-                   if (!disableFastForwardHeaderNumber) {
-               //         headerNumber(newHeaderNumber);
-                 //       bytes.writePosition(lastPositionValue);
+                    // we are already ahead of the lastSequence
+                    if (currentSequence > lastSequence)
                         break;
-                     }
+
+                    long newHeaderNumber = sequence.toIndex(headerNumber, lastSequence - 1);
+
+                    if (!disableFastForwardHeaderNumber) {
+                        headerNumber(newHeaderNumber);
+                        bytes.writePosition(lastPositionValue);
+                        break;
+                    }
                 }
 
                 if (attempt == maxAttempts - 1) {

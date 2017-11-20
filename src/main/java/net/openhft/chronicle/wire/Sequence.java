@@ -27,4 +27,6 @@ public interface Sequence {
     void setSequence(long sequence, long position);
 
     long toIndex(long headerNumber, long sequence);
+
+    long toSequenceNumber(long index);
 }
