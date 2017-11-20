@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.core.values.TwoLongValue;
 import net.openhft.chronicle.threads.BusyPauser;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
@@ -373,6 +374,12 @@ public class HashWire implements WireOut {
         public WireOut int64(long i64) {
             hash = hash * M1 + i64 * M2;
             return HashWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut int128forBinding(long i64x0, long i64x1, TwoLongValue longValue) {
+            throw new UnsupportedOperationException("todo");
         }
 
         @NotNull

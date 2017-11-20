@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.core.values.TwoLongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -166,6 +167,9 @@ public interface ValueOut {
     default WireOut int64(long i64, long previous) {
         return int64(i64);
     }
+
+    @NotNull
+    WireOut int128forBinding(long i64x0, long i64x1, TwoLongValue value);
 
     @NotNull
     WireOut int64_0x(long i64);

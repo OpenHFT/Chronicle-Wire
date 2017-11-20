@@ -1656,6 +1656,15 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+
+        @NotNull
+        @Override
+        public WireOut int128forBinding(long i64x0, long i64x1, TwoLongValue longValue) {
+            int128forBinding(i64x0, i64x1);
+            ((BinaryTwoLongReference) longValue).bytesStore(bytes, bytes.writePosition() - 16, 16);
+            return BinaryWire.this;
+        }
+
         @NotNull
         @Override
         public <T> WireOut sequence(T t, @NotNull BiConsumer<T, ValueOut> writer) {

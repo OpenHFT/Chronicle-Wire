@@ -27,6 +27,7 @@ import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.core.values.TwoLongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -413,6 +414,12 @@ public class RawWire extends AbstractWire implements Wire {
         public WireOut int64(long i64) {
             bytes.writeLong(i64);
             return RawWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut int128forBinding(long i64x0, long i64x1, TwoLongValue longValue) {
+            throw new UnsupportedOperationException("todo");
         }
 
         @NotNull

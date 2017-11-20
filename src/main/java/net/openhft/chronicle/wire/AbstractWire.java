@@ -69,7 +69,7 @@ public abstract class AbstractWire implements Wire {
     /**
      * See comments on tryMoveToEndOfQueue
      */
-    private static boolean enableFastForwardHeaderNumber = Boolean.getBoolean("enableFastForwardHeaderNumber");
+     private static boolean disableFastForwardHeaderNumber = Boolean.getBoolean("disableFastForwardHeaderNumber");
 
     static {
         boolean assertions = false;
@@ -359,11 +359,11 @@ public abstract class AbstractWire implements Wire {
                     if (newHeaderNumber > this.headerNumber)
                         continue;
 
-                    if (enableFastForwardHeaderNumber) {
-                        headerNumber(newHeaderNumber);
-                        bytes.writePosition(lastPositionValue);
+                   if (!disableFastForwardHeaderNumber) {
+               //         headerNumber(newHeaderNumber);
+                 //       bytes.writePosition(lastPositionValue);
                         break;
-                    }
+                     }
                 }
 
                 if (attempt == maxAttempts - 1) {

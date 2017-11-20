@@ -27,6 +27,7 @@ import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.core.values.TwoLongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -413,6 +414,10 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
     public Supplier<LongValue> newLongReference() {
         return BinaryLongReference::new;
+    }
+
+    public Supplier<TwoLongValue> newTwoLongReference() {
+        return BinaryTwoLongReference::new;
     }
 
     public Supplier<LongArrayValues> newLongArrayReference() {
