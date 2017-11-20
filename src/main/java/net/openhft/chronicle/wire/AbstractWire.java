@@ -341,6 +341,12 @@ public abstract class AbstractWire implements Wire {
         if (lastPositionValue <= bytes.writePosition())
             return;
 
+        if (headerNumber == Long.MIN_VALUE) {
+            fastForwardDontWriteHeaderNumber(lastPositionValue);
+            return;
+        }
+
+
         try {
 
             int maxAttempts = 128;
