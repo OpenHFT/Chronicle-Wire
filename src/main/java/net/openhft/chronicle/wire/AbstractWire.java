@@ -41,7 +41,7 @@ import static net.openhft.chronicle.wire.Wires.*;
  * Created by Peter Lawrey on 10/03/16.
  */
 public abstract class AbstractWire implements Wire {
-    public static final String INSIDE_HEADER_MESSAGE = "you cant put a header inside a header, check that " +
+    private static final String INSIDE_HEADER_MESSAGE = "you cant put a header inside a header, check that " +
             "you have not nested the documents. If you are using Chronicle-Queue please " +
             "ensure that you have a unique instance of the Appender per thread, in " +
             "other-words you can not share appenders across threads.";
@@ -277,10 +277,7 @@ public abstract class AbstractWire implements Wire {
                             @Nullable LongValue lastPosition,
                             @Nullable Sequence sequence) throws TimeoutException, EOFException {
 
-        assert !insideHeader : "you cant put a header inside a header, check that " +
-                "you have not nested the documents. If you are using Chronicle-Queue please " +
-                "ensure that you have a unique instance of the Appender per thread, in " +
-                "other-words you can not share appenders across threads.";
+        assert !insideHeader : INSIDE_HEADER_MESSAGE;
 
         insideHeader = true;
 
@@ -290,7 +287,7 @@ public abstract class AbstractWire implements Wire {
             if (tryPos != TRY_WRITE_HEADER_FAILED)
                 return tryPos;
 
-            if (lastPosition != null)
+            if (lastPosition != null && sequence != null)
                 tryMoveToEndOfQueue(lastPosition, sequence);
 
             return writeHeader0(length, safeLength, timeout, timeUnit);
@@ -304,11 +301,11 @@ public abstract class AbstractWire implements Wire {
      * The Problem this method attempts to resolve
      * <p>
      * Appenders that have not written for a while are having to scan down the queue to get to the end,
-     * there is some code that attempts to resolve this by detecting if the appenders are far away from the end,
-     * then just jumping tot the end, but this code looses the sequence number of the end of the queue.
-     * However, because we loose the sequence number we are currently over conservative before invoking this jump to the end.
+     * there was some code that attempts to resolve this by detecting if the appenders are far away from the end,
+     * then just jumping tot the end, but this code loses the sequence number of the end of the queue.
+     * However, because we lose the sequence number we are currently over conservative before invoking this jump to the end.
      * Because we are over conservative, apparently we are still spending a lot of time
-     * ( I don’t have the sats to hand ) linear scanning to the end of the queue.
+     * (I don’t have the stats to hand ) linear scanning to the end of the queue.
      * <p>
      * So, The problem is that we don’t know the sequence number of the end of the queue atomically with the lastPosition.
      * <p>
@@ -330,33 +327,27 @@ public abstract class AbstractWire implements Wire {
      * @param lastPosition the end of the queue
      * @param sequence     and object that can be used for getting the last sequence
      */
-    private void tryMoveToEndOfQueue(@NotNull LongValue lastPosition,
-                                     @Nullable Sequence sequence) {
+    private void tryMoveToEndOfQueue(@NotNull final LongValue lastPosition,
+                                     @NotNull final Sequence sequence) {
 
         long lastPositionValue = lastPosition.getVolatileValue();
-        // do we jump forward if there has been writes else where.
 
+        // do we jump forward if there has been writes else where.
         if (lastPositionValue <= bytes.writePosition())
             return;
-
 
         try {
 
             int maxAttempts = 128;
             for (int attempt = 0; attempt < maxAttempts; attempt++) {
 
-                if (sequence == null)
-                    break;
-
                 long sequence1 = sequence.getSequence(lastPositionValue);
 
-                if (sequence1 == -1) {
-
+                if (sequence1 == Sequence.NOT_FOUND) {
                     if (lastPositionValue > bytes.writePosition() + ignoreHeaderCountIfNumberOfBytesBehindExceeds) {
                         headerNumber(Long.MIN_VALUE);
                         bytes.writePosition(lastPositionValue);
                     }
-
                     break;
                 }
 
@@ -365,10 +356,10 @@ public abstract class AbstractWire implements Wire {
                 if (newHeaderNumber < this.headerNumber)
                     continue;
 
-                if (sequence1 != Long.MIN_VALUE) {
+                if (sequence1 != Sequence.NOT_FOUND_RETRY) {
                  //   headerNumber(newHeaderNumber);
                  //   bytes.writePosition(lastPositionValue);
-                    break;
+                 //   break;
                 }
 
                 if (attempt == maxAttempts - 1) {
