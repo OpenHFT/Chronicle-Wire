@@ -66,6 +66,11 @@ public abstract class AbstractWire implements Wire {
     private static long ignoreHeaderCountIfNumberOfBytesBehindExceeds = Integer.getInteger
             ("ignoreHeaderCountIfNumberOfBytesBehindExceeds", 1 << 20);
 
+    /**
+     * See comments on tryMoveToEndOfQueue
+     */
+    private static boolean enableFastForwardHeaderNumber = Boolean.getBoolean("enableFastForwardHeaderNumber");
+
     static {
         boolean assertions = false;
         // enable our class assertions if java assertions are turned on
@@ -344,29 +349,25 @@ public abstract class AbstractWire implements Wire {
                 long sequence1 = sequence.getSequence(lastPositionValue);
 
                 if (sequence1 == Sequence.NOT_FOUND) {
-                    if (lastPositionValue > bytes.writePosition() + ignoreHeaderCountIfNumberOfBytesBehindExceeds) {
-                        headerNumber(Long.MIN_VALUE);
-                        bytes.writePosition(lastPositionValue);
-                    }
+                    fastForwardDontWriteHeaderNumber(lastPositionValue);
                     break;
                 }
 
-                long newHeaderNumber = sequence.toIndex(headerNumber, sequence1 - 1);
-
-                if (newHeaderNumber < this.headerNumber)
-                    continue;
-
                 if (sequence1 != Sequence.NOT_FOUND_RETRY) {
-                 //   headerNumber(newHeaderNumber);
-                 //   bytes.writePosition(lastPositionValue);
-                 //   break;
+                    long newHeaderNumber = sequence.toIndex(headerNumber, sequence1 - 1);
+
+                    if (newHeaderNumber > this.headerNumber)
+                        continue;
+
+                    if (enableFastForwardHeaderNumber) {
+                        headerNumber(newHeaderNumber);
+                        bytes.writePosition(lastPositionValue);
+                        break;
+                    }
                 }
 
                 if (attempt == maxAttempts - 1) {
-                    if (lastPositionValue > bytes.writePosition() + ignoreHeaderCountIfNumberOfBytesBehindExceeds) {
-                        headerNumber(Long.MIN_VALUE);
-                        bytes.writePosition(lastPositionValue);
-                    }
+                    fastForwardDontWriteHeaderNumber(lastPositionValue);
                     break;
                 }
 
@@ -374,6 +375,13 @@ public abstract class AbstractWire implements Wire {
             }
         } catch (Throwable e) {
             Jvm.warn().on(getClass(), e);
+        }
+    }
+
+    private void fastForwardDontWriteHeaderNumber(long lastPositionValue) {
+        if (lastPositionValue > bytes.writePosition() + ignoreHeaderCountIfNumberOfBytesBehindExceeds) {
+            headerNumber(Long.MIN_VALUE);
+            bytes.writePosition(lastPositionValue);
         }
     }
 
