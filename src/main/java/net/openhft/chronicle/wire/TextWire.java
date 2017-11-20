@@ -322,6 +322,17 @@ public class TextWire extends AbstractWire implements Wire {
         }
     }
 
+    @Override
+    public long readEventNumber() {
+        StringBuilder sb = acquireStringBuilder();
+        readField(sb);
+        try {
+            return Integer.parseInt(sb.toString());
+        } catch (NumberFormatException ignored) {
+            return Long.MIN_VALUE;
+        }
+    }
+
     @NotNull
     @Override
     public ValueIn read() {

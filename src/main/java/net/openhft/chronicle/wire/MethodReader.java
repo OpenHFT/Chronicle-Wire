@@ -17,9 +17,12 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.util.Annotations;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,7 +184,8 @@ public class MethodReader implements Closeable {
             try {
                 MethodHandle mh = MethodHandles.lookup().unreflect(m).bindTo(o);
                 @NotNull Object[] argArr = {null};
-                wireParser.registerOnce(m::getName, (s, v, $) -> {
+                MethodWireKey key = createWireKey(m, name);
+                wireParser.registerOnce(key, (s, v, $) -> {
                     invokeMethodWithOneLong(o, m, name, mh, argArr, s, v, methodReaderInterceptor);
                 });
             } catch (IllegalAccessException e) {
@@ -190,7 +194,8 @@ public class MethodReader implements Closeable {
 
         } else if (parameterType.isInterface() || !ReadMarshallable.class.isAssignableFrom(parameterType)) {
             @NotNull Object[] argArr = {null};
-            wireParser.registerOnce(m::getName, (s, v, $) -> {
+            MethodWireKey key = createWireKey(m, name);
+            wireParser.registerOnce(key, (s, v, $) -> {
                 try {
                     if (Jvm.isDebug())
                         logMessage(s, v);
@@ -216,7 +221,8 @@ public class MethodReader implements Closeable {
                 }
             }
             @NotNull ReadMarshallable[] argArr = {arg};
-            wireParser.registerOnce(m::getName, (s, v, $) -> {
+            MethodWireKey key = createWireKey(m, name);
+            wireParser.registerOnce(key, (s, v, $) -> {
                 try {
                     if (Jvm.isDebug())
                         logMessage(s, v);
@@ -234,7 +240,8 @@ public class MethodReader implements Closeable {
     public void addParseletForMethod(Object o, @NotNull Method m) {
         m.setAccessible(true); // turn of security check to make a little faster
         String name = m.getName();
-        wireParser.registerOnce(m::getName, (s, v, $) -> {
+        MethodWireKey key = createWireKey(m, name);
+        wireParser.registerOnce(key, (s, v, $) -> {
             try {
                 if (Jvm.isDebug())
                     logMessage(s, v);
@@ -246,6 +253,12 @@ public class MethodReader implements Closeable {
                 Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + "()", i);
             }
         });
+    }
+
+    @NotNull
+    private MethodWireKey createWireKey(@NotNull Method m, String name) {
+        MethodId annotation = Annotations.getAnnotation(m, MethodId.class);
+        return new MethodWireKey(name, annotation == null ? name.hashCode() : Maths.toUInt31(annotation.value()));
     }
 
 
@@ -260,7 +273,8 @@ public class MethodReader implements Closeable {
             }
         };
         String name = m.getName();
-        wireParser.registerOnce(m::getName, (s, v, $) -> {
+        MethodWireKey key = createWireKey(m, name);
+        wireParser.registerOnce(key, (s, v, $) -> {
             try {
                 if (Jvm.isDebug())
                     logMessage(s, v);
@@ -303,7 +317,8 @@ public class MethodReader implements Closeable {
             }
         };
         String name = m.getName();
-        wireParser.registerOnce(m::getName, (s, v, $) -> {
+        MethodWireKey key = createWireKey(m, name);
+        wireParser.registerOnce(key, (s, v, $) -> {
             try {
                 if (Jvm.isDebug())
                     logMessage(s, v);

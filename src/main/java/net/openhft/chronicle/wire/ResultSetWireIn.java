@@ -76,10 +76,16 @@ public class ResultSetWireIn implements WireIn {
         throw new UnsupportedOperationException("TODO");
     }
 
+    @Override
+    public long readEventNumber() {
+        return Long.MIN_VALUE;
+    }
+
     @NotNull
     @Override
     public ValueIn read() {
-        throw new UnsupportedOperationException("TODO");
+        key = null;
+        return valueIn;
     }
 
     @NotNull

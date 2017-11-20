@@ -465,6 +465,16 @@ public class BinaryWire extends AbstractWire implements Wire {
         return defaultValueIn;
     }
 
+    @Override
+    public long readEventNumber() {
+        int peekCode = peekCodeAfterPadding();
+        if (peekCode == BinaryWireCode.FIELD_NUMBER) {
+            bytes.uncheckedReadSkipOne();
+            return bytes.readStopBit();
+        }
+        return Long.MIN_VALUE;
+    }
+
     @NotNull
     @Override
     public ValueIn readEventName(@NotNull StringBuilder name) {
@@ -504,7 +514,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private int peekCodeAfterPadding() {
         int peekCode = peekCode();
         if (peekCode == PADDING || peekCode == PADDING32 || peekCode == COMMENT) {
-            consumePadding(false);
+            consumePadding();
             peekCode = peekCode();
         }
         return peekCode;
@@ -574,10 +584,6 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @Override
     public void consumePadding() {
-        consumePadding(false);
-    }
-
-    void consumePadding(boolean consumeType) {
         while (true) {
             int code = peekCode();
             switch (code) {
@@ -589,11 +595,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                     bytes.uncheckedReadSkipOne();
                     bytes.readSkip(bytes.readUnsignedInt());
                     break;
-
-                case TYPE_PREFIX:
-                    if (!consumeType)
-                        return;
-                    // fall through
 
                 case COMMENT: {
                     bytes.uncheckedReadSkipOne();
@@ -2657,7 +2658,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td) {
-            consumePadding(false);
+            consumePadding();
             final int code = readCode();
             td.accept(t, readFloat(code));
             return BinaryWire.this;
@@ -3144,6 +3145,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         public boolean marshallable(@NotNull ReadMarshallable object, boolean overwrite)
                 throws BufferUnderflowException, IORuntimeException {
+            consumePadding();
             if (this.isNull())
                 return false;
             pushState();
@@ -3171,24 +3173,45 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         public boolean isNull() {
-            consumePadding(true);
-            if (peekCode() == NULL) {
-                bytes.uncheckedReadSkipOne();
-                return true;
+            while (true) {
+                int code = peekCode();
+                switch (code) {
+                    case PADDING:
+                        bytes.uncheckedReadSkipOne();
+                        break;
+
+                    case PADDING32:
+                        bytes.uncheckedReadSkipOne();
+                        bytes.readSkip(bytes.readUnsignedInt());
+                        break;
+
+                    case COMMENT:
+                        bytes.uncheckedReadSkipOne();
+                        readUtf8();
+                        break;
+
+                    case NULL:
+                        bytes.uncheckedReadSkipOne();
+                        return true;
+
+                    default:
+                        return false;
+                }
             }
-            return false;
         }
 
         @Override
         @Nullable
         public Object marshallable(@Nullable Object object, @NotNull SerializationStrategy strategy)
                 throws BufferUnderflowException, IORuntimeException {
-            if (this.isNull())
-                return null;
             pushState();
             consumePadding();
             int code = peekCode();
             switch (code) {
+                case NULL:
+                    popState();
+                    return null;
+
                 case ANCHOR:
                 case UPDATED_ALIAS: {
                     bytes.uncheckedReadSkipOne();

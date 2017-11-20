@@ -65,6 +65,11 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     /**
+     * @return field number or Long.MIN_VALUE if no number.
+     */
+    long readEventNumber();
+
+    /**
      * Read a field, or string which is always written, even for formats which might drop the field
      * such as RAW.
      */

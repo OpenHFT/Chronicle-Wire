@@ -680,4 +680,9 @@ public abstract class AbstractWire implements Wire {
             objectInput = new WireObjectInput(this);
         return objectInput;
     }
+
+    @Override
+    public long readEventNumber() {
+        return Long.MIN_VALUE;
+    }
 }
