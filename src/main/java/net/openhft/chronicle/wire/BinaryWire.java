@@ -3182,45 +3182,24 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         public boolean isNull() {
-            while (true) {
-                int code = peekCode();
-                switch (code) {
-                    case PADDING:
-                        bytes.uncheckedReadSkipOne();
-                        break;
-
-                    case PADDING32:
-                        bytes.uncheckedReadSkipOne();
-                        bytes.readSkip(bytes.readUnsignedInt());
-                        break;
-
-                    case COMMENT:
-                        bytes.uncheckedReadSkipOne();
-                        readUtf8();
-                        break;
-
-                    case NULL:
-                        bytes.uncheckedReadSkipOne();
-                        return true;
-
-                    default:
-                        return false;
-                }
+            consumePadding();
+            if (peekCode() == NULL) {
+                bytes.uncheckedReadSkipOne();
+                return true;
             }
+            return false;
         }
 
         @Override
         @Nullable
         public Object marshallable(@Nullable Object object, @NotNull SerializationStrategy strategy)
                 throws BufferUnderflowException, IORuntimeException {
+            if (this.isNull())
+                return null;
             pushState();
             consumePadding();
             int code = peekCode();
             switch (code) {
-                case NULL:
-                    popState();
-                    return null;
-
                 case ANCHOR:
                 case UPDATED_ALIAS: {
                     bytes.uncheckedReadSkipOne();
