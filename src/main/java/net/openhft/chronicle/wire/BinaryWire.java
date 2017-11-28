@@ -1273,8 +1273,14 @@ public class BinaryWire extends AbstractWire implements Wire {
                 int len = s.length();
                 if (len < 0x20)
                     len = (int) AppendableUtil.findUtf8Length(s);
+                char ch;
+                if (len == 0) {
+                    bytes.writeUnsignedByte(STRING_0);
 
-                if (len < 0x20) {
+                } else if (len == 1 && (ch = s.charAt(0)) < 128) {
+                    bytes.writeUnsignedByte(STRING_0 + 1).writeUnsignedByte(ch);
+
+                } else if (len < 0x20) {
                     bytes.writeUnsignedByte((int) (STRING_0 + len)).appendUtf8(StringUtils.extractChars(s), 0, s.length());
 
                 } else {
@@ -2545,7 +2551,6 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag) {
-            consumePadding();
             int code = readCode();
             switch (code) {
                 case NULL:
@@ -2560,6 +2565,15 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case TRUE:
                     tFlag.accept(t, true);
                     break;
+
+                case PADDING:
+                case PADDING32:
+                case COMMENT:
+                    bytes.uncheckedReadSkipBackOne();
+                    consumePadding();
+                    bool(t, tFlag);
+                    break;
+
                 default:
                     throw cantRead(code);
             }
@@ -2569,16 +2583,31 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public <T> WireIn int8(@NotNull T t, @NotNull ObjByteConsumer<T> tb) {
-            consumePadding();
+            int code = bytes.readUnsignedByte();
+            if (code < 128) {
+                tb.accept(t, (byte) code);
+                return BinaryWire.this;
+            }
+            int8b(t, tb, code);
 
-            final int code = bytes.readUnsignedByte();
+            return BinaryWire.this;
+        }
+
+        private <T> void int8b(@NotNull T t, @NotNull ObjByteConsumer<T> tb, int code) {
+            switch (code) {
+                case PADDING:
+                case PADDING32:
+                case COMMENT:
+                    bytes.uncheckedReadSkipBackOne();
+                    consumePadding();
+                    code = bytes.readUnsignedByte();
+                    break;
+            }
 
             if (isText(code))
                 tb.accept(t, Byte.parseByte(text()));
             else
                 tb.accept(t, (byte) readInt(code));
-
-            return BinaryWire.this;
         }
 
         @NotNull
@@ -3294,7 +3323,6 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         public boolean bool() throws IORuntimeException {
-            consumePadding();
             int code = readCode();
             if (isText(code))
                 return Boolean.valueOf(text());
@@ -3304,20 +3332,40 @@ public class BinaryWire extends AbstractWire implements Wire {
                     return true;
                 case FALSE:
                     return false;
+
+                case PADDING:
+                case PADDING32:
+                case COMMENT:
+                    bytes.uncheckedReadSkipBackOne();
+                    consumePadding();
+                    return bool();
             }
             throw new IORuntimeException(stringForCode(code));
         }
 
         @Override
         public byte int8() {
-            consumePadding();
             int code = readCode();
+            if (code < 128)
+                return (byte) code;
+            return int8b(code);
+        }
+
+        private byte int8b(int code) {
+            switch (code) {
+                case PADDING:
+                case PADDING32:
+                case COMMENT:
+                    bytes.uncheckedReadSkipBackOne();
+                    consumePadding();
+                    code = readCode();
+                    break;
+            }
             final long value = isText(code) ? readTextAsLong(Byte.MIN_VALUE) : readInt0(code);
 
             if (value > Byte.MAX_VALUE || value < Byte.MIN_VALUE)
                 throw new IllegalStateException();
             return (byte) value;
-
         }
 
         @Override
