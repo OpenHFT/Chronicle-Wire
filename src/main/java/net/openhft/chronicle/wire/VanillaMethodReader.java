@@ -18,6 +18,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodId;
+import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.bytes.MethodReaderInterceptor;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
@@ -42,10 +44,9 @@ import java.util.function.BiConsumer;
 /*
  * Created by Peter Lawrey on 24/03/16.
  */
-public class MethodReader implements Closeable {
-    public static final String HISTORY = "history";
+public class VanillaMethodReader implements MethodReader {
     static final Object[] NO_ARGS = {};
-    static final Logger LOGGER = LoggerFactory.getLogger(MethodReader.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(VanillaMethodReader.class);
     static final Object IGNORED = new Object(); // object used to flag that the call should be ignored.
     private final MarshallableIn in;
     @NotNull
@@ -53,7 +54,7 @@ public class MethodReader implements Closeable {
     private boolean closeIn = false, closed;
     private MethodReaderInterceptor methodReaderInterceptor;
 
-    public MethodReader(MarshallableIn in, boolean ignoreDefault, WireParselet defaultParselet, MethodReaderInterceptor methodReaderInterceptor, @NotNull Object... objects) {
+    public VanillaMethodReader(MarshallableIn in, boolean ignoreDefault, WireParselet defaultParselet, MethodReaderInterceptor methodReaderInterceptor, @NotNull Object... objects) {
         this.in = in;
         this.methodReaderInterceptor = methodReaderInterceptor;
         if (objects[0] instanceof WireParselet)
@@ -129,7 +130,7 @@ public class MethodReader implements Closeable {
             try {
                 if (methodReaderInterceptor != null) {
                     argArr[0] = arg;
-                    methodReaderInterceptor.intercept(m, o, argArr, MethodReader::actualInvoke);
+                    methodReaderInterceptor.intercept(m, o, argArr, VanillaMethodReader::actualInvoke);
 
                 } else {
                     mh.invokeExact(arg);
@@ -171,7 +172,7 @@ public class MethodReader implements Closeable {
     }
 
     @NotNull
-    public MethodReader closeIn(boolean closeIn) {
+    public VanillaMethodReader closeIn(boolean closeIn) {
         this.closeIn = closeIn;
         return this;
     }
@@ -338,7 +339,7 @@ public class MethodReader implements Closeable {
     private void invoke(Object o, @NotNull Method m, Object[] args) throws IllegalAccessException {
         try {
             if (methodReaderInterceptor != null)
-                methodReaderInterceptor.intercept(m, o, args, MethodReader::actualInvoke);
+                methodReaderInterceptor.intercept(m, o, args, VanillaMethodReader::actualInvoke);
             else
                 m.invoke(o, args);
 

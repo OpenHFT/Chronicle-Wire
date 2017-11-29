@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.ReadBytesMarshallable;
 import net.openhft.chronicle.bytes.StopCharTesters;
 import org.jetbrains.annotations.NotNull;
@@ -148,12 +149,12 @@ public interface MarshallableIn {
      */
     @NotNull
     default MethodReader methodReader(Object... objects) {
-        return new MethodReader(this, false, MethodReaderBuilder.createDefaultParselet(), null, objects);
+        return new VanillaMethodReader(this, false, VanillaMethodReaderBuilder.createDefaultParselet(), null, objects);
     }
 
     @NotNull
-    default MethodReaderBuilder methodReaderBuilder() {
-        return new MethodReaderBuilder(this);
+    default VanillaMethodReaderBuilder methodReaderBuilder() {
+        return new VanillaMethodReaderBuilder(this);
     }
 }
 

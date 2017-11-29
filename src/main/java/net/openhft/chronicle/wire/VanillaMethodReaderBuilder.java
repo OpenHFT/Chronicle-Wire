@@ -1,17 +1,20 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.bytes.MethodReaderBuilder;
+import net.openhft.chronicle.bytes.MethodReaderInterceptor;
 import org.jetbrains.annotations.NotNull;
 
 /*
  * Created by Peter Lawrey on 17/05/2017.
  */
-public class MethodReaderBuilder {
+public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private final MarshallableIn in;
     private boolean ignoreDefaults;
     private WireParselet defaultParselet = createDefaultParselet();
     private MethodReaderInterceptor methodReaderInterceptor;
 
-    public MethodReaderBuilder(MarshallableIn in) {
+    public VanillaMethodReaderBuilder(MarshallableIn in) {
         this.in = in;
     }
 
@@ -24,9 +27,9 @@ public class MethodReaderBuilder {
             long sourceIndex = history.lastSourceIndex();
             v.skipValue();
             if (s.length() == 0)
-                MethodReader.LOGGER.warn(errorMsg(s, history, sourceIndex));
-            else if (MethodReader.LOGGER.isDebugEnabled())
-                MethodReader.LOGGER.debug(errorMsg(s, history, sourceIndex));
+                VanillaMethodReader.LOGGER.warn(errorMsg(s, history, sourceIndex));
+            else if (VanillaMethodReader.LOGGER.isDebugEnabled())
+                VanillaMethodReader.LOGGER.debug(errorMsg(s, history, sourceIndex));
         };
     }
 
@@ -61,6 +64,6 @@ public class MethodReaderBuilder {
 
     @NotNull
     public MethodReader build(Object... impls) {
-        return new MethodReader(in, ignoreDefaults, defaultParselet, methodReaderInterceptor, impls);
+        return new VanillaMethodReader(in, ignoreDefaults, defaultParselet, methodReaderInterceptor, impls);
     }
 }

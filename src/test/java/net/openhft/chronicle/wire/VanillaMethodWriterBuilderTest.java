@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class MethodWriterBuilderTest {
+public class VanillaMethodWriterBuilderTest {
 
     @Test
     public void useMethodId_False() {

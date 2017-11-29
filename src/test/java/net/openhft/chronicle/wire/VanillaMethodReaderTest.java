@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
@@ -30,7 +31,7 @@ interface MockMethods {
 /*
  * Created by Peter Lawrey on 17/05/2017.
  */
-public class MethodReaderTest {
+public class VanillaMethodReaderTest {
     @Test
     public void readMethods() throws IOException {
         Wire wire = new TextWire(BytesUtil.readFile("methods-in.yaml")).useTextDocuments();
@@ -83,33 +84,33 @@ public class MethodReaderTest {
         }
         assertFalse(reader.readOne());
         String expected = "subs timed[1234567890]\n" +
-                "subs top[!net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
+                "subs top[!net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +
                 "  value: a\n" +
                 "}\n" +
                 "]\n" +
-                "subs method2[one, !net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
+                "subs method2[one, !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +
                 "  value: a\n" +
                 "}\n" +
                 "]\n" +
-                "subs top[!net.openhft.chronicle.wire.MethodReaderTest$MRT2 {\n" +
+                "subs top[!net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: one,\n" +
                 "  value: a,\n" +
                 "  field2: two\n" +
                 "}\n" +
                 "]\n" +
-                "subs mid[!net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
+                "subs mid[!net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: \"1\",\n" +
                 "  value: a\n" +
                 "}\n" +
                 "]\n" +
-                "subs method2[1, !net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
+                "subs method2[1, !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: \"1\",\n" +
                 "  value: a\n" +
                 "}\n" +
                 "]\n" +
-                "subs mid[!net.openhft.chronicle.wire.MethodReaderTest$MRT2 {\n" +
+                "subs mid[!net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: \"1\",\n" +
                 "  value: a,\n" +
                 "  field2: \"2\"\n" +
@@ -133,12 +134,12 @@ public class MethodReaderTest {
 
         assertEquals("timed: 1234567890\n" +
                 "---\n" +
-                "top: !net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
+                "top: !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +
                 "  value: x\n" +
                 "}\n" +
                 "---\n" +
-                "top: !net.openhft.chronicle.wire.MethodReaderTest$MRT2 {\n" +
+                "top: !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: one,\n" +
                 "  value: x,\n" +
                 "  field2: two\n" +
@@ -149,7 +150,7 @@ public class MethodReaderTest {
                 "  value: x\n" +
                 "}\n" +
                 "---\n" +
-                "mid: !net.openhft.chronicle.wire.MethodReaderTest$MRT2 {\n" +
+                "mid: !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: \"1\",\n" +
                 "  value: x,\n" +
                 "  field2: \"2\"\n" +
@@ -167,12 +168,12 @@ public class MethodReaderTest {
         writer.mid(new MRT1("1"));
         writer.mid(new MRT2("1", "2"));
 
-        assertEquals("top: !net.openhft.chronicle.wire.MethodReaderTest$MRT1 {\n" +
+        assertEquals("top: !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +
                 "  value: a\n" +
                 "}\n" +
                 "---\n" +
-                "top: !net.openhft.chronicle.wire.MethodReaderTest$MRT2 {\n" +
+                "top: !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: one,\n" +
                 "  value: a,\n" +
                 "  field2: two\n" +
@@ -183,7 +184,7 @@ public class MethodReaderTest {
                 "  value: a\n" +
                 "}\n" +
                 "---\n" +
-                "mid: !net.openhft.chronicle.wire.MethodReaderTest$MRT2 {\n" +
+                "mid: !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: \"1\",\n" +
                 "  value: a,\n" +
                 "  field2: \"2\"\n" +

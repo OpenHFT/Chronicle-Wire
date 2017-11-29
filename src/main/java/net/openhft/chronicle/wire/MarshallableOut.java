@@ -152,8 +152,8 @@ public interface MarshallableOut {
     }
 
     @NotNull
-    default <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
-        return new MethodWriterBuilder<>(tClass, new BinaryMethodWriterInvocationHandler(this));
+    default <T> VanillaMethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
+        return new VanillaMethodWriterBuilder<>(tClass, new BinaryMethodWriterInvocationHandler(this));
     }
 
     /**

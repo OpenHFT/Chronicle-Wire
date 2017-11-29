@@ -229,8 +229,8 @@ public class TextWire extends AbstractWire implements Wire {
 
     @Override
     @NotNull
-    public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
-        return new MethodWriterBuilder<>(tClass, new TextMethodWriterInvocationHandler(this));
+    public <T> VanillaMethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
+        return new VanillaMethodWriterBuilder<>(tClass, new TextMethodWriterInvocationHandler(this));
     }
 
     @Override

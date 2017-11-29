@@ -17,6 +17,10 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.MethodWriterBuilder;
+import net.openhft.chronicle.bytes.MethodWriterInterceptor;
+import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
+import net.openhft.chronicle.bytes.MethodWriterListener;
 import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,7 +32,7 @@ import java.util.function.Supplier;
 /*
  * Created by Peter Lawrey on 28/03/16.
  */
-public class MethodWriterBuilder<T> implements Supplier<T> {
+public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterBuilder<T> {
 
     private final List<Class> interfaces = new ArrayList<>();
     @NotNull
@@ -36,7 +40,7 @@ public class MethodWriterBuilder<T> implements Supplier<T> {
     private ClassLoader classLoader;
     private String genericEvent = "";
 
-    public MethodWriterBuilder(@NotNull Class<T> tClass, @NotNull MethodWriterInvocationHandler handler) {
+    public VanillaMethodWriterBuilder(@NotNull Class<T> tClass, @NotNull MethodWriterInvocationHandler handler) {
         interfaces.add(Closeable.class);
         interfaces.add(tClass);
         classLoader = tClass.getClassLoader();
