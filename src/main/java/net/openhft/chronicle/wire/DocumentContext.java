@@ -59,4 +59,10 @@ public interface DocumentContext extends Closeable, SourceContext {
      * @return whether the NOT_COMPLETE flag has been set.
      */
     boolean isNotComplete();
+
+    /**
+     * Call this if you have detected an error condition and you want the context
+     * rolled back when it is closed, rather than half a messaage committed
+     */
+    default void setRollback() { }
 }
