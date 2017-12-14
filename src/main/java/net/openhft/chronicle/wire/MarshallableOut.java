@@ -17,6 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.WriteBytesMarshallable;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -73,9 +74,15 @@ public interface MarshallableOut {
      * @param value to write with it.
      */
     default void writeMessage(WireKey key, Object value) throws UnrecoverableTimeoutException {
-        try (@NotNull DocumentContext dc = writingDocument()) {
+        @NotNull DocumentContext dc = writingDocument();
+        try {
             Wire wire = dc.wire();
             wire.write(key).object(value);
+        } catch (Throwable t) {
+            dc.rollbackOnClose();
+            Jvm.rethrow(t);
+        } finally {
+            dc.close();
         }
     }
 
@@ -95,8 +102,14 @@ public interface MarshallableOut {
      * @param marshallable to write to excerpt.
      */
     default void writeBytes(@NotNull WriteBytesMarshallable marshallable) throws UnrecoverableTimeoutException {
-        try (@NotNull DocumentContext dc = writingDocument()) {
+        @NotNull DocumentContext dc = writingDocument();
+        try {
             marshallable.writeMarshallable(dc.wire().bytes());
+        } catch (Throwable t) {
+            dc.rollbackOnClose();
+            Jvm.rethrow(t);
+        } finally {
+            dc.close();
         }
     }
 
@@ -107,9 +120,15 @@ public interface MarshallableOut {
      * @param writer using this code
      */
     default <T> void writeDocument(T t, @NotNull BiConsumer<ValueOut, T> writer) throws UnrecoverableTimeoutException {
-        try (@NotNull DocumentContext dc = writingDocument()) {
+        @NotNull DocumentContext dc = writingDocument();
+        try {
             Wire wire = dc.wire();
             writer.accept(wire.getValueOut(), t);
+        } catch (Throwable e) {
+            dc.rollbackOnClose();
+            Jvm.rethrow(e);
+        } finally {
+            dc.close();
         }
     }
 
@@ -117,8 +136,14 @@ public interface MarshallableOut {
      * @param text to write a message
      */
     default void writeText(@NotNull CharSequence text) throws UnrecoverableTimeoutException {
-        try (@NotNull DocumentContext dc = writingDocument()) {
+        @NotNull DocumentContext dc = writingDocument();
+        try {
             dc.wire().bytes().append8bit(text);
+        } catch (Throwable t) {
+            dc.rollbackOnClose();
+            Jvm.rethrow(t);
+        } finally {
+            dc.close();
         }
     }
 
@@ -126,12 +151,18 @@ public interface MarshallableOut {
      * Write a Map as a marshallable
      */
     default void writeMap(@NotNull Map<?, ?> map) throws UnrecoverableTimeoutException {
-        try (@NotNull DocumentContext dc = writingDocument()) {
+        @NotNull DocumentContext dc = writingDocument();
+        try {
             Wire wire = dc.wire();
             for (@NotNull Map.Entry<?, ?> entry : map.entrySet()) {
                 wire.writeEvent(Object.class, entry.getKey())
                         .object(Object.class, entry.getValue());
             }
+        } catch (Throwable t) {
+            dc.rollbackOnClose();
+            Jvm.rethrow(t);
+        } finally {
+            dc.close();
         }
     }
 

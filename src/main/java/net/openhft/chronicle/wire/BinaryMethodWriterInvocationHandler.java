@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
@@ -40,11 +41,16 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
     @Override
     protected void handleInvoke(Method method, Object[] args) {
         MarshallableOut marshallableOut = this.marshallableOutSupplier.get();
-        try (@NotNull DocumentContext context = marshallableOut.writingDocument()) {
+        @NotNull DocumentContext context = marshallableOut.writingDocument();
+        try {
             Wire wire = context.wire();
-
             handleInvoke(method, args, wire);
             wire.padToCacheAlign();
+        } catch (Throwable t) {
+            context.rollbackOnClose();
+            Jvm.rethrow(t);
+        } finally {
+            context.close();
         }
     }
 }
