@@ -4,6 +4,9 @@ Peter Lawrey; Edits by Neil Clifford
 :css-signature: demo
 :toc-placement: preamble
 
+
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-core)
+
 The purpose of Chronicle Wire is to combine a number of concerns in a consistent manner:
 
 - Application configuration. (Using YAML)
