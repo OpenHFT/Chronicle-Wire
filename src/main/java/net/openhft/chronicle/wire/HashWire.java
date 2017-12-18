@@ -224,7 +224,7 @@ public class HashWire implements WireOut, BytesComment {
     }
 
     @Override
-    public void writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) throws TimeoutException {
+    public void writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) {
         throw new UnsupportedOperationException();
     }
 

@@ -256,10 +256,9 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @param timeout      throw TimeoutException if it could not write the marker in time.
      * @param timeUnit     of the timeout
      * @param lastPosition the end of the wire
-     * @throws TimeoutException timeout exceeded.
      */
 
-    void writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) throws TimeoutException;
+    void writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition);
 
     /**
      * Start an event object, mostly for internal use.
