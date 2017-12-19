@@ -493,7 +493,7 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public void updateHeader(int length, long position, boolean metaData) throws
-            StreamCorruptedException {
+            StreamCorruptedException, EOFException {
         if (position <= 0) {
             // this should never happen so blow up
             IllegalStateException ex = new IllegalStateException("Attempt to write to position=" + position);
@@ -529,13 +529,18 @@ public abstract class AbstractWire implements Wire {
             incrementHeaderNumber(position);
     }
 
-    void updateHeaderAssertions(long position, long pos, int expectedHeader, int header) throws StreamCorruptedException {
+    void updateHeaderAssertions(long position, long pos, int expectedHeader, int header) throws StreamCorruptedException, EOFException {
         if (ASSERTIONS) {
             checkNoDataAfterEnd(pos);
         }
 
-        if (!bytes.compareAndSwapInt(position, expectedHeader, header))
-            throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(bytes.readVolatileInt(position)));
+        if (!bytes.compareAndSwapInt(position, expectedHeader, header)) {
+            int currentHeader = bytes.readVolatileInt(position);
+            if (Wires.isEndOfFile(currentHeader))
+                throw new EOFException();
+            else
+                throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(currentHeader));
+        }
     }
 
     protected void checkNoDataAfterEnd(long pos) {

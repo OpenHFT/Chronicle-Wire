@@ -190,7 +190,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @param metaData whether the message is meta data or not.
      * @throws StreamCorruptedException if the steam has become corrupted
      */
-    default void updateHeader(long position, boolean metaData) throws StreamCorruptedException {
+    default void updateHeader(long position, boolean metaData) throws StreamCorruptedException, EOFException {
         updateHeader(Wires.UNKNOWN_LENGTH, position, metaData);
     }
 
@@ -233,7 +233,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @param metaData whether the message is meta data or not.
      * @throws StreamCorruptedException if the steam has become corrupted
      */
-    void updateHeader(int length, long position, boolean metaData) throws StreamCorruptedException;
+    void updateHeader(int length, long position, boolean metaData) throws StreamCorruptedException, EOFException;
 
     /**
      * Start the first header, if there is none This will increment the headerNumber as appropriate
