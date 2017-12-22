@@ -695,4 +695,8 @@ public abstract class AbstractWire implements Wire {
     public long readEventNumber() {
         return Long.MIN_VALUE;
     }
+
+    public void forceNotInsideHeader() {
+        insideHeader = false;
+    }
 }
