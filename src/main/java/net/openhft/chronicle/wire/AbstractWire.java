@@ -696,6 +696,9 @@ public abstract class AbstractWire implements Wire {
         return Long.MIN_VALUE;
     }
 
+    /**
+     * used by write bytes when doing a rollback
+     */
     public void forceNotInsideHeader() {
         insideHeader = false;
     }
