@@ -36,7 +36,18 @@ import java.io.StreamCorruptedException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static net.openhft.chronicle.wire.Wires.*;
+import static net.openhft.chronicle.wire.Wires.END_OF_DATA;
+import static net.openhft.chronicle.wire.Wires.META_DATA;
+import static net.openhft.chronicle.wire.Wires.NOT_COMPLETE;
+import static net.openhft.chronicle.wire.Wires.NOT_COMPLETE_UNKNOWN_LENGTH;
+import static net.openhft.chronicle.wire.Wires.NOT_INITIALIZED;
+import static net.openhft.chronicle.wire.Wires.SPB_HEADER_SIZE;
+import static net.openhft.chronicle.wire.Wires.UNKNOWN_LENGTH;
+import static net.openhft.chronicle.wire.Wires.isData;
+import static net.openhft.chronicle.wire.Wires.isNotComplete;
+import static net.openhft.chronicle.wire.Wires.isReady;
+import static net.openhft.chronicle.wire.Wires.isReadyMetaData;
+import static net.openhft.chronicle.wire.Wires.lengthOf;
 
 /*
  * Created by Peter Lawrey on 10/03/16.
@@ -284,22 +295,6 @@ public abstract class AbstractWire implements Wire {
     public long writeHeaderOfUnknownLength(final int safeLength, final long timeout, final TimeUnit timeUnit,
                                            @Nullable final LongValue lastPosition, final Sequence sequence)
             throws TimeoutException, EOFException {
-        return writeHeader(Wires.UNKNOWN_LENGTH, safeLength, timeout, timeUnit, lastPosition, sequence);
-    }
-
-    @Override
-    public long writeHeader(int length,
-                            int safeLength,
-                            long timeout,
-                            TimeUnit timeUnit,
-                            @Nullable LongValue lastPosition,
-                            @Nullable Sequence sequence) throws TimeoutException, EOFException {
-
-        if (length != Wires.UNKNOWN_LENGTH) {
-            Jvm.warn().on(AbstractWire.class, "Writing a header with a known length is deprecated, " +
-                    "and will be removed in a future release. Please use Wires.UNKNOWN_LENGTH as the length parameter.");
-        }
-
         assert !insideHeader : INSIDE_HEADER_MESSAGE;
 
         insideHeader = true;
@@ -414,14 +409,8 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public long tryWriteHeader(int length, int safeLength) {
-
+    public long tryWriteHeader(final int safeLength) {
         assert !insideHeader : INSIDE_HEADER_MESSAGE;
-
-        if (length != Wires.UNKNOWN_LENGTH) {
-            Jvm.warn().on(AbstractWire.class, "Writing a header with a known length is deprecated, " +
-                    "and will be removed in a future release. Please use Wires.UNKNOWN_LENGTH as the length parameter.");
-        }
 
         insideHeader = true;
         try {
@@ -509,20 +498,13 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public void updateHeader(int length, long position, boolean metaData) throws
-            StreamCorruptedException, EOFException {
+    public void updateHeader(final long position, final boolean metaData) throws StreamCorruptedException, EOFException {
         if (position <= 0) {
             // this should never happen so blow up
             IllegalStateException ex = new IllegalStateException("Attempt to write to position=" + position);
             Slf4jExceptionHandler.WARN.on(getClass(), "Attempt to update header at position=" + position, ex);
             throw ex;
         }
-
-        if (length != Wires.UNKNOWN_LENGTH) {
-            Jvm.warn().on(AbstractWire.class, "Updating a header with a known length is deprecated, " +
-                    "and will be removed in a future release. Please use Wires.UNKNOWN_LENGTH as the length parameter.");
-        }
-
 
         // the reason we add padding is so that a message gets sent ( this is, mostly for queue as
         // it cant handle a zero len message )
@@ -533,8 +515,7 @@ public abstract class AbstractWire implements Wire {
         int actualLength = Maths.toUInt31(pos - position - 4);
 
         int expectedHeader = NOT_COMPLETE | UNKNOWN_LENGTH;
-        length = actualLength;
-        int header = length;
+        int header = actualLength;
         if (metaData) header |= META_DATA;
         if (header == UNKNOWN_LENGTH)
             throw new UnsupportedOperationException("Data messages of 0 length are not supported.");
@@ -549,7 +530,7 @@ public abstract class AbstractWire implements Wire {
             incrementHeaderNumber(position);
     }
 
-    void updateHeaderAssertions(long position, long pos, int expectedHeader, int header) throws StreamCorruptedException, EOFException {
+    private void updateHeaderAssertions(long position, long pos, int expectedHeader, int header) throws StreamCorruptedException, EOFException {
         if (ASSERTIONS) {
             checkNoDataAfterEnd(pos);
         }
@@ -563,7 +544,7 @@ public abstract class AbstractWire implements Wire {
         }
     }
 
-    protected void checkNoDataAfterEnd(long pos) {
+    private void checkNoDataAfterEnd(long pos) {
         if (pos <= bytes.realCapacity() - 4) {
             final int value = bytes.bytesStore().readVolatileInt(pos);
             if (value != 0) {

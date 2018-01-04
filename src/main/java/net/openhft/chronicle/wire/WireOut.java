@@ -174,14 +174,14 @@ public interface WireOut extends WireCommon, MarshallableOut {
      *                     time.
      * @param timeUnit     of the timeOut
      * @param lastPosition the last known position
-     * @param sequence
+     * @param sequence     sequence number access
      * @return the position of the start of the header
      * @throws TimeoutException the underlying pauser timed out.
      * @throws EOFException     the end of wire marker was reached.
      */
     default long writeHeader(long timeout, TimeUnit timeUnit, @Nullable final LongValue
             lastPosition, Sequence sequence) throws TimeoutException, EOFException {
-        return writeHeader(Wires.UNKNOWN_LENGTH, timeout, timeUnit, lastPosition, sequence);
+        return writeHeaderOfUnknownLength(timeout, timeUnit, lastPosition, sequence);
     }
 
     /**
@@ -191,15 +191,12 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @param metaData whether the message is meta data or not.
      * @throws StreamCorruptedException if the steam has become corrupted
      */
-    default void updateHeader(long position, boolean metaData) throws StreamCorruptedException, EOFException {
-        updateHeader(Wires.UNKNOWN_LENGTH, position, metaData);
-    }
+    void updateHeader(long position, boolean metaData) throws StreamCorruptedException, EOFException;
 
     /**
-     * Write a message of a known length, handling timeouts and the end of wire marker. This will
+     * Write a message of unknown length, handling timeouts and the end of wire marker. This will
      * increment the headerNumber as appropriate if successful
      *
-     * @param length       the maximum length of the message.
      * @param timeout      throw a TimeoutException if the header could not be written in this
      *                     time.
      * @param timeUnit     of the timeOut
@@ -208,14 +205,6 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @throws TimeoutException the underlying pauser timed out.
      * @throws EOFException     the end of wire marker was reached.
      */
-    default long writeHeader(int length, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, Sequence sequence)
-            throws TimeoutException, EOFException {
-        return writeHeader(length, DEFAULT_SAFE_LENGTH, timeout, timeUnit, lastPosition, sequence);
-    }
-
-    long writeHeader(int length, int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, Sequence sequence)
-            throws TimeoutException, EOFException;
-
     long writeHeaderOfUnknownLength(int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, Sequence sequence)
             throws TimeoutException, EOFException;
 
@@ -227,22 +216,10 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * Makes a single attempt to try and write the header.
      *
-     * @param length     the maximum length of the message.
-     * @param safeLength if length is unknown (0) then assume this safe length
+     * @param safeLength assume this safe length
      * @return TRY_WRITE_HEADER_FAILED if it failed, otherwise the position of the start of the header
      */
-    long tryWriteHeader(int length, int safeLength);
-
-    /**
-     * Change the header from NOT_COMPLETE | length to metaData * META_DATA | length.
-     *
-     * @param length   provided to make the header, note this can be larger than the message
-     *                 actually used.
-     * @param position returned by writeHeader
-     * @param metaData whether the message is meta data or not.
-     * @throws StreamCorruptedException if the steam has become corrupted
-     */
-    void updateHeader(int length, long position, boolean metaData) throws StreamCorruptedException, EOFException;
+    long tryWriteHeader(int safeLength);
 
     /**
      * Start the first header, if there is none This will increment the headerNumber as appropriate

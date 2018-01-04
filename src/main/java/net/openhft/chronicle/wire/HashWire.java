@@ -31,7 +31,6 @@ import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.EOFException;
 import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
@@ -42,7 +41,6 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 
 /*
@@ -198,24 +196,18 @@ public class HashWire implements WireOut, BytesComment {
     }
 
     @Override
-    public long writeHeader(int length, int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, Sequence  sequence) throws TimeoutException, EOFException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public long writeHeaderOfUnknownLength(final int safeLength, final long timeout, final TimeUnit timeUnit,
                                            @Nullable final LongValue lastPosition, final Sequence sequence) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public long tryWriteHeader(int length, int safeLength) {
+    public long tryWriteHeader(final int safeLength) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void updateHeader(int length, long position, boolean metaData) throws
-            StreamCorruptedException {
+    public void updateHeader(long position, boolean metaData) {
         throw new UnsupportedOperationException();
     }
 
