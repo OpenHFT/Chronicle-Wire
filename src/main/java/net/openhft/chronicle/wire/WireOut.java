@@ -34,6 +34,7 @@ import java.util.concurrent.TimeoutException;
  */
 public interface WireOut extends WireCommon, MarshallableOut {
     long TRY_WRITE_HEADER_FAILED = 0xFFFF_FFFF_FFFF_FFFFL;
+    int DEFAULT_SAFE_LENGTH = 1 << 30;
 
     /**
      * Write an empty filed marker
@@ -209,7 +210,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      */
     default long writeHeader(int length, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, Sequence sequence)
             throws TimeoutException, EOFException {
-        return writeHeader(length, 1 << 30, timeout, timeUnit, lastPosition, sequence);
+        return writeHeader(length, DEFAULT_SAFE_LENGTH, timeout, timeUnit, lastPosition, sequence);
     }
 
     long writeHeader(int length, int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, Sequence sequence)
@@ -217,6 +218,11 @@ public interface WireOut extends WireCommon, MarshallableOut {
 
     long writeHeaderOfUnknownLength(int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, Sequence sequence)
             throws TimeoutException, EOFException;
+
+    default long writeHeaderOfUnknownLength(long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, Sequence sequence)
+            throws TimeoutException, EOFException {
+        return writeHeaderOfUnknownLength(DEFAULT_SAFE_LENGTH, timeout, timeUnit, lastPosition, sequence);
+    }
 
     /**
      * Makes a single attempt to try and write the header.
