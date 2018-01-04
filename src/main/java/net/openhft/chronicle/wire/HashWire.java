@@ -203,6 +203,12 @@ public class HashWire implements WireOut, BytesComment {
     }
 
     @Override
+    public long writeHeaderOfUnknownLength(final int safeLength, final long timeout, final TimeUnit timeUnit,
+                                           @Nullable final LongValue lastPosition, final Sequence sequence) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public long tryWriteHeader(int length, int safeLength) {
         throw new UnsupportedOperationException();
     }

@@ -281,6 +281,13 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
+    public long writeHeaderOfUnknownLength(final int safeLength, final long timeout, final TimeUnit timeUnit,
+                                           @Nullable final LongValue lastPosition, final Sequence sequence)
+            throws TimeoutException, EOFException {
+        return writeHeader(Wires.UNKNOWN_LENGTH, safeLength, timeout, timeUnit, lastPosition, sequence);
+    }
+
+    @Override
     public long writeHeader(int length,
                             int safeLength,
                             long timeout,

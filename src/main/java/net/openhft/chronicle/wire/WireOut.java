@@ -215,6 +215,9 @@ public interface WireOut extends WireCommon, MarshallableOut {
     long writeHeader(int length, int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, Sequence sequence)
             throws TimeoutException, EOFException;
 
+    long writeHeaderOfUnknownLength(int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, Sequence sequence)
+            throws TimeoutException, EOFException;
+
     /**
      * Makes a single attempt to try and write the header.
      *
