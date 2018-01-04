@@ -288,20 +288,25 @@ public abstract class AbstractWire implements Wire {
                             @Nullable LongValue lastPosition,
                             @Nullable Sequence sequence) throws TimeoutException, EOFException {
 
+        if (length != Wires.UNKNOWN_LENGTH) {
+            Jvm.warn().on(AbstractWire.class, "Writing a header with a known length is deprecated, " +
+                    "and will be removed in a future release. Please use Wires.UNKNOWN_LENGTH as the length parameter.");
+        }
+
         assert !insideHeader : INSIDE_HEADER_MESSAGE;
 
         insideHeader = true;
 
 
         try {
-            long tryPos = tryWriteHeader0(length, safeLength);
+            long tryPos = tryWriteHeader0(Wires.UNKNOWN_LENGTH, safeLength);
             if (tryPos != TRY_WRITE_HEADER_FAILED)
                 return tryPos;
 
             if (lastPosition != null && sequence != null)
                 tryMoveToEndOfQueue(lastPosition, sequence);
 
-            return writeHeader0(length, safeLength, timeout, timeUnit);
+            return writeHeader0(Wires.UNKNOWN_LENGTH, safeLength, timeout, timeUnit);
         } catch (Throwable t) {
             insideHeader = false;
             throw t;
@@ -406,9 +411,14 @@ public abstract class AbstractWire implements Wire {
 
         assert !insideHeader : INSIDE_HEADER_MESSAGE;
 
+        if (length != Wires.UNKNOWN_LENGTH) {
+            Jvm.warn().on(AbstractWire.class, "Writing a header with a known length is deprecated, " +
+                    "and will be removed in a future release. Please use Wires.UNKNOWN_LENGTH as the length parameter.");
+        }
+
         insideHeader = true;
         try {
-            long tryPos = tryWriteHeader0(length, safeLength);
+            long tryPos = tryWriteHeader0(Wires.UNKNOWN_LENGTH, safeLength);
             insideHeader = (tryPos != TRY_WRITE_HEADER_FAILED);
             return tryPos;
         } catch (Throwable t) {
@@ -501,6 +511,12 @@ public abstract class AbstractWire implements Wire {
             throw ex;
         }
 
+        if (length != Wires.UNKNOWN_LENGTH) {
+            Jvm.warn().on(AbstractWire.class, "Updating a header with a known length is deprecated, " +
+                    "and will be removed in a future release. Please use Wires.UNKNOWN_LENGTH as the length parameter.");
+        }
+
+
         // the reason we add padding is so that a message gets sent ( this is, mostly for queue as
         // it cant handle a zero len message )
         if (bytes.writePosition() == position + 4)
@@ -509,11 +525,8 @@ public abstract class AbstractWire implements Wire {
         long pos = bytes.writePosition();
         int actualLength = Maths.toUInt31(pos - position - 4);
 
-        int expectedHeader = NOT_COMPLETE | length;
-        if (length == UNKNOWN_LENGTH)
-            length = actualLength;
-        else if (length < actualLength)
-            throwLengthMismatch(length, actualLength);
+        int expectedHeader = NOT_COMPLETE | UNKNOWN_LENGTH;
+        length = actualLength;
         int header = length;
         if (metaData) header |= META_DATA;
         if (header == UNKNOWN_LENGTH)

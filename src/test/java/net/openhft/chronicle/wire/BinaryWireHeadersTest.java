@@ -102,24 +102,4 @@ public class BinaryWireHeadersTest {
             wire2.bytes().release();
         }
     }
-
-    @Test
-    public void testConcurrentTryWriteHeader() throws TimeoutException, EOFException, StreamCorruptedException {
-        @NotNull BytesStore store = NativeBytesStore.elasticByteBuffer();
-        @NotNull AbstractWire wire = (AbstractWire) new BinaryWire(store.bytesForWrite()).headerNumber(0L);
-        @NotNull AbstractWire wire2 = (AbstractWire) new BinaryWire(store.bytesForWrite()).headerNumber(0L);
-        try {
-            long position = wire.tryWriteHeader(1, 1_000);
-            assertEquals(0, position);
-            assertTrue(wire.isInsideHeader());
-
-            long position2 = wire2.tryWriteHeader(1, 1_000);
-            assertEquals(WireOut.TRY_WRITE_HEADER_FAILED, position2);
-            assertFalse(wire2.isInsideHeader());
-
-        } finally {
-            wire.bytes().release();
-            wire2.bytes().release();
-        }
-    }
 }
