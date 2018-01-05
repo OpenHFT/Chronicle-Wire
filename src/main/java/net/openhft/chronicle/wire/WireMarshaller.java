@@ -33,6 +33,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
+import static net.openhft.chronicle.wire.Wires.acquireStringBuilder;
 
 /*
  * Created by Peter Lawrey on 16/03/16.
@@ -524,8 +525,25 @@ public class WireMarshaller<T> {
             @NotNull Bytes bytes = (Bytes) UNSAFE.getObject(o, offset);
             if (bytes == null)
                 UNSAFE.putObject(o, offset, bytes = Bytes.elasticHeapByteBuffer(128));
+            WireIn wireIn = read.wireIn();
+            if (wireIn instanceof TextWire) {
+                wireIn.consumePadding();
+                if (wireIn.bytes().startsWith(Bytes.from("!!binary"))) {
+                    decodeBytes(read, bytes);
+                    return;
+                }
+            }
             if (read.textTo(bytes) == null)
                 UNSAFE.putObject(o, offset, null);
+        }
+
+        private void decodeBytes(@NotNull ValueIn read, Bytes bytes) {
+            @NotNull StringBuilder sb0 = acquireStringBuilder();
+            read.text(sb0);
+            String s = WireInternal.INTERNER.intern(sb0);
+            byte[] decode = Base64.getDecoder().decode(s);
+            bytes.clear();
+            bytes.write(decode);
         }
 
         @Override
@@ -1130,7 +1148,7 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
-            @NotNull StringBuilder sb = Wires.acquireStringBuilder();
+            @NotNull StringBuilder sb = acquireStringBuilder();
             sb.append(UNSAFE.getChar(o, offset));
             write.text(sb);
         }

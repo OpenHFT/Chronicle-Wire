@@ -1423,9 +1423,7 @@ public class TextWireTest {
                     .object(expected));
         });
         assertEquals("--- !!data\n" +
-                "put: { key: \"1\", " +
-                "value: !byte[] !!binary //79/Pv6+Q==  " +
-                "}\n", (Wires.fromSizePrefixedBlobs(wire.bytes())));
+                "put: { key: \"1\", value: !byte[] !!binary //79/Pv6+Q== }\n", (Wires.fromSizePrefixedBlobs(wire.bytes())));
 
         wire.readDocument(null, wir -> wire.read(() -> "put")
                 .marshallable(w -> w.read(() -> "key").object(Object.class, "1", Assert::assertEquals)
@@ -1443,15 +1441,12 @@ public class TextWireTest {
 
         assertEquals("--- !!data\n" +
                         "nothing: !byte[] !!binary \n" +
-                        "\n" +
-                        "# position: 32, header: 1\n" +
+                        "# position: 31, header: 1\n" +
                         "--- !!data\n" +
                         "one: !byte[] !!binary AQ==\n" +
-                        "\n" +
-                        "# position: 64, header: 2\n" +
+                        "# position: 62, header: 2\n" +
                         "--- !!data\n" +
-                        "four: !byte[] !!binary AQIDBA==\n" +
-                        "\n"
+                        "four: !byte[] !!binary AQIDBA==\n"
                 , Wires.fromSizePrefixedBlobs(wire.bytes()));
         wire.readDocument(null, w -> assertArrayEquals(new byte[0], (byte[]) w.read(() -> "nothing").object()));
         wire.readDocument(null, w -> assertArrayEquals(one, (byte[]) w.read(() -> "one").object()));

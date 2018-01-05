@@ -76,6 +76,7 @@ public class TextWire extends AbstractWire implements Wire {
     static final BytesStore SPACE = BytesStore.from(" ");
     static final BytesStore END_FIELD = NEW_LINE;
     static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
+    public static final BytesStore BINARY = Bytes.from("!!binary");
 
     static {
         for (char ch : "?0123456789+- ',#:{}[]|>!\\".toCharArray())
@@ -1220,7 +1221,6 @@ public class TextWire extends AbstractWire implements Wire {
             prependSeparator();
             typePrefix(type);
             append(Base64.getEncoder().encodeToString(byteArray));
-            append(leaf ? SPACE : END_FIELD);
             elementSeparator();
 
             return TextWire.this;
@@ -2258,9 +2258,8 @@ public class TextWire extends AbstractWire implements Wire {
 
                     @Nullable byte[] bytes = Compression.uncompress(sb, this, t -> {
                         @NotNull StringBuilder sb0 = acquireStringBuilder();
-                        AppendableUtil.setLength(sb0, 0);
                         parseWord(sb0);
-                        return Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb));
+                        return Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb0));
                     });
                     if (bytes != null)
                         return bytes;

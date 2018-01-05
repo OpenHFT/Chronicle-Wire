@@ -87,8 +87,8 @@ public enum Wires {
     static {
         CLASS_STRATEGY_FUNCTIONS.add(SerializeEnum.INSTANCE);
         CLASS_STRATEGY_FUNCTIONS.add(SerializeJavaLang.INSTANCE);
-        CLASS_STRATEGY_FUNCTIONS.add(SerializeMarshallables.INSTANCE);
         CLASS_STRATEGY_FUNCTIONS.add(SerializeBytes.INSTANCE);
+        CLASS_STRATEGY_FUNCTIONS.add(SerializeMarshallables.INSTANCE); // must be after SerializeBytes.
         WireInternal.addAliases();
     }
 
@@ -445,11 +445,17 @@ public enum Wires {
         if (clazz2 == void.class) {
             in.text();
             return null;
+        } else if (clazz2 == BytesStore.class) {
+            if (using == null)
+                using = (E) Bytes.elasticHeapByteBuffer(32);
+            clazz = Base64.class;
         }
-        if (clazz2 != null && (clazz == null
-                || clazz.isAssignableFrom(clazz2)
-                || ReadResolvable.class.isAssignableFrom(clazz2)
-                || !ObjectUtils.isConcreteClass(clazz))) {
+        if (clazz2 != null &&
+                clazz != clazz2 &&
+                (clazz == null
+                        || clazz.isAssignableFrom(clazz2)
+                        || ReadResolvable.class.isAssignableFrom(clazz2)
+                        || !ObjectUtils.isConcreteClass(clazz))) {
             clazz = clazz2;
             if (!clazz.isInstance(using))
                 using = null;
@@ -472,26 +478,20 @@ public enum Wires {
                 return objectSequence(in, using, clazz, strategy);
 
             case NONE:
-                @NotNull final E e = (E) strategy.readUsing(using, in);
-                return (E) ObjectUtils.convertTo(clazz, e);
+                @NotNull final Object e = strategy.readUsing(using, in);
+                return clazz == Base64.class ? (E) e : (E) ObjectUtils.convertTo(clazz, e);
 
             default:
                 throw new AssertionError();
         }
     }
 
-    enum SerializeBytes implements Function<Class, SerializationStrategy> {
-        INSTANCE;
-
-        @Override
-        public SerializationStrategy apply(@NotNull Class aClass) {
-            switch (aClass.getName()) {
-                case "net.openhft.chronicle.bytes.BytesStore":
-                    return ScalarStrategy.of(BytesStore.class, (o, in) -> in.bytesStore());
-                default:
-                    return null;
-            }
-        }
+    public static boolean dtoInterface(Class clazz) {
+        return clazz != null
+                && clazz.isInterface()
+                && clazz != Bytes.class
+                && clazz != BytesStore.class
+                && !clazz.getPackage().getName().startsWith("java");
     }
 
     enum SerializeEnum implements Function<Class, SerializationStrategy> {
@@ -678,8 +678,36 @@ public enum Wires {
         return (T) MARSHALLABLE_FUNCTION.get(tClass).apply(typeName);
     }
 
-    public static boolean dtoInterface(Class clazz) {
-        return clazz != null && clazz.isInterface() && !clazz.getPackage().getName().startsWith("java");
+    enum SerializeBytes implements Function<Class, SerializationStrategy> {
+        INSTANCE;
+
+        static Bytes decodeBase64(Bytes o, ValueIn in) {
+            @NotNull StringBuilder sb0 = acquireStringBuilder();
+            in.text(sb0);
+            String s = WireInternal.INTERNER.intern(sb0);
+            byte[] decode = Base64.getDecoder().decode(s);
+            if (o == null)
+                return Bytes.wrapForRead(decode);
+            o.clear();
+            o.write(decode);
+            return o;
+        }
+
+        @Override
+        public SerializationStrategy apply(@NotNull Class aClass) {
+            switch (aClass.getName()) {
+                case "net.openhft.chronicle.bytes.BytesStore":
+                    return ScalarStrategy.of(BytesStore.class, (o, in) -> in.bytesStore());
+                case "net.openhft.chronicle.bytes.Bytes":
+                    return ScalarStrategy.of(Bytes.class,
+                            (o, in) -> in.bytesStore().bytesForRead());
+                case "java.util.Base64":
+                    return ScalarStrategy.of(Bytes.class,
+                            (o, in) -> decodeBase64(o, in));
+                default:
+                    return null;
+            }
+        }
     }
 
     static class TupleInvocationHandler implements InvocationHandler {

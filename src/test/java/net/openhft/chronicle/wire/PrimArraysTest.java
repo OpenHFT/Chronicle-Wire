@@ -62,8 +62,8 @@ public class PrimArraysTest {
                     "test: !boolean[] [true, false]",
                     "test: !boolean[] []",
                     new byte[]{Byte.MIN_VALUE, 0, Byte.MAX_VALUE},
-                    "test: !byte[] !!binary gAB/\n\n",
-                    "test: !byte[] !!binary \n\n",
+                    "test: !byte[] !!binary gAB/\n",
+                    "test: !byte[] !!binary \n",
                     new char[]{Character.MIN_VALUE, '?', Character.MAX_VALUE},
                     "test: !char[] [\"\\0\", \"?\", \"\\uFFFF\"]",
                     "test: !char[] []",
@@ -96,18 +96,21 @@ public class PrimArraysTest {
     @Test
     public void testPrimArray() {
         Wire wire = createWire();
-        wire.write("test")
-                .object(array);
-        System.out.println(wire);
-        if (wireType == WireType.TEXT)
-            assertEquals(asText, wire.toString());
+        try {
+            wire.write("test")
+                    .object(array);
+            System.out.println(wire);
+            if (wireType == WireType.TEXT)
+                assertEquals(asText, wire.toString());
 
-        @Nullable Object array2 = wire.read().object();
-        assertEquals(array.getClass(), array2.getClass());
-        assertEquals(Array.getLength(array), Array.getLength(array));
-        for (int i = 0, len = Array.getLength(array); i < len; i++)
-            assertEquals(Array.get(array, i), Array.get(array2, i));
-        wire.bytes().release();
+            @Nullable Object array2 = wire.read().object();
+            assertEquals(array.getClass(), array2.getClass());
+            assertEquals(Array.getLength(array), Array.getLength(array));
+            for (int i = 0, len = Array.getLength(array); i < len; i++)
+                assertEquals(Array.get(array, i), Array.get(array2, i));
+        } finally {
+            wire.bytes().release();
+        }
     }
 
     private Wire createWire() {
