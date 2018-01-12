@@ -130,7 +130,7 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
         }
     }
 
-    private void addSource(int id, long index) {
+    public void addSource(int id, long index) {
         sourceIdArray[sources] = id;
         sourceIndexArray[sources++] = index;
     }
