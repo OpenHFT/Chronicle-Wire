@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
 import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -63,6 +64,8 @@ public enum Wires {
     public static final int META_DATA = 1 << 30;
     public static final int UNKNOWN_LENGTH = 0x0;
     public static final int MAX_LENGTH = (1 << 30) - 1;
+    private static final int PID_MASK = 0b01111111_11111111_11111111_11111111;
+    private static final int INVERSE_PID_MASK = ~PID_MASK;
 
     // value to use when the message is not ready and of an unknown length
     public static final int NOT_COMPLETE_UNKNOWN_LENGTH = NOT_COMPLETE | UNKNOWN_LENGTH;
@@ -382,6 +385,18 @@ public enum Wires {
     public static void reset(@NotNull Object o) {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(o.getClass());
         wm.reset(o);
+    }
+
+    public static int addMaskedPidToHeader(final int header) {
+        return header | (PID_MASK & OS.getProcessId());
+    }
+
+    public static int removeMaskedPidFromHeader(final int header) {
+        return header & INVERSE_PID_MASK;
+    }
+
+    public static int extractPidFromHeader(final int header) {
+        return header & PID_MASK;
     }
 
     static final ClassLocal<Function<String, Marshallable>> MARSHALLABLE_FUNCTION = ClassLocal.withInitial(tClass -> {

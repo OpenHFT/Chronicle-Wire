@@ -20,7 +20,12 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.StopCharTesters;
-import net.openhft.chronicle.bytes.ref.*;
+import net.openhft.chronicle.bytes.ref.BinaryIntReference;
+import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
+import net.openhft.chronicle.bytes.ref.BinaryLongReference;
+import net.openhft.chronicle.bytes.ref.BinaryTwoLongReference;
+import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
+import net.openhft.chronicle.bytes.ref.TextLongReference;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.LicenceCheck;
 import net.openhft.chronicle.core.io.IOTools;
@@ -49,7 +54,9 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static net.openhft.chronicle.core.io.IOTools.*;
+import static net.openhft.chronicle.core.io.IOTools.open;
+import static net.openhft.chronicle.core.io.IOTools.readAsBytes;
+import static net.openhft.chronicle.core.io.IOTools.urlFor;
 
 /**
  * A selection of prebuilt wire types.
