@@ -7,6 +7,8 @@
 [caption="", link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire]
 image::https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire/badge.svg[]
 
+== About
+
 Peter Lawrey; Edits by Neil Clifford
 :toc: manual
 :css-signature: demo
