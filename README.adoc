@@ -547,5 +547,5 @@ Chronicle Wire doesn't have pointers, but it does have content-lengths, which ar
 
 ===  Platform support
 
-Chronicle Wire supports `Java 8`.  Future versions may support `Java 6`, `C++` and `C#`.
+Chronicle Wire supports `Java 8`.  Future versions may support `Java 9`, `C++` and `C#`.
 
