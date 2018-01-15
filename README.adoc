@@ -1,4 +1,12 @@
-= Wire Format abstraction library
+= Chronicle-Wire
+=== A Wire Format abstraction library
+
+== Version 
+
+[#image-maven]
+[caption="", link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire]
+image::https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire/badge.svg[]
+
 Peter Lawrey; Edits by Neil Clifford
 :toc: manual
 :css-signature: demo
@@ -11,11 +19,7 @@ The purpose of Chronicle Wire is to combine a number of concerns in a consistent
 - Accessing off-heap memory in a thread-safe manner. (Bind to shared off-heap memory)
 - High performance data exchange via binary formats. Only include as much meta data as you need.
 
-== Version 
 
-[#image-maven]
-[caption="", link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire]
-image::https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire/badge.svg[]
 
 == Design
 
