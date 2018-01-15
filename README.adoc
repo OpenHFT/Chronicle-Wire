@@ -1,5 +1,5 @@
 = Chronicle-Wire
-=== A Wire Format abstraction library
+A Wire Format Abstraction Library
 
 == Version 
 
