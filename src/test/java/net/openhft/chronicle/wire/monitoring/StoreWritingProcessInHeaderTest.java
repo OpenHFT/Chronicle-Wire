@@ -7,6 +7,8 @@ import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.Wires;
 import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -41,6 +43,7 @@ public final class StoreWritingProcessInHeaderTest {
         final int pid = OS.getProcessId();
         final int headerWithPid = Wires.addMaskedPidToHeader(Wires.NOT_COMPLETE_UNKNOWN_LENGTH);
 
+        assertThat(Wires.isNotComplete(headerWithPid), is(true));
         assertThat(headerWithPid, is(not(Wires.NOT_COMPLETE_UNKNOWN_LENGTH)));
         assertThat(Wires.extractPidFromHeader(headerWithPid), is(pid));
         assertThat(Wires.removeMaskedPidFromHeader(headerWithPid), is(Wires.NOT_COMPLETE_UNKNOWN_LENGTH));
@@ -50,12 +53,26 @@ public final class StoreWritingProcessInHeaderTest {
     public void shouldStoreWritingProcessIdInHeader() throws TimeoutException, EOFException {
         final long position = wire.writeHeaderOfUnknownLength(1, TimeUnit.SECONDS, null, null);
 
-        assertThat(wire.bytes().readVolatileInt(position), is(Wires.NOT_COMPLETE_UNKNOWN_LENGTH));
+        final int header = wire.bytes().readVolatileInt(position);
+        assertThat(Wires.isNotComplete(header), is(true));
+        assertThat(header, is(Wires.addMaskedPidToHeader(Wires.NOT_COMPLETE_UNKNOWN_LENGTH)));
+        assertThat(Wires.removeMaskedPidFromHeader(header), is(Wires.NOT_COMPLETE_UNKNOWN_LENGTH));
+        assertThat(Wires.extractPidFromHeader(header), is(OS.getProcessId()));
     }
 
     @After
     public void tearDown() {
         bytes.release();
+    }
+
+    @BeforeClass
+    public static void enableFeature() {
+        System.setProperty("wire.encodePidInHeader", Boolean.TRUE.toString());
+    }
+
+    @AfterClass
+    public static void disableFeature() {
+        System.setProperty("wire.encodePidInHeader", Boolean.FALSE.toString());
     }
 
     private static Object[][] toParams(final WireType[] values) {

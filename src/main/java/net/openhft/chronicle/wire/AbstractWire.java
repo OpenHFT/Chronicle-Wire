@@ -82,6 +82,7 @@ public abstract class AbstractWire implements Wire {
      * See comments on tryMoveToEndOfQueue
      */
     private static boolean disableFastForwardHeaderNumber = Boolean.getBoolean("disableFastForwardHeaderNumber");
+    private static final boolean ENCODE_PID_IN_HEADER = Boolean.getBoolean("wire.encodePidInHeader");
 
     static {
         boolean assertions = false;
@@ -428,7 +429,10 @@ public abstract class AbstractWire implements Wire {
             throw new IllegalArgumentException();
         long pos = bytes.writePosition();
 
-        if (bytes.compareAndSwapInt(pos, 0, NOT_COMPLETE | length)) {
+        final int value = ENCODE_PID_IN_HEADER ?
+                Wires.addMaskedPidToHeader(NOT_COMPLETE | length) :
+                NOT_COMPLETE | length;
+        if (bytes.compareAndSwapInt(pos, 0, value)) {
 
             int maxlen = length == UNKNOWN_LENGTH ? safeLength : length;
             if (length != safeLength && maxlen > bytes.writeRemaining())
@@ -450,8 +454,11 @@ public abstract class AbstractWire implements Wire {
 
 //        System.out.println(Thread.currentThread()+" wh0 pos: "+pos+" hdr "+(int) headerNumber);
         try {
+            final int value = ENCODE_PID_IN_HEADER ?
+                    Wires.addMaskedPidToHeader(NOT_COMPLETE | length) :
+                    NOT_COMPLETE | length;
             for (; ; ) {
-                if (bytes.compareAndSwapInt(pos, 0, NOT_COMPLETE | length)) {
+                if (bytes.compareAndSwapInt(pos, 0, value)) {
 
                     bytes.writePosition(pos + SPB_HEADER_SIZE);
                     int maxlen = length == UNKNOWN_LENGTH ? safeLength : length;
@@ -514,7 +521,9 @@ public abstract class AbstractWire implements Wire {
         long pos = bytes.writePosition();
         int actualLength = Maths.toUInt31(pos - position - 4);
 
-        int expectedHeader = NOT_COMPLETE | UNKNOWN_LENGTH;
+        int expectedHeader = ENCODE_PID_IN_HEADER ?
+                Wires.addMaskedPidToHeader(NOT_COMPLETE | UNKNOWN_LENGTH) :
+                NOT_COMPLETE | UNKNOWN_LENGTH;
         int header = actualLength;
         if (metaData) header |= META_DATA;
         if (header == UNKNOWN_LENGTH)
