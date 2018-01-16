@@ -23,6 +23,7 @@ public class WireDumperTest {
     private final Wire wire;
     private final WireType wireType;
     private final Map<WireType, String> expectedContentByType = new HashMap<>();
+    private final Map<WireType, String> expectedPartialContent = new HashMap<>();
 
     public WireDumperTest(final String name, final WireType wireType) {
         bytes = Bytes.allocateElasticDirect();
@@ -43,6 +44,17 @@ public class WireDumperTest {
         wire.writeDocument(3.14D, ValueOut::float64);
 
         assertThat(WireDumper.of(wire).asString(), is(expectedContentByType.get(wireType)));
+    }
+
+    @Test
+    public void shouldSerialisePartialContent() {
+        wire.writeDocument(17L, ValueOut::int64);
+        final DocumentContext context = wire.writingDocument();
+        context.wire().getValueOut().text("meow");
+
+        final String actual = WireDumper.of(wire).asString();
+
+        assertThat(actual, is(expectedPartialContent.get(wireType)));
     }
 
     @BeforeClass
@@ -137,6 +149,75 @@ public class WireDumperTest {
                         "--- !!data #binary\n" +
                         "00000010                             1f 85 eb 51 b8 1e 09           ···Q···\n" +
                         "00000020 40                                               @                \n" +
+                        "");
+
+        expectedPartialContent.put(WireType.TEXT,
+                "--- !!data #binary\n" +
+                        "00000000             31 37 0a                                 17·          \n" +
+                        "# position: 7, header: 0 or 1\n" +
+                        "--- !!not-ready-data!\n" +
+                        "...\n" +
+                        "# 5 bytes remaining\n" +
+                        "");
+
+
+        expectedPartialContent.put(WireType.BINARY,
+                "--- !!data #binary\n" +
+                        "00000000             11                                       ·            \n" +
+                        "# position: 5, header: 0 or 1\n" +
+                        "--- !!not-ready-data! #binary\n" +
+                        "...\n" +
+                        "# 5 bytes remaining\n" +
+                        "");
+
+
+        expectedPartialContent.put(WireType.BINARY_LIGHT,
+                "--- !!data #binary\n" +
+                        "00000000             11                                       ·            \n" +
+                        "# position: 5, header: 0 or 1\n" +
+                        "--- !!not-ready-data! #binary\n" +
+                        "...\n" +
+                        "# 5 bytes remaining\n" +
+                        "");
+
+
+        expectedPartialContent.put(WireType.FIELDLESS_BINARY,
+                "--- !!data #binary\n" +
+                        "00000000             11                                       ·            \n" +
+                        "# position: 5, header: 0 or 1\n" +
+                        "--- !!not-ready-data! #binary\n" +
+                        "...\n" +
+                        "# 5 bytes remaining\n" +
+                        "");
+
+
+        expectedPartialContent.put(WireType.COMPRESSED_BINARY,
+                "--- !!data #binary\n" +
+                        "00000000             11                                       ·            \n" +
+                        "# position: 5, header: 0 or 1\n" +
+                        "--- !!not-ready-data! #binary\n" +
+                        "...\n" +
+                        "# 5 bytes remaining\n" +
+                        "");
+
+
+        expectedPartialContent.put(WireType.JSON,
+                "--- !!data #binary\n" +
+                        "00000000             31 37                                    17           \n" +
+                        "# position: 6, header: 0 or 1\n" +
+                        "--- !!not-ready-data!\n" +
+                        "...\n" +
+                        "# 7 bytes remaining\n" +
+                        "");
+
+
+        expectedPartialContent.put(WireType.RAW,
+                "--- !!data #binary\n" +
+                        "00000000             11 00 00 00  00 00 00 00                 ···· ····    \n" +
+                        "# position: 12, header: 0 or 1\n" +
+                        "--- !!not-ready-data! #binary\n" +
+                        "...\n" +
+                        "# 5 bytes remaining\n" +
                         "");
 
     }

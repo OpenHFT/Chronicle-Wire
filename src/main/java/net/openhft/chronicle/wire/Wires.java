@@ -64,6 +64,7 @@ public enum Wires {
     public static final int META_DATA = 1 << 30;
     public static final int UNKNOWN_LENGTH = 0x0;
     public static final int MAX_LENGTH = (1 << 30) - 1;
+    private static final boolean ENCODE_PID_IN_HEADER = Boolean.getBoolean("wire.encodePidInHeader");
     private static final int PID_MASK = 0b01111111_11111111_11111111_11111111;
     private static final int INVERSE_PID_MASK = ~PID_MASK;
 
@@ -188,6 +189,9 @@ public enum Wires {
     }
 
     public static int lengthOf(int len) {
+        if (isNotComplete(len) && ENCODE_PID_IN_HEADER) {
+            return Wires.removeMaskedPidFromHeader(len) & LENGTH_MASK;
+        }
         final int len0 = len & LENGTH_MASK;
 //        if (len0 > 1 << 20)
 //            System.out.println("len: " + len0);
@@ -388,7 +392,7 @@ public enum Wires {
     }
 
     public static int addMaskedPidToHeader(final int header) {
-        return header | (PID_MASK & OS.getProcessId());
+        return ENCODE_PID_IN_HEADER ? header | (PID_MASK & OS.getProcessId()) : header;
     }
 
     public static int removeMaskedPidFromHeader(final int header) {
