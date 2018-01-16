@@ -20,10 +20,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.Resettable;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.*;
-import net.openhft.chronicle.core.values.IntValue;
-import net.openhft.chronicle.core.values.LongArrayValues;
-import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.core.values.TwoLongValue;
+import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -219,6 +216,16 @@ public interface ValueIn {
         int64(ret);
         return ret;
     }
+
+    @NotNull
+    default BooleanValue boolForBinding(@Nullable LongValue value) {
+        @NotNull BooleanValue ret = wireIn().newBooleanReference();
+        bool(ret);
+        return ret;
+    }
+
+    WireIn bool(@NotNull  BooleanValue ret);
+
 
     @NotNull
     default IntValue int32ForBinding(@Nullable LongValue value) {

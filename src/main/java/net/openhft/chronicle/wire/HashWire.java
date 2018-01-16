@@ -22,10 +22,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
-import net.openhft.chronicle.core.values.IntValue;
-import net.openhft.chronicle.core.values.LongArrayValues;
-import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.core.values.TwoLongValue;
+import net.openhft.chronicle.core.values.*;
 import net.openhft.chronicle.threads.BusyPauser;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
@@ -189,6 +186,7 @@ public class HashWire implements WireOut, BytesComment {
         return 0;
     }
 
+
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
@@ -248,6 +246,13 @@ public class HashWire implements WireOut, BytesComment {
     public LongValue newLongReference() {
         throw new UnsupportedOperationException();
     }
+
+    @NotNull
+    @Override
+    public BooleanValue newBooleanReference() {
+        throw new UnsupportedOperationException();
+    }
+
 
     @NotNull
     @Override
@@ -496,6 +501,12 @@ public class HashWire implements WireOut, BytesComment {
         @NotNull
         @Override
         public WireOut int64forBinding(long value, LongValue longValue) {
+            throw new UnsupportedOperationException("todo");
+        }
+
+        @NotNull
+        @Override
+        public WireOut boolForBinding(final boolean value, @NotNull final BooleanValue longValue) {
             throw new UnsupportedOperationException("todo");
         }
 

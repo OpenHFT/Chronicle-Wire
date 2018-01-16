@@ -16,6 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.ref.TextBooleanReference;
 import net.openhft.chronicle.bytes.ref.TextIntReference;
 import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
 import net.openhft.chronicle.bytes.ref.TextLongReference;
@@ -26,10 +27,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.*;
-import net.openhft.chronicle.core.values.IntValue;
-import net.openhft.chronicle.core.values.LongArrayValues;
-import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.core.values.TwoLongValue;
+import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.xerial.snappy.Snappy;
@@ -870,6 +868,12 @@ public class TextWire extends AbstractWire implements Wire {
 
     @NotNull
     @Override
+    public BooleanValue  newBooleanReference() {
+         return new TextBooleanReference();
+    }
+
+    @NotNull
+    @Override
     public IntValue newIntReference() {
         return new TextIntReference();
     }
@@ -1652,6 +1656,23 @@ public class TextWire extends AbstractWire implements Wire {
             prependSeparator();
             long offset = bytes.writePosition();
             TextLongReference.write(bytes, value);
+            long length = bytes.writePosition() - offset;
+            ((Byteable) longValue).bytesStore(bytes, offset, length);
+            elementSeparator();
+            return wireOut();
+        }
+
+        @NotNull
+        @Override
+        public WireOut boolForBinding(final boolean value, @NotNull final BooleanValue longValue) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
+            if (!TextBooleanReference.class.isInstance(longValue))
+                throw new IllegalArgumentException();
+            prependSeparator();
+            long offset = bytes.writePosition();
+            TextBooleanReference.write(value, bytes, offset);
             long length = bytes.writePosition() - offset;
             ((Byteable) longValue).bytesStore(bytes, offset, length);
             elementSeparator();
@@ -2593,6 +2614,17 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireIn int32(@NotNull IntValue value) {
+            consumePadding();
+            @NotNull Byteable b = (Byteable) value;
+            long length = b.maxSize();
+            b.bytesStore(bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
+            consumePadding(1);
+            return TextWire.this;
+        }
+
+        @Override
+        public WireIn bool(@NotNull final BooleanValue value) {
             consumePadding();
             @NotNull Byteable b = (Byteable) value;
             long length = b.maxSize();

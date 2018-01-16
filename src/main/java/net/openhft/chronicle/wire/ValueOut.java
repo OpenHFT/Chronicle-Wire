@@ -22,10 +22,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
-import net.openhft.chronicle.core.values.IntValue;
-import net.openhft.chronicle.core.values.LongArrayValues;
-import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.core.values.TwoLongValue;
+import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -247,6 +244,10 @@ public interface ValueOut {
 
     @NotNull
     WireOut int64forBinding(long value, @NotNull LongValue longValue);
+
+    @NotNull
+    WireOut boolForBinding(boolean value, @NotNull BooleanValue longValue);
+
 
     @NotNull
     default WireOut sequence(WriteValue writer) {
