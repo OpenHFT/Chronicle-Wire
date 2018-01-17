@@ -28,20 +28,22 @@ import java.util.function.Supplier;
 public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
     @NotNull
     private final Supplier<MarshallableOut> marshallableOutSupplier;
+    private final boolean metaData;
 
-    BinaryMethodWriterInvocationHandler(@NotNull MarshallableOut marshallableOut) {
-        this(() -> marshallableOut);
+    BinaryMethodWriterInvocationHandler(final boolean metaData, @NotNull MarshallableOut marshallableOut) {
+        this(metaData, () -> marshallableOut);
     }
 
-    public BinaryMethodWriterInvocationHandler(Supplier<MarshallableOut> marshallableOutSupplier) {
+    public BinaryMethodWriterInvocationHandler(final boolean metaData, Supplier<MarshallableOut> marshallableOutSupplier) {
         this.marshallableOutSupplier = marshallableOutSupplier;
+        this.metaData = metaData;
         recordHistory = marshallableOutSupplier.get().recordHistory();
     }
 
     @Override
     protected void handleInvoke(Method method, Object[] args) {
         MarshallableOut marshallableOut = this.marshallableOutSupplier.get();
-        @NotNull DocumentContext context = marshallableOut.writingDocument();
+        @NotNull DocumentContext context = marshallableOut.writingDocument(metaData);
         try {
             Wire wire = context.wire();
             handleInvoke(method, args, wire);
