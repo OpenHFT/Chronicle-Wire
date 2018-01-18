@@ -32,6 +32,44 @@ interface MockMethods {
  * Created by Peter Lawrey on 17/05/2017.
  */
 public class VanillaMethodReaderTest {
+
+    static class A extends AbstractMarshallable {
+        int x;
+    }
+
+    private interface AListener {
+        void a(A a);
+
+    }
+
+    A instance;
+
+    @Test
+    public void testMethodReaderWriter() {
+        Bytes b = Bytes.elasticByteBuffer();
+        Wire w = WireType.BINARY.apply(b);
+        {
+            AListener aListener = w.methodWriter(true, AListener.class);
+            A a = new A();
+            a.x = 5;
+            aListener.a(a);
+
+        }
+        {
+            w.methodReader(new AListener() {
+                @Override
+                public void a(final A a) {
+                    VanillaMethodReaderTest.this.instance = a;
+                }
+            }).readOne();
+        }
+
+        assertEquals(5, this.instance.x);
+
+    }
+
+
+
     @Test
     public void readMethods() throws IOException {
         Wire wire = new TextWire(BytesUtil.readFile("methods-in.yaml")).useTextDocuments();

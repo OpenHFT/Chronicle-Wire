@@ -15,10 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
-import net.openhft.chronicle.bytes.NativeBytes;
-import net.openhft.chronicle.bytes.NoBytesStore;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.util.Compressions;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -862,6 +859,25 @@ public class TextWireTest {
                 .read().bytes(b -> assertEquals("quotable, text", b.toString()))
                 .read().bytes(allBytes2);
         assertEquals(Bytes.wrapForRead(allBytes), allBytes2);
+    }
+
+    @Test
+    @Ignore("unreleased bytes")
+    public void testBytesField() {
+        DtoWithBytesField dto = new DtoWithBytesField(), dto2 = null;
+        byte[] binaryData = new byte[] { 1, 2, 3, 4};
+        dto.bytes = Bytes.wrapForRead(binaryData);
+        dto.another = 123L;
+
+        try {
+            String cs = dto.toString();
+            System.out.println(cs);
+            dto2 = Marshallable.fromString(cs);
+            assertEquals(cs, dto2.toString());
+        } finally {
+            dto.bytes.release();
+            dto2.bytes.release();
+        }
     }
 
     @Test
@@ -1869,5 +1885,24 @@ public class TextWireTest {
 
     private static class WithMap extends AbstractMarshallable {
         private Map<CcyPair, String> innerMap = new HashMap<>();
+    }
+
+    static class DtoWithBytesField extends AbstractMarshallable {
+        private BytesStore bytes;
+        private long another;
+
+        @Override
+        public void readMarshallable(@NotNull WireIn wire) {
+            if (bytes == null)
+                bytes = BytesStore.nativePointer();
+            wire.read(() -> "bytes").bytesSet((PointerBytesStore) bytes);
+            another = (wire.read(() -> "another").int64());
+        }
+
+        @Override
+        public void writeMarshallable(@NotNull WireOut wire) {
+            wire.write(() -> "bytes").bytes(bytes);
+            wire.write(() -> "another").int64(another);
+        }
     }
 }

@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
+import net.openhft.chronicle.core.values.BooleanValue;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -263,6 +264,12 @@ public class ResultSetWireIn implements WireIn, BytesComment {
     @Override
     public long headerNumber() {
         return 0;
+    }
+
+    @NotNull
+    @Override
+    public BooleanValue newBooleanReference() {
+        throw new UnsupportedOperationException("todo");
     }
 
     @NotNull
@@ -556,6 +563,11 @@ public class ResultSetWireIn implements WireIn, BytesComment {
         @Override
         public WireIn int32(@NotNull IntValue value) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public WireIn bool(@NotNull final BooleanValue ret) {
+            throw new UnsupportedOperationException("todo");
         }
 
         @NotNull
