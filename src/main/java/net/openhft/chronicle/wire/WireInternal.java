@@ -87,6 +87,10 @@ public enum WireInternal {
 
     public static long writeData(@NotNull WireOut wireOut, boolean metaData, boolean notComplete,
                                  @NotNull WriteMarshallable writer) {
+        if (notComplete) {
+            Jvm.warn().on(WireInternal.class, "Writing an incomplete document is deprecated, " +
+                    "this feature will be removed in a future release.");
+        }
         wireOut.getValueOut().resetBetweenDocuments();
         assert wireOut.startUse();
         long position;

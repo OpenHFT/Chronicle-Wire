@@ -53,7 +53,12 @@ public class VanillaWireParser<O> implements WireParser<O> {
             parslet = lastParslet;
 
         } else {
-            parslet = lookup(sb);
+            if (sb.length() > 0 && sb.charAt(0) >= '0' && sb.charAt(0) <= '9') {
+                //Must be methodId since Java method-name cannot start with a digit.
+                parslet = lookup(parseInt(sb));
+            } else {
+                parslet = lookup(sb);
+            }
             if (parslet == null)
                 parslet = getDefaultConsumer();
         }
@@ -62,6 +67,20 @@ public class VanillaWireParser<O> implements WireParser<O> {
         lastEventName.setLength(0);
         lastEventName.append(sb);
         lastParslet = parslet;
+    }
+
+    private int parseInt(CharSequence sb) {
+        int acc = 0;
+        for (int i = 0; i < sb.length(); ++i) {
+            char ch = sb.charAt(i);
+            if (ch >= '0' && ch <= '9') {
+                acc *= 10;
+                acc += ch - '0';
+            } else {
+                throw new IllegalStateException(String.format("Cannot parse %s as an int.", sb));
+            }
+        }
+        return acc;
     }
 
     @NotNull

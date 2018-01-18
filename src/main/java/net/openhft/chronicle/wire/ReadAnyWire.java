@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.values.BooleanValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,6 +52,12 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
     public void clear() {
         checkWire();
         bytes.clear();
+    }
+
+    @NotNull
+    @Override
+    public BooleanValue newBooleanReference() {
+        throw new UnsupportedOperationException("todo");
     }
 
     @NotNull

@@ -159,9 +159,13 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * This will increment the headerNumber as appropriate if successful
      *
+     * This method has been deprecated. Writing an incomplete document with a known
+     * length is no longer supported.
+     *
      * @param metaData {@code true} if the write should write metaData rather than data
      * @param writer   writes bytes to the wire
      */
+    @Deprecated
     default void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) {
         WireInternal.writeData(this, metaData, true, writer);
     }

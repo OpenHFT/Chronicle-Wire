@@ -20,13 +20,15 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Supplier;
+
 /*
  * Created by Peter Lawrey on 27/03/16.
  */
 public class VanillaMessageHistory extends AbstractMarshallable implements MessageHistory {
     public static final int MESSAGE_HISTORY_LENGTH = 20;
     private static final ThreadLocal<MessageHistory> THREAD_LOCAL =
-            ThreadLocal.withInitial((java.util.function.Supplier<MessageHistory>) () -> {
+            ThreadLocal.withInitial((Supplier<MessageHistory>) () -> {
                 @NotNull VanillaMessageHistory veh = new VanillaMessageHistory();
                 veh.addSourceDetails(true);
                 return veh;
@@ -95,7 +97,7 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
 
     @Override
     public int sourceId(int n) {
-        return sourceIdArray[n] & 0xFF;
+        return sourceIdArray[n];
     }
 
     @Override
@@ -128,8 +130,8 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
         }
     }
 
-    private void addSource(int id, long index) {
-        sourceIdArray[sources] = (byte) id;
+    public void addSource(int id, long index) {
+        sourceIdArray[sources] = id;
         sourceIndexArray[sources++] = index;
     }
 

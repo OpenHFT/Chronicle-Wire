@@ -24,10 +24,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
-import net.openhft.chronicle.core.values.IntValue;
-import net.openhft.chronicle.core.values.LongArrayValues;
-import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.core.values.TwoLongValue;
+import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -180,6 +177,12 @@ public class RawWire extends AbstractWire implements Wire {
     @Override
     public void clear() {
         bytes.clear();
+    }
+
+    @NotNull
+    @Override
+    public BooleanValue newBooleanReference() {
+        throw new UnsupportedOperationException("todo");
     }
 
     @NotNull
@@ -550,6 +553,14 @@ public class RawWire extends AbstractWire implements Wire {
         public WireOut int64forBinding(long value, @NotNull LongValue longValue) {
             int64forBinding(value);
             ((BinaryLongReference) longValue).bytesStore(bytes, bytes.writePosition() - 8, 8);
+            return RawWire.this;
+        }
+
+        @NotNull
+        @Override
+        public WireOut boolForBinding(final boolean value, @NotNull final BooleanValue longValue) {
+            bool(value);
+            ((BinaryLongReference) longValue).bytesStore(bytes, bytes.writePosition() - 1, 1);
             return RawWire.this;
         }
 
@@ -928,6 +939,11 @@ public class RawWire extends AbstractWire implements Wire {
             b.bytesStore(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
             return RawWire.this;
+        }
+
+        @Override
+        public WireIn bool(@NotNull final BooleanValue ret) {
+            throw new UnsupportedOperationException("todo");
         }
 
         @NotNull

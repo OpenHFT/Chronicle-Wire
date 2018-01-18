@@ -1,21 +1,24 @@
-= Wire Format abstraction library
-Peter Lawrey; Edits by Neil Clifford
+= Chronicle-Wire
 :toc: manual
 :css-signature: demo
 :toc-placement: preamble
-
-The purpose of Chronicle Wire is to combine a number of concerns in a consistent manner:
-
-- Application configuration. (Using YAML)
-- Data serialization (YAML, binary YAML, JSON, Raw binary data, CSV)
-- Accessing off-heap memory in a thread-safe manner. (Bind to shared off-heap memory)
-- High performance data exchange via binary formats. Only include as much meta data as you need.
 
 == Version 
 
 [#image-maven]
 [caption="", link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire]
 image::https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire/badge.svg[]
+
+== About
+
+Chronicle Wire is a a Wire Format abstraction Library, The purpose of Chronicle Wire is to combine a number of concerns in a consistent manner:
+
+- Application configuration. (Using YAML)
+- Data serialization (YAML, binary YAML, JSON, Raw binary data, CSV)
+- Accessing off-heap memory in a thread-safe manner. (Bind to shared off-heap memory)
+- High performance data exchange via binary formats. Only include as much meta data as you need.
+
+
 
 == Design
 
@@ -544,5 +547,5 @@ Chronicle Wire doesn't have pointers, but it does have content-lengths, which ar
 
 ===  Platform support
 
-Chronicle Wire supports `Java 8`.  Future versions may support `Java 6`, `C++` and `C#`.
+Chronicle Wire supports `Java 8`.  Future versions may support `Java 9`, `C++` and `C#`.
 
