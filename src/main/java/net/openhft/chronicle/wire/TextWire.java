@@ -258,6 +258,7 @@ public class TextWire extends AbstractWire implements Wire {
         return readContext;
     }
 
+
     protected void initReadContext() {
         if (readContext == null)
             readContext = new TextReadDocumentContext(this);
