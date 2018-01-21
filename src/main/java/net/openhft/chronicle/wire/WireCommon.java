@@ -19,10 +19,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesComment;
 import net.openhft.chronicle.core.pool.ClassLookup;
-import net.openhft.chronicle.core.values.IntValue;
-import net.openhft.chronicle.core.values.LongArrayValues;
-import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.core.values.TwoLongValue;
+import net.openhft.chronicle.core.values.*;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -142,4 +139,10 @@ public interface WireCommon {
     WireOut headerNumber(long headerNumber);
 
     long headerNumber();
+
+    /**
+     * @return a BooleanValue which appropriate for this wire.
+     */
+    @NotNull
+    BooleanValue newBooleanReference();
 }

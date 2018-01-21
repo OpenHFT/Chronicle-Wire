@@ -16,10 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.bytes.ref.BinaryIntReference;
-import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
-import net.openhft.chronicle.bytes.ref.BinaryLongReference;
-import net.openhft.chronicle.bytes.ref.BinaryTwoLongReference;
+import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.bytes.util.Bit8StringInterner;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
@@ -27,10 +24,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.*;
-import net.openhft.chronicle.core.values.IntValue;
-import net.openhft.chronicle.core.values.LongArrayValues;
-import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.core.values.TwoLongValue;
+import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -1195,6 +1189,12 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @NotNull
     @Override
+    public BooleanValue newBooleanReference() {
+        return new BinaryBooleanReference();
+    }
+
+    @NotNull
+    @Override
     public TwoLongValue newTwoLongReference() {
         return new BinaryTwoLongReference();
     }
@@ -1669,6 +1669,14 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        @NotNull
+        @Override
+        public WireOut boolForBinding(final boolean value, @NotNull final BooleanValue booleanValue) {
+            bool(value);
+            ((BinaryBooleanReference) booleanValue).bytesStore(bytes, bytes.writePosition() - 1,
+                    1);
+            return BinaryWire.this;
+        }
 
         @NotNull
         @Override
@@ -2848,6 +2856,20 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (code != INT32)
                 cantRead(code);
 
+            @NotNull Byteable b = (Byteable) value;
+            long length = b.maxSize();
+            b.bytesStore(bytes, bytes.readPosition(), length);
+            bytes.readSkip(length);
+            return BinaryWire.this;
+        }
+
+        @Override
+        public WireIn bool(@NotNull final BooleanValue value) {
+            consumePadding();
+            int code = readCode();
+            if (code != TRUE && code != FALSE)
+                cantRead(code);
+            bytes.readSkip(-1);
             @NotNull Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);

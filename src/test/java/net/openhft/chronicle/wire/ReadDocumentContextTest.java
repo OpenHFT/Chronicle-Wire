@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.MappedBytes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -35,6 +36,7 @@ import static org.junit.Assert.assertTrue;
  * @author Rob Austin.
  */
 public class ReadDocumentContextTest {
+    @Ignore("The ability to write incomplete documents is deprecated, and will be removed in a future release")
     @Test
     public void testWritingNotCompleteDocument() {
 

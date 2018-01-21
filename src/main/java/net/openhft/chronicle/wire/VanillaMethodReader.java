@@ -360,9 +360,14 @@ public class VanillaMethodReader implements MethodReader {
      */
     public boolean readOne() {
         for (; ; ) {
+
             try (DocumentContext context = in.readingDocument()) {
                 if (!context.isPresent())
                     return false;
+                if (context.isMetaData()) {
+                    wireParser.accept(context.wire(), null);
+                    return true;
+                }
                 if (!context.isData())
                     continue;
                 MessageHistory history = MessageHistory.get();

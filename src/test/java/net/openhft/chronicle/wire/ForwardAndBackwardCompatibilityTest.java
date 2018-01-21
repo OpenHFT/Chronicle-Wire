@@ -51,6 +51,7 @@ public class ForwardAndBackwardCompatibilityTest {
         return Arrays.asList(new Object[][]{
 //                {WireType.TEXT},
                 {WireType.BINARY}
+
         });
     }
 
@@ -177,5 +178,34 @@ public class ForwardAndBackwardCompatibilityTest {
             return this;
         }
     }
+
+    @Test
+    public void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        try {
+            Wire w = WireType.FIELDLESS_BINARY.apply(b);
+
+            try (DocumentContext dc = w.writingDocument()) {
+                dc.wire().write("hello").text("hello world");
+                dc.wire().write("hello2").text("hello world");
+            }
+
+            try (DocumentContext dc = w.writingDocument()) {
+                dc.wire().write("other data").text("other data");
+            }
+
+            try (DocumentContext dc = w.readingDocument()) {
+                Assert.assertEquals("hello world", dc.wire().read("hello").text());
+            }
+
+            try (DocumentContext dc = w.readingDocument()) {
+                Assert.assertEquals("other data", dc.wire().read("other data").text());
+            }
+        } finally {
+            b.release();
+        }
+    }
+
 }
 

@@ -40,7 +40,7 @@ public class BinaryMethodWriterInvocationHandlerTest {
         expect(out.recordHistory()).andReturn(true);
         replay(out);
 
-        @NotNull BinaryMethodWriterInvocationHandler handler = new BinaryMethodWriterInvocationHandler(out);
+        @NotNull BinaryMethodWriterInvocationHandler handler = new BinaryMethodWriterInvocationHandler(false, out);
         handler.onClose(closeable);
 
         try (@NotNull Closeable close = (Closeable) Proxy.newProxyInstance(Closeable.class.getClassLoader(), new Class[]{Closeable.class}, handler)) {

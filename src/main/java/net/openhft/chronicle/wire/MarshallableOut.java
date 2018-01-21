@@ -176,15 +176,30 @@ public interface MarshallableOut {
      */
     @NotNull
     default <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
+        return methodWriter(false, tClass, additional);
+    }
+
+    /**
+     * Proxy an interface so each message called is written to a file for method.
+     *
+     * @param metaData true if you wish to write every method as meta data
+     * @param tClass     primary interface
+     * @param additional any additional interfaces
+     * @return a proxy which implements the primary interface (additional interfaces have to be
+     * cast)
+     */
+    @NotNull
+    default <T> T methodWriter(boolean metaData, @NotNull Class<T> tClass, Class... additional) {
         Class[] interfaces = ObjectUtils.addAll(tClass, additional);
 
         //noinspection unchecked
-        return (T) Proxy.newProxyInstance(tClass.getClassLoader(), interfaces, new BinaryMethodWriterInvocationHandler(this));
+        return (T) Proxy.newProxyInstance(tClass.getClassLoader(), interfaces, new BinaryMethodWriterInvocationHandler(metaData, this));
     }
+
 
     @NotNull
     default <T> VanillaMethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
-        return new VanillaMethodWriterBuilder<>(tClass, new BinaryMethodWriterInvocationHandler(this));
+        return new VanillaMethodWriterBuilder<>(tClass, new BinaryMethodWriterInvocationHandler(false, this));
     }
 
     /**

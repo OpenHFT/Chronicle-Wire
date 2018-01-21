@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.*;
+import net.openhft.chronicle.core.values.BooleanValue;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -294,6 +295,11 @@ public class DefaultValueIn implements ValueIn {
         if (o == null) o = 0;
         value.setValue(o.intValue());
         return wireIn();
+    }
+
+    @Override
+    public WireIn bool(@NotNull final BooleanValue ret) {
+        throw new UnsupportedOperationException("todo");
     }
 
     @NotNull

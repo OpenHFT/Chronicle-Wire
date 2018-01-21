@@ -428,7 +428,8 @@ public abstract class AbstractWire implements Wire {
             throw new IllegalArgumentException();
         long pos = bytes.writePosition();
 
-        if (bytes.compareAndSwapInt(pos, 0, NOT_COMPLETE | length)) {
+        final int value = Wires.addMaskedPidToHeader(NOT_COMPLETE | length);
+        if (bytes.compareAndSwapInt(pos, 0, value)) {
 
             int maxlen = length == UNKNOWN_LENGTH ? safeLength : length;
             if (length != safeLength && maxlen > bytes.writeRemaining())
@@ -450,8 +451,9 @@ public abstract class AbstractWire implements Wire {
 
 //        System.out.println(Thread.currentThread()+" wh0 pos: "+pos+" hdr "+(int) headerNumber);
         try {
+            final int value = Wires.addMaskedPidToHeader(NOT_COMPLETE | length);
             for (; ; ) {
-                if (bytes.compareAndSwapInt(pos, 0, NOT_COMPLETE | length)) {
+                if (bytes.compareAndSwapInt(pos, 0, value)) {
 
                     bytes.writePosition(pos + SPB_HEADER_SIZE);
                     int maxlen = length == UNKNOWN_LENGTH ? safeLength : length;
@@ -514,7 +516,7 @@ public abstract class AbstractWire implements Wire {
         long pos = bytes.writePosition();
         int actualLength = Maths.toUInt31(pos - position - 4);
 
-        int expectedHeader = NOT_COMPLETE | UNKNOWN_LENGTH;
+        int expectedHeader = Wires.addMaskedPidToHeader(NOT_COMPLETE | UNKNOWN_LENGTH);
         int header = actualLength;
         if (metaData) header |= META_DATA;
         if (header == UNKNOWN_LENGTH)
@@ -604,7 +606,7 @@ public abstract class AbstractWire implements Wire {
                 // two states where it is unable to continue.
                 if (header == END_OF_DATA)
                     return; // already written.
-                if (header == NOT_COMPLETE_UNKNOWN_LENGTH) {
+                if (Wires.isNotComplete(header)) {
                     try {
                         acquireTimedParser().pause(timeout, timeUnit);
 
