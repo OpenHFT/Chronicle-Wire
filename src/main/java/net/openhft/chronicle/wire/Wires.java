@@ -65,7 +65,7 @@ public enum Wires {
     public static final int UNKNOWN_LENGTH = 0x0;
     public static final int MAX_LENGTH = (1 << 30) - 1;
     private static final boolean ENCODE_PID_IN_HEADER = Boolean.getBoolean("wire.encodePidInHeader");
-    private static final int PID_MASK = 0b01111111_11111111_11111111_11111111;
+    private static final int PID_MASK = 0b00111111_11111111_11111111_11111111;
     private static final int INVERSE_PID_MASK = ~PID_MASK;
 
     // value to use when the message is not ready and of an unknown length

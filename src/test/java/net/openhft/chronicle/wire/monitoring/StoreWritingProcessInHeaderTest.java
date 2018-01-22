@@ -8,6 +8,7 @@ import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.Wires;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,10 +28,12 @@ public final class StoreWritingProcessInHeaderTest {
 
     private final NativeBytes<Void> bytes;
     private final Wire wire;
+    private final WireType wireType;
 
     public StoreWritingProcessInHeaderTest(final String name, final WireType wireType) {
         bytes = Bytes.allocateElasticDirect();
         wire = wireType.apply(bytes);
+        this.wireType = wireType;
     }
 
     @Parameterized.Parameters(name = "{0}")
@@ -52,12 +55,27 @@ public final class StoreWritingProcessInHeaderTest {
     @Test
     public void shouldStoreWritingProcessIdInHeader() throws TimeoutException, EOFException {
         final long position = wire.writeHeaderOfUnknownLength(1, TimeUnit.SECONDS, null, null);
-
         final int header = wire.bytes().readVolatileInt(position);
         assertThat(Wires.isNotComplete(header), is(true));
         assertThat(header, is(Wires.addMaskedPidToHeader(Wires.NOT_COMPLETE_UNKNOWN_LENGTH)));
         assertThat(Wires.removeMaskedPidFromHeader(header), is(Wires.NOT_COMPLETE_UNKNOWN_LENGTH));
         assertThat(Wires.extractPidFromHeader(header), is(OS.getProcessId()));
+    }
+
+    @Test
+    public void shouldWorkWithMetaDataEntries() throws TimeoutException, EOFException {
+        Assume.assumeTrue(wireType != WireType.READ_ANY);
+
+        final long position = wire.writeHeaderOfUnknownLength(1, TimeUnit.SECONDS, null, null);
+        final int header = wire.bytes().readVolatileInt(position);
+        // simulate meta-data indicator in header
+        wire.bytes().writeInt(position, header | Wires.META_DATA);
+        final int updatedHeader = wire.bytes().readVolatileInt(position);
+        assertThat(Wires.isNotComplete(updatedHeader), is(true));
+        assertThat(updatedHeader, is(Wires.addMaskedPidToHeader(Wires.NOT_COMPLETE_UNKNOWN_LENGTH | Wires.META_DATA)));
+        assertThat(Wires.removeMaskedPidFromHeader(updatedHeader), is(Wires.NOT_COMPLETE_UNKNOWN_LENGTH | Wires.META_DATA));
+        assertThat(Wires.extractPidFromHeader(updatedHeader), is(OS.getProcessId()));
+        assertThat(Wires.isNotComplete(updatedHeader), is(true));
     }
 
     @After
