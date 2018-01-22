@@ -84,7 +84,7 @@ public final class StoreWritingProcessInHeaderTest {
 
     @BeforeClass
     public static void enableFeature() {
-        System.setProperty("wire.encodePidInHeader", Boolean.FALSE.toString());
+        System.setProperty("wire.encodePidInHeader", Boolean.TRUE.toString());
     }
 
     @AfterClass
