@@ -8,7 +8,6 @@ import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.Wires;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,10 +21,10 @@ import java.util.concurrent.TimeoutException;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 @RunWith(Parameterized.class)
 public final class StoreWritingProcessInHeaderTest {
-
     private final NativeBytes<Void> bytes;
     private final Wire wire;
     private final WireType wireType;
@@ -64,7 +63,7 @@ public final class StoreWritingProcessInHeaderTest {
 
     @Test
     public void shouldWorkWithMetaDataEntries() throws TimeoutException, EOFException {
-        Assume.assumeTrue(wireType != WireType.READ_ANY);
+        assumeTrue(wireType != WireType.READ_ANY);
 
         final long position = wire.writeHeaderOfUnknownLength(1, TimeUnit.SECONDS, null, null);
         final int header = wire.bytes().readVolatileInt(position);
@@ -85,7 +84,7 @@ public final class StoreWritingProcessInHeaderTest {
 
     @BeforeClass
     public static void enableFeature() {
-        System.setProperty("wire.encodePidInHeader", Boolean.TRUE.toString());
+        System.setProperty("wire.encodePidInHeader", Boolean.FALSE.toString());
     }
 
     @AfterClass
