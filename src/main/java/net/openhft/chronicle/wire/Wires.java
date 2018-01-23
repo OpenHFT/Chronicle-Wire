@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
@@ -64,9 +65,9 @@ public enum Wires {
     public static final int META_DATA = 1 << 30;
     public static final int UNKNOWN_LENGTH = 0x0;
     public static final int MAX_LENGTH = (1 << 30) - 1;
-    private static final boolean ENCODE_PID_IN_HEADER = Boolean.getBoolean("wire.encodePidInHeader");
-    private static final int PID_MASK = 0b00111111_11111111_11111111_11111111;
-    private static final int INVERSE_PID_MASK = ~PID_MASK;
+    private static final boolean ENCODE_TID_IN_HEADER = Boolean.getBoolean("wire.encodeTidInHeader");
+    private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
+    private static final int INVERSE_TID_MASK = ~TID_MASK;
 
     // value to use when the message is not ready and of an unknown length
     public static final int NOT_COMPLETE_UNKNOWN_LENGTH = NOT_COMPLETE | UNKNOWN_LENGTH;
@@ -189,8 +190,8 @@ public enum Wires {
     }
 
     public static int lengthOf(int len) {
-        if (isNotComplete(len) && ENCODE_PID_IN_HEADER) {
-            return Wires.removeMaskedPidFromHeader(len) & LENGTH_MASK;
+        if (isNotComplete(len) && ENCODE_TID_IN_HEADER) {
+            return Wires.removeMaskedTidFromHeader(len) & LENGTH_MASK;
         }
         final int len0 = len & LENGTH_MASK;
 //        if (len0 > 1 << 20)
@@ -391,16 +392,16 @@ public enum Wires {
         wm.reset(o);
     }
 
-    public static int addMaskedPidToHeader(final int header) {
-        return ENCODE_PID_IN_HEADER ? header | (PID_MASK & OS.getProcessId()) : header;
+    public static int addMaskedTidToHeader(final int header) {
+        return ENCODE_TID_IN_HEADER ? header | (TID_MASK & Affinity.getThreadId()) : header;
     }
 
-    public static int removeMaskedPidFromHeader(final int header) {
-        return header & INVERSE_PID_MASK;
+    public static int removeMaskedTidFromHeader(final int header) {
+        return header & INVERSE_TID_MASK;
     }
 
-    public static int extractPidFromHeader(final int header) {
-        return header & PID_MASK;
+    public static int extractTidFromHeader(final int header) {
+        return header & TID_MASK;
     }
 
     static final ClassLocal<Function<String, Marshallable>> MARSHALLABLE_FUNCTION = ClassLocal.withInitial(tClass -> {

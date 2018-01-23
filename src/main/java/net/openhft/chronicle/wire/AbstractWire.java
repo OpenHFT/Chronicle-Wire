@@ -428,7 +428,7 @@ public abstract class AbstractWire implements Wire {
             throw new IllegalArgumentException();
         long pos = bytes.writePosition();
 
-        final int value = Wires.addMaskedPidToHeader(NOT_COMPLETE | length);
+        final int value = Wires.addMaskedTidToHeader(NOT_COMPLETE | length);
         if (bytes.compareAndSwapInt(pos, 0, value)) {
 
             int maxlen = length == UNKNOWN_LENGTH ? safeLength : length;
@@ -451,7 +451,7 @@ public abstract class AbstractWire implements Wire {
 
 //        System.out.println(Thread.currentThread()+" wh0 pos: "+pos+" hdr "+(int) headerNumber);
         try {
-            final int value = Wires.addMaskedPidToHeader(NOT_COMPLETE | length);
+            final int value = Wires.addMaskedTidToHeader(NOT_COMPLETE | length);
             for (; ; ) {
                 if (bytes.compareAndSwapInt(pos, 0, value)) {
 
@@ -516,7 +516,7 @@ public abstract class AbstractWire implements Wire {
         long pos = bytes.writePosition();
         int actualLength = Maths.toUInt31(pos - position - 4);
 
-        int expectedHeader = Wires.addMaskedPidToHeader(NOT_COMPLETE | UNKNOWN_LENGTH);
+        int expectedHeader = Wires.addMaskedTidToHeader(NOT_COMPLETE | UNKNOWN_LENGTH);
         int header = actualLength;
         if (metaData) header |= META_DATA;
         if (header == UNKNOWN_LENGTH)
