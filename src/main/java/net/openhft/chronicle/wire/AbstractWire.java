@@ -334,7 +334,7 @@ public abstract class AbstractWire implements Wire {
      * this would be done much in the same way that we store the index, containing both the cycle and seq number ),
      * or to put it another way, this LongValue will store the end of the lastPosition in the same place that the index stores it’s cycle number.
      * <p>
-     * When ever we store the lastPostion, we should also store the seqAndLastPosition.
+     * When ever we store the lastPosition, we should also store the seqAndLastPosition.
      * <p>
      * so to get the the lastPosition and the sequence number of the approximate end of the queue, first we read the lastPosition,
      * then we read the seqAndLastPosition, if the last bits of the lastPosition, match the higher bits of seqAndLastPosition
