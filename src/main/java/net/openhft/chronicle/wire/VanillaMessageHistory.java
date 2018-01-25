@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.BytesIn;
+import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -130,18 +132,6 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
         }
     }
 
-    public void addSource(int id, long index) {
-        sourceIdArray[sources] = id;
-        sourceIndexArray[sources++] = index;
-    }
-
-    public void addTiming(long l) {
-        if (timings >= timingsArray.length) {
-            throw new IllegalStateException("Have exceeded message history size: " + this.toString());
-        }
-        timingsArray[timings++] = l;
-    }
-
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
         wire.write("sources").sequence(this, (t, out) -> {
@@ -156,5 +146,41 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
             }
             out.int64(System.nanoTime());
         });
+    }
+
+    @Override
+    public void readMarshallable(@NotNull BytesIn bytes) throws IORuntimeException {
+        int sources = (int) bytes.readStopBit();
+        this.sources = 0;
+        for (int i = 0; i < sources; i++)
+            addSource(bytes.readInt(), bytes.readLong());
+
+        int timings = (int) bytes.readStopBit();
+        this.timings = 0;
+        for (int i = 0; i < timings; i++)
+            addTiming(bytes.readLong());
+    }
+
+    @Override
+    public void writeMarshallable(@NotNull BytesOut bytes) {
+        bytes.writeStopBit(sources);
+        for (int i = 0; i < sources; i++)
+            bytes.writeInt(sourceIdArray[i]).writeLong(sourceIndexArray[i]);
+
+        bytes.writeStopBit(timings);
+        for (int i = 0; i < timings; i++)
+            bytes.writeLong(timingsArray[i]);
+    }
+
+    public void addSource(int id, long index) {
+        sourceIdArray[sources] = id;
+        sourceIndexArray[sources++] = index;
+    }
+
+    public void addTiming(long l) {
+        if (timings >= timingsArray.length) {
+            throw new IllegalStateException("Have exceeded message history size: " + this.toString());
+        }
+        timingsArray[timings++] = l;
     }
 }
