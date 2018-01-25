@@ -69,7 +69,7 @@ public class VanillaWireParser<O> implements WireParser<O> {
         lastParslet = parslet;
     }
 
-    private int parseInt(CharSequence sb) {
+    private static int parseInt(CharSequence sb) {
         int acc = 0;
         for (int i = 0; i < sb.length(); ++i) {
             char ch = sb.charAt(i);

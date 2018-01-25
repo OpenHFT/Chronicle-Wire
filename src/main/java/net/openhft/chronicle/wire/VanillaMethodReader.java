@@ -360,6 +360,7 @@ public class VanillaMethodReader implements MethodReader {
      */
     public boolean readOne() {
         for (; ; ) {
+
             try (DocumentContext context = in.readingDocument()) {
                 if (!context.isPresent())
                     return false;

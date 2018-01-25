@@ -35,7 +35,10 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
     @NotNull
     private static String errorMsg(CharSequence s, MessageHistory history, long sourceIndex) {
-        return "Unknown method-name='" + s + "' from " + history.lastSourceId() + " at " + Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex;
+
+        final String identifierType = s.length() != 0 && Character.isDigit(s.charAt(0)) ? "@MethodId" : "method-name";
+        return "Unknown " + identifierType + "='" + s + "' from " + history.lastSourceId() + " at " +
+                Long.toHexString(sourceIndex) + " ~ " + (int) sourceIndex;
     }
 
     public boolean ignoreDefaults() {

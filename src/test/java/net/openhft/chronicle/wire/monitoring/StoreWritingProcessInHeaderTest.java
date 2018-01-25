@@ -1,8 +1,8 @@
 package net.openhft.chronicle.wire.monitoring;
 
+import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.Wires;
@@ -21,16 +21,18 @@ import java.util.concurrent.TimeoutException;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 @RunWith(Parameterized.class)
 public final class StoreWritingProcessInHeaderTest {
-
     private final NativeBytes<Void> bytes;
     private final Wire wire;
+    private final WireType wireType;
 
     public StoreWritingProcessInHeaderTest(final String name, final WireType wireType) {
         bytes = Bytes.allocateElasticDirect();
         wire = wireType.apply(bytes);
+        this.wireType = wireType;
     }
 
     @Parameterized.Parameters(name = "{0}")
@@ -40,24 +42,39 @@ public final class StoreWritingProcessInHeaderTest {
 
     @Test
     public void shouldEncodePid() {
-        final int pid = OS.getProcessId();
-        final int headerWithPid = Wires.addMaskedPidToHeader(Wires.NOT_COMPLETE_UNKNOWN_LENGTH);
+        final int tid = Affinity.getThreadId();
+        final int headerWithTid = Wires.addMaskedTidToHeader(Wires.NOT_COMPLETE_UNKNOWN_LENGTH);
 
-        assertThat(Wires.isNotComplete(headerWithPid), is(true));
-        assertThat(headerWithPid, is(not(Wires.NOT_COMPLETE_UNKNOWN_LENGTH)));
-        assertThat(Wires.extractPidFromHeader(headerWithPid), is(pid));
-        assertThat(Wires.removeMaskedPidFromHeader(headerWithPid), is(Wires.NOT_COMPLETE_UNKNOWN_LENGTH));
+        assertThat(Wires.isNotComplete(headerWithTid), is(true));
+        assertThat(headerWithTid, is(not(Wires.NOT_COMPLETE_UNKNOWN_LENGTH)));
+        assertThat(Wires.extractTidFromHeader(headerWithTid), is(tid));
+        assertThat(Wires.removeMaskedTidFromHeader(headerWithTid), is(Wires.NOT_COMPLETE_UNKNOWN_LENGTH));
     }
 
     @Test
     public void shouldStoreWritingProcessIdInHeader() throws TimeoutException, EOFException {
         final long position = wire.writeHeaderOfUnknownLength(1, TimeUnit.SECONDS, null, null);
-
         final int header = wire.bytes().readVolatileInt(position);
         assertThat(Wires.isNotComplete(header), is(true));
-        assertThat(header, is(Wires.addMaskedPidToHeader(Wires.NOT_COMPLETE_UNKNOWN_LENGTH)));
-        assertThat(Wires.removeMaskedPidFromHeader(header), is(Wires.NOT_COMPLETE_UNKNOWN_LENGTH));
-        assertThat(Wires.extractPidFromHeader(header), is(OS.getProcessId()));
+        assertThat(header, is(Wires.addMaskedTidToHeader(Wires.NOT_COMPLETE_UNKNOWN_LENGTH)));
+        assertThat(Wires.removeMaskedTidFromHeader(header), is(Wires.NOT_COMPLETE_UNKNOWN_LENGTH));
+        assertThat(Wires.extractTidFromHeader(header), is(Affinity.getThreadId()));
+    }
+
+    @Test
+    public void shouldWorkWithMetaDataEntries() throws TimeoutException, EOFException {
+        assumeTrue(wireType != WireType.READ_ANY);
+
+        final long position = wire.writeHeaderOfUnknownLength(1, TimeUnit.SECONDS, null, null);
+        final int header = wire.bytes().readVolatileInt(position);
+        // simulate meta-data indicator in header
+        wire.bytes().writeInt(position, header | Wires.META_DATA);
+        final int updatedHeader = wire.bytes().readVolatileInt(position);
+        assertThat(Wires.isNotComplete(updatedHeader), is(true));
+        assertThat(updatedHeader, is(Wires.addMaskedTidToHeader(Wires.NOT_COMPLETE_UNKNOWN_LENGTH | Wires.META_DATA)));
+        assertThat(Wires.removeMaskedTidFromHeader(updatedHeader), is(Wires.NOT_COMPLETE_UNKNOWN_LENGTH | Wires.META_DATA));
+        assertThat(Wires.extractTidFromHeader(updatedHeader), is(Affinity.getThreadId()));
+        assertThat(Wires.isNotComplete(updatedHeader), is(true));
     }
 
     @After
@@ -67,12 +84,12 @@ public final class StoreWritingProcessInHeaderTest {
 
     @BeforeClass
     public static void enableFeature() {
-        System.setProperty("wire.encodePidInHeader", Boolean.TRUE.toString());
+        System.setProperty("wire.encodeTidInHeader", Boolean.TRUE.toString());
     }
 
     @AfterClass
     public static void disableFeature() {
-        System.setProperty("wire.encodePidInHeader", Boolean.FALSE.toString());
+        System.setProperty("wire.encodeTidInHeader", Boolean.FALSE.toString());
     }
 
     private static Object[][] toParams(final WireType[] values) {
