@@ -150,24 +150,26 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
 
     @Override
     public void readMarshallable(@NotNull BytesIn bytes) throws IORuntimeException {
-        int sources = (int) bytes.readStopBit();
-        this.sources = 0;
+        sources = bytes.readUnsignedByte();
         for (int i = 0; i < sources; i++)
-            addSource(bytes.readInt(), bytes.readLong());
+            sourceIdArray[i] = bytes.readInt();
+        for (int i = 0; i < sources; i++)
+            sourceIndexArray[i] = bytes.readLong();
 
-        int timings = (int) bytes.readStopBit();
-        this.timings = 0;
+        timings = bytes.readUnsignedByte();
         for (int i = 0; i < timings; i++)
-            addTiming(bytes.readLong());
+            timingsArray[i] = bytes.readLong();
     }
 
     @Override
     public void writeMarshallable(@NotNull BytesOut bytes) {
-        bytes.writeStopBit(sources);
+        bytes.writeUnsignedByte(sources);
         for (int i = 0; i < sources; i++)
-            bytes.writeInt(sourceIdArray[i]).writeLong(sourceIndexArray[i]);
+            bytes.writeInt(sourceIdArray[i]);
+        for (int i = 0; i < sources; i++)
+            bytes.writeLong(sourceIndexArray[i]);
 
-        bytes.writeStopBit(timings);
+        bytes.writeUnsignedByte(timings);
         for (int i = 0; i < timings; i++)
             bytes.writeLong(timingsArray[i]);
     }
