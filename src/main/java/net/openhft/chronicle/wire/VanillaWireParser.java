@@ -44,7 +44,7 @@ public class VanillaWireParser<O> implements WireParser<O> {
         return defaultConsumer;
     }
 
-    public void parseOne(@NotNull WireIn wireIn, O out) {
+        public void parseOne(@NotNull WireIn wireIn, O out) {
         @NotNull ValueIn valueIn = wireIn.readEventName(sb);
         WireParselet<O> parslet;
         // on the assumption most messages are the same as the last,
