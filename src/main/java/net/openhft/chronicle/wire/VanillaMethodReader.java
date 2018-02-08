@@ -45,6 +45,9 @@ import java.util.function.BiConsumer;
  * Created by Peter Lawrey on 24/03/16.
  */
 public class VanillaMethodReader implements MethodReader {
+
+    private static final String[] metaIgnoreList = {"header", "index", "index2index", "roll"};
+
     static final Object[] NO_ARGS = {};
     static final Logger LOGGER = LoggerFactory.getLogger(VanillaMethodReader.class);
     static final Object IGNORED = new Object(); // object used to flag that the call should be ignored.
@@ -365,7 +368,24 @@ public class VanillaMethodReader implements MethodReader {
                 if (!context.isPresent())
                     return false;
                 if (context.isMetaData()) {
+                    StringBuilder sb = Wires.acquireStringBuilder();
+
+                    long r = context.wire().bytes().readPosition();
+                    try {
+                        context.wire().readEventName(sb);
+
+                        for (String s : metaIgnoreList) {
+                            // we wish to ignore our system meta data field
+                            if (s.contentEquals(sb))
+                                return false;
+                        }
+                    } finally {
+                        // roll back position to where is was before we read the SB
+                        context.wire().bytes().readPosition(r);
+                    }
+
                     wireParser.accept(context.wire(), null);
+
                     return true;
                 }
                 if (!context.isData())
