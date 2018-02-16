@@ -169,9 +169,11 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
         for (int i = 0; i < sources; i++)
             bytes.writeLong(sourceIndexArray[i]);
 
-        bytes.writeUnsignedByte(timings);
-        for (int i = 0; i < timings; i++)
+        bytes.writeUnsignedByte(timings + 1 );// one more time for this output
+        for (int i = 0; i < timings; i++) {
             bytes.writeLong(timingsArray[i]);
+        }
+        bytes.writeLong(System.nanoTime()); // add time for this output
     }
 
     public void addSource(int id, long index) {
