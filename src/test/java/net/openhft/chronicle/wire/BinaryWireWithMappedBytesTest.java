@@ -65,17 +65,17 @@ public class BinaryWireWithMappedBytesTest {
 
         assertEquals("", bytes.toHexString());
 
-        assertEquals(2, ((Byteable) a).bytesStore().refCount());
+        assertEquals(5, ((Byteable) a).bytesStore().refCount());
 
         assertEquals("value: 1 value: 2 value: 3 value: 4, value2: 5", a + " " + b + " " + c + " " + d);
 
         // cause the old memory to drop out.
         bytes.compareAndSwapInt(1 << 20, 1, 1);
-        assertEquals(1, ((Byteable) a).bytesStore().refCount());
+        assertEquals(4, ((Byteable) a).bytesStore().refCount());
         System.out.println(a + " " + b + " " + c);
 
         bytes.compareAndSwapInt(2 << 20, 1, 1);
-        assertEquals(1, ((Byteable) a).bytesStore().refCount());
+        assertEquals(4, ((Byteable) a).bytesStore().refCount());
         System.out.println(a + " " + b + " " + c);
 
         bytes.release();
