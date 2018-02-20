@@ -5,6 +5,8 @@ import org.junit.After;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotSame;
 
 /*
  * Created by rob on 14/06/2017.
@@ -58,6 +60,28 @@ public class WiresTest {
     }
 
     @Test
+    public void shouldDemonstrateMutableFieldIssue() {
+        final MutableContainer container1 = new MutableContainer();
+        final MutableContainer container2 = new MutableContainer();
+
+        container1.mutableClass = new MutableClass();
+        container1.mutableClass.answer = 42;
+        container1.mutableClass.question = "meaning";
+
+        container2.mutableClass = new MutableClass();
+        container2.mutableClass.answer = 120;
+        container2.mutableClass.question = "5!";
+
+        Wires.reset(container1);
+        Wires.reset(container2);
+
+        container1.mutableClass.question = "safe mutation?";
+
+        assertNotSame(container1.mutableClass.question, container2.mutableClass.question);
+        assertNotEquals("safe mutation?", container2.mutableClass.question);
+    }
+
+    @Test
     public void copyToShouldMutateBytes() {
         BytesContainerMarshallable container1 = new BytesContainerMarshallable();
         container1.bytesField.append("1");
@@ -68,18 +92,6 @@ public class WiresTest {
         assertEquals(container2Bytes, container2.bytesField);
         assertEquals("12", container2.bytesField.toString());
         container2.bytesField.append("123");
-    }
-
-    public static class BytesContainer {
-        Bytes bytesField = Bytes.elasticHeapByteBuffer(64);
-    }
-
-    public static class BytesContainerMarshallable extends AbstractMarshallable {
-        Bytes bytesField = Bytes.elasticHeapByteBuffer(64);
-    }
-
-    public static class StringBuilderContainer {
-        StringBuilder stringBuilder = new StringBuilder();
     }
 
     @Test
@@ -141,5 +153,31 @@ public class WiresTest {
         ThreeValues big(double d);
 
         double big();
+    }
+
+    private static final class BytesContainer {
+        Bytes bytesField = Bytes.elasticHeapByteBuffer(64);
+    }
+
+    private static final class BytesContainerMarshallable extends AbstractMarshallable {
+        Bytes bytesField = Bytes.elasticHeapByteBuffer(64);
+    }
+
+    private static final class StringBuilderContainer {
+        StringBuilder stringBuilder = new StringBuilder();
+    }
+
+    private static final class MutableContainer implements ResetOverride {
+        MutableClass mutableClass = new MutableClass();
+
+        @Override
+        public void onReset() {
+            mutableClass = new MutableClass();
+        }
+    }
+
+    private static final class MutableClass {
+        int answer;
+        String question = "";
     }
 }

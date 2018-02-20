@@ -198,6 +198,78 @@ prints in RawWire
 
 For more examples see https://github.com/OpenHFT/Chronicle-Wire/blob/master/README-Chapter1.md[Examples Chapter1]
 
+=== A note on `Wires.reset()`
+
+Wire allows (and encourages) objects to be re-used in order to reduce allocation rates.
+
+When a marshallable object is re-used or initialised by the framework, it is first reset by way of
+`Wires.reset()`. In the case of most DTOs with simple scalar values, this will not cause any issues,
+however more complicated objects with object instance fields may experience undesired behaviour.
+
+In order to `reset` a marshallable object, the process is as follows:
+
+   1. create a new instance of the object to be reset
+   2. copy all fields from the new instance to the existing instance
+   3. the existing instance is now considered 'reset' back to default values
+
+The object created in step `1` is cached for performance reasons, meaning that both the new and existing
+instance of the marshallable object could have a reference to the same object.
+
+While this will not be a problem for primitive or immutable values (e.g. `int`, `Long`, `String`), a mutable
+field such as `ByteBuffer` will cause problems. Consider the following case:
+
+[source,java]
+----
+private static final class BufferContainer {
+    private ByteBuffer b = ByteBuffer.allocate(16);
+}
+
+@Test
+public void shouldDemonstrateMutableFieldIssue2() {
+    // create 2 instances of a marshallable POJO
+    final BufferContainer c1 = new BufferContainer();
+    final BufferContainer c2 = new BufferContainer();
+    // reset both instances - this will set each container's
+    // b field to a 'default' value
+    Wires.reset(c1);
+    Wires.reset(c2);
+    // write to the buffer in c1
+    c1.b.putInt(42);
+    // inspect the buffer in both c1 and c2
+    System.out.println(c1.b.position());
+    System.out.println(c2.b.position());
+    System.out.println(c1.b == c2.b);
+}
+----
+
+The output of the test above is:
+
+----
+4
+4
+true
+----
+
+
+showing that the field **b** of each container object is now referencing the same `ByteBuffer` instance.
+
+In order to work around this, if necessary, the marshallable class
+should implement `ResetOverride`:
+
+[source,java]
+----
+private static final class BufferContainer implements ResetOverride {
+    private ByteBuffer b = ByteBuffer.allocate(16);
+
+    @Override
+    public void onReset() {
+        // or acquire from a pool if allocation should
+        // be kept to a minimum
+        b = ByteBuffer.allocate(16);
+    }
+}
+----
+
 == Binding to a field value
 
 While serialized data can be updated by replacing a whole record, this might not be the most efficient option, nor thread-safe.
