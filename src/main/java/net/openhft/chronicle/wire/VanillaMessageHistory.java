@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -45,6 +46,7 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
     @NotNull
     private long[] timingsArray = new long[MESSAGE_HISTORY_LENGTH * 2];
     private boolean addSourceDetails = false;
+    private long start;
 
     static MessageHistory getThreadLocal() {
         return THREAD_LOCAL.get();
@@ -161,8 +163,43 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
             timingsArray[i] = bytes.readLong();
     }
 
+    public static int marshallableSize(@NotNull BytesIn bytes) {
+
+        long start = bytes.readPosition();
+        try {
+
+            int sources = bytes.readUnsignedByte();
+            int size = 1;
+
+            //sourceIdArray
+            size += (4 * sources);
+
+            // sourceIndexArray
+            size += (8 * sources);
+
+            bytes.readSkip(size - 1);
+            int timings = bytes.readUnsignedByte() - 1;
+
+            // writeUnsignedByte
+            size += 1;
+
+            size += (timings * 8);
+
+            // nano time
+            size += 8;
+
+            return size;
+
+        } finally {
+            bytes.readPosition(start);
+        }
+
+    }
+
+    @SuppressWarnings("AssertWithSideEffects")
     @Override
     public void writeMarshallable(@NotNull BytesOut bytes) {
+        assert start(bytes.writePosition());
         bytes.writeUnsignedByte(sources);
         for (int i = 0; i < sources; i++)
             bytes.writeInt(sourceIdArray[i]);
@@ -174,7 +211,25 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
             bytes.writeLong(timingsArray[i]);
         }
         bytes.writeLong(System.nanoTime()); // add time for this output
+        assert checkMarshallableSize(start, (Bytes) bytes);
     }
+
+    private boolean start(final long start) {
+        this.start = start;
+        return true;
+    }
+
+    private boolean checkMarshallableSize(final long start, final BytesIn bytes) {
+        long rp = bytes.readPosition();
+        try {
+            bytes.readPosition(start);
+            return bytes.readLimit() - start == marshallableSize(bytes);
+        } finally {
+            bytes.readPosition(rp);
+        }
+
+    }
+
 
     public void addSource(int id, long index) {
         sourceIdArray[sources] = id;
