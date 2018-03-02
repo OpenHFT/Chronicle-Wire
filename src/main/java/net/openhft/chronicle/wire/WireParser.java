@@ -27,8 +27,15 @@ import java.util.function.BiConsumer;
 public interface WireParser<O> extends BiConsumer<WireIn, O> {
     @NotNull
     static <O> WireParser<O> wireParser(WireParselet<O> defaultConsumer) {
-        return new VanillaWireParser<>(defaultConsumer);
+        return new VanillaWireParser<>(defaultConsumer, null);
     }
+
+    @NotNull
+    static <O> WireParser<O> wireParser(WireParselet<O> defaultConsumer,
+                                        FieldNumberParselet<O> fieldNumberParselet) {
+        return new VanillaWireParser<>(defaultConsumer, fieldNumberParselet);
+    }
+
 
     WireParselet<O> getDefaultConsumer();
 

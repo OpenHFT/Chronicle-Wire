@@ -32,11 +32,18 @@ public class VanillaWireParser<O> implements WireParser<O> {
     private final WireParselet<O> defaultConsumer;
     private final StringBuilder sb = new StringBuilder(128);
     private final StringBuilder lastEventName = new StringBuilder(128);
+    private FieldNumberParselet<O> fieldNumberParselet;
     private WireParselet<O> lastParslet = null;
 
-    public VanillaWireParser(WireParselet<O> defaultConsumer) {
+    public VanillaWireParser(WireParselet<O> defaultConsumer,
+                             FieldNumberParselet<O> fieldNumberParselet) {
         this.defaultConsumer = defaultConsumer;
         lastEventName.appendCodePoint(0xFFFF);
+        this.fieldNumberParselet = fieldNumberParselet;
+    }
+
+    private int peekCode(@net.openhft.chronicle.core.annotation.NotNull WireIn wireIn) {
+        return wireIn.bytes().peekUnsignedByte();
     }
 
     @Override
@@ -44,7 +51,13 @@ public class VanillaWireParser<O> implements WireParser<O> {
         return defaultConsumer;
     }
 
-        public void parseOne(@NotNull WireIn wireIn, O out) {
+    public void parseOne(@NotNull WireIn wireIn, O out) {
+
+        if (fieldNumberParselet != null && peekCode(wireIn) == BinaryWireCode.FIELD_NUMBER) {
+            fieldNumberParselet.readOne(wireIn.readEventNumber(), wireIn.bytes(), out);
+            return;
+        }
+
         @NotNull ValueIn valueIn = wireIn.readEventName(sb);
         WireParselet<O> parslet;
         // on the assumption most messages are the same as the last,

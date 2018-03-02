@@ -21,7 +21,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     // TODO add support for filtering.
 
     @NotNull
-    static WireParselet createDefaultParselet() {
+    public static WireParselet createDefaultParselet() {
         return (s, v, $) -> {
             MessageHistory history = MessageHistory.get();
             long sourceIndex = history.lastSourceIndex();
