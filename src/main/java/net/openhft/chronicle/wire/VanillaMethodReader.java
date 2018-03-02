@@ -61,19 +61,18 @@ public class VanillaMethodReader implements MethodReader {
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
                                WireParselet defaultParselet,
-                               FieldNumberParselet fieldNumberParselet,
                                MethodReaderInterceptor methodReaderInterceptor,
                                @NotNull Object... objects) {
-
-        this(in, ignoreDefault, defaultParselet, methodReaderInterceptor, objects);
-        this.fieldNumberParselet = fieldNumberParselet;
+        this(in, ignoreDefault, defaultParselet, null, methodReaderInterceptor, objects);
     }
 
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
                                WireParselet defaultParselet,
+                               FieldNumberParselet fieldNumberParselet,
                                MethodReaderInterceptor methodReaderInterceptor,
                                @NotNull Object... objects) {
+        this.fieldNumberParselet = fieldNumberParselet;
         this.in = in;
         this.methodReaderInterceptor = methodReaderInterceptor;
         if (objects[0] instanceof WireParselet)
