@@ -1905,4 +1905,41 @@ public class TextWireTest {
             wire.write(() -> "another").int64(another);
         }
     }
+
+    @Test
+    public void longConverter() {
+        TwoLongs twoLongs = new TwoLongs(0x1234567890abcdefL, -1);
+        assertEquals("!net.openhft.chronicle.wire.TextWireTest$TwoLongs {\n" +
+                "  hexadecimal: \"1234567890abcdef\",\n" +
+                "  hexa2: ffffffffffffffff\n" +
+                "}\n", twoLongs.toString());
+        assertEquals(twoLongs, Marshallable.fromString(twoLongs.toString()));
+    }
+
+    static class TwoLongs extends AbstractMarshallable {
+
+        @LongConversion(HexaDecimalConverter.class)
+        long hexadecimal;
+
+        @LongConversion(HexaDecimalConverter.class)
+        long hexa2;
+
+        public TwoLongs(long hexadecimal, long hexa2) {
+            this.hexadecimal = hexadecimal;
+            this.hexa2 = hexa2;
+        }
+    }
+
+    static class HexaDecimalConverter implements LongConverter {
+        @Override
+        public long parse(CharSequence text) {
+            return Long.parseUnsignedLong(text.toString(), 16);
+        }
+
+        @Override
+        public void append(StringBuilder text, long value) {
+            text.append(Long.toHexString(value));
+        }
+    }
+
 }
