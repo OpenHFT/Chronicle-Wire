@@ -299,8 +299,12 @@ public class WireMarshaller<T> {
                     return new CharFieldAccess(field);
                 case "short":
                     return new ShortFieldAccess(field);
-                case "int":
-                    return new IntegerFieldAccess(field);
+                case "int": {
+                    IntConversion intConversion = field.getAnnotation(IntConversion.class);
+                    return intConversion == null
+                            ? new IntegerFieldAccess(field)
+                            : new IntConversionFieldAccess(field, intConversion);
+                }
                 case "float":
                     return new FloatFieldAccess(field);
                 case "long": {
@@ -1207,6 +1211,49 @@ public class WireMarshaller<T> {
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) {
             bytes.writeInt(UNSAFE.getInt(o, offset));
+        }
+
+        @Override
+        protected boolean sameValue(Object o, Object o2) {
+            return UNSAFE.getInt(o, offset) == UNSAFE.getInt(o2, offset);
+        }
+
+        @Override
+        protected void copy(Object from, Object to) {
+            UNSAFE.putInt(to, offset, UNSAFE.getInt(from, offset));
+        }
+    }
+
+    static class IntConversionFieldAccess extends FieldAccess {
+        @NotNull
+        private final IntConverter intConverter;
+
+        IntConversionFieldAccess(@NotNull Field field, @NotNull IntConversion intConversion) {
+            super(field);
+            this.intConverter = ObjectUtils.newInstance(intConversion.value());
+        }
+
+        @Override
+        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
+            StringBuilder sb = acquireStringBuilder();
+            intConverter.append(sb, UNSAFE.getInt(o, offset));
+            write.text(sb);
+        }
+
+        @Override
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
+            StringBuilder sb = acquireStringBuilder();
+            read.text(sb);
+            int i = intConverter.parse(sb);
+            UNSAFE.putInt(o, offset, i);
+        }
+
+        @Override
+        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+            StringBuilder sb = acquireStringBuilder();
+            bytes.readUtf8(sb);
+            int i = intConverter.parse(sb);
+            bytes.writeInt(i);
         }
 
         @Override
