@@ -303,8 +303,12 @@ public class WireMarshaller<T> {
                     return new IntegerFieldAccess(field);
                 case "float":
                     return new FloatFieldAccess(field);
-                case "long":
-                    return new LongFieldAccess(field);
+                case "long": {
+                    LongConversion longConversion = field.getAnnotation(LongConversion.class);
+                    return longConversion == null
+                            ? new LongFieldAccess(field)
+                            : new LongConversionFieldAccess(field, longConversion);
+                }
                 case "double":
                     return new DoubleFieldAccess(field);
                 case "java.lang.String":
@@ -440,17 +444,17 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull ValueOut write, Object previous) {
             write.text((String) UNSAFE.getObject(o, offset));
         }
 
         @Override
-        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             UNSAFE.putObject(o, offset, read.text());
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
+        public void getAsBytes(Object o, @NotNull Bytes bytes) {
             bytes.writeUtf8((String) UNSAFE.getObject(o, offset));
         }
 
@@ -467,13 +471,13 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull ValueOut write, Object previous) {
             @NotNull CharSequence cs = (CharSequence) UNSAFE.getObject(o, offset);
             write.text(cs);
         }
 
         @Override
-        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             @NotNull StringBuilder sb = (StringBuilder) UNSAFE.getObject(o, offset);
             if (sb == null)
                 UNSAFE.putObject(o, offset, sb = new StringBuilder());
@@ -482,7 +486,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
+        public void getAsBytes(Object o, @NotNull Bytes bytes) {
             bytes.writeUtf8((CharSequence) UNSAFE.getObject(o, offset));
         }
 
@@ -492,7 +496,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void copy(Object from, Object to) throws IllegalAccessException {
+        protected void copy(Object from, Object to) {
             final StringBuilder fromSequence = (StringBuilder) UNSAFE.getObject(from, offset);
             StringBuilder toSequence = (StringBuilder) UNSAFE.getObject(to, offset);
 
@@ -521,7 +525,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             @NotNull Bytes bytes = (Bytes) UNSAFE.getObject(o, offset);
             if (bytes == null)
                 UNSAFE.putObject(o, offset, bytes = Bytes.elasticHeapByteBuffer(128));
@@ -553,7 +557,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void copy(Object from, Object to) throws IllegalAccessException {
+        protected void copy(Object from, Object to) {
             Bytes fromBytes = (Bytes) UNSAFE.getObject(from, offset);
             Bytes toBytes = (Bytes) UNSAFE.getObject(to, offset);
             if (fromBytes == null) {
@@ -706,12 +710,12 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void setValue(final Object o, final ValueIn read, final boolean overwrite) throws IllegalAccessException {
+        protected void setValue(final Object o, final ValueIn read, final boolean overwrite) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public void getAsBytes(final Object o, final Bytes bytes) throws IllegalAccessException {
+        public void getAsBytes(final Object o, final Bytes bytes) {
             throw new UnsupportedOperationException();
         }
 
@@ -871,7 +875,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException {
+        protected void setValue(Object o, ValueIn read, boolean overwrite) {
             throw new UnsupportedOperationException();
         }
 
@@ -948,7 +952,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException {
+        protected void setValue(Object o, ValueIn read, boolean overwrite) {
             throw new UnsupportedOperationException();
         }
 
@@ -1038,7 +1042,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException {
+        protected void setValue(Object o, ValueIn read, boolean overwrite) {
             throw new UnsupportedOperationException();
         }
 
@@ -1054,27 +1058,27 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull ValueOut write, Object previous) {
             write.bool(UNSAFE.getBoolean(o, offset));
         }
 
         @Override
-        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             UNSAFE.putBoolean(o, offset, read.bool());
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
+        public void getAsBytes(Object o, @NotNull Bytes bytes) {
             bytes.writeBoolean(UNSAFE.getBoolean(o, offset));
         }
 
         @Override
-        protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
+        protected boolean sameValue(Object o, Object o2) {
             return UNSAFE.getBoolean(o, offset) == UNSAFE.getBoolean(o2, offset);
         }
 
         @Override
-        protected void copy(Object from, Object to) throws IllegalAccessException {
+        protected void copy(Object from, Object to) {
             UNSAFE.putBoolean(to, offset, UNSAFE.getBoolean(from, offset));
         }
     }
@@ -1085,27 +1089,27 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull ValueOut write, Object previous) {
             write.int8(UNSAFE.getByte(o, offset));
         }
 
         @Override
-        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             UNSAFE.putByte(o, offset, read.int8());
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
+        public void getAsBytes(Object o, @NotNull Bytes bytes) {
             bytes.writeByte(UNSAFE.getByte(o, offset));
         }
 
         @Override
-        protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
+        protected boolean sameValue(Object o, Object o2) {
             return UNSAFE.getByte(o, offset) == UNSAFE.getByte(o2, offset);
         }
 
         @Override
-        protected void copy(Object from, Object to) throws IllegalAccessException {
+        protected void copy(Object from, Object to) {
             UNSAFE.putByte(to, offset, UNSAFE.getByte(from, offset));
         }
     }
@@ -1116,27 +1120,27 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull ValueOut write, Object previous) {
             write.int16(UNSAFE.getShort(o, offset));
         }
 
         @Override
-        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             UNSAFE.putShort(o, offset, read.int16());
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
+        public void getAsBytes(Object o, @NotNull Bytes bytes) {
             bytes.writeShort(UNSAFE.getShort(o, offset));
         }
 
         @Override
-        protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
+        protected boolean sameValue(Object o, Object o2) {
             return UNSAFE.getShort(o, offset) == UNSAFE.getShort(o2, offset);
         }
 
         @Override
-        protected void copy(Object from, Object to) throws IllegalAccessException {
+        protected void copy(Object from, Object to) {
             UNSAFE.putShort(to, offset, UNSAFE.getShort(from, offset));
         }
     }
@@ -1147,14 +1151,14 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull ValueOut write, Object previous) {
             @NotNull StringBuilder sb = acquireStringBuilder();
             sb.append(UNSAFE.getChar(o, offset));
             write.text(sb);
         }
 
         @Override
-        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             String text = read.text();
             if (text == null || text.length() < 1) {
                 if (overwrite)
@@ -1166,17 +1170,17 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
+        public void getAsBytes(Object o, @NotNull Bytes bytes) {
             bytes.writeUnsignedShort(UNSAFE.getChar(o, offset));
         }
 
         @Override
-        protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
+        protected boolean sameValue(Object o, Object o2) {
             return UNSAFE.getChar(o, offset) == UNSAFE.getChar(o2, offset);
         }
 
         @Override
-        protected void copy(Object from, Object to) throws IllegalAccessException {
+        protected void copy(Object from, Object to) {
             UNSAFE.putChar(to, offset, UNSAFE.getChar(from, offset));
         }
     }
@@ -1187,8 +1191,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous)
-                throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             if (previous == null)
                 write.int32(UNSAFE.getInt(o, offset));
             else
@@ -1196,23 +1199,23 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             int i = overwrite ? read.int32() : read.int32(UNSAFE.getInt(o, offset));
             UNSAFE.putInt(o, offset, i);
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
+        public void getAsBytes(Object o, @NotNull Bytes bytes) {
             bytes.writeInt(UNSAFE.getInt(o, offset));
         }
 
         @Override
-        protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
+        protected boolean sameValue(Object o, Object o2) {
             return UNSAFE.getInt(o, offset) == UNSAFE.getInt(o2, offset);
         }
 
         @Override
-        protected void copy(Object from, Object to) throws IllegalAccessException {
+        protected void copy(Object from, Object to) {
             UNSAFE.putInt(to, offset, UNSAFE.getInt(from, offset));
         }
     }
@@ -1223,8 +1226,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous)
-                throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             if (previous == null)
                 write.float32(UNSAFE.getFloat(o, offset));
             else
@@ -1232,23 +1234,23 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             final float v = overwrite ? read.float32() : read.float32(UNSAFE.getFloat(o, offset));
             UNSAFE.putFloat(o, offset, v);
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
+        public void getAsBytes(Object o, @NotNull Bytes bytes) {
             bytes.writeFloat(UNSAFE.getFloat(o, offset));
         }
 
         @Override
-        protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
+        protected boolean sameValue(Object o, Object o2) {
             return Maths.same(UNSAFE.getFloat(o, offset), UNSAFE.getFloat(o2, offset));
         }
 
         @Override
-        protected void copy(Object from, Object to) throws IllegalAccessException {
+        protected void copy(Object from, Object to) {
             UNSAFE.putFloat(to, offset, UNSAFE.getFloat(from, offset));
         }
     }
@@ -1259,8 +1261,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous)
-                throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             if (previous == null)
                 write.int64(UNSAFE.getLong(o, offset));
             else
@@ -1268,23 +1269,66 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             long i = overwrite ? read.int64() : read.int64(UNSAFE.getLong(o, offset));
             UNSAFE.putLong(o, offset, i);
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
+        public void getAsBytes(Object o, @NotNull Bytes bytes) {
             bytes.writeLong(UNSAFE.getLong(o, offset));
         }
 
         @Override
-        protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
+        protected boolean sameValue(Object o, Object o2) {
             return UNSAFE.getLong(o, offset) == UNSAFE.getLong(o2, offset);
         }
 
         @Override
-        protected void copy(Object from, Object to) throws IllegalAccessException {
+        protected void copy(Object from, Object to) {
+            UNSAFE.putLong(to, offset, UNSAFE.getLong(from, offset));
+        }
+    }
+
+    static class LongConversionFieldAccess extends FieldAccess {
+        @NotNull
+        private final LongConverter longConverter;
+
+        LongConversionFieldAccess(@NotNull Field field, @NotNull LongConversion longConversion) {
+            super(field);
+            this.longConverter = ObjectUtils.newInstance(longConversion.value());
+        }
+
+        @Override
+        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
+            StringBuilder sb = acquireStringBuilder();
+            longConverter.append(sb, UNSAFE.getLong(o, offset));
+            write.text(sb);
+        }
+
+        @Override
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
+            StringBuilder sb = acquireStringBuilder();
+            read.text(sb);
+            long i = longConverter.parse(sb);
+            UNSAFE.putLong(o, offset, i);
+        }
+
+        @Override
+        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+            StringBuilder sb = acquireStringBuilder();
+            bytes.readUtf8(sb);
+            long i = longConverter.parse(sb);
+            bytes.writeLong(i);
+        }
+
+        @Override
+        protected boolean sameValue(Object o, Object o2) {
+            return UNSAFE.getLong(o, offset) == UNSAFE.getLong(o2, offset);
+        }
+
+        @Override
+        protected void copy(Object from, Object to) {
             UNSAFE.putLong(to, offset, UNSAFE.getLong(from, offset));
         }
     }
@@ -1295,8 +1339,7 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous)
-                throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             if (previous == null)
                 write.float64(UNSAFE.getDouble(o, offset));
             else
@@ -1304,23 +1347,23 @@ public class WireMarshaller<T> {
         }
 
         @Override
-        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             final double v = overwrite ? read.float64() : read.float64(UNSAFE.getDouble(o, offset));
             UNSAFE.putDouble(o, offset, v);
         }
 
         @Override
-        public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
+        public void getAsBytes(Object o, @NotNull Bytes bytes) {
             bytes.writeDouble(UNSAFE.getDouble(o, offset));
         }
 
         @Override
-        protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
+        protected boolean sameValue(Object o, Object o2) {
             return Maths.same(UNSAFE.getDouble(o, offset), UNSAFE.getDouble(o2, offset));
         }
 
         @Override
-        protected void copy(Object from, Object to) throws IllegalAccessException {
+        protected void copy(Object from, Object to) {
             UNSAFE.putDouble(to, offset, UNSAFE.getDouble(from, offset));
         }
     }
