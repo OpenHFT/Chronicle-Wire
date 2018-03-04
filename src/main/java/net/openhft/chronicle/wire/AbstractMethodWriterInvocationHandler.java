@@ -66,7 +66,7 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
 
     protected void handleInvoke(@NotNull Method method, Object[] args, Wire wire) {
         if (recordHistory) {
-            wire.write(MethodReader.HISTORY)
+            wire.writeEventName(MethodReader.HISTORY)
                     .marshallable(MessageHistory.get());
         }
         String methodName = method.getName();
