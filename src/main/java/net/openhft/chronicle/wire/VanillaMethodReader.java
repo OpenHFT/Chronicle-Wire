@@ -54,15 +54,31 @@ public class VanillaMethodReader implements MethodReader {
     private final MarshallableIn in;
     @NotNull
     private final WireParser<Void> wireParser;
+    private FieldNumberParselet fieldNumberParselet;
     private boolean closeIn = false, closed;
     private MethodReaderInterceptor methodReaderInterceptor;
 
-    public VanillaMethodReader(MarshallableIn in, boolean ignoreDefault, WireParselet defaultParselet, MethodReaderInterceptor methodReaderInterceptor, @NotNull Object... objects) {
+    public VanillaMethodReader(MarshallableIn in,
+                               boolean ignoreDefault,
+                               WireParselet defaultParselet,
+                               MethodReaderInterceptor methodReaderInterceptor,
+                               @NotNull Object... objects) {
+        this(in, ignoreDefault, defaultParselet, null, methodReaderInterceptor, objects);
+    }
+
+    public VanillaMethodReader(MarshallableIn in,
+                               boolean ignoreDefault,
+                               WireParselet defaultParselet,
+                               FieldNumberParselet fieldNumberParselet,
+                               MethodReaderInterceptor methodReaderInterceptor,
+                               @NotNull Object... objects) {
+        this.fieldNumberParselet = fieldNumberParselet;
         this.in = in;
         this.methodReaderInterceptor = methodReaderInterceptor;
         if (objects[0] instanceof WireParselet)
             defaultParselet = (WireParselet) objects[0];
-        wireParser = WireParser.wireParser(defaultParselet);
+
+        wireParser = WireParser.wireParser(defaultParselet, fieldNumberParselet);
 
         @NotNull Set<String> methodsHandled = new HashSet<>();
         MethodFilterOnFirstArg methodFilterOnFirstArg = null;
