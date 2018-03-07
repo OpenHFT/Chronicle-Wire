@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.CharSequenceComparator;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -58,6 +59,7 @@ public class VanillaWireParser<O> implements WireParser<O> {
             return;
         }
 
+        long start = wireIn.bytes().readPosition();
         @NotNull ValueIn valueIn = wireIn.readEventName(sb);
         WireParselet<O> parslet;
         // on the assumption most messages are the same as the last,
@@ -72,8 +74,14 @@ public class VanillaWireParser<O> implements WireParser<O> {
             } else {
                 parslet = lookup(sb);
             }
-            if (parslet == null)
-                parslet = getDefaultConsumer();
+            if (parslet == null) {
+                if (sb.length() == 0) {
+                    // invalid rather than unknown method.
+                    Jvm.warn().on(getClass(), "Attempt to read but not at the start of a method\n" + wireIn.bytes().toHexString(start, 1024));
+                } else {
+                    parslet = getDefaultConsumer();
+                }
+            }
         }
 
         parslet.accept(sb, valueIn, out);
