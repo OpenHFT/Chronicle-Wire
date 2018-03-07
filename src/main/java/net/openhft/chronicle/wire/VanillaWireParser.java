@@ -77,7 +77,7 @@ public class VanillaWireParser<O> implements WireParser<O> {
             if (parslet == null) {
                 if (sb.length() == 0) {
                     // invalid rather than unknown method.
-                    Jvm.warn().on(getClass(), "Attempt to read but not at the start of a method\n" + wireIn.bytes().toHexString(start, 1024));
+                    Jvm.warn().on(getClass(), "Attempt to read method name/id but not at the start of a method\n" + wireIn.bytes().toHexString(start, 1024));
                 }
                 parslet = getDefaultConsumer();
             }
