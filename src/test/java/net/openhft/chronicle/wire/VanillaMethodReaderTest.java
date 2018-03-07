@@ -6,6 +6,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
+import org.junit.After;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -47,25 +48,28 @@ public class VanillaMethodReaderTest {
     @Test
     public void testMethodReaderWriter() {
         Bytes b = Bytes.elasticByteBuffer();
-        Wire w = WireType.BINARY.apply(b);
-        {
-            AListener aListener = w.methodWriter(true, AListener.class);
-            A a = new A();
-            a.x = 5;
-            aListener.a(a);
+        try {
+            Wire w = WireType.BINARY.apply(b);
+            {
+                AListener aListener = w.methodWriter(true, AListener.class);
+                A a = new A();
+                a.x = 5;
+                aListener.a(a);
 
+            }
+            {
+                w.methodReader(new AListener() {
+                    @Override
+                    public void a(final A a) {
+                        VanillaMethodReaderTest.this.instance = a;
+                    }
+                }).readOne();
+            }
+
+            assertEquals(5, this.instance.x);
+        } finally {
+            b.release();
         }
-        {
-            w.methodReader(new AListener() {
-                @Override
-                public void a(final A a) {
-                    VanillaMethodReaderTest.this.instance = a;
-                }
-            }).readOne();
-        }
-
-        assertEquals(5, this.instance.x);
-
     }
 
 
@@ -335,6 +339,12 @@ public class VanillaMethodReaderTest {
         void method();
 
         void method(MockDto dto);
+    }
+
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 }
 
