@@ -35,6 +35,7 @@ public class VanillaWireParser<O> implements WireParser<O> {
     private final StringBuilder lastEventName = new StringBuilder(128);
     private FieldNumberParselet<O> fieldNumberParselet;
     private WireParselet<O> lastParslet = null;
+    private long lastStart = 0;
 
     public VanillaWireParser(WireParselet<O> defaultConsumer,
                              FieldNumberParselet<O> fieldNumberParselet) {
@@ -77,7 +78,12 @@ public class VanillaWireParser<O> implements WireParser<O> {
             if (parslet == null) {
                 if (sb.length() == 0) {
                     // invalid rather than unknown method.
-                    Jvm.warn().on(getClass(), "Attempt to read method name/id but not at the start of a method, the previous method name was " + lastEventName + "\n" + wireIn.bytes().toHexString(start, 1024));
+                    Jvm.warn().on(getClass(),
+                            "Attempt to read method name/id but not at the start of a method, the previous method name was "
+                                    + lastEventName + "\n" + wireIn.bytes().toHexString(start, 1024));
+                    if (lastStart < start && lastStart + 1024 >= start)
+                        Jvm.warn().on(getClass(),
+                                "The previous message was\n" + wireIn.bytes().toHexString(lastStart, start - lastStart));
                 }
                 parslet = getDefaultConsumer();
             }
@@ -87,6 +93,7 @@ public class VanillaWireParser<O> implements WireParser<O> {
         lastEventName.setLength(0);
         lastEventName.append(sb);
         lastParslet = parslet;
+        lastStart = start;
     }
 
     private static int parseInt(CharSequence sb) {
