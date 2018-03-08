@@ -65,6 +65,10 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
         sources = timings = 0;
     }
 
+    public boolean addSourceDetails() {
+        return addSourceDetails;
+    }
+
     @Override
     public void reset(int sourceId, long sourceIndex) {
         sources = 1;
@@ -206,7 +210,7 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
         for (int i = 0; i < sources; i++)
             bytes.writeLong(sourceIndexArray[i]);
 
-        bytes.writeUnsignedByte(timings + 1 );// one more time for this output
+        bytes.writeUnsignedByte(timings + 1);// one more time for this output
         for (int i = 0; i < timings; i++) {
             bytes.writeLong(timingsArray[i]);
         }

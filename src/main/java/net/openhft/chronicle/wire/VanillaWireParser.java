@@ -56,7 +56,7 @@ public class VanillaWireParser<O> implements WireParser<O> {
     public void parseOne(@NotNull WireIn wireIn, O out) {
 
         if (fieldNumberParselet != null && peekCode(wireIn) == BinaryWireCode.FIELD_NUMBER) {
-            fieldNumberParselet.readOne(wireIn.readEventNumber(), wireIn.bytes(), out);
+            fieldNumberParselet.readOne(wireIn.readEventNumber(), wireIn, out);
             return;
         }
 
