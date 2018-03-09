@@ -39,7 +39,6 @@ public interface WireParser<O> extends BiConsumer<WireIn, O> {
         return new VanillaWireParser<>(defaultConsumer, fieldNumberParselet);
     }
 
-
     static <T> void noOpReadOne(long ignoreMethodId, WireIn wire, T o) {
         wire.bytes().writePosition(wire.bytes().readLimit());
     }
