@@ -20,7 +20,6 @@ import net.openhft.chronicle.core.util.CharSequenceComparator;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -29,7 +28,6 @@ import java.util.TreeMap;
  */
 public class VanillaWireParser<O> implements WireParser<O> {
     private final Map<CharSequence, WireParselet<O>> namedConsumer = new TreeMap<>(CharSequenceComparator.INSTANCE);
-    private final Map<Integer, WireParselet<O>> numberedConsumer = new HashMap<>();
     private final WireParselet<O> defaultConsumer;
     private final StringBuilder sb = new StringBuilder(128);
     private final StringBuilder lastEventName = new StringBuilder(128);
@@ -69,12 +67,7 @@ public class VanillaWireParser<O> implements WireParser<O> {
             parslet = lastParslet;
 
         } else {
-            if (sb.length() > 0 && sb.charAt(0) >= '0' && sb.charAt(0) <= '9') {
-                //Must be methodId since Java method-name cannot start with a digit.
-                parslet = lookup(parseInt(sb));
-            } else {
-                parslet = lookup(sb);
-            }
+            parslet = lookup(sb);
             if (parslet == null) {
                 if (sb.length() == 0) {
                     // invalid rather than unknown method.
@@ -96,25 +89,10 @@ public class VanillaWireParser<O> implements WireParser<O> {
         lastStart = start;
     }
 
-    private static int parseInt(CharSequence sb) {
-        int acc = 0;
-        for (int i = 0; i < sb.length(); ++i) {
-            char ch = sb.charAt(i);
-            if (ch >= '0' && ch <= '9') {
-                acc *= 10;
-                acc += ch - '0';
-            } else {
-                throw new IllegalStateException(String.format("Cannot parse %s as an int.", sb));
-            }
-        }
-        return acc;
-    }
-
     @NotNull
     @Override
     public VanillaWireParser<O> register(@NotNull WireKey key, WireParselet<O> valueInConsumer) {
         namedConsumer.put(key.name(), valueInConsumer);
-        numberedConsumer.put(key.code(), valueInConsumer);
         return this;
     }
 
@@ -123,8 +101,4 @@ public class VanillaWireParser<O> implements WireParser<O> {
         return namedConsumer.get(name);
     }
 
-    @Override
-    public WireParselet<O> lookup(int number) {
-        return numberedConsumer.get(number);
-    }
 }
