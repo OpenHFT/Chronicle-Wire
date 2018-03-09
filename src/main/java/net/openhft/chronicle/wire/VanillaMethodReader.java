@@ -41,6 +41,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
+import static net.openhft.chronicle.wire.VanillaWireParser.NO_OP;
+
 /*
  * Created by Peter Lawrey on 24/03/16.
  */
@@ -63,7 +65,7 @@ public class VanillaMethodReader implements MethodReader {
                                WireParselet defaultParselet,
                                MethodReaderInterceptor methodReaderInterceptor,
                                @NotNull Object... objects) {
-        this(in, ignoreDefault, defaultParselet, null, methodReaderInterceptor, objects);
+        this(in, ignoreDefault, defaultParselet, NO_OP, methodReaderInterceptor, objects);
     }
 
     public VanillaMethodReader(MarshallableIn in,

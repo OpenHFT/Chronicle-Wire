@@ -37,8 +37,8 @@ public class VanillaWireParser<O> implements WireParser<O> {
     private WireParselet<O> lastParslet = null;
     private long lastStart = 0;
 
-    public VanillaWireParser(WireParselet<O> defaultConsumer,
-                             FieldNumberParselet<O> fieldNumberParselet) {
+    public VanillaWireParser(@NotNull WireParselet<O> defaultConsumer,
+                             @NotNull FieldNumberParselet<O> fieldNumberParselet) {
         this.defaultConsumer = defaultConsumer;
         lastEventName.appendCodePoint(0xFFFF);
         this.fieldNumberParselet = fieldNumberParselet;
@@ -55,7 +55,7 @@ public class VanillaWireParser<O> implements WireParser<O> {
 
     public void parseOne(@NotNull WireIn wireIn, O out) {
 
-        if (fieldNumberParselet != null && peekCode(wireIn) == BinaryWireCode.FIELD_NUMBER) {
+        if (peekCode(wireIn) == BinaryWireCode.FIELD_NUMBER) {
             fieldNumberParselet.readOne(wireIn.readEventNumber(), wireIn, out);
             return;
         }

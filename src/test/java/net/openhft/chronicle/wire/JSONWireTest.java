@@ -88,9 +88,14 @@ public class JSONWireTest {
     @Test
     public void testNoSpaces() {
         @NotNull Wire wire = getWire("\"echo\":\"\"");
-        @NotNull WireParser<Void> parser = new VanillaWireParser<>((s, v, $) -> System.out.println(s + " - " + v.text()), null);
+        @NotNull VanillaWireParser parser = new VanillaWireParser<>(soutWireParselet(), VanillaWireParser.NO_OP);
         parser.parseOne(wire, null);
         assertEquals("", wire.bytes().toString());
+    }
+
+    @NotNull
+    private WireParselet<Object> soutWireParselet() {
+        return (s, v, $) -> System.out.println(s + " - " + v.text());
     }
 
     @Test
@@ -154,14 +159,14 @@ public class JSONWireTest {
     public void testBytes() throws Exception {
         @NotNull Wire w = getWire();
 
-        Bytes bs = Bytes.from("blablabla");
+        Bytes<byte[]> bs = Bytes.from("blablabla");
         w.write("a").int64(123);
         w.write("somebytes").text(bs);
 
         Wire w2 = WireType.JSON.apply(w.bytes());
         assertEquals("\"a\":123,\"somebytes\":\"blablabla\"", w2.toString());
 
-        Bytes bb = Bytes.elasticByteBuffer();
+        Bytes<java.nio.ByteBuffer> bb = Bytes.elasticByteBuffer();
         assertEquals(123, w2.read("a").int64());
 
         w2.read("somebytes").text(bb);

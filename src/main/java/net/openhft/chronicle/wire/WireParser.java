@@ -25,17 +25,24 @@ import java.util.function.BiConsumer;
  * Interface to parseOne arbitrary field-value data.
  */
 public interface WireParser<O> extends BiConsumer<WireIn, O> {
+
+    FieldNumberParselet NO_OP = WireParser::noOpReadOne;
+
     @NotNull
     static <O> WireParser<O> wireParser(WireParselet<O> defaultConsumer) {
-        return new VanillaWireParser<>(defaultConsumer, null);
+        return new VanillaWireParser<>(defaultConsumer, NO_OP);
     }
 
     @NotNull
-    static <O> WireParser<O> wireParser(WireParselet<O> defaultConsumer,
-                                        FieldNumberParselet<O> fieldNumberParselet) {
+    static <O> WireParser<O> wireParser(@NotNull WireParselet<O> defaultConsumer,
+                                        @NotNull FieldNumberParselet<O> fieldNumberParselet) {
         return new VanillaWireParser<>(defaultConsumer, fieldNumberParselet);
     }
 
+
+    static <T> void noOpReadOne(long ignoreMethodId, WireIn wire, T o) {
+        wire.bytes().writePosition(wire.bytes().readLimit());
+    }
 
     WireParselet<O> getDefaultConsumer();
 
