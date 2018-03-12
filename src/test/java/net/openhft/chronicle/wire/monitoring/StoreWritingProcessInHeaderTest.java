@@ -84,12 +84,12 @@ public final class StoreWritingProcessInHeaderTest {
 
     @BeforeClass
     public static void enableFeature() {
-        System.setProperty("wire.encodeTidInHeader", Boolean.TRUE.toString());
+        Wires.encodeTidInHeader(true);
     }
 
     @AfterClass
     public static void disableFeature() {
-        System.setProperty("wire.encodeTidInHeader", Boolean.FALSE.toString());
+        Wires.encodeTidInHeader(false);
     }
 
     private static Object[][] toParams(final WireType[] values) {

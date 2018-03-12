@@ -22,7 +22,6 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
 import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -65,10 +64,6 @@ public enum Wires {
     public static final int META_DATA = 1 << 30;
     public static final int UNKNOWN_LENGTH = 0x0;
     public static final int MAX_LENGTH = (1 << 30) - 1;
-    private static final boolean ENCODE_TID_IN_HEADER = Boolean.getBoolean("wire.encodeTidInHeader");
-    private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
-    private static final int INVERSE_TID_MASK = ~TID_MASK;
-
     // value to use when the message is not ready and of an unknown length
     public static final int NOT_COMPLETE_UNKNOWN_LENGTH = NOT_COMPLETE | UNKNOWN_LENGTH;
     // value to use when no more data is possible e.g. on a roll.
@@ -86,8 +81,23 @@ public enum Wires {
         }
         return SerializationStrategies.ANY_OBJECT;
     });
+    static final ClassLocal<Function<String, Marshallable>> MARSHALLABLE_FUNCTION = ClassLocal.withInitial(tClass -> {
+        Class[] interfaces = {Marshallable.class, tClass};
+        if (tClass == Marshallable.class)
+            interfaces = new Class[]{Marshallable.class};
+        Class<?> proxyClass = Proxy.getProxyClass(tClass.getClassLoader(), interfaces);
+        try {
+            Constructor<?> constructor = proxyClass.getConstructor(InvocationHandler.class);
+            return typeName -> newInstance(constructor, typeName);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    });
     static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(VanillaFieldInfo::lookupClass);
     static final StringBuilderPool SBP = new StringBuilderPool();
+    private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
+    private static final int INVERSE_TID_MASK = ~TID_MASK;
+    static boolean ENCODE_TID_IN_HEADER = Boolean.getBoolean("wire.encodeTidInHeader");
 
     static {
         CLASS_STRATEGY_FUNCTIONS.add(SerializeEnum.INSTANCE);
@@ -408,19 +418,6 @@ public enum Wires {
         return header & TID_MASK;
     }
 
-    static final ClassLocal<Function<String, Marshallable>> MARSHALLABLE_FUNCTION = ClassLocal.withInitial(tClass -> {
-        Class[] interfaces = {Marshallable.class, tClass};
-        if (tClass == Marshallable.class)
-            interfaces = new Class[]{Marshallable.class};
-        Class<?> proxyClass = Proxy.getProxyClass(tClass.getClassLoader(), interfaces);
-        try {
-            Constructor<?> constructor = proxyClass.getConstructor(InvocationHandler.class);
-            return typeName -> newInstance(constructor, typeName);
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-    });
-
     @Nullable
     public static <E> E objectSequence(ValueIn in, @Nullable E using, @Nullable Class clazz, SerializationStrategy<E> strategy) {
         if (clazz == Object.class)
@@ -516,6 +513,32 @@ public enum Wires {
                 && clazz != Bytes.class
                 && clazz != BytesStore.class
                 && !clazz.getPackage().getName().startsWith("java");
+    }
+
+    public static String typeNameFor(@NotNull Object value) {
+        return value instanceof Marshallable ? ((Marshallable) value).getClassName() : ClassAliasPool.CLASS_ALIASES.nameFor(value.getClass());
+    }
+
+    static Marshallable newInstance(Constructor constructor, String typeName) {
+        try {
+            return (Marshallable) constructor.newInstance(new TupleInvocationHandler(typeName));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public static <T> T tupleFor(Class<T> tClass, String typeName) {
+        if (tClass == null || tClass == Object.class)
+            tClass = (Class<T>) Marshallable.class;
+        return (T) MARSHALLABLE_FUNCTION.get(tClass).apply(typeName);
+    }
+
+    public static boolean encodeTidInHeader() {
+        return ENCODE_TID_IN_HEADER;
+    }
+
+    public static void encodeTidInHeader(boolean encodeTidInHeader) {
+        ENCODE_TID_IN_HEADER = encodeTidInHeader;
     }
 
     enum SerializeEnum implements Function<Class, SerializationStrategy> {
@@ -670,38 +693,6 @@ public enum Wires {
         }
     }
 
-    static class FieldInfoPair {
-        static final FieldInfoPair EMPTY = new FieldInfoPair(Collections.emptyList(), Collections.emptyMap());
-
-        @NotNull
-        final List<FieldInfo> list;
-        @NotNull
-        final Map<String, FieldInfo> map;
-
-        public FieldInfoPair(@NotNull List<FieldInfo> list, @NotNull Map<String, FieldInfo> map) {
-            this.list = list;
-            this.map = map;
-        }
-    }
-
-    public static String typeNameFor(@NotNull Object value) {
-        return value instanceof Marshallable ? ((Marshallable) value).getClassName() : ClassAliasPool.CLASS_ALIASES.nameFor(value.getClass());
-    }
-
-    static Marshallable newInstance(Constructor constructor, String typeName) {
-        try {
-            return (Marshallable) constructor.newInstance(new TupleInvocationHandler(typeName));
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    public static <T> T tupleFor(Class<T> tClass, String typeName) {
-        if (tClass == null || tClass == Object.class)
-            tClass = (Class<T>) Marshallable.class;
-        return (T) MARSHALLABLE_FUNCTION.get(tClass).apply(typeName);
-    }
-
     enum SerializeBytes implements Function<Class, SerializationStrategy> {
         INSTANCE;
 
@@ -731,6 +722,20 @@ public enum Wires {
                 default:
                     return null;
             }
+        }
+    }
+
+    static class FieldInfoPair {
+        static final FieldInfoPair EMPTY = new FieldInfoPair(Collections.emptyList(), Collections.emptyMap());
+
+        @NotNull
+        final List<FieldInfo> list;
+        @NotNull
+        final Map<String, FieldInfo> map;
+
+        public FieldInfoPair(@NotNull List<FieldInfo> list, @NotNull Map<String, FieldInfo> map) {
+            this.list = list;
+            this.map = map;
         }
     }
 
