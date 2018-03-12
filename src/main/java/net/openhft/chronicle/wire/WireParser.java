@@ -26,11 +26,11 @@ import java.util.function.BiConsumer;
  */
 public interface WireParser<O> extends BiConsumer<WireIn, O> {
 
-    FieldNumberParselet NO_OP = WireParser::noOpReadOne;
+    FieldNumberParselet SKIP_READABLE_BYTES = WireParser::skipReadable;
 
     @NotNull
     static <O> WireParser<O> wireParser(WireParselet<O> defaultConsumer) {
-        return new VanillaWireParser<>(defaultConsumer, NO_OP);
+        return new VanillaWireParser<>(defaultConsumer, SKIP_READABLE_BYTES);
     }
 
     @NotNull
@@ -39,8 +39,9 @@ public interface WireParser<O> extends BiConsumer<WireIn, O> {
         return new VanillaWireParser<>(defaultConsumer, fieldNumberParselet);
     }
 
-    static <T> void noOpReadOne(long ignoreMethodId, WireIn wire, T o) {
-        wire.bytes().writePosition(wire.bytes().readLimit());
+    static <T> void skipReadable(long ignoreMethodId, WireIn wire, T o) {
+        Bytes<?> bytes = wire.bytes();
+        bytes.readPosition(bytes.readLimit());
     }
 
     WireParselet<O> getDefaultConsumer();

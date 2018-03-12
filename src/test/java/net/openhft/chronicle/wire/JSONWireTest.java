@@ -88,7 +88,7 @@ public class JSONWireTest {
     @Test
     public void testNoSpaces() {
         @NotNull Wire wire = getWire("\"echo\":\"\"");
-        @NotNull VanillaWireParser parser = new VanillaWireParser<>(soutWireParselet(), VanillaWireParser.NO_OP);
+        @NotNull VanillaWireParser parser = new VanillaWireParser<>(soutWireParselet(), VanillaWireParser.SKIP_READABLE_BYTES);
         parser.parseOne(wire, null);
         assertEquals("", wire.bytes().toString());
     }
