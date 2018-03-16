@@ -246,4 +246,35 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
         }
         timingsArray[timings++] = l;
     }
+
+    /**
+     * We need a custom toString as the base class toString calls writeMarshallable which can mutate this
+     * @return String representation
+     */
+    @Override
+    public String toString() {
+        return "VanillaMessageHistory{" +
+                "sources: [" + toStringSources() +
+                "] timings: [" + toStringTimings() +
+                "] addSourceDetails=" + addSourceDetails +
+                '}';
+    }
+
+    private String toStringSources() {
+        StringBuilder sb = new StringBuilder();
+        for (int i=0; i<sources; i++) {
+            if (i > 0) sb.append(',');
+            sb.append(sourceIdArray[i]).append("=0x").append(Long.toHexString(sourceIndexArray[i]));
+        }
+        return sb.toString();
+    }
+
+    private String toStringTimings() {
+        StringBuilder sb = new StringBuilder();
+        for (int i=0; i<timings; i++) {
+            if (i > 0) sb.append(',');
+            sb.append(timingsArray[i]);
+        }
+        return sb.toString();
+    }
 }
