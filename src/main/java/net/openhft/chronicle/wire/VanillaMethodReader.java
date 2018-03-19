@@ -189,6 +189,9 @@ public class VanillaMethodReader implements MethodReader {
         } else {
             rest = v.toString();
         }
+        // TextWire.toString has an \n at the end
+        if (rest.endsWith("\n"))
+            rest = rest.substring(0, rest.length() - 1);
         LOGGER.debug("read " + name + " - " + rest);
     }
 
