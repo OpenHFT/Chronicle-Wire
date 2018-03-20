@@ -248,7 +248,8 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
     }
 
     /**
-     * We need a custom toString as the base class toString calls writeMarshallable which can mutate this
+     * We need a custom toString as the base class toString calls writeMarshallable which does not mutate this,
+     * but will display a different result every time you toString the object as it outputs System.nanoTime
      * @return String representation
      */
     @Override
