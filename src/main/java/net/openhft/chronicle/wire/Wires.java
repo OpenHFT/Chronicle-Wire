@@ -65,9 +65,9 @@ public enum Wires {
     public static final int UNKNOWN_LENGTH = 0x0;
     public static final int MAX_LENGTH = (1 << 30) - 1;
     // value to use when the message is not ready and of an unknown length
-    public static final int NOT_COMPLETE_UNKNOWN_LENGTH = NOT_COMPLETE | UNKNOWN_LENGTH;
+    public static final int NOT_COMPLETE_UNKNOWN_LENGTH = NOT_COMPLETE;
     // value to use when no more data is possible e.g. on a roll.
-    public static final int END_OF_DATA = NOT_COMPLETE | META_DATA | UNKNOWN_LENGTH;
+    public static final int END_OF_DATA = NOT_COMPLETE | META_DATA;
     public static final int NOT_INITIALIZED = 0x0;
     public static final Bytes<?> NO_BYTES = new VanillaBytes<>(BytesStore.empty());
     public static final WireIn EMPTY = new BinaryWire(NO_BYTES);
@@ -176,14 +176,14 @@ public enum Wires {
             length = Wires.lengthOf(bytes.readInt(headerPosition));
         }
 
-        return WireDumper.of(wire).asString(headerPosition, (long) (length + 4));
+        return WireDumper.of(wire).asString(headerPosition, length + 4);
     }
 
     public static String fromSizePrefixedBlobs(@NotNull WireIn wireIn) {
         return WireDumper.of(wireIn).asString();
     }
 
-    @Nullable
+    @NotNull
     public static CharSequence asText(@NotNull WireIn wireIn) {
         long pos = wireIn.bytes().readPosition();
         try {
@@ -203,10 +203,7 @@ public enum Wires {
         if (isNotComplete(len) && ENCODE_TID_IN_HEADER) {
             return Wires.removeMaskedTidFromHeader(len) & LENGTH_MASK;
         }
-        final int len0 = len & LENGTH_MASK;
-//        if (len0 > 1 << 20)
-//            System.out.println("len: " + len0);
-        return len0;
+        return len & LENGTH_MASK;
     }
 
     public static boolean isReady(int header) {
@@ -279,28 +276,28 @@ public enum Wires {
         return bytes.readPosition();
     }
 
-    @Nullable
+    @NotNull
     public static Bytes<?> acquireBytes() {
         Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::allocateElasticDirect);
         bytes.clear();
         return bytes;
     }
 
-    @Nullable
+    @NotNull
     static Bytes<?> acquireBytesForToString() {
         Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL, Bytes::allocateElasticDirect);
         bytes.clear();
         return bytes;
     }
 
-    @Nullable
+    @NotNull
     public static Wire acquireBinaryWire() {
         Wire wire = ThreadLocalHelper.getTL(WireInternal.BINARY_WIRE_TL, () -> new BinaryWire(acquireBytes()));
         wire.clear();
         return wire;
     }
 
-    @Nullable
+    @NotNull
     public static Bytes acquireAnotherBytes() {
         Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::allocateElasticDirect);
         bytes.clear();
@@ -366,10 +363,7 @@ public enum Wires {
     }
 
     public static boolean isEquals(@NotNull Object o1, @NotNull Object o2) {
-        if (o1.getClass() != o2.getClass())
-            return false;
-        return WireMarshaller.WIRE_MARSHALLER_CL.get(o1.getClass())
-                .isEqual(o1, o2);
+        return o1.getClass() == o2.getClass() && WireMarshaller.WIRE_MARSHALLER_CL.get(o1.getClass()).isEqual(o1, o2);
     }
 
     @NotNull
