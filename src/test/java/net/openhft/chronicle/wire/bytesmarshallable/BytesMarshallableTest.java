@@ -54,7 +54,7 @@ public class BytesMarshallableTest {
                 expected = "[pos: 0, rlim: 159, wlim: 8EiB, cap: 8EiB ] ǁprim: {⒑  flag: true,⒑  s8: 1,⒑  ch: \"\\x01\",⒑  s16: 1,⒑  s32: 1,⒑  s64: 1,⒑  f32: 1.0,⒑  f64: 1.0⒑}⒑scalar: {⒑  text: Hello1,⒑  buffer: bye 1,⒑  bytes: hi 1⒑}⒑‡٠٠٠٠٠٠٠٠٠";
                 break;
             case BINARY_LIGHT:
-                expected = "[pos: 0, rlim: 70, wlim: 8EiB, cap: 8EiB ] ǁÄprim\\u0082\\u001E٠٠٠Y⒈⒈⒈⒈٠⒈٠٠٠⒈٠٠٠٠٠٠٠٠٠\\u0080?٠٠٠٠٠٠ð?Æscalar\\u0082⒙٠٠٠⒍Hello1⒌bye 1⒋hi 1‡٠٠٠٠٠٠٠٠٠٠";
+                expected = "[pos: 0, rlim: 69, wlim: 8EiB, cap: 8EiB ] ǁÄprim\\u0082\\u001D٠٠٠Y⒈⒈⒈٠⒈٠٠٠⒈٠٠٠٠٠٠٠٠٠\\u0080?٠٠٠٠٠٠ð?Æscalar\\u0082⒙٠٠٠⒍Hello1⒌bye 1⒋hi 1‡٠٠٠٠٠٠٠٠٠٠٠";
                 break;
         }
         assertEquals(expected, wire.bytes().toDebugString());
