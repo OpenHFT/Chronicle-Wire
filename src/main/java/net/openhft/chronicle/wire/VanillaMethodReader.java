@@ -55,8 +55,7 @@ public class VanillaMethodReader implements MethodReader {
     static final Object IGNORED = new Object(); // object used to flag that the call should be ignored.
     private final MarshallableIn in;
     @NotNull
-    private final WireParser<Void> wireParser;
-    private FieldNumberParselet fieldNumberParselet;
+    private final WireParser wireParser;
     private boolean closeIn = false, closed;
     private MethodReaderInterceptor methodReaderInterceptor;
 
@@ -74,7 +73,6 @@ public class VanillaMethodReader implements MethodReader {
                                FieldNumberParselet fieldNumberParselet,
                                MethodReaderInterceptor methodReaderInterceptor,
                                @NotNull Object... objects) {
-        this.fieldNumberParselet = fieldNumberParselet;
         this.in = in;
         this.methodReaderInterceptor = methodReaderInterceptor;
         if (objects[0] instanceof WireParselet)
@@ -130,7 +128,7 @@ public class VanillaMethodReader implements MethodReader {
             }
         }
         if (wireParser.lookup(HISTORY) == null) {
-            wireParser.registerOnce(() -> HISTORY, (s, v, $) -> v.marshallable(MessageHistory.get()));
+            wireParser.registerOnce(() -> HISTORY, (s, v) -> v.marshallable(MessageHistory.get()));
         }
     }
 
@@ -210,9 +208,7 @@ public class VanillaMethodReader implements MethodReader {
                 MethodHandle mh = MethodHandles.lookup().unreflect(m).bindTo(o);
                 @NotNull Object[] argArr = {null};
                 MethodWireKey key = createWireKey(m, name);
-                wireParser.registerOnce(key, (s, v, $) -> {
-                    invokeMethodWithOneLong(o, m, name, mh, argArr, s, v, methodReaderInterceptor);
-                });
+                wireParser.registerOnce(key, (s, v) -> invokeMethodWithOneLong(o, m, name, mh, argArr, s, v, methodReaderInterceptor));
             } catch (IllegalAccessException e) {
                 Jvm.warn().on(o.getClass(), "Unable to unreflect " + m, e);
             }
@@ -220,7 +216,7 @@ public class VanillaMethodReader implements MethodReader {
         } else if (parameterType.isInterface() || !ReadMarshallable.class.isAssignableFrom(parameterType)) {
             @NotNull Object[] argArr = {null};
             MethodWireKey key = createWireKey(m, name);
-            wireParser.registerOnce(key, (s, v, $) -> {
+            wireParser.registerOnce(key, (s, v) -> {
                 try {
                     if (Jvm.isDebug())
                         logMessage(s, v);
@@ -235,19 +231,19 @@ public class VanillaMethodReader implements MethodReader {
         } else {
             ReadMarshallable arg;
             try {
-                Constructor constructor = ((Class) parameterType).getDeclaredConstructor();
+                Constructor constructor = parameterType.getDeclaredConstructor();
                 constructor.setAccessible(true);
                 arg = (ReadMarshallable) constructor.newInstance();
             } catch (Exception e) {
                 try {
-                    arg = (ReadMarshallable) OS.memory().allocateInstance((Class) parameterType);
+                    arg = (ReadMarshallable) OS.memory().allocateInstance(parameterType);
                 } catch (InstantiationException e1) {
                     throw Jvm.rethrow(e1);
                 }
             }
             @NotNull ReadMarshallable[] argArr = {arg};
             MethodWireKey key = createWireKey(m, name);
-            wireParser.registerOnce(key, (s, v, $) -> {
+            wireParser.registerOnce(key, (s, v) -> {
                 try {
                     if (Jvm.isDebug())
                         logMessage(s, v);
@@ -266,7 +262,7 @@ public class VanillaMethodReader implements MethodReader {
         m.setAccessible(true); // turn of security check to make a little faster
         String name = m.getName();
         MethodWireKey key = createWireKey(m, name);
-        wireParser.registerOnce(key, (s, v, $) -> {
+        wireParser.registerOnce(key, (s, v) -> {
             try {
                 if (Jvm.isDebug())
                     logMessage(s, v);
@@ -299,7 +295,7 @@ public class VanillaMethodReader implements MethodReader {
         };
         String name = m.getName();
         MethodWireKey key = createWireKey(m, name);
-        wireParser.registerOnce(key, (s, v, $) -> {
+        wireParser.registerOnce(key, (s, v) -> {
             try {
                 if (Jvm.isDebug())
                     logMessage(s, v);
@@ -343,7 +339,7 @@ public class VanillaMethodReader implements MethodReader {
         };
         String name = m.getName();
         MethodWireKey key = createWireKey(m, name);
-        wireParser.registerOnce(key, (s, v, $) -> {
+        wireParser.registerOnce(key, (s, v) -> {
             try {
                 if (Jvm.isDebug())
                     logMessage(s, v);
@@ -405,7 +401,7 @@ public class VanillaMethodReader implements MethodReader {
                         context.wire().bytes().readPosition(r);
                     }
 
-                    wireParser.accept(context.wire(), null);
+                    wireParser.accept(context.wire());
 
                     return true;
                 }
@@ -413,7 +409,7 @@ public class VanillaMethodReader implements MethodReader {
                     continue;
                 MessageHistory history = MessageHistory.get();
                 history.reset(context.sourceId(), context.index());
-                wireParser.accept(context.wire(), null);
+                wireParser.accept(context.wire());
             }
             return true;
         }

@@ -12,7 +12,7 @@ public class WireParserTest {
         BinaryWire wire = new BinaryWire(Bytes.elasticHeapByteBuffer(128));
         wire.bytes().writeUtf8("Hello world");
 
-        WireParser.skipReadable(-1, wire, null);
+        WireParser.skipReadable(-1, wire);
         assertEquals(0, wire.bytes().readRemaining());
     }
 }

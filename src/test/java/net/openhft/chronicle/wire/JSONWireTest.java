@@ -88,18 +88,18 @@ public class JSONWireTest {
     @Test
     public void testNoSpaces() {
         @NotNull Wire wire = getWire("\"echo\":\"\"");
-        @NotNull VanillaWireParser parser = new VanillaWireParser<>(soutWireParselet(), VanillaWireParser.SKIP_READABLE_BYTES);
-        parser.parseOne(wire, null);
+        @NotNull VanillaWireParser parser = new VanillaWireParser(soutWireParselet(), VanillaWireParser.SKIP_READABLE_BYTES);
+        parser.parseOne(wire);
         assertEquals("", wire.bytes().toString());
     }
 
     @NotNull
-    private WireParselet<Object> soutWireParselet() {
-        return (s, v, $) -> System.out.println(s + " - " + v.text());
+    private WireParselet soutWireParselet() {
+        return (s, v) -> System.out.println(s + " - " + v.text());
     }
 
     @Test
-    public void testMarshallableWithTwoLists() throws Exception {
+    public void testMarshallableWithTwoLists() {
         @NotNull Wire wire = getWire();
 
         @NotNull TwoLists lists1 = new TwoLists(null, 5, 5);
@@ -139,7 +139,7 @@ public class JSONWireTest {
     }
 
     @Test
-    public void testNullString() throws Exception {
+    public void testNullString() {
         @NotNull Wire w = getWire();
 
         @NotNull Item item1 = new Item(null, 1, 2);
@@ -156,7 +156,7 @@ public class JSONWireTest {
     }
 
     @Test
-    public void testBytes() throws Exception {
+    public void testBytes() {
         @NotNull Wire w = getWire();
 
         Bytes<byte[]> bs = Bytes.from("blablabla");

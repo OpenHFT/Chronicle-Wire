@@ -26,17 +26,17 @@ import java.util.TreeMap;
 /**
  * A simple parser to associate actions based on events/field names received.
  */
-public class VanillaWireParser<O> implements WireParser<O> {
-    private final Map<CharSequence, WireParselet<O>> namedConsumer = new TreeMap<>(CharSequenceComparator.INSTANCE);
-    private final WireParselet<O> defaultConsumer;
+public class VanillaWireParser implements WireParser {
+    private final Map<CharSequence, WireParselet> namedConsumer = new TreeMap<>(CharSequenceComparator.INSTANCE);
+    private final WireParselet defaultConsumer;
     private final StringBuilder sb = new StringBuilder(128);
     private final StringBuilder lastEventName = new StringBuilder(128);
-    private FieldNumberParselet<O> fieldNumberParselet;
-    private WireParselet<O> lastParslet = null;
+    private FieldNumberParselet fieldNumberParselet;
+    private WireParselet lastParslet = null;
     private long lastStart = 0;
 
-    public VanillaWireParser(@NotNull WireParselet<O> defaultConsumer,
-                             @NotNull FieldNumberParselet<O> fieldNumberParselet) {
+    public VanillaWireParser(@NotNull WireParselet defaultConsumer,
+                             @NotNull FieldNumberParselet fieldNumberParselet) {
         this.defaultConsumer = defaultConsumer;
         lastEventName.appendCodePoint(0xFFFF);
         this.fieldNumberParselet = fieldNumberParselet;
@@ -47,20 +47,20 @@ public class VanillaWireParser<O> implements WireParser<O> {
     }
 
     @Override
-    public WireParselet<O> getDefaultConsumer() {
+    public WireParselet getDefaultConsumer() {
         return defaultConsumer;
     }
 
-    public void parseOne(@NotNull WireIn wireIn, O out) {
+    public void parseOne(@NotNull WireIn wireIn) {
 
         if (peekCode(wireIn) == BinaryWireCode.FIELD_NUMBER) {
-            fieldNumberParselet.readOne(wireIn.readEventNumber(), wireIn, out);
+            fieldNumberParselet.readOne(wireIn.readEventNumber(), wireIn);
             return;
         }
 
         long start = wireIn.bytes().readPosition();
         @NotNull ValueIn valueIn = wireIn.readEventName(sb);
-        WireParselet<O> parslet;
+        WireParselet parslet;
         // on the assumption most messages are the same as the last,
         // save having to lookup a TreeMap.
         if (StringUtils.isEqual(sb, lastEventName)) {
@@ -82,7 +82,7 @@ public class VanillaWireParser<O> implements WireParser<O> {
             }
         }
 
-        parslet.accept(sb, valueIn, out);
+        parslet.accept(sb, valueIn);
         lastEventName.setLength(0);
         lastEventName.append(sb);
         lastParslet = parslet;
@@ -91,13 +91,13 @@ public class VanillaWireParser<O> implements WireParser<O> {
 
     @NotNull
     @Override
-    public VanillaWireParser<O> register(@NotNull WireKey key, WireParselet<O> valueInConsumer) {
+    public VanillaWireParser register(@NotNull WireKey key, WireParselet valueInConsumer) {
         namedConsumer.put(key.name(), valueInConsumer);
         return this;
     }
 
     @Override
-    public WireParselet<O> lookup(CharSequence name) {
+    public WireParselet lookup(CharSequence name) {
         return namedConsumer.get(name);
     }
 

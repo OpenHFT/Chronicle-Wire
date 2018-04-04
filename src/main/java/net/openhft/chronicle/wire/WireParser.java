@@ -19,41 +19,41 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * Interface to parseOne arbitrary field-value data.
  */
-public interface WireParser<O> extends BiConsumer<WireIn, O> {
+public interface WireParser extends Consumer<WireIn> {
 
     FieldNumberParselet SKIP_READABLE_BYTES = WireParser::skipReadable;
 
     @NotNull
-    static <O> WireParser<O> wireParser(WireParselet<O> defaultConsumer) {
-        return new VanillaWireParser<>(defaultConsumer, SKIP_READABLE_BYTES);
+    static WireParser wireParser(WireParselet defaultConsumer) {
+        return new VanillaWireParser(defaultConsumer, SKIP_READABLE_BYTES);
     }
 
     @NotNull
-    static <O> WireParser<O> wireParser(@NotNull WireParselet<O> defaultConsumer,
-                                        @NotNull FieldNumberParselet<O> fieldNumberParselet) {
-        return new VanillaWireParser<>(defaultConsumer, fieldNumberParselet);
+    static WireParser wireParser(@NotNull WireParselet defaultConsumer,
+                                        @NotNull FieldNumberParselet fieldNumberParselet) {
+        return new VanillaWireParser(defaultConsumer, fieldNumberParselet);
     }
 
-    static <T> void skipReadable(long ignoreMethodId, WireIn wire, T o) {
+    static void skipReadable(long ignoreMethodId, WireIn wire) {
         Bytes<?> bytes = wire.bytes();
         bytes.readPosition(bytes.readLimit());
     }
 
-    WireParselet<O> getDefaultConsumer();
+    WireParselet getDefaultConsumer();
 
-    void parseOne(@NotNull WireIn wireIn, O out);
+    void parseOne(@NotNull WireIn wireIn);
 
     @Override
-    default void accept(@NotNull WireIn wireIn, O marshallableOut) {
+    default void accept(@NotNull WireIn wireIn) {
         Bytes<?> bytes = wireIn.bytes();
         while (bytes.readRemaining() > 0) {
             long start = bytes.readPosition();
-            parseOne(wireIn, marshallableOut);
+            parseOne(wireIn);
             wireIn.consumePadding();
             if (bytes.readPosition() == start) {
                 Jvm.warn().on(getClass(), "Failed to progress reading " + bytes.readRemaining() + " bytes left.");
@@ -62,20 +62,20 @@ public interface WireParser<O> extends BiConsumer<WireIn, O> {
         }
     }
 
-    WireParselet<O> lookup(CharSequence name);
+    WireParselet lookup(CharSequence name);
 
     @NotNull
-    default VanillaWireParser<O> registerOnce(WireKey key, WireParselet<O> valueInConsumer) {
+    default VanillaWireParser registerOnce(WireKey key, WireParselet valueInConsumer) {
         CharSequence name = key.name();
         if (lookup(name) != null) {
             Jvm.warn().on(getClass(), "Unable to register multiple methods for " + name + " ignoring one.");
         } else {
             register(key, valueInConsumer);
         }
-        return (VanillaWireParser<O>) this;
+        return (VanillaWireParser) this;
     }
 
     @NotNull
-    VanillaWireParser<O> register(WireKey key, WireParselet<O> valueInConsumer);
+    VanillaWireParser register(WireKey key, WireParselet valueInConsumer);
 
 }

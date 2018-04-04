@@ -53,15 +53,15 @@ public class QueryWireTest {
                 .read(() -> "int").int64(this, (o, i) -> assertEquals(12345, i))
                 .read(() -> "text").text(this, (o, s) -> assertEquals("Hello World", s))
                 .read(() -> "float").float64(this, (o, f) -> assertEquals(12.345, f, 0.0));
-        @NotNull WireParser wp = WireParser.wireParser((s, v, o) -> System.err.println(s + " " + v.text()));
+        @NotNull WireParser wp = WireParser.wireParser((s, v) -> System.err.println(s + " " + v.text()));
         @NotNull List<Object> results = new ArrayList<>();
-        wp.register(() -> "bool", (s, v, o) -> v.bool(results, List::add));
-        wp.register(() -> "int", (s, v, o) -> v.int64(results, List::add));
-        wp.register(() -> "text", (s, v, o) -> v.text(results, List::add));
-        wp.register(() -> "float", (s, v, o) -> v.float64(results, List::add));
+        wp.register(() -> "bool", (s, v) -> v.bool(results, List::add));
+        wp.register(() -> "int", (s, v) -> v.int64(results, List::add));
+        wp.register(() -> "text", (s, v) -> v.text(results, List::add));
+        wp.register(() -> "float", (s, v) -> v.float64(results, List::add));
         bytes.readPosition(0);
         while (bytes.readRemaining() > 0)
-            wp.parseOne(wire, null);
+            wp.parseOne(wire);
         assertEquals(new ArrayList<>(Arrays.asList(true, 12345L, "Hello World", 12.345)), results);
     }
 }

@@ -22,7 +22,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
     @NotNull
     public static WireParselet createDefaultParselet() {
-        return (s, v, $) -> {
+        return (s, v) -> {
             MessageHistory history = MessageHistory.get();
             long sourceIndex = history.lastSourceIndex();
             v.skipValue();
