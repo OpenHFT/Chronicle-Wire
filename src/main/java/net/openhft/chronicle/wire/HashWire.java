@@ -30,7 +30,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.ObjectOutput;
 import java.io.Serializable;
-import java.io.StreamCorruptedException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -40,10 +39,20 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
-/*
- * Created by peter.lawrey on 05/02/2016.
- */
 public class HashWire implements WireOut, BytesComment {
+    private static final ThreadLocal<HashWire> hwTL = new ThreadLocal<HashWire>() {
+        @Override
+        protected HashWire initialValue() {
+            return new HashWire();
+        }
+
+        @Override
+        public HashWire get() {
+            HashWire hashWire = super.get();
+            hashWire.hash = 0;
+            return hashWire;
+        }
+    };
     private static final int K0 = 0x6d0f27bd;
     private static final int M0 = 0x5bc80bad;
     private static final int M1 = 0xea7585d7;
@@ -57,7 +66,7 @@ public class HashWire implements WireOut, BytesComment {
     }
 
     public static long hash64(Object value) {
-        @NotNull HashWire hashWire = new HashWire();
+        @NotNull HashWire hashWire = hwTL.get();
         hashWire.getValueOut().object(value);
         return hashWire.hash64();
     }
@@ -67,7 +76,7 @@ public class HashWire implements WireOut, BytesComment {
     }
 
     public static int hash32(Object value) {
-        @NotNull HashWire hashWire = new HashWire();
+        @NotNull HashWire hashWire = hwTL.get();
         hashWire.getValueOut().object(value);
         return hashWire.hash32();
     }
