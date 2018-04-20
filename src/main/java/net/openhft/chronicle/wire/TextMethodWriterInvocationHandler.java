@@ -17,9 +17,14 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 
 /*
  * Created by Peter Lawrey on 25/03/16.
@@ -29,6 +34,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
     static boolean ENABLE_EOD = true;
     @NotNull
     private final TextWire wire;
+    private final Map<Method, Consumer<Object[]>> visitorConverter = new LinkedHashMap<>();
 
     TextMethodWriterInvocationHandler(@NotNull TextWire wire) {
         this.wire = wire;
@@ -37,6 +43,8 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
 
     @Override
     protected void handleInvoke(Method method, Object[] args) {
+        visitorConverter.computeIfAbsent(method, this::buildConverter)
+                .accept(args);
         handleInvoke(method, args, wire);
         wire.getValueOut().resetBetweenDocuments();
         Bytes<?> bytes = wire.bytes();
@@ -44,6 +52,43 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
             bytes.append('\n');
         if (ENABLE_EOD) {
             bytes.append("---\n");
+        }
+    }
+
+    private Consumer<Object[]> buildConverter(Method method) {
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        for (Annotation anno : parameterAnnotations[0]) {
+            if (anno instanceof LongConversion) {
+                LongConversion longConversion = (LongConversion) anno;
+                LongConverter ic = ObjectUtils.newInstance(longConversion.value());
+                return a -> {
+                    if (a[0] instanceof Number) {
+                        StringBuilder sb = Wires.acquireStringBuilder();
+                        ic.append(sb, ((Number) a[0]).longValue());
+                        a[0] = sb.toString();
+                    }
+                };
+            }
+            if (anno instanceof IntConversion) {
+                IntConversion intConversion = (IntConversion) anno;
+                IntConverter ic = ObjectUtils.newInstance(intConversion.value());
+                return a -> {
+                    if (a[0] instanceof Number) {
+                        StringBuilder sb = Wires.acquireStringBuilder();
+                        ic.append(sb, ((Number) a[0]).intValue());
+                        a[0] = sb.toString();
+                    }
+                };
+            }
+        }
+        return NoOp.INSTANCE;
+    }
+
+    static enum NoOp implements Consumer<Object[]> {
+        INSTANCE;
+
+        @Override
+        public void accept(Object[] objects) {
         }
     }
 }
