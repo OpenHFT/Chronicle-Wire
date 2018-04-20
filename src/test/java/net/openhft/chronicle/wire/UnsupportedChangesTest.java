@@ -29,7 +29,7 @@ public class UnsupportedChangesTest {
                 "  inner: !!null \"\"\n" +
                 "}\n", nested.toString());
 
-        assertEquals("{ExceptionKey{level=FATAL, clazz=class net.openhft.chronicle.wire.WireMarshaller$ObjectFieldAccess, message='Unable to parse field: inner, as a marshallable as it is 128', throwable=}=1}", exceptions.toString());
+        assertEquals("{ExceptionKey{level=WARN, clazz=class net.openhft.chronicle.wire.WireMarshaller$ObjectFieldAccess, message='Unable to parse field: inner, as a marshallable as it is 128', throwable=}=1}", exceptions.toString());
     }
 
     @Test
@@ -45,8 +45,7 @@ public class UnsupportedChangesTest {
                 "  second: 123.4\n" +
                 "}\n", wrapper.toString());
 
-        // TODO probably should produce a warning.
-        assertEquals("{ExceptionKey{level=FATAL, clazz=class net.openhft.chronicle.wire.TextWire$TextValueIn, message='Unable to read {a=128, b=1.0} as a double.', throwable=}=1}", exceptions.toString());
+        assertEquals("{ExceptionKey{level=WARN, clazz=class net.openhft.chronicle.wire.TextWire$TextValueIn, message='Unable to read {a=128, b=1.0} as a double.', throwable=}=1}", exceptions.toString());
     }
 
     @Test
@@ -62,7 +61,7 @@ public class UnsupportedChangesTest {
                 "  second: 1234\n" +
                 "}\n", wrapper.toString());
 
-        assertEquals("{ExceptionKey{level=FATAL, clazz=class net.openhft.chronicle.wire.TextWire$TextValueIn, message='Unable to read {a=128, b=1.0} as a long.', throwable=}=1}", exceptions.toString());
+        assertEquals("{ExceptionKey{level=WARN, clazz=class net.openhft.chronicle.wire.TextWire$TextValueIn, message='Unable to read {a=128, b=1.0} as a long.', throwable=}=1}", exceptions.toString());
     }
 
     @Test
