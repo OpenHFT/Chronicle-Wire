@@ -62,7 +62,6 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      *
      * @param filename or path to read
      * @return the marshallable object
-     * @throws IOException
      */
     @NotNull
     static <T> T fromFile(String filename) throws IOException {
@@ -75,7 +74,6 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * @param filename     or path to read
      * @param expectedType to deserialize as
      * @return the marshallable object
-     * @throws IOException
      */
     @Nullable
     static <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException {

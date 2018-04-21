@@ -152,7 +152,7 @@ public class RawWire extends AbstractWire implements Wire {
     @Nullable
     @Override
     public <K> K readEvent(@NotNull Class<K> expectedClass) {
-        return (K) valueIn.object(expectedClass);
+        return valueIn.object(expectedClass);
     }
 
     @NotNull
@@ -680,12 +680,18 @@ public class RawWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> flag) {
             int b = bytes.readUnsignedByte();
-            if (b == BinaryWireCode.NULL)
-                flag.accept(t, null);
-            else if (b == 0 || b == BinaryWireCode.FALSE)
-                flag.accept(t, false);
-            else
-                flag.accept(t, true);
+            switch (b) {
+                case BinaryWireCode.NULL:
+                    flag.accept(t, null);
+                    break;
+                case 0:
+                case BinaryWireCode.FALSE:
+                    flag.accept(t, false);
+                    break;
+                default:
+                    flag.accept(t, true);
+                    break;
+            }
             return RawWire.this;
         }
 
@@ -738,7 +744,7 @@ public class RawWire extends AbstractWire implements Wire {
             long length = readLength();
             @NotNull Bytes<?> bytes = wireIn().bytes();
 
-            toBytes.write((BytesStore) bytes, bytes.readPosition(), length);
+            toBytes.write(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
             return wireIn();
         }

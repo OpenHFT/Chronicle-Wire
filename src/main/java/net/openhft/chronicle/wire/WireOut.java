@@ -133,8 +133,6 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * This will increment the headerNumber as appropriate if successful
      *
-     * @param metaData
-     * @param writer
      */
     default void writeDocument(boolean metaData, @NotNull WriteMarshallable writer) {
         WireInternal.writeData(this, metaData, false, writer);

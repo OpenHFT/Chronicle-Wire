@@ -1994,7 +1994,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (SPEC >= 18) {
                 long l6 = Math.round(l * 1e6);
                 if (l6 / 1e6 == l && l6 > (-1L << 35) && l6 < (1L << 42)) {
-                    if (writeAsFixedPoint(l, l6)) return true;
+                    return writeAsFixedPoint(l, l6);
                 }
             }
             return false;
@@ -3145,14 +3145,18 @@ public class BinaryWire extends AbstractWire implements Wire {
         public <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts) {
             @NotNull StringBuilder sb = acquireStringBuilder();
             int code = readCode();
-            if (code == TYPE_PREFIX) {
-                bytes.readUtf8(sb);
+            switch (code) {
+                case TYPE_PREFIX:
+                    bytes.readUtf8(sb);
 
-            } else if (code == NULL) {
-                sb.setLength(0);
-                sb.append("!null");
-            } else {
-                cantRead(code);
+                    break;
+                case NULL:
+                    sb.setLength(0);
+                    sb.append("!null");
+                    break;
+                default:
+                    cantRead(code);
+                    break;
             }
             ts.accept(t, sb);
             return this;
@@ -3162,13 +3166,17 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer) {
             int code = readCode();
-            if (code == TYPE_LITERAL) {
-                @Nullable StringBuilder sb = readUtf8();
-                classNameConsumer.accept(t, sb);
-            } else if (code == NULL) {
-                classNameConsumer.accept(t, null);
-            } else {
-                cantRead(code);
+            switch (code) {
+                case TYPE_LITERAL:
+                    @Nullable StringBuilder sb = readUtf8();
+                    classNameConsumer.accept(t, sb);
+                    break;
+                case NULL:
+                    classNameConsumer.accept(t, null);
+                    break;
+                default:
+                    cantRead(code);
+                    break;
             }
             return BinaryWire.this;
         }
@@ -3177,18 +3185,19 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public <T> Class<T> typeLiteral() {
             int code = readCode();
-            if (code == TYPE_LITERAL) {
-                @Nullable StringBuilder sb = readUtf8();
-                try {
-                    return classLookup().forName(sb);
-                } catch (ClassNotFoundException e) {
-                    throw new IORuntimeException(e);
-                }
-            } else if (code == NULL) {
-                return null;
+            switch (code) {
+                case TYPE_LITERAL:
+                    @Nullable StringBuilder sb = readUtf8();
+                    try {
+                        return classLookup().forName(sb);
+                    } catch (ClassNotFoundException e) {
+                        throw new IORuntimeException(e);
+                    }
+                case NULL:
+                    return null;
 
-            } else {
-                throw cantRead(code);
+                default:
+                    throw cantRead(code);
             }
         }
 
@@ -3721,7 +3730,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 //            System.out.println("anchor " + ref + " inObjects " + Integer.toHexString(inObjects.hashCode()));
             if (ref >= inObjects.length)
                 inObjects = Arrays.copyOf(inObjects, inObjects.length * 2);
-            @NotNull T t = (T) super.typedMarshallable0();
+            @NotNull T t = super.typedMarshallable0();
             inObjects[Maths.toUInt31(ref)] = (Marshallable) t;
             return t;
         }

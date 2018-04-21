@@ -712,7 +712,7 @@ public enum Wires {
                             (o, in) -> in.bytesStore().bytesForRead());
                 case "java.util.Base64":
                     return ScalarStrategy.of(Bytes.class,
-                            (o, in) -> decodeBase64(o, in));
+                            SerializeBytes::decodeBase64);
                 default:
                     return null;
             }

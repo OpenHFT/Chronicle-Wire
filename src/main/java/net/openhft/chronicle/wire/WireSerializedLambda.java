@@ -64,21 +64,20 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
                             Object[] capturedArgs) {
              */
             valueOut.typePrefix("SerializedLambda");
-            valueOut.marshallable(v -> {
-                v.write(() -> "cc").typeLiteral(sl.getCapturingClass().replace('/', '.'))
-                        .write(() -> "fic").text(sl.getFunctionalInterfaceClass())
-                        .write(() -> "fimn").text(sl.getFunctionalInterfaceMethodName())
-                        .write(() -> "fims").text(sl.getFunctionalInterfaceMethodSignature())
-                        .write(() -> "imk").int32(sl.getImplMethodKind())
-                        .write(() -> "ic").text(sl.getImplClass())
-                        .write(() -> "imn").text(sl.getImplMethodName())
-                        .write(() -> "ims").text(sl.getImplMethodSignature())
-                        .write(() -> "imt").text(sl.getInstantiatedMethodType())
-                        .write(() -> "ca").sequence(v2 -> {
-                    for (int i = 0; i < sl.getCapturedArgCount(); i++)
-                        v2.object(sl.getCapturedArg(i));
-                });
-            });
+            valueOut.marshallable(v ->
+                    v.write(() -> "cc").typeLiteral(sl.getCapturingClass().replace('/', '.'))
+                            .write(() -> "fic").text(sl.getFunctionalInterfaceClass())
+                            .write(() -> "fimn").text(sl.getFunctionalInterfaceMethodName())
+                            .write(() -> "fims").text(sl.getFunctionalInterfaceMethodSignature())
+                            .write(() -> "imk").int32(sl.getImplMethodKind())
+                            .write(() -> "ic").text(sl.getImplClass())
+                            .write(() -> "imn").text(sl.getImplMethodName())
+                            .write(() -> "ims").text(sl.getImplMethodSignature())
+                            .write(() -> "imt").text(sl.getInstantiatedMethodType())
+                            .write(() -> "ca").sequence(v2 -> {
+                        for (int i = 0; i < sl.getCapturedArgCount(); i++)
+                            v2.object(sl.getCapturedArg(i));
+                    }));
         } catch (Exception e) {
             throw new AssertionError(e);
         }

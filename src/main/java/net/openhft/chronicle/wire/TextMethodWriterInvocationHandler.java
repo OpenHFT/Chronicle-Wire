@@ -84,7 +84,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
         return NoOp.INSTANCE;
     }
 
-    static enum NoOp implements Consumer<Object[]> {
+    enum NoOp implements Consumer<Object[]> {
         INSTANCE;
 
         @Override

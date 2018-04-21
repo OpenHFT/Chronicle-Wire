@@ -484,7 +484,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         if (bytes.readRemaining() == 0)
             throw new IOException("File " + file + " was empty");
         try {
-            return (T) (apply(bytes).getValueIn().object(expectedType));
+            return apply(bytes).getValueIn().object(expectedType);
         } finally {
             bytes.release();
         }

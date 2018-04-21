@@ -274,7 +274,7 @@ public interface ValueOut {
 
     default <T, K> WireOut sequenceWithLength(T t, int length, ObjectIntObjectConsumer<T, ValueOut> writer) {
         boolean b = swapLeaf(true);
-        WireOut sequence = sequence(t, length, (TriConsumer<T, Integer, ValueOut>) writer::accept);
+        WireOut sequence = sequence(t, length, writer::accept);
         swapLeaf(b);
         return sequence;
     }
@@ -462,6 +462,7 @@ public interface ValueOut {
     default <V> WireOut list(List<V> coll, Class<V> assumedClass) {
         sequence(coll, assumedClass, (s, kls, out) -> {
             int size = s.size();
+            //noinspection ForLoopReplaceableByForEach
             for (int i = 0; i < size; i++) {
                 boolean wasLeaf = out.swapLeaf(true);
                 marshallable((WriteMarshallable) s.get(i));
@@ -617,7 +618,7 @@ public interface ValueOut {
             WireSerializedLambda.write(value, this);
             return wireOut();
         } else if (Object[].class.isAssignableFrom(value.getClass())) {
-            @NotNull Class type = (Class) value.getClass().getComponentType();
+            @NotNull Class type = value.getClass().getComponentType();
             return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), value.getClass());
         } else if (value instanceof Serializable) {
             return typedMarshallable((Serializable) value);
@@ -643,17 +644,17 @@ public interface ValueOut {
 
     @NotNull
     default WireOut fixedFloat32(float value) {
-        return typePrefix(float.class).float32((Float) value);
+        return typePrefix(float.class).float32(value);
     }
 
     @NotNull
     default WireOut fixedInt8(byte value) {
-        return typePrefix(byte.class).int8((Byte) value);
+        return typePrefix(byte.class).int8(value);
     }
 
     @NotNull
     default WireOut fixedInt16(short value) {
-        return typePrefix(short.class).int16((Short) value);
+        return typePrefix(short.class).int16(value);
     }
 
     @NotNull
@@ -711,7 +712,7 @@ public interface ValueOut {
         if (value instanceof Marshallable)
             return marshallable((Marshallable) value);
         if (Object[].class.isAssignableFrom(value.getClass())) {
-            @NotNull Class type = (Class) value.getClass().getComponentType();
+            @NotNull Class type = value.getClass().getComponentType();
             return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), Object[].class);
         }
         return object(value);

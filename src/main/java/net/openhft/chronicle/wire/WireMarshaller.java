@@ -772,6 +772,7 @@ public class WireMarshaller<T> {
                 }
                 if (coll instanceof RandomAccess) {
                     @NotNull List list = (List) coll;
+                    //noinspection ForLoopReplaceableByForEach
                     for (int i = 0, len = list.size(); i < len; i++) {
                         out.object(componentType, list.get(i));
                     }
@@ -930,6 +931,7 @@ public class WireMarshaller<T> {
             write.sequence(c, (coll, out) -> {
                 if (coll instanceof RandomAccess) {
                     @NotNull List<String> list = (List<String>) coll;
+                    //noinspection ForLoopReplaceableByForEach
                     for (int i = 0, len = list.size(); i < len; i++)
                         out.text(list.get(i));
 
