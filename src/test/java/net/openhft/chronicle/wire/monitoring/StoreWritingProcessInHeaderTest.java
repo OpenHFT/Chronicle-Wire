@@ -40,6 +40,22 @@ public final class StoreWritingProcessInHeaderTest {
         return toParams(WireType.values());
     }
 
+    @BeforeClass
+    public static void enableFeature() {
+        Wires.encodeTidInHeader(true);
+    }
+
+    @AfterClass
+    public static void disableFeature() {
+        Wires.encodeTidInHeader(false);
+    }
+
+    private static Object[][] toParams(final WireType[] values) {
+        return Arrays.stream(values).filter(WireType::isAvailable).
+                filter(wt -> wt != WireType.CSV).
+                map(wt -> new Object[]{wt.toString(), wt}).toArray(Object[][]::new);
+    }
+
     @Test
     public void shouldEncodePid() {
         final int tid = Affinity.getThreadId();
@@ -80,21 +96,5 @@ public final class StoreWritingProcessInHeaderTest {
     @After
     public void tearDown() {
         bytes.release();
-    }
-
-    @BeforeClass
-    public static void enableFeature() {
-        Wires.encodeTidInHeader(true);
-    }
-
-    @AfterClass
-    public static void disableFeature() {
-        Wires.encodeTidInHeader(false);
-    }
-
-    private static Object[][] toParams(final WireType[] values) {
-        return Arrays.stream(values).filter(WireType::isAvailable).
-                filter(wt -> wt != WireType.CSV).
-                map(wt -> new Object[] {wt.toString(), wt}).toArray(Object[][]::new);
     }
 }

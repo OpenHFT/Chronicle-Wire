@@ -31,6 +31,19 @@ public final class BinaryWireStringInternerTest {
     private final Bytes heapBytes = Bytes.elasticHeapByteBuffer(4096);
     private final BinaryWire wire = BinaryWire.binaryOnly(heapBytes);
 
+    private static String message(final int index, final String inputData) {
+        return String.format("At index %d for string %s",
+                index, inputData);
+    }
+
+    private static String makeString(final int length, final Random random) {
+        final StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            builder.append((char) ('a' + random.nextInt('z' - 'a')));
+        }
+        return builder.toString();
+    }
+
     @Before
     public void createTestData() throws Exception {
         for (int i = 0; i < DATA_SET_SIZE; i++) {
@@ -117,22 +130,9 @@ public final class BinaryWireStringInternerTest {
                         exceptionConsumer.accept(new IllegalStateException("text was null"));
                     }
                 }
-            } catch(RuntimeException e) {
+            } catch (RuntimeException e) {
                 exceptionConsumer.accept(e);
             }
         }
-    }
-
-    private static String message(final int index, final String inputData) {
-        return String.format("At index %d for string %s",
-                index, inputData);
-    }
-
-    private static String makeString(final int length, final Random random) {
-        final StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            builder.append((char) ('a' + random.nextInt('z' - 'a')));
-        }
-        return builder.toString();
     }
 }

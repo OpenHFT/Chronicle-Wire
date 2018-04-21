@@ -210,7 +210,6 @@ public class TextMethodTester<T> {
         return actual;
     }
 
-
     public TextMethodTester<T> methodWriterListener(MethodWriterListener methodWriterListener) {
         this.methodWriterListener = methodWriterListener;
         return this;

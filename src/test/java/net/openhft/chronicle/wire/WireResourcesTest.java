@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals;
 public class WireResourcesTest {
 
     private static void writeMessage(@NotNull Wire wire) throws TimeoutException, EOFException, StreamCorruptedException {
-        long pos = wire.writeHeader(1, TimeUnit.MILLISECONDS, null,null);
+        long pos = wire.writeHeader(1, TimeUnit.MILLISECONDS, null, null);
         wire.bytes().writeSkip(128000);
         wire.bytes().writeLong(1L);
         wire.updateHeader(pos, false);

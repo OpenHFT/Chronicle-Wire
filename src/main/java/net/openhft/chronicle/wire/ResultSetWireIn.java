@@ -593,7 +593,6 @@ public class ResultSetWireIn implements WireIn, BytesComment {
             throw new UnsupportedOperationException();
         }
 
-
         @NotNull
         @Override
         public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) {

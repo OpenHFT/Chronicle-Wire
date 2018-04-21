@@ -15,23 +15,6 @@ import java.util.TreeMap;
 
 public class MarshallableWithOverwriteFalseTest {
 
-
-    static class MyDto extends AbstractMarshallable {
-        List<String> strings = new ArrayList<>();
-        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
-
-            // WORKS
-           //  Wires.readMarshallable(this, wire, true); //  WORKS
-
-            // FAILS
-            Wires.readMarshallable(this, wire, false);
-        }
-    }
-
-    static class MyDto2 extends AbstractMarshallable {
-        Map<String, MyDto> myDto = new TreeMap<String, MyDto>();
-    }
-
     @Test
     public void test() {
 
@@ -47,5 +30,22 @@ public class MarshallableWithOverwriteFalseTest {
         MyDto2 o = (MyDto2) Marshallable.fromString(cs);
 
         assert o.myDto.get("").strings.size() == 2;
+    }
+
+    static class MyDto extends AbstractMarshallable {
+        List<String> strings = new ArrayList<>();
+
+        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
+
+            // WORKS
+            //  Wires.readMarshallable(this, wire, true); //  WORKS
+
+            // FAILS
+            Wires.readMarshallable(this, wire, false);
+        }
+    }
+
+    static class MyDto2 extends AbstractMarshallable {
+        Map<String, MyDto> myDto = new TreeMap<String, MyDto>();
     }
 }

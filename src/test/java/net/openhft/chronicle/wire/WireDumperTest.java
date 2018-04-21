@@ -37,6 +37,23 @@ public class WireDumperTest {
         return toParams(WireType.values());
     }
 
+    @BeforeClass
+    public static void beforeClass() {
+        StoreWritingProcessInHeaderTest.enableFeature();
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        StoreWritingProcessInHeaderTest.disableFeature();
+    }
+
+    private static Object[][] toParams(final WireType[] values) {
+        return Arrays.stream(values).filter(WireType::isAvailable).
+                filter(wt -> wt != WireType.CSV).
+                filter(wt -> wt != WireType.READ_ANY).
+                map(wt -> new Object[]{wt.toString(), wt}).toArray(Object[][]::new);
+    }
+
     @Test
     public void shouldSerialiseContent() {
         wire.writeDocument(17L, ValueOut::int64);
@@ -55,16 +72,6 @@ public class WireDumperTest {
         final String actual = WireDumper.of(wire).asString();
 
         assertThat(actual, is(expectedPartialContent.get(wireType)));
-    }
-
-    @BeforeClass
-    public static void beforeClass() {
-        StoreWritingProcessInHeaderTest.enableFeature();
-    }
-
-    @AfterClass
-    public static void afterClass() {
-        StoreWritingProcessInHeaderTest.disableFeature();
     }
 
     @After
@@ -160,7 +167,6 @@ public class WireDumperTest {
                         "# 5 bytes remaining\n" +
                         "");
 
-
         expectedPartialContent.put(WireType.BINARY,
                 "--- !!data #binary\n" +
                         "00000000             11                                       ·            \n" +
@@ -169,7 +175,6 @@ public class WireDumperTest {
                         "...\n" +
                         "# 5 bytes remaining\n" +
                         "");
-
 
         expectedPartialContent.put(WireType.BINARY_LIGHT,
                 "--- !!data #binary\n" +
@@ -180,7 +185,6 @@ public class WireDumperTest {
                         "# 5 bytes remaining\n" +
                         "");
 
-
         expectedPartialContent.put(WireType.FIELDLESS_BINARY,
                 "--- !!data #binary\n" +
                         "00000000             11                                       ·            \n" +
@@ -189,7 +193,6 @@ public class WireDumperTest {
                         "...\n" +
                         "# 5 bytes remaining\n" +
                         "");
-
 
         expectedPartialContent.put(WireType.COMPRESSED_BINARY,
                 "--- !!data #binary\n" +
@@ -200,7 +203,6 @@ public class WireDumperTest {
                         "# 5 bytes remaining\n" +
                         "");
 
-
         expectedPartialContent.put(WireType.JSON,
                 "--- !!data #binary\n" +
                         "00000000             31 37                                    17           \n" +
@@ -209,7 +211,6 @@ public class WireDumperTest {
                         "...\n" +
                         "# 7 bytes remaining\n" +
                         "");
-
 
         expectedPartialContent.put(WireType.RAW,
                 "--- !!data #binary\n" +
@@ -220,12 +221,5 @@ public class WireDumperTest {
                         "# 5 bytes remaining\n" +
                         "");
 
-    }
-
-    private static Object[][] toParams(final WireType[] values) {
-        return Arrays.stream(values).filter(WireType::isAvailable).
-                filter(wt -> wt != WireType.CSV).
-                filter(wt -> wt != WireType.READ_ANY).
-                map(wt -> new Object[] {wt.toString(), wt}).toArray(Object[][]::new);
     }
 }

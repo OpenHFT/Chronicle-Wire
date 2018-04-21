@@ -56,6 +56,39 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
         THREAD_LOCAL.set(md);
     }
 
+    public static int marshallableSize(@NotNull BytesIn bytes) {
+
+        long start = bytes.readPosition();
+        try {
+
+            int sources = bytes.readUnsignedByte();
+            int size = 1;
+
+            //sourceIdArray
+            size += (4 * sources);
+
+            // sourceIndexArray
+            size += (8 * sources);
+
+            bytes.readSkip(size - 1);
+            int timings = bytes.readUnsignedByte() - 1;
+
+            // writeUnsignedByte
+            size += 1;
+
+            size += (timings * 8);
+
+            // nano time
+            size += 8;
+
+            return size;
+
+        } finally {
+            bytes.readPosition(start);
+        }
+
+    }
+
     public void addSourceDetails(boolean addSourceDetails) {
         this.addSourceDetails = addSourceDetails;
     }
@@ -167,39 +200,6 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
             timingsArray[i] = bytes.readLong();
     }
 
-    public static int marshallableSize(@NotNull BytesIn bytes) {
-
-        long start = bytes.readPosition();
-        try {
-
-            int sources = bytes.readUnsignedByte();
-            int size = 1;
-
-            //sourceIdArray
-            size += (4 * sources);
-
-            // sourceIndexArray
-            size += (8 * sources);
-
-            bytes.readSkip(size - 1);
-            int timings = bytes.readUnsignedByte() - 1;
-
-            // writeUnsignedByte
-            size += 1;
-
-            size += (timings * 8);
-
-            // nano time
-            size += 8;
-
-            return size;
-
-        } finally {
-            bytes.readPosition(start);
-        }
-
-    }
-
     @SuppressWarnings("AssertWithSideEffects")
     @Override
     public void writeMarshallable(@NotNull BytesOut bytes) {
@@ -234,7 +234,6 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
 
     }
 
-
     public void addSource(int id, long index) {
         sourceIdArray[sources] = id;
         sourceIndexArray[sources++] = index;
@@ -250,6 +249,7 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
     /**
      * We need a custom toString as the base class toString calls writeMarshallable which does not mutate this,
      * but will display a different result every time you toString the object as it outputs System.nanoTime
+     *
      * @return String representation
      */
     @Override
@@ -263,7 +263,7 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
 
     private String toStringSources() {
         StringBuilder sb = new StringBuilder();
-        for (int i=0; i<sources; i++) {
+        for (int i = 0; i < sources; i++) {
             if (i > 0) sb.append(',');
             sb.append(sourceIdArray[i]).append("=0x").append(Long.toHexString(sourceIndexArray[i]));
         }
@@ -272,7 +272,7 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
 
     private String toStringTimings() {
         StringBuilder sb = new StringBuilder();
-        for (int i=0; i<timings; i++) {
+        for (int i = 0; i < timings; i++) {
             if (i > 0) sb.append(',');
             sb.append(timingsArray[i]);
         }

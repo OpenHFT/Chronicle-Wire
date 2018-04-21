@@ -248,7 +248,6 @@ public interface ValueOut {
     @NotNull
     WireOut boolForBinding(boolean value, @NotNull BooleanValue longValue);
 
-
     @NotNull
     default WireOut sequence(WriteValue writer) {
         return sequence(writer, WriteValue::writeValue);

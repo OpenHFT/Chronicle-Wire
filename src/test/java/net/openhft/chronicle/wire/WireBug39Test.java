@@ -44,6 +44,11 @@ public class WireBug39Test {
         bytes.release();
     }
 
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
     class MarshallableObj implements Marshallable {
         private final StringBuilder builder = new StringBuilder();
 
@@ -86,10 +91,5 @@ public class WireBug39Test {
         public String toString() {
             return builder.toString();
         }
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 }

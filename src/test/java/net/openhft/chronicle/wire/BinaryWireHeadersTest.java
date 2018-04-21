@@ -30,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /*
@@ -57,26 +56,26 @@ public class BinaryWireHeadersTest {
         assertEquals(0, wire.headerNumber()); // meta data doesn't count.
 
         for (int i = 0; i <= 3; i++) {
-            long position = wire2.writeHeader(1, TimeUnit.MILLISECONDS, null,null);
+            long position = wire2.writeHeader(1, TimeUnit.MILLISECONDS, null, null);
             assertEquals(i, wire2.headerNumber());
             wire2.getValueOut().text("hello world");
             wire2.updateHeader(position, false);
         }
         assertEquals(4, wire2.headerNumber());
         {
-            long position = wire2.writeHeader(1, TimeUnit.MILLISECONDS, null,null);
+            long position = wire2.writeHeader(1, TimeUnit.MILLISECONDS, null, null);
             wire2.getValueOut().text("hello world");
             wire2.updateHeader(position, true); // meta data doesn't count.
             assertEquals(4, wire2.headerNumber());
         }
 
         for (int i = 4; i <= 8; i += 2) {
-            long position = wire.writeHeader(1, TimeUnit.MILLISECONDS, null,null);
+            long position = wire.writeHeader(1, TimeUnit.MILLISECONDS, null, null);
             assertEquals(i, wire.headerNumber());
             wire.getValueOut().text("hello world");
             wire.updateHeader(position, false);
 
-            long position2 = wire2.writeHeader(1, TimeUnit.MILLISECONDS, null,null);
+            long position2 = wire2.writeHeader(1, TimeUnit.MILLISECONDS, null, null);
             assertEquals(i + 1, wire2.headerNumber());
             wire2.getValueOut().text("hello world");
             wire2.updateHeader(position2, false);
@@ -93,9 +92,9 @@ public class BinaryWireHeadersTest {
         @NotNull Wire wire = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
         @NotNull Wire wire2 = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
         try {
-            long position = wire.writeHeader(1, TimeUnit.SECONDS, null,null);
+            long position = wire.writeHeader(1, TimeUnit.SECONDS, null, null);
 
-            long position2 = wire2.writeHeader(100, TimeUnit.MILLISECONDS, null,null);
+            long position2 = wire2.writeHeader(100, TimeUnit.MILLISECONDS, null, null);
 
         } finally {
             wire.bytes().release();

@@ -42,6 +42,7 @@ public class WireSerializedLambdaTest {
         ClassAliasPool.CLASS_ALIASES.addAlias(Fun.class);
         ClassAliasPool.CLASS_ALIASES.addAlias(Update.class);
     }
+
     @Test
     public void testIsLambda() {
         @NotNull Function<String, String> fun = (Function<String, String> & Serializable) String::toUpperCase;
@@ -63,7 +64,7 @@ public class WireSerializedLambdaTest {
                 .write(() -> "two").object(Fun.ADD_A)
                 .write(() -> "three").object(Update.INCR);
 
-         System.out.println(wire.bytes().toString());
+        System.out.println(wire.bytes().toString());
 
         assertEquals("one: !SerializedLambda {\n" +
                 "  cc: !type net.openhft.chronicle.wire.WireSerializedLambdaTest,\n" +

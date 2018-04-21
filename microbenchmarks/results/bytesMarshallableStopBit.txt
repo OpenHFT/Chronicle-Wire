@@ -140,7 +140,6 @@ Iteration   3: n = 30080, mean = 156 ns/op, p{0.00, 0.50, 0.90, 0.95, 0.99, 0.99
 Iteration   4: n = 30515, mean = 157 ns/op, p{0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 1.00} = 141, 157, 160, 162, 175, 186, 300, 5344 ns/op
 Iteration   5: n = 30519, mean = 157 ns/op, p{0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 1.00} = 142, 157, 160, 161, 175, 186, 233, 6448 ns/op
 
-
 Result "bytesMarshallableStopBit":
   164.418 ±(99.9%) 0.055 ns/op [Average]
   (min, avg, max) = (103.000, 164.418, 6448.000), stdev = 20.223
@@ -158,7 +157,6 @@ Result "bytesMarshallableStopBit":
   p(99.9990) =   2355.661 ns/op
   p(99.9999) =   5946.523 ns/op
          max =   6448.000 ns/op
-
 
 # Run complete. Total time: 00:02:44
 

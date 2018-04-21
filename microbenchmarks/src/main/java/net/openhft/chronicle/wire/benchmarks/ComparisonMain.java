@@ -46,7 +46,6 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
 import uk.co.real_logic.agrona.concurrent.UnsafeBuffer;
 
-import java.io.*;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
@@ -148,65 +147,65 @@ public class ComparisonMain {
         }
     }
 
-        @Benchmark
-        public Data snakeYaml() {
-            s = yaml.dumpAsMap(data);
-            Data data = (Data) yaml.load(s);
-            return data;
-        }
+    @Benchmark
+    public Data snakeYaml() {
+        s = yaml.dumpAsMap(data);
+        Data data = (Data) yaml.load(s);
+        return data;
+    }
 
-        // fails on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
+    // fails on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
     //    @Benchmark
-        public Data jsonSmart() throws net.minidev.json.parser.ParseException {
-            JSONObject obj = new JSONObject();
-            data.writeTo(obj);
-            s = obj.toJSONString();
-            JSONObject jsonObject = (JSONObject) jsonParser.parse(s);
-            data2.readFrom(jsonObject);
-            return data2;
-        }
+    public Data jsonSmart() throws net.minidev.json.parser.ParseException {
+        JSONObject obj = new JSONObject();
+        data.writeTo(obj);
+        s = obj.toJSONString();
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(s);
+        data2.readFrom(jsonObject);
+        return data2;
+    }
 
-        // fails on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
+    // fails on Java 8, https://code.google.com/p/json-smart/issues/detail?id=56&thanks=56&ts=1439401767
     //    @Benchmark
-        public void jsonSmartCompact() throws net.minidev.json.parser.ParseException {
-            JSONObject obj = new JSONObject();
-            data.writeTo(obj);
-            s = obj.toJSONString(JSONStyle.MAX_COMPRESS);
-            JSONObject jsonObject = (JSONObject) jsonParser.parse(s);
-            data.readFrom(jsonObject);
-        }
+    public void jsonSmartCompact() throws net.minidev.json.parser.ParseException {
+        JSONObject obj = new JSONObject();
+        data.writeTo(obj);
+        s = obj.toJSONString(JSONStyle.MAX_COMPRESS);
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(s);
+        data.readFrom(jsonObject);
+    }
 
-        @Benchmark
-        public Data boon() {
-            sb.setLength(0);
-            boonMapper.toJson(data, sb);
-            return boonMapper.fromJson(sb.toString(), Data.class);
-        }
+    @Benchmark
+    public Data boon() {
+        sb.setLength(0);
+        boonMapper.toJson(data, sb);
+        return boonMapper.fromJson(sb.toString(), Data.class);
+    }
 
-        @Benchmark
-        public Data jackson() throws IOException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            JsonGenerator generator = jsonFactory.createGenerator(baos);
-            data.writeTo(generator);
-            generator.flush();
+    @Benchmark
+    public Data jackson() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        JsonGenerator generator = jsonFactory.createGenerator(baos);
+        data.writeTo(generator);
+        generator.flush();
 
-            buf = baos.toByteArray();
-            JsonParser jp = jsonFactory.createParser(buf); // or URL, Stream, Reader, String, byte[]
-            data2.readFrom(jp);
-            return data2;
-        }
+        buf = baos.toByteArray();
+        JsonParser jp = jsonFactory.createParser(buf); // or URL, Stream, Reader, String, byte[]
+        data2.readFrom(jp);
+        return data2;
+    }
 
-        @Benchmark
-        public Data jacksonWithCBytes() throws IOException {
-            bytes.clear();
-            generator = jsonFactory.createGenerator(outputStream);
-            data.writeTo(generator);
-            generator.flush();
+    @Benchmark
+    public Data jacksonWithCBytes() throws IOException {
+        bytes.clear();
+        generator = jsonFactory.createGenerator(outputStream);
+        data.writeTo(generator);
+        generator.flush();
 
-            jp.clearCurrentToken();
-            data2.readFrom(jp);
-            return data2;
-        }
+        jp.clearCurrentToken();
+        data2.readFrom(jp);
+        return data2;
+    }
 
     @Benchmark
     public Data jacksonWithTextCBytes() throws IOException {

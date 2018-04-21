@@ -55,6 +55,7 @@ public interface MessageHistory extends Marshallable {
 
     /**
      * reset for a given source prior to reading a new message in
+     *
      * @param sourceId
      * @param sourceIndex
      */

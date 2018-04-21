@@ -29,23 +29,19 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 
-public class ExampleTokenListener implements TokenListener
-{
+public class ExampleTokenListener implements TokenListener {
     private final PrintWriter out;
     private final Deque<String> namedScope = new ArrayDeque<>();
     private final byte[] tempBuffer = new byte[1024];
 
-    public ExampleTokenListener(final PrintWriter out)
-    {
+    public ExampleTokenListener(final PrintWriter out) {
         this.out = out;
     }
 
     private static CharSequence readEncodingAsString(
-            final DirectBuffer buffer, final int index, final Token typeToken, final int actingVersion)
-    {
+            final DirectBuffer buffer, final int index, final Token typeToken, final int actingVersion) {
         final PrimitiveValue constOrNotPresentValue = constOrNotPresentValue(typeToken, actingVersion);
-        if (null != constOrNotPresentValue)
-        {
+        if (null != constOrNotPresentValue) {
             return constOrNotPresentValue.toString();
         }
 
@@ -53,28 +49,22 @@ public class ExampleTokenListener implements TokenListener
         final Encoding encoding = typeToken.encoding();
         final int elementSize = encoding.primitiveType().size();
 
-        for (int i = 0, size = typeToken.arrayLength(); i < size; i++)
-        {
+        for (int i = 0, size = typeToken.arrayLength(); i < size; i++) {
             mapEncodingToString(sb, buffer, index + (i * elementSize), encoding);
             sb.append(", ");
         }
 
-        sb.setLength(sb.length() );
+        sb.setLength(sb.length());
 
         return sb;
     }
 
-    private static PrimitiveValue constOrNotPresentValue(final Token token, final int actingVersion)
-    {
+    private static PrimitiveValue constOrNotPresentValue(final Token token, final int actingVersion) {
         final Encoding encoding = token.encoding();
-        if (token.isConstantEncoding())
-        {
+        if (token.isConstantEncoding()) {
             return encoding.constValue();
-        }
-        else if (token.isOptionalEncoding())
-        {
-            if (actingVersion < token.version())
-            {
+        } else if (token.isOptionalEncoding()) {
+            if (actingVersion < token.version()) {
                 return encoding.applicableNullValue();
             }
         }
@@ -83,10 +73,8 @@ public class ExampleTokenListener implements TokenListener
     }
 
     private static void mapEncodingToString(
-            final StringBuilder sb, final DirectBuffer buffer, final int index, final Encoding encoding)
-    {
-        switch (encoding.primitiveType())
-        {
+            final StringBuilder sb, final DirectBuffer buffer, final int index, final Encoding encoding) {
+        switch (encoding.primitiveType()) {
             case CHAR:
                 sb.append('\'').append((char) CodecUtil.charGet(buffer, index)).append('\'');
                 break;
@@ -133,10 +121,8 @@ public class ExampleTokenListener implements TokenListener
         }
     }
 
-    private static long getLong(final DirectBuffer buffer, final int index, final Encoding encoding)
-    {
-        switch (encoding.primitiveType())
-        {
+    private static long getLong(final DirectBuffer buffer, final int index, final Encoding encoding) {
+        switch (encoding.primitiveType()) {
             case CHAR:
                 return CodecUtil.charGet(buffer, index);
 
@@ -169,49 +155,43 @@ public class ExampleTokenListener implements TokenListener
         }
     }
 
-    public void onBeginMessage(final Token token)
-    {
+    public void onBeginMessage(final Token token) {
         namedScope.push(token.name() + ".");
     }
 
-    public void onEndMessage(final Token token)
-    {
+    public void onEndMessage(final Token token) {
         namedScope.pop();
     }
 
     public void onEncoding(
-        final Token fieldToken,
-        final DirectBuffer buffer,
-        final int index,
-        final Token typeToken,
-        final int actingVersion)
-    {
+            final Token fieldToken,
+            final DirectBuffer buffer,
+            final int index,
+            final Token typeToken,
+            final int actingVersion) {
         final CharSequence value = readEncodingAsString(buffer, index, typeToken, actingVersion);
 
         printScope();
         out.append(fieldToken.name())
-           .append('=')
-           .append(value)
-           .println();
+                .append('=')
+                .append(value)
+                .println();
     }
 
     public void onEnum(
-        final Token fieldToken,
-        final DirectBuffer buffer,
-        final int bufferIndex,
-        final List<Token> tokens,
-        final int beginIndex,
-        final int endIndex,
-        final int actingVersion)
-    {
+            final Token fieldToken,
+            final DirectBuffer buffer,
+            final int bufferIndex,
+            final List<Token> tokens,
+            final int beginIndex,
+            final int endIndex,
+            final int actingVersion) {
         final Token typeToken = tokens.get(beginIndex + 1);
         final long encodedValue = readEncodingAsLong(buffer, bufferIndex, typeToken, actingVersion);
 
         String value = null;
-        for (int i = beginIndex + 1; i < endIndex; i++)
-        {
-            if (encodedValue == tokens.get(i).encoding().constValue().longValue())
-            {
+        for (int i = beginIndex + 1; i < endIndex; i++) {
+            if (encodedValue == tokens.get(i).encoding().constValue().longValue()) {
                 value = tokens.get(i).name();
                 break;
             }
@@ -219,28 +199,26 @@ public class ExampleTokenListener implements TokenListener
 
         printScope();
         out.append(fieldToken.name())
-           .append('=')
-           .append(value)
-           .println();
+                .append('=')
+                .append(value)
+                .println();
     }
 
     public void onBitSet(
-        final Token fieldToken,
-        final DirectBuffer buffer,
-        final int bufferIndex,
-        final List<Token> tokens,
-        final int beginIndex,
-        final int endIndex,
-        final int actingVersion)
-    {
+            final Token fieldToken,
+            final DirectBuffer buffer,
+            final int bufferIndex,
+            final List<Token> tokens,
+            final int beginIndex,
+            final int endIndex,
+            final int actingVersion) {
         final Token typeToken = tokens.get(beginIndex + 1);
         final long encodedValue = readEncodingAsLong(buffer, bufferIndex, typeToken, actingVersion);
 
         printScope();
         out.append(fieldToken.name()).append(':');
 
-        for (int i = beginIndex + 1; i < endIndex; i++)
-        {
+        for (int i = beginIndex + 1; i < endIndex; i++) {
             out.append(' ').append(tokens.get(i).name()).append('=');
 
             final long bitPosition = tokens.get(i).encoding().constValue().longValue();
@@ -252,74 +230,61 @@ public class ExampleTokenListener implements TokenListener
         out.println();
     }
 
-    public void onBeginComposite(final Token fieldToken, final List<Token> tokens, final int fromIndex, final int toIndex)
-    {
+    public void onBeginComposite(final Token fieldToken, final List<Token> tokens, final int fromIndex, final int toIndex) {
         namedScope.push(fieldToken.name() + ".");
     }
 
-    public void onEndComposite(final Token fieldToken, final List<Token> tokens, final int fromIndex, final int toIndex)
-    {
+    public void onEndComposite(final Token fieldToken, final List<Token> tokens, final int fromIndex, final int toIndex) {
         namedScope.pop();
     }
 
-    public void onGroupHeader(final Token token, final int numInGroup)
-    {
+    public void onGroupHeader(final Token token, final int numInGroup) {
         printScope();
         out.append(token.name())
-           .append(" Group Header : numInGroup=")
-           .append(Integer.toString(numInGroup))
-           .println();
+                .append(" Group Header : numInGroup=")
+                .append(Integer.toString(numInGroup))
+                .println();
     }
 
-    public void onBeginGroup(final Token token, final int groupIndex, final int numInGroup)
-    {
+    public void onBeginGroup(final Token token, final int groupIndex, final int numInGroup) {
         namedScope.push(token.name() + ".");
     }
 
-    public void onEndGroup(final Token token, final int groupIndex, final int numInGroup)
-    {
+    public void onEndGroup(final Token token, final int groupIndex, final int numInGroup) {
         namedScope.pop();
     }
 
     public void onVarData(
-            final Token fieldToken, final DirectBuffer buffer, final int bufferIndex, final int length, final Token typeToken)
-    {
+            final Token fieldToken, final DirectBuffer buffer, final int bufferIndex, final int length, final Token typeToken) {
         final String value;
-        try
-        {
+        try {
             buffer.getBytes(bufferIndex, tempBuffer, 0, length);
             value = new String(tempBuffer, 0, length, typeToken.encoding().characterEncoding());
-        }
-        catch (final UnsupportedEncodingException ex)
-        {
+        } catch (final UnsupportedEncodingException ex) {
             ex.printStackTrace();
             return;
         }
 
         printScope();
         out.append(fieldToken.name())
-           .append('=')
-           .append(value)
-           .println();
+                .append('=')
+                .append(value)
+                .println();
     }
 
     private long readEncodingAsLong(
-            final DirectBuffer buffer, final int bufferIndex, final Token typeToken, final int actingVersion)
-    {
+            final DirectBuffer buffer, final int bufferIndex, final Token typeToken, final int actingVersion) {
         final PrimitiveValue constOrNotPresentValue = constOrNotPresentValue(typeToken, actingVersion);
-        if (null != constOrNotPresentValue)
-        {
+        if (null != constOrNotPresentValue) {
             return constOrNotPresentValue.longValue();
         }
 
         return getLong(buffer, bufferIndex, typeToken.encoding());
     }
 
-    private void printScope()
-    {
+    private void printScope() {
         final Iterator<String> i = namedScope.descendingIterator();
-        while (i.hasNext())
-        {
+        while (i.hasNext()) {
             out.print(i.next());
         }
     }

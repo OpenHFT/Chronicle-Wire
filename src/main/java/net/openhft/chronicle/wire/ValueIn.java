@@ -224,8 +224,7 @@ public interface ValueIn {
         return ret;
     }
 
-    WireIn bool(@NotNull  BooleanValue ret);
-
+    WireIn bool(@NotNull BooleanValue ret);
 
     @NotNull
     default IntValue int32ForBinding(@Nullable LongValue value) {
@@ -243,17 +242,11 @@ public interface ValueIn {
     @NotNull
     <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader);
 
-
-    interface Reader {
-        <T> void accept(ValueIn valueIn, List<T> list, List<T> buffer, Supplier<T> bufferAdd);
-    }
-
     <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0);
 
     default <T> boolean sequence(@NotNull T t, @NotNull SerializationStrategy<T> tReader) {
         return sequence(t, tReader::readUsing);
     }
-
 
     default <T> void reader0(ValueIn v, List<T> list, List<T> buffer, Supplier<T> bufferAdd) {
         while (v.hasNextSequenceItem()) {
@@ -267,7 +260,6 @@ public interface ValueIn {
             list.add((T) v.object(t, t.getClass()));
         }
     }
-
 
     /**
      * sequence to use when using a cached buffer
@@ -283,7 +275,6 @@ public interface ValueIn {
         list.clear();
         return sequence(list, buffer, bufferAdd, this::reader0);
     }
-
 
     @NotNull
     <T, K> WireIn sequence(@NotNull T t, K k, @NotNull TriConsumer<T, K, ValueIn> tReader);
@@ -615,5 +606,9 @@ public interface ValueIn {
     @NotNull
     default UUID uuid() {
         return UUID.fromString(text());
+    }
+
+    interface Reader {
+        <T> void accept(ValueIn valueIn, List<T> list, List<T> buffer, Supplier<T> bufferAdd);
     }
 }

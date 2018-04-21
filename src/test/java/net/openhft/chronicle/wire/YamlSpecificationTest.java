@@ -45,6 +45,7 @@ public class YamlSpecificationTest {
         ClassAliasPool.CLASS_ALIASES.addAlias(Line.class, "line");
         ClassAliasPool.CLASS_ALIASES.addAlias(Label.class, "label");
     }
+
     private final String input;
 
     public YamlSpecificationTest(String input) {

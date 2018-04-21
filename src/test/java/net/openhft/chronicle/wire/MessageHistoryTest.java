@@ -16,7 +16,7 @@ public class MessageHistoryTest {
         container1.addSourceDetails(true);
         VanillaMessageHistory container2 = new VanillaMessageHistory();
         container2.addSourceDetails(true);
-        for (int i=0; i<VanillaMessageHistory.MESSAGE_HISTORY_LENGTH/2; i++) {
+        for (int i = 0; i < VanillaMessageHistory.MESSAGE_HISTORY_LENGTH / 2; i++) {
             Wires.copyTo(container1, container2);
             Wires.copyTo(container2, container1);
         }

@@ -340,6 +340,7 @@ public class DefaultValueIn implements ValueIn {
         tReader.accept(t, kls, this);
         return wireIn();
     }
+
     @Nullable
     @Override
     public <T> T applyToMarshallable(Function<WireIn, T> marshallableReader) {

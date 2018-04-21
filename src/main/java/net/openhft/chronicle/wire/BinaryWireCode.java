@@ -27,7 +27,7 @@ public enum BinaryWireCode {
     ;
     // sequence of length 0 - 255 bytes
     public static final int BYTES_LENGTH8 = 0x80;
-//     sequence of length 0 - 2^16-1 bytes
+    //     sequence of length 0 - 2^16-1 bytes
     public static final int BYTES_LENGTH16 = 0x81;
     // sequence of length 0 - 2^32-1
     public static final int BYTES_LENGTH32 = 0x82;
@@ -66,7 +66,7 @@ public enum BinaryWireCode {
     public static final int INT64 = 0xA7;
     public static final int SET_LOW_INT8 = 0xA8;
     public static final int SET_LOW_INT16 = 0xA9;
-//    public static final int FIXED_5 = 0xAA;
+    //    public static final int FIXED_5 = 0xAA;
 //    public static final int FIXED_4 = 0xAB;
 //    public static final int FIXED_3 = 0xAC;
 //    public static final int FIXED_2 = 0xAD;

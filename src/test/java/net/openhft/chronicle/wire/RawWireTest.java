@@ -489,6 +489,7 @@ public class RawWireTest {
     public void checkRegisteredBytes() {
         BytesUtil.checkRegisteredBytes();
     }
+
     enum BWKey implements WireKey {
         field1, field2, field3
     }

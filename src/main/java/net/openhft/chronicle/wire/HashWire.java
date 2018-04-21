@@ -195,7 +195,6 @@ public class HashWire implements WireOut, BytesComment {
         return 0;
     }
 
-
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
@@ -261,7 +260,6 @@ public class HashWire implements WireOut, BytesComment {
     public BooleanValue newBooleanReference() {
         throw new UnsupportedOperationException();
     }
-
 
     @NotNull
     @Override

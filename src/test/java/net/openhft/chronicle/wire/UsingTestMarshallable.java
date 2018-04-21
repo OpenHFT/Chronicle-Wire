@@ -108,6 +108,11 @@ public class UsingTestMarshallable {
 
     }
 
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
     public static class MyMarshallable implements Marshallable {
 
         @NotNull
@@ -130,11 +135,6 @@ public class UsingTestMarshallable {
                     "text=" + text +
                     '}';
         }
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     static class MarshableFilter extends AbstractMarshallable {

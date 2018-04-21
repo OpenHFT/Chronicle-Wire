@@ -32,7 +32,7 @@ public class StreamMain {
         for (@NotNull WireType wt : WireType.values()) {
             if (wt == WireType.CSV)
                 continue;
-            
+
             @NotNull Bytes b = Bytes.allocateElasticDirect();
             Wire w = wt.apply(b);
             w.writeDocument(true, w2 -> w2.write(() -> "header")

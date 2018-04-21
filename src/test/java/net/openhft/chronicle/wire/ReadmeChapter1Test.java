@@ -560,6 +560,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         BytesUtil.checkRegisteredBytes();
     }
 }
+
 /*
 The code for the class Data
 ```java

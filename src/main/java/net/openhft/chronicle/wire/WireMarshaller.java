@@ -39,6 +39,7 @@ import static net.openhft.chronicle.wire.Wires.acquireStringBuilder;
  * Created by Peter Lawrey on 16/03/16.
  */
 public class WireMarshaller<T> {
+    public static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     private static final FieldAccess[] NO_FIELDS = {};
     public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
             (tClass ->
@@ -46,7 +47,6 @@ public class WireMarshaller<T> {
                             ? WireMarshaller.ofThrowable(tClass)
                             : WireMarshaller.of(tClass)
             );
-    public static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     @NotNull
     final FieldAccess[] fields;
     private final boolean isLeaf;
@@ -664,6 +664,25 @@ public class WireMarshaller<T> {
             this.addAll = this::addAll;
         }
 
+        private static void sequenceGetter(Object o,
+                                           ValueOut out,
+                                           Object[] values,
+                                           Field field,
+                                           Class componentType) {
+            EnumSet coll;
+            try {
+                coll = (EnumSet) field.get(o);
+            } catch (IllegalAccessException e) {
+                throw new AssertionError(e);
+            }
+
+            for (int i = values.length - 1; i != -1; i--) {
+                if (coll.contains(values[i])) {
+                    out.object(componentType, values[i]);
+                }
+            }
+        }
+
         @Override
         protected void getValue(final Object o, final ValueOut write, final Object previous) throws IllegalAccessException {
             @NotNull Collection c = (Collection) field.get(o);
@@ -721,25 +740,6 @@ public class WireMarshaller<T> {
         @Override
         public void getAsBytes(final Object o, final Bytes bytes) {
             throw new UnsupportedOperationException();
-        }
-
-        private static void sequenceGetter(Object o,
-                                           ValueOut out,
-                                           Object[] values,
-                                           Field field,
-                                           Class componentType) {
-            EnumSet coll;
-            try {
-                coll = (EnumSet) field.get(o);
-            } catch (IllegalAccessException e) {
-                throw new AssertionError(e);
-            }
-
-            for (int i = values.length - 1; i != -1; i--) {
-                if (coll.contains(values[i])) {
-                    out.object(componentType, values[i]);
-                }
-            }
         }
 
         private void addAll(EnumSet c, ValueIn in2) {

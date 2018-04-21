@@ -81,7 +81,7 @@ public class MarshallableWireTest {
         @Nullable Object m2 = wire.getValueIn()
                 .object();
         if (!m.equals(m2))
-        assertEquals(m, m2);
+            assertEquals(m, m2);
 
         bytes.release();
     }

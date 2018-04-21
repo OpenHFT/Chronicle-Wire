@@ -34,15 +34,6 @@ interface MockMethods {
  */
 public class VanillaMethodReaderTest {
 
-    static class A extends AbstractMarshallable {
-        int x;
-    }
-
-    private interface AListener {
-        void a(A a);
-
-    }
-
     A instance;
 
     @Test
@@ -71,8 +62,6 @@ public class VanillaMethodReaderTest {
             b.release();
         }
     }
-
-
 
     @Test
     public void readMethods() throws IOException {
@@ -254,10 +243,6 @@ public class VanillaMethodReaderTest {
         assertEquals(text, wire2.toString());
     }
 
-    interface MRTInterface {
-
-    }
-
     @Test
     public void testUnknownClass() {
         Wire wire2 = new TextWire(Bytes.elasticHeapByteBuffer(256));
@@ -301,6 +286,20 @@ public class VanillaMethodReaderTest {
 
     }
 
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
+    private interface AListener {
+        void a(A a);
+
+    }
+
+    interface MRTInterface {
+
+    }
+
     interface MRTListener {
         void timed(long time);
 
@@ -311,6 +310,16 @@ public class VanillaMethodReaderTest {
         void method2(String key, MRT1 mrt);
 
         void unknown(NestedUnknown unknown);
+    }
+
+    interface Overloaded {
+        void method();
+
+        void method(MockDto dto);
+    }
+
+    static class A extends AbstractMarshallable {
+        int x;
     }
 
     static class NestedUnknown extends AbstractMarshallable {
@@ -333,18 +342,6 @@ public class VanillaMethodReaderTest {
             super(field1);
             this.field2 = field2;
         }
-    }
-
-    interface Overloaded {
-        void method();
-
-        void method(MockDto dto);
-    }
-
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 }
 

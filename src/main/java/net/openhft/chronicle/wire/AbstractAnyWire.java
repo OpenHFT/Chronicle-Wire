@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 
 /**
  * A wire type than can be either
- *
+ * <p>
  * TextWire BinaryWire
  *
  * @author Rob Austin.

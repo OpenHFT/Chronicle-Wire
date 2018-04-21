@@ -63,6 +63,11 @@ public class WireTextBugTest {
         decodeWire.bytes().release();
     }
 
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
     static class Bug extends AbstractMarshallable {
         private String clOrdID;
 
@@ -73,11 +78,5 @@ public class WireTextBugTest {
         public void setClOrdID(String aClOrdID) {
             clOrdID = aClOrdID;
         }
-    }
-
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 }

@@ -64,7 +64,6 @@ public class EnumSetMarshallingTest {
             w.write(() -> "key").marshallable(written);
         });
 
-
         assertThat(Wires.fromSizePrefixedBlobs(bytes), is(EMPTY_SET_SERIALISED_FORM));
         tw.readingDocument().wire().read("key").marshallable(read);
 
@@ -127,6 +126,11 @@ public class EnumSetMarshallingTest {
         bytes.release();
     }
 
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
     private static final class Container extends AbstractMarshallable {
         private List<Foo> f1 = new ArrayList<>(Arrays.asList(new Foo(EnumSet.allOf(Thread.State.class))));
         private List<Foo> f2 = new ArrayList<>(Arrays.asList(new Foo(EnumSet.noneOf(Thread.State.class))));
@@ -138,10 +142,5 @@ public class EnumSetMarshallingTest {
         private Foo(final EnumSet<Thread.State> membership) {
             f = membership;
         }
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 }

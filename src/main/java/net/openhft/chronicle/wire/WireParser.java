@@ -35,7 +35,7 @@ public interface WireParser extends Consumer<WireIn> {
 
     @NotNull
     static WireParser wireParser(@NotNull WireParselet defaultConsumer,
-                                        @NotNull FieldNumberParselet fieldNumberParselet) {
+                                 @NotNull FieldNumberParselet fieldNumberParselet) {
         return new VanillaWireParser(defaultConsumer, fieldNumberParselet);
     }
 

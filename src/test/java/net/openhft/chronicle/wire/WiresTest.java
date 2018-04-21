@@ -4,9 +4,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.junit.After;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.*;
 
 /*
  * Created by rob on 14/06/2017.

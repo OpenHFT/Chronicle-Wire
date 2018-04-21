@@ -56,6 +56,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 public class TextWire extends AbstractWire implements Wire {
 
     public static final BytesStore TYPE = BytesStore.from("!type ");
+    public static final BytesStore BINARY = Bytes.from("!!binary");
     static final String SEQ_MAP = "!seqmap";
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
@@ -65,7 +66,6 @@ public class TextWire extends AbstractWire implements Wire {
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
     static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
     static final ThreadLocal<WeakReference<StopCharsTester>> ESCAPED_END_EVENT_NAME = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
-
     static final BytesStore COMMA_SPACE = BytesStore.from(", ");
     static final BytesStore COMMA_NEW_LINE = BytesStore.from(",\n");
     static final BytesStore NEW_LINE = BytesStore.from("\n");
@@ -74,7 +74,6 @@ public class TextWire extends AbstractWire implements Wire {
     static final BytesStore SPACE = BytesStore.from(" ");
     static final BytesStore END_FIELD = NEW_LINE;
     static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
-    public static final BytesStore BINARY = Bytes.from("!!binary");
 
     static {
         for (char ch : "?0123456789+- ',#:{}[]|>!\\".toCharArray())
@@ -257,7 +256,6 @@ public class TextWire extends AbstractWire implements Wire {
         initReadContext();
         return readContext;
     }
-
 
     protected void initReadContext() {
         if (readContext == null)
@@ -513,7 +511,7 @@ public class TextWire extends AbstractWire implements Wire {
     @Override
     @NotNull
     public String readingPeekYaml() {
-       return "todo";
+        return "todo";
     }
 
     public void consumePadding(int commas) {
@@ -869,8 +867,8 @@ public class TextWire extends AbstractWire implements Wire {
 
     @NotNull
     @Override
-    public BooleanValue  newBooleanReference() {
-         return new TextBooleanReference();
+    public BooleanValue newBooleanReference() {
+        return new TextBooleanReference();
     }
 
     @NotNull
@@ -2693,9 +2691,8 @@ public class TextWire extends AbstractWire implements Wire {
             return true;
         }
 
-
         public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) {
-         return    sequence(list, buffer, bufferAdd);
+            return sequence(list, buffer, bufferAdd);
         }
 
         @Override
@@ -2745,7 +2742,6 @@ public class TextWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) {
-
 
             consumePadding();
             char code = (char) peekCode();

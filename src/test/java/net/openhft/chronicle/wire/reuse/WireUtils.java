@@ -31,7 +31,6 @@ import java.util.stream.IntStream;
 import static org.junit.Assert.assertEquals;
 
 /**
- *
  * @author gadei
  */
 public class WireUtils {

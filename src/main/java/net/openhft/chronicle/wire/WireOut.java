@@ -158,7 +158,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
 
     /**
      * This will increment the headerNumber as appropriate if successful
-     *
+     * <p>
      * This method has been deprecated. Writing an incomplete document with a known
      * length is no longer supported.
      *

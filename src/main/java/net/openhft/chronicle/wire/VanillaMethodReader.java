@@ -48,11 +48,10 @@ import static net.openhft.chronicle.wire.VanillaWireParser.SKIP_READABLE_BYTES;
  */
 public class VanillaMethodReader implements MethodReader {
 
-    private static final String[] metaIgnoreList = {"header", "index", "index2index", "roll"};
-
     static final Object[] NO_ARGS = {};
     static final Logger LOGGER = LoggerFactory.getLogger(VanillaMethodReader.class);
     static final Object IGNORED = new Object(); // object used to flag that the call should be ignored.
+    private static final String[] metaIgnoreList = {"header", "index", "index2index", "roll"};
     private final MarshallableIn in;
     @NotNull
     private final WireParser wireParser;
@@ -281,7 +280,6 @@ public class VanillaMethodReader implements MethodReader {
         MethodId annotation = Annotations.getAnnotation(m, MethodId.class);
         return new MethodWireKey(name, annotation == null ? name.hashCode() : Maths.toUInt31(annotation.value()));
     }
-
 
     public void addParseletForMethod(Object o, @NotNull Method m, @NotNull Class[] parameterTypes) {
         m.setAccessible(true); // turn of security check to make a little faster

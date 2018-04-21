@@ -1524,7 +1524,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
-
         @NotNull
         @Override
         public WireOut int64array(long capacity, @NotNull LongArrayValues values) {
@@ -2235,7 +2234,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return bytes(toBytes, true);
         }
 
-
         @NotNull
         @Override
         public WireIn bytes(@NotNull BytesOut toBytes, boolean clearBytes) {
@@ -2832,7 +2830,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
-
         @NotNull
         @Override
         public WireIn int64(LongValue value) {
@@ -2994,7 +2991,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                 bytes.readPosition(limit2);
             }
         }
-
 
         @Override
         public <T> T applyToMarshallable(@NotNull Function<WireIn, T> marshallableReader) {

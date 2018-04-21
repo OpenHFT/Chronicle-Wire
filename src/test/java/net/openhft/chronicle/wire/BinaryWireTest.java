@@ -793,7 +793,6 @@ public class BinaryWireTest {
         assertArrayEquals(a3, (Object[]) o3);
     }
 
-
     @Test
     public void testUsingEvents() throws Exception {
 

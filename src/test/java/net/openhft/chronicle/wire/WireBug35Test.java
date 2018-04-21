@@ -34,7 +34,6 @@ public class WireBug35Test {
         bytes.release();
     }
 
-
     @Test
     public void objectsInSequenceBinaryWire() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -52,7 +51,6 @@ public class WireBug35Test {
 
         bytes.release();
     }
-
 
     @After
     public void checkRegisteredBytes() {

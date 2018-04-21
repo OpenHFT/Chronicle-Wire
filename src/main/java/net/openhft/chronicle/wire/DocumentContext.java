@@ -64,5 +64,6 @@ public interface DocumentContext extends Closeable, SourceContext {
      * Call this if you have detected an error condition and you want the context
      * rolled back when it is closed, rather than half a message committed
      */
-    default void rollbackOnClose() { }
+    default void rollbackOnClose() {
+    }
 }

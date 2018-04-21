@@ -48,11 +48,11 @@ public class SnappyComparisonMain {
         long start = System.nanoTime();
         int count = 0;
         @NotNull byte[] bytes = s.getBytes(ISO_8859_1);
-        while(System.nanoTime() < start + 5e9) {
+        while (System.nanoTime() < start + 5e9) {
             blackHole = Snappy.compress(bytes);
             count++;
         }
         long avgTime = (System.nanoTime() - start) / count;
-        System.out.println("Average time "+avgTime+" ns, saved "+saved+" transfer rate = "+saved*1000/avgTime+" MB/s");
+        System.out.println("Average time " + avgTime + " ns, saved " + saved + " transfer rate = " + saved * 1000 / avgTime + " MB/s");
     }
 }

@@ -65,7 +65,7 @@ public class Marshallable2Test {
         }
     }
 
-    private static class Inner1 extends AbstractMarshallable{
+    private static class Inner1 extends AbstractMarshallable {
     }
 
     private static class Inner2 extends AbstractMarshallable {

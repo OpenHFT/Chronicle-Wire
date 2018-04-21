@@ -36,28 +36,17 @@ import java.io.StreamCorruptedException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static net.openhft.chronicle.wire.Wires.END_OF_DATA;
-import static net.openhft.chronicle.wire.Wires.META_DATA;
-import static net.openhft.chronicle.wire.Wires.NOT_COMPLETE;
-import static net.openhft.chronicle.wire.Wires.NOT_COMPLETE_UNKNOWN_LENGTH;
-import static net.openhft.chronicle.wire.Wires.NOT_INITIALIZED;
-import static net.openhft.chronicle.wire.Wires.SPB_HEADER_SIZE;
-import static net.openhft.chronicle.wire.Wires.UNKNOWN_LENGTH;
-import static net.openhft.chronicle.wire.Wires.isData;
-import static net.openhft.chronicle.wire.Wires.isNotComplete;
-import static net.openhft.chronicle.wire.Wires.isReady;
-import static net.openhft.chronicle.wire.Wires.isReadyMetaData;
-import static net.openhft.chronicle.wire.Wires.lengthOf;
+import static net.openhft.chronicle.wire.Wires.*;
 
 /*
  * Created by Peter Lawrey on 10/03/16.
  */
 public abstract class AbstractWire implements Wire {
+    protected static final boolean ASSERTIONS;
     private static final String INSIDE_HEADER_MESSAGE = "you cant put a header inside a header, check that " +
             "you have not nested the documents. If you are using Chronicle-Queue please " +
             "ensure that you have a unique instance of the Appender per thread, in " +
             "other-words you can not share appenders across threads.";
-    protected static final boolean ASSERTIONS;
     /**
      * This code is used to stop keeping track of the index that it was just about to write, and just
      * write the data if the appender was more than 1<<20 = 1MB behind, if the appender is less
@@ -299,7 +288,6 @@ public abstract class AbstractWire implements Wire {
 
         insideHeader = true;
 
-
         try {
             long tryPos = tryWriteHeader0(Wires.UNKNOWN_LENGTH, safeLength);
             if (tryPos != TRY_WRITE_HEADER_FAILED)
@@ -358,7 +346,6 @@ public abstract class AbstractWire implements Wire {
             fastForwardDontWriteHeaderNumber(lastPositionValue);
             return;
         }
-
 
         try {
 

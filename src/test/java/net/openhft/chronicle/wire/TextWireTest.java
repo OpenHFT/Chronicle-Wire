@@ -111,18 +111,6 @@ public class TextWireTest {
         return map.entrySet().stream().map(Object::toString).collect(Collectors.joining("\n"));
     }
 
-    static class TwoFields extends AbstractMarshallableCfg {
-        String b;
-        int d;
-        int notThere;
-
-        transient Map<String, Object> others = new LinkedHashMap<>();
-
-        @Override
-        public void unexpectedField(Object event, ValueIn valueIn) {
-            others.put(event.toString(), valueIn.object());
-        }
-    }
     @Test
     public void licenseCheck() {
         WireType.TEXT.licenceCheck();
@@ -865,7 +853,7 @@ public class TextWireTest {
     @Ignore("unreleased bytes")
     public void testBytesField() {
         DtoWithBytesField dto = new DtoWithBytesField(), dto2 = null;
-        byte[] binaryData = new byte[] { 1, 2, 3, 4};
+        byte[] binaryData = new byte[]{1, 2, 3, 4};
         dto.bytes = Bytes.wrapForRead(binaryData);
         dto.another = 123L;
 
@@ -1744,12 +1732,51 @@ public class TextWireTest {
         assertEquals(n, a);
     }
 
+    @Test
+    public void testParse2() {
+
+        MyDto myDto1 = new MyDto();
+
+        myDto1.strings.add("hello");
+        myDto1.strings.add("world");
+
+        String cs = myDto1.toString();
+        System.out.println(cs);
+        MyDto o = Marshallable.fromString(cs);
+        assertEquals(cs, o.toString());
+
+        assert o.strings.size() == 2;
+    }
+
+    @Test
+    public void longConverter() {
+        TwoLongs twoLongs = new TwoLongs(0x1234567890abcdefL, -1);
+        assertEquals("!net.openhft.chronicle.wire.TextWireTest$TwoLongs {\n" +
+                "  hexadecimal: \"1234567890abcdef\",\n" +
+                "  hexa2: ffffffffffffffff\n" +
+                "}\n", twoLongs.toString());
+        assertEquals(twoLongs, Marshallable.fromString(twoLongs.toString()));
+    }
+
     enum TWTSingleton {
         INSTANCE;
     }
 
     enum BWKey implements WireKey {
         field1, field2, field3
+    }
+
+    static class TwoFields extends AbstractMarshallableCfg {
+        String b;
+        int d;
+        int notThere;
+
+        transient Map<String, Object> others = new LinkedHashMap<>();
+
+        @Override
+        public void unexpectedField(Object event, ValueIn valueIn) {
+            others.put(event.toString(), valueIn.object());
+        }
     }
 
     static class ABCD extends AbstractMarshallable {
@@ -1854,22 +1881,6 @@ public class TextWireTest {
         }
     }
 
-    @Test
-    public void testParse2() {
-
-        MyDto myDto1 = new MyDto();
-
-        myDto1.strings.add("hello");
-        myDto1.strings.add("world");
-
-        String cs = myDto1.toString();
-        System.out.println(cs);
-        MyDto o = Marshallable.fromString(cs);
-        assertEquals(cs, o.toString());
-
-        assert o.strings.size() == 2;
-    }
-
     static class MyDto extends AbstractMarshallable {
         List<String> strings = new ArrayList<>();
 
@@ -1904,16 +1915,6 @@ public class TextWireTest {
             wire.write(() -> "bytes").bytes(bytes);
             wire.write(() -> "another").int64(another);
         }
-    }
-
-    @Test
-    public void longConverter() {
-        TwoLongs twoLongs = new TwoLongs(0x1234567890abcdefL, -1);
-        assertEquals("!net.openhft.chronicle.wire.TextWireTest$TwoLongs {\n" +
-                "  hexadecimal: \"1234567890abcdef\",\n" +
-                "  hexa2: ffffffffffffffff\n" +
-                "}\n", twoLongs.toString());
-        assertEquals(twoLongs, Marshallable.fromString(twoLongs.toString()));
     }
 
     static class TwoLongs extends AbstractMarshallable {

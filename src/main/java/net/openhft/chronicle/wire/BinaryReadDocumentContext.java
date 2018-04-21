@@ -33,8 +33,8 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     @Nullable
     protected AbstractWire wire;
     protected boolean present, notComplete;
-    private boolean metaData;
     protected long readPosition, readLimit;
+    private boolean metaData;
 
     public BinaryReadDocumentContext(@Nullable Wire wire) {
         this(wire, wire != null && wire.getValueIn() instanceof BinaryWire.DeltaValueIn);

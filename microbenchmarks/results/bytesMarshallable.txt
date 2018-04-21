@@ -140,7 +140,6 @@ Iteration   3: n = 21173, mean = 132 ns/op, p{0.00, 0.50, 0.90, 0.95, 0.99, 0.99
 Iteration   4: n = 21176, mean = 132 ns/op, p{0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 1.00} = 121, 130, 138, 139, 155, 160, 295, 6952 ns/op
 Iteration   5: n = 21262, mean = 132 ns/op, p{0.00, 0.50, 0.90, 0.95, 0.99, 0.999, 0.9999, 1.00} = 117, 130, 139, 139, 155, 168, 197, 200 ns/op
 
-
 Result "bytesMarshallable":
   127.995 ±(99.9%) 0.053 ns/op [Average]
   (min, avg, max) = (98.000, 127.995, 6952.000), stdev = 16.790
@@ -158,7 +157,6 @@ Result "bytesMarshallable":
   p(99.9990) =   2126.394 ns/op
   p(99.9999) =   6766.999 ns/op
          max =   6952.000 ns/op
-
 
 # Run complete. Total time: 00:02:44
 

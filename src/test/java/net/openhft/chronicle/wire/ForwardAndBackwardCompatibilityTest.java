@@ -107,6 +107,34 @@ public class ForwardAndBackwardCompatibilityTest {
         BytesUtil.checkRegisteredBytes();
     }
 
+    @Test
+    public void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        try {
+            Wire w = WireType.FIELDLESS_BINARY.apply(b);
+
+            try (DocumentContext dc = w.writingDocument()) {
+                dc.wire().write("hello").text("hello world");
+                dc.wire().write("hello2").text("hello world");
+            }
+
+            try (DocumentContext dc = w.writingDocument()) {
+                dc.wire().write("other data").text("other data");
+            }
+
+            try (DocumentContext dc = w.readingDocument()) {
+                Assert.assertEquals("hello world", dc.wire().read("hello").text());
+            }
+
+            try (DocumentContext dc = w.readingDocument()) {
+                Assert.assertEquals("other data", dc.wire().read("other data").text());
+            }
+        } finally {
+            b.release();
+        }
+    }
+
     public static class DTO1 extends AbstractMarshallable implements Demarshallable {
 
         int one;
@@ -176,34 +204,6 @@ public class ForwardAndBackwardCompatibilityTest {
         public DTO2 two(int two) {
             this.two = two;
             return this;
-        }
-    }
-
-    @Test
-    public void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads() {
-
-        Bytes b = Bytes.elasticByteBuffer();
-        try {
-            Wire w = WireType.FIELDLESS_BINARY.apply(b);
-
-            try (DocumentContext dc = w.writingDocument()) {
-                dc.wire().write("hello").text("hello world");
-                dc.wire().write("hello2").text("hello world");
-            }
-
-            try (DocumentContext dc = w.writingDocument()) {
-                dc.wire().write("other data").text("other data");
-            }
-
-            try (DocumentContext dc = w.readingDocument()) {
-                Assert.assertEquals("hello world", dc.wire().read("hello").text());
-            }
-
-            try (DocumentContext dc = w.readingDocument()) {
-                Assert.assertEquals("other data", dc.wire().read("other data").text());
-            }
-        } finally {
-            b.release();
         }
     }
 

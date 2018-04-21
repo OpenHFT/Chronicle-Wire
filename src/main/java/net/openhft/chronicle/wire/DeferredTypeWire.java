@@ -27,10 +27,10 @@ import java.util.function.Supplier;
 
 /**
  * Used typically for writing in conjunction with a readAny wire
- *
+ * <p>
  * Ideal when some bytes have to be read before the type is know, this type is subsequently set via
  * {@code wireTypeSupplier}
- *
+ * <p>
  * TextWire BinaryWire
  *
  * @author Rob Austin.

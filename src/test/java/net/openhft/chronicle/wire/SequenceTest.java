@@ -16,12 +16,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-
 @RunWith(value = Parameterized.class)
 public class SequenceTest {
 
     private final WireType wireType;
-
 
     public SequenceTest(WireType wireType) {
         this.wireType = wireType;
@@ -35,16 +33,6 @@ public class SequenceTest {
                 new Object[]{WireType.BINARY},
                 new Object[]{WireType.TEXT}
         );
-    }
-
-    static class My extends AbstractMarshallable {
-        List<CharSequence> stuff = new ArrayList<>();
-        transient List<CharSequence> stuffBuffer = new ArrayList<>();
-
-        @Override
-        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
-            wire.read("stuff").sequence(stuff, stuffBuffer, StringBuilder::new);
-        }
     }
 
     @Test
@@ -77,7 +65,6 @@ public class SequenceTest {
                     "  ]\n" +
                     "}\n", m2.toString());
 
-
             m2.readMarshallable(w2);
 
             Assert.assertEquals("!net.openhft.chronicle.wire.SequenceTest$My {\n" +
@@ -87,7 +74,6 @@ public class SequenceTest {
                     "    six\n" +
                     "  ]\n" +
                     "}\n", m2.toString());
-
 
             m2.readMarshallable(w2);
 
@@ -101,9 +87,18 @@ public class SequenceTest {
         bytes.release();
     }
 
-
     @After
     public void checkRegisteredBytes() {
         BytesUtil.checkRegisteredBytes();
+    }
+
+    static class My extends AbstractMarshallable {
+        List<CharSequence> stuff = new ArrayList<>();
+        transient List<CharSequence> stuffBuffer = new ArrayList<>();
+
+        @Override
+        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
+            wire.read("stuff").sequence(stuff, stuffBuffer, StringBuilder::new);
+        }
     }
 }

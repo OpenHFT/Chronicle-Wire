@@ -9,14 +9,19 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /*
  * Created by peter.lawrey@chronicle.software on 28/07/2017
  */
 public class UnknownEnumTest {
+
+    private static final byte[] SERIALISED_MAP_DATA = new byte[]{
+            (byte) -59, 101, 118, 101, 110, 116, -126, 60, 0, 0, 0, -71, 3,
+            107, 101, 121, -74, 47, 110, 101, 116, 46, 111, 112, 101, 110, 104,
+            102, 116, 46, 99, 104, 114, 111, 110, 105, 99, 108, 101, 46, 119,
+            105, 114, 101, 46, 85, 110, 107, 110, 111, 119, 110, 69, 110, 117,
+            109, 84, 101, 115, 116, 36, 84, 101, 109, 112, -27, 70, 73, 82, 83, 84};
 
     public Wire createWire() {
         return new TextWire(Bytes.elasticHeapByteBuffer(128));
@@ -35,13 +40,6 @@ public class UnknownEnumTest {
         String maybe = wire2.read("value").text();
         assertEquals("Maybe", maybe);
     }
-
-    private static final byte[] SERIALISED_MAP_DATA = new byte[] {
-            (byte) -59, 101, 118, 101, 110, 116, -126, 60, 0, 0, 0, -71, 3,
-            107, 101, 121, -74, 47, 110, 101, 116, 46, 111, 112, 101, 110, 104,
-            102, 116, 46, 99, 104, 114, 111, 110, 105, 99, 108, 101, 46, 119,
-            105, 114, 101, 46, 85, 110, 107, 110, 111, 119, 110, 69, 110, 117,
-            109, 84, 101, 115, 116, 36, 84, 101, 109, 112, -27, 70, 73, 82, 83, 84};
 
 //    private enum Temp {
 //        FIRST

@@ -178,7 +178,6 @@ public class BinaryWire2Test {
         assertEquals("Hello", b.toString());
     }
 
-
     @Test
     public void writeObjectWithTreeMap() {
         @NotNull Wire wire = createWire();
@@ -714,15 +713,6 @@ public class BinaryWire2Test {
         assertEquals("Hello World", bh2.bytes.toString());
     }
 
-    static class BytesHolder extends AbstractMarshallable {
-        final Bytes bytes = Bytes.elasticHeapByteBuffer(64);
-
-        @Override
-        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
-            wire.read("bytes").bytes(bytes);
-        }
-    }
-
     @Test
     public void testWritingDecimals() {
 //        BinaryWire.SPEC = 18;
@@ -786,6 +776,15 @@ public class BinaryWire2Test {
             assertEquals(d, v, 0.0);
             final long size = wire.bytes().readPosition();
             System.out.println(d + " size: " + size);
+        }
+    }
+
+    static class BytesHolder extends AbstractMarshallable {
+        final Bytes bytes = Bytes.elasticHeapByteBuffer(64);
+
+        @Override
+        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
+            wire.read("bytes").bytes(bytes);
         }
     }
 }

@@ -60,7 +60,7 @@ public class TextDocumentTest {
         @NotNull Bytes<?> bytes = wire.bytes();
         assertEquals("--- !!meta-data\n" +
                 "header: {\n" +
-                "  uuid: "+wheader.uuid+",\n" +
+                "  uuid: " + wheader.uuid + ",\n" +
                 "  writeByte: !!atomic { locked: false, value: 00000000000000000512 },\n" +
                 "  readByte: !!atomic { locked: false, value: 00000000000000001024 },\n" +
                 "  created: \"" + wheader.created + "\"\n" +

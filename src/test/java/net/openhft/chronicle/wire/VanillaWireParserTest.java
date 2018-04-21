@@ -9,6 +9,11 @@ import static org.junit.Assert.assertTrue;
 
 public class VanillaWireParserTest {
 
+    private static Listener impl() {
+        return m -> {
+        };
+    }
+
     @Test
     public void shouldDetermineMethodNamesFromMethodIds() {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticDirect());
@@ -27,9 +32,5 @@ public class VanillaWireParserTest {
 
     interface Listener {
         void hear(final String message);
-    }
-
-    private static Listener impl() {
-        return m -> {};
     }
 }
