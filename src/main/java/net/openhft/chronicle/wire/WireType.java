@@ -102,6 +102,9 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             }
         }
     },
+    /**
+     * Use this ONLY if intend to use Delta and Binary. Otherwise, use {@link #BINARY_LIGHT}
+     */
     BINARY {
         @NotNull
         @Override
@@ -121,6 +124,9 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             return fromHexString(cs);
         }
     },
+    /**
+     * Use this when only need to use Binary (does not support DeltaWire)
+     */
     BINARY_LIGHT {
         @NotNull
         @Override
