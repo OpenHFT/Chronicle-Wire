@@ -55,6 +55,7 @@ public class VanillaMethodReader implements MethodReader {
     private final MarshallableIn in;
     @NotNull
     private final WireParser wireParser;
+    private final MessageHistory messageHistory = MessageHistory.get();
     private boolean closeIn = false, closed;
     private MethodReaderInterceptor methodReaderInterceptor;
 
@@ -127,7 +128,7 @@ public class VanillaMethodReader implements MethodReader {
             }
         }
         if (wireParser.lookup(HISTORY) == null) {
-            wireParser.registerOnce(() -> HISTORY, (s, v) -> v.marshallable(MessageHistory.get()));
+            wireParser.registerOnce(() -> HISTORY, (s, v) -> v.marshallable(messageHistory));
         }
     }
 
@@ -405,7 +406,7 @@ public class VanillaMethodReader implements MethodReader {
                 }
                 if (!context.isData())
                     continue;
-                MessageHistory history = MessageHistory.get();
+                MessageHistory history = messageHistory;
                 history.reset(context.sourceId(), context.index());
                 wireParser.accept(context.wire());
             }
