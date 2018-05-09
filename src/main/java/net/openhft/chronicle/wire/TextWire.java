@@ -2879,6 +2879,8 @@ public class TextWire extends AbstractWire implements Wire {
                 bytes.readSkip(-1);
                 try {
                     return classLookup().forName(sb);
+                } catch (NoClassDefFoundError e) {
+                    throw new IORuntimeException("Unable to load class " + e, e);
                 } catch (ClassNotFoundException e) {
                     return Wires.tupleFor(tClass, sb.toString());
                 }
