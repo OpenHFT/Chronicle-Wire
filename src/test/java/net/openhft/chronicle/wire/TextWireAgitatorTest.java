@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.Test;
 
@@ -9,6 +10,8 @@ import static org.junit.Assert.assertEquals;
 public class TextWireAgitatorTest {
     @Test(expected = IORuntimeException.class)
     public void lowerCaseClass() {
+        if (!OS.isWindows())
+            throw new IORuntimeException("Only fails this way on Windows");
         TextWireTest.MyDto myDto = Marshallable.fromString("!" + TextWireTest.MyDto.class.getName() + " { }");
         assertEquals("!net.openhft.chronicle.wire.TextWireTest$MyDto {\n" +
                 "  strings: [\n" +
