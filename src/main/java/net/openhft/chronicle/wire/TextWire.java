@@ -345,6 +345,8 @@ public class TextWire extends AbstractWire implements Wire {
     }
 
     private static void checkConsecutiveSpaces(@NotNull StringBuilder sb) {
+        if (sb.length() == 0)
+            return;
         char lastCh = sb.charAt(0);
         for (int i = 1; i < sb.length() - 1; i++) {
             char ch2 = sb.charAt(i);
@@ -400,8 +402,6 @@ public class TextWire extends AbstractWire implements Wire {
                 parseUntil(sb, getEscapingEndOfText());
             }
             unescape(sb);
-            if (sb.length() == 0)
-                throw new IORuntimeException("Cannot have an empty field name");
             // check no consecutive spaces.
             checkConsecutiveSpaces(sb);
         } catch (BufferUnderflowException e) {

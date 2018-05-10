@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
 import org.junit.After;
 import org.junit.Test;
@@ -64,21 +65,12 @@ public class UnsupportedChangesTest {
         assertEquals("{ExceptionKey{level=WARN, clazz=class net.openhft.chronicle.wire.TextWire$TextValueIn, message='Unable to read {a=128, b=1.0} as a long.', throwable=}=1}", exceptions.toString());
     }
 
-    @Test
+    @Test(expected = IORuntimeException.class)
     public void marshallableToScalar3() {
-        Map<ExceptionKey, Integer> exceptions = Jvm.recordExceptions(true);
-
         BooleanWrapper wrapper = Marshallable.fromString(BooleanWrapper.class, "{\n" +
                 "flag: { a: 128, b: 1.0 },\n" +
                 "second: 1234," +
                 "}\n");
-        assertEquals("!net.openhft.chronicle.wire.UnsupportedChangesTest$BooleanWrapper {\n" +
-                "  flag: false,\n" +
-                "  second: 1234\n" +
-                "}\n", wrapper.toString());
-
-        // TODO probably should produce a warning.
-        assertEquals("{}", exceptions.toString());
     }
 
     static class Wrapper extends AbstractMarshallable {
