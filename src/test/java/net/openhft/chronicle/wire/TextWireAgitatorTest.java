@@ -17,4 +17,25 @@ public class TextWireAgitatorTest {
 
         TextWireTest.MyDto myDto2 = Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }");
     }
+
+    @Test(expected = IORuntimeException.class)
+    public void colonInList() {
+        TextWireTest.MyDto md = Marshallable.fromString("!net.openhft.chronicle.wire.TextWireTest$MyDto {\n" +
+                "  strings: [\n" +
+                "  :\n" +
+                "  ]\n" +
+                "}\n");
+        assertEquals("[hello]", md.toString());
+    }
+
+    @Test(expected = IORuntimeException.class)
+    public void notBoolean() {
+        MyFlagged mf = Marshallable.fromString("!net.openhft.chronicle.wire.TextWireAgitatorTest$MyFlagged {\n" +
+                "  flag: not-false\n" +
+                "}");
+    }
+
+    static class MyFlagged extends AbstractMarshallable {
+        boolean flag;
+    }
 }

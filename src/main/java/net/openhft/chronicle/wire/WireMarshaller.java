@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.BytesComment;
 import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -901,8 +902,16 @@ public class WireMarshaller<T> {
         private final Class<?> type;
         @NotNull
         private BiConsumer<Collection, ValueIn> seqConsumer = (c, in2) -> {
-            while (in2.hasNextSequenceItem())
+            Bytes<?> bytes = in2.wireIn().bytes();
+            while (in2.hasNextSequenceItem()) {
+                long start = bytes.readPosition();
                 c.add(in2.text());
+                long end = bytes.readPosition();
+                if (start == end) {
+                    int ch = bytes.readUnsignedByte(start);
+                    throw new IORuntimeException("Expected a ] but found " + ch + " '" + (char) ch + "'");
+                }
+            }
         };
 
         public StringCollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class<?> type) {

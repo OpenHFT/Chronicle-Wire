@@ -344,6 +344,16 @@ public class TextWire extends AbstractWire implements Wire {
         return sb;
     }
 
+    private static void checkConsecutiveSpaces(@NotNull StringBuilder sb) {
+        char lastCh = sb.charAt(0);
+        for (int i = 1; i < sb.length() - 1; i++) {
+            char ch2 = sb.charAt(i);
+            if (lastCh <= ' ' && ch2 <= ' ')
+                throw new IORuntimeException("Cannot have multiple consecutive spaces in a field name '" + sb + "'");
+            lastCh = ch2;
+        }
+    }
+
     @NotNull
     protected StringBuilder readField(@NotNull StringBuilder sb) {
         consumePadding();
@@ -390,6 +400,10 @@ public class TextWire extends AbstractWire implements Wire {
                 parseUntil(sb, getEscapingEndOfText());
             }
             unescape(sb);
+            if (sb.length() == 0)
+                throw new IORuntimeException("Cannot have an empty field name");
+            // check no consecutive spaces.
+            checkConsecutiveSpaces(sb);
         } catch (BufferUnderflowException e) {
             Jvm.debug().on(getClass(), e);
         }
@@ -3124,7 +3138,11 @@ public class TextWire extends AbstractWire implements Wire {
             if (textTo(sb) == null)
                 throw new NullPointerException("value is null");
 
-            return ObjectUtils.isTrue(sb);
+            if (ObjectUtils.isTrue(sb))
+                return true;
+            if (ObjectUtils.isFalse(sb))
+                return false;
+            throw new IORuntimeException("Unable to parse '" + sb + "' as a boolean flag");
         }
 
         @Override
