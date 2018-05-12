@@ -378,41 +378,42 @@ public class VanillaMethodReader implements MethodReader {
      * @return true if there was a message, or false if no more data is available.
      */
     public boolean readOne() {
-        for (; ; ) {
+        try (DocumentContext context = in.readingDocument()) {
+            if (!context.isPresent())
+                return false;
+            if (context.isMetaData())
+                return readOneMetaData(context);
 
-            try (DocumentContext context = in.readingDocument()) {
-                if (!context.isPresent())
+            assert context.isData();
+
+            messageHistory.reset(context.sourceId(), context.index());
+            wireParser.accept(context.wire());
+        }
+        return true;
+    }
+
+    private boolean readOneMetaData(DocumentContext context) {
+        StringBuilder sb = Wires.acquireStringBuilder();
+
+        Wire wire = context.wire();
+        Bytes<?> bytes = wire.bytes();
+        long r = bytes.readPosition();
+        try {
+            wire.readEventName(sb);
+
+            for (String s : metaIgnoreList) {
+                // we wish to ignore our system meta data field
+                if (s.contentEquals(sb))
                     return false;
-                if (context.isMetaData()) {
-                    StringBuilder sb = Wires.acquireStringBuilder();
-
-                    long r = context.wire().bytes().readPosition();
-                    try {
-                        context.wire().readEventName(sb);
-
-                        for (String s : metaIgnoreList) {
-                            // we wish to ignore our system meta data field
-                            if (s.contentEquals(sb))
-                                return false;
-                        }
-                    } finally {
-                        // roll back position to where is was before we read the SB
-                        context.wire().bytes().readPosition(r);
-                    }
-
-                    wireParser.accept(context.wire());
-
-                    return true;
-                }
-                if (!context.isData())
-                    continue;
-                MessageHistory history = messageHistory;
-                history.reset(context.sourceId(), context.index());
-                wireParser.accept(context.wire());
             }
-            return true;
+        } finally {
+            // roll back position to where is was before we read the SB
+            bytes.readPosition(r);
         }
 
+        wireParser.accept(wire);
+
+        return true;
     }
 
     @Override
