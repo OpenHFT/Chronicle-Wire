@@ -2164,8 +2164,10 @@ public class TextWire extends AbstractWire implements Wire {
                 default: {
                     final long rem = bytes.readRemaining();
                     if (rem > 0) {
-                        if (a instanceof Bytes || use8bit) {
-                            bytes.parse8bit(a, getStrictEscapingEndOfText());
+                        if (a instanceof Bytes) {
+                            bytes.parse8bit((Bytes) a, getStrictEscapingEndOfText());
+                        } else if (use8bit) {
+                            bytes.parse8bit((StringBuilder) a, getStrictEscapingEndOfText());
                         } else {
                             bytes.parseUtf8(a, getStrictEscapingEndOfText());
                         }

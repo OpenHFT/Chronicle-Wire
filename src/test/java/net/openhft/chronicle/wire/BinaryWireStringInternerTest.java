@@ -58,7 +58,7 @@ public final class BinaryWireStringInternerTest {
     }
 
     @Test
-    public void shouldInternExistingStrings() throws Exception {
+    public void shouldInternExistingStrings() {
         for (int i = 0; i < 5; i++) {
             final int dataPointIndex = random.nextInt(DATA_SET_SIZE);
             wire.getFixedBinaryValueOut(true).text(testData[dataPointIndex]);
