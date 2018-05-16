@@ -412,7 +412,6 @@ public class VanillaMethodReader implements MethodReader {
         }
 
         wireParser.accept(wire);
-
         return true;
     }
 
