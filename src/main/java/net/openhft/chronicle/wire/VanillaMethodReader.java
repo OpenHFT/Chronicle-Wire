@@ -378,18 +378,24 @@ public class VanillaMethodReader implements MethodReader {
      * @return true if there was a message, or false if no more data is available.
      */
     public boolean readOne() {
-        try (DocumentContext context = in.readingDocument()) {
-            if (!context.isPresent())
-                return false;
-            if (context.isMetaData())
-                return readOneMetaData(context);
 
-            assert context.isData();
+        for (; ; ) {
+            try (DocumentContext context = in.readingDocument()) {
+                if (!context.isPresent())
+                    return false;
+                if (context.isMetaData())
+                    if (readOneMetaData(context))
+                        return true;
+                    else
+                        continue;
 
-            messageHistory.reset(context.sourceId(), context.index());
-            wireParser.accept(context.wire());
+                assert context.isData();
+
+                messageHistory.reset(context.sourceId(), context.index());
+                wireParser.accept(context.wire());
+            }
+            return true;
         }
-        return true;
     }
 
     private boolean readOneMetaData(DocumentContext context) {
