@@ -494,7 +494,9 @@ public enum Wires {
 
             case NONE:
                 @NotNull final Object e = strategy.readUsing(using, in);
-                return clazz == Base64.class ? (E) e : (E) ObjectUtils.convertTo(clazz, e);
+                return clazz == Base64.class
+                        ? (E) e
+                        : (E) ObjectUtils.convertTo(clazz, e);
 
             default:
                 throw new AssertionError();

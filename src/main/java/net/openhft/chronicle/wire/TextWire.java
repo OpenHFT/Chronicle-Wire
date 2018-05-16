@@ -3142,7 +3142,8 @@ public class TextWire extends AbstractWire implements Wire {
                 return true;
             if (ObjectUtils.isFalse(sb))
                 return false;
-            throw new IORuntimeException("Unable to parse '" + sb + "' as a boolean flag");
+            Jvm.debug().on(getClass(), "Unable to parse '" + sb + "' as a boolean flag, assuming false");
+            return false;
         }
 
         @Override
