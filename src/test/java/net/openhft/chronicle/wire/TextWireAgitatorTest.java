@@ -31,8 +31,9 @@ public class TextWireAgitatorTest {
         assertEquals("[hello]", md.toString());
     }
 
-    @Test(expected = IORuntimeException.class)
+    @Test
     public void notBoolean() {
+        // produces a warning.
         MyFlagged mf = Marshallable.fromString("!net.openhft.chronicle.wire.TextWireAgitatorTest$MyFlagged {\n" +
                 "  flag: not-false\n" +
                 "}");
