@@ -58,6 +58,10 @@ public class VanillaWireParser implements WireParser {
             return;
         }
 
+        wireIn.consumePadding();
+        if (wireIn.bytes().readRemaining() == 0)
+            return;
+
         long start = wireIn.bytes().readPosition();
         @NotNull ValueIn valueIn = wireIn.readEventName(sb);
         WireParselet parslet;
