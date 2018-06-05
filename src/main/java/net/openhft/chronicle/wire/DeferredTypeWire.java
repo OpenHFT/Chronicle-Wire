@@ -35,6 +35,7 @@ import java.util.function.Supplier;
  *
  * @author Rob Austin.
  */
+@Deprecated(/*TODO Add tests, or delete?*/)
 public class DeferredTypeWire extends AbstractAnyWire implements Wire {
 
     public DeferredTypeWire(@NotNull Bytes bytes, Supplier<WireType> wireTypeSupplier) {

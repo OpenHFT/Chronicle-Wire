@@ -24,12 +24,14 @@ import org.jetbrains.annotations.Nullable;
  * Created by Peter Lawrey on 10/05/16.
  */
 public interface SerializationStrategy<T> {
+    @Deprecated(/*to be removed?*/)
     @Nullable
     default T read(ValueIn in, Class<T> type) {
         return readUsing(newInstance(type), in);
     }
 
     @Nullable
+    @Deprecated(/*to be removed?*/)
     default T readUsing(@Nullable T using, ValueIn in, @Nullable Class<T> type) {
         if (using == null && type != null)
             using = newInstance(type);

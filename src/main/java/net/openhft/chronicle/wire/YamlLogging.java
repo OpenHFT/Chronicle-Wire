@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Class to control whether to log Yaml messages for debugging or documentation.
  */
+// TODO Add tests
 public enum YamlLogging {
     ;
     @NotNull

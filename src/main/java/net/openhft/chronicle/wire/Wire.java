@@ -24,6 +24,7 @@ import java.io.IOException;
  * Created by peter.lawrey on 12/01/15.
  */
 public interface Wire extends WireIn, WireOut {
+    @Deprecated(/*to be removed?*/)
     static Wire fromFile(@NotNull String name) throws IOException {
         @NotNull String ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
         switch (ext) {

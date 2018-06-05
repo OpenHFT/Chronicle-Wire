@@ -98,7 +98,9 @@ public class TextMethodTester<T> {
                 .methodWriterListener(methodWriterListener);
         if (genericEvent != null) methodWriterBuilder.genericEvent(genericEvent);
         T writer0 = methodWriterBuilder.build();
-        T writer = retainLast == null ? writer0 : cachedMethodWriter(writer0);
+        T writer = retainLast == null
+                ? writer0
+                : cachedMethodWriter(writer0);
         Object component = componentFunction.apply(writer);
         Object[] components = component instanceof Object[]
                 ? (Object[]) component
@@ -220,6 +222,7 @@ public class TextMethodTester<T> {
         return this;
     }
 
+    @Deprecated(/* used by one client*/)
     static class Invocation {
         Method method;
         Object[] args;
@@ -230,6 +233,7 @@ public class TextMethodTester<T> {
         }
     }
 
+    @Deprecated(/* used by one client*/)
     class CachedInvocationHandler implements InvocationHandler {
         private final Map<String, Invocation> cache = new TreeMap<>();
         private final T writer0;

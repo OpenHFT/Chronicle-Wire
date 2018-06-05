@@ -107,6 +107,7 @@ public enum Wires {
         WireInternal.addAliases();
     }
 
+    @Deprecated(/*to be removed?*/)
     @Nullable
     public static <T> T read(@NotNull Class<T> tClass, ValueIn in) {
         final SerializationStrategy<T> strategy = CLASS_STRATEGY.get(tClass);
