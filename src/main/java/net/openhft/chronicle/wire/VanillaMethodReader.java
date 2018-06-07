@@ -378,7 +378,14 @@ public class VanillaMethodReader implements MethodReader {
      * @return true if there was a message, or false if no more data is available.
      */
     public boolean readOne() {
-
+/*
+        if (++five > 10000) {
+            System.out.println(one + ", " + two + ", " + three + ", " + four);
+            if (one == 0)
+                Jvm.safepoint();
+            one = two = three = four = five = 0;
+        }
+*/
         for (; ; ) {
             try (DocumentContext context = in.readingDocument()) {
                 if (!context.isPresent())
@@ -396,6 +403,38 @@ public class VanillaMethodReader implements MethodReader {
             }
             return true;
         }
+    }
+
+//    long one = 0, two = 0, three = 0, four = 0, five = 0;
+
+    @Override
+    public boolean quickReadOne() {
+        if (!in.peekDocument()) {
+//            one++;
+            return false;
+        }
+
+        return quickReadOne0();
+    }
+
+    private boolean quickReadOne0() {
+        try (DocumentContext context = in.readingDocument()) {
+            if (!context.isPresent()) {
+//                two++;
+                return false;
+            }
+            if (context.isMetaData()) {
+//                three++;
+                readOneMetaData(context);
+                return true;
+            }
+//            four++;
+            assert context.isData();
+
+            messageHistory.reset(context.sourceId(), context.index());
+            wireParser.accept(context.wire());
+        }
+        return true;
     }
 
     private boolean readOneMetaData(DocumentContext context) {

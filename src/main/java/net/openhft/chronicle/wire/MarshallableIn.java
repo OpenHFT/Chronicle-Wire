@@ -38,6 +38,10 @@ public interface MarshallableIn {
     @NotNull
     DocumentContext readingDocument();
 
+    default boolean peekDocument() {
+        return true;
+    }
+
     /**
      * @param reader user to read the document
      * @return {@code true} if successful
