@@ -27,6 +27,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static net.openhft.chronicle.wire.Wires.NOT_COMPLETE;
+import static net.openhft.chronicle.wire.Wires.UNKNOWN_LENGTH;
+
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream.
  * <p/>
@@ -193,7 +196,11 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @param metaData whether the message is meta data or not.
      * @throws StreamCorruptedException if the steam has become corrupted
      */
-    void updateHeader(long position, boolean metaData) throws StreamCorruptedException, EOFException;
+    default void updateHeader(long position, boolean metaData) throws StreamCorruptedException {
+        updateHeader(position, metaData, Wires.addMaskedTidToHeader(NOT_COMPLETE | UNKNOWN_LENGTH));
+    }
+
+    void updateHeader(long position, boolean metaData, int expectedHeader) throws StreamCorruptedException;
 
     /**
      * Write a message of unknown length, handling timeouts and the end of wire marker. This will
@@ -215,13 +222,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
         return writeHeaderOfUnknownLength(DEFAULT_SAFE_LENGTH, timeout, timeUnit, lastPosition, sequence);
     }
 
-    /**
-     * Makes a single attempt to try and write the header.
-     *
-     * @param safeLength assume this safe length
-     * @return TRY_WRITE_HEADER_FAILED if it failed, otherwise the position of the start of the header
-     */
-    long tryWriteHeader(int safeLength);
+    long enterHeader(int safeLength);
 
     /**
      * Start the first header, if there is none This will increment the headerNumber as appropriate
