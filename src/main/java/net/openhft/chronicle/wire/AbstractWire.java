@@ -313,15 +313,12 @@ public abstract class AbstractWire implements Wire {
                 break;
 
             if (isNotComplete(header)) {
-                Jvm.warn().on(getClass(), "Incomplete header found at pos: " + pos + ", overwriting");
+                Jvm.warn().on(getClass(), new Exception("Incomplete header found at pos: " + pos + ": " + Integer.toHexString(header) + ", overwriting"));
                 bytes.writeVolatileInt(pos, NOT_INITIALIZED);
                 break;
             }
 
             pos += lengthOf(header) + SPB_HEADER_SIZE; // length of message plus length of header
-
-            if (isData(header))
-                incrementHeaderNumber(pos);
         }
         bytes.writePositionRemaining(pos + SPB_HEADER_SIZE, safeLength);
         return pos;
