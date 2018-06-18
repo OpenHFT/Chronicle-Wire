@@ -110,10 +110,6 @@ public abstract class AbstractWire implements Wire {
         throw new IllegalStateException("not enough space to write " + maxlen + " was " + bytes.writeRemaining() + " limit " + bytes.writeLimit() + " type " + bytes.getClass());
     }
 
-    private static void throwLengthMismatch(int length, int actualLength) throws StreamCorruptedException {
-        throw new StreamCorruptedException("Wrote " + actualLength + " when " + length + " was set initially.");
-    }
-
     @NotNull
     private Pauser acquireTimedParser() {
         return timedParser != null
@@ -164,6 +160,7 @@ public abstract class AbstractWire implements Wire {
 
     @NotNull
     private Wire headerNumber0(long headerNumber) {
+//        new Exception("thread: " + Thread.currentThread().getName() + "\n\tHeader number: " + Long.toHexString(headerNumber)).printStackTrace();
         this.headerNumber = headerNumber;
         return this;
     }
@@ -289,7 +286,7 @@ public abstract class AbstractWire implements Wire {
         insideHeader = true;
 
         try {
-            long tryPos = tryWriteHeader0(Wires.UNKNOWN_LENGTH, safeLength);
+            long tryPos = tryWriteHeader(safeLength);
             if (tryPos != TRY_WRITE_HEADER_FAILED)
                 return tryPos;
 
@@ -301,6 +298,30 @@ public abstract class AbstractWire implements Wire {
             insideHeader = false;
             throw t;
         }
+    }
+
+    @Override
+    public long enterHeader(int safeLength) {
+        if (safeLength > bytes.writeRemaining())
+            return throwNotEnoughSpace(safeLength, bytes);
+        insideHeader = true;
+        long pos = bytes.writePosition();
+
+        for (; ; ) {
+            int header = bytes.readVolatileInt(pos);
+            if (header == NOT_INITIALIZED)
+                break;
+
+            if (isNotComplete(header)) {
+                Jvm.warn().on(getClass(), new Exception("Incomplete header found at pos: " + pos + ": " + Integer.toHexString(header) + ", overwriting"));
+                bytes.writeVolatileInt(pos, NOT_INITIALIZED);
+                break;
+            }
+
+            pos += lengthOf(header) + SPB_HEADER_SIZE; // length of message plus length of header
+        }
+        bytes.writePositionRemaining(pos + SPB_HEADER_SIZE, safeLength);
+        return pos;
     }
 
     /**
@@ -395,34 +416,16 @@ public abstract class AbstractWire implements Wire {
         }
     }
 
-    @Override
-    public long tryWriteHeader(final int safeLength) {
-        assert !insideHeader : INSIDE_HEADER_MESSAGE;
-
-        insideHeader = true;
-        try {
-            long tryPos = tryWriteHeader0(Wires.UNKNOWN_LENGTH, safeLength);
-            insideHeader = (tryPos != TRY_WRITE_HEADER_FAILED);
-            return tryPos;
-        } catch (Throwable t) {
-            insideHeader = false;
-            throw t;
-        }
-    }
-
-    private long tryWriteHeader0(int length, int safeLength) {
-        if (length < 0 || length > safeLength)
-            throw new IllegalArgumentException();
+    private long tryWriteHeader(int safeLength) {
         long pos = bytes.writePosition();
 
-        final int value = Wires.addMaskedTidToHeader(NOT_COMPLETE | length);
+        final int value = Wires.addMaskedTidToHeader(NOT_COMPLETE | Wires.UNKNOWN_LENGTH);
         if (bytes.compareAndSwapInt(pos, 0, value)) {
 
-            int maxlen = length == UNKNOWN_LENGTH ? safeLength : length;
-            if (length != safeLength && maxlen > bytes.writeRemaining())
-                return throwNotEnoughSpace(maxlen, bytes);
+            if (safeLength > bytes.writeRemaining())
+                return throwNotEnoughSpace(safeLength, bytes);
 
-            bytes.writePositionRemaining(pos + SPB_HEADER_SIZE, maxlen);
+            bytes.writePositionRemaining(pos + SPB_HEADER_SIZE, safeLength);
 //            System.out.println(Thread.currentThread()+" wpr pos: "+pos+" hdr "+headerNumber);
             return pos;
         }
@@ -440,7 +443,7 @@ public abstract class AbstractWire implements Wire {
         try {
             final int value = Wires.addMaskedTidToHeader(NOT_COMPLETE | length);
             for (; ; ) {
-                if (bytes.compareAndSwapInt(pos, 0, value)) {
+                if (bytes.compareAndSwapInt(pos, NOT_INITIALIZED, value)) {
 
                     bytes.writePosition(pos + SPB_HEADER_SIZE);
                     int maxlen = length == UNKNOWN_LENGTH ? safeLength : length;
@@ -487,7 +490,7 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public void updateHeader(final long position, final boolean metaData) throws StreamCorruptedException, EOFException {
+    public void updateHeader(final long position, final boolean metaData, int expectedHeader) throws StreamCorruptedException {
         if (position <= 0) {
             // this should never happen so blow up
             IllegalStateException ex = new IllegalStateException("Attempt to write to position=" + position);
@@ -501,10 +504,8 @@ public abstract class AbstractWire implements Wire {
             addPadding(1);
 
         long pos = bytes.writePosition();
-        int actualLength = Maths.toUInt31(pos - position - 4);
 
-        int expectedHeader = Wires.addMaskedTidToHeader(NOT_COMPLETE | UNKNOWN_LENGTH);
-        int header = actualLength;
+        int header = Maths.toUInt31(pos - position - 4);
         if (metaData) header |= META_DATA;
         if (header == UNKNOWN_LENGTH)
             throw new UnsupportedOperationException("Data messages of 0 length are not supported.");
@@ -519,16 +520,13 @@ public abstract class AbstractWire implements Wire {
             incrementHeaderNumber(position);
     }
 
-    private void updateHeaderAssertions(long position, long pos, int expectedHeader, int header) throws StreamCorruptedException, EOFException {
+    private void updateHeaderAssertions(long position, long pos, int expectedHeader, int header) throws StreamCorruptedException {
         if (ASSERTIONS) {
             checkNoDataAfterEnd(pos);
         }
 
         if (!bytes.compareAndSwapInt(position, expectedHeader, header)) {
             int currentHeader = bytes.readVolatileInt(position);
-            if (Wires.isEndOfFile(currentHeader))
-                throw new EOFException();
-            else
                 throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(currentHeader));
         }
     }

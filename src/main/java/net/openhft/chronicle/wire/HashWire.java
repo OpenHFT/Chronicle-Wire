@@ -208,12 +208,12 @@ public class HashWire implements WireOut, BytesComment {
     }
 
     @Override
-    public long tryWriteHeader(final int safeLength) {
+    public long enterHeader(final int safeLength) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void updateHeader(long position, boolean metaData) {
+    public void updateHeader(long position, boolean metaData, int expectedHeader) {
         throw new UnsupportedOperationException();
     }
 
