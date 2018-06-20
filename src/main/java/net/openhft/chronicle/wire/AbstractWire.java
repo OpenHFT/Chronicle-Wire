@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.threads.BusyTimedPauser;
 import net.openhft.chronicle.threads.Pauser;
+import net.openhft.chronicle.threads.TimingPauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -92,7 +93,7 @@ public abstract class AbstractWire implements Wire {
     volatile Throwable usedHere, lastEnded;
     int usedCount = 0;
     private Pauser pauser;
-    private Pauser timedParser;
+    private TimingPauser timedParser;
     private long headerNumber = Long.MIN_VALUE;
     private boolean notCompleteIsNotPresent;
     private ObjectOutput objectOutput;
@@ -111,7 +112,7 @@ public abstract class AbstractWire implements Wire {
     }
 
     @NotNull
-    private Pauser acquireTimedParser() {
+    private TimingPauser acquireTimedParser() {
         return timedParser != null
                 ? timedParser
                 : (timedParser = new BusyTimedPauser());
