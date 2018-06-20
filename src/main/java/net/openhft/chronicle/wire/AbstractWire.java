@@ -24,7 +24,6 @@ import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.threads.BusyTimedPauser;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.threads.TimingPauser;
 import org.jetbrains.annotations.NotNull;
@@ -115,7 +114,7 @@ public abstract class AbstractWire implements Wire {
     private TimingPauser acquireTimedParser() {
         return timedParser != null
                 ? timedParser
-                : (timedParser = new BusyTimedPauser());
+                : (timedParser = Pauser.timedBusy());
     }
 
     public boolean isInsideHeader() {
