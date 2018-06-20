@@ -3675,6 +3675,11 @@ public class BinaryWire extends AbstractWire implements Wire {
                         case FLOAT64:
                             bytes.readDouble();
                             return;
+                        case FLOAT_SET_LOW_0:
+                        case FLOAT_SET_LOW_2:
+                        case FLOAT_SET_LOW_4:
+                            bytes.readUnsignedByte();
+                            return;
                     }
                     throw new UnsupportedOperationException(stringForCode(code));
 
