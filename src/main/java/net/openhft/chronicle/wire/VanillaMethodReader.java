@@ -380,20 +380,14 @@ public class VanillaMethodReader implements MethodReader {
     public boolean readOne() {
 
         try (DocumentContext context = in.readingDocument()) {
-            if (!context.isPresent())
-                return false;
-            if (context.isMetaData())
-                if (readOneMetaData(context))
-                    return true;
-                else
-                    return readOneLoop();
+            if (context.isData()) {
+                messageHistory.reset(context.sourceId(), context.index());
+                wireParser.accept(context.wire());
+                return true;
+            }
 
-            assert context.isData();
-
-            messageHistory.reset(context.sourceId(), context.index());
-            wireParser.accept(context.wire());
+            return context.isPresent() && (readOneMetaData(context) || readOneLoop());
         }
-        return true;
 
     }
 
