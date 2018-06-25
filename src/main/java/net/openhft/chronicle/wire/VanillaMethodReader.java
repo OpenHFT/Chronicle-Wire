@@ -443,19 +443,19 @@ public class VanillaMethodReader implements MethodReader {
         Wire wire = context.wire();
         Bytes<?> bytes = wire.bytes();
         long r = bytes.readPosition();
-        try {
-            wire.readEventName(sb);
+        wire.readEventName(sb);
 
-            for (String s : metaIgnoreList) {
-                // we wish to ignore our system meta data field
-                if (s.contentEquals(sb))
-                    return false;
+        for (String s : metaIgnoreList) {
+            // we wish to ignore our system meta data field
+            if (s.contentEquals(sb)) {
+                // Skip to end of document.
+                bytes.readPosition(bytes.writePosition());
+                return false;
             }
-        } finally {
-            // roll back position to where is was before we read the SB
-            bytes.readPosition(r);
         }
 
+        // roll back position to where is was before we read the SB
+        bytes.readPosition(r);
         wireParser.accept(wire);
         return true;
     }
