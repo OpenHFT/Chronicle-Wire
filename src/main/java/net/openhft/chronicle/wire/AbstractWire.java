@@ -304,6 +304,8 @@ public abstract class AbstractWire implements Wire {
     public long enterHeader(int safeLength) {
         if (safeLength > bytes.writeRemaining())
             return throwNotEnoughSpace(safeLength, bytes);
+        assert !insideHeader : INSIDE_HEADER_MESSAGE;
+
         insideHeader = true;
         long pos = bytes.writePosition();
 
