@@ -379,6 +379,7 @@ public class VanillaMethodReader implements MethodReader {
      */
     public boolean readOne() {
 
+
         try (DocumentContext context = in.readingDocument()) {
             if (context.isData()) {
                 messageHistory.reset(context.sourceId(), context.index());
@@ -386,9 +387,11 @@ public class VanillaMethodReader implements MethodReader {
                 return true;
             }
 
-            return context.isPresent() && (readOneMetaData(context) || readOneLoop());
+            if (context.isPresent() && (readOneMetaData(context)))
+                return true;
         }
 
+        return readOneLoop();
     }
 
     private boolean readOneLoop() {
