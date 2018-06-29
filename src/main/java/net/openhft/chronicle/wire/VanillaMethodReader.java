@@ -450,11 +450,8 @@ public class VanillaMethodReader implements MethodReader {
 
         for (String s : metaIgnoreList) {
             // we wish to ignore our system meta data field
-            if (s.contentEquals(sb)) {
-                // Skip to end of document.
-                bytes.readPosition(bytes.writePosition());
+            if (s.contentEquals(sb))
                 return false;
-            }
         }
 
         // roll back position to where is was before we read the SB
