@@ -2388,6 +2388,9 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
             if (code != U8_ARRAY)
                 cantRead(code);
+            if (length > bytes.readRemaining())
+                throw new IllegalStateException("Length of Bytes " + length + " > " + bytes.readRemaining());
+            toBytes.ensureCapacity(toBytes.writePosition() + length);
             toBytes.write(0, bytes, bytes.readPosition(), length);
             toBytes.readLimit(length);
             bytes.readSkip(length);
