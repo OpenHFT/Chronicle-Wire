@@ -30,7 +30,7 @@ public class UnicodeStringTest {
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         List<Object[]> chars = new ArrayList<>();
-        int a = 0, b = 1;
+        int a = 1, b = 1;
         while (a < Character.MAX_VALUE) {
             int i = a;
             a = b;
@@ -39,6 +39,8 @@ public class UnicodeStringTest {
                 continue;
             chars.add(new Object[]{(char) i});
         }
+        for (int ch : new int[]{0x0, 0x7F, 0x80, 0x07FF, 0x800, 0xFFFF})
+            chars.add(new Object[]{(char) ch});
         return chars;
     }
 
