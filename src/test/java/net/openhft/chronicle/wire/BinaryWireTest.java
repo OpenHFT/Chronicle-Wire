@@ -738,17 +738,17 @@ public class BinaryWireTest {
     @Test
     public void testLongString() {
         @NotNull Wire wire = createWire();
-        @NotNull char[] chars = new char[128];
+        @NotNull char[] chars = new char[16];
         for (int i = 0; i < Character.MAX_VALUE; i++) {
             if (!Character.isValidCodePoint(i))
                 continue;
             wire.clear();
             Arrays.fill(chars, (char) i);
             @NotNull String s = new String(chars);
-            wire.writeDocument(false, w -> w.write(() -> "message").text(s));
+            wire.writeDocument(false, w -> w.write(() -> "msg").text(s));
 
 //            System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
-            wire.readDocument(null, w -> w.read(() -> "message").text(s, Assert::assertEquals));
+            wire.readDocument(null, w -> w.read(() -> "msg").text(s, Assert::assertEquals));
         }
     }
 
