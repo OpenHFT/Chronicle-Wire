@@ -20,7 +20,7 @@ public class UnicodeStringTest {
     @NotNull
     static Bytes bytes = nativeBytes();
     static Wire wire = createWire();
-    static char[] chars = new char[16];
+    static char[] chars = new char[128];
     private final char ch;
 
     public UnicodeStringTest(char ch) {
@@ -33,8 +33,8 @@ public class UnicodeStringTest {
         int a = 1, b = 1;
         while (a < Character.MAX_VALUE) {
             int i = a++;
-//            a = b;
-//            b += i;
+            a = b;
+            b += i;
             if (!Character.isValidCodePoint(i))
                 continue;
             chars.add(new Object[]{(char) i});
