@@ -32,9 +32,9 @@ public class UnicodeStringTest {
         List<Object[]> chars = new ArrayList<>();
         int a = 1, b = 1;
         while (a < Character.MAX_VALUE) {
-            int i = a;
-            a = b;
-            b += i;
+            int i = a++;
+//            a = b;
+//            b += i;
             if (!Character.isValidCodePoint(i))
                 continue;
             chars.add(new Object[]{(char) i});
