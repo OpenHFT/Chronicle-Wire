@@ -379,6 +379,7 @@ public class VanillaMethodReader implements MethodReader {
      */
     public boolean readOne() {
 
+
         try (DocumentContext context = in.readingDocument()) {
             if (context.isData()) {
                 messageHistory.reset(context.sourceId(), context.index());
@@ -386,9 +387,11 @@ public class VanillaMethodReader implements MethodReader {
                 return true;
             }
 
-            return context.isPresent() && (readOneMetaData(context) || readOneLoop());
+            if (context.isPresent() && (readOneMetaData(context)))
+                return true;
         }
 
+        return readOneLoop();
     }
 
     private boolean readOneLoop() {
@@ -447,11 +450,8 @@ public class VanillaMethodReader implements MethodReader {
 
         for (String s : metaIgnoreList) {
             // we wish to ignore our system meta data field
-            if (s.contentEquals(sb)) {
-                // Skip to end of document.
-                bytes.readPosition(bytes.writePosition());
+            if (s.contentEquals(sb))
                 return false;
-            }
         }
 
         // roll back position to where is was before we read the SB
