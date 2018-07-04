@@ -202,8 +202,6 @@ public abstract class AbstractWire implements Wire {
         for (; ; ) {
             int header = bytes.peekVolatileInt();
             if (isReady(header)) {
-                if (header == NOT_INITIALIZED)
-                    return HeaderType.NONE;
                 if (isData(header))
                     return HeaderType.DATA;
                 if (includeMetaData && isReadyMetaData(header))
