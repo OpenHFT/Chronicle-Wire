@@ -23,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Rob Austin.
  */
-@Deprecated
 public interface KeyedMarshallable {
     default void writeKey(@NotNull Bytes bytes) {
         Wires.writeKey(this, bytes);
