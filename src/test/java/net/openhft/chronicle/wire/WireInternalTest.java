@@ -22,9 +22,31 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class WireInternalTest {
+
+    @Test
+    public void testThrowable() {
+        final Bytes bytes = Bytes.elasticByteBuffer();
+        try {
+            final Wire wire = new TextWire(bytes);
+
+            final Exception exc = new Exception();
+
+            wire.write(() -> "exc").throwable(exc);
+
+            System.out.println(bytes);
+
+            final Throwable actual = wire.read("exc").throwable(false);
+            actual.printStackTrace();
+            exc.printStackTrace();
+            assertArrayEquals(exc.getStackTrace(), actual.getStackTrace());
+        } finally {
+            bytes.release();
+        }
+    }
 
     @Test
     public void testFromSizePrefixedBinaryToText() {
