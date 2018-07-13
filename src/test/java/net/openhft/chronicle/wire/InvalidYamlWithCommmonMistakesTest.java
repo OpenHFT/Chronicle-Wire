@@ -64,6 +64,6 @@ public class InvalidYamlWithCommmonMistakesTest {
                 "  y: hello,\n" +
                 "}");
 
-    }
+    }                                                                                                              
 
 }
