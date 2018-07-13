@@ -37,11 +37,7 @@ public class WireInternalTest {
 
             wire.write(() -> "exc").throwable(exc);
 
-            System.out.println(bytes);
-
             final Throwable actual = wire.read("exc").throwable(false);
-            actual.printStackTrace();
-            exc.printStackTrace();
             assertArrayEquals(exc.getStackTrace(), actual.getStackTrace());
         } finally {
             bytes.release();
