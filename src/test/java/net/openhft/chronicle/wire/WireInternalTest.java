@@ -28,6 +28,23 @@ import static org.junit.Assert.assertEquals;
 public class WireInternalTest {
 
     @Test
+    public void testThrowableAsObject() {
+        final Bytes bytes = Bytes.elasticByteBuffer();
+        try {
+            final Wire wire = new BinaryWire(bytes);
+
+            final Exception exc = new Exception();
+
+            wire.write(() -> "exc").object(exc);
+
+            final Throwable actual = (Throwable) wire.read("exc").object();
+            assertArrayEquals(exc.getStackTrace(), actual.getStackTrace());
+        } finally {
+            bytes.release();
+        }
+    }
+
+    @Test
     public void testThrowable() {
         final Bytes bytes = Bytes.elasticByteBuffer();
         try {
