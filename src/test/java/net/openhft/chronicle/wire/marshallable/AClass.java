@@ -15,7 +15,9 @@
  *
  */
 
-package net.openhft.chronicle.wire;
+package net.openhft.chronicle.wire.marshallable;
+
+import net.openhft.chronicle.wire.AbstractMarshallable;
 
 /*
  * Created by Peter Lawrey on 07/05/16.
