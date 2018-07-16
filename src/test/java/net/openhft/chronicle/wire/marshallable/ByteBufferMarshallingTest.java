@@ -42,8 +42,8 @@ public class ByteBufferMarshallingTest {
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         bytes2.ensureCapacity(bb.remaining());
 
-        ByteBuffer bb2 = bytes.underlyingObject();
-        bb2.reset();
+        ByteBuffer bb2 = bytes2.underlyingObject();
+        bb2.clear();
 
         bb2.put(bb);
         // read what we just wrote
@@ -72,8 +72,8 @@ public class ByteBufferMarshallingTest {
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         bytes2.ensureCapacity(bb.remaining());
 
-        ByteBuffer bb2 = bytes.underlyingObject();
-        bb2.reset();
+        ByteBuffer bb2 = bytes2.underlyingObject();
+        bb2.clear();
 
         bb2.put(bb);
         // read what we just wrote
