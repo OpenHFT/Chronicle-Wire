@@ -56,4 +56,32 @@ public class ByteBufferMarshallingTest {
         o2.readMarshallable(wire2);
         assertEquals(o1, o2);
     }
+
+    @Test
+    public void writeReadBytesViaByteBuffer() {
+        Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+
+        AClass o1 = new AClass(1, true, (byte) 2, '3', (short) 4, 5, 6, 7, 8, "nine");
+
+        o1.writeMarshallable(bytes);
+
+        ByteBuffer bb = bytes.underlyingObject();
+        bb.position((int) bytes.readPosition());
+        bb.limit((int) bytes.readLimit());
+
+        Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
+        bytes2.ensureCapacity(bb.remaining());
+
+        ByteBuffer bb2 = bytes.underlyingObject();
+        bb2.reset();
+
+        bb2.put(bb);
+        // read what we just wrote
+        bytes2.readPosition(0);
+        bytes2.readLimit(bb2.position());
+
+        AClass o2 = ObjectUtils.newInstance(AClass.class);
+        o2.readMarshallable(bytes2);
+        assertEquals(o1, o2);
+    }
 }
