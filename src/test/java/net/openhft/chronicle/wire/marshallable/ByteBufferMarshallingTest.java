@@ -61,7 +61,7 @@ public class ByteBufferMarshallingTest {
     public void writeReadBytesViaByteBuffer() {
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
-        AClass o1 = new AClass(1, true, (byte) 2, '3', (short) 4, 5, 6, 7, 8, "nine");
+        BClass o1 = new BClass(1, true, (byte) 2, '3', (short) 4, 5, 6, 7, 8, "nine");
 
         o1.writeMarshallable(bytes);
 
@@ -80,7 +80,7 @@ public class ByteBufferMarshallingTest {
         bytes2.readPosition(0);
         bytes2.readLimit(bb2.position());
 
-        AClass o2 = ObjectUtils.newInstance(AClass.class);
+        BClass o2 = ObjectUtils.newInstance(BClass.class);
         o2.readMarshallable(bytes2);
         assertEquals(o1, o2);
     }
