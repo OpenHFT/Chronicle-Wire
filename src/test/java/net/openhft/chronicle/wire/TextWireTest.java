@@ -1120,7 +1120,8 @@ public class TextWireTest {
                 "  message: Reference cannot be null,\n" +
                 "  stackTrace: [\n" +
                 "    { class: net.openhft.chronicle.wire.TextWireTest, method: testException, file: TextWireTest.java, line: 783 },\n" +
-                "    { class: net.openhft.chronicle.wire.TextWireTest, method: runTestException, file: TextWireTest.java, line: 73 }\n" +
+                "    { class: net.openhft.chronicle.wire.TextWireTest, method: runTestException, file: TextWireTest.java, line: 73 },\n" +
+                "    { class: sun.reflect.NativeMethodAccessorImpl, method: invoke0, file: NativeMethodAccessorImpl.java, line: -2 }\n" +
                 "  ]\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(bytes));
 

@@ -37,6 +37,7 @@ enum TextStopCharsTesters implements StopCharsTester {
                     return true;
                 // two character stop.
                 case ':':
+                    return ch2 == '!' || ch2 == '{' || ch2 <= ' ' || ch2 == '"' || ch2 == '[';
                 case ',':
                     return ch2 <= ' ' || ch2 == '"';
                 default:

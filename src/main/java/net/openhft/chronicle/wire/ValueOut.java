@@ -736,10 +736,7 @@ public interface ValueOut {
         typedMarshallable(t.getClass().getName(), (WireOut w) -> {
             w.write(() -> "message").text(t.getMessage())
                     .write(() -> "stackTrace").sequence(w3 -> {
-                StackTraceElement[] stes = t.getStackTrace();
-                int last = Jvm.trimLast(0, stes);
-                for (int i = 0; i < last; i++) {
-                    StackTraceElement ste = stes[i];
+                for (StackTraceElement ste : t.getStackTrace()) {
                     w3.marshallable(w4 ->
                             w4.write(() -> "class").text(ste.getClassName())
                                     .write(() -> "method").text(ste.getMethodName())
