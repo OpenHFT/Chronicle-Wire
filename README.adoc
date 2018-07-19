@@ -412,34 +412,32 @@ public void testUnknownClass() {
 
 === Filtering with MethodReaders
 
-To support filtering, you need to make sure the first of multiple arguments can be used to filter the method call.
-If you have only one argument now, you may need to add an additional argument to support efficient filtering.
+To support filtering, you need to make sure the first of multiple arguments can be used to filter the method call. If you have only one argument, you may need to add an additional argument to support efficient filtering.
 
-What this facility does is call an implementation of `MethodFilterOnFirstArg` to see if the rest of the method call should be parsed. e.g. say today you have
+This feature calls an implementation of `MethodFilterOnFirstArg` to see if the rest of the method call should be parsed. For example, today you have:
 
 [source, Java]
----
+----
 interface MyInterface {
     void method(ExpensiveDto dto);
 }
 ----
 
-This can be migrated to
+This can be migrated to:
 
 [source, Java]
----
+----
 interface MyInterface extends MethodFilterOnFirstArg<String> {
     @Deprecated
     void method(ExpensiveDto dto);
-
     void method2(String filter, ExpensiveDto dto);
 }
 ----
 
-Where the implementation can look like this
+where the implementation can look like this:
 
 [source, Java]
----
+----
 class MyInterfaceImpl extends MyInterface {
     public void method(ExpensiveDto dto) {
        // something
