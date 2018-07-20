@@ -47,7 +47,7 @@ public class InvalidYamlWithCommmonMistakesTest {
     @Test
     public void testDtp() {
 
-        Marshallable.fromString("!software.chronicle.services.config.BadYamlParseTest$Dto " +
+        Marshallable.fromString("!net.openhft.chronicle.wire.InvalidYamlWithCommmonMistakesTest$Dto " +
                 "{\n" +
                 "  x:hello\n" +
                 "  y:hello8\n" +
@@ -55,9 +55,30 @@ public class InvalidYamlWithCommmonMistakesTest {
     }
 
     @Test
+    public void testAssumeTheType() {
+
+        Marshallable.fromString(Dto.class, "!InvalidYamlWithCommmonMistakesTest$Dto " +
+                "{\n" +
+                "  x:hello\n" +
+                "  y:hello8\n" +
+                "}\n");
+    }
+
+    @Test
+    public void testAssumeTheType2() {
+
+        Marshallable.fromString(Dto.class, "!Dto " +
+                "{\n" +
+                "  x:hello\n" +
+                "  y:hello8\n" +
+                "}\n");
+    }
+
+
+    @Test
     public void testBadTypeDtp0() {
 
-        Marshallable.fromString("!software.chronicle.services.config.BadYamlParseTest$Dto {\n" +
+        Marshallable.fromString("!net.openhft.chronicle.wire.InvalidYamlWithCommmonMistakesTest$Dto {\n" +
                 "  x:{\n" + // strickly speaking this
                 "    y: c\n" +
                 "  }\n" +

@@ -45,6 +45,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.*;
+import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
@@ -54,6 +55,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  * YAML Based wire format
  */
 public class TextWire extends AbstractWire implements Wire {
+    Pattern REGX_PATTERN = Pattern.compile("\\.|\\$");
 
     public static final BytesStore TYPE = BytesStore.from("!type ");
     public static final BytesStore BINARY = Bytes.from("!!binary");
@@ -2894,11 +2896,26 @@ public class TextWire extends AbstractWire implements Wire {
                 parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
                 bytes.readSkip(-1);
                 try {
+
                     return classLookup().forName(sb);
                 } catch (NoClassDefFoundError e) {
                     throw new IORuntimeException("Unable to load class " + e, e);
                 } catch (ClassNotFoundException e) {
-                    return Wires.tupleFor(tClass, sb.toString());
+                    if (tClass == null)
+                        return Wires.tupleFor(null, sb.toString());
+
+                    final String className = tClass.getName();
+
+                    String[] split = REGX_PATTERN.split(sb);
+                    if (split[split.length - 1].equalsIgnoreCase(tClass.getSimpleName()))
+                        try {
+                            return classLookup().forName(className);
+                        } catch (ClassNotFoundException e1) {
+                            return Wires.tupleFor(tClass, className);
+                        }
+
+                    else
+                        return Wires.tupleFor(tClass, sb.toString());
                 }
             }
             return Wires.dtoInterface(tClass) ? Wires.tupleFor(tClass, null) : null;
