@@ -9,7 +9,7 @@ import org.junit.Test;
  *
  * Tests that common mistakes are still parsed where we can
  */
-public class InvalidYamlWithCommmonMistakesTest {
+public class InvalidYamWithCommonMistakesTest {
 
     public static class Dto extends AbstractMarshallable {
         String y;
@@ -51,8 +51,7 @@ public class InvalidYamlWithCommmonMistakesTest {
 
         DtoB expected = new DtoB("hello8");
 
-        Marshallable actual = Marshallable.fromString("!net.openhft.chronicle.wire" +
-                ".InvalidYamlWithCommmonMistakesTest$DtoB " +
+        Marshallable actual = Marshallable.fromString("!net.openhft.chronicle.wire.InvalidYamWithCommonMistakesTest$DtoB " +
                 "{\n" +
                 "  y:hello8\n" +
                 "}\n");
@@ -64,7 +63,7 @@ public class InvalidYamlWithCommmonMistakesTest {
 
         DtoB expected = new DtoB("hello8");
 
-        Marshallable actual = Marshallable.fromString(DtoB.class, "!InvalidYamlWithCommmonMistakesTest$DtoB " +
+        Marshallable actual = Marshallable.fromString(DtoB.class, "!InvalidYamWithCommonMistakesTest$DtoB " +
                 "{\n" +
                 "  y:hello8\n" +
                 "}\n");
@@ -112,8 +111,7 @@ public class InvalidYamlWithCommmonMistakesTest {
 
         DtoB expected = new DtoB("hello8");
 
-        DtoB actual = Marshallable.<DtoB>fromString("!net.openhft.chronicle.wire" +
-                ".InvalidYamlWithCommmonMistakesTest$DtoB " +
+        DtoB actual = Marshallable.<DtoB>fromString("!net.openhft.chronicle.wire.InvalidYamWithCommonMistakesTest$DtoB " +
                 "{\n" +
                 "  y:hello8\n" +
                 "}\n");
@@ -122,11 +120,23 @@ public class InvalidYamlWithCommmonMistakesTest {
     }
 
     @Test
+    public void testAssumeTypeBasedOnWhatIsIntheYaml3() {
+
+        DtoB expected = new DtoB("hello8");
+
+        DtoB actual = Marshallable.<DtoB>fromString(DtoB.class, "{\n" +
+                "  y:hello8\n" +
+                "}\n");
+
+        Assert.assertEquals(expected, actual);
+    }
+
+
+    @Test
     public void testAssumeTypeBasedOnWhatIsIntheYamlWithSpace() {
 
         DtoB expected = new DtoB("hello8");
-        Object actual = Marshallable.<DtoB>fromString(" !net.openhft.chronicle.wire" +
-                ".InvalidYamlWithCommmonMistakesTest$DtoB " +
+        Object actual = Marshallable.<DtoB>fromString(" !net.openhft.chronicle.wire.InvalidYamWithCommonMistakesTest$DtoB " +
                 "{\n" +
                 "  y:hello8\n" +
                 "}\n");
@@ -138,8 +148,7 @@ public class InvalidYamlWithCommmonMistakesTest {
     public void testAssumeTypeBasedOnWhatIsIntheYamlWithSpace2() {
 
         DtoB expected = new DtoB("hello8");
-        Object actual = Marshallable.<DtoB>fromString(" !net.openhft.chronicle.wire" +
-                ".InvalidYamlWithCommmonMistakesTest$DtoB{\n" +
+        Object actual = Marshallable.<DtoB>fromString(" !net.openhft.chronicle.wire.InvalidYamWithCommonMistakesTest$DtoB {\n" +
                 "  y:hello8\n" +
                 "}\n");
 
