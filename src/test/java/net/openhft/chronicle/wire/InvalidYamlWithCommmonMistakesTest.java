@@ -1,5 +1,7 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.pool.ClassAliasPool;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -47,31 +49,49 @@ public class InvalidYamlWithCommmonMistakesTest {
     @Test
     public void testDtp() {
 
-        Marshallable.fromString("!net.openhft.chronicle.wire.InvalidYamlWithCommmonMistakesTest$Dto " +
+        DtoB expected = new DtoB("hello8");
+
+        Marshallable actual = Marshallable.fromString("!net.openhft.chronicle.wire" +
+                ".InvalidYamlWithCommmonMistakesTest$DtoB " +
                 "{\n" +
-                "  x:hello\n" +
                 "  y:hello8\n" +
                 "}\n");
+        Assert.assertEquals(expected, actual);
     }
 
     @Test
     public void testAssumeTheType() {
 
-        Marshallable.fromString(Dto.class, "!InvalidYamlWithCommmonMistakesTest$Dto " +
+        DtoB expected = new DtoB("hello8");
+
+        Marshallable actual = Marshallable.fromString(DtoB.class, "!InvalidYamlWithCommmonMistakesTest$DtoB " +
                 "{\n" +
-                "  x:hello\n" +
                 "  y:hello8\n" +
                 "}\n");
+        Assert.assertEquals(expected, actual);
     }
 
     @Test
     public void testAssumeTheType2() {
 
-        Marshallable.fromString(Dto.class, "!Dto " +
+        DtoB expected = new DtoB("hello8");
+
+        Marshallable actual = Marshallable.fromString(DtoB.class, "!DtoB " +
                 "{\n" +
-                "  x:hello\n" +
                 "  y:hello8\n" +
                 "}\n");
+
+        Assert.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testAssumeTheTypeMissingType() {
+
+        Marshallable.fromString(Dto.class, "Dto " +
+                "{\n" +
+                "  y:hello8\n" +
+                "}\n");
+
     }
 
 
@@ -85,6 +105,57 @@ public class InvalidYamlWithCommmonMistakesTest {
                 "  y: hello,\n" +
                 "}");
 
-    }                                                                                                              
+    }
+
+    @Test
+    public void testAssumeTypeBasedOnWhatIsIntheYaml() {
+
+        DtoB expected = new DtoB("hello8");
+
+        DtoB actual = Marshallable.<DtoB>fromString("!net.openhft.chronicle.wire" +
+                ".InvalidYamlWithCommmonMistakesTest$DtoB " +
+                "{\n" +
+                "  y:hello8\n" +
+                "}\n");
+
+        Assert.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testAssumeTypeBasedOnWhatIsIntheYamlWithSpace() {
+
+        DtoB expected = new DtoB("hello8");
+        Object actual = Marshallable.<DtoB>fromString(" !net.openhft.chronicle.wire" +
+                ".InvalidYamlWithCommmonMistakesTest$DtoB " +
+                "{\n" +
+                "  y:hello8\n" +
+                "}\n");
+
+        Assert.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testAssumeTypeBasedOnWhatIsIntheYamlWithSpace2() {
+
+        DtoB expected = new DtoB("hello8");
+        Object actual = Marshallable.<DtoB>fromString(" !net.openhft.chronicle.wire" +
+                ".InvalidYamlWithCommmonMistakesTest$DtoB{\n" +
+                "  y:hello8\n" +
+                "}\n");
+
+        Assert.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testAssumeTypeBasedOnWhatButUseAlias() {
+
+        ClassAliasPool.CLASS_ALIASES.addAlias(DtoB.class);
+        DtoB expected = new DtoB("hello8");
+        DtoB actual = Marshallable.<DtoB>fromString("!DtoB{\n" +
+                "  y:hello8\n" +
+                "}\n");
+
+        Assert.assertEquals(expected, actual);
+    }
 
 }
