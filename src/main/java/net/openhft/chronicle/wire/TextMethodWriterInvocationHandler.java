@@ -57,6 +57,8 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
 
     private Consumer<Object[]> buildConverter(Method method) {
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        if (parameterAnnotations.length <= 0)
+            return NoOp.INSTANCE;
         for (Annotation anno : parameterAnnotations[0]) {
             if (anno instanceof LongConversion) {
                 LongConversion longConversion = (LongConversion) anno;

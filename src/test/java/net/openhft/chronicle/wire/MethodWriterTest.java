@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Mocker;
+import org.easymock.EasyMock;
 import org.junit.Test;
 
 import java.io.StringWriter;
@@ -83,6 +84,32 @@ public class MethodWriterTest {
         }
 
         void method(String... args);
+    }
+
+    @Test
+    public void testNoArgs() {
+        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        NoArgs writer = wire.methodWriter(NoArgs.class);
+        writer.methodOne();
+        writer.methodTwo();
+        assertEquals("methodOne: \"\"\n" +
+                "---\n" +
+                "methodTwo: \"\"\n" +
+                "---\n", wire.toString());
+        NoArgs mock = EasyMock.createMock(NoArgs.class);
+        mock.methodOne();
+        mock.methodTwo();
+        EasyMock.replay(mock);
+        MethodReader reader = wire.methodReader(mock);
+        for (int i = 0; i < 3; i++)
+            assertEquals(i < 2, reader.readOne());
+        EasyMock.verify(mock);
+    }
+
+    public interface NoArgs {
+        void methodOne();
+
+        void methodTwo();
     }
 }
 
