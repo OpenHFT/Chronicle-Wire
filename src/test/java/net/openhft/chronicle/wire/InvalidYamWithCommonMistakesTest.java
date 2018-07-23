@@ -97,12 +97,33 @@ public class InvalidYamWithCommonMistakesTest {
     @Test
     public void testBadTypeDtp0() {
 
-        Marshallable.fromString("!net.openhft.chronicle.wire.InvalidYamlWithCommmonMistakesTest$Dto {\n" +
+        Dto expected = new Dto("hello", new DtoB("c"));
+
+        Dto actual = Marshallable.fromString("!net.openhft.chronicle.wire.InvalidYamWithCommonMistakesTest$Dto {\n" +
                 "  x:{\n" + // strickly speaking this
                 "    y: c\n" +
                 "  }\n" +
                 "  y: hello,\n" +
                 "}");
+
+        Assert.assertEquals(expected, actual);
+
+    }
+
+    @Test
+    public void testBadTypeDtpBadType() {
+
+        Dto expected = new Dto("hello", new DtoB("c"));
+
+        Dto actual = Marshallable.fromString(Dto.class, " {\n" +
+                "  x: !net.openhft.chronicle.wire.InvalidYamWithCommonMistakesTest$DtoB {\n" + //
+                // strickly speaking this
+                "    y: c\n" +
+                "  }\n" +
+                "  y: hello,\n" +
+                "}");
+
+        Assert.assertEquals(expected, actual);
 
     }
 
