@@ -74,4 +74,22 @@ public class BitSetTest {
                 "]", wire.toString());
     }
 
+    @Test
+    public void testBitSetUsing() {
+
+        BitSet using = new BitSet(4);
+        using.set(1);
+
+        Bytes b = Bytes.elasticByteBuffer();
+        Wire wire = WireType.TEXT.apply(b);
+
+        BitSet original = new BitSet(64);
+        original.set(10);
+        original.set(89);
+        wire.getValueOut().object(original);
+
+        BitSet read = wire.getValueIn().object(using, BitSet.class);
+        Assert.assertEquals(original, read);
+
+    }
 }
