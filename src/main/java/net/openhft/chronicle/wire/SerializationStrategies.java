@@ -343,7 +343,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         @Override
         public Object readUsing(Object using, @NotNull ValueIn in) {
             @NotNull PrimArrayWrapper wrapper = (PrimArrayWrapper) using;
-            final Class componentType = wrapper.type.getComponentType();
+            final Class componentType = wrapper.type;
             int i = 0, len = 0;
             Object array = Array.newInstance(componentType, 0);
             while (in.hasNextSequenceItem()) {

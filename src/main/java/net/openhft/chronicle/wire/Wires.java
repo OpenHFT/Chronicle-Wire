@@ -486,6 +486,15 @@ public enum Wires {
         if (Date.class.isAssignableFrom(clazz))
             return objectDate(in, using);
 
+        if (BitSet.class.isAssignableFrom(clazz)) {
+
+            SerializationStrategies.PrimArrayWrapper u = new SerializationStrategies
+                    .PrimArrayWrapper(long.class);
+            objectSequence(in, u, SerializationStrategies.PrimArrayWrapper.class,
+                    SerializationStrategies.PRIM_ARRAY);
+            return (E) BitSet.valueOf((long[]) u.array);
+        }
+
         switch (brackets) {
             case MAP:
                 return objectMap(in, using, clazz, strategy);

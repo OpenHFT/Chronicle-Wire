@@ -43,6 +43,7 @@ import java.util.stream.Stream;
 public interface ValueOut {
 
     int SMALL_MESSAGE = 64;
+    String ZEROS_64 = "0000000000000000000000000000000000000000000000000000000000000000";
 
     /**
      * scalar data types
@@ -608,6 +609,26 @@ public interface ValueOut {
             return throwable((Throwable) value);
         if (value instanceof Enum)
             return typedScalar(value);
+        if (value instanceof BitSet) {
+            typePrefix(BitSet.class);
+
+            BitSet bs = (BitSet) value;
+            boolean isTextWire = TextWire.TextValueOut.class.isAssignableFrom(this.getClass());
+
+            // note : this like the others below this is capturing lambda
+            return sequence(v -> {
+                for (int i = 0; i < bs.size() >> 6; i++) {
+                    long l = BitSetUtil.getWord(bs, i);
+                    WireOut wireOut = v.int64(l);
+                    if (isTextWire) {
+                        String bits = Long.toBinaryString(l);
+                        wireOut.writeComment(ZEROS_64.substring(bits.length()) + bits);
+                    }
+
+                }
+            });
+
+        }
         if (value instanceof Collection) {
             if (value instanceof SortedSet)
                 typePrefix(SortedSet.class);
