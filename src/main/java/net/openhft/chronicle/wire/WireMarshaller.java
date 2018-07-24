@@ -276,7 +276,7 @@ public class WireMarshaller<T> {
                             && WIRE_MARSHALLER_CL.get(componentType).isLeaf;
                     try {
                         final Method method = Class.class.getDeclaredMethod("enumConstantDirectory");
-                        method.setAccessible(true);
+                        Jvm.setAccessible(method);
                         final Map<String, ? extends Enum> values = (Map<String, ? extends Enum>) method.invoke(componentType);
                         return new EnumSetFieldAccess(field, isLeaf, values.values().toArray(), componentType);
                     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {

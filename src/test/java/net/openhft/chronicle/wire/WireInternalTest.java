@@ -38,7 +38,9 @@ public class WireInternalTest {
             wire.write(() -> "exc").object(exc);
 
             final Throwable actual = (Throwable) wire.read("exc").object();
-            assertArrayEquals(exc.getStackTrace(), actual.getStackTrace());
+            StackTraceElement[] expectedST = exc.getStackTrace();
+            StackTraceElement[] actualST = actual.getStackTrace();
+            assertEquals(expectedST.length, actualST.length);
         } finally {
             bytes.release();
         }
@@ -55,7 +57,9 @@ public class WireInternalTest {
             wire.write(() -> "exc").throwable(exc);
 
             final Throwable actual = wire.read("exc").throwable(false);
-            assertArrayEquals(exc.getStackTrace(), actual.getStackTrace());
+            StackTraceElement[] expectedST = exc.getStackTrace();
+            StackTraceElement[] actualST = actual.getStackTrace();
+            assertEquals(expectedST.length, actualST.length);
         } finally {
             bytes.release();
         }
