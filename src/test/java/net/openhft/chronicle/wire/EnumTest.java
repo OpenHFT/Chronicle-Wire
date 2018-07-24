@@ -25,25 +25,31 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
+
+import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
 
-@Ignore("TODO FIX")
+
 public class EnumTest {
 
     @Test
     public void testEnum() {
-        @NotNull TextWire wire = new TextWire(Bytes.elasticByteBuffer());
-        wire.write("test")
-                .object(TestEnum.INSTANCE);
-        assertEquals("test: !net.openhft.chronicle.wire.EnumTest$TestEnum INSTANCE\n", wire.toString());
-        @NotNull TextWire wire2 = new TextWire(Bytes.from("test: !net.openhft.chronicle.wire.EnumTest$TestEnum {\n" +
-                "}\n"));
-        @Nullable Object enumObject = wire2.read(() -> "test")
-                .object();
-        Assert.assertTrue(enumObject == TestEnum.INSTANCE);
+        Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+        try {
+            @NotNull TextWire wire = new TextWire(bytes);
+            wire.write("test")
+                    .object(TestEnum.INSTANCE);
+            assertEquals("test: !net.openhft.chronicle.wire.EnumTest$TestEnum INSTANCE\n", wire.toString());
+            @NotNull TextWire wire2 = new TextWire(Bytes.from("test: !net.openhft.chronicle.wire.EnumTest$TestEnum {\n" +
+                    "}\n"));
+            @Nullable Object enumObject = wire2.read(() -> "test")
+                    .object();
+            Assert.assertTrue(enumObject == TestEnum.INSTANCE);
+        } finally {
+            bytes.release();
+        }
     }
 
     @After
