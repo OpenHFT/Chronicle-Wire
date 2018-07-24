@@ -489,7 +489,7 @@ public enum Wires {
 
         if (BitSet.class.isAssignableFrom(clazz)) {
 
-            PrimArrayWrapper longWrapper = new PrimArrayWrapper(long.class);
+            PrimArrayWrapper longWrapper = new PrimArrayWrapper(long[].class);
             objectSequence(in, longWrapper, PrimArrayWrapper.class, PRIM_ARRAY);
 
             return (using == null) ?
