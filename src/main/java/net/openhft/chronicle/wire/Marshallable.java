@@ -22,8 +22,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -66,6 +68,11 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     @NotNull
     static <T> T fromFile(String filename) throws IOException {
         return TEXT.fromFile(filename);
+    }
+
+    static <T> T fromString(@NotNull InputStream is) {
+        Scanner s = new Scanner(is).useDelimiter("\\A");
+        return TEXT.fromString(s.hasNext() ? s.next() : "");
     }
 
     /**
