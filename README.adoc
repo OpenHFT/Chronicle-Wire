@@ -620,7 +620,8 @@ Chronicle Wire supports `Java 8`.  Future versions may support `Java 9`, `C++` a
 = YAML 2 Spec Compliance
 
 Chronicle wire supports a subset of the features available from the YAML 2 specification.
-This section lists those features and suggests other ways in Chronicle Wire to define some of the YAML 2 compliant messages in chronicle wire.
+This section lists those features and suggests other ways in Chronicle Wire to define the same
+thing.
 
 ==  YAML 2 features in Chronicle-Wire
 
@@ -731,8 +732,7 @@ The section numbering below reflects that of the fix specification - see http://
 ]
 ----
 
-=== 2.8 Play by Play Feed
-    from a Game
+=== 2.8 Play by Play Feed from a Game
 
 .Yaml Spec Example
 [source,yaml]
