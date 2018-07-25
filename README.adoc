@@ -630,7 +630,7 @@ The following list the features are from the YAML 2 spec ( see http://yaml.org/s
 
 the sections below list those areas of the spec that are implemented in Chronicle-Wire
 |===============
-| Feature                     | Strict Yaml 2 Spec Compliant | Equivalent Operation in
+| Feature                     | Strict Yaml 2 Spec Compliant | Equivalent Operations in
 Chronicle-Wire
 |2_1 SequenceOfScalars | yes  |
 |2_2 MappingScalarsToScalars | yes |
@@ -668,8 +668,7 @@ Chronicle-Wire
 
 The section numbering below reflects that of the fix specification - see http://yaml.org/spec/1.2/spec.html
 
-=== 2.4  Sequence of Mappings
-    (players’ statistics)
+=== 2.4  Sequence of Mappings (players’ statistics)
 
 
 .Yaml Spec Example
@@ -701,8 +700,7 @@ The section numbering below reflects that of the fix specification - see http://
 ----
 
 
-=== 2.7 Two Documents in a Stream
-    (each with a leading comment)
+=== 2.7 Two Documents in a Stream (each with a leading comment)
 
 .Yaml Spec Example
 ----
@@ -768,8 +766,7 @@ action: grand slam
 ----
 
 
-=== 2.9 Single Document with
-    Two Comments
+=== 2.9 Single Document with Two Comments
 
 .Yaml Spec Example
 ----
@@ -822,8 +819,7 @@ rbi:
 ----
 
 
-=== 2.14 In the folded scalars,
-     newlines become spaces
+=== 2.14 In the folded scalars, newlines become spaces
 
 .Yaml Spec Example
 [source,yaml]
