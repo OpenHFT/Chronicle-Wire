@@ -658,3 +658,275 @@ the sections below list those areas of the spec that are implemented in Chronicl
 |===============
 
 
+
+== Yaml Specification Equivalent Operation in Chroncile-Wire
+
+The section numbering below reflects that of the fix specification - see http://yaml.org/spec/1
+.2/spec.html
+
+2.4  Sequence of Mappings
+    (players’ statistics)
+
+
+.Yaml Spec Example
+----
+ -
+   name: Mark McGwire
+   hr:   65
+   avg:  0.278
+ -
+   name: Sammy Sosa
+   hr:   63
+   avg:  0.288
+----
+
+.Chronicle-Wire equivalent:
+----
+[
+    {
+      name: Mark McGwire,
+      hr:   65,
+      avg:  0.278
+    },
+    {
+      name: Sammy Sosa,
+      hr:   63,
+      avg:  0.288
+    }
+]
+----
+
+
+2.7 Two Documents in a Stream
+    (each with a leading comment)
+
+.Yaml Spec Example
+----
+# Ranking of 1998 home runs
+---
+- Mark McGwire
+- Sammy Sosa
+- Ken Griffey
+
+# Team ranking
+---
+- Chicago Cubs
+- St Louis Cardinals
+----
+
+.Chronicle-Wire equivalent:
+
+----
+[
+# Ranking of 1998 home runs
+- Mark McGwire
+- Sammy Sosa
+- Ken Griffey
+,
+# Team ranking
+- Chicago Cubs
+- St Louis Cardinals
+]
+----
+
+2.8 Play by Play Feed
+    from a Game
+
+.Yaml Spec Example
+[source,yaml]
+----
+---
+time: 20:03:20
+player: Sammy Sosa
+action: strike (miss)
+...
+---
+time: 20:03:47
+player: Sammy Sosa
+action: grand slam
+...
+----
+
+.Chronicle-Wire equivalent:
+----
+[
+  {
+    time: 20:03:20
+    player: Sammy Sosa
+    action: strike (miss)
+  },
+  {
+    time: 20:03:47
+    player: Sammy Sosa
+    action: grand slam
+  }
+]
+----
+
+
+2.9 Single Document with
+    Two Comments
+
+.Yaml Spec Example
+----
+---
+hr: # 1998 hr ranking
+  - Mark McGwire
+  - Sammy Sosa
+rbi:
+  # 1998 rbi ranking
+  - Sammy Sosa
+  - Ken Griffey
+----
+
+.Chronicle-Wire equivalent:
+----
+hr: # 1998 hr ranking
+  - Mark McGwire
+  - Sammy Sosa
+rbi:
+  # 1998 rbi ranking
+  - Sammy Sosa
+  - Ken Griffey
+----
+
+2.12 Compact Nested Mapping
+
+.Yaml Spec Example
+[source,yaml]
+----
+---
+# Products purchased
+- item    : Super Hoop
+  quantity: 1
+- item    : Basketball
+  quantity: 4
+- item    : Big Shoes
+  quantity: 1
+----
+
+.Chronicle-Wire equivalent:
+[source,yaml]
+----
+# Products purchased
+-  {item: Super Hoop,
+    quantity: 1}
+-  {item: Basketball,
+    quantity: 4}
+-  {item: Big Shoes,
+    quantity: 1}
+----
+
+
+2.14 In the folded scalars,
+     newlines become spaces
+
+.Yaml Spec Example
+[source,yaml]
+----
+--- >
+  Mark McGwire's
+  year was crippled
+  by a knee injury.
+----
+
+.Chronicle-Wire equivalent:
+[source,yaml]
+----
+[Mark McGwire's
+  year was crippled
+  by a knee injury.]
+----
+
+2.16  Indentation determines scope
+
+.Yaml Spec Example
+[source,yaml]
+----
+name: Mark McGwire
+accomplishment: >
+  Mark set a major league
+  home run record in 1998.
+stats: |
+  65 Home Runs
+  0.278 Batting Average
+----
+
+.Chronicle-Wire equivalent:
+[source,yaml]
+----
+name: Mark McGwire
+accomplishment:
+  Mark set a major league home run record in 1998.
+stats:
+-  65 Home Runs,
+-  0.278 Batting Average
+----
+
+2.17 Quoted Scalars
+
+.Yaml Spec Example
+[source,yaml]
+----
+unicode: "Sosa did fine.\u263A"
+control: "\b1998\t1999\t2000\n"
+hex esc: "\x0d\x0a is \r\n"
+
+single: '"Howdy!" he cried.'
+quoted: ' # Not a ''comment''.'
+tie-fighter: '|\-*-/|'
+----
+
+.Chronicle-Wire equivalent:
+[source,yaml]
+----
+unicode: "Sosa did fine.\u263A"
+control: "\b1998\t1999\t2000\n"
+hex esc: "\x0d\x0a is \r\n"
+single: "Howdy! he cried.",
+quoted: " # Not a ''comment''."
+tie-fighter: '|\-*-/|'
+----
+
+2.18 Multi-line Flow Scalars
+
+.Yaml Spec Example
+[source,yaml]
+----
+plain:
+  This unquoted scalar
+  spans many lines.
+
+quoted: "So does this
+  quoted scalar.\n"
+----
+
+.Chronicle-Wire equivalent:
+[source,yaml]
+----
+plain: "
+  This unquoted scalar
+  spans many lines."
+quoted: "So does this
+  quoted scalar.\n"
+----
+
+2.21 Miscellaneous
+
+.Yaml Spec Example
+[source,yaml]
+----
+null:
+booleans: [ true, false ]
+string: '012345'
+----
+
+.Chronicle-Wire equivalent:
+[source,yaml]
+----
+{
+null: ,
+booleans: [ true, false ],
+string: '012345'
+}
+----

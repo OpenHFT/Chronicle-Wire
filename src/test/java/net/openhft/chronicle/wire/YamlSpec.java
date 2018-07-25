@@ -87,6 +87,26 @@ public class YamlSpec {
     }
 
     @Test
+    public void test2_4_SequenceOfMappingsFixed() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        try {
+            InputStream is = YamlSpec.class.getResourceAsStream
+                    (DIR + "2_4_SequenceOfMappings-fixed.yaml");
+
+            Object o = Marshallable.fromString(is);
+            String actual = o.toString();
+            Assert.assertEquals("", actual);
+
+        } finally {
+            b.release();
+        }
+
+    }
+
+
+
+    @Test
     public void test2_5_SequenceOfSequences() {
 
         Bytes b = Bytes.elasticByteBuffer();
@@ -141,6 +161,24 @@ public class YamlSpec {
 
     }
 
+    @Test
+    public void test2_7_TwoDocumentsInAStreamFixed() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        try {
+            InputStream is = YamlSpec.class.getResourceAsStream
+                    (DIR + "2_7_TwoDocumentsInAStreamFixed.yaml");
+
+            Object o = Marshallable.fromString(is);
+            String actual = o.toString();
+            Assert.assertEquals("[[Mark McGwire, Sammy Sosa, Ken Griffey], [Chicago Cubs, St Louis Cardinals]]", actual);
+
+        } finally {
+            b.release();
+        }
+
+    }
+
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
     @Test
     public void test2_8_PlayByPlayFeed() {
@@ -153,6 +191,24 @@ public class YamlSpec {
             Object o = Marshallable.fromString(is);
             String actual = o.toString();
             Assert.assertEquals("", actual);
+
+        } finally {
+            b.release();
+        }
+
+    }
+
+    @Test
+    public void test2_8_PlayByPlayFeedFixed() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        try {
+            InputStream is = YamlSpec.class.getResourceAsStream
+                    (DIR + "2_8_PlayByPlayFeedFixed.yaml");
+
+            Object o = Marshallable.fromString(is);
+            String actual = o.toString();
+            Assert.assertEquals("[{time=20:03:20, player=Sammy Sosa, action=strike (miss)}, {time=20:03:47, player=Sammy Sosa, action=grand slam}]", actual);
 
         } finally {
             b.release();
@@ -179,6 +235,45 @@ public class YamlSpec {
         }
 
     }
+
+    @Test
+    public void test2_9_SingleDocumentWithTwoCommentsFixed() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        try {
+            InputStream is = YamlSpec.class.getResourceAsStream
+                    (DIR + "2_9_SingleDocumentWithTwoCommentsFixed.yaml");
+
+            Object o = Marshallable.fromString(is);
+            Assert.assertNotNull(o);
+            String actual = o.toString();
+            Assert.assertEquals("[{hr=[Mark McGwire, Sammy Sosa]}, {rbi=[Sammy Sosa, Ken Griffey]}]", actual);
+
+        } finally {
+            b.release();
+        }
+
+    }
+
+    @Test
+    public void test2_10_NodeAppearsTwiceInThisDocumentFixed() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        try {
+            InputStream is = YamlSpec.class.getResourceAsStream
+                    (DIR + "2_10_NodeAppearsTwiceInThisDocumentFixed.yaml");
+
+            Object o = Marshallable.fromString(is);
+            Assert.assertNotNull(o);
+            String actual = o.toString();
+            Assert.assertEquals("", actual);
+
+        } finally {
+            b.release();
+        }
+
+    }
+
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
     @Test
@@ -240,6 +335,25 @@ public class YamlSpec {
 
     }
 
+    @Test
+    public void test2_12CompactNestedMappingFixed() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        try {
+            InputStream is = YamlSpec.class.getResourceAsStream
+                    (DIR + "2_12CompactNestedMappingFixed.yaml");
+
+            Object o = Marshallable.fromString(is);
+            Assert.assertNotNull(o);
+            String actual = o.toString();
+            Assert.assertEquals("", actual);
+
+        } finally {
+            b.release();
+        }
+
+    }
+
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
     @Test
     public void test2_13InLiteralsNewlinesArePreserved() {
@@ -268,6 +382,25 @@ public class YamlSpec {
         try {
             InputStream is = YamlSpec.class.getResourceAsStream
                     (DIR + "2_14InThefoldedScalars.yaml");
+
+            Object o = Marshallable.fromString(is);
+            Assert.assertNotNull(o);
+            String actual = o.toString();
+            Assert.assertEquals("", actual);
+
+        } finally {
+            b.release();
+        }
+
+    }
+
+    @Test
+    public void test2_14InThefoldedScalarsFixed() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        try {
+            InputStream is = YamlSpec.class.getResourceAsStream
+                    (DIR + "2_14InThefoldedScalarsFixed.yaml");
 
             Object o = Marshallable.fromString(is);
             Assert.assertNotNull(o);
@@ -320,6 +453,26 @@ public class YamlSpec {
 
     }
 
+    @Test
+    public void test2_16IndentationDeterminesScopeFixed() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        try {
+            InputStream is = YamlSpec.class.getResourceAsStream
+                    (DIR + "2_16IndentationDeterminesScopeFixed.yaml");
+
+            Object o = Marshallable.fromString(is);
+            Assert.assertNotNull(o);
+            String actual = o.toString();
+            Assert.assertEquals("{name=Mark McGwire, accomplishment=Mark set a major league home run record in 1998., stats=[65 Home Runs, 0.278 Batting Average]}", actual);
+
+        } finally {
+            b.release();
+        }
+
+    }
+
+
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
     @Test
     public void test2_17QuotedScalars() {
@@ -340,6 +493,29 @@ public class YamlSpec {
 
     }
 
+    @Test
+    public void test2_17QuotedScalarsFixed() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        try {
+            InputStream is = YamlSpec.class.getResourceAsStream
+                    (DIR + "2_17QuotedScalarsFixed.yaml");
+
+            Object o = Marshallable.fromString(is);
+            Assert.assertNotNull(o);
+            String actual = o.toString();
+            Assert.assertEquals("{unicode=Sosa did fine.☺, control=|b1998\t1999\t2000\n" +
+                    ", hex esc=\n" +
+                    " is \n" +
+                    ", single=Howdy! he cried., quoted= # Not a ''comment''., tie-fighter=|-*-/|}", actual);
+
+        } finally {
+            b.release();
+        }
+
+    }
+
+
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
     @Test
     public void test2_18Multi_lineFlowScalars() {
@@ -352,15 +528,37 @@ public class YamlSpec {
             Object o = Marshallable.fromString(is);
             Assert.assertNotNull(o);
             String actual = o.toString();
-            Assert.assertEquals("{plain=\"This unquoted scalar, spans many lines.\", quoted=\"So " +
-                    "does this\n" +
-                    "  quoted scalar.\"\n" + "}", actual);
+            Assert.assertEquals(" ", actual);
 
         } finally {
             b.release();
         }
 
     }
+
+    @Test
+    public void test2_18Multi_lineFlowScalarsFixed() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        try {
+            InputStream is = YamlSpec.class.getResourceAsStream
+                    (DIR + "2_18Multi_lineFlowScalarsFixed.yaml");
+
+            Object o = Marshallable.fromString(is);
+            Assert.assertNotNull(o);
+            String actual = o.toString();
+            Assert.assertEquals("{plain=\n" +
+                    "  This unquoted scalar\n" +
+                    "  spans many lines., quoted=So does this\n" +
+                    "  quoted scalar.\n" +
+                    "}", actual);
+
+        } finally {
+            b.release();
+        }
+
+    }
+
 
     @Test
     public void test2_19Integers() {
@@ -412,7 +610,26 @@ public class YamlSpec {
             Object o = Marshallable.fromString(is);
             Assert.assertNotNull(o);
             String actual = o.toString();
-            Assert.assertEquals("{null=, booleans={true, false}, string=012345}", actual);
+            Assert.assertEquals("", actual);
+
+        } finally {
+            b.release();
+        }
+
+    }
+
+    @Test
+    public void test2_21MiscellaneousFixed() {
+
+        Bytes b = Bytes.elasticByteBuffer();
+        try {
+            InputStream is = YamlSpec.class.getResourceAsStream
+                    (DIR + "2_21MiscellaneousFixed.yaml");
+
+            Object o = Marshallable.fromString(is);
+            Assert.assertNotNull(o);
+            String actual = o.toString();
+            Assert.assertEquals("{null=, booleans=[true, false], string=012345}", actual);
 
         } finally {
             b.release();
