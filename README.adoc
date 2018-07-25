@@ -659,7 +659,7 @@ the sections below list those areas of the spec that are implemented in Chronicl
 
 
 
-== Yaml Specification Equivalent Operation in Chroncile-Wire
+== Yaml Specification Equivalent Operation in Chronicle-Wire
 
 The section numbering below reflects that of the fix specification - see http://yaml.org/spec/1
 .2/spec.html
