@@ -631,7 +631,7 @@ Chronicle-Wire
 |2_1 SequenceOfScalars | yes  |
 |2_2 MappingScalarsToScalars | yes |
 |2_3 MappingScalarsToSequences | yes |
-|2_4 SequenceOfMappings | no |   link::#24--sequence-of-mappings
+|2_4 SequenceOfMappings | no |   link:#24--sequence-of-mappings
 |2_5 SequenceOfSequences | yes |
 |2_6 MappingOfMappings | yes |
 |2_7 TwoDocumentsInAStream | no |
