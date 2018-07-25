@@ -617,8 +617,9 @@ Chronicle Wire doesn't have pointers, but it does have content-lengths, which ar
 
 Chronicle Wire supports `Java 8`.  Future versions may support `Java 9`, `C++` and `C#`.
 
+= YAML 2 Spec Complicance
 
-===  YAML 2 Features currently suppored in Chronicle-Wire
+==  YAML 2 Features currently supported in Chronicle-Wire
 
 The following list the features are from the YAML 2 spec ( see http://yaml.org/spec/1.2/spec.html )
 which are currently supported by Chronicle-wire, the numbering refers to the section in the spec.
@@ -660,7 +661,7 @@ Chronicle-Wire
 
 
 
-== Yaml Specification Equivalent Operation in Chronicle-Wire
+== Yaml 2 Equivalent Operation in Chronicle-Wire
 
 The section numbering below reflects that of the fix specification - see http://yaml.org/spec/1.2/spec.html
 
