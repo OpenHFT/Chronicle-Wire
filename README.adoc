@@ -514,6 +514,9 @@ The documentation looks well thought out, and it is worth emulating.
 | Authors' preferred use case      | distributed  computing | financial / trading | distributed  computing | platforms /  sandboxing | financial / trading | games
 |===============
 
+
+
+
 NOTE: The Binary YAML format can be automatically converted to YAML without any knowledge of the schema, because the messages are self-describing.
 
 NOTE: You can parse all the expected fields (if any) and then parse any remaining fields. As YAML supports object field names (or keys), these could be strings or even objects as keys and values.
@@ -613,4 +616,45 @@ Chronicle Wire doesn't have pointers, but it does have content-lengths, which ar
 ===  Platform support
 
 Chronicle Wire supports `Java 8`.  Future versions may support `Java 9`, `C++` and `C#`.
+
+
+===  YAML 2 Features currently suppored in Chronicle-Wire
+
+The following list the features are from the YAML 2 spec ( see http://yaml.org/spec/1.2/spec.html )
+which are currently supported by Chronicle-wire, the numbering refers to the section in the spec.
+See the test case net.openhft.chronicle.wire.YamlSpec for more details.
+
+the sections below list those areas of the spec that are implemented in Chronicle-Wire
+|===============
+| Feature                     | supported
+|2_1 SequenceOfScalars | yes
+|2_2 MappingScalarsToScalars | yes
+|2_3 MappingScalarsToSequences | yes
+|2_4 SequenceOfMappings | no
+|2_5 SequenceOfSequences | yes
+|2_6 MappingOfMappings | yes
+|2_7 TwoDocumentsInAStream | no
+|2_8 PlayByPlayFeed | no
+|2_9 SingleDocumentWithTwoComments | no
+|2_10 NodeAppearsTwiceInThisDocument | no
+|2_11 MappingBetweenSequences | no
+|2_12 CompactNestedMapping | no
+|2_13 InLiteralsNewlinesArePreserved | no
+|2_14 InThefoldedScalars | no
+|2_15 FoldedNewlines | no
+|2_16 IndentationDeterminesScope | no
+|2_17 QuotedScalars | no
+|2_18 Multi_lineFlowScalars | no
+|2_19 Integers | yes
+|2_20 FloatingPoint | yes
+|2_21 Miscellaneous | no
+|2_22 Timestamps | yes
+|2_23 VariousExplicitTags | no
+|2_24 GlobalTags | no
+|2_25 UnorderedSets | no
+|2_26 OrderedMappings | no
+|2_27 Invoice | no
+|2_28 LogFile | no
+|===============
+
 

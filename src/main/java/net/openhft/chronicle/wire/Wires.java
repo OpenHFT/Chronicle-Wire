@@ -50,6 +50,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
+import static net.openhft.chronicle.wire.SerializationStrategies.*;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
 /*
@@ -63,14 +64,14 @@ public enum Wires {
     public static final int NOT_READY = NOT_COMPLETE;
     public static final int META_DATA = 1 << 30;
     public static final int UNKNOWN_LENGTH = 0x0;
-    public static final int MAX_LENGTH = (1 << 30) - 1;
+    // public static final int MAX_LENGTH = (1 << 30) - 1;
     // value to use when the message is not ready and of an unknown length
     public static final int NOT_COMPLETE_UNKNOWN_LENGTH = NOT_COMPLETE;
     // value to use when no more data is possible e.g. on a roll.
     public static final int END_OF_DATA = NOT_COMPLETE | META_DATA;
     public static final int NOT_INITIALIZED = 0x0;
     public static final Bytes<?> NO_BYTES = new VanillaBytes<>(BytesStore.empty());
-    public static final WireIn EMPTY = new BinaryWire(NO_BYTES);
+    //public static final WireIn EMPTY = new BinaryWire(NO_BYTES);
     public static final int SPB_HEADER_SIZE = 4;
     public static final List<Function<Class, SerializationStrategy>> CLASS_STRATEGY_FUNCTIONS = new CopyOnWriteArrayList<>();
     public static final ClassLocal<SerializationStrategy> CLASS_STRATEGY = ClassLocal.withInitial(c -> {
@@ -79,7 +80,7 @@ public enum Wires {
             if (strategy != null)
                 return strategy;
         }
-        return SerializationStrategies.ANY_OBJECT;
+        return ANY_OBJECT;
     });
     static final ClassLocal<Function<String, Marshallable>> MARSHALLABLE_FUNCTION = ClassLocal.withInitial(tClass -> {
         Class[] interfaces = {Marshallable.class, tClass};
@@ -416,7 +417,7 @@ public enum Wires {
     @Nullable
     public static <E> E objectSequence(ValueIn in, @Nullable E using, @Nullable Class clazz, SerializationStrategy<E> strategy) {
         if (clazz == Object.class)
-            strategy = SerializationStrategies.LIST;
+            strategy = LIST;
         if (using == null)
             using = (E) strategy.newInstance(clazz);
 
@@ -426,7 +427,7 @@ public enum Wires {
     @Nullable
     public static <E> E objectMap(ValueIn in, @Nullable E using, @Nullable Class clazz, SerializationStrategy<E> strategy) {
         if (clazz == Object.class)
-            strategy = SerializationStrategies.MAP;
+            strategy = MAP;
         if (using == null)
             using = (E) strategy.newInstance(clazz);
         if (Throwable.class.isAssignableFrom(clazz))
@@ -455,7 +456,7 @@ public enum Wires {
     public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz) {
         Object o = in.typePrefixOrObject(clazz);
         if (o != null && !(o instanceof Class)) {
-            return (E) in.marshallable(o, SerializationStrategies.MARSHALLABLE);
+            return (E) in.marshallable(o, MARSHALLABLE);
         }
         @Nullable final Class clazz2 = (Class) o;
         if (clazz2 == void.class) {
@@ -485,6 +486,17 @@ public enum Wires {
 
         if (Date.class.isAssignableFrom(clazz))
             return objectDate(in, using);
+
+        if (BitSet.class.isAssignableFrom(clazz)) {
+
+            PrimArrayWrapper longWrapper = new PrimArrayWrapper(long[].class);
+            objectSequence(in, longWrapper, PrimArrayWrapper.class, PRIM_ARRAY);
+
+            return (using == null) ?
+                    (E) BitSet.valueOf((long[]) longWrapper.array) :
+                    (E) BitSetUtil.set((BitSet) using, (long[]) longWrapper.array);
+
+        }
 
         switch (brackets) {
             case MAP:
@@ -544,7 +556,7 @@ public enum Wires {
         @Nullable
         static SerializationStrategy getSerializationStrategy(@NotNull Class aClass) {
             if (Enum.class.isAssignableFrom(aClass))
-                return SerializationStrategies.ENUM;
+                return ENUM;
             return null;
         }
 
@@ -577,7 +589,7 @@ public enum Wires {
                     return ScalarStrategy.of(String.class, (o, in) -> in.text());
 
                 case "java.lang.Object":
-                    return SerializationStrategies.ANY_OBJECT;
+                    return ANY_OBJECT;
 
                 case "java.lang.Class":
                     return ScalarStrategy.of(Class.class, (o, in) -> {
@@ -644,16 +656,16 @@ public enum Wires {
 
                 default:
                     if (aClass.isPrimitive())
-                        return SerializationStrategies.ANY_SCALAR;
+                        return ANY_SCALAR;
                     if (aClass.isArray()) {
                         final Class componentType = aClass.getComponentType();
                         if (componentType.isPrimitive())
-                            return SerializationStrategies.PRIM_ARRAY;
-                        return SerializationStrategies.ARRAY;
+                            return PRIM_ARRAY;
+                        return ARRAY;
                     }
                     if (Enum.class.isAssignableFrom(aClass)) {
                         @Nullable final SerializationStrategy ss = SerializeMarshallables.getSerializationStrategy(aClass);
-                        return ss == null ? SerializationStrategies.ENUM : ss;
+                        return ss == null ? ENUM : ss;
                     }
                     return null;
             }
@@ -666,9 +678,9 @@ public enum Wires {
         @Nullable
         static SerializationStrategy getSerializationStrategy(@NotNull Class aClass) {
             if (Demarshallable.class.isAssignableFrom(aClass))
-                return SerializationStrategies.DEMARSHALLABLE;
+                return DEMARSHALLABLE;
             if (ReadMarshallable.class.isAssignableFrom(aClass))
-                return SerializationStrategies.MARSHALLABLE;
+                return MARSHALLABLE;
             return null;
         }
 
@@ -677,16 +689,16 @@ public enum Wires {
             @Nullable SerializationStrategy x = getSerializationStrategy(aClass);
             if (x != null) return x;
             if (Map.class.isAssignableFrom(aClass))
-                return SerializationStrategies.MAP;
+                return MAP;
             if (Set.class.isAssignableFrom(aClass))
-                return SerializationStrategies.SET;
+                return SET;
             if (List.class.isAssignableFrom(aClass))
-                return SerializationStrategies.LIST;
+                return LIST;
             if (Externalizable.class.isAssignableFrom(aClass))
-                return SerializationStrategies.EXTERNALIZABLE;
+                return EXTERNALIZABLE;
             if (Serializable.class.isAssignableFrom(aClass))
-                return SerializationStrategies.ANY_NESTED;
-            return SerializationStrategies.ANY_SCALAR;
+                return ANY_NESTED;
+            return ANY_SCALAR;
         }
     }
 
