@@ -623,47 +623,42 @@ Chronicle wire supports a subset of the features available from the YAML 2 speci
 This section lists those features and suggests other ways in Chronicle Wire to define the same
 thing.
 
-==  YAML 2 features in Chronicle-Wire
+==  YAML 2 features supported in Chronicle Wire
+The list below lists the features of the specification that are implemented in Chronicle Wire.
 
-The following list the features are from the YAML 2 spec ( see http://yaml.org/spec/1.2/spec.html
- ) the below numbering refers to the section in the yaml spec.
+NOTE: The numbers refer to the section in the YAML 2 specification. See http://yaml.org/spec/1.2/spec.html for more information.
 
-
-the sections below list those areas of the spec that are implemented in Chronicle-Wire
 |===============
-| Feature                     | Strict Yaml 2 Spec Compliant | Equivalent Operations in
-Chronicle-Wire
-|2_1 SequenceOfScalars | yes  |
-|2_2 MappingScalarsToScalars | yes |
-|2_3 MappingScalarsToSequences | yes |
-|2_4 SequenceOfMappings | no |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#24--sequence-of-mappings
-|2_5 SequenceOfSequences | yes |
-|2_6 MappingOfMappings | yes |
-|2_7 TwoDocumentsInAStream | no | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#27-two-documents-in-a-stream
-|2_8 PlayByPlayFeed | no | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#28-play-by-play-feed
-|2_9 SingleDocumentWithTwoComments | no | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#29-single-document-with
-|2_10 NodeAppearsTwiceInThisDocument | no |
-|2_11 MappingBetweenSequences | no |
-|2_12 CompactNestedMapping | no |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#212-compact-nested-mapping
-|2_13 InLiteralsNewlinesArePreserved | no |
-|2_14 InThefoldedScalars | no | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#214-in-the-folded-scalars
-|2_15 FoldedNewlines | no |
-|2_16 IndentationDeterminesScope | no | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#216--indentation-determines-scope
-|2_17 QuotedScalars | no |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#217-quoted-scalars
-|2_18 Multi_lineFlowScalars | no |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#218-multi-line-flow-scalars
-|2_19 Integers | yes |
-|2_20 FloatingPoint | yes |
-|2_21 Miscellaneous | no |   https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#221-miscellaneous
-|2_22 Timestamps | yes |
-|2_23 VariousExplicitTags | no |
-|2_24 GlobalTags | no |
-|2_25 UnorderedSets | no |
-|2_26 OrderedMappings | no |
-|2_27 Invoice | no |
-|2_28 LogFile | no |
+| Feature                     | Strict YAML Specoiification Compliance | Equivalent Operations in Chronicle Wire
+|Section 2_1, `SequenceOfScalars` | Yes  |
+|Section 2_2, `MappingScalarsToScalars` | Yes |
+|Section 2_3, `MappingScalarsToSequences` | Yes |
+|Section 2_4, `SequenceOfMappings` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#24--sequence-of-mappings
+|Section 2_5, `SequenceOfSequences` | Yes |
+|Section 2_6, `MappingOfMappings` | Yes |
+|Section 2_7, `TwoDocumentsInAStream` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#27-two-documents-in-a-stream
+|Section 2_8, `PlayByPlayFeed` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#28-play-by-play-feed
+|Section 2_9, `SingleDocumentWithTwoComments` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#29-single-document-with
+|Section 2_10, `NodeAppearsTwiceInThisDocument` | No |
+|Section 2_11, `MappingBetweenSequences` | No |
+|Section 2_12, `CompactNestedMapping` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#212-compact-nested-mapping
+|Section 2_13, `InLiteralsNewlinesArePreserved` | No |
+|Section 2_14, `InThefoldedScalars` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#214-in-the-folded-scalars
+|Section 2_15, `FoldedNewlines` | No |
+|Section 2_16, `IndentationDeterminesScope` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#216--indentation-determines-scope
+|Section 2_17, `QuotedScalars` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#217-quoted-scalars
+|Section 2_18, `Multi_lineFlowScalars` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#218-multi-line-flow-scalars
+|Section 2_19, `Integers` | Yes |
+|Section 2_20, `FloatingPoint` | Yes |
+|Section 2_21, `Miscellaneous` | No |   https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#221-miscellaneous
+|Section 2_22, `Timestamps` | Yes |
+|Section 2_23, `VariousExplicitTags` | No |
+|Section 2_24, `GlobalTags` | No |
+|Section 2_25, `UnorderedSets` | No |
+|Section 2_26, `OrderedMappings` | No |
+|Section 2_27, `Invoice` | No |
+|Section 2_28, `LogFile` | No |
 |===============
-
-
 
 == Yaml 2 Equivalent Operation in Chronicle-Wire
 
