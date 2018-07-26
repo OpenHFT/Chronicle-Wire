@@ -629,7 +629,7 @@ The list below lists the features of the specification that are implemented in C
 NOTE: The numbers refer to the section in the YAML 2 specification. See http://yaml.org/spec/1.2/spec.html for more information.
 
 |===============
-| Feature                     | Strict YAML Specoiification Compliance | Equivalent Operations in Chronicle Wire
+| Feature                     | Strict YAML Specification Compliance | Equivalent Operations in Chronicle Wire
 |Section 2_1, `SequenceOfScalars` | Yes  |
 |Section 2_2, `MappingScalarsToScalars` | Yes |
 |Section 2_3, `MappingScalarsToSequences` | Yes |
