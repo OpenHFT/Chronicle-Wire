@@ -2909,7 +2909,11 @@ public class TextWire extends AbstractWire implements Wire {
                     String[] split = REGX_PATTERN.split(sb);
                     if (split[split.length - 1].equalsIgnoreCase(tClass.getSimpleName()))
                         try {
-                            return classLookup().forName(className);
+
+                            return tClass.isInterface()
+                                    ? Wires.tupleFor(tClass, sb.toString())
+                                    : classLookup().forName(className);
+
                         } catch (ClassNotFoundException e1) {
                             return Wires.tupleFor(tClass, className);
                         }
