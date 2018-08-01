@@ -10,7 +10,7 @@ import java.io.InputStream;
 /**
  * Created by Rob Austin
  */
-public class YamlSpec {
+public class YamlSpecTest {
     static String DIR = "/yaml/spec/";
 
     @Test
@@ -19,7 +19,7 @@ public class YamlSpec {
         Bytes b = Bytes.elasticByteBuffer();
         try {
 
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_1_SequenceOfScalars.yaml");
 
             String actual = Marshallable.fromString(is).toString();
@@ -36,7 +36,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_2_MappingScalarsToScalars.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -54,7 +54,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_3_MappingScalarsToSequences.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -73,7 +73,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_4_SequenceOfMappings.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -91,7 +91,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_4_SequenceOfMappings-fixed.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -111,7 +111,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_5_SequenceOfSequences.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -129,7 +129,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_6_MappingOfMappings.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -148,7 +148,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_7_TwoDocumentsInAStream.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -166,7 +166,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_7_TwoDocumentsInAStreamFixed.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -185,7 +185,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_8_PlayByPlayFeed.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -203,7 +203,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_8_PlayByPlayFeedFixed.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -222,7 +222,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_9_SingleDocumentWithTwoComments.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -241,7 +241,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_9_SingleDocumentWithTwoCommentsFixed.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -261,7 +261,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_10_NodeAppearsTwiceInThisDocument.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -282,7 +282,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_10_NodeAppearsTwiceInThisDocument.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -302,7 +302,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_11MappingBetweenSequences.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -322,7 +322,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_12CompactNestedMapping.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -341,7 +341,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_12CompactNestedMappingFixed.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -361,7 +361,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_13InLiteralsNewlinesArePreserved.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -381,7 +381,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_14InThefoldedScalars.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -400,7 +400,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_14InThefoldedScalarsFixed.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -420,7 +420,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_15FoldedNewlines.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -440,7 +440,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_16IndentationDeterminesScope.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -459,7 +459,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_16IndentationDeterminesScopeFixed.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -480,7 +480,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_17QuotedScalars.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -500,7 +500,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_17QuotedScalarsFixed.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -527,7 +527,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_18Multi_lineFlowScalars.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -546,7 +546,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_18Multi_lineFlowScalarsFixed.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -570,7 +570,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_19Integers.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -589,7 +589,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_20FloatingPoint.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -609,7 +609,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_21Miscellaneous.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -628,7 +628,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_21MiscellaneousFixed.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -647,7 +647,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_22Timestamps.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -667,7 +667,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_23VariousExplicitTags.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -687,7 +687,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_24GlobalTags.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -707,7 +707,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_25UnorderedSets.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -727,7 +727,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_26OrderedMappings.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -747,7 +747,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_27Invoice.yaml");
 
             Object o = Marshallable.fromString(is);
@@ -767,7 +767,7 @@ public class YamlSpec {
 
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            InputStream is = YamlSpec.class.getResourceAsStream
+            InputStream is = YamlSpecTest.class.getResourceAsStream
                     (DIR + "2_28LogFile.yaml");
 
             Object o = Marshallable.fromString(is);
