@@ -279,7 +279,9 @@ public class VanillaMethodReader implements MethodReader {
     @NotNull
     private MethodWireKey createWireKey(@NotNull Method m, String name) {
         MethodId annotation = Annotations.getAnnotation(m, MethodId.class);
-        return new MethodWireKey(name, annotation == null ? name.hashCode() : Maths.toUInt31(annotation.value()));
+        return new MethodWireKey(name, annotation == null
+                ? name.hashCode()
+                : Maths.toInt32(annotation.value()));
     }
 
     public void addParseletForMethod(Object o, @NotNull Method m, @NotNull Class[] parameterTypes) {
