@@ -834,9 +834,7 @@ rbi:
   by a knee injury.]
 ----
 
-=== Indentation determines scope
-
-=== 2.16  Indentation determines scope
+=== 2.16 Indentation determines scope
 
 .Yaml Spec Example
 [source,yaml]
