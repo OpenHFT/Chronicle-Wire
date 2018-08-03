@@ -639,7 +639,7 @@ NOTE: The numbers refer to the section in the YAML 2 specification. See http://y
 |Section 2_7, `TwoDocumentsInAStream` | No | 
 https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#27-two-documents-in-a-stream-each-with-a-leading-comment[Section 2.7, Two Documents in a Stream]
 |Section 2_8, `PlayByPlayFeed` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#28-play-by-play-feed-from-a-game[Section 2.8, Play by Play Feed from a Game]
-|Section 2_9, `SingleDocumentWithTwoComments` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#29-single-document-with-two-comments[]
+|Section 2_9, `SingleDocumentWithTwoComments` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#29-single-document-with-two-comments[Section 2.9, Single Document with Two Comments]
 |Section 2_10, `NodeAppearsTwiceInThisDocument` | No |
 |Section 2_11, `MappingBetweenSequences` | No |
 |Section 2_12, `CompactNestedMapping` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#212-compact-nested-mapping[Section 2.12, Compact Nested Mapping]
@@ -666,8 +666,7 @@ https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#214-in-the-fol
 
 The section numbering below reflects that of the fix specification - see http://yaml.org/spec/1.2/spec.html
 
-
-=== 2.4  Sequence of Mappings (player statistics)
+=== Sequence of Mappings (player statistics)
 
 === 2.4  Sequence of Mappings (player statistics)
 
