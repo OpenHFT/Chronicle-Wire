@@ -633,7 +633,7 @@ NOTE: The numbers refer to the section in the YAML 2 specification. See http://y
 |Section 2_1, `SequenceOfScalars` | Yes  |
 |Section 2_2, `MappingScalarsToScalars` | Yes |
 |Section 2_3, `MappingScalarsToSequences` | Yes |
-|Section 2_4, `SequenceOfMappings` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#24--sequence-of-mappings-player-statistics-1[Section 2.4, Sequence of Mappings]
+|Section 2_4, `SequenceOfMappings` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#sequence-of-mappings-player-statistics[Section 2.4, Sequence of Mappings]
 |Section 2_5, `SequenceOfSequences` | Yes |
 |Section 2_6, `MappingOfMappings` | Yes |
 |Section 2_7, `TwoDocumentsInAStream` | No | 
