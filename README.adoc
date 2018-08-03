@@ -1,3 +1,4 @@
+
 = Chronicle-Wire
 :toc: manual
 :css-signature: demo
@@ -11,12 +12,12 @@ image::https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wi
 
 == About
 
-Chronicle Wire is a a Wire Format abstraction Library, The purpose of Chronicle Wire is to combine a number of concerns in a consistent manner:
+Chronicle Wire is a a Wire Format abstraction library, The purpose of Chronicle Wire is to address the following concerns in a consistent manner:
 
 - Application configuration. (Using YAML)
 - Data serialization (YAML, binary YAML, JSON, Raw binary data, CSV)
 - Accessing off-heap memory in a thread-safe manner. (Bind to shared off-heap memory)
-- High performance data exchange via binary formats. Only include as much meta data as you need.
+- High performance data exchange using binary formats. Only include as much meta data as you need.
 
 == Design
 
@@ -26,7 +27,7 @@ Chronicle Wire uses Chronicle Bytes for bytes manipulation, and Chronicle Core f
 
 Often you want to use these interchangeably.
 
-- Configuration includes aliased type information.  This supports easy extension, through adding new classes/versions, and cross-platform through type aliasing.
+- Configuration includes aliased type information.  This supports easy extension by adding new classes/versions, and cross-platform using type aliasing.
 - By supporting types, a configuration file can bootstrap itself. You control how the configuration file is decoded. See https://github.com/OpenHFT/Chronicle-Engine/blob/master/demo/src/main/resources/engine.yaml[`engine.yaml`].
 - To send the configuration of a server to a client, or from a client to a server.
 - To store the configuration of a data store in its header.
@@ -36,27 +37,26 @@ Often you want to use these interchangeably.
 
 === Features
 
-Chronicle Wire supports a separation of describing what data you want to store and retrieve, and how it should be rendered/parsed. Wire handles a variety of formatting options for a wide range of formats.
+Chronicle Wire supports a separation of describing what data you want to store and retrieve, and how it should be rendered/parsed. Chronicle Wire handles a variety of formatting options, for a wide range of formats.
 
-A key aim of Chronicle Wire is to support schema changes.  It should make reasonable
-    attempts to handle:
+A key aim of Chronicle Wire is to support schema changes.  It should make reasonable attempts to handle:
 
-* optional fields,
-* fields in a different order,
+* optional fields
+* fields in a different order
 * fields that the consumer doesn't expect; optionally parsing them, or ignoring them
 * more or less data than expected; in field-less formats
 * reading a different type to the one written
 * updating fixed-length fields, automatically where possible using a `bound` data structure.
 
-Chronicle Wire will also be efficient in the case where any, or all, of the following are true:
+Chronicle Wire will also be efficient where any, or all, of the following points are true:
 
 * fields are in the order expected
 * fields are the type expected
 * fields names/numbers are not used
-* self describing types are not needed
+* self-describing types are not needed
 * random access of data values is supported.
 
-Chronicle Wire is designed to make it easy to convert from one wire format to another. For example, you can use fixed width binary data in memory for performance, and variable width or text over the network. Different TCP connections could use different formats.
+Chronicle Wire is designed to make it easy to convert from one wire format to another. For example, you can use fixed-width binary data in memory for performance, and variable-width or text over the network. Different TCP connections could use different formats.
   
 Chronicle Wire also supports hybrid wire formats.  For example, you can have one format embedded in another.
 
@@ -69,17 +69,17 @@ This library will require Java 8. Support for `C++` and `C#` is planned.
 The text formats include:
 
 * `YAML` - subset of mapping structures included
-* `JSON` - super set to support serialization
-* `CSV` - super set to support serialization
+* `JSON` - superset to support serialization
+* `CSV` - superset to support serialization
 * `XML` - planned
 * `FIX` - proposed
 
 Options include:
 
-* field names (e.g. JSON), or field numbers (e.g. FIX)
+* field names (for example, JSON), or field numbers (for example, FIX)
 * optional fields with default values that can be dropped
-* zero copy access to fields - planned
-* thread safe operations in text - planned
+* zero-copy access to fields - planned
+* thread-safe operations in text - planned
 
 To support wire format discovery, the first byte should be in the `ASCII` range; adding an `ASCII` whitespace if needed.
     
@@ -101,9 +101,9 @@ Options for Binary format:
 * fixed width data with zero copy support
 * thread-safe operations
 
-Note: Chronicle Wire supports debug/transparent combinations like self describing data with zero copy support.
+Note: Chronicle Wire supports debug/transparent combinations like self-describing data with zero copy support.
 
-To support wire format discovery, the first bytes should have the top-bit set.
+To support wire format discovery, the first bytes should have the top bit set.
 
 == Using Wire
 
@@ -186,7 +186,7 @@ The down-side is that we cannot easily see what the message contains.
         System.out.println(bytes3.toHexString());
 ----
 
-prints in RawWire
+prints in `RawWire`.
 
 ----
 00000000 0B 48 65 6C 6C 6F 20 57  6F 72 6C 64 D2 02 96 49 ·Hello W orld···I
@@ -198,11 +198,9 @@ For more examples see https://github.com/OpenHFT/Chronicle-Wire/blob/master/READ
 
 === A note on `Wires.reset()`
 
-Wire allows (and encourages) objects to be re-used in order to reduce allocation rates.
+Chronicle Wire allows (and encourages) objects to be re-used in order to reduce allocation rates.
 
-When a marshallable object is re-used or initialised by the framework, it is first reset by way of
-`Wires.reset()`. In the case of most DTOs with simple scalar values, this will not cause any issues,
-however more complicated objects with object instance fields may experience undesired behaviour.
+When a marshallable object is re-used or initialised by the framework, it is first reset by way of `Wires.reset()`. In the case of most DTOs with simple scalar values, this will not cause any issues. However, more complicated objects with object instance fields may experience undesired behaviour.
 
 In order to `reset` a marshallable object, the process is as follows:
 
@@ -210,11 +208,9 @@ In order to `reset` a marshallable object, the process is as follows:
    2. copy all fields from the new instance to the existing instance
    3. the existing instance is now considered 'reset' back to default values
 
-The object created in step `1` is cached for performance reasons, meaning that both the new and existing
-instance of the marshallable object could have a reference to the same object.
+The object created in step `1` is cached for performance reasons, meaning that both the new and existing instance of the marshallable object could have a reference to the same object.
 
-While this will not be a problem for primitive or immutable values (e.g. `int`, `Long`, `String`), a mutable
-field such as `ByteBuffer` will cause problems. Consider the following case:
+While this will not be a problem for primitive or immutable values (for example, `int`, `Long`, `String`), a mutable field such as `ByteBuffer` will cause problems. Consider the following case:
 
 [source,java]
 ----
@@ -285,17 +281,17 @@ Chronicle Wire offers the ability to bind a reference to a fixed value of a fiel
    long id = counter.getAndAdd(1);
 ----
 
-Other types are supported; for example,32-bit integer values, and an array of 64-bit integer values.
+Other types are supported; for example, 32-bit integer values, and an array of 64-bit integer values.
     
 == Compression Options
 
-* no compression
+* No compression
 * Snappy compression - planned
 * LZW compression - planned
 
 == Bytes options
 
-Wire is built on top of the Bytes library, however Bytes in turn can wrap
+Chronicle Wire is built on top of the `Bytes` library, however `Bytes`, in turn, can wrap:
 
 * `ByteBuffer` - heap and direct
 * `byte\[\]` - using `ByteBuffer`
@@ -467,22 +463,21 @@ Chronicle Wire can be used for:
 
 == Similar projects
 
-=== SBE
+=== Simple Binary Encoding (SBE)
 
 Simple Binary Encoding (SBE) is designed to be a more efficient replacement for FIX. It is not limited to FIX protocols, and can be easily extended by updating an XML schema. It is simple, binary, and it supports C++ and Java.
 
-XML, when it first started, didn't use XML for its own schema files, and its not
-   insignificant that SBE doesn't use SBE for its schema either.  This is because it is not trying to be human readable. It has XML which, though standard, isn't designed to be human readable either.  Peter Lawrey thinks that it is a limitation that it doesn't naturally lend itself to a human readable form.
+XML, when it first started, did not use XML for its own schema files, and it is not insignificant that SBE does not use SBE for its schema either.  This is because it is not trying to be human readable. It has XML which, though standard, is not designed to be human readable either.  Chronicle believes that it is a limitation that it does not naturally lend itself to a human readable form.
    
-The encoding that SBE uses is similar to binary; with field numbers and fixed width types.
+The encoding that SBE uses is similar to binary; with field numbers and fixed-width types.
 
-SBE assumes the field types, which can be more compact than Wire's most similar option; though not as compact as others.
+SBE assumes the field types, which can be more compact than Chronicle Wire's most similar option; though not as compact as others.
    
 SBE has support for schema changes provided that the type of a field doesn't change.
    
 === Message Pack (`msgpack`)
 
-Message Pack is a packed binary wire format which also supports JSON for human readability and compatibility. It has many similarities to the binary (and JSON) formats of this library.  Chronicle Wire is designed to be human readable first, based on YAML, and has a range of options to make it more efficient. The most extreme being fixed position binary.
+Message Pack is a packed binary wire format which also supports `JSON` for human readability and compatibility. It has many similarities to the binary (and `JSON`) formats of this library.  Chronicle Wire is designed to be human readable first, based on `YAML`, and has a range of options to make it more efficient. The most extreme being fixed position binary.
     
 Message Pack has support for embedded binary, whereas Chronicle Wire has support for comments and hints, to improve rendering for human consumption.
     
@@ -517,13 +512,13 @@ The documentation looks well thought out, and it is worth emulating.
 
 
 
-NOTE: The Binary YAML format can be automatically converted to YAML without any knowledge of the schema, because the messages are self-describing.
+NOTE: The `Binary YAML` format can be automatically converted to `YAML` without any knowledge of the schema, because the messages are self-describing.
 
-NOTE: You can parse all the expected fields (if any) and then parse any remaining fields. As YAML supports object field names (or keys), these could be strings or even objects as keys and values.
+NOTE: You can parse all the expected fields (if any) and then parse any remaining fields. As `YAML` supports object field names (or keys), these could be strings or even objects as keys and values.
 
 Based on https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html
 
-Note: It not clear what padding which doesn't take up space on the wire means.
+NOTE: It not clear what padding which does not take up space on the wire means.
 
 == Design notes.
 
@@ -540,7 +535,7 @@ Wire optionally supports:
 - raw messages can be longer or shorter than expected
 
 The more flexibility, the larger the overhead in terms of CPU and memory.  
-Wire allows you to dynamically pick the optimal configuration, and convert between these options.
+Chronicle Wire allows you to dynamically pick the optimal configuration, and convert between these options.
 
 === Zero copy.
 
@@ -549,7 +544,7 @@ It also supports translation from one wire format to another. For example, switc
 
 === Random Access.
 
-You can access a random field in memory, For example, in a 2TB file, page in/pull into CPU cache, only the data relating to your read or write.
+You can access a random field in memory, For example, in a `2TB` file, page-in/pull-into CPU cache, only the data relating to your read or write.
 
 [options="header"]
 |===============
@@ -569,29 +564,29 @@ Chronicle Wire has built in tiers of bounds checks to prevent accidental read/wr
 === Reflection / generic algorithms.
 
 Chronicle Wire supports generic reading and writing of an arbitrary stream. This can be used in combination with predetermined fields.
-For example, you can read the fields you know about, and ask it to provide the fields that you don't.
-You can also give generic field names like keys to a map as YAML does.
+For example, you can read the fields you know about, and ask it to provide the fields that you do not.
+You can also give generic field names like keys to a map as `YAML` does.
 
 === Initialization order.
 
 Chronicle Wire can handle unknown information like lengths, by using padding.
-It will go back and fill in any data that it wasn't aware of when it was writing the data. For example, when it writes an object, it doesn't know how long it is going to be, so it adds padding at the start. Once the object has been written, it goes back and overwrites the length. It can also handle situations where the length was more than needed; this is known as packing.
+It will go back and fill in any data that it was not aware of when it was writing the data. For example, when it writes an object, it does not know how long it is going to be, so it adds padding at the start. Once the object has been written, it goes back and overwrites the length. It can also handle situations where the length was more than needed; this is known as packing.
 
 === Unknown field retention?
 
-Chronicle Wire can read data that it didn't expect, interspersed with data it did expect. Rather than specify the expected field name, a `StringBuilder` is provided.
+Chronicle Wire can read data that it did not expect, interspersed with data it did expect. Rather than specify the expected field name, a `StringBuilder` is provided.
 
 Note: There are times when you want to skip/copy an entire field or message, without reading any more of it.  This is also supported.
 
 === Object-maximumLimit RPC system.
 
-Chronicle Wire supports references based on name, number, or UUID. This is useful when including a reference to an object taht the reader should look up by other means.
+Chronicle Wire supports references based on name, number, or UUID. This is useful when including a reference to an object that the reader should look up by other means.
    
 A common case is if you have a proxy to a remote object, and you want to pass or return this in an RPC call.
 
 === Schema language
 
-Chronicle Wire's schema is not externalised from the code. However it is planned to use YAML in a format that it can parse.
+Chronicle Wire's schema is not externalised from the code. However it is planned to use `YAML` in a format that it can parse.
 
 === Usable as mutable state
 
@@ -599,7 +594,7 @@ Chronicle Wire supports storing an application's internal state. This will not a
     
 === Padding takes space on the wire.
 
-The Chronicle Wire format that is chosen determines if there is any padding on the wire. If you copy the in-memory data directly, its format doesn't change.
+The Chronicle Wire format that is chosen determines if there is any padding on the wire. If you copy the in-memory data directly, its format does not change.
 
 If you want to drop padding, you can copy the message to a wire format without padding. You can decide whether the original padding is to be preserved or not, if turned back into a format with padding.
 
@@ -607,13 +602,16 @@ We could look at supporting *Cap'n'Proto*'s zero-byte removal compression.
 
 === Un-set fields take space on the wire?
 
-Chronicle Wire supports fields with, and without, optional fields and automatic means of removing them. Chronicle Wire doesn't support automatically adding them back in, because information has been lost.
+Chronicle Wire supports fields with, and without, optional fields, and automatic means of removing them. Chronicle Wire does not support automatically adding them back in, because information has been lost.
 
 === Pointers take space on the wire.
 
-Chronicle Wire doesn't have pointers, but it does have content-lengths, which are a useful hint for random access and robustness; but these are optional.
+Chronicle Wire does not have pointers, but it does have content-lengths which are a useful hint for random access and robustness; but these are optional.
 
 ===  Platform support
 
-Chronicle Wire supports `Java 8`.  Future versions may support `Java 9`, `C++` and `C#`.
+Chronicle Wire supports `Java 8`.  Future versions may support `Java 9`, `C++`, and `C#`.
 
+
+'''
+https://github.com/OpenHFT/Chronicle-Wire[Back to Chronicle Wire project]
