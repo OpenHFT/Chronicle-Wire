@@ -647,7 +647,7 @@ https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#27-two-documen
 |Section 2_14, `InThefoldedScalars` | No | 
 https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#214-in-the-folded-scalars-newlines-become-spaces[Section 2.14, In the folded scalars, newlines become spaces]
 |Section 2_15, `FoldedNewlines` | No |
-|Section 2_16, `IndentationDeterminesScope` | No | https://github.com/OpenHFT/Chronicle-Wire/#216-indentation-determines-scope[Indentation determines scope]
+|Section 2_16, `IndentationDeterminesScope` | No | https://github.com/OpenHFT/Chronicle-Wire/#216-indentation-determines-scope[Section 2.16, Indentation determines scope]
 |Section 2_17, `QuotedScalars` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#217-quoted-scalars[Section 2.17, Quoted Scalars]
 |Section 2_18, `Multi_lineFlowScalars` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#218-multi-line-flow-scalars[Section 2.18, Multi-line Flow Scalars]
 |Section 2_19, `Integers` | Yes |
