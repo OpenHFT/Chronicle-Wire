@@ -666,8 +666,10 @@ https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#214-in-the-fol
 
 The section numbering below reflects that of the fix specification - see http://yaml.org/spec/1.2/spec.html
 
-=== 2.4  Sequence of Mappings (players’ statistics)
 
+=== 2.4  Sequence of Mappings (player statistics)
+
+=== 2.4  Sequence of Mappings (player statistics)
 
 .Yaml Spec Example
 ----
@@ -834,6 +836,8 @@ rbi:
   year was crippled
   by a knee injury.]
 ----
+
+=== 2.16  Indentation determines scope
 
 === 2.16  Indentation determines scope
 
