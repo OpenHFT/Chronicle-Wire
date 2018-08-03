@@ -641,7 +641,7 @@ NOTE: The numbers refer to the section in the YAML 2 specification. See http://y
 |Section 2_9, `SingleDocumentWithTwoComments` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#29-single-document-with
 |Section 2_10, `NodeAppearsTwiceInThisDocument` | No |
 |Section 2_11, `MappingBetweenSequences` | No |
-|Section 2_12, `CompactNestedMapping` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#212-compact-nested-mapping
+|Section 2_12, `CompactNestedMapping` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#212-compact-nested-mapping[Section 2_12, CompactNestedMapping]
 |Section 2_13, `InLiteralsNewlinesArePreserved` | No |
 |Section 2_14, `InThefoldedScalars` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#214-in-the-folded-scalars
 |Section 2_15, `FoldedNewlines` | No |
