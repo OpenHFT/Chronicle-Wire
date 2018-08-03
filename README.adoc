@@ -633,25 +633,26 @@ NOTE: The numbers refer to the section in the YAML 2 specification. See http://y
 |Section 2_1, `SequenceOfScalars` | Yes  |
 |Section 2_2, `MappingScalarsToScalars` | Yes |
 |Section 2_3, `MappingScalarsToSequences` | Yes |
-|Section 2_4, `SequenceOfMappings` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#24--sequence-of-mappings-players-statistics[Section 2.4, Sequence of Mappings]
+|Section 2_4, `SequenceOfMappings` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#24-sequence-of-mappings-players-statistics[Section 2.4, Sequence of Mappings]
 |Section 2_5, `SequenceOfSequences` | Yes |
 |Section 2_6, `MappingOfMappings` | Yes |
 |Section 2_7, `TwoDocumentsInAStream` | No | 
 https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#27-two-documents-in-a-stream-each-with-a-leading-comment[Section 2.7, Two Documents in a Stream]
 |Section 2_8, `PlayByPlayFeed` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#28-play-by-play-feed-from-a-game[Section 2.8, Play by Play Feed from a Game]
-|Section 2_9, `SingleDocumentWithTwoComments` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#29-single-document-with
+|Section 2_9, `SingleDocumentWithTwoComments` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#29-single-document-with-two-comments[]
 |Section 2_10, `NodeAppearsTwiceInThisDocument` | No |
 |Section 2_11, `MappingBetweenSequences` | No |
-|Section 2_12, `CompactNestedMapping` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#212-compact-nested-mapping[Section 2_12, CompactNestedMapping]
+|Section 2_12, `CompactNestedMapping` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#212-compact-nested-mapping[Section 2.12, Compact Nested Mapping]
 |Section 2_13, `InLiteralsNewlinesArePreserved` | No |
-|Section 2_14, `InThefoldedScalars` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#214-in-the-folded-scalars
+|Section 2_14, `InThefoldedScalars` | No | 
+https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#214-in-the-folded-scalars-newlines-become-spaces[Section 2.14, In the folded scalars, newlines become spaces]
 |Section 2_15, `FoldedNewlines` | No |
-|Section 2_16, `IndentationDeterminesScope` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#216--indentation-determines-scope
-|Section 2_17, `QuotedScalars` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#217-quoted-scalars
-|Section 2_18, `Multi_lineFlowScalars` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#218-multi-line-flow-scalars
+|Section 2_16, `IndentationDeterminesScope` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#216-indentation-determines-scope[Section 2.16, Indentation determines scope]
+|Section 2_17, `QuotedScalars` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#217-quoted-scalars[Section 2.17, Quoted Scalars]
+|Section 2_18, `Multi_lineFlowScalars` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#218-multi-line-flow-scalars[Section 2.18, Multi-line Flow Scalars]
 |Section 2_19, `Integers` | Yes |
 |Section 2_20, `FloatingPoint` | Yes |
-|Section 2_21, `Miscellaneous` | No |   https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#221-miscellaneous
+|Section 2_21, `Miscellaneous` | No |   https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#221-miscellaneous[Section 2.21, Miscellaneous]
 |Section 2_22, `Timestamps` | Yes |
 |Section 2_23, `VariousExplicitTags` | No |
 |Section 2_24, `GlobalTags` | No |
