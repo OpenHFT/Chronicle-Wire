@@ -1,9 +1,9 @@
-= Chronicle-Wire
+= Chronicle Wire and YAML 2 
 :toc: manual
 :css-signature: demo
 :toc-placement: preamble
 
-= YAML 2 Spec Compliance
+= YAML 2 Specifiucation Compliance
 
 Chronicle wire supports a subset of the features available from the YAML 2 specification.
 This section lists those features and suggests other ways in Chronicle Wire to define the same
@@ -313,4 +313,5 @@ string: '012345'
 }
 ----
 
+'''
 https://github.com/OpenHFT/Chronicle-Wire[Back to Chronicle Wire project]
