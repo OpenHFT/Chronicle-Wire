@@ -633,11 +633,12 @@ NOTE: The numbers refer to the section in the YAML 2 specification. See http://y
 |Section 2_1, `SequenceOfScalars` | Yes  |
 |Section 2_2, `MappingScalarsToScalars` | Yes |
 |Section 2_3, `MappingScalarsToSequences` | Yes |
-|Section 2_4, `SequenceOfMappings` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#24--sequence-of-mappings-players-statistics[Section 2_4, SequenceOfMappings]
+|Section 2_4, `SequenceOfMappings` | No |  https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#24--sequence-of-mappings-players-statistics[Section 2.4, Sequence of Mappings]
 |Section 2_5, `SequenceOfSequences` | Yes |
 |Section 2_6, `MappingOfMappings` | Yes |
-|Section 2_7, `TwoDocumentsInAStream` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#27-two-documents-in-a-stream
-|Section 2_8, `PlayByPlayFeed` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#28-play-by-play-feed
+|Section 2_7, `TwoDocumentsInAStream` | No | 
+https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#27-two-documents-in-a-stream-each-with-a-leading-comment[Section 2.7, Two Documents in a Stream]
+|Section 2_8, `PlayByPlayFeed` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#28-play-by-play-feed-from-a-game[Section 2.8, Play by Play Feed from a Game]
 |Section 2_9, `SingleDocumentWithTwoComments` | No | https://github.com/OpenHFT/Chronicle-Wire/blob/master/README.adoc#29-single-document-with
 |Section 2_10, `NodeAppearsTwiceInThisDocument` | No |
 |Section 2_11, `MappingBetweenSequences` | No |
