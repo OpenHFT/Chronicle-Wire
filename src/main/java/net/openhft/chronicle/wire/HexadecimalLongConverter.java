@@ -3,7 +3,7 @@ package net.openhft.chronicle.wire;
 public class HexadecimalLongConverter implements LongConverter {
     @Override
     public long parse(CharSequence text) {
-        return Long.parseLong(text.toString(), 16);
+        return Long.parseUnsignedLong(text.toString(), 16);
     }
 
     @Override
