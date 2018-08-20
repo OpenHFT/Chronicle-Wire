@@ -123,7 +123,7 @@ public class MethodWriterTest {
         microTS.timeUS = now;
         writer.microTS(microTS);
         assertEquals("microTS: {\n" +
-                "  timeUS: \"2018-07-22T09:28:29.775811\"\n" +
+                "  timeUS: 2018-07-22T09:28:29.775811\n" +
                 "}\n" +
                 "---\n", wire.toString());
         HasMicroTS mock = createMock(HasMicroTS.class);

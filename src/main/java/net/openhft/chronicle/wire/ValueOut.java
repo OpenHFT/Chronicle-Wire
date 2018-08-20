@@ -102,6 +102,11 @@ public interface ValueOut {
     WireOut rawBytes(byte[] value);
 
     @NotNull
+    default WireOut rawText(CharSequence value) {
+        return text(value);
+    }
+
+    @NotNull
     ValueOut writeLength(long remaining);
 
     @NotNull

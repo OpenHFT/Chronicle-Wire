@@ -294,12 +294,20 @@ public class WireMarshaller<T> {
             switch (type.getName()) {
                 case "boolean":
                     return new BooleanFieldAccess(field);
-                case "byte":
-                    return new ByteFieldAccess(field);
+                case "byte": {
+                    IntConversion intConversion = field.getAnnotation(IntConversion.class);
+                    return intConversion == null
+                            ? new ByteFieldAccess(field)
+                            : new ByteIntConversionFieldAccess(field, intConversion);
+                }
                 case "char":
                     return new CharFieldAccess(field);
-                case "short":
-                    return new ShortFieldAccess(field);
+                case "short": {
+                    IntConversion intConversion = field.getAnnotation(IntConversion.class);
+                    return intConversion == null
+                            ? new ShortFieldAccess(field)
+                            : new ShortIntConversionFieldAccess(field, intConversion);
+                }
                 case "int": {
                     IntConversion intConversion = field.getAnnotation(IntConversion.class);
                     return intConversion == null
@@ -1235,6 +1243,38 @@ public class WireMarshaller<T> {
         }
     }
 
+    static class ByteIntConversionFieldAccess extends IntConversionFieldAccess {
+        public ByteIntConversionFieldAccess(@NotNull Field field, @NotNull IntConversion intConversion) {
+            super(field, intConversion);
+        }
+
+        @Override
+        protected int getInt(Object o) {
+            return UNSAFE.getByte(o, offset) & 0xFF;
+        }
+
+        @Override
+        protected void putInt(Object o, int i) {
+            UNSAFE.putByte(o, offset, (byte) i);
+        }
+    }
+
+    static class ShortIntConversionFieldAccess extends IntConversionFieldAccess {
+        public ShortIntConversionFieldAccess(@NotNull Field field, @NotNull IntConversion intConversion) {
+            super(field, intConversion);
+        }
+
+        @Override
+        protected int getInt(Object o) {
+            return UNSAFE.getShort(o, offset) & 0xFFFF;
+        }
+
+        @Override
+        protected void putInt(Object o, int i) {
+            UNSAFE.putShort(o, offset, (short) i);
+        }
+    }
+
     static class IntConversionFieldAccess extends FieldAccess {
         @NotNull
         private final IntConverter intConverter;
@@ -1247,8 +1287,12 @@ public class WireMarshaller<T> {
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             StringBuilder sb = acquireStringBuilder();
-            intConverter.append(sb, UNSAFE.getInt(o, offset));
-            write.text(sb);
+            intConverter.append(sb, getInt(o));
+            write.rawText(sb);
+        }
+
+        protected int getInt(Object o) {
+            return UNSAFE.getInt(o, offset);
         }
 
         @Override
@@ -1256,6 +1300,10 @@ public class WireMarshaller<T> {
             StringBuilder sb = acquireStringBuilder();
             read.text(sb);
             int i = intConverter.parse(sb);
+            putInt(o, i);
+        }
+
+        protected void putInt(Object o, int i) {
             UNSAFE.putInt(o, offset, i);
         }
 
@@ -1269,12 +1317,12 @@ public class WireMarshaller<T> {
 
         @Override
         protected boolean sameValue(Object o, Object o2) {
-            return UNSAFE.getInt(o, offset) == UNSAFE.getInt(o2, offset);
+            return getInt(o) == getInt(o2);
         }
 
         @Override
         protected void copy(Object from, Object to) {
-            UNSAFE.putInt(to, offset, UNSAFE.getInt(from, offset));
+            putInt(to, getInt(from));
         }
     }
 
@@ -1361,7 +1409,7 @@ public class WireMarshaller<T> {
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             StringBuilder sb = acquireStringBuilder();
             longConverter.append(sb, UNSAFE.getLong(o, offset));
-            write.text(sb);
+            write.rawText(sb);
         }
 
         @Override

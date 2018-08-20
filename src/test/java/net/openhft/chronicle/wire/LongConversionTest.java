@@ -17,13 +17,17 @@ public class LongConversionTest {
 
     @Test
     public void dto() {
+        LongHolder lh = new LongHolder();
+        lh.hex = 0XFEDCBA9876543210L;
+        lh.unsigned = Long.MIN_VALUE;
+        lh.timestamp = 0x05432108090a0bL;
         assertEquals("!LongHolder {\n" +
-                "  number: \"1234\"\n" +
-                "}\n", new LongHolder(0x1234).toString());
-        LongConversionTest.LongHolder ih = Marshallable.fromString(
-                new LongConversionTest.LongHolder(1234).toString());
-        assertEquals(1234, ih.number);
-
+                "  unsigned: 9223372036854775808,\n" +
+                "  hex: fedcba9876543210,\n" +
+                "  timestamp: 2016-12-08T08:00:31.345163\n" +
+                "}\n", lh.toString());
+        LongConversionTest.LongHolder lh2 = Marshallable.fromString(lh.toString());
+        assertEquals(lh2, lh);
     }
 
     @Test
@@ -32,7 +36,7 @@ public class LongConversionTest {
         LongConversionTest.WriteWithLong write = wire.methodWriter(LongConversionTest.WriteWithLong.class);
         assertSame(write, write.to(0x12345));
 
-        assertEquals("to: \"12345\"\n" +
+        assertEquals("to: 12345\n" +
                 "---\n", wire.toString());
 
         StringWriter sw = new StringWriter();
@@ -47,20 +51,11 @@ public class LongConversionTest {
     }
 
     static class LongHolder extends AbstractMarshallable {
+        @LongConversion(UnsignedLongConverter.class)
+        long unsigned;
         @LongConversion(HexadecimalLongConverter.class)
-        long number;
-
-        public LongHolder(long number) {
-            this.number = number;
-        }
-
-        public long number() {
-            return number;
-        }
-
-        public LongHolder number(long number) {
-            this.number = number;
-            return this;
-        }
+        long hex;
+        @LongConversion(MicroTimestampLongConverter.class)
+        long timestamp;
     }
 }

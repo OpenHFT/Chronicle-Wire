@@ -18,10 +18,17 @@ public class IntConversionTest {
     @Test
     public void dto() {
         assertEquals("!IntHolder {\n" +
-                "  number: \"1234\"\n" +
+                "  number: 1234\n" +
                 "}\n", new IntHolder(0x1234).toString());
         IntHolder ih = Marshallable.fromString(new IntHolder(1234).toString());
         assertEquals(1234, ih.number);
+
+        ih.number = 0xDEAF;
+        assertEquals("!IntHolder {\n" +
+                "  number: deaf\n" +
+                "}\n", ih.toString());
+        IntHolder ih2 = Marshallable.fromString(ih.toString());
+        assertEquals(ih2, ih);
     }
 
     @Test
@@ -30,7 +37,7 @@ public class IntConversionTest {
         WriteWithInt write = wire.methodWriter(WriteWithInt.class);
         assertSame(write, write.to(0x12345));
 
-        assertEquals("to: \"12345\"\n" +
+        assertEquals("to: 12345\n" +
                 "---\n", wire.toString());
 
         StringWriter sw = new StringWriter();
@@ -38,6 +45,22 @@ public class IntConversionTest {
         wire.methodReader(read).readOne();
 
         assertEquals("to[12345]\n", sw.toString().replaceAll("\r", ""));
+    }
+
+    @Test
+    public void unsigned() {
+        UnsignedHolder uh = new UnsignedHolder();
+        uh.u8 = -1;
+        uh.u16 = -1;
+        uh.u32 = -1;
+        assertEquals("!net.openhft.chronicle.wire.IntConversionTest$UnsignedHolder {\n" +
+                "  u8: 255,\n" +
+                "  u16: 65535,\n" +
+                "  u32: 4294967295\n" +
+                "}\n", uh.toString());
+
+        UnsignedHolder uh2 = Marshallable.fromString(uh.toString());
+        assertEquals(uh2, uh);
     }
 
     interface WriteWithInt {
@@ -60,5 +83,15 @@ public class IntConversionTest {
             this.number = number;
             return this;
         }
+    }
+
+    static class UnsignedHolder extends AbstractMarshallable {
+        @IntConversion(UnsignedIntConverter.class)
+        public byte u8;
+        @IntConversion(UnsignedIntConverter.class)
+        public short u16;
+        @IntConversion(UnsignedIntConverter.class)
+        public int u32;
+
     }
 }

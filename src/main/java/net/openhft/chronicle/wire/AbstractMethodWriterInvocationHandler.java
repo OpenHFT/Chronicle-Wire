@@ -102,7 +102,10 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
                 Object arg = args[oneParam];
                 if (bytes.retainsComments())
                     addComment(bytes, arg);
-                valueOut.object(phsw.parameterTypes[oneParam], arg);
+                if (arg != null && arg.getClass() == RawText.class)
+                    valueOut.rawText(((RawText) arg).text);
+                else
+                    valueOut.object(phsw.parameterTypes[oneParam], arg);
                 break;
             default:
                 valueOut.sequence(args, oneParam == 0 ? phsw.from0 : phsw.from1);

@@ -1204,6 +1204,18 @@ public class TextWire extends AbstractWire implements Wire {
             return wireOut();
         }
 
+        @NotNull
+        @Override
+        public WireOut rawText(CharSequence value) {
+            if (dropDefault) {
+                writeSavedEventName();
+            }
+            prependSeparator();
+            bytes.write(value);
+            elementSeparator();
+            return wireOut();
+        }
+
         private boolean isText(@Nullable BytesStore fromBytes) {
 
             if (fromBytes == null)
