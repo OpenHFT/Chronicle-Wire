@@ -20,6 +20,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesComment;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.StackTrace;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
@@ -636,7 +637,7 @@ public abstract class AbstractWire implements Wire {
             throw new IllegalStateException("Used by " + usedBy + " while trying to use it in " + Thread.currentThread(), usedHere);
         }
         this.usedBy = Thread.currentThread();
-        this.usedHere = new Throwable();
+        this.usedHere = new StackTrace();
         usedCount++;
         return true;
     }
@@ -650,7 +651,7 @@ public abstract class AbstractWire implements Wire {
             usedBy = null;
             usedHere = null;
             usedCount = 0;
-            lastEnded = new Throwable();
+            lastEnded = new StackTrace();
         }
         return true;
     }
