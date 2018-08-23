@@ -59,29 +59,29 @@ public class PrimArraysTest {
         }) {
             @NotNull final Object[] objects = {
                     new boolean[]{true, false},
-                    "test: !boolean[] [true, false]",
-                    "test: !boolean[] []",
+                    "test: !boolean[] [ true, false ]",
+                    "test: !boolean[] [ ]",
                     new byte[]{Byte.MIN_VALUE, 0, Byte.MAX_VALUE},
                     "test: !byte[] !!binary gAB/\n",
                     "test: !byte[] !!binary \n",
                     new char[]{Character.MIN_VALUE, '?', Character.MAX_VALUE},
-                    "test: !char[] [\"\\0\", \"?\", \"\\uFFFF\"]",
-                    "test: !char[] []",
+                    "test: !char[] [ \"\\0\", \"?\", \"\\uFFFF\" ]",
+                    "test: !char[] [ ]",
                     new short[]{Short.MIN_VALUE, -1, 0, 1, Short.MAX_VALUE},
-                    "test: !short[] [-32768, -1, 0, 1, 32767]",
-                    "test: !short[] []",
+                    "test: !short[] [ -32768, -1, 0, 1, 32767 ]",
+                    "test: !short[] [ ]",
                     new int[]{Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE},
-                    "test: !int[] [-2147483648, -1, 0, 1, 2147483647]",
-                    "test: !int[] []",
+                    "test: !int[] [ -2147483648, -1, 0, 1, 2147483647 ]",
+                    "test: !int[] [ ]",
                     new long[]{Long.MIN_VALUE, -1, 0, 1, Long.MAX_VALUE},
-                    "test: !long[] [-9223372036854775808, -1, 0, 1, 9223372036854775807]",
-                    "test: !long[] []",
+                    "test: !long[] [ -9223372036854775808, -1, 0, 1, 9223372036854775807 ]",
+                    "test: !long[] [ ]",
                     new float[]{Float.MIN_VALUE, -1, 0, 1, Float.MAX_VALUE},
-                    "test: !float[] [1.4E-45, -1.0, 0.0, 1.0, 3.4028235E38]",
-                    "test: !float[] []",
+                    "test: !float[] [ 1.4E-45, -1.0, 0.0, 1.0, 3.4028235E38 ]",
+                    "test: !float[] [ ]",
                     new double[]{Double.MIN_VALUE, -1, 0, 1, Double.MAX_VALUE},
-                    "test: !double[] [4.9E-324, -1.0, 0.0, 1.0, 1.7976931348623157E308]",
-                    "test: !double[] []"
+                    "test: !double[] [ 4.9E-324, -1.0, 0.0, 1.0, 1.7976931348623157E308 ]",
+                    "test: !double[] [ ]"
             };
             for (int i = 0; i < objects.length; i += 3) {
                 Object array = objects[i];

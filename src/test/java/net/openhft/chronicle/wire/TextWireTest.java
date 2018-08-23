@@ -1156,8 +1156,7 @@ public class TextWireTest {
         @NotNull Object[] noObjects = {};
         wire.write("a").object(noObjects);
 
-        assertEquals("a: [\n" +
-                "]", wire.toString());
+        assertEquals("a: []", wire.toString());
 
         @Nullable Object[] object = wire.read().object(Object[].class);
         assertEquals(0, object.length);
@@ -1730,6 +1729,28 @@ public class TextWireTest {
     }
 
     @Test
+    public void testArrayTypes1() {
+        Wire wire = createWire();
+        wire.bytes().append("a: !type [B;, b: !type String[], c: hi");
+
+        assertEquals(String[].class, wire.read("b").typeLiteral());
+        assertEquals(byte[].class, wire.read("a").typeLiteral());
+        assertEquals("hi", wire.read("c").text());
+    }
+
+    @Test
+    @Ignore("see #102")
+    public void testArrayTypes2() {
+        Wire wire = createWire();
+        wire.bytes().append("a: [ !type byte[] ], b: !type String[], c: hi");
+
+        assertEquals(String[].class, wire.read("b").typeLiteral());
+        Collection<Class> classes = wire.read("a").typedMarshallable();
+        assertArrayEquals(new Class[] {byte[].class}, classes.toArray());
+        assertEquals("hi", wire.read("c").text());
+    }
+
+    @Test
     public void readMarshallableAsEnum() {
         Wire wire = createWire();
         ClassAliasPool.CLASS_ALIASES.addAlias(TWTSingleton.class);
@@ -1753,8 +1774,8 @@ public class TextWireTest {
         assertEquals("hello: {\n" +
                 "  list: [\n" +
                 "    { name: none },\n" +
-                "    { name: one, timeUnits: [DAYS]},\n" +
-                "    { name: two, timeUnits: [HOURS, DAYS]}\n" +
+                "    { name: one, timeUnits: [ DAYS ]},\n" +
+                "    { name: two, timeUnits: [ HOURS, DAYS ]}\n" +
                 "  ]\n" +
                 "}\n", wire.toString());
 

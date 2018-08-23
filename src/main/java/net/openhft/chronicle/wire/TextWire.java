@@ -1713,7 +1713,9 @@ public class TextWire extends AbstractWire implements Wire {
             boolean leaf = this.leaf;
             if (!leaf)
                 newLine();
-            long pos = bytes.readPosition();
+            else
+                bytes.writeUnsignedByte(' ');
+            long pos = bytes.writePosition();
             writer.accept(t, this);
             if (!leaf)
                 addNewLine(pos);
@@ -1721,7 +1723,9 @@ public class TextWire extends AbstractWire implements Wire {
             popState();
             if (!leaf)
                 indent();
-            endBlock(leaf, ']');
+            else
+                addSpace(pos);
+            endBlock(this.leaf, ']');
             return wireOut();
         }
 
@@ -1757,13 +1761,13 @@ public class TextWire extends AbstractWire implements Wire {
             popState();
             if (!leaf)
                 indent();
-            endBlock(leaf, ']');
+            endBlock(this.leaf, ']');
             return wireOut();
         }
 
         public void endBlock(boolean leaf, char c) {
             bytes.writeUnsignedByte(c);
-            sep = this.leaf ? COMMA_SPACE : COMMA_NEW_LINE;
+            sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
         }
 
         protected void addNewLine(long pos) {

@@ -50,7 +50,7 @@ public class DefaultMarshallerTest {
 
         assertEquals("!net.openhft.chronicle.wire.DefaultMarshallerTest$DMOuterClassWithEmbeddedArray {\n" +
                 "  str: words,\n" +
-                "  enums: [ONE, TWO, THREE]\n" +
+                "  enums: [ ONE, TWO, THREE ]\n" +
                 "}\n", oc.toString());
 
         @NotNull Wire text = new TextWire(Bytes.elasticHeapByteBuffer(128));

@@ -49,12 +49,11 @@ public class EnumSetMarshallingTest {
     private static final String EMPTY_SET_SERIALISED_FORM =
             "--- !!data #binary\n" +
                     "key: {\n" +
-                    "  f: [\n" +
-                    "  ]\n" +
+                    "  f: [  ]\n" +
                     "}\n";
 
     @Test
-    public void shouldMarshallEmptySet() throws Exception {
+    public void shouldMarshallEmptySet() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         final Foo written = new Foo(EnumSet.noneOf(Thread.State.class));
         final Foo read = new Foo(EnumSet.allOf(Thread.State.class));
