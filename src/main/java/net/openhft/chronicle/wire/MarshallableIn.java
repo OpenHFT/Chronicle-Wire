@@ -153,7 +153,7 @@ public interface MarshallableIn {
      */
     @NotNull
     default MethodReader methodReader(Object... objects) {
-        return new VanillaMethodReader(this, false, VanillaMethodReaderBuilder.createDefaultParselet(), null, objects);
+        return new VanillaMethodReader(this, false, VanillaMethodReaderBuilder.createDefaultParselet(false), null, objects);
     }
 
     @NotNull

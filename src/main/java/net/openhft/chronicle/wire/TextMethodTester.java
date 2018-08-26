@@ -34,6 +34,7 @@ public class TextMethodTester<T> {
     private String[] retainLast;
     private MethodWriterListener methodWriterListener;
     private MethodReaderInterceptor methodReaderInterceptor;
+    private long timeoutMS = 25;
 
     public TextMethodTester(String input, Function<T, Object> componentFunction, Class<T> outputClass, String output) {
         this.input = input;
@@ -111,6 +112,7 @@ public class TextMethodTester<T> {
 
             MethodReader reader0 = wire0.methodReaderBuilder()
                     .methodReaderInterceptor(methodReaderInterceptor)
+                    .warnMissing(true)
                     .build(components);
             while (reader0.readOne()) {
                 wire2.bytes().clear();
@@ -148,6 +150,7 @@ public class TextMethodTester<T> {
         }
         MethodReader reader = wire.methodReaderBuilder()
                 .methodReaderInterceptor(methodReaderInterceptor)
+                .warnMissing(true)
                 .build(components);
         if (exceptionHandlerSetup != null)
             exceptionHandlerSetup.accept(reader, writer);
@@ -185,6 +188,14 @@ public class TextMethodTester<T> {
             TextMethodWriterInvocationHandler.ENABLE_EOD = true;
         }
         actual = wire2.toString().trim();
+        long start = System.currentTimeMillis();
+        while (System.currentTimeMillis() < start + timeoutMS) {
+            if (actual.length() < expected.length())
+                Jvm.pause(25);
+            else
+                break;
+            actual = wire2.toString().trim();
+        }
         if (afterRun != null) {
             expected = afterRun.apply(expected);
             actual = afterRun.apply(actual);
@@ -219,6 +230,11 @@ public class TextMethodTester<T> {
 
     public TextMethodTester<T> methodReaderInterceptor(MethodReaderInterceptor methodReaderInterceptor) {
         this.methodReaderInterceptor = methodReaderInterceptor;
+        return this;
+    }
+
+    public TextMethodTester<T> timeoutMS(long timeoutMS) {
+        this.timeoutMS = timeoutMS;
         return this;
     }
 

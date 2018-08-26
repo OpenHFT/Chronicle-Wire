@@ -551,6 +551,8 @@ public interface ValueOut {
                 valueOut.swapLeaf(wasLeaf);
                 return wireOut();
 
+            case "net.openhft.chronicle.wire.RawText":
+                return rawText(((RawText) value).text);
             case "java.lang.String":
                 return text((String) value);
             case "java.lang.Byte":

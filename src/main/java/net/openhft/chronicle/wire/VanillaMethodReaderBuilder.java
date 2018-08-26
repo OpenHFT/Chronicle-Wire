@@ -10,8 +10,9 @@ import org.jetbrains.annotations.NotNull;
  */
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private final MarshallableIn in;
+    private boolean warnMissing = false;
     private boolean ignoreDefaults;
-    private WireParselet defaultParselet = createDefaultParselet();
+    private WireParselet defaultParselet;
     private MethodReaderInterceptor methodReaderInterceptor;
 
     public VanillaMethodReaderBuilder(MarshallableIn in) {
@@ -21,12 +22,12 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     // TODO add support for filtering.
 
     @NotNull
-    public static WireParselet createDefaultParselet() {
+    public static WireParselet createDefaultParselet(boolean warnMissing) {
         return (s, v) -> {
             MessageHistory history = MessageHistory.get();
             long sourceIndex = history.lastSourceIndex();
             v.skipValue();
-            if (s.length() == 0)
+            if (s.length() == 0 || warnMissing)
                 VanillaMethodReader.LOGGER.warn(errorMsg(s, history, sourceIndex));
             else if (VanillaMethodReader.LOGGER.isDebugEnabled())
                 VanillaMethodReader.LOGGER.debug(errorMsg(s, history, sourceIndex));
@@ -65,8 +66,20 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         return this;
     }
 
+    public boolean warnMissing() {
+        return warnMissing;
+    }
+
+    public VanillaMethodReaderBuilder warnMissing(boolean warnMissing) {
+        this.warnMissing = warnMissing;
+        return this;
+    }
+
     @NotNull
     public MethodReader build(Object... impls) {
+        WireParselet defaultParselet = this.defaultParselet;
+        if (defaultParselet == null)
+            defaultParselet = createDefaultParselet(warnMissing);
         return new VanillaMethodReader(in, ignoreDefaults, defaultParselet, methodReaderInterceptor, impls);
     }
 }
