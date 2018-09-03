@@ -14,8 +14,7 @@ public class TextWireAgitatorTest {
             throw new IORuntimeException("Only fails this way on Windows");
         TextWireTest.MyDto myDto = Marshallable.fromString("!" + TextWireTest.MyDto.class.getName() + " { }");
         assertEquals("!net.openhft.chronicle.wire.TextWireTest$MyDto {\n" +
-                "  strings: [\n" +
-                "  ]\n" +
+                "  strings: [  ]\n" +
                 "}\n", myDto.toString());
 
         TextWireTest.MyDto myDto2 = Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }");
