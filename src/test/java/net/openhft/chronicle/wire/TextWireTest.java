@@ -59,6 +59,14 @@ public class TextWireTest {
     Bytes bytes;
 
     @Test
+    public void comment() {
+        @NotNull Wire wire = createWire();
+        wire.writeComment("\thi: omg");
+        wire.write("hi").text("there");
+        assertEquals("there", wire.read("hi").text());
+    }
+
+    @Test
     public void testTypeInsteadOfField() {
         Wire wire = new TextWire(Bytes.from("!!null \"\""));
         StringBuilder sb = new StringBuilder();

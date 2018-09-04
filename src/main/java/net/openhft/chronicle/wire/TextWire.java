@@ -535,7 +535,7 @@ public class TextWire extends AbstractWire implements Wire {
             int codePoint = peekCode();
             if (codePoint == '#') {
                 //noinspection StatementWithEmptyBody
-                while (readCode() >= ' ') ;
+                while (notNewLine(readCode())) ;
                 this.lineStart = bytes.readPosition();
             } else if (codePoint == ',') {
                 if (commas-- <= 0)
@@ -551,6 +551,10 @@ public class TextWire extends AbstractWire implements Wire {
                 break;
             }
         }
+    }
+
+    private boolean notNewLine(int readCode) {
+        return readCode >= 0 && readCode != '\r' && readCode != '\n';
     }
 
     protected void consumeDocumentStart() {
