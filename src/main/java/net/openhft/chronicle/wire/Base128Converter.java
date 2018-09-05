@@ -1,7 +1,9 @@
 package net.openhft.chronicle.wire;
 
-public enum Base128Converter implements LongConverter {
-    INSTANCE;
+import net.openhft.chronicle.core.util.StringUtils;
+
+public class Base128Converter implements LongConverter {
+    public static final Base128Converter INSTANCE = new Base128Converter();
 
     @Override
     public long parse(CharSequence text) {
@@ -18,12 +20,6 @@ public enum Base128Converter implements LongConverter {
             text.append((char) (value & 0x7F));
             value >>>= 7;
         }
-        int end = text.length() - 1;
-        int mid = (start + end + 1) / 2;
-        for (int i = 0; i < mid - start; i++) {
-            char ch = text.charAt(start + i);
-            text.setCharAt(start + i, text.charAt(end - i));
-            text.setCharAt(end - i, ch);
-        }
+        StringUtils.reverse(text, start);
     }
 }
