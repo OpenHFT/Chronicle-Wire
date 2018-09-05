@@ -2,8 +2,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.util.StringUtils;
 
-public class Base128Converter implements LongConverter {
-    public static final Base128Converter INSTANCE = new Base128Converter();
+public class Base128LongConverter implements LongConverter {
+    public static final Base128LongConverter INSTANCE = new Base128LongConverter();
 
     @Override
     public long parse(CharSequence text) {
@@ -16,7 +16,7 @@ public class Base128Converter implements LongConverter {
     @Override
     public void append(StringBuilder text, long value) {
         int start = text.length();
-        while (value > 0) {
+        while (value != 0) {
             text.append((char) (value & 0x7F));
             value >>>= 7;
         }

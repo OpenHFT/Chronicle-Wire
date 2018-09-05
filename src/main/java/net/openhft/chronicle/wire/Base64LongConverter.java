@@ -4,9 +4,9 @@ import net.openhft.chronicle.core.util.StringUtils;
 
 import java.util.Arrays;
 
-public class Base64Converter implements LongConverter {
-    public static final Base64Converter INSTANCE = new Base64Converter();
-    static final char[] CODES = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuv0123456789+".toCharArray();
+public class Base64LongConverter implements LongConverter {
+    public static final Base64LongConverter INSTANCE = new Base64LongConverter();
+    static final char[] CODES = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+".toCharArray();
     static final byte[] LOOKUP = new byte[128];
 
     static {
@@ -31,7 +31,7 @@ public class Base64Converter implements LongConverter {
     @Override
     public void append(StringBuilder text, long value) {
         int start = text.length();
-        while (value > 0) {
+        while (value != 0) {
             text.append(CODES[(int) (value & 0x3F)]);
             value >>>= 6;
         }
