@@ -8,6 +8,7 @@ public class Base95LongConverter implements LongConverter {
     public static final Base95LongConverter INSTANCE = new Base95LongConverter();
     private static final int BASE = 95;
     private static final BigInteger BASE_BI = BigInteger.valueOf(BASE);
+    private static final BigInteger TWO_TO_64 = BigInteger.ONE.shiftLeft(64);
 
     @Override
     public long parse(CharSequence text) {
@@ -21,7 +22,7 @@ public class Base95LongConverter implements LongConverter {
     public void append(StringBuilder text, long value) {
         int start = text.length();
         if (value < 0) {
-            BigInteger bi = BigInteger.valueOf(value).add(BigInteger.ONE.shiftLeft(64));
+            BigInteger bi = BigInteger.valueOf(value).add(TWO_TO_64);
             int v = bi.mod(BASE_BI).intValueExact();
             value = bi.divide(BASE_BI).longValueExact();
             text.append((char) (' ' + v - 1));
