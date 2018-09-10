@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.ReadBytesMarshallable;
-import net.openhft.chronicle.bytes.StopCharTesters;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -85,6 +84,8 @@ public interface MarshallableIn {
         return true;
     }
 
+    int MARSHALLABLE_IN_INTERN_SIZE = Integer.getInteger("marshallableIn.intern.size", 128);
+
     /**
      * Read the next message as a String
      *
@@ -97,10 +98,10 @@ public interface MarshallableIn {
                 return null;
             }
             StringBuilder sb = Wires.acquireStringBuilder();
-            dc.wire().bytes().parse8bit(sb, StopCharTesters.ALL);
-            while (sb.length() > 0 && sb.charAt(sb.length() - 1) == 0)
-                sb.setLength(sb.length() - 1);
-            return WireInternal.INTERNER.intern(sb);
+            dc.wire().getValueIn().text(sb);
+            return sb.length() < MARSHALLABLE_IN_INTERN_SIZE
+                    ? WireInternal.INTERNER.intern(sb)
+                    : sb.toString();
         }
     }
 
@@ -116,7 +117,7 @@ public interface MarshallableIn {
                 sb.setLength(0);
                 return false;
             }
-            dc.wire().bytes().parse8bit(sb, StopCharTesters.ALL);
+            dc.wire().getValueIn().text(sb);
         }
         return true;
     }

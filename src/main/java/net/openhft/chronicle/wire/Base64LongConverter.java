@@ -1,10 +1,12 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.util.StringUtils;
+
 import java.util.Arrays;
 
-public enum Base64Converter implements LongConverter {
-    INSTANCE;
-    static final char[] CODES = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuv0123456789+".toCharArray();
+public class Base64LongConverter implements LongConverter {
+    public static final Base64LongConverter INSTANCE = new Base64LongConverter();
+    static final char[] CODES = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+".toCharArray();
     static final byte[] LOOKUP = new byte[128];
 
     static {
@@ -29,16 +31,10 @@ public enum Base64Converter implements LongConverter {
     @Override
     public void append(StringBuilder text, long value) {
         int start = text.length();
-        while (value > 0) {
+        while (value != 0) {
             text.append(CODES[(int) (value & 0x3F)]);
             value >>>= 6;
         }
-        int end = text.length() - 1;
-        int mid = (start + end + 1) / 2;
-        for (int i = 0; i < mid - start; i++) {
-            char ch = text.charAt(start + i);
-            text.setCharAt(start + i, text.charAt(end - i));
-            text.setCharAt(end - i, ch);
-        }
+        StringUtils.reverse(text, start);
     }
 }

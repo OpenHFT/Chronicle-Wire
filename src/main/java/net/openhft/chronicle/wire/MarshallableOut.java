@@ -138,7 +138,7 @@ public interface MarshallableOut {
     default void writeText(@NotNull CharSequence text) throws UnrecoverableTimeoutException {
         @NotNull DocumentContext dc = writingDocument();
         try {
-            dc.wire().bytes().append8bit(text);
+            dc.wire().getValueOut().text(text);
         } catch (Throwable t) {
             dc.rollbackOnClose();
             Jvm.rethrow(t);
