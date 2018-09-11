@@ -533,6 +533,9 @@ public abstract class AbstractWire implements Wire {
     }
 
     private void checkNoDataAfterEnd(long pos) {
+        // can't do this check without jumping back.
+        if (!bytes.inside(pos, 4))
+            return;
         if (pos <= bytes.realCapacity() - 4) {
             final int value = bytes.bytesStore().readVolatileInt(pos);
             if (value != 0) {

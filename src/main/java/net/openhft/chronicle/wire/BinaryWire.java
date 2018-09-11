@@ -1167,6 +1167,11 @@ public class BinaryWire extends AbstractWire implements Wire {
             case BinaryWireHighCode.STR1:
                 return getStringBuilder(code, sb);
 
+            case BinaryWireHighCode.FIELD0:
+            case BinaryWireHighCode.FIELD1:
+                readField(Wires.acquireStringBuilder(), "", code);
+                AppendableUtil.setLength(sb, 0);
+                return readText(peekCode(), sb);
             default:
                 throw new UnsupportedOperationException("code=0x" + String.format("%02X ", code).trim());
         }
