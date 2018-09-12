@@ -35,6 +35,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     protected boolean present, notComplete;
     protected long readPosition, readLimit;
     private boolean metaData;
+    private boolean rollback;
 
     public BinaryReadDocumentContext(@Nullable Wire wire) {
         this(wire, wire != null && wire.getValueIn() instanceof BinaryWire.DeltaValueIn);
@@ -75,6 +76,10 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     @Override
     public Wire wire() {
         return wire;
+    }
+
+    protected boolean rollback() {
+        return rollback;
     }
 
     @Override
@@ -123,6 +128,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
 
     @Override
     public void start() {
+        rollback = false;
         wire.getValueOut().resetBetweenDocuments();
         readPosition = readLimit = -1;
         @NotNull final Bytes<?> bytes = wire.bytes();
@@ -172,6 +178,11 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     @Override
     public boolean isNotComplete() {
         return notComplete;
+    }
+
+    @Override
+    public void rollbackOnClose() {
+        rollback = true;
     }
 
     public void setStart(long start) {
