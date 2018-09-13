@@ -212,7 +212,8 @@ public interface MarshallableOut {
     }
 
     enum Padding {
-        ALWAYS("always pads to cache lines"),
+        WORD("align to every word"),
+        CACHE_LINE("always pads to cache lines"),
         NEVER("never adds padding"),
         SMART("adds padding to ensure new wire headers dont straggle cache lines, where " +
                 "possible to " +
@@ -221,9 +222,10 @@ public interface MarshallableOut {
                 "breaking the" +
                 "existing " +
                 "message format specification");
+        @Deprecated
+        public static final Padding ALWAYS = CACHE_LINE;
 
         Padding(String comment) {
-
         }
     }
 }
