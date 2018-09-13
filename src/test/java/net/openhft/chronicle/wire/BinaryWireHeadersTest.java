@@ -51,6 +51,7 @@ public class BinaryWireHeadersTest {
         assertEquals(0, wire.headerNumber());
         assertTrue(wire.writeFirstHeader());
         wire.getValueOut().text("my header");
+        wire.writeAlignTo(4, 0);
 
         wire.updateFirstHeader();
         assertEquals(0, wire.headerNumber()); // meta data doesn't count.
@@ -59,12 +60,14 @@ public class BinaryWireHeadersTest {
             long position = wire2.writeHeader(1, TimeUnit.MILLISECONDS, null, null);
             assertEquals(i, wire2.headerNumber());
             wire2.getValueOut().text("hello world");
+            wire2.writeAlignTo(4, 0);
             wire2.updateHeader(position, false);
         }
         assertEquals(4, wire2.headerNumber());
         {
             long position = wire2.writeHeader(1, TimeUnit.MILLISECONDS, null, null);
             wire2.getValueOut().text("hello world");
+            wire2.writeAlignTo(4, 0);
             wire2.updateHeader(position, true); // meta data doesn't count.
             assertEquals(4, wire2.headerNumber());
         }
