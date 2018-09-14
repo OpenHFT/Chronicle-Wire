@@ -65,7 +65,9 @@ public class VanillaMethodWriterBuilderTest {
         id.method3(1234567890L);
         id.method4(new MWB2("world", 123, 3.456));
 
-        return bytes.toHexString();
+        String s = bytes.toHexString();
+        bytes.release();
+        return s;
     }
 
     interface WithMethodId {
