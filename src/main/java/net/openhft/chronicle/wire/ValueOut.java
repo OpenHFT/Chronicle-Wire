@@ -652,6 +652,12 @@ public interface ValueOut {
             return typedMarshallable((Serializable) value);
         } else if (value instanceof ByteBuffer) {
             return object(BytesStore.wrap((ByteBuffer) value));
+        } else if (value instanceof LongValue) {
+            LongValue value2 = (LongValue) value;
+            return int64forBinding(value2.getValue(), value2);
+        } else if (value instanceof IntValue) {
+            IntValue value2 = (IntValue) value;
+            return int32forBinding(value2.getValue(), value2);
         } else {
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +

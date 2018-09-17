@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -60,6 +61,7 @@ public final class BinaryWireStringInternerTest {
     @Test
     public void shouldInternExistingStrings() {
         for (int i = 0; i < 5; i++) {
+            wire.clear();
             final int dataPointIndex = random.nextInt(DATA_SET_SIZE);
             wire.getFixedBinaryValueOut(true).text(testData[dataPointIndex]);
 
@@ -77,7 +79,7 @@ public final class BinaryWireStringInternerTest {
 
         final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < (Jvm.isArm() ? 12 : 200); i++) {
             executorService.submit(new BinaryTextReaderWriter(capturedExceptions::add, () -> BinaryWire.binaryOnly(Bytes.elasticHeapByteBuffer(4096))));
         }
 

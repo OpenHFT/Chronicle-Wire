@@ -106,8 +106,8 @@ public enum WireInternal {
 //            if (position1 < position)
 //                System.out.println("Message truncated from " + position + " to " + position1);
             int length = metaDataBit | toIntU30(position1 - position - 4, "Document length %,d out of 30-bit int range.");
-            if (!bytes.compareAndSwapInt(position, len0, length | (notComplete ? Wires.NOT_COMPLETE : 0)))
-                throw new IllegalStateException("This wire was altered by more than one thread.");
+            bytes.testAndSetInt(position, len0, length | (notComplete ? Wires.NOT_COMPLETE : 0));
+
         } finally {
             assert wireOut.endUse();
         }

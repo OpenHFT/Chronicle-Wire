@@ -121,7 +121,8 @@ public interface WireOut extends WireCommon, MarshallableOut {
 
     @NotNull
     default WireOut writeAlignTo(int alignment, int plus) {
-        long mod = (bytes().writePosition() + plus) % alignment;
+        assert Integer.bitCount(alignment) == 1;
+        long mod = (bytes().writePosition() + plus) & (alignment - 1);
         if (mod != 0)
             addPadding((int) (alignment - mod));
         return this;
@@ -135,7 +136,6 @@ public interface WireOut extends WireCommon, MarshallableOut {
 
     /**
      * This will increment the headerNumber as appropriate if successful
-     *
      */
     default void writeDocument(boolean metaData, @NotNull WriteMarshallable writer) {
         WireInternal.writeData(this, metaData, false, writer);

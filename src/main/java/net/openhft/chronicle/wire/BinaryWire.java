@@ -1167,6 +1167,11 @@ public class BinaryWire extends AbstractWire implements Wire {
             case BinaryWireHighCode.STR1:
                 return getStringBuilder(code, sb);
 
+            case BinaryWireHighCode.FIELD0:
+            case BinaryWireHighCode.FIELD1:
+                readField(Wires.acquireStringBuilder(), "", code);
+                AppendableUtil.setLength(sb, 0);
+                return readText(peekCode(), sb);
             default:
                 throw new UnsupportedOperationException("code=0x" + String.format("%02X ", code).trim());
         }
@@ -1635,9 +1640,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int32forBinding(int value) {
-            int fromEndOfCacheLine = (int) ((-bytes.readPosition() - 1) & 63);
-            if (fromEndOfCacheLine < 4)
-                addPadding(fromEndOfCacheLine - 1);
+            writeAlignTo(Integer.BYTES, 1);
             fixedInt32(value);
             return BinaryWire.this;
         }
@@ -1645,9 +1648,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int64forBinding(long value) {
-            int fromEndOfCacheLine = (int) ((-bytes.readPosition() - 1) & 63);
-            if (fromEndOfCacheLine < 8)
-                addPadding(fromEndOfCacheLine);
+            writeAlignTo(Long.BYTES, 1);
             fixedOrderedInt64(value);
             return BinaryWire.this;
         }

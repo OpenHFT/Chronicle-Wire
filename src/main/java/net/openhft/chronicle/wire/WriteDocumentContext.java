@@ -64,9 +64,7 @@ public class WriteDocumentContext implements DocumentContext {
         if (length0 > Integer.MAX_VALUE && bytes instanceof HexDumpBytes)
             length0 = (int) length0;
         int length = metaDataBit | toIntU30(length0, "Document length %,d out of 30-bit int range.");
-        if (!bytes.compareAndSwapInt(position, tmpHeader, length))
-            throw new IllegalStateException("Header at " + position + " overwritten with " + Integer.toHexString(bytes.readInt(position)));
-
+        bytes.testAndSetInt(position, tmpHeader, length);
     }
 
     @Override
