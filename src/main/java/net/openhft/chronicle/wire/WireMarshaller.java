@@ -114,7 +114,7 @@ public class WireMarshaller<T> {
                 Jvm.warn().on(WireMarshaller.class, "Found this$0, in " + clazz + " which will be ignored!");
                 continue;
             }
-            field.setAccessible(true);
+            Jvm.setAccessible(field);
             map.put(name, field);
         }
     }
