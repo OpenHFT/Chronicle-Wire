@@ -24,6 +24,8 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -332,6 +334,10 @@ public class WireMarshaller<T> {
                     return new BytesFieldAccess(field);
                 default:
                     @Nullable Boolean isLeaf = null;
+                    if (IntValue.class.isAssignableFrom(type))
+                        return new IntValueAccess(field);
+                    if (LongValue.class.isAssignableFrom(type))
+                        return new LongValueAccess(field);
                     if (WireMarshaller.class.isAssignableFrom(type))
                         isLeaf = WIRE_MARSHALLER_CL.get(type).isLeaf;
                     else if (isCollection(type))
@@ -405,6 +411,58 @@ public class WireMarshaller<T> {
             } catch (IllegalAccessException e) {
                 return false;
             }
+        }
+    }
+
+    static class IntValueAccess extends FieldAccess {
+        IntValueAccess(@NotNull Field field) {
+            super(field);
+        }
+
+        @Override
+        protected void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException {
+            IntValue f = (IntValue) field.get(o);
+            int value = f == null ? 0 : f.getValue();
+            write.int32forBinding(value);
+        }
+
+        @Override
+        protected void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException {
+            IntValue f = (IntValue) field.get(o);
+            if (f == null)
+                f = read.wireIn().newIntReference();
+            read.int32(f);
+        }
+
+        @Override
+        public void getAsBytes(Object o, Bytes bytes) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    static class LongValueAccess extends FieldAccess {
+        LongValueAccess(@NotNull Field field) {
+            super(field);
+        }
+
+        @Override
+        protected void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException {
+            LongValue f = (LongValue) field.get(o);
+            long value = f == null ? 0 : f.getValue();
+            write.int64forBinding(value);
+        }
+
+        @Override
+        protected void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException {
+            LongValue f = (LongValue) field.get(o);
+            if (f == null)
+                f = read.wireIn().newLongReference();
+            read.int64(f);
+        }
+
+        @Override
+        public void getAsBytes(Object o, Bytes bytes) {
+            throw new UnsupportedOperationException();
         }
     }
 

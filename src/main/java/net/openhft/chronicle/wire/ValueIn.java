@@ -227,8 +227,16 @@ public interface ValueIn {
     WireIn bool(@NotNull BooleanValue ret);
 
     @NotNull
+    @Deprecated
     default IntValue int32ForBinding(@Nullable LongValue value) {
         @NotNull IntValue ret = wireIn().newIntReference();
+        int32(ret);
+        return ret;
+    }
+
+    @NotNull
+    default IntValue int32ForBinding(@Nullable IntValue value) {
+        @NotNull IntValue ret = value == null ? wireIn().newIntReference() : value;
         int32(ret);
         return ret;
     }
