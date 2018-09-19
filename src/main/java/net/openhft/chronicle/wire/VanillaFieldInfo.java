@@ -171,7 +171,7 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
     public Field getField() throws NoSuchFieldException {
         if (field == null) {
             field = parent.getDeclaredField(name);
-            field.setAccessible(true);
+            Jvm.setAccessible(field);
         }
         return field;
     }

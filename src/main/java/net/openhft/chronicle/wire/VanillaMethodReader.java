@@ -201,7 +201,7 @@ public class VanillaMethodReader implements MethodReader {
 
     // one arg
     public void addParseletForMethod(Object o, @NotNull Method m, Class<?> parameterType) {
-        m.setAccessible(true); // turn of security check to make a little faster
+        Jvm.setAccessible(m); // turn of security check to make a little faster
         String name = m.getName();
         if (parameterType == long.class) {
             try {
@@ -232,7 +232,7 @@ public class VanillaMethodReader implements MethodReader {
             ReadMarshallable arg;
             try {
                 Constructor constructor = parameterType.getDeclaredConstructor();
-                constructor.setAccessible(true);
+                Jvm.setAccessible(constructor);
                 arg = (ReadMarshallable) constructor.newInstance();
             } catch (Exception e) {
                 try {
@@ -259,7 +259,7 @@ public class VanillaMethodReader implements MethodReader {
 
     // no args
     public void addParseletForMethod(Object o, @NotNull Method m) {
-        m.setAccessible(true); // turn of security check to make a little faster
+        Jvm.setAccessible(m); // turn of security check to make a little faster
         String name = m.getName();
         MethodWireKey key = createWireKey(m, name);
         wireParser.registerOnce(key, (s, v) -> {
@@ -285,7 +285,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     public void addParseletForMethod(Object o, @NotNull Method m, @NotNull Class[] parameterTypes) {
-        m.setAccessible(true); // turn of security check to make a little faster
+        Jvm.setAccessible(m); // turn of security check to make a little faster
         @NotNull Object[] args = new Object[parameterTypes.length];
         @NotNull BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
             int i = 0;
@@ -319,7 +319,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     public void addParseletForMethod(Object o, @NotNull Method m, @NotNull Class[] parameterTypes, MethodFilterOnFirstArg methodFilterOnFirstArg) {
-        m.setAccessible(true); // turn of security check to make a little faster
+        Jvm.setAccessible(m); // turn off security check to make a little faster
         @NotNull Object[] args = new Object[parameterTypes.length];
         @NotNull BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
             int i = 0;

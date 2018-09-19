@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,7 +39,7 @@ public interface Demarshallable {
                 @NotNull Constructor<Demarshallable> declaredConstructor =
                         (Constructor<Demarshallable>)
                                 type.getDeclaredConstructor(WireIn.class);
-                declaredConstructor.setAccessible(true);
+                Jvm.setAccessible(declaredConstructor);
                 return declaredConstructor;
             } catch (NoSuchMethodException e) {
                 throw new AssertionError(e);

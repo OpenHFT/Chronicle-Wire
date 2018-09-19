@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,7 +50,7 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
     public static <Lambda> void write(@NotNull Lambda lambda, @NotNull ValueOut valueOut) {
         try {
             Method writeReplace = lambda.getClass().getDeclaredMethod("writeReplace");
-            writeReplace.setAccessible(true);
+            Jvm.setAccessible(writeReplace);
             @NotNull SerializedLambda sl = (SerializedLambda) writeReplace.invoke(lambda);
 /*
                 public SerializedLambda(Class<?> capturingClass,
@@ -111,9 +112,9 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
                 implMethodKind, implClass, implMethodName, implMethodSignature,
                 instantiatedMethodType, capturedArgs.toArray());
         try {
-            Method readReplace = SerializedLambda.class.getDeclaredMethod("readResolve");
-            readReplace.setAccessible(true);
-            return readReplace.invoke(sl);
+            Method readResolve = SerializedLambda.class.getDeclaredMethod("readResolve");
+            Jvm.setAccessible(readResolve);
+            return readResolve.invoke(sl);
         } catch (Exception e) {
             throw new AssertionError(e);
         }
