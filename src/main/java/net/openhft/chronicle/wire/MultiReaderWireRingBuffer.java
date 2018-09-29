@@ -11,13 +11,15 @@ import java.nio.BufferOverflowException;
  */
 public interface MultiReaderWireRingBuffer extends MultiReaderBytesRingBuffer {
 
+    @NotNull
     default DocumentContext writingDocument() throws UnrecoverableTimeoutException {
         return writingDocument(false);
     }
 
+    @NotNull
     DocumentContext writingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
-    void endRead(@NotNull long next) throws BufferOverflowException;
+    void endRead(long next) throws BufferOverflowException;
 
     @NotNull
     RingBufferReader createReader();
