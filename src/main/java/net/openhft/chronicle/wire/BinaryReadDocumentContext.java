@@ -124,6 +124,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         }
 
         present = false;
+        rollback = false;
     }
 
     @Override
