@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.ref.BinaryIntReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.bytes.ref.LongReference;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -50,7 +51,7 @@ public class LongValueBitSet implements Marshallable {
     /**
      * The number of words in the logical size of this BitSet.
      */
-    private transient int wordsInUse = 0;
+    private BinaryIntReference wordsInUse = new BinaryIntReference();
 
     /**
      * Whether the size of "words" is user-specified.  If so, we assume
@@ -72,34 +73,37 @@ public class LongValueBitSet implements Marshallable {
      * Every public method must preserve these invariants.
      */
     private void checkInvariants() {
-        assert (wordsInUse == 0 || words[wordsInUse - 1].getValue() != 0);
-        assert (wordsInUse >= 0 && wordsInUse <= words.length);
-        assert (wordsInUse == words.length || words[wordsInUse].getValue() == 0);
+        assert (wordsInUse.getValue() == 0 || words[wordsInUse.getValue() - 1].getValue() != 0);
+        assert (wordsInUse.getValue() >= 0 && wordsInUse.getValue() <= words.length);
+//        assert (wordsInUse.getValue() == words.length || words[wordsInUse.getValue()].getValue() == 0);
+
     }
 
     /**
-     * Sets the field wordsInUse to the logical size in words of the bit set.
+     * Sets the field wordsInUse.getValue() to the logical size in words of the bit set.
      * WARNING:This method assumes that the number of words actually in use is
-     * less than or equal to the current value of wordsInUse!
+     * less than or equal to the current value of wordsInUse.getValue()!
      */
-    private void recalculateWordsInUse() {
+    private void recalculatewordsInUse()
+
+    {
         // Traverse the bitset until a used word is found
         int i;
-        for (i = wordsInUse - 1; i >= 0; i--)
+        for (i = wordsInUse.getValue() - 1; i >= 0; i--)
             if (words[i].getValue() != 0)
                 break;
 
-        wordsInUse = i + 1; // The new logical size
+        wordsInUse.setValue(i + 1); // The new logical size
     }
 
     /**
      * Creates a bit set using words as the internal representation.
      * The last word (if there is one) must be non-zero.
      */
-    private LongValueBitSet(LongReference[] words) {
+    public LongValueBitSet(LongReference[] words) {
         this.words = words;
-        this.wordsInUse = words.length;
-        checkInvariants();
+        //     wordsInUse.setValue();
+        //   checkInvariants();
     }
 
     /**
@@ -220,7 +224,7 @@ public class LongValueBitSet implements Marshallable {
      * @since 1.7
      */
     public byte[] toByteArray() {
-        int n = wordsInUse;
+        int n = wordsInUse.getValue();
         if (n == 0)
             return new byte[0];
         int len = 8 * (n - 1);
@@ -253,15 +257,15 @@ public class LongValueBitSet implements Marshallable {
      * Ensures that the BitSet can accommodate a given wordIndex,
      * temporarily violating the invariants.  The caller must
      * restore the invariants before returning to the user,
-     * possibly using recalculateWordsInUse().
+     * possibly using recalculatewordsInUse.getValue()().
      *
      * @param wordIndex the index to be accommodated.
      */
     private void expandTo(int wordIndex) {
         int wordsRequired = wordIndex + 1;
-        if (wordsInUse < wordsRequired) {
+        if (wordsInUse.getValue() < wordsRequired) {
             ensureCapacity(wordsRequired);
-            wordsInUse = wordsRequired;
+            wordsInUse.setValue(wordsRequired);
         }
     }
 
@@ -295,7 +299,7 @@ public class LongValueBitSet implements Marshallable {
 
         words[wordIndex].setValue(words[wordIndex].getValue() ^ (1L << bitIndex));
 
-        recalculateWordsInUse();
+        recalculatewordsInUse();
         checkInvariants();
     }
 
@@ -340,7 +344,7 @@ public class LongValueBitSet implements Marshallable {
             words[endWordIndex].setValue(words[endWordIndex].getValue() ^ lastWordMask);
         }
 
-        recalculateWordsInUse();
+        recalculatewordsInUse();
         checkInvariants();
     }
 
@@ -454,12 +458,12 @@ public class LongValueBitSet implements Marshallable {
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
         int wordIndex = wordIndex(bitIndex);
-        if (wordIndex >= wordsInUse)
+        if (wordIndex >= wordsInUse.getValue())
             return;
 
         words[wordIndex].setValue(words[wordIndex].getValue() & ~(1L << bitIndex));
 
-        recalculateWordsInUse();
+        recalculatewordsInUse();
         checkInvariants();
     }
 
@@ -481,13 +485,13 @@ public class LongValueBitSet implements Marshallable {
             return;
 
         int startWordIndex = wordIndex(fromIndex);
-        if (startWordIndex >= wordsInUse)
+        if (startWordIndex >= wordsInUse.getValue())
             return;
 
         int endWordIndex = wordIndex(toIndex - 1);
-        if (endWordIndex >= wordsInUse) {
+        if (endWordIndex >= wordsInUse.getValue()) {
             toIndex = length();
-            endWordIndex = wordsInUse - 1;
+            endWordIndex = wordsInUse.getValue() - 1;
         }
 
         long firstWordMask = WORD_MASK << fromIndex;
@@ -509,7 +513,7 @@ public class LongValueBitSet implements Marshallable {
             words[endWordIndex].setValue(words[endWordIndex].getValue() & ~lastWordMask);
         }
 
-        recalculateWordsInUse();
+        recalculatewordsInUse();
         checkInvariants();
     }
 
@@ -519,8 +523,10 @@ public class LongValueBitSet implements Marshallable {
      * @since 1.4
      */
     public void clear() {
-        while (wordsInUse > 0)
-            words[--wordsInUse].setValue(0);
+        int value = wordsInUse.getValue();
+        while (value > 0)
+            words[--value].setValue(0);
+        wordsInUse.setValue(value);
     }
 
     /**
@@ -540,7 +546,7 @@ public class LongValueBitSet implements Marshallable {
         checkInvariants();
 
         int wordIndex = wordIndex(bitIndex);
-        return (wordIndex < wordsInUse)
+        return (wordIndex < wordsInUse.getValue())
                 && ((words[wordIndex].getValue() & (1L << bitIndex)) != 0);
     }
 
@@ -595,9 +601,9 @@ public class LongValueBitSet implements Marshallable {
                         :
                         ((words[sourceIndex].getValue() & lastWordMask) >>> fromIndex));
 
-        // Set wordsInUse correctly
-        result.wordsInUse = targetWords;
-        result.recalculateWordsInUse();
+        // Set wordsInUse.getValue() correctly
+        result.wordsInUse.getValue() = targetWords;
+        result.recalculatewordsInUse.getValue()();
         result.checkInvariants();
 
         return result;
@@ -633,7 +639,7 @@ public class LongValueBitSet implements Marshallable {
         checkInvariants();
 
         int u = wordIndex(fromIndex);
-        if (u >= wordsInUse)
+        if (u >= wordsInUse.getValue())
             return -1;
 
         long word = words[u].getValue() & (WORD_MASK << fromIndex);
@@ -641,7 +647,7 @@ public class LongValueBitSet implements Marshallable {
         while (true) {
             if (word != 0)
                 return (u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word);
-            if (++u == wordsInUse)
+            if (++u == wordsInUse.getValue())
                 return -1;
             word = words[u].getValue();
         }
@@ -665,7 +671,7 @@ public class LongValueBitSet implements Marshallable {
         checkInvariants();
 
         int u = wordIndex(fromIndex);
-        if (u >= wordsInUse)
+        if (u >= wordsInUse.getValue())
             return fromIndex;
 
         long word = ~words[u].getValue() & (WORD_MASK << fromIndex);
@@ -673,8 +679,8 @@ public class LongValueBitSet implements Marshallable {
         while (true) {
             if (word != 0)
                 return (u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word);
-            if (++u == wordsInUse)
-                return wordsInUse * BITS_PER_WORD;
+            if (++u == wordsInUse.getValue())
+                return wordsInUse.getValue() * BITS_PER_WORD;
             word = ~words[u].getValue();
         }
     }
@@ -711,7 +717,7 @@ public class LongValueBitSet implements Marshallable {
         checkInvariants();
 
         int u = wordIndex(fromIndex);
-        if (u >= wordsInUse)
+        if (u >= wordsInUse.getValue())
             return length() - 1;
 
         long word = words[u].getValue() & (WORD_MASK >>> -(fromIndex + 1));
@@ -749,7 +755,7 @@ public class LongValueBitSet implements Marshallable {
         checkInvariants();
 
         int u = wordIndex(fromIndex);
-        if (u >= wordsInUse)
+        if (u >= wordsInUse.getValue())
             return fromIndex;
 
         long word = ~words[u].getValue() & (WORD_MASK >>> -(fromIndex + 1));
@@ -772,11 +778,11 @@ public class LongValueBitSet implements Marshallable {
      * @since 1.2
      */
     public int length() {
-        if (wordsInUse == 0)
+        if (wordsInUse.getValue() == 0)
             return 0;
 
-        return BITS_PER_WORD * (wordsInUse - 1) +
-                (BITS_PER_WORD - Long.numberOfLeadingZeros(words[wordsInUse - 1].getValue()));
+        return BITS_PER_WORD * (wordsInUse.getValue() - 1) +
+                (BITS_PER_WORD - Long.numberOfLeadingZeros(words[wordsInUse.getValue() - 1].getValue()));
     }
 
     /**
@@ -787,7 +793,7 @@ public class LongValueBitSet implements Marshallable {
      * @since 1.4
      */
     public boolean isEmpty() {
-        return wordsInUse == 0;
+        return wordsInUse.getValue() == 0;
     }
 
     /**
@@ -800,7 +806,7 @@ public class LongValueBitSet implements Marshallable {
      * @since 1.4
      */
     public boolean intersects(LongValueBitSet set) {
-        for (int i = Math.min(wordsInUse, set.wordsInUse) - 1; i >= 0; i--)
+        for (int i = Math.min(wordsInUse.getValue(), set.wordsInUse.getValue()) - 1; i >= 0; i--)
             if ((words[i].getValue() & set.words[i].getValue()) != 0)
                 return true;
         return false;
@@ -814,7 +820,7 @@ public class LongValueBitSet implements Marshallable {
      */
     public int cardinality() {
         int sum = 0;
-        for (int i = 0; i < wordsInUse; i++)
+        for (int i = 0; i < wordsInUse.getValue(); i++)
             sum += Long.bitCount(words[i].getValue());
         return sum;
     }
@@ -832,14 +838,17 @@ public class LongValueBitSet implements Marshallable {
         if (this == set)
             return;
 
-        while (wordsInUse > set.wordsInUse)
-            words[--wordsInUse].setValue(0);
+        int value = wordsInUse.getValue();
+        while (wordsInUse.getValue() > set.wordsInUse.getValue()) {
+            words[--value].setValue(0);
+        }
+        wordsInUse.setValue(value);
 
         // Perform logical AND on words in common
-        for (int i = 0; i < wordsInUse; i++)
+        for (int i = 0; i < wordsInUse.getValue(); i++)
             words[i].setValue(words[i].getValue() & set.words[i].getValue());
 
-        recalculateWordsInUse();
+        recalculatewordsInUse();
         checkInvariants();
     }
 
@@ -856,11 +865,11 @@ public class LongValueBitSet implements Marshallable {
         if (this == set)
             return;
 
-        int wordsInCommon = Math.min(wordsInUse, set.wordsInUse);
+        int wordsInCommon = Math.min(wordsInUse.getValue(), set.wordsInUse.getValue());
 
-        if (wordsInUse < set.wordsInUse) {
-            ensureCapacity(set.wordsInUse);
-            wordsInUse = set.wordsInUse;
+        if (wordsInUse.getValue() < set.wordsInUse.getValue()) {
+            ensureCapacity(set.wordsInUse.getValue());
+            wordsInUse.setValue(set.wordsInUse.getValue());
         }
 
         // Perform logical OR on words in common
@@ -868,12 +877,12 @@ public class LongValueBitSet implements Marshallable {
             words[i].setValue(words[i].getValue() | set.words[i].getValue());
 
         // Copy any remaining words
-        if (wordsInCommon < set.wordsInUse)
+        if (wordsInCommon < set.wordsInUse.getValue())
             System.arraycopy(set.words, wordsInCommon,
                     words, wordsInCommon,
-                    wordsInUse - wordsInCommon);
+                    wordsInUse.getValue() - wordsInCommon);
 
-        // recalculateWordsInUse() is unnecessary
+        // recalculatewordsInUse.getValue()() is unnecessary
         checkInvariants();
     }
 
@@ -892,11 +901,11 @@ public class LongValueBitSet implements Marshallable {
      * @param set a bit set
      */
     public void xor(LongValueBitSet set) {
-        int wordsInCommon = Math.min(wordsInUse, set.wordsInUse);
+        int wordsInCommon = Math.min(wordsInUse.getValue(), set.wordsInUse.getValue());
 
-        if (wordsInUse < set.wordsInUse) {
-            ensureCapacity(set.wordsInUse);
-            wordsInUse = set.wordsInUse;
+        if (wordsInUse.getValue() < set.wordsInUse.getValue()) {
+            ensureCapacity(set.wordsInUse.getValue());
+            wordsInUse.setValue(set.wordsInUse.getValue());
         }
 
         // Perform logical XOR on words in common
@@ -904,12 +913,12 @@ public class LongValueBitSet implements Marshallable {
             words[i].setValue(words[i].getValue() ^ set.words[i].getValue());
 
         // Copy any remaining words
-        if (wordsInCommon < set.wordsInUse)
+        if (wordsInCommon < set.wordsInUse.getValue())
             System.arraycopy(set.words, wordsInCommon,
                     words, wordsInCommon,
-                    set.wordsInUse - wordsInCommon);
+                    set.wordsInUse.getValue() - wordsInCommon);
 
-        recalculateWordsInUse();
+        recalculatewordsInUse();
         checkInvariants();
     }
 
@@ -923,10 +932,10 @@ public class LongValueBitSet implements Marshallable {
      */
     public void andNot(LongValueBitSet set) {
         // Perform logical (a & !b) on words in common
-        for (int i = Math.min(wordsInUse, set.wordsInUse) - 1; i >= 0; i--)
+        for (int i = Math.min(wordsInUse.getValue(), set.wordsInUse.getValue()) - 1; i >= 0; i--)
             words[i].setValue(words[i].getValue() & ~set.words[i].getValue());
 
-        recalculateWordsInUse();
+        recalculatewordsInUse();
         checkInvariants();
     }
 
@@ -950,7 +959,7 @@ public class LongValueBitSet implements Marshallable {
      */
     public int hashCode() {
         long h = 1234;
-        for (int i = wordsInUse; --i >= 0; )
+        for (int i = wordsInUse.getValue(); --i >= 0; )
             h ^= words[i].getValue() * (i + 1);
 
         return (int) ((h >> 32) ^ h);
@@ -982,7 +991,7 @@ public class LongValueBitSet implements Marshallable {
      * @see #size()
      */
     public boolean equals(Object obj) {
-        if (!(obj instanceof java.util.BitSet))
+        if (!(obj instanceof LongValueBitSet))
             return false;
         if (this == obj)
             return true;
@@ -992,11 +1001,11 @@ public class LongValueBitSet implements Marshallable {
         checkInvariants();
         set.checkInvariants();
 
-        if (wordsInUse != set.wordsInUse)
+        if (wordsInUse.getValue() != set.wordsInUse.getValue())
             return false;
 
         // Check words in use by both BitSets
-        for (int i = 0; i < wordsInUse; i++)
+        for (int i = 0; i < wordsInUse.getValue(); i++)
             if (words[i] != set.words[i])
                 return false;
 
@@ -1032,8 +1041,8 @@ public class LongValueBitSet implements Marshallable {
      * returned by a subsequent call to the {@link #size()} method.
      */
     private void trimToSize() {
-        if (wordsInUse != words.length) {
-            words = Arrays.copyOf(words, wordsInUse);
+        if (wordsInUse.getValue() != words.length) {
+            words = Arrays.copyOf(words, wordsInUse.getValue());
             checkInvariants();
         }
     }
@@ -1066,10 +1075,10 @@ public class LongValueBitSet implements Marshallable {
         words = (long[]) fields.get("bits", null);
 
         // Assume maximum length then find real length
-        // because recalculateWordsInUse assumes maintenance
+        // because recalculatewordsInUse.getValue() assumes maintenance
         // or reduction in logical size
-        wordsInUse = words.length;
-        recalculateWordsInUse();
+        wordsInUse.getValue() = words.length;
+        recalculatewordsInUse.getValue()();
         sizeIsSticky = (words.length > 0 && words[words.length - 1] == 0L); // heuristic
         checkInvariants();
     }*/
@@ -1100,8 +1109,8 @@ public class LongValueBitSet implements Marshallable {
     public String toString() {
         checkInvariants();
 
-        int numBits = (wordsInUse > 128) ?
-                cardinality() : wordsInUse * BITS_PER_WORD;
+        int numBits = (wordsInUse.getValue() > 128) ?
+                cardinality() : wordsInUse.getValue() * BITS_PER_WORD;
         StringBuilder b = new StringBuilder(6 * numBits + 2);
         b.append('{');
 
@@ -1170,18 +1179,33 @@ public class LongValueBitSet implements Marshallable {
     @Override
     public void readMarshallable(@NotNull final WireIn wire) throws IORuntimeException {
         int numberOfLongValues = wire.read("numberOfLongValues").int32();
+        wordsInUse = new BinaryIntReference();
+        wordsInUse.bytesStore(wire.bytes().bytesStore(), wire.bytes().readPosition(), 4);
+        wire.bytes().readSkip(4);
+        //  wire.read("wordsInUse").int32(wordsInUse, null, (o, i) -> {
+        //  });
+
+        //    wordsInUse.getValue() = wire.read("wordsInUse.getValue()").int32();
         words = new BinaryLongReference[numberOfLongValues];
         for (int i = 0; i < numberOfLongValues; i++) {
-            words[i] = wire.getValueIn().object(BinaryLongReference.class);
+
+            // todo improve this so that it works with text wire
+            words[i] = new BinaryLongReference();
+            words[i].bytesStore(wire.bytes().bytesStore(), wire.bytes().readPosition(), 8);
+            wire.bytes().readSkip(8);
+
         }
     }
 
     @Override
     public void writeMarshallable(@NotNull final WireOut wire) {
         wire.write("numberOfLongValues").int32(words.length);
-        for (int i = 0; i < words.length; i++) {
-            wire.getValueOut().object(words[i]);
-        }
+        //wordsInUse
+        wire.bytes().writeSkip(4);
 
+        //    wire.write("wordsInUse.getValue()").int32(wordsInUse.getValue());
+        ///
+        // because this is a LongValue bit set the "words" are bound on the call to net.openhft.chronicle.wire.LongValueBitSet.readMarshallable
+        wire.bytes().writeSkip(words.length * 8);
     }
 }
