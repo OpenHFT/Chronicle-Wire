@@ -1,14 +1,12 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.ref.BinaryIntReference;
-import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.bytes.ref.LongReference;
-import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.values.IntValue;
+import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.io.ObjectStreamField;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.*;
@@ -18,7 +16,7 @@ import java.util.stream.StreamSupport;
 /**
  * Created by Rob Austin
  */
-public class LongValueBitSet implements Marshallable {
+public abstract class AbstractLongValueBitSet implements Marshallable {
 
     /*
      * BitSets are packed into arrays of "words."  Currently a word is
@@ -27,31 +25,22 @@ public class LongValueBitSet implements Marshallable {
      */
     private final static int ADDRESS_BITS_PER_WORD = 6;
     private final static int BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
-    private final static int BIT_INDEX_MASK = BITS_PER_WORD - 1;
 
     /* Used to shift left or right for a partial word mask */
     private static final long WORD_MASK = 0xffffffffffffffffL;
 
     /**
-     * @serialField bits long[]
-     *
-     * The bits in this BitSet.  The ith bit is stored in bits[i/64] at
-     * bit position i % 64 (where bit position 0 refers to the least
-     * significant bit and 63 refers to the most significant bit).
-     */
-    private static final ObjectStreamField[] serialPersistentFields = {
-            new ObjectStreamField("bits", long[].class),
-    };
-
-    /**
      * The internal field corresponding to the serialField "bits".
      */
-    private LongReference[] words;
+    LongValue[] words;
 
     /**
      * The number of words in the logical size of this BitSet.
      */
-    private BinaryIntReference wordsInUse = new BinaryIntReference();
+    IntValue wordsInUse = newIntValue();
+
+    @NotNull
+    abstract IntValue newIntValue();
 
     /**
      * Whether the size of "words" is user-specified.  If so, we assume
@@ -75,8 +64,7 @@ public class LongValueBitSet implements Marshallable {
     private void checkInvariants() {
         assert (wordsInUse.getValue() == 0 || words[wordsInUse.getValue() - 1].getValue() != 0);
         assert (wordsInUse.getValue() >= 0 && wordsInUse.getValue() <= words.length);
-//        assert (wordsInUse.getValue() == words.length || words[wordsInUse.getValue()].getValue() == 0);
-
+        assert (wordsInUse.getValue() == words.length || words[wordsInUse.getValue()].getValue() == 0);
     }
 
     /**
@@ -100,62 +88,11 @@ public class LongValueBitSet implements Marshallable {
      * Creates a bit set using words as the internal representation.
      * The last word (if there is one) must be non-zero.
      */
-    public LongValueBitSet(LongReference[] words) {
+    public AbstractLongValueBitSet(LongReference[] words) {
         this.words = words;
         //     wordsInUse.setValue();
         //   checkInvariants();
     }
-
-    /**
-     * Returns a new bit set containing all the bits in the given long array.
-     *
-     * <p>More precisely,
-     * <br>{@code BitSet.valueOf(longs).get(n) == ((longs[n/64] & (1L<<(n%64))) != 0)}
-     * <br>for all {@code n < 64 * longs.length}.
-     *
-     * <p>This method is equivalent to
-     * {@code BitSet.valueOf(LongBuffer.wrap(longs))}.
-     *
-     * @param longs a long array containing a little-endian representation
-     *              of a sequence of bits to be used as the initial bits of the
-     *              new bit set
-     * @return a {@code BitSet} containing all the bits in the long array
-     * @since 1.7
-     */
-   /* public static java.util.BitSet valueOf(long[] longs) {
-        int n;
-        for (n = longs.length; n > 0 && longs[n - 1] == 0; n--)
-            ;
-        return new java.util.BitSet(Arrays.copyOf(longs, n));
-    }*/
-
-    /**
-     * Returns a new bit set containing all the bits in the given long
-     * buffer between its position and limit.
-     *
-     * <p>More precisely,
-     * <br>{@code BitSet.valueOf(lb).get(n) == ((lb.get(lb.position()+n/64) & (1L<<(n%64))) != 0)}
-     * <br>for all {@code n < 64 * lb.remaining()}.
-     *
-     * <p>The long buffer is not modified by this method, and no
-     * reference to the buffer is retained by the bit set.
-     *
-     * @param lb a long buffer containing a little-endian representation
-     *           of a sequence of bits between its position and limit, to be
-     *           used as the initial bits of the new bit set
-     * @return a {@code BitSet} containing all the bits in the buffer in the
-     * specified range
-     * @since 1.7
-     */
- /*   public static java.util.BitSet valueOf(LongBuffer lb) {
-        lb = lb.slice();
-        int n;
-        for (n = lb.remaining(); n > 0 && lb.get(n - 1) == 0; n--)
-            ;
-        long[] words = new long[n];
-        lb.get(words);
-        return new java.util.BitSet(words);
-    }*/
 
     /**
      * Returns a new bit set containing all the bits in the given byte array.
@@ -173,42 +110,9 @@ public class LongValueBitSet implements Marshallable {
      * @return a {@code BitSet} containing all the bits in the byte array
      * @since 1.7
      */
-    public static java.util.BitSet valueOf(byte[] bytes) {
-        return java.util.BitSet.valueOf(ByteBuffer.wrap(bytes));
+    public static BitSet valueOf(byte[] bytes) {
+        return BitSet.valueOf(ByteBuffer.wrap(bytes));
     }
-
-    /**
-     * Returns a new bit set containing all the bits in the given byte
-     * buffer between its position and limit.
-     *
-     * <p>More precisely,
-     * <br>{@code BitSet.valueOf(bb).get(n) == ((bb.get(bb.position()+n/8) & (1<<(n%8))) != 0)}
-     * <br>for all {@code n < 8 * bb.remaining()}.
-     *
-     * <p>The byte buffer is not modified by this method, and no
-     * reference to the buffer is retained by the bit set.
-     *
-     * @param bb a byte buffer containing a little-endian representation
-     *           of a sequence of bits between its position and limit, to be
-     *           used as the initial bits of the new bit set
-     * @return a {@code BitSet} containing all the bits in the buffer in the
-     * specified range
-     * @since 1.7
-     */
-    /*public static java.util.BitSet valueOf(ByteBuffer bb) {
-        bb = bb.slice().order(ByteOrder.LITTLE_ENDIAN);
-        int n;
-        for (n = bb.remaining(); n > 0 && bb.get(n - 1) == 0; n--)
-            ;
-        long[] words = new long[(n + 7) / 8];
-        bb.limit(n);
-        int i = 0;
-        while (bb.remaining() >= 8)
-            words[i++] = bb.getLong();
-        for (int remaining = bb.remaining(), j = 0; j < remaining; j++)
-            words[i] |= (bb.get() & 0xffL) << (8 * j);
-        return new java.util.BitSet(words);
-    }*/
 
     /**
      * Returns a new byte array containing all the bits in this bit set.
@@ -551,66 +455,6 @@ public class LongValueBitSet implements Marshallable {
     }
 
     /**
-     * Returns a new {@code BitSet} composed of bits from this {@code BitSet}
-     * from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
-     *
-     * @param fromIndex index of the first bit to include
-     * @param toIndex   index after the last bit to include
-     * @return a new {@code BitSet} from a range of this {@code BitSet}
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative,
-     *                                   or {@code toIndex} is negative, or {@code fromIndex} is
-     *                                   larger than {@code toIndex}
-     * @since 1.4
-     */
-/*
-    public LongValueBitSet get(int fromIndex, int toIndex) {
-        checkRange(fromIndex, toIndex);
-
-        checkInvariants();
-
-        int len = length();
-
-        // If no set bits in range return empty bitset
-        if (len <= fromIndex || fromIndex == toIndex)
-            return new LongValueBitSet(0);
-
-        // An optimization
-        if (toIndex > len)
-            toIndex = len;
-
-        LongValueBitSet result = new LongValueBitSet(toIndex - fromIndex);
-        int targetWords = wordIndex(toIndex - fromIndex - 1) + 1;
-        int sourceIndex = wordIndex(fromIndex);
-        boolean wordAligned = ((fromIndex & BIT_INDEX_MASK) == 0);
-
-        // Process all words but the last word
-        for (int i = 0; i < targetWords - 1; i++, sourceIndex++)
-            result.words[i].setValue(wordAligned ? words[sourceIndex].getValue() :
-                    (words[sourceIndex].getValue() >>> fromIndex) |
-                            (words[sourceIndex + 1].getValue() << -fromIndex));
-
-        // Process the last word
-        long lastWordMask = WORD_MASK >>> -toIndex;
-        result.words[targetWords - 1].setValue(
-                ((toIndex - 1) & BIT_INDEX_MASK) < (fromIndex & BIT_INDEX_MASK)
-                        ? */
-    /* straddles source words *//*
-
-                        ((words[sourceIndex].getValue() >>> fromIndex) |
-                                (words[sourceIndex + 1].getValue() & lastWordMask) << -fromIndex)
-                        :
-                        ((words[sourceIndex].getValue() & lastWordMask) >>> fromIndex));
-
-        // Set wordsInUse.getValue() correctly
-        result.wordsInUse.getValue() = targetWords;
-        result.recalculatewordsInUse.getValue()();
-        result.checkInvariants();
-
-        return result;
-    }
-*/
-
-    /**
      * Returns the index of the first bit that is set to {@code true}
      * that occurs on or after the specified starting index. If no such
      * bit exists then {@code -1} is returned.
@@ -805,7 +649,7 @@ public class LongValueBitSet implements Marshallable {
      * the specified {@code BitSet}
      * @since 1.4
      */
-    public boolean intersects(LongValueBitSet set) {
+    public boolean intersects(AbstractLongValueBitSet set) {
         for (int i = Math.min(wordsInUse.getValue(), set.wordsInUse.getValue()) - 1; i >= 0; i--)
             if ((words[i].getValue() & set.words[i].getValue()) != 0)
                 return true;
@@ -834,7 +678,7 @@ public class LongValueBitSet implements Marshallable {
      *
      * @param set a bit set
      */
-    public void and(LongValueBitSet set) {
+    public void and(AbstractLongValueBitSet set) {
         if (this == set)
             return;
 
@@ -861,7 +705,7 @@ public class LongValueBitSet implements Marshallable {
      *
      * @param set a bit set
      */
-    public void or(LongValueBitSet set) {
+    public void or(AbstractLongValueBitSet set) {
         if (this == set)
             return;
 
@@ -900,7 +744,7 @@ public class LongValueBitSet implements Marshallable {
      *
      * @param set a bit set
      */
-    public void xor(LongValueBitSet set) {
+    public void xor(AbstractLongValueBitSet set) {
         int wordsInCommon = Math.min(wordsInUse.getValue(), set.wordsInUse.getValue());
 
         if (wordsInUse.getValue() < set.wordsInUse.getValue()) {
@@ -930,7 +774,7 @@ public class LongValueBitSet implements Marshallable {
      *            {@code BitSet}
      * @since 1.2
      */
-    public void andNot(LongValueBitSet set) {
+    public void andNot(AbstractLongValueBitSet set) {
         // Perform logical (a & !b) on words in common
         for (int i = Math.min(wordsInUse.getValue(), set.wordsInUse.getValue()) - 1; i >= 0; i--)
             words[i].setValue(words[i].getValue() & ~set.words[i].getValue());
@@ -991,12 +835,12 @@ public class LongValueBitSet implements Marshallable {
      * @see #size()
      */
     public boolean equals(Object obj) {
-        if (!(obj instanceof LongValueBitSet))
+        if (!(obj instanceof AbstractLongValueBitSet))
             return false;
         if (this == obj)
             return true;
 
-        LongValueBitSet set = (LongValueBitSet) obj;
+        AbstractLongValueBitSet set = (AbstractLongValueBitSet) obj;
 
         checkInvariants();
         set.checkInvariants();
@@ -1011,29 +855,6 @@ public class LongValueBitSet implements Marshallable {
 
         return true;
     }
-
-    /**
-     * Cloning this {@code BitSet} produces a new {@code BitSet}
-     * that is equal to it.
-     * The clone of the bit set is another bit set that has exactly the
-     * same bits set to {@code true} as this bit set.
-     *
-     * @return a clone of this bit set
-     * @see #size()
-     */
-/*    public Object clone() {
-        if (!sizeIsSticky)
-            trimToSize();
-
-        try {
-            java.util.BitSet result = (java.util.BitSet) super.clone();
-            result.words = words.clone();
-            result.checkInvariants();
-            return result;
-        } catch (CloneNotSupportedException e) {
-            throw new InternalError(e);
-        }
-    }*/
 
     /**
      * Attempts to reduce internal storage used for the bits in this bit set.
@@ -1063,25 +884,6 @@ public class LongValueBitSet implements Marshallable {
         fields.put("bits", words);
         s.writeFields();
     }
-
-    /**
-     * Reconstitute the {@code BitSet} instance from a stream (i.e.,
-     * deserialize it).
-     */
-/*    private void readObject(ObjectInputStream s)
-            throws IOException, ClassNotFoundException {
-
-        ObjectInputStream.GetField fields = s.readFields();
-        words = (long[]) fields.get("bits", null);
-
-        // Assume maximum length then find real length
-        // because recalculatewordsInUse.getValue() assumes maintenance
-        // or reduction in logical size
-        wordsInUse.getValue() = words.length;
-        recalculatewordsInUse.getValue()();
-        sizeIsSticky = (words.length > 0 && words[words.length - 1] == 0L); // heuristic
-        checkInvariants();
-    }*/
 
     /**
      * Returns a string representation of this bit set. For every index
@@ -1147,6 +949,7 @@ public class LongValueBitSet implements Marshallable {
      * @since 1.8
      */
     public IntStream stream() {
+
         class BitSetIterator implements PrimitiveIterator.OfInt {
             int next = nextSetBit(0);
 
@@ -1174,38 +977,5 @@ public class LongValueBitSet implements Marshallable {
                 Spliterator.SIZED | Spliterator.SUBSIZED |
                         Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED,
                 false);
-    }
-
-    @Override
-    public void readMarshallable(@NotNull final WireIn wire) throws IORuntimeException {
-        int numberOfLongValues = wire.read("numberOfLongValues").int32();
-        wordsInUse = new BinaryIntReference();
-        wordsInUse.bytesStore(wire.bytes().bytesStore(), wire.bytes().readPosition(), 4);
-        wire.bytes().readSkip(4);
-        //  wire.read("wordsInUse").int32(wordsInUse, null, (o, i) -> {
-        //  });
-
-        //    wordsInUse.getValue() = wire.read("wordsInUse.getValue()").int32();
-        words = new BinaryLongReference[numberOfLongValues];
-        for (int i = 0; i < numberOfLongValues; i++) {
-
-            // todo improve this so that it works with text wire
-            words[i] = new BinaryLongReference();
-            words[i].bytesStore(wire.bytes().bytesStore(), wire.bytes().readPosition(), 8);
-            wire.bytes().readSkip(8);
-
-        }
-    }
-
-    @Override
-    public void writeMarshallable(@NotNull final WireOut wire) {
-        wire.write("numberOfLongValues").int32(words.length);
-        //wordsInUse
-        wire.bytes().writeSkip(4);
-
-        //    wire.write("wordsInUse.getValue()").int32(wordsInUse.getValue());
-        ///
-        // because this is a LongValue bit set the "words" are bound on the call to net.openhft.chronicle.wire.LongValueBitSet.readMarshallable
-        wire.bytes().writeSkip(words.length * 8);
     }
 }
