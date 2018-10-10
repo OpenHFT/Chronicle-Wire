@@ -1,6 +1,9 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.bytes.ref.LongReference;
+import net.openhft.chronicle.core.io.IORuntimeException;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -1162,5 +1165,23 @@ public class LongValueBitSet implements Marshallable {
                 Spliterator.SIZED | Spliterator.SUBSIZED |
                         Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED,
                 false);
+    }
+
+    @Override
+    public void readMarshallable(@NotNull final WireIn wire) throws IORuntimeException {
+        int numberOfLongValues = wire.read("numberOfLongValues").int32();
+        words = new BinaryLongReference[numberOfLongValues];
+        for (int i = 0; i < numberOfLongValues; i++) {
+            words[i] = wire.getValueIn().object(BinaryLongReference.class);
+        }
+    }
+
+    @Override
+    public void writeMarshallable(@NotNull final WireOut wire) {
+        wire.write("numberOfLongValues").int32(words.length);
+        for (int i = 0; i < words.length; i++) {
+            wire.getValueOut().object(words[i]);
+        }
+
     }
 }
