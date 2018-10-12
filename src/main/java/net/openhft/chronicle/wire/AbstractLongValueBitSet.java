@@ -850,7 +850,7 @@ public abstract class AbstractLongValueBitSet implements Marshallable {
 
         // Check words in use by both BitSets
         for (int i = 0; i < wordsInUse.getValue(); i++)
-            if (words[i] != set.words[i])
+            if (words[i].getValue() != set.words[i].getValue())
                 return false;
 
         return true;
