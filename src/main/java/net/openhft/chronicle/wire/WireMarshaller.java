@@ -429,8 +429,10 @@ public class WireMarshaller<T> {
         @Override
         protected void setValue(Object o, ValueIn read, boolean overwrite) throws IllegalAccessException {
             IntValue f = (IntValue) field.get(o);
-            if (f == null)
+            if (f == null) {
                 f = read.wireIn().newIntReference();
+                field.set(o,f);
+            }
             read.int32(f);
         }
 
