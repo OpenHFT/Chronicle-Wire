@@ -2362,6 +2362,9 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (length < 0)
                 throw cantRead(peekCode());
 
+            if (length > bytes.readRemaining())
+                throw new BufferUnderflowException();
+
             int code = readCode();
             if (code == U8_ARRAY) {
                 for (long i = 1; i < length; i++)
