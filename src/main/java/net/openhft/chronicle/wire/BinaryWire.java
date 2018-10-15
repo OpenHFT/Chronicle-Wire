@@ -2842,7 +2842,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         public WireIn int64(LongValue value) {
             consumePadding();
             int code = readCode();
-            if (code != INT64)
+            if (code != INT64 && code != 0)
                 cantRead(code);
 
             @NotNull Byteable b = (Byteable) value;

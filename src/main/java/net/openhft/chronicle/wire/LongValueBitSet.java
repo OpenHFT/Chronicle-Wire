@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.ref.LongReference;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +17,7 @@ import java.util.stream.StreamSupport;
 /**
  * Created by Rob Austin
  */
-public abstract class AbstractLongValueBitSet implements Marshallable {
+public class LongValueBitSet implements Marshallable {
 
     /*
      * BitSets are packed into arrays of "words."  Currently a word is
@@ -37,10 +38,7 @@ public abstract class AbstractLongValueBitSet implements Marshallable {
     /**
      * The number of words in the logical size of this BitSet.
      */
-    IntValue wordsInUse = newIntValue();
-
-    @NotNull
-    abstract IntValue newIntValue();
+    IntValue wordsInUse;
 
     /**
      * Whether the size of "words" is user-specified.  If so, we assume
@@ -50,6 +48,11 @@ public abstract class AbstractLongValueBitSet implements Marshallable {
 
     /* use serialVersionUID from JDK 1.0.2 for interoperability */
     private static final long serialVersionUID = 7997698588986878753L;
+
+    public LongValueBitSet(final int maxNumberOfBits) {
+        int size = (maxNumberOfBits / 64) + 1;
+        words = new LongValue[size];
+    }
 
     /**
      * Given a bit index, return word index containing it.
@@ -82,16 +85,6 @@ public abstract class AbstractLongValueBitSet implements Marshallable {
                 break;
 
         wordsInUse.setValue(i + 1); // The new logical size
-    }
-
-    /**
-     * Creates a bit set using words as the internal representation.
-     * The last word (if there is one) must be non-zero.
-     */
-    public AbstractLongValueBitSet(LongReference[] words) {
-        this.words = words;
-        //     wordsInUse.setValue();
-        //   checkInvariants();
     }
 
     /**
@@ -649,7 +642,7 @@ public abstract class AbstractLongValueBitSet implements Marshallable {
      * the specified {@code BitSet}
      * @since 1.4
      */
-    public boolean intersects(AbstractLongValueBitSet set) {
+    public boolean intersects(LongValueBitSet set) {
         for (int i = Math.min(wordsInUse.getValue(), set.wordsInUse.getValue()) - 1; i >= 0; i--)
             if ((words[i].getValue() & set.words[i].getValue()) != 0)
                 return true;
@@ -678,7 +671,7 @@ public abstract class AbstractLongValueBitSet implements Marshallable {
      *
      * @param set a bit set
      */
-    public void and(AbstractLongValueBitSet set) {
+    public void and(LongValueBitSet set) {
         if (this == set)
             return;
 
@@ -705,7 +698,7 @@ public abstract class AbstractLongValueBitSet implements Marshallable {
      *
      * @param set a bit set
      */
-    public void or(AbstractLongValueBitSet set) {
+    public void or(LongValueBitSet set) {
         if (this == set)
             return;
 
@@ -744,7 +737,7 @@ public abstract class AbstractLongValueBitSet implements Marshallable {
      *
      * @param set a bit set
      */
-    public void xor(AbstractLongValueBitSet set) {
+    public void xor(LongValueBitSet set) {
         int wordsInCommon = Math.min(wordsInUse.getValue(), set.wordsInUse.getValue());
 
         if (wordsInUse.getValue() < set.wordsInUse.getValue()) {
@@ -774,7 +767,7 @@ public abstract class AbstractLongValueBitSet implements Marshallable {
      *            {@code BitSet}
      * @since 1.2
      */
-    public void andNot(AbstractLongValueBitSet set) {
+    public void andNot(LongValueBitSet set) {
         // Perform logical (a & !b) on words in common
         for (int i = Math.min(wordsInUse.getValue(), set.wordsInUse.getValue()) - 1; i >= 0; i--)
             words[i].setValue(words[i].getValue() & ~set.words[i].getValue());
@@ -835,12 +828,12 @@ public abstract class AbstractLongValueBitSet implements Marshallable {
      * @see #size()
      */
     public boolean equals(Object obj) {
-        if (!(obj instanceof AbstractLongValueBitSet))
+        if (!(obj instanceof LongValueBitSet))
             return false;
         if (this == obj)
             return true;
 
-        AbstractLongValueBitSet set = (AbstractLongValueBitSet) obj;
+        LongValueBitSet set = (LongValueBitSet) obj;
 
         checkInvariants();
         set.checkInvariants();
@@ -977,5 +970,39 @@ public abstract class AbstractLongValueBitSet implements Marshallable {
                 Spliterator.SIZED | Spliterator.SUBSIZED |
                         Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED,
                 false);
+    }
+
+    @Override
+    public void writeMarshallable(@NotNull final WireOut wire) {
+        try (DocumentContext dc = wire.writingDocument()) {
+
+            dc.wire().consumePadding();
+            wire.write("numberOfLongValues").int32(words.length);
+            wire.write("wordsInUse").int32forBinding(wordsInUse == null ? 0 : wordsInUse.getValue
+                    ());
+            dc.wire().consumePadding();
+
+            for (int i = 0; i < words.length; i++) {
+                if (words[i] == null)
+                    words[i] = wire.newLongReference();
+                wire.getValueOut().int64forBinding(words[i].getValue());
+            }
+        }
+
+    }
+
+    @Override
+    public void readMarshallable(@NotNull final WireIn wire) throws IORuntimeException {
+
+        try (DocumentContext dc = wire.readingDocument()) {
+            dc.wire().padToCacheAlign();
+            int numberOfLongValues = wire.read("numberOfLongValues").int32();
+            this.wordsInUse = wire.read("wordsInUse").int32ForBinding((IntValue) null);
+            dc.wire().padToCacheAlign();
+            words = new LongReference[numberOfLongValues];
+            for (int i = 0; i < numberOfLongValues; i++) {
+                words[i] = wire.getValueIn().int64ForBinding(null);
+            }
+        }
     }
 }
