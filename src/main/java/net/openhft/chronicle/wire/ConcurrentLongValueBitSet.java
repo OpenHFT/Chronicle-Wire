@@ -1022,7 +1022,6 @@ public class ConcurrentLongValueBitSet implements Marshallable {
     public void writeMarshallable(@NotNull final WireOut wire) {
         try (DocumentContext dc = wire.writingDocument()) {
 
-            dc.wire().consumePadding();
             wire.write("numberOfLongValues").int32(words.length);
             //  wire.write("wordsInUse").int32forBinding(wordsInUse == null ? 0 : getWordsInUse());
             dc.wire().consumePadding();
@@ -1040,7 +1039,7 @@ public class ConcurrentLongValueBitSet implements Marshallable {
     public void readMarshallable(@NotNull final WireIn wire) throws IORuntimeException {
 
         try (DocumentContext dc = wire.readingDocument()) {
-            dc.wire().padToCacheAlign();
+
             int numberOfLongValues = wire.read("numberOfLongValues").int32();
             //   this.wordsInUse = wire.read("wordsInUse").int32ForBinding((IntValue) null);
             dc.wire().padToCacheAlign();
