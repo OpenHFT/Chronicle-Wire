@@ -34,7 +34,7 @@ public class ConcurrentLongValueBitSet implements Marshallable {
     /**
      * The internal field corresponding to the serialField "bits".
      */
-    LongValue[] words;
+    private LongValue[] words;
 
     /**
      * Whether the size of "words" is user-specified.  If so, we assume
