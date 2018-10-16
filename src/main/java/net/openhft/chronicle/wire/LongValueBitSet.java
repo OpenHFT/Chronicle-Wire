@@ -15,9 +15,12 @@ import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
 /**
+ * This bitset is indented to be shared between processes, in-order to keep the locking constrains
+ * to a minimum, this is implement as a lock free solution, It also does not support resizing.
+ *
  * Created by Rob Austin
  */
-public class ConcurrentLongValueBitSet implements Marshallable {
+public class LongValueBitSet implements Marshallable {
 
     /*
      * BitSets are packed into arrays of "words."  Currently a word is
@@ -42,7 +45,7 @@ public class ConcurrentLongValueBitSet implements Marshallable {
      */
     private transient boolean sizeIsSticky = true;
 
-    public ConcurrentLongValueBitSet(final int maxNumberOfBits) {
+    public LongValueBitSet(final int maxNumberOfBits) {
         int size = (maxNumberOfBits / 64) + 1;
         words = new LongValue[size];
         pauser = Pauser.busy();
@@ -686,7 +689,7 @@ public class ConcurrentLongValueBitSet implements Marshallable {
      * the specified {@code BitSet}
      * @since 1.4
      */
-    public boolean intersects(ConcurrentLongValueBitSet set) {
+    public boolean intersects(LongValueBitSet set) {
         for (int i = Math.min(getWordsInUse(), set.getWordsInUse()) - 1; i >= 0; i--)
             if ((words[i].getVolatileValue() & set.words[i].getVolatileValue()) != 0)
                 return true;
@@ -715,7 +718,7 @@ public class ConcurrentLongValueBitSet implements Marshallable {
      *
      * @param set a bit set
      */
-    public void and(ConcurrentLongValueBitSet set) {
+    public void and(LongValueBitSet set) {
         if (this == set)
             return;
 
@@ -742,7 +745,7 @@ public class ConcurrentLongValueBitSet implements Marshallable {
      *
      * @param set a bit set
      */
-    public void or(ConcurrentLongValueBitSet set) {
+    public void or(LongValueBitSet set) {
         if (this == set)
             return;
 
@@ -781,7 +784,7 @@ public class ConcurrentLongValueBitSet implements Marshallable {
      *
      * @param set a bit set
      */
-    public void xor(ConcurrentLongValueBitSet set) {
+    public void xor(LongValueBitSet set) {
         int wordsInCommon = Math.min(getWordsInUse(), set.getWordsInUse());
 
         //   if (getWordsInUse() < set.getWordsInUse()) {
@@ -813,7 +816,7 @@ public class ConcurrentLongValueBitSet implements Marshallable {
      *            {@code BitSet}
      * @since 1.2
      */
-    public void andNot(ConcurrentLongValueBitSet set) {
+    public void andNot(LongValueBitSet set) {
         // Perform logical (a & !b) on words in common
         for (int i = Math.min(getWordsInUse(), set.getWordsInUse()) - 1; i >= 0; i--)
             and(words[i], ~set.words[i].getVolatileValue());
@@ -874,12 +877,12 @@ public class ConcurrentLongValueBitSet implements Marshallable {
      * @see #size()
      */
     public boolean equals(Object obj) {
-        if (!(obj instanceof ConcurrentLongValueBitSet))
+        if (!(obj instanceof LongValueBitSet))
             return false;
         if (this == obj)
             return true;
 
-        ConcurrentLongValueBitSet set = (ConcurrentLongValueBitSet) obj;
+        LongValueBitSet set = (LongValueBitSet) obj;
 
         //   checkInvariants();
         //    set.checkInvariants();
