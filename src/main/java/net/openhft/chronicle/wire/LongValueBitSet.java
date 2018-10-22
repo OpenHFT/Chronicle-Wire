@@ -554,7 +554,7 @@ public class LongValueBitSet implements Marshallable {
      * }}</pre>
      *
      * @param fromIndex the index to start checking from (inclusive)
-     * @param to        (inclusive) returns -1 if a bit is not found before this value
+     * @param toIndex        (inclusive) returns -1 if a bit is not found before this value
      * @return the index of the next set bit, or {@code -1} if there
      * is no such bit
      * @throws IndexOutOfBoundsException if the specified index is negative
