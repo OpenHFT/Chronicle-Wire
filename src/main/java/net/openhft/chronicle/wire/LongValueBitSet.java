@@ -51,9 +51,15 @@ public class LongValueBitSet implements Marshallable {
         pauser = Pauser.busy();
     }
 
+    public LongValueBitSet(final int maxNumberOfBits, Wire w) {
+        this(maxNumberOfBits);
+        writeMarshallable(w);
+        readMarshallable(w);
+    }
+
     /**
      * Given a bit index, return word index containing it.
-     */                           
+     */
     private static int wordIndex(int bitIndex) {
         return bitIndex >> ADDRESS_BITS_PER_WORD;
     }
