@@ -538,6 +538,52 @@ public class LongValueBitSet implements Marshallable {
     }
 
     /**
+     * Returns the index of the first bit that is set to {@code true}
+     * that occurs on or after the specified starting index. If no such
+     * bit exists then {@code -1} is returned.
+     *
+     * <p>To iterate over the {@code true} bits in a {@code BitSet},
+     * use the following loop:
+     *
+     * <pre> {@code
+     * for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1,to)) {
+     *     // operate on index i here
+     *     if (i == Integer.MAX_VALUE) {
+     *         break; // or (i+1) would overflow
+     *     }
+     * }}</pre>
+     *
+     * @param fromIndex the index to start checking from (inclusive)
+     * @param to        (inclusive) returns -1 if a bit is not found before this value
+     * @return the index of the next set bit, or {@code -1} if there
+     * is no such bit
+     * @throws IndexOutOfBoundsException if the specified index is negative
+     * @since 1.4
+     */
+    public int nextSetBit(int fromIndex, int toIndex) {
+        if (fromIndex < 0)
+            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
+
+        //checkInvariants();
+
+        int u = wordIndex(fromIndex);
+        if (u >= getWordsInUse())
+            return -1;
+
+        long word = words[u].getVolatileValue() & (WORD_MASK << fromIndex);
+
+        while (true) {
+            if (word != 0)
+                return (u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word);
+            if (++u == getWordsInUse())
+                return -1;
+            if (u * BITS_PER_WORD > toIndex)
+                return -1;
+            word = words[u].getVolatileValue();
+        }
+    }
+
+    /**
      * Returns the index of the first bit that is set to {@code false}
      * that occurs on or after the specified starting index.
      *
