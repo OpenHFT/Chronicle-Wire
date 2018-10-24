@@ -117,7 +117,7 @@ public interface ValueOut {
 
     @NotNull
     default WireOut uint8(int x) {
-        return uint8checked((int) Maths.toUInt8(x));
+        return uint8checked(Maths.toUInt8(x & 0xFF));
     }
 
     @NotNull
