@@ -1507,7 +1507,7 @@ public class TextWire extends AbstractWire implements Wire {
                 } else if ((int) (ad / 1e3) * 1e3 == ad) {
                     bytes.append((int) (d / 1e3)).append("E3");
                 } else if (ad < 1e-3) {
-                    double d7 = Math.round(d * 1e14) / 1e7;
+                    double d7 = Math.round(d * 1e16) / 1e9;
                     double ad7 = Math.abs(d7);
                     if (ad7 < 1e1)
                         bytes.append(d7).append("E-7");

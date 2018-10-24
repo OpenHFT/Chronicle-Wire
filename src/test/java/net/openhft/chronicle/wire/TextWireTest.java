@@ -1208,7 +1208,7 @@ public class TextWireTest {
 
     @Test
     @Ignore
-    public void testSnappyCompression() throws IOException {
+    public void testSnappyCompression() {
         if (!Compressions.Snappy.available())
             return;
         @NotNull Wire wire = createWire();
@@ -1226,7 +1226,7 @@ public class TextWireTest {
 
     @Test
     @Ignore
-    public void testSnappyCompressionAsText() throws IOException {
+    public void testSnappyCompressionAsText() {
         if (!Compressions.Snappy.available())
             return;
 
@@ -1243,7 +1243,7 @@ public class TextWireTest {
     }
 
     @Test
-    public void testGZIPCompressionAsText() throws IOException {
+    public void testGZIPCompressionAsText() {
         @NotNull Wire wire = createWire();
         @NotNull final String s = "xxxxxxxxxxx1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
         @NotNull String str = s + s + s + s;
@@ -1257,7 +1257,7 @@ public class TextWireTest {
     }
 
     @Test
-    public void testLZWCompressionAsText() throws IOException {
+    public void testLZWCompressionAsText() {
         @NotNull Wire wire = createWire();
         @NotNull final String s = "xxxxxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxx";
         @NotNull String str = s + s + s + s;
@@ -1327,7 +1327,7 @@ public class TextWireTest {
         // TODO we shouldn't need to create a new wire.
         wire = createWire();
 
-        @NotNull Set<String> threeObjects = new HashSet(Arrays.asList(new String[]{"abc", "def", "ghi"}));
+        @NotNull Set<String> threeObjects = new HashSet(Arrays.asList("abc", "def", "ghi"));
         wire.write().object(threeObjects);
 
         @Nullable Set<String> list2 = wire.read()
@@ -1820,7 +1820,7 @@ public class TextWireTest {
     }
 
     enum TWTSingleton {
-        INSTANCE;
+        INSTANCE
     }
 
     enum BWKey implements WireKey {
@@ -2002,6 +2002,20 @@ public class TextWireTest {
         public void append(StringBuilder text, long value) {
             text.append(Long.toHexString(value));
         }
+    }
+
+    @Test
+    public void testDoublePrecisionOverTextWire() {
+        final Bytes<?> bytes = Wires.acquireBytes();
+
+        final Wire wire = WireType.TEXT.apply(bytes);
+        final double d = 0.000212345678901;
+        wire.getValueOut().float64(d);
+
+        final TextWire textWire = TextWire.from(bytes.toString());
+        final double d2 = textWire.getValueIn().float64();
+
+        Assert.assertEquals(d2, d, 0);
     }
 
 }
