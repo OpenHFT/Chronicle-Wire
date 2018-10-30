@@ -259,9 +259,10 @@ public abstract class AbstractWire implements Wire {
         int header;
         try {
             for (; ; ) {
-                header = bytes.readVolatileInt(0L);
-                if (isReady(header)) {
-                    break;
+                if (bytes.realCapacity() >= 4) {
+                    header = bytes.readVolatileInt(0L);
+                    if (isReady(header))
+                        break;
                 }
                 acquireTimedParser().pause(timeout, timeUnit);
             }
