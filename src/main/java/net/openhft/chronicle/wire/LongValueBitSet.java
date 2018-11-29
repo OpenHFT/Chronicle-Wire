@@ -134,8 +134,9 @@ public class LongValueBitSet implements Marshallable {
     }
 
     private Pauser pauser() {
-        Pauser pauser = this.pauser;
-        return pauser == null ? Pauser.busy() : pauser;
+        if (this.pauser == null)
+            this.pauser = Pauser.busy();
+        return this.pauser;
     }
 
     public void set(LongValue word, long newValue) {
