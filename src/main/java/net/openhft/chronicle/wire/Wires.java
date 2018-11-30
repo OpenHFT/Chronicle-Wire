@@ -698,7 +698,9 @@ public enum Wires {
                 return EXTERNALIZABLE;
             if (Serializable.class.isAssignableFrom(aClass))
                 return ANY_NESTED;
-            return ANY_SCALAR;
+            if (Comparable.class.isAssignableFrom(aClass))
+                return ANY_SCALAR;
+            return ANY_NESTED;
         }
     }
 
