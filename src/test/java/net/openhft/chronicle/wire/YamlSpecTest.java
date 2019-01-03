@@ -104,8 +104,6 @@ public class YamlSpecTest {
 
     }
 
-
-
     @Test
     public void test2_5_SequenceOfSequences() {
 
@@ -274,7 +272,6 @@ public class YamlSpecTest {
         }
 
     }
-
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
     @Test
@@ -473,7 +470,6 @@ public class YamlSpecTest {
 
     }
 
-
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
     @Test
     public void test2_17QuotedScalars() {
@@ -520,7 +516,6 @@ public class YamlSpecTest {
 
     }
 
-
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
     @Test
     public void test2_18Multi_lineFlowScalars() {
@@ -563,7 +558,6 @@ public class YamlSpecTest {
         }
 
     }
-
 
     @Test
     public void test2_19Integers() {

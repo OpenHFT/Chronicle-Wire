@@ -31,7 +31,6 @@ import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
 
-
 public class EnumTest {
 
     @Test

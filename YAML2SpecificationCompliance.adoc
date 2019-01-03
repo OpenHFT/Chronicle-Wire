@@ -82,7 +82,6 @@ The section numbering below reflects that of the fix specification - see http://
 ]
 ----
 
-
 === 2.7 Two Documents in a Stream (each with a leading comment)
 
 .Yaml Spec Example
@@ -147,7 +146,6 @@ action: grand slam
 ]
 ----
 
-
 === 2.9 Single Document with Two Comments
 
 .Yaml Spec Example
@@ -199,7 +197,6 @@ rbi:
 -  {item: Big Shoes,
     quantity: 1}
 ----
-
 
 === 2.14 In the folded scalars, newlines become spaces
 

@@ -92,7 +92,6 @@ public class MarshallableTest {
         BytesUtil.checkRegisteredBytes();
     }
 
-
     @Test
     public void testCopy() {
         DTO2 dto2 = new DTO2();

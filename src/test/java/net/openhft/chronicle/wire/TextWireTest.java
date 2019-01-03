@@ -1754,7 +1754,7 @@ public class TextWireTest {
 
         assertEquals(String[].class, wire.read("b").typeLiteral());
         Collection<Class> classes = wire.read("a").typedMarshallable();
-        assertArrayEquals(new Class[] {byte[].class}, classes.toArray());
+        assertArrayEquals(new Class[]{byte[].class}, classes.toArray());
         assertEquals("hi", wire.read("c").text());
     }
 
@@ -1817,6 +1817,20 @@ public class TextWireTest {
                 "  hexa2: ffffffffffffffff\n" +
                 "}\n", twoLongs.toString());
         assertEquals(twoLongs, Marshallable.fromString(twoLongs.toString()));
+    }
+
+    @Test
+    public void testDoublePrecisionOverTextWire() {
+        final Bytes<?> bytes = Wires.acquireBytes();
+
+        final Wire wire = WireType.TEXT.apply(bytes);
+        final double d = 0.000212345678901;
+        wire.getValueOut().float64(d);
+
+        final TextWire textWire = TextWire.from(bytes.toString());
+        final double d2 = textWire.getValueIn().float64();
+
+        Assert.assertEquals(d2, d, 0);
     }
 
     enum TWTSingleton {
@@ -2002,20 +2016,6 @@ public class TextWireTest {
         public void append(StringBuilder text, long value) {
             text.append(Long.toHexString(value));
         }
-    }
-
-    @Test
-    public void testDoublePrecisionOverTextWire() {
-        final Bytes<?> bytes = Wires.acquireBytes();
-
-        final Wire wire = WireType.TEXT.apply(bytes);
-        final double d = 0.000212345678901;
-        wire.getValueOut().float64(d);
-
-        final TextWire textWire = TextWire.from(bytes.toString());
-        final double d2 = textWire.getValueIn().float64();
-
-        Assert.assertEquals(d2, d, 0);
     }
 
 }

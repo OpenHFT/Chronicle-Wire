@@ -73,20 +73,6 @@ public class MethodWriterTest {
 
     }
 
-    @FunctionalInterface
-    interface Event {
-        void event(String eventName, Object o);
-    }
-
-    @FunctionalInterface
-    public interface HasDefault {
-        default void callsMethod(String args) {
-            method(args.split(","));
-        }
-
-        void method(String... args);
-    }
-
     @Test
     public void testNoArgs() {
         Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
@@ -105,12 +91,6 @@ public class MethodWriterTest {
         for (int i = 0; i < 3; i++)
             assertEquals(i < 2, reader.readOne());
         verify(mock);
-    }
-
-    public interface NoArgs {
-        void methodOne();
-
-        void methodTwo();
     }
 
     @Test
@@ -133,6 +113,26 @@ public class MethodWriterTest {
         for (int i = 0; i < 2; i++)
             assertEquals(i < 1, reader.readOne());
         verify(mock);
+    }
+
+    @FunctionalInterface
+    interface Event {
+        void event(String eventName, Object o);
+    }
+
+    @FunctionalInterface
+    public interface HasDefault {
+        default void callsMethod(String args) {
+            method(args.split(","));
+        }
+
+        void method(String... args);
+    }
+
+    public interface NoArgs {
+        void methodOne();
+
+        void methodTwo();
     }
 
     public interface HasMicroTS {

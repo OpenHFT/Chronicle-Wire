@@ -21,10 +21,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Test;
 
 public class TextWireTypeArrayTest {
-    static class Person extends AbstractMarshallable {
-        Class<?>[] classes = {Object.class, Object.class};
-    }
-
     @Test
     public void shouldUnmarshalArrayOfType() {
         final Bytes<?> bytes = Wires.acquireBytes();
@@ -36,5 +32,9 @@ public class TextWireTypeArrayTest {
 
         final TextWire textWire = TextWire.from(bytes.toString());
         textWire.getValueIn().typedMarshallable();
+    }
+
+    static class Person extends AbstractMarshallable {
+        Class<?>[] classes = {Object.class, Object.class};
     }
 }

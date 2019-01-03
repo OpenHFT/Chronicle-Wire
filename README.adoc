@@ -509,9 +509,6 @@ The documentation looks well thought out, and it is worth emulating.
 | Authors' preferred use case      | distributed  computing | financial / trading | distributed  computing | platforms /  sandboxing | financial / trading | games
 |===============
 
-
-
-
 NOTE: The `Binary YAML` format can be automatically converted to `YAML` without any knowledge of the schema, because the messages are self-describing.
 
 NOTE: You can parse all the expected fields (if any) and then parse any remaining fields. As `YAML` supports object field names (or keys), these could be strings or even objects as keys and values.
@@ -611,7 +608,6 @@ Chronicle Wire does not have pointers, but it does have content-lengths which ar
 ===  Platform support
 
 Chronicle Wire supports `Java 8`.  Future versions may support `Java 9`, `C++`, and `C#`.
-
 
 '''
 https://github.com/OpenHFT/Chronicle-Wire[Back to Chronicle Wire project]

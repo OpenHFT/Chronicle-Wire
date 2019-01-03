@@ -55,8 +55,6 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  * YAML Based wire format
  */
 public class TextWire extends AbstractWire implements Wire {
-    Pattern REGX_PATTERN = Pattern.compile("\\.|\\$");
-
     public static final BytesStore TYPE = BytesStore.from("!type ");
     public static final BytesStore BINARY = Bytes.from("!!binary");
     static final String SEQ_MAP = "!seqmap";
@@ -90,6 +88,7 @@ public class TextWire extends AbstractWire implements Wire {
     protected final TextValueIn valueIn = createValueIn();
     private final StringBuilder sb = new StringBuilder();
     protected long lineStart = 0;
+    Pattern REGX_PATTERN = Pattern.compile("\\.|\\$");
     DefaultValueIn defaultValueIn;
     private WriteDocumentContext writeContext;
     private ReadDocumentContext readContext;
@@ -198,6 +197,18 @@ public class TextWire extends AbstractWire implements Wire {
         // reset it.
         sct.isStopChar(' ');
         return sct;
+    }
+
+    private static void checkConsecutiveSpaces(@NotNull StringBuilder sb) {
+        if (sb.length() == 0)
+            return;
+        char lastCh = sb.charAt(0);
+        for (int i = 1; i < sb.length() - 1; i++) {
+            char ch2 = sb.charAt(i);
+            if (lastCh <= ' ' && ch2 <= ' ')
+                throw new IORuntimeException("Cannot have multiple consecutive spaces in a field name '" + sb + "'");
+            lastCh = ch2;
+        }
     }
 
     public boolean strict() {
@@ -344,18 +355,6 @@ public class TextWire extends AbstractWire implements Wire {
     private StringBuilder acquireStringBuilder() {
         StringUtils.setCount(sb, 0);
         return sb;
-    }
-
-    private static void checkConsecutiveSpaces(@NotNull StringBuilder sb) {
-        if (sb.length() == 0)
-            return;
-        char lastCh = sb.charAt(0);
-        for (int i = 1; i < sb.length() - 1; i++) {
-            char ch2 = sb.charAt(i);
-            if (lastCh <= ' ' && ch2 <= ' ')
-                throw new IORuntimeException("Cannot have multiple consecutive spaces in a field name '" + sb + "'");
-            lastCh = ch2;
-        }
     }
 
     @NotNull

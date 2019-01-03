@@ -529,7 +529,7 @@ public abstract class AbstractWire implements Wire {
 
         if (!bytes.compareAndSwapInt(position, expectedHeader, header)) {
             int currentHeader = bytes.readVolatileInt(position);
-                throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(currentHeader));
+            throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(currentHeader));
         }
     }
 

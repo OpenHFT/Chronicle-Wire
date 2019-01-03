@@ -14,6 +14,7 @@ public class IgnoreHighOrderBitsTest {
     /**
      * Writes to the output stream the eight low-order bits of the argument b. The 24 high-order bits of b are ignored.
      * see https://docs.oracle.com/javase/7/docs/api/java/io/DataOutput.html#write(int)
+     *
      * @throws IOException
      */
     @Test

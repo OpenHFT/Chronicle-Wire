@@ -17,7 +17,7 @@ import java.util.stream.StreamSupport;
 /**
  * This bitset is indented to be shared between processes, in-order to keep the locking constrains
  * to a minimum, this is implement as a lock free solution, It also does not support resizing.
- *
+ * <p>
  * Created by Rob Austin
  */
 public class LongValueBitSet implements Marshallable {
@@ -69,32 +69,12 @@ public class LongValueBitSet implements Marshallable {
      */
     // private void checkInvariants() {
     //    assert (wordsInUse.getVolatileValue() == 0 || words[wordsInUse.getVolatileValue() - 1]
-   //             .getValue() != 0);
+    //             .getValue() != 0);
     //    assert (wordsInUse.getVolatileValue() >= 0 && wordsInUse.getVolatileValue() <= words
     //            .length);
     //    assert (wordsInUse.getVolatileValue() == words.length || words[wordsInUse
-     //          .getVolatileValue()].getValue() == 0);
+    //          .getVolatileValue()].getValue() == 0);
     //}
-
-    /**
-     * Sets the field wordsInUse.getValue() to the logical size in words of the bit set.
-     * WARNING:This method assumes that the number of words actually in use is
-     * less than or equal to the current value of wordsInUse.getValue()!
-     */
-  /*  private void recalculatewordsInUse()
-
-    {
-        // Traverse the bitset until a used word is found
-        int i;
-        for (i = getWordsInUse() - 1; i >= 0; i--)
-            if (words[i].getVolatileValue() != 0)
-                break;
-
-        wordsInUse.setOrderedValue(i + 1); // The new logical size
-    }*/
-    private int getWordsInUse() {
-        return words.length;
-    }
 
     /**
      * Returns a new bit set containing all the bits in the given byte array.
@@ -116,8 +96,37 @@ public class LongValueBitSet implements Marshallable {
         return BitSet.valueOf(ByteBuffer.wrap(bytes));
     }
 
-    interface LongFunction {
-        long apply(long oldValue, long param);
+    /**
+     * Checks that fromIndex ... toIndex is a valid range of bit indices.
+     */
+    private static void checkRange(int fromIndex, int toIndex) {
+        if (fromIndex < 0)
+            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
+        if (toIndex < 0)
+            throw new IndexOutOfBoundsException("toIndex < 0: " + toIndex);
+        if (fromIndex > toIndex)
+            throw new IndexOutOfBoundsException("fromIndex: " + fromIndex +
+                    " > toIndex: " + toIndex);
+    }
+
+    /**
+     * Sets the field wordsInUse.getValue() to the logical size in words of the bit set.
+     * WARNING:This method assumes that the number of words actually in use is
+     * less than or equal to the current value of wordsInUse.getValue()!
+     */
+  /*  private void recalculatewordsInUse()
+
+    {
+        // Traverse the bitset until a used word is found
+        int i;
+        for (i = getWordsInUse() - 1; i >= 0; i--)
+            if (words[i].getVolatileValue() != 0)
+                break;
+
+        wordsInUse.setOrderedValue(i + 1); // The new logical size
+    }*/
+    private int getWordsInUse() {
+        return words.length;
     }
 
     public void set(LongValue word, long param, LongFunction function) {
@@ -147,7 +156,6 @@ public class LongValueBitSet implements Marshallable {
             pauser.pause();
         }
     }
-
 
     /**
      * Returns a new byte array containing all the bits in this bit set.
@@ -209,19 +217,6 @@ public class LongValueBitSet implements Marshallable {
             //  ensureCapacity(wordsRequired);
             //  wordsInUse.setValue(wordsRequired);
         }
-    }
-
-    /**
-     * Checks that fromIndex ... toIndex is a valid range of bit indices.
-     */
-    private static void checkRange(int fromIndex, int toIndex) {
-        if (fromIndex < 0)
-            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
-        if (toIndex < 0)
-            throw new IndexOutOfBoundsException("toIndex < 0: " + toIndex);
-        if (fromIndex > toIndex)
-            throw new IndexOutOfBoundsException("fromIndex: " + fromIndex +
-                    " > toIndex: " + toIndex);
     }
 
     /**
@@ -561,7 +556,7 @@ public class LongValueBitSet implements Marshallable {
      * }}</pre>
      *
      * @param fromIndex the index to start checking from (inclusive)
-     * @param toIndex        (inclusive) returns -1 if a bit is not found before this value
+     * @param toIndex   (inclusive) returns -1 if a bit is not found before this value
      * @return the index of the next set bit, or {@code -1} if there
      * is no such bit
      * @throws IndexOutOfBoundsException if the specified index is negative
@@ -1106,5 +1101,8 @@ public class LongValueBitSet implements Marshallable {
         }
     }
 
+    interface LongFunction {
+        long apply(long oldValue, long param);
+    }
 
 }

@@ -34,6 +34,8 @@ import java.util.Map;
  */
 @FunctionalInterface
 public interface MarshallableIn {
+    int MARSHALLABLE_IN_INTERN_SIZE = Integer.getInteger("marshallableIn.intern.size", 128);
+
     @NotNull
     DocumentContext readingDocument();
 
@@ -82,8 +84,6 @@ public interface MarshallableIn {
         }
         return true;
     }
-
-    int MARSHALLABLE_IN_INTERN_SIZE = Integer.getInteger("marshallableIn.intern.size", 128);
 
     /**
      * Read the next message as a String

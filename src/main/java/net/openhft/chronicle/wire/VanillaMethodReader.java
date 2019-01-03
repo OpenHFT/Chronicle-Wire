@@ -381,7 +381,6 @@ public class VanillaMethodReader implements MethodReader {
      */
     public boolean readOne() {
 
-
         try (DocumentContext context = in.readingDocument()) {
             if (context.isData()) {
                 messageHistory.reset(context.sourceId(), context.index());

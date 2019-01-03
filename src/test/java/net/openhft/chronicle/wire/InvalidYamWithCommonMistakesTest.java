@@ -6,45 +6,10 @@ import org.junit.Test;
 
 /**
  * Created by Rob Austin
- *
+ * <p>
  * Tests that common mistakes are still parsed where we can
  */
 public class InvalidYamWithCommonMistakesTest {
-
-    public static class Dto extends AbstractMarshallable {
-        String y;
-        DtoB x;
-
-        String y() {
-            return y;
-        }
-
-        DtoB x() {
-            return x;
-        }
-
-        Dto(final String y, final DtoB x) {
-            this.y = y;
-            this.x = x;
-        }
-    }
-
-    public static class DtoB extends AbstractMarshallable {
-        String y;
-
-        public DtoB(final String y) {
-            this.y = y;
-        }
-
-        String y() {
-            return y;
-        }
-
-        public DtoB y(final String y) {
-            this.y = y;
-            return this;
-        }
-    }
 
     @Test
     public void testDtp() {
@@ -92,7 +57,6 @@ public class InvalidYamWithCommonMistakesTest {
                 "}\n");
 
     }
-
 
     @Test
     public void testBadTypeDtp0() {
@@ -152,7 +116,6 @@ public class InvalidYamWithCommonMistakesTest {
         Assert.assertEquals(expected, actual);
     }
 
-
     @Test
     public void testAssumeTypeBasedOnWhatIsIntheYamlWithSpace() {
 
@@ -186,6 +149,41 @@ public class InvalidYamWithCommonMistakesTest {
                 "}\n");
 
         Assert.assertEquals(expected, actual);
+    }
+
+    public static class Dto extends AbstractMarshallable {
+        String y;
+        DtoB x;
+
+        Dto(final String y, final DtoB x) {
+            this.y = y;
+            this.x = x;
+        }
+
+        String y() {
+            return y;
+        }
+
+        DtoB x() {
+            return x;
+        }
+    }
+
+    public static class DtoB extends AbstractMarshallable {
+        String y;
+
+        public DtoB(final String y) {
+            this.y = y;
+        }
+
+        String y() {
+            return y;
+        }
+
+        public DtoB y(final String y) {
+            this.y = y;
+            return this;
+        }
     }
 
 }

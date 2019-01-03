@@ -431,7 +431,7 @@ public class WireMarshaller<T> {
             IntValue f = (IntValue) field.get(o);
             if (f == null) {
                 f = read.wireIn().newIntReference();
-                field.set(o,f);
+                field.set(o, f);
             }
             read.int32(f);
         }
