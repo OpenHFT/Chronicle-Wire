@@ -684,6 +684,27 @@ public class BinaryWire2Test {
     }
 
     @Test
+    public void testUnicodeReadAndWrite() {
+
+        @NotNull Wire wire = createWire();
+        wire.writeDocument(false, w -> w.write("data")
+                .typePrefix("!UpdateEvent")
+                .marshallable(
+                        v -> {
+                            v.write("mm").text("你好")
+                                    .write("value").float64(15.0);
+                        }));
+
+        assertEquals("--- !!data #binary\n" +
+                "data: !!UpdateEvent {\n" +
+                "  mm: \"\\u4F60\\u597D\",\n" +
+                "  value: 15\n" +
+                "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
+        
+        wire.bytes().release();
+    }
+
+    @Test
     public void testWriteMap() {
         @NotNull Wire wire = new BinaryWire(Bytes.elasticByteBuffer());
 
