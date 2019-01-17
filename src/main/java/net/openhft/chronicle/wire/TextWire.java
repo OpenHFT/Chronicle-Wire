@@ -1484,7 +1484,7 @@ public class TextWire extends AbstractWire implements Wire {
             if (af >= 1e-3 && af < 1e6)
                 bytes.append(f);
             else
-                bytes.append(Float.toString(f));
+                bytes.append(floatToString(f));
             elementSeparator();
 
             return TextWire.this;
@@ -1523,11 +1523,19 @@ public class TextWire extends AbstractWire implements Wire {
                 }
 
             } else {
-                bytes.append(Double.toString(d));
+                bytes.append(doubleToString(d));
             }
             elementSeparator();
 
             return TextWire.this;
+        }
+
+        protected String doubleToString(double d) {
+            return Double.toString(d);
+        }
+
+        protected String floatToString(float f) {
+            return Float.toString(f);
         }
 
         @NotNull

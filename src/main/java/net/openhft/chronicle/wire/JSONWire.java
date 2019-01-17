@@ -174,6 +174,16 @@ public class JSONWire extends TextWire {
         @Override
         public void writeComment(@NotNull CharSequence s) {
         }
+
+        @Override
+        protected String doubleToString(double d) {
+            return Double.isNaN(d) ? "null" : super.doubleToString(d);
+        }
+
+        @Override
+        protected String floatToString(float f) {
+            return Float.isNaN(f) ? "null" : super.floatToString(f);
+        }
     }
 
     class JSONValueIn extends TextValueIn {
