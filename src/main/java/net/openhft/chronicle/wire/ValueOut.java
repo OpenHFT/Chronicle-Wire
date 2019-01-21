@@ -658,10 +658,16 @@ public interface ValueOut {
         } else if (value instanceof IntValue) {
             IntValue value2 = (IntValue) value;
             return int32forBinding(value2.getValue(), value2);
-        } else {
+        } else if (Wires.isInternal(value)){
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +
                     "AutoBoxed primitive Object");
+        } else {
+            String typeName = Wires.typeNameFor(value);
+            if (typeName != null)
+                typePrefix(typeName);
+            marshallable(w -> Wires.writeMarshallable(value, w));
+            return wireOut();
         }
     }
 

@@ -550,6 +550,13 @@ public enum Wires {
         ENCODE_TID_IN_HEADER = encodeTidInHeader;
     }
 
+    public static boolean isInternal(@NotNull Object value) {
+        String name = value.getClass().getPackage().getName();
+        return name.startsWith("java.")
+                || name.startsWith("javax.")
+                || name.startsWith("jdk.");
+    }
+
     enum SerializeEnum implements Function<Class, SerializationStrategy> {
         INSTANCE;
 
