@@ -100,9 +100,9 @@ public class WireTests {
         final Bytes b = Bytes.elasticByteBuffer();
         final Wire wire = wireType.apply(b);
         wire.getValueOut()
-                .object(new Date(0));
-        Assert.assertEquals(new Date(0), wire.getValueIn()
-                .object());
+                .object(new Date(1234567890000L));
+        Assert.assertEquals(new Date(1234567890000L), wire.getValueIn()
+                .object(Date.class));
 
         b.release();
     }

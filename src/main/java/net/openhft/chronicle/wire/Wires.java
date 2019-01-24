@@ -41,6 +41,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -484,9 +487,6 @@ public enum Wires {
         if (brackets == BracketType.UNKNOWN)
             brackets = in.getBracketType();
 
-        if (Date.class.isAssignableFrom(clazz))
-            return objectDate(in, using);
-
         if (BitSet.class.isAssignableFrom(clazz)) {
 
             PrimArrayWrapper longWrapper = new PrimArrayWrapper(long[].class);
@@ -577,6 +577,34 @@ public enum Wires {
     enum SerializeJavaLang implements Function<Class, SerializationStrategy> {
         INSTANCE;
 
+        private static SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy");
+        private static SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+        static {
+            sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+            sdf2.setTimeZone(TimeZone.getTimeZone("GMT"));
+        }
+
+        public static Date parseDate(ValueIn in) {
+            String text = in.text().trim();
+            try {
+                return new Date(Long.parseLong(text));
+            } catch (NumberFormatException nfe) {
+                try {
+                    synchronized (sdf) {
+                        return sdf.parse(text);
+                    }
+                } catch (ParseException pe) {
+                    try {
+                        synchronized (sdf2) {
+                            return sdf2.parse(text);
+                        }
+                    } catch (ParseException pe2) {
+                        throw new IORuntimeException(pe);
+                    }
+                }
+            }
+        }
+
         @Override
         public SerializationStrategy apply(@NotNull Class aClass) {
             switch (aClass.getName()) {
@@ -660,6 +688,12 @@ public enum Wires {
 
                 case "java.math.BigDecimal":
                     return ScalarStrategy.text(BigDecimal.class, BigDecimal::new);
+
+                case "java.util.Date":
+                    return ScalarStrategy.of(Date.class, (o, in) -> parseDate(in));
+
+                case "java.sql.Timestamp":
+                    return ScalarStrategy.of(Timestamp.class, (o, in) -> new Timestamp(parseDate(in).getTime()));
 
                 default:
                     if (aClass.isPrimitive())

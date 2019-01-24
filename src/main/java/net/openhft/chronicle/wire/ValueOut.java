@@ -585,11 +585,10 @@ public interface ValueOut {
                 return optionalTyped(LocalDateTime.class).dateTime((LocalDateTime) value);
             case "java.time.ZonedDateTime":
                 return optionalTyped(ZonedDateTime.class).zonedDateTime((ZonedDateTime) value);
-            case "java.util.Date":
-                long time = ((Date) value).getTime();
-                return typePrefix(value.getClass()).fixedInt64(time);
             case "java.util.UUID":
                 return optionalTyped(UUID.class).uuid((UUID) value);
+            case "java.util.Date":
+            case "java.sql.Timestamp":
             case "java.math.BigInteger":
             case "java.math.BigDecimal":
             case "java.io.File":

@@ -266,11 +266,11 @@ public class BinaryWire2Test {
         @NotNull Wire wire = createWire();
 
         try (final DocumentContext dc = wire.writingDocument(true)) {
-            dc.wire().write().object(new Date(0));
+            dc.wire().write().object(new Date(1234567890000L));
         }
         try (final DocumentContext dc = wire.readingDocument()) {
             System.out.println(Wires.fromSizePrefixedBlobs(dc));
-            Assert.assertEquals(0, dc.wire().read().object(Date.class).getTime());
+            Assert.assertEquals(1234567890000L, dc.wire().read().object(Date.class).getTime());
         }
     }
 

@@ -12,9 +12,10 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.security.Timestamp;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -26,12 +27,15 @@ public class WireToOutputStreamTest {
         long value;
         String text;
 
-        Timestamp timestamp1;
-        Timestamp timestamp=null;
+        Timestamp timestamp = new Timestamp(1234567890000L);
 
         @Override
         public String toString() {
-            return "AnObject{" + "value=" + value + ", text='" + text + '\'' + '}';
+            return "AnObject{" +
+                    "value=" + value +
+                    ", text='" + text + '\'' +
+                    ", timestamp=" + timestamp +
+                    '}';
         }
     }
     private WireType currentWireType;
@@ -55,6 +59,18 @@ public class WireToOutputStreamTest {
         }
 
         return wireTypes;
+    }
+
+    @Test
+    public void testTimestamp() {
+        Wire wire = currentWireType.apply(Bytes.elasticHeapByteBuffer(128));
+        Timestamp ts = new Timestamp(1234567890000L);
+        wire.write().object(ts);
+        System.out.println(wire);
+
+        Timestamp ts2 = wire.read()
+                .object(Timestamp.class);
+        assertEquals(ts.toString(), ts2.toString());
     }
 
     @Test
