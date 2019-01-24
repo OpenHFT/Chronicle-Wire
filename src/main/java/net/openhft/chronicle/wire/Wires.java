@@ -707,6 +707,8 @@ public enum Wires {
                 return ANY_NESTED;
             if (Comparable.class.isAssignableFrom(aClass))
                 return ANY_SCALAR;
+            if (aClass.isInterface())
+                return null;
             return ANY_NESTED;
         }
     }

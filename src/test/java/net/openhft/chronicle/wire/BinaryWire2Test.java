@@ -800,6 +800,16 @@ public class BinaryWire2Test {
         }
     }
 
+    @Test
+    public void readCharSequence() {
+        Wire wire = createWire();
+        wire.write().object("hello world");
+
+        CharSequence s = wire.read()
+                .object(CharSequence.class);
+        assertEquals("hello world", s);
+    }
+
     static class BytesHolder extends AbstractMarshallable {
         final Bytes bytes = Bytes.elasticHeapByteBuffer(64);
 
