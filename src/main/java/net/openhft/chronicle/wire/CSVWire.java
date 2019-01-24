@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +38,12 @@ public class CSVWire extends TextWire {
 
     public CSVWire(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
-        while (lineStart == 0)
+        while (lineStart == 0) {
+            long start = bytes.readPosition();
             header.add(valueIn.text());
+            if (bytes.readPosition() == start)
+                break;
+        }
     }
 
     public CSVWire(@NotNull Bytes bytes) {
@@ -134,7 +139,17 @@ public class CSVWire extends TextWire {
     }
 
     class CSVValueOut extends TextValueOut {
+        @NotNull
+        @Override
+        public WireOut typeLiteral(@NotNull CharSequence type) {
+            throw new UnsupportedOperationException("Type literals not supported in CSV, cannot write " + type);
+        }
 
+        @NotNull
+        @Override
+        public WireOut marshallable(@NotNull Serializable object) {
+            throw new UnsupportedOperationException("Serializable objects not supported in CSV, cannot write " + object);
+        }
     }
 
     class CSVValueIn extends TextValueIn {
@@ -266,4 +281,5 @@ public class CSVWire extends TextWire {
             return true;
         }
     }
+
 }

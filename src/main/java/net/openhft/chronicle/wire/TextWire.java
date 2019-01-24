@@ -2233,7 +2233,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         protected int peekBack() {
-            while (bytes.readPosition() >= bytes.start()) {
+            while (bytes.readPosition() > bytes.start()) {
                 int prev = bytes.readUnsignedByte(bytes.readPosition() - 1);
                 if (prev != ' ') {
                     if (prev == '\n' || prev == '\r') {

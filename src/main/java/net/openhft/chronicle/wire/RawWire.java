@@ -1138,7 +1138,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @Override
         public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type) {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("Cannot read " + using + " valure and " + type + " type for RawWire");
         }
     }
 }
