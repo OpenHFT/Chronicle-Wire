@@ -21,9 +21,11 @@ import net.openhft.chronicle.bytes.MethodWriterBuilder;
 import net.openhft.chronicle.bytes.MethodWriterInterceptor;
 import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
 import net.openhft.chronicle.bytes.MethodWriterListener;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,10 +36,13 @@ import java.util.function.Supplier;
  */
 public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterBuilder<T> {
 
+
     private final List<Class> interfaces = new ArrayList<>();
     @NotNull
     private final MethodWriterInvocationHandler handler;
     private ClassLoader classLoader;
+    private Class<? extends T> proxyClass;
+
     private String genericEvent = "";
 
     public VanillaMethodWriterBuilder(@NotNull Class<T> tClass, @NotNull MethodWriterInvocationHandler handler) {
@@ -89,10 +94,24 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return get();
     }
 
-    // Supplier terminology
+
     @NotNull
     @Override
     public T get() {
+        if (proxyClass != null) {
+            Constructor<?>[] constructors = proxyClass.getConstructors();
+            try {
+                @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
+                //noinspection unchecked
+                Object o = Proxy.newProxyInstance(classLoader, interfacesArr, handler);
+
+                return (T) constructors[0].newInstance(new Object[]{o, handler});
+            } catch (Exception e) {
+                // do nothing and drop through
+                Jvm.warn().on(getClass(), e);
+            }
+        }
+
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
         //noinspection unchecked
         return (T) Proxy.newProxyInstance(classLoader, interfacesArr, handler);
@@ -113,4 +132,14 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         handler.useMethodIds(useMethodIds);
         return this;
     }
+
+    public Class<? extends T> proxyClass() {
+        return proxyClass;
+    }
+
+    public MethodWriterBuilder<T> proxyClass(Class<? extends T> proxyClass) {
+        this.proxyClass = proxyClass;
+        return this;
+    }
+
 }
