@@ -94,7 +94,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return get();
     }
 
-    private Class<? extends Marshallable> proxyClass;
+    private Class<?> proxyClass;
 
     private static Class generatedProxyClass(Set<Class> interfaces) {
         return GeneratedProxyClass.from(interfaces, "Proxy" + proxyCount.getAndIncrement());
@@ -156,11 +156,11 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return this;
     }
 
-    public Class<? extends Marshallable> proxyClass() {
+    public Class<?> proxyClass() {
         return proxyClass;
     }
 
-    public MethodWriterBuilder<T> proxyClass(Class<? extends Marshallable> proxyClass) {
+    public MethodWriterBuilder<T> proxyClass(Class<?> proxyClass) {
         if (proxyClass.isInterface())
             throw new IllegalArgumentException("expecting a class rather than an interface, proxyClass=" + proxyClass);
         this.proxyClass = proxyClass;
