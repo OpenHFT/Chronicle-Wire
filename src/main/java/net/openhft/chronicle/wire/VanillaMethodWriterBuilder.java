@@ -27,8 +27,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 /*
@@ -36,14 +37,11 @@ import java.util.function.Supplier;
  */
 public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterBuilder<T> {
 
-
     private final List<Class> interfaces = new ArrayList<>();
     @NotNull
     private final MethodWriterInvocationHandler handler;
     private ClassLoader classLoader;
-    private Class<? extends T> proxyClass;
-
-    private String genericEvent = "";
+    private static ConcurrentHashMap<Set<Class>, Class> setOfClassesToClassName = new ConcurrentHashMap<Set<Class>, Class>();
 
     public VanillaMethodWriterBuilder(@NotNull Class<T> tClass, @NotNull MethodWriterInvocationHandler handler) {
         interfaces.add(Closeable.class);
@@ -51,6 +49,8 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         classLoader = tClass.getClassLoader();
         this.handler = handler;
     }
+
+    private static AtomicInteger proxyCount = new AtomicInteger();
 
     @NotNull
     public MethodWriterBuilder<T> classLoader(ClassLoader classLoader) {
@@ -94,6 +94,11 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return get();
     }
 
+    private Class<? extends Marshallable> proxyClass;
+
+    private static Class generatedProxyClass(Set<Class> interfaces) {
+        return GeneratedProxyClass.from(interfaces, "Proxy" + proxyCount.getAndIncrement());
+    }
 
     @NotNull
     @Override
@@ -103,13 +108,31 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
             try {
                 @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
                 //noinspection unchecked
-                Object o = Proxy.newProxyInstance(classLoader, interfacesArr, handler);
+                Object proxy = Proxy.newProxyInstance(classLoader, interfacesArr, handler);
 
-                return (T) constructors[0].newInstance(new Object[]{o, handler});
+                return (T) constructors[0].newInstance(new Object[]{proxy, handler});
             } catch (Exception e) {
                 // do nothing and drop through
                 Jvm.warn().on(getClass(), e);
             }
+        }
+
+        try {
+            @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
+            Object proxy = Proxy.newProxyInstance(classLoader, interfacesArr, handler);
+
+            Set<Class> interfaces = new HashSet<>();
+            Collections.addAll(interfaces, interfacesArr);
+
+            // this will create proxy that does not suffer from the arg[] issue
+            final Class o = setOfClassesToClassName.computeIfAbsent(interfaces, VanillaMethodWriterBuilder::generatedProxyClass);
+
+            Constructor constructor = o.getConstructors()[0];
+            return (T) constructor.newInstance(new Object[]{proxy, handler});
+
+        } catch (Exception e) {
+            // do nothing and drop through
+            Jvm.warn().on(getClass(), e);
         }
 
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
@@ -133,11 +156,13 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return this;
     }
 
-    public Class<? extends T> proxyClass() {
+    public Class<? extends Marshallable> proxyClass() {
         return proxyClass;
     }
 
-    public MethodWriterBuilder<T> proxyClass(Class<? extends T> proxyClass) {
+    public MethodWriterBuilder<T> proxyClass(Class<? extends Marshallable> proxyClass) {
+        if (proxyClass.isInterface())
+            throw new IllegalArgumentException("expecting a class rather than an interface, proxyClass=" + proxyClass);
         this.proxyClass = proxyClass;
         return this;
     }
