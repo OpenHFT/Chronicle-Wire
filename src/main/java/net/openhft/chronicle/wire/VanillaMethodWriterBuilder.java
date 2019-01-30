@@ -28,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
@@ -41,7 +41,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     @NotNull
     private final MethodWriterInvocationHandler handler;
     private ClassLoader classLoader;
-    private static ConcurrentHashMap<Set<Class>, Class> setOfClassesToClassName = new ConcurrentHashMap<Set<Class>, Class>();
+    private static Map<Set<Class>, Class> setOfClassesToClassName = new ConcurrentSkipListMap<>();
 
     public VanillaMethodWriterBuilder(@NotNull Class<T> tClass, @NotNull MethodWriterInvocationHandler handler) {
         interfaces.add(Closeable.class);
@@ -50,7 +50,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         this.handler = handler;
     }
 
-    private static AtomicLong proxyCount = new AtomicLong(System.currentTimeMillis());
+    private static AtomicLong proxyCount = new AtomicLong(System.nanoTime());
 
     @NotNull
     public MethodWriterBuilder<T> classLoader(ClassLoader classLoader) {
