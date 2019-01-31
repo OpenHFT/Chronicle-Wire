@@ -113,7 +113,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
                 return (T) constructors[0].newInstance(new Object[]{proxy, handler});
             } catch (Exception e) {
                 // do nothing and drop through
-                Jvm.warn().on(getClass(), e);
+                Jvm.debug().on(getClass(), e);
             }
         }
 
@@ -132,7 +132,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
         } catch (Exception e) {
             // do nothing and drop through
-            Jvm.warn().on(getClass(), e);
+            Jvm.debug().on(getClass(), e);
         }
 
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
