@@ -97,7 +97,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     private Class<?> proxyClass;
 
     private static Class generatedProxyClass(Set<Class> interfaces) {
-        return GeneratedProxyClass.from(interfaces, "Proxy" + proxyCount.getAndIncrement());
+        return GeneratedProxyClass.from(interfaces, "Proxy" + proxyCount.incrementAndGet());
     }
 
     @NotNull
