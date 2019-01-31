@@ -50,7 +50,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         this.handler = handler;
     }
 
-    private static AtomicLong proxyCount = new AtomicLong(System.nanoTime());
+    private static AtomicLong proxyCount = new AtomicLong();
 
     @NotNull
     public MethodWriterBuilder<T> classLoader(ClassLoader classLoader) {
