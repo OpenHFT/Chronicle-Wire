@@ -74,11 +74,10 @@ public enum GeneratedProxyClass {
         createProxyMethods(methods, sb);
         sb.append("}\n");
 
-        System.out.println(sb.toString());
         try {
             return CompilerUtils.CACHED_COMPILER.loadFromJava(PACKAGE + "." + className, sb.toString());
         } catch (ClassNotFoundException e) {
-            throw Jvm.rethrow(e);
+            throw Jvm.rethrow(new ClassNotFoundException(sb.toString(), e));
         }
 
     }
