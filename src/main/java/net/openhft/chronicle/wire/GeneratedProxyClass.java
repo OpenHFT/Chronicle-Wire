@@ -57,11 +57,16 @@ public enum GeneratedProxyClass {
 
             int j = -1;
             for (final Method dm : interfaceClazz.getMethods()) {
+
+                if (dm.isDefault())
+                    continue;
+
                 if (dm.getExceptionTypes().length > 0)
                     return null;
 
                 if (dm.getGenericReturnType() instanceof TypeVariableImpl)
                     return null;
+
                 j++;
                 if (!methods.add(dm))
                     continue;

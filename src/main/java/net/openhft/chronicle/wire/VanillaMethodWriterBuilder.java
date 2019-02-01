@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -96,7 +97,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
     private Class<?> proxyClass;
 
-    private static Class generatedProxyClass(Set<Class> interfaces) {
+    private static <T> Class generatedProxyClass(Set<Class> interfaces) {
         return GeneratedProxyClass.from(interfaces, "Proxy" + proxyCount.incrementAndGet());
     }
 
@@ -104,14 +105,16 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     @Override
     public T get() {
         if (proxyClass != null) {
-            Constructor<?>[] constructors = proxyClass.getConstructors();
+
             try {
+                Constructor<T> constructors = (Constructor) proxyClass.getConstructor(Object.class, InvocationHandler.class);
+
                 @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
                 //noinspection unchecked
                 Object proxy = Proxy.newProxyInstance(classLoader, interfacesArr, handler);
 
-                return (T) constructors[0].newInstance(new Object[]{proxy, handler});
-            } catch (Exception e) {
+                return (T) constructors.newInstance(proxy, handler);
+            } catch (Throwable e) {
                 // do nothing and drop through
                 Jvm.debug().on(getClass(), e);
             }
@@ -125,11 +128,10 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
             Collections.addAll(interfaces, interfacesArr);
 
             // this will create proxy that does not suffer from the arg[] issue
-            final Class o = setOfClassesToClassName.computeIfAbsent(interfaces, VanillaMethodWriterBuilder::generatedProxyClass);
-            if (o != null) {
-                Constructor constructor = o.getConstructors()[0];
-                return (T) constructor.newInstance(new Object[]{proxy, handler});
-            }
+            final Class<T> o = setOfClassesToClassName.computeIfAbsent(interfaces, VanillaMethodWriterBuilder::generatedProxyClass);
+            if (o != null)
+                return o.getConstructor(Object.class, InvocationHandler.class).newInstance(proxy, handler);
+            
         } catch (Throwable e) {
             // do nothing and drop through
             Jvm.debug().on(getClass(), e);
