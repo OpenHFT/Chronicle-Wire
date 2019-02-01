@@ -126,10 +126,10 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
             // this will create proxy that does not suffer from the arg[] issue
             final Class o = setOfClassesToClassName.computeIfAbsent(interfaces, VanillaMethodWriterBuilder::generatedProxyClass);
-
-            Constructor constructor = o.getConstructors()[0];
-            return (T) constructor.newInstance(new Object[]{proxy, handler});
-
+            if (o != null) {
+                Constructor constructor = o.getConstructors()[0];
+                return (T) constructor.newInstance(new Object[]{proxy, handler});
+            }
         } catch (Throwable e) {
             // do nothing and drop through
             Jvm.debug().on(getClass(), e);

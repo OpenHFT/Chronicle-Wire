@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.compiler.CompilerUtils;
+import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -23,11 +24,11 @@ public enum GeneratedProxyClass {
 
     /**
      * @param interfaces an interface class
-     * @return a proxy class from an interface class
+     * @return a proxy class from an interface class or null if it can't be created
      */
     public static Class from(Set<Class> interfaces, String className) {
         int maxArgs = 0;
-        LinkedHashSet<Method> methods = new LinkedHashSet<Method>();
+        LinkedHashSet<Method> methods = new LinkedHashSet<>();
 
         StringBuilder sb = new StringBuilder("package " + PACKAGE + ";\n\n" +
                 "import net.openhft.chronicle.core.Jvm;\n" +
@@ -53,8 +54,14 @@ public enum GeneratedProxyClass {
             if (!interfaceClazz.isInterface())
                 throw new IllegalArgumentException("expecting and interface instead of class=" + interfaceClazz.getName());
 
+
             int j = -1;
             for (final Method dm : interfaceClazz.getMethods()) {
+                if (dm.getExceptionTypes().length > 0)
+                    return null;
+
+                if (dm.getGenericReturnType() instanceof TypeVariableImpl)
+                    return null;
                 j++;
                 if (!methods.add(dm))
                     continue;
@@ -146,7 +153,12 @@ public enum GeneratedProxyClass {
         final int len = dm.getParameters().length;
         final StringBuilder result = new StringBuilder();
 
-        result.append("  public ").append(returnType.getName() + " ").append(dm.getName()).append("(");
+        // Type genericSuperclass = returnType.getGenericSuperclass();
+        //  if (genericSuperclass instanceof ParameterizedType)
+        //    ((ParameterizedType)genericSuperclass)
+
+        String typeName = returnType.getName();
+        result.append("  public ").append(typeName + " ").append(dm.getName()).append("(");
 
         for (int j = 0; j < len; j++) {
             Parameter p = dm.getParameters()[j];
