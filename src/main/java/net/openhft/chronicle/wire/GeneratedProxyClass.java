@@ -77,7 +77,7 @@ public enum GeneratedProxyClass {
         try {
             return CompilerUtils.CACHED_COMPILER.loadFromJava(PACKAGE + "." + className, sb.toString());
         } catch (ClassNotFoundException e) {
-            throw Jvm.rethrow(new ClassNotFoundException(sb.toString(), e));
+            throw Jvm.rethrow(new ClassNotFoundException(e.getCause() + "\n" + sb.toString(), e));
         }
 
     }
