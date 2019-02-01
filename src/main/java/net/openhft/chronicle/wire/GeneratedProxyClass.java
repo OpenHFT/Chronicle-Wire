@@ -75,18 +75,11 @@ public enum GeneratedProxyClass {
         sb.append("}\n");
 
         try {
-            return CompilerUtils.CACHED_COMPILER.loadFromJava(GeneratedProxyClass.class.getClassLoader(), PACKAGE + "." + className, sb.toString());
-        } catch (Throwable e) {
-            if (e.getMessage().contains("java.lang.ClassFormatError: Truncated class file")) {
-                // try again - I'm not sure why this sometimes happens, but it seams that retying helps. Possible race condition, requires further investigation
-                try {
-                    return CompilerUtils.CACHED_COMPILER.loadFromJava(GeneratedProxyClass.class.getClassLoader(), PACKAGE + "." + className, sb.toString());
-                } catch (Throwable e2) {
-                    throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + "\n" + sb.toString(), e2));
-                }
-
+            // synchronizing due to ConcurrentModificationException in net.openhft.compiler.MyJavaFileManager.buffers
+            synchronized (GeneratedProxyClass.class) {
+                return CompilerUtils.CACHED_COMPILER.loadFromJava(GeneratedProxyClass.class.getClassLoader(), PACKAGE + "." + className, sb.toString());
             }
-
+        } catch (Throwable e) {
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + "\n" + sb.toString(), e));
         }
 
