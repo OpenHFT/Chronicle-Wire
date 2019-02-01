@@ -130,7 +130,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
             Constructor constructor = o.getConstructors()[0];
             return (T) constructor.newInstance(new Object[]{proxy, handler});
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
             // do nothing and drop through
             Jvm.debug().on(getClass(), e);
         }
