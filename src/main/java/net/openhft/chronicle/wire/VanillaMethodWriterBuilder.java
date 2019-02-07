@@ -89,7 +89,6 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return this;
     }
 
-    // Builder terminology
     @NotNull
     public T build() {
         return get();
