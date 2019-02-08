@@ -105,6 +105,10 @@
             <artifactId>snakeyaml</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>compiler</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -230,7 +234,7 @@
         <url>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</url>
         <connection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</connection>
         <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</developerConnection>
-        <tag>chronicle-wire-1.12.7</tag>
+        <tag>mater</tag>
     </scm>
 
 </project>
