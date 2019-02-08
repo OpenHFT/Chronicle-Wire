@@ -21,12 +21,16 @@ import net.openhft.chronicle.bytes.MethodWriterBuilder;
 import net.openhft.chronicle.bytes.MethodWriterInterceptor;
 import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
 import net.openhft.chronicle.bytes.MethodWriterListener;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 /*
@@ -38,7 +42,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     @NotNull
     private final MethodWriterInvocationHandler handler;
     private ClassLoader classLoader;
-    private String genericEvent = "";
+    private static Map<Set<Class>, Class> setOfClassesToClassName = new ConcurrentHashMap<>();
 
     public VanillaMethodWriterBuilder(@NotNull Class<T> tClass, @NotNull MethodWriterInvocationHandler handler) {
         interfaces.add(Closeable.class);
@@ -46,6 +50,8 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         classLoader = tClass.getClassLoader();
         this.handler = handler;
     }
+
+    private static AtomicLong proxyCount = new AtomicLong();
 
     @NotNull
     public MethodWriterBuilder<T> classLoader(ClassLoader classLoader) {
@@ -83,16 +89,53 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return this;
     }
 
-    // Builder terminology
     @NotNull
     public T build() {
         return get();
     }
 
-    // Supplier terminology
+    private Class<?> proxyClass;
+
+    private static <T> Class generatedProxyClass(Set<Class> interfaces) {
+        return GeneratedProxyClass.from(interfaces, "Proxy" + proxyCount.incrementAndGet());
+    }
+
     @NotNull
     @Override
     public T get() {
+        if (proxyClass != null) {
+
+            try {
+                Constructor<T> constructors = (Constructor) proxyClass.getConstructor(Object.class, InvocationHandler.class);
+
+                @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
+                //noinspection unchecked
+                Object proxy = Proxy.newProxyInstance(classLoader, interfacesArr, handler);
+
+                return (T) constructors.newInstance(proxy, handler);
+            } catch (Throwable e) {
+                // do nothing and drop through
+                Jvm.debug().on(getClass(), e);
+            }
+        }
+
+        try {
+            @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
+            Object proxy = Proxy.newProxyInstance(classLoader, interfacesArr, handler);
+
+            Set<Class> interfaces = new HashSet<>();
+            Collections.addAll(interfaces, interfacesArr);
+
+            // this will create proxy that does not suffer from the arg[] issue
+            final Class<T> o = setOfClassesToClassName.computeIfAbsent(interfaces, VanillaMethodWriterBuilder::generatedProxyClass);
+            if (o != null)
+                return o.getConstructor(Object.class, InvocationHandler.class).newInstance(proxy, handler);
+
+        } catch (Throwable e) {
+            // do nothing and drop through
+            Jvm.debug().on(getClass(), e);
+        }
+
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
         //noinspection unchecked
         return (T) Proxy.newProxyInstance(classLoader, interfacesArr, handler);
@@ -113,4 +156,16 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         handler.useMethodIds(useMethodIds);
         return this;
     }
+
+    public Class<?> proxyClass() {
+        return proxyClass;
+    }
+
+    public MethodWriterBuilder<T> proxyClass(Class<?> proxyClass) {
+        if (proxyClass.isInterface())
+            throw new IllegalArgumentException("expecting a class rather than an interface, proxyClass=" + proxyClass);
+        this.proxyClass = proxyClass;
+        return this;
+    }
+
 }
