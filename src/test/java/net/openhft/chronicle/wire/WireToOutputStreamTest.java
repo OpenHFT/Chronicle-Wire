@@ -11,11 +11,9 @@ import org.junit.runners.Parameterized.Parameters;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -102,6 +100,7 @@ public class WireToOutputStreamTest {
         }
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @NotNull
     public Object readAnObject(Wire wire2) {
         Class type = wire2.getValueIn().typeLiteral();

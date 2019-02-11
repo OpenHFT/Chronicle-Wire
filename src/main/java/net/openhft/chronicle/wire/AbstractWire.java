@@ -35,7 +35,6 @@ import java.io.EOFException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.StreamCorruptedException;
-import java.nio.BufferUnderflowException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -100,6 +99,7 @@ public abstract class AbstractWire implements Wire {
     private boolean insideHeader;
     private HeadNumberChecker headNumberChecker;
 
+    @SuppressWarnings("rawtypes")
     public AbstractWire(@NotNull Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
         this.use8bit = use8bit;
