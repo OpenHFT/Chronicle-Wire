@@ -179,22 +179,9 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             throw licence;
         }
 
-        private Boolean isAvailable;
-
         @Override
         public boolean isAvailable() {
-            if (isAvailable != null)
-                return isAvailable;
-
-            try {
-                Class<?> e = Class.forName("software.chronicle.wire.DefaultZeroWire");
-                e.getDeclaredConstructor(Bytes.class);
-                isAvailable = true;
-                return true;
-            } catch (Exception var4) {
-                isAvailable = false;
-                return false;
-            }
+            return IS_DEFAULT_ZERO_AVAILABLE;
         }
 
         @NotNull
@@ -241,21 +228,9 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             throw licence;
         }
 
-        private final boolean isAvailable = isAvailable0();
-
-        private boolean isAvailable0() {
-            try {
-                Class.forName("software.chronicle.wire.DeltaWire")
-                        .getDeclaredConstructor(Bytes.class);
-                return true;
-            } catch (Exception fallback) {
-                return false;
-            }
-        }
-
         @Override
         public boolean isAvailable() {
-            return isAvailable;
+            return IS_DELTA_AVAILABLE;
         }
 
         @NotNull
@@ -353,8 +328,28 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     static final BytesStore PREABLE = BytesStore.from("--- ");
     private static final Logger LOG = LoggerFactory.getLogger(WireType.class);
     private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
+    private static final boolean IS_DELTA_AVAILABLE = isDeltaAvailable();
+    private static final boolean IS_DEFAULT_ZERO_AVAILABLE = isDefaultZeroAvailable();
 
-    @Nullable
+    private static boolean isDeltaAvailable() {
+        try {
+            Class.forName("software.chronicle.wire.DeltaWire").getDeclaredConstructor(Bytes.class);
+            return true;
+        } catch (Exception fallback) {
+            return false;
+        }
+    }
+
+    private static boolean isDefaultZeroAvailable() {
+        try {
+            Class.forName("software.chronicle.wire.DefaultZeroWire").getDeclaredConstructor(Bytes.class);
+            return true;
+        } catch (Exception var4) {
+            return false;
+        }
+    }
+
+    @NotNull
     static Bytes getBytes() {
         // when in debug, the output becomes confused if you reuse the buffer.
         if (Jvm.isDebug())
@@ -362,12 +357,12 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         return Wires.acquireBytes();
     }
 
-    @Nullable
+    @NotNull
     static Bytes getBytesForToString() {
         return Wires.acquireBytesForToString();
     }
 
-    @Nullable
+    @NotNull
     static Bytes getBytes2() {
         // when in debug, the output becomes confused if you reuse the buffer.
         if (Jvm.isDebug())
@@ -436,7 +431,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         return bytes.toString();
     }
 
-    @Nullable
+    @NotNull
     private Bytes asBytes(Object marshallable) {
         Bytes bytes = getBytesForToString();
         Wire wire = apply(bytes);
@@ -576,7 +571,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         }
     }
 
-    public <T> void toFile(@NotNull String filename, WriteMarshallable marshallable) throws IOException {
+    public void toFile(@NotNull String filename, WriteMarshallable marshallable) throws IOException {
         Bytes bytes = getBytes();
         Wire wire = apply(bytes);
         wire.getValueOut().typedMarshallable(marshallable);
