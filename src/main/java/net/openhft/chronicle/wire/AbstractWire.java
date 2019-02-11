@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesComment;
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.StackTrace;
@@ -34,14 +35,12 @@ import java.io.EOFException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.StreamCorruptedException;
+import java.nio.BufferUnderflowException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static net.openhft.chronicle.wire.Wires.*;
 
-/*
- * Created by Peter Lawrey on 10/03/16.
- */
 public abstract class AbstractWire implements Wire {
     protected static final boolean ASSERTIONS;
     private static final String INSIDE_HEADER_MESSAGE = "you cant put a header inside a header, check that " +
@@ -252,6 +251,22 @@ public abstract class AbstractWire implements Wire {
     private void setLimitPosition(int header) {
         bytes.readLimit(bytes.readPosition() + lengthOf(header) + SPB_HEADER_SIZE)
                 .readSkip(SPB_HEADER_SIZE);
+    }
+
+    @Override
+    public void readFirstHeader() throws StreamCorruptedException {
+        int header;
+        if (bytes.realCapacity() >= 4) {
+            header = bytes.readVolatileInt(0L);
+            if (!isReady(header))
+                throw new StreamCorruptedException("Not ready header is found");
+            int len = lengthOf(header);
+            if (!isReadyMetaData(header) || len > 64 << 10)
+                throw new StreamCorruptedException("Unexpected magic number " + Integer.toHexString(header));
+            bytes.readPositionRemaining(SPB_HEADER_SIZE, len);
+        } else {
+            throw new DecoratedBufferUnderflowException("Not enough capacity to read from");
+        }
     }
 
     @Override

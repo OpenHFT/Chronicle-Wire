@@ -194,6 +194,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     void readAndSetLength(long position);
 
     void readFirstHeader(long timeout, TimeUnit timeUnit) throws TimeoutException, StreamCorruptedException;
+    void readFirstHeader() throws StreamCorruptedException;
 
     void readMetaDataHeader();
 
