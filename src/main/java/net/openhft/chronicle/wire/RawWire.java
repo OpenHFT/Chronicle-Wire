@@ -44,6 +44,7 @@ import java.util.function.*;
 /**
  * This format writes just the data, without meta data.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class RawWire extends AbstractWire implements Wire {
     private final RawValueOut valueOut = new RawValueOut();
     private final RawValueIn valueIn = new RawValueIn();
@@ -52,9 +53,7 @@ public class RawWire extends AbstractWire implements Wire {
     boolean use8bit;
     private ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
     @Nullable
-    private
-    StringBuilder lastSB;
-    private boolean ready;
+    private StringBuilder lastSB;
 
     public RawWire(@NotNull Bytes bytes) {
         this(bytes, true);
