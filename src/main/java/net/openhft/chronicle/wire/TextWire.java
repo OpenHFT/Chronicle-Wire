@@ -53,6 +53,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 /**
  * YAML Based wire format
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class TextWire extends AbstractWire implements Wire {
     public static final BytesStore TYPE = BytesStore.from("!type ");
     public static final BytesStore BINARY = Bytes.from("!!binary");
@@ -467,13 +468,6 @@ public class TextWire extends AbstractWire implements Wire {
         }
         //      consumePadding();
         return toExpected(expectedClass, sb);
-    }
-
-    private void parseText(StringBuilder sb) {
-        if (strict)
-            parseUntil(sb, getStrictEscapingEndOfText());
-        else
-            parseUntil(sb, getEscapingEndOfText());
     }
 
     @Nullable
@@ -1952,17 +1946,6 @@ public class TextWire extends AbstractWire implements Wire {
             sep = END_FIELD;
         }
 
-        private void object2(Object v) {
-            if (v instanceof CharSequence)
-                text((CharSequence) v);
-            else if (v instanceof WriteMarshallable)
-                typedMarshallable((WriteMarshallable) v);
-            else if (v == null)
-                append(nullOut());
-            else
-                text(String.valueOf(v));
-        }
-
         @NotNull
         @Override
         public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map) {
@@ -3157,8 +3140,8 @@ public class TextWire extends AbstractWire implements Wire {
                     while (hasNext()) {
                         sequence(this, (o, s) -> s.marshallable(r -> {
                             try {
-                                @Nullable @SuppressWarnings("unchecked") final K k = r.read(() -> "key").typedMarshallable();
-                                @Nullable @SuppressWarnings("unchecked") final V v = r.read(() -> "value").typedMarshallable();
+                                @Nullable final K k = r.read(() -> "key").typedMarshallable();
+                                @Nullable final V v = r.read(() -> "value").typedMarshallable();
                                 usingMap.put(k, v);
                             } catch (Exception e) {
                                 Jvm.warn().on(getClass(), e);
@@ -3450,23 +3433,6 @@ public class TextWire extends AbstractWire implements Wire {
                 throw new UnsupportedOperationException("Arrays of type "
                         + clazz + " not supported.");
             }
-        }
-
-        private Object typedObject() {
-            readCode();
-            @NotNull StringBuilder sb = acquireStringBuilder();
-            parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
-            if (StringUtils.isEqual(sb, "!null")) {
-                text();
-                return null;
-            }
-            final Class clazz2;
-            try {
-                clazz2 = classLookup().forName(sb);
-            } catch (ClassNotFoundException e) {
-                throw new IORuntimeException(e);
-            }
-            return object(null, clazz2);
         }
 
         @Override
