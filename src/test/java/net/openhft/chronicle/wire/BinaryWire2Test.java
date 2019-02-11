@@ -18,7 +18,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
-import net.openhft.chronicle.bytes.util.Compressions;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -476,10 +475,7 @@ public class BinaryWire2Test {
     }
 
     @Test
-    public void testSnappyCompressWithGzip() {
-        if (!Compressions.Snappy.available())
-            return;
-
+    public void testCompressWithGzip() {
         @NotNull Wire wire = createWire();
         @NotNull String s = "xxxxxxxxxxxxxxxx" +
                 "xxxxxxxxxxxxxxxx" +
