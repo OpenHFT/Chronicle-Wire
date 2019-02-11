@@ -34,8 +34,9 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 /**
- * THis wire decodes URL query strings.
+ * This wire decodes URL query strings.
  */
+@SuppressWarnings("rawtypes")
 public class QueryWire extends TextWire {
     final QueryValueOut valueOut = new QueryValueOut();
     final ValueIn valueIn = new QueryValueIn();
@@ -411,6 +412,7 @@ public class QueryWire extends TextWire {
             return wireIn();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public <T> Class<T> typeLiteral() throws IORuntimeException {
             StringBuilder sb = WireInternal.acquireStringBuilder();
