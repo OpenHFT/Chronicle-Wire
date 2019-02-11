@@ -59,7 +59,7 @@ public class VanillaMethodWriterBuilderTest {
     private String doUseMethodId(boolean useMethodIds) {
         HexDumpBytes bytes = new HexDumpBytes();
         BinaryWire wire = new BinaryWire(bytes);
-        WithMethodId id = wire.methodWriterBuilder(WithMethodId.class).useMethodIds(useMethodIds).build();
+        WithMethodId id = wire.methodWriterBuilder(WithMethodId.class).useMethodIds(useMethodIds).get();
         id.method1("hello");
         id.method2(new MWB("world", 123, 3.456));
         id.method3(1234567890L);
