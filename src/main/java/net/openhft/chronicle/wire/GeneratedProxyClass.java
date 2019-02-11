@@ -1,13 +1,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.compiler.CompilerUtils;
 import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -41,7 +39,7 @@ public enum GeneratedProxyClass {
 
         final Iterator<Class> iterator = interfaces.iterator();
 
-        StringBuilder methodArray = new StringBuilder();
+        final StringBuilder methodArray = new StringBuilder();
         int count = 0;
 
         // create methodArray
@@ -53,7 +51,6 @@ public enum GeneratedProxyClass {
 
             if (!interfaceClazz.isInterface())
                 throw new IllegalArgumentException("expecting and interface instead of class=" + interfaceClazz.getName());
-
 
             int j = -1;
             for (final Method dm : interfaceClazz.getMethods()) {
@@ -102,9 +99,7 @@ public enum GeneratedProxyClass {
         sb.append("  private final Object proxy;\n" +
                 "  private final InvocationHandler handler;\n" +
                 "  private Method[] methods = new  Method[" + declaredMethods.size() + "];\n");
-
         sb.append("  private List<Object[]> args = new ArrayList<Object[]>(" + (maxArgs + 1) + ");\n\n");
-
         sb.append("  public " + className + "(Object proxy, InvocationHandler handler) {\n" +
                 "    this.proxy = proxy;\n" +
                 "    this.handler = handler;\n");
@@ -125,7 +120,6 @@ public enum GeneratedProxyClass {
             methodIndex++;
 
             sb.append(createMethodSignature(dm, returnType));
-
             sb.append("    Method method = this.methods[" + methodIndex + "];\n");
             sb.append("    Object[] a = this.args.get(" + dm.getParameterCount() + ");\n");
 
@@ -139,6 +133,7 @@ public enum GeneratedProxyClass {
 
         if (returnType != void.class)
             sb.append("return (" + returnType.getName() + ")");
+
         sb.append(" handler.invoke(proxy,method,a);\n" +
                 "    } catch (Throwable throwable) {\n" +
                 "       throw Jvm.rethrow(throwable);\n" +
@@ -157,12 +152,7 @@ public enum GeneratedProxyClass {
     private static CharSequence createMethodSignature(final Method dm, final Class<?> returnType) {
         final int len = dm.getParameters().length;
         final StringBuilder result = new StringBuilder();
-
-        // Type genericSuperclass = returnType.getGenericSuperclass();
-        //  if (genericSuperclass instanceof ParameterizedType)
-        //    ((ParameterizedType)genericSuperclass)
-
-        String typeName = returnType.getName();
+        final String typeName = returnType.getName();
         result.append("  public ").append(typeName + " ").append(dm.getName()).append("(");
 
         for (int j = 0; j < len; j++) {
@@ -176,24 +166,7 @@ public enum GeneratedProxyClass {
         }
 
         result.append(") {\n");
-
         return result;
-    }
-
-    public static String className(Class inter) {
-        return inter.getName().replace(inter.getPackage().getName() + ".", "");
-    }
-
-    public static String className(Collection<Class> inter) {
-        StringBuilder s = new StringBuilder();
-        for (final Class aClass : inter) {
-            s.append(className(aClass) + "$");
-        }
-        return s.toString();
-    }
-
-    public static interface MsgListener extends Closeable {
-        void onMessage(Object o);
     }
 
 }

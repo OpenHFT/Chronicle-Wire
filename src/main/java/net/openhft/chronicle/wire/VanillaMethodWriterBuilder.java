@@ -28,10 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
@@ -92,7 +89,6 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return this;
     }
 
-    // Builder terminology
     @NotNull
     public T build() {
         return get();
@@ -123,7 +119,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
             }
         }
 
-       /* try {
+        try {
             @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
             Object proxy = Proxy.newProxyInstance(classLoader, interfacesArr, handler);
 
@@ -138,7 +134,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         } catch (Throwable e) {
             // do nothing and drop through
             Jvm.debug().on(getClass(), e);
-        }*/
+        }
 
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
         //noinspection unchecked
