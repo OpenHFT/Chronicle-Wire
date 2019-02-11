@@ -34,6 +34,7 @@ import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 /*
  * Created by Peter Lawrey on 18/10/16.
  */
+@SuppressWarnings("rawtypes")
 public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
 
     private final Class parent;
@@ -122,6 +123,7 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void set(Object object, Object value) throws IllegalArgumentException {
         Object value2 = ObjectUtils.convertTo(type, value);

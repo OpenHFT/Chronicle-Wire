@@ -36,6 +36,7 @@ public interface Demarshallable {
         @Override
         protected Constructor<Demarshallable> computeValue(@NotNull Class<?> type) {
             try {
+                @SuppressWarnings("unchecked")
                 @NotNull Constructor<Demarshallable> declaredConstructor =
                         (Constructor<Demarshallable>)
                                 type.getDeclaredConstructor(WireIn.class);
@@ -47,6 +48,7 @@ public interface Demarshallable {
         }
     };
 
+    @SuppressWarnings("unchecked")
     @NotNull
     static <T extends Demarshallable> T newInstance(@NotNull Class<T> clazz, WireIn wireIn) {
         try {

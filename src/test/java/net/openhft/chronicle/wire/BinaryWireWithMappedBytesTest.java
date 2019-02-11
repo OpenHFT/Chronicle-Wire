@@ -37,6 +37,7 @@ import static org.junit.Assert.assertEquals;
  * Created by Peter Lawrey on 18/01/16.
  */
 public class BinaryWireWithMappedBytesTest {
+    @SuppressWarnings("rawtypes")
     @Test
     public void testRefAtStart() throws FileNotFoundException {
         @NotNull File file = new File(OS.TARGET, "testRefAtStart.map");

@@ -35,6 +35,7 @@ enum CcyPair {
 /*
  * Created by peter.lawrey on 03/12/2015.
  */
+@SuppressWarnings("rawtypes")
 public class CSVBytesMarshallableTest {
     Bytes bytes = Bytes.from(
             "1.09029,1.090305,EURUSD,2,1,EBS\n" +
@@ -93,6 +94,7 @@ public class CSVBytesMarshallableTest {
     }
 }
 
+@SuppressWarnings("rawtypes")
 class FXPrice implements BytesMarshallable {
     public double bidprice;
     public double offerprice;

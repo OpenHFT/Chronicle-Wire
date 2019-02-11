@@ -8,6 +8,7 @@ import static org.junit.Assert.assertEquals;
 
 // only extend MethodFilterOnFirstArg for testing purposes.
 // Don't do this unless you need to record your filtering choices.
+@SuppressWarnings("rawtypes")
 interface MockMethods2 extends MethodFilterOnFirstArg {
     void method1(MockDto dto);
 
@@ -16,6 +17,7 @@ interface MockMethods2 extends MethodFilterOnFirstArg {
     void method3(MockDto dto, MockDto dto2);
 }
 
+@SuppressWarnings("rawtypes")
 public class MethodFilterOnFirstArgTest {
     @Test
     public void ignoreMethodBasedOnFirstArg() throws IOException {
@@ -29,6 +31,7 @@ public class MethodFilterOnFirstArgTest {
     }
 }
 
+@SuppressWarnings("rawtypes")
 class MockMethods2Impl implements MockMethods2, MethodFilterOnFirstArg {
     private final MockMethods2 out;
 
@@ -51,6 +54,7 @@ class MockMethods2Impl implements MockMethods2, MethodFilterOnFirstArg {
         out.method3(dto, dto2);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean ignoreMethodBasedOnFirstArg(String methodName, Object firstArg) {
         out.ignoreMethodBasedOnFirstArg(methodName, firstArg);

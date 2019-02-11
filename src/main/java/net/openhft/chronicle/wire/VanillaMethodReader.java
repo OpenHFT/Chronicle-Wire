@@ -46,6 +46,7 @@ import static net.openhft.chronicle.wire.VanillaWireParser.SKIP_READABLE_BYTES;
 /*
  * Created by Peter Lawrey on 24/03/16.
  */
+@SuppressWarnings("rawtypes")
 public class VanillaMethodReader implements MethodReader {
 
     static final Object[] NO_ARGS = {};
@@ -318,6 +319,7 @@ public class VanillaMethodReader implements MethodReader {
         return o instanceof Marshallable ? o : null;
     }
 
+    @SuppressWarnings("unchecked")
     public void addParseletForMethod(Object o, @NotNull Method m, @NotNull Class[] parameterTypes, MethodFilterOnFirstArg methodFilterOnFirstArg) {
         Jvm.setAccessible(m); // turn off security check to make a little faster
         @NotNull Object[] args = new Object[parameterTypes.length];

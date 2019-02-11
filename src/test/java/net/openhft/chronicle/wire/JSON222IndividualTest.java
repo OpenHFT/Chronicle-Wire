@@ -54,6 +54,7 @@ public class JSON222IndividualTest {
 
     @Test
     public void nestedSeq() {
+        @SuppressWarnings("rawtypes")
         @NotNull List list = Arrays.asList(3L, Arrays.asList(4L));
         checkSerialized("[\n" +
                 "  3,\n" +

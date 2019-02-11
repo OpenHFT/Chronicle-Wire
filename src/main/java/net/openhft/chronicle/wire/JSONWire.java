@@ -29,12 +29,15 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  * At the moment, this is a cut down version of the YAML wire format.
  */
 public class JSONWire extends TextWire {
+    @SuppressWarnings("rawtypes")
     static final BytesStore COMMA = BytesStore.from(",");
 
+    @SuppressWarnings("rawtypes")
     public JSONWire(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
     }
 
+    @SuppressWarnings("rawtypes")
     public JSONWire(@NotNull Bytes bytes) {
         this(bytes, false);
     }

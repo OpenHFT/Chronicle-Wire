@@ -5,6 +5,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 /*
  * Created by peter.lawrey@chronicle.software on 24/07/2017
  */
+@SuppressWarnings("rawtypes")
 public abstract class AbstractFieldInfo implements FieldInfo {
     protected final String name;
     protected final Class type;

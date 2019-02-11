@@ -35,6 +35,7 @@ import java.util.function.Supplier;
  *
  * @author Rob Austin.
  */
+@SuppressWarnings("rawtypes")
 @Deprecated(/*TODO Add tests, or delete?*/)
 public class DeferredTypeWire extends AbstractAnyWire implements Wire {
 

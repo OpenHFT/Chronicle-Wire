@@ -9,6 +9,7 @@ import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 /**
  * @author Rob Austin.
  */
+@SuppressWarnings("rawtypes")
 public class FloatDtoTest {
 
     @Test
@@ -23,12 +24,14 @@ public class FloatDtoTest {
 
     private static class Key extends AbstractMarshallable implements
             KeyedMarshallable {
+        @SuppressWarnings("unused")
         int uiid;
 
         Key(int uiid) {
             this.uiid = uiid;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public void writeKey(@NotNull Bytes bytes) {
             WIRE_MARSHALLER_CL.get(Key.class).writeKey(this, bytes);
@@ -38,6 +41,7 @@ public class FloatDtoTest {
 
     private static class Value extends Key implements Marshallable {
 
+        @SuppressWarnings("unused")
         final float myFloat;
 
         Value(int uiid,

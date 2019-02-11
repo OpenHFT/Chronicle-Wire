@@ -55,6 +55,7 @@ public class WriteDocumentContext implements DocumentContext {
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public void close() {
         @NotNull Bytes bytes = wire().bytes();
         long position1 = bytes.writePosition();

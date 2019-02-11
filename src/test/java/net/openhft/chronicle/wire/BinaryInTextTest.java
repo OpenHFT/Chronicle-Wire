@@ -7,6 +7,7 @@ import org.junit.Test;
 import static junit.framework.TestCase.assertEquals;
 
 public class BinaryInTextTest {
+    @SuppressWarnings("rawtypes")
     @Test
     public void testBytesFromText() {
         Bytes a = Marshallable.fromString(Bytes.class, "A==");
@@ -40,6 +41,7 @@ public class BinaryInTextTest {
                 "}\n", bit.toString());
     }
 
+    @SuppressWarnings("rawtypes")
     static class BIT extends AbstractMarshallable {
         Bytes b;
         BytesStore c;

@@ -25,6 +25,7 @@ public interface FieldInfo {
 
     String name();
 
+    @SuppressWarnings("rawtypes")
     Class type();
 
     BracketType bracketType();
@@ -50,5 +51,6 @@ public interface FieldInfo {
 
     void set(Object object, double value) throws IllegalArgumentException;
 
+    @SuppressWarnings("rawtypes")
     Class genericType(int index);
 }

@@ -37,6 +37,7 @@ import java.util.function.*;
 /**
  * Read in data after reading a field.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface ValueIn {
     Consumer<ValueIn> DISCARD = v -> {
     };

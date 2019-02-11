@@ -86,6 +86,7 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
         writeEvent0(wire, method, args, methodName, 1);
     }
 
+    @SuppressWarnings("unchecked")
     private void writeEvent0(Wire wire, @NotNull Method method, Object[] args, String methodName, int oneParam) {
         ParameterHolderSequenceWriter phsw = parameterMap.computeIfAbsent(method, ParameterHolderSequenceWriter::new);
         Bytes<?> bytes = wire.bytes();

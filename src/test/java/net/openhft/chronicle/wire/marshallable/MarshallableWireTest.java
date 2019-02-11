@@ -70,6 +70,7 @@ public class MarshallableWireTest {
         return list;
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void writeMarshallable() {
         Bytes bytes = Bytes.elasticByteBuffer();

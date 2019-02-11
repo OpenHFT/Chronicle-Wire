@@ -49,6 +49,7 @@ public class BinaryWireTest {
     final boolean numericField;
     final boolean fieldLess;
     final int compressedSize;
+    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes bytes = nativeBytes();
 
@@ -669,6 +670,7 @@ public class BinaryWireTest {
                 .write()
                 .bytes(allBytes);
         System.out.println(bytes.toDebugString());
+        @SuppressWarnings("rawtypes")
         @NotNull NativeBytes allBytes2 = nativeBytes();
         wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
                 .read().bytes(b -> assertEquals("Hello", b.toString()))

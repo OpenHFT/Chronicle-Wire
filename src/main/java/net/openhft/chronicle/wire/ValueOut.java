@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 /**
  * Write out data after writing a field.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface ValueOut {
 
     int SMALL_MESSAGE = 64;

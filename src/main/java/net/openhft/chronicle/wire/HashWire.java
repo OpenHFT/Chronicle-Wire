@@ -39,6 +39,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
+@SuppressWarnings("rawtypes")
 public class HashWire implements WireOut, BytesComment {
     private static final ThreadLocal<HashWire> hwTL = new ThreadLocal<HashWire>() {
         @Override

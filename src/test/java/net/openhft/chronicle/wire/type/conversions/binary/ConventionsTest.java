@@ -29,8 +29,10 @@ import java.nio.ByteBuffer;
 /*
  * Created by Rob Austin
  */
+@SuppressWarnings("unchecked")
 public class ConventionsTest {
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testTypeConversionsMaxValue() throws NoSuchFieldException, IllegalAccessException {
 
@@ -50,6 +52,7 @@ public class ConventionsTest {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testTypeConversionsMinValue() throws IllegalAccessException, NoSuchFieldException {
 
@@ -68,6 +71,7 @@ public class ConventionsTest {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testTypeConversionsSmallNumber() {
 
@@ -83,6 +87,7 @@ public class ConventionsTest {
 
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testTypeConversionsConvertViaString() throws NoSuchFieldException, IllegalAccessException {
 

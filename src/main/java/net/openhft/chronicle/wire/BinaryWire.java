@@ -50,6 +50,7 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
 /**
  * This Wire is a binary translation of TextWire which is a sub set of YAML.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class BinaryWire extends AbstractWire implements Wire {
     private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
     private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
@@ -322,6 +323,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
+    @SuppressWarnings("incomplete-switch")
     public void readWithLength(@NotNull WireOut wire, int len) {
         long lim = bytes.readLimit();
         try {

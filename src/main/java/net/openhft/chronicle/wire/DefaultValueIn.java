@@ -38,6 +38,7 @@ import java.util.function.*;
 /*
  * Created by peter.lawrey on 02/02/2016.
  */
+@SuppressWarnings("rawtypes")
 public class DefaultValueIn implements ValueIn {
     private final WireIn wireIn;
     Object defaultValue;
@@ -341,12 +342,14 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    @SuppressWarnings("unchecked")
     @Nullable
     @Override
     public <T> T applyToMarshallable(Function<WireIn, T> marshallableReader) {
         return (T) defaultValue;
     }
 
+    @SuppressWarnings("unchecked")
     @Nullable
     @Override
     public <T> T typedMarshallable() throws IORuntimeException {
@@ -441,6 +444,7 @@ public class DefaultValueIn implements ValueIn {
         return o.floatValue();
     }
 
+    @SuppressWarnings("unchecked")
     @Nullable
     @Override
     public <T> Class<T> typeLiteral() throws IORuntimeException, BufferUnderflowException {

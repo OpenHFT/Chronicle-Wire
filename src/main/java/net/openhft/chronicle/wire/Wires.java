@@ -59,6 +59,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 /*
  * Created by Peter Lawrey on 31/08/15.
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public enum Wires {
     ;
     public static final int LENGTH_MASK = -1 >>> 2;

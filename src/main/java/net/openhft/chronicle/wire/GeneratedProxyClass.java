@@ -15,6 +15,7 @@ import java.util.Set;
  *
  * The purpose of this class is to generate a proxy that will re-use the arg[]
  */
+@SuppressWarnings("restriction")
 public enum GeneratedProxyClass {
     ;
 
@@ -24,6 +25,7 @@ public enum GeneratedProxyClass {
      * @param interfaces an interface class
      * @return a proxy class from an interface class or null if it can't be created
      */
+    @SuppressWarnings("rawtypes")
     public static Class from(Set<Class> interfaces, String className) {
         int maxArgs = 0;
         LinkedHashSet<Method> methods = new LinkedHashSet<>();

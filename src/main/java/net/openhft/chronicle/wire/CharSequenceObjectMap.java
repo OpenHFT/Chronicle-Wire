@@ -5,12 +5,14 @@ import net.openhft.chronicle.core.util.StringUtils;
 
 public class CharSequenceObjectMap<T> {
     private static final int K0 = 0x6d0f27bd;
+    @SuppressWarnings("unused")
     private static final int M0 = 0x5bc80bad;
 
     final String[] keys;
     final T[] values;
     final int mask;
 
+    @SuppressWarnings("unchecked")
     public CharSequenceObjectMap(int capacity) {
         int nextPower2 = Maths.nextPower2(capacity, 16);
         keys = new String[nextPower2];

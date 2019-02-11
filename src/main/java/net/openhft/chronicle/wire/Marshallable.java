@@ -134,6 +134,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         Wires.writeMarshallable(this, wire);
     }
 
+    @SuppressWarnings("unchecked")
     @NotNull
     default <T> T deepCopy() {
         return (T) Wires.deepCopy(this);

@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 /*
  * Created by Peter Lawrey on 26/05/2017.
  */
+@SuppressWarnings("rawtypes")
 public class WithDefaults extends AbstractMarshallable {
     Bytes bytes = Bytes.fromString("Hello");
     String text = "Hello";

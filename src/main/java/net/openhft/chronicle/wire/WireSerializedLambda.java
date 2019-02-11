@@ -29,6 +29,7 @@ import java.util.List;
 /**
  * Helper calls to support serialization of lambdas in Wire formats.
  */
+@SuppressWarnings("rawtypes")
 public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
 
     private Class<?> capturingClass;

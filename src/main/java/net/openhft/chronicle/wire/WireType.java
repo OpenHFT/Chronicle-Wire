@@ -51,6 +51,7 @@ import static net.openhft.chronicle.core.io.IOTools.*;
 /**
  * A selection of prebuilt wire types.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
     TEXT {
@@ -202,7 +203,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         public Wire apply(Bytes bytes) {
 
             try {
-                @NotNull @SuppressWarnings("unchecked")
+                @NotNull
                 Class<Wire> aClass = (Class) Class.forName("software.chronicle.wire.DeltaWire");
                 final Constructor<Wire> declaredConstructor = aClass.getDeclaredConstructor(Bytes.class);
                 return declaredConstructor.newInstance(bytes);
