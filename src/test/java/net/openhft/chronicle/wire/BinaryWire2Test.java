@@ -33,6 +33,7 @@ import java.time.*;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static net.openhft.chronicle.bytes.Bytes.elasticByteBuffer;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
@@ -167,15 +168,14 @@ public class BinaryWire2Test {
     }
 
     @Test
-    @Ignore("TODO FIX")
     public void testBytesStore() {
         @NotNull Wire wire = createWire();
         wire.write().object(Bytes.from("Hello"));
 
         Bytes b = Bytes.elasticByteBuffer();
-        wire.read()
-                .object(b, Bytes.class);
+        wire.read().bytes(b);
         assertEquals("Hello", b.toString());
+        b.release();
     }
 
     @Test
@@ -335,11 +335,11 @@ public class BinaryWire2Test {
     }
 
     private void writeMessageContext(@NotNull WireOut wire) {
-        try (DocumentContext dc = wire.writingDocument(true)) {
+        try (DocumentContext ignored = wire.writingDocument(true)) {
             wire.write("csp").text("//path/service")
                     .write("tid").int64(123456789);
         }
-        try (DocumentContext dc = wire.writingDocument(false)) {
+        try (DocumentContext ignored = wire.writingDocument(false)) {
             wire.write("entrySet").sequence(s -> {
                 s.marshallable(m -> m
                         .write("key").text("key-1")
@@ -416,11 +416,11 @@ public class BinaryWire2Test {
     @Test
     public void fieldAfterNullContext() {
         @NotNull Wire wire = createWire();
-        try (DocumentContext dc = wire.writingDocument(true)) {
+        try (DocumentContext ignored = wire.writingDocument(true)) {
             wire.write("tid").int64(1234567890L);
         }
 
-        try (DocumentContext dc = wire.writingDocument(false)) {
+        try (DocumentContext ignored = wire.writingDocument(false)) {
             wire.write("data").typedMarshallable("!UpdateEvent",
                     v -> v.write("assetName").text("/name")
                             .write("key").object("test")
@@ -478,74 +478,91 @@ public class BinaryWire2Test {
     }
 
     @Test
-    @Ignore("str is too small to be compressed, and doesn't work if it is made longer")
-    public void testSnappyCompressWithSnappy() throws IOException {
+    @Ignore("Snappy decompression doesn't work for some reason")
+    public void testSnappyCompressWithSnappy() {
         if (!Compressions.Snappy.available())
             return;
 
         @NotNull Wire wire = createWire();
-        @NotNull String str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        @NotNull String str = "xxxxxxxxxxxxxxxx" +
+                "xxxxxxxxxxxxxxxx" +
+                "xxxxxxxxxxxxxxxx" +
+                "xxxxxxxxxxxxxxxx" +
+                "xxxxxxxxxxxxxxxx";
 
-        wire.write("message").compress("snappy", str);
+        wire.write().compress("snappy", Bytes.from(str));
 
         wire.bytes().readPosition(0);
-        @Nullable String str2 = wire.read(() -> "message").text();
-        assertEquals(str, str2);
+        Bytes b = elasticByteBuffer();
+        wire.read().bytes(b);
+        assertEquals(str, b.toString());
 
         wire.bytes().readPosition(0);
         Bytes asText = Bytes.elasticByteBuffer();
         wire.copyTo(new TextWire(asText));
-        assertEquals("message: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n", asText.toString());
+        assertEquals("message: " + str + "\n", asText.toString());
 
         wire.bytes().release();
         asText.release();
     }
 
     @Test
-    @Ignore("Todo fix")
-    public void testSnappyCompressWithSnappy2() throws IOException {
+    public void testSnappyCompressWithGzip() {
         if (!Compressions.Snappy.available())
             return;
 
         @NotNull Wire wire = createWire();
-        Bytes str = Bytes.from("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        @NotNull String s = "xxxxxxxxxxxxxxxx" +
+                "xxxxxxxxxxxxxxxx" +
+                "xxxxxxxxxxxxxxxx" +
+                "xxxxxxxxxxxxxxxx" +
+                "xxxxxxxxxxxxxxxx";
+        Bytes str = Bytes.from(s);
 
-        wire.write("message").compress("snappy", str);
+        wire.write("message").compress("gzip", str);
 
         wire.bytes().readPosition(0);
-        @Nullable String str2 = wire.read(() -> "message").text();
-        assertEquals(str.toString(), str2);
+        @Nullable String str2 = wire.read("message").text();
+        assertEquals(s, str2);
 
         wire.bytes().readPosition(0);
         Bytes asText = Bytes.elasticByteBuffer();
         wire.copyTo(new TextWire(asText));
-        assertEquals("message: # snappy\n" +
-                "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n", asText.toString());
+        assertEquals("message: # gzip\n" + s +
+                "\n", asText.toString());
+        asText.release();
     }
 
-    @Ignore
     @Test
-    public void testCompression() {
-        for (@NotNull String comp : "binary,gzip,lzw".split(",")) {
-            bytes.clear();
+    public void testBinaryCompression() {
+        testCompression("binary");
+    }
 
-            @NotNull Wire wire = new BinaryWire(bytes, false, false, false, 32, comp, false);
-            assert wire.startUse();
-            @NotNull String str = "xxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy2yyyyyyyyyyyyyyyyy";
-            BytesStore bytes = BytesStore.from(str);
+    @Test
+    public void testGzipCompression() {
+        testCompression("gzip");
+    }
 
-            wire.write().bytes(bytes);
-            System.out.println(comp + ": str.length() = " + str.length() + ", wire.bytes().readRemaining() = " + wire.bytes().readRemaining());
-            if (!comp.equals("binary"))
-                assertTrue(wire.bytes().readRemaining() + " >= " + str.length(),
-                        wire.bytes().readRemaining() < str.length());
+    @Test
+    public void testLzwCompression() {
+        testCompression("lzw");
+    }
 
-            wire.bytes().readPosition(0);
-            @Nullable BytesStore bytesStore = wire.read()
-                    .bytesStore();
-            assert bytesStore != null;
-            assertEquals(bytes.toDebugString(), bytesStore.toDebugString());
-        }
+    public void testCompression(String comp) {
+        bytes.clear();
+        @NotNull Wire wire = new BinaryWire(bytes, false, false, false, 32, comp, false);
+        assert wire.startUse();
+        @NotNull String str = "xxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy2yyyyyyyyyyyyyyyyy";
+        BytesStore bytes = BytesStore.from(str);
+
+        wire.write().bytes(bytes);
+        if (!comp.equals("binary"))
+            assertTrue(wire.bytes().readRemaining() + " >= " + str.length(),
+                    wire.bytes().readRemaining() < str.length());
+
+        wire.bytes().readPosition(0);
+        String str2 = wire.read().text();
+        assertEquals(str, str2);
     }
 
     @Test
