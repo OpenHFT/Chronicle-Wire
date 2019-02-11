@@ -19,6 +19,7 @@ import java.util.stream.IntStream;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 interface MockMethods {
@@ -32,6 +33,7 @@ interface MockMethods {
 /*
  * Created by Peter Lawrey on 17/05/2017.
  */
+@SuppressWarnings("rawtypes")
 public class VanillaMethodReaderTest {
 
     A instance;
@@ -156,7 +158,7 @@ public class VanillaMethodReaderTest {
         Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
         MRTListener writer = wire.methodWriterBuilder(MRTListener.class)
                 .methodWriterListener((m, a) -> IntStream.range(0, a.length).filter(i -> a[i] instanceof MRT1).forEach(i -> ((MRT1) a[i]).value = "x"))
-                .build();
+                .get();
         writer.timed(1234567890L);
         writer.top(new MRT1("one"));
         writer.top(new MRT2("one", "two"));
@@ -276,6 +278,7 @@ public class VanillaMethodReaderTest {
             Overloaded writer2 = wire2.methodWriter(Overloaded.class);
             Wire wire = new TextWire(Bytes.from("method: [ ]\n"));
             MethodReader reader = wire.methodReader(writer2);
+            assertNotNull(reader);
 //            reader.readOne();
 
             String s = map.keySet().toString();

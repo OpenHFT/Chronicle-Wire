@@ -18,6 +18,7 @@ import java.util.function.Function;
 /*
  * Created by Peter Lawrey on 17/05/2017.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class TextMethodTester<T> {
     private final String input;
     private final Class<T> outputClass;
@@ -98,7 +99,7 @@ public class TextMethodTester<T> {
         MethodWriterBuilder<T> methodWriterBuilder = wire2.methodWriterBuilder(outputClass)
                 .methodWriterListener(methodWriterListener);
         if (genericEvent != null) methodWriterBuilder.genericEvent(genericEvent);
-        T writer0 = methodWriterBuilder.build();
+        T writer0 = methodWriterBuilder.get();
         T writer = retainLast == null
                 ? writer0
                 : cachedMethodWriter(writer0);

@@ -18,7 +18,7 @@ public class VanillaWireParserTest {
     public void shouldDetermineMethodNamesFromMethodIds() {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticDirect());
         final Speaker speaker =
-                wire.methodWriterBuilder(Speaker.class).useMethodIds(true).build();
+                wire.methodWriterBuilder(Speaker.class).useMethodIds(true).get();
         speaker.say("hello");
 
         final MethodReader reader = new VanillaMethodReaderBuilder(wire).build(impl());
