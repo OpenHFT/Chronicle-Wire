@@ -30,7 +30,6 @@ import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.xerial.snappy.Snappy;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -2165,16 +2164,6 @@ public class TextWire extends AbstractWire implements Wire {
                     if (StringUtils.isEqual(sb, "!null")) {
                         textTo(sb);
                         ret = null;
-                    } else if (StringUtils.isEqual(sb, "snappy")) {
-                        textTo(sb);
-                        try {
-                            //todo needs to be made efficient
-                            byte[] decodedBytes = Base64.getDecoder().decode(sb.toString().getBytes(ISO_8859_1));
-                            String csq = Snappy.uncompressString(decodedBytes);
-                            ret = acquireStringBuilder().append(csq);
-                        } catch (IOException e) {
-                            throw new AssertionError(e);
-                        }
                     } else {
                         // ignore the type.
                         if (a instanceof StringBuilder) {

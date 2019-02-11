@@ -24,16 +24,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.time.*;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static net.openhft.chronicle.bytes.Bytes.elasticByteBuffer;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
@@ -476,35 +473,6 @@ public class BinaryWire2Test {
             assertEquals("test", dobj.name);
             assertEquals(123456, dobj.value);
         }
-    }
-
-    @Test
-    @Ignore("Snappy decompression doesn't work for some reason")
-    public void testSnappyCompressWithSnappy() {
-        if (!Compressions.Snappy.available())
-            return;
-
-        @NotNull Wire wire = createWire();
-        @NotNull String str = "xxxxxxxxxxxxxxxx" +
-                "xxxxxxxxxxxxxxxx" +
-                "xxxxxxxxxxxxxxxx" +
-                "xxxxxxxxxxxxxxxx" +
-                "xxxxxxxxxxxxxxxx";
-
-        wire.write().compress("snappy", Bytes.from(str));
-
-        wire.bytes().readPosition(0);
-        Bytes b = elasticByteBuffer();
-        wire.read().bytes(b);
-        assertEquals(str, b.toString());
-
-        wire.bytes().readPosition(0);
-        Bytes asText = Bytes.elasticByteBuffer();
-        wire.copyTo(new TextWire(asText));
-        assertEquals("message: " + str + "\n", asText.toString());
-
-        wire.bytes().release();
-        asText.release();
     }
 
     @Test

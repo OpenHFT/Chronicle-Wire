@@ -745,7 +745,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 long readPosition = bytes.readPosition();
                 bytes.uncheckedReadSkipOne();
                 @Nullable StringBuilder sb = readUtf8();
-                if (StringUtils.isEqual("snappy", sb) || StringUtils.isEqual("gzip", sb) || StringUtils.isEqual("lzw", sb)) {
+                if (StringUtils.isEqual("gzip", sb) || StringUtils.isEqual("lzw", sb)) {
                     bytes.readPosition(readPosition);
                     wire.writeComment(sb);
                     wire.getValueOut().text(valueIn.text());

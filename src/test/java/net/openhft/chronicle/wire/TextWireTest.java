@@ -1207,42 +1207,6 @@ public class TextWireTest {
     }
 
     @Test
-    @Ignore
-    public void testSnappyCompression() {
-        if (!Compressions.Snappy.available())
-            return;
-        @NotNull Wire wire = createWire();
-        @NotNull final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-        @NotNull String str = s + s + s + s;
-
-        wire.write().compress("snappy", Bytes.wrapForRead(str.getBytes(ISO_8859_1)));
-
-        @NotNull Bytes ret = Bytes.allocateElasticDirect();
-        wire.read().bytes(ret);
-        @NotNull byte[] returnBytes = new byte[(int) ret.readRemaining()];
-        ret.read(returnBytes);
-        assertArrayEquals(str.getBytes(ISO_8859_1), returnBytes);
-    }
-
-    @Test
-    @Ignore
-    public void testSnappyCompressionAsText() {
-        if (!Compressions.Snappy.available())
-            return;
-
-        @NotNull Wire wire = createWire();
-        @NotNull final String s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-        @NotNull String str = s + s + s + s;
-
-        @NotNull byte[] bytes0 = str.getBytes(ISO_8859_1);
-        wire.write().compress("snappy", Bytes.wrapForRead(bytes0));
-
-        @NotNull Bytes bytes = allocateElasticDirect();
-        wire.read().bytes(bytes);
-        assertEquals(str, bytes.toString());
-    }
-
-    @Test
     public void testGZIPCompressionAsText() {
         @NotNull Wire wire = createWire();
         @NotNull final String s = "xxxxxxxxxxx1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
