@@ -5,6 +5,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 // Test created as a result of agitator tests i.e. random character changes
 public class TextWireAgitatorTest {
@@ -18,6 +19,7 @@ public class TextWireAgitatorTest {
                 "}\n", myDto.toString());
 
         TextWireTest.MyDto myDto2 = Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }");
+        assertNotNull(myDto2);
     }
 
     @Test(expected = IORuntimeException.class)
@@ -36,6 +38,7 @@ public class TextWireAgitatorTest {
         MyFlagged mf = Marshallable.fromString("!net.openhft.chronicle.wire.TextWireAgitatorTest$MyFlagged {\n" +
                 "  flag: not-false\n" +
                 "}");
+        assertNotNull(mf);
     }
 
     static class MyFlagged extends AbstractMarshallable {

@@ -54,6 +54,7 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class TextWireTest {
 
     Bytes bytes;
@@ -641,7 +642,6 @@ public class TextWireTest {
                 "Test: !" + name1 + " # \n", wire.toString());
 
         // ok as blank matches anything
-        @NotNull StringBuilder sb = new StringBuilder();
         Stream.of("MyType", "AlsoMyType", name1).forEach(e -> {
             wire.read().typePrefix(e, Assert::assertEquals);
         });
@@ -672,7 +672,7 @@ public class TextWireTest {
                 "  b: !NestedB,\n" +
                 "  value: 12345\n" +
                 "}");
-
+        assertNotNull(a);
     }
 
     @Test
@@ -978,6 +978,7 @@ public class TextWireTest {
         assertEquals(fieldLen, len, 1);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteStrings() {
         @NotNull final Bytes bytes = nativeBytes();
@@ -1034,6 +1035,7 @@ public class TextWireTest {
                 fromString.toString());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     @Ignore
     public void testMapReadAndWriteIntegers() {
@@ -1073,6 +1075,7 @@ public class TextWireTest {
         expectWithSnakeYaml("{1=11, 2=2, 3=3}", wire);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteMarshable() {
         @NotNull final Bytes bytes = nativeBytes();
@@ -1967,10 +1970,6 @@ public class TextWireTest {
             // FAILS
             Wires.readMarshallable(this, wire, false);
         }
-    }
-
-    private static class WithMap extends AbstractMarshallable {
-        private Map<CcyPair, String> innerMap = new HashMap<>();
     }
 
     static class DtoWithBytesField extends AbstractMarshallable {
