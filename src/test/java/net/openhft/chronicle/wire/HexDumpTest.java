@@ -14,6 +14,7 @@ public class HexDumpTest {
         if (ByteOrder.nativeOrder() != ByteOrder.LITTLE_ENDIAN)
             return;
 
+        @SuppressWarnings("rawtypes")
         Bytes b = new HexDumpBytes();
         b.writeInt(0x0a0b0c0d);
         assertEquals("0d 0c 0b 0a\n", b.toHexString());

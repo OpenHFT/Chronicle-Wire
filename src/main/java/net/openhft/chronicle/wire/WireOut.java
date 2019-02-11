@@ -58,6 +58,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
         return write(key);
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     default ValueOut writeEvent(Class expectedType, Object eventKey) {
         if (eventKey instanceof WireKey)
             return writeEventName((WireKey) eventKey);

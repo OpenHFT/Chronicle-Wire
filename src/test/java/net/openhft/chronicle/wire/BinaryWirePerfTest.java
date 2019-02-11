@@ -37,6 +37,7 @@ public class BinaryWirePerfTest {
     final boolean fixed;
     final boolean numericField;
     final boolean fieldLess;
+    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes bytes = nativeBytes();
 

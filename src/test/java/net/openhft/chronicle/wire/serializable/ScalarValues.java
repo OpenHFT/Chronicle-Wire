@@ -32,6 +32,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 /*
  * Created by Peter Lawrey on 09/05/16.
  */
+@SuppressWarnings("rawtypes")
 public class ScalarValues implements Serializable {
     boolean flag;
     byte b;

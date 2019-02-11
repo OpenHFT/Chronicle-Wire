@@ -9,6 +9,7 @@ import static org.junit.Assert.*;
 /*
  * Created by rob on 14/06/2017.
  */
+@SuppressWarnings("rawtypes")
 public class WiresTest {
 
     private final BytesContainer container1 = new BytesContainer();

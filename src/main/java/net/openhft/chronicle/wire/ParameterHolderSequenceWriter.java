@@ -8,11 +8,13 @@ import java.util.function.BiConsumer;
 
 // lambda was causing garbage
 class ParameterHolderSequenceWriter {
+    @SuppressWarnings("rawtypes")
     final Class[] parameterTypes;
     final BiConsumer<Object[], ValueOut> from0;
     final BiConsumer<Object[], ValueOut> from1;
     final long methodId;
 
+    @SuppressWarnings("unchecked")
     protected ParameterHolderSequenceWriter(Method method) {
         this.parameterTypes = method.getParameterTypes();
         this.from0 = (a, v) -> {

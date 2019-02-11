@@ -48,6 +48,7 @@ public class ProjectTest {
         return list;
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testProject() throws Exception {
         @NotNull Dto1 dto1 = new Dto1();
@@ -84,6 +85,7 @@ public class ProjectTest {
         BytesUtil.checkRegisteredBytes();
     }
 
+    @SuppressWarnings("rawtypes")
     static class Dto1 extends AbstractMarshallable {
         @NotNull
         Map m = new HashMap<>();
@@ -91,6 +93,7 @@ public class ProjectTest {
         long someValue;
     }
 
+    @SuppressWarnings("rawtypes")
     static class Dto2 extends AbstractMarshallable {
         long someValue;
         String anotherField;

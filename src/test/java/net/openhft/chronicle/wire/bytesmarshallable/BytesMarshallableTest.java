@@ -18,6 +18,7 @@ import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class BytesMarshallableTest {
     private final WireType wireType;
@@ -38,6 +39,7 @@ public class BytesMarshallableTest {
         return wireType.apply(Bytes.elasticHeapByteBuffer(64));
     }
 
+    @SuppressWarnings("incomplete-switch")
     @Test
     public void primitiveDto() {
         Wire wire = createWire();
@@ -73,6 +75,7 @@ public class BytesMarshallableTest {
         }
     }
 
+    @SuppressWarnings("incomplete-switch")
     @Test
     public void primitiveDto2() {
         Wire wire = createWire();

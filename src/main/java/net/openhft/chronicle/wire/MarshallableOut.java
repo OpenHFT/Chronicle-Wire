@@ -174,6 +174,7 @@ public interface MarshallableOut {
      * @return a proxy which implements the primary interface (additional interfaces have to be
      * cast)
      */
+    @SuppressWarnings("rawtypes")
     @NotNull
     default <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
         return methodWriter(false, tClass, additional);
@@ -188,6 +189,7 @@ public interface MarshallableOut {
      * @return a proxy which implements the primary interface (additional interfaces have to be
      * cast)
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @NotNull
     default <T> T methodWriter(boolean metaData, @NotNull Class<T> tClass, Class... additional) {
         Class[] interfaces = ObjectUtils.addAll(tClass, additional);

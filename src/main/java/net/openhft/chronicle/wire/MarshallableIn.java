@@ -73,6 +73,7 @@ public interface MarshallableIn {
      * @param using used to read the document
      * @return {@code true} if successful
      */
+    @SuppressWarnings("rawtypes")
     default boolean readBytes(@NotNull Bytes using) {
         try (@NotNull DocumentContext dc = readingDocument()) {
             if (!dc.isPresent())
@@ -126,6 +127,7 @@ public interface MarshallableIn {
      *
      * @return the Map, or null if no message is waiting.
      */
+    @SuppressWarnings("unchecked")
     @Nullable
     default <K, V> Map<K, V> readMap() {
         try (@NotNull DocumentContext dc = readingDocument()) {

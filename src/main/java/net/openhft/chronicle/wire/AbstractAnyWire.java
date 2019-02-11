@@ -33,6 +33,7 @@ import java.util.function.Supplier;
  *
  * @author Rob Austin.
  */
+@SuppressWarnings("rawtypes")
 public abstract class AbstractAnyWire extends AbstractWire implements Wire {
 
     @NotNull

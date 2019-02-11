@@ -32,6 +32,7 @@ import java.util.Collection;
 /**
  * @author Rob Austin.
  */
+@SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class PrimitiveTypeWrappersTest {
 
@@ -50,6 +51,7 @@ public class PrimitiveTypeWrappersTest {
         );
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testNumbers() {
         @NotNull final Class[] types = new Class[]{Byte.class,

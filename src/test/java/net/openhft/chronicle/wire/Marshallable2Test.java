@@ -42,6 +42,7 @@ public class Marshallable2Test {
         );
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testObject() {
         Bytes bytes = Bytes.elasticHeapByteBuffer(64);
@@ -55,6 +56,7 @@ public class Marshallable2Test {
         Assert.assertEquals(source, target);
     }
 
+    @SuppressWarnings("unused")
     private static class Outer extends AbstractMarshallable {
         String name;
         Inner1 inner1;

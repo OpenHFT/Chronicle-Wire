@@ -33,6 +33,7 @@ public class RFCExamplesTest {
     map.put(2, "world");
     map.put(3, "bye");
      */
+    @SuppressWarnings("rawtypes")
     @Test
     public void testPuts() {
         @NotNull Bytes bytes = Bytes.allocateElasticDirect();
@@ -144,6 +145,7 @@ put: [ 3, bye ]
                 "‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
     }
 
+    @SuppressWarnings("rawtypes")
     public void clear(@NotNull Bytes bytes) {
         bytes.clear();
         bytes.zeroOut(0, bytes.realCapacity());

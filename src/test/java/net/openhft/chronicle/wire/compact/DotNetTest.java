@@ -28,6 +28,7 @@ import org.junit.Test;
  * Created by Peter Lawrey on 14/05/16.
  */
 public class DotNetTest {
+    @SuppressWarnings("rawtypes")
     @Test
     public void testCode() {
         final Bytes bytes = Bytes.fromHexString("000000: B9 06 75 73 65 72 49 64 E5 61 6E 64 72 65 B9 06\n" +

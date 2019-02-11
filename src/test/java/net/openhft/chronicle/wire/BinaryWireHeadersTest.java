@@ -44,6 +44,7 @@ public class BinaryWireHeadersTest {
 
     @Test
     public void testHeaderNumbers() throws TimeoutException, EOFException, StreamCorruptedException {
+        @SuppressWarnings("rawtypes")
         @NotNull BytesStore store = NativeBytesStore.elasticByteBuffer();
         @NotNull Wire wire = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
         @NotNull Wire wire2 = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
@@ -91,6 +92,7 @@ public class BinaryWireHeadersTest {
 
     @Test(timeout = 3000, expected = TimeoutException.class)
     public void testConcurrentHeaderNumbers() throws TimeoutException, EOFException, StreamCorruptedException {
+        @SuppressWarnings("rawtypes")
         @NotNull BytesStore store = NativeBytesStore.elasticByteBuffer();
         @NotNull Wire wire = new BinaryWire(store.bytesForWrite()).headerNumber(0L);
         @NotNull Wire wire2 = new BinaryWire(store.bytesForWrite()).headerNumber(0L);

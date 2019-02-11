@@ -19,9 +19,11 @@ public class IgnoreHighOrderBitsTest {
      */
     @Test
     public void testWriteByte() throws IOException {
+        @SuppressWarnings("rawtypes")
         final Bytes bytes = Bytes.elasticByteBuffer();
         try {
             final Wire wire = new BinaryWire(bytes);
+            @SuppressWarnings("resource")
             DataOutput out = new WireObjectOutput(wire);
             int b = 256;
             out.write(b); // expecting 0 to be written

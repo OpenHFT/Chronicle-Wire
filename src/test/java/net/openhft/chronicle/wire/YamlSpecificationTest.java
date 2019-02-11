@@ -36,6 +36,7 @@ import static org.junit.Assert.assertEquals;
 /*
  * Created by Peter Lawrey on 25/08/15.
  */
+@SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class YamlSpecificationTest {
     static {

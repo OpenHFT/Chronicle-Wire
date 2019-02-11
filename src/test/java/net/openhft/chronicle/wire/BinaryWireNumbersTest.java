@@ -105,6 +105,7 @@ public class BinaryWireNumbersTest {
     }
 
     public void test(@NotNull WriteValue expected, @NotNull WriteValue perform) {
+        @SuppressWarnings("rawtypes")
         @NotNull Bytes bytes1 = nativeBytes();
         @NotNull Wire wire1 = new BinaryWire(bytes1, true, false, false, Integer.MAX_VALUE, "binary", false);
         assert wire1.startUse();
@@ -112,6 +113,7 @@ public class BinaryWireNumbersTest {
 
         assertEquals("Length for fixed length doesn't match for " + TextWire.asText(wire1), len, bytes1.readRemaining());
 
+        @SuppressWarnings("rawtypes")
         @NotNull Bytes bytes2 = nativeBytes();
         @NotNull Wire wire2 = new BinaryWire(bytes2);
         perform.writeValue(wire2.write());

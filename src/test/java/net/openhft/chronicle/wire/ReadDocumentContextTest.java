@@ -35,6 +35,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Rob Austin.
  */
+@SuppressWarnings("rawtypes")
 public class ReadDocumentContextTest {
     @Ignore("The ability to write incomplete documents is deprecated, and will be removed in a future release")
     @Test

@@ -17,6 +17,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 @RunWith(value = Parameterized.class)
 public class UnicodeStringTest {
+    @SuppressWarnings("rawtypes")
     @NotNull
     static Bytes bytes = nativeBytes();
     static Wire wire = createWire();

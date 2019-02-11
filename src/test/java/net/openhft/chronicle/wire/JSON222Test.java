@@ -63,6 +63,7 @@ public class JSON222Test {
         return list;
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test//(timeout = 500)
     public void testJSON() throws IOException {
         int len = Maths.toUInt31(file.length());

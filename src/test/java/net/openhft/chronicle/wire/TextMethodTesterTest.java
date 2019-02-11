@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
  * Created by Peter Lawrey on 17/05/2017.
  */
 public class TextMethodTesterTest {
+    @SuppressWarnings("rawtypes")
     @Test
     public void run() throws IOException {
         TextMethodTester test = new TextMethodTester<>(

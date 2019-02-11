@@ -57,8 +57,10 @@ public class ReorderedTest {
         outerClass2.addListB().setTextNumber("num2B", 22);
     }
 
+    @SuppressWarnings("rawtypes")
     private final Function<Bytes, Wire> wireType;
 
+    @SuppressWarnings("rawtypes")
     public ReorderedTest(Function<Bytes, Wire> wireType) {
         this.wireType = wireType;
     }
@@ -72,6 +74,7 @@ public class ReorderedTest {
         );
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testWithReorderedFields() {
         Bytes bytes = Bytes.elasticByteBuffer();
@@ -96,6 +99,7 @@ public class ReorderedTest {
         bytes.release();
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testTopLevel() {
         Bytes bytes = Bytes.elasticByteBuffer();

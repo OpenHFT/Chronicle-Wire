@@ -38,8 +38,10 @@ import static org.junit.Assert.assertEquals;
 @RunWith(value = Parameterized.class)
 public class MapWireTest {
     private final WireType wireType;
+    @SuppressWarnings("rawtypes")
     private final Map m;
 
+    @SuppressWarnings("rawtypes")
     public MapWireTest(WireType wireType, Map m) {
         this.wireType = wireType;
         this.m = m;
@@ -66,6 +68,7 @@ public class MapWireTest {
         return list;
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void writeMap() {
         Bytes bytes = Bytes.elasticByteBuffer();

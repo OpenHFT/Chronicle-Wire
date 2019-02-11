@@ -50,6 +50,7 @@ public class CopyTest {
         );
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testCopy() {
         Bytes bytesFrom = Bytes.elasticHeapByteBuffer(64);
@@ -83,6 +84,7 @@ public class CopyTest {
         return aClass;
     }
 
+    @SuppressWarnings("unused")
     private static class AClass extends AbstractMarshallable {
         Map<CcyPair, String> map;
         String[] array;

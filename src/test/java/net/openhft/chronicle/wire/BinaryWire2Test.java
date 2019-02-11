@@ -40,6 +40,7 @@ import static org.junit.Assert.*;
 /*
  * Created by peter.lawrey on 06/02/15.
  */
+@SuppressWarnings("rawtypes")
 public class BinaryWire2Test {
     @NotNull
     Bytes bytes = nativeBytes();

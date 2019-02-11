@@ -10,6 +10,7 @@ import java.io.InputStream;
 /**
  * Created by Rob Austin
  */
+@SuppressWarnings("rawtypes")
 public class YamlSpecTest {
     static String DIR = "/yaml/spec/";
 

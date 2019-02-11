@@ -34,6 +34,7 @@ import static org.junit.Assert.assertTrue;
 /*
  * Created by Peter Lawrey on 21/04/16.
  */
+@SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class NestedMapsTest {
     private final WireType wireType;
@@ -51,6 +52,7 @@ public class NestedMapsTest {
         );
     }
 
+    @SuppressWarnings("incomplete-switch")
     @Test
     public void testMapped() {
         @NotNull Mapped m = new Mapped();
@@ -172,6 +174,7 @@ public class NestedMapsTest {
         bytes.release();
     }
 
+    @SuppressWarnings("incomplete-switch")
     @Test
     public void testMappedTopLevel() {
         @NotNull Mapped m = new Mapped();

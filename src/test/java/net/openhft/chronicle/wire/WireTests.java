@@ -41,7 +41,7 @@ import java.util.List;
 /**
  * @author Rob Austin.
  */
-
+@SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class WireTests {
 

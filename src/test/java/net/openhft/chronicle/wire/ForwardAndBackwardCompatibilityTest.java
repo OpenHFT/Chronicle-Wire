@@ -110,6 +110,7 @@ public class ForwardAndBackwardCompatibilityTest {
     @Test
     public void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads() {
 
+        @SuppressWarnings("rawtypes")
         Bytes b = Bytes.elasticByteBuffer();
         try {
             Wire w = WireType.FIELDLESS_BINARY.apply(b);

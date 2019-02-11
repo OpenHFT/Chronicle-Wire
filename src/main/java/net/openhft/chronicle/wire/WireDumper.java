@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 /*
  * Created by Peter Lawrey on 09/07/16.
  */
+@SuppressWarnings("rawtypes")
 public class WireDumper {
     @NotNull
     private final WireIn wireIn;

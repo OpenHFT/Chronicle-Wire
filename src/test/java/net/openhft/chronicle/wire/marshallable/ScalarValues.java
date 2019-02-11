@@ -29,6 +29,7 @@ import java.util.UUID;
 /*
  * Created by Peter Lawrey on 09/05/16.
  */
+@SuppressWarnings("rawtypes")
 public class ScalarValues extends AbstractMarshallable {
     boolean flag;
     byte b;

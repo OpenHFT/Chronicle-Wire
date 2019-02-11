@@ -9,6 +9,7 @@ import static junit.framework.TestCase.assertEquals;
 
 public class BytesUsageTest {
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testBytes() {
         BytesStore value = Bytes.from("helloWorld");
@@ -25,6 +26,7 @@ public class BytesUsageTest {
         assertEquals(Bytes.from("AhelloWorld"), bw.clOrdId());
     }
 
+    @SuppressWarnings("rawtypes")
     static class BytesWrapper extends AbstractMarshallable {
         Bytes clOrdId = Bytes.allocateElasticDirect();
 

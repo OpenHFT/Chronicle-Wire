@@ -75,6 +75,7 @@ public class TextCompatibilityTest {
         list.add(args);
     }
 
+    @SuppressWarnings("rawtypes")
     private static void runTest(String filename, String expectedFilename, boolean print) {
         String expected = null;
         try {

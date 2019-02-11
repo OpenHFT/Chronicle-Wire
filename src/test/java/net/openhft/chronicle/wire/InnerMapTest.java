@@ -51,6 +51,7 @@ public class InnerMapTest {
                 "  }\n" +
                 "}\n", asString);
 
+        @SuppressWarnings("rawtypes")
         Bytes b = Bytes.elasticByteBuffer();
         @NotNull Wire w = new BinaryWire(b);     // works with text fails with binary
 
