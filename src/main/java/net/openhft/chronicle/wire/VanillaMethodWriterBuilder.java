@@ -42,10 +42,12 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     private final List<Class> interfaces = new ArrayList<>();
     @NotNull
     private final MethodWriterInvocationHandler handler;
+    private final String packageName;
     private ClassLoader classLoader;
     private static Map<Set<Class>, Class> setOfClassesToClassName = new ConcurrentHashMap<>();
 
     public VanillaMethodWriterBuilder(@NotNull Class<T> tClass, @NotNull MethodWriterInvocationHandler handler) {
+        packageName = tClass.getPackage().getName();
         interfaces.add(Closeable.class);
         interfaces.add(tClass);
         classLoader = tClass.getClassLoader();
@@ -97,8 +99,8 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
     private Class<?> proxyClass;
 
-    private static <T> Class generatedProxyClass(Set<Class> interfaces) {
-        return GeneratedProxyClass.from(interfaces, "Proxy" + proxyCount.incrementAndGet());
+    private static <T> Class generatedProxyClass(String packageName, Set<Class> interfaces) {
+        return GeneratedProxyClass.from(packageName, interfaces, "Proxy" + proxyCount.incrementAndGet());
     }
 
     @NotNull
@@ -128,7 +130,8 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
             Collections.addAll(interfaces, interfacesArr);
 
             // this will create proxy that does not suffer from the arg[] issue
-            final Class<T> o = setOfClassesToClassName.computeIfAbsent(interfaces, VanillaMethodWriterBuilder::generatedProxyClass);
+            final Class<T> o = setOfClassesToClassName.computeIfAbsent(interfaces,
+                    i -> VanillaMethodWriterBuilder.generatedProxyClass(packageName, i));
             if (o != null)
                 return o.getConstructor(Object.class, InvocationHandler.class).newInstance(proxy, handler);
             

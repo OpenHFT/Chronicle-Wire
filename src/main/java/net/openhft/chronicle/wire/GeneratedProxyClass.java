@@ -19,18 +19,16 @@ import java.util.Set;
 public enum GeneratedProxyClass {
     ;
 
-    private static final String PACKAGE = "net.openhft.chronicle.wire.proxy";
-
     /**
      * @param interfaces an interface class
      * @return a proxy class from an interface class or null if it can't be created
      */
     @SuppressWarnings("rawtypes")
-    public static Class from(Set<Class> interfaces, String className) {
+    public static Class from(String packageName, Set<Class> interfaces, String className) {
         int maxArgs = 0;
         LinkedHashSet<Method> methods = new LinkedHashSet<>();
 
-        StringBuilder sb = new StringBuilder("package " + PACKAGE + ";\n\n" +
+        StringBuilder sb = new StringBuilder("package " + packageName + ";\n\n" +
                 "import net.openhft.chronicle.core.Jvm;\n" +
                 "import java.lang.reflect.InvocationHandler;\n" +
                 "import java.lang.reflect.Method;\n" +
@@ -88,7 +86,7 @@ public enum GeneratedProxyClass {
         try {
             // synchronizing due to ConcurrentModificationException in net.openhft.compiler.MyJavaFileManager.buffers
             synchronized (GeneratedProxyClass.class) {
-                return CompilerUtils.CACHED_COMPILER.loadFromJava(GeneratedProxyClass.class.getClassLoader(), PACKAGE + "." + className, sb.toString());
+                return CompilerUtils.CACHED_COMPILER.loadFromJava(GeneratedProxyClass.class.getClassLoader(), packageName + "." + className, sb.toString());
             }
         } catch (Throwable e) {
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + "\n" + sb.toString(), e));

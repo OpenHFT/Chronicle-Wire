@@ -2,9 +2,12 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -20,6 +23,7 @@ import java.util.function.Function;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TextMethodTester<T> {
+    private static final boolean REGRESS_TESTS = Boolean.getBoolean("regress.tests");
     private final String input;
     private final Class<T> outputClass;
     private final String output;
@@ -94,7 +98,8 @@ public class TextMethodTester<T> {
 
     @NotNull
     public TextMethodTester run() throws IOException {
-
+        if (REGRESS_TESTS)
+            System.err.println("NOTE: Regressing tests, please check your commits");
         Wire wire2 = new TextWire(Bytes.allocateElasticDirect()).useTextDocuments().addTimeStamps(true);
         MethodWriterBuilder<T> methodWriterBuilder = wire2.methodWriterBuilder(outputClass)
                 .methodWriterListener(methodWriterListener);
@@ -123,31 +128,13 @@ public class TextMethodTester<T> {
 
         Wire wire = new TextWire(BytesUtil.readFile(input));
 
-        // expected
-        if (retainLast == null) {
-            expected = BytesUtil.readFile(output).toString().trim().replace("\r", "");
-        } else {
-            Wire wireOut = new TextWire(BytesUtil.readFile(output));
-            Map<String, String> events = new TreeMap<>();
-            consumeDocumentSeparator(wireOut);
-            while (wireOut.hasMore()) {
-                StringBuilder event = new StringBuilder();
-                long start = wireOut.bytes().readPosition();
-                Map<String, Object> m = wireOut.read(event).marshallableAsMap(String.class, Object.class);
-                assert m != null;
-                StringBuilder key = new StringBuilder(event);
-                for (String s : retainLast) {
-                    key.append(",").append(m.get(s));
-                }
-                long end = wireOut.bytes().readPosition();
-                events.put(key.toString(), wireOut.bytes().subBytes(start, end - start).toString().trim());
-                consumeDocumentSeparator(wireOut);
+        if (!REGRESS_TESTS) {
+            // expected
+            if (retainLast == null) {
+                expected = BytesUtil.readFile(output).toString().trim().replace("\r", "");
+            } else {
+                expected = loadLastValues().toString().trim();
             }
-            StringBuilder expected2 = new StringBuilder();
-            for (String s : events.values()) {
-                expected2.append(s.replace("\r", "")).append("\n");
-            }
-            expected = expected2.toString().trim();
         }
         MethodReader reader = wire.methodReaderBuilder()
                 .methodReaderInterceptor(methodReaderInterceptor)
@@ -189,19 +176,67 @@ public class TextMethodTester<T> {
             TextMethodWriterInvocationHandler.ENABLE_EOD = true;
         }
         actual = wire2.toString().trim();
-        long start = System.currentTimeMillis();
-        while (System.currentTimeMillis() < start + timeoutMS) {
-            if (actual.length() < expected.length())
-                Jvm.pause(25);
-            else
-                break;
-            actual = wire2.toString().trim();
+        if (REGRESS_TESTS) {
+            Jvm.pause(100);
+            expected = actual = wire2.toString().trim();
+        } else {
+            long start = System.currentTimeMillis();
+            while (System.currentTimeMillis() < start + timeoutMS) {
+                if (actual.length() < expected.length())
+                    Jvm.pause(25);
+                else
+                    break;
+                actual = wire2.toString().trim();
+            }
         }
         if (afterRun != null) {
             expected = afterRun.apply(expected);
             actual = afterRun.apply(actual);
         }
+        if (REGRESS_TESTS) {
+            String output2;
+            try {
+                output2 = BytesUtil.findFile(output);
+            } catch (FileNotFoundException fnfe) {
+                try {
+                    output2 = BytesUtil.findFile(input.replace("in.yaml", "out.yaml"));
+                } catch (FileNotFoundException e) {
+                    throw fnfe;
+                }
+            }
+            try (FileWriter fw = new FileWriter(output2)) {
+                String actual2 = actual + "\n";
+                if (OS.isWindows())
+                    actual2 = actual2.replace("\n", "\r\n");
+                fw.write(actual2);
+            }
+        }
         return this;
+    }
+
+    @NotNull
+    protected StringBuilder loadLastValues() throws IOException {
+        Wire wireOut = new TextWire(BytesUtil.readFile(output));
+        Map<String, String> events = new TreeMap<>();
+        consumeDocumentSeparator(wireOut);
+        while (wireOut.hasMore()) {
+            StringBuilder event = new StringBuilder();
+            long start = wireOut.bytes().readPosition();
+            Map<String, Object> m = wireOut.read(event).marshallableAsMap(String.class, Object.class);
+            assert m != null;
+            StringBuilder key = new StringBuilder(event);
+            for (String s : retainLast) {
+                key.append(",").append(m.get(s));
+            }
+            long end = wireOut.bytes().readPosition();
+            events.put(key.toString(), wireOut.bytes().subBytes(start, end - start).toString().trim());
+            consumeDocumentSeparator(wireOut);
+        }
+        StringBuilder expected2 = new StringBuilder();
+        for (String s : events.values()) {
+            expected2.append(s.replace("\r", "")).append("\n");
+        }
+        return expected2;
     }
 
     private void consumeDocumentSeparator(@NotNull Wire wireOut) {
