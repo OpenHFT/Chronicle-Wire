@@ -15,8 +15,8 @@ import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
 /**
- * This bitset is indented to be shared between processes, in-order to keep the locking constrains
- * to a minimum, this is implement as a lock free solution, It also does not support resizing.
+ * This <code>BitSet</code> is intended to be shared between processes. To minimize locking constraints,
+ * it is implemented as a lock-free solution without support for resizing.
  * <p>
  * Created by Rob Austin
  */
@@ -191,6 +191,7 @@ public class LongValueBitSet implements Marshallable {
      *
      * @param wordsRequired the minimum acceptable number of words.
      */
+    /*
     private void ensureCapacity(int wordsRequired) {
         if (words.length < wordsRequired) {
             // Allocate larger of doubled size or required size
@@ -199,6 +200,7 @@ public class LongValueBitSet implements Marshallable {
             sizeIsSticky = false;
         }
     }
+    */
 
     /**
      * Ensures that the BitSet can accommodate a given wordIndex,
@@ -211,8 +213,8 @@ public class LongValueBitSet implements Marshallable {
     private void expandTo(int wordIndex) {
         int wordsRequired = wordIndex + 1;
         if (getWordsInUse() < wordsRequired) {
-            throw new UnsupportedOperationException("todo: its not possible currently to expend " +
-                    "this stucture, becuase if its concurrent nature and have to implement cross " +
+            throw new UnsupportedOperationException("todo: it is not possible currently to expand " +
+                    "this stucture, because if its concurrent nature and have to implement cross " +
                     "process locking");
             //  ensureCapacity(wordsRequired);
             //  wordsInUse.setValue(wordsRequired);
@@ -841,10 +843,10 @@ public class LongValueBitSet implements Marshallable {
         //  }
 
         // Perform logical XOR on words in common
-        for (int i = 0; i < wordsInCommon; i++) {
-            final long result;
-            result = words[i].getVolatileValue() ^ set.words[i].getVolatileValue();
-        }
+        //for (int i = 0; i < wordsInCommon; i++) {
+        //    final long result;
+        //    result = words[i].getVolatileValue() ^ set.words[i].getVolatileValue();
+        //}
 
         // Copy any remaining words
         if (wordsInCommon < set.getWordsInUse())
