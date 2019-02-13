@@ -36,6 +36,7 @@ import static org.junit.Assert.assertTrue;
  * Created by Peter Lawrey on 15/08/15.
  */
 public class ReadmeChapter1Test {
+    @SuppressWarnings("unused")
     @Test
     public void example1() {
         // Bytes which wraps a ByteBuffer which is resized as needed.

@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /*
  * Created by peter.lawrey@chronicle.software on 31/07/2017
@@ -71,6 +72,7 @@ public class UnsupportedChangesTest {
                 "flag: { a: 128, b: 1.0 },\n" +
                 "second: 1234," +
                 "}\n");
+        assertNotNull(wrapper);
     }
 
     static class Wrapper extends AbstractMarshallable {
