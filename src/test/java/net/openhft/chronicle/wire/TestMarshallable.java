@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 /*
  * Created by daniel on 08/04/15.

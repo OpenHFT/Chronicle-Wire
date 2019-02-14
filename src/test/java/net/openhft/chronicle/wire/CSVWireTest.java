@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;

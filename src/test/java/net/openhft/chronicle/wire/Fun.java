@@ -17,7 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.util.SerializableFunction;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 /*
  * Created by Peter Lawrey on 23/06/15.

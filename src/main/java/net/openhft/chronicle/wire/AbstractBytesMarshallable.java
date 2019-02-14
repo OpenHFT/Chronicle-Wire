@@ -1,7 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 public class AbstractBytesMarshallable extends AbstractMarshallable {
     @Override

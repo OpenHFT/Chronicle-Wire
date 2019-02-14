@@ -1,7 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
     final CharSequenceObjectMap<FieldAccess> fieldMap;

@@ -16,8 +16,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.openhft.chronicle.core.annotation.NotNull;
+import net.openhft.chronicle.core.annotation.Nullable;
 
 import java.io.EOFException;
 import java.io.ObjectInput;

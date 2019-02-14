@@ -2,7 +2,7 @@ package net.openhft.chronicle.wire.map;
 
 import net.openhft.chronicle.wire.AbstractMarshallable;
 import net.openhft.chronicle.wire.Wires;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 import org.junit.Test;
 
 import java.util.LinkedHashMap;

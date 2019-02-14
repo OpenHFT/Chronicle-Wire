@@ -18,7 +18,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.CharSequenceComparator;
 import net.openhft.chronicle.core.util.StringUtils;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -42,7 +42,7 @@ public class VanillaWireParser implements WireParser {
         this.fieldNumberParselet = fieldNumberParselet;
     }
 
-    private int peekCode(@net.openhft.chronicle.core.annotation.NotNull WireIn wireIn) {
+    private int peekCode(@NotNull WireIn wireIn) {
         return wireIn.bytes().peekUnsignedByte();
     }
 

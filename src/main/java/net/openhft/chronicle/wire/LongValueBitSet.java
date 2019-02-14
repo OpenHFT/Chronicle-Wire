@@ -4,7 +4,7 @@ import net.openhft.chronicle.bytes.ref.LongReference;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.threads.Pauser;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;

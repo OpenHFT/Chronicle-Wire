@@ -17,7 +17,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.bytes.MappedFile;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 import org.junit.Test;
 
 import java.io.EOFException;

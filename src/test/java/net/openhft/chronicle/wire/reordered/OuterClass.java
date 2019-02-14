@@ -18,7 +18,7 @@ package net.openhft.chronicle.wire.reordered;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;

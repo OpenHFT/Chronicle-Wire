@@ -15,8 +15,8 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.openhft.chronicle.core.annotation.NotNull;
+import net.openhft.chronicle.core.annotation.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;

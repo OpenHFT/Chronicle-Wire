@@ -17,7 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.util.SerializableUpdater;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 import java.util.concurrent.atomic.AtomicLong;
 

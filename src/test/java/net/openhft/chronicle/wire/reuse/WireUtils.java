@@ -21,7 +21,7 @@
  */
 package net.openhft.chronicle.wire.reuse;
 
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 import org.junit.Assert;
 
 import java.util.Random;

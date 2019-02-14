@@ -17,7 +17,7 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.wire.AbstractMarshallable;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

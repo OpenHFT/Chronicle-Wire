@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 /**
  * This WireKey expects paramaters to follow in a marshallable.

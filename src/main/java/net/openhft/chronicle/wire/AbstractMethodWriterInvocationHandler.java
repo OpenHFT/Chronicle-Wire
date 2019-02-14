@@ -22,7 +22,7 @@ import net.openhft.chronicle.bytes.MethodWriterInterceptor;
 import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
 import net.openhft.chronicle.core.util.AbstractInvocationHandler;
 import net.openhft.chronicle.core.util.ObjectUtils;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;

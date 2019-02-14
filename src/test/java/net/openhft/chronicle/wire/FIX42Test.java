@@ -66,7 +66,7 @@ BinaryWire, fixed=true, numericField=false, fieldLess=true
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;

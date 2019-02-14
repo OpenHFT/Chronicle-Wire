@@ -68,11 +68,6 @@
             <artifactId>chronicle-threads</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.intellij</groupId>
-            <artifactId>annotations</artifactId>
-        </dependency>
-
         <!-- test dependencies -->
 
         <dependency>

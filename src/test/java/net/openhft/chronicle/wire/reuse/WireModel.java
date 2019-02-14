@@ -25,7 +25,7 @@ import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.wire.AbstractMarshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
-import org.jetbrains.annotations.Nullable;
+import net.openhft.chronicle.core.annotation.Nullable;
 
 /**
  * @author gadei

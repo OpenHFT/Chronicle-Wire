@@ -19,7 +19,7 @@ package net.openhft.chronicle.wire.reuse;
 import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
-import org.jetbrains.annotations.Nullable;
+import net.openhft.chronicle.core.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -115,7 +115,7 @@ public class WireCollection extends WireModel {
         this.properties = properties;
     }
 
-    public void addProperty(@org.jetbrains.annotations.NotNull WireProperty property) {
+    public void addProperty(@NotNull WireProperty property) {
         this.properties.put(property.getReference(), property);
     }
 
@@ -128,7 +128,7 @@ public class WireCollection extends WireModel {
         this.collections = collections;
     }
 
-    public void addCollection(@org.jetbrains.annotations.NotNull WireCollection collection) {
+    public void addCollection(@NotNull WireCollection collection) {
         this.collections.put(collection.getReference(), collection);
     }
 }

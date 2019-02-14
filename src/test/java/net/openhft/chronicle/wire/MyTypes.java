@@ -15,7 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 class MyTypes extends AbstractMarshallable {
     final StringBuilder text = new StringBuilder();

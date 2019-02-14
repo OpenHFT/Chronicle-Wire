@@ -23,7 +23,7 @@ import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
 import net.openhft.chronicle.bytes.MethodWriterListener;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;

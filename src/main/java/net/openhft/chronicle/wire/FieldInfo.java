@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
-import org.jetbrains.annotations.Nullable;
+import net.openhft.chronicle.core.annotation.Nullable;
 
 /*
  * Created by Peter Lawrey on 18/10/16.
