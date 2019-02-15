@@ -6,8 +6,9 @@ import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -26,7 +27,7 @@ public enum GeneratedProxyClass {
     @SuppressWarnings("rawtypes")
     public static Class from(String packageName, Set<Class> interfaces, String className) {
         int maxArgs = 0;
-        LinkedHashSet<Method> methods = new LinkedHashSet<>();
+        ArrayList<Method> methods = new ArrayList<>();
 
         StringBuilder sb = new StringBuilder("package " + packageName + ";\n\n" +
                 "import net.openhft.chronicle.core.Jvm;\n" +
@@ -52,8 +53,9 @@ public enum GeneratedProxyClass {
             if (!interfaceClazz.isInterface())
                 throw new IllegalArgumentException("expecting and interface instead of class=" + interfaceClazz.getName());
 
-            int j = -1;
-            for (final Method dm : interfaceClazz.getMethods()) {
+            for (int i = 0; i < interfaceClazz.getMethods().length; i++) {
+
+                Method dm = interfaceClazz.getMethods()[i];
 
                 if (dm.isDefault())
                     continue;
@@ -64,11 +66,16 @@ public enum GeneratedProxyClass {
                 if (dm.getGenericReturnType() instanceof TypeVariableImpl)
                     return null;
 
-                j++;
-                if (!methods.add(dm))
+                if (methods.contains(dm))
                     continue;
+
                 maxArgs = Math.max(maxArgs, dm.getParameterCount());
-                methodArray.append("    methods[" + (count++) + "]=" + interfaceClazz.getName().replace("$", ".") + ".class.getMethods()[" + j + "];\n");
+
+                methods.add(dm);
+                methodArray.append("\n");
+
+                methodArray.append("    //").append(createMethodSignature(dm, dm.getReturnType()));
+                methodArray.append("    methods[" + (count++) + "]=" + interfaceClazz.getName().replace("$", ".") + ".class.getMethods()[" + i + "];\n");
             }
 
             if (!iterator.hasNext())
@@ -94,7 +101,7 @@ public enum GeneratedProxyClass {
 
     }
 
-    private static void addFieldsAndConstructor(final int maxArgs, final LinkedHashSet<Method> declaredMethods, final StringBuilder sb, final String className, final StringBuilder methodArray) {
+    private static void addFieldsAndConstructor(final int maxArgs, final List<Method> declaredMethods, final StringBuilder sb, final String className, final StringBuilder methodArray) {
 
         sb.append("  private final Object proxy;\n" +
                 "  private final InvocationHandler handler;\n" +
@@ -111,7 +118,7 @@ public enum GeneratedProxyClass {
         sb.append("  }\n\n");
     }
 
-    private static void createProxyMethods(final LinkedHashSet<Method> declaredMethods, final StringBuilder sb) {
+    private static void createProxyMethods(final List<Method> declaredMethods, final StringBuilder sb) {
         int methodIndex = -1;
         for (final Method dm : declaredMethods) {
 
