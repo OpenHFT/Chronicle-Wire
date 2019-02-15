@@ -90,6 +90,7 @@ public class BinaryWireHeadersTest {
         wire2.bytes().release();
     }
 
+    @SuppressWarnings("unused")
     @Test(timeout = 3000, expected = TimeoutException.class)
     public void testConcurrentHeaderNumbers() throws TimeoutException, EOFException, StreamCorruptedException {
         @SuppressWarnings("rawtypes")

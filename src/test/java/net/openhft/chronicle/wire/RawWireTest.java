@@ -41,6 +41,7 @@ import static org.junit.Assert.*;
 
 public class RawWireTest {
 
+    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes bytes = nativeBytes();
 
@@ -272,6 +273,7 @@ public class RawWireTest {
         // ok as blank matches anything
         @NotNull AtomicLong i = new AtomicLong();
         IntConsumer ic = i::set;
+        assertNotNull(ic);
         LongStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().int64(i, AtomicLong::set);
             assertEquals(e, i.get());
@@ -430,6 +432,7 @@ public class RawWireTest {
     }
 
     @Ignore("todo fix :currently using NoBytesStore so will fail with UnsupportedOperationException")
+    @SuppressWarnings("rawtypes")
     @Test
     public void testBytes() {
         @NotNull Wire wire = createWire();

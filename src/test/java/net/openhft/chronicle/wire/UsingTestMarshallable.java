@@ -66,6 +66,7 @@ public class UsingTestMarshallable {
     @Test
     public void testMarshall() {
 
+        @SuppressWarnings("rawtypes")
         Bytes bytes = Bytes.elasticByteBuffer();
         @NotNull Wire wire = new BinaryWire(bytes);
 
@@ -95,6 +96,7 @@ public class UsingTestMarshallable {
             @NotNull SortedFilter sortedFilter = new SortedFilter();
 
             boolean add = sortedFilter.marshableFilters.add(expected);
+            Assert.assertTrue(add);
             wire.write().marshallable(sortedFilter);
         }
 

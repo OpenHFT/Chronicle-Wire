@@ -47,14 +47,17 @@ public class MarshallableTest {
     @Test(expected = IllegalArgumentException.class)
     public void testFromString2() {
         Object o = Marshallable.fromString("\"");
+        assertNotNull(o);
     }
 
     @Ignore("Undefined behaviour")
     @Test(expected = IllegalArgumentException.class)
     public void testFromString3() {
         Object o = Marshallable.fromString("'");
+        assertNotNull(o);
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testBytesMarshallable() {
         @NotNull Marshallable m = new MyTypes();
@@ -67,6 +70,7 @@ public class MarshallableTest {
         m.readMarshallable(wire);
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testEquals() {
         @NotNull final Bytes bytes = nativeBytes();

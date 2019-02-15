@@ -206,7 +206,7 @@ public class TextMethodTester<T> {
             }
 
             try (FileWriter fw = new FileWriter(output2)) {
-                String actual2 = actual + "\n";
+                String actual2 = actual.endsWith("\n") ? actual : (actual + "\n");
                 if (OS.isWindows())
                     actual2 = actual2.replace("\n", "\r\n");
                 fw.write(actual2);
