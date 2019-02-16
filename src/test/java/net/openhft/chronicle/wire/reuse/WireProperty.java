@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.wire.reuse;
 
-import net.openhft.chronicle.core.annotation.NotNull;
+import org.jetbrains.annotations.NotNull;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
 import org.jetbrains.annotations.Nullable;

@@ -42,7 +42,7 @@ public class VanillaWireParser implements WireParser {
         this.fieldNumberParselet = fieldNumberParselet;
     }
 
-    private int peekCode(@net.openhft.chronicle.core.annotation.NotNull WireIn wireIn) {
+    private int peekCode(@NotNull WireIn wireIn) {
         return wireIn.bytes().peekUnsignedByte();
     }
 

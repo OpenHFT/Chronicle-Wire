@@ -19,7 +19,7 @@ package net.openhft.chronicle.wire.benchmarks;
 import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.annotation.NotNull;
+import org.jetbrains.annotations.NotNull;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
