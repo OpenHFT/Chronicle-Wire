@@ -20,8 +20,7 @@
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
-        <version>1.1.18</version>
-        <relativePath />
+        <version>1.1.22</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>chronicle-wire</artifactId>
@@ -66,11 +65,6 @@
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>chronicle-threads</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.intellij</groupId>
-            <artifactId>annotations</artifactId>
         </dependency>
 
         <!-- test dependencies -->
@@ -207,20 +201,6 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>java9</id>
-            <properties>
-                <maven.compiler.source>1.9</maven.compiler.source>
-                <maven.compiler.target>1.9</maven.compiler.target>
-                <maven.compiler.fork>true</maven.compiler.fork>
-                <compiler.argument>--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED
-                    --add-exports=java.base/sun.nio.ch=ALL-UNNAMED --add-exports=java.unsupported/sun.misc=ALL-UNNAMED
-                </compiler.argument>
-            </properties>
-        </profile>
-    </profiles>
 
     <scm>
         <url>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</url>
