@@ -1200,6 +1200,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         return new BinaryBooleanReference();
     }
 
+    @Override
+    public boolean isTextWire() {
+        return false;
+    }
+
     @NotNull
     @Override
     public TwoLongValue newTwoLongReference() {

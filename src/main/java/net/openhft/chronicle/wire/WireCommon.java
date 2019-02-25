@@ -145,4 +145,6 @@ public interface WireCommon {
      */
     @NotNull
     BooleanValue newBooleanReference();
+
+    boolean isTextWire();
 }

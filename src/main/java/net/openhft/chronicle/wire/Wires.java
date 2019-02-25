@@ -345,11 +345,36 @@ public enum Wires {
 
     @NotNull
     public static <T extends Marshallable> T deepCopy(@NotNull T marshallable) {
+        Class<? extends Marshallable> aClass = marshallable.getClass();
+        @NotNull T t = (T) ObjectUtils.newInstance(aClass);
+        WireMarshaller<? extends Marshallable> marshaller = WireMarshaller.of(aClass);
+        try {
+            for (WireMarshaller.FieldAccess field : marshaller.fields) {
+                field.copy(t, marshallable);
+            }
+        } catch (IllegalAccessException e) {
+            throw new AssertionError(e);
+        }
+        return t;
+    }
+
+    @Nullable
+    static <T extends Marshallable> T deepCopyMarshallable(T marshallable) {
+        if (marshallable == null) return null;
         Wire wire = acquireBinaryWire();
         marshallable.writeMarshallable(wire);
         @NotNull T t = (T) ObjectUtils.newInstance(marshallable.getClass());
         t.readMarshallable(wire);
         return t;
+    }
+
+    @Nullable
+    static <T> T deepCopyObject(T object) {
+        if (object == null) return null;
+        Wire wire = acquireBinaryWire();
+        Class<T> aClass = (Class<T>) object.getClass();
+        wire.getValueOut().object(aClass, object);
+        return wire.getValueIn().object(aClass);
     }
 
     @NotNull
