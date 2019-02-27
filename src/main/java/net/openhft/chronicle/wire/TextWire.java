@@ -2300,7 +2300,7 @@ public class TextWire extends AbstractWire implements Wire {
 
                     @Nullable byte[] bytes = Compression.uncompress(sb, this, t -> {
                         @NotNull StringBuilder sb0 = acquireStringBuilder();
-                        parseWord(sb0);
+                        parseUntil(sb0, StopCharTesters.COMMA_SPACE_STOP);
                         return Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb0));
                     });
                     if (bytes != null)
