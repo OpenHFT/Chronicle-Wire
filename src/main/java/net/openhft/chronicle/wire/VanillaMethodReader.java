@@ -91,9 +91,12 @@ public class VanillaMethodReader implements MethodReader {
                     methodFilterOnFirstArg = (MethodFilterOnFirstArg) o;
             }
             for (@NotNull Method m : o.getClass().getMethods()) {
+                Class<?> declaringClass = m.getDeclaringClass();
+                if (declaringClass == Object.class)
+                    continue;
                 if (Modifier.isStatic(m.getModifiers()))
                     continue;
-                if (ignoreDefault && m.getDeclaringClass().isInterface())
+                if (ignoreDefault && declaringClass.isInterface())
                     continue;
                 if ("ignoreMethodBasedOnFirstArg".equals(m.getName()))
                     continue;

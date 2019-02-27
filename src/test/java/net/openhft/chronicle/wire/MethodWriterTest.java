@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.core.io.Closeable;
 import org.easymock.EasyMock;
 import org.junit.Test;
 
@@ -70,7 +71,14 @@ public class MethodWriterTest {
         writer.callsMethod("hello,world,bye");
         assertEquals("callsMethod: \"hello,world,bye\"\n" +
                 "---\n", wire.toString());
+    }
 
+    @Test
+    public void ignoreStatic() {
+        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        Closeable writer = wire.methodWriter(Closeable.class);
+        Closeable.closeQuietly(writer);
+        assertEquals("", wire.toString());
     }
 
     @Test
