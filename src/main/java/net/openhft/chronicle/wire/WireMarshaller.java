@@ -485,7 +485,7 @@ public class WireMarshaller<T> {
                     ObjectUtils.isImmutable(type) == ObjectUtils.Immutability.YES
                             ? t -> t
                             : Marshallable.class.isAssignableFrom(type)
-                            ? m -> Wires.deepCopyMarshallable((Marshallable) m)
+                            ? m -> Wires.deepCopy((Marshallable) m)
                             : Wires::deepCopyObject;
         }
 
