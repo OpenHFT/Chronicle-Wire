@@ -187,6 +187,15 @@ public class JSONWire extends TextWire {
         protected String floatToString(float f) {
             return Float.isNaN(f) ? "null" : super.floatToString(f);
         }
+
+        @NotNull
+        @Override
+        public WireOut rawText(CharSequence value) {
+            bytes.writeByte((byte) '\"');
+            WireOut wireOut = super.rawText(value);
+            bytes.writeByte((byte) '\"');
+            return wireOut;
+        }
     }
 
     class JSONValueIn extends TextValueIn {
