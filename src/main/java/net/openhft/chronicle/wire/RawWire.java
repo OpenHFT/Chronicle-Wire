@@ -184,11 +184,6 @@ public class RawWire extends AbstractWire implements Wire {
         throw new UnsupportedOperationException("todo");
     }
 
-    @Override
-    public boolean isTextWire() {
-        return false;
-    }
-
     @NotNull
     @Override
     public Bytes bytes() {

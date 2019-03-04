@@ -46,19 +46,6 @@ public class LongConversionTest {
         assertEquals("to[12345]\n", sw.toString().replaceAll("\r", ""));
     }
 
-    @Test
-    public void deepCopy() {
-        LongHolder lh = new LongHolder();
-        lh.unsigned = lh.hex = lh.timestamp = -1;
-        assertEquals("!LongHolder {\n" +
-                "  unsigned: 18446744073709551615,\n" +
-                "  hex: ffffffffffffffff,\n" +
-                "  timestamp: 1969-12-31T23:59:59.999999\n" +
-                "}\n", lh.toString());
-        LongHolder lh2 = lh.deepCopy();
-        assertEquals(lh, lh2);
-    }
-
     interface WriteWithLong {
         LongConversionTest.WriteWithLong to(@LongConversion(HexadecimalLongConverter.class) int x);
     }

@@ -476,17 +476,10 @@ public class WireMarshaller<T> {
 
     static class ObjectFieldAccess extends FieldAccess {
         private final Class type;
-        private final Function deepCopy;
 
         ObjectFieldAccess(@NotNull Field field, Boolean isLeaf) {
             super(field, isLeaf);
             type = field.getType();
-            deepCopy =
-                    ObjectUtils.isImmutable(type) == ObjectUtils.Immutability.YES
-                            ? t -> t
-                            : Marshallable.class.isAssignableFrom(type)
-                            ? m -> Wires.deepCopy((Marshallable) m)
-                            : Wires::deepCopyObject;
         }
 
         @Override
@@ -522,13 +515,6 @@ public class WireMarshaller<T> {
         public void getAsBytes(Object o, @NotNull Bytes bytes) throws IllegalAccessException {
             bytes.writeUtf8(String.valueOf(field.get(o)));
         }
-
-        @Override
-        protected void copy(Object from, Object to) {
-            UNSAFE.putObject(to, offset,
-                    deepCopy.apply(
-                            UNSAFE.getObject(from, offset)));
-        }
     }
 
     static class StringFieldAccess extends FieldAccess {
@@ -549,6 +535,11 @@ public class WireMarshaller<T> {
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) {
             bytes.writeUtf8((String) UNSAFE.getObject(o, offset));
+        }
+
+        @Override
+        protected void copy(Object from, Object to) throws IllegalAccessException {
+            super.copy(from, to);
         }
     }
 
@@ -728,13 +719,6 @@ public class WireMarshaller<T> {
             } catch (IllegalAccessException e) {
                 throw new AssertionError(e);
             }
-        }
-
-        @Override
-        protected void copy(Object from, Object to) {
-            UNSAFE.putObject(to, offset,
-                    Wires.deepCopyObject(
-                            UNSAFE.getObject(from, offset)));
         }
     }
 
@@ -1064,20 +1048,6 @@ public class WireMarshaller<T> {
         @Override
         public void getAsBytes(Object o, Bytes bytes) {
             throw new UnsupportedOperationException();
-        }
-
-        @Override
-        protected void copy(Object from, Object to) throws IllegalAccessException {
-            Collection<String> coll = (Collection<String>) UNSAFE.getObject(from, offset);
-            if (coll == null) {
-                UNSAFE.putObject(to, offset, null);
-                return;
-            }
-            Collection<String> coll2 = (Collection<String>) UNSAFE.getObject(to, offset);
-            if (coll2 == null)
-                UNSAFE.putObject(to, offset, coll2 = new ArrayList<>());
-            coll2.clear();
-            coll2.addAll(coll);
         }
     }
 
@@ -1492,7 +1462,7 @@ public class WireMarshaller<T> {
         }
     }
 
-    static class LongConversionFieldAccess extends LongFieldAccess {
+    static class LongConversionFieldAccess extends FieldAccess {
         @NotNull
         private final LongConverter longConverter;
 
@@ -1503,25 +1473,17 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
-            if (write.wireOut().isTextWire()) {
-                StringBuilder sb = acquireStringBuilder();
-                longConverter.append(sb, UNSAFE.getLong(o, offset));
-                write.rawText(sb);
-            } else {
-                super.getValue(o, write, previous);
-            }
+            StringBuilder sb = acquireStringBuilder();
+            longConverter.append(sb, UNSAFE.getLong(o, offset));
+            write.rawText(sb);
         }
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            if (read.wireIn().isTextWire()) {
-                StringBuilder sb = acquireStringBuilder();
-                read.text(sb);
-                long i = longConverter.parse(sb);
-                UNSAFE.putLong(o, offset, i);
-            } else {
-                super.setValue(o, read, overwrite);
-            }
+            StringBuilder sb = acquireStringBuilder();
+            read.text(sb);
+            long i = longConverter.parse(sb);
+            UNSAFE.putLong(o, offset, i);
         }
 
         @Override

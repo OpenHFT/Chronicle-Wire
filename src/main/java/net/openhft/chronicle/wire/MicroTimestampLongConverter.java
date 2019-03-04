@@ -29,11 +29,9 @@ public class MicroTimestampLongConverter implements LongConverter {
 
     @Override
     public void append(StringBuilder text, long value) {
-        long secs = Math.floorDiv(value, 1_000_000);
-        int nanos = (int) ((value - secs * 1_000_000) * 1000);
         LocalDateTime ldt = LocalDateTime.ofEpochSecond(
-                secs,
-                nanos,
+                value / 1_000_000,
+                (int) (value % 1_000_000 * 1000),
                 ZoneOffset.UTC);
         dtf.formatTo(ldt, text);
     }

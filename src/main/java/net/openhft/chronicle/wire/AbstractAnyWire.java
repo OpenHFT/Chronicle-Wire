@@ -193,11 +193,6 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         return wireAcquisition.acquireWire().readingPeekYaml();
     }
 
-    @Override
-    public boolean isTextWire() {
-        throw new UnsupportedOperationException();
-    }
-
     interface WireAcquisition {
 
         /**

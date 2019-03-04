@@ -262,11 +262,6 @@ public class HashWire implements WireOut, BytesComment {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public boolean isTextWire() {
-        return false;
-    }
-
     @NotNull
     @Override
     public LongArrayValues newLongArrayReference() {

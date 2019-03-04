@@ -343,22 +343,13 @@ public enum Wires {
         wm.writeKey(marshallable, bytes);
     }
 
-    public static <T extends Marshallable> T deepCopy(T marshallable) {
-        if (marshallable == null) return null;
+    @NotNull
+    public static <T extends Marshallable> T deepCopy(@NotNull T marshallable) {
         Wire wire = acquireBinaryWire();
         marshallable.writeMarshallable(wire);
         @NotNull T t = (T) ObjectUtils.newInstance(marshallable.getClass());
         t.readMarshallable(wire);
         return t;
-    }
-
-    @Nullable
-    static <T> T deepCopyObject(T object) {
-        if (object == null) return null;
-        Wire wire = acquireBinaryWire();
-        Class<T> aClass = (Class<T>) object.getClass();
-        wire.getValueOut().object(aClass, object);
-        return wire.getValueIn().object(aClass);
     }
 
     @NotNull
