@@ -1,0 +1,12 @@
+data:
+  aaa: 1
+  bbb: 2
+  zzz: 3
+developers:
+  team1:
+    name: Fred
+    role: creator
+  team2:
+    name: John
+    role: committer
+name: Bean123

@@ -1,0 +1,4 @@
+&id001 !!java.util.SortedMap
+'2': two
+'1': one
+'3': *id001

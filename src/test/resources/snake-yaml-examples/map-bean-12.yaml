@@ -1,0 +1,16 @@
+data:
+  ? name: Andy
+    role: tester
+  : BLACK
+  ? name: Lisa
+    role: owner
+  : RED
+developers:
+  WHITE:
+    name: Fred
+    role: creator
+  BLACK:
+    name: John
+    role: committer
+name: Bean123
+

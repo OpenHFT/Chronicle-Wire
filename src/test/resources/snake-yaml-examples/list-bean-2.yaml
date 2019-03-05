@@ -1,0 +1,12 @@
+children:
+- aaa
+- bbb
+developers:
+- !!examples.collections.TypeSafeListWithInterfaceTest$Developer
+  name: Fred
+  role: creator
+- !!examples.collections.TypeSafeListWithInterfaceTest$Committer
+  key: 34
+  name: John
+  role: committer
+name: Bean123

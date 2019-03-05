@@ -1,0 +1,7 @@
+&id001 !!set
+? !!examples.collections.TypeSafeSetImplementationsTest$Box
+  id: id123
+  set: *id001
+: null
+111: null
+aaa: null

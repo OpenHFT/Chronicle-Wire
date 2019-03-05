@@ -1,0 +1,12 @@
+children:
+- aaa
+- bbb
+developers:
+- !!examples.collections.TypeSafeListNoGerericsTest$Developer
+  name: Fred
+  role: creator
+- !!examples.collections.TypeSafeListNoGerericsTest$Developer
+  name: John
+  role: committer
+name: Bean123
+

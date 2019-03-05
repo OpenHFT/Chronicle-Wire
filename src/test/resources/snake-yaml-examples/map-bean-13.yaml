@@ -1,0 +1,25 @@
+data:
+  ? name: Andy
+    role: tester
+  : BLACK
+  ? !!examples.collections.TypeSafeMap2Test$SuperMan
+    name: Bill
+    role: cleaner
+    smart: false
+  : BLACK
+  ? name: Lisa
+    role: owner
+  : RED
+developers:
+  WHITE:
+    name: Fred
+    role: creator
+  RED: !!examples.collections.TypeSafeMap2Test$SuperMan
+    name: Jason
+    role: contributor
+    smart: true
+  BLACK:
+    name: John
+    role: committer
+name: Bean123
+

@@ -1,0 +1,14 @@
+developers: !!set
+  ? name: Karl
+    role: user
+  : null
+  ? name: John
+    role: founder
+  : null
+  
+name: Bean123
+
+sorted: !!set
+  two: null
+  one: null
+  three: null
