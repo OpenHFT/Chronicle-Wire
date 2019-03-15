@@ -5,14 +5,18 @@ import net.openhft.chronicle.core.util.StringUtils;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-public class Base85LongConverter implements LongConverter {
-    public static final Base85LongConverter INSTANCE = new Base85LongConverter();
-    private static final String CHARS = "0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz\"#$%&'()*+,-./ ";
+import static net.openhft.chronicle.wire.Base85LongConverter.TWO_TO_64;
+
+/**
+ * Unsigned 64-bit number.
+ */
+public class Base40LongConverter implements LongConverter {
+    public static final Base40LongConverter INSTANCE = new Base40LongConverter();
+    private static final String CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_:+";
     private static final char[] DECODE = CHARS.toCharArray();
     private static final byte[] ENCODE = new byte[128];
-    static final BigInteger TWO_TO_64 = BigInteger.ONE.shiftLeft(64);
 
-    private static final int BASE = 85;
+    private static final int BASE = 40;
     static final BigInteger BASE_BI = BigInteger.valueOf(BASE);
 
     static {
