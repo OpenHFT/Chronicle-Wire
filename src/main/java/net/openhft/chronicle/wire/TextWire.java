@@ -48,6 +48,7 @@ import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
+import static net.openhft.chronicle.bytes.BytesUtil.unregister;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 /**
@@ -75,7 +76,7 @@ public class TextWire extends AbstractWire implements Wire {
     static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
 
     static {
-        assert BytesUtil.unregister(TYPE, BINARY);
+        assert unregister(TYPE) & unregister(BINARY);
         for (char ch : "?0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
         for (char ch : "?,#:{}[]|>\\".toCharArray())
