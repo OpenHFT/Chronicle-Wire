@@ -56,7 +56,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TextWire extends AbstractWire implements Wire {
     public static final BytesStore TYPE = BytesStore.from("!type ");
-    public static final BytesStore BINARY = Bytes.from("!!binary");
+    public static final BytesStore BINARY = BytesStore.from("!!binary");
     static final String SEQ_MAP = "!seqmap";
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
@@ -65,7 +65,6 @@ public class TextWire extends AbstractWire implements Wire {
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_SINGLE_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(() -> StopCharTesters.SINGLE_QUOTES.escaping());
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
     static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
-    static final ThreadLocal<WeakReference<StopCharsTester>> ESCAPED_END_EVENT_NAME = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
     static final BytesStore COMMA_SPACE = BytesStore.from(", ");
     static final BytesStore COMMA_NEW_LINE = BytesStore.from(",\n");
     static final BytesStore NEW_LINE = BytesStore.from("\n");
@@ -76,6 +75,7 @@ public class TextWire extends AbstractWire implements Wire {
     static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
 
     static {
+        assert BytesUtil.unregister(TYPE, BINARY);
         for (char ch : "?0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
         for (char ch : "?,#:{}[]|>\\".toCharArray())
