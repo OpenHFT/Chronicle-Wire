@@ -1,6 +1,5 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
@@ -78,7 +77,7 @@ public class TextSkipValueTest {
 
     @Test
     public void skipValue() {
-        Wire wire = new TextWire(Bytes.from(input));
+        Wire wire = TextWire.from(input);
         wire.getValueIn()
                 .skipValue();
         wire.consumePadding();

@@ -16,7 +16,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.bytes.util.Compressions;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -69,7 +68,7 @@ public class TextWireTest {
 
     @Test
     public void testTypeInsteadOfField() {
-        Wire wire = new TextWire(Bytes.from("!!null \"\""));
+        Wire wire = TextWire.from("!!null \"\"");
         StringBuilder sb = new StringBuilder();
         wire.read(sb).object(Object.class);
         assertEquals(0, sb.length());
@@ -178,9 +177,9 @@ public class TextWireTest {
     @Test
     public void testFromString2() {
         for (int i = 0; i <= 256; i++) {
-            Wire w = WireType.TEXT.apply(Bytes.from(
+            Wire w = TextWire.from(
                     "data: 0x" + Integer.toHexString(i).toUpperCase() + ",\n" +
-                            "data2: 0x" + Integer.toHexString(i).toLowerCase()));
+                            "data2: 0x" + Integer.toHexString(i).toLowerCase());
             assertEquals(i, w.read("data").int64());
             assertEquals(i, w.read("data2").int64());
         }

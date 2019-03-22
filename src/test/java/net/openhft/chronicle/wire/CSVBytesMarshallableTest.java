@@ -37,7 +37,7 @@ enum CcyPair {
  */
 @SuppressWarnings("rawtypes")
 public class CSVBytesMarshallableTest {
-    Bytes bytes = Bytes.from(
+    Bytes bytes = Bytes.fromString(
             "1.09029,1.090305,EURUSD,2,1,EBS\n" +
                     "1.50935,1.50936,GBPUSD,5,1,RTRS\n" +
                     "1.0906,1.09065,EURCHF,3,1,EBS\n");

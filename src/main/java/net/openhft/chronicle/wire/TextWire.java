@@ -110,7 +110,7 @@ public class TextWire extends AbstractWire implements Wire {
 
     @NotNull
     public static TextWire from(@NotNull String text) {
-        return new TextWire(Bytes.from(text));
+        return new TextWire(Bytes.fromString(text));
     }
 
     public static String asText(@NotNull Wire wire) {

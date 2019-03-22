@@ -41,8 +41,9 @@ public class EnumTest {
             wire.write("test")
                     .object(TestEnum.INSTANCE);
             assertEquals("test: !net.openhft.chronicle.wire.EnumTest$TestEnum INSTANCE\n", wire.toString());
-            @NotNull TextWire wire2 = new TextWire(Bytes.from("test: !net.openhft.chronicle.wire.EnumTest$TestEnum {\n" +
-                    "}\n"));
+            @NotNull TextWire wire2 = TextWire.from(
+                    "test: !net.openhft.chronicle.wire.EnumTest$TestEnum {\n" +
+                            "}\n");
             @Nullable Object enumObject = wire2.read(() -> "test")
                     .object();
             Assert.assertTrue(enumObject == TestEnum.INSTANCE);
