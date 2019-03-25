@@ -69,7 +69,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     private final BinaryReadDocumentContext readContext;
     private final StringBuilder stringBuilder = new StringBuilder();
-    DefaultValueIn defaultValueIn;
+    private DefaultValueIn defaultValueIn;
     private String compression;
 
     public BinaryWire(@NotNull Bytes bytes) {
