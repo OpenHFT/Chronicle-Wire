@@ -59,6 +59,7 @@ public final class BinaryWireStringInternerTest {
         wire.clear();
     }
 
+    @Ignore("todo fix see #137")
     @Test
     public void shouldInternExistingStringsAlright() throws Exception {
         final List<RuntimeException> capturedExceptions = new CopyOnWriteArrayList<>();

@@ -56,7 +56,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private static final ThreadLocal<UTF8StringInterner>  UTF8 = ThreadLocal.withInitial(()-> new UTF8StringInterner(4096));
     private static final ThreadLocal<Bit8StringInterner>  BIT8 = ThreadLocal.withInitial(()-> new Bit8StringInterner(1024));
 
-    static int SPEC = Integer.getInteger("BinaryWire.SPEC", 18);
+    private static int SPEC = Integer.getInteger("BinaryWire.SPEC", 18);
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     private final FixedBinaryValueOut valueOut;
