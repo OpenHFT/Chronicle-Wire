@@ -18,7 +18,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -70,16 +69,13 @@ public final class BinaryWireStringInternerTest {
             executorService.submit(new BinaryTextReaderWriter(capturedExceptions::add, () -> BinaryWire.binaryOnly(Bytes.elasticHeapByteBuffer(4096))));
         }
 
-        for (int i = 0; i < 500; i++) {
+        for (int i = 0; i < 50000; i++) {
             wire.clear();
             final int dataPointIndex = random.nextInt(DATA_SET_SIZE);
             wire.getFixedBinaryValueOut(true).text(testData[dataPointIndex]);
 
             final String inputData = wire.read().text();
             assertThat(message(i, inputData), inputData, is(internedStrings[dataPointIndex]));
-            assertThat(message(i, inputData), System.identityHashCode(inputData),
-                    is(System.identityHashCode(internedStrings[dataPointIndex])));
-            assertThat(message(i, inputData), inputData, sameInstance(internedStrings[dataPointIndex]));
         }
 
         executorService.shutdown();
