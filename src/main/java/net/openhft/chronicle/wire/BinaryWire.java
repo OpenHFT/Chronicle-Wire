@@ -52,8 +52,10 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class BinaryWire extends AbstractWire implements Wire {
-    private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
-    private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
+
+    private static final ThreadLocal<UTF8StringInterner>  UTF8 = ThreadLocal.withInitial(()-> new UTF8StringInterner(4096));
+    private static final ThreadLocal<Bit8StringInterner>  BIT8 = ThreadLocal.withInitial(()-> new Bit8StringInterner(1024));
+
     static int SPEC = Integer.getInteger("BinaryWire.SPEC", 18);
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
@@ -541,7 +543,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private <K> K readSmallField(int peekCode, Class<K> expectedClass) {
         bytes.uncheckedReadSkipOne();
         final int length = peekCode & 0x1F;
-        final String s = BIT8.intern(bytes, length);
+        final String s = BIT8.get().intern(bytes, length);
         bytes.readSkip(length);
         return ObjectUtils.convertTo(expectedClass, s);
     }
@@ -2203,7 +2205,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     long end = bytes.readPosition() + len;
                     try {
                         bytes.readLimit(end);
-                        return UTF8.intern(bytes);
+                        return UTF8.get().intern(bytes);
                     } finally {
                         bytes.readLimit(limit);
                         bytes.readPosition(end);
