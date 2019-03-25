@@ -37,7 +37,7 @@ public class WireBug37Test {
         final String output = bytes.toString();
         System.out.println("output: [" + output + "]");
 
-        obj3.readMarshallable(wireType.apply(Bytes.from(output)));
+        obj3.readMarshallable(wireType.apply(Bytes.fromString(output)));
 
         assertEquals(obj2, obj3);
 

@@ -90,7 +90,7 @@ public class JSON222IndividualTest {
     }
 
     void checkDeserialized(String expected, @NotNull String input) {
-        @NotNull Wire wire = new TextWire(Bytes.from(input));
+        @NotNull Wire wire = TextWire.from(input);
 
         try {
             @NotNull Yaml yaml = new Yaml();

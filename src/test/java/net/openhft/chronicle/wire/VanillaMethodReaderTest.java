@@ -18,9 +18,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.stream.IntStream;
 
 import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 interface MockMethods {
     void method1(MockDto dto);
@@ -239,7 +237,7 @@ public class VanillaMethodReaderTest {
                 "  }\n" +
                 "}\n" +
                 "---\n";
-        Wire wire = new TextWire(Bytes.from(text));
+        Wire wire = TextWire.from(text);
         MethodReader reader = wire.methodReader(writer2);
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
@@ -263,7 +261,7 @@ public class VanillaMethodReaderTest {
                 "  three: many words\n" +
                 "}\n" +
                 "---\n";
-        Wire wire = new TextWire(Bytes.from(text));
+        Wire wire = TextWire.from(text);
         MethodReader reader = wire.methodReader(writer2);
         assertTrue(reader.readOne());
         assertTrue(reader.readOne());
@@ -277,7 +275,7 @@ public class VanillaMethodReaderTest {
         try {
             Wire wire2 = new TextWire(Bytes.elasticHeapByteBuffer(32));
             Overloaded writer2 = wire2.methodWriter(Overloaded.class);
-            Wire wire = new TextWire(Bytes.from("method: [ ]\n"));
+            Wire wire = TextWire.from("method: [ ]\n");
             MethodReader reader = wire.methodReader(writer2);
             assertNotNull(reader);
 //            reader.readOne();

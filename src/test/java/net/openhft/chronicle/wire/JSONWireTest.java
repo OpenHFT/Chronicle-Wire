@@ -41,7 +41,7 @@ public class JSONWireTest {
 
     @NotNull
     private JSONWire getWire(@NotNull String json) {
-        return new JSONWire(Bytes.from(json));
+        return new JSONWire(Bytes.fromString(json));
     }
 
     @Test
@@ -159,7 +159,7 @@ public class JSONWireTest {
     public void testBytes() {
         @NotNull Wire w = getWire();
 
-        Bytes bs = Bytes.from("blablabla");
+        Bytes bs = Bytes.fromString("blablabla");
         w.write("a").int64(123);
         w.write("somebytes").text(bs);
 

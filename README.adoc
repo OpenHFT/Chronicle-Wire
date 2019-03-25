@@ -397,7 +397,7 @@ public void testUnknownClass() {
             "  three: many words\n" +
             "}\n" +
             "---\n";
-    Wire wire = new TextWire(Bytes.from(text));
+    Wire wire = TextWire.from(text);
     MethodReader reader = wire.methodReader(writer2);
     assertTrue(reader.readOne());
     assertTrue(reader.readOne());

@@ -32,7 +32,6 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -611,7 +610,7 @@ public class WireMarshaller<T> {
             WireIn wireIn = read.wireIn();
             if (wireIn instanceof TextWire) {
                 wireIn.consumePadding();
-                if (wireIn.bytes().startsWith(Bytes.from("!!binary"))) {
+                if (wireIn.bytes().startsWith(TextWire.BINARY)) {
                     decodeBytes(read, bytes);
                     return;
                 }

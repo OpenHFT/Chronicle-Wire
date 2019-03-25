@@ -38,9 +38,9 @@ public class MarshallableTest {
         fail("Got " + Marshallable.fromFile("empty-file.yaml"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testEmptyFromString() {
-        Marshallable.fromString("");
+        assertEquals("", Marshallable.fromString(""));
     }
 
     @Ignore("Undefined behaviour")
