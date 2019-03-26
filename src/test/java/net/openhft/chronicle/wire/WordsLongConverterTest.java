@@ -45,7 +45,7 @@ public class WordsLongConverterTest {
         for (int i = 0; i < 1000; i++) {
             long l = random.nextLong();
             String text = bic.asString(l);
-            System.out.println(text);
+//            System.out.println(text);
             assertEquals(l, bic.parse(text));
 
         }
