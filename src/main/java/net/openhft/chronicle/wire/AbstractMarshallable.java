@@ -36,4 +36,5 @@ public abstract class AbstractMarshallable implements Marshallable, BytesMarshal
     public String toString() {
         return Marshallable.$toString(this);
     }
+
 }

@@ -52,9 +52,11 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class BinaryWire extends AbstractWire implements Wire {
+
     private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
     private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
-    static int SPEC = Integer.getInteger("BinaryWire.SPEC", 18);
+
+    private static int SPEC = Integer.getInteger("BinaryWire.SPEC", 18);
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
     private final FixedBinaryValueOut valueOut;
@@ -67,7 +69,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     private final BinaryReadDocumentContext readContext;
     private final StringBuilder stringBuilder = new StringBuilder();
-    DefaultValueIn defaultValueIn;
+    private DefaultValueIn defaultValueIn;
     private String compression;
 
     public BinaryWire(@NotNull Bytes bytes) {
