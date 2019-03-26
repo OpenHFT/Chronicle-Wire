@@ -509,7 +509,6 @@ cease
 chain
 chair
 chart
-cheat
 cheek
 chick
 chief

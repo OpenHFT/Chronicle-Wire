@@ -33,10 +33,13 @@ public class WordsLongConverterTest {
                 "publish.unload.dare.hobby.precise.melt\n" +
                 "promote.except.crucial.cease.inside.make\n" +
                 "damp.holiday.beak.score.percent.nail\n" +
-                "dismiss.laugh.harmless.squeeze.bother.unit\n").split("\n")) {
+                "dismiss.laugh.harmless.squeeze.bother.unit").split("\n")) {
             assertEquals(s, bic.asString(bic.parse(s)));
         }
-        for (long l : new long[]{Long.MIN_VALUE, Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE, Long.MAX_VALUE}) {
+        for (long l : new long[]{Long.MIN_VALUE, Integer.MIN_VALUE,
+                System.currentTimeMillis(), System.nanoTime(), System.currentTimeMillis() * 1000,
+                -1, 0, 1,
+                Integer.MAX_VALUE, Long.MAX_VALUE}) {
             String text = bic.asString(l);
 //            System.out.println(text);
             assertEquals(l, bic.parse(text));
