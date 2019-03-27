@@ -4,6 +4,7 @@ import net.openhft.chronicle.core.io.IOTools;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -15,10 +16,13 @@ public class WordsLongConverter implements LongConverter {
 
     static {
         try {
-            WORDS = new String(IOTools.readFile("2k-oxford-words.txt"), StandardCharsets.ISO_8859_1).split("\\s+");
+            String[] words = new String(IOTools.readFile("common-words.txt"), StandardCharsets.ISO_8859_1).split("\\s+");
+            WORDS = Arrays.copyOf(words, 4096);
             for (int i = 0; i < WORDS.length; i++) {
                 String word = WORDS[i];
-                WORD_ID.put(word, i);
+                Integer ii = WORD_ID.put(word, i);
+                assert ii == null : "Duplicate " + word;
+
             }
         } catch (IOException e) {
             throw new AssertionError(e);
@@ -33,6 +37,47 @@ public class WordsLongConverter implements LongConverter {
 
     public WordsLongConverter(char sep) {
         this.sep = Character.toString(sep);
+    }
+
+    static int sign(double d) {
+        return (int) (Double.doubleToRawLongBits(d) >>> 63);
+    }
+
+    public static String latLong(double lat, double lon, double precision) {
+        int lats = sign(lat);
+        int lons = sign(lon);
+        double lata = Math.abs(lat) / 90.0;
+        double lona = Math.abs(lon) / 180.0;
+        precision /= 180;
+        StringBuilder ret = new StringBuilder();
+        final int factor = 64;
+        {
+            lata *= factor / 2;
+            lona *= factor / 2;
+            int lati = (int) Math.floor(lata);
+            int loni = (int) Math.floor(lona);
+            lata -= lati;
+            lona -= loni;
+
+            lati = lati * 2 + lats;
+            loni = loni * 2 + lons;
+            int index = loni * factor + lati;
+            ret.append(WORDS[index]);
+            precision *= factor;
+        }
+
+        while (precision < 1) {
+            lata *= factor;
+            lona *= factor;
+            int lati = (int) Math.floor(lata);
+            int loni = (int) Math.floor(lona);
+            lata -= lati;
+            lona -= loni;
+            int index = loni * factor + lati;
+            ret.append(".").append(WORDS[index]);
+            precision *= factor;
+        }
+        return ret.toString();
     }
 
     @Override
