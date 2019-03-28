@@ -19,20 +19,19 @@ public class WordsLongConverterTest {
     @Test
     public void parse() {
         LongConverter bic = new WordsLongConverter();
-        for (String s : ("square.army.observe.plate.wash.achieve\n" +
-                "instant.content.occur.gold.thank.coins\n" +
-                "pay.who.unable.appropriate.essay.bring\n" +
+        for (String s : ("square.army.plan.player.wash.disk\n" +
+                "instant.our.ocean.gold.thank.bang\n" +
                 "attach.campaign.castle.instant.young.brick\n" +
-                "creation.smoke.smart.grants.when.beard\n" +
-                "bunch.outline.coral.bomb.assist.apply\n" +
-                "bandage.exchange.acid.ban.capable.bold\n" +
-                "aim.neck.deal.award.impress.award\n" +
-                "cruel.damp.they.countries.quite.drill\n" +
-                "chart.cover.girl.clock.anytime.allow\n" +
-                "guard.could.gap.glue.boil.choice\n" +
-                "glue.account.sour.bubble.thought.ours\n" +
+                "we.smoothly.smart.grants.when.beard\n" +
+                "bunch.prior.sky.bond.assist.apply\n" +
+                "island.cheek.across.ban.laws.bomb\n" +
+                "aim.neck.deal.award.impress.ink\n" +
+                "cruel.damp.they.toy.quite.drill\n" +
+                "chart.two.glad.clock.any.lean\n" +
+                "guard.could.gap.glue.boil.apply\n" +
+                "glue.account.sour.bubble.thought.spa\n" +
                 "songs.unlock.dare.enough.shed.child\n" +
-                "smile.excerpt.crucial.cease.inside.chance\n" +
+                "smile.excerpt.alpha.centre.grill.alpha\n" +
                 "it.launch.duck.stable.bother.calm").split("\n")) {
             assertEquals(s, bic.asString(bic.parse(s)));
         }
