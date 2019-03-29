@@ -4,7 +4,6 @@ import net.openhft.chronicle.core.io.IOTools;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -17,7 +16,7 @@ public class WordsLongConverter implements LongConverter {
     static {
         try {
             String[] words = new String(IOTools.readFile("common-words.txt"), StandardCharsets.ISO_8859_1).split("\\s+");
-            WORDS = Arrays.copyOf(words, 4096);
+            WORDS = words;
             for (int i = 0; i < WORDS.length; i++) {
                 String word = WORDS[i];
                 Integer ii = WORD_ID.put(word, i);
