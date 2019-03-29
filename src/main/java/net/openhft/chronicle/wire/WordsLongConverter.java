@@ -39,47 +39,6 @@ public class WordsLongConverter implements LongConverter {
         this.sep = Character.toString(sep);
     }
 
-    static int sign(double d) {
-        return (int) (Double.doubleToRawLongBits(d) >>> 63);
-    }
-
-    public static String latLong(double lat, double lon, double precision) {
-        int lats = sign(lat);
-        int lons = sign(lon);
-        double lata = Math.abs(lat) / 90.0;
-        double lona = Math.abs(lon) / 180.0;
-        precision /= 180;
-        StringBuilder ret = new StringBuilder();
-        final int factor = 64;
-        {
-            lata *= factor / 2;
-            lona *= factor / 2;
-            int lati = (int) Math.floor(lata);
-            int loni = (int) Math.floor(lona);
-            lata -= lati;
-            lona -= loni;
-
-            lati = lati * 2 + lats;
-            loni = loni * 2 + lons;
-            int index = loni * factor + lati;
-            ret.append(WORDS[index]);
-            precision *= factor;
-        }
-
-        while (precision < 1) {
-            lata *= factor;
-            lona *= factor;
-            int lati = (int) Math.floor(lata);
-            int loni = (int) Math.floor(lona);
-            lata -= lati;
-            lona -= loni;
-            int index = loni * factor + lati;
-            ret.append(".").append(WORDS[index]);
-            precision *= factor;
-        }
-        return ret.toString();
-    }
-
     @Override
     public long parse(CharSequence text) {
         String[] split = NON_LETTER.split(text.toString().trim(), 0);

@@ -7,14 +7,6 @@ import java.util.Random;
 import static org.junit.Assert.assertEquals;
 
 public class WordsLongConverterTest {
-    @Test
-    public void london() {
-        double precision = 0.7e-3;
-        System.out.println(WordsLongConverter.latLong(51.5074, -0.1278, precision));
-        System.out.println(WordsLongConverter.latLong(48.8566, 2.3522, precision));
-        System.out.println(WordsLongConverter.latLong(40.7128, -74.0060, precision));
-        System.out.println(WordsLongConverter.latLong(-37.8136, 144.9631, precision));
-    }
 
     @Test
     public void parse() {
