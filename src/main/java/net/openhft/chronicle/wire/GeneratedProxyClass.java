@@ -53,9 +53,11 @@ public enum GeneratedProxyClass {
             if (!interfaceClazz.isInterface())
                 throw new IllegalArgumentException("expecting and interface instead of class=" + interfaceClazz.getName());
 
-            int i = 0;
-            for (Method dm : interfaceClazz.getMethods()) {
-                i++;
+            Method[] dms = interfaceClazz.getMethods();
+            int n = dms.length;
+
+            for (int i = 0; i < n; ++i) {
+                Method dm = dms[i];
                 if (dm.isDefault() || Modifier.isStatic(dm.getModifiers()))
                     continue;
 
