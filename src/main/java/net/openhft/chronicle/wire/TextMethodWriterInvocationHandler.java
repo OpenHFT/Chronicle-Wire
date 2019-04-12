@@ -31,7 +31,7 @@ import java.util.function.Consumer;
  */
 public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
     // TODO remove this hack for TextMethodTester
-    static boolean ENABLE_EOD = true;
+    public static boolean ENABLE_EOD = true;
     @NotNull
     private final TextWire wire;
     private final Map<Method, Consumer<Object[]>> visitorConverter = new LinkedHashMap<>();
