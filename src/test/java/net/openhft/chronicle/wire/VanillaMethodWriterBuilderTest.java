@@ -14,7 +14,7 @@ public class VanillaMethodWriterBuilderTest {
         assertEquals(
                 "0f 00 00 00                                     # msg-length\n" +
                         "b9 07 6d 65 74 68 6f 64 31                      # method1\n" +
-                        "e5 68 65 6c 6c 6f                               # hello\n" +
+                        "e5                                              # hello\n" +
                         "24 00 00 00                                     # msg-length\n" +
                         "b9 07 6d 65 74 68 6f 64 32                      # method2\n" +
                         "82 16 00 00 00                                  # MWB\n" +
@@ -27,7 +27,7 @@ public class VanillaMethodWriterBuilderTest {
                         "2b 00 00 00                                     # msg-length\n" +
                         "b9 07 6d 65 74 68 6f 64 34                      # method4\n" +
                         "82 1d 00 00 00                                  # MWB2\n" +
-                        "   c5 68 65 6c 6c 6f e5 77 6f 72 6c 64             # hello\n" +
+                        "   c5 68 65 6c 6c 6f e5                            # hello\n" +
                         "   c5 76 61 6c 75 65 7b                            # value\n" +
                         "   c5 6d 6f 6e 65 79 94 80 8e 02                   # money\n", doUseMethodId(false));
     }
@@ -37,7 +37,7 @@ public class VanillaMethodWriterBuilderTest {
         assertEquals(
                 "08 00 00 00                                     # msg-length\n" +
                         "ba 01                                           # method1\n" +
-                        "e5 68 65 6c 6c 6f                               # hello\n" +
+                        "e5                                              # hello\n" +
                         "1d 00 00 00                                     # msg-length\n" +
                         "ba 02                                           # method2\n" +
                         "82 16 00 00 00                                  # MWB\n" +
@@ -50,7 +50,7 @@ public class VanillaMethodWriterBuilderTest {
                         "24 00 00 00                                     # msg-length\n" +
                         "ba 04                                           # method4\n" +
                         "82 1d 00 00 00                                  # MWB2\n" +
-                        "   c5 68 65 6c 6c 6f e5 77 6f 72 6c 64             # hello\n" +
+                        "   c5 68 65 6c 6c 6f e5                            # hello\n" +
                         "   c5 76 61 6c 75 65 7b                            # value\n" +
                         "   c5 6d 6f 6e 65 79 94 80 8e 02                   # money\n", doUseMethodId(true));
     }
