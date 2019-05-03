@@ -2,19 +2,23 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodId;
+import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.Mocker;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import java.io.StringWriter;
+
+import static org.junit.Assert.*;
 
 public class VanillaMethodWriterBuilderTest {
 
     @Test
     public void useMethodId_False() {
-        assertEquals(
-                "0f 00 00 00                                     # msg-length\n" +
+        assertEquals("" +
+                        "0f 00 00 00                                     # msg-length\n" +
                         "b9 07 6d 65 74 68 6f 64 31                      # method1\n" +
-                        "e5                                              # hello\n" +
+                        "e5 68 65 6c 6c 6f                               # hello\n" +
                         "24 00 00 00                                     # msg-length\n" +
                         "b9 07 6d 65 74 68 6f 64 32                      # method2\n" +
                         "82 16 00 00 00                                  # MWB\n" +
@@ -27,17 +31,18 @@ public class VanillaMethodWriterBuilderTest {
                         "2b 00 00 00                                     # msg-length\n" +
                         "b9 07 6d 65 74 68 6f 64 34                      # method4\n" +
                         "82 1d 00 00 00                                  # MWB2\n" +
-                        "   c5 68 65 6c 6c 6f e5                            # hello\n" +
+                        "   c5 68 65 6c 6c 6f e5 77 6f 72 6c 64             # hello\n" +
                         "   c5 76 61 6c 75 65 7b                            # value\n" +
-                        "   c5 6d 6f 6e 65 79 94 80 8e 02                   # money\n", doUseMethodId(false));
+                        "   c5 6d 6f 6e 65 79 94 80 8e 02                   # money\n",
+                doUseMethodId(false));
     }
 
     @Test
     public void useMethodId() {
-        assertEquals(
-                "08 00 00 00                                     # msg-length\n" +
+        assertEquals("" +
+                        "08 00 00 00                                     # msg-length\n" +
                         "ba 01                                           # method1\n" +
-                        "e5                                              # hello\n" +
+                        "e5 68 65 6c 6c 6f                               # hello\n" +
                         "1d 00 00 00                                     # msg-length\n" +
                         "ba 02                                           # method2\n" +
                         "82 16 00 00 00                                  # MWB\n" +
@@ -50,9 +55,10 @@ public class VanillaMethodWriterBuilderTest {
                         "24 00 00 00                                     # msg-length\n" +
                         "ba 04                                           # method4\n" +
                         "82 1d 00 00 00                                  # MWB2\n" +
-                        "   c5 68 65 6c 6c 6f e5                            # hello\n" +
+                        "   c5 68 65 6c 6c 6f e5 77 6f 72 6c 64             # hello\n" +
                         "   c5 76 61 6c 75 65 7b                            # value\n" +
-                        "   c5 6d 6f 6e 65 79 94 80 8e 02                   # money\n", doUseMethodId(true));
+                        "   c5 6d 6f 6e 65 79 94 80 8e 02                   # money\n",
+                doUseMethodId(true));
     }
 
     @NotNull
@@ -66,6 +72,25 @@ public class VanillaMethodWriterBuilderTest {
         id.method4(new MWB2("world", 123, 3.456));
 
         String s = bytes.toHexString();
+        StringWriter sw = new StringWriter();
+        MethodReader reader = wire.methodReader(Mocker.logging(WithMethodId.class, "", sw));
+        for (int i = 0; i < 4; i++)
+            assertTrue(reader.readOne());
+        assertFalse(reader.readOne());
+        assertEquals("method1[hello]\n" +
+                "method2[!net.openhft.chronicle.wire.VanillaMethodWriterBuilderTest$MWB {\n" +
+                "  hello: world,\n" +
+                "  value: 123,\n" +
+                "  money: 3.456\n" +
+                "}\n" +
+                "]\n" +
+                "method3[1234567890]\n" +
+                "method4[!net.openhft.chronicle.wire.VanillaMethodWriterBuilderTest$MWB2 {\n" +
+                "  hello: world,\n" +
+                "  value: 123,\n" +
+                "  money: 3.456\n" +
+                "}\n" +
+                "]\n", sw.toString().replace("\r\n", "\n"));
         bytes.release();
         return s;
     }

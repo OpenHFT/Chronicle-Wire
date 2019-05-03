@@ -20,6 +20,8 @@ import net.openhft.chronicle.core.util.CharSequenceComparator;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -28,6 +30,7 @@ import java.util.TreeMap;
  */
 public class VanillaWireParser implements WireParser {
     private final Map<CharSequence, WireParselet> namedConsumer = new TreeMap<>(CharSequenceComparator.INSTANCE);
+    private final Map<Integer, Map.Entry<String, WireParselet>> numberedConsumer = new HashMap<>();
     private final WireParselet defaultConsumer;
     private final StringBuilder sb = new StringBuilder(128);
     private final StringBuilder lastEventName = new StringBuilder(128);
@@ -52,13 +55,21 @@ public class VanillaWireParser implements WireParser {
     }
 
     public void parseOne(@NotNull WireIn wireIn) {
-
+        long start = wireIn.bytes().readPosition();
         if (peekCode(wireIn) == BinaryWireCode.FIELD_NUMBER) {
-            fieldNumberParselet.readOne(wireIn.readEventNumber(), wireIn);
+            long methodId = wireIn.readEventNumber();
+            if (methodId == (int) methodId) {
+                Map.Entry<String, WireParselet> entry = numberedConsumer.get((int) methodId);
+                if (entry != null) {
+                    WireParselet parselet = entry.getValue();
+                    parselet.accept(entry.getKey(), wireIn.getValueIn());
+                    return;
+                }
+            }
+            fieldNumberParselet.readOne(methodId, wireIn);
             return;
         }
 
-        long start = wireIn.bytes().readPosition();
         @NotNull ValueIn valueIn = wireIn.readEventName(sb);
         WireParselet parslet;
         // on the assumption most messages are the same as the last,
@@ -92,7 +103,9 @@ public class VanillaWireParser implements WireParser {
     @NotNull
     @Override
     public VanillaWireParser register(@NotNull WireKey key, WireParselet valueInConsumer) {
-        namedConsumer.put(key.name(), valueInConsumer);
+        String keyName = key.name().toString();
+        namedConsumer.put(keyName, valueInConsumer);
+        numberedConsumer.put(key.code(), new AbstractMap.SimpleEntry<>(keyName, valueInConsumer));
         return this;
     }
 
