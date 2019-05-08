@@ -5,7 +5,6 @@ import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Mocker;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.StringWriter;
@@ -15,7 +14,6 @@ import static org.junit.Assert.*;
 public class VanillaMethodWriterBuilderTest {
 
     @Test
-    @Ignore("wait for these tests to catch up")
     public void useMethodId_False() {
         assertEquals("" +
                         "0f 00 00 00                                     # msg-length\n" +
@@ -40,7 +38,6 @@ public class VanillaMethodWriterBuilderTest {
     }
 
     @Test
-    @Ignore("wait for these tests to catch up")
     public void useMethodId() {
         assertEquals("" +
                         "08 00 00 00                                     # msg-length\n" +
