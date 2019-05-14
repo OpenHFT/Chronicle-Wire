@@ -748,6 +748,9 @@ public class LongValueBitSet implements Marshallable {
     public void xor(LongValueBitSet set) {
         int wordsInCommon = Math.min(getWordsInUse(), set.getWordsInUse());
 
+        for (int i = 0; i < wordsInCommon; i++)
+            caret(words[i], set.words[i].getVolatileValue());
+
         // Copy any remaining words
         if (wordsInCommon < set.getWordsInUse())
             System.arraycopy(set.words, wordsInCommon,
