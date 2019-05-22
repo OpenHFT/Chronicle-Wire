@@ -139,12 +139,27 @@ public class WireMarshaller<T> {
             for (@NotNull FieldAccess field : fields) {
                 if (retainsComments)
                     bytes.comment(field.field.getName());
+                applyComment(t, out, field);
                 field.write(t, out);
             }
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
         }
         bytes.indent(-1);
+    }
+
+    private void applyComment(final T t, @NotNull final WireOut out, @NotNull final FieldAccess field) {
+
+        try {
+            Object value = field.field.get(t);
+            Comment comment = field.field.getAnnotation(Comment.class);
+            if (comment != null) {
+                out.writeComment(String.format(comment.value(), value.toString()));
+            }
+        } catch (Exception e) {
+            if (Jvm.isDebug())
+                Jvm.debug().on(getClass(), "Field to write @Comment", e);
+        }
     }
 
     public void writeMarshallable(T t, Bytes bytes) {
@@ -160,6 +175,7 @@ public class WireMarshaller<T> {
     public void writeMarshallable(T t, @NotNull WireOut out, T previous, boolean copy) {
         try {
             for (@NotNull FieldAccess field : fields) {
+                applyComment(t, out, field);
                 field.write(t, out, previous, copy);
             }
         } catch (IllegalAccessException e) {

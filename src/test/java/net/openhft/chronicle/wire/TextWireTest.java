@@ -75,6 +75,16 @@ public class TextWireTest {
     }
 
     @Test
+    public void testFieldWithComment() {
+        FieldWithComment f = new FieldWithComment();
+        f.field = "hello world";
+        Assert.assertEquals("!net.openhft.chronicle.wire.TextWireTest$FieldWithComment {\n" +
+                "  # a comment where the value=hello world\n" +
+                "  field: hello world\n" +
+                "}\n", Marshallable.$toString(f));
+    }
+
+    @Test
     public void handleUnexpectedFields() {
         TwoFields tf = Marshallable.fromString("!" + TwoFields.class.getName() + " {" +
                 "a: 1,\n" +
@@ -1805,6 +1815,11 @@ public class TextWireTest {
 
     enum BWKey implements WireKey {
         field1, field2, field3
+    }
+
+    static class FieldWithComment extends AbstractMarshallable {
+        @Comment("a comment where the value=%s")
+        String field;
     }
 
     static class TwoFields extends AbstractMarshallableCfg {
