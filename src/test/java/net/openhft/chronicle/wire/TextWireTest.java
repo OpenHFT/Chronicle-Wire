@@ -79,8 +79,8 @@ public class TextWireTest {
         FieldWithComment f = new FieldWithComment();
         f.field = "hello world";
         Assert.assertEquals("!net.openhft.chronicle.wire.TextWireTest$FieldWithComment {\n" +
-                "  # a comment where the value=hello world\n" +
-                "  field: hello world\n" +
+                "  field: hello world, \t# a comment where the value=hello world\n" +
+                "  field2: !!null \"\"\n" +
                 "}\n", Marshallable.$toString(f));
     }
 
@@ -1820,6 +1820,7 @@ public class TextWireTest {
     static class FieldWithComment extends AbstractMarshallable {
         @Comment("a comment where the value=%s")
         String field;
+        String field2;
     }
 
     static class TwoFields extends AbstractMarshallableCfg {
