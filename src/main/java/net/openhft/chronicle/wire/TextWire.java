@@ -68,6 +68,7 @@ public class TextWire extends AbstractWire implements Wire {
     static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
     static final BytesStore COMMA_SPACE = BytesStore.from(", ");
     static final BytesStore COMMA_NEW_LINE = BytesStore.from(",\n");
+    static final BytesStore COMMA_TAB = BytesStore.from(", \t");
     static final BytesStore NEW_LINE = BytesStore.from("\n");
     static final BytesStore EMPTY_AFTER_COMMENT = BytesStore.from(""); // not the same as EMPTY so we can check this value.
     static final BytesStore EMPTY = BytesStore.from("");
@@ -1069,16 +1070,37 @@ public class TextWire extends AbstractWire implements Wire {
 
     enum NoObject {NO_OBJECT}
 
-    class TextValueOut implements ValueOut {
+    class TextValueOut implements ValueOut, CommentAnnotationNotifier {
+        protected boolean hasCommentAnnotation = false;
+
+        public int indentation() {
+            return indentation;
+        }
+
         protected int indentation = 0;
         @NotNull
         protected List<BytesStore> seps = new ArrayList<>(4);
         @NotNull
         protected BytesStore sep = BytesStore.empty();
         protected boolean leaf = false;
+
+        @NotNull
+        public boolean isLeaf() {
+            return leaf;
+        }
         protected boolean dropDefault = false;
         @Nullable
         private String eventName;
+
+        @Override
+        public void hasPreseedingComment(boolean hasCommentAnnotation) {
+            this.hasCommentAnnotation = hasCommentAnnotation;
+        }
+
+        @Override
+        public boolean canProvideComment() {
+            return valueOut.sep == TextWire.COMMA_TAB;
+        }
 
         @Override
         public void resetState() {
@@ -1130,7 +1152,16 @@ public class TextWire extends AbstractWire implements Wire {
                 }
 
             } else {
-                sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
+
+                if (leaf)
+                    sep = COMMA_SPACE;
+                else {
+                    if (hasCommentAnnotation)
+                        sep = COMMA_TAB;
+                    else
+                        sep = COMMA_NEW_LINE;
+                }
+
             }
         }
 
