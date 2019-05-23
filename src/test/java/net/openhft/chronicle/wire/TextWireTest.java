@@ -79,7 +79,17 @@ public class TextWireTest {
         FieldWithComment f = new FieldWithComment();
         f.field = "hello world";
         Assert.assertEquals("!net.openhft.chronicle.wire.TextWireTest$FieldWithComment {\n" +
-                "  field: hello world, \t# a comment where the value=hello world\n" +
+                "  field: hello world, \t\t# a comment where the value=hello world\n" +
+                "\n" +
+                "}\n", Marshallable.$toString(f));
+    }
+
+    @Test
+    public void testFieldWithComment2() {
+        FieldWithComment2 f = new FieldWithComment2();
+        f.field = "hello world";
+        Assert.assertEquals("!net.openhft.chronicle.wire.TextWireTest$FieldWithComment2 {\n" +
+                "  field: hello world, \t\t# a comment where the value=hello world\n" +
                 "  field2: !!null \"\"\n" +
                 "}\n", Marshallable.$toString(f));
     }
@@ -1818,6 +1828,12 @@ public class TextWireTest {
     }
 
     static class FieldWithComment extends AbstractMarshallable {
+        @Comment("a comment where the value=%s")
+        String field;
+        //    String field2;
+    }
+
+    static class FieldWithComment2 extends AbstractMarshallable {
         @Comment("a comment where the value=%s")
         String field;
         String field2;

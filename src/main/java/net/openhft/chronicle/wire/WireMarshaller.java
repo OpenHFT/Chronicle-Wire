@@ -383,22 +383,14 @@ public class WireMarshaller<T> {
 
             ValueOut valueOut = out.write(field.getName());
 
-            if (valueOut instanceof CommentAnnotationNotifier) {
+            if (valueOut instanceof CommentAnnotationNotifier && this.commentAnnotation != null) {
                 CommentAnnotationNotifier notifier = (CommentAnnotationNotifier) valueOut;
-
+                notifier.hasPrecedingComment(true);
                 try {
-                    notifier.hasPreseedingComment(this.commentAnnotation != null);
-
                     getValue(o, valueOut, null);
-
-                    if (this.commentAnnotation == null)
-                        return;
-
-                    if (notifier.canProvideComment())
-                        out.writeComment(String.format(this.commentAnnotation.value(), field.get(o)));
-
+                    out.writeComment(String.format(this.commentAnnotation.value(), field.get(o)));
                 } finally {
-                    notifier.hasPreseedingComment(false);
+                    notifier.hasPrecedingComment(false);
                 }
                 return;
             }
