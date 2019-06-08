@@ -37,7 +37,7 @@ public class VanillaMethodReaderTest {
     A instance;
 
     @Test
-    public void testMethodReaderWriter() {
+    public void testMethodReaderWriterMetadata() {
         Bytes b = Bytes.elasticByteBuffer();
         try {
             Wire w = WireType.BINARY.apply(b);
@@ -46,18 +46,31 @@ public class VanillaMethodReaderTest {
                 A a = new A();
                 a.x = 5;
                 aListener.a(a);
+                // pretend to be system metadata
+                aListener.index2index(a);
+            }
 
+            MethodReader methodReader = w.methodReader(new AListener() {
+                @Override
+                public void a(final A a) {
+                    VanillaMethodReaderTest.this.instance = a;
+                }
+                @Override
+                public void index2index(A a) {
+                    // this should not be called
+                    VanillaMethodReaderTest.this.instance = null;
+                }
+            });
+            {
+                boolean succeeded = methodReader.readOne();
+                assertTrue(succeeded);
+                assertEquals(5, this.instance.x);
             }
             {
-                w.methodReader(new AListener() {
-                    @Override
-                    public void a(final A a) {
-                        VanillaMethodReaderTest.this.instance = a;
-                    }
-                }).readOne();
+                boolean succeeded = methodReader.readOne();
+                assertTrue(succeeded);
+                assertEquals(5, this.instance.x);
             }
-
-            assertEquals(5, this.instance.x);
         } finally {
             b.release();
         }
@@ -295,7 +308,8 @@ public class VanillaMethodReaderTest {
 
     private interface AListener {
         void a(A a);
-
+        // this pretends to be system metadata
+        void index2index(A a);
     }
 
     interface MRTInterface {
