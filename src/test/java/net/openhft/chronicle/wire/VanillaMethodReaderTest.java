@@ -282,7 +282,7 @@ public class VanillaMethodReaderTest {
         assertEquals(text, wire2.toString());
     }
 
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void testOverloaded() {
         Map<ExceptionKey, Integer> map = Jvm.recordExceptions();
         try {

@@ -52,6 +52,7 @@ public class VanillaMethodReader implements MethodReader {
     static final Object[] NO_ARGS = {};
     static final Logger LOGGER = LoggerFactory.getLogger(VanillaMethodReader.class);
     static final Object IGNORED = new Object(); // object used to flag that the call should be ignored.
+    private static final boolean DONT_THROW_ON_OVERLOAD = Boolean.getBoolean("chronicle.mr_overload_dont_throw");
     private static final String[] metaIgnoreList = {"header", "index", "index2index", "roll"};
     private final MarshallableIn in;
     @NotNull
@@ -110,7 +111,10 @@ public class VanillaMethodReader implements MethodReader {
                 }
 
                 if (!methodsHandled.add(m.getName())) {
-                    Jvm.warn().on(getClass(), "Unable to support overloaded methods, ignoring one of " + m.getName());
+                    if (DONT_THROW_ON_OVERLOAD)
+                        Jvm.warn().on(getClass(), "Unable to support overloaded methods, ignoring one of " + m.getName());
+                    else
+                        throw new IllegalStateException("MethodReader does not support overloaded methods. Method name: "+m.getName());
                     continue;
                 }
 
