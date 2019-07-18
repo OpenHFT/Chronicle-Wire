@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -140,8 +141,13 @@ public class TextMethodTester<T> {
                 .methodReaderInterceptor(methodReaderInterceptor)
                 .warnMissing(true)
                 .build(components);
+
         if (exceptionHandlerSetup != null)
             exceptionHandlerSetup.accept(reader, writer);
+
+        if (component instanceof Closeable)
+            Closeable.closeQuietly(components);
+        
 //        long pos = wire2.bytes().writePosition();
         TextMethodWriterInvocationHandler.ENABLE_EOD = false;
         try {
@@ -174,6 +180,7 @@ public class TextMethodTester<T> {
             }
         } finally {
             TextMethodWriterInvocationHandler.ENABLE_EOD = true;
+
         }
         actual = wire2.toString().trim();
         if (REGRESS_TESTS) {
@@ -189,6 +196,7 @@ public class TextMethodTester<T> {
                 actual = wire2.toString().trim();
             }
         }
+
         if (afterRun != null) {
             expected = afterRun.apply(expected);
             actual = afterRun.apply(actual);
