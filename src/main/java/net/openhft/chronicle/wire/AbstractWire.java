@@ -552,7 +552,7 @@ public abstract class AbstractWire implements Wire {
         // can't do this check without jumping back.
         if (!bytes.inside(pos, 4L))
             return;
-        if (pos <= bytes.realCapacity() - 4) {
+        if (pos <= bytes.writeLimit() - 4) {
             final int value = bytes.bytesStore().readVolatileInt(pos);
             if (value != 0) {
                 String text;
