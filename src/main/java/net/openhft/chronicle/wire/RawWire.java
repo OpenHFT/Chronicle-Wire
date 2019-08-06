@@ -226,12 +226,12 @@ public class RawWire extends AbstractWire implements Wire {
     }
 
     @Override
-    public void startEvent() {
+    public void writeStartEvent() {
 
     }
 
     @Override
-    public void endEvent() {
+    public void writeEndEvent() {
 
     }
 

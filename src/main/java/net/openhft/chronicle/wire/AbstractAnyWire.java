@@ -84,13 +84,13 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
     }
 
     @Override
-    public void startEvent() {
-        wireAcquisition.acquireWire().startEvent();
+    public void writeStartEvent() {
+        wireAcquisition.acquireWire().writeStartEvent();
     }
 
     @Override
-    public void endEvent() {
-        wireAcquisition.acquireWire().endEvent();
+    public void writeEndEvent() {
+        wireAcquisition.acquireWire().writeEndEvent();
     }
 
     @NotNull

@@ -772,13 +772,13 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             case EVENT_OBJECT:
                 bytes.uncheckedReadSkipOne();
-                wire.startEvent();
+                wire.writeStartEvent();
                 boolean wasLeaf = wire.getValueOut().swapLeaf(true);
                 if (peekCode() == TYPE_PREFIX)
                     copyOne(wire);
                 copyOne(wire);
                 wire.getValueOut().swapLeaf(wasLeaf);
-                wire.endEvent();
+                wire.writeEndEvent();
                 break;
 
             case STRING_ANY: {
@@ -1016,12 +1016,12 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @Override
-    public void startEvent() {
+    public void writeStartEvent() {
         writeCode(EVENT_OBJECT);
     }
 
     @Override
-    public void endEvent() {
+    public void writeEndEvent() {
 
     }
 

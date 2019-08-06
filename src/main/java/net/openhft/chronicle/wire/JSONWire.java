@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -101,17 +102,18 @@ public class JSONWire extends TextWire {
         consumePadding();
         int code = peekCode();
         if (code == '}') {
-            valueIn.popState();
-            bytes.readSkip(1);
-            consumePadding();
-            code = peekCode();
+            sb.setLength(0);
+            return sb;
         }
         if (code == '{') {
+            if (valueIn.stack.level > 0)
+                throw new IORuntimeException("Expected field name, but got { at " + bytes.toDebugString(64));
             valueIn.pushState();
             bytes.readSkip(1);
         }
         return super.readField(sb);
     }
+
 
     class JSONValueOut extends TextValueOut {
         @NotNull

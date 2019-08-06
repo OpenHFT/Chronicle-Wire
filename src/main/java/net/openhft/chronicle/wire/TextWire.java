@@ -615,6 +615,9 @@ public class TextWire extends AbstractWire implements Wire {
             long position = bytes.readPosition();
             // at the current position look for the field.
             readField(sb);
+            // might have changed due to readField in JSONWire
+            curr = valueIn.curr();
+
             if (StringUtils.equalsCaseIgnore(sb, keyName))
                 return valueIn;
             if (sb.length() == 0) {
@@ -1052,13 +1055,13 @@ public class TextWire extends AbstractWire implements Wire {
     }
 
     @Override
-    public void startEvent() {
+    public void writeStartEvent() {
         valueOut.prependSeparator();
         writeTwo('?', ' ');
     }
 
     @Override
-    public void endEvent() {
+    public void writeEndEvent() {
         valueOut.endEvent();
     }
 
@@ -2013,7 +2016,7 @@ public class TextWire extends AbstractWire implements Wire {
                 eventName = objectKey.toString();
             } else {
                 prependSeparator();
-                startEvent();
+                writeStartEvent();
                 object(expectedType, objectKey);
                 endEvent();
             }

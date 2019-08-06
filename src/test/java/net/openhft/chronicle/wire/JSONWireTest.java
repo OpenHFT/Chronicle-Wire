@@ -80,9 +80,19 @@ public class JSONWireTest {
         @Nullable String textB = wire2.readEventName(sb).text();
         assertEquals("echoB", sb.toString());
         assertEquals("HelloB", textB);
+
+        // finish up one object but keep reading.
+        readExpect(wire2, '}');
+        ((JSONWire) wire2).valueIn.stack.reset();
+
         @Nullable String textB2 = wire2.readEventName(sb).text();
         assertEquals("echo2B", sb.toString());
         assertEquals("Hello2B", textB2);
+    }
+
+    void readExpect(Wire wire2, char expected) {
+        wire2.consumePadding();
+        assertEquals(expected, (char) wire2.bytes().readByte());
     }
 
     @Test

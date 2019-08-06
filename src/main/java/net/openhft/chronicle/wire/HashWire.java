@@ -154,11 +154,11 @@ public class HashWire implements WireOut, BytesComment {
     }
 
     @Override
-    public void startEvent() {
+    public void writeStartEvent() {
     }
 
     @Override
-    public void endEvent() {
+    public void writeEndEvent() {
     }
 
     @NotNull

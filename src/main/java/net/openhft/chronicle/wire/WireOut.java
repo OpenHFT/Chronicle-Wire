@@ -64,9 +64,9 @@ public interface WireOut extends WireCommon, MarshallableOut {
             return writeEventName((WireKey) eventKey);
         if (eventKey instanceof CharSequence)
             return writeEventName((CharSequence) eventKey);
-        startEvent();
+        writeStartEvent();
         getValueOut().object(expectedType, eventKey);
-        endEvent();
+        writeEndEvent();
         return getValueOut();
     }
 
@@ -253,9 +253,9 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * Start an event object, mostly for internal use.
      */
-    void startEvent();
+    void writeStartEvent();
 
-    void endEvent();
+    void writeEndEvent();
 
     default <K, V> void writeAllAsMap(Class<K> kClass, Class<V> vClass, @NotNull Map<K, V> map) {
         map.forEach((k, v) -> writeEvent(kClass, k).object(vClass, v));
