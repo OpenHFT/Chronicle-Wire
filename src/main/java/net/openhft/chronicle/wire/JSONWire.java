@@ -114,7 +114,6 @@ public class JSONWire extends TextWire {
         return super.readField(sb);
     }
 
-
     class JSONValueOut extends TextValueOut {
         @NotNull
         @Override

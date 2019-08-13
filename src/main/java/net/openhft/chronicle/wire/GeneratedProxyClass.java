@@ -39,7 +39,6 @@ public enum GeneratedProxyClass {
                 .append(className)
                 .append(" implements ");
 
-
         final StringBuilder methodArray = new StringBuilder();
         int count = 0;
 
