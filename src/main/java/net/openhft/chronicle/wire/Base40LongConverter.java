@@ -2,10 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.util.StringUtils;
 
-import java.math.BigInteger;
 import java.util.Arrays;
-
-import static net.openhft.chronicle.wire.Base85LongConverter.TWO_TO_64;
 
 /**
  * Unsigned 64-bit number.
@@ -17,7 +14,6 @@ public class Base40LongConverter implements LongConverter {
     private static final byte[] ENCODE = new byte[128];
 
     private static final int BASE = 40;
-    static final BigInteger BASE_BI = BigInteger.valueOf(BASE);
 
     static {
         assert DECODE.length == BASE;
@@ -43,10 +39,12 @@ public class Base40LongConverter implements LongConverter {
     public void append(StringBuilder text, long value) {
         int start = text.length();
         if (value < 0) {
-            BigInteger bi = BigInteger.valueOf(value).add(TWO_TO_64);
-            int v = bi.mod(BASE_BI).intValueExact();
-            value = bi.divide(BASE_BI).longValueExact();
+            long hi = (value >>> 32);
+            long h2 = hi / BASE, mod = hi % BASE;
+            long val2 = (mod << 32) + (value & 0xFFFFFFFFL);
+            int l2 = (int) (val2 / BASE), v = (int) (val2 % BASE);
             text.append(DECODE[v]);
+            value = (h2 << 32) + (l2 & 0xFFFFFFFFL);
         }
         while (value != 0) {
             int v = (int) (value % BASE);
