@@ -5,7 +5,7 @@ import net.openhft.chronicle.core.util.StringUtils;
 import static net.openhft.chronicle.wire.Base32IntConverter.*;
 
 /**
- * Unsigned 64-bit number with encoding to be as disambigous as possible.
+ * Unsigned 64-bit number with encoding to be as disambiguated as possible.
  */
 public class Base32LongConverter implements LongConverter {
     public static final Base32LongConverter INSTANCE = new Base32LongConverter();

@@ -5,7 +5,7 @@ import net.openhft.chronicle.core.util.StringUtils;
 import java.util.Arrays;
 
 /**
- * Unsigned 32-bit number with encoding to be as disambigous as possible.
+ * Unsigned 32-bit number with encoding to be as disambiguated as possible.
  */
 public class Base32IntConverter implements IntConverter {
     public static final Base32IntConverter INSTANCE = new Base32IntConverter();
