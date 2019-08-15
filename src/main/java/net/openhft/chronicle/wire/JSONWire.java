@@ -26,7 +26,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 /**
  * JSON wire format
- * <p/>
+ * <p>
  * At the moment, this is a cut down version of the YAML wire format.
  */
 public class JSONWire extends TextWire {

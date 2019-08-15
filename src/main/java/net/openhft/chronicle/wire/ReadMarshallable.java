@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * This interface marks a object which can be reloaded from stream re-using an
  * existing object.
- * <p/>
+ * <p>
  * For objects which must deserialize final field see Demarshallable
  */
 @FunctionalInterface

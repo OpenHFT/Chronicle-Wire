@@ -26,7 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * This is similar to ReadMarshallable however it is expected that
  * a new potentially immutable object will be created each time.
- * <p/>
+ * <p>
  * Any implementation must have a constructor which takes a WireIn for deserialization.
  */
 public interface Demarshallable {

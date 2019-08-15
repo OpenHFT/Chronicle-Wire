@@ -32,7 +32,7 @@ import static net.openhft.chronicle.wire.Wires.UNKNOWN_LENGTH;
 
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream.
- * <p/>
+ * <p>
  * Created by peter.lawrey on 12/01/15.
  */
 public interface WireOut extends WireCommon, MarshallableOut {
