@@ -168,7 +168,6 @@ public enum Wires {
             } finally {
                 tempBytes.release();
             }
-
         } else {
             if (dc instanceof BinaryReadDocumentContext) {
                 long start = ((BinaryReadDocumentContext) dc).lastStart;

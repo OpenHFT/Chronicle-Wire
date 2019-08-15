@@ -162,7 +162,6 @@ public class VanillaMethodReader implements MethodReader {
                 } else {
                     mh.invokeExact(arg);
                 }
-
             } catch (Throwable e) {
                 Throwable cause = e.getCause();
                 String msg = "Failure to dispatch message: " + m.getName() + " " + Arrays.asList(argArr);
@@ -220,7 +219,6 @@ public class VanillaMethodReader implements MethodReader {
             } catch (IllegalAccessException e) {
                 Jvm.warn().on(o.getClass(), "Unable to unreflect " + m, e);
             }
-
         } else if (parameterType.isInterface() || !ReadMarshallable.class.isAssignableFrom(parameterType)) {
             @NotNull Object[] argArr = {null};
             MethodWireKey key = createWireKey(m, name);

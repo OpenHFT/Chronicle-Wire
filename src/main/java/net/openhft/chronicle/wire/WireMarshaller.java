@@ -238,7 +238,6 @@ public class WireMarshaller<T> {
             for (FieldAccess field : fields) {
                 field.copy(defaultValue, o);
             }
-
         } catch (IllegalAccessException e) {
             // should never happen as the types should match.
             throw new AssertionError(e);
@@ -274,7 +273,6 @@ public class WireMarshaller<T> {
             } catch (NullPointerException ignore) {
 
             }
-
         }
 
         @Nullable

@@ -128,7 +128,6 @@ public enum SerializationStrategies implements SerializationStrategy {
         public Class type() {
             return Object.class;
         }
-
     },
     DEMARSHALLABLE {
         @NotNull

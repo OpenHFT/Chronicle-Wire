@@ -1138,7 +1138,6 @@ public class TextWire extends AbstractWire implements Wire {
                     sep = BytesStore.empty();
                     bytes.writeUnsignedByte('\n');
                 }
-
             } else {
                 sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
             }
@@ -1525,7 +1524,6 @@ public class TextWire extends AbstractWire implements Wire {
                 } else {
                     bytes.append(d);
                 }
-
             } else {
                 bytes.append(doubleToString(d));
             }
@@ -2467,7 +2465,6 @@ public class TextWire extends AbstractWire implements Wire {
                 } else {
                     consumeAny();
                 }
-
             } else {
                 textTo(sb);
             }

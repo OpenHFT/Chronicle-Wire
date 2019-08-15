@@ -895,7 +895,6 @@ public class BinaryWireTest {
         public int code() {
             return code;
         }
-
     }
 
     private static class DTO extends AbstractMarshallable {
@@ -905,7 +904,6 @@ public class BinaryWireTest {
         DTO(String text) {
             this.text = text;
         }
-
     }
 
 }

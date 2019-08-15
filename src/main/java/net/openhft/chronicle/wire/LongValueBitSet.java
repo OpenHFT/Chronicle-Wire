@@ -974,7 +974,6 @@ public class LongValueBitSet implements Marshallable {
                 wire.getValueOut().int64forBinding(words[i].getValue());
             }
         }
-
     }
 
     @Override

@@ -192,6 +192,5 @@ public class BinaryWirePerfTest {
                 return ordinal();
             }
         }
-
     }
 }

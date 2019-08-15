@@ -36,7 +36,6 @@ public class FloatDtoTest {
         public void writeKey(@NotNull Bytes bytes) {
             WIRE_MARSHALLER_CL.get(Key.class).writeKey(this, bytes);
         }
-
     }
 
     private static class Value extends Key implements Marshallable {
@@ -49,7 +48,6 @@ public class FloatDtoTest {
             super(uiid);
             this.myFloat = myFloat;
         }
-
     }
 
 }

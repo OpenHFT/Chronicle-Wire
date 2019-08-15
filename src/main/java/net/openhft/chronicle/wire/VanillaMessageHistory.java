@@ -87,7 +87,6 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
         } finally {
             bytes.readPosition(start);
         }
-
     }
 
     public void addSourceDetails(boolean addSourceDetails) {
@@ -232,7 +231,6 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
         } finally {
             bytes.readPosition(rp);
         }
-
     }
 
     public void addSource(int id, long index) {

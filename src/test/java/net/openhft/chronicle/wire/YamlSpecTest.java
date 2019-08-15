@@ -29,7 +29,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Test
@@ -47,7 +46,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Test
@@ -65,7 +63,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -84,7 +81,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Test
@@ -102,7 +98,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Test
@@ -120,7 +115,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Test
@@ -138,7 +132,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -157,7 +150,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Test
@@ -175,7 +167,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -194,7 +185,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Test
@@ -212,7 +202,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -232,7 +221,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Test
@@ -251,7 +239,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("TODO FIX")
@@ -271,7 +258,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -291,7 +277,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -311,7 +296,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -331,7 +315,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Test
@@ -350,7 +333,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -370,7 +352,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -390,7 +371,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Test
@@ -409,7 +389,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -429,7 +408,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -449,7 +427,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Test
@@ -468,7 +445,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -488,7 +464,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("TODO FIX")
@@ -514,7 +489,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -534,7 +508,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Test
@@ -557,7 +530,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Test
@@ -576,7 +548,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Test
@@ -595,7 +566,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -615,7 +585,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Test
@@ -634,7 +603,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Test
@@ -653,7 +621,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -673,7 +640,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -693,7 +659,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -713,7 +678,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -733,7 +697,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -753,7 +716,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
     @Ignore("todo see spec http://yaml.org/spec/1.2/spec.html#comment/")
@@ -772,7 +734,6 @@ public class YamlSpecTest {
         } finally {
             b.release();
         }
-
     }
 
 }

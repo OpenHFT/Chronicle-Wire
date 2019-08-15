@@ -2551,7 +2551,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                     //System.out.println("code=" + code + ", bytes=" + bytes.toHexString());
                     return -1;
             }
-
         }
 
         @NotNull

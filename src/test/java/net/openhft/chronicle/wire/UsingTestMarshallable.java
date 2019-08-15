@@ -107,7 +107,6 @@ public class UsingTestMarshallable {
             Assert.assertEquals(1, sortedFilter.marshableFilters.size());
             Assert.assertEquals(expected, sortedFilter.marshableFilters.get(0));
         }
-
     }
 
     @After

@@ -51,6 +51,5 @@ public class LongValueBitSetTest {
         } finally {
             b.release();
         }
-
     }
 }

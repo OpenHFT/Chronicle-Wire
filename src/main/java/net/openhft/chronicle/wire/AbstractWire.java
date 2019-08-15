@@ -281,7 +281,6 @@ public abstract class AbstractWire implements Wire {
                 }
                 acquireTimedParser().pause(timeout, timeUnit);
             }
-
         } finally {
             resetTimedPauser();
         }

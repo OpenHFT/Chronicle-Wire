@@ -298,7 +298,6 @@ public class VanillaMethodReaderTest {
         } finally {
             Jvm.resetExceptionHandlers();
         }
-
     }
 
     @After

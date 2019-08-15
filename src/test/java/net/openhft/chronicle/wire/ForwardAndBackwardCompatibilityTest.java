@@ -51,7 +51,6 @@ public class ForwardAndBackwardCompatibilityTest {
         return Arrays.asList(new Object[][]{
 //                {WireType.TEXT},
                 {WireType.BINARY}
-
         });
     }
 

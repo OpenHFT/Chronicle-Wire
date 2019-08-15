@@ -178,7 +178,6 @@ public class DefaultMarshallerTest {
         public boolean equals(Object o) {
             return super.equals(o);
         }
-
     }
 
 }

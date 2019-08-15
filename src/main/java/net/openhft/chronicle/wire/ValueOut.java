@@ -631,7 +631,6 @@ public interface ValueOut {
                         String bits = Long.toBinaryString(l);
                         wireOut.writeComment(ZEROS_64.substring(bits.length()) + bits);
                     }
-
                 }
             });
 

@@ -245,7 +245,6 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         public <T> T fromString(@NotNull CharSequence cs) {
             return fromHexString(cs);
         }
-
     },
     FIELDLESS_BINARY {
         @NotNull
