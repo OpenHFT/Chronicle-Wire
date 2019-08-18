@@ -145,9 +145,7 @@ public class TextMethodTester<T> {
         if (exceptionHandlerSetup != null)
             exceptionHandlerSetup.accept(reader, writer);
 
-        if (component instanceof Closeable)
-            Closeable.closeQuietly(components);
-        
+
 //        long pos = wire2.bytes().writePosition();
         TextMethodWriterInvocationHandler.ENABLE_EOD = false;
         try {
@@ -182,6 +180,10 @@ public class TextMethodTester<T> {
             TextMethodWriterInvocationHandler.ENABLE_EOD = true;
 
         }
+
+        if (component instanceof Closeable)
+            Closeable.closeQuietly(components);
+
         actual = wire2.toString().trim();
         if (REGRESS_TESTS) {
             Jvm.pause(100);
