@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Type;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -89,6 +90,25 @@ public class WireTests {
                 Assert.assertEquals(expectedLong2, x);
                 Class<Object> y = dc.wire().read("y").typeLiteral();
                 Assert.assertEquals(String.class, y);
+            }
+        } finally {
+            b.release();
+        }
+    }
+
+    @Test
+    public void testLenientTypeLiteral() {
+        final Bytes b = Bytes.elasticByteBuffer();
+        try {
+            final Wire wire = wireType.apply(b);
+
+            try (DocumentContext dc = wire.writingDocument()) {
+                dc.wire().write("w").typeLiteral("DoesntExist");
+            }
+
+            try (DocumentContext dc = wire.readingDocument()) {
+                Type t = dc.wire().read("w").lenientTypeLiteral();
+                Assert.assertEquals("DoesntExist", t.getTypeName());
             }
         } finally {
             b.release();

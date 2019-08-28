@@ -16,6 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.core.UnresolvedType;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.Resettable;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -25,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.time.LocalDate;
@@ -546,7 +548,16 @@ public interface ValueIn {
     }
 
     @Nullable
-    <T> Class<T> typeLiteral() throws IORuntimeException, BufferUnderflowException;
+    default <T> Class<T> typeLiteral() throws IORuntimeException, BufferUnderflowException {
+        return (Class<T>) typeLiteral((sb, e) -> { throw new IORuntimeException(e); });
+    }
+
+    @Nullable
+    default Type lenientTypeLiteral() throws IORuntimeException, BufferUnderflowException {
+        return typeLiteral((sb, e) -> UnresolvedType.of(sb.toString()));
+    }
+
+    Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler);
 
     default Throwable throwable(boolean appendCurrentStack) {
         return WireInternal.throwable(this, appendCurrentStack);

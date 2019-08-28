@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -1000,13 +1001,13 @@ public class RawWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public <T> Class<T> typeLiteral() {
+        public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             bytes.readUtf8(sb);
             try {
                 return classLookup.forName(sb);
             } catch (ClassNotFoundException e) {
-                throw new IORuntimeException(e);
+                return unresolvedHandler.apply(sb, e);
             }
         }
 

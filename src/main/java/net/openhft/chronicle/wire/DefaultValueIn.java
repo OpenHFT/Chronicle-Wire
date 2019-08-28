@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Type;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -444,11 +445,9 @@ public class DefaultValueIn implements ValueIn {
         return o.floatValue();
     }
 
-    @SuppressWarnings("unchecked")
-    @Nullable
     @Override
-    public <T> Class<T> typeLiteral() throws IORuntimeException, BufferUnderflowException {
-        return (Class<T>) defaultValue;
+    public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
+        return (Type) defaultValue;
     }
 
     @NotNull
