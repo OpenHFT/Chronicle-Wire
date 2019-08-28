@@ -131,6 +131,10 @@ public enum Wires {
         return WireDumper.of(bytes).asString();
     }
 
+    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, boolean abbrev) {
+        return WireDumper.of(bytes).asString(abbrev);
+    }
+
     public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position) {
         final long limit = bytes.readLimit();
         if (position > limit)
