@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.nio.BufferUnderflowException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -3192,9 +3193,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
-        @Nullable
         @Override
-        public <T> Class<T> typeLiteral() {
+        public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
             int code = readCode();
             switch (code) {
                 case TYPE_LITERAL:
@@ -3202,7 +3202,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     try {
                         return classLookup().forName(sb);
                     } catch (ClassNotFoundException e) {
-                        throw new IORuntimeException(e);
+                        return unresolvedHandler.apply(sb, e);
                     }
                 case NULL:
                     return null;

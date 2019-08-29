@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -224,6 +225,13 @@ public interface ValueOut {
     default WireOut typeLiteral(@Nullable Class type) {
         return type == null ? nu11()
                 : typeLiteral((t, b) -> b.appendUtf8(ClassAliasPool.CLASS_ALIASES.nameFor(t)), type);
+    }
+
+    @NotNull
+    default WireOut typeLiteral(@Nullable Type type) {
+        return type == null ? nu11()
+                : type instanceof Class ? typeLiteral((Class) type)
+                : typeLiteral(type.getTypeName());
     }
 
     @NotNull

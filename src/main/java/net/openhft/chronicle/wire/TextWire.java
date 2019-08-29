@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -2973,7 +2974,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public <T> Class<T> typeLiteral() throws IORuntimeException, BufferUnderflowException {
+        public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
             consumePadding();
             int code = readCode();
             if (!peekStringIgnoreCase("type "))
@@ -2984,7 +2985,7 @@ public class TextWire extends AbstractWire implements Wire {
             try {
                 return classLookup().forName(sb);
             } catch (ClassNotFoundException e) {
-                throw new IORuntimeException(e);
+                return unresolvedHandler.apply(sb, e);
             }
         }
 

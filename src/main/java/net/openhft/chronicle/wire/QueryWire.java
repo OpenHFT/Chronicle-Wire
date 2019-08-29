@@ -20,7 +20,6 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.StopCharTester;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.core.annotation.ForceInline;
-import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
@@ -29,9 +28,11 @@ import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Type;
 import java.util.Base64;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 /**
  * This wire decodes URL query strings.
@@ -412,15 +413,14 @@ public class QueryWire extends TextWire {
             return wireIn();
         }
 
-        @SuppressWarnings("unchecked")
         @Override
-        public <T> Class<T> typeLiteral() throws IORuntimeException {
+        public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             textTo(sb);
             try {
                 return ClassAliasPool.CLASS_ALIASES.forName(sb);
             } catch (ClassNotFoundException e) {
-                throw new IORuntimeException(e);
+                return unresolvedHandler.apply(sb, e);
             }
         }
 

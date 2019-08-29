@@ -53,11 +53,20 @@ public class WireDumper {
 
     @NotNull
     public String asString() {
-        return asString(bytes.readPosition(), bytes.readRemaining());
+        return asString(false);
+    }
+
+    @NotNull
+    public String asString(boolean abbrev) {
+        return asString(bytes.readPosition(), bytes.readRemaining(), abbrev);
     }
 
     @NotNull
     public String asString(long position, long length) {
+        return asString(position, length, false);
+    }
+    @NotNull
+    public String asString(long position, long length, boolean abbrev) {
         @NotNull StringBuilder sb = new StringBuilder();
         final long limit0 = bytes.readLimit();
         final long position0 = bytes.readPosition();
@@ -70,11 +79,11 @@ public class WireDumper {
 
             long missing = position + length - limit2;
             while (bytes.readRemaining() >= 4) {
-                if (dumpOne(sb, bytes2))
+                if (dumpOne(sb, bytes2, abbrev))
                     break;
 
             }
-            if (missing > 0)
+            if (missing > 0 && !abbrev)
                 sb.append(" # missing: ").append(missing);
         } catch (Throwable t) {
             sb.append(" ").append(t);
@@ -86,22 +95,28 @@ public class WireDumper {
         return sb.toString();
     }
 
+    @Deprecated
     public boolean dumpOne(@NotNull StringBuilder sb) {
-        return dumpOne(sb, null);
+        return dumpOne(sb, null, false);
     }
 
     public boolean dumpOne(@NotNull StringBuilder sb, @Nullable Bytes<ByteBuffer> buffer) {
+        return dumpOne(sb, buffer, false);
+    }
+    public boolean dumpOne(@NotNull StringBuilder sb, @Nullable Bytes<ByteBuffer> buffer, boolean abbrev) {
         long start = this.bytes.readPosition();
         int header = this.bytes.readInt();
         if (header == 0) {
-            sb.append("...\n");
-            sb.append("# ").append(this.bytes.readRemaining()).append(" bytes remaining\n");
+            if (!abbrev) {
+                sb.append("...\n");
+                sb.append("# ").append(this.bytes.readRemaining()).append(" bytes remaining\n");
+            }
             return true;
         }
         if (Wires.isReadyData(header))
             headerNumber++;
 
-        if (start > 0) {
+        if (start > 0 && !abbrev) {
             sb.append("# position: ").append(start).append(", header: ");
             sb.append(headerNumber);
             if (Wires.isEndOfFile(header))
@@ -113,7 +128,7 @@ public class WireDumper {
 
         int len = Wires.lengthOf(header);
         if (len > this.bytes.readRemaining()) {
-            sb.append("#  has a 4 byte size prefix, ").append(len).append(" > ").append(this.bytes.readRemaining()).append(" len is ").append(Integer.toString(len));
+            sb.append("#  has a 4 byte size prefix, ").append(len).append(" > ").append(this.bytes.readRemaining()).append(" len is ").append(len);
             return true;
         }
         @NotNull String type = Wires.isData(header)
@@ -129,14 +144,18 @@ public class WireDumper {
             }
         }
 
-        sb.append("--- ").append(type).append(binary ? " #binary" : "");
+        if (!abbrev) {
+            sb.append("--- ").append(type).append(binary ? " #binary" : "");
+            if (len > this.bytes.readRemaining())
+                sb.append(" # len: ").append(len).append(", remaining: ").append(this.bytes.readRemaining());
+            sb.append("\n");
+        }
 
-        if (len > this.bytes.readRemaining())
-            sb.append(" # len: ").append(len).append(", remaining: ").append(this.bytes.readRemaining());
-        sb.append("\n");
         if (len == 0) {
-            sb.append("...\n");
-            sb.append("# ").append(this.bytes.readRemaining()).append(" bytes remaining\n");
+            if (!abbrev) {
+                sb.append("...\n");
+                sb.append("# ").append(this.bytes.readRemaining()).append(" bytes remaining\n");
+            }
             return true;
         }
 
