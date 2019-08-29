@@ -29,6 +29,8 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
     @NotNull
     private final Supplier<MarshallableOut> marshallableOutSupplier;
     private final boolean metaData;
+    @NotNull
+    private final CountingDocumentContext context = new CountingDocumentContext();
 
     BinaryMethodWriterInvocationHandler(final boolean metaData, @NotNull MarshallableOut marshallableOut) {
         this(metaData, () -> marshallableOut);
@@ -41,18 +43,39 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
     }
 
     @Override
+    protected Object doInvoke(Object proxy, Method method, Object[] args) {
+        if (method.getName().equals("writingDocument") && method.getParameterCount() == 0) {
+            MarshallableOut marshallableOut = this.marshallableOutSupplier.get();
+            context.count = 0;
+            return context.dc( marshallableOut.writingDocument(metaData));
+        }
+        return super.doInvoke(proxy, method, args);
+    }
+
+    @Override
     protected void handleInvoke(Method method, Object[] args) {
-        MarshallableOut marshallableOut = this.marshallableOutSupplier.get();
-        @NotNull DocumentContext context = marshallableOut.writingDocument(metaData);
+        DocumentContext dc = context.dc();
+        boolean local = false;
+        if (dc == null) {
+            MarshallableOut marshallableOut = this.marshallableOutSupplier.get();
+            dc = marshallableOut.writingDocument(metaData);
+            local = true;
+        }
         try {
-            Wire wire = context.wire();
+            Wire wire = dc.wire();
             handleInvoke(method, args, wire);
             wire.padToCacheAlign();
+
         } catch (Throwable t) {
-            context.rollbackOnClose();
+            dc.rollbackOnClose();
             Jvm.rethrow(t);
+
         } finally {
-            context.close();
+            if (local) {
+                dc.close();
+            } else {
+                context.count++;
+            }
         }
     }
 }

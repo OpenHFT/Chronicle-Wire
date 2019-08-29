@@ -42,6 +42,14 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
     }
 
     @Override
+    protected Object doInvoke(Object proxy, Method method, Object[] args) {
+        if (method.getName().equals("writingDocument") && method.getParameterCount() == 0) {
+            throw new UnsupportedOperationException();
+        }
+        return super.doInvoke(proxy, method, args);
+    }
+
+    @Override
     protected void handleInvoke(Method method, Object[] args) {
         visitorConverter.computeIfAbsent(method, this::buildConverter)
                 .accept(args);

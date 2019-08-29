@@ -4,14 +4,37 @@ import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
+@RunWith(Parameterized.class)
 public class VanillaMethodWriterBuilderTest {
+
+    @UsedViaReflection
+    private final String name;
+    private final boolean explicitContext;
+
+    public VanillaMethodWriterBuilderTest(String name, boolean explicitContext) {
+        this.name = name;
+        this.explicitContext = explicitContext;
+    }
+
+    @Parameterized.Parameters(name = "{0}")
+    public static List<Object[]> schemas() {
+        List<Object[]> tests = new ArrayList<>();
+        tests.add(new Object[]{"implied context", false});
+        tests.add(new Object[]{"explicit context", true});
+        return tests;
+    }
 
     @Test
     public void useMethodId_False() {
@@ -66,11 +89,18 @@ public class VanillaMethodWriterBuilderTest {
         HexDumpBytes bytes = new HexDumpBytes();
         BinaryWire wire = new BinaryWire(bytes);
         WithMethodId id = wire.methodWriterBuilder(WithMethodId.class).useMethodIds(useMethodIds).get();
-        id.method1("hello");
-        id.method2(new MWB("world", 123, 3.456));
-        id.method3(1234567890L);
-        id.method4(new MWB2("world", 123, 3.456));
-
+        try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
+            id.method1("hello");
+        }
+        try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
+            id.method2(new MWB("world", 123, 3.456));
+        }
+        try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
+            id.method3(1234567890L);
+        }
+        try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
+            id.method4(new MWB2("world", 123, 3.456));
+        }
         String s = bytes.toHexString();
         StringWriter sw = new StringWriter();
         MethodReader reader = wire.methodReader(Mocker.logging(WithMethodId.class, "", sw));
@@ -95,7 +125,7 @@ public class VanillaMethodWriterBuilderTest {
         return s;
     }
 
-    interface WithMethodId {
+    interface WithMethodId extends MethodWriterWithContext {
         @MethodId(1)
         void method1(String hello);
 
