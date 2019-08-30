@@ -46,6 +46,8 @@ public interface MessageHistory extends Marshallable {
 
     int sourceId(int n);
 
+    boolean sourceIdsEndsWith(int[] sourceIds);
+
     long sourceIndex(int n);
 
     /**

@@ -142,6 +142,19 @@ public class VanillaMessageHistory extends AbstractMarshallable implements Messa
     }
 
     @Override
+    public boolean sourceIdsEndsWith(int[] sourceIds) {
+        int start = sources - sourceIds.length;
+        if (start < 0)
+            return false;
+        for (int i = 0; i < sourceIds.length; i++) {
+            if (sourceId(start + i) != sourceIds[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
     public long sourceIndex(int n) {
         return sourceIndexArray[n];
     }
