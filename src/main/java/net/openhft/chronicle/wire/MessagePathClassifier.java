@@ -27,8 +27,9 @@ public class MessagePathClassifier implements IntSupplier {
                 .filter(s -> Arrays.equals(sources, sourcePattern.get(s)))
                 .findFirst();
         if (duplicate.isPresent()) {
-            if (duplicate.getAsInt() == pathId) {
+            if (sources[duplicate.getAsInt()] == pathId) {
                 Jvm.debug().on(getClass(), "Added pathId " + pathId + " more than once");
+                return this;
             }
             throw new IllegalArgumentException("Duplicate entry for " + Arrays.toString(sources) + " for path " + duplicate.getAsInt() + " and " + pathId);
         }
