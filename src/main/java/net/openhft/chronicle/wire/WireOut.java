@@ -242,13 +242,13 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * Write the end of wire marker, unless one is already written. This will increment the
      * headerNumber as appropriate if successful
-     *
-     * @param timeout      throw TimeoutException if it could not write the marker in time.
+     *  @param timeout      throw TimeoutException if it could not write the marker in time.
      * @param timeUnit     of the timeout
      * @param lastPosition the end of the wire
+     * @return did this method write EOF or was it already there.
      */
 
-    void writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition);
+    boolean writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition);
 
     /**
      * Start an event object, mostly for internal use.

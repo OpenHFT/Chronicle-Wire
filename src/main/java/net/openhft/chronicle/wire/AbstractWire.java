@@ -594,7 +594,7 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public void writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) {
+    public boolean writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) {
 
         long pos = Math.max(lastPosition, bytes.writePosition());
         headerNumber = Long.MIN_VALUE;
@@ -603,13 +603,13 @@ public abstract class AbstractWire implements Wire {
             for (; ; ) {
                 if (bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
                     bytes.writePosition(pos + SPB_HEADER_SIZE);
-                    return;
+                    return true;
                 }
 
                 int header = bytes.readVolatileInt(pos);
                 // two states where it is unable to continue.
                 if (header == END_OF_DATA)
-                    return; // already written.
+                    return false; // already written.
                 if (Wires.isNotComplete(header)) {
                     try {
                         acquireTimedParser().pause(timeout, timeUnit);

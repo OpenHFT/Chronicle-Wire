@@ -229,7 +229,7 @@ public class HashWire implements WireOut, BytesComment {
     }
 
     @Override
-    public void writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) {
+    public boolean writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition) {
         throw new UnsupportedOperationException();
     }
 
