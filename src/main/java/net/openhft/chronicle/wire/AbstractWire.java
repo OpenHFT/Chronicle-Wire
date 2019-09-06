@@ -316,8 +316,16 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public long enterHeader(int safeLength) {
-        if (safeLength > bytes.writeRemaining())
+        if (safeLength > bytes.writeRemaining()) {
+            if (bytes.isElastic()) {
+                long l = bytes.writeLimit();
+                Jvm.warn().on(getClass(), "Unexpected writeLimit of " + l + " capacity " + bytes.capacity());
+                Jvm.pause(100);
+                Jvm.warn().on(getClass(), "After a pause, the writeLimit was " +
+                        (l == bytes.writeLimit() ? "the same" : "different " + bytes.writeLimit()));
+            }
             return throwNotEnoughSpace(safeLength, bytes);
+        }
         assert !insideHeader : INSIDE_HEADER_MESSAGE;
 
         insideHeader = true;
