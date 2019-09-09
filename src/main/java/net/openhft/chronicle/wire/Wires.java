@@ -59,7 +59,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 /*
  * Created by Peter Lawrey on 31/08/15.
  */
-@SuppressWarnings({"rawtypes","unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked"})
 public enum Wires {
     ;
     public static final int LENGTH_MASK = -1 >>> 2;
@@ -430,18 +430,22 @@ public enum Wires {
 
     @Nullable
     public static <E> E objectMap(ValueIn in, @Nullable E using, @Nullable Class clazz, SerializationStrategy<E> strategy) {
+        boolean nullObject = false;
         if (clazz == Object.class)
             strategy = MAP;
-        if (using == null)
+        if (using == null) {
             using = (E) strategy.newInstance(clazz);
+            nullObject = using == null && strategy == MARSHALLABLE;
+        }
         if (Throwable.class.isAssignableFrom(clazz))
             return (E) WireInternal.throwable(in, false, (Throwable) using);
 
-        if (using == null)
+        if (using == null && nullObject)
+            return null;
+        else if (using == null)
             throw new IllegalStateException("failed to create instance of clazz=" + clazz + " is it aliased?");
-
-        @Nullable Object ret = in.marshallable(using, strategy);
-        return readResolve(ret);
+        else
+            return readResolve(in.marshallable(using, strategy));
     }
 
     @NotNull
@@ -580,6 +584,7 @@ public enum Wires {
 
         private static SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy");
         private static SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+
         static {
             sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
             sdf2.setTimeZone(TimeZone.getTimeZone("GMT"));
