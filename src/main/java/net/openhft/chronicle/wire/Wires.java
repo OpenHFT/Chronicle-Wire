@@ -440,9 +440,7 @@ public enum Wires {
         if (Throwable.class.isAssignableFrom(clazz))
             return (E) WireInternal.throwable(in, false, (Throwable) using);
 
-        if (using == null && nullObject)
-            return null;
-        else if (using == null)
+        if (using == null && !nullObject)
             throw new IllegalStateException("failed to create instance of clazz=" + clazz + " is it aliased?");
         else
             return readResolve(in.marshallable(using, strategy));
