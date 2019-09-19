@@ -1,0 +1,19 @@
+data: {
+  aaa: 1,
+  bbb: 2
+}
+developers: {
+  team1: {
+    name: Fred,
+    role: creator
+  },
+  team2: {
+    name: John,
+    role: committer
+  },
+  team3: !Developer {
+    name: Bill,
+    role: head
+  }
+}
+name: Bean123

@@ -1,0 +1,30 @@
+data: {
+  ? { name: Andy,
+      role: tester }
+    : BLACK
+    ? !SuperMan {
+      name: Bill,
+      role: cleanerl
+        smart: false }
+      : BLACK
+    ? { name: Lisa,
+        role: owner }
+      : RED
+}
+developers: {
+  WHITE: {
+    name: Fred,
+    role: creator
+  },
+  RED: !SuperMan {
+    name: Jason,
+    role: contributor,
+    smart: true
+  },
+  BLACK: {
+    name: John,
+    role: committer
+  }
+}
+name: Bean123
+

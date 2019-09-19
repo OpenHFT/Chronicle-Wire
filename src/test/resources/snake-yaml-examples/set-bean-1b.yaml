@@ -1,0 +1,16 @@
+developers: !!set [
+  {
+    name: John,
+    role: founder
+  },
+  {
+    name: Karl,
+    role: user
+  }
+],
+name: Bean123
+sorted: !!set [
+  one,
+  three,
+  two
+]

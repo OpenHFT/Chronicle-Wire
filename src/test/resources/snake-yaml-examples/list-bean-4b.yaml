@@ -1,0 +1,15 @@
+children: [
+  aaa,
+  bbb
+],
+developers: [
+  !Developer {
+    name: Fred,
+    role: creator
+  },
+  !Developer {
+    name: John,
+    role: committer
+  }
+],
+name: Bean123

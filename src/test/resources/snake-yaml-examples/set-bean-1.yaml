@@ -1,12 +1,11 @@
-developers: !!set
-  ? name: John
-    role: founder
-  : null
-  ? name: Karl
-    role: user
-  : null
+developers: !!set [
+  { name: John,
+    role: founder },
+  { name: Karl,
+    role: user }
+]
 name: Bean123
-sorted: !!set
-  one: null
-  three: null
-  two: null
+sorted: !!set [
+  one,
+  three,
+  two ]
