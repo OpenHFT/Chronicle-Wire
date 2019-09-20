@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
 import net.openhft.chronicle.core.ClassLocal;
@@ -103,6 +104,7 @@ public enum Wires {
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
     private static final int INVERSE_TID_MASK = ~TID_MASK;
     static boolean ENCODE_TID_IN_HEADER = Boolean.getBoolean("wire.encodeTidInHeader");
+    static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(new VanillaBytes(BytesStore.empty())));
 
     static {
         CLASS_STRATEGY_FUNCTIONS.add(SerializeEnum.INSTANCE);
@@ -810,7 +812,7 @@ public enum Wires {
             switch (method.getName()) {
                 case "hashCode":
                     if (args == null || args.length == 0) {
-                        return Maths.agitate(typeName.hashCode() * 1019L + fields.hashCode() * 10191L);
+                        return (int) Maths.agitate(typeName.hashCode() * 1019L + fields.hashCode() * 10191L);
                     }
                     break;
                 case "equals":
@@ -973,5 +975,22 @@ public enum Wires {
         public Class genericType(int index) {
             return Object.class;
         }
+    }
+
+    @NotNull
+    public static BinaryWire binaryWireForRead(Bytes in, long position, long length) {
+        BinaryWire wire = WIRE_TL.get();
+        VanillaBytes bytes = (VanillaBytes) wire.bytes();
+        bytes.bytesStore(in.bytesStore(), position, length);
+        return wire;
+    }
+
+    @NotNull
+    public static BinaryWire binaryWireForWrite(Bytes in, long position, long length) {
+        BinaryWire wire = WIRE_TL.get();
+        VanillaBytes bytes = (VanillaBytes) wire.bytes();
+        bytes.bytesStore(in.bytesStore(), 0, position);
+        bytes.writeLimit(position+length);
+        return wire;
     }
 }
