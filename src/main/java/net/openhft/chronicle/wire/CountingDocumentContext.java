@@ -17,5 +17,6 @@ class CountingDocumentContext extends WrappedDocumentContext {
             super.rollbackOnClose();
         super.close();
         dc( null);
+        count = 0;
     }
 }
