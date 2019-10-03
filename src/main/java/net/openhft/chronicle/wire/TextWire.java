@@ -3013,7 +3013,7 @@ public class TextWire extends AbstractWire implements Wire {
 
             } else if (code != '{') {
                 consumeValue();
-                throw new IORuntimeException("Could not determine type for value " + sb + " of type " + object);
+                throw new IORuntimeException("Trying to read marshallable " + object.getClass() + " at " + bytes.toDebugString(128) + " expected to find a {");
             }
 
             final long len = readLengthMarshallable();
