@@ -81,7 +81,7 @@ public class UnknownEnumTest {
             fail();
         } catch (Exception e) {
             assertThat(e.getMessage(),
-                    is(equalTo("Could not determine type for value QUX of type !UnknownEnum {\n}\n")));
+                    is(equalTo("Trying to read marshallable class com.sun.proxy.$Proxy5 at [pos: 27, rlim: 27, wlim: 27, cap: 27 ] enumField: !UnknownEnum QUXǁ‡ expected to find a {")));
         }
     }
 
