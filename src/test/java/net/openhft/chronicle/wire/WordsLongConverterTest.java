@@ -13,8 +13,8 @@ public class WordsLongConverterTest {
         LongConverter bic = new WordsLongConverter();
         for (String s : ("square.army.plan.player.wash.disk\n" +
                 "instant.our.ocean.gold.thank.bang\n" +
-                "attach.campaign.castle.instant.young.brick\n" +
-                "we.smoothly.smart.grants.when.beard\n" +
+                "attach.company.castle.instant.young.brick\n" +
+                "we.smooth.smart.grants.when.beard\n" +
                 "bunch.prior.sky.bond.assist.apply\n" +
                 "island.cheek.across.ban.laws.bomb\n" +
                 "aim.neck.deal.award.impress.ink\n" +
@@ -24,7 +24,7 @@ public class WordsLongConverterTest {
                 "glue.account.sour.bubble.thought.spa\n" +
                 "songs.unlock.dare.enough.shed.child\n" +
                 "smile.excerpt.alpha.centre.grill.alpha\n" +
-                "it.launch.duck.stable.bother.calm").split("\n")) {
+                "it.launch.duck.stable.brother.calm").split("\n")) {
             assertEquals(s, bic.asString(bic.parse(s)));
         }
         for (long l : new long[]{Long.MIN_VALUE, Integer.MIN_VALUE,
