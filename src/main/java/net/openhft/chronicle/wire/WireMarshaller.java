@@ -57,10 +57,16 @@ public class WireMarshaller<T> {
     @Nullable
     private final T defaultValue;
 
-    public WireMarshaller(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
+    private WireMarshaller(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
         this.fields = fields;
         this.isLeaf = isLeaf;
         defaultValue = defaultValueForType(tClass);
+    }
+
+    private WireMarshaller(@NotNull FieldAccess[] fields, boolean isLeaf, @Nullable T defaultValue) {
+        this.fields = fields;
+        this.isLeaf = isLeaf;
+        this.defaultValue = defaultValue;
     }
 
     @NotNull
@@ -79,6 +85,14 @@ public class WireMarshaller<T> {
         return overridesUnexpectedFields(tClass)
                 ? new WireMarshallerForUnexpectedFields<>(tClass, fields, isLeaf)
                 : new WireMarshaller<>(tClass, fields, isLeaf);
+    }
+
+    public WireMarshaller excludeFields(String... fieldNames) {
+        Set<String> fieldSet = new HashSet<>(Arrays.asList(fieldNames));
+        return new WireMarshaller(Stream.of(fields)
+                .filter(f -> !fieldSet.contains(f.field.getName()))
+                .toArray(FieldAccess[]::new),
+                isLeaf, defaultValue);
     }
 
     private static <T> boolean overridesUnexpectedFields(Class<T> tClass) {
