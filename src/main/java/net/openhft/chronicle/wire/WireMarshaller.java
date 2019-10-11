@@ -57,7 +57,7 @@ public class WireMarshaller<T> {
     @Nullable
     private final T defaultValue;
 
-    private WireMarshaller(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
+    protected WireMarshaller(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
         this.fields = fields;
         this.isLeaf = isLeaf;
         defaultValue = defaultValueForType(tClass);
