@@ -9,6 +9,13 @@ import static org.junit.Assert.assertEquals;
 public class WordsLongConverterTest {
 
     @Test
+    public void asString() {
+        LongConverter bic = new WordsLongConverter();
+        for (long i = 1; i <= 1e12; i *= 10)
+            System.out.println(i + ": " + bic.asString(i));
+    }
+
+    @Test
     public void parse() {
         LongConverter bic = new WordsLongConverter();
         for (String s : ("square.army.plan.player.wash.disk\n" +
