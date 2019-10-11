@@ -6,7 +6,12 @@ import java.util.Arrays;
 
 public class Base85LongConverter implements LongConverter {
     public static final Base85LongConverter INSTANCE = new Base85LongConverter();
-    private static final String CHARS = "0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz\"#$%&'()*+,-./ ";
+    private static final String CHARS =
+            "0123456789" +
+                    ":;<=>?@" +
+                    "ABCDEFGHIJKLMNOPQRSTUVWXYZ_" +
+                    "abcdefghijklmnopqrstuvwxyz" +
+                    "\"#$%&'()*+,-./ ";
     private static final char[] DECODE = CHARS.toCharArray();
     private static final byte[] ENCODE = new byte[128];
     private static final int BASE = 85;

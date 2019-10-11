@@ -11,6 +11,7 @@ public class Base32IntConverter implements IntConverter {
     public static final Base32IntConverter INSTANCE = new Base32IntConverter();
     static final byte[] ENCODE = new byte[128];
     static final int BASE = 32;
+    // similar but no the same as c.f. https://tools.ietf.org/html/rfc4648 to allow letters to be preserved.
     private static final String CHARS = "234567ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     static final char[] DECODE = CHARS.toCharArray();
 
@@ -26,6 +27,7 @@ public class Base32IntConverter implements IntConverter {
         ENCODE['1'] = ENCODE['l'];
         ENCODE['8'] = ENCODE['B'];
         ENCODE['9'] = ENCODE['q'];
+        ENCODE['='] = 0;
     }
 
     @Override
@@ -42,11 +44,11 @@ public class Base32IntConverter implements IntConverter {
     @Override
     public void append(StringBuilder text, int value) {
         int start = text.length();
-        while (value != 0) {
+        do {
             int v = (int) (value & (BASE - 1));
             value >>>= 5;
             text.append(DECODE[v]);
-        }
+        } while (value != 0);
         StringUtils.reverse(text, start);
     }
 }
