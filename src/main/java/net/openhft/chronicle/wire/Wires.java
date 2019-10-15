@@ -18,7 +18,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
 import net.openhft.chronicle.core.ClassLocal;
@@ -891,7 +890,7 @@ public enum Wires {
                 fields.put(method.getName(), args[0]);
                 return proxy;
             }
-            throw new UnsupportedOperationException(method.toString());
+            throw new UnsupportedOperationException("The class or alias " + typeName + " could not be found, so unable to call " + method);
         }
 
         @NotNull
