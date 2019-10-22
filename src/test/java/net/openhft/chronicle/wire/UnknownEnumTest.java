@@ -73,15 +73,16 @@ public class UnknownEnumTest {
     }
 
     @Test
-    public void shouldGenerateFriendlyErrorMessageWhenTypeIsNotKnownInTextWire() throws Exception {
+    public void shouldGenerateFriendlyErrorMessageWhenTypeIsNotKnownInTextWire() {
         try {
             final TextWire textWire = TextWire.from("enumField: !UnknownEnum QUX");
             textWire.valueIn.wireIn().read("enumField").object();
 
             fail();
         } catch (Exception e) {
-            assertThat(e.getMessage(),
-                    is(equalTo("Trying to read marshallable class com.sun.proxy.$Proxy5 at [pos: 27, rlim: 27, wlim: 27, cap: 27 ] enumField: !UnknownEnum QUXǁ‡ expected to find a {")));
+            String message = e.getMessage().replaceAll("Proxy\\d+", "ProxyXX");
+            assertThat(message,
+                    is(equalTo("Trying to read marshallable class com.sun.proxy.$ProxyXX at [pos: 27, rlim: 27, wlim: 27, cap: 27 ] enumField: !UnknownEnum QUXǁ‡ expected to find a {")));
         }
     }
 
