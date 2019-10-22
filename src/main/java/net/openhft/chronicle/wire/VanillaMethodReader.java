@@ -364,7 +364,7 @@ public class VanillaMethodReader implements MethodReader {
         });
     }
 
-    private void invoke(Object o, @NotNull Method m, Object[] args) throws IllegalAccessException {
+    private void invoke(Object o, @NotNull Method m, Object[] args) {
         try {
             if (methodReaderInterceptor != null)
                 methodReaderInterceptor.intercept(m, o, args, VanillaMethodReader::actualInvoke);
