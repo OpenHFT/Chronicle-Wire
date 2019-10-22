@@ -44,11 +44,11 @@ public class Base32IntConverter implements IntConverter {
     @Override
     public void append(StringBuilder text, int value) {
         int start = text.length();
-        do {
+        while (value != 0) {
             int v = (int) (value & (BASE - 1));
             value >>>= 5;
             text.append(DECODE[v]);
-        } while (value != 0);
+        }
         StringUtils.reverse(text, start);
     }
 }
