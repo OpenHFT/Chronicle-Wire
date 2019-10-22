@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,18 +41,18 @@ import java.util.function.Supplier;
 public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterBuilder<T> {
 
     private final List<Class> interfaces = new ArrayList<>();
-    @NotNull
-    private final MethodWriterInvocationHandler handler;
+    private static final Map<Set<Class>, Class> setOfClassesToClassName = new ConcurrentHashMap<>();
     private final String packageName;
     private ClassLoader classLoader;
-    private static Map<Set<Class>, Class> setOfClassesToClassName = new ConcurrentHashMap<>();
+    @NotNull
+    private final MethodWriterInvocationHandlerSupplier handlerSupplier;
 
-    public VanillaMethodWriterBuilder(@NotNull Class<T> tClass, @NotNull MethodWriterInvocationHandler handler) {
+    public VanillaMethodWriterBuilder(@NotNull Class<T> tClass, @NotNull Supplier<MethodWriterInvocationHandler> handlerSupplier) {
         packageName = tClass.getPackage().getName();
         interfaces.add(Closeable.class);
         interfaces.add(tClass);
         classLoader = tClass.getClassLoader();
-        this.handler = handler;
+        this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(handlerSupplier);
     }
 
     private static AtomicLong proxyCount = new AtomicLong();
@@ -70,25 +71,31 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
     @NotNull
     public MethodWriterBuilder<T> recordHistory(boolean recordHistory) {
-        handler.recordHistory(recordHistory);
+        handlerSupplier.recordHistory(recordHistory);
         return this;
     }
 
     @NotNull
     public MethodWriterBuilder<T> methodWriterListener(MethodWriterListener methodWriterListener) {
-        handler.methodWriterListener(methodWriterListener);
+        handlerSupplier.methodWriterListener(methodWriterListener);
         return this;
     }
 
     @NotNull
     public MethodWriterBuilder<T> methodWriterInterceptor(MethodWriterInterceptor methodWriterInterceptor) {
-        handler.methodWriterInterceptor(methodWriterInterceptor);
+        handlerSupplier.methodWriterInterceptor(methodWriterInterceptor);
         return this;
     }
 
     @NotNull
     public MethodWriterBuilder<T> onClose(Closeable closeable) {
-        handler.onClose(closeable);
+        handlerSupplier.onClose(closeable);
+        return this;
+    }
+
+    @NotNull
+    public MethodWriterBuilder<T> disableThreadSafe(boolean theadSafe) {
+        handlerSupplier.disableThreadSafe(theadSafe);
         return this;
     }
 
@@ -109,13 +116,8 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         if (proxyClass != null) {
 
             try {
-                Constructor<T> constructors = (Constructor) proxyClass.getConstructor(Object.class, InvocationHandler.class);
-
-                @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
-                //noinspection unchecked
-                Object proxy = Proxy.newProxyInstance(classLoader, interfacesArr, handler);
-
-                return (T) constructors.newInstance(proxy, handler);
+                Constructor<T> constructor = (Constructor) proxyClass.getConstructor(MethodWriterInvocationHandlerSupplier.class);
+                return (T) constructor.newInstance(handlerSupplier);
             } catch (Throwable e) {
                 // do nothing and drop through
                 if (Jvm.isDebug())
@@ -124,17 +126,13 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         }
 
         try {
-            @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
-            Object proxy = Proxy.newProxyInstance(classLoader, interfacesArr, handler);
-
-            Set<Class> interfaces = new HashSet<>();
-            Collections.addAll(interfaces, interfacesArr);
-
             // this will create proxy that does not suffer from the arg[] issue
-            final Class<T> o = setOfClassesToClassName.computeIfAbsent(interfaces,
+            LinkedHashSet<Class> setOfInterfaces = new LinkedHashSet<>(interfaces);
+            final Class<T> o = setOfClassesToClassName.computeIfAbsent(setOfInterfaces,
                     i -> VanillaMethodWriterBuilder.generatedProxyClass(packageName, i));
             if (o != null)
-                return o.getConstructor(Object.class, InvocationHandler.class).newInstance(proxy, handler);
+                return o.getConstructor(MethodWriterInvocationHandlerSupplier.class)
+                        .newInstance(handlerSupplier);
             
         } catch (Throwable e) {
             // do nothing and drop through
@@ -144,7 +142,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
         //noinspection unchecked
-        return (T) Proxy.newProxyInstance(classLoader, interfacesArr, handler);
+        return (T) Proxy.newProxyInstance(classLoader, interfacesArr, new CallSupplierInvocationHandler());
     }
 
     /**
@@ -154,13 +152,20 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
      * @return this
      */
     public MethodWriterBuilder<T> genericEvent(String genericEvent) {
-        handler.genericEvent(genericEvent);
+        handlerSupplier.genericEvent(genericEvent);
         return this;
     }
 
     public MethodWriterBuilder<T> useMethodIds(boolean useMethodIds) {
-        handler.useMethodIds(useMethodIds);
+        handlerSupplier.useMethodIds(useMethodIds);
         return this;
+    }
+
+    class CallSupplierInvocationHandler implements InvocationHandler {
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            return handlerSupplier.get().invoke(proxy, method, args);
+        }
     }
 
     public Class<?> proxyClass() {

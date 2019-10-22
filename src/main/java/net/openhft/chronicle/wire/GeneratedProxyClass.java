@@ -30,8 +30,10 @@ public enum GeneratedProxyClass {
 
         StringBuilder sb = new StringBuilder("package " + packageName + ";\n\n" +
                 "import net.openhft.chronicle.core.Jvm;\n" +
+                "import net.openhft.chronicle.wire.MethodWriterInvocationHandlerSupplier;\n" +
                 "import java.lang.reflect.InvocationHandler;\n" +
                 "import java.lang.reflect.Method;\n" +
+                "import java.util.stream.IntStream;\n" +
                 "import java.util.ArrayList;\n" +
                 "import java.util.List;\n");
 
@@ -96,29 +98,20 @@ public enum GeneratedProxyClass {
     }
 
     private static void addFieldsAndConstructor(final int maxArgs, final Set<Method> declaredMethods, final StringBuilder sb, final String className, final StringBuilder methodArray) {
-
-        sb.append("  private final Object proxy;\n" +
-                "  private final InvocationHandler handler;\n" +
-                "  private Method[] methods = new  Method[")
+        sb.append("  private final MethodWriterInvocationHandlerSupplier handler;\n" +
+                "    private final Method[] methods = new Method[")
                 .append(declaredMethods.size())
                 .append("];\n")
-                .append("  private List<Object[]> args = new ArrayList<Object[]>(")
-                .append(maxArgs + 1)
-                .append(");\n\n")
+                .append("  private static final int maxArgs = " + maxArgs + ";\n")
+                .append("  private final ThreadLocal<Object[][]> argsTL = " +
+                        "ThreadLocal.withInitial(() -> IntStream.range(0, maxArgs + 1)" +
+                        ".mapToObj(Object[]::new).toArray(Object[][]::new));\n\n")
                 .append("  public ")
                 .append(className)
-                .append("(Object proxy, InvocationHandler handler) {\n")
-                .append("    this.proxy = proxy;\n")
-                .append("    this.handler = handler;\n");
-        for (int j = 0; j <= maxArgs; j++) {
-            sb.append("    args.add(new Object[")
-                    .append(j)
-                    .append("]);\n");
-        }
-
-        sb.append(methodArray);
-        sb.append("  }\n" +
-                '\n');
+                .append("(MethodWriterInvocationHandlerSupplier handler) {\n")
+                .append("    this.handler = handler;\n")
+                .append(methodArray)
+                .append("  }\n\n");
     }
 
     private static void createProxyMethods(final Set<Method> declaredMethods, final StringBuilder sb) {
@@ -131,7 +124,7 @@ public enum GeneratedProxyClass {
 
             sb.append(createMethodSignature(dm, returnType));
             sb.append("    Method method = this.methods[").append(methodIndex).append("];\n");
-            sb.append("    Object[] a = this.args.get(").append(dm.getParameterCount()).append(");\n");
+            sb.append("    Object[] a = this.argsTL.get()[").append(dm.getParameterCount()).append("];\n");
 
             assignParametersToArgs(sb, dm);
             callInvoke(sb, returnType);
@@ -145,7 +138,7 @@ public enum GeneratedProxyClass {
         if (returnType != void.class)
             sb.append("return (").append(returnType.getName()).append(')');
 
-        sb.append(" handler.invoke(proxy,method,a);\n" +
+        sb.append(" handler.get().invoke(this,method,a);\n" +
                 "    } catch (Throwable throwable) {\n" +
                 "       throw Jvm.rethrow(throwable);\n" +
                 "    }\n" +

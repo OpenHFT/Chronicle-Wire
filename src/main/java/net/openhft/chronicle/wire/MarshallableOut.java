@@ -18,12 +18,11 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.WriteBytesMarshallable;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 /*
  * Created by peter.lawrey on 06/02/2016.
@@ -192,15 +191,14 @@ public interface MarshallableOut {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @NotNull
     default <T> T methodWriter(boolean metaData, @NotNull Class<T> tClass, Class... additional) {
-        Class[] interfaces = ObjectUtils.addAll(tClass, additional);
-
-        //noinspection unchecked
-        return (T) Proxy.newProxyInstance(tClass.getClassLoader(), interfaces, new BinaryMethodWriterInvocationHandler(metaData, this));
+        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<T>(tClass, () -> new BinaryMethodWriterInvocationHandler(metaData, this));
+        Stream.of(additional).forEach(builder::addInterface);
+        return builder.build();
     }
 
     @NotNull
     default <T> VanillaMethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
-        return new VanillaMethodWriterBuilder<>(tClass, new BinaryMethodWriterInvocationHandler(false, this));
+        return new VanillaMethodWriterBuilder<T>(tClass, () -> new BinaryMethodWriterInvocationHandler(false, this));
     }
 
     /**
