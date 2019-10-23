@@ -87,7 +87,7 @@ public class WireMarshaller<T> {
                 : new WireMarshaller<>(tClass, fields, isLeaf);
     }
 
-    public WireMarshaller excludeFields(String... fieldNames) {
+    public WireMarshaller<T> excludeFields(String... fieldNames) {
         Set<String> fieldSet = new HashSet<>(Arrays.asList(fieldNames));
         return new WireMarshaller(Stream.of(fields)
                 .filter(f -> !fieldSet.contains(f.field.getName()))
