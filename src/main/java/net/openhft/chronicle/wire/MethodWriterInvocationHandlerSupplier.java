@@ -54,9 +54,8 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
 
     private MethodWriterInvocationHandler newHandler() {
         MethodWriterInvocationHandler h = supplier.get();
-        h.methodWriterInterceptor(methodWriterInterceptor);
         h.genericEvent(genericEvent);
-        h.methodWriterListener(methodWriterListener);
+        h.methodWriterInterceptor(methodWriterListener, methodWriterInterceptor);
         h.onClose(closeable);
         h.recordHistory(recordHistory);
         h.useMethodIds(useMethodIds);

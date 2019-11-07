@@ -329,7 +329,11 @@ public class WireMarshaller<T> {
                             : new ByteIntConversionFieldAccess(field, intConversion);
                 }
                 case "char":
-                    return new CharFieldAccess(field);
+                    CharConversion charConversion = field.getAnnotation(CharConversion.class);
+                    return charConversion == null
+                            ? new CharFieldAccess(field)
+                            : new CharConversionFieldAccess(field, charConversion);
+
                 case "short": {
                     IntConversion intConversion = field.getAnnotation(IntConversion.class);
                     return intConversion == null
@@ -1377,6 +1381,61 @@ public class WireMarshaller<T> {
             UNSAFE.putShort(o, offset, (short) i);
         }
     }
+
+    static class CharConversionFieldAccess extends CharFieldAccess {
+
+        @NotNull
+        private final CharConverter intConverter;
+
+        CharConversionFieldAccess(@NotNull Field field, @NotNull CharConversion charConversion) {
+            super(field);
+            this.intConverter = ObjectUtils.newInstance(charConversion.value());
+        }
+
+        @Override
+        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
+            StringBuilder sb = acquireStringBuilder();
+            intConverter.append(sb, getChar(o));
+            write.rawText(sb);
+        }
+
+        protected char getChar(Object o) {
+            return UNSAFE.getChar(o, offset);
+        }
+
+        @Override
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
+            StringBuilder sb = acquireStringBuilder();
+            read.text(sb);
+            char i = intConverter.parse(sb);
+            putChar(o, i);
+        }
+
+        protected void putChar(Object o, char i) {
+            UNSAFE.putChar(o, offset, i);
+        }
+
+        @Override
+        public void getAsBytes(Object o, @NotNull Bytes bytes) {
+            StringBuilder sb = acquireStringBuilder();
+            bytes.readUtf8(sb);
+            int i = intConverter.parse(sb);
+            bytes.writeInt(i);
+        }
+
+        @Override
+        protected boolean sameValue(Object o, Object o2) {
+            return getChar(o) == getChar(o2);
+        }
+
+        @Override
+        protected void copy(Object from, Object to) {
+            putChar(to, getChar(from));
+        }
+
+    }
+
+
 
     static class IntConversionFieldAccess extends FieldAccess {
         @NotNull
