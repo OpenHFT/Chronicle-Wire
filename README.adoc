@@ -605,9 +605,33 @@ Chronicle Wire supports fields with, and without, optional fields, and automatic
 
 Chronicle Wire does not have pointers, but it does have content-lengths which are a useful hint for random access and robustness; but these are optional.
 
+== Working with intellij
+
+These templates can be added to IntelliJ to create simple getters and setters.
+
+.Simple Getter
+[source,velocity]
+----
+$field.type ##
+${field.name}() {
+  return $field.name;
+}
+----
+
+.Simple Setter
+[source,velocity]
+----
+#set($paramName = $helper.getParamName($field, $project))
+$class.name ${field.name}($field.type $paramName) {
+  this.$field.name = $paramName;
+  return this;
+}
+----
+
 ===  Platform support
 
-Chronicle Wire supports `Java 8`.  Future versions may support `Java 9`, `C++`, and `C#`.
+Chronicle Wire supports `Java 8`, `Java 11` and `C++`.
+Future versions may support `Java 14`, `python`.
 
 '''
 https://github.com/OpenHFT/Chronicle-Wire[Back to Chronicle Wire project]
