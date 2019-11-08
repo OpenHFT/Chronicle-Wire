@@ -613,6 +613,10 @@ public enum Wires {
             }
         }
 
+        private static Class forName(Class o, ValueIn in) {
+            return ClassAliasPool.CLASS_ALIASES.forName(in.text());
+        }
+
         @Override
         public SerializationStrategy apply(@NotNull Class aClass) {
             switch (aClass.getName()) {
@@ -635,13 +639,7 @@ public enum Wires {
                     return ANY_OBJECT;
 
                 case "java.lang.Class":
-                    return ScalarStrategy.of(Class.class, (o, in) -> {
-                        try {
-                            return ClassAliasPool.CLASS_ALIASES.forName(in.text());
-                        } catch (ClassNotFoundException e) {
-                            throw new IORuntimeException(e);
-                        }
-                    });
+                    return ScalarStrategy.of(Class.class, SerializeJavaLang::forName);
 
                 case "java.lang.Boolean":
                     return ScalarStrategy.of(Boolean.class, (o, in) -> in.bool());
