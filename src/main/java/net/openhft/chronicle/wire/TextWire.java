@@ -235,15 +235,24 @@ public class TextWire extends AbstractWire implements Wire {
     @NotNull
     public <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
         Class[] interfaces = ObjectUtils.addAll(tClass, additional);
-
         //noinspection unchecked
-        return (T) Proxy.newProxyInstance(tClass.getClassLoader(), interfaces, new TextMethodWriterInvocationHandler(this));
+        return (T) Proxy.newProxyInstance(tClass.getClassLoader(), interfaces, newTextMethodWriterInvocationHandler(interfaces));
+    }
+
+    @NotNull
+    TextMethodWriterInvocationHandler newTextMethodWriterInvocationHandler(Class... interfaces) {
+        for (Class<?> anInterface : interfaces) {
+            Comment c = anInterface.getAnnotation(Comment.class);
+            if (c != null)
+                writeComment(c.value());
+        }
+        return new TextMethodWriterInvocationHandler(this);
     }
 
     @Override
     @NotNull
     public <T> VanillaMethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
-        return new VanillaMethodWriterBuilder<>(tClass, () -> new TextMethodWriterInvocationHandler(this));
+        return new VanillaMethodWriterBuilder<>(tClass, () -> newTextMethodWriterInvocationHandler(tClass));
     }
 
     @Override
