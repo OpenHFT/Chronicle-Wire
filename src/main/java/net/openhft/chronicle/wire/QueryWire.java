@@ -417,11 +417,7 @@ public class QueryWire extends TextWire {
         public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             textTo(sb);
-            try {
-                return ClassAliasPool.CLASS_ALIASES.forName(sb);
-            } catch (ClassNotFoundException e) {
-                return unresolvedHandler.apply(sb, e);
-            }
+            return ClassAliasPool.CLASS_ALIASES.forName(sb);
         }
 
         @Override

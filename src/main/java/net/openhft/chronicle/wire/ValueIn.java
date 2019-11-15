@@ -454,23 +454,15 @@ public interface ValueIn {
     @NotNull
     default <T> WireIn typeLiteral(T t, @NotNull BiConsumer<T, Class> classConsumer) throws IORuntimeException {
         return typeLiteralAsText(t, (o, x) -> {
-            try {
-                classConsumer.accept(o, ClassAliasPool.CLASS_ALIASES.forName(x));
-            } catch (ClassNotFoundException e) {
-                throw new IORuntimeException(e);
-            }
+            classConsumer.accept(o, ClassAliasPool.CLASS_ALIASES.forName(x));
+
         });
     }
 
     @NotNull
     default <T> WireIn typeLiteral(T t, @NotNull BiConsumer<T, Class> classConsumer, Class defaultClass) {
         return typeLiteralAsText(t, (o, x) -> {
-            Class u = defaultClass;
-            try {
-                u = ClassAliasPool.CLASS_ALIASES.forName(x);
-            } catch (ClassNotFoundException e) {
-                // use default class.
-            }
+            Class u = ClassAliasPool.CLASS_ALIASES.forName(x);
             classConsumer.accept(o, u);
         });
     }
@@ -549,7 +541,9 @@ public interface ValueIn {
 
     @Nullable
     default <T> Class<T> typeLiteral() throws IORuntimeException, BufferUnderflowException {
-        return (Class<T>) typeLiteral((sb, e) -> { throw new IORuntimeException(e); });
+        return (Class<T>) typeLiteral((sb, e) -> {
+            throw new IORuntimeException(e);
+        });
     }
 
     @Nullable
