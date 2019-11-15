@@ -87,14 +87,6 @@ public class WireMarshaller<T> {
                 : new WireMarshaller<>(tClass, fields, isLeaf);
     }
 
-    public WireMarshaller<T> excludeFields(String... fieldNames) {
-        Set<String> fieldSet = new HashSet<>(Arrays.asList(fieldNames));
-        return new WireMarshaller(Stream.of(fields)
-                .filter(f -> !fieldSet.contains(f.field.getName()))
-                .toArray(FieldAccess[]::new),
-                isLeaf, defaultValue);
-    }
-
     private static <T> boolean overridesUnexpectedFields(Class<T> tClass) {
         try {
             Method method = tClass.getMethod("unexpectedField", UNEXPECTED_FIELDS_PARAMETER_TYPES);
@@ -143,6 +135,14 @@ public class WireMarshaller<T> {
                 && !tClass.isArray()
                 ? ObjectUtils.newInstance(tClass) :
                 null;
+    }
+
+    public WireMarshaller<T> excludeFields(String... fieldNames) {
+        Set<String> fieldSet = new HashSet<>(Arrays.asList(fieldNames));
+        return new WireMarshaller(Stream.of(fields)
+                .filter(f -> !fieldSet.contains(f.field.getName()))
+                .toArray(FieldAccess[]::new),
+                isLeaf, defaultValue);
     }
 
     public void writeMarshallable(T t, @NotNull WireOut out) {
@@ -1436,7 +1436,6 @@ public class WireMarshaller<T> {
     }
 
 
-
     static class IntConversionFieldAccess extends FieldAccess {
         @NotNull
         private final IntConverter intConverter;
@@ -1448,9 +1447,14 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
-            StringBuilder sb = acquireStringBuilder();
-            intConverter.append(sb, getInt(o));
-            write.rawText(sb);
+            int anInt = getInt(o);
+            if (write.isBinary()) {
+                write.int32(anInt);
+            } else {
+                StringBuilder sb = acquireStringBuilder();
+                intConverter.append(sb, anInt);
+                write.rawText(sb);
+            }
         }
 
         protected int getInt(Object o) {
@@ -1459,9 +1463,15 @@ public class WireMarshaller<T> {
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            StringBuilder sb = acquireStringBuilder();
-            read.text(sb);
-            int i = intConverter.parse(sb);
+            int i;
+            if (read.isBinary()) {
+                i = read.int32();
+
+            } else {
+                StringBuilder sb = acquireStringBuilder();
+                read.text(sb);
+                i = intConverter.parse(sb);
+            }
             putInt(o, i);
         }
 
@@ -1569,16 +1579,26 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
-            StringBuilder sb = acquireStringBuilder();
-            longConverter.append(sb, UNSAFE.getLong(o, offset));
-            write.rawText(sb);
+            long aLong = UNSAFE.getLong(o, offset);
+            if (write.isBinary()) {
+                write.int64(aLong);
+            } else {
+                StringBuilder sb = acquireStringBuilder();
+                longConverter.append(sb, aLong);
+                write.rawText(sb);
+            }
         }
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            StringBuilder sb = acquireStringBuilder();
-            read.text(sb);
-            long i = longConverter.parse(sb);
+            long i;
+            if (read.isBinary()) {
+                i = read.int64();
+            } else {
+                StringBuilder sb = acquireStringBuilder();
+                read.text(sb);
+                i = longConverter.parse(sb);
+            }
             UNSAFE.putLong(o, offset, i);
         }
 

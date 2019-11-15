@@ -628,6 +628,10 @@ public interface ValueIn {
         return UUID.fromString(text());
     }
 
+    default boolean isBinary() {
+        return false;
+    }
+
     interface Reader {
         <T> void accept(ValueIn valueIn, List<T> list, List<T> buffer, Supplier<T> bufferAdd);
     }

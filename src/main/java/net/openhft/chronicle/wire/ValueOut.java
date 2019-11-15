@@ -832,4 +832,7 @@ public interface ValueOut {
 
     void resetState();
 
+    default boolean isBinary() {
+        return false;
+    }
 }

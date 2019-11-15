@@ -1780,6 +1780,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     protected class BinaryValueOut extends FixedBinaryValueOut {
+        @Override
+        public boolean isBinary() {
+            return true;
+        }
+
         @NotNull
         @Override
         public WireOut int8(byte i8) {
@@ -2087,6 +2092,11 @@ public class BinaryWire extends AbstractWire implements Wire {
     protected class BinaryValueIn implements ValueIn {
         final ValueInStack stack = new ValueInStack();
         final Reader reader0field = this::reader0;
+
+        @Override
+        public boolean isBinary() {
+            return true;
+        }
 
         @Override
         @Nullable
