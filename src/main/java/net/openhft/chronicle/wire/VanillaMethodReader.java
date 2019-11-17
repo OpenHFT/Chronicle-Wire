@@ -175,7 +175,7 @@ public class VanillaMethodReader implements MethodReader {
         }
     }
 
-    static void logMessage(@NotNull CharSequence s, @NotNull ValueIn v) {
+    protected static void logMessage(@NotNull CharSequence s, @NotNull ValueIn v) {
         if (!LOGGER.isDebugEnabled()) {
             return;
         }
@@ -283,7 +283,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     @NotNull
-    private MethodWireKey createWireKey(@NotNull Method m, String name) {
+    protected MethodWireKey createWireKey(@NotNull Method m, String name) {
         MethodId annotation = Annotations.getAnnotation(m, MethodId.class);
         return new MethodWireKey(name, annotation == null
                 ? name.hashCode()
@@ -364,7 +364,7 @@ public class VanillaMethodReader implements MethodReader {
         });
     }
 
-    private void invoke(Object o, @NotNull Method m, Object[] args) {
+    protected void invoke(Object o, @NotNull Method m, Object[] args) {
         try {
             if (methodReaderInterceptor != null)
                 methodReaderInterceptor.intercept(m, o, args, VanillaMethodReader::actualInvoke);
@@ -451,5 +451,10 @@ public class VanillaMethodReader implements MethodReader {
 
     public MethodReaderInterceptor methodReaderInterceptor() {
         return methodReaderInterceptor;
+    }
+
+    @NotNull
+    protected WireParser wireParser() {
+        return wireParser;
     }
 }
