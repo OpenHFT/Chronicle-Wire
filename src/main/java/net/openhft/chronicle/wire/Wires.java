@@ -100,10 +100,10 @@ public enum Wires {
     });
     static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(VanillaFieldInfo::lookupClass);
     static final StringBuilderPool SBP = new StringBuilderPool();
+    static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(new VanillaBytes(BytesStore.empty())));
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
     private static final int INVERSE_TID_MASK = ~TID_MASK;
     static boolean ENCODE_TID_IN_HEADER = Boolean.getBoolean("wire.encodeTidInHeader");
-    static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(new VanillaBytes(BytesStore.empty())));
 
     static {
         CLASS_STRATEGY_FUNCTIONS.add(SerializeEnum.INSTANCE);
@@ -546,6 +546,8 @@ public enum Wires {
     public static <T> T tupleFor(Class<T> tClass, String typeName) {
         if (tClass == null || tClass == Object.class)
             tClass = (Class<T>) Marshallable.class;
+        if (!tClass.isInterface())
+            throw new IllegalArgumentException("Cannot generate a class for " + typeName + " are you missing an alias?");
         return (T) MARSHALLABLE_FUNCTION.get(tClass).apply(typeName);
     }
 
@@ -562,6 +564,23 @@ public enum Wires {
         return name.startsWith("java.")
                 || name.startsWith("javax.")
                 || name.startsWith("jdk.");
+    }
+
+    @NotNull
+    public static BinaryWire binaryWireForRead(Bytes in, long position, long length) {
+        BinaryWire wire = WIRE_TL.get();
+        VanillaBytes bytes = (VanillaBytes) wire.bytes();
+        bytes.bytesStore(in.bytesStore(), position, length);
+        return wire;
+    }
+
+    @NotNull
+    public static BinaryWire binaryWireForWrite(Bytes in, long position, long length) {
+        BinaryWire wire = WIRE_TL.get();
+        VanillaBytes bytes = (VanillaBytes) wire.bytes();
+        bytes.bytesStore(in.bytesStore(), 0, position);
+        bytes.writeLimit(position + length);
+        return wire;
     }
 
     enum SerializeEnum implements Function<Class, SerializationStrategy> {
@@ -975,22 +994,5 @@ public enum Wires {
         public Class genericType(int index) {
             return Object.class;
         }
-    }
-
-    @NotNull
-    public static BinaryWire binaryWireForRead(Bytes in, long position, long length) {
-        BinaryWire wire = WIRE_TL.get();
-        VanillaBytes bytes = (VanillaBytes) wire.bytes();
-        bytes.bytesStore(in.bytesStore(), position, length);
-        return wire;
-    }
-
-    @NotNull
-    public static BinaryWire binaryWireForWrite(Bytes in, long position, long length) {
-        BinaryWire wire = WIRE_TL.get();
-        VanillaBytes bytes = (VanillaBytes) wire.bytes();
-        bytes.bytesStore(in.bytesStore(), 0, position);
-        bytes.writeLimit(position+length);
-        return wire;
     }
 }
