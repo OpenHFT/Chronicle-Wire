@@ -681,7 +681,7 @@ public class TextWireTest {
                 "  b: {\n" +
                 "    field1: 0.0\n" +
                 "  },\n" +
-                "  value: 0\n" +
+                "  value: 12345\n" +
                 "}\n", a.toString());
     }
 

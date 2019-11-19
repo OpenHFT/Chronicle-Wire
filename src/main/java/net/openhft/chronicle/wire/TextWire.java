@@ -3018,6 +3018,7 @@ public class TextWire extends AbstractWire implements Wire {
 
             } else if (code == ',') {
                 Jvm.warn().on(getClass(), "Expected a {} but was blank for type " + object.getClass());
+                readCode();
                 return object;
 
             } else if (code != '{') {
@@ -3252,6 +3253,9 @@ public class TextWire extends AbstractWire implements Wire {
             int ch = bytes.readUnsignedByte(bytes.readPosition() - 1);
             if (ch == ':' || ch == '}' || ch == ']')
                 bytes.readSkip(-1);
+            else if (ch >= 'A') {
+                throw new IllegalArgumentException("Unexpected character in number '" + (char) ch + "'");
+            }
         }
 
         @Override
