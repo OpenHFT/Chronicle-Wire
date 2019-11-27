@@ -1701,8 +1701,21 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             writer.accept(t, this);
 
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
+            setSequenceLength(position);
             return BinaryWire.this;
+        }
+
+        private void setSequenceLength(long position) {
+            int length = Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range.");
+            boolean debug = false;
+            assert debug = true;
+            if (debug) {
+                if (!bytes.compareAndSwapInt(position, 0, length)) {
+                    throw new IllegalStateException("CAS failed for sequence was " + Integer.toHexString(bytes.readInt(position)));
+                }
+            } else {
+                bytes.writeInt(position, length);
+            }
         }
 
         @NotNull
@@ -1714,7 +1727,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             writer.accept(t, kls, this);
 
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
+            setSequenceLength(position);
             return BinaryWire.this;
         }
 
