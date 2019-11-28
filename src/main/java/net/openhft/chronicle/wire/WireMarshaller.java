@@ -79,6 +79,9 @@ public class WireMarshaller<T> {
         final FieldAccess[] fields = map.values().stream()
                 .map(FieldAccess::create)
                 .toArray(FieldAccess[]::new);
+        long aCount = Stream.of(fields).filter(f -> f.field.getName().equals("a")).count();
+        if (aCount > 0)
+            Jvm.warn().on(tClass, "Has " + aCount + " fields called 'a'");
         boolean isLeaf = Stream.of(fields).noneMatch(
                 c -> (isCollection(c.field.getType()) && !Boolean.TRUE.equals(c.isLeaf))
                         || WriteMarshallable.class.isAssignableFrom(c.field.getType()));
