@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.IntValue;
@@ -36,7 +37,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
-import static net.openhft.chronicle.wire.Wires.acquireStringBuilder;
 
 /*
  * Created by Peter Lawrey on 16/03/16.
@@ -45,6 +45,7 @@ import static net.openhft.chronicle.wire.Wires.acquireStringBuilder;
 public class WireMarshaller<T> {
     public static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     private static final FieldAccess[] NO_FIELDS = {};
+    private static final StringBuilderPool SBP = new StringBuilderPool();
     public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
             (tClass ->
                     Throwable.class.isAssignableFrom(tClass)
@@ -88,6 +89,10 @@ public class WireMarshaller<T> {
         return overridesUnexpectedFields(tClass)
                 ? new WireMarshallerForUnexpectedFields<>(tClass, fields, isLeaf)
                 : new WireMarshaller<>(tClass, fields, isLeaf);
+    }
+
+    private static StringBuilder acquireStringBuilder() {
+        return SBP.acquireStringBuilder();
     }
 
     private static <T> boolean overridesUnexpectedFields(Class<T> tClass) {
