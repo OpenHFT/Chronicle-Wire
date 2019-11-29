@@ -45,13 +45,14 @@ import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
 public class WireMarshaller<T> {
     public static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     private static final FieldAccess[] NO_FIELDS = {};
-    private static final StringBuilderPool SBP = new StringBuilderPool();
     public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
             (tClass ->
                     Throwable.class.isAssignableFrom(tClass)
                             ? WireMarshaller.ofThrowable(tClass)
                             : WireMarshaller.of(tClass)
             );
+    private static final StringBuilderPool RSBP = new StringBuilderPool();
+    private static final StringBuilderPool WSBP = new StringBuilderPool();
     @NotNull
     final FieldAccess[] fields;
     private final boolean isLeaf;
@@ -89,10 +90,6 @@ public class WireMarshaller<T> {
         return overridesUnexpectedFields(tClass)
                 ? new WireMarshallerForUnexpectedFields<>(tClass, fields, isLeaf)
                 : new WireMarshaller<>(tClass, fields, isLeaf);
-    }
-
-    private static StringBuilder acquireStringBuilder() {
-        return SBP.acquireStringBuilder();
     }
 
     private static <T> boolean overridesUnexpectedFields(Class<T> tClass) {
@@ -450,7 +447,16 @@ public class WireMarshaller<T> {
             if (read instanceof DefaultValueIn) {
                 if (overwrite) copy(defaults, o);
             } else {
-                setValue(o, read, overwrite);
+                long pos = read.wireIn().bytes().readPosition();
+                try {
+                    setValue(o, read, overwrite);
+                } catch (Exception e) {
+                    read.wireIn().bytes().readPosition(pos);
+                    StringBuilder sb = RSBP.acquireStringBuilder();
+                    read.text(sb);
+                    Jvm.warn().on(getClass(), "Failed to read '" + this.field.getName() + "' with '" + sb + "' taking default");
+                    copy(defaults, o);
+                }
             }
         }
 
@@ -670,7 +676,7 @@ public class WireMarshaller<T> {
         }
 
         private void decodeBytes(@NotNull ValueIn read, Bytes bytes) {
-            @NotNull StringBuilder sb0 = acquireStringBuilder();
+            @NotNull StringBuilder sb0 = RSBP.acquireStringBuilder();
             read.text(sb0);
             String s = WireInternal.INTERNER.intern(sb0);
             byte[] decode = Base64.getDecoder().decode(s);
@@ -1290,7 +1296,7 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, Object previous) {
-            @NotNull StringBuilder sb = acquireStringBuilder();
+            @NotNull StringBuilder sb = WSBP.acquireStringBuilder();
             sb.append(UNSAFE.getChar(o, offset));
             write.text(sb);
         }
@@ -1402,7 +1408,7 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
-            StringBuilder sb = acquireStringBuilder();
+            StringBuilder sb = WSBP.acquireStringBuilder();
             intConverter.append(sb, getChar(o));
             write.rawText(sb);
         }
@@ -1413,7 +1419,7 @@ public class WireMarshaller<T> {
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            StringBuilder sb = acquireStringBuilder();
+            StringBuilder sb = RSBP.acquireStringBuilder();
             read.text(sb);
             char i = intConverter.parse(sb);
             putChar(o, i);
@@ -1425,7 +1431,7 @@ public class WireMarshaller<T> {
 
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) {
-            StringBuilder sb = acquireStringBuilder();
+            StringBuilder sb = WSBP.acquireStringBuilder();
             bytes.readUtf8(sb);
             int i = intConverter.parse(sb);
             bytes.writeInt(i);
@@ -1459,7 +1465,7 @@ public class WireMarshaller<T> {
             if (write.isBinary()) {
                 write.int32(anInt);
             } else {
-                StringBuilder sb = acquireStringBuilder();
+                StringBuilder sb = WSBP.acquireStringBuilder();
                 intConverter.append(sb, anInt);
                 write.rawText(sb);
             }
@@ -1476,7 +1482,7 @@ public class WireMarshaller<T> {
                 i = read.int32();
 
             } else {
-                StringBuilder sb = acquireStringBuilder();
+                StringBuilder sb = RSBP.acquireStringBuilder();
                 read.text(sb);
                 i = intConverter.parse(sb);
             }
@@ -1489,7 +1495,7 @@ public class WireMarshaller<T> {
 
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) {
-            StringBuilder sb = acquireStringBuilder();
+            StringBuilder sb = WSBP.acquireStringBuilder();
             bytes.readUtf8(sb);
             int i = intConverter.parse(sb);
             bytes.writeInt(i);
@@ -1591,7 +1597,7 @@ public class WireMarshaller<T> {
             if (write.isBinary()) {
                 write.int64(aLong);
             } else {
-                StringBuilder sb = acquireStringBuilder();
+                StringBuilder sb = WSBP.acquireStringBuilder();
                 longConverter.append(sb, aLong);
                 write.rawText(sb);
             }
@@ -1603,7 +1609,7 @@ public class WireMarshaller<T> {
             if (read.isBinary()) {
                 i = read.int64();
             } else {
-                StringBuilder sb = acquireStringBuilder();
+                StringBuilder sb = RSBP.acquireStringBuilder();
                 read.text(sb);
                 i = longConverter.parse(sb);
             }
@@ -1612,7 +1618,7 @@ public class WireMarshaller<T> {
 
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) {
-            StringBuilder sb = acquireStringBuilder();
+            StringBuilder sb = WSBP.acquireStringBuilder();
             bytes.readUtf8(sb);
             long i = longConverter.parse(sb);
             bytes.writeLong(i);
