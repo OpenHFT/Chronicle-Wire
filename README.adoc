@@ -634,11 +634,16 @@ Install the Code Generation plugin, and add a template in `File` -> `Settings` -
 
 This will add more efficient code for Marshallable format.
 
+[source]
+.Wire Marshallable
 ----
 #set($javaPsiFacade = $JavaPsiFacade.getInstance($project))
 #set($global = $GlobalSearchScope.allScope($project))
 
 @Override public void writeMarshallable(net.openhft.chronicle.wire.WireOut out) {
+#if($class0.hasSuper)
+   super.writeMarshallable(out); // <1>
+#end
 #foreach( $member in $members )
     #set($memberType = $member.type.split("<").get(0))
     #set($type = $javaPsiFacade.findClass($memberType, $global))
@@ -651,6 +656,9 @@ This will add more efficient code for Marshallable format.
 }
 
 @Override public void readMarshallable(net.openhft.chronicle.wire.WireIn in) {
+#if($class0.hasSuper)
+   super.readMarshallable(in); // <1>
+#end
 #foreach( $member in $members )
     #set($memberType = $member.type.split("<").get(0))
     #set($type = $javaPsiFacade.findClass($memberType, $global))
@@ -662,6 +670,7 @@ This will add more efficient code for Marshallable format.
 #end
 }
 ----
+<1> You will have to remove this line if the class extends `AbstractMarshallable`
 
 ===  Platform support
 
