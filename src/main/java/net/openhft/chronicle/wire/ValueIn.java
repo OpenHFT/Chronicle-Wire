@@ -629,4 +629,36 @@ public interface ValueIn {
     interface Reader {
         <T> void accept(ValueIn valueIn, List<T> list, List<T> buffer, Supplier<T> bufferAdd);
     }
+
+    default boolean readBoolean() {
+        return bool();
+    }
+
+    default byte readByte() {
+        return int8();
+    }
+
+    default char readChar() {
+        return (char) uint16();
+    }
+
+    default short readShort() {
+        return int16();
+    }
+
+    default int readInt() {
+        return int32();
+    }
+
+    default float readFloat() {
+        return float32();
+    }
+
+    default double readDouble() {
+        return float64();
+    }
+
+    default String readString() {
+        return text();
+    }
 }

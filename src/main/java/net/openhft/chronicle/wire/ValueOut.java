@@ -665,7 +665,7 @@ public interface ValueOut {
         } else if (value instanceof IntValue) {
             IntValue value2 = (IntValue) value;
             return int32forBinding(value2.getValue(), value2);
-        } else if (Wires.isInternal(value)){
+        } else if (Wires.isInternal(value)) {
             throw new IllegalStateException("type=" + value.getClass() +
                     " is unsupported, it must either be of type Marshallable, String or " +
                     "AutoBoxed primitive Object");
@@ -835,4 +835,37 @@ public interface ValueOut {
     default boolean isBinary() {
         return false;
     }
+
+    default WireOut writeBoolean(boolean x) {
+        return bool(x);
+    }
+
+    default WireOut writeByte(byte x) {
+        return int8(x);
+    }
+
+    default WireOut writeChar(char x) {
+        return uint16(x);
+    }
+
+    default WireOut writeShort(short x) {
+        return int16(x);
+    }
+
+    default WireOut writeInt(int x) {
+        return int32(x);
+    }
+
+    default WireOut writeFloat(float x) {
+        return float32(x);
+    }
+
+    default WireOut writeDouble(double x) {
+        return float64(x);
+    }
+
+    default WireOut writeString(CharSequence x) {
+        return text(x);
+    }
+
 }

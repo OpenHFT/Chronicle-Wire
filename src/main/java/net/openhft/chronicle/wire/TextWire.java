@@ -3254,7 +3254,7 @@ public class TextWire extends AbstractWire implements Wire {
             if (ch == ':' || ch == '}' || ch == ']')
                 bytes.readSkip(-1);
             else if (ch > 'F' && (ch < 'a' || ch > 'f')) {
-                throw new IllegalArgumentException("Unexpected character in number '" + (char) ch + "'");
+                throw new IllegalArgumentException("Unexpected character in number '" + (char) ch + '\'');
             }
         }
 
