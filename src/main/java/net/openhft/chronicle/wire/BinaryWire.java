@@ -2648,7 +2648,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (isText(code))
                 tb.accept(t, Byte.parseByte(text()));
             else
-                tb.accept(t, (byte) readInt(code));
+                tb.accept(t, (byte) BinaryWire.this.readInt(code));
         }
 
         @NotNull
@@ -2660,7 +2660,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (isText(code))
                 ti.accept(t, Short.parseShort(text()));
             else
-                ti.accept(t, (short) readInt(code));
+                ti.accept(t, (short) BinaryWire.this.readInt(code));
             return BinaryWire.this;
         }
 
@@ -2671,7 +2671,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (isText(code))
                 ti.accept(t, Short.parseShort(text()));
             else
-                ti.accept(t, (short) readInt(code));
+                ti.accept(t, (short) BinaryWire.this.readInt(code));
             return BinaryWire.this;
         }
 
@@ -2683,7 +2683,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (isText(code))
                 ti.accept(t, Integer.parseInt(text()));
             else
-                ti.accept(t, (int) readInt(code));
+                ti.accept(t, (int) BinaryWire.this.readInt(code));
             return BinaryWire.this;
         }
 
@@ -2695,7 +2695,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (isText(code))
                 ti.accept(t, Integer.parseInt(text()));
             else
-                ti.accept(t, (int) readInt(code));
+                ti.accept(t, (int) BinaryWire.this.readInt(code));
             return BinaryWire.this;
         }
 
@@ -2707,7 +2707,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (isText(code))
                 tl.accept(t, Long.parseLong(text()));
             else
-                tl.accept(t, readInt(code));
+                tl.accept(t, BinaryWire.this.readInt(code));
             return BinaryWire.this;
         }
 
@@ -2718,7 +2718,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (isText(code))
                 tl.accept(t, Long.parseLong(text()));
             else
-                tl.accept(t, readInt(code));
+                tl.accept(t, BinaryWire.this.readInt(code));
             return BinaryWire.this;
         }
 
@@ -2730,7 +2730,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (isText(code))
                 tf.accept(t, Float.parseFloat(text()));
             else
-                tf.accept(t, (float) readFloat(code));
+                tf.accept(t, (float) BinaryWire.this.readFloat(code));
             return BinaryWire.this;
         }
 
@@ -2739,7 +2739,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         public <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td) {
             consumePadding();
             final int code = readCode();
-            td.accept(t, readFloat(code));
+            td.accept(t, BinaryWire.this.readFloat(code));
             return BinaryWire.this;
         }
 

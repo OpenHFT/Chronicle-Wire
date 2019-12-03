@@ -856,6 +856,10 @@ public interface ValueOut {
         return int32(x);
     }
 
+    default WireOut writeLong(long x) {
+        return int64(x);
+    }
+
     default WireOut writeFloat(float x) {
         return float32(x);
     }

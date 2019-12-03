@@ -650,6 +650,10 @@ public interface ValueIn {
         return int32();
     }
 
+    default long readLong() {
+        return int64();
+    }
+
     default float readFloat() {
         return float32();
     }
