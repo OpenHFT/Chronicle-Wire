@@ -628,6 +628,41 @@ $class.name ${field.name}($field.type $paramName) {
 }
 ----
 
+=== Code generation for Marshallable
+
+Install the Code Generation plugin, and add a template in `File` -> `Settings` -> `Code Generation` as follows.
+
+This will add more efficient code for Marshallable format.
+
+----
+#set($javaPsiFacade = $JavaPsiFacade.getInstance($project))
+#set($global = $GlobalSearchScope.allScope($project))
+
+@Override public void writeMarshallable(net.openhft.chronicle.wire.WireOut out) {
+#foreach( $member in $members )
+    #set($memberType = $member.type.split("<").get(0))
+    #set($type = $javaPsiFacade.findClass($memberType, $global))
+    #if ($member.primitive)
+        out.write("$member.name").write${StringUtil.capitalizeWithJavaBeanConvention($memberType)}($member.name);
+    #else
+        out.write("$member.name").object(${memberType}.class, $member.name);
+    #end
+#end
+}
+
+@Override public void readMarshallable(net.openhft.chronicle.wire.WireIn in) {
+#foreach( $member in $members )
+    #set($memberType = $member.type.split("<").get(0))
+    #set($type = $javaPsiFacade.findClass($memberType, $global))
+    #if ($member.primitive)
+        $member.name = in.read("$member.name").read${StringUtil.capitalizeWithJavaBeanConvention($memberType)}();
+    #else
+        $member.name = in.read("$member.name").object($member.name, ${memberType}.class);
+    #end
+#end
+}
+----
+
 ===  Platform support
 
 Chronicle Wire supports `Java 8`, `Java 11` and `C++`.
