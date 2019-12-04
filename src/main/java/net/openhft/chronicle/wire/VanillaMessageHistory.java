@@ -29,7 +29,7 @@ import java.util.function.Supplier;
  * Created by Peter Lawrey on 27/03/16.
  */
 @SuppressWarnings("rawtypes")
-public class VanillaMessageHistory extends AbstractMarshallable implements MessageHistory {
+public class VanillaMessageHistory extends BytesInBinaryMarshallable implements MessageHistory {
     public static final int MESSAGE_HISTORY_LENGTH = 20;
     private static final ThreadLocal<MessageHistory> THREAD_LOCAL =
             ThreadLocal.withInitial((Supplier<MessageHistory>) () -> {

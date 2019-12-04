@@ -2,7 +2,7 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 
-public class MethodWireKey extends AbstractMarshallable implements WireKey {
+public class MethodWireKey extends BytesInBinaryMarshallable implements WireKey {
     private final String name;
     private final int code;
 
