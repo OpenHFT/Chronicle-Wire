@@ -29,10 +29,14 @@ public class MicroTimestampLongConverter implements LongConverter {
 
             return time;
         } catch (DateTimeParseException dtpe) {
-            long number = Long.parseLong(text.toString());
-            if (number < 31e12) // 1970/12/25
-                return number * 1000; // milli-seconds.
-            return number;
+            try {
+                long number = Long.parseLong(text.toString());
+                if (number < 31e12) // 1970/12/25
+                    return number * 1000; // milli-seconds.
+                return number;
+            } catch (NumberFormatException e) {
+                throw dtpe;
+            }
         }
     }
 
