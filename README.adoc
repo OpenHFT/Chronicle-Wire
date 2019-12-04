@@ -699,9 +699,9 @@ private static final int MASHALLABLE_VERSION = 1;
 
 @Override public void writeMarshallable(net.openhft.chronicle.bytes.BytesOut out) {
 #if($class0.superName != "BytesInBinaryMarshallable")
-   super.writeMarshallable(out); //
+   super.writeMarshallable(out);
 #end
-  out.writeStopBit(MASHALLABLE_VERSION);
+   out.writeStopBit(MASHALLABLE_VERSION);
 #foreach( $member in $members )
    #set($memberType = $member.type.split("<").get(0))
    #set($type = $javaPsiFacade.findClass($memberType, $global))
@@ -733,6 +733,52 @@ private static final int MASHALLABLE_VERSION = 1;
    }
 }
 ----
+
+[source]
+.BytesMarshallable
+----
+#set($javaPsiFacade = $JavaPsiFacade.getInstance($project))
+#set($global = $GlobalSearchScope.allScope($project))
+
+private static final int MASHALLABLE_VERSION = 1;
+
+@Override public void writeMarshallable(net.openhft.chronicle.bytes.BytesOut out) {
+#if($class0.hasSuper)
+   super.writeMarshallable(out); // <1>
+#end
+  out.writeStopBit(MASHALLABLE_VERSION);
+#foreach( $member in $members )
+   #set($memberType = $member.type.split("<").get(0))
+   #set($type = $javaPsiFacade.findClass($memberType, $global))
+   #if ($member.primitive)
+       out.write${StringUtil.capitalizeWithJavaBeanConvention($memberType)}($member.name);
+   #else
+       out.writeObject(${memberType}.class, $member.name);
+   #end
+#end
+}
+
+@Override public void readMarshallable(net.openhft.chronicle.bytes.BytesIn in) {
+#if($class0.hasSuper)
+   super.readMarshallable(in);
+#end
+   int version = (int) in.readStopBit();
+   if (version == MASHALLABLE_VERSION) {
+#foreach( $member in $members )
+   #set($memberType = $member.type.split("<").get(0))
+   #set($type = $javaPsiFacade.findClass($memberType, $global))
+   #if ($member.primitive)
+       $member.name = in.read${StringUtil.capitalizeWithJavaBeanConvention($memberType)}();
+   #else
+       $member.name = (${memberType})in.readObject(${memberType}.class);
+   #end
+#end
+   } else {
+       throw new IllegalStateException("Unknown version " + version);
+   }
+}
+----
+<1> You will have to remove this line if the class extends `AbstractBytesMarshallable`
 
 ===  Platform support
 
