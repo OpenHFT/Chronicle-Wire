@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 
@@ -16,16 +17,23 @@ public class MicroTimestampLongConverter implements LongConverter {
 
     @Override
     public long parse(CharSequence text) {
-        TemporalAccessor parse = dtf.parse(text);
-        long time = parse.getLong(ChronoField.EPOCH_DAY) * 86400_000_000L;
-        if (parse.isSupported(ChronoField.MICRO_OF_DAY))
-            time += parse.getLong(ChronoField.MICRO_OF_DAY);
-        else if (parse.isSupported(ChronoField.MILLI_OF_DAY))
-            time += parse.getLong(ChronoField.MILLI_OF_DAY) * 1_000L;
-        else if (parse.isSupported(ChronoField.SECOND_OF_DAY))
-            time += parse.getLong(ChronoField.SECOND_OF_DAY) * 1_000_000L;
+        try {
+            TemporalAccessor parse = dtf.parse(text);
+            long time = parse.getLong(ChronoField.EPOCH_DAY) * 86400_000_000L;
+            if (parse.isSupported(ChronoField.MICRO_OF_DAY))
+                time += parse.getLong(ChronoField.MICRO_OF_DAY);
+            else if (parse.isSupported(ChronoField.MILLI_OF_DAY))
+                time += parse.getLong(ChronoField.MILLI_OF_DAY) * 1_000L;
+            else if (parse.isSupported(ChronoField.SECOND_OF_DAY))
+                time += parse.getLong(ChronoField.SECOND_OF_DAY) * 1_000_000L;
 
-        return time;
+            return time;
+        } catch (DateTimeParseException dtpe) {
+            long number = Long.parseLong(text.toString());
+            if (number < 31e12) // 1970/12/25
+                return number * 1000; // milli-seconds.
+            return number;
+        }
     }
 
     @Override
