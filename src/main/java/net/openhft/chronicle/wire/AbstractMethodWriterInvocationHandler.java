@@ -92,7 +92,8 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
         Bytes<?> bytes = wire.bytes();
         if (bytes.retainsComments())
             bytes.comment(methodName);
-        ValueOut valueOut = useMethodIds && phsw.methodId >= 0
+        boolean useMethodId = useMethodIds && phsw.methodId >= 0 && wire.getValueOut().isBinary();
+        ValueOut valueOut = useMethodId
                 ? wire.writeEventId((int) phsw.methodId)
                 : wire.writeEventName(methodName);
         switch (args.length - oneParam) {
