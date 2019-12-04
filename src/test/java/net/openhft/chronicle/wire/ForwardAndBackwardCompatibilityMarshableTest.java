@@ -132,7 +132,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
         BytesUtil.checkRegisteredBytes();
     }
 
-    public static class DTO1 extends AbstractMarshallable implements Demarshallable {
+    public static class DTO1 extends SelfDescribingMarshallable implements Demarshallable {
 
         int one;
 
@@ -160,7 +160,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
         }
     }
 
-    public static class DTO2 extends AbstractMarshallable implements Demarshallable {
+    public static class DTO2 extends SelfDescribingMarshallable implements Demarshallable {
 
         final StringBuilder three = new StringBuilder();
         int one;

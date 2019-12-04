@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.wire.marshallable;
 
-import net.openhft.chronicle.wire.AbstractMarshallable;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -50,7 +50,7 @@ public class CompareNaNTest {
         assertEquals(a, b);
     }
 
-    static class PrimDTO extends AbstractMarshallable {
+    static class PrimDTO extends SelfDescribingMarshallable {
         double d;
         float f;
 
@@ -60,7 +60,7 @@ public class CompareNaNTest {
         }
     }
 
-    static class WrapDTO extends AbstractMarshallable {
+    static class WrapDTO extends SelfDescribingMarshallable {
         Double d;
         Float f;
 
@@ -70,7 +70,7 @@ public class CompareNaNTest {
         }
     }
 
-    static class ObjectWrapDTO extends AbstractMarshallable {
+    static class ObjectWrapDTO extends SelfDescribingMarshallable {
         Object d;
         Object f;
 

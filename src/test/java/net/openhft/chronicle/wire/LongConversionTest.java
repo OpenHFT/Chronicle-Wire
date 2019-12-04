@@ -50,7 +50,7 @@ public class LongConversionTest {
         LongConversionTest.WriteWithLong to(@LongConversion(HexadecimalLongConverter.class) int x);
     }
 
-    static class LongHolder extends AbstractMarshallable {
+    static class LongHolder extends SelfDescribingMarshallable {
         @LongConversion(UnsignedLongConverter.class)
         long unsigned;
         @LongConversion(HexadecimalLongConverter.class)

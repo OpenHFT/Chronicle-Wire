@@ -274,7 +274,7 @@ public class WireTests {
         BytesUtil.checkRegisteredBytes();
     }
 
-    static class TestClass extends AbstractMarshallable {
+    static class TestClass extends SelfDescribingMarshallable {
 
         Class o;
 

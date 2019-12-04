@@ -1,7 +1,7 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.wire.AbstractMarshallable;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireIn;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-class ThreeSequence extends AbstractMarshallable {
+class ThreeSequence extends SelfDescribingMarshallable {
     @NotNull
     transient List<Rung> aBuffer = new ArrayList<>();
     @NotNull

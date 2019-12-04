@@ -68,7 +68,7 @@ public class WireTextBugTest {
         BytesUtil.checkRegisteredBytes();
     }
 
-    static class Bug extends AbstractMarshallable {
+    static class Bug extends SelfDescribingMarshallable {
         private String clOrdID;
 
         public String getClOrdID() {

@@ -29,7 +29,7 @@ public final class BytesMarshallableCompatibilityTest {
         assertThat(copy.truth, is(container.truth));
     }
 
-    private static final class Container extends AbstractMarshallable {
+    private static final class Container extends BytesInBinaryMarshallable {
         private int number;
         private String label;
         private Boolean truth;

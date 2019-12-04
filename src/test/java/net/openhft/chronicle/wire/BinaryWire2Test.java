@@ -792,7 +792,7 @@ public class BinaryWire2Test {
         assertEquals("hello world", s);
     }
 
-    static class BytesHolder extends AbstractMarshallable {
+    static class BytesHolder extends SelfDescribingMarshallable {
         final Bytes bytes = Bytes.elasticHeapByteBuffer(64);
 
         @Override

@@ -16,25 +16,12 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.BytesMarshallable;
-
-/*
+/**
  * Created by Peter Lawrey on 16/03/16.
+ *
+ * @deprecated use BytesInBinaryMarshallable
  */
-public abstract class AbstractMarshallable implements Marshallable, BytesMarshallable {
-    @Override
-    public boolean equals(Object o) {
-        return Marshallable.$equals(this, o);
-    }
-
-    @Override
-    public int hashCode() {
-        return Marshallable.$hashCode(this);
-    }
-
-    @Override
-    public String toString() {
-        return Marshallable.$toString(this);
-    }
+@Deprecated
+public abstract class AbstractMarshallable extends AbstractCommonMarshallable {
 
 }

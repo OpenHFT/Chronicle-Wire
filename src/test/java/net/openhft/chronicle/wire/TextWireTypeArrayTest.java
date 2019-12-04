@@ -34,7 +34,7 @@ public class TextWireTypeArrayTest {
         textWire.getValueIn().typedMarshallable();
     }
 
-    static class Person extends AbstractMarshallable {
+    static class Person extends SelfDescribingMarshallable {
         Class<?>[] classes = {Object.class, Object.class};
     }
 }

@@ -30,7 +30,7 @@ public class WiresFromFileTest {
         assertEquals("[EU, UY, AU]", symbols.toString());
     }
 
-    static class MDU extends AbstractMarshallable {
+    static class MDU extends SelfDescribingMarshallable {
         String symbol;
     }
 }

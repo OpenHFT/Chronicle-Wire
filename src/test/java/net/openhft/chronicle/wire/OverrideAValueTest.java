@@ -54,21 +54,21 @@ public class OverrideAValueTest {
                 "}\n", ph.toString());
     }
 
-    static class NumberHolder extends AbstractMarshallable {
+    static class NumberHolder extends SelfDescribingMarshallable {
         @SuppressWarnings("UnnecessaryBoxing")
         public static final Integer ONE = new Integer(1);
         @NotNull
         Integer num = ONE;
     }
 
-    static class ObjectHolder extends AbstractMarshallable {
+    static class ObjectHolder extends SelfDescribingMarshallable {
         @SuppressWarnings("UnnecessaryBoxing")
         public static final NumberHolder NH = new NumberHolder();
         @NotNull
         NumberHolder nh = NH;
     }
 
-    static class ParentClass extends AbstractMarshallable {
+    static class ParentClass extends SelfDescribingMarshallable {
         @NotNull
         String name = "name";
     }
@@ -77,7 +77,7 @@ public class OverrideAValueTest {
         double value = 1.28;
     }
 
-    static class ParentHolder extends AbstractMarshallable {
+    static class ParentHolder extends SelfDescribingMarshallable {
         final ParentClass object = new ParentClass();
     }
 }

@@ -5,6 +5,7 @@ import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -139,7 +140,7 @@ public class VanillaMethodWriterBuilderTest {
         void method4(MWB2 mwb);
     }
 
-    static class MWB extends AbstractBytesMarshallable {
+    static class MWB extends BytesInBinaryMarshallable {
         String hello;
         long value;
         double money;
@@ -149,9 +150,15 @@ public class VanillaMethodWriterBuilderTest {
             this.value = value;
             this.money = money;
         }
+
+        @Override
+        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
+            super.readMarshallable(wire);
+        }
+
     }
 
-    static class MWB2 extends AbstractMarshallable {
+    static class MWB2 extends SelfDescribingMarshallable {
         String hello;
         long value;
         double money;

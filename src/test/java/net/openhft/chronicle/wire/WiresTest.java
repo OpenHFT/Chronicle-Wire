@@ -158,7 +158,7 @@ public class WiresTest {
         Bytes bytesField = Bytes.elasticHeapByteBuffer(64);
     }
 
-    private static final class BytesContainerMarshallable extends AbstractMarshallable {
+    private static final class BytesContainerMarshallable extends SelfDescribingMarshallable {
         Bytes bytesField = Bytes.elasticHeapByteBuffer(64);
     }
 

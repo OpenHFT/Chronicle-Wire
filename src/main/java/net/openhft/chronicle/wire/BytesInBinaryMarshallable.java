@@ -16,23 +16,22 @@
 
 package net.openhft.chronicle.wire;
 
-import java.io.Serializable;
+import net.openhft.chronicle.bytes.BytesIn;
+import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.core.io.IORuntimeException;
 
-/*
- * Created by Peter Lawrey on 27/08/15.
+/**
+ * Created by Peter Lawrey
+ * <p>
+ * This uses bytes marshallable, non self describing messages by default.
  */
-public class EndOfDayShort extends SelfDescribingMarshallable implements Serializable {
-    // Symbol,Company,Price,Change,ChangePercent,Day's Volume
-    public String name;
-    public double closingPrice, change, changePercent;
-    long daysVolume;
-
+public abstract class BytesInBinaryMarshallable extends AbstractCommonMarshallable {
     @Override
-    public void writeMarshallable(WireOut wire) {
-        wire.write(() -> "name").text(name)
-                .write(() -> "price").float64(closingPrice)
-                .write(() -> "change").float64(change)
-                .write(() -> "changePercent").float64(changePercent)
-                .write(() -> "daysVolume").int64(daysVolume);
+    public boolean usesSelfDescribingMessage() {
+        return false;
+    }
+
+    public void readMarshallable(BytesIn bytes) throws IORuntimeException {
+        BytesUtil.readMarshallable(this, bytes);
     }
 }

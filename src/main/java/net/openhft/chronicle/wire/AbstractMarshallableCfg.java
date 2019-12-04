@@ -17,13 +17,13 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
-import org.jetbrains.annotations.NotNull;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import org.jetbrains.annotations.NotNull;
 
 /*
  * Created by Peter Lawrey on 16/03/16.
  */
-public abstract class AbstractMarshallableCfg extends AbstractMarshallable {
+public abstract class AbstractMarshallableCfg extends SelfDescribingMarshallable {
 
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {

@@ -17,12 +17,12 @@
 
 package net.openhft.chronicle.wire.marshallable;
 
-import net.openhft.chronicle.wire.AbstractMarshallable;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
 /*
  * Created by Peter Lawrey on 07/05/16.
  */
-class AClass extends AbstractMarshallable {
+class AClass extends SelfDescribingMarshallable {
     int id;
     boolean flag;
     byte b;

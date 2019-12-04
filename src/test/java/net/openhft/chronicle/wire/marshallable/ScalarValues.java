@@ -17,7 +17,7 @@
 
 package net.openhft.chronicle.wire.marshallable;
 
-import net.openhft.chronicle.wire.AbstractMarshallable;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
 import java.io.File;
 import java.lang.annotation.RetentionPolicy;
@@ -30,7 +30,7 @@ import java.util.UUID;
  * Created by Peter Lawrey on 09/05/16.
  */
 @SuppressWarnings("rawtypes")
-public class ScalarValues extends AbstractMarshallable {
+public class ScalarValues extends SelfDescribingMarshallable {
     boolean flag;
     byte b;
     short s;

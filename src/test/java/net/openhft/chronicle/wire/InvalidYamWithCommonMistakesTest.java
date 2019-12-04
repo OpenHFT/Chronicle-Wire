@@ -151,7 +151,7 @@ public class InvalidYamWithCommonMistakesTest {
         Assert.assertEquals(expected, actual);
     }
 
-    public static class Dto extends AbstractMarshallable {
+    public static class Dto extends SelfDescribingMarshallable {
         String y;
         DtoB x;
 
@@ -169,7 +169,7 @@ public class InvalidYamWithCommonMistakesTest {
         }
     }
 
-    public static class DtoB extends AbstractMarshallable {
+    public static class DtoB extends SelfDescribingMarshallable {
         String y;
 
         public DtoB(final String y) {

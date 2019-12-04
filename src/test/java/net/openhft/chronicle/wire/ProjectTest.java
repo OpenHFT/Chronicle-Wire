@@ -86,7 +86,7 @@ public class ProjectTest {
     }
 
     @SuppressWarnings("rawtypes")
-    static class Dto1 extends AbstractMarshallable {
+    static class Dto1 extends SelfDescribingMarshallable {
         @NotNull
         Map m = new HashMap<>();
         String anotherField;
@@ -94,14 +94,14 @@ public class ProjectTest {
     }
 
     @SuppressWarnings("rawtypes")
-    static class Dto2 extends AbstractMarshallable {
+    static class Dto2 extends SelfDescribingMarshallable {
         long someValue;
         String anotherField;
         @NotNull
         Map m = new HashMap<>();
     }
 
-    public static class Inner extends AbstractMarshallable {
+    public static class Inner extends SelfDescribingMarshallable {
         private String name;
 
         public String name() {
@@ -115,7 +115,7 @@ public class ProjectTest {
         }
     }
 
-    public static class Outer extends AbstractMarshallable {
+    public static class Outer extends SelfDescribingMarshallable {
         private Inner inner;
 
         public Inner inner() {

@@ -89,17 +89,17 @@ public class EnumWireTest {
         }
     }
 
-    static class Person1 extends AbstractMarshallable {
+    static class Person1 extends SelfDescribingMarshallable {
         @NotNull
         private Marsh field = Marsh.MARSH;
     }
 
-    static class Person2 extends AbstractMarshallable {
+    static class Person2 extends SelfDescribingMarshallable {
         @NotNull
         private NoMarsh field = NoMarsh.NO_MARSH;
     }
 
-    static class Person3 extends AbstractMarshallable {
+    static class Person3 extends SelfDescribingMarshallable {
         @NotNull
         private MarshAndResolve field = MarshAndResolve.MARSH_AND_RESOLVE;
     }

@@ -17,12 +17,12 @@
 
 package net.openhft.chronicle.wire.marshallable;
 
-import net.openhft.chronicle.wire.AbstractBytesMarshallable;
+import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 
 /*
  * Created by Peter Lawrey on 07/05/16.
  */
-class BClass extends AbstractBytesMarshallable {
+class BClass extends BytesInBinaryMarshallable {
     int id;
     boolean flag;
     byte b;

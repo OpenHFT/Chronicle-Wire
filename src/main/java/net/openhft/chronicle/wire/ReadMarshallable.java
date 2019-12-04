@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.CommonMarshallable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
  * For objects which must deserialize final field see Demarshallable
  */
 @FunctionalInterface
-public interface ReadMarshallable {
+public interface ReadMarshallable extends CommonMarshallable {
     ReadMarshallable DISCARD = w -> {
     };
 
@@ -39,5 +40,10 @@ public interface ReadMarshallable {
 
     default void unexpectedField(Object event, ValueIn valueIn) {
         valueIn.skipValue();
+    }
+
+    @Override
+    default boolean usesSelfDescribingMessage() {
+        return true;
     }
 }

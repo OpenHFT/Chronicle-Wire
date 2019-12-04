@@ -85,7 +85,7 @@ public class CopyTest {
     }
 
     @SuppressWarnings("unused")
-    private static class AClass extends AbstractMarshallable {
+    private static class AClass extends SelfDescribingMarshallable {
         Map<CcyPair, String> map;
         String[] array;
         int intValue;

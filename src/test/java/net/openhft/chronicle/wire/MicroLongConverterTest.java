@@ -15,7 +15,7 @@ public class MicroLongConverterTest {
         assertEquals(in, data.toString());
     }
 
-    static class Data extends AbstractMarshallable {
+    static class Data extends SelfDescribingMarshallable {
         @LongConversion(MicroTimestampLongConverter.class)
         long time;
         @LongConversion(MicroDurationLongConverter.class)

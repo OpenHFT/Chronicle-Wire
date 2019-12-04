@@ -147,7 +147,7 @@ public class MethodWriterTest {
         void microTS(MicroTS microTS);
     }
 
-    static class MicroTS extends AbstractBytesMarshallable {
+    static class MicroTS extends SelfDescribingMarshallable {
         @LongConversion(MicroTimestampLongConverter.class)
         long timeUS;
     }

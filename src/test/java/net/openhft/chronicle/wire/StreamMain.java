@@ -50,7 +50,7 @@ public class StreamMain {
     }
 }
 
-class FileFormat extends AbstractMarshallable {
+class FileFormat extends SelfDescribingMarshallable {
     int version = 100;
     ZonedDateTime createdTime = ZonedDateTime.now();
     String creator = System.getProperty("user.name");

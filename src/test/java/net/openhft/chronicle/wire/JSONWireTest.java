@@ -191,7 +191,7 @@ public class JSONWireTest {
         BytesUtil.checkRegisteredBytes();
     }
 
-    private static class Item extends AbstractMarshallable {
+    private static class Item extends SelfDescribingMarshallable {
         String name;
         long number1;
         double number2;

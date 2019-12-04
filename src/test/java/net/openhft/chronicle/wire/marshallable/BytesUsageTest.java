@@ -2,7 +2,7 @@ package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.wire.AbstractMarshallable;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
@@ -27,7 +27,7 @@ public class BytesUsageTest {
     }
 
     @SuppressWarnings("rawtypes")
-    static class BytesWrapper extends AbstractMarshallable {
+    static class BytesWrapper extends SelfDescribingMarshallable {
         Bytes clOrdId = Bytes.allocateElasticDirect();
 
         public Bytes clOrdId() {

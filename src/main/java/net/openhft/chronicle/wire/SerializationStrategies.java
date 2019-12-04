@@ -18,6 +18,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.CommonMarshallable;
+import net.openhft.chronicle.bytes.ReadBytesMarshallable;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -41,7 +43,30 @@ public enum SerializationStrategies implements SerializationStrategy {
         @NotNull
         @Override
         public Object readUsing(@NotNull Object o, @NotNull ValueIn in) {
-            ((ReadMarshallable) o).readMarshallable(in.wireIn());
+            if (in.isBinary() && !((CommonMarshallable) o).usesSelfDescribingMessage()) {
+                ((ReadBytesMarshallable) o).readMarshallable(in.wireIn().bytes());
+            } else {
+                ((ReadMarshallable) o).readMarshallable(in.wireIn());
+            }
+            return o;
+        }
+
+        @NotNull
+        @Override
+        public Class type() {
+            return Marshallable.class;
+        }
+
+        @Nullable
+        @Override
+        public Object newInstance(@NotNull Class type) {
+            return type.isInterface() || Modifier.isAbstract(type.getModifiers()) ? null : super.newInstance(type);
+        }
+    },
+    BYTES_MARSHALLABLE {
+        @NotNull
+        @Override
+        public Object readUsing(@NotNull Object o, @NotNull ValueIn in) {
             return o;
         }
 

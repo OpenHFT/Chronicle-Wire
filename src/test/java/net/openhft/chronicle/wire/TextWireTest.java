@@ -1827,13 +1827,13 @@ public class TextWireTest {
         field1, field2, field3
     }
 
-    static class FieldWithComment extends AbstractMarshallable {
+    static class FieldWithComment extends SelfDescribingMarshallable {
         @Comment("a comment where the value=%s")
         String field;
         //    String field2;
     }
 
-    static class FieldWithComment2 extends AbstractMarshallable {
+    static class FieldWithComment2 extends SelfDescribingMarshallable {
         @Comment("a comment where the value=%s")
         String field;
         String field2;
@@ -1852,7 +1852,7 @@ public class TextWireTest {
         }
     }
 
-    static class ABCD extends AbstractMarshallable {
+    static class ABCD extends SelfDescribingMarshallable {
         Bytes A = Bytes.allocateElasticDirect();
         Bytes B = Bytes.allocateDirect(64);
         Bytes C = Bytes.elasticByteBuffer();
@@ -1866,18 +1866,18 @@ public class TextWireTest {
         }
     }
 
-    static class ABC extends AbstractMarshallable {
+    static class ABC extends SelfDescribingMarshallable {
         StringBuilder A = new StringBuilder();
         StringBuilder B = new StringBuilder();
         StringBuilder C = new StringBuilder();
     }
 
-    static class NestedA extends AbstractMarshallable {
+    static class NestedA extends SelfDescribingMarshallable {
         NestedB b;
         long value;
     }
 
-    static class NestedB extends AbstractMarshallable {
+    static class NestedB extends SelfDescribingMarshallable {
         double field1;
     }
 
@@ -1885,7 +1885,7 @@ public class TextWireTest {
         String[] strings;
     }
 
-    static class BytesWrapper extends AbstractMarshallable {
+    static class BytesWrapper extends SelfDescribingMarshallable {
         @NotNull
         Bytes bytes = allocateElasticDirect();
 
@@ -1895,7 +1895,7 @@ public class TextWireTest {
         }
     }
 
-    static class DoubleWrapper extends AbstractMarshallable {
+    static class DoubleWrapper extends SelfDescribingMarshallable {
         double d;
         double n;
 
@@ -1905,7 +1905,7 @@ public class TextWireTest {
         }
     }
 
-    static class NestedList extends AbstractMarshallable {
+    static class NestedList extends SelfDescribingMarshallable {
         String name;
         List<NestedItem> listA = new ArrayList<>();
         List<NestedItem> listB = new ArrayList<>();
@@ -1922,16 +1922,16 @@ public class TextWireTest {
         }
     }
 
-    static class NestedItem extends AbstractMarshallable {
+    static class NestedItem extends SelfDescribingMarshallable {
         int a;
         double b;
     }
 
-    static class NestedWithEnumSet extends AbstractMarshallable {
+    static class NestedWithEnumSet extends SelfDescribingMarshallable {
         List<WithEnumSet> list = new ArrayList<>();
     }
 
-    static class WithEnumSet extends AbstractMarshallable {
+    static class WithEnumSet extends SelfDescribingMarshallable {
         String name;
         Set<TimeUnit> timeUnits = EnumSet.noneOf(TimeUnit.class);
 
@@ -1954,7 +1954,7 @@ public class TextWireTest {
         }
     }
 
-    static class MyDto extends AbstractMarshallable {
+    static class MyDto extends SelfDescribingMarshallable {
         List<String> strings = new ArrayList<>();
 
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
@@ -1967,7 +1967,7 @@ public class TextWireTest {
         }
     }
 
-    static class DtoWithBytesField extends AbstractMarshallable {
+    static class DtoWithBytesField extends SelfDescribingMarshallable {
         private BytesStore bytes;
         private long another;
 
@@ -1986,7 +1986,7 @@ public class TextWireTest {
         }
     }
 
-    static class TwoLongs extends AbstractMarshallable {
+    static class TwoLongs extends SelfDescribingMarshallable {
 
         @LongConversion(HexaDecimalConverter.class)
         long hexadecimal;

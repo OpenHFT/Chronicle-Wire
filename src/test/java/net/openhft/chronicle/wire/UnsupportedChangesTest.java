@@ -75,26 +75,26 @@ public class UnsupportedChangesTest {
         assertNotNull(wrapper);
     }
 
-    static class Wrapper extends AbstractMarshallable {
+    static class Wrapper extends SelfDescribingMarshallable {
         double pnl;
         double second;
     }
 
-    static class IntWrapper extends AbstractMarshallable {
+    static class IntWrapper extends SelfDescribingMarshallable {
         long pnl;
         long second;
     }
 
-    static class BooleanWrapper extends AbstractMarshallable {
+    static class BooleanWrapper extends SelfDescribingMarshallable {
         boolean flag;
         long second;
     }
 
-    static class Nested extends AbstractMarshallable {
+    static class Nested extends SelfDescribingMarshallable {
         Inner inner;
     }
 
-    static class Inner extends AbstractMarshallable {
+    static class Inner extends SelfDescribingMarshallable {
         String value;
     }
 }

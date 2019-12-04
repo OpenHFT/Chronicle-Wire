@@ -30,14 +30,14 @@ public class OutOfOrderTest {
         assertEquals(expected, wire2.toString());
     }
 
-    static class OOOT extends AbstractMarshallable {
+    static class OOOT extends SelfDescribingMarshallable {
         int a;
         String b;
         List<OOOT2> records;
         int z;
     }
 
-    static class OOOT2 extends AbstractMarshallable {
+    static class OOOT2 extends SelfDescribingMarshallable {
         int id;
     }
 }

@@ -566,7 +566,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 The code for the class Data
 ```java
 */
-class Data extends AbstractMarshallable {
+class Data extends SelfDescribingMarshallable {
     String message;
     long number;
     TimeUnit timeUnit;

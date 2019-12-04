@@ -1,6 +1,6 @@
 package net.openhft.chronicle.wire.marshallable;
 
-import net.openhft.chronicle.wire.AbstractMarshallable;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireOut;
 import net.openhft.chronicle.wire.Wires;
 import org.jetbrains.annotations.NotNull;
@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 /*
  * Created by Peter Lawrey on 16/05/2017.
  */
-class Rung extends AbstractMarshallable {
+class Rung extends SelfDescribingMarshallable {
     double price, qty;
     boolean delta;
     String notSet;

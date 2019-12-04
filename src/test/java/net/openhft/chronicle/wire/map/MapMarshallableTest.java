@@ -1,6 +1,6 @@
 package net.openhft.chronicle.wire.map;
 
-import net.openhft.chronicle.wire.AbstractMarshallable;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wires;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -33,7 +33,7 @@ public class MapMarshallableTest {
         assertEquals("{one=10, three=30, two=20}", map3.toString());
     }
 
-    private static class MyDto extends AbstractMarshallable {
+    private static class MyDto extends SelfDescribingMarshallable {
         int one;
         int two;
         int three;

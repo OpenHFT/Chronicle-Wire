@@ -45,7 +45,7 @@ public class TextWithArraysTest {
 
     }
 
-    static class WithArrays extends AbstractMarshallable {
+    static class WithArrays extends SelfDescribingMarshallable {
         boolean[] booleans;
         byte[] bytes;
         short[] shorts;

@@ -92,7 +92,7 @@ public class ReadmePojoTest {
         assertEquals(map, map2);
     }
 
-    static class MyPojo extends AbstractMarshallable {
+    static class MyPojo extends SelfDescribingMarshallable {
         String text;
         int num;
         double factor;
@@ -104,7 +104,7 @@ public class ReadmePojoTest {
         }
     }
 
-    static class MyPojos extends AbstractMarshallable {
+    static class MyPojos extends SelfDescribingMarshallable {
         String name;
         @NotNull
         List<MyPojo> myPojos = new ArrayList<>();

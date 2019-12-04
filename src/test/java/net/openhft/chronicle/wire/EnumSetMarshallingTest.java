@@ -130,12 +130,12 @@ public class EnumSetMarshallingTest {
         BytesUtil.checkRegisteredBytes();
     }
 
-    private static final class Container extends AbstractMarshallable {
+    private static final class Container extends SelfDescribingMarshallable {
         private List<Foo> f1 = new ArrayList<>(Arrays.asList(new Foo(EnumSet.allOf(Thread.State.class))));
         private List<Foo> f2 = new ArrayList<>(Arrays.asList(new Foo(EnumSet.noneOf(Thread.State.class))));
     }
 
-    private static final class Foo extends AbstractMarshallable {
+    private static final class Foo extends SelfDescribingMarshallable {
         private EnumSet<Thread.State> f = EnumSet.noneOf(Thread.State.class);
 
         private Foo(final EnumSet<Thread.State> membership) {

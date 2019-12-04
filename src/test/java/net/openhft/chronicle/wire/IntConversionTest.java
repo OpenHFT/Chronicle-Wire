@@ -67,7 +67,7 @@ public class IntConversionTest {
         WriteWithInt to(@IntConversion(HexadecimalIntConverter.class) int x);
     }
 
-    static class IntHolder extends AbstractMarshallable {
+    static class IntHolder extends SelfDescribingMarshallable {
         @IntConversion(HexadecimalIntConverter.class)
         int number;
 
@@ -85,7 +85,7 @@ public class IntConversionTest {
         }
     }
 
-    static class UnsignedHolder extends AbstractMarshallable {
+    static class UnsignedHolder extends SelfDescribingMarshallable {
         @IntConversion(UnsignedIntConverter.class)
         public byte u8;
         @IntConversion(UnsignedIntConverter.class)

@@ -41,7 +41,7 @@ public class TextWireAgitatorTest {
         assertNotNull(mf);
     }
 
-    static class MyFlagged extends AbstractMarshallable {
+    static class MyFlagged extends SelfDescribingMarshallable {
         boolean flag;
     }
 }

@@ -135,7 +135,7 @@ public class ForwardAndBackwardCompatibilityTest {
         }
     }
 
-    public static class DTO1 extends AbstractMarshallable implements Demarshallable {
+    public static class DTO1 extends SelfDescribingMarshallable implements Demarshallable {
 
         int one;
 
@@ -159,7 +159,7 @@ public class ForwardAndBackwardCompatibilityTest {
         }
     }
 
-    public static class DTO2 extends AbstractMarshallable implements Demarshallable {
+    public static class DTO2 extends SelfDescribingMarshallable implements Demarshallable {
         Object three;
         int one;
         int two;

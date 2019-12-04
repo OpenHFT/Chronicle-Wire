@@ -72,7 +72,7 @@ public class InnerMapTest {
         BytesUtil.checkRegisteredBytes();
     }
 
-    static class MyMarshable extends AbstractMarshallable implements Demarshallable {
+    static class MyMarshable extends SelfDescribingMarshallable implements Demarshallable {
         String name;
         Map<String, Double> commission;
         Marshallable nested;
@@ -101,7 +101,7 @@ public class InnerMapTest {
         }
     }
 
-    static class MyNested extends AbstractMarshallable {
+    static class MyNested extends SelfDescribingMarshallable {
         String value;
 
         public MyNested(String value) {

@@ -92,7 +92,7 @@ public class SequenceTest {
         BytesUtil.checkRegisteredBytes();
     }
 
-    static class My extends AbstractMarshallable {
+    static class My extends SelfDescribingMarshallable {
         List<CharSequence> stuff = new ArrayList<>();
         transient List<CharSequence> stuffBuffer = new ArrayList<>();
 

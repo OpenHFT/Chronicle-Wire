@@ -22,7 +22,7 @@ public class FloatDtoTest {
         w.read().marshallable(object1);
     }
 
-    private static class Key extends AbstractMarshallable implements
+    private static class Key extends SelfDescribingMarshallable implements
             KeyedMarshallable {
         @SuppressWarnings("unused")
         int uiid;

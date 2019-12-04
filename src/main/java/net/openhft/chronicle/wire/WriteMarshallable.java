@@ -15,10 +15,11 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.CommonMarshallable;
 import org.jetbrains.annotations.NotNull;
 
 @FunctionalInterface
-public interface WriteMarshallable extends WriteValue {
+public interface WriteMarshallable extends WriteValue, CommonMarshallable {
     WriteMarshallable EMPTY = wire -> {
         // nothing
     };
@@ -33,5 +34,10 @@ public interface WriteMarshallable extends WriteValue {
     @Override
     default void writeValue(@NotNull ValueOut out) {
         out.marshallable(this);
+    }
+
+    @Override
+    default boolean usesSelfDescribingMessage() {
+        return true;
     }
 }

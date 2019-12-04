@@ -117,7 +117,7 @@ public class DefaultMarshallerTest {
         THREE;
     }
 
-    static class DMOuterClass extends AbstractMarshallable {
+    static class DMOuterClass extends SelfDescribingMarshallable {
         String text;
         boolean b;
         byte bb;
@@ -152,7 +152,7 @@ public class DefaultMarshallerTest {
         }
     }
 
-    static class DMNestedClass extends AbstractMarshallable {
+    static class DMNestedClass extends SelfDescribingMarshallable {
         String str;
         int num;
 
@@ -162,7 +162,7 @@ public class DefaultMarshallerTest {
         }
     }
 
-    static class DMOuterClassWithEmbeddedArray extends AbstractMarshallable {
+    static class DMOuterClassWithEmbeddedArray extends SelfDescribingMarshallable {
         String str;
         NestedEnum[] enums;
 

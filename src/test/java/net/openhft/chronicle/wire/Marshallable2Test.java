@@ -57,7 +57,7 @@ public class Marshallable2Test {
     }
 
     @SuppressWarnings("unused")
-    private static class Outer extends AbstractMarshallable {
+    private static class Outer extends SelfDescribingMarshallable {
         String name;
         Inner1 inner1;
         Inner2 inner2;
@@ -67,9 +67,9 @@ public class Marshallable2Test {
         }
     }
 
-    private static class Inner1 extends AbstractMarshallable {
+    private static class Inner1 extends SelfDescribingMarshallable {
     }
 
-    private static class Inner2 extends AbstractMarshallable {
+    private static class Inner2 extends SelfDescribingMarshallable {
     }
 }

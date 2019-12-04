@@ -42,7 +42,7 @@ public class BinaryInTextTest {
     }
 
     @SuppressWarnings("rawtypes")
-    static class BIT extends AbstractMarshallable {
+    static class BIT extends SelfDescribingMarshallable {
         Bytes b;
         BytesStore c;
     }

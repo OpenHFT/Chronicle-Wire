@@ -6,7 +6,7 @@ import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import net.openhft.chronicle.wire.AbstractBytesMarshallable;
+import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import org.junit.Test;
@@ -132,7 +132,7 @@ public class BytesMarshallableTest {
                 "}\n", sdto2.toString());
     }
 
-    static class PrimDto extends AbstractBytesMarshallable {
+    static class PrimDto extends BytesInBinaryMarshallable {
         boolean flag;
         byte s8;
         char ch;
@@ -189,7 +189,7 @@ public class BytesMarshallableTest {
         }
     }
 
-    static class ScalarDto extends AbstractBytesMarshallable {
+    static class ScalarDto extends BytesInBinaryMarshallable {
         String text;
         StringBuilder buffer;
         Bytes bytes;

@@ -254,7 +254,7 @@ public class NestedMapsTest {
         BytesUtil.checkRegisteredBytes();
     }
 
-    static class Mapped extends AbstractMarshallable {
+    static class Mapped extends SelfDescribingMarshallable {
         final Set<String> words = new LinkedHashSet<>();
         final List<Integer> numbers = new ArrayList<>();
         final Map<String, String> map1 = new LinkedHashMap<>();

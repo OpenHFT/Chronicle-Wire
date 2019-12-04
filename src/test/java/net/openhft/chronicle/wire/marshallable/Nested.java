@@ -17,7 +17,7 @@
 
 package net.openhft.chronicle.wire.marshallable;
 
-import net.openhft.chronicle.wire.AbstractMarshallable;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
 import java.util.List;
 import java.util.Map;
@@ -26,7 +26,7 @@ import java.util.Set;
 /*
  * Created by Peter Lawrey on 09/05/16.
  */
-public class Nested extends AbstractMarshallable {
+public class Nested extends SelfDescribingMarshallable {
     ScalarValues values;
     List<String> strings;
     Set<Integer> ints;

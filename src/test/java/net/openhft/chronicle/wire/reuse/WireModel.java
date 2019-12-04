@@ -21,16 +21,16 @@
  */
 package net.openhft.chronicle.wire.reuse;
 
-import org.jetbrains.annotations.NotNull;
-import net.openhft.chronicle.wire.AbstractMarshallable;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * @author gadei
  */
-public class WireModel extends AbstractMarshallable {
+public class WireModel extends SelfDescribingMarshallable {
     private long id;
     private int revision;
     @Nullable

@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 /*
  * Created by daniel on 08/04/15.
  */
-public class TestMarshallable extends AbstractMarshallable {
+public class TestMarshallable extends SelfDescribingMarshallable {
 
     @NotNull
     private StringBuilder name = new StringBuilder();

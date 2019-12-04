@@ -26,7 +26,7 @@ import java.util.List;
 /*
  * Created by peter.lawrey on 01/02/2016.
  */
-public class OuterClass extends AbstractMarshallable {
+public class OuterClass extends SelfDescribingMarshallable {
     final List<NestedClass> listAFree = new ArrayList<>();
     final List<NestedClass> listA = new ArrayList<>();
     final List<NestedClass> listBFree = new ArrayList<>();

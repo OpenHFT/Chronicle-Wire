@@ -138,7 +138,7 @@ public class UsingTestMarshallable {
         }
     }
 
-    static class MarshableFilter extends AbstractMarshallable {
+    static class MarshableFilter extends SelfDescribingMarshallable {
         @NotNull
         public final String columnName;
         @NotNull
@@ -150,7 +150,7 @@ public class UsingTestMarshallable {
         }
     }
 
-    static class MarshableOrderBy extends AbstractMarshallable {
+    static class MarshableOrderBy extends SelfDescribingMarshallable {
         @NotNull
         public final String column;
         public final boolean isAscending;
@@ -161,7 +161,7 @@ public class UsingTestMarshallable {
         }
     }
 
-    static class SortedFilter extends AbstractMarshallable {
+    static class SortedFilter extends SelfDescribingMarshallable {
         public long fromIndex;
         @NotNull
         public List<MarshableOrderBy> marshableOrderBy = new ArrayList<>();

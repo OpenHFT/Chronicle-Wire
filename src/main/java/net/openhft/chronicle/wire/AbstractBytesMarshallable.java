@@ -3,6 +3,10 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * @deprecated "Use BytesInBinaryMarshallable"
+ */
+@Deprecated
 public class AbstractBytesMarshallable extends AbstractMarshallable {
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {

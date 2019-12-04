@@ -1738,7 +1738,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             long position = bytes.writePosition();
             bytes.writeInt(0);
 
-            object.writeMarshallable(BinaryWire.this);
+            if (object.usesSelfDescribingMessage())
+                object.writeMarshallable(BinaryWire.this);
+            else
+                ((WriteBytesMarshallable) object).writeMarshallable(BinaryWire.this.bytes());
 
             long length = bytes.writePosition() - position - 4;
             if (length > Integer.MAX_VALUE && bytes instanceof HexDumpBytes)
@@ -3254,10 +3257,14 @@ public class BinaryWire extends AbstractWire implements Wire {
                 long limit2 = bytes.readPosition() + length;
                 bytes.readLimit(limit2);
                 try {
-                    if (overwrite)
-                        object.readMarshallable(BinaryWire.this);
-                    else
-                        Wires.readMarshallable(object, BinaryWire.this, false);
+                    if (object.usesSelfDescribingMessage()) {
+                        if (overwrite)
+                            object.readMarshallable(BinaryWire.this);
+                        else
+                            Wires.readMarshallable(object, BinaryWire.this, false);
+                    } else {
+                        ((ReadBytesMarshallable) object).readMarshallable(BinaryWire.this.bytes);
+                    }
 
                 } finally {
                     bytes.readLimit(limit);

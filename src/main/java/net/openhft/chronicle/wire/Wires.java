@@ -828,7 +828,8 @@ public enum Wires {
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
-            switch (method.getName()) {
+            String name = method.getName();
+            switch (name) {
                 case "hashCode":
                     if (args == null || args.length == 0) {
                         return (int) Maths.agitate(typeName.hashCode() * 1019L + fields.hashCode() * 10191L);
@@ -898,13 +899,17 @@ public enum Wires {
                         return fieldInfos;
                     }
                     break;
+                case "usesSelfDescribingMessage":
+                    return Boolean.TRUE;
             }
             if (args == null || args.length == 0) {
                 Class returnType = method.getReturnType();
-                return ObjectUtils.convertTo(returnType, fields.get(method.getName()));
+                if (fields.containsKey(name))
+                    return ObjectUtils.convertTo(returnType, fields.get(name));
+                return ObjectUtils.defaultValue(returnType);
             }
             if (args.length == 1) {
-                fields.put(method.getName(), args[0]);
+                fields.put(name, args[0]);
                 return proxy;
             }
             throw new UnsupportedOperationException("The class or alias " + typeName + " could not be found, so unable to call " + method);

@@ -2,12 +2,12 @@ package net.openhft.chronicle.wire.monitoring;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
-import net.openhft.chronicle.wire.AbstractMarshallable;
 import net.openhft.chronicle.wire.JSONWire;
 import net.openhft.chronicle.wire.LongConversion;
 import net.openhft.chronicle.wire.MicroTimestampLongConverter;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
-public class MonitorSample extends AbstractMarshallable {
+public class MonitorSample extends SelfDescribingMarshallable {
     // id for the stream
     String id;
     // timestamtp in microseconds

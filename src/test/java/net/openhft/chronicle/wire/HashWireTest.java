@@ -64,7 +64,7 @@ public class HashWireTest {
         A
     }
 
-    static class Field extends AbstractMarshallable implements Cloneable {
+    static class Field extends SelfDescribingMarshallable implements Cloneable {
         private final String name;
         private final Map<String, Required> required = new HashMap<>();
         private final List<EnumValue> values = new ArrayList<>();

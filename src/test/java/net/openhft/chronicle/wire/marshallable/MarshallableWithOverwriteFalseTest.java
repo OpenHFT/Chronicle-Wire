@@ -1,8 +1,8 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.wire.AbstractMarshallable;
 import net.openhft.chronicle.wire.Marshallable;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.Wires;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +32,7 @@ public class MarshallableWithOverwriteFalseTest {
         assert o.myDto.get("").strings.size() == 2;
     }
 
-    static class MyDto extends AbstractMarshallable {
+    static class MyDto extends SelfDescribingMarshallable {
         List<String> strings = new ArrayList<>();
 
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
@@ -45,7 +45,7 @@ public class MarshallableWithOverwriteFalseTest {
         }
     }
 
-    static class MyDto2 extends AbstractMarshallable {
+    static class MyDto2 extends SelfDescribingMarshallable {
         Map<String, MyDto> myDto = new TreeMap<String, MyDto>();
     }
 }

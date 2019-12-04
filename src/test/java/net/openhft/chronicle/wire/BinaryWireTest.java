@@ -897,7 +897,7 @@ public class BinaryWireTest {
         }
     }
 
-    private static class DTO extends AbstractMarshallable {
+    private static class DTO extends SelfDescribingMarshallable {
 
         String text;
 

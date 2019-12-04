@@ -17,7 +17,7 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 
-class MyTypes extends AbstractMarshallable {
+class MyTypes extends SelfDescribingMarshallable {
     final StringBuilder text = new StringBuilder();
     boolean b;
     short s;

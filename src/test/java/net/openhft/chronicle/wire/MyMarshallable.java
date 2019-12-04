@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 /*
  * Created by Peter Lawrey on 11/05/16.
  */
-class MyMarshallable extends AbstractMarshallable {
+class MyMarshallable extends SelfDescribingMarshallable {
 
     @Nullable
     String someData;

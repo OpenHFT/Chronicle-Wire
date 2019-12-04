@@ -333,15 +333,15 @@ public class VanillaMethodReaderTest {
         void method(MockDto dto);
     }
 
-    static class A extends AbstractMarshallable {
+    static class A extends SelfDescribingMarshallable {
         int x;
     }
 
-    static class NestedUnknown extends AbstractMarshallable {
+    static class NestedUnknown extends SelfDescribingMarshallable {
         Marshallable u;
     }
 
-    static class MRT1 extends AbstractMarshallable implements MRTInterface {
+    static class MRT1 extends SelfDescribingMarshallable implements MRTInterface {
         final String field1;
         String value = "a";
 
@@ -360,7 +360,7 @@ public class VanillaMethodReaderTest {
     }
 }
 
-class MockDto extends AbstractMarshallable {
+class MockDto extends SelfDescribingMarshallable {
     String field1;
     double field2;
 }

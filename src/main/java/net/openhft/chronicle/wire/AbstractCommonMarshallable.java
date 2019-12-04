@@ -16,23 +16,27 @@
 
 package net.openhft.chronicle.wire;
 
-import java.io.Serializable;
+import net.openhft.chronicle.bytes.BytesMarshallable;
 
-/*
- * Created by Peter Lawrey on 27/08/15.
+/**
+ * Created by Peter Lawrey on 16/03/16.
+ * <p>
+ * This uses bytes marshallable, non self describing messages by default.
  */
-public class EndOfDayShort extends SelfDescribingMarshallable implements Serializable {
-    // Symbol,Company,Price,Change,ChangePercent,Day's Volume
-    public String name;
-    public double closingPrice, change, changePercent;
-    long daysVolume;
+public abstract class AbstractCommonMarshallable implements Marshallable, BytesMarshallable {
+    @Override
+    public boolean equals(Object o) {
+        return Marshallable.$equals(this, o);
+    }
 
     @Override
-    public void writeMarshallable(WireOut wire) {
-        wire.write(() -> "name").text(name)
-                .write(() -> "price").float64(closingPrice)
-                .write(() -> "change").float64(change)
-                .write(() -> "changePercent").float64(changePercent)
-                .write(() -> "daysVolume").int64(daysVolume);
+    public int hashCode() {
+        return Marshallable.$hashCode(this);
     }
+
+    @Override
+    public String toString() {
+        return Marshallable.$toString(this);
+    }
+
 }
