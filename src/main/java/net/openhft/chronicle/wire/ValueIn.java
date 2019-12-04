@@ -626,6 +626,12 @@ public interface ValueIn {
         return false;
     }
 
+    default long readLong(LongConverter longConverter) {
+        StringBuilder sb = Wires.acquireStringBuilder();
+        text(sb);
+        return longConverter.parse(sb);
+    }
+
     interface Reader {
         <T> void accept(ValueIn valueIn, List<T> list, List<T> buffer, Supplier<T> bufferAdd);
     }

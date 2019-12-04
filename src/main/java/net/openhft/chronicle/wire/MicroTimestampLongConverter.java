@@ -8,6 +8,7 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 
 public class MicroTimestampLongConverter implements LongConverter {
+    public static final MicroTimestampLongConverter INSTANCE = new MicroTimestampLongConverter();
     final DateTimeFormatter dtf = new DateTimeFormatterBuilder()
             .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
             .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true)

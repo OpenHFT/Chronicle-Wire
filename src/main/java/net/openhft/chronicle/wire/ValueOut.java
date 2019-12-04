@@ -872,4 +872,9 @@ public interface ValueOut {
         return text(x);
     }
 
+    default WireOut writeLong(LongConverter longConverter, long l) {
+        StringBuilder sb = Wires.acquireStringBuilder();
+        longConverter.append(sb, l);
+        return rawText(sb);
+    }
 }

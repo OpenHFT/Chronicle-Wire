@@ -1801,6 +1801,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             return true;
         }
 
+        public WireOut writeLong(LongConverter longConverter, long l) {
+            return writeLong(l);
+        }
+
         @NotNull
         @Override
         public WireOut int8(byte i8) {
@@ -2112,6 +2116,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public boolean isBinary() {
             return true;
+        }
+
+        @Override
+        public long readLong(LongConverter longConverter) {
+            return readLong();
         }
 
         @Override
