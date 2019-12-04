@@ -40,6 +40,7 @@ import java.util.function.Supplier;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterBuilder<T> {
 
+    private static final boolean DISABLE_PROXY_GEN = Boolean.getBoolean("disableProxyCodegen");
     private final List<Class> interfaces = new ArrayList<>();
     private static final Map<Set<Class>, Class> setOfClassesToClassName = new ConcurrentHashMap<>();
     private final String packageName;
@@ -114,7 +115,6 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     @Override
     public T get() {
         if (proxyClass != null) {
-
             try {
                 Constructor<T> constructor = (Constructor) proxyClass.getConstructor(MethodWriterInvocationHandlerSupplier.class);
                 return (T) constructor.newInstance(handlerSupplier);
@@ -125,19 +125,21 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
             }
         }
 
-        try {
-            // this will create proxy that does not suffer from the arg[] issue
-            LinkedHashSet<Class> setOfInterfaces = new LinkedHashSet<>(interfaces);
-            final Class<T> o = setOfClassesToClassName.computeIfAbsent(setOfInterfaces,
-                    i -> VanillaMethodWriterBuilder.generatedProxyClass(packageName, i));
-            if (o != null)
-                return o.getConstructor(MethodWriterInvocationHandlerSupplier.class)
-                        .newInstance(handlerSupplier);
-            
-        } catch (Throwable e) {
-            // do nothing and drop through
-            if (Jvm.isDebug())
-                Jvm.debug().on(getClass(), e);
+        if (! DISABLE_PROXY_GEN) {
+            try {
+                // this will create proxy that does not suffer from the arg[] issue
+                LinkedHashSet<Class> setOfInterfaces = new LinkedHashSet<>(interfaces);
+                final Class<T> o = setOfClassesToClassName.computeIfAbsent(setOfInterfaces,
+                        i -> VanillaMethodWriterBuilder.generatedProxyClass(packageName, i));
+                if (o != null)
+                    return o.getConstructor(MethodWriterInvocationHandlerSupplier.class)
+                            .newInstance(handlerSupplier);
+
+            } catch (Throwable e) {
+                // do nothing and drop through
+                if (Jvm.isDebug())
+                    Jvm.debug().on(getClass(), e);
+            }
         }
 
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
