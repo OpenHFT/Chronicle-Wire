@@ -628,21 +628,39 @@ $class.name ${field.name}($field.type $paramName) {
 }
 ----
 
-=== Code generation for Marshallable
+== Self describing messages
+
+When writing and reading from text, Marshallable are always self describing, however when using Binary there is two choices,
+`SelfDescribingMarshallable` with is self decribing in binary and `BytesInBinaryMarshallable` which uses raw values.
+
+`SelfDescribingMarshallable` is slightly slower, and larger when writing but supports schema changes such as
+
+- Adding fields.
+- Removing fields
+- Changing the order of fields
+- Change the type of fields
+- Dumbing as text without access to the class specification.
+
+`BytesInBinaryMarshallable` is slower and more compact, however you need to add your own support for schema changes.
+See the Code Generating section below.
+
+=== Code Generation for Marshallable
 
 Install the Code Generation plugin, and add a template in `File` -> `Settings` -> `Code Generation` as follows.
+
+Use the `Add Member Dialog` button and `Exclude transient fields`
 
 This will add more efficient code for Marshallable format.
 
 [source]
-.Wire Marshallable
+.SelfDescribingMarshallable
 ----
 #set($javaPsiFacade = $JavaPsiFacade.getInstance($project))
 #set($global = $GlobalSearchScope.allScope($project))
 
 @Override public void writeMarshallable(net.openhft.chronicle.wire.WireOut out) {
-#if($class0.hasSuper)
-   super.writeMarshallable(out); // <1>
+#if($class0.superName != "SelfDescribingMarshallable")
+   super.writeMarshallable(out);
 #end
 #foreach( $member in $members )
     #set($memberType = $member.type.split("<").get(0))
@@ -656,8 +674,8 @@ This will add more efficient code for Marshallable format.
 }
 
 @Override public void readMarshallable(net.openhft.chronicle.wire.WireIn in) {
-#if($class0.hasSuper)
-   super.readMarshallable(in); // <1>
+#if($class0.superName != "SelfDescribingMarshallable")
+   super.readMarshallable(in);
 #end
 #foreach( $member in $members )
     #set($memberType = $member.type.split("<").get(0))
@@ -670,7 +688,51 @@ This will add more efficient code for Marshallable format.
 #end
 }
 ----
-<1> You will have to remove this line if the class extends `AbstractMarshallable`
+
+[source]
+.BytesInBinaryMarshallable
+----
+#set($javaPsiFacade = $JavaPsiFacade.getInstance($project))
+#set($global = $GlobalSearchScope.allScope($project))
+
+private static final int MASHALLABLE_VERSION = 1;
+
+@Override public void writeMarshallable(net.openhft.chronicle.bytes.BytesOut out) {
+#if($class0.superName != "BytesInBinaryMarshallable")
+   super.writeMarshallable(out); //
+#end
+  out.writeStopBit(MASHALLABLE_VERSION);
+#foreach( $member in $members )
+   #set($memberType = $member.type.split("<").get(0))
+   #set($type = $javaPsiFacade.findClass($memberType, $global))
+   #if ($member.primitive)
+       out.write${StringUtil.capitalizeWithJavaBeanConvention($memberType)}($member.name);
+   #else
+       out.writeObject(${memberType}.class, $member.name);
+   #end
+#end
+}
+
+@Override public void readMarshallable(net.openhft.chronicle.bytes.BytesIn in) {
+#if($class0.superName != "BytesInBinaryMarshallable")
+   super.readMarshallable(in);
+#end
+   int version = (int) in.readStopBit();
+   if (version == MASHALLABLE_VERSION) {
+#foreach( $member in $members )
+   #set($memberType = $member.type.split("<").get(0))
+   #set($type = $javaPsiFacade.findClass($memberType, $global))
+   #if ($member.primitive)
+       $member.name = in.read${StringUtil.capitalizeWithJavaBeanConvention($memberType)}();
+   #else
+       $member.name = (${memberType})in.readObject(${memberType}.class);
+   #end
+#end
+   } else {
+       throw new IllegalStateException("Unknown version " + version);
+   }
+}
+----
 
 ===  Platform support
 

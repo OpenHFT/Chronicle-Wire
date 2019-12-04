@@ -34,6 +34,7 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
@@ -81,9 +82,10 @@ public class WireMarshaller<T> {
         final FieldAccess[] fields = map.values().stream()
                 .map(FieldAccess::create)
                 .toArray(FieldAccess[]::new);
-        long aCount = Stream.of(fields).filter(f -> f.field.getName().equals("a")).count();
-        if (aCount > 0)
-            Jvm.warn().on(tClass, "Has " + aCount + " fields called 'a'");
+        Map<String, Long> fieldCount = Stream.of(fields).collect(Collectors.groupingBy(f -> f.field.getName(), Collectors.counting()));
+        fieldCount.forEach((n, c) -> {
+            if (c > 1) Jvm.warn().on(tClass, "Has " + c + " fields called '" + n + "'");
+        });
         boolean isLeaf = Stream.of(fields).noneMatch(
                 c -> (isCollection(c.field.getType()) && !Boolean.TRUE.equals(c.isLeaf))
                         || WriteMarshallable.class.isAssignableFrom(c.field.getType()));

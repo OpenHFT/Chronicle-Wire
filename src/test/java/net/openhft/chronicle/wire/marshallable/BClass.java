@@ -17,6 +17,8 @@
 
 package net.openhft.chronicle.wire.marshallable;
 
+import net.openhft.chronicle.bytes.BytesIn;
+import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 
 /*
@@ -45,5 +47,42 @@ class BClass extends BytesInBinaryMarshallable {
         this.f = f;
         this.d = d;
         this.text = text;
+    }
+
+    // from generated code
+    private static final int MASHALLABLE_VERSION = 1;
+
+    @Override
+    public void writeMarshallable(BytesOut out) {
+        out.writeStopBit(MASHALLABLE_VERSION);
+        out.writeInt(id);
+        out.writeBoolean(flag);
+        out.writeByte(b);
+        out.writeChar(ch);
+        out.writeShort(s);
+        out.writeInt(i);
+        out.writeLong(l);
+        out.writeFloat(f);
+        out.writeDouble(d);
+        out.writeObject(String.class, text);
+    }
+
+    @Override
+    public void readMarshallable(BytesIn in) {
+        int version = (int) in.readStopBit();
+        if (version == MASHALLABLE_VERSION) {
+            id = in.readInt();
+            flag = in.readBoolean();
+            b = in.readByte();
+            ch = in.readChar();
+            s = in.readShort();
+            i = in.readInt();
+            l = in.readLong();
+            f = in.readFloat();
+            d = in.readDouble();
+            text = (String) in.readObject(String.class);
+        } else {
+            throw new IllegalStateException("Unknown version " + version);
+        }
     }
 }

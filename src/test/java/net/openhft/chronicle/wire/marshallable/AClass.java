@@ -18,6 +18,8 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+import net.openhft.chronicle.wire.WireIn;
+import net.openhft.chronicle.wire.WireOut;
 
 /*
  * Created by Peter Lawrey on 07/05/16.
@@ -45,5 +47,33 @@ class AClass extends SelfDescribingMarshallable {
         this.f = f;
         this.d = d;
         this.text = text;
+    }
+
+    @Override
+    public void writeMarshallable(WireOut out) {
+        out.write("id").writeInt(id);
+        out.write("flag").writeBoolean(flag);
+        out.write("b").writeByte(b);
+        out.write("ch").writeChar(ch);
+        out.write("s").writeShort(s);
+        out.write("i").writeInt(i);
+        out.write("l").writeLong(l);
+        out.write("f").writeFloat(f);
+        out.write("d").writeDouble(d);
+        out.write("text").object(String.class, text);
+    }
+
+    @Override
+    public void readMarshallable(WireIn in) {
+        id = in.read("id").readInt();
+        flag = in.read("flag").readBoolean();
+        b = in.read("b").readByte();
+        ch = in.read("ch").readChar();
+        s = in.read("s").readShort();
+        i = in.read("i").readInt();
+        l = in.read("l").readLong();
+        f = in.read("f").readFloat();
+        d = in.read("d").readDouble();
+        text = in.read("text").object(text, String.class);
     }
 }
