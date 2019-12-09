@@ -76,6 +76,11 @@ public interface WireParser extends Consumer<WireIn> {
     }
 
     @NotNull
-    VanillaWireParser register(WireKey key, WireParselet valueInConsumer);
+    default VanillaWireParser register(WireKey key, WireParselet valueInConsumer) {
+        return register(key.toString(), valueInConsumer);
+    }
+
+    @NotNull
+    VanillaWireParser register(String keyName, WireParselet valueInConsumer);
 
 }
