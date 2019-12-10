@@ -107,8 +107,8 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
     private Class<?> proxyClass;
 
-    private static <T> Class generatedProxyClass(String packageName, Set<Class> interfaces) {
-        return GeneratedProxyClass.from(packageName, interfaces, "Proxy" + proxyCount.incrementAndGet());
+    private <T> Class generatedProxyClass(String packageName, Set<Class> interfaces) {
+        return GeneratedProxyClass.from(packageName, interfaces, "Proxy" + proxyCount.incrementAndGet(), classLoader);
     }
 
     @NotNull
@@ -130,7 +130,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
                 // this will create proxy that does not suffer from the arg[] issue
                 LinkedHashSet<Class> setOfInterfaces = new LinkedHashSet<>(interfaces);
                 final Class<T> o = setOfClassesToClassName.computeIfAbsent(setOfInterfaces,
-                        i -> VanillaMethodWriterBuilder.generatedProxyClass(packageName, i));
+                        i -> generatedProxyClass(packageName, i));
                 if (o != null)
                     return o.getConstructor(MethodWriterInvocationHandlerSupplier.class)
                             .newInstance(handlerSupplier);

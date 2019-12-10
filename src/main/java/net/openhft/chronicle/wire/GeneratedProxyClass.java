@@ -20,11 +20,12 @@ public enum GeneratedProxyClass {
     ;
 
     /**
+     * @param classLoader
      * @param interfaces an interface class
      * @return a proxy class from an interface class or null if it can't be created
      */
     @SuppressWarnings("rawtypes")
-    public static Class from(String packageName, Set<Class> interfaces, String className) {
+    public static Class from(String packageName, Set<Class> interfaces, String className, ClassLoader classLoader) {
         int maxArgs = 0;
         Set<Method> methods = new LinkedHashSet<>(16);
 
@@ -87,10 +88,11 @@ public enum GeneratedProxyClass {
         createProxyMethods(methods, sb);
         sb.append("}\n");
 
+
         try {
             // synchronizing due to ConcurrentModificationException in net.openhft.compiler.MyJavaFileManager.buffers
             synchronized (CompilerUtils.CACHED_COMPILER) {
-                return CompilerUtils.CACHED_COMPILER.loadFromJava(GeneratedProxyClass.class.getClassLoader(), packageName + '.' + className, sb.toString());
+                return CompilerUtils.CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, sb.toString());
             }
         } catch (Throwable e) {
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + sb, e));
