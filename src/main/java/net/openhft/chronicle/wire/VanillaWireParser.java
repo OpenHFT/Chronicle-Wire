@@ -103,9 +103,17 @@ public class VanillaWireParser implements WireParser {
     @NotNull
     @Override
     public VanillaWireParser register(@NotNull WireKey key, WireParselet valueInConsumer) {
-        String keyName = key.name().toString();
+        return register(key.name().toString(), key.code(), valueInConsumer);
+    }
+
+    @NotNull
+    public VanillaWireParser register(String keyName, WireParselet valueInConsumer) {
+        return register(keyName, keyName.hashCode(), valueInConsumer);
+    }
+
+    private VanillaWireParser register(String keyName, int code, WireParselet valueInConsumer) {
         namedConsumer.put(keyName, valueInConsumer);
-        numberedConsumer.put(key.code(), new AbstractMap.SimpleEntry<>(keyName, valueInConsumer));
+        numberedConsumer.put(code, new AbstractMap.SimpleEntry<>(keyName, valueInConsumer));
         return this;
     }
 
