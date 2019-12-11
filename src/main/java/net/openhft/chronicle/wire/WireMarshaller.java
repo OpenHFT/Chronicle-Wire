@@ -120,7 +120,7 @@ public class WireMarshaller<T> {
     }
 
     public static void getAllField(@NotNull Class clazz, @NotNull Map<String, Field> map) {
-        if (clazz != Object.class && !Modifier.isAbstract(clazz.getModifiers()))
+        if (clazz != Object.class && clazz != AbstractCommonMarshallable.class)
             getAllField(clazz.getSuperclass(), map);
         for (@NotNull Field field : clazz.getDeclaredFields()) {
             if ((field.getModifiers() & (Modifier.STATIC | Modifier.TRANSIENT)) != 0)
