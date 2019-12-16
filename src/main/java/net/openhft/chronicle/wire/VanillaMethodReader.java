@@ -194,7 +194,7 @@ public class VanillaMethodReader implements MethodReader {
         // add chained interfaces last.
         for (@NotNull Method m : oClass.getMethods()) {
             Class returnType = m.getReturnType();
-            if (returnType.isInterface() && returnType != DocumentContext.class) {
+            if (returnType.isInterface() && Jvm.dontChain(returnType)) {
                 addParsletsFor(interfaces, returnType, ignoreDefault, methodsHandled, methodFilterOnFirstArg, null, context, nextContext, nextContext);
             }
         }

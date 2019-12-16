@@ -16,6 +16,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.CommonMarshallable;
+import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
  * For objects which must deserialize final field see Demarshallable
  */
 @FunctionalInterface
+@DontChain
 public interface ReadMarshallable extends CommonMarshallable {
     ReadMarshallable DISCARD = w -> {
     };

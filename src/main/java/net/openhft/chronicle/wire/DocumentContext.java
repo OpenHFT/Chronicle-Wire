@@ -16,12 +16,14 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.Nullable;
 
 /*
  * Created by Peter Lawrey on 24/12/15.
  */
+@DontChain
 public interface DocumentContext extends Closeable, SourceContext {
 
     /**

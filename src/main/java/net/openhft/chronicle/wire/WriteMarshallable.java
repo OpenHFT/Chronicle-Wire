@@ -16,9 +16,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.CommonMarshallable;
+import net.openhft.chronicle.core.annotation.DontChain;
 import org.jetbrains.annotations.NotNull;
 
 @FunctionalInterface
+@DontChain
 public interface WriteMarshallable extends WriteValue, CommonMarshallable {
     WriteMarshallable EMPTY = wire -> {
         // nothing

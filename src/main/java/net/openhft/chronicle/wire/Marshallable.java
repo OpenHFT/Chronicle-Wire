@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.Resettable;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -35,6 +36,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 /**
  * The implementation of this interface is both readable and write-able as marshallable data.
  */
+@DontChain
 public interface Marshallable extends WriteMarshallable, ReadMarshallable, Resettable {
     static boolean $equals(@NotNull WriteMarshallable $this, Object o) {
         return o instanceof WriteMarshallable &&
