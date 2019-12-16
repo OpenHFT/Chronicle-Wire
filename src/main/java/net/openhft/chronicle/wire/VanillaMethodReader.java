@@ -19,7 +19,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.bytes.MethodReaderInterceptor;
+import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
@@ -35,11 +35,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 import static net.openhft.chronicle.wire.VanillaWireParser.SKIP_READABLE_BYTES;
 
@@ -59,24 +57,24 @@ public class VanillaMethodReader implements MethodReader {
     private final WireParser wireParser;
     private final MessageHistory messageHistory = MessageHistory.get();
     private boolean closeIn = false, closed;
-    private MethodReaderInterceptor methodReaderInterceptor;
+    private MethodReaderInterceptorReturns methodReaderInterceptorReturns;
 
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
                                WireParselet defaultParselet,
-                               MethodReaderInterceptor methodReaderInterceptor,
+                               MethodReaderInterceptorReturns methodReaderInterceptorReturns,
                                @NotNull Object... objects) {
-        this(in, ignoreDefault, defaultParselet, SKIP_READABLE_BYTES, methodReaderInterceptor, objects);
+        this(in, ignoreDefault, defaultParselet, SKIP_READABLE_BYTES, methodReaderInterceptorReturns, objects);
     }
 
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
                                WireParselet defaultParselet,
                                FieldNumberParselet fieldNumberParselet,
-                               MethodReaderInterceptor methodReaderInterceptor,
+                               MethodReaderInterceptorReturns methodReaderInterceptorReturns,
                                @NotNull Object... objects) {
         this.in = in;
-        this.methodReaderInterceptor = methodReaderInterceptor;
+        this.methodReaderInterceptorReturns = methodReaderInterceptorReturns;
         if (objects[0] instanceof WireParselet)
             defaultParselet = (WireParselet) objects[0];
 
@@ -91,48 +89,13 @@ public class VanillaMethodReader implements MethodReader {
                 else
                     methodFilterOnFirstArg = (MethodFilterOnFirstArg) o;
             }
-            for (@NotNull Method m : o.getClass().getMethods()) {
-                Class<?> declaringClass = m.getDeclaringClass();
-                if (declaringClass == Object.class)
-                    continue;
-                if (Modifier.isStatic(m.getModifiers()))
-                    continue;
-                if (ignoreDefault && declaringClass.isInterface())
-                    continue;
-                if ("ignoreMethodBasedOnFirstArg".equals(m.getName()))
-                    continue;
-
-                try {
-                    // skip Object defined methods.
-                    Object.class.getMethod(m.getName(), m.getParameterTypes());
-                    continue;
-                } catch (NoSuchMethodException e) {
-                    // not an Object method.
-                }
-
-                if (!methodsHandled.add(m.getName())) {
-                    if (DONT_THROW_ON_OVERLOAD)
-                        Jvm.warn().on(getClass(), "Unable to support overloaded methods, ignoring one of " + m.getName());
-                    else
-                        throw new IllegalStateException("MethodReader does not support overloaded methods. Method name: "+m.getName());
-                    continue;
-                }
-
-                Class<?>[] parameterTypes = m.getParameterTypes();
-                switch (parameterTypes.length) {
-                    case 0:
-                        addParseletForMethod(o, m);
-                        break;
-                    case 1:
-                        addParseletForMethod(o, m, parameterTypes[0]);
-                        break;
-                    default:
-                        if (methodFilterOnFirstArg == null)
-                            addParseletForMethod(o, m, parameterTypes);
-                        else
-                            addParseletForMethod(o, m, parameterTypes, methodFilterOnFirstArg);
-                        break;
-                }
+            Class<?> oClass = o.getClass();
+            Object[] context = {null};
+            Supplier<Object> original = () -> o;
+            Supplier<Object> inarray = () -> context[0];
+            Set<Class> interfaces = new LinkedHashSet<>();
+            for (Class<?> anInterface : oClass.getInterfaces()) {
+                addParsletsFor(interfaces, anInterface, ignoreDefault, methodsHandled, methodFilterOnFirstArg, o, context, original, inarray);
             }
         }
         if (wireParser.lookup(HISTORY) == null) {
@@ -140,15 +103,7 @@ public class VanillaMethodReader implements MethodReader {
         }
     }
 
-    private static Object actualInvoke(Method method, Object o, Object[] objects) throws InvocationTargetException {
-        try {
-            return method.invoke(o, objects);
-        } catch (IllegalAccessException iae) {
-            throw Jvm.rethrow(iae);
-        }
-    }
-
-    private static void invokeMethodWithOneLong(Object o, @NotNull Method m, String name, MethodHandle mh, Object[] argArr, CharSequence s, ValueIn v, MethodReaderInterceptor methodReaderInterceptor) {
+    private static void invokeMethodWithOneLong(Object o, Object[] context, @NotNull Method m, String name, MethodHandle mh, Object[] argArr, CharSequence s, ValueIn v, MethodReaderInterceptorReturns methodReaderInterceptor) {
         try {
             if (Jvm.isDebug())
                 logMessage(s, v);
@@ -157,7 +112,12 @@ public class VanillaMethodReader implements MethodReader {
             try {
                 if (methodReaderInterceptor != null) {
                     argArr[0] = arg;
-                    methodReaderInterceptor.intercept(m, o, argArr, VanillaMethodReader::actualInvoke);
+                    Object intercept = methodReaderInterceptor.intercept(m, o, argArr, VanillaMethodReader::actualInvoke);
+                    if (intercept == null) {
+                        context[0] = o;
+                    } else {
+                        context[0] = intercept;
+                    }
 
                 } else {
                     mh.invokeExact(arg);
@@ -172,6 +132,71 @@ public class VanillaMethodReader implements MethodReader {
             }
         } catch (Exception i) {
             Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], i);
+        }
+    }
+
+    private static Object actualInvoke(Method method, Object o, Object[] objects) throws InvocationTargetException {
+        try {
+            return method.invoke(o, objects);
+        } catch (IllegalAccessException iae) {
+            throw Jvm.rethrow(iae);
+        }
+    }
+
+    private void addParsletsFor(Set<Class> interfaces, Class<?> oClass, boolean ignoreDefault, Set<String> methodsHandled, MethodFilterOnFirstArg methodFilterOnFirstArg, Object o, Object[] context, Supplier contextSupplier, Supplier nextContext) {
+        if (!interfaces.add(oClass))
+            return;
+
+        for (@NotNull Method m : oClass.getMethods()) {
+            Class<?> declaringClass = m.getDeclaringClass();
+            if (declaringClass == Object.class)
+                continue;
+            if (Modifier.isStatic(m.getModifiers()))
+                continue;
+            if (ignoreDefault && declaringClass.isInterface())
+                continue;
+            if ("ignoreMethodBasedOnFirstArg".equals(m.getName()))
+                continue;
+
+            try {
+                // skip Object defined methods.
+                Object.class.getMethod(m.getName(), m.getParameterTypes());
+                continue;
+            } catch (NoSuchMethodException e) {
+                // not an Object method.
+            }
+
+            if (!methodsHandled.add(m.getName())) {
+                if (DONT_THROW_ON_OVERLOAD)
+                    Jvm.warn().on(getClass(), "Unable to support overloaded methods, ignoring one of " + m.getName());
+                else
+                    throw new IllegalStateException("MethodReader does not support overloaded methods. Method name: " + m.getName());
+                continue;
+            }
+
+            Class<?>[] parameterTypes = m.getParameterTypes();
+            switch (parameterTypes.length) {
+                case 0:
+                    addParseletForMethod(o, context, contextSupplier, m);
+                    break;
+                case 1:
+                    addParseletForMethod(o, context, contextSupplier, m, parameterTypes[0]);
+                    break;
+                default:
+                    if (methodFilterOnFirstArg == null)
+                        addParseletForMethod(o, context, contextSupplier, m, parameterTypes);
+                    else
+                        addParseletForMethod(o, context, contextSupplier, m, parameterTypes, methodFilterOnFirstArg);
+                    break;
+            }
+        }
+
+        // add chained interfaces last.
+        for (@NotNull Method m : oClass.getMethods()) {
+            Class returnType = m.getReturnType();
+            if (returnType.isInterface() && returnType != DocumentContext.class) {
+                addParsletsFor(interfaces, returnType, ignoreDefault, methodsHandled, methodFilterOnFirstArg, null, context, nextContext, nextContext);
+            }
         }
     }
 
@@ -207,19 +232,19 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     // one arg
-    public void addParseletForMethod(Object o, @NotNull Method m, Class<?> parameterType) {
+    public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, Class<?> parameterType) {
         Jvm.setAccessible(m); // turn of security check to make a little faster
         String name = m.getName();
-        if (parameterType == long.class) {
+        if (parameterType == long.class && o2 != null) {
             try {
-                MethodHandle mh = MethodHandles.lookup().unreflect(m).bindTo(o);
+                MethodHandle mh = MethodHandles.lookup().unreflect(m).bindTo(o2);
                 @NotNull Object[] argArr = {null};
                 MethodWireKey key = createWireKey(m, name);
-                wireParser.registerOnce(key, (s, v) -> invokeMethodWithOneLong(o, m, name, mh, argArr, s, v, methodReaderInterceptor));
+                wireParser.registerOnce(key, (s, v) -> invokeMethodWithOneLong(o2, context, m, name, mh, argArr, s, v, methodReaderInterceptorReturns));
             } catch (IllegalAccessException e) {
-                Jvm.warn().on(o.getClass(), "Unable to unreflect " + m, e);
+                Jvm.warn().on(o2.getClass(), "Unable to unreflect " + m, e);
             }
-        } else if (parameterType.isInterface() || !ReadMarshallable.class.isAssignableFrom(parameterType)) {
+        } else if (parameterType.isPrimitive() || parameterType.isInterface() || !ReadMarshallable.class.isAssignableFrom(parameterType)) {
             @NotNull Object[] argArr = {null};
             MethodWireKey key = createWireKey(m, name);
             wireParser.registerOnce(key, (s, v) -> {
@@ -228,9 +253,13 @@ public class VanillaMethodReader implements MethodReader {
                         logMessage(s, v);
 
                     argArr[0] = v.object(checkRecycle(argArr[0]), parameterType);
-                    invoke(o, m, argArr);
+                    Object invoke = invoke(contextSupplier.get(), m, argArr);
+                    if (invoke != null)
+                        context[0] = invoke;
+                    else if (o2 != null)
+                        context[0] = o2;
                 } catch (Exception i) {
-                    Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], i);
+                    Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + " " + argArr[0], i);
                 }
             });
 
@@ -255,16 +284,25 @@ public class VanillaMethodReader implements MethodReader {
                         logMessage(s, v);
 
                     argArr[0] = v.object(checkRecycle(argArr[0]), parameterType);
-                    invoke(o, m, argArr);
+                    Object invoke = invoke(contextSupplier.get(), m, argArr);
+                    if (invoke != null)
+                        context[0] = invoke;
+                    else if (o2 != null)
+                        context[0] = o2;
                 } catch (Throwable t) {
-                    Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], t);
+                    Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + " " + argArr[0], t);
                 }
             });
         }
     }
 
+    private Class<?> contextClass(Supplier contextSupplier) {
+        Object o = contextSupplier.get();
+        return o == null ? VanillaMethodReader.class : o.getClass();
+    }
+
     // no args
-    public void addParseletForMethod(Object o, @NotNull Method m) {
+    public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m) {
         Jvm.setAccessible(m); // turn of security check to make a little faster
         String name = m.getName();
         MethodWireKey key = createWireKey(m, name);
@@ -275,9 +313,13 @@ public class VanillaMethodReader implements MethodReader {
 
                 v.skipValue();
 
-                invoke(o, m, NO_ARGS);
+                Object invoke = invoke(contextSupplier.get(), m, NO_ARGS);
+                if (invoke != null)
+                    context[0] = invoke;
+                if (o2 != null)
+                    context[0] = o2;
             } catch (Exception i) {
-                Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + "()", i);
+                Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + "()", i);
             }
         });
     }
@@ -290,7 +332,7 @@ public class VanillaMethodReader implements MethodReader {
                 : Maths.toInt32(annotation.value()));
     }
 
-    public void addParseletForMethod(Object o, @NotNull Method m, @NotNull Class[] parameterTypes) {
+    public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, @NotNull Class[] parameterTypes) {
         Jvm.setAccessible(m); // turn of security check to make a little faster
         @NotNull Object[] args = new Object[parameterTypes.length];
         @NotNull BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
@@ -309,9 +351,13 @@ public class VanillaMethodReader implements MethodReader {
 
                 v.sequence(args, sequenceReader);
 
-                invoke(o, m, args);
+                Object invoke = invoke(contextSupplier.get(), m, args);
+                if (invoke != null)
+                    context[0] = invoke;
+                if (o2 != null)
+                    context[0] = o2;
             } catch (Exception i) {
-                Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + Arrays.toString(args), i);
+                Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + " " + Arrays.toString(args), i);
             }
         });
     }
@@ -325,7 +371,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     @SuppressWarnings("unchecked")
-    public void addParseletForMethod(Object o, @NotNull Method m, @NotNull Class[] parameterTypes, MethodFilterOnFirstArg methodFilterOnFirstArg) {
+    public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, @NotNull Class[] parameterTypes, MethodFilterOnFirstArg methodFilterOnFirstArg) {
         Jvm.setAccessible(m); // turn off security check to make a little faster
         @NotNull Object[] args = new Object[parameterTypes.length];
         @NotNull BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
@@ -357,19 +403,23 @@ public class VanillaMethodReader implements MethodReader {
                     args[0] = null;
                     return;
                 }
-                invoke(o, m, args);
+                Object invoke = invoke(contextSupplier.get(), m, args);
+                if (invoke != null)
+                    context[0] = invoke;
+                if (o2 != null)
+                    context[0] = o2;
             } catch (Exception i) {
-                Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + Arrays.toString(args), i);
+                Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + " " + Arrays.toString(args), i);
             }
         });
     }
 
-    protected void invoke(Object o, @NotNull Method m, Object[] args) {
+    protected Object invoke(Object o, @NotNull Method m, Object[] args) {
         try {
-            if (methodReaderInterceptor != null)
-                methodReaderInterceptor.intercept(m, o, args, VanillaMethodReader::actualInvoke);
+            if (methodReaderInterceptorReturns != null)
+                return methodReaderInterceptorReturns.intercept(m, o, args, VanillaMethodReader::actualInvoke);
             else
-                m.invoke(o, args);
+                return m.invoke(o, args);
 
         } catch (InvocationTargetException | IllegalAccessException e) {
             Throwable cause = e.getCause();
@@ -378,6 +428,7 @@ public class VanillaMethodReader implements MethodReader {
                 Jvm.warn().on(o.getClass(), msg + " " + cause);
             else
                 Jvm.warn().on(o.getClass(), msg, cause);
+            return null;
         }
     }
 
@@ -449,8 +500,8 @@ public class VanillaMethodReader implements MethodReader {
         return closed;
     }
 
-    public MethodReaderInterceptor methodReaderInterceptor() {
-        return methodReaderInterceptor;
+    public MethodReaderInterceptorReturns methodReaderInterceptorReturns() {
+        return methodReaderInterceptorReturns;
     }
 
     @NotNull

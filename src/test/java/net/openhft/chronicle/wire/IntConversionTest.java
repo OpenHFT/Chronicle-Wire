@@ -37,8 +37,7 @@ public class IntConversionTest {
         WriteWithInt write = wire.methodWriter(WriteWithInt.class);
         assertSame(write, write.to(0x12345));
 
-        assertEquals("to: 12345\n" +
-                "---\n", wire.toString());
+        assertEquals("to: 12345\n", wire.toString());
 
         StringWriter sw = new StringWriter();
         WriteWithInt read = Mocker.logging(WriteWithInt.class, "", sw);
@@ -63,7 +62,7 @@ public class IntConversionTest {
         assertEquals(uh2, uh);
     }
 
-    interface WriteWithInt {
+    public interface WriteWithInt {
         WriteWithInt to(@IntConversion(HexadecimalIntConverter.class) int x);
     }
 

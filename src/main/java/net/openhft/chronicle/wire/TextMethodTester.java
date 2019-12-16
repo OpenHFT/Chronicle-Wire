@@ -39,7 +39,7 @@ public class TextMethodTester<T> {
     private String actual;
     private String[] retainLast;
     private MethodWriterListener methodWriterListener;
-    private MethodReaderInterceptor methodReaderInterceptor;
+    private MethodReaderInterceptorReturns methodReaderInterceptorReturns;
     private long timeoutMS = 25;
 
     public TextMethodTester(String input, Function<T, Object> componentFunction, Class<T> outputClass, String output) {
@@ -118,7 +118,7 @@ public class TextMethodTester<T> {
             Wire wire0 = new TextWire(BytesUtil.readFile(setup));
 
             MethodReader reader0 = wire0.methodReaderBuilder()
-                    .methodReaderInterceptor(methodReaderInterceptor)
+                    .methodReaderInterceptorReturns(methodReaderInterceptorReturns)
                     .warnMissing(true)
                     .build(components);
             while (reader0.readOne()) {
@@ -138,7 +138,7 @@ public class TextMethodTester<T> {
             }
         }
         MethodReader reader = wire.methodReaderBuilder()
-                .methodReaderInterceptor(methodReaderInterceptor)
+                .methodReaderInterceptorReturns(methodReaderInterceptorReturns)
                 .warnMissing(true)
                 .build(components);
 
@@ -275,8 +275,8 @@ public class TextMethodTester<T> {
         return this;
     }
 
-    public TextMethodTester<T> methodReaderInterceptor(MethodReaderInterceptor methodReaderInterceptor) {
-        this.methodReaderInterceptor = methodReaderInterceptor;
+    public TextMethodTester<T> methodReaderInterceptorReturns(MethodReaderInterceptorReturns methodReaderInterceptorReturns) {
+        this.methodReaderInterceptorReturns = methodReaderInterceptorReturns;
         return this;
     }
 

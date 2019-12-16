@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 
 class CountingDocumentContext extends WrappedDocumentContext {
     public int count;
+    public boolean local;
 
     public CountingDocumentContext() {
         super(null);

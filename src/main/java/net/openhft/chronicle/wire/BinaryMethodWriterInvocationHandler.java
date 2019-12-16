@@ -47,7 +47,7 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
         if (method.getName().equals("writingDocument") && method.getParameterCount() == 0) {
             MarshallableOut marshallableOut = this.marshallableOutSupplier.get();
             context.count = 0;
-            return context.dc( marshallableOut.writingDocument(metaData));
+            return context.dc(marshallableOut.writingDocument(metaData));
         }
         return super.doInvoke(proxy, method, args);
     }
@@ -55,11 +55,13 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
     @Override
     protected void handleInvoke(Method method, Object[] args) {
         DocumentContext dc = context.dc();
-        boolean local = false;
+        boolean chained = method.getReturnType().isInterface();
         if (dc == null) {
             MarshallableOut marshallableOut = this.marshallableOutSupplier.get();
             dc = marshallableOut.writingDocument(metaData);
-            local = true;
+            if (chained)
+                context.dc(dc);
+            context.local = true;
         }
         try {
             Wire wire = dc.wire();
@@ -71,10 +73,14 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
             Jvm.rethrow(t);
 
         } finally {
-            if (local) {
-                dc.close();
-            } else {
-                context.count++;
+            if (!chained) {
+                if (context.local) {
+                    dc.close();
+                    context.dc(null);
+                    context.local = false;
+                } else {
+                    context.count++;
+                }
             }
         }
     }

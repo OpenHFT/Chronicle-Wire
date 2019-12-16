@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.compiler.CompilerUtils;
+import org.jetbrains.annotations.NotNull;
 import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
 import java.lang.reflect.Method;
@@ -21,7 +22,7 @@ public enum GeneratedProxyClass {
 
     /**
      * @param classLoader
-     * @param interfaces an interface class
+     * @param interfaces  an interface class
      * @return a proxy class from an interface class or null if it can't be created
      */
     @SuppressWarnings("rawtypes")
@@ -49,7 +50,7 @@ public enum GeneratedProxyClass {
         // create methodArray
         for (Class interfaceClazz : interfaces) {
             sb.append(sep);
-            String interfaceName = interfaceClazz.getName().replace('$', '.');
+            String interfaceName = nameForClass(interfaceClazz);
             sb.append(interfaceName);
 
             if (!interfaceClazz.isInterface())
@@ -99,6 +100,11 @@ public enum GeneratedProxyClass {
         }
     }
 
+    @NotNull
+    private static String nameForClass(Class interfaceClazz) {
+        return interfaceClazz.getName().replace('$', '.');
+    }
+
     private static void addFieldsAndConstructor(final int maxArgs, final Set<Method> declaredMethods, final StringBuilder sb, final String className, final StringBuilder methodArray) {
         sb.append("  private final MethodWriterInvocationHandlerSupplier handler;\n" +
                 "    private final Method[] methods = new Method[")
@@ -125,8 +131,8 @@ public enum GeneratedProxyClass {
             methodIndex++;
 
             sb.append(createMethodSignature(dm, returnType));
-            sb.append("    Method method = this.methods[").append(methodIndex).append("];\n");
-            sb.append("    Object[] a = this.argsTL.get()[").append(dm.getParameterCount()).append("];\n");
+            sb.append("    Method _method_ = this.methods[").append(methodIndex).append("];\n");
+            sb.append("    Object[] _a_ = this.argsTL.get()[").append(dm.getParameterCount()).append("];\n");
 
             assignParametersToArgs(sb, dm);
             callInvoke(sb, returnType);
@@ -138,9 +144,9 @@ public enum GeneratedProxyClass {
                 "      ");
 
         if (returnType != void.class)
-            sb.append("return (").append(returnType.getName()).append(')');
+            sb.append("return (").append(nameForClass(returnType)).append(')');
 
-        sb.append(" handler.get().invoke(this,method,a);\n" +
+        sb.append(" handler.get().invoke(this,_method_,_a_);\n" +
                 "    } catch (Throwable throwable) {\n" +
                 "       throw Jvm.rethrow(throwable);\n" +
                 "    }\n" +
@@ -151,14 +157,14 @@ public enum GeneratedProxyClass {
         final int len = dm.getParameters().length;
         for (int j = 0; j < len; j++) {
             String paramName = dm.getParameters()[j].getName();
-            sb.append("    a[").append(j).append("] = ").append(paramName).append(";\n");
+            sb.append("    _a_[").append(j).append("] = ").append(paramName).append(";\n");
         }
     }
 
     private static CharSequence createMethodSignature(final Method dm, final Class<?> returnType) {
         final int len = dm.getParameters().length;
         final StringBuilder result = new StringBuilder();
-        final String typeName = returnType.getName();
+        final String typeName = nameForClass(returnType);
         result.append("  public ").append(typeName).append(' ').append(dm.getName()).append('(');
 
         for (int j = 0; j < len; j++) {

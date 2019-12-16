@@ -18,7 +18,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /*
@@ -85,12 +84,12 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     @Override
     public void start() {
         wire.getValueOut().resetBetweenDocuments();
-        @NotNull final Bytes<?> bytes = wire.bytes();
+        Bytes<?> bytes = wire.bytes();
 
         present = false;
         wire.consumePadding();
-        if (wire.bytes().startsWith(MSG_SEP)) {
-            wire.bytes().readSkip(3);
+        if (bytes.startsWith(MSG_SEP)) {
+            bytes.readSkip(3);
             wire.consumePadding();
         }
         if (bytes.readRemaining() < 1) {
@@ -100,7 +99,14 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         }
 
         long position = bytes.readPosition();
-        wire.getValueIn().skipValue();
+        while (bytes.readRemaining() > 0) {
+            while (bytes.readRemaining() > 0 && bytes.readUnsignedByte() >= ' ') {
+                // read skips forward.
+            }
+            if (bytes.startsWith(MSG_SEP)) {
+                break;
+            }
+        }
         metaData = false;
         readLimit = bytes.readLimit();
         readPosition = bytes.readPosition();

@@ -16,10 +16,6 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.BytesIn;
-import net.openhft.chronicle.bytes.BytesUtil;
-import net.openhft.chronicle.core.io.IORuntimeException;
-
 /**
  * Created by Peter Lawrey
  * <p>
@@ -29,9 +25,5 @@ public abstract class BytesInBinaryMarshallable extends AbstractCommonMarshallab
     @Override
     public boolean usesSelfDescribingMessage() {
         return false;
-    }
-
-    public void readMarshallable(BytesIn bytes) throws IORuntimeException {
-        BytesUtil.readMarshallable(this, bytes);
     }
 }

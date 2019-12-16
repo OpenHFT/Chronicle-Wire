@@ -18,10 +18,9 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.bytes.MethodWriterInterceptor;
+import net.openhft.chronicle.bytes.MethodWriterInterceptorReturns;
 import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
 import net.openhft.chronicle.core.util.AbstractInvocationHandler;
-import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
@@ -38,7 +37,7 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
 
     protected boolean recordHistory;
     protected String genericEvent = "";
-    private MethodWriterInterceptor methodWriterInterceptor;
+    private MethodWriterInterceptorReturns methodWriterInterceptorReturns;
     private BiConsumer<Method, Object[]> handleInvoke;
     // Note the Object[] passed in creates an object on every call.
     private boolean useMethodIds;
@@ -50,11 +49,15 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
 
     @Override
     protected Object doInvoke(Object proxy, Method method, Object[] args) {
-        if (methodWriterInterceptor != null)
-            methodWriterInterceptor.intercept(method, args, this.handleInvoke);
-        else
+        if (methodWriterInterceptorReturns != null) {
+            methodWriterInterceptorReturns.intercept(method, args, (m, a) -> {
+                this.handleInvoke.accept(m, a);
+                return m.getReturnType().isInterface() ? proxy : null;
+            });
+        } else {
             handleInvoke(method, args);
-        return ObjectUtils.defaultValue(method.getReturnType());
+        }
+        return method.getReturnType().isInterface() ? proxy : null;
     }
 
     @Override
@@ -127,8 +130,8 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     }
 
     @Override
-    public void methodWriterInterceptor(MethodWriterInterceptor methodWriterInterceptor) {
-        this.methodWriterInterceptor = methodWriterInterceptor;
+    public void methodWriterInterceptorReturns(MethodWriterInterceptorReturns methodWriterInterceptorReturns) {
+        this.methodWriterInterceptorReturns = methodWriterInterceptorReturns;
     }
 
     @Override

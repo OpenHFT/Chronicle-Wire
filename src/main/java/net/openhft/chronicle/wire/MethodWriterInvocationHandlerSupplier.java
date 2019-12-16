@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.MethodWriterInterceptor;
+import net.openhft.chronicle.bytes.MethodWriterInterceptorReturns;
 import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
 import net.openhft.chronicle.bytes.MethodWriterListener;
 import net.openhft.chronicle.core.io.Closeable;
@@ -11,7 +12,7 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
     private final Supplier<MethodWriterInvocationHandler> supplier;
     private boolean recordHistory;
     private MethodWriterListener methodWriterListener;
-    private MethodWriterInterceptor methodWriterInterceptor;
+    private MethodWriterInterceptorReturns methodWriterInterceptorReturns;
     private Closeable closeable;
     private boolean disableThreadSafe;
     private String genericEvent;
@@ -33,7 +34,12 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
     }
 
     public void methodWriterInterceptor(MethodWriterInterceptor methodWriterInterceptor) {
-        this.methodWriterInterceptor = methodWriterInterceptor;
+        this.methodWriterInterceptorReturns = MethodWriterInterceptorReturns.of(methodWriterInterceptor);
+    }
+
+    public MethodWriterInvocationHandlerSupplier methodWriterInterceptorReturns(MethodWriterInterceptorReturns methodWriterInterceptorReturns) {
+        this.methodWriterInterceptorReturns = methodWriterInterceptorReturns;
+        return this;
     }
 
     public void onClose(Closeable closeable) {
@@ -55,7 +61,7 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
     private MethodWriterInvocationHandler newHandler() {
         MethodWriterInvocationHandler h = supplier.get();
         h.genericEvent(genericEvent);
-        h.methodWriterInterceptor(methodWriterListener, methodWriterInterceptor);
+        h.methodWriterInterceptorReturns(methodWriterListener, methodWriterInterceptorReturns);
         h.onClose(closeable);
         h.recordHistory(recordHistory);
         h.useMethodIds(useMethodIds);

@@ -36,8 +36,7 @@ public class LongConversionTest {
         LongConversionTest.WriteWithLong write = wire.methodWriter(LongConversionTest.WriteWithLong.class);
         assertSame(write, write.to(0x12345));
 
-        assertEquals("to: 12345\n" +
-                "---\n", wire.toString());
+        assertEquals("to: 12345\n", wire.toString());
 
         StringWriter sw = new StringWriter();
         LongConversionTest.WriteWithLong read = Mocker.logging(LongConversionTest.WriteWithLong.class, "", sw);

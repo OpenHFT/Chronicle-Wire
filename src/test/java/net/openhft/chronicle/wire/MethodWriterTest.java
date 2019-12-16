@@ -69,7 +69,11 @@ public class MethodWriterTest {
         // this should work for replaying events back through a VanillaMethodReader.
         // Change made in Chronicle-Core https://github.com/OpenHFT/Chronicle-Core/commit/86c532d20a304c990cb2a82ebd84ffb355660fd3
         writer.callsMethod("hello,world,bye");
-        assertEquals("callsMethod: \"hello,world,bye\"\n" +
+        assertEquals("method: [\n" +
+                "  hello,\n" +
+                "  world,\n" +
+                "  bye\n" +
+                "]\n" +
                 "---\n", wire.toString());
     }
 

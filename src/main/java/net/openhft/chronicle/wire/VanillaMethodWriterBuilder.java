@@ -29,7 +29,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
@@ -41,7 +43,7 @@ import java.util.function.Supplier;
 public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterBuilder<T> {
 
     private static final boolean DISABLE_PROXY_GEN = Boolean.getBoolean("disableProxyCodegen");
-    private final List<Class> interfaces = new ArrayList<>();
+    private final Set<Class> interfaces = new LinkedHashSet<>();
     private static final Map<Set<Class>, Class> setOfClassesToClassName = new ConcurrentHashMap<>();
     private final String packageName;
     private ClassLoader classLoader;
@@ -50,8 +52,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
     public VanillaMethodWriterBuilder(@NotNull Class<T> tClass, @NotNull Supplier<MethodWriterInvocationHandler> handlerSupplier) {
         packageName = tClass.getPackage().getName();
-        interfaces.add(Closeable.class);
-        interfaces.add(tClass);
+        addInterface(tClass);
         classLoader = tClass.getClassLoader();
         this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(handlerSupplier);
     }
@@ -66,7 +67,16 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
     @NotNull
     public MethodWriterBuilder<T> addInterface(Class additionalClass) {
+        if (interfaces.contains(additionalClass))
+            return this;
+
         interfaces.add(additionalClass);
+        for (Method method : additionalClass.getMethods()) {
+            Class<?> returnType = method.getReturnType();
+            if (returnType.isInterface() && returnType != DocumentContext.class) {
+                addInterface(returnType);
+            }
+        }
         return this;
     }
 
@@ -129,6 +139,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
             try {
                 // this will create proxy that does not suffer from the arg[] issue
                 LinkedHashSet<Class> setOfInterfaces = new LinkedHashSet<>(interfaces);
+                setOfInterfaces.add(Closeable.class);
                 final Class<T> o = setOfClassesToClassName.computeIfAbsent(setOfInterfaces,
                         i -> generatedProxyClass(packageName, i));
                 if (o != null)

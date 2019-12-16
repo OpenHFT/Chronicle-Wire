@@ -35,7 +35,6 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
@@ -234,9 +233,10 @@ public class TextWire extends AbstractWire implements Wire {
     @Override
     @NotNull
     public <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
-        Class[] interfaces = ObjectUtils.addAll(tClass, additional);
-        //noinspection unchecked
-        return (T) Proxy.newProxyInstance(tClass.getClassLoader(), interfaces, newTextMethodWriterInvocationHandler(interfaces));
+        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass, () -> newTextMethodWriterInvocationHandler(tClass));
+        for (Class aClass : additional)
+            builder.addInterface(aClass);
+        return builder.build();
     }
 
     @NotNull
