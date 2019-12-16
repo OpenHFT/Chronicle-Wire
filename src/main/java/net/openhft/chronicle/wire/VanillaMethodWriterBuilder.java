@@ -73,7 +73,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         interfaces.add(additionalClass);
         for (Method method : additionalClass.getMethods()) {
             Class<?> returnType = method.getReturnType();
-            if (returnType.isInterface() && Jvm.dontChain(returnType)) {
+            if (returnType.isInterface() && !Jvm.dontChain(returnType)) {
                 addInterface(returnType);
             }
         }
