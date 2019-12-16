@@ -19,7 +19,7 @@ package net.openhft.chronicle.wire;
 /**
  * Created by Peter Lawrey on 16/03/16.
  *
- * @deprecated use BytesInBinaryMarshallable
+ * @deprecated most like SelfDescribingMarshallable should be used instead.
  */
 @Deprecated
 public abstract class AbstractMarshallable extends AbstractCommonMarshallable {
