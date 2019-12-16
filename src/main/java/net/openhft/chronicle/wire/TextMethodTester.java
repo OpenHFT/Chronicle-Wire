@@ -275,6 +275,14 @@ public class TextMethodTester<T> {
         return this;
     }
 
+    public TextMethodTester<T> methodReaderInterceptor(MethodReaderInterceptor methodReaderInterceptor) {
+        this.methodReaderInterceptorReturns = (m, o, a, i) -> {
+            methodReaderInterceptor.intercept(m, o, a, i);
+            return null;
+        };
+        return this;
+    }
+
     public TextMethodTester<T> methodReaderInterceptorReturns(MethodReaderInterceptorReturns methodReaderInterceptorReturns) {
         this.methodReaderInterceptorReturns = methodReaderInterceptorReturns;
         return this;
