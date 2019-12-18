@@ -3253,7 +3253,8 @@ public class TextWire extends AbstractWire implements Wire {
             int ch = bytes.readUnsignedByte(bytes.readPosition() - 1);
             if (ch == ':' || ch == '}' || ch == ']')
                 bytes.readSkip(-1);
-            else if (ch > 'F' && (ch < 'a' || ch > 'f')) {
+
+            else if ((ch > 'F' && (ch < 'a' || ch > 'f'))) {
                 throw new IllegalArgumentException("Unexpected character in number '" + (char) ch + '\'');
             }
         }
@@ -3273,7 +3274,7 @@ public class TextWire extends AbstractWire implements Wire {
             return v;
         }
 
-        private void skipType() {
+        void skipType() {
             long peek = bytes.peekUnsignedByte();
             if (peek == '!') {
                 @NotNull StringBuilder sb = acquireStringBuilder();

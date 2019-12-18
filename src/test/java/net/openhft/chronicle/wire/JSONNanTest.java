@@ -25,9 +25,31 @@ public class JSONNanTest {
         Bytes b = Bytes.fromString("\"\":{\"value\":null}");
         Wire wire = WireType.JSON.apply(b);
         Dto value = wire.read().object(Dto.class);
-        Assert.assertEquals(Double.NaN, value.value);
-
+        Assert.assertTrue(Double.isNaN(value.value));
     }
+
+    /**
+     * JSON spec says that NAN should be written as null
+     */
+    @Test
+    public void readNanWithSpaceAteEnd() {
+        Bytes b = Bytes.fromString("\"\":{\"value\":null }");
+        Wire wire = WireType.JSON.apply(b);
+        Dto value = wire.read().object(Dto.class);
+        Assert.assertTrue(Double.isNaN(value.value));
+    }
+
+    /**
+     * JSON spec says that NAN should be written as null
+     */
+    @Test
+    public void readNanWithSpaceAtStart() {
+        Bytes b = Bytes.fromString("\"\":{\"value\": null}");
+        Wire wire = WireType.JSON.apply(b);
+        Dto value = wire.read().object(Dto.class);
+        Assert.assertTrue(Double.isNaN(value.value));
+    }
+
 
     public static class Dto extends SelfDescribingMarshallable {
         double value;

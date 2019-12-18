@@ -18,6 +18,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -66,7 +67,52 @@ public class JSONWire extends TextWire {
     @NotNull
     @Override
     protected TextValueIn createValueIn() {
-        return new JSONValueIn();
+        return new JSONValueIn() {
+
+            @Override
+            public double float64() {
+                consumePadding();
+                valueIn.skipType();
+                switch (peekCode()) {
+                    case '[':
+                    case '{':
+                        Jvm.warn().on(getClass(), "Unable to read " + valueIn.object() + " as a double.");
+                        return 0;
+                }
+
+                boolean isNull;
+
+                long l = bytes.readLimit();
+                try {
+                    bytes.readLimit(bytes.readPosition() + 4);
+                    isNull = "null".contentEquals(bytes);
+                } finally {
+                    bytes.readLimit(l);
+                }
+
+                if (isNull) {
+                    bytes.readSkip("null".length());
+                    consumePadding();
+                }
+
+                final double v = isNull ? Double.NaN : bytes.parseDouble();
+                checkRewind();
+                return v;
+            }
+
+            @Override
+            public void checkRewind() {
+                int ch = bytes.readUnsignedByte(bytes.readPosition() - 1);
+                if (ch == ':' || ch == '}' || ch == ']')
+                    bytes.readSkip(-1);
+
+                    // !='l' to handle 'null' in JSON wire
+                else if (ch != 'l' && (ch > 'F' && (ch < 'a' || ch > 'f'))) {
+                    throw new IllegalArgumentException("Unexpected character in number '" + (char) ch + '\'');
+                }
+            }
+
+        };
     }
 
     @Override
