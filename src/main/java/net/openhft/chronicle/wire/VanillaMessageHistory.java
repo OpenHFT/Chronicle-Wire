@@ -162,13 +162,13 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
         sources = 0;
-        wire.read(() -> "sources").sequence(this, (t, in) -> {
+        wire.read("sources").sequence(this, (t, in) -> {
             while (in.hasNextSequenceItem()) {
                 t.addSource(in.int32(), in.int64());
             }
         });
         timings = 0;
-        wire.read(() -> "timings").sequence(this, (t, in) -> {
+        wire.read("timings").sequence(this, (t, in) -> {
             while (in.hasNextSequenceItem()) {
                 t.addTiming(in.int64());
             }
@@ -186,14 +186,22 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
-        wire.write("sources").sequence(this, (t, out) -> {
-            for (int i = 0; i < t.sources; i++) {
-                out.uint32(t.sourceIdArray[i]);
-                out.int64_0x(t.sourceIndexArray[i]);
-            }
-        });
+        BytesOut bytes = wire.bytes();
+        bytes.comment("sources");
+        wire.write("sources")
+                .sequence(this, (t, out) -> {
+                    Bytes<?> b = out.wireOut().bytes();
+                    for (int i = 0; i < t.sources; i++) {
+                        b.comment("source id & index");
+                        out.uint32(t.sourceIdArray[i]);
+                        out.int64_0x(t.sourceIndexArray[i]);
+                    }
+                });
+        bytes.comment("timings");
         wire.write("timings").sequence(this, (t, out) -> {
+            Bytes<?> b = out.wireOut().bytes();
             for (int i = 0; i < t.timings; i++) {
+                b.comment("timing in nanos");
                 out.int64(t.timingsArray[i]);
             }
             out.int64(System.nanoTime());
@@ -215,15 +223,18 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     @SuppressWarnings("AssertWithSideEffects")
     @Override
-    public void writeMarshallable(@NotNull BytesOut bytes) {
+    public void writeMarshallable(@NotNull BytesOut b) {
+        BytesOut<?> bytes = b;
         assert start(bytes.writePosition());
-        bytes.writeUnsignedByte(sources);
+        bytes.comment("sources")
+                .writeUnsignedByte(sources);
         for (int i = 0; i < sources; i++)
             bytes.writeInt(sourceIdArray[i]);
         for (int i = 0; i < sources; i++)
             bytes.writeLong(sourceIndexArray[i]);
 
-        bytes.writeUnsignedByte(timings + 1);// one more time for this output
+        bytes.comment("timings")
+                .writeUnsignedByte(timings + 1);// one more time for this output
         for (int i = 0; i < timings; i++) {
             bytes.writeLong(timingsArray[i]);
         }

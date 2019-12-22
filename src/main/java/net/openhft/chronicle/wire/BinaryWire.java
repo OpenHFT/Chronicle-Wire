@@ -1706,7 +1706,10 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         private void setSequenceLength(long position) {
-            int length = Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range.");
+            long length0 = bytes.writePosition() - position - 4;
+            int length = bytes instanceof HexDumpBytes
+                    ? (int) length0
+                    : Maths.toInt32(length0, "Document length %,d out of 32-bit int range.");
             boolean debug = false;
             assert debug = true;
             if (debug) {
