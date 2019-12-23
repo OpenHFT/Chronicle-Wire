@@ -19,6 +19,7 @@ import java.util.Set;
 @SuppressWarnings("restriction")
 public enum GeneratedProxyClass {
     ;
+    static final boolean DUMP_CODE = Boolean.getBoolean("dumpCode");
 
     /**
      * @param classLoader
@@ -89,10 +90,15 @@ public enum GeneratedProxyClass {
         createProxyMethods(methods, sb);
         sb.append("}\n");
 
+        if (DUMP_CODE)
+            System.out.println(sb);
 
         try {
             // synchronizing due to ConcurrentModificationException in net.openhft.compiler.MyJavaFileManager.buffers
             synchronized (CompilerUtils.CACHED_COMPILER) {
+//                URLClassLoader loader = (URLClassLoader) classLoader;
+//                URL[] urLs = loader.getURLs();
+//                Stream.of(urLs).forEach(System.out::println);
                 return CompilerUtils.CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, sb.toString());
             }
         } catch (Throwable e) {

@@ -46,15 +46,25 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     private final Set<Class> interfaces = new LinkedHashSet<>();
     private static final Map<Set<Class>, Class> setOfClassesToClassName = new ConcurrentHashMap<>();
     private final String packageName;
+    private final String className;
     private ClassLoader classLoader;
     @NotNull
     private final MethodWriterInvocationHandlerSupplier handlerSupplier;
+    private final String proxyClassName;
 
     public VanillaMethodWriterBuilder(@NotNull Class<T> tClass, @NotNull Supplier<MethodWriterInvocationHandler> handlerSupplier) {
         packageName = tClass.getPackage().getName();
+        className = tClass.getSimpleName();
+        proxyClassName = className + "MethodWriter";
         addInterface(tClass);
         classLoader = tClass.getClassLoader();
+
         this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(handlerSupplier);
+        try {
+            proxyClass = Class.forName(packageName + "." + proxyClassName);
+        } catch (ClassNotFoundException e) {
+            // ignored
+        }
     }
 
     private static AtomicLong proxyCount = new AtomicLong();
@@ -117,8 +127,8 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
     private Class<?> proxyClass;
 
-    private <T> Class generatedProxyClass(String packageName, Set<Class> interfaces) {
-        return GeneratedProxyClass.from(packageName, interfaces, "Proxy" + proxyCount.incrementAndGet(), classLoader);
+    private Class generatedProxyClass(Set<Class> interfaces) {
+        return GeneratedProxyClass.from(packageName, interfaces, proxyClassName, classLoader);
     }
 
     @NotNull
@@ -135,13 +145,13 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
             }
         }
 
-        if (! DISABLE_PROXY_GEN) {
+        if (!DISABLE_PROXY_GEN) {
             try {
                 // this will create proxy that does not suffer from the arg[] issue
                 LinkedHashSet<Class> setOfInterfaces = new LinkedHashSet<>(interfaces);
                 setOfInterfaces.add(Closeable.class);
                 final Class<T> o = setOfClassesToClassName.computeIfAbsent(setOfInterfaces,
-                        i -> generatedProxyClass(packageName, i));
+                        this::generatedProxyClass);
                 if (o != null)
                     return o.getConstructor(MethodWriterInvocationHandlerSupplier.class)
                             .newInstance(handlerSupplier);
