@@ -107,9 +107,16 @@ public class YamlTokeniser {
                 return readText(indent);
             }
             case '&':
-                return YamlToken.ANCHOR;
+                if (in.peekUnsignedByte() > ' ') {
+                    readAnchor();
+                    return YamlToken.ANCHOR;
+                }
+                break;
             case '*':
-                return YamlToken.ALIAS;
+                if (in.peekUnsignedByte() > ' ') {
+                    readAnchor();
+                    return YamlToken.ALIAS;
+                }
             case '|':
                 readLiteral();
                 return YamlToken.TEXT;
@@ -192,6 +199,17 @@ public class YamlTokeniser {
 
     private void readLiteral() {
         throw new UnsupportedOperationException();
+    }
+
+    private void readAnchor() {
+        blockStart = in.readPosition();
+        while (true) {
+            blockEnd = in.readPosition();
+            int ch = in.readUnsignedByte();
+            if (ch <= ' ')
+                return;
+        }
+
     }
 
     private YamlToken readText(int indent) {
