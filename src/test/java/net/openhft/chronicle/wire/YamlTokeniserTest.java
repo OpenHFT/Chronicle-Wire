@@ -2,7 +2,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -274,7 +273,6 @@ public class YamlTokeniserTest {
                 doTest("yaml/spec/2_10_NodeAppearsTwiceInThisDocument.yaml"));
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void eg2_11() {
         assertEquals(
@@ -290,6 +288,7 @@ public class YamlTokeniserTest {
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
                         "TEXT 2001-07-23\n" +
+                        "SEQUENCE_END \n" +
                         "MAPPING_KEY \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
