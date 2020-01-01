@@ -24,7 +24,7 @@ public class YamlTokeniserTest {
     }
 
     @Test
-    public void one() {
+    public void eg2_1() {
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
@@ -39,7 +39,7 @@ public class YamlTokeniserTest {
     }
 
     @Test
-    public void two() {
+    public void eg2_3() {
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
@@ -68,7 +68,7 @@ public class YamlTokeniserTest {
     }
 
     @Test
-    public void three() {
+    public void eg2_4() {
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
@@ -101,7 +101,7 @@ public class YamlTokeniserTest {
     }
 
     @Test
-    public void threeB() {
+    public void eg2_4B() {
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
@@ -131,6 +131,60 @@ public class YamlTokeniserTest {
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_4_SequenceOfMappings-fixed.yaml"));
+    }
+
+    @Test
+    public void eg2_6() {
+        assertEquals("DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT Mark McGwire\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT hr\n" +
+                        "INTEGER  65\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT avg\n" +
+                        "DECIMAL  0.278\n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT Sammy Sosa\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT hr\n" +
+                        "INTEGER  63\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT avg\n" +
+                        "DECIMAL  0.288\n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/spec/2_6_MappingOfMappings.yaml"));
+    }
+
+    @Test
+    public void eg2_7() {
+        assertEquals("COMMENT Ranking of 1998 home runs\n" +
+                        "DIRECTIVES_END \n" +
+                        "SEQUENCE_START \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TEXT Mark McGwire\n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TEXT Sammy Sosa\n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TEXT Ken Griffey\n" +
+                        "COMMENT Team ranking\n" +
+                        "SEQUENCE_END \n" +
+                        "DOCUMENT_END \n" +
+                        "DIRECTIVES_END \n" +
+                        "SEQUENCE_START \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TEXT Chicago Cubs\n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TEXT St Louis Cardinals\n" +
+                        "SEQUENCE_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/spec/2_7_TwoDocumentsInAStream.yaml"));
     }
 
 

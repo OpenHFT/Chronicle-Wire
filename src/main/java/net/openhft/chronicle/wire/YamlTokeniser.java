@@ -4,64 +4,11 @@ import net.openhft.chronicle.bytes.BytesIn;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
-
-enum YamlToken {
-    COMMENT,
-    TAG,
-    DIRECTIVE,
-    DIRECTIVES_END,
-    DOCUMENT_END,
-    MAPPING_START,
-    MAPPING_KEY,
-    MAPPING_END,
-    SEQUENCE_START,
-    SEQUENCE_END,
-    SEQUENCE_ENTRY,
-    INTEGER,
-    DECIMAL,
-    TEXT,
-    ANCHOR,
-    ALIAS,
-    RESERVED,
-    NONE
-}
-
-enum YamlType {
-    DOC_START,
-    DOC_END,
-    B_SEQUENCE_COMPACT_START,
-    B_SEQUENCE_START,
-    B_MAP_COMPACT_KEY,
-    B_MAP_COMPACT_VALUE,
-    B_MAP_KEY,
-    B_MAP_VALUE,
-    B_LITERAL_START,
-    B_LITERAL_END,
-    B_FOLD_START,
-    B_FOLD_END,
-    DOUBLEQUOTE_START,
-    DOUBLEQUOTE_END,
-    SINGLEQUOTE_START,
-    SINGLEQUOTE_END,
-    CAST_TYPE,
-    SCALAR,
-    INDENT,
-    DEDENT,
-    F_SEQUENCE_START,
-    F_SEQUENCE_END,
-    F_MAP_START,
-    F_MAP_END,
-    F_MAP_KEY,
-    F_SEP,
-
-}
 
 public class YamlTokeniser {
+
     private static final int INIT_SIZE = 10;
-    private static final Set<YamlToken> HEADER = EnumSet.of(YamlToken.COMMENT, YamlToken.DIRECTIVE, YamlToken.DIRECTIVES_END, YamlToken.NONE);
     private final BytesIn in;
     private final List<YamlToken> pushed = new ArrayList<>();
     private int lastContext = 0;
@@ -108,7 +55,6 @@ public class YamlTokeniser {
             case -1:
                 if (context() == YamlToken.NONE)
                     return YamlToken.NONE;
-                pushed.add(YamlToken.DOCUMENT_END);
                 popAll();
                 context(YamlToken.NONE);
                 return popPushed();
@@ -136,8 +82,10 @@ public class YamlTokeniser {
                 if (next == '-') {
                     if (in.peekUnsignedByte(in.readPosition() + 1) == '-' &&
                             in.peekUnsignedByte(in.readPosition() + 2) <= ' ') {
+                        in.readSkip(2);
                         pushed.add(YamlToken.DIRECTIVES_END);
                         popAll();
+                        contextPush(YamlToken.DIRECTIVES_END, 0);
                         return popPushed();
                     }
                 }
@@ -152,6 +100,7 @@ public class YamlTokeniser {
                 if (next == '.') {
                     if (in.peekUnsignedByte(in.readPosition() + 1) == '.' &&
                             in.peekUnsignedByte(in.readPosition() + 2) <= ' ') {
+                        in.readSkip(2);
                         pushed.add(YamlToken.DOCUMENT_END);
                         popAll();
                         context(YamlToken.NONE);
@@ -367,7 +316,7 @@ public class YamlTokeniser {
 
     private void popAll() {
         int pos = pushed.size();
-        while (lastContext > 1) {
+        while (lastContext > 0) {
             contextPop();
         }
         reversePushed(pos);
@@ -449,7 +398,7 @@ public class YamlTokeniser {
         consumeSpaces();
         blockStart = blockEnd = in.readPosition();
         while (true) {
-            int ch = in.peekUnsignedByte();
+            int ch = in.readUnsignedByte();
             if (ch < 0 || ch == '\n' || ch == '\r')
                 return;
             if (ch > ' ')
@@ -518,10 +467,5 @@ public class YamlTokeniser {
     // set the context
     public void context(YamlToken token) {
         contextArray[lastContext] = token;
-    }
-
-    private class YamlContext {
-        YamlToken token;
-        int indent;
     }
 }
