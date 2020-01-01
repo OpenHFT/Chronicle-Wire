@@ -251,7 +251,6 @@ public class YamlTokeniser {
     }
 
     private void endOfWords() {
-        blockEnd = in.readPosition() - 1;
         in.readSkip(-1);
     }
 
@@ -318,8 +317,9 @@ public class YamlTokeniser {
                     endOfWords();
                     return;
             }
+            if (ch > ' ')
+                blockEnd = in.readPosition();
         }
-        blockEnd = in.readPosition();
     }
 
     private YamlToken popPushed() {
@@ -361,7 +361,6 @@ public class YamlTokeniser {
     }
 
     private void readQuoted(char stop) {
-        in.readSkip(1);
         blockStart = in.readPosition();
         while (in.readRemaining() > 0) {
             int ch = in.readUnsignedByte();

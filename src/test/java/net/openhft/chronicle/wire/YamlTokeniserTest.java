@@ -294,7 +294,7 @@ public class YamlTokeniserTest {
                         "SEQUENCE_ENTRY \n" +
                         "TEXT New York Yankees\n" +
                         "SEQUENCE_ENTRY \n" +
-                        "TEXT Atlanta Braves \n" +
+                        "TEXT Atlanta Braves\n" +
                         "SEQUENCE_END \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
@@ -302,11 +302,79 @@ public class YamlTokeniserTest {
                         "SEQUENCE_ENTRY \n" +
                         "TEXT 2001-08-12\n" +
                         "SEQUENCE_ENTRY \n" +
-                        "TEXT 2001-08-14 \n" +
+                        "TEXT 2001-08-14\n" +
                         "SEQUENCE_END \n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_11MappingBetweenSequences.yaml"));
+    }
+
+    @Test
+    public void eg2_12() {
+        assertEquals(
+                "DIRECTIVES_END \n" +
+                        "COMMENT Products purchased\n" +
+                        "SEQUENCE_START \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT item\n" +
+                        "TEXT Super Hoop\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT quantity\n" +
+                        "TEXT 1\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT item\n" +
+                        "TEXT Basketball\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT quantity\n" +
+                        "TEXT 4\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT item\n" +
+                        "TEXT Big Shoes\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT quantity\n" +
+                        "TEXT 1\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/spec/2_12CompactNestedMapping.yaml"));
+    }
+
+    @Test
+    public void eg2_17() {
+        assertEquals(
+                "DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT unicode\n" +
+                        "TEXT Sosa did fine.\\u263A\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT control\n" +
+                        "TEXT \\b1998\\t1999\\t2000\\n\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT hex esc\n" +
+                        "TEXT \\x0d\\x0a is \\r\\n\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT single\n" +
+                        "TEXT \"Howdy!\" he cried.\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT quoted\n" +
+                        "TEXT  # Not a \n" +
+                        "TEXT comment\n" +
+                        "TEXT .\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT tie-fighter\n" +
+                        "TEXT |\\-*-/|\n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/spec/2_17QuotedScalars.yaml"));
     }
 
 
