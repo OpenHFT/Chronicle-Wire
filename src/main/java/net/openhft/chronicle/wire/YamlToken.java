@@ -12,8 +12,6 @@ public enum YamlToken {
     SEQUENCE_START,
     SEQUENCE_END,
     SEQUENCE_ENTRY,
-    INTEGER,
-    DECIMAL,
     TEXT,
     ANCHOR,
     ALIAS,

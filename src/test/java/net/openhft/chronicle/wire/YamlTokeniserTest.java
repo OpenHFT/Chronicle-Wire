@@ -78,10 +78,10 @@ public class YamlTokeniserTest {
                         "TEXT Mark McGwire\n" +
                         "MAPPING_KEY \n" +
                         "TEXT hr\n" +
-                        "INTEGER  65\n" +
+                        "TEXT 65\n" +
                         "MAPPING_KEY \n" +
                         "TEXT avg\n" +
-                        "DECIMAL  0.278\n" +
+                        "TEXT 0.278\n" +
                         "MAPPING_END \n" +
                         "SEQUENCE_ENTRY \n" +
                         "MAPPING_START \n" +
@@ -90,10 +90,10 @@ public class YamlTokeniserTest {
                         "TEXT Sammy Sosa\n" +
                         "MAPPING_KEY \n" +
                         "TEXT hr\n" +
-                        "INTEGER  63\n" +
+                        "TEXT 63\n" +
                         "MAPPING_KEY \n" +
                         "TEXT avg\n" +
-                        "DECIMAL  0.288\n" +
+                        "TEXT 0.288\n" +
                         "MAPPING_END \n" +
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
@@ -111,10 +111,10 @@ public class YamlTokeniserTest {
                         "TEXT Mark McGwire\n" +
                         "MAPPING_KEY \n" +
                         "TEXT hr\n" +
-                        "INTEGER  65\n" +
+                        "TEXT 65\n" +
                         "MAPPING_KEY \n" +
                         "TEXT avg\n" +
-                        "DECIMAL  0.278\n" +
+                        "TEXT 0.278\n" +
                         "MAPPING_END \n" +
                         "SEQUENCE_ENTRY \n" +
                         "MAPPING_START \n" +
@@ -123,10 +123,10 @@ public class YamlTokeniserTest {
                         "TEXT Sammy Sosa\n" +
                         "MAPPING_KEY \n" +
                         "TEXT hr\n" +
-                        "INTEGER  63\n" +
+                        "TEXT 63\n" +
                         "MAPPING_KEY \n" +
                         "TEXT avg\n" +
-                        "DECIMAL  0.288\n" +
+                        "TEXT 0.288\n" +
                         "MAPPING_END \n" +
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
@@ -142,20 +142,20 @@ public class YamlTokeniserTest {
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT hr\n" +
-                        "INTEGER  65\n" +
+                        "TEXT 65\n" +
                         "MAPPING_KEY \n" +
                         "TEXT avg\n" +
-                        "DECIMAL  0.278\n" +
+                        "TEXT 0.278\n" +
                         "MAPPING_END \n" +
                         "MAPPING_KEY \n" +
                         "TEXT Sammy Sosa\n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT hr\n" +
-                        "INTEGER  63\n" +
+                        "TEXT 63\n" +
                         "MAPPING_KEY \n" +
                         "TEXT avg\n" +
-                        "DECIMAL  0.288\n" +
+                        "TEXT 0.288\n" +
                         "MAPPING_END \n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
@@ -185,6 +185,37 @@ public class YamlTokeniserTest {
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_7_TwoDocumentsInAStream.yaml"));
+    }
+
+    @Test
+    public void eg2_8() {
+        assertEquals("DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT time\n" +
+                        "TEXT 20:03:20\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT player\n" +
+                        "TEXT Sammy Sosa\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT action\n" +
+                        "TEXT strike (miss)\n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n" +
+                        "DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT time\n" +
+                        "TEXT 20:03:47\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT player\n" +
+                        "TEXT Sammy Sosa\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT action\n" +
+                        "TEXT grand slam\n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/spec/2_8_PlayByPlayFeed.yaml"));
     }
 
 

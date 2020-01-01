@@ -90,9 +90,6 @@ public class YamlTokeniser {
                     }
                 }
                 in.readSkip(-1);
-                if (next >= '0' && next <= '9') {
-                    return readNumber(indent);
-                }
                 return readText(indent);
             }
             case '.': {
@@ -101,16 +98,12 @@ public class YamlTokeniser {
                     if (in.peekUnsignedByte(in.readPosition() + 1) == '.' &&
                             in.peekUnsignedByte(in.readPosition() + 2) <= ' ') {
                         in.readSkip(2);
-                        pushed.add(YamlToken.DOCUMENT_END);
                         popAll();
                         context(YamlToken.NONE);
                         return popPushed();
                     }
                 }
                 in.readSkip(-1);
-                if (next >= '0' && next <= '9') {
-                    return readNumber(indent);
-                }
                 return readText(indent);
             }
             case '&':
@@ -130,8 +123,6 @@ public class YamlTokeniser {
             case '`':
                 readReserved();
                 return YamlToken.RESERVED;
-            case '+':
-                return readNumber(indent);
             case '!':
                 return YamlToken.TAG;
             case '{':
@@ -147,6 +138,7 @@ public class YamlTokeniser {
                 return next0();
 
             // other symbols
+            case '+':
             case '$':
             case '(':
             case ')':
@@ -161,8 +153,6 @@ public class YamlTokeniser {
             case '~':
         }
         in.readSkip(-1);
-        if (ch >= '0' && ch <= '9')
-            return readNumber(indent);
         return readText(indent);
     }
 
@@ -209,46 +199,6 @@ public class YamlTokeniser {
         if (isFieldEnd())
             return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent * 2 + 1);
         return YamlToken.TEXT;
-    }
-
-    @NotNull
-    private YamlToken readNumber(int indent) {
-        blockStart = in.readPosition() - 1;
-        YamlToken token = YamlToken.INTEGER;
-        int ch;
-        LOOP:
-        while (true) {
-            ch = in.readUnsignedByte();
-            switch (ch) {
-                case '_':
-                case '-':
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    continue;
-                case '.':
-                case 'e':
-                case 'E':
-                    token = YamlToken.DECIMAL;
-                    continue;
-                default:
-                    break LOOP;
-            }
-        }
-        if (ch >= 0)
-            in.readSkip(-1);
-        blockEnd = in.readPosition();
-
-        if (isFieldEnd())
-            return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, token, indent * 2 + 1);
-        return token;
     }
 
     private void readWords() {
