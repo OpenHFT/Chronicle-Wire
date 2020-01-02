@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesIn;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,6 +21,7 @@ public class YamlTokeniser {
             YamlToken.MAPPING_END,
             YamlToken.DIRECTIVES_END);
     private final BytesIn in;
+    private Bytes temp = null;
     private final List<YamlToken> pushed = new ArrayList<>();
     private int lastContext = 0;
     private YamlToken[] contextArray = new YamlToken[INIT_SIZE];
@@ -61,6 +63,8 @@ public class YamlTokeniser {
     private YamlToken next0() {
         consumeWhitespace();
         blockStart = blockEnd = in.readPosition();
+        if (temp != null)
+            temp.clear();
         int indent = Math.toIntExact(in.readPosition() - lineStart);
         int ch = in.readUnsignedByte();
         switch (ch) {
@@ -123,6 +127,7 @@ public class YamlTokeniser {
                 in.readSkip(-1);
                 return readText(indent);
             }
+/* TODO
             case '&':
                 if (in.peekUnsignedByte() > ' ') {
                     readAnchor();
@@ -134,12 +139,18 @@ public class YamlTokeniser {
                     readAnchor();
                     return YamlToken.ALIAS;
                 }
+*/
             case '|':
-                readLiteral();
-                return YamlToken.TEXT;
+                if (in.peekUnsignedByte() <= ' ') {
+                    readLiteral();
+                    return YamlToken.TEXT;
+                }
+                break;
             case '>':
-                readFolded();
-                return YamlToken.TEXT;
+                if (in.peekUnsignedByte() <= ' ') {
+                    readFolded();
+                    return YamlToken.TEXT;
+                }
             case '%':
                 readDirective();
                 return YamlToken.DIRECTIVE;
@@ -148,6 +159,7 @@ public class YamlTokeniser {
                 readReserved();
                 return YamlToken.RESERVED;
             case '!':
+                readWord();
                 return YamlToken.TAG;
             case '{':
                 return flow(YamlToken.MAPPING_START, indent);
@@ -164,10 +176,11 @@ public class YamlTokeniser {
             case ':':
                 if (in.peekUnsignedByte() <= ' ') {
                     int pos = pushed.size();
-                    while (context() != YamlToken.MAPPING_KEY) {
+                    while (context() != YamlToken.MAPPING_KEY && lastContext > 0) {
                         contextPop();
                     }
-                    contextPop();
+                    if (lastContext > 0)
+                        contextPop();
                     reversePushed(pos);
                     return pushed.isEmpty() ? next0() : popPushed();
                 }
@@ -206,15 +219,77 @@ public class YamlTokeniser {
     }
 
     private void readDirective() {
-        throw new UnsupportedOperationException();
+        readWords();
     }
 
     private void readFolded() {
-        throw new UnsupportedOperationException();
+        readLiteral(false);
+    }
+
+    private Bytes temp() {
+        if (temp == null)
+            temp = Bytes.elasticHeapByteBuffer(32);
+        temp.clear();
+        return temp;
     }
 
     private void readLiteral() {
-        throw new UnsupportedOperationException();
+        readLiteral(true);
+    }
+
+    private void readLiteral(boolean withNewLines) {
+        readNewline(); // read to the end of the line.
+        readIndent();
+        int indent2 = Math.toIntExact(in.readPosition() - lineStart);
+        blockStart = blockEnd = -1;
+        Bytes temp = temp();
+        long start = in.readPosition();
+        while (true) {
+            int ch = in.readUnsignedByte();
+            if (ch < 0) {
+                temp.write(in, start, in.readPosition() - start);
+                break;
+            }
+            if (ch == '\r' || ch == '\n') {
+                if (withNewLines)
+                    readNewline();
+                else
+                    in.readSkip(-1);
+                temp.write(in, start, in.readPosition() - start);
+                if (!withNewLines)
+                    if (temp.peekUnsignedByte(temp.writePosition() - 1) > ' ')
+                        temp.append(' ');
+
+                readIndent();
+                int indent3 = Math.toIntExact(in.readPosition() - lineStart);
+                if (indent3 < indent2)
+                    return;
+                if (indent3 > indent2)
+                    in.readPosition(lineStart + indent2);
+                start = in.readPosition();
+            }
+        }
+    }
+
+    private void readIndent() {
+        while (true) {
+            int ch = in.peekUnsignedByte();
+            if (ch < 0 || ch > ' ')
+                break;
+            in.readSkip(1);
+            if (ch < ' ')
+                lineStart = in.readPosition();
+        }
+    }
+
+    private void readNewline() {
+        while (true) {
+            int ch = in.peekUnsignedByte();
+            if (ch < 0 || ch >= ' ')
+                break;
+            in.readSkip(1);
+            lineStart = in.readPosition();
+        }
     }
 
     private void readAnchor() {
@@ -288,6 +363,22 @@ public class YamlTokeniser {
             contextPop();
         }
         reversePushed(pos);
+    }
+
+    private void readWord() {
+        blockStart = in.readPosition();
+        boolean isQuote = in.peekUnsignedByte() == '<';
+        while (true) {
+            int ch = in.readUnsignedByte();
+            if (ch <= ' ' || (ch == ',' && !isQuote)) {
+                endOfWords();
+                break;
+            }
+            blockEnd = in.readPosition();
+            if (isQuote && ch == '>') {
+                break;
+            }
+        }
     }
 
     private void readWords() {
@@ -368,7 +459,7 @@ public class YamlTokeniser {
                 blockEnd = in.readPosition() - 1;
                 return;
             }
-            if (ch < ' ') {
+            if (ch < 0) {
                 throw new IllegalStateException("Unterminated quotes " + in.subBytes(blockStart - 1, in.readPosition()));
             }
         }
@@ -445,6 +536,8 @@ public class YamlTokeniser {
 
     // for testing.
     public String text() {
+        if (blockEnd < 0 && temp != null)
+            return temp.toString();
         if (blockStart == blockEnd || NO_TEXT.contains(last))
             return "";
         StringBuilder sb = Wires.acquireStringBuilder();

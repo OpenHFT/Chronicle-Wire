@@ -40,6 +40,27 @@ public class YamlTokeniserTest {
     }
 
     @Test
+    public void eg2_2() {
+        assertEquals("DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT hr\n" +
+                        "TEXT 65\n" +
+                        "COMMENT Home runs\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT avg\n" +
+                        "TEXT 0.278\n" +
+                        "COMMENT Batting average\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT rbi\n" +
+                        "TEXT 147\n" +
+                        "COMMENT Runs Batted In\n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/spec/2_2_MappingScalarsToScalars.yaml"));
+    }
+
+    @Test
     public void eg2_3() {
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -132,6 +153,46 @@ public class YamlTokeniserTest {
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_4_SequenceOfMappings-fixed.yaml"));
+    }
+
+    @Ignore("TODO Handle properly")
+    @Test
+    public void eg2_5() {
+        assertEquals("DIRECTIVES_END \n" +
+                        "SEQUENCE_START \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "SEQUENCE_START \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TEXT name\n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TEXT hr\n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TEXT avg\n" +
+                        "SEQUENCE_END \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "SEQUENCE_START \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TEXT Mark McGwire\n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TEXT 65\n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TEXT 0.278\n" +
+                        "SEQUENCE_END \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "SEQUENCE_START \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TEXT Sammy Sosa\n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TEXT 63\n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TEXT 0.288\n" +
+                        "SEQUENCE_END \n" +
+                        "SEQUENCE_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/spec/2_5_SequenceOfSequences.yaml"));
     }
 
     @Test
@@ -257,14 +318,13 @@ public class YamlTokeniserTest {
                         "TEXT Mark McGwire\n" +
                         "COMMENT Following node labeled SS\n" +
                         "SEQUENCE_ENTRY \n" +
-                        "ANCHOR SS\n" +
-                        "TEXT Sammy Sosa\n" +
+                        "TEXT &SS Sammy Sosa\n" +
                         "SEQUENCE_END \n" +
                         "MAPPING_KEY \n" +
                         "TEXT rbi\n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
-                        "ALIAS SS\n" +
+                        "TEXT *SS\n" +
                         "COMMENT Subsequent occurrence\n" +
                         "SEQUENCE_ENTRY \n" +
                         "TEXT Ken Griffey\n" +
@@ -349,6 +409,54 @@ public class YamlTokeniserTest {
     }
 
     @Test
+    public void eg2_13() {
+        assertEquals(
+                "COMMENT ASCII Art\n" +
+                        "DIRECTIVES_END \n" +
+                        "TEXT \\//||\\/||\n" +
+                        "// ||  ||__\n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/spec/2_13InLiteralsNewlinesArePreserved.yaml").replace("\r", ""));
+    }
+
+    @Test
+    public void eg2_14() {
+        assertEquals(
+                "DIRECTIVES_END \n" +
+                        "TEXT Mark McGwire's year was crippled by a knee injury.\n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/spec/2_14InThefoldedScalars.yaml").replace("\r", ""));
+    }
+
+    @Test
+    public void eg2_15() {
+        assertEquals(
+                "TEXT Sammy Sosa completed another fine season with great stats.   63 Home Runs   0.288 Batting Average What a year!\n",
+                doTest("yaml/spec/2_15FoldedNewlines.yaml").replace("\r", ""));
+    }
+
+    @Test
+    public void eg2_16() {
+        assertEquals(
+                "DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT name\n" +
+                        "TEXT Mark McGwire\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT accomplishment\n" +
+                        "TEXT Mark set a major league home run record in 1998. \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT stats\n" +
+                        "TEXT 65 Home Runs\n" +
+                        "0.278 Batting Average\n" +
+                        "\n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/spec/2_16IndentationDeterminesScope.yaml").replace("\r", ""));
+    }
+
+    @Test
     public void eg2_17() {
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -376,6 +484,23 @@ public class YamlTokeniserTest {
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_17QuotedScalars.yaml"));
+    }
+
+    @Ignore("TODO FIX")
+    @Test
+    public void eg2_18() {
+        assertEquals(
+                "DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT plain\\nThis unquoted scalar\\nspans many lines.\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT quoted\n" +
+                        "TEXT So does this\n" +
+                        "  quoted scalar.\\n\n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/spec/2_18Multi_lineFlowScalars.yaml"));
     }
 
     @Test
@@ -470,142 +595,318 @@ public class YamlTokeniserTest {
                 doTest("yaml/spec/2_22Timestamps.yaml"));
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void eg2_23() {
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
-                        "TEXT canonical\n" +
-                        "TEXT 2001-12-15T02:59:43.1Z\n" +
+                        "TEXT not-date\n" +
+                        "TAG !str\n" +
+                        "TEXT 2002-04-28\n" +
                         "MAPPING_KEY \n" +
-                        "TEXT iso8601\n" +
-                        "TEXT 2001-12-14t21:59:43.10-05:00\n" +
+                        "TEXT picture\n" +
+                        "TAG !binary\n" +
+                        "TEXT R0lGODlhDAAMAIQAAP//9/X\n" +
+                        "17unp5WZmZgAAAOfn515eXv\n" +
+                        "Pz7Y6OjuDg4J+fn5OTk6enp\n" +
+                        "56enmleECcgggoBADs=\n" +
+                        "\n" +
+                        "\n" +
                         "MAPPING_KEY \n" +
-                        "TEXT spaced\n" +
-                        "TEXT 2001-12-14 21:59:43.10 -5\n" +
-                        "MAPPING_KEY \n" +
-                        "TEXT date\n" +
-                        "TEXT 2002-12-14\n" +
+                        "TEXT application specific tag\n" +
+                        "TAG something\n" +
+                        "TEXT The semantics of the tag\n" +
+                        "above may be different for\n" +
+                        "different documents.\n" +
+                        "\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_23VariousExplicitTags.yaml"));
+                doTest("yaml/spec/2_23VariousExplicitTags.yaml")
+                        .replace("\r", ""));
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void eg2_24() {
         assertEquals(
-                "DIRECTIVES_END \n" +
+                "DIRECTIVE TAG ! tag:clarkevans.com,2002\n" +
+                        "DIRECTIVES_END \n" +
+                        "TAG shape\n" +
+                        "COMMENT Use the ! handle for presenting\n" +
+                        "COMMENT tag:clarkevans.com,2002:circle\n" +
+                        "SEQUENCE_START \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TAG circle\n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
-                        "TEXT canonical\n" +
-                        "TEXT 2001-12-15T02:59:43.1Z\n" +
+                        "TEXT center\n" +
+                        "TEXT &ORIGIN\n" +
+                        "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
-                        "TEXT iso8601\n" +
-                        "TEXT 2001-12-14t21:59:43.10-05:00\n" +
+                        "TEXT x\n" +
+                        "TEXT 73\n" +
                         "MAPPING_KEY \n" +
-                        "TEXT spaced\n" +
-                        "TEXT 2001-12-14 21:59:43.10 -5\n" +
-                        "MAPPING_KEY \n" +
-                        "TEXT date\n" +
-                        "TEXT 2002-12-14\n" +
+                        "TEXT y\n" +
+                        "TEXT 129\n" +
                         "MAPPING_END \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT radius\n" +
+                        "TEXT 7\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TAG line\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT start\n" +
+                        "TEXT *ORIGIN\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT finish\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT x\n" +
+                        "TEXT 89\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT y\n" +
+                        "TEXT 102\n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "TAG label\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT start\n" +
+                        "TEXT *ORIGIN\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT color\n" +
+                        "TEXT 0xFFEEBB\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT text\n" +
+                        "TEXT Pretty vector drawing.\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_24GlobalTags.yaml"));
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void eg2_25() {
         assertEquals(
-                "DIRECTIVES_END \n" +
+                "COMMENT Sets are represented as a\n" +
+                        "COMMENT Mapping where each key is\n" +
+                        "COMMENT associated with a null value\n" +
+                        "DIRECTIVES_END \n" +
+                        "TAG !set\n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
-                        "TEXT canonical\n" +
-                        "TEXT 2001-12-15T02:59:43.1Z\n" +
+                        "TEXT Mark McGwire\n" +
                         "MAPPING_KEY \n" +
-                        "TEXT iso8601\n" +
-                        "TEXT 2001-12-14t21:59:43.10-05:00\n" +
+                        "TEXT Sammy Sosa\n" +
                         "MAPPING_KEY \n" +
-                        "TEXT spaced\n" +
-                        "TEXT 2001-12-14 21:59:43.10 -5\n" +
-                        "MAPPING_KEY \n" +
-                        "TEXT date\n" +
-                        "TEXT 2002-12-14\n" +
+                        "TEXT Ken Griff\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_25UnorderedSets.yaml"));
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void eg2_26() {
         assertEquals(
                 "DIRECTIVES_END \n" +
+                        "TAG !omap\n" +
+                        "SEQUENCE_START \n" +
+                        "SEQUENCE_ENTRY \n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
-                        "TEXT canonical\n" +
-                        "TEXT 2001-12-15T02:59:43.1Z\n" +
-                        "MAPPING_KEY \n" +
-                        "TEXT iso8601\n" +
-                        "TEXT 2001-12-14t21:59:43.10-05:00\n" +
-                        "MAPPING_KEY \n" +
-                        "TEXT spaced\n" +
-                        "TEXT 2001-12-14 21:59:43.10 -5\n" +
-                        "MAPPING_KEY \n" +
-                        "TEXT date\n" +
-                        "TEXT 2002-12-14\n" +
+                        "TEXT Mark McGwire\n" +
+                        "TEXT 65\n" +
                         "MAPPING_END \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT Sammy Sosa\n" +
+                        "TEXT 63\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT Ken Griffy\n" +
+                        "TEXT 58\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_26OrderedMappings.yaml"));
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void eg2_27() {
         assertEquals(
                 "DIRECTIVES_END \n" +
+                        "TAG <tag:clarkevans.com,2002:invoice>\n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
-                        "TEXT canonical\n" +
-                        "TEXT 2001-12-15T02:59:43.1Z\n" +
-                        "MAPPING_KEY \n" +
-                        "TEXT iso8601\n" +
-                        "TEXT 2001-12-14t21:59:43.10-05:00\n" +
-                        "MAPPING_KEY \n" +
-                        "TEXT spaced\n" +
-                        "TEXT 2001-12-14 21:59:43.10 -5\n" +
+                        "TEXT invoice\n" +
+                        "TEXT 34843\n" +
                         "MAPPING_KEY \n" +
                         "TEXT date\n" +
-                        "TEXT 2002-12-14\n" +
+                        "TEXT 2001-01-23\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT bill-to\n" +
+                        "TEXT &id001\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT given\n" +
+                        "TEXT Chris\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT family\n" +
+                        "TEXT Dumars\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT address\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT lines\n" +
+                        "TEXT 458 Walkman Dr.\n" +
+                        "Suite #292\n" +
+                        "\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT city\n" +
+                        "TEXT Royal Oak\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT state\n" +
+                        "TEXT MI\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT postal\n" +
+                        "TEXT 48046\n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT ship-to\n" +
+                        "TEXT *id001\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT product\n" +
+                        "SEQUENCE_START \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT sku\n" +
+                        "TEXT BL394D\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT quantity\n" +
+                        "TEXT 4\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT description\n" +
+                        "TEXT Basketball\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT price\n" +
+                        "TEXT 450.00\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT sku\n" +
+                        "TEXT BL4438H\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT quantity\n" +
+                        "TEXT 1\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT description\n" +
+                        "TEXT Super Hoop\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT price\n" +
+                        "TEXT 2392.00\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_END \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT tax\n" +
+                        "TEXT 251.42\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT total\n" +
+                        "TEXT 4443.52\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT comments\n" +
+                        "TEXT Late afternoon is best.\n" +
+                        "TEXT Backup contact is Nancy\n" +
+                        "TEXT Billsmer @ 338-4338.\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_27Invoice.yaml"));
+                doTest("yaml/spec/2_27Invoice.yaml")
+                        .replace("\r", ""));
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void eg2_28() {
         assertEquals(
                 "DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
-                        "TEXT canonical\n" +
-                        "TEXT 2001-12-15T02:59:43.1Z\n" +
+                        "TEXT Time\n" +
+                        "TEXT 2001-11-23 15:01:42 -5\n" +
                         "MAPPING_KEY \n" +
-                        "TEXT iso8601\n" +
-                        "TEXT 2001-12-14t21:59:43.10-05:00\n" +
+                        "TEXT User\n" +
+                        "TEXT ed\n" +
                         "MAPPING_KEY \n" +
-                        "TEXT spaced\n" +
-                        "TEXT 2001-12-14 21:59:43.10 -5\n" +
+                        "TEXT Warning\n" +
+                        "TEXT This is an error message\n" +
+                        "TEXT for the log file\n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n" +
+                        "DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
-                        "TEXT date\n" +
-                        "TEXT 2002-12-14\n" +
+                        "TEXT Time\n" +
+                        "TEXT 2001-11-23 15:02:31 -5\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT User\n" +
+                        "TEXT ed\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT Warning\n" +
+                        "TEXT A slightly different error\n" +
+                        "TEXT message.\n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n" +
+                        "DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT Date\n" +
+                        "TEXT 2001-11-23 15:03:17 -5\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT User\n" +
+                        "TEXT ed\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT Fatal\n" +
+                        "TEXT Unknown variable \"bar\"\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT Stack\n" +
+                        "SEQUENCE_START \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT file\n" +
+                        "TEXT TopClass.py\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT line\n" +
+                        "TEXT 23\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT code\n" +
+                        "TEXT x = MoreObject(\"345\\n\")\n" +
+                        "\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT file\n" +
+                        "TEXT MoreClass.py\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT line\n" +
+                        "TEXT 58\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT code\n" +
+                        "TEXT |-\n" +
+                        "TEXT foo = bar\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_END \n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_28LogFile.yaml"));
+                doTest("yaml/spec/2_28LogFile.yaml").replace("\r", ""));
     }
 
 
