@@ -13,7 +13,7 @@ public class YamlTokeniserTest {
     public static String doTest(String resource) {
         try {
             Bytes bytes = BytesUtil.readFile(resource);
-            bytes = Bytes.from(bytes.toString().replace("\r", ""));
+//            bytes = Bytes.from(bytes.toString().replace("\r", ""));
             YamlTokeniser yn = new YamlTokeniser(bytes);
             StringBuilder sb = new StringBuilder();
             for (YamlToken t; (t = yn.next()) != YamlToken.NONE; ) {
