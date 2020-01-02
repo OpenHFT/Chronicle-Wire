@@ -110,7 +110,7 @@ public class YamlTokeniser {
                         return popPushed();
                     }
                 }
-                in.readSkip(-1);
+                unreadLast();
                 return readText(indent);
             }
             case '.': {
@@ -124,7 +124,7 @@ public class YamlTokeniser {
                         return popPushed();
                     }
                 }
-                in.readSkip(-1);
+                unreadLast();
                 return readText(indent);
             }
 /* TODO
@@ -198,7 +198,7 @@ public class YamlTokeniser {
             case '_':
             case '~':
         }
-        in.readSkip(-1);
+        unreadLast();
         return readText(indent);
     }
 
@@ -251,10 +251,9 @@ public class YamlTokeniser {
                 break;
             }
             if (ch == '\r' || ch == '\n') {
+                unreadLast();
                 if (withNewLines)
                     readNewline();
-                else
-                    in.readSkip(-1);
                 temp.write(in, start, in.readPosition() - start);
                 if (!withNewLines)
                     if (temp.peekUnsignedByte(temp.writePosition() - 1) > ' ')
@@ -277,7 +276,7 @@ public class YamlTokeniser {
             if (ch < 0 || ch > ' ')
                 break;
             in.readSkip(1);
-            if (ch < ' ')
+            if (ch == '\r' || ch == '\n')
                 lineStart = in.readPosition();
         }
     }
@@ -325,7 +324,7 @@ public class YamlTokeniser {
         return YamlToken.TEXT;
     }
 
-    private void endOfWords() {
+    private void unreadLast() {
         in.readSkip(-1);
     }
 
@@ -371,7 +370,7 @@ public class YamlTokeniser {
         while (true) {
             int ch = in.readUnsignedByte();
             if (ch <= ' ' || (ch == ',' && !isQuote)) {
-                endOfWords();
+                unreadLast();
                 break;
             }
             blockEnd = in.readPosition();
@@ -390,13 +389,13 @@ public class YamlTokeniser {
                     if (in.peekUnsignedByte() > ' ')
                         continue;
                     // is a field.
-                    endOfWords();
+                    unreadLast();
                     return;
                 case ',':
                     if (context() != YamlToken.SEQUENCE_START
                             && context() != YamlToken.MAPPING_START)
                         continue;
-                    endOfWords();
+                    unreadLast();
                     return;
                 case '[':
                 case ']':
@@ -405,7 +404,7 @@ public class YamlTokeniser {
                 case '#':
                 case '\n':
                 case '\r':
-                    endOfWords();
+                    unreadLast();
                     return;
             }
             if (ch > ' ')
@@ -467,9 +466,9 @@ public class YamlTokeniser {
 
     private boolean isFieldEnd() {
         consumeSpaces();
-        if (in.peekUnsignedByte() == ':' &&
-                in.peekUnsignedByte(in.readPosition() + 1) <= ' ') {
-            in.readSkip(Math.min(2, in.readRemaining()));
+        if (in.peekUnsignedByte() == ':') {
+            int ch = in.peekUnsignedByte(in.readPosition() + 1);
+            in.readSkip((ch == '\t' || ch == ' ') ? 2 : 1);
             return true;
         }
         return false;
@@ -481,8 +480,12 @@ public class YamlTokeniser {
         blockStart = blockEnd = in.readPosition();
         while (true) {
             int ch = in.readUnsignedByte();
-            if (ch < 0 || ch == '\n' || ch == '\r')
+            if (ch < 0)
                 return;
+            if (ch == '\n' || ch == '\r') {
+                unreadLast();
+                return;
+            }
             if (ch > ' ')
                 blockEnd = in.readPosition();
         }
