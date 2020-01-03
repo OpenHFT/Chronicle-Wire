@@ -12,6 +12,7 @@ import java.util.Set;
 public class YamlTokeniser {
 
     private static final int INIT_SIZE = 10;
+    private static final int NO_INDENT = -1;
     static final Set<YamlToken> NO_TEXT = EnumSet.of(
             YamlToken.SEQUENCE_START,
             YamlToken.SEQUENCE_ENTRY,
@@ -32,7 +33,14 @@ public class YamlTokeniser {
     private long blockStart = 0; // inclusive
     private long blockEnd = 0; // inclusive
     private int flowDepth = Integer.MAX_VALUE;
-    private static final int NO_INDENT = -1;
+
+    public void reset() {
+        pushed.clear();
+        lastContext = 0;
+        last = YamlToken.NONE;
+        flowDepth = Integer.MAX_VALUE;
+        lineStart = blockStart = blockEnd = 0;
+    }
 
     public YamlToken context() {
         return contextArray[lastContext];
@@ -539,16 +547,23 @@ public class YamlTokeniser {
 
     // for testing.
     public String text() {
-        if (blockEnd < 0 && temp != null)
-            return temp.toString();
-        if (blockStart == blockEnd || NO_TEXT.contains(last))
-            return "";
         StringBuilder sb = Wires.acquireStringBuilder();
+        text(sb);
+        return sb.length() == 0 ? "" : sb.toString();
+    }
+
+    public void text(StringBuilder sb) {
+        if (blockEnd < 0 && temp != null) {
+            sb.append(temp.toString());
+            return;
+        }
+        sb.setLength(0);
+        if (blockStart == blockEnd || NO_TEXT.contains(last))
+            return;
         long pos = in.readPosition();
         in.readPosition(blockStart);
         in.parseUtf8(sb, Math.toIntExact(blockEnd - blockStart));
         in.readPosition(pos);
-        return sb.toString();
     }
 
     public void push(YamlToken token) {
@@ -558,5 +573,19 @@ public class YamlTokeniser {
     // set the context
     public void context(YamlToken token) {
         contextArray[lastContext] = token;
+    }
+
+    public boolean isText(String s) {
+        // TODO make more efficient.
+        return text().equals(s);
+    }
+
+    @Override
+    public String toString() {
+        return current() + " " + text();
+    }
+
+    public int lastContext() {
+        return lastContext;
     }
 }

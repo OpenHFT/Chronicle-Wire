@@ -27,13 +27,13 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     @SuppressWarnings("rawtypes")
     public static final BytesStore MSG_SEP = BytesStore.from("---");
     @Nullable
-    protected TextWire wire;
+    protected AbstractWire wire;
     protected boolean present, notComplete;
 
     private boolean metaData;
     private long readPosition, readLimit;
 
-    public TextReadDocumentContext(@Nullable TextWire wire) {
+    public TextReadDocumentContext(@Nullable AbstractWire wire) {
         this.wire = wire;
     }
 

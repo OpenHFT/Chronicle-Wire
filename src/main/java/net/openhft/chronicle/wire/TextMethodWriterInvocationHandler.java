@@ -33,10 +33,10 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
     // TODO remove this hack for TextMethodTester
     public static boolean ENABLE_EOD = true;
     @NotNull
-    private final TextWire wire;
+    private final AbstractWire wire;
     private final Map<Method, Consumer<Object[]>> visitorConverter = new LinkedHashMap<>();
 
-    TextMethodWriterInvocationHandler(@NotNull TextWire wire) {
+    TextMethodWriterInvocationHandler(@NotNull AbstractWire wire) {
         this.wire = wire;
         recordHistory = wire.recordHistory();
     }
