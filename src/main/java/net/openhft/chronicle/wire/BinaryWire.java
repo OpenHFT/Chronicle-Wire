@@ -2127,12 +2127,6 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
-        @Nullable
-        public <E> E object(@Nullable E using, @Nullable Class clazz) {
-            return Wires.object0(this, using, clazz);
-        }
-
-        @Override
         public void resetState() {
             stack.reset();
         }

@@ -4,14 +4,11 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesIn;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class YamlTokeniser {
 
-    private static final int INIT_SIZE = 10;
+    private static final int INIT_SIZE = 7;
     private static final int NO_INDENT = -1;
     static final Set<YamlToken> NO_TEXT = EnumSet.of(
             YamlToken.SEQUENCE_START,
@@ -27,6 +24,7 @@ public class YamlTokeniser {
     private int lastContext = 0;
     private YamlToken[] contextArray = new YamlToken[INIT_SIZE];
     private int[] contextIndent = new int[INIT_SIZE];
+    private YamlKeys[] contextKeys = new YamlKeys[INIT_SIZE];
     @NotNull
     private YamlToken last = YamlToken.NONE;
     private long lineStart = 0;
@@ -405,7 +403,18 @@ public class YamlTokeniser {
                         continue;
                     unreadLast();
                     return;
-                case '[':
+
+                case '[': {
+                    long pos = in.readPosition();
+                    if (in.peekUnsignedByte(pos - 2) > ' ' &&
+                            in.peekUnsignedByte() == ']') {
+                        in.readSkip(1);
+                        blockEnd = pos + 1;
+                        return;
+                    }
+                    unreadLast();
+                    return;
+                }
                 case ']':
                 case '{':
                 case '}':
@@ -449,9 +458,17 @@ public class YamlTokeniser {
     }
 
     private void contextPush0(YamlToken indented, int indent) {
+        if (lastContext == contextArray.length) {
+            int newLength = 2 * lastContext;
+            contextArray = Arrays.copyOf(contextArray, newLength);
+            contextIndent = Arrays.copyOf(contextIndent, newLength);
+            contextKeys = Arrays.copyOf(contextKeys, newLength);
+        }
         lastContext++;
         contextArray[lastContext] = indented;
         contextIndent[lastContext] = indent;
+        if (contextKeys[lastContext] != null)
+            contextKeys[lastContext].reset();
     }
 
     private int contextIndent() {
@@ -587,5 +604,12 @@ public class YamlTokeniser {
 
     public int lastContext() {
         return lastContext;
+    }
+
+    public YamlKeys keys() {
+        YamlKeys key = contextKeys[lastContext];
+        if (key == null)
+            contextKeys[lastContext] = key = new YamlKeys();
+        return key;
     }
 }

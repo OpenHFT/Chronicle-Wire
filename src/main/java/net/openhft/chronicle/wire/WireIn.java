@@ -37,7 +37,8 @@ public interface WireIn extends WireCommon, MarshallableIn {
         while (isNotEmptyAfterPadding()) {
             long len = bytes().readRemaining();
             final K k = readEvent(kClass);
-            @Nullable final V v = getValueIn().object(vClass);
+            @Nullable final V v = getValueIn()
+                    .object(vClass);
             if (len == bytes().readRemaining())
                 break;
             map.put(k, v);
