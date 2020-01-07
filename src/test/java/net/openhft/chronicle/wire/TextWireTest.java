@@ -59,6 +59,21 @@ public class TextWireTest {
     Bytes bytes;
 
     @Test
+    public void testWhiteSpaceInType() {
+        try {
+            Object o = Marshallable.fromString("key: !net.openhft.chronicle.wire.BinaryWire2Test$DTO {\n" +
+                    "  type:            !type               String\n" +
+                    "}\n");
+
+            Assert.assertTrue(o != null);
+
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+    }
+
+    @Test
     public void comment() {
         @NotNull Wire wire = createWire();
         wire.writeComment("\thi: omg");
