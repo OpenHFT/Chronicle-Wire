@@ -94,7 +94,7 @@ public class VanillaMethodReader implements MethodReader {
             Supplier<Object> original = () -> o;
             Supplier<Object> inarray = () -> context[0];
             Set<Class> interfaces = new LinkedHashSet<>();
-            for (Class<?> anInterface : oClass.getInterfaces()) {
+            for (Class<?> anInterface : ReflectionUtil.interfaces(oClass)) {
                 addParsletsFor(interfaces, anInterface, ignoreDefault, methodsHandled, methodFilterOnFirstArg, o, context, original, inarray);
             }
         }
