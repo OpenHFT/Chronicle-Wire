@@ -3475,4 +3475,17 @@ public class TextWire extends AbstractWire implements Wire {
             return TextWire.this.toString();
         }
     }
+
+    /**
+     * Loads an Object from a file
+     *
+     * @param filename the file-path containing the object
+     * @param <T>      the type of the object to load
+     * @return an instance of the object created fromt the data in the file
+     * @throws IOException if the file can not be found or read
+     */
+    public static <T> T load(String filename) throws IOException {
+        return (T) TextWire.fromFile(filename).readObject();
+    }
+
 }
