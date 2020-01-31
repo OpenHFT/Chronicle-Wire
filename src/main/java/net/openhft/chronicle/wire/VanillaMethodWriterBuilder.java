@@ -33,7 +33,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 /*
@@ -66,8 +65,6 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
             // ignored
         }
     }
-
-    private static AtomicLong proxyCount = new AtomicLong();
 
     @NotNull
     public MethodWriterBuilder<T> classLoader(ClassLoader classLoader) {
