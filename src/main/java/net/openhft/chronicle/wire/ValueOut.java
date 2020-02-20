@@ -583,9 +583,9 @@ public interface ValueOut {
                 return fixedFloat64((double) value);
             case "java.lang.Float":
                 return fixedFloat32((float) value);
-            case "[java.lang.String;":
+            case "[Ljava.lang.String;":
                 return array(v -> Stream.of((String[]) value).forEach(v::text), String[].class);
-            case "[java.lang.Object;":
+            case "[Ljava.lang.Object;":
                 return array(v -> Stream.of((Object[]) value).forEach(v::object), Object[].class);
             case "java.time.LocalTime":
                 return optionalTyped(LocalTime.class).time((LocalTime) value);
