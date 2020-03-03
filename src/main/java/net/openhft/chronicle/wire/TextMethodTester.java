@@ -101,7 +101,7 @@ public class TextMethodTester<T> {
     public TextMethodTester run() throws IOException {
         if (REGRESS_TESTS)
             System.err.println("NOTE: Regressing tests, please check your commits");
-        Wire wire2 = new TextWire(Bytes.allocateElasticDirect()).useTextDocuments().addTimeStamps(true);
+        Wire wire2 = createWire(Bytes.allocateElasticDirect());
         MethodWriterBuilder<T> methodWriterBuilder = wire2.methodWriterBuilder(outputClass)
                 .methodWriterListener(methodWriterListener);
         if (genericEvent != null) methodWriterBuilder.genericEvent(genericEvent);
@@ -115,7 +115,7 @@ public class TextMethodTester<T> {
                 : new Object[]{component};
 
         if (setup != null) {
-            Wire wire0 = new TextWire(BytesUtil.readFile(setup));
+            Wire wire0 = createWire(BytesUtil.readFile(setup));
 
             MethodReader reader0 = wire0.methodReaderBuilder()
                     .methodReaderInterceptorReturns(methodReaderInterceptorReturns)
@@ -127,7 +127,7 @@ public class TextMethodTester<T> {
             wire2.bytes().clear();
         }
 
-        Wire wire = new TextWire(BytesUtil.readFile(input));
+        Wire wire = createWire(BytesUtil.readFile(input));
 
         if (!REGRESS_TESTS) {
             // expected
@@ -225,9 +225,13 @@ public class TextMethodTester<T> {
         return this;
     }
 
+    protected Wire createWire(Bytes bytes) {
+        return new TextWire(bytes).useTextDocuments().addTimeStamps(true);
+    }
+
     @NotNull
     protected StringBuilder loadLastValues() throws IOException {
-        Wire wireOut = new TextWire(BytesUtil.readFile(output));
+        Wire wireOut = createWire(BytesUtil.readFile(output));
         Map<String, String> events = new TreeMap<>();
         consumeDocumentSeparator(wireOut);
         while (wireOut.hasMore()) {
