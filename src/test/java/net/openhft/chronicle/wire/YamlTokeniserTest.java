@@ -14,10 +14,10 @@ public class YamlTokeniserTest {
         try {
             Bytes bytes = BytesUtil.readFile(resource);
 //            bytes = Bytes.from(bytes.toString().replace("\r", ""));
-            YamlTokeniser yn = new YamlTokeniser(bytes);
+            YamlTokeniser yt = new YamlTokeniser(bytes);
             StringBuilder sb = new StringBuilder();
-            for (YamlToken t; (t = yn.next()) != YamlToken.NONE; ) {
-                sb.append(t).append(' ').append(yn.text()).append('\n');
+            while (yt.next() != YamlToken.NONE) {
+                sb.append(yt).append('\n');
             }
             return sb.toString();
         } catch (IOException e) {
@@ -464,24 +464,22 @@ public class YamlTokeniserTest {
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT unicode\n" +
-                        "TEXT Sosa did fine.\\u263A\n" +
+                        "TEXT \" Sosa did fine.\\u263A\n" +
                         "MAPPING_KEY \n" +
                         "TEXT control\n" +
-                        "TEXT \\b1998\\t1999\\t2000\\n\n" +
+                        "TEXT \" \\b1998\\t1999\\t2000\\n\n" +
                         "MAPPING_KEY \n" +
                         "TEXT hex esc\n" +
-                        "TEXT \\x0d\\x0a is \\r\\n\n" +
+                        "TEXT \" \\x0d\\x0a is \\r\\n\n" +
                         "MAPPING_KEY \n" +
                         "TEXT single\n" +
-                        "TEXT \"Howdy!\" he cried.\n" +
+                        "TEXT ' \"Howdy!\" he cried.\n" +
                         "MAPPING_KEY \n" +
                         "TEXT quoted\n" +
-                        "TEXT  # Not a \n" +
-                        "TEXT comment\n" +
-                        "TEXT .\n" +
+                        "TEXT '  # Not a ''comment''.\n" +
                         "MAPPING_KEY \n" +
                         "TEXT tie-fighter\n" +
-                        "TEXT |\\-*-/|\n" +
+                        "TEXT ' |\\-*-/|\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_17QuotedScalars.yaml"));
@@ -568,7 +566,7 @@ public class YamlTokeniserTest {
                         "SEQUENCE_END \n" +
                         "MAPPING_KEY \n" +
                         "TEXT string\n" +
-                        "TEXT 012345\n" +
+                        "TEXT ' 012345\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_21Miscellaneous.yaml"));

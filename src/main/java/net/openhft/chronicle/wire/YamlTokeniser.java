@@ -31,13 +31,14 @@ public class YamlTokeniser {
     private long blockStart = 0; // inclusive
     private long blockEnd = 0; // inclusive
     private int flowDepth = Integer.MAX_VALUE;
+    private char blockQuote = 0;
 
     public void reset() {
         pushed.clear();
         lastContext = 0;
         last = YamlToken.NONE;
         flowDepth = Integer.MAX_VALUE;
-        lineStart = blockStart = blockEnd = 0;
+        lineStart = blockStart = blockEnd = blockQuote = 0;
     }
 
     public YamlToken context() {
@@ -319,6 +320,7 @@ public class YamlTokeniser {
     }
 
     private YamlToken readText(int indent) {
+        blockQuote = 0;
         readWords();
         if (isFieldEnd())
             return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent * 2);
@@ -476,10 +478,20 @@ public class YamlTokeniser {
     }
 
     private void readQuoted(char stop) {
+        blockQuote = stop;
         blockStart = in.readPosition();
         while (in.readRemaining() > 0) {
             int ch = in.readUnsignedByte();
+            if (ch == '\\') {
+                ch = in.readUnsignedByte();
+            }
             if (ch == stop) {
+                // ignore double single quotes.
+                int ch2 = in.peekUnsignedByte();
+                if (ch2 == stop) {
+                    in.readSkip(1);
+                    continue;
+                }
                 blockEnd = in.readPosition() - 1;
                 return;
             }
@@ -562,6 +574,10 @@ public class YamlTokeniser {
         contextPush0(context, indent);
     }
 
+    public char blockQuote() {
+        return blockQuote;
+    }
+
     // for testing.
     public String text() {
         StringBuilder sb = Wires.acquireStringBuilder();
@@ -599,7 +615,7 @@ public class YamlTokeniser {
 
     @Override
     public String toString() {
-        return current() + " " + text();
+        return current() + " " + (blockQuote == 0 || current().name().endsWith("_END") ? "" : blockQuote + " ") + text();
     }
 
     public int lastContext() {

@@ -84,7 +84,9 @@ public class TextCompatibilityTest {
                 return;
             expected = filename.equals(expectedFilename) ? bytes.toString() : BytesUtil.readFile(filename).toString();
             try {
-                Object o = new YamlWire(bytes).getValueIn().object();
+                Object o = new YamlWire(bytes)
+                        .getValueIn()
+                        .object();
                 Bytes out = Bytes.elasticHeapByteBuffer(256);
                 String s = new TextWire(out).getValueOut().object(o).toString();
                 if (s.trim().equals(expected.trim()))

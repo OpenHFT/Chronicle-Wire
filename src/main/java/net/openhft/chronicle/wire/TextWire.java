@@ -77,7 +77,7 @@ public class TextWire extends AbstractWire implements Wire {
 
     static {
         assert unregister(TYPE) & unregister(BINARY);
-        for (char ch : "?0123456789+- ',#:{}[]|>!\\".toCharArray())
+        for (char ch : "?%&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
         for (char ch : "?,#:{}[]|>\\".toCharArray())
             QUOTE_CHARS.set(ch);

@@ -20,6 +20,7 @@ import net.openhft.chronicle.bytes.ref.TextBooleanReference;
 import net.openhft.chronicle.bytes.ref.TextIntReference;
 import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
 import net.openhft.chronicle.bytes.ref.TextLongReference;
+import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -44,6 +45,7 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.*;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
 import static net.openhft.chronicle.bytes.BytesUtil.unregister;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
@@ -70,7 +72,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
     static {
         assert unregister(TYPE) & unregister(BINARY);
-        for (char ch : "?0123456789+- ',#:{}[]|>!\\".toCharArray())
+        for (char ch : "?%&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
         for (char ch : "?,#:{}[]|>\\".toCharArray())
             QUOTE_CHARS.set(ch);
@@ -363,6 +365,7 @@ public class YamlWire extends AbstractWire implements Wire {
     @Nullable
     @Override
     public <K> K readEvent(@NotNull Class<K> expectedClass) {
+        consumePadding();
         if (yt.current() == YamlToken.MAPPING_KEY) {
             YamlToken next = yt.next();
             if (next == YamlToken.TEXT) {
@@ -404,8 +407,6 @@ public class YamlWire extends AbstractWire implements Wire {
                     yt.next();
                     break;
                 default:
-                    if (yt.lastContext() == 2 && yt.current() == YamlToken.MAPPING_START)
-                        yt.next();
                     return;
             }
         }
@@ -1909,7 +1910,34 @@ public class YamlWire extends AbstractWire implements Wire {
         @NotNull
         public WireIn bytes(@NotNull ReadBytesMarshallable bytesConsumer) {
             consumePadding();
-            throw new UnsupportedOperationException(yt.toString());
+            // TODO needs to be made much more efficient.
+            @NotNull StringBuilder sb = acquireStringBuilder();
+            if (yt.current() == YamlToken.TAG) {
+                bytes.readSkip(1);
+                yt.text(sb);
+                yt.next();
+                if (yt.current() != YamlToken.TEXT)
+                    throw new UnsupportedOperationException(yt.toString());
+                @Nullable byte[] uncompressed = Compression.uncompress(sb, yt, t -> {
+                    @NotNull StringBuilder sb2 = acquireStringBuilder();
+                    t.text(sb2);
+                    return Base64.getDecoder().decode(sb2.toString());
+                });
+                if (uncompressed != null) {
+                    bytesConsumer.readMarshallable(Bytes.wrapForRead(uncompressed));
+
+                } else if (StringUtils.isEqual(sb, "!null")) {
+                    bytesConsumer.readMarshallable(null);
+                    yt.next();
+
+                } else {
+                    throw new IORuntimeException("Unsupported type=" + sb);
+                }
+            } else {
+                textTo(sb);
+                bytesConsumer.readMarshallable(Bytes.wrapForRead(sb.toString().getBytes(ISO_8859_1)));
+            }
+            return YamlWire.this;
         }
 
         @Override
@@ -2357,6 +2385,10 @@ public class YamlWire extends AbstractWire implements Wire {
             }
 
             consumePadding();
+            if (yt.current() == YamlToken.SEQUENCE_ENTRY) {
+                yt.next();
+                consumePadding();
+            }
             switch (yt.current()) {
                 case TAG:
                     typePrefix(null, (o, x) -> { /* sets acquireStringBuilder(); */});
@@ -2635,28 +2667,35 @@ public class YamlWire extends AbstractWire implements Wire {
             }
             switch (yt.current()) {
                 case MAPPING_START:
-                    if (type == SortedMap.class && !(using instanceof SortedMap))
-                        using = new TreeMap();
-                    if (type == Object.class || Map.class.isAssignableFrom(type) || using instanceof Map)
-                        return map(Object.class, Object.class, (Map) using);
+                    if (type != null) {
+                        if (type == SortedMap.class && !(using instanceof SortedMap))
+                            using = new TreeMap();
+                        if (type == Object.class || Map.class.isAssignableFrom(type) || using instanceof Map)
+                            return map(Object.class, Object.class, (Map) using);
+                    }
                     return valueIn.marshallableAsMap(Object.class, Object.class);
                 case SEQUENCE_START:
                     return readSequence(type);
                 case TEXT:
-                    return valueIn.readNumber();
+                    Object o = valueIn.readNumberOrText();
+                    return ObjectUtils.convertTo(type, o);
                 default:
                     throw new UnsupportedOperationException("Cannot determine what to do with " + yt.current());
             }
         }
 
         @Nullable
-        protected Object readNumber() {
+        protected Object readNumberOrText() {
+            char bq = yt.blockQuote();
             @Nullable String s = text();
-            @Nullable String ss = s;
-            if (s == null || s.length() > 40)
+            if (s == null
+                    || bq != 0
+                    || s.length() < 1
+                    || s.length() > 40
+                    || "0123456789.+-".indexOf(s.charAt(0)) < 0)
                 return s;
-
-            if (s.contains("_"))
+            String ss = s;
+            if (s.indexOf('_') >= 0)
                 ss = s.replace("_", "");
             try {
                 return Long.decode(ss);
@@ -2670,7 +2709,7 @@ public class YamlWire extends AbstractWire implements Wire {
             }
             try {
                 if (s.length() == 7 && s.charAt(1) == ':')
-                    return LocalTime.parse("0" + s);
+                    return LocalTime.parse('0' + s);
                 if (s.length() == 8 && s.charAt(2) == ':')
                     return LocalTime.parse(s);
             } catch (DateTimeParseException fallback) {
