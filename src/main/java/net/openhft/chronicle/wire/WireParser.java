@@ -50,8 +50,11 @@ public interface WireParser extends Consumer<WireIn> {
 
     @Override
     default void accept(@NotNull WireIn wireIn) {
+        wireIn.startEvent();
         Bytes<?> bytes = wireIn.bytes();
         while (bytes.readRemaining() > 0) {
+            if (wireIn.isEndEvent())
+                break;
             long start = bytes.readPosition();
             parseOne(wireIn);
             wireIn.consumePadding();
@@ -60,6 +63,7 @@ public interface WireParser extends Consumer<WireIn> {
                 break;
             }
         }
+        wireIn.endEvent();
     }
 
     WireParselet lookup(CharSequence name);

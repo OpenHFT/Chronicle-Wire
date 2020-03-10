@@ -206,6 +206,17 @@ public interface WireIn extends WireCommon, MarshallableIn {
 
     String readingPeekYaml();
 
+    // Use for processing events/method flows.
+    default void startEvent() {
+    }
+
+    default boolean isEndEvent() {
+        return false;
+    }
+
+    default void endEvent() {
+    }
+
     enum HeaderType {
         NONE, DATA, META_DATA
     }
