@@ -57,16 +57,7 @@ public class VanillaWireParser implements WireParser {
     public void parseOne(@NotNull WireIn wireIn) {
         long start = wireIn.bytes().readPosition();
         if (peekCode(wireIn) == BinaryWireCode.FIELD_NUMBER) {
-            long methodId = wireIn.readEventNumber();
-            if (methodId == (int) methodId) {
-                Map.Entry<String, WireParselet> entry = numberedConsumer.get((int) methodId);
-                if (entry != null) {
-                    WireParselet parselet = entry.getValue();
-                    parselet.accept(entry.getKey(), wireIn.getValueIn());
-                    return;
-                }
-            }
-            fieldNumberParselet.readOne(methodId, wireIn);
+            parseOneBinary(wireIn);
             return;
         }
 
@@ -81,13 +72,7 @@ public class VanillaWireParser implements WireParser {
             parslet = lookup(sb);
             if (parslet == null) {
                 if (sb.length() == 0) {
-                    // invalid rather than unknown method.
-                    Jvm.warn().on(getClass(),
-                            "Attempt to read method name/id but not at the start of a method, the previous method name was "
-                                    + lastEventName + "\n" + wireIn.bytes().toHexString(start, 1024));
-                    if (lastStart < start && lastStart + 1024 >= start)
-                        Jvm.warn().on(getClass(),
-                                "The previous message was\n" + wireIn.bytes().toHexString(lastStart, start - lastStart));
+                    parseOneEmpty(wireIn, start);
                 }
                 parslet = getDefaultConsumer();
             }
@@ -98,6 +83,30 @@ public class VanillaWireParser implements WireParser {
         lastEventName.append(sb);
         lastParslet = parslet;
         lastStart = start;
+    }
+
+    private void parseOneEmpty(@NotNull WireIn wireIn, long start) {
+        // invalid rather than unknown method.
+        Jvm.warn().on(getClass(),
+                "Attempt to read method name/id but not at the start of a method, the previous method name was "
+                        + lastEventName + "\n" + wireIn.bytes().toHexString(start, 1024));
+        if (lastStart < start && lastStart + 1024 >= start)
+            Jvm.warn().on(getClass(),
+                    "The previous message was\n" + wireIn.bytes().toHexString(lastStart, start - lastStart));
+    }
+
+    private void parseOneBinary(@NotNull WireIn wireIn) {
+        long methodId = wireIn.readEventNumber();
+        if (methodId == (int) methodId) {
+            Map.Entry<String, WireParselet> entry = numberedConsumer.get((int) methodId);
+            if (entry != null) {
+                WireParselet parselet = entry.getValue();
+                parselet.accept(entry.getKey(), wireIn.getValueIn());
+                return;
+            }
+        }
+        fieldNumberParselet.readOne(methodId, wireIn);
+        return;
     }
 
     @NotNull
