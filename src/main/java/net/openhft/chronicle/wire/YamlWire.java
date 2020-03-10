@@ -2038,9 +2038,23 @@ public class YamlWire extends AbstractWire implements Wire {
         }
 
         private void consumeSeq() {
-            while (yt.next() == YamlToken.SEQUENCE_ENTRY)
-                consumeAny();
+            assert yt.current() == YamlToken.SEQUENCE_START;
             yt.next();
+            while (true) {
+                switch (yt.current()) {
+                    case SEQUENCE_ENTRY:
+                        yt.next();
+                        consumeAny();
+                        break;
+
+                    case SEQUENCE_END:
+                        yt.next();
+                        return;
+
+                    default:
+                        throw new IllegalStateException(yt.toString());
+                }
+            }
         }
 
         private void consumeMap() {

@@ -32,6 +32,7 @@ public class YamlTokeniser {
     private long blockEnd = 0; // inclusive
     private int flowDepth = Integer.MAX_VALUE;
     private char blockQuote = 0;
+    private boolean hasSequenceEntry;
 
     public void reset() {
         pushed.clear();
@@ -150,13 +151,13 @@ public class YamlTokeniser {
             case '|':
                 if (in.peekUnsignedByte() <= ' ') {
                     readLiteral();
-                    return YamlToken.TEXT;
+                    return seq(YamlToken.TEXT);
                 }
                 break;
             case '>':
                 if (in.peekUnsignedByte() <= ' ') {
                     readFolded();
-                    return YamlToken.TEXT;
+                    return seq(YamlToken.TEXT);
                 }
             case '%':
                 readDirective();
@@ -164,19 +165,21 @@ public class YamlTokeniser {
             case '@':
             case '`':
                 readReserved();
-                return YamlToken.RESERVED;
+                return seq(YamlToken.RESERVED);
             case '!':
                 readWord();
-                return YamlToken.TAG;
+                return seq(YamlToken.TAG);
             case '{':
                 return flow(YamlToken.MAPPING_START, indent);
             case '}':
                 return flowPop(YamlToken.MAPPING_START, '}');
             case '[':
+                hasSequenceEntry = false;
                 return flow(YamlToken.SEQUENCE_START, indent);
             case ']':
                 return flowPop(YamlToken.SEQUENCE_START, ']');
             case ',':
+                hasSequenceEntry = false;
                 // CHECK in a LIST or MAPPING.
                 return next0();
 
@@ -311,8 +314,10 @@ public class YamlTokeniser {
 
     private YamlToken flow(YamlToken token, int indent) {
         pushed.add(token);
-        if (context() == YamlToken.SEQUENCE_START)
+        if (!hasSequenceEntry && context() == YamlToken.SEQUENCE_START) {
+            hasSequenceEntry = true;
             pushed.add(YamlToken.SEQUENCE_ENTRY);
+        }
         contextPush(token, indent);
         if (flowDepth > lastContext)
             flowDepth = lastContext;
@@ -325,11 +330,17 @@ public class YamlTokeniser {
         if (isFieldEnd())
             return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent * 2);
 
-        if (context() == YamlToken.SEQUENCE_START && isInFlow()) {
-            pushed.add(YamlToken.TEXT);
+        YamlToken token = YamlToken.TEXT;
+        return seq(token);
+    }
+
+    private YamlToken seq(YamlToken token) {
+        if (!hasSequenceEntry && context() == YamlToken.SEQUENCE_START && isInFlow()) {
+            hasSequenceEntry = true;
+            pushed.add(token);
             return YamlToken.SEQUENCE_ENTRY;
         }
-        return YamlToken.TEXT;
+        return token;
     }
 
     private void unreadLast() {

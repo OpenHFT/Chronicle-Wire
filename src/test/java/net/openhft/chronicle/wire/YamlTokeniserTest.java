@@ -9,7 +9,6 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-@Ignore
 public class YamlTokeniserTest {
     public static String doTest(String resource) {
         try {

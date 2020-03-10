@@ -7,7 +7,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -35,7 +34,6 @@ interface MockMethods {
  * Created by Peter Lawrey on 17/05/2017.
  */
 @SuppressWarnings("rawtypes")
-@Ignore
 public class VanillaMethodReaderTest {
 
     A instance;
