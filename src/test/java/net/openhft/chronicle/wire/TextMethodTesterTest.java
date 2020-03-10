@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -10,11 +11,25 @@ import static org.junit.Assert.assertEquals;
 /*
  * Created by Peter Lawrey on 17/05/2017.
  */
+@Ignore
 public class TextMethodTesterTest {
     @SuppressWarnings("rawtypes")
     @Test
     public void run() throws IOException {
         TextMethodTester test = new TextMethodTester<>(
+                "methods-in.yaml",
+                MockMethodsImpl::new,
+                MockMethods.class,
+                "methods-in.yaml")
+                .setup("methods-in.yaml") // calls made here are not validated in the output.
+                .run();
+        assertEquals(test.expected(), test.actual());
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Test
+    public void runYaml() throws IOException {
+        TextMethodTester test = new YamlMethodTester<>(
                 "methods-in.yaml",
                 MockMethodsImpl::new,
                 MockMethods.class,
@@ -45,5 +60,10 @@ class MockMethodsImpl implements MockMethods {
     @Override
     public void method3(List<MockDto> dtos) {
         out.method3(dtos);
+    }
+
+    @Override
+    public void list(List<String> strings) {
+        out.list(strings);
     }
 }

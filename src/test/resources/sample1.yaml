@@ -1,0 +1,11 @@
+ladderDefinitions: [
+!LadderDefinition {
+  ccyPair: NZDUSD,
+  name: NZDUSD-CNX,
+  ecns: [
+    CNX
+  ],
+  maxPriceMoveInPipsFromTopOfBook: 400,
+}
+]
+---

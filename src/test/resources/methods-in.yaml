@@ -8,3 +8,8 @@ method2: {
   field2: 1E6
 }
 ---
+list: [
+  hello,
+  world
+]
+---
