@@ -807,6 +807,35 @@ public class YamlWire extends AbstractWire implements Wire {
         bytes.writeUnsignedByte(ch2);
     }
 
+
+    @Override
+    public void startEvent() {
+        consumePadding();
+        if (yt.current() == YamlToken.MAPPING_START) {
+            yt.next();
+            return;
+        }
+        throw new UnsupportedOperationException(yt.toString());
+    }
+
+    @Override
+    public boolean isEndEvent() {
+        consumePadding();
+        return yt.current() == YamlToken.MAPPING_END;
+    }
+
+    @Override
+    public void endEvent() {
+        if (yt.current() == YamlToken.MAPPING_END) {
+            yt.next();
+            if (yt.current() == YamlToken.DOCUMENT_END) {
+                yt.next();
+            }
+            return;
+        }
+        throw new UnsupportedOperationException(yt.toString());
+    }
+
     class TextValueOut implements ValueOut, CommentAnnotationNotifier {
         protected boolean hasCommentAnnotation = false;
 
@@ -2001,6 +2030,7 @@ public class YamlWire extends AbstractWire implements Wire {
                     yt.next();
                     break;
                 case NONE:
+                case DOCUMENT_END:
                     break;
                 default:
                     throw new UnsupportedOperationException(yt.toString());

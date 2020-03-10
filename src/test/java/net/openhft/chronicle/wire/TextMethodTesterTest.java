@@ -1,6 +1,5 @@
 package net.openhft.chronicle.wire;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -11,7 +10,6 @@ import static org.junit.Assert.assertEquals;
 /*
  * Created by Peter Lawrey on 17/05/2017.
  */
-@Ignore
 public class TextMethodTesterTest {
     @SuppressWarnings("rawtypes")
     @Test
