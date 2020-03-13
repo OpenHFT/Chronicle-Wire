@@ -456,7 +456,7 @@ public class WireMarshaller<T> {
                     read.wireIn().bytes().readPosition(pos);
                     StringBuilder sb = RSBP.acquireStringBuilder();
                     read.text(sb);
-                    Jvm.warn().on(getClass(), "Failed to read '" + this.field.getName() + "' with '" + sb + "' taking default");
+                    Jvm.warn().on(getClass(), "Failed to read '" + this.field.getName() + "' with '" + sb + "' taking default", e);
                     copy(defaults, o);
                 }
             }

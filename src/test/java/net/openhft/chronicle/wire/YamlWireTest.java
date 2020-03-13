@@ -159,7 +159,7 @@ public class YamlWireTest {
 
     @Test
     public void writeObjectWithTreeMap() {
-        @NotNull Wire wire = createWire();
+        @NotNull YamlWire wire = createWire();
         ObjectWithTreeMap value = new ObjectWithTreeMap();
         value.map.put("hello", "world");
         wire.write().object(value);
@@ -170,12 +170,12 @@ public class YamlWireTest {
         wire.read().object(value2, ObjectWithTreeMap.class);
         assertEquals("{hello=world}", value2.map.toString());
 
-        wire.bytes().readPosition(0);
+        wire.reset();
         ObjectWithTreeMap value3 = new ObjectWithTreeMap();
         wire.read().object(value3, Object.class);
         assertEquals("{hello=world}", value3.map.toString());
 
-        wire.bytes().readPosition(0);
+        wire.reset();
         ObjectWithTreeMap value4 = wire.read().object(ObjectWithTreeMap.class);
         assertEquals("{hello=world}", value4.map.toString());
     }
@@ -847,7 +847,7 @@ public class YamlWireTest {
 
     @Test
     public void testABCDBytes() {
-        @NotNull Wire wire = createWire();
+        @NotNull YamlWire wire = createWire();
         wire.bytes().append(
                 "A: \"hi\",\n" +
                         "B: 'hi',\n" +
@@ -857,7 +857,7 @@ public class YamlWireTest {
 
         try {
             for (int i = 0; i < 5; i++) {
-                wire.bytes().readPosition(0);
+                wire.reset();
                 assertEquals("!net.openhft.chronicle.wire.YamlWireTest$ABCD {\n" +
                         "  A: hi,\n" +
                         "  B: hi,\n" +
@@ -879,7 +879,7 @@ public class YamlWireTest {
     @Test
     public void testABCStringBuilder() {
 
-        @NotNull Wire wire = createWire();
+        @NotNull YamlWire wire = createWire();
         wire.bytes().append(
                 "A: \"hi\",\n" +
                         "B: 'hi',\n" +
@@ -887,7 +887,7 @@ public class YamlWireTest {
         ABC abc = new ABC();
 
         for (int i = 0; i < 5; i++) {
-            wire.bytes().readPosition(0);
+            wire.reset();
             assertEquals("!net.openhft.chronicle.wire.YamlWireTest$ABC {\n" +
                     "  A: hi,\n" +
                     "  B: hi,\n" +
@@ -1069,7 +1069,7 @@ public class YamlWireTest {
     @Ignore
     public void testMapReadAndWriteIntegers() {
         @NotNull final Bytes bytes = nativeBytes();
-        @NotNull final Wire wire = new YamlWire(bytes);
+        @NotNull final YamlWire wire = new YamlWire(bytes);
 
         @NotNull final Map<Integer, Integer> expected = new HashMap<>();
 
@@ -1093,7 +1093,7 @@ public class YamlWireTest {
             assertEquals(m, expected);
         });
 
-        wire.bytes().readPosition(0);
+        wire.reset();
         // skip the length
         wire.bytes().readSkip(4);
         // TODO: snakeyaml doesn't like !int
@@ -1378,6 +1378,54 @@ public class YamlWireTest {
                 "       hostId: 21\n" +
                 "    }\n" +
                 "}\n";
+        assertEquals("DIRECTIVES_END \n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT cluster\n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT host1\n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT hostId\n" +
+                "TEXT 1\n" +
+                "MAPPING_END \n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT host2\n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT hostId\n" +
+                "TEXT 2\n" +
+                "MAPPING_END \n" +
+                "COMMENT host3: {\n" +
+                "COMMENT hostId: 3,\n" +
+                "COMMENT },\n" +
+                "MAPPING_KEY \n" +
+                "TEXT host4\n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT hostId\n" +
+                "TEXT 4\n" +
+                "MAPPING_END \n" +
+                "MAPPING_END \n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT cluster2\n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT host21\n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT hostId\n" +
+                "TEXT 21\n" +
+                "MAPPING_END \n" +
+                "MAPPING_END \n" +
+                "MAPPING_END \n" +
+                "MAPPING_END \n" +
+                "MAPPING_END \n" +
+                "DOCUMENT_END \n", YamlTokeniserTest.doTest("=" + s));
+
         ObjIntConsumer<String> results = EasyMock.createMock(ObjIntConsumer.class);
         results.accept("host1", 1);
         results.accept("host2", 2);
@@ -1385,12 +1433,13 @@ public class YamlWireTest {
         replay(results);
         @NotNull YamlWire wire = YamlWire.from(s);
         wire.read(() -> "cluster").marshallable(v -> {
-                    @NotNull StringBuilder sb = new StringBuilder();
-                    while (wire.hasMore()) {
-                        wire.readEventName(sb).marshallable(m -> {
-                            m.read(() -> "hostId").int32(sb.toString(), results);
-                        });
-                    }
+            @NotNull StringBuilder sb = new StringBuilder();
+            while (wire.hasMore()) {
+                wire.readEventName(sb)
+                        .marshallable(m ->
+                                m.read(() -> "hostId")
+                                        .int32(sb.toString(), results));
+            }
                 }
         );
         verify(results);

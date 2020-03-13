@@ -845,6 +845,11 @@ public class YamlWire extends AbstractWire implements Wire {
         throw new UnsupportedOperationException(yt.toString());
     }
 
+    public void reset() {
+        bytes.readPosition(0);
+        yt.reset();
+    }
+
     class TextValueOut implements ValueOut, CommentAnnotationNotifier {
         protected boolean hasCommentAnnotation = false;
 
@@ -2301,6 +2306,10 @@ public class YamlWire extends AbstractWire implements Wire {
                 tReader.accept(t, YamlWire.this.valueIn);
                 if (yt.current() == YamlToken.SEQUENCE_END)
                     yt.next();
+
+            } else if (yt.current() == YamlToken.TEXT) {
+                tReader.accept(t, YamlWire.this.valueIn);
+
             } else {
                 throw new UnsupportedOperationException(yt.toString());
             }
@@ -2330,8 +2339,14 @@ public class YamlWire extends AbstractWire implements Wire {
 
         @Override
         public boolean hasNextSequenceItem() {
-            return yt.current() == YamlToken.SEQUENCE_ENTRY;
+            switch (yt.current()) {
+                case TEXT:
+                case SEQUENCE_ENTRY:
+                    return true;
+            }
+            return false;
         }
+
 
         @Override
         public <T> T applyToMarshallable(@NotNull Function<WireIn, T> marshallableReader) {

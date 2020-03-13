@@ -174,12 +174,12 @@ public class YamlTokeniser {
                 readWord();
                 return seq(YamlToken.TAG);
             case '{':
-                return flow(YamlToken.MAPPING_START, indent);
+                return flow(YamlToken.MAPPING_START);
             case '}':
                 return flowPop(YamlToken.MAPPING_START, '}');
             case '[':
                 hasSequenceEntry = false;
-                return flow(YamlToken.SEQUENCE_START, indent);
+                return flow(YamlToken.SEQUENCE_START);
             case ']':
                 return flowPop(YamlToken.SEQUENCE_START, ']');
             case ',':
@@ -316,13 +316,13 @@ public class YamlTokeniser {
 
     }
 
-    private YamlToken flow(YamlToken token, int indent) {
+    private YamlToken flow(YamlToken token) {
         pushed.add(token);
         if (!hasSequenceEntry && context() == YamlToken.SEQUENCE_START) {
             hasSequenceEntry = true;
             pushed.add(YamlToken.SEQUENCE_ENTRY);
         }
-        contextPush(token, indent);
+        contextPush(token, -1);
         if (flowDepth > lastContext)
             flowDepth = lastContext;
         return popPushed();
