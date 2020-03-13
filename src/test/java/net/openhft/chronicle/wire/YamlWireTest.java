@@ -1399,18 +1399,21 @@ public class YamlWireTest {
     @Test
     public void writeNull() {
         @NotNull Wire wire = createWire();
-        wire.write().object(null);
-        wire.write().object(null);
-        wire.write().object(null);
-        wire.write().object(null);
+        for (int i = 0; i < 4; i++)
+            wire.getValueOut().object(null);
+        assertEquals("!!null \"\"\n" +
+                "!!null \"\"\n" +
+                "!!null \"\"\n" +
+                "!!null \"\"\n", wire.toString());
 
-        @Nullable Object o = wire.read().object(Object.class);
+        @Nullable Object o = wire.getValueIn()
+                .object(Object.class);
         assertEquals(null, o);
-        @Nullable String s = wire.read().object(String.class);
+        @Nullable String s = wire.getValueIn().object(String.class);
         assertEquals(null, s);
-        @Nullable RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
+        @Nullable RetentionPolicy rp = wire.getValueIn().object(RetentionPolicy.class);
         assertEquals(null, rp);
-        @Nullable Circle c = wire.read().object(Circle.class);
+        @Nullable Circle c = wire.getValueIn().object(Circle.class);
         assertEquals(null, c);
     }
 

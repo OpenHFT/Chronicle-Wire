@@ -83,12 +83,14 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
     @Override
     public void start() {
+        // TODO Do we need this when reading.
         wire.getValueOut().resetBetweenDocuments();
+
         Bytes<?> bytes = wire.bytes();
 
         present = false;
         wire.consumePadding();
-        if (bytes.startsWith(MSG_SEP)) {
+        if (wire instanceof TextWire && isMsgSeparator(bytes)) {
             bytes.readSkip(3);
             wire.consumePadding();
         }
@@ -99,13 +101,8 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         }
 
         long position = bytes.readPosition();
-        while (bytes.readRemaining() > 0) {
-            while (bytes.readRemaining() > 0 && bytes.readUnsignedByte() >= ' ') {
-                // read skips forward.
-            }
-            if (bytes.startsWith(MSG_SEP)) {
-                break;
-            }
+        if (wire instanceof TextWire) {
+            comsumeToEndOfMessage(bytes);
         }
         metaData = false;
         readLimit = bytes.readLimit();
@@ -114,6 +111,21 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         bytes.readLimit(bytes.readPosition());
         bytes.readPosition(position);
         present = true;
+    }
+
+    private void comsumeToEndOfMessage(Bytes<?> bytes) {
+        while (bytes.readRemaining() > 0) {
+            while (bytes.readRemaining() > 0 && bytes.readUnsignedByte() >= ' ') {
+                // read skips forward.
+            }
+            if (isMsgSeparator(bytes)) {
+                break;
+            }
+        }
+    }
+
+    private boolean isMsgSeparator(Bytes<?> bytes) {
+        return bytes.startsWith(MSG_SEP) && bytes.peekUnsignedByte(bytes.readPosition() + 3) <= ' ';
     }
 
     @Override

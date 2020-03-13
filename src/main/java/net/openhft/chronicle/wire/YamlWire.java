@@ -345,7 +345,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
     @NotNull
     protected StringBuilder readField(@NotNull StringBuilder sb) {
-        consumePadding();
+        startEventIfTop();
         sb.setLength(0);
         if (yt.current() == YamlToken.MAPPING_KEY) {
             yt.next();
@@ -365,7 +365,7 @@ public class YamlWire extends AbstractWire implements Wire {
     @Nullable
     @Override
     public <K> K readEvent(@NotNull Class<K> expectedClass) {
-        consumePadding();
+        startEventIfTop();
         if (yt.current() == YamlToken.MAPPING_KEY) {
             YamlToken next = yt.next();
             if (next == YamlToken.TEXT) {
@@ -375,6 +375,40 @@ public class YamlWire extends AbstractWire implements Wire {
                 unescape(sb);
                 return toExpected(expectedClass, sb);
             }
+        }
+        throw new UnsupportedOperationException(yt.toString());
+    }
+
+    @Override
+    public void startEvent() {
+        consumePadding();
+        if (yt.current() == YamlToken.MAPPING_START) {
+            yt.next();
+            return;
+        }
+        throw new UnsupportedOperationException(yt.toString());
+    }
+
+    void startEventIfTop() {
+        consumePadding();
+        if (yt.lastContext() == 2 && yt.current() == YamlToken.MAPPING_START)
+            yt.next();
+    }
+
+    @Override
+    public boolean isEndEvent() {
+        consumePadding();
+        return yt.current() == YamlToken.MAPPING_END;
+    }
+
+    @Override
+    public void endEvent() {
+        if (yt.current() == YamlToken.MAPPING_END) {
+            yt.next();
+            if (yt.current() == YamlToken.DOCUMENT_END) {
+                yt.next();
+            }
+            return;
         }
         throw new UnsupportedOperationException(yt.toString());
     }
@@ -431,25 +465,40 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     private ValueIn read(@NotNull CharSequence keyName, int keyCode, Object defaultValue) {
-        consumePadding();
-
-        while (yt.current() == YamlToken.MAPPING_KEY) {
+        startEventIfTop();
+        // check previous keys first.
+        int count = yt.keys().count();
+        if (count > 0) {
             long pos = bytes.readPosition();
+            YamlToken current = yt.current();
+            try {
+                // do through remaining keys
+                long[] offsets = yt.keys().offsets();
+                for (int i = 0; i < count; i++) {
+                    bytes.readPosition(offsets[i]);
+                    YamlToken next = yt.next0();
+                    assert next == YamlToken.MAPPING_KEY;
+                    if (checkForMatch(keyName))
+                        return valueIn;
+                }
+
+                return defaultValueIn;
+            } finally {
+                bytes.readPosition(pos);
+                yt.resetCurrent(current);
+            }
+        }
+        // check new keys.
+        while (yt.current() == YamlToken.MAPPING_KEY) {
+            long pos = yt.lastKeyPosition();
             if (checkForMatch(keyName))
                 return valueIn;
 
             yt.keys().push(pos);
             valueIn.consumeAny();
+//            int lc2 = yt.lastContext();
+//            assert lc == lc2;
         }
-        // do through remaining keys
-        int count = yt.keys().count();
-        long[] offsets = yt.keys().offsets();
-        for (int i = 0; i < count; i++) {
-            bytes.readPosition(offsets[i]);
-            if (checkForMatch(keyName))
-                return valueIn;
-        }
-
         return defaultValueIn;
     }
 
@@ -728,15 +777,13 @@ public class YamlWire extends AbstractWire implements Wire {
         }
     }
 
-    @NotNull
-    <T> List<T> readList(Class<T> elementType) {
+    @NotNull <T> List<T> readList(Class<T> elementType) {
         List<T> list = new ArrayList();
         readCollection(elementType, list);
         return list;
     }
 
-    @NotNull
-    <T> Set<T> readSet(Class<T> elementType) {
+    @NotNull <T> Set<T> readSet(Class<T> elementType) {
         Set<T> set = new LinkedHashSet<>();
         readCollection(elementType, set);
         return set;
@@ -1978,39 +2025,62 @@ public class YamlWire extends AbstractWire implements Wire {
         protected void consumeAny() {
             consumePadding();
             switch (yt.current()) {
+                case DOCUMENT_END:
+                    return;
+
                 case SEQUENCE_ENTRY:
                 case TAG:
                     yt.next();
                     consumeAny();
                     break;
+
                 case MAPPING_START:
                     consumeMap();
                     break;
+
                 case SEQUENCE_START:
                     consumeSeq();
                     break;
+
                 case MAPPING_KEY:
                     yt.next();
                     consumeAny();
                     if (yt.current() != YamlToken.MAPPING_KEY && yt.current() != YamlToken.MAPPING_END)
                         consumeAny();
                     break;
+
                 case SEQUENCE_END:
                 case MAPPING_END:
                 case TEXT:
                     yt.next();
                     break;
+
                 case NONE:
                     break;
+
                 default:
                     throw new UnsupportedOperationException(yt.toString());
             }
         }
 
         private void consumeSeq() {
-            while (yt.next() == YamlToken.SEQUENCE_ENTRY)
-                consumeAny();
+            assert yt.current() == YamlToken.SEQUENCE_START;
             yt.next();
+            while (true) {
+                switch (yt.current()) {
+                    case SEQUENCE_ENTRY:
+                        yt.next();
+                        consumeAny();
+                        break;
+
+                    case SEQUENCE_END:
+                        yt.next();
+                        return;
+
+                    default:
+                        throw new IllegalStateException(yt.toString());
+                }
+            }
         }
 
         private void consumeMap() {
@@ -2673,7 +2743,10 @@ public class YamlWire extends AbstractWire implements Wire {
                         if (type == Object.class || Map.class.isAssignableFrom(type) || using instanceof Map)
                             return map(Object.class, Object.class, (Map) using);
                     }
-                    return valueIn.marshallableAsMap(Object.class, Object.class);
+                    if (Map.class.isAssignableFrom(type))
+                        return valueIn.marshallableAsMap(Object.class, Object.class, (Map) using);
+                    return valueIn.object(using, type);
+
                 case SEQUENCE_START:
                     return readSequence(type);
                 case TEXT:

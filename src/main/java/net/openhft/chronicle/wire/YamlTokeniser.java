@@ -32,6 +32,7 @@ public class YamlTokeniser {
     private long blockEnd = 0; // inclusive
     private int flowDepth = Integer.MAX_VALUE;
     private char blockQuote = 0;
+    private long lastKeyPosition = -1;
 
     public void reset() {
         pushed.clear();
@@ -51,8 +52,19 @@ public class YamlTokeniser {
         return last;
     }
 
+    public void resetCurrent(YamlToken last) {
+        this.last = last;
+    }
+
     @NotNull
     public YamlToken next() {
+        switch (last) {
+            case MAPPING_END:
+            case SEQUENCE_END:
+            case DOCUMENT_END:
+                lastContext--;
+                break;
+        }
         if (!pushed.isEmpty()) {
             YamlToken next = popPushed();
             return last = next;
@@ -67,7 +79,7 @@ public class YamlTokeniser {
         contextIndent[0] = NO_INDENT;
     }
 
-    private YamlToken next0() {
+    YamlToken next0() {
         consumeWhitespace();
         blockStart = blockEnd = in.readPosition();
         if (temp != null)
@@ -85,11 +97,13 @@ public class YamlTokeniser {
                 readComment();
                 return YamlToken.COMMENT;
             case '"':
+                lastKeyPosition = in.readPosition() - 1;
                 readQuoted('"');
                 if (isFieldEnd())
                     return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent * 2);
                 return YamlToken.TEXT;
             case '\'':
+                lastKeyPosition = in.readPosition() - 1;
                 readQuoted('\'');
                 if (isFieldEnd())
                     return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent * 2);
@@ -97,6 +111,7 @@ public class YamlTokeniser {
                 return YamlToken.TEXT;
 
             case '?': {
+                lastKeyPosition = in.readPosition() - 1;
                 YamlToken indent2 = indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.NONE, indent * 2);
                 contextPush(YamlToken.MAPPING_KEY, indent * 2);
                 return indent2;
@@ -105,7 +120,10 @@ public class YamlTokeniser {
             case '-': {
                 int next = in.peekUnsignedByte();
                 if (next <= ' ') {
-                    return indent(YamlToken.SEQUENCE_START, YamlToken.SEQUENCE_ENTRY, YamlToken.NONE, indent * 2 + 1);
+                    int indent2 = indent * 2 + 1;
+                    YamlToken token = indent(YamlToken.SEQUENCE_START, YamlToken.SEQUENCE_ENTRY, YamlToken.NONE, indent2);
+                    contextPush(YamlToken.SEQUENCE_ENTRY, indent2);
+                    return token;
                 }
                 if (next == '-') {
                     if (in.peekUnsignedByte(in.readPosition() + 1) == '-' &&
@@ -167,13 +185,13 @@ public class YamlTokeniser {
                 return YamlToken.RESERVED;
             case '!':
                 readWord();
-                return YamlToken.TAG;
+                return flow(YamlToken.TAG, indent, false);
             case '{':
-                return flow(YamlToken.MAPPING_START, indent);
+                return flow(YamlToken.MAPPING_START, indent, true);
             case '}':
                 return flowPop(YamlToken.MAPPING_START, '}');
             case '[':
-                return flow(YamlToken.SEQUENCE_START, indent);
+                return flow(YamlToken.SEQUENCE_START, indent, true);
             case ']':
                 return flowPop(YamlToken.SEQUENCE_START, ']');
             case ',':
@@ -215,6 +233,7 @@ public class YamlTokeniser {
             if (lastContext == 0)
                 throw new IllegalArgumentException("Unexpected '" + end + '\'');
             contextPop();
+            lastContext--;
         }
         contextPop();
         reversePushed(pos);
@@ -309,21 +328,25 @@ public class YamlTokeniser {
 
     }
 
-    private YamlToken flow(YamlToken token, int indent) {
+    private YamlToken flow(YamlToken token, int indent, boolean usesIndent) {
         pushed.add(token);
         if (context() == YamlToken.SEQUENCE_START)
             pushed.add(YamlToken.SEQUENCE_ENTRY);
         contextPush(token, indent);
-        if (flowDepth > lastContext)
+        if (usesIndent && flowDepth > lastContext)
             flowDepth = lastContext;
         return popPushed();
     }
 
     private YamlToken readText(int indent) {
+        long pos = in.readPosition() - 1;
+
         blockQuote = 0;
         readWords();
-        if (isFieldEnd())
+        if (isFieldEnd()) {
+            lastKeyPosition = pos;
             return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent * 2);
+        }
 
         if (context() == YamlToken.SEQUENCE_START && isInFlow()) {
             pushed.add(YamlToken.TEXT);
@@ -345,6 +368,7 @@ public class YamlTokeniser {
         int pos = this.pushed.size();
         while (indent < contextIndent()) {
             contextPop();
+            lastContext--;
         }
         if (indent != contextIndent())
             this.pushed.add(indented);
@@ -368,6 +392,7 @@ public class YamlTokeniser {
         int pos = pushed.size();
         while (lastContext > 0) {
             contextPop();
+            lastContext--;
         }
         reversePushed(pos);
     }
@@ -437,8 +462,7 @@ public class YamlTokeniser {
 
     private void contextPop() {
         YamlToken context = context();
-        lastContext--;
-        if (flowDepth == lastContext)
+        if (flowDepth == lastContext - 1)
             flowDepth = Integer.MAX_VALUE;
         switch (context) {
             case MAPPING_START:
@@ -450,9 +474,10 @@ public class YamlTokeniser {
             case DIRECTIVES_END:
                 pushed.add(YamlToken.DOCUMENT_END);
                 break;
+            case TAG:
             case MAPPING_KEY:
-                break;
             case NONE:
+            case SEQUENCE_ENTRY:
                 break;
             default:
                 throw new IllegalStateException("context: " + context);
@@ -460,13 +485,13 @@ public class YamlTokeniser {
     }
 
     private void contextPush0(YamlToken indented, int indent) {
+        ++lastContext;
         if (lastContext == contextArray.length) {
             int newLength = 2 * lastContext;
             contextArray = Arrays.copyOf(contextArray, newLength);
             contextIndent = Arrays.copyOf(contextIndent, newLength);
             contextKeys = Arrays.copyOf(contextKeys, newLength);
         }
-        lastContext++;
         contextArray[lastContext] = indented;
         contextIndent[lastContext] = indent;
         if (contextKeys[lastContext] != null)
@@ -627,5 +652,9 @@ public class YamlTokeniser {
         if (key == null)
             contextKeys[lastContext] = key = new YamlKeys();
         return key;
+    }
+
+    public long lastKeyPosition() {
+        return lastKeyPosition;
     }
 }
