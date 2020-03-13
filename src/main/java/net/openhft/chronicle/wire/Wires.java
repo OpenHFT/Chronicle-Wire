@@ -446,8 +446,9 @@ public enum Wires {
 
         if (using == null && !nullObject)
             throw new IllegalStateException("failed to create instance of clazz=" + clazz + " is it aliased?");
-        else
-            return readResolve(in.marshallable(using, strategy));
+
+        Object marshallable = in.marshallable(using, strategy);
+        return readResolve(marshallable);
     }
 
     @NotNull

@@ -345,7 +345,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
     @NotNull
     protected StringBuilder readField(@NotNull StringBuilder sb) {
-        consumePadding();
+        startEventIfTop();
         sb.setLength(0);
         if (yt.current() == YamlToken.MAPPING_KEY) {
             yt.next();
@@ -365,7 +365,7 @@ public class YamlWire extends AbstractWire implements Wire {
     @Nullable
     @Override
     public <K> K readEvent(@NotNull Class<K> expectedClass) {
-        consumePadding();
+        startEventIfTop();
         if (yt.current() == YamlToken.MAPPING_KEY) {
             YamlToken next = yt.next();
             if (next == YamlToken.TEXT) {
@@ -431,7 +431,7 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     private ValueIn read(@NotNull CharSequence keyName, int keyCode, Object defaultValue) {
-        consumePadding();
+        startEventIfTop();
 
         while (yt.current() == YamlToken.MAPPING_KEY) {
             long pos = bytes.readPosition();
@@ -473,7 +473,7 @@ public class YamlWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public ValueIn read(@NotNull StringBuilder name) {
-        consumePadding();
+        startEventIfTop();
         readField(name);
         return valueIn;
     }
@@ -728,15 +728,13 @@ public class YamlWire extends AbstractWire implements Wire {
         }
     }
 
-    @NotNull
-    <T> List<T> readList(Class<T> elementType) {
+    @NotNull <T> List<T> readList(Class<T> elementType) {
         List<T> list = new ArrayList();
         readCollection(elementType, list);
         return list;
     }
 
-    @NotNull
-    <T> Set<T> readSet(Class<T> elementType) {
+    @NotNull <T> Set<T> readSet(Class<T> elementType) {
         Set<T> set = new LinkedHashSet<>();
         readCollection(elementType, set);
         return set;
@@ -818,6 +816,13 @@ public class YamlWire extends AbstractWire implements Wire {
         throw new UnsupportedOperationException(yt.toString());
     }
 
+    void startEventIfTop() {
+        consumePadding();
+        if (yt.lastContext() == 2)
+            if (yt.current() == YamlToken.MAPPING_START)
+                yt.next();
+    }
+
     @Override
     public boolean isEndEvent() {
         consumePadding();
@@ -826,6 +831,10 @@ public class YamlWire extends AbstractWire implements Wire {
 
     @Override
     public void endEvent() {
+        while (yt.current() == YamlToken.MAPPING_KEY) {
+            yt.next();
+            valueIn.consumeAny();
+        }
         if (yt.current() == YamlToken.MAPPING_END) {
             yt.next();
             if (yt.current() == YamlToken.DOCUMENT_END) {

@@ -33,6 +33,7 @@ public class YamlTokeniser {
     private int flowDepth = Integer.MAX_VALUE;
     private char blockQuote = 0;
     private boolean hasSequenceEntry;
+    private long lastKeyPosition = -1;
 
     public void reset() {
         pushed.clear();
@@ -86,11 +87,13 @@ public class YamlTokeniser {
                 readComment();
                 return YamlToken.COMMENT;
             case '"':
+                lastKeyPosition = in.readPosition() - 1;
                 readQuoted('"');
                 if (isFieldEnd())
                     return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent * 2);
                 return YamlToken.TEXT;
             case '\'':
+                lastKeyPosition = in.readPosition() - 1;
                 readQuoted('\'');
                 if (isFieldEnd())
                     return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent * 2);
@@ -98,6 +101,7 @@ public class YamlTokeniser {
                 return YamlToken.TEXT;
 
             case '?': {
+                lastKeyPosition = in.readPosition() - 1;
                 YamlToken indent2 = indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.NONE, indent * 2);
                 contextPush(YamlToken.MAPPING_KEY, indent * 2);
                 return indent2;
@@ -325,10 +329,14 @@ public class YamlTokeniser {
     }
 
     private YamlToken readText(int indent) {
+        long pos = in.readPosition();
+
         blockQuote = 0;
         readWords();
-        if (isFieldEnd())
+        if (isFieldEnd()) {
+            lastKeyPosition = pos;
             return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent * 2);
+        }
 
         YamlToken token = YamlToken.TEXT;
         return seq(token);

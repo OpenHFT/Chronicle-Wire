@@ -81,6 +81,22 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         present = false;
     }
 
+    public static void consumeToEndOfMessage(Bytes<?> bytes) {
+        while (bytes.readRemaining() > 0) {
+            while (bytes.readRemaining() > 0 && bytes.readUnsignedByte() >= ' ') {
+                // read skips forward.
+            }
+            if (isEndOfMessage(bytes)) {
+                break;
+            }
+        }
+    }
+
+    public static boolean isEndOfMessage(Bytes<?> bytes) {
+        return bytes.startsWith(MSG_SEP)
+                && bytes.peekUnsignedByte(bytes.readPosition() + 3) <= ' ';
+    }
+
     @Override
     public void start() {
         wire.getValueOut().resetBetweenDocuments();
@@ -88,7 +104,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
         present = false;
         wire.consumePadding();
-        if (bytes.startsWith(MSG_SEP)) {
+        if (isEndOfMessage(bytes)) {
             bytes.readSkip(3);
             wire.consumePadding();
         }
@@ -99,14 +115,8 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         }
 
         long position = bytes.readPosition();
-        while (bytes.readRemaining() > 0) {
-            while (bytes.readRemaining() > 0 && bytes.readUnsignedByte() >= ' ') {
-                // read skips forward.
-            }
-            if (bytes.startsWith(MSG_SEP)) {
-                break;
-            }
-        }
+        consumeToEndOfMessage(bytes);
+
         metaData = false;
         readLimit = bytes.readLimit();
         readPosition = bytes.readPosition();
