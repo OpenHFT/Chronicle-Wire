@@ -183,6 +183,8 @@ public class YamlTokeniser {
             case ']':
                 return flowPop(YamlToken.SEQUENCE_START, ']');
             case ',':
+                if (flowDepth > lastContext)
+                    flowDepth = lastContext;
                 hasSequenceEntry = false;
                 // CHECK in a LIST or MAPPING.
                 return next0();
@@ -396,12 +398,16 @@ public class YamlTokeniser {
         boolean isQuote = in.peekUnsignedByte() == '<';
         while (true) {
             int ch = in.readUnsignedByte();
-            if (ch <= ' ' || (ch == ',' && !isQuote)) {
+            // ! is valid in a type TAG
+            // [] isn't standard but needed for array types in Java.
+            if (ch <= ' ' || (!isQuote && ",{}:?'\"#".indexOf(ch) >= 0)) {
                 unreadLast();
                 break;
             }
             blockEnd = in.readPosition();
             if (isQuote && ch == '>') {
+                blockStart++;
+                blockEnd--;
                 break;
             }
         }

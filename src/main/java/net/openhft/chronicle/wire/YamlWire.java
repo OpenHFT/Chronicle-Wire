@@ -56,7 +56,6 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class YamlWire extends AbstractWire implements Wire {
     public static final BytesStore TYPE = BytesStore.from("!type ");
-    public static final BytesStore BINARY = BytesStore.from("!!binary");
     static final String SEQ_MAP = "!seqmap";
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
@@ -71,7 +70,7 @@ public class YamlWire extends AbstractWire implements Wire {
     static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
 
     static {
-        assert unregister(TYPE) & unregister(BINARY);
+        assert unregister(TYPE);
         for (char ch : "?%&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
         for (char ch : "?,#:{}[]|>\\".toCharArray())
@@ -1867,9 +1866,10 @@ public class YamlWire extends AbstractWire implements Wire {
         @Override
         public Bytes textTo(@NotNull Bytes bytes) {
             bytes.clear();
-            if (yt.next() == YamlToken.TEXT) {
+            if (yt.current() == YamlToken.TEXT) {
                 bytes.clear();
-                bytes.write8bit(yt.text());
+                bytes.append(yt.text());
+                yt.next();
             } else {
                 throw new UnsupportedOperationException(yt.toString());
             }
@@ -2733,6 +2733,7 @@ public class YamlWire extends AbstractWire implements Wire {
                 if (type == null || type == Object.class || type.isInterface())
                     type = aClass;
             }
+
             switch (yt.current()) {
                 case MAPPING_START:
                     if (type != null) {
@@ -2741,12 +2742,15 @@ public class YamlWire extends AbstractWire implements Wire {
                         if (type == Object.class || Map.class.isAssignableFrom(type) || using instanceof Map)
                             return map(Object.class, Object.class, (Map) using);
                     }
-                    return valueIn.marshallableAsMap(Object.class, Object.class);
+                    return valueIn.object(using, type);
+
                 case SEQUENCE_START:
                     return readSequence(type);
+
                 case TEXT:
                     Object o = valueIn.readNumberOrText();
                     return ObjectUtils.convertTo(type, o);
+
                 default:
                     throw new UnsupportedOperationException("Cannot determine what to do with " + yt.current());
             }

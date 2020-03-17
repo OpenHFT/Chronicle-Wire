@@ -54,7 +54,6 @@ import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-@Ignore("TODO FIX")
 public class YamlWireTest {
 
     Bytes bytes;
@@ -816,7 +815,8 @@ public class YamlWireTest {
         @NotNull Wire wire = createWire();
         wire.bytes().append("A: !").append(MyTypes.class.getName()).append("{}");
 
-        @NotNull MyTypes mt = (MyTypes) wire.read(() -> "A").object();
+        @NotNull MyTypes mt = (MyTypes) wire.read("A")
+                .object();
         assertEquals("!net.openhft.chronicle.wire.MyTypes {\n" +
                 "  text: \"\",\n" +
                 "  b: false,\n" +
@@ -858,13 +858,14 @@ public class YamlWireTest {
         try {
             for (int i = 0; i < 5; i++) {
                 wire.reset();
+                ABCD object = wire.getValueIn()
+                        .object(abcd, ABCD.class);
                 assertEquals("!net.openhft.chronicle.wire.YamlWireTest$ABCD {\n" +
                         "  A: hi,\n" +
                         "  B: hi,\n" +
                         "  C: hi,\n" +
                         "  D: bye\n" +
-                        "}\n", wire.getValueIn()
-                        .object(abcd, ABCD.class)
+                        "}\n", object
                         .toString());
             }
         } finally {
@@ -1106,6 +1107,7 @@ public class YamlWireTest {
 
     @SuppressWarnings("deprecation")
     @Test
+    @Ignore("TODO FIX")
     public void testMapReadAndWriteMarshable() {
         @NotNull final Bytes bytes = nativeBytes();
         @NotNull final Wire wire = new YamlWire(bytes);
@@ -1390,7 +1392,6 @@ public class YamlWireTest {
                 "TEXT hostId\n" +
                 "TEXT 1\n" +
                 "MAPPING_END \n" +
-                "MAPPING_START \n" +
                 "MAPPING_KEY \n" +
                 "TEXT host2\n" +
                 "MAPPING_START \n" +
@@ -1419,7 +1420,6 @@ public class YamlWireTest {
                 "MAPPING_KEY \n" +
                 "TEXT hostId\n" +
                 "TEXT 21\n" +
-                "MAPPING_END \n" +
                 "MAPPING_END \n" +
                 "MAPPING_END \n" +
                 "MAPPING_END \n" +
@@ -1477,6 +1477,7 @@ public class YamlWireTest {
         }
     }
 
+    @Ignore("TODO FIX")
     @Test
     public void readDemarshallable() {
         @NotNull Wire wire = createWire().useBinaryDocuments();
@@ -1498,6 +1499,7 @@ public class YamlWireTest {
         }
     }
 
+    @Ignore("TODO FIX")
     @Test
     public void testByteArrayValueWithRealBytesNegative() {
         @NotNull Wire wire = createWire();
@@ -1544,6 +1546,7 @@ public class YamlWireTest {
         wire.readDocument(null, w -> assertArrayEquals(four, (byte[]) w.read(() -> "four").object()));
     }
 
+    @Ignore("TODO FIX")
     @Test
     public void testObjectKeys() {
         @NotNull Map<MyMarshallable, String> map = new LinkedHashMap<>();
@@ -1790,10 +1793,10 @@ public class YamlWireTest {
     @Test
     public void testArrayTypes1() {
         Wire wire = createWire();
-        wire.bytes().append("a: !type [B;, b: !type String[], c: hi");
+        wire.bytes().append("a: !type \"[B\", b: !type \"String[]\", c: hi");
 
-        assertEquals(String[].class, wire.read("b").typeLiteral());
         assertEquals(byte[].class, wire.read("a").typeLiteral());
+        assertEquals(String[].class, wire.read("b").typeLiteral());
         assertEquals("hi", wire.read("c").text());
     }
 

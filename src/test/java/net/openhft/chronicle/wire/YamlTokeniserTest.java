@@ -740,7 +740,7 @@ public class YamlTokeniserTest {
     public void eg2_27() {
         assertEquals(
                 "DIRECTIVES_END \n" +
-                        "TAG <tag:clarkevans.com,2002:invoice>\n" +
+                        "TAG tag:clarkevans.com,2002:invoice\n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT invoice\n" +
@@ -940,6 +940,60 @@ public class YamlTokeniserTest {
                         "DOCUMENT_END \n" +
                         "DIRECTIVES_END \n" +
                         "DOCUMENT_END \n",
-                doTest("sample1.yaml").replace("\r", ""));
+                doTest("yaml/sample1.yaml").replace("\r", ""));
+    }
+
+    @Test
+    public void sample2() {
+        assertEquals(
+                "DIRECTIVES_END \n" +
+                        "TAG !meta-data\n" +
+                        "TAG net.openhft.chronicle.wire.DemarshallableObject\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT name\n" +
+                        "TEXT test\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT value\n" +
+                        "TEXT 12345\n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/sample2.yaml").replace("\r", ""));
+    }
+
+    @Test
+    public void sample3() {
+        assertEquals(
+                "DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT A\n" +
+                        "TAG net.openhft.chronicle.wire.DemarshallableObject\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/sample3.yaml").replace("\r", ""));
+    }
+
+    @Test
+    public void sample4() {
+        assertEquals(
+                "DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT a\n" +
+                        "TAG type\n" +
+                        "TEXT \" [B\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT b\n" +
+                        "TAG type\n" +
+                        "TEXT \" String[]\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT c\n" +
+                        "TEXT hi\n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/sample4.yaml").replace("\r", ""));
     }
 }
