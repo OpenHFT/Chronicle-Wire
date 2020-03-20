@@ -16,7 +16,7 @@ public class YamlTokeniserTest {
 //            bytes = Bytes.from(bytes.toString().replace("\r", ""));
             YamlTokeniser yt = new YamlTokeniser(bytes);
             StringBuilder sb = new StringBuilder();
-            while (yt.next() != YamlToken.NONE) {
+            while (yt.next() != YamlToken.STREAM_END) {
                 sb.append(yt).append('\n');
             }
             return sb.toString();

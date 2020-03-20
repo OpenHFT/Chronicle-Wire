@@ -143,6 +143,6 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
     @Override
     public String toString() {
-        return Wires.fromSizePrefixedBlobs(this);
+        return wire.toString();
     }
 }

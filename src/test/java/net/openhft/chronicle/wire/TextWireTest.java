@@ -1834,10 +1834,6 @@ public class TextWireTest {
         Assert.assertEquals(d2, d, 0);
     }
 
-    enum TWTSingleton {
-        INSTANCE
-    }
-
     enum BWKey implements WireKey {
         field1, field2, field3
     }

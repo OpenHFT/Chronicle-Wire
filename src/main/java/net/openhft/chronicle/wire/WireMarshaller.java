@@ -561,7 +561,12 @@ public class WireMarshaller<T> {
 
             } catch (Exception e) {
                 read.wireIn().bytes().readPosition(pos);
-                Object object = read.object();
+                Object object = null;
+                try {
+                    object = read.object();
+                } catch (Exception ex) {
+                    object = ex;
+                }
                 Jvm.warn().on(getClass(), "Unable to parse field: " + field.getName() + ", as a marshallable as it is " + object);
                 if (overwrite)
                     field.set(o, ObjectUtils.defaultValue(field.getType()));
