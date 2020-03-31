@@ -43,10 +43,11 @@ public enum SerializationStrategies implements SerializationStrategy {
         @NotNull
         @Override
         public Object readUsing(@NotNull Object o, @NotNull ValueIn in) {
+            WireIn wireIn = in.wireIn();
             if (in.isBinary() && !((CommonMarshallable) o).usesSelfDescribingMessage()) {
-                ((ReadBytesMarshallable) o).readMarshallable(in.wireIn().bytes());
+                ((ReadBytesMarshallable) o).readMarshallable(wireIn.bytes());
             } else {
-                ((ReadMarshallable) o).readMarshallable(in.wireIn());
+                ((ReadMarshallable) o).readMarshallable(wireIn);
             }
             return o;
         }

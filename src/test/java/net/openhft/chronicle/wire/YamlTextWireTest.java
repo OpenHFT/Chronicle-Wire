@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -46,8 +47,8 @@ public class YamlTextWireTest {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Stream.of(
-                "{}",
-                "a: hi",
+//                "{}",
+//                "a: hi",
                 "b: {}",
                 "c: hi",
                 "d: {}",
@@ -91,6 +92,7 @@ public class YamlTextWireTest {
         assertEquals(tw, yw);
     }
 
+    @SuppressWarnings("unused")
     static class Fields extends SelfDescribingMarshallable {
         String a;
         Fields b;

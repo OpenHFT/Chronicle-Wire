@@ -16,7 +16,7 @@ public class YamlTokeniserTest {
 //            bytes = Bytes.from(bytes.toString().replace("\r", ""));
             YamlTokeniser yt = new YamlTokeniser(bytes);
             StringBuilder sb = new StringBuilder();
-            while (yt.next() != YamlToken.STREAM_END) {
+            while (yt.next(YamlTokeniser.ContextLevel.ANY) != YamlToken.STREAM_END) {
                 sb.append(yt).append('\n');
             }
             return sb.toString();
@@ -973,7 +973,7 @@ public class YamlTokeniserTest {
                         "MAPPING_END \n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/sample3.yaml").replace("\r", ""));
+                doTest("=A: !net.openhft.chronicle.wire.DemarshallableObject{}"));
     }
 
     @Test
@@ -994,6 +994,50 @@ public class YamlTokeniserTest {
                         "TEXT hi\n" +
                         "MAPPING_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/sample4.yaml").replace("\r", ""));
+                doTest("=a: !type \"[B\", b: !type \"String[]\", c: hi"));
+    }
+
+    @Test
+    public void sample5() {
+        assertEquals(
+                "DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT A\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT b\n" +
+                        "TEXT 1234\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT c\n" +
+                        "TEXT hi\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT d\n" +
+                        "TEXT abc\n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT B\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT c\n" +
+                        "TEXT lo\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT d\n" +
+                        "TEXT xyz\n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT C\n" +
+                        "TEXT see\n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest(
+                        "=A: \n" +
+                                "  b: 1234\n" +
+                                "  c: hi\n" +
+                                "  d: abc\n" +
+                                "B: \n" +
+                                "  c: lo\n" +
+                                "  d: xyz\n" +
+                                "C: see\n"));
     }
 }
