@@ -1808,6 +1808,7 @@ public class YamlWire extends AbstractWire implements Wire {
     class TextValueIn implements ValueIn {
         @Override
         public void resetState() {
+            yt.reset();
         }
 
         @Nullable

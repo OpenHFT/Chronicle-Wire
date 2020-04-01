@@ -77,7 +77,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         AbstractWire wire0 = this.wire;
         wire0.bytes.readLimit(readLimit);
         wire0.bytes.readPosition(readPosition);
-
+        wire.getValueIn().resetState();
         present = false;
     }
 
@@ -99,13 +99,14 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
     @Override
     public void start() {
-        wire.getValueOut().resetBetweenDocuments();
+        wire.getValueIn().resetState();
         Bytes<?> bytes = wire.bytes();
 
         present = false;
         wire.consumePadding();
         if (isEndOfMessage(bytes)) {
             bytes.readSkip(3);
+            wire.getValueIn().resetState();
             wire.consumePadding();
         }
         if (bytes.readRemaining() < 1) {
