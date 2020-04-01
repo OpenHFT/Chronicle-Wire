@@ -42,6 +42,8 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     // Note the Object[] passed in creates an object on every call.
     private boolean useMethodIds;
 
+    private final  ThreadLocal<Object> proxy= new ThreadLocal<>();
+
     public AbstractMethodWriterInvocationHandler() {
         super(HashMap::new);
         this.handleInvoke = this::handleInvoke;
@@ -49,15 +51,19 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
 
     @Override
     protected Object doInvoke(Object proxy, Method method, Object[] args) {
+
         if (methodWriterInterceptorReturns != null) {
-            methodWriterInterceptorReturns.intercept(method, args, (m, a) -> {
-                this.handleInvoke.accept(m, a);
-                return m.getReturnType().isInterface() ? proxy : null;
-            });
+            this.proxy.set(proxy);
+            methodWriterInterceptorReturns.intercept(method, args, this::onMethod);
         } else {
             handleInvoke(method, args);
         }
         return method.getReturnType().isInterface() ? proxy : null;
+    }
+
+    private Object onMethod(final Method m, final Object[] a) {
+            this.handleInvoke.accept(m, a);
+            return m.getReturnType().isInterface() ? this.proxy.get() : null;
     }
 
     @Override
