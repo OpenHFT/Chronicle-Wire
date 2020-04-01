@@ -50,7 +50,7 @@ public interface WireKey {
     }
 
     @NotNull
-    CharSequence name();
+    String name();
 
     default int code() {
         return toCode(name());

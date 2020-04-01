@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class YamlTokeniser {
 
-    private static final int NO_INDENT = -1;
+    static final int NO_INDENT = -1;
     static final Set<YamlToken> NO_TEXT = EnumSet.of(
             YamlToken.SEQUENCE_START,
             YamlToken.SEQUENCE_ENTRY,
@@ -70,27 +70,25 @@ public class YamlTokeniser {
 
     public YamlToken current() {
         if (last == YamlToken.STREAM_START)
-            return next(ContextLevel.ANY);
+            return next(NO_INDENT);
         return last;
     }
 
-    enum ContextLevel {
-        ANY,
-        SAME,
-        ONE_POP
+    public YamlToken next() {
+        return next(contextIndent());
     }
 
     @NotNull
-    public YamlToken next(ContextLevel sameContext) {
+    public YamlToken next(int minIndent) {
         if (!pushed.isEmpty()) {
             YamlToken next = popPushed();
             return last = next;
         }
-        YamlToken next = next0(sameContext);
+        YamlToken next = next0(minIndent);
         return this.last = next;
     }
 
-    YamlToken next0(ContextLevel contextLevel) {
+    YamlToken next0(int minIndent) {
         consumeWhitespace();
         blockStart = blockEnd = in.readPosition();
         if (temp != null)
@@ -99,15 +97,15 @@ public class YamlTokeniser {
         int ch = in.readUnsignedByte();
         switch (ch) {
             case -1:
-                if (contextLevel == ContextLevel.SAME)
+                if (contextIndent() <= minIndent)
                     return YamlToken.NONE;
-                popAll(0);
+                contextPop();
                 return popPushed();
             case '#':
                 readComment();
                 return YamlToken.COMMENT;
             case '"':
-                if (wouldChangeContext(contextLevel, indent2))
+                if (wouldChangeContext(minIndent, indent2))
                     return dontRead();
                 lastKeyPosition = in.readPosition() - 1;
                 readQuoted('"');
@@ -115,7 +113,7 @@ public class YamlTokeniser {
                     return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent2);
                 return YamlToken.TEXT;
             case '\'':
-                if (wouldChangeContext(contextLevel, indent2))
+                if (wouldChangeContext(minIndent, indent2))
                     return dontRead();
                 lastKeyPosition = in.readPosition() - 1;
                 readQuoted('\'');
@@ -125,7 +123,7 @@ public class YamlTokeniser {
                 return YamlToken.TEXT;
 
             case '?': {
-                if (wouldChangeContext(contextLevel, indent2))
+                if (wouldChangeContext(minIndent, indent2))
                     return dontRead();
                 lastKeyPosition = in.readPosition() - 1;
                 YamlToken indentB = indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.STREAM_START, indent2);
@@ -136,14 +134,14 @@ public class YamlTokeniser {
             case '-': {
                 int next = in.peekUnsignedByte();
                 if (next <= ' ') {
-                    if (wouldChangeContext(contextLevel,indent2 + 1))
+                    if (wouldChangeContext(minIndent, indent2 + 1))
                         return dontRead();
                     return indent(YamlToken.SEQUENCE_START, YamlToken.SEQUENCE_ENTRY, YamlToken.STREAM_START, indent2 + 1);
                 }
                 if (next == '-') {
                     if (in.peekUnsignedByte(in.readPosition() + 1) == '-' &&
                             in.peekUnsignedByte(in.readPosition() + 2) <= ' ') {
-                        if (contextLevel == ContextLevel.SAME)
+                        if (contextIndent() <= minIndent)
                             return dontRead();
                         in.readSkip(2);
                         pushed.add(YamlToken.DIRECTIVES_END);
@@ -160,7 +158,7 @@ public class YamlTokeniser {
                 if (next == '.') {
                     if (in.peekUnsignedByte(in.readPosition() + 1) == '.' &&
                             in.peekUnsignedByte(in.readPosition() + 2) <= ' ') {
-                        if (contextLevel == ContextLevel.SAME)
+                        if (contextIndent() <= minIndent)
                             return dontRead();
                         in.readSkip(2);
                         popAll(1);
@@ -207,14 +205,14 @@ public class YamlTokeniser {
             case '{':
                 return flow(YamlToken.MAPPING_START);
             case '}':
-                if (contextLevel == ContextLevel.SAME)
+                if (minIndent == Integer.MAX_VALUE)
                     return dontRead();
                 return flowPop(YamlToken.MAPPING_START, '}');
             case '[':
                 hasSequenceEntry = false;
                 return flow(YamlToken.SEQUENCE_START);
             case ']':
-                if (contextLevel == ContextLevel.SAME)
+                if (minIndent == Integer.MAX_VALUE)
                     return dontRead();
                 return flowPop(YamlToken.SEQUENCE_START, ']');
             case ',':
@@ -222,7 +220,7 @@ public class YamlTokeniser {
                     flowDepth = contextSize();
                 hasSequenceEntry = false;
                 // CHECK in a LIST or MAPPING.
-                return next0(contextLevel);
+                return next0(minIndent);
 
             case ':':
                 if (in.peekUnsignedByte() <= ' ') {
@@ -233,7 +231,7 @@ public class YamlTokeniser {
                     if (context() == YamlToken.MAPPING_KEY)
                         contextPop();
                     reversePushed(pos);
-                    return pushed.isEmpty() ? next0(contextLevel) : popPushed();
+                    return pushed.isEmpty() ? next0(minIndent) : popPushed();
                 }
                 // other symbols
             case '+':
@@ -249,25 +247,16 @@ public class YamlTokeniser {
             case '_':
             case '~':
         }
-        if (wouldChangeContext(contextLevel, indent2))
+        if (wouldChangeContext(minIndent, indent2))
             return dontRead();
         unreadLast();
         return readText(indent2);
     }
 
-    private boolean wouldChangeContext(ContextLevel contextLevel, int indent) {
+    private boolean wouldChangeContext(int minIndent, int indent) {
         if (isInFlow())
             return false;
-        switch (contextLevel) {
-            case ANY:
-                return false;
-            case SAME:
-                return contextIndent() > indent;
-            case ONE_POP:
-                return previousContextIndent() > indent;
-            default:
-                throw new AssertionError();
-        }
+        return minIndent > indent;
     }
 
     private YamlToken dontRead() {
@@ -531,7 +520,7 @@ public class YamlTokeniser {
 
     private void contextPop() {
         YTContext context0 = contexts.remove(contextSize() - 1);
-        if (flowDepth == contextSize())
+        if (flowDepth > contextSize())
             flowDepth = Integer.MAX_VALUE;
         YamlToken toEnd = context0.token.toEnd;
         if (toEnd == null)
@@ -596,7 +585,6 @@ public class YamlTokeniser {
     }
 
     private void readComment() {
-        in.readSkip(1);
         consumeSpaces();
         blockStart = blockEnd = in.readPosition();
         while (true) {
@@ -713,7 +701,7 @@ public class YamlTokeniser {
     public YamlToken rereadAndNext(long offset) {
         in.readPosition(offset);
         lineStart = offset;
-        return next0(ContextLevel.SAME);
+        return next();
     }
 
     static class YTContext extends SelfDescribingMarshallable {

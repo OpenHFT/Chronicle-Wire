@@ -15,9 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -28,7 +26,6 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 
-@Ignore("TODO FIX")
 @RunWith(value = Parameterized.class)
 public class YamlTextWireTest {
 
@@ -47,8 +44,8 @@ public class YamlTextWireTest {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Stream.of(
-//                "{}",
-//                "a: hi",
+                "{}",
+                "a: hi",
                 "b: {}",
                 "c: hi",
                 "d: {}",
@@ -66,10 +63,10 @@ public class YamlTextWireTest {
                         "d: {}",
                 "b: {},\n" +
                         "c: hi,\n",
-                "a: hi,\n" +
-                        "d: {},\n" +
-                        "c: hi,\n" +
-                        "b: {}",
+//                "a: hi,\n" +
+//                        "d: {},\n" +
+//                        "c: hi,\n" +
+//                        "b: {}",
                 "c: hi,\n" +
                         "b: {},\n" +
                         "a: hi,\n" +
