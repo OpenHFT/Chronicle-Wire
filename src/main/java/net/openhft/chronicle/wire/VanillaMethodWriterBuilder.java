@@ -17,10 +17,7 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.MethodWriterBuilder;
-import net.openhft.chronicle.bytes.MethodWriterInterceptor;
-import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
-import net.openhft.chronicle.bytes.MethodWriterListener;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
@@ -102,6 +99,12 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     @NotNull
     public MethodWriterBuilder<T> methodWriterInterceptor(MethodWriterInterceptor methodWriterInterceptor) {
         handlerSupplier.methodWriterInterceptor(methodWriterInterceptor);
+        return this;
+    }
+
+    @NotNull
+    public MethodWriterBuilder<T> methodWriterInterceptorReturns(MethodWriterInterceptorReturns methodWriterInterceptor) {
+        handlerSupplier.methodWriterInterceptorReturns(methodWriterInterceptor);
         return this;
     }
 
