@@ -49,8 +49,9 @@ public interface WireKey {
         return s.hashCode();
     }
 
+    // TODO change to String in x.20
     @NotNull
-    String name();
+    CharSequence name();
 
     default int code() {
         return toCode(name());
