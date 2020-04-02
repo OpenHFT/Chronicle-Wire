@@ -1712,7 +1712,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     : Maths.toInt32(length0, "Document length %,d out of 32-bit int range.");
             boolean debug = false;
             assert debug = true;
-            if (debug) {
+            if (debug && !Jvm.isArm()) {
                 if (!bytes.compareAndSwapInt(position, 0, length)) {
                     throw new IllegalStateException("CAS failed for sequence was " + Integer.toHexString(bytes.readInt(position)));
                 }
