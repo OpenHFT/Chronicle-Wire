@@ -63,10 +63,10 @@ public class YamlTextWireTest {
                         "d: {}",
                 "b: {},\n" +
                         "c: hi,\n",
-//                "a: hi,\n" +
-//                        "d: {},\n" +
-//                        "c: hi,\n" +
-//                        "b: {}",
+                "a: hi,\n" +
+                        "d: {},\n" +
+                        "c: hi,\n" +
+                        "b: {}",
                 "c: hi,\n" +
                         "b: {},\n" +
                         "a: hi,\n" +
@@ -74,7 +74,12 @@ public class YamlTextWireTest {
                 "a: hi,\n" +
                         "b: {},\n" +
                         "c: hi,\n" +
-                        "d: {}"
+                        "d: {}",
+                "e: [ hi ],\n" +
+                        "f: { hi: there },\n" +
+                        "b: { a: hi },\n" +
+                        "c: hi,\n" +
+                        "d: { c: bye }"
         )
                 .map(o -> new Object[]{o.replaceAll("\n", " "), o})
                 .collect(Collectors.toList());

@@ -56,20 +56,24 @@ public class WireMarshaller<T> {
     private static final StringBuilderPool WSBP = new StringBuilderPool();
     @NotNull
     final FieldAccess[] fields;
+    static final StringBuilderPool SBP = new StringBuilderPool();
+    final TreeMap<CharSequence, FieldAccess> fieldMap = new TreeMap<>(WireMarshaller::compare);
+
     private final boolean isLeaf;
     @Nullable
     private final T defaultValue;
 
     protected WireMarshaller(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
-        this.fields = fields;
-        this.isLeaf = isLeaf;
-        defaultValue = defaultValueForType(tClass);
+        this(fields, isLeaf, defaultValueForType(tClass));
     }
 
     private WireMarshaller(@NotNull FieldAccess[] fields, boolean isLeaf, @Nullable T defaultValue) {
         this.fields = fields;
         this.isLeaf = isLeaf;
         this.defaultValue = defaultValue;
+        for (FieldAccess field : fields) {
+            fieldMap.put(field.key.name(), field);
+        }
     }
 
     @NotNull
@@ -190,15 +194,50 @@ public class WireMarshaller<T> {
         }
     }
 
+    private static int compare(CharSequence cs0, CharSequence cs1) {
+        for (int i = 0, len = Math.min(cs0.length(), cs1.length()); i < len; i++) {
+            int cmp = Character.compare(cs0.charAt(i), cs1.charAt(i));
+            if (cmp != 0)
+                return cmp;
+        }
+        return Integer.compare(cs0.length(), cs1.length());
+    }
+
     public void readMarshallable(T t, @NotNull WireIn in, T defaults, boolean overwrite) {
         try {
-            for (@NotNull FieldAccess field : fields) {
-                ValueIn vin = in.read(field.key);
-                field.readValue(t, defaults, vin, overwrite);
+            StringBuilder sb = SBP.acquireStringBuilder();
+            for (int i = 0; i < fields.length; i++) {
+                boolean more = in.hasMore();
+                FieldAccess field = fields[i];
+                ValueIn vin = more ? in.read(sb) : null;
+                // are the fields all present and in order?
+                if (more && matchesFieldName(sb, field)) {
+                    field.readValue(t, defaults, in.getValueIn(), overwrite);
+
+                } else {
+                    for (; i < fields.length; i++) {
+                        FieldAccess field2 = fields[i];
+                        field2.copy(defaults, t);
+                    }
+                    if (vin == null || sb.length() <= 0)
+                        return;
+                    do {
+                        FieldAccess fieldAccess = fieldMap.get(sb);
+                        if (fieldAccess == null)
+                            vin.skipValue();
+                        else
+                            fieldAccess.readValue(t, defaults, vin, overwrite);
+                        vin = in.read(sb);
+                    } while (in.hasMore());
+                }
             }
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
         }
+    }
+
+    public boolean matchesFieldName(StringBuilder sb, FieldAccess field) {
+        return sb.length() == 0 || StringUtils.isEqual(field.field.getName(), sb);
     }
 
     public void writeKey(T t, Bytes bytes) {
