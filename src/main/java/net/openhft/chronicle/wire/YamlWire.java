@@ -185,6 +185,12 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     @Override
+    public boolean hintReadInputOrder() {
+        // TODO Fix YamlTextWireTest for false.
+        return true;
+    }
+
+    @Override
     @NotNull
     public <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass, () -> newTextMethodWriterInvocationHandler(tClass));

@@ -217,6 +217,10 @@ public interface WireIn extends WireCommon, MarshallableIn {
     default void endEvent() {
     }
 
+    default boolean hintReadInputOrder() {
+        return false;
+    }
+
     enum HeaderType {
         NONE, DATA, META_DATA
     }

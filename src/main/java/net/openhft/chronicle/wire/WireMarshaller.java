@@ -204,6 +204,24 @@ public class WireMarshaller<T> {
     }
 
     public void readMarshallable(T t, @NotNull WireIn in, T defaults, boolean overwrite) {
+        if (in.hintReadInputOrder())
+            readMarshallableInputOrder(t, in, defaults, overwrite);
+        else
+            readMarshallableDTOOrder(t, in, defaults, overwrite);
+    }
+
+    public void readMarshallableDTOOrder(T t, @NotNull WireIn in, T defaults, boolean overwrite) {
+        try {
+            for (@NotNull FieldAccess field : fields) {
+                ValueIn vin = in.read(field.key);
+                field.readValue(t, defaults, vin, overwrite);
+            }
+        } catch (IllegalAccessException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    public void readMarshallableInputOrder(T t, @NotNull WireIn in, T defaults, boolean overwrite) {
         try {
             StringBuilder sb = SBP.acquireStringBuilder();
             for (int i = 0; i < fields.length; i++) {
