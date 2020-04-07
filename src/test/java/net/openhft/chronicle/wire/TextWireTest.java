@@ -1748,7 +1748,6 @@ public class TextWireTest {
     }
 
     @Test
-    @Ignore("see #102")
     public void testArrayTypes2() {
         Wire wire = createWire();
         wire.bytes().append("a: [ !type byte[] ], b: !type String[], c: hi");

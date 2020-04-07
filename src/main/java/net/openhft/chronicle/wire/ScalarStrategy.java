@@ -73,6 +73,7 @@ class ScalarStrategy<T> implements SerializationStrategy<T> {
     public T readUsing(T using, @NotNull ValueIn in) {
         if (in.isNull())
             return null;
+
         return read.apply(using, in);
     }
 

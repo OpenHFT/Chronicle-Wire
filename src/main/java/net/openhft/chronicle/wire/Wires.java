@@ -86,6 +86,7 @@ public enum Wires {
         }
         return ANY_OBJECT;
     });
+    static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
     static final ClassLocal<Function<String, Marshallable>> MARSHALLABLE_FUNCTION = ClassLocal.withInitial(tClass -> {
         Class[] interfaces = {Marshallable.class, tClass};
         if (tClass == Marshallable.class)
@@ -634,7 +635,14 @@ public enum Wires {
         }
 
         private static Class forName(Class o, ValueIn in) {
-            return ClassAliasPool.CLASS_ALIASES.forName(in.text());
+            final StringBuilder sb0 = sb.get();
+            sb0.setLength(0);
+            in.text(sb0);
+
+            if ("byte[".contentEquals(sb0))
+                return byte[].class;
+
+            return ClassAliasPool.CLASS_ALIASES.forName(sb0);
         }
 
         @Override
