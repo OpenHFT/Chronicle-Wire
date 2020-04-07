@@ -1750,7 +1750,7 @@ public class TextWireTest {
 
     @Test
     public void testArrayTypes2() {
-        for (Class<?> clz : new Class[]{byte.class, char.class, int.class, long.class, double.class, float.class}) {
+        for (Class<?> clz : new Class[]{byte.class, char.class, int.class, long.class, double.class, float.class, boolean.class}) {
             Wire wire = createWire();
             System.out.println("Class: " + clz);
             wire.bytes().append("a: [ !type ").append(clz.getName()).append("[] ], b: !type String[], c: hi");
