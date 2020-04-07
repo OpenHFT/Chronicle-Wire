@@ -639,9 +639,6 @@ public enum Wires {
             sb0.setLength(0);
             in.text(sb0);
 
-            if ("byte[".contentEquals(sb0))
-                return byte[].class;
-
             return ClassAliasPool.CLASS_ALIASES.forName(sb0);
         }
 
