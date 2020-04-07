@@ -31,6 +31,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Array;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
 import java.security.InvalidAlgorithmParameterException;
@@ -1749,13 +1750,16 @@ public class TextWireTest {
 
     @Test
     public void testArrayTypes2() {
-        Wire wire = createWire();
-        wire.bytes().append("a: [ !type byte[] ], b: !type String[], c: hi");
+        for (Class<?> clz : new Class[]{byte.class, char.class, int.class, long.class, double.class, float.class}) {
+            Wire wire = createWire();
+            System.out.println("Class: " + clz);
+            wire.bytes().append("a: [ !type ").append(clz.getName()).append("[] ], b: !type String[], c: hi");
 
-        assertEquals(String[].class, wire.read("b").typeLiteral());
-        Collection<Class> classes = wire.read("a").typedMarshallable();
-        assertArrayEquals(new Class[]{byte[].class}, classes.toArray());
-        assertEquals("hi", wire.read("c").text());
+            assertEquals(String[].class, wire.read("b").typeLiteral());
+            Collection<Class> classes = wire.read("a").typedMarshallable();
+            assertArrayEquals(new Class[]{Array.newInstance(clz, 0).getClass()}, classes.toArray());
+            assertEquals("hi", wire.read("c").text());
+        }
     }
 
     @Test
