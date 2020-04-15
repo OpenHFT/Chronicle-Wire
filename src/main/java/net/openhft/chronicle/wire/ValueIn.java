@@ -578,7 +578,7 @@ public interface ValueIn {
 
     @Nullable
     default <E> E object(@NotNull Class<E> clazz) {
-        return object(null, clazz);
+        return Wires.object0(this, null, clazz);
     }
 
     @Nullable

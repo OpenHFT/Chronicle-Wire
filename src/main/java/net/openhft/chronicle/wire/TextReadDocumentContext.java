@@ -77,21 +77,36 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         AbstractWire wire0 = this.wire;
         wire0.bytes.readLimit(readLimit);
         wire0.bytes.readPosition(readPosition);
-
+        wire.getValueIn().resetState();
         present = false;
+    }
+
+    public static void consumeToEndOfMessage(Bytes<?> bytes) {
+        while (bytes.readRemaining() > 0) {
+            while (bytes.readRemaining() > 0 && bytes.readUnsignedByte() >= ' ') {
+                // read skips forward.
+            }
+            if (isEndOfMessage(bytes)) {
+                break;
+            }
+        }
+    }
+
+    public static boolean isEndOfMessage(Bytes<?> bytes) {
+        return bytes.startsWith(MSG_SEP)
+                && bytes.peekUnsignedByte(bytes.readPosition() + 3) <= ' ';
     }
 
     @Override
     public void start() {
-        // TODO Do we need this when reading.
-        wire.getValueOut().resetBetweenDocuments();
-
+        wire.getValueIn().resetState();
         Bytes<?> bytes = wire.bytes();
 
         present = false;
         wire.consumePadding();
-        if (wire instanceof TextWire && isMsgSeparator(bytes)) {
+        if (isEndOfMessage(bytes)) {
             bytes.readSkip(3);
+            wire.getValueIn().resetState();
             wire.consumePadding();
         }
         if (bytes.readRemaining() < 1) {
@@ -101,9 +116,8 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         }
 
         long position = bytes.readPosition();
-        if (wire instanceof TextWire) {
-            comsumeToEndOfMessage(bytes);
-        }
+        consumeToEndOfMessage(bytes);
+
         metaData = false;
         readLimit = bytes.readLimit();
         readPosition = bytes.readPosition();
@@ -111,21 +125,6 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         bytes.readLimit(bytes.readPosition());
         bytes.readPosition(position);
         present = true;
-    }
-
-    private void comsumeToEndOfMessage(Bytes<?> bytes) {
-        while (bytes.readRemaining() > 0) {
-            while (bytes.readRemaining() > 0 && bytes.readUnsignedByte() >= ' ') {
-                // read skips forward.
-            }
-            if (isMsgSeparator(bytes)) {
-                break;
-            }
-        }
-    }
-
-    private boolean isMsgSeparator(Bytes<?> bytes) {
-        return bytes.startsWith(MSG_SEP) && bytes.peekUnsignedByte(bytes.readPosition() + 3) <= ' ';
     }
 
     @Override
@@ -145,6 +144,6 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
     @Override
     public String toString() {
-        return Wires.fromSizePrefixedBlobs(this);
+        return wire.toString();
     }
 }

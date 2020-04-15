@@ -56,7 +56,6 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class YamlWire extends AbstractWire implements Wire {
     public static final BytesStore TYPE = BytesStore.from("!type ");
-    public static final BytesStore BINARY = BytesStore.from("!!binary");
     static final String SEQ_MAP = "!seqmap";
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
@@ -71,7 +70,7 @@ public class YamlWire extends AbstractWire implements Wire {
     static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
 
     static {
-        assert unregister(TYPE) & unregister(BINARY);
+        assert unregister(TYPE);
         for (char ch : "?%&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
         for (char ch : "?,#:{}[]|>\\".toCharArray())
@@ -80,15 +79,13 @@ public class YamlWire extends AbstractWire implements Wire {
         WireInternal.INTERNER.valueCount();
     }
 
-    protected final TextValueOut valueOut = createValueOut();
-    protected final TextValueIn valueIn = createValueIn();
+    private final TextValueOut valueOut = createValueOut();
+    private final TextValueIn valueIn = createValueIn();
     private final StringBuilder sb = new StringBuilder();
     private final YamlTokeniser yt;
-    DefaultValueIn defaultValueIn;
+    private DefaultValueIn defaultValueIn;
     private WriteDocumentContext writeContext;
     private ReadDocumentContext readContext;
-    private boolean strict = false;
-    private boolean addTimeStamps = false;
 
     public YamlWire(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
@@ -187,22 +184,10 @@ public class YamlWire extends AbstractWire implements Wire {
         AppendableUtil.setLength(sb, end);
     }
 
-    public boolean strict() {
-        return strict;
-    }
-
-    public YamlWire strict(boolean strict) {
-        this.strict = strict;
-        return this;
-    }
-
-    public boolean addTimeStamps() {
-        return addTimeStamps;
-    }
-
-    public YamlWire addTimeStamps(boolean addTimeStamps) {
-        this.addTimeStamps = addTimeStamps;
-        return this;
+    @Override
+    public boolean hintReadInputOrder() {
+        // TODO Fix YamlTextWireTest for false.
+        return true;
     }
 
     @Override
@@ -334,7 +319,13 @@ public class YamlWire extends AbstractWire implements Wire {
     @Override
     public ValueIn read() {
         readField(acquireStringBuilder());
-        return yt.current() == YamlToken.MAPPING_END ? defaultValueIn : valueIn;
+        switch (yt.current()) {
+            case NONE:
+            case MAPPING_END:
+                return defaultValueIn;
+            default:
+                return valueIn;
+        }
     }
 
     @NotNull
@@ -380,46 +371,13 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     @Override
-    public void startEvent() {
-        consumePadding();
-        if (yt.current() == YamlToken.MAPPING_START) {
-            yt.next();
-            return;
-        }
-        throw new UnsupportedOperationException(yt.toString());
-    }
-
-    void startEventIfTop() {
-        consumePadding();
-        if (yt.lastContext() == 2 && yt.current() == YamlToken.MAPPING_START)
-            yt.next();
-    }
-
-    @Override
-    public boolean isEndEvent() {
-        consumePadding();
-        return yt.current() == YamlToken.MAPPING_END;
-    }
-
-    @Override
-    public void endEvent() {
-        if (yt.current() == YamlToken.MAPPING_END) {
-            yt.next();
-            if (yt.current() == YamlToken.DOCUMENT_END) {
-                yt.next();
-            }
-            return;
-        }
-        throw new UnsupportedOperationException(yt.toString());
-    }
-
-    @Override
     public boolean isNotEmptyAfterPadding() {
         consumePadding();
         switch (yt.current()) {
             case MAPPING_END:
             case DOCUMENT_END:
             case SEQUENCE_END:
+            case NONE:
                 return false;
             default:
                 return true;
@@ -452,57 +410,61 @@ public class YamlWire extends AbstractWire implements Wire {
         return "todo";
     }
 
-    @NotNull
-    @Override
-    public ValueIn read(String fieldName) {
-        return read(fieldName, fieldName.hashCode(), null);
-    }
 
     @NotNull
     @Override
     public ValueIn read(@NotNull WireKey key) {
-        return read(key.name(), key.code(), key.defaultValue());
+        return read(key.name().toString());
     }
 
-    private ValueIn read(@NotNull CharSequence keyName, int keyCode, Object defaultValue) {
+    @NotNull
+    @Override
+    public ValueIn read(String keyName) {
         startEventIfTop();
-        // check previous keys first.
-        int count = yt.keys().count();
-        if (count > 0) {
-            long pos = bytes.readPosition();
-            YamlToken current = yt.current();
-            try {
-                // do through remaining keys
-                long[] offsets = yt.keys().offsets();
-                for (int i = 0; i < count; i++) {
-                    bytes.readPosition(offsets[i]);
-                    YamlToken next = yt.next0();
-                    assert next == YamlToken.MAPPING_KEY;
-                    if (checkForMatch(keyName))
-                        return valueIn;
-                }
 
-                return defaultValueIn;
-            } finally {
-                bytes.readPosition(pos);
-                yt.resetCurrent(current);
-            }
-        }
-        // check new keys.
-        while (yt.current() == YamlToken.MAPPING_KEY) {
+        // check the keys we have already seen first.
+        YamlKeys keys = yt.keys();
+        int count = keys.count();
+        if (count > 0) {
             long pos = yt.lastKeyPosition();
+            long[] offsets = keys.offsets();
+            int contextSize = yt.contextSize();
+            for (int i = 0; i < count; i++) {
+                yt.revertToContext(contextSize);
+                YamlToken next = yt.rereadAndNext(offsets[i]);
+                assert next == YamlToken.MAPPING_KEY;
+                if (checkForMatch(keyName)) {
+                    keys.removeIndex(i);
+                    return valueIn;
+                }
+            }
+            yt.revertToContext(contextSize);
+            bytes.readPosition(pos);
+            yt.next();
+        }
+
+        int minIndent = yt.topContext().indent;
+        // go through remaining keys
+        while (yt.current() == YamlToken.MAPPING_KEY) {
+            long lastKeyPosition = yt.lastKeyPosition();
             if (checkForMatch(keyName))
                 return valueIn;
 
-            yt.keys().push(pos);
-            valueIn.consumeAny();
-//            int lc2 = yt.lastContext();
-//            assert lc == lc2;
+            keys.push(lastKeyPosition);
+            valueIn.consumeAny(minIndent);
         }
+
         return defaultValueIn;
     }
 
-    private boolean checkForMatch(@NotNull CharSequence keyName) {
+    public String dumpContext() {
+        Bytes b = Bytes.elasticHeapByteBuffer(128);
+        YamlWire yw = new YamlWire(b);
+        yw.valueOut.list(yt.contexts, YamlTokeniser.YTContext.class);
+        return b.toString();
+    }
+
+    private boolean checkForMatch(@NotNull String keyName) {
         YamlToken next = yt.next();
 
         if (next == YamlToken.TEXT) {
@@ -510,7 +472,7 @@ public class YamlWire extends AbstractWire implements Wire {
             sb.append(yt.text());
             yt.next();
         } else {
-            throw new IllegalStateException();
+            throw new IllegalStateException(next.toString());
         }
 
         unescape(sb);
@@ -522,7 +484,7 @@ public class YamlWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public ValueIn read(@NotNull StringBuilder name) {
-        consumePadding();
+        startEventIfTop();
         readField(name);
         return valueIn;
     }
@@ -768,27 +730,6 @@ public class YamlWire extends AbstractWire implements Wire {
             bytes.appendUtf8(cs, offset, length);
     }
 
-    private void consumeDocumentStart() {
-        while (true) {
-            YamlToken current = yt.current();
-            if (current != YamlToken.DIRECTIVE && current != YamlToken.DIRECTIVES_END)
-                return;
-            yt.next();
-        }
-    }
-
-    @NotNull <T> List<T> readList(Class<T> elementType) {
-        List<T> list = new ArrayList();
-        readCollection(elementType, list);
-        return list;
-    }
-
-    @NotNull <T> Set<T> readSet(Class<T> elementType) {
-        Set<T> set = new LinkedHashSet<>();
-        readCollection(elementType, set);
-        return set;
-    }
-
     private <T> void readCollection(Class<T> elementType, Collection<T> collection) {
         if (yt.current() == YamlToken.SEQUENCE_START) {
             while (yt.next() == YamlToken.SEQUENCE_ENTRY) {
@@ -854,6 +795,66 @@ public class YamlWire extends AbstractWire implements Wire {
         bytes.writeUnsignedByte(ch2);
     }
 
+
+    @Override
+    public void startEvent() {
+        consumePadding();
+        if (yt.current() == YamlToken.MAPPING_START) {
+            yt.next(Integer.MAX_VALUE);
+            return;
+        }
+        throw new UnsupportedOperationException(yt.toString());
+    }
+
+    void startEventIfTop() {
+        consumePadding();
+        if (yt.contextSize() == 3)
+            if (yt.current() == YamlToken.MAPPING_START)
+                yt.next();
+    }
+
+    @Override
+    public boolean isEndEvent() {
+        consumePadding();
+        return yt.current() == YamlToken.MAPPING_END;
+    }
+
+    @Override
+    public void endEvent() {
+        int minIndent = yt.topContext().indent;
+        switch (yt.current()) {
+            case MAPPING_KEY:
+            case MAPPING_END:
+            case DOCUMENT_END:
+            case NONE:
+                break;
+            case SEQUENCE_END:
+                yt.next();
+                break;
+            default:
+                valueIn.consumeAny(minIndent);
+                break;
+        }
+        if (yt.current() == YamlToken.NONE) {
+            yt.next(Integer.MIN_VALUE);
+        } else {
+            while (yt.current() == YamlToken.MAPPING_KEY) {
+                yt.next();
+                valueIn.consumeAny(minIndent);
+            }
+        }
+        if (yt.current() == YamlToken.MAPPING_END) {
+            yt.next(Integer.MIN_VALUE);
+            return;
+        }
+        throw new UnsupportedOperationException(yt.toString());
+    }
+
+    public void reset() {
+        bytes.readPosition(0);
+        yt.reset();
+    }
+
     class TextValueOut implements ValueOut, CommentAnnotationNotifier {
         protected boolean hasCommentAnnotation = false;
 
@@ -880,6 +881,7 @@ public class YamlWire extends AbstractWire implements Wire {
             leaf = false;
             dropDefault = false;
             eventName = null;
+            yt.reset();
         }
 
         void prependSeparator() {
@@ -1177,12 +1179,6 @@ public class YamlWire extends AbstractWire implements Wire {
             prependSeparator();
             bytes.append(i64);
             elementSeparator();
-            // 2001 to 2100 best effort basis.
-            boolean addTimeStamp = YamlWire.this.addTimeStamps && !leaf;
-            if (addTimeStamp) {
-                addTimeStamp(i64);
-            }
-
             return YamlWire.this;
         }
 
@@ -1190,31 +1186,6 @@ public class YamlWire extends AbstractWire implements Wire {
         @Override
         public WireOut int128forBinding(long i64x0, long i64x1, TwoLongValue longValue) {
             throw new UnsupportedOperationException(yt.toString());
-        }
-
-        public void addTimeStamp(long i64) {
-            if ((long) 1e12 < i64 && i64 < (long) 4.111e12) {
-                bytes.append(", # ");
-                bytes.appendDateMillis(i64);
-                bytes.append("T");
-                bytes.appendTimeMillis(i64);
-                sep = NEW_LINE;
-            } else if ((long) 1e18 < i64 && i64 < (long) 4.111e18) {
-                long millis = i64 / 1_000_000;
-                long nanos = i64 % 1_000_000;
-                bytes.append(", # ");
-                bytes.appendDateMillis(millis);
-                bytes.append("T");
-                bytes.appendTimeMillis(millis);
-                bytes.append((char) ('0' + nanos / 100000));
-                bytes.append((char) ('0' + nanos / 100000 % 10));
-                bytes.append((char) ('0' + nanos / 10000 % 10));
-                bytes.append((char) ('0' + nanos / 1000 % 10));
-                bytes.append((char) ('0' + nanos / 100 % 10));
-                bytes.append((char) ('0' + nanos / 10 % 10));
-                bytes.append((char) ('0' + nanos % 10));
-                sep = NEW_LINE;
-            }
         }
 
         @NotNull
@@ -1844,6 +1815,7 @@ public class YamlWire extends AbstractWire implements Wire {
     class TextValueIn implements ValueIn {
         @Override
         public void resetState() {
+            yt.reset();
         }
 
         @Nullable
@@ -1871,9 +1843,10 @@ public class YamlWire extends AbstractWire implements Wire {
         @Override
         public Bytes textTo(@NotNull Bytes bytes) {
             bytes.clear();
-            if (yt.next() == YamlToken.TEXT) {
+            if (yt.current() == YamlToken.TEXT) {
                 bytes.clear();
-                bytes.write8bit(yt.text());
+                bytes.append(yt.text());
+                yt.next();
             } else {
                 throw new UnsupportedOperationException(yt.toString());
             }
@@ -1892,7 +1865,7 @@ public class YamlWire extends AbstractWire implements Wire {
                     return BracketType.SEQ;
                 case MAPPING_KEY:
                 case SEQUENCE_ENTRY:
-                case NONE:
+                case STREAM_START:
                 case TEXT:
                     return BracketType.NONE;
             }
@@ -2008,73 +1981,68 @@ public class YamlWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireIn skipValue() {
-            consumeAny();
+            consumeAny(yt.topContext().indent);
             return YamlWire.this;
         }
 
         protected long readLengthMarshallable() {
             long start = bytes.readPosition();
             try {
-                consumeAny();
+                consumeAny(yt.topContext().indent);
                 return bytes.readPosition() - start;
             } finally {
                 bytes.readPosition(start);
             }
         }
 
-        protected void consumeAny() {
+        protected void consumeAny(int minIndent) {
             consumePadding();
+            int indent2 = Math.max(yt.topContext().indent, minIndent);
             switch (yt.current()) {
-                case DOCUMENT_END:
-                    return;
-
                 case SEQUENCE_ENTRY:
                 case TAG:
-                    yt.next();
-                    consumeAny();
+                    yt.next(minIndent);
+                    consumeAny(minIndent);
                     break;
-
                 case MAPPING_START:
-                    consumeMap();
+                    consumeMap(indent2);
                     break;
-
                 case SEQUENCE_START:
-                    consumeSeq();
+                    consumeSeq(indent2);
                     break;
-
                 case MAPPING_KEY:
-                    yt.next();
-                    consumeAny();
+                    yt.next(minIndent);
+                    consumeAny(minIndent);
                     if (yt.current() != YamlToken.MAPPING_KEY && yt.current() != YamlToken.MAPPING_END)
-                        consumeAny();
+                        consumeAny(minIndent);
                     break;
-
                 case SEQUENCE_END:
                 case MAPPING_END:
+                    yt.next(minIndent);
+                    break;
                 case TEXT:
-                    yt.next();
+                    yt.next(minIndent);
                     break;
-
-                case NONE:
+                case STREAM_START:
+                case DOCUMENT_END:
                     break;
-
                 default:
                     throw new UnsupportedOperationException(yt.toString());
             }
         }
 
-        private void consumeSeq() {
+        private void consumeSeq(int minIndent) {
             assert yt.current() == YamlToken.SEQUENCE_START;
-            yt.next();
+            yt.next(minIndent);
             while (true) {
                 switch (yt.current()) {
                     case SEQUENCE_ENTRY:
-                        yt.next();
-                        consumeAny();
+                        yt.next(minIndent);
+                        consumeAny(minIndent);
                         break;
 
                     case SEQUENCE_END:
-                        yt.next();
+                        yt.next(minIndent);
                         return;
 
                     default:
@@ -2083,31 +2051,18 @@ public class YamlWire extends AbstractWire implements Wire {
             }
         }
 
-        private void consumeMap() {
-            while (yt.next() == YamlToken.MAPPING_KEY) {
-                consumeAny();
-                yt.next();
-                if (yt.current() == YamlToken.MAPPING_KEY)
-                    continue;
-                if (yt.current() == YamlToken.MAPPING_END)
-                    break;
-                consumeAny();
+        private void consumeMap(int minIndent) {
+            // consume MAPPING_START
+            yt.next(minIndent);
+            while (yt.current() == YamlToken.MAPPING_KEY) {
+                yt.next(minIndent); // consume KEY
+                consumeAny(minIndent); // consume the key
+                consumeAny(minIndent); // consume the value
             }
+            if (yt.current() == YamlToken.NONE)
+                yt.next(Integer.MIN_VALUE);
             if (yt.current() == YamlToken.MAPPING_END)
-                yt.next();
-        }
-
-        private void consumeValue() {
-            consumeAny();
-        }
-
-        private void consumeType() {
-            consumePadding();
-            switch (yt.current()) {
-                case TAG:
-                    yt.next();
-                    break;
-            }
+                yt.next(minIndent);
         }
 
         @NotNull
@@ -2314,10 +2269,17 @@ public class YamlWire extends AbstractWire implements Wire {
         public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
             consumePadding();
             if (yt.current() == YamlToken.SEQUENCE_START) {
-                yt.next();
+                int minIndent = yt.secondTopContext().indent;
+                yt.next(Integer.MAX_VALUE);
                 tReader.accept(t, YamlWire.this.valueIn);
+                if (yt.current() == YamlToken.NONE)
+                    yt.next(minIndent);
                 if (yt.current() == YamlToken.SEQUENCE_END)
-                    yt.next();
+                    yt.next(minIndent);
+
+            } else if (yt.current() == YamlToken.TEXT) {
+                tReader.accept(t, YamlWire.this.valueIn);
+
             } else {
                 throw new UnsupportedOperationException(yt.toString());
             }
@@ -2342,13 +2304,28 @@ public class YamlWire extends AbstractWire implements Wire {
         @Override
         public boolean hasNext() {
             consumePadding();
-            return bytes.readRemaining() > 0;
+            switch (yt.current()) {
+                case SEQUENCE_END:
+                case STREAM_END:
+                case DOCUMENT_END:
+                case MAPPING_END:
+                case NONE:
+                    return false;
+                default:
+                    return true;
+            }
         }
 
         @Override
         public boolean hasNextSequenceItem() {
-            return yt.current() == YamlToken.SEQUENCE_ENTRY;
+            switch (yt.current()) {
+                case TEXT:
+                case SEQUENCE_ENTRY:
+                    return true;
+            }
+            return false;
         }
+
 
         @Override
         public <T> T applyToMarshallable(@NotNull Function<WireIn, T> marshallableReader) {
@@ -2450,7 +2427,7 @@ public class YamlWire extends AbstractWire implements Wire {
         public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy)
                 throws BufferUnderflowException, IORuntimeException {
             if (isNull()) {
-                consumeAny();
+                consumeAny(yt.topContext().indent);
                 return null;
             }
 
@@ -2466,18 +2443,21 @@ public class YamlWire extends AbstractWire implements Wire {
 
                 case SEQUENCE_START:
                     Jvm.warn().on(getClass(), "Expected a {} but was blank for type " + object.getClass());
-                    consumeAny();
+                    consumeAny(yt.secondTopContext().indent);
                     return object;
 
                 case MAPPING_START:
-                    yt.next();
+                    wireIn().startEvent();
+
                     object = strategy.readUsing(object, this);
 
-                    if (yt.current() != YamlToken.MAPPING_END)
+                    try {
+                        wireIn().endEvent();
+                    } catch (UnsupportedOperationException uoe) {
                         throw new IORuntimeException("Unterminated { while reading marshallable " +
                                 object + ",code='" + yt.current() + "', bytes=" + Bytes.toString(bytes, 1024)
                         );
-                    yt.next();
+                    }
                     return object;
 
                 default:
@@ -2710,7 +2690,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
             if (yt.current() == YamlToken.TAG) {
                 if (yt.isText("!null")) {
-                    consumeAny();
+                    consumeAny(0);
                     return true;
                 }
             }
@@ -2735,6 +2715,7 @@ public class YamlWire extends AbstractWire implements Wire {
                 if (type == null || type == Object.class || type.isInterface())
                     type = aClass;
             }
+
             switch (yt.current()) {
                 case MAPPING_START:
                     if (type != null) {
@@ -2743,15 +2724,15 @@ public class YamlWire extends AbstractWire implements Wire {
                         if (type == Object.class || Map.class.isAssignableFrom(type) || using instanceof Map)
                             return map(Object.class, Object.class, (Map) using);
                     }
-                    if (Map.class.isAssignableFrom(type))
-                        return valueIn.marshallableAsMap(Object.class, Object.class, (Map) using);
                     return valueIn.object(using, type);
 
                 case SEQUENCE_START:
                     return readSequence(type);
+
                 case TEXT:
                     Object o = valueIn.readNumberOrText();
                     return ObjectUtils.convertTo(type, o);
+
                 default:
                     throw new UnsupportedOperationException("Cannot determine what to do with " + yt.current());
             }

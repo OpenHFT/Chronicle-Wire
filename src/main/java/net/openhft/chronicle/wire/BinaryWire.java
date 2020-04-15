@@ -1291,9 +1291,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     bytes.writeUnsignedByte(STRING_0 + 1).writeUnsignedByte(ch);
 
                 } else if (len < 0x20) {
-                    bytes.writeUnsignedByte((int) (STRING_0 + len));
-                    bytes.appendUtf8(StringUtils.extractChars(s), 0, s.length());
-
+                    bytes.writeUnsignedByte((int) (STRING_0 + len)).appendUtf8(s);
                 } else {
                     writeCode(STRING_ANY);
                     bytes.writeUtf8(s);
@@ -1712,7 +1710,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     : Maths.toInt32(length0, "Document length %,d out of 32-bit int range.");
             boolean debug = false;
             assert debug = true;
-            if (debug) {
+            if (debug && !Jvm.isArm()) {
                 if (!bytes.compareAndSwapInt(position, 0, length)) {
                     throw new IllegalStateException("CAS failed for sequence was " + Integer.toHexString(bytes.readInt(position)));
                 }

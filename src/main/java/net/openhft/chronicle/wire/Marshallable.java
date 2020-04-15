@@ -30,6 +30,7 @@ import java.util.Scanner;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 import static net.openhft.chronicle.wire.WireType.READ_ANY;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
@@ -128,12 +129,16 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
 
     @Override
     default void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
-        Wires.readMarshallable(this, wire, true);
+        // Wires.readMarshallable(this, wire, true);
+        WireMarshaller wm = WIRE_MARSHALLER_CL.get(this.getClass());
+        wm.readMarshallable(this, wire, wm.defaultValue(), true);
     }
 
     @Override
     default void writeMarshallable(@NotNull WireOut wire) {
-        Wires.writeMarshallable(this, wire);
+        // Wires.writeMarshallable(this, wire);
+        WireMarshaller wm = WIRE_MARSHALLER_CL.get(this.getClass());
+        wm.writeMarshallable(this, wire);
     }
 
     @SuppressWarnings("unchecked")

@@ -74,6 +74,7 @@ public class TextWire extends AbstractWire implements Wire {
     static final BytesStore SPACE = BytesStore.from(" ");
     static final BytesStore END_FIELD = NEW_LINE;
     static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
+    static final Pattern REGX_PATTERN = Pattern.compile("\\.|\\$");
 
     static {
         assert unregister(TYPE) & unregister(BINARY);
@@ -85,16 +86,15 @@ public class TextWire extends AbstractWire implements Wire {
         WireInternal.INTERNER.valueCount();
     }
 
-    protected final TextValueOut valueOut = createValueOut();
+    private final TextValueOut valueOut = createValueOut();
     protected final TextValueIn valueIn = createValueIn();
-    private final StringBuilder sb = new StringBuilder();
-    protected long lineStart = 0;
-    Pattern REGX_PATTERN = Pattern.compile("\\.|\\$");
-    DefaultValueIn defaultValueIn;
+    private DefaultValueIn defaultValueIn;
     private WriteDocumentContext writeContext;
     private ReadDocumentContext readContext;
+    private final StringBuilder sb = new StringBuilder();
     private boolean strict = false;
     private boolean addTimeStamps = false;
+    protected long lineStart = 0;
 
     public TextWire(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
@@ -2481,7 +2481,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         private void consumeType() {
-            parseUntil(sb, StopCharTesters.COMMA_SPACE_STOP);
+            parseUntil(acquireStringBuilder(), StopCharTesters.COMMA_SPACE_STOP);
         }
 
         @NotNull

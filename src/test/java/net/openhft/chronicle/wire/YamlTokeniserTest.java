@@ -9,7 +9,6 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-@Ignore
 public class YamlTokeniserTest {
     public static String doTest(String resource) {
         try {
@@ -17,8 +16,13 @@ public class YamlTokeniserTest {
 //            bytes = Bytes.from(bytes.toString().replace("\r", ""));
             YamlTokeniser yt = new YamlTokeniser(bytes);
             StringBuilder sb = new StringBuilder();
-            while (yt.next() != YamlToken.NONE) {
+            int i = 0;
+            while (yt.next(Integer.MIN_VALUE) != YamlToken.STREAM_END) {
                 sb.append(yt).append('\n');
+                if (++i >= 100) {
+                    sb.append(".......\n");
+                    break;
+                }
             }
             return sb.toString();
         } catch (IOException e) {
@@ -688,6 +692,7 @@ public class YamlTokeniserTest {
                 doTest("yaml/spec/2_24GlobalTags.yaml"));
     }
 
+    @Ignore("TODO FIX")
     @Test
     public void eg2_25() {
         assertEquals(
@@ -741,7 +746,7 @@ public class YamlTokeniserTest {
     public void eg2_27() {
         assertEquals(
                 "DIRECTIVES_END \n" +
-                        "TAG <tag:clarkevans.com,2002:invoice>\n" +
+                        "TAG tag:clarkevans.com,2002:invoice\n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT invoice\n" +
@@ -941,6 +946,136 @@ public class YamlTokeniserTest {
                         "DOCUMENT_END \n" +
                         "DIRECTIVES_END \n" +
                         "DOCUMENT_END \n",
-                doTest("sample1.yaml").replace("\r", ""));
+                doTest("yaml/sample1.yaml").replace("\r", ""));
+    }
+
+    @Test
+    public void sample2() {
+        assertEquals(
+                "DIRECTIVES_END \n" +
+                        "TAG !meta-data\n" +
+                        "TAG net.openhft.chronicle.wire.DemarshallableObject\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT name\n" +
+                        "TEXT test\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT value\n" +
+                        "TEXT 12345\n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/sample2.yaml").replace("\r", ""));
+    }
+
+    @Test
+    public void sample3() {
+        assertEquals(
+                "DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT A\n" +
+                        "TAG net.openhft.chronicle.wire.DemarshallableObject\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("=A: !net.openhft.chronicle.wire.DemarshallableObject{}"));
+    }
+
+    @Test
+    public void sample4() {
+        assertEquals(
+                "DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT a\n" +
+                        "TAG type\n" +
+                        "TEXT \" [B\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT b\n" +
+                        "TAG type\n" +
+                        "TEXT \" String[]\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT c\n" +
+                        "TEXT hi\n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("=a: !type \"[B\", b: !type \"String[]\", c: hi"));
+    }
+
+    @Test
+    public void sample5() {
+        assertEquals(
+                "DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT A\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT b\n" +
+                        "TEXT 1234\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT c\n" +
+                        "TEXT hi\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT d\n" +
+                        "TEXT abc\n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT B\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT c\n" +
+                        "TEXT lo\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT d\n" +
+                        "TEXT xyz\n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT C\n" +
+                        "TEXT see\n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest(
+                        "=A: \n" +
+                                "  b: 1234\n" +
+                                "  c: hi\n" +
+                                "  d: abc\n" +
+                                "B: \n" +
+                                "  c: lo\n" +
+                                "  d: xyz\n" +
+                                "C: see\n"));
+    }
+
+    @Test
+    public void sample6() {
+        assertEquals(
+                "COMMENT \n" +
+                        "DIRECTIVES_END \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT b\n" +
+                        "TEXT AA\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT c\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT d\n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT A\n" +
+                        "TEXT 1\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT B\n" +
+                        "TEXT 2\n" +
+                        "MAPPING_END \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT e\n" +
+                        "TEXT end\n" +
+                        "MAPPING_END \n" +
+                        "DOCUMENT_END \n",
+                doTest(
+                        "=" + "#\nb: AA\nc: {}\nd: \n  A: 1\n  B: 2\ne: end"));
     }
 }

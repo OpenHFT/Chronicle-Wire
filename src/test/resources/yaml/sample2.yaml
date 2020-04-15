@@ -1,0 +1,5 @@
+--- !!meta-data
+!net.openhft.chronicle.wire.DemarshallableObject {
+  name: test,
+  value: 12345
+}

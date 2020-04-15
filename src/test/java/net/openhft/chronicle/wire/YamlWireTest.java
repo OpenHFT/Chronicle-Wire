@@ -49,12 +49,12 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.WireType.TEXT;
+import static net.openhft.chronicle.wire.YamlTokeniserTest.doTest;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-@Ignore("TODO FIX")
 public class YamlWireTest {
 
     Bytes bytes;
@@ -157,9 +157,10 @@ public class YamlWireTest {
         assertFalse(WireType.DELTA_BINARY.isAvailable());
     }
 
+    @Ignore("TODO FIX")
     @Test
     public void writeObjectWithTreeMap() {
-        @NotNull Wire wire = createWire();
+        @NotNull YamlWire wire = createWire();
         ObjectWithTreeMap value = new ObjectWithTreeMap();
         value.map.put("hello", "world");
         wire.write().object(value);
@@ -170,12 +171,12 @@ public class YamlWireTest {
         wire.read().object(value2, ObjectWithTreeMap.class);
         assertEquals("{hello=world}", value2.map.toString());
 
-        wire.bytes().readPosition(0);
+        wire.reset();
         ObjectWithTreeMap value3 = new ObjectWithTreeMap();
         wire.read().object(value3, Object.class);
         assertEquals("{hello=world}", value3.map.toString());
 
-        wire.bytes().readPosition(0);
+        wire.reset();
         ObjectWithTreeMap value4 = wire.read().object(ObjectWithTreeMap.class);
         assertEquals("{hello=world}", value4.map.toString());
     }
@@ -682,12 +683,12 @@ public class YamlWireTest {
 
     @Test
     public void testTypeWithEmpty() {
-        ClassAliasPool.CLASS_ALIASES.addAlias(NestedA.class, NestedB.class);
-        NestedA a = Marshallable.fromString("!NestedA {\n" +
-                "  b: !NestedB,\n" +
+        ClassAliasPool.CLASS_ALIASES.addAlias(YNestedA.class, YNestedB.class);
+        YNestedA a = Marshallable.fromString("!YNestedA {\n" +
+                "  b: !YNestedB,\n" +
                 "  value: 12345\n" +
                 "}");
-        assertEquals("!NestedA {\n" +
+        assertEquals("!YNestedA {\n" +
                 "  b: {\n" +
                 "    field1: 0.0\n" +
                 "  },\n" +
@@ -697,8 +698,8 @@ public class YamlWireTest {
 
     @Test
     public void testSingleQuote() {
-        NestedA a = Marshallable.fromString("!NestedA {\n" +
-                "  b: !NestedB,\n" +
+        YNestedA a = Marshallable.fromString("!YNestedA {\n" +
+                "  b: !YNestedB,\n" +
                 "  value: 12345\n" +
                 "}");
         assertNotNull(a);
@@ -746,6 +747,7 @@ public class YamlWireTest {
                 .read().time(LocalTime.MIN, Assert::assertEquals);
     }
 
+    @Ignore("TODO FIX")
     @Test
     public void testZonedDateTime() {
         @NotNull Wire wire = createWire();
@@ -816,7 +818,8 @@ public class YamlWireTest {
         @NotNull Wire wire = createWire();
         wire.bytes().append("A: !").append(MyTypes.class.getName()).append("{}");
 
-        @NotNull MyTypes mt = (MyTypes) wire.read(() -> "A").object();
+        @NotNull MyTypes mt = (MyTypes) wire.read("A")
+                .object();
         assertEquals("!net.openhft.chronicle.wire.MyTypes {\n" +
                 "  text: \"\",\n" +
                 "  b: false,\n" +
@@ -845,9 +848,10 @@ public class YamlWireTest {
         assertEquals(1.23, wire.read("B").float64(), 0);
     }
 
+    @Ignore("TODO FIX")
     @Test
     public void testABCDBytes() {
-        @NotNull Wire wire = createWire();
+        @NotNull YamlWire wire = createWire();
         wire.bytes().append(
                 "A: \"hi\",\n" +
                         "B: 'hi',\n" +
@@ -857,14 +861,15 @@ public class YamlWireTest {
 
         try {
             for (int i = 0; i < 5; i++) {
-                wire.bytes().readPosition(0);
+                wire.reset();
+                ABCD object = wire.getValueIn()
+                        .object(abcd, ABCD.class);
                 assertEquals("!net.openhft.chronicle.wire.YamlWireTest$ABCD {\n" +
                         "  A: hi,\n" +
                         "  B: hi,\n" +
                         "  C: hi,\n" +
                         "  D: bye\n" +
-                        "}\n", wire.getValueIn()
-                        .object(abcd, ABCD.class)
+                        "}\n", object
                         .toString());
             }
         } finally {
@@ -876,10 +881,11 @@ public class YamlWireTest {
         }
     }
 
+    @Ignore("TODO FIX")
     @Test
     public void testABCStringBuilder() {
 
-        @NotNull Wire wire = createWire();
+        @NotNull YamlWire wire = createWire();
         wire.bytes().append(
                 "A: \"hi\",\n" +
                         "B: 'hi',\n" +
@@ -887,7 +893,7 @@ public class YamlWireTest {
         ABC abc = new ABC();
 
         for (int i = 0; i < 5; i++) {
-            wire.bytes().readPosition(0);
+            wire.reset();
             assertEquals("!net.openhft.chronicle.wire.YamlWireTest$ABC {\n" +
                     "  A: hi,\n" +
                     "  B: hi,\n" +
@@ -1007,6 +1013,81 @@ public class YamlWireTest {
         assertEquals(fieldLen, len, 1);
     }
 
+    @Test
+    public void testContextDump() {
+        Bytes<?> from = Bytes.from("# comment\n" +
+                "A: \n" +
+                "  b: 1234\n" +
+                "  c: hi\n" +
+                "  d: abc\n" +
+                "B: \n" +
+                "  c: lo\n" +
+                "  d: xyz\n" +
+                "C: see\n");
+        try {
+            YamlWire yw = new YamlWire(from);
+            assertEquals("[\n" +
+                    "  { token: STREAM_START, indent: -1, keys: !!null \"\" }\n" +
+                    "]", yw.dumpContext());
+            yw.read("C")
+                    .text();
+            assertEquals("[\n" +
+                    "  { token: STREAM_START, indent: -1, keys: !!null \"\" },\n" +
+                    "  { token: DIRECTIVES_END, indent: -1, keys: !!null \"\" },\n" +
+                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 2, offsets: [ 10, 41, 0, 0, 0, 0, 0 ]} }\n" +
+                    "]", yw.dumpContext());
+            assertEquals("{c=lo, d=xyz}", "" + yw.read("B").object());
+            assertEquals("{b=1234, c=hi, d=abc}", "" + yw.read("A").object());
+
+        } finally {
+            from.release();
+        }
+    }
+
+    @Test
+    public void testContextDump2() {
+        Bytes<?> from = Bytes.from("#\nb: AA\nc: {}\nd: \n  A: 1\n  B: 2\ne: end");
+        try {
+            YamlWire yw = new YamlWire(from);
+            yw.read("a").text();
+            assertEquals("[\n" +
+                    "  { token: STREAM_START, indent: -1, keys: !!null \"\" },\n" +
+                    "  { token: DIRECTIVES_END, indent: -1, keys: !!null \"\" },\n" +
+                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 4, offsets: [ 2, 8, 14, 32, 0, 0, 0 ]} }\n" +
+                    "]", yw.dumpContext());
+            assertEquals("AA", "" + yw.read("b").object());
+            assertEquals("{}", "" + yw.read("c").object());
+            assertEquals("{A=1, B=2}", "" + yw.read("d").object());
+            assertEquals("end", "" + yw.read("e").object());
+
+        } finally {
+            from.release();
+        }
+    }
+
+    @Test
+    public void testConsumeAny() {
+        Bytes<?> from = Bytes.from("A: \n" +
+                "  b: 1234\n" +
+                "  c: hi\n" +
+                "  d: abc\n" +
+                "B: \n" +
+                "  c: lo\n" +
+                "  d: xyz\n" +
+                "C: see\n");
+        try {
+            YamlWire yw = new YamlWire(from);
+            yw.startEvent();
+            yw.read().skipValue();
+            assertEquals("B", yw.readEvent(String.class));
+            yw.getValueIn().skipValue();
+            assertEquals("C", yw.readEvent(String.class));
+            yw.endEvent();
+        } finally {
+            from.release();
+        }
+    }
+
     @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteStrings() {
@@ -1069,7 +1150,7 @@ public class YamlWireTest {
     @Ignore
     public void testMapReadAndWriteIntegers() {
         @NotNull final Bytes bytes = nativeBytes();
-        @NotNull final Wire wire = new YamlWire(bytes);
+        @NotNull final YamlWire wire = new YamlWire(bytes);
 
         @NotNull final Map<Integer, Integer> expected = new HashMap<>();
 
@@ -1093,7 +1174,7 @@ public class YamlWireTest {
             assertEquals(m, expected);
         });
 
-        wire.bytes().readPosition(0);
+        wire.reset();
         // skip the length
         wire.bytes().readSkip(4);
         // TODO: snakeyaml doesn't like !int
@@ -1106,6 +1187,7 @@ public class YamlWireTest {
 
     @SuppressWarnings("deprecation")
     @Test
+    @Ignore("TODO FIX")
     public void testMapReadAndWriteMarshable() {
         @NotNull final Bytes bytes = nativeBytes();
         @NotNull final Wire wire = new YamlWire(bytes);
@@ -1189,6 +1271,7 @@ public class YamlWireTest {
         assertEquals(WireType.RAW, wire.read().object(Object.class));
     }
 
+    @Ignore("TODO FIX")
     @Test
     public void testArrays() {
         @NotNull Wire wire = createWire();
@@ -1268,6 +1351,7 @@ public class YamlWireTest {
         assertEquals(str, bytes.toString());
     }
 
+    @Ignore("TODO FIX")
     @Test
     public void testStringArrays() {
         @NotNull Wire wire = createWire();
@@ -1357,7 +1441,7 @@ public class YamlWireTest {
     }
 
     @Test
-    public void testNestedDecode() {
+    public void testYNestedDecode() {
         @NotNull String s = "cluster: {\n" +
                 "  host1: {\n" +
                 "     hostId: 1,\n" +
@@ -1378,6 +1462,52 @@ public class YamlWireTest {
                 "       hostId: 21\n" +
                 "    }\n" +
                 "}\n";
+        assertEquals("DIRECTIVES_END \n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT cluster\n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT host1\n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT hostId\n" +
+                "TEXT 1\n" +
+                "MAPPING_END \n" +
+                "MAPPING_KEY \n" +
+                "TEXT host2\n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT hostId\n" +
+                "TEXT 2\n" +
+                "MAPPING_END \n" +
+                "COMMENT host3: {\n" +
+                "COMMENT hostId: 3,\n" +
+                "COMMENT },\n" +
+                "MAPPING_KEY \n" +
+                "TEXT host4\n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT hostId\n" +
+                "TEXT 4\n" +
+                "MAPPING_END \n" +
+                "MAPPING_END \n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT cluster2\n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT host21\n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT hostId\n" +
+                "TEXT 21\n" +
+                "MAPPING_END \n" +
+                "MAPPING_END \n" +
+                "MAPPING_END \n" +
+                "MAPPING_END \n" +
+                "DOCUMENT_END \n", doTest("=" + s));
+
         ObjIntConsumer<String> results = EasyMock.createMock(ObjIntConsumer.class);
         results.accept("host1", 1);
         results.accept("host2", 2);
@@ -1387,9 +1517,10 @@ public class YamlWireTest {
         wire.read(() -> "cluster").marshallable(v -> {
                     @NotNull StringBuilder sb = new StringBuilder();
                     while (wire.hasMore()) {
-                        wire.readEventName(sb).marshallable(m -> {
-                            m.read(() -> "hostId").int32(sb.toString(), results);
-                        });
+                        wire.readEventName(sb)
+                                .marshallable(m ->
+                                        m.read(() -> "hostId")
+                                                .int32(sb.toString(), results));
                     }
                 }
         );
@@ -1417,6 +1548,7 @@ public class YamlWireTest {
         assertEquals(null, c);
     }
 
+    @Ignore("TODO FIX")
     @Test
     public void testAllChars() {
         @NotNull Wire wire = createWire();
@@ -1431,6 +1563,7 @@ public class YamlWireTest {
         }
     }
 
+    @Ignore("TODO FIX")
     @Test
     public void readDemarshallable() {
         @NotNull Wire wire = createWire().useBinaryDocuments();
@@ -1452,6 +1585,7 @@ public class YamlWireTest {
         }
     }
 
+    @Ignore("TODO FIX")
     @Test
     public void testByteArrayValueWithRealBytesNegative() {
         @NotNull Wire wire = createWire();
@@ -1498,6 +1632,7 @@ public class YamlWireTest {
         wire.readDocument(null, w -> assertArrayEquals(four, (byte[]) w.read(() -> "four").object()));
     }
 
+    @Ignore("TODO FIX")
     @Test
     public void testObjectKeys() {
         @NotNull Map<MyMarshallable, String> map = new LinkedHashMap<>();
@@ -1538,6 +1673,7 @@ public class YamlWireTest {
         System.out.println(TEXT.asString(sc));
     }
 
+    @Ignore("TODO FIX")
     @Test
     public void writeCharacter() {
         @NotNull Wire wire = createWire();
@@ -1670,14 +1806,14 @@ public class YamlWireTest {
     }
 
     @Test
-    public void testNestedList() {
-        NestedList nl = Marshallable.fromString("!" + NestedList.class.getName() + " {\n" +
+    public void testYNestedList() {
+        YNestedList nl = Marshallable.fromString("!" + YNestedList.class.getName() + " {\n" +
                 "  name: name,\n" +
                 "  listA: [ { a: 1, b: 1.2 } ],\n" +
                 "  listB: [ { a: 1, b: 1.2 }, { a: 3, b: 2.3 } ]," +
                 "  num: 128\n" +
                 "}\n");
-        String expected = "!net.openhft.chronicle.wire.YamlWireTest$NestedList {\n" +
+        String expected = "!net.openhft.chronicle.wire.YamlWireTest$YNestedList {\n" +
                 "  name: name,\n" +
                 "  listA: [\n" +
                 "    { a: 1, b: 1.2 }\n" +
@@ -1694,7 +1830,7 @@ public class YamlWireTest {
         for (int i = 0; i < 64; i++) {
             Set<Integer> set = new HashSet<>();
 
-            String cs = "!net.openhft.chronicle.wire.YamlWireTest$NestedList {\n";
+            String cs = "!net.openhft.chronicle.wire.YamlWireTest$YNestedList {\n";
             int z = i;
             for (int j = 0; j < 4; j++) {
                 if (!set.add(z & 3))
@@ -1724,7 +1860,7 @@ public class YamlWireTest {
                 z /= 4;
             }
             cs += "}\n";
-            NestedList nl2 = Marshallable.fromString(cs);
+            YNestedList nl2 = Marshallable.fromString(cs);
             assertEquals(expected, nl2.toString());
         }
     }
@@ -1744,10 +1880,10 @@ public class YamlWireTest {
     @Test
     public void testArrayTypes1() {
         Wire wire = createWire();
-        wire.bytes().append("a: !type [B;, b: !type String[], c: hi");
+        wire.bytes().append("a: !type \"[B\", b: !type \"String[]\", c: hi");
 
-        assertEquals(String[].class, wire.read("b").typeLiteral());
         assertEquals(byte[].class, wire.read("a").typeLiteral());
+        assertEquals(String[].class, wire.read("b").typeLiteral());
         assertEquals("hi", wire.read("c").text());
     }
 
@@ -1766,24 +1902,24 @@ public class YamlWireTest {
     @Test
     public void readMarshallableAsEnum() {
         Wire wire = createWire();
-        ClassAliasPool.CLASS_ALIASES.addAlias(TWTSingleton.class);
-        wire.bytes().append("a: !TWTSingleton INSTANCE,\n" +
-                "b: !TWTSingleton INSTANCE\n");
-        assertEquals(TWTSingleton.INSTANCE, wire.read("a")
+        ClassAliasPool.CLASS_ALIASES.addAlias(YWTSingleton.class);
+        wire.bytes().append("a: !YWTSingleton INSTANCE,\n" +
+                "b: !YWTSingleton INSTANCE\n");
+        assertEquals(YWTSingleton.INSTANCE, wire.read("a")
                 .object());
-        assertEquals(TWTSingleton.INSTANCE, wire.read("b").object());
+        assertEquals(YWTSingleton.INSTANCE, wire.read("b").object());
 
     }
 
     @Test
     public void nestedWithEnumSet() {
         Wire wire = createWire();
-        NestedWithEnumSet n = new NestedWithEnumSet();
+        YNestedWithEnumSet n = new YNestedWithEnumSet();
         n.list.add(new WithEnumSet("none"));
         n.list.add(new WithEnumSet("one", EnumSet.of(TimeUnit.DAYS)));
         n.list.add(new WithEnumSet("two", EnumSet.of(TimeUnit.DAYS, TimeUnit.HOURS)));
         wire.write("hello")
-                .object(NestedWithEnumSet.class, n);
+                .object(YNestedWithEnumSet.class, n);
         assertEquals("hello: {\n" +
                 "  list: [\n" +
                 "    { name: none },\n" +
@@ -1792,8 +1928,8 @@ public class YamlWireTest {
                 "  ]\n" +
                 "}\n", wire.toString());
 
-        NestedWithEnumSet a = wire.read("hello")
-                .object(NestedWithEnumSet.class);
+        YNestedWithEnumSet a = wire.read("hello")
+                .object(YNestedWithEnumSet.class);
         assertEquals(n.toString(), a.toString());
         assertEquals(n, a);
     }
@@ -1836,10 +1972,6 @@ public class YamlWireTest {
         final double d2 = wire2.getValueIn().float64();
 
         Assert.assertEquals(d2, d, 0);
-    }
-
-    enum TWTSingleton {
-        INSTANCE
     }
 
     enum BWKey implements WireKey {
@@ -1891,13 +2023,13 @@ public class YamlWireTest {
         StringBuilder C = new StringBuilder();
     }
 
-    static class NestedA extends SelfDescribingMarshallable {
-        NestedB b;
-        long value;
+    enum YWTSingleton {
+        INSTANCE
     }
 
-    static class NestedB extends SelfDescribingMarshallable {
-        double field1;
+    static class YNestedA extends SelfDescribingMarshallable {
+        YNestedB b;
+        long value;
     }
 
     static class StringArray implements Marshallable {
@@ -1924,30 +2056,30 @@ public class YamlWireTest {
         }
     }
 
-    static class NestedList extends SelfDescribingMarshallable {
+    static class YNestedB extends SelfDescribingMarshallable {
+        double field1;
+    }
+
+    static class YNestedList extends SelfDescribingMarshallable {
         String name;
-        List<NestedItem> listA = new ArrayList<>();
-        List<NestedItem> listB = new ArrayList<>();
-        transient List<NestedItem> listA2 = new ArrayList<>();
-        transient List<NestedItem> listB2 = new ArrayList<>();
+        List<YNestedItem> listA = new ArrayList<>();
+        List<YNestedItem> listB = new ArrayList<>();
+        transient List<YNestedItem> listA2 = new ArrayList<>();
+        transient List<YNestedItem> listB2 = new ArrayList<>();
         int num;
 
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
             name = wire.read("name").text();
-            wire.read("listA").sequence(listA, listA2, NestedItem::new);
-            wire.read("listB").sequence(listB, listB2, NestedItem::new);
+            wire.read("listA").sequence(listA, listA2, YNestedItem::new);
+            wire.read("listB").sequence(listB, listB2, YNestedItem::new);
             num = wire.read("num").int32();
         }
     }
 
-    static class NestedItem extends SelfDescribingMarshallable {
+    static class YNestedItem extends SelfDescribingMarshallable {
         int a;
         double b;
-    }
-
-    static class NestedWithEnumSet extends SelfDescribingMarshallable {
-        List<WithEnumSet> list = new ArrayList<>();
     }
 
     static class WithEnumSet extends SelfDescribingMarshallable {
@@ -2031,4 +2163,7 @@ public class YamlWireTest {
         }
     }
 
+    static class YNestedWithEnumSet extends SelfDescribingMarshallable {
+        List<WithEnumSet> list = new ArrayList<>();
+    }
 }

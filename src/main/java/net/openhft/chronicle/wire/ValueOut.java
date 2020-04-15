@@ -666,11 +666,11 @@ public interface ValueOut {
         } else if (value instanceof IntValue) {
             IntValue value2 = (IntValue) value;
             return int32forBinding(value2.getValue(), value2);
-        } else if (Wires.isInternal(value)) {
-            throw new IllegalStateException("type=" + value.getClass() +
-                    " is unsupported, it must either be of type Marshallable, String or " +
-                    "AutoBoxed primitive Object");
         } else {
+            assert (!Wires.isInternal(value)) : "type=" + value.getClass() +
+                    " is unsupported, it must either be of type Marshallable, String or " +
+                    "AutoBoxed primitive Object";
+
             String typeName = Wires.typeNameFor(value);
             if (typeName != null)
                 typePrefix(typeName);

@@ -63,7 +63,7 @@ public class NestedMapsTest {
         m.map2.put("one", 1.0);
         m.map2.put("two point two", 2.2);
 
-        Bytes bytes = Bytes.elasticByteBuffer();
+        Bytes bytes = Bytes.elasticHeapByteBuffer(128);
         Wire wire = wireType.apply(bytes);
         wire.writeDocument(false, w -> w.writeEventName("mapped").object(m));
         switch (wireType) {
@@ -168,7 +168,8 @@ public class NestedMapsTest {
                 break;
         }
         @NotNull Mapped m2 = new Mapped();
-        assertTrue(wire.readDocument(null, w -> w.read(() -> "mapped").marshallable(m2)));
+        assertTrue(wire.readDocument(null, w -> w.read(() -> "mapped")
+                .marshallable(m2)));
         assertEquals(m, m2);
 
         bytes.release();
@@ -185,7 +186,7 @@ public class NestedMapsTest {
         m.map2.put("one", 1.0);
         m.map2.put("two point two", 2.2);
 
-        Bytes bytes = Bytes.elasticByteBuffer();
+        Bytes bytes = Bytes.elasticHeapByteBuffer(128);
         Wire wire = wireType.apply(bytes);
         m.writeMarshallable(wire);
         switch (wireType) {
@@ -220,10 +221,10 @@ public class NestedMapsTest {
                         "}\n", wire.toString());
                 break;
             case BINARY:
-                assertEquals("[pos: 0, rlim: 135, wlim: 8EiB, cap: 8EiB ] ǁÅwords\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdogÇnumbers\\u0082⒎٠٠٠⒈⒉⒉⒊⒌⒏⒔Ämap1\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBBÄmap2\\u0082\\u0018٠٠٠¹⒊one⒈¹⒔two point two\\u0092Ü⒈‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+                assertEquals("[pos: 0, rlim: 135, wlim: 8EiB, cap: 8EiB ] ǁÅwords\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdogÇnumbers\\u0082⒎٠٠٠⒈⒉⒉⒊⒌⒏⒔Ämap1\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBBÄmap2\\u0082\\u0018٠٠٠¹⒊one⒈¹⒔two point two\\u0092Ü⒈‡٠٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
                 break;
             case FIELDLESS_BINARY:
-                assertEquals("[pos: 0, rlim: 111, wlim: 8EiB, cap: 8EiB ] ǁ\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdog\\u0082⒎٠٠٠⒈⒉⒉⒊⒌⒏⒔\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBB\\u0082\\u0018٠٠٠¹⒊one⒈¹⒔two point two\\u0092Ü⒈‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+                assertEquals("[pos: 0, rlim: 111, wlim: 8EiB, cap: 8EiB ] ǁ\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdog\\u0082⒎٠٠٠⒈⒉⒉⒊⒌⒏⒔\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBB\\u0082\\u0018٠٠٠¹⒊one⒈¹⒔two point two\\u0092Ü⒈‡٠٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
                 break;
         }
         @NotNull Mapped m2 = new Mapped();

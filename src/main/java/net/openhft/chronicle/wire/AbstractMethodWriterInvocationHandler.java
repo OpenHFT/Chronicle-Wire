@@ -28,18 +28,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
-/*
- * Created by Peter Lawrey on 25/03/16.
- */
 public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvocationHandler implements MethodWriterInvocationHandler {
     private final Map<Method, ParameterHolderSequenceWriter> parameterMap = new ConcurrentHashMap<>();
-
+    private final ThreadLocal<Object> proxy = new ThreadLocal<>();
+    private final BiFunction<Method, Object[], Object> onMethod = (m, a) -> {
+        this.handleInvoke.accept(m, a);
+        return m.getReturnType().isInterface() ? this.proxy.get() : null;
+    };
     protected boolean recordHistory;
     protected String genericEvent = "";
     private MethodWriterInterceptorReturns methodWriterInterceptorReturns;
     private BiConsumer<Method, Object[]> handleInvoke;
-    // Note the Object[] passed in creates an object on every call.
     private boolean useMethodIds;
 
     public AbstractMethodWriterInvocationHandler() {
@@ -49,11 +50,10 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
 
     @Override
     protected Object doInvoke(Object proxy, Method method, Object[] args) {
+
         if (methodWriterInterceptorReturns != null) {
-            methodWriterInterceptorReturns.intercept(method, args, (m, a) -> {
-                this.handleInvoke.accept(m, a);
-                return m.getReturnType().isInterface() ? proxy : null;
-            });
+            this.proxy.set(proxy);
+            methodWriterInterceptorReturns.intercept(method, args, onMethod);
         } else {
             handleInvoke(method, args);
         }

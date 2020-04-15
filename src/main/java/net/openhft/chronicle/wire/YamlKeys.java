@@ -27,4 +27,11 @@ public class YamlKeys {
     public void reset() {
         count = 0;
     }
+
+    public void removeIndex(int i) {
+        count--;
+        int length = count - i;
+        if (length > 0)
+            System.arraycopy(offsets, i + 1, offsets, i, length);
+    }
 }

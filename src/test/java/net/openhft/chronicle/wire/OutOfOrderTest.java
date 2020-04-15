@@ -22,7 +22,8 @@ public class OutOfOrderTest {
     void doTest(String input, String expected) {
         Bytes<?> from = Bytes.from(input);
         JSONWire wire = new JSONWire(from);
-        OOOT ooot = wire.getValueIn().object(OOOT.class);
+        OOOT ooot = wire.getValueIn()
+                .object(OOOT.class);
         from.release();
 
         JSONWire wire2 = new JSONWire(Bytes.elasticHeapByteBuffer(64));
