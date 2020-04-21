@@ -25,7 +25,6 @@ import net.openhft.chronicle.core.StackTrace;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
-import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.threads.TimingPauser;
 import org.jetbrains.annotations.NotNull;
@@ -46,30 +45,6 @@ public abstract class AbstractWire implements Wire {
             "you have not nested the documents. If you are using Chronicle-Queue please " +
             "ensure that you have a unique instance of the Appender per thread, in " +
             "other-words you can not share appenders across threads.";
-    /**
-     * This code is used to stop keeping track of the index that it was just about to write, and just
-     * write the data if the appender was more than 1<<20 = 1MB behind, if the appender is less
-     * behind than 1MB then, it will cycle through each excerpt to keep track of the sequence number
-     * ( we call this the headerNumber ). Keeping track if you are very far behind is expensive (
-     * time wise ) as it has to walk up the queue, recording the number of messages it encounters to
-     * know what the index number is for the message it is about to write. This is not a problem if
-     * all the appenders are on the same thread, it never gets behind. So when you have a multi
-     * threaded appender, we look to see how far behind your appender is compare to the end of the
-     * queue which was written by another thread, if its far behind, we just write the data, and
-     * don’t update the headerNumber, the code later uses the built in indexing to work out what the
-     * header number is.
-     * <p>
-     * As such I have expose this property so that you can tune it , you want to keep the number as
-     * large as possible, to a point where your write performance is no longer acceptable ( of
-     * appenders that have fallen behind )
-     */
-    private static long ignoreHeaderCountIfNumberOfBytesBehindExceeds = Integer.getInteger
-            ("ignoreHeaderCountIfNumberOfBytesBehindExceeds", 1 << 20);
-
-    /**
-     * See comments on tryMoveToEndOfQueue
-     */
-    private static boolean disableFastForwardHeaderNumber = Boolean.getBoolean("disableFastForwardHeaderNumber");
 
     static {
         boolean assertions = false;
@@ -98,6 +73,7 @@ public abstract class AbstractWire implements Wire {
     private ObjectInput objectInput;
     private boolean insideHeader;
     private HeadNumberChecker headNumberChecker;
+    private boolean usePadding = false;
 
     @SuppressWarnings("rawtypes")
     public AbstractWire(@NotNull Bytes bytes, boolean use8bit) {
@@ -200,6 +176,7 @@ public abstract class AbstractWire implements Wire {
     public HeaderType readDataHeader(boolean includeMetaData) throws EOFException {
 
         for (; ; ) {
+            alignForRead(bytes);
             int header = bytes.peekVolatileInt();
             if (isReady(header)) {
                 if (isData(header))
@@ -217,8 +194,14 @@ public abstract class AbstractWire implements Wire {
         }
     }
 
+    private void alignForRead(Bytes<?> bytes) {
+        if (usePadding)
+            bytes.readSkip((-bytes.readPosition()) & 0x3);
+    }
+
     @Override
     public void readAndSetLength(long position) {
+        alignForRead(bytes);
         int header = bytes.peekVolatileInt();
         if (isReady(header)) {
             if (header == NOT_INITIALIZED)
@@ -236,6 +219,7 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public void readMetaDataHeader() {
+        alignForRead(bytes);
         int header = bytes.peekVolatileInt();
         if (isReady(header)) {
             if (header == NOT_INITIALIZED)
@@ -292,29 +276,6 @@ public abstract class AbstractWire implements Wire {
     }
 
     @Override
-    public long writeHeaderOfUnknownLength(final int safeLength, final long timeout, final TimeUnit timeUnit,
-                                           @Nullable final LongValue lastPosition, final Sequence sequence)
-            throws TimeoutException, EOFException {
-        assert !insideHeader : INSIDE_HEADER_MESSAGE;
-
-        insideHeader = true;
-
-        try {
-            long tryPos = tryWriteHeader(safeLength);
-            if (tryPos != TRY_WRITE_HEADER_FAILED)
-                return tryPos;
-
-            if (lastPosition != null && sequence != null)
-                tryMoveToEndOfQueue(lastPosition, sequence);
-
-            return writeHeader0(Wires.UNKNOWN_LENGTH, safeLength, timeout, timeUnit);
-        } catch (Throwable t) {
-            insideHeader = false;
-            throw t;
-        }
-    }
-
-    @Override
     public long enterHeader(int safeLength) {
         if (safeLength > bytes.writeRemaining()) {
             if (bytes.isElastic()) {
@@ -329,6 +290,10 @@ public abstract class AbstractWire implements Wire {
         long pos = bytes.writePosition();
 
         for (; ; ) {
+            if (usePadding)
+                // align
+                pos += -pos & 0x3;
+
             int header = bytes.readVolatileInt(pos);
             if (header == NOT_INITIALIZED)
                 break;
@@ -343,171 +308,6 @@ public abstract class AbstractWire implements Wire {
         }
         bytes.writePositionRemaining(pos + SPB_HEADER_SIZE, safeLength);
         return pos;
-    }
-
-    /**
-     * The Problem this method attempts to resolve
-     * <p>
-     * Appenders that have not written for a while are having to scan down the queue to get to the end,
-     * there was some code that attempts to resolve this by detecting if the appenders are far away from the end,
-     * then just jumping tot the end, but this code loses the sequence number of the end of the queue.
-     * However, because we lose the sequence number we are currently over conservative before invoking this jump to the end.
-     * Because we are over conservative, apparently we are still spending a lot of time
-     * (I don’t have the stats to hand ) linear scanning to the end of the queue.
-     * <p>
-     * So, The problem is that we don’t know the sequence number of the end of the queue atomically with the lastPosition.
-     * <p>
-     * This proposal attempts to resolve this :
-     * <p>
-     * How about we introduce another LongValue into the queues header, lets call it the seqAndLastPosition
-     * that stores the sequence number in the lower bits and the ( lower bits of the address in higher bits,
-     * this would be done much in the same way that we store the index, containing both the cycle and seq number ),
-     * or to put it another way, this LongValue will store the end of the lastPosition in the same place that the index stores it’s cycle number.
-     * <p>
-     * When ever we store the lastPosition, we should also store the seqAndLastPosition.
-     * <p>
-     * so to get the the lastPosition and the sequence number of the approximate end of the queue, first we read the lastPosition,
-     * then we read the seqAndLastPosition, if the last bits of the lastPosition, match the higher bits of seqAndLastPosition
-     * we can be sure that these are atomic, however, if they don’t match we just retry, until they do match.
-     * <p>
-     * Hence we don’t have to any more linear scan too far down the queue or jump to the end without knowing what the sequence number of this address is !
-     *
-     * @param lastPosition the end of the queue
-     * @param sequence     and object that can be used for getting the last sequence
-     */
-    private void tryMoveToEndOfQueue(@NotNull final LongValue lastPosition,
-                                     @NotNull final Sequence sequence) {
-
-        long lastPositionValue = lastPosition.getVolatileValue();
-
-        // do we jump forward if there has been writes else where.
-        if (lastPositionValue <= bytes.writePosition())
-            return;
-
-        if (headerNumber == Long.MIN_VALUE) {
-            fastForwardDontWriteHeaderNumber(lastPositionValue);
-            return;
-        }
-
-        try {
-
-            int maxAttempts = 128;
-            for (int attempt = 0; attempt < maxAttempts; attempt++) {
-
-                long lastSequence = sequence.getSequence(lastPositionValue);
-
-                if (lastSequence == Sequence.NOT_FOUND) {
-                    fastForwardDontWriteHeaderNumber(lastPositionValue);
-                    break;
-                }
-
-                if (lastSequence != Sequence.NOT_FOUND_RETRY) {
-
-                    long currentSequence = sequence.toSequenceNumber(headerNumber);
-
-                    // we are already ahead of the lastSequence
-                    if (currentSequence > lastSequence)
-                        break;
-
-                    long newHeaderNumber = sequence.toIndex(headerNumber, lastSequence - 1);
-
-                    if (!disableFastForwardHeaderNumber) {
-                        headerNumber(newHeaderNumber);
-                        bytes.writePosition(lastPositionValue);
-                        break;
-                    }
-                }
-
-                if (attempt == maxAttempts - 1) {
-                    fastForwardDontWriteHeaderNumber(lastPositionValue);
-                    break;
-                }
-
-                lastPositionValue = lastPosition.getVolatileValue();
-            }
-        } catch (Throwable e) {
-            Jvm.warn().on(getClass(), e);
-        }
-    }
-
-    private void fastForwardDontWriteHeaderNumber(long lastPositionValue) {
-        if (lastPositionValue > bytes.writePosition() + ignoreHeaderCountIfNumberOfBytesBehindExceeds) {
-            headerNumber(Long.MIN_VALUE);
-            bytes.writePosition(lastPositionValue);
-        }
-    }
-
-    private long tryWriteHeader(int safeLength) {
-        long pos = bytes.writePosition();
-
-        final int value = Wires.addMaskedTidToHeader(NOT_COMPLETE | Wires.UNKNOWN_LENGTH);
-        if (bytes.compareAndSwapInt(pos, 0, value)) {
-
-            if (safeLength > bytes.writeRemaining())
-                return throwNotEnoughSpace(safeLength, bytes);
-
-            bytes.writePositionRemaining(pos + SPB_HEADER_SIZE, safeLength);
-//            System.out.println(Thread.currentThread()+" wpr pos: "+pos+" hdr "+headerNumber);
-            return pos;
-        }
-        return TRY_WRITE_HEADER_FAILED;
-    }
-
-    private long writeHeader0(int length, int safeLength, long timeout, TimeUnit timeUnit) throws TimeoutException, EOFException {
-        if (length < 0 || length > safeLength)
-            throwISE();
-        long pos = bytes.writePosition();
-
-        resetTimedPauser();
-
-//        System.out.println(Thread.currentThread()+" wh0 pos: "+pos+" hdr "+(int) headerNumber);
-        try {
-            final int value = Wires.addMaskedTidToHeader(NOT_COMPLETE | length);
-            for (; ; ) {
-                if (bytes.compareAndSwapInt(pos, NOT_INITIALIZED, value)) {
-
-                    bytes.writePosition(pos + SPB_HEADER_SIZE);
-                    int maxlen = length == UNKNOWN_LENGTH ? safeLength : length;
-                    if (maxlen > bytes.writeRemaining())
-                        throwNotEnoughSpace(maxlen, bytes);
-                    bytes.writeLimit(bytes.writePosition() + maxlen);
-                    return pos;
-                }
-                bytes.readPositionRemaining(pos, 0);
-
-                int header = bytes.readVolatileInt(pos);
-                // two states where it is unable to continue.
-                if (Wires.isEndOfFile(header))
-                    throw new EOFException();
-                if (isNotComplete(header)) {
-                    acquireTimedParser().pause(timeout, timeUnit);
-                    continue;
-                }
-
-                acquireTimedParser().reset();
-
-                int len = lengthOf(header);
-
-                int nextHeader = lengthOf(bytes.readVolatileInt(pos + len + SPB_HEADER_SIZE));
-                if (nextHeader > 1 << 10) {
-                    int header2 = bytes.readVolatileInt(pos);
-                    if (header2 != header) {
-                        Jvm.warn().on(getClass(), "At pos: " + pos +
-                                " header: " + header +
-                                " header2: " + header2);
-                        header = header2;
-                    }
-                }
-                pos += len + SPB_HEADER_SIZE; // length of message plus length of header
-
-                if (isData(header))
-                    incrementHeaderNumber(pos);
-//                System.out.println(Thread.currentThread()+" wh0-iter pos: "+pos+" hdr "+(int) headerNumber);
-
-            }
-        } finally {
-            resetTimedPauser();
-        }
     }
 
     @Override
@@ -606,6 +406,8 @@ public abstract class AbstractWire implements Wire {
 
         try {
             for (; ; ) {
+                if (usePadding)
+                    pos += -pos & 0x3;
                 if (bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
                     bytes.writePosition(pos + SPB_HEADER_SIZE);
                     return true;
@@ -713,5 +515,13 @@ public abstract class AbstractWire implements Wire {
      */
     public void forceNotInsideHeader() {
         insideHeader = false;
+    }
+
+    public void usePadding(boolean usePadding) {
+        this.usePadding = usePadding;
+    }
+
+    public boolean usePadding() {
+        return usePadding;
     }
 }

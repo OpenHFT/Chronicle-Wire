@@ -2,10 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
-import net.openhft.chronicle.wire.monitoring.StoreWritingProcessInHeaderTest;
 import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -35,16 +32,6 @@ public class WireDumperTest {
     @Parameterized.Parameters(name = "{0}")
     public static Object[][] parameters() {
         return toParams(WireType.values());
-    }
-
-    @BeforeClass
-    public static void beforeClass() {
-        StoreWritingProcessInHeaderTest.enableFeature();
-    }
-
-    @AfterClass
-    public static void afterClass() {
-        StoreWritingProcessInHeaderTest.disableFeature();
     }
 
     private static Object[][] toParams(final WireType[] values) {

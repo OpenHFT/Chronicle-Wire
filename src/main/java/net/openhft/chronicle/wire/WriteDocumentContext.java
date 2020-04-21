@@ -22,9 +22,6 @@ import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
-/*
- * Created by Peter Lawrey on 24/12/15.
- */
 public class WriteDocumentContext implements DocumentContext {
     protected Wire wire;
     protected long position = -1;
@@ -37,6 +34,8 @@ public class WriteDocumentContext implements DocumentContext {
 
     public void start(boolean metaData) {
         @NotNull Bytes<?> bytes = wire().bytes();
+        if (wire.usePadding())
+            bytes.writeSkip((-bytes.writePosition()) & 0x3);
         bytes.comment("msg-length");
         this.position = bytes.writePosition();
         metaDataBit = metaData ? Wires.META_DATA : 0;

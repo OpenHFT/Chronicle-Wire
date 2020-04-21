@@ -24,9 +24,6 @@ import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-/*
- * Created by Peter Lawrey on 30/06/15.
- */
 public interface WireCommon {
 
     /**
@@ -139,6 +136,9 @@ public interface WireCommon {
     WireOut headerNumber(long headerNumber);
 
     long headerNumber();
+
+    void usePadding(boolean usePadding);
+    boolean usePadding();
 
     /**
      * @return a BooleanValue which appropriate for this wire.
