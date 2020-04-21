@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.MethodWriterBuilder;
 import net.openhft.chronicle.bytes.WriteBytesMarshallable;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
@@ -197,7 +198,7 @@ public interface MarshallableOut {
     }
 
     @NotNull
-    default <T> VanillaMethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
+    default <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
         return new VanillaMethodWriterBuilder<T>(tClass, () -> new BinaryMethodWriterInvocationHandler(false, this));
     }
 
