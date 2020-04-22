@@ -17,9 +17,6 @@
 
 package net.openhft.chronicle.wire;
 
-/**
- * @author Rob Austin.
- */
 @FunctionalInterface
 public interface HeadNumberChecker {
     boolean checkHeaderNumber(long headerNumber, long position);

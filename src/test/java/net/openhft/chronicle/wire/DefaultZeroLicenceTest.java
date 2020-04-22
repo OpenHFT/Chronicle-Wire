@@ -27,9 +27,6 @@ import java.nio.ByteBuffer;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-/**
- * @author Rob Austin.
- */
 public class DefaultZeroLicenceTest {
 
     @Test

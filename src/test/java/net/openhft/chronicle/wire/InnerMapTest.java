@@ -29,9 +29,6 @@ import org.junit.Test;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * @author Rob Austin.
- */
 public class InnerMapTest {
 
     @Test

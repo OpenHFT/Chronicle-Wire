@@ -29,9 +29,6 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 
-/**
- * @author Rob Austin.
- */
 @SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class PrimitiveTypeWrappersTest {

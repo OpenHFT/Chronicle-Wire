@@ -28,9 +28,6 @@ import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.wire.WireType.*;
 
-/**
- * @author Rob Austin.
- */
 public class ReadAnyWireTest {
 
     @Test

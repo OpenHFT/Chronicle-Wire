@@ -27,9 +27,6 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
-/**
- * @author Rob Austin.
- */
 public class ElasticByteBufferTest {
 
     @Test

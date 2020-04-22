@@ -32,9 +32,6 @@ import java.util.Collection;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
-/**
- * @author Rob Austin.
- */
 @RunWith(value = Parameterized.class)
 public class ValueOutTest extends TestCase {
 
