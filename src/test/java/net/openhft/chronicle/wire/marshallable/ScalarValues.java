@@ -26,9 +26,7 @@ import java.math.BigInteger;
 import java.time.*;
 import java.util.UUID;
 
-/*
- * Created by Peter Lawrey on 09/05/16.
- */
+
 @SuppressWarnings("rawtypes")
 public class ScalarValues extends SelfDescribingMarshallable {
     boolean flag;

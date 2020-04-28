@@ -21,9 +21,7 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
 
-/*
- * Created by Peter Lawrey on 07/05/16.
- */
+
 class AClass extends SelfDescribingMarshallable {
     int id;
     boolean flag;

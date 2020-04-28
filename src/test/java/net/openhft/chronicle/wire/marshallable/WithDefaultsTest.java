@@ -7,9 +7,7 @@ import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
 
-/*
- * Created by Peter Lawrey on 26/05/2017.
- */
+
 public class WithDefaultsTest {
     @Test
     public void writeMarshallable() {

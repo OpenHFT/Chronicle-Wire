@@ -20,9 +20,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import org.jetbrains.annotations.Nullable;
 
-/*
- * Created by Peter Lawrey on 24/12/15.
- */
+
 public class TextReadDocumentContext implements ReadDocumentContext {
     @SuppressWarnings("rawtypes")
     public static final BytesStore MSG_SEP = BytesStore.from("---");

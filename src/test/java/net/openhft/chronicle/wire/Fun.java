@@ -19,9 +19,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.util.SerializableFunction;
 import org.jetbrains.annotations.NotNull;
 
-/*
- * Created by Peter Lawrey on 23/06/15.
- */
+
 public enum Fun implements SerializableFunction<String, String> {
     ADD_A {
         @NotNull

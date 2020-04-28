@@ -27,9 +27,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
 
-/*
- * Created by peter.lawrey on 05/02/2016.
- */
+
 public class HashWireTest {
 
     @Test

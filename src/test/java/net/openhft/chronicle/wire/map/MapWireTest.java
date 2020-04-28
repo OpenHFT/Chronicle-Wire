@@ -32,9 +32,7 @@ import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
-/*
- * Created by Peter Lawrey on 09/05/16.
- */
+
 @RunWith(value = Parameterized.class)
 public class MapWireTest {
     private final WireType wireType;

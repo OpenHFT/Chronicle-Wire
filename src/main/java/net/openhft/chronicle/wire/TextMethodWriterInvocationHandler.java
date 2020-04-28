@@ -26,9 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-/*
- * Created by Peter Lawrey on 25/03/16.
- */
+
 public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
     // TODO remove this hack for TextMethodTester
     public static boolean ENABLE_EOD = true;

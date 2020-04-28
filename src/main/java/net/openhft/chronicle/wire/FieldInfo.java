@@ -18,9 +18,7 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.Nullable;
 
-/*
- * Created by Peter Lawrey on 18/10/16.
- */
+
 public interface FieldInfo {
 
     String name();

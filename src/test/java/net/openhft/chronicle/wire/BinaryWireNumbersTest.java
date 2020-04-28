@@ -30,9 +30,6 @@ import java.util.Collection;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
 
-/*
- * Created by Peter Lawrey on 25/05/15.
- */
 
 @RunWith(value = Parameterized.class)
 public class BinaryWireNumbersTest {

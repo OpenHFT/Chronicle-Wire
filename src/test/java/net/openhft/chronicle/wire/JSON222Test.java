@@ -36,9 +36,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-/*
- * Created by Peter Lawrey on 28/10/16.
- */
+
 @RunWith(value = Parameterized.class)
 public class JSON222Test {
 

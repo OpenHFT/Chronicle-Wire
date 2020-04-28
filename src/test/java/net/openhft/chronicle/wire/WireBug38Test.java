@@ -13,9 +13,7 @@ import java.nio.ByteBuffer;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-/*
- * Created by dsmith on 11/11/16.
- */
+
 public class WireBug38Test {
     @Test
     public void testNestedObj() {

@@ -31,9 +31,7 @@ import static java.util.Collections.addAll;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/*
- * Created by Peter Lawrey on 21/04/16.
- */
+
 @SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class NestedMapsTest {

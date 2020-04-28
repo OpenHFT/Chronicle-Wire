@@ -30,9 +30,7 @@ interface MockMethods {
     void list(List<String> strings);
 }
 
-/*
- * Created by Peter Lawrey on 17/05/2017.
- */
+
 @SuppressWarnings("rawtypes")
 public class VanillaMethodReaderTest {
 
@@ -57,6 +55,7 @@ public class VanillaMethodReaderTest {
                 public void a(final A a) {
                     VanillaMethodReaderTest.this.instance = a;
                 }
+
                 @Override
                 public void index2index(A a) {
                     // this should not be called

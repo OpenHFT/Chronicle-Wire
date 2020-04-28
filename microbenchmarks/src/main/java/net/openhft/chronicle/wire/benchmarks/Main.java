@@ -49,9 +49,7 @@ enum DataFields implements WireKey {
 @interface PrintAsText {
 }
 
-/*
- * Created by Peter Lawrey on 11/08/15.
- */
+
 @State(Scope.Thread)
 public class Main {
     final Bytes bytes = Bytes.allocateDirect(128).unchecked(true);

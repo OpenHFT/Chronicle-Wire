@@ -55,9 +55,7 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.SerializationStrategies.*;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
-/*
- * Created by Peter Lawrey on 31/08/15.
- */
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum Wires {
     ;
@@ -191,6 +189,7 @@ public enum Wires {
 
         return WireDumper.of(wire).asString(headerPosition, length + 4);
     }
+
     public static String fromSizePrefixedBlobs(@NotNull WireIn wireIn) {
         return fromSizePrefixedBlobs(wireIn, false);
     }

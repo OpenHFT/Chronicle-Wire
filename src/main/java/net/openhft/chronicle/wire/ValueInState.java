@@ -18,9 +18,7 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 
-/*
- * Created by peter.lawrey on 02/02/2016.
- */
+
 class ValueInState {
 
     private static final long[] EMPTY_ARRAY = {};

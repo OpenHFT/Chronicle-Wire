@@ -18,9 +18,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.annotation.DontChain;
 
-/*
- * Created by Peter Lawrey on 26/12/15.
- */
+
 @FunctionalInterface
 @DontChain
 public interface WriteValue {

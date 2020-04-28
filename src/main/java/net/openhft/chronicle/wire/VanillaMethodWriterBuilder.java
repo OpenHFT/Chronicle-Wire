@@ -32,9 +32,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-/*
- * Created by Peter Lawrey on 28/03/16.
- */
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterBuilder<T> {
 

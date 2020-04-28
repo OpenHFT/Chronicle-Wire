@@ -34,10 +34,8 @@ import java.util.List;
 
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
-/*
- * Created by peter.lawrey on 16/01/15.
- */
-@SuppressWarnings({"rawtypes","unchecked"})
+
+@SuppressWarnings({"rawtypes", "unchecked"})
 public enum WireInternal {
     ;
     static final StringInterner INTERNER = new StringInterner(Integer.getInteger("wire.interner.size", 4096));

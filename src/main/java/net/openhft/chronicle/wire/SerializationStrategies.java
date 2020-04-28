@@ -34,9 +34,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
-/*
- * Created by Peter Lawrey on 10/05/16.
- */
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum SerializationStrategies implements SerializationStrategy {
     MARSHALLABLE {

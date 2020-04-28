@@ -34,9 +34,7 @@ import java.util.function.Function;
 
 import static org.junit.Assert.*;
 
-/*
- * Created by Peter Lawrey on 23/06/15.
- */
+
 @SuppressWarnings("unchecked")
 public class WireSerializedLambdaTest {
     static {

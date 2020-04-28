@@ -21,9 +21,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-/*
- * Created by skidder on 5/6/16.
- */
 
 @FunctionalInterface
 public interface TriConsumer<T, U, V> {

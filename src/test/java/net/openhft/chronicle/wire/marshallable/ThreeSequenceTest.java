@@ -5,9 +5,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/*
- * Created by Peter Lawrey on 16/05/2017.
- */
+
 public class ThreeSequenceTest {
     @Test
     public void testThree() {

@@ -33,9 +33,7 @@ import java.util.function.Consumer;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
-/*
- * Created by peter.lawrey on 06/02/15.
- */
+
 @SuppressWarnings("rawtypes")
 public class BinaryWire2Test {
     @NotNull
@@ -682,7 +680,7 @@ public class BinaryWire2Test {
                 "  mm: \"\\u4F60\\u597D\",\n" +
                 "  value: 15\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
-        
+
         wire.bytes().release();
     }
 

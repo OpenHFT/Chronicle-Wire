@@ -19,9 +19,7 @@ import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-/*
- * Created by Peter Lawrey on 17/05/2017.
- */
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TextMethodTester<T> {
     private static final boolean REGRESS_TESTS = Boolean.getBoolean("regress.tests");

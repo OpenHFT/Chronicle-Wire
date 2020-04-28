@@ -24,9 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-/*
- * Created by Peter Lawrey on 10/05/16.
- */
+
 class ScalarStrategy<T> implements SerializationStrategy<T> {
     @NotNull
     final BiFunction<? super T, ValueIn, T> read;
