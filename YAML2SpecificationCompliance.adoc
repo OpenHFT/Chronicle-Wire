@@ -3,13 +3,13 @@
 :css-signature: demo
 :toc-placement: preamble
 
-= YAML 2 Specification Compliance
+= YAML 1.2 Specification Compliance
 
 Chronicle wire supports a subset of the features available from the YAML 2 specification.
 This section lists those features and suggests other ways in Chronicle Wire to define the same
 thing.
 
-==  YAML 2 features supported in Chronicle Wire
+==  YAML 1.2 features supported in Chronicle Wire
 The list below lists the features of the specification that are implemented in Chronicle Wire.
 
 NOTE: The numbers refer to the section in the YAML 2 specification. See http://yaml.org/spec/1.2/spec.html for more information.
