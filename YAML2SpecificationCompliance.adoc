@@ -1,4 +1,4 @@
-= Chronicle Wire and YAML 2 
+= Chronicle Wire and YAML 1.2 
 :toc: manual
 :css-signature: demo
 :toc-placement: preamble
