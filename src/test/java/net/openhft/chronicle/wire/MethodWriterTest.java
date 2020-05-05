@@ -59,7 +59,8 @@ public class MethodWriterTest {
 
     @Test
     public void testDefault() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256))
+                .useTextDocuments();
         HasDefault writer = wire.methodWriter(HasDefault.class);
 
         // MethodWriter records an invocation on the default method
@@ -85,7 +86,8 @@ public class MethodWriterTest {
 
     @Test
     public void testNoArgs() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256))
+                .useTextDocuments();
         NoArgs writer = wire.methodWriter(NoArgs.class);
         writer.methodOne();
         writer.methodTwo();
@@ -105,7 +107,8 @@ public class MethodWriterTest {
 
     @Test
     public void testMicroTS() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256))
+                .useTextDocuments();
         HasMicroTS writer = wire.methodWriter(HasMicroTS.class);
         long now = 1532251709775811L; //TimeProvider.get().currentTimeMicros();
 //        System.out.println(now);

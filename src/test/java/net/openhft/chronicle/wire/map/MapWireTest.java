@@ -51,9 +51,10 @@ public class MapWireTest {
         @NotNull List<Object[]> list = new ArrayList<>();
         @NotNull WireType[] wireTypes = {WireType.TEXT, WireType.BINARY};
         for (WireType wt : wireTypes) {
-            for (int i = 0; i < Character.MAX_VALUE; i += 128) {
+            char maxValue = 256; // Character.MAX_VALUE;
+            for (int i = 0; i < maxValue; i += 16) {
                 @NotNull Map<Integer, String> map = new LinkedHashMap<>();
-                for (int ch = i; ch < i + 128; ch++) {
+                for (int ch = i; ch < i + 16; ch++) {
                     if (Character.isValidCodePoint(ch)) {
                         final String s = Character.toString((char) ch);
                         map.put(i, s);

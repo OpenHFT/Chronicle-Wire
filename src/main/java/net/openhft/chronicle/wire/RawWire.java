@@ -49,7 +49,7 @@ import java.util.function.*;
 public class RawWire extends AbstractWire implements Wire {
     private final RawValueOut valueOut = new RawValueOut();
     private final RawValueIn valueIn = new RawValueIn();
-    private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
+    private final WriteDocumentContext writeContext = new BinaryWriteDocumentContext(this);
     private final BinaryReadDocumentContext readContext = new BinaryReadDocumentContext(this, false);
     boolean use8bit;
     private ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;

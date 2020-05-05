@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,24 +25,33 @@ import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 
 public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
     // TODO remove this hack for TextMethodTester
     public static boolean ENABLE_EOD = true;
     @NotNull
-    private final AbstractWire wire;
+    private final Supplier<MarshallableOut> marshallableOutSupplier;
+    private final CountingDocumentContext context = new CountingDocumentContext();
     private final Map<Method, Consumer<Object[]>> visitorConverter = new LinkedHashMap<>();
+    private boolean metaData;
 
-    TextMethodWriterInvocationHandler(@NotNull AbstractWire wire) {
-        this.wire = wire;
-        recordHistory = wire.recordHistory();
+    TextMethodWriterInvocationHandler(@NotNull MarshallableOut marshallableOut) {
+        this(() -> marshallableOut);
     }
+
+    public TextMethodWriterInvocationHandler(Supplier<MarshallableOut> marshallableOutSupplier) {
+        this.marshallableOutSupplier = marshallableOutSupplier;
+    }
+
 
     @Override
     protected Object doInvoke(Object proxy, Method method, Object[] args) {
         if (method.getName().equals("writingDocument") && method.getParameterCount() == 0) {
-            throw new UnsupportedOperationException();
+            MarshallableOut marshallableOut = this.marshallableOutSupplier.get();
+            context.count = 0;
+            return context.dc(marshallableOut.writingDocument(metaData));
         }
         return super.doInvoke(proxy, method, args);
     }
@@ -51,13 +60,35 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
     protected void handleInvoke(Method method, Object[] args) {
         visitorConverter.computeIfAbsent(method, this::buildConverter)
                 .accept(args);
-        handleInvoke(method, args, wire);
-        wire.getValueOut().resetBetweenDocuments();
-        Bytes<?> bytes = wire.bytes();
-        if (bytes.peekUnsignedByte(bytes.writePosition() - 1) >= ' ')
-            bytes.append('\n');
-        if (ENABLE_EOD && !method.getReturnType().isInterface()) {
-            bytes.append("---\n");
+
+        DocumentContext dc = context.dc();
+        boolean chained = method.getReturnType().isInterface();
+        if (dc == null) {
+            MarshallableOut marshallableOut = this.marshallableOutSupplier.get();
+            dc = marshallableOut.writingDocument(metaData);
+            if (chained)
+                context.dc(dc);
+            context.local = true;
+        }
+        try {
+            Wire wire = dc.wire();
+            handleInvoke(method, args, wire);
+//            wire.padToCacheAlign();
+
+        } catch (Throwable t) {
+            dc.rollbackOnClose();
+            Jvm.rethrow(t);
+
+        } finally {
+            if (!chained) {
+                if (context.local) {
+                    dc.close();
+                    context.dc(null);
+                    context.local = false;
+                } else {
+                    context.count++;
+                }
+            }
         }
     }
 

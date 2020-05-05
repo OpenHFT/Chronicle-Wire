@@ -100,8 +100,15 @@ public class TextMethodTester<T> {
         if (REGRESS_TESTS)
             System.err.println("NOTE: Regressing tests, please check your commits");
         Wire wire2 = createWire(Bytes.allocateElasticDirect());
-        MethodWriterBuilder<T> methodWriterBuilder = wire2.methodWriterBuilder(outputClass)
-                .methodWriterListener(methodWriterListener);
+
+        MethodWriterBuilder<T> methodWriterBuilder = wire2.methodWriterBuilder(outputClass);
+        if (methodWriterListener != null) {
+            MethodWriterInterceptorReturns interceptorReturns = (method, args, invoker) -> {
+                methodWriterListener.onWrite(method.getName(), args);
+                return invoker.apply(method, args);
+            };
+            methodWriterBuilder.methodWriterInterceptorReturns(interceptorReturns);
+        }
         if (genericEvent != null) methodWriterBuilder.genericEvent(genericEvent);
         T writer0 = methodWriterBuilder.get();
         T writer = retainLast == null
@@ -272,11 +279,13 @@ public class TextMethodTester<T> {
         return actual;
     }
 
+    @Deprecated
     public TextMethodTester<T> methodWriterListener(MethodWriterListener methodWriterListener) {
         this.methodWriterListener = methodWriterListener;
         return this;
     }
 
+    @Deprecated
     public TextMethodTester<T> methodReaderInterceptor(MethodReaderInterceptor methodReaderInterceptor) {
         this.methodReaderInterceptorReturns = (m, o, a, i) -> {
             methodReaderInterceptor.intercept(m, o, a, i);

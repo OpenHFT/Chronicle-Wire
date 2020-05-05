@@ -79,8 +79,10 @@ public class VanillaMethodReaderTest {
 
     @Test
     public void readMethods() throws IOException {
-        Wire wire = new TextWire(BytesUtil.readFile("methods-in.yaml")).useTextDocuments();
-        Wire wire2 = new TextWire(Bytes.allocateElasticDirect());
+        Wire wire = new TextWire(BytesUtil.readFile("methods-in.yaml"))
+                .useTextDocuments();
+        Wire wire2 = new TextWire(Bytes.allocateElasticDirect())
+                .useTextDocuments();
         // expected
         Bytes expected = BytesUtil.readFile("methods-in.yaml");
         MockMethods writer = wire2.methodWriter(MockMethods.class);
@@ -97,8 +99,10 @@ public class VanillaMethodReaderTest {
     @SuppressWarnings("unused")
     @Test
     public void readMethodsCollections() throws IOException, InterruptedException {
-        Wire wire = new TextWire(BytesUtil.readFile("methods-collections-in.yaml")).useTextDocuments();
-        Wire wire2 = new TextWire(Bytes.allocateElasticDirect());
+        Wire wire = new TextWire(BytesUtil.readFile("methods-collections-in.yaml"))
+                .useTextDocuments();
+        Wire wire2 = new TextWire(Bytes.allocateElasticDirect())
+                .useTextDocuments();
         BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
         MockMethods mocker = Mocker.queuing(MockMethods.class, "", queue);
         MethodReader reader = wire.methodReader(mocker);
@@ -113,7 +117,8 @@ public class VanillaMethodReaderTest {
 
     @Test
     public void testSubclasses() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256))
+                .useTextDocuments();
         MRTListener writer = wire.methodWriter(MRTListener.class);
         writer.timed(1234567890L);
         writer.top(new MRT1("one"));
@@ -168,7 +173,8 @@ public class VanillaMethodReaderTest {
 
     @Test
     public void methodInterceptor() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256))
+                .useTextDocuments();
         MRTListener writer = wire.methodWriterBuilder(MRTListener.class)
                 .methodWriterListener((m, a) -> IntStream.range(0, a.length).filter(i -> a[i] instanceof MRT1).forEach(i -> ((MRT1) a[i]).value = "x"))
                 .get();
@@ -206,7 +212,8 @@ public class VanillaMethodReaderTest {
 
     @Test
     public void methodInterceptorNull() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256))
+                .useTextDocuments();
         MRTListener writer = wire.methodWriterBuilder(MRTListener.class)
                 .build();
         writer.top(new MRT1("one"));
@@ -240,7 +247,8 @@ public class VanillaMethodReaderTest {
 
     @Test
     public void testNestedUnknownClass() {
-        Wire wire2 = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        Wire wire2 = new TextWire(Bytes.elasticHeapByteBuffer(256))
+                .useTextDocuments();
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
         String text = "unknown: {\n" +
@@ -251,7 +259,8 @@ public class VanillaMethodReaderTest {
                 "  }\n" +
                 "}\n" +
                 "---\n";
-        Wire wire = TextWire.from(text);
+        Wire wire = TextWire.from(text)
+                .useTextDocuments();
         MethodReader reader = wire.methodReader(writer2);
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
@@ -260,7 +269,8 @@ public class VanillaMethodReaderTest {
 
     @Test
     public void testUnknownClass() {
-        Wire wire2 = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        Wire wire2 = new TextWire(Bytes.elasticHeapByteBuffer(256))
+                .useTextDocuments();
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
         String text = "top: !UnknownClass {\n" +
@@ -275,7 +285,8 @@ public class VanillaMethodReaderTest {
                 "  three: many words\n" +
                 "}\n" +
                 "---\n";
-        Wire wire = TextWire.from(text);
+        Wire wire = TextWire.from(text)
+                .useTextDocuments();
         MethodReader reader = wire.methodReader(writer2);
         assertTrue(reader.readOne());
         assertTrue(reader.readOne());
