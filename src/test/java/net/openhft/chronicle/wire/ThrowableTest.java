@@ -4,10 +4,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-/*
- * Created by Peter Lawrey on 10/05/2017.
- */
 public class ThrowableTest {
     @Test
     public void writeReadThrowable() {
@@ -22,7 +20,7 @@ public class ThrowableTest {
 
             Throwable t = (Throwable) wire.getValueIn().object();
             assertEquals("message", t.getMessage());
-            assertEquals("net.openhft.chronicle.wire.ThrowableTest.writeReadThrowable(ThrowableTest.java:17)", t.getStackTrace()[0].toString());
+            assertTrue(t.getStackTrace()[0].toString().startsWith("net.openhft.chronicle.wire.ThrowableTest.writeReadThrowable(ThrowableTest.java"));
             wire.bytes().release();
         }
     }

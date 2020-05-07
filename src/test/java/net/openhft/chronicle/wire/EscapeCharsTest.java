@@ -31,9 +31,7 @@ import java.util.List;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
 
-/*
- * Created by Peter Lawrey on 13/12/16.
- */
+
 @RunWith(value = Parameterized.class)
 public class EscapeCharsTest {
     @NotNull

@@ -5,9 +5,7 @@ import net.openhft.chronicle.bytes.MethodReaderBuilder;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import org.jetbrains.annotations.NotNull;
 
-/*
- * Created by Peter Lawrey on 17/05/2017.
- */
+
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private final MarshallableIn in;
     private boolean warnMissing = false;

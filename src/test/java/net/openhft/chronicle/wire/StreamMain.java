@@ -23,9 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-/*
- * Created by Peter Lawrey on 30/06/15.
- */
+
 public class StreamMain {
     public static void main(String[] args) {
         ClassAliasPool.CLASS_ALIASES.addAlias(FileFormat.class);

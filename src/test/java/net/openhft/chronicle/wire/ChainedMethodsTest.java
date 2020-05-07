@@ -28,7 +28,36 @@ interface ILast {
 public class ChainedMethodsTest {
     @Test
     public void chainedText() {
-        TextWire wire = new TextWire(Bytes.elasticHeapByteBuffer(128));
+        TextWire wire = new TextWire(Bytes.elasticHeapByteBuffer(128))
+                .useTextDocuments();
+        ITop top = wire.methodWriter(ITop.class);
+        top.mid("mid")
+                .next(1)
+                .echo("echo-1");
+        top.mid2("mid2")
+                .next2("word")
+                .echo("echo-2");
+        assertEquals("mid: mid\n" +
+                "next: 1\n" +
+                "echo: echo-1\n" +
+                "---\n" +
+                "mid2: mid2\n" +
+                "next2: word\n" +
+                "echo: echo-2\n" +
+                "---\n", wire.toString());
+
+        StringBuilder sb = new StringBuilder();
+        MethodReader reader = wire.methodReader(Mocker.intercepting(ITop.class, "*", sb::append));
+        assertTrue(reader.readOne());
+        assertTrue(reader.readOne());
+        assertEquals("*mid[mid]*next[1]*echo[echo-1]*mid2[mid2]*next2[word]*echo[echo-2]", sb.toString());
+        assertFalse(reader.readOne());
+    }
+
+    @Test
+    public void chainedYaml() {
+        YamlWire wire = new YamlWire(Bytes.elasticHeapByteBuffer(128))
+                .useTextDocuments();
         ITop top = wire.methodWriter(ITop.class);
         top.mid("mid")
                 .next(1)

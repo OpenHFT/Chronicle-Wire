@@ -6,9 +6,6 @@ import org.junit.Test;
 
 import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 
-/**
- * @author Rob Austin.
- */
 @SuppressWarnings("rawtypes")
 public class FloatDtoTest {
 

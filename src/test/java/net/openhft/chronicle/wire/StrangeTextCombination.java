@@ -29,9 +29,6 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 
-/**
- * @author Rob Austin.
- */
 @RunWith(value = Parameterized.class)
 public class StrangeTextCombination {
     private WireType wireType;

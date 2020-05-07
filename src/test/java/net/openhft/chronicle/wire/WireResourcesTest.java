@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.bytes.MappedFile;
 import org.jetbrains.annotations.NotNull;
@@ -29,17 +30,7 @@ import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * @author lburgazzoli
- */
 public class WireResourcesTest {
-
-    private static void writeMessage(@NotNull Wire wire) throws TimeoutException, EOFException, StreamCorruptedException {
-        long pos = wire.writeHeader(1, TimeUnit.MILLISECONDS, null, null);
-        wire.bytes().writeSkip(128000);
-        wire.bytes().writeLong(1L);
-        wire.updateHeader(pos, false);
-    }
 
     @Test
     public void testMappedBytesClose() throws Exception {
@@ -153,6 +144,14 @@ public class WireResourcesTest {
         assertEquals(0, wire.bytes().refCount());
         assertEquals(0, t.refCount());
         assertEquals(0, mappedFile(wire).refCount());
+    }
+
+    private static void writeMessage(@NotNull Wire wire) throws StreamCorruptedException {
+        try (DocumentContext dc = wire.writingDocument()) {
+            final Bytes<?> bytes = dc.wire().bytes();
+            bytes.writeSkip(128000);
+            bytes.writeLong(1L);
+        }
     }
 
     @NotNull

@@ -16,9 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
-/*
- * Created by Peter Lawrey on 06/10/15.
- */
+
 public enum FIX42 implements WireKey {
     Account(1),
     AdvId(2),

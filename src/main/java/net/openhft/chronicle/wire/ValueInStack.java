@@ -19,9 +19,7 @@ package net.openhft.chronicle.wire;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
- * Created by peter.lawrey on 02/02/2016.
- */
+
 class ValueInStack {
     final List<ValueInState> freeList = new ArrayList<>();
     int level = 0;

@@ -22,9 +22,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Test;
 
-/**
- * @author Rob Austin.
- */
 public class BinaryToTextTest {
 
     @Test

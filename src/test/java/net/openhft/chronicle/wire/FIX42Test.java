@@ -77,9 +77,7 @@ import java.util.Collection;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
-/*
- * Created by Peter Lawrey on 06/10/15.
- */
+
 @RunWith(value = Parameterized.class)
 public class FIX42Test {
     final int testId;

@@ -31,9 +31,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-/*
- * Created by Peter Lawrey on 31/10/16.
- */
+
 public class JSON222IndividualTest {
     @Test
     public void testEmptyBrackets() {

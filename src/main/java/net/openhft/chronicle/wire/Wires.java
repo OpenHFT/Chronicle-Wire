@@ -16,7 +16,6 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
@@ -56,9 +55,7 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.SerializationStrategies.*;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
-/*
- * Created by Peter Lawrey on 31/08/15.
- */
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum Wires {
     ;
@@ -104,7 +101,6 @@ public enum Wires {
     static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(new VanillaBytes(BytesStore.empty())));
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
     private static final int INVERSE_TID_MASK = ~TID_MASK;
-    static boolean ENCODE_TID_IN_HEADER = Boolean.getBoolean("wire.encodeTidInHeader");
 
     static {
         CLASS_STRATEGY_FUNCTIONS.add(SerializeEnum.INSTANCE);
@@ -131,6 +127,10 @@ public enum Wires {
      */
     public static String fromSizePrefixedBlobs(@NotNull Bytes bytes) {
         return WireDumper.of(bytes).asString();
+    }
+
+    public static String fromAlignedSizePrefixedBlobs(@NotNull Bytes bytes) {
+        return WireDumper.of(bytes, true).asString();
     }
 
     public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, boolean abbrev) {
@@ -191,7 +191,11 @@ public enum Wires {
     }
 
     public static String fromSizePrefixedBlobs(@NotNull WireIn wireIn) {
-        return WireDumper.of(wireIn).asString();
+        return fromSizePrefixedBlobs(wireIn, false);
+    }
+
+    public static String fromSizePrefixedBlobs(@NotNull WireIn wireIn, boolean abbrev) {
+        return WireDumper.of(wireIn).asString(abbrev);
     }
 
     @NotNull
@@ -211,9 +215,6 @@ public enum Wires {
     }
 
     public static int lengthOf(int len) {
-        if (isNotComplete(len) && ENCODE_TID_IN_HEADER) {
-            return Wires.removeMaskedTidFromHeader(len) & LENGTH_MASK;
-        }
         return len & LENGTH_MASK;
     }
 
@@ -411,16 +412,8 @@ public enum Wires {
         }
     }
 
-    public static int addMaskedTidToHeader(final int header) {
-        return ENCODE_TID_IN_HEADER ? header | (TID_MASK & Affinity.getThreadId()) : header;
-    }
-
     public static int removeMaskedTidFromHeader(final int header) {
         return header & INVERSE_TID_MASK;
-    }
-
-    public static int extractTidFromHeader(final int header) {
-        return header & TID_MASK;
     }
 
     @Nullable
@@ -551,14 +544,6 @@ public enum Wires {
         if (!tClass.isInterface())
             throw new IllegalArgumentException("Cannot generate a class for " + typeName + " are you missing an alias?");
         return (T) MARSHALLABLE_FUNCTION.get(tClass).apply(typeName);
-    }
-
-    public static boolean encodeTidInHeader() {
-        return ENCODE_TID_IN_HEADER;
-    }
-
-    public static void encodeTidInHeader(boolean encodeTidInHeader) {
-        ENCODE_TID_IN_HEADER = encodeTidInHeader;
     }
 
     public static boolean isInternal(@NotNull Object value) {

@@ -211,7 +211,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
     @Override
     @NotNull
-    public <T> VanillaMethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
+    public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
         return new VanillaMethodWriterBuilder<>(tClass, () -> newTextMethodWriterInvocationHandler(tClass));
     }
 
@@ -229,7 +229,7 @@ public class YamlWire extends AbstractWire implements Wire {
     @Override
     public DocumentContext writingDocument(boolean metaData) {
         if (writeContext == null)
-            writeContext = new WriteDocumentContext(this);
+            useBinaryDocuments();
         writeContext.start(metaData);
         return writeContext;
     }
@@ -243,19 +243,21 @@ public class YamlWire extends AbstractWire implements Wire {
 
     protected void initReadContext() {
         if (readContext == null)
-            readContext = new TextReadDocumentContext(this);
+            useBinaryDocuments();
         readContext.start();
     }
 
     @NotNull
     public YamlWire useBinaryDocuments() {
         readContext = new BinaryReadDocumentContext(this, false);
+        writeContext = new BinaryWriteDocumentContext(this);
         return this;
     }
 
     @NotNull
     public YamlWire useTextDocuments() {
         readContext = new TextReadDocumentContext(this);
+        writeContext = new TextWriteDocumentContext(this);
         return this;
     }
 

@@ -31,9 +31,7 @@ import java.util.stream.Collectors;
 
 import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 
-/*
- * Created by Peter Lawrey on 18/10/16.
- */
+
 @SuppressWarnings("rawtypes")
 public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
 

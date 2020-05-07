@@ -32,13 +32,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-/*
- * Created by Peter Lawrey on 28/03/16.
- */
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterBuilder<T> {
 
     private static final boolean DISABLE_PROXY_GEN = Boolean.getBoolean("disableProxyCodegen");
+    private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
     private final Set<Class> interfaces = new LinkedHashSet<>();
     private static final Map<Set<Class>, Class> setOfClassesToClassName = new ConcurrentHashMap<>();
     private final String packageName;
@@ -146,17 +145,17 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         }
 
         if (!DISABLE_PROXY_GEN) {
+            final LinkedHashSet<Class> setOfInterfaces = new LinkedHashSet<>(interfaces);
             try {
                 // this will create proxy that does not suffer from the arg[] issue
-                LinkedHashSet<Class> setOfInterfaces = new LinkedHashSet<>(interfaces);
                 setOfInterfaces.add(Closeable.class);
-                final Class<T> o = setOfClassesToClassName.computeIfAbsent(setOfInterfaces,
-                        this::generatedProxyClass);
-                if (o != null)
+                final Class<T> o = setOfClassesToClassName.computeIfAbsent(setOfInterfaces, this::generatedProxyClass);
+                if (o != null && o != COMPILE_FAILED)
                     return o.getConstructor(MethodWriterInvocationHandlerSupplier.class)
                             .newInstance(handlerSupplier);
 
             } catch (Throwable e) {
+                setOfClassesToClassName.put(setOfInterfaces, COMPILE_FAILED);
                 // do nothing and drop through
                 if (Jvm.isDebug())
                     Jvm.debug().on(getClass(), e);

@@ -41,9 +41,7 @@ import java.util.function.Supplier;
 
 import static net.openhft.chronicle.wire.VanillaWireParser.SKIP_READABLE_BYTES;
 
-/*
- * Created by Peter Lawrey on 24/03/16.
- */
+
 @SuppressWarnings("rawtypes")
 public class VanillaMethodReader implements MethodReader {
 

@@ -28,9 +28,6 @@ import org.junit.runners.Parameterized;
 
 import java.util.*;
 
-/**
- * @author Rob Austin.
- */
 public class ProjectTest {
 
     @NotNull

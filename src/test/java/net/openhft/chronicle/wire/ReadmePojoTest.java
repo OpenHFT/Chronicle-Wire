@@ -27,9 +27,7 @@ import java.util.*;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
 
-/*
- * Created by Peter Lawrey on 17/03/16.
- */
+
 public class ReadmePojoTest {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(MyPojos.class);

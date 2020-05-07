@@ -36,9 +36,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
-/*
- * Created by Peter Lawrey on 11/08/15.
- */
+
 @State(Scope.Thread)
 public class ObjectPoolMain {
 

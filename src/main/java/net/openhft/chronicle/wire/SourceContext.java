@@ -19,9 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
 
-/*
- * Created by Peter Lawrey on 12/05/16.
- */
+
 public interface SourceContext {
     /**
      * @return the current source id or -1

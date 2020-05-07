@@ -23,9 +23,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 
-/*
- * Created by Peter Lawrey on 09/07/16.
- */
 @SuppressWarnings("rawtypes")
 public class WireDumper {
     @NotNull
@@ -48,7 +45,14 @@ public class WireDumper {
 
     @NotNull
     public static WireDumper of(@NotNull Bytes bytes) {
-        return new WireDumper(new BinaryWire(bytes), bytes);
+        return of(bytes, false);
+    }
+
+    @NotNull
+    public static WireDumper of(@NotNull Bytes bytes, boolean align) {
+        final BinaryWire wireIn = new BinaryWire(bytes);
+        wireIn.usePadding(align);
+        return new WireDumper(wireIn, bytes);
     }
 
     @NotNull
@@ -65,6 +69,7 @@ public class WireDumper {
     public String asString(long position, long length) {
         return asString(position, length, false);
     }
+
     @NotNull
     public String asString(long position, long length, boolean abbrev) {
         @NotNull StringBuilder sb = new StringBuilder();
@@ -103,7 +108,10 @@ public class WireDumper {
     public boolean dumpOne(@NotNull StringBuilder sb, @Nullable Bytes<ByteBuffer> buffer) {
         return dumpOne(sb, buffer, false);
     }
+
     public boolean dumpOne(@NotNull StringBuilder sb, @Nullable Bytes<ByteBuffer> buffer, boolean abbrev) {
+        if (wireIn.usePadding())
+            bytes.readSkip((-bytes.readPosition()) & 0x3);
         long start = this.bytes.readPosition();
         int header = this.bytes.readInt();
         if (header == 0) {

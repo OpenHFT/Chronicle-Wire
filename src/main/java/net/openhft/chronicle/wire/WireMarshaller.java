@@ -39,9 +39,7 @@ import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
 
-/*
- * Created by Peter Lawrey on 16/03/16.
- */
+
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
 public class WireMarshaller<T> {
     public static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};

@@ -16,29 +16,20 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.io.EOFException;
 import java.io.ObjectOutput;
 import java.io.StreamCorruptedException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import static net.openhft.chronicle.wire.Wires.NOT_COMPLETE;
 import static net.openhft.chronicle.wire.Wires.UNKNOWN_LENGTH;
 
 /**
- * The defines the stand interface for writing and reading sequentially to/from a Bytes stream.
- * <p>
- * Created by peter.lawrey on 12/01/15.
+ * The defines the standard interface for writing and reading sequentially to/from a Bytes stream
  */
 public interface WireOut extends WireCommon, MarshallableOut {
-    long TRY_WRITE_HEADER_FAILED = 0xFFFF_FFFF_FFFF_FFFFL;
-    int DEFAULT_SAFE_LENGTH = 1 << 30;
-
     /**
      * Write an empty filed marker
      */
@@ -172,56 +163,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
         WireInternal.writeData(this, metaData, true, writer);
     }
 
-    /**
-     * Write a new header, an unknown length, handling timeouts and the end of wire marker. This
-     * will increment the headerNumber as appropriate if successful
-     *
-     * @param timeout      throw a TimeoutException if the header could not be written in this
-     *                     time.
-     * @param timeUnit     of the timeOut
-     * @param lastPosition the last known position
-     * @param sequence     sequence number access
-     * @return the position of the start of the header
-     * @throws TimeoutException the underlying pauser timed out.
-     * @throws EOFException     the end of wire marker was reached.
-     */
-    default long writeHeader(long timeout, TimeUnit timeUnit, @Nullable final LongValue
-            lastPosition, Sequence sequence) throws TimeoutException, EOFException {
-        return writeHeaderOfUnknownLength(timeout, timeUnit, lastPosition, sequence);
-    }
-
-    /**
-     * Change the header from NOT_COMPLETE | UNKNOWN_LENGTH to metaData * META_DATA | length.
-     *
-     * @param position returned by writeHeader
-     * @param metaData whether the message is meta data or not.
-     * @throws StreamCorruptedException if the steam has become corrupted
-     */
-    default void updateHeader(long position, boolean metaData) throws StreamCorruptedException {
-        updateHeader(position, metaData, Wires.addMaskedTidToHeader(NOT_COMPLETE | UNKNOWN_LENGTH));
-    }
-
     void updateHeader(long position, boolean metaData, int expectedHeader) throws StreamCorruptedException;
-
-    /**
-     * Write a message of unknown length, handling timeouts and the end of wire marker. This will
-     * increment the headerNumber as appropriate if successful
-     *
-     * @param timeout      throw a TimeoutException if the header could not be written in this
-     *                     time.
-     * @param timeUnit     of the timeOut
-     * @param lastPosition the last known position
-     * @return the position of the start of the header
-     * @throws TimeoutException the underlying pauser timed out.
-     * @throws EOFException     the end of wire marker was reached.
-     */
-    long writeHeaderOfUnknownLength(int safeLength, long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, Sequence sequence)
-            throws TimeoutException, EOFException;
-
-    default long writeHeaderOfUnknownLength(long timeout, TimeUnit timeUnit, @Nullable LongValue lastPosition, Sequence sequence)
-            throws TimeoutException, EOFException {
-        return writeHeaderOfUnknownLength(DEFAULT_SAFE_LENGTH, timeout, timeUnit, lastPosition, sequence);
-    }
 
     long enterHeader(int safeLength);
 
@@ -242,12 +184,12 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * Write the end of wire marker, unless one is already written. This will increment the
      * headerNumber as appropriate if successful
-     *  @param timeout      throw TimeoutException if it could not write the marker in time.
+     *
+     * @param timeout      throw TimeoutException if it could not write the marker in time.
      * @param timeUnit     of the timeout
      * @param lastPosition the end of the wire
      * @return did this method write EOF or was it already there.
      */
-
     boolean writeEndOfWire(long timeout, TimeUnit timeUnit, long lastPosition);
 
     /**

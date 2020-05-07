@@ -16,9 +16,7 @@
 
 package net.openhft.chronicle.wire;
 
-/*
- * Created by Peter Lawrey on 12/02/2016.
- */
+
 public enum NoDocumentContext implements DocumentContext {
     INSTANCE;
 

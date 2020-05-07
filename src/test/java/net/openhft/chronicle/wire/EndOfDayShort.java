@@ -18,9 +18,7 @@ package net.openhft.chronicle.wire;
 
 import java.io.Serializable;
 
-/*
- * Created by Peter Lawrey on 27/08/15.
- */
+
 public class EndOfDayShort extends SelfDescribingMarshallable implements Serializable {
     // Symbol,Company,Price,Change,ChangePercent,Day's Volume
     public String name;

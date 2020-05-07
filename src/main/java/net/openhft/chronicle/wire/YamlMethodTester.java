@@ -11,6 +11,6 @@ public class YamlMethodTester<T> extends TextMethodTester<T> {
 
     @Override
     protected Wire createWire(Bytes bytes) {
-        return new YamlWire(bytes);
+        return new YamlWire(bytes).useTextDocuments();
     }
 }

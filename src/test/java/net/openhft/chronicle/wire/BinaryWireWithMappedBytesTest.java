@@ -33,9 +33,7 @@ import java.io.FileNotFoundException;
 
 import static org.junit.Assert.assertEquals;
 
-/*
- * Created by Peter Lawrey on 18/01/16.
- */
+
 public class BinaryWireWithMappedBytesTest {
     @SuppressWarnings("rawtypes")
     @Test

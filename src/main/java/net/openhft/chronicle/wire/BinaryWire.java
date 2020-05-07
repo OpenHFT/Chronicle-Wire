@@ -66,7 +66,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private final boolean numericFields;
     private final boolean fieldLess;
     private final int compressedSize;
-    private final WriteDocumentContext writeContext = new WriteDocumentContext(this);
+    private final WriteDocumentContext writeContext = new BinaryWriteDocumentContext(this);
     @NotNull
     private final BinaryReadDocumentContext readContext;
     private final StringBuilder stringBuilder = new StringBuilder();

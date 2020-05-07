@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,29 +23,24 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Supplier;
-
-/*
- * Created by Peter Lawrey on 27/03/16.
- */
 @SuppressWarnings("rawtypes")
 public class VanillaMessageHistory extends SelfDescribingMarshallable implements MessageHistory {
     public static final int MESSAGE_HISTORY_LENGTH = 20;
     private static final ThreadLocal<MessageHistory> THREAD_LOCAL =
-            ThreadLocal.withInitial((Supplier<MessageHistory>) () -> {
+            ThreadLocal.withInitial(() -> {
                 @NotNull VanillaMessageHistory veh = new VanillaMessageHistory();
                 veh.addSourceDetails(true);
                 return veh;
             });
 
     private int sources;
-    @NotNull
-    private int[] sourceIdArray = new int[MESSAGE_HISTORY_LENGTH];
-    @NotNull
-    private long[] sourceIndexArray = new long[MESSAGE_HISTORY_LENGTH];
     private int timings;
     @NotNull
-    private long[] timingsArray = new long[MESSAGE_HISTORY_LENGTH * 2];
+    private final int[] sourceIdArray = new int[MESSAGE_HISTORY_LENGTH];
+    @NotNull
+    private final long[] sourceIndexArray = new long[MESSAGE_HISTORY_LENGTH];
+    @NotNull
+    private final long[] timingsArray = new long[MESSAGE_HISTORY_LENGTH * 2];
     private boolean addSourceDetails = false;
     private long start;
 

@@ -23,9 +23,6 @@ import org.jetbrains.annotations.Nullable;
 
 import static net.openhft.chronicle.wire.Wires.lengthOf;
 
-/*
- * Created by Peter Lawrey on 24/12/15.
- */
 public class BinaryReadDocumentContext implements ReadDocumentContext {
     private final boolean ensureFullRead;
     public long start = -1;
@@ -140,6 +137,10 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
             notComplete = false;
             return;
         }
+
+        // align
+        if (wire.usePadding())
+            bytes.readSkip((-bytes.readPosition()) & 0x3);
 
         long position = bytes.readPosition();
 

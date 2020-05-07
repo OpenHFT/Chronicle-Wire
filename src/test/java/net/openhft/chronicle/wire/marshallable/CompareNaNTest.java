@@ -22,9 +22,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/*
- * Created by Peter Lawrey on 18/10/16.
- */
+
 public class CompareNaNTest {
     @Test
     public void testPrim() {

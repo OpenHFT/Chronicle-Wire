@@ -24,9 +24,7 @@ import java.io.ObjectOutput;
 import java.util.List;
 import java.util.Map;
 
-/*
- * Created by Peter Lawrey on 09/05/16.
- */
+
 class WireObjectOutput implements ObjectOutput {
     private final WireOut wire;
 

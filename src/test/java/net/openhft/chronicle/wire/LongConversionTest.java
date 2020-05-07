@@ -32,7 +32,8 @@ public class LongConversionTest {
 
     @Test
     public void method() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(64));
+        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(64))
+                .useTextDocuments();
         LongConversionTest.WriteWithLong write = wire.methodWriter(LongConversionTest.WriteWithLong.class);
         assertSame(write, write.to(0x12345));
 
