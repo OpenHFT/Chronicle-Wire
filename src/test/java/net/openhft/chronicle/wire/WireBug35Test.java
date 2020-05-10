@@ -19,37 +19,40 @@ public class WireBug35Test {
     @Test
     public void objectsInSequence() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+        try {
+            final Wire wire = WireType.TEXT.apply(bytes);
+            wire.write(() -> "seq").sequence(seq -> {
+                seq.marshallable(obj -> obj.write(() -> "key").text("value"));
+                seq.marshallable(obj -> obj.write(() -> "key").text("value"));
+            });
 
-        final Wire wire = WireType.TEXT.apply(bytes);
-        wire.write(() -> "seq").sequence(seq -> {
-            seq.marshallable(obj -> obj.write(() -> "key").text("value"));
-            seq.marshallable(obj -> obj.write(() -> "key").text("value"));
-        });
+            @NotNull final String text = wire.asText().toString();
+            Object load = new Yaml().load(text);
 
-        @NotNull final String text = wire.asText().toString();
-        Object load = new Yaml().load(text);
+            assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
+        } finally {
+            bytes.release();
+        }
 
-        assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
-
-        bytes.release();
     }
 
     @Test
     public void objectsInSequenceBinaryWire() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+        try {
+            final Wire wire = WireType.BINARY.apply(bytes);
+            wire.write(() -> "seq").sequence(seq -> {
+                seq.marshallable(obj -> obj.write(() -> "key").text("value"));
+                seq.marshallable(obj -> obj.write(() -> "key").text("value"));
+            });
 
-        final Wire wire = WireType.BINARY.apply(bytes);
-        wire.write(() -> "seq").sequence(seq -> {
-            seq.marshallable(obj -> obj.write(() -> "key").text("value"));
-            seq.marshallable(obj -> obj.write(() -> "key").text("value"));
-        });
+            @NotNull final String text = wire.asText().toString();
+            Object load = new Yaml().load(text);
 
-        @NotNull final String text = wire.asText().toString();
-        Object load = new Yaml().load(text);
-
-        assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
-
-        bytes.release();
+            assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
+        } finally {
+            bytes.release();
+        }
     }
 
     @After

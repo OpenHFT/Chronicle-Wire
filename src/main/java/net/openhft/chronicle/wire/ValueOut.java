@@ -584,7 +584,7 @@ public interface ValueOut {
             case "java.lang.Float":
                 return fixedFloat32((float) value);
             case "[Ljava.lang.String;":
-                return array(v -> Stream.of((String[]) value).forEach(v::text), String[].class);
+                return array(v -> Stream.of((String[]) value).forEach(v::text), Object[].class);
             case "[Ljava.lang.Object;":
                 return array(v -> Stream.of((Object[]) value).forEach(v::object), Object[].class);
             case "java.time.LocalTime":

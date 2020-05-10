@@ -50,6 +50,10 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
         return super.doInvoke(proxy, method, args);
     }
 
+    public boolean metaData() {
+        return metaData;
+    }
+
     @Override
     protected void handleInvoke(Method method, Object[] args) {
         DocumentContext dc = context.dc();

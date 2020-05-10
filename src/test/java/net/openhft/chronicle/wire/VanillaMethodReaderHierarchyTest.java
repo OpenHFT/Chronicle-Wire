@@ -44,6 +44,8 @@ public class VanillaMethodReaderHierarchyTest {
         MethodReader reader = wire.methodReader(simple);
         final String superMario = "Mario";
         writer.hello(superMario);
+        // writer =    "hello: Mario\n---\n"
+
         assertTrue(reader.readOne());
         assertEquals(1, queue.size());
         assertEquals(superMario, queue.poll());

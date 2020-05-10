@@ -291,6 +291,13 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             return new JSONWire(bytes).useBinaryDocuments();
         }
     },
+    YAML {
+        @NotNull
+        @Override
+        public Wire apply(@NotNull Bytes bytes) {
+            return new YamlWire(bytes).useBinaryDocuments();
+        }
+    },
     RAW {
         @NotNull
         @Override
@@ -330,6 +337,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
     private static final boolean IS_DELTA_AVAILABLE = isDeltaAvailable();
     private static final boolean IS_DEFAULT_ZERO_AVAILABLE = isDefaultZeroAvailable();
+
 
     private static boolean isDeltaAvailable() {
         try {
@@ -378,6 +386,9 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
         if (wire instanceof AbstractAnyWire)
             wire = ((AbstractAnyWire) wire).underlyingWire();
+
+        if (wire instanceof YamlWire)
+            return WireType.YAML;
 
         if (wire instanceof JSONWire)
             return WireType.JSON;

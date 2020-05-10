@@ -110,6 +110,7 @@ public class TextMethodTester<T> {
             methodWriterBuilder.methodWriterInterceptorReturns(interceptorReturns);
         }
         if (genericEvent != null) methodWriterBuilder.genericEvent(genericEvent);
+
         T writer0 = methodWriterBuilder.get();
         T writer = retainLast == null
                 ? writer0
