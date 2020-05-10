@@ -53,7 +53,7 @@ public class GenerateMethodWriter {
     private final String genericEvent;
     AtomicInteger i = new AtomicInteger();
     MarshallableOut o;
-    private ConcurrentMap<Class, Integer> methodWritersMap = new ConcurrentHashMap<>();
+    private ConcurrentMap<Class, String> methodWritersMap = new ConcurrentHashMap<>();
     private boolean hasMethodWriterListener;
     private AtomicInteger indent = new AtomicInteger();
 
@@ -283,8 +283,8 @@ public class GenerateMethodWriter {
                 .append(DOCUMENT_CONTEXT_HOLDER)
                 .append("> documentContextTL = ThreadLocal.withInitial(")
                 .append(DOCUMENT_CONTEXT).append("Holder::new);\n");
-        for (Map.Entry<Class, Integer> e : methodWritersMap.entrySet()) {
-            result.append(format("private %s methodWriter%s;\n", e.getKey().getName(), e.getValue()));
+        for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
+            result.append(format("private ThreadLocal %s = new ThreadLocal();\n", e.getValue()));
         }
         result.append("\n");
 
@@ -493,11 +493,14 @@ public class GenerateMethodWriter {
         if (dm.getReturnType().isAssignableFrom(interfaceClazz) || dm.getReturnType() == interfaceClazz) {
             result.append("return this;\n");
         } else if (dm.getReturnType().isInterface()) {
-            String index = methodWritersMap.computeIfAbsent(dm.getReturnType(), k -> count.incrementAndGet()).toString();
+            String index = methodWritersMap.computeIfAbsent(dm.getReturnType(), k -> "methodWriter" + k.getSimpleName() + "TL");
             result.append("// method return\n");
-            result.append(format("return ((" + SHARED_DOCUMENT_CONTEXT + ") (methodWriter%s ==null " +
-                    " ? methodWriter%s = out.methodWriter(%s.class)" +
-                    " :  methodWriter%s)).documentContext(documentContextTL);\n", index, index, dm.getReturnType().getName(), index));
+
+            result.append(format("%s result = (%s)%s.get();\n", dm.getReturnType().getName(), dm.getReturnType().getName(), index));
+            result.append(format("if ( result == null) {\n" +
+                    "result = out.methodWriter(%s.class);\n %s.set(result);\n }\n", dm.getReturnType().getName(), index));
+
+            result.append(format("return ((%s)result).documentContext(documentContextTL);\n", SHARED_DOCUMENT_CONTEXT));
         } else if (!dm.getReturnType().isPrimitive()) {
             result.append("return null;\n");
         } else if (dm.getReturnType() == boolean.class) {

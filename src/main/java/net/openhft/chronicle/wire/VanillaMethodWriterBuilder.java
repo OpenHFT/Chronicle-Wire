@@ -148,11 +148,30 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return GeneratedProxyClass.from(packageName, interfaces, proxyClassName, classLoader);
     }
 
+    /**
+     * its very important to come up with a name that is unique for what the class does, event the below is probably not unique enough
+     *
+     * @return the name of the new class
+     */
+    @NotNull
+    private String getClassName() {
+
+        final StringBuilder sb = new StringBuilder();
+        interfaces.forEach(i -> sb.append(i.getSimpleName()));
+        sb.append(this.genericEvent == null ? "" : this.genericEvent);
+        sb.append(this.metaData ? "MetadataAware" : "");
+        sb.append(useMethodIds ? "MethodIds" : "");
+        sb.append(hasMethodWriterListener() ? "MethodListener" : "");
+        sb.append(toFirstCapCase(wireType.toString()));
+        sb.append("MethodWriter");
+        return sb.toString();
+    }
+
     @NotNull
     @Override
     public T get() {
 
-        proxyClassName = className + toFirstCapCase(wireType.toString()) + "MethodWriter";
+        proxyClassName = getClassName();
         try {
             proxyClass = Class.forName(packageName + "." + proxyClassName + System.nanoTime());// l.incrementAndGet());
         } catch (ClassNotFoundException e) {
@@ -174,10 +193,18 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
             try {
 
-                interfaces.add(SharedDocumentContext.class);
                 //  final Class<T> clazz = setOfClassesToClassName.computeIfAbsent(setOfInterfaces,
                 //          i ->
-                Class clazz = GenerateMethodWriter.from(packageName, interfaces, proxyClassName + System.nanoTime(), classLoader, wireType, genericEvent, methodWriterListener != null, metaData, useMethodIds);
+                final LinkedHashSet<Class> setOfInterfaces = new LinkedHashSet<>(interfaces);
+                setOfInterfaces.add(SharedDocumentContext.class);
+                Class clazz = GenerateMethodWriter.from(packageName,
+                        setOfInterfaces,
+                        getClassName(),
+                        classLoader,
+                        wireType,
+                        genericEvent,
+                        hasMethodWriterListener(), metaData, useMethodIds);
+
                 if (clazz != null)
                     return (T) newInstance3(clazz);
 
@@ -212,6 +239,10 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
         //noinspection unchecked
         return (T) Proxy.newProxyInstance(classLoader, interfacesArr, new CallSupplierInvocationHandler());
+    }
+
+    private boolean hasMethodWriterListener() {
+        return methodWriterListener != null;
     }
 
     private Object newInstance3(final Class aClass) {
@@ -257,9 +288,6 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         }
     }
 
-    public Class<?> proxyClass() {
-        return proxyClass;
-    }
 
     public MethodWriterBuilder<T> proxyClass(Class<?> proxyClass) {
         if (proxyClass.isInterface())
