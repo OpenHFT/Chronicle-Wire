@@ -87,14 +87,14 @@ public class GenerateMethodWriter {
      */
 
     @Nullable
-    public static Class from(String packageName,
-                             Set<Class> interfaces,
-                             String className,
-                             ClassLoader classLoader,
-                             final WireType wireType,
-                             final String genericEvent,
-                             boolean hasMethodWriterListener,
-                             boolean metaData, boolean useMethodId) {
+    public static Class newClass(String packageName,
+                                 Set<Class> interfaces,
+                                 String className,
+                                 ClassLoader classLoader,
+                                 final WireType wireType,
+                                 final String genericEvent,
+                                 boolean hasMethodWriterListener,
+                                 boolean metaData, boolean useMethodId) {
 
         return new GenerateMethodWriter(packageName,
                 interfaces,
@@ -253,8 +253,8 @@ public class GenerateMethodWriter {
             imports.append(interfaceMethods);
             imports.append("\n}\n");
 
-//if (DUMP_CODE)
-            System.out.println(imports);
+            if (DUMP_CODE)
+                System.out.println(imports);
 
             return CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
 

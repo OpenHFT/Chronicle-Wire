@@ -39,9 +39,8 @@ import java.util.function.Supplier;
 public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterBuilder<T> {
 
     private static final boolean DISABLE_PROXY_GEN = Boolean.getBoolean("disableProxyCodegen");
-    private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
     private final Set<Class> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
-    private static final Map<Set<Class>, Class> setOfClassesToClassName = new ConcurrentHashMap<>();
+    private static final Map<String, Class> classCache = new ConcurrentHashMap<>();
 
     private final String packageName;
     private final String className;
@@ -57,6 +56,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     private boolean metaData;
     private boolean useMethodIds;
     private WireType wireType;
+    private Class<?> proxyClass;
 
     @NotNull
     public MethodWriterBuilder<T> classLoader(ClassLoader classLoader) {
@@ -126,7 +126,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return get();
     }
 
-    private Class<?> proxyClass;
+
 
     @NotNull
     public MethodWriterBuilder<T> onClose(Closeable closeable) {
@@ -144,18 +144,14 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return this;
     }
 
-    private Class generatedProxyClass(Set<Class> interfaces) {
-        return GeneratedProxyClass.from(packageName, interfaces, proxyClassName, classLoader);
-    }
-
     /**
-     * its very important to come up with a name that is unique for what the class does, event the below is probably not unique enough
+     * because we cache the classes in {@code classCache}, its very important to come up with a name that is
+     * unique for what the class does.
      *
      * @return the name of the new class
      */
     @NotNull
     private String getClassName() {
-
         final StringBuilder sb = new StringBuilder();
         interfaces.forEach(i -> sb.append(i.getSimpleName()));
         sb.append(this.genericEvent == null ? "" : this.genericEvent);
@@ -170,14 +166,6 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     @NotNull
     @Override
     public T get() {
-
-        proxyClassName = getClassName();
-        try {
-            proxyClass = Class.forName(packageName + "." + proxyClassName + System.nanoTime());// l.incrementAndGet());
-        } catch (ClassNotFoundException e) {
-            // ignored
-        }
-
         if (proxyClass != null) {
             try {
                 Constructor<T> constructor = (Constructor) proxyClass.getConstructor(MethodWriterInvocationHandlerSupplier.class);
@@ -188,47 +176,14 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
                     Jvm.debug().on(getClass(), e);
             }
         }
-        if
-        (!DISABLE_PROXY_GEN) {
+        if (!DISABLE_PROXY_GEN) {
 
             try {
-
-                //  final Class<T> clazz = setOfClassesToClassName.computeIfAbsent(setOfInterfaces,
-                //          i ->
-                final LinkedHashSet<Class> setOfInterfaces = new LinkedHashSet<>(interfaces);
-                setOfInterfaces.add(SharedDocumentContext.class);
-                Class clazz = GenerateMethodWriter.from(packageName,
-                        setOfInterfaces,
-                        getClassName(),
-                        classLoader,
-                        wireType,
-                        genericEvent,
-                        hasMethodWriterListener(), metaData, useMethodIds);
-
+                Class clazz = classCache.computeIfAbsent(getClassName(), this::newClass);
                 if (clazz != null)
-                    return (T) newInstance3(clazz);
+                    return (T) newInstance(clazz);
 
             } catch (Throwable e) {
-
-                e.printStackTrace();
-
-                // do nothing and drop through
-                if (Jvm.isDebug())
-                    Jvm.debug().on(getClass(), e);
-            }
-            final LinkedHashSet<Class> setOfInterfaces = new LinkedHashSet<>(interfaces);
-            try {
-
-                // this will create proxy that does not suffer from the arg[] issue
-                //  setOfInterfaces.add(Closeable.class);
-                setOfInterfaces.add(Closeable.class);
-                final Class<T> o = setOfClassesToClassName.computeIfAbsent(setOfInterfaces, this::generatedProxyClass);
-                if (o != null && o != COMPILE_FAILED)
-                    return o.getConstructor(MethodWriterInvocationHandlerSupplier.class)
-                            .newInstance(handlerSupplier);
-
-            } catch (Throwable e) {
-                setOfClassesToClassName.put(setOfInterfaces, COMPILE_FAILED);
 
                 // do nothing and drop through
                 if (Jvm.isDebug())
@@ -241,11 +196,23 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return (T) Proxy.newProxyInstance(classLoader, interfacesArr, new CallSupplierInvocationHandler());
     }
 
+    private Class newClass(final String name) {
+        final LinkedHashSet<Class> setOfInterfaces = new LinkedHashSet<>(interfaces);
+        setOfInterfaces.add(SharedDocumentContext.class);
+        return GenerateMethodWriter.newClass(packageName,
+                setOfInterfaces,
+                name,
+                classLoader,
+                wireType,
+                genericEvent,
+                hasMethodWriterListener(), metaData, useMethodIds);
+    }
+
     private boolean hasMethodWriterListener() {
         return methodWriterListener != null;
     }
 
-    private Object newInstance3(final Class aClass) {
+    private Object newInstance(final Class aClass) {
         try {
             return aClass.getDeclaredConstructors()[0].newInstance(out, closeable, methodWriterListener);
         } catch (Exception e) {
@@ -288,6 +255,9 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         }
     }
 
+    public Class<?> proxyClass() {
+        return proxyClass;
+    }
 
     public MethodWriterBuilder<T> proxyClass(Class<?> proxyClass) {
         if (proxyClass.isInterface())
