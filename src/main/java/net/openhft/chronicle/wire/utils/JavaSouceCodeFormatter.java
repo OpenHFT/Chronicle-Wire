@@ -4,6 +4,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * simple java source code formatter, will indent on a "{" and reduce the indent on a "}" all spaces before a "/n" are removed to enforce a consistent
+ * format
+ */
 public class JavaSouceCodeFormatter implements Appendable, CharSequence {
 
     private static final int INDENT_SPACES = 4;
