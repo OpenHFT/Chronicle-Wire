@@ -6,10 +6,12 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodWriterListener;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.wire.utils.JavaSouceCodeFormatter;
 import net.openhft.compiler.CompilerUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -29,6 +31,14 @@ public class GenerateMethodWriter {
     static final boolean DUMP_CODE = Boolean.getBoolean("dumpCode");
     private static final String SHARED_DOCUMENT_CONTEXT = SharedDocumentContext.class.getSimpleName();
     private static final String DOCUMENT_CONTEXT_HOLDER = DocumentContextHolder.class.getSimpleName();
+    private static final String GENERATE_METHOD_WRITER = GenerateMethodWriter.class.getSimpleName();
+    private static final String DOCUMENT_CONTEXT = DocumentContext.class.getSimpleName();
+    private static final String MARSHALLABLE_OUT = MarshallableOut.class.getSimpleName();
+    private static final String METHOD_ID = MethodId.class.getSimpleName();
+    private static final String VALUE_OUT = ValueOut.class.getSimpleName();
+    private static final String CLOSEABLE = Closeable.class.getSimpleName();
+    private static final String MARSHALLABLE = Marshallable.class.getSimpleName();
+    private static final String METHOD_READER = MethodReader.class.getSimpleName();
 
     private static boolean recordHistory;
     private static AtomicInteger count = new AtomicInteger();
@@ -44,6 +54,7 @@ public class GenerateMethodWriter {
     MarshallableOut o;
     private ConcurrentMap<Class, Integer> methodWritersMap = new ConcurrentHashMap<>();
     private boolean hasMethodWriterListener;
+    private AtomicInteger indent = new AtomicInteger();
 
     private GenerateMethodWriter(final String packageName,
                                  final Set<Class> interfaces,
@@ -94,6 +105,7 @@ public class GenerateMethodWriter {
                 metaData, useMethodId).createClass();
     }
 
+    @SuppressWarnings("unused")
     public static DocumentContext acquireDocumentContext(boolean metaData, ThreadLocal<DocumentContextHolder> documentContextTL, MarshallableOut out) {
         DocumentContextHolder contextHolder = documentContextTL.get();
         if (!contextHolder.isClosed())
@@ -103,6 +115,7 @@ public class GenerateMethodWriter {
         return contextHolder;
     }
 
+    @SuppressWarnings("unused")
     public static void addComment(Bytes<?> bytes, Object arg) {
 
         if (arg instanceof Marshallable)
@@ -112,9 +125,9 @@ public class GenerateMethodWriter {
     }
 
     @NotNull
-    private static StringBuilder methodSignature(final Method dm, final int len) {
+    private Appendable methodSignature(final Method dm, final int len) throws IOException {
 
-        StringBuilder result = new StringBuilder();
+        Appendable result = new JavaSouceCodeFormatter(this.indent);
         for (int j = 0; j < len; j++) {
             Parameter p = dm.getParameters()[j];
             String className = p.getType().getTypeName().replace('$', '.');
@@ -124,7 +137,13 @@ public class GenerateMethodWriter {
 
             if (intConversion.isPresent())
                 result.append("@IntConversion(").append(intConversion.get()).append(".class) ");
-            else longConversion.ifPresent(s -> result.append("@LongConversion(").append(s).append(".class) "));
+            else longConversion.ifPresent(s -> {
+                try {
+                    result.append("@LongConversion(").append(s).append(".class) ");
+                } catch (Exception w) {
+                    throw Jvm.rethrow(w);
+                }
+            });
 
             result.append("final ");
             result.append(className);
@@ -164,18 +183,16 @@ public class GenerateMethodWriter {
 
         return "object";
     }
-
-    ;
-
     private Class createClass() {
 
         int maxArgs = 0;
-        // className = className + i.getAndIncrement();
-        StringBuilder interfaceMethods = new StringBuilder();
+// className = className + i.getAndIncrement();
 
-        StringBuilder sb = new StringBuilder();
+        JavaSouceCodeFormatter interfaceMethods = new JavaSouceCodeFormatter(1);
+
+        JavaSouceCodeFormatter imports = new JavaSouceCodeFormatter();
         try {
-            sb.append("package " + packageName + ";\n\n" +
+            imports.append("package " + packageName + ";\n\n" +
 
                     "import net.openhft.chronicle.wire.*;\n" +
                     "import " + IntConversion.class.getName() + ";\n" +
@@ -196,22 +213,17 @@ public class GenerateMethodWriter {
                     "import java.lang.reflect.Method;\n" +
                     "import java.util.stream.IntStream;\n" +
                     "import java.util.ArrayList;\n" +
-                    "import java.util.List;\n");
+                    "import java.util.List;\n\n");
 
-            sb.append("public final class ")
+            imports.append("public final class ")
                     .append(className)
                     .append(" implements ");
 
-            final StringBuilder methodArray = new StringBuilder();
-            int count = 0;
-
-            String sep = "";
-            // create methodArray
             for (Class interfaceClazz : interfaces) {
-                sb.append(sep);
+
                 String interfaceName = nameForClass(interfaceClazz);
-                sb.append(interfaceName);
-                sb.append(",");
+                imports.append(interfaceName);
+                imports.append(",");
 
                 if (!interfaceClazz.isInterface())
                     throw new IllegalArgumentException("expecting and interface instead of class=" + interfaceClazz.getName());
@@ -227,8 +239,8 @@ public class GenerateMethodWriter {
                     if (dm.getName().equals("documentContext") && dm.getParameterTypes().length == 1 && dm.getParameterTypes()[0] == ThreadLocal.class && SharedDocumentContext.class.isAssignableFrom(dm.getReturnType()))
                         continue;
 
-                    //    if (dm.getGenericReturnType() instanceof TypeVariableImpl)
-                    //       return null;
+//if (dm.getGenericReturnType() instanceof TypeVariableImpl)
+//   return null;
 
                     interfaceMethods.append(createMethod(dm, interfaceClazz, wireType, genericEvent, hasMethodWriterListener, metaData, useMethodId));
 
@@ -236,28 +248,28 @@ public class GenerateMethodWriter {
 
             }
 
-            sb.setLength(sb.length() - 1);
-            sb.append(" {\n\n");
+            imports.setLength(imports.length() - 1);
+            imports.append("{\n\n");
 
-            sb.append(constructorAndFields(className));
-            sb.append(methodDocumentContext());
-            sb.append(interfaceMethods);
-            sb.append("}\n");
+            imports.append(constructorAndFields(className));
+            imports.append(methodDocumentContext());
+            imports.append(interfaceMethods);
+            imports.append("\n}\n");
 
-            //    if (DUMP_CODE)
-            System.out.println(sb);
+//if (DUMP_CODE)
+            System.out.println(imports);
 
-            //   try {
+//   try {
 
-            //      return Class.forName(packageName + '.' + className);
-            //    } catch (ClassNotFoundException e) {
-            return CompilerUtils.CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, sb.toString());
-            //    }
+//  return Class.forName(packageName + '.' + className);
+//} catch (ClassNotFoundException e) {
+            return CompilerUtils.CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
+//}
         } catch (
                 Throwable e) {
-            System.out.println(sb.toString());
+            System.out.println(imports.toString());
             e.printStackTrace();
-            throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + sb, e));
+            throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + imports, e));
         }
 
     }
@@ -271,39 +283,39 @@ public class GenerateMethodWriter {
 
         methodDocumentContext();
 
-        final StringBuilder fields = new StringBuilder("  // fields\n");
+        final StringBuilder fields = new StringBuilder("// fields\n");
 
-        fields.append("  private transient final Closeable closeable;\n");
-        fields.append("  private transient final MethodWriterListener methodWriterListener;\n");
-        fields.append("  private transient final MarshallableOut out;\n");
-        fields.append("  private transient ThreadLocal<" + DOCUMENT_CONTEXT_HOLDER + "> documentContextTL = ThreadLocal.withInitial(DocumentContextHolder::new);\n");
+        fields.append("private transient final " + CLOSEABLE + " closeable;\n");
+        fields.append("private transient final MethodWriterListener methodWriterListener;\n");
+        fields.append("private transient final " + MARSHALLABLE_OUT + " out;\n");
+        fields.append("private transient ThreadLocal<" + DOCUMENT_CONTEXT_HOLDER + "> documentContextTL = ThreadLocal.withInitial(" + DOCUMENT_CONTEXT + "Holder::new);\n");
 
         for (Map.Entry<Class, Integer> e : methodWritersMap.entrySet()) {
-            fields.append(format("  private %s methodWriter%s;\n", e.getKey().getName(), e.getValue()));
+            fields.append(format("private %s methodWriter%s;\n", e.getKey().getName(), e.getValue()));
         }
         fields.append("\n");
 
-        StringBuilder constructor = new StringBuilder("  // constructor\n");
-        constructor.append(format("  public %s(MarshallableOut out, Closeable closeable, MethodWriterListener methodWriterListener) {\n" +
-                "    this.methodWriterListener = methodWriterListener;\n" +
-                "    this.out = out;\n" +
-                "    this.closeable = closeable;\n" +
-                "  }\n\n", className));
+        StringBuilder constructor = new StringBuilder("// constructor\n");
+        constructor.append(format("public %s(" + MARSHALLABLE_OUT + " out, " + CLOSEABLE + " closeable, MethodWriterListener methodWriterListener) {\n" +
+                "this.methodWriterListener = methodWriterListener;\n" +
+                "this.out = out;\n" +
+                "this.closeable = closeable;\n" +
+                "}\n\n", className));
 
         return fields.append(constructor);
 
     }
 
     private CharSequence methodDocumentContext() {
-        return ("  // method documentContext\n" +
-                "  @Override\n" +
-                "  public <T extends " + SHARED_DOCUMENT_CONTEXT + "> T documentContext(final ThreadLocal<" + DOCUMENT_CONTEXT_HOLDER + "> documentContextTL) {\n" +
-                "    this.documentContextTL = documentContextTL; \n" +
-                "    return (T)this;\n" +
-                "  }\n\n");
+        return ("// method documentContext\n" +
+                "@Override\n" +
+                "public <T extends " + SHARED_DOCUMENT_CONTEXT + "> T documentContext(final ThreadLocal<" + DOCUMENT_CONTEXT_HOLDER + "> documentContextTL) {\n" +
+                "this.documentContextTL = documentContextTL; \n" +
+                "return (T)this;\n" +
+                "}\n");
     }
 
-    private CharSequence createMethod(final Method dm, final Class<?> interfaceClazz, final WireType wireType, final String genericEvent, final boolean hasMethodWriterListener, boolean metaData, boolean useMethodId) {
+    private CharSequence createMethod(final Method dm, final Class<?> interfaceClazz, final WireType wireType, final String genericEvent, final boolean hasMethodWriterListener, boolean metaData, boolean useMethodId) throws IOException {
 
         if (Modifier.isStatic(dm.getModifiers()))
             return "";
@@ -313,142 +325,137 @@ public class GenerateMethodWriter {
         }
 
         if ("writingDocument".contentEquals(dm.getName()) && dm.getReturnType() == DocumentContext.class && dm.getParameterCount() == 0) {
-            return "public DocumentContext writingDocument(){\n return GenerateMethodWriter.acquireDocumentContext(false,this.documentContextTL,this.out);\n}\n";
+            return "public " + DOCUMENT_CONTEXT + " writingDocument(){\n return " + GENERATE_METHOD_WRITER
+                    + ".acquire" + DOCUMENT_CONTEXT + "(false,this.documentContextTL,this.out);\n}\n";
         }
 
         final int len = dm.getParameters().length;
         Class<?> returnType = dm.getReturnType();
         final String typeName = nameForClass(returnType);
 
-        final StringBuilder methodBody = new StringBuilder();
+        final StringBuilder body = new StringBuilder();
         String methodID = "";
         if (dm.getReturnType() == void.class && "close".equals(dm.getName()) && dm.getParameterCount() == 0) {
-            methodBody.append("    if (this.closeable != null)\n");
-            methodBody.append("        this.closeable.close();\n");
+            body.append("if (this.closeable != null){\n this.closeable.close();\n}\n");
         } else {
 
-            methodBody.append(format("    final DocumentContext dc = GenerateMethodWriter.acquireDocumentContext(%s,this.documentContextTL,this.out);\n\n", metaData));
+            body.append(format("final " + DOCUMENT_CONTEXT + " dc = " + GENERATE_METHOD_WRITER + ".acquire"
+                    + DOCUMENT_CONTEXT + "(%s,this.documentContextTL,this.out);\n", metaData));
 
-            methodBody.append(recordHistory());
+            body.append(recordHistory());
 
             int startJ = 0;
 
             String eventName;
             if (dm.getParameterCount() > 0 && dm.getName().equals(genericEvent)) {
-                // this is used when we are processing the genericEvent
+// this is used when we are processing the genericEvent
                 eventName = dm.getParameters()[0].getName();
                 startJ = 1;
             } else {
                 eventName = '\"' + dm.getName() + '\"';
             }
 
-            methodBody.append(format("    if (dc.wire().bytes().retainsComments())\n     dc.wire().bytes().comment(\"%s\");\n", dm.getName()));
+            body.append(format("if (dc.wire().bytes().retainsComments()){\n dc.wire().bytes().comment(\"%s\");\n}\n", dm.getName()));
 
             Optional<Annotation> methodId = useMethodId ? stream(dm.getAnnotations()).filter(f -> f instanceof MethodId).findFirst() : Optional.empty();
             if ((wireType != WireType.TEXT && wireType != WireType.YAML) && methodId.isPresent()) {
 
                 long value = ((MethodId) methodId.get()).value();
-                methodBody.append(format("    final ValueOut valueOut = dc.wire().writeEventId(%d);\n", value));
-                methodID = format("  @MethodId(%d)\n", value);
+                body.append(format("final " + VALUE_OUT + " valueOut = dc.wire().writeEventId(%d);\n", value));
+                methodID = format("@" + METHOD_ID + "(%d)\n", value);
 
             } else
-                methodBody.append(format("    final ValueOut valueOut = dc.wire().writeEventName(%s);\n", eventName));
+                body.append(format("final " + VALUE_OUT + " valueOut = dc.wire().writeEventName(%s);\n", eventName));
 
             if (dm.getParameterCount() - startJ == 1) {
-                methodBody.append(String.format("    if (dc.wire().bytes().retainsComments())\n   GenerateMethodWriter.addComment(dc.wire().bytes(), %s);\n  ", dm.getParameters()[0].getName()));
+                body.append(String.format("if (dc.wire().bytes().retainsComments()){\n " + GENERATE_METHOD_WRITER
+                        + ".addComment(dc.wire().bytes(), %s);\n}\n", dm.getParameters()[0].getName()));
             }
 
             if (hasMethodWriterListener && dm.getParameterCount() > 0)
-                createMethodWriterListener(dm, methodBody);
+                createMethodWriterListener(dm, body);
             else if (dm.getParameters().length > 0) {
 
                 if (dm.getParameterTypes().length > startJ + 1)
-                    methodBody.append("    valueOut.array(v -> {\n");
+                    body.append("valueOut.array(v -> {\n");
                 for (int j = startJ; j < len; j++) {
 
-                    Parameter p = dm.getParameters()[j];
-
-                    Optional<String> intConversion = stream(p.getAnnotations()).filter(a -> a.annotationType() == IntConversion.class).map(x -> (((IntConversion) x).value().getName())).findFirst();
-                    Optional<String> longConversion = stream(p.getAnnotations()).filter(a -> a.annotationType() == LongConversion.class).map(x -> (((LongConversion) x).value().getName())).findFirst();
-                    String name = intConversion.orElseGet(() -> (longConversion.orElse("")));
+                    final Parameter p = dm.getParameters()[j];
+                    final Optional<String> intConversion = stream(p.getAnnotations()).filter(a -> a.annotationType() == IntConversion.class).map(x -> (((IntConversion) x).value().getName())).findFirst();
+                    final Optional<String> longConversion = stream(p.getAnnotations()).filter(a -> a.annotationType() == LongConversion.class).map(x -> (((LongConversion) x).value().getName())).findFirst();
+                    final String name = intConversion.orElseGet(() -> (longConversion.orElse("")));
 
                     if (!name.isEmpty() && (WireType.TEXT == wireType || WireType.YAML == wireType))
-                        methodBody.append(format("        //todo improve this\n        valueOut.rawText(new %s().asText(%s));\n", name, p.getName()));
+                        body.append(format("//todo improve this\nvalueOut.rawText(new %s().asText(%s));\n", name, p.getName()));
                     else if (p.getType().isPrimitive() || CharSequence.class.isAssignableFrom(p.getType())) {
                         if ("int64".contentEquals(toString(p.getType())))
-                            methodBody.append(format("        %s.object(long.class,%s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", p.getName()));
+                            body.append(format("%s.object(long.class,%s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", p.getName()));
                         else
-
-                            methodBody.append(format("        %s.%s(%s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", toString(p.getType()), p.getName()));
+                            body.append(format("%s.%s(%s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", toString(p.getType()), p.getName()));
                     } else {
                         String className = p.getType().getTypeName().replace('$', '.');
 
+                        boolean closeif = false;
                         if (Marshallable.class.isAssignableFrom(p.getType())) {
-                            methodBody.append(format("        if (%s.getClass() == %s.class )\n ", p.getName(), className));
-                            methodBody.append(format("          %s.marshallable(%s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", p.getName()));
-                            methodBody.append("        else\n");
+                            body.append(format("if (%s.getClass() == %s.class){\n", p.getName(), className));
+                            body.append(format("%s.marshallable(%s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", p.getName()));
+                            body.append("} else {\n");
+                            closeif = true;
                         }
-                        // methodBody.append(format("          %s.object(%s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", p.getName()));
 
-                        methodBody.append(format("          %s.object(%s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", p.getName()));
+                        body.append(format("%s.object(%s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", p.getName()));
 
+                        if (closeif) body.append("}\n");
                     }
 
                 }
 
                 if (dm.getParameterTypes().length > startJ + 1)
-                    methodBody.append("    }, Object[].class);\n");
+                    body.append("}, Object[].class);\n");
 
             }
 
             if (dm.getParameterTypes().length == 0)
-                methodBody.append("    valueOut.text(\"\");\n");
+                body.append("valueOut.text(\"\");\n");
 
             if (returnType == Void.class || returnType == void.class || returnType.isPrimitive()) {
-                methodBody.append("    dc.close();\n");
+                body.append("dc.close();\n");
             }
 
         }
-        return
-
-                format("%s  public %s %s(%s){\n" +
-                                "%s" +
-                                "%s" +
-                                "  }\n\n", methodID, typeName, dm.getName(), methodSignature(dm, len), methodBody,
-
-                        methodReturn(dm, interfaceClazz));
+        return format("\n%s public %s %s(%s){\n %s%s}\n", methodID, typeName, dm.getName(), methodSignature(dm, len), body, methodReturn(dm, interfaceClazz));
     }
 
-    private void createMethodWriterListener(final Method dm, final StringBuilder methodBody) {
-        methodBody.append("    Object[] args$$ = new Object[]{");
+    private void createMethodWriterListener(final Method dm, final StringBuilder body) {
+        body.append("Object[] args$$ = new Object[]{\n");
         for (int i1 = 0; i1 < dm.getParameters().length; i1++) {
-            methodBody.append("(Object)" + dm.getParameters()[i1].getName() + ",");
+            body.append("(Object)").append(dm.getParameters()[i1].getName());
+            if (i1 < dm.getParameters().length - 1)
+                body.append(",\n");
         }
-        methodBody.setLength(methodBody.length() - 1);
-        methodBody.append("};\n");
+        body.append("\n};\n");
 
-        methodBody.append(format("    this.methodWriterListener.onWrite(\"%s\",args$$);\n", dm.getName()));
+        body.append(format("this.methodWriterListener.onWrite(\"%s\",args$$);\n", dm.getName()));
         if (dm.getParameterCount() == 1) {
             if (Marshallable.class.isAssignableFrom(dm.getParameterTypes()[0])) {
-                methodBody.append(format("        if (args$$[0].getClass() == %s.class)\n ", dm.getParameterTypes()[0].getName().replace('$', '.')));
-                methodBody.append("             valueOut.marshallable((Marshallable)args$$[0]);\n");
-                methodBody.append("          else\n");
-                methodBody.append("             valueOut.object(args$$[0]);\n");
+                body.append(format("if (args$$[0].getClass() == %s.class){\n", dm.getParameterTypes()[0].getName().replace('$', '.')));
+                body.append("valueOut.marshallable((" + MARSHALLABLE + ")args$$[0]);\n");
+                body.append("} else {\n");
+                body.append("valueOut.object(args$$[0]);\n}\n");
             } else {
-                methodBody.append("             valueOut.object(args$$[0]);\n");
+                body.append("valueOut.object(args$$[0]);\n");
             }
 
         } else {
-            methodBody.append("    valueOut.object(args$$);\n");
+            body.append("valueOut.object(args$$);\n");
         }
     }
 
     private StringBuilder recordHistory() {
         final StringBuilder result = new StringBuilder();
-        result.append("    // record history\n");
-        result.append("    if (out.recordHistory())   \n" +
-                "        dc.wire().writeEventName(MethodReader.HISTORY).marshallable(MessageHistory.get());\n\n");
-
+        result.append("// record history\n");
+        result.append("if (out.recordHistory()){\n" +
+                "dc.wire().writeEventName(" + METHOD_READER + ".HISTORY).marshallable(MessageHistory.get());\n}\n");
         return result;
     }
 
@@ -458,22 +465,21 @@ public class GenerateMethodWriter {
             return result;
 
         if (dm.getReturnType().isAssignableFrom(interfaceClazz) || dm.getReturnType() == interfaceClazz) {
-            result.append("    return this;\n");
+            result.append("return this;\n");
         } else if (dm.getReturnType().isInterface()) {
             String index = methodWritersMap.computeIfAbsent(dm.getReturnType(), k -> count.incrementAndGet()).toString();
-            result.append("    // method return\n");
-
-            result.append(format("    return ((" + SHARED_DOCUMENT_CONTEXT + ") (methodWriter%s ==null\n" +
-                    "        ? methodWriter%s = out.methodWriter(%s.class)\n" +
-                    "        :  methodWriter%s)).documentContext(documentContextTL);\n", index, index, dm.getReturnType().getName(), index));
+            result.append("// method return\n");
+            result.append(format("return ((" + SHARED_DOCUMENT_CONTEXT + ") (methodWriter%s ==null " +
+                    " ? methodWriter%s = out.methodWriter(%s.class)" +
+                    " :  methodWriter%s)).documentContext(documentContextTL);\n", index, index, dm.getReturnType().getName(), index));
         } else if (!dm.getReturnType().isPrimitive()) {
-            result.append("    return null;\n");
+            result.append("return null;\n");
         } else if (dm.getReturnType() == boolean.class) {
-            result.append("    return false;\n");
+            result.append("return false;\n");
         } else if (dm.getReturnType() == byte.class) {
-            result.append("    return (byte)0;\n");
+            result.append("return (byte)0;\n");
         } else {
-            result.append("    return 0;\n");
+            result.append("return 0;\n");
         }
 
         return result;

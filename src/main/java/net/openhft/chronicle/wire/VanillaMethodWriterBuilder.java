@@ -42,7 +42,6 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
     private final Set<Class> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
     private static final Map<Set<Class>, Class> setOfClassesToClassName = new ConcurrentHashMap<>();
-    //   private static final Map<String, Object> objectPool = new ConcurrentHashMap<>();
 
     private final String packageName;
     private final String className;
