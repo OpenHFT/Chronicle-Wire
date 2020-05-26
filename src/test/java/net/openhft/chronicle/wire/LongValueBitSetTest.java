@@ -7,9 +7,6 @@ import org.junit.Test;
 import java.nio.ByteBuffer;
 import java.util.BitSet;
 
-/**
- * Created by Rob Austin
- */
 public class LongValueBitSetTest {
 
     @Test

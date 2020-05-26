@@ -6,9 +6,6 @@ import org.junit.Test;
 import java.io.DataOutput;
 import java.io.IOException;
 
-/**
- * Created by Rob Austin
- */
 public class IgnoreHighOrderBitsTest {
 
     /**

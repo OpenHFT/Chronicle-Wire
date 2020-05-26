@@ -10,10 +10,6 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
-
-/*
- * Created by peter.lawrey@chronicle.software on 28/07/2017
- */
 public class UnknownEnumTest {
 
     private static final byte[] SERIALISED_MAP_DATA = new byte[]{

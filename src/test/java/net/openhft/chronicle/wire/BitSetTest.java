@@ -6,9 +6,6 @@ import org.junit.Test;
 
 import java.util.BitSet;
 
-/**
- * Created by Rob Austin
- */
 @SuppressWarnings("rawtypes")
 public class BitSetTest {
 

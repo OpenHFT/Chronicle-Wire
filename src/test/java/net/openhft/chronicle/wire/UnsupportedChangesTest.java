@@ -9,10 +9,6 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
-/*
- * Created by peter.lawrey@chronicle.software on 31/07/2017
- */
 public class UnsupportedChangesTest {
     @After
     public void reset() {
