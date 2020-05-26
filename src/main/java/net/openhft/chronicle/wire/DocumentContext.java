@@ -18,9 +18,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.annotation.DontChain;
+import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.Closeable;
 
 @DontChain
 public interface DocumentContext extends Closeable, SourceContext {
@@ -66,5 +65,10 @@ public interface DocumentContext extends Closeable, SourceContext {
      * rolled back when it is closed, rather than half a message committed
      */
     default void rollbackOnClose() {
+    }
+
+    @Override
+    default boolean isClosed() {
+        throw new UnsupportedOperationException("todo");
     }
 }
