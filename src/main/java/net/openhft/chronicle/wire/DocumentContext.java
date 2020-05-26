@@ -18,8 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.annotation.DontChain;
-import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.Closeable;
 
 @DontChain
 public interface DocumentContext extends Closeable, SourceContext {
