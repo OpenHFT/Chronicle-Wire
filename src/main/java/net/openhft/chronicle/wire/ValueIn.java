@@ -217,34 +217,12 @@ public interface ValueIn {
 
     @NotNull
     default LongValue int64ForBinding(@Nullable LongValue value) {
-        @NotNull LongValue ret = wireIn().newLongReference();
+        @NotNull LongValue ret = value == null ? wireIn().newLongReference() : value;
         int64(ret);
         return ret;
     }
 
-    @NotNull
-    default BooleanValue boolForBinding(@Nullable LongValue value) {
-        @NotNull BooleanValue ret = wireIn().newBooleanReference();
-        bool(ret);
-        return ret;
-    }
-
     WireIn bool(@NotNull BooleanValue ret);
-
-    @NotNull
-    @Deprecated
-    default IntValue int32ForBinding(@Nullable LongValue value) {
-        @NotNull IntValue ret = wireIn().newIntReference();
-        int32(ret);
-        return ret;
-    }
-
-    @NotNull
-    default IntValue int32ForBinding(@Nullable IntValue value) {
-        @NotNull IntValue ret = value == null ? wireIn().newIntReference() : value;
-        int32(ret);
-        return ret;
-    }
 
     @NotNull
     <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter);
