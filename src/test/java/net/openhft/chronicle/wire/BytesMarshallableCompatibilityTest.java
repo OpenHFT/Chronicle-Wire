@@ -5,8 +5,7 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 public final class BytesMarshallableCompatibilityTest {
 
@@ -24,9 +23,9 @@ public final class BytesMarshallableCompatibilityTest {
         final Container copy = new Container();
         copy.readMarshallable(bytes);
 
-        assertThat(copy.number, is(container.number));
-        assertThat(copy.label, is(container.label));
-        assertThat(copy.truth, is(container.truth));
+        assertEquals(container.number, copy.number);
+        assertEquals(container.label, copy.label);
+        assertEquals(container.truth, copy.truth);
     }
 
     private static final class Container extends BytesInBinaryMarshallable {

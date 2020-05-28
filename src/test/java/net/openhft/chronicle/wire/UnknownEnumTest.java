@@ -65,7 +65,7 @@ public class UnknownEnumTest {
 
         final Wire wire = WireType.BINARY.apply(bytes);
         final Map<String, Object> enumField = wire.read("event").marshallableAsMap(String.class, Object.class);
-        assertThat(enumField.get("key"), is("FIRST"));
+        assertEquals("FIRST", enumField.get("key"));
     }
 
     @Test

@@ -31,6 +31,7 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class EnumSetMarshallingTest {
@@ -64,10 +65,10 @@ public class EnumSetMarshallingTest {
             w.write(() -> "key").marshallable(written);
         });
 
-        assertThat(Wires.fromSizePrefixedBlobs(bytes), is(EMPTY_SET_SERIALISED_FORM));
+        assertEquals(EMPTY_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes));
         tw.readingDocument().wire().read("key").marshallable(read);
 
-        assertThat(read.f, is(written.f));
+        assertEquals(written.f, read.f);
         bytes.release();
     }
 
@@ -82,10 +83,10 @@ public class EnumSetMarshallingTest {
             w.write(() -> "key").marshallable(written);
         });
 
-        assertThat(Wires.fromSizePrefixedBlobs(bytes), is(FULL_SET_SERIALISED_FORM));
+        assertEquals(FULL_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes));
         tw.readingDocument().wire().read("key").marshallable(read);
 
-        assertThat(read.f, is(written.f));
+        assertEquals(written.f, read.f);
         bytes.release();
     }
 
@@ -102,10 +103,10 @@ public class EnumSetMarshallingTest {
             w.write(() -> "key").marshallable(written);
         });
 
-        assertThat(Wires.fromSizePrefixedBlobs(bytes), is(FULL_SET_SERIALISED_FORM));
+        assertEquals(FULL_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes));
         tw.readingDocument().wire().read("key").marshallable(read);
 
-        assertThat(read.f, is(written.f));
+        assertEquals(written.f, read.f);
         bytes.release();
     }
 
