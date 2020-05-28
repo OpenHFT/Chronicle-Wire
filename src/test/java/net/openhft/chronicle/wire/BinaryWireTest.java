@@ -730,13 +730,13 @@ public class BinaryWireTest {
         wire.write().object(null);
 
         @Nullable Object o = wire.read().object(Object.class);
-        assertEquals(null, o);
+        assertNull(o);
         @Nullable String s = wire.read().object(String.class);
-        assertEquals(null, s);
+        assertNull(s);
         @Nullable RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
-        assertEquals(null, rp);
+        assertNull(rp);
         @Nullable Circle c = wire.read().object(Circle.class);
-        assertEquals(null, c);
+        assertNull(c);
     }
 
     @Test

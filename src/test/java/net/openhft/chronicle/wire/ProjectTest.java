@@ -74,7 +74,7 @@ public class ProjectTest {
         final Outer project = Wires.project(Outer.class, simple);
         System.out.println(project);
 
-        Assert.assertTrue(project.inner().name().equals("some data"));
+        Assert.assertEquals("some data", project.inner().name());
     }
 
     @After

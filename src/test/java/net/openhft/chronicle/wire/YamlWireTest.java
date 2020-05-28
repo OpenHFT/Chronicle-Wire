@@ -263,8 +263,8 @@ public class YamlWireTest {
         @NotNull String expected = "{F=false, T=true}";
         expectWithSnakeYaml(expected, wire);
 
-        assertEquals(false, wire.read(() -> "F").bool());
-        assertEquals(true, wire.read(() -> "T").bool());
+        assertFalse(wire.read(() -> "F").bool());
+        assertTrue(wire.read(() -> "T").bool());
     }
 
     @Test
@@ -278,8 +278,8 @@ public class YamlWireTest {
         @NotNull String expected = "{A=, B=other}";
         expectWithSnakeYaml(expected, wire);
 
-        assertEquals(false, wire.read(() -> "A").bool());
-        assertEquals(false, wire.read(() -> "B").bool());
+        assertFalse(wire.read(() -> "A").bool());
+        assertFalse(wire.read(() -> "B").bool());
     }
 
     @Test
@@ -1538,13 +1538,13 @@ public class YamlWireTest {
         wire.write().object(null);
 
         @Nullable Object o = wire.read().object(Object.class);
-        assertEquals(null, o);
+        assertNull(o);
         @Nullable String s = wire.read().object(String.class);
-        assertEquals(null, s);
+        assertNull(s);
         @Nullable RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
-        assertEquals(null, rp);
+        assertNull(rp);
         @Nullable Circle c = wire.read().object(Circle.class);
-        assertEquals(null, c);
+        assertNull(c);
     }
 
     @Ignore("TODO FIX")

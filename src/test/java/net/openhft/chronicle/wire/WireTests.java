@@ -182,13 +182,13 @@ public class WireTests {
         wire.write().object(null);
 
         @Nullable Object o = wire.read().object(Object.class);
-        Assert.assertEquals(null, o);
+        Assert.assertNull(o);
         @Nullable String s = wire.read().object(String.class);
-        Assert.assertEquals(null, s);
+        Assert.assertNull(s);
         @Nullable RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
-        Assert.assertEquals(null, rp);
+        Assert.assertNull(rp);
         @Nullable Circle c = wire.read().object(Circle.class);  // this fails without the check.
-        Assert.assertEquals(null, c);
+        Assert.assertNull(c);
 
         b.release();
     }

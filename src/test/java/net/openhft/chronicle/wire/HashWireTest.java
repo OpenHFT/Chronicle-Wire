@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 
 
 public class HashWireTest {
@@ -42,7 +42,7 @@ public class HashWireTest {
                             .write(() -> "key").text("key-2")
                             .write(() -> "value").text("value-2"));
                 }));
-        assertFalse(h == 0);
+        assertNotEquals(0, h);
     }
 
     @After
