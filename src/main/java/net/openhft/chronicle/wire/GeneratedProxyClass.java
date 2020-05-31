@@ -34,7 +34,7 @@ import java.util.Set;
 @SuppressWarnings("restriction")
 public enum GeneratedProxyClass {
     ;
-    static final boolean DUMP_CODE = Boolean.getBoolean("dumpCode");
+    static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
 
     /**
      * @param classLoader

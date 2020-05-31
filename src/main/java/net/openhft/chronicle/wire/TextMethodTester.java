@@ -38,7 +38,7 @@ import java.util.function.Function;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TextMethodTester<T> {
-    private static final boolean REGRESS_TESTS = Boolean.getBoolean("regress.tests");
+    private static final boolean REGRESS_TESTS = Jvm.getBoolean("regress.tests");
     private final String input;
     private final Class<T> outputClass;
     private final String output;

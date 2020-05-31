@@ -29,12 +29,12 @@ public enum YamlLogging {
     @NotNull
     public static volatile String title = "";
     // TODO Doesn't show all writes. Use clientReads
-    private static volatile boolean showServerWrites = Boolean.getBoolean("yaml.logging");
-    private static volatile boolean clientWrites = Boolean.getBoolean("yaml.logging");
+    private static volatile boolean showServerWrites = Jvm.getBoolean("yaml.logging");
+    private static volatile boolean clientWrites = Jvm.getBoolean("yaml.logging");
     @NotNull
     private static volatile String writeMessage = "";
-    private static volatile boolean clientReads = Boolean.getBoolean("yaml.logging");
-    private static volatile boolean showServerReads = Boolean.getBoolean("yaml.logging");
+    private static volatile boolean clientReads = Jvm.getBoolean("yaml.logging");
+    private static volatile boolean showServerReads = Jvm.getBoolean("yaml.logging");
     private static volatile boolean showHeartBeats = false;
 
     public static void setAll(boolean flag) {

@@ -48,7 +48,7 @@ public class VanillaMethodReader implements MethodReader {
     static final Object[] NO_ARGS = {};
     static final Logger LOGGER = LoggerFactory.getLogger(VanillaMethodReader.class);
     static final Object IGNORED = new Object(); // object used to flag that the call should be ignored.
-    private static final boolean DONT_THROW_ON_OVERLOAD = Boolean.getBoolean("chronicle.mr_overload_dont_throw");
+    private static final boolean DONT_THROW_ON_OVERLOAD = Jvm.getBoolean("chronicle.mr_overload_dont_throw");
     private static final String[] metaIgnoreList = {"header", "index", "index2index", "roll"};
     private final MarshallableIn in;
     @NotNull
