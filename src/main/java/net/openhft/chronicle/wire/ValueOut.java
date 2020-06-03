@@ -283,11 +283,9 @@ public interface ValueOut {
         });
     }
 
-    @NotNull
-    <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer);
+    @NotNull <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer);
 
-    @NotNull
-    <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer);
+    @NotNull <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer);
 
     default <T, K> WireOut sequenceWithLength(T t, int length, ObjectIntObjectConsumer<T, ValueOut> writer) {
         boolean b = swapLeaf(true);
@@ -669,9 +667,10 @@ public interface ValueOut {
             IntValue value2 = (IntValue) value;
             return int32forBinding(value2.getValue(), value2);
         } else {
-            assert (!Wires.isInternal(value)) : "type=" + value.getClass() +
-                    " is unsupported, it must either be of type Marshallable, String or " +
-                    "AutoBoxed primitive Object";
+            if ((Wires.isInternal(value)))
+                throw new IllegalArgumentException("type=" + value.getClass() +
+                        " is unsupported, it must either be of type Marshallable, String or " +
+                        "AutoBoxed primitive Object");
 
             String typeName = Wires.typeNameFor(value);
             if (typeName != null)

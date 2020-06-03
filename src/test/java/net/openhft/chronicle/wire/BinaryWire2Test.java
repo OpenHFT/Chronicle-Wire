@@ -59,6 +59,12 @@ public class BinaryWire2Test {
         return wire;
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void unmarshallableObject() {
+        BinaryWire wire = createWire();
+        wire.getValueOut().object(new Object());
+    }
+
     @Test
     public void testReadLength() {
         Map<Integer, String> wireCodes = new TreeMap<>();
