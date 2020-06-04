@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
@@ -28,12 +29,12 @@ public enum YamlLogging {
     @NotNull
     public static volatile String title = "";
     // TODO Doesn't show all writes. Use clientReads
-    private static volatile boolean showServerWrites = Boolean.getBoolean("yaml.logging");
-    private static volatile boolean clientWrites = Boolean.getBoolean("yaml.logging");
+    private static volatile boolean showServerWrites = Jvm.getBoolean("yaml.logging");
+    private static volatile boolean clientWrites = Jvm.getBoolean("yaml.logging");
     @NotNull
     private static volatile String writeMessage = "";
-    private static volatile boolean clientReads = Boolean.getBoolean("yaml.logging");
-    private static volatile boolean showServerReads = Boolean.getBoolean("yaml.logging");
+    private static volatile boolean clientReads = Jvm.getBoolean("yaml.logging");
+    private static volatile boolean showServerReads = Jvm.getBoolean("yaml.logging");
     private static volatile boolean showHeartBeats = false;
 
     public static void setAll(boolean flag) {

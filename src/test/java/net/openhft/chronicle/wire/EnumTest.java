@@ -46,7 +46,7 @@ public class EnumTest {
                             "}\n");
             @Nullable Object enumObject = wire2.read(() -> "test")
                     .object();
-            Assert.assertTrue(enumObject == TestEnum.INSTANCE);
+            Assert.assertSame(enumObject, TestEnum.INSTANCE);
         } finally {
             bytes.release();
         }

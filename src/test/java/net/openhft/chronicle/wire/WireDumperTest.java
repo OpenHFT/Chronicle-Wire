@@ -11,8 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
 public class WireDumperTest {
@@ -47,7 +46,7 @@ public class WireDumperTest {
         wire.writeDocument("bark", ValueOut::text);
         wire.writeDocument(3.14D, ValueOut::float64);
 
-        assertThat(WireDumper.of(wire).asString(), is(expectedContentByType.get(wireType)));
+        assertEquals(expectedContentByType.get(wireType), WireDumper.of(wire).asString());
     }
 
     @Test
@@ -58,7 +57,7 @@ public class WireDumperTest {
 
         final String actual = WireDumper.of(wire).asString();
 
-        assertThat(actual, is(expectedPartialContent.get(wireType)));
+        assertEquals(expectedPartialContent.get(wireType), actual);
     }
 
     @After

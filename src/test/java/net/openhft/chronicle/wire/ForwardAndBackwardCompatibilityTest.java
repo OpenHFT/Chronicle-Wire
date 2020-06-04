@@ -69,7 +69,7 @@ public class ForwardAndBackwardCompatibilityTest {
             @Nullable DTO2 dto2 = dc.wire().getValueIn().typedMarshallable();
             Assert.assertEquals(dto2.one, 1);
             Assert.assertEquals(dto2.two, 0);
-            Assert.assertEquals(dto2.three, null);
+            Assert.assertNull(dto2.three);
         }
 
         wire.bytes().release();

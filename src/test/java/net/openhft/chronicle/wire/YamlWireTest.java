@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -261,8 +263,8 @@ public class YamlWireTest {
         @NotNull String expected = "{F=false, T=true}";
         expectWithSnakeYaml(expected, wire);
 
-        assertEquals(false, wire.read(() -> "F").bool());
-        assertEquals(true, wire.read(() -> "T").bool());
+        assertFalse(wire.read(() -> "F").bool());
+        assertTrue(wire.read(() -> "T").bool());
     }
 
     @Test
@@ -276,8 +278,8 @@ public class YamlWireTest {
         @NotNull String expected = "{A=, B=other}";
         expectWithSnakeYaml(expected, wire);
 
-        assertEquals(false, wire.read(() -> "A").bool());
-        assertEquals(false, wire.read(() -> "B").bool());
+        assertFalse(wire.read(() -> "A").bool());
+        assertFalse(wire.read(() -> "B").bool());
     }
 
     @Test
@@ -1537,15 +1539,14 @@ public class YamlWireTest {
                 "!!null \"\"\n" +
                 "!!null \"\"\n", wire.toString());
 
-        @Nullable Object o = wire.getValueIn()
-                .object(Object.class);
-        assertEquals(null, o);
-        @Nullable String s = wire.getValueIn().object(String.class);
-        assertEquals(null, s);
-        @Nullable RetentionPolicy rp = wire.getValueIn().object(RetentionPolicy.class);
-        assertEquals(null, rp);
-        @Nullable Circle c = wire.getValueIn().object(Circle.class);
-        assertEquals(null, c);
+        @Nullable Object o = wire.read().object(Object.class);
+        assertNull(o);
+        @Nullable String s = wire.read().object(String.class);
+        assertNull(s);
+        @Nullable RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
+        assertNull(rp);
+        @Nullable Circle c = wire.read().object(Circle.class);
+        assertNull(c);
     }
 
     @Ignore("TODO FIX")

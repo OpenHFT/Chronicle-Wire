@@ -17,8 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public final class BinaryWireStringInternerTest {
@@ -75,12 +74,12 @@ public final class BinaryWireStringInternerTest {
             wire.getFixedBinaryValueOut(true).text(testData[dataPointIndex]);
 
             final String inputData = wire.read().text();
-            assertThat(message(i, inputData), inputData, is(internedStrings[dataPointIndex]));
+            assertEquals(internedStrings[dataPointIndex], message(i, inputData), inputData);
         }
 
         executorService.shutdown();
         assertTrue("jobs did not complete in time", executorService.awaitTermination(15L, TimeUnit.SECONDS));
-        assertThat(capturedExceptions.isEmpty(), is(true));
+        assertEquals(true, capturedExceptions.isEmpty());
     }
 
     @Test
@@ -95,7 +94,7 @@ public final class BinaryWireStringInternerTest {
 
         executorService.shutdown();
         assertTrue("jobs did not complete in time", executorService.awaitTermination(5L, TimeUnit.SECONDS));
-        assertThat(capturedExceptions.isEmpty(), is(true));
+        assertEquals(true, capturedExceptions.isEmpty());
     }
 
     @Ignore("used to demonstrate errors that can occur when buffers are shared between threads")
@@ -113,7 +112,7 @@ public final class BinaryWireStringInternerTest {
         executorService.shutdown();
         assertTrue("jobs did not complete in time", executorService.awaitTermination(15L, TimeUnit.SECONDS));
         capturedExceptions.stream().filter(e -> e instanceof BufferUnderflowException).forEach(RuntimeException::printStackTrace);
-        assertThat(capturedExceptions.isEmpty(), is(true));
+        assertEquals(true, capturedExceptions.isEmpty());
     }
 
     private static final class BinaryTextReaderWriter implements Runnable {

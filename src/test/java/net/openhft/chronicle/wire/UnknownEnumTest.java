@@ -10,10 +10,6 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
-
-/*
- * Created by peter.lawrey@chronicle.software on 28/07/2017
- */
 public class UnknownEnumTest {
 
     private static final byte[] SERIALISED_MAP_DATA = new byte[]{
@@ -69,7 +65,7 @@ public class UnknownEnumTest {
 
         final Wire wire = WireType.BINARY.apply(bytes);
         final Map<String, Object> enumField = wire.read("event").marshallableAsMap(String.class, Object.class);
-        assertThat(enumField.get("key"), is("FIRST"));
+        assertEquals("FIRST", enumField.get("key"));
     }
 
     @Test
