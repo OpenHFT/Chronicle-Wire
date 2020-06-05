@@ -47,6 +47,8 @@ public abstract class AbstractWire implements Wire {
             "ensure that you have a unique instance of the Appender per thread, in " +
             "other-words you can not share appenders across threads.";
 
+    private final static boolean TRACK_USED = Boolean.getBoolean("tack.used");
+
     static {
         boolean assertions = false;
         // enable our class assertions if java assertions are turned on
@@ -463,7 +465,8 @@ public abstract class AbstractWire implements Wire {
             throw new IllegalStateException("Used by " + usedBy + " while trying to use it in " + Thread.currentThread(), usedHere);
         }
         this.usedBy = Thread.currentThread();
-        this.usedHere = new StackTrace();
+        // creating an object here, every time in not cool ! so added TRACK_USED
+        this.usedHere = TRACK_USED ? new StackTrace() : null;
         usedCount++;
         return true;
     }
