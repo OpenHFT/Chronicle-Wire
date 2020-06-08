@@ -47,7 +47,7 @@ public abstract class AbstractWire implements Wire {
             "ensure that you have a unique instance of the Appender per thread, in " +
             "other-words you can not share appenders across threads.";
 
-    private final static boolean TRACK_USED = Boolean.getBoolean("tack.used");
+    private final static boolean TRACK_USED = Boolean.getBoolean("track.used");
 
     static {
         boolean assertions = false;
