@@ -47,8 +47,6 @@ public abstract class AbstractWire implements Wire {
             "ensure that you have a unique instance of the Appender per thread, in " +
             "other-words you can not share appenders across threads.";
 
-    private final static boolean TRACK_USED = Boolean.getBoolean("track.used");
-
     static {
         boolean assertions = false;
         // enable our class assertions if java assertions are turned on
@@ -66,7 +64,7 @@ public abstract class AbstractWire implements Wire {
     @Nullable
     volatile Thread usedBy;
     @Nullable
-    volatile Throwable usedHere, lastEnded;
+    volatile Throwable usedHere;
     int usedCount = 0;
     private Pauser pauser;
     private TimingPauser timedParser;
@@ -459,28 +457,32 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public boolean startUse() {
-        Throwable usedHere = this.usedHere;
-        Thread usedBy = this.usedBy;
-        if (usedBy != Thread.currentThread() && usedBy != null) {
-            throw new IllegalStateException("Used by " + usedBy + " while trying to use it in " + Thread.currentThread(), usedHere);
+        if (Jvm.isResourceTracing()) {
+            Thread usedBy = this.usedBy;
+            Throwable usedHere = this.usedHere;
+            if (usedBy != Thread.currentThread() && usedBy != null) {
+                throw new IllegalStateException("Used by " + usedBy + " while trying to use it in " + Thread.currentThread(), usedHere);
+            }
+            this.usedBy = Thread.currentThread();
+            // creating an object here, every time in not cool ! so added TRACK_USED
+            this.usedHere = new StackTrace("Used here");
         }
-        this.usedBy = Thread.currentThread();
-        // creating an object here, every time in not cool ! so added TRACK_USED
-        this.usedHere = TRACK_USED ? new StackTrace() : null;
         usedCount++;
         return true;
     }
 
     @Override
     public boolean endUse() {
-        if (usedBy != Thread.currentThread()) {
-            throw new IllegalStateException("Used by " + usedHere, usedHere);
-        }
-        if (--usedCount <= 0) {
-            usedBy = null;
-            usedHere = null;
-            usedCount = 0;
-            lastEnded = new StackTrace();
+        --usedCount;
+        if (Jvm.isResourceTracing()) {
+            if (usedBy != Thread.currentThread()) {
+                throw new IllegalStateException("Used by " + usedHere, usedHere);
+            }
+            if (usedCount <= 0) {
+                usedBy = null;
+                usedHere = null;
+                usedCount = 0;
+            }
         }
         return true;
     }
