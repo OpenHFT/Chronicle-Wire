@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 
-public class MethodWriterTest {
+public class MethodWriterTest extends WireTestCommon {
     @Test
     public void testSubclasses() {
         Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));

@@ -18,18 +18,16 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class InnerMapTest {
+public class InnerMapTest extends WireTestCommon {
 
     @Test
     public void testMyInnnerMap() {
@@ -61,12 +59,7 @@ public class InnerMapTest {
             Assert.assertEquals(asString, tm.toString());
         }
 
-        b.release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        b.releaseLast();
     }
 
     static class MyMarshable extends SelfDescribingMarshallable implements Demarshallable {

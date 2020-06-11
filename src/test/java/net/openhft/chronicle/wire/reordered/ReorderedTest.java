@@ -18,11 +18,10 @@
 package net.openhft.chronicle.wire.reordered;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -35,7 +34,7 @@ import static org.junit.Assert.assertEquals;
 
 
 @RunWith(value = Parameterized.class)
-public class ReorderedTest {
+public class ReorderedTest extends WireTestCommon {
     private static final OuterClass outerClass1 = new OuterClass();
     private static final OuterClass outerClass2 = new OuterClass();
 
@@ -95,7 +94,7 @@ public class ReorderedTest {
         assertEquals("test2", sb.toString());
         assertEquals(outerClass2.toString().replace(',', '\n'), outerClass0.toString().replace(',', '\n'));
 
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @SuppressWarnings("rawtypes")
@@ -115,12 +114,6 @@ public class ReorderedTest {
             assertEquals(i * 11, wire.read(() -> "b").int32());
         }
 
-        bytes.release();
+        bytes.releaseLast();
     }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
-    }
-
 }

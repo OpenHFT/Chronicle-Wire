@@ -16,7 +16,7 @@ import java.util.List;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 @RunWith(value = Parameterized.class)
-public class UnicodeStringTest {
+public class UnicodeStringTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @NotNull
     static Bytes bytes = nativeBytes();
@@ -59,7 +59,7 @@ public class UnicodeStringTest {
 
     @AfterClass
     public static void release() {
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test

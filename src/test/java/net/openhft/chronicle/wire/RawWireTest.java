@@ -18,12 +18,10 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -41,7 +39,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
-public class RawWireTest {
+public class RawWireTest extends WireTestCommon {
 
     @SuppressWarnings("rawtypes")
     @NotNull
@@ -488,11 +486,6 @@ public class RawWireTest {
         wire.readEventName(key).marshallable(mt2);
         assertEquals("B", key.toString());
         assertEquals(mt2, mtB);
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     enum BWKey implements WireKey {

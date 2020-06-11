@@ -212,7 +212,7 @@ public class VanillaMethodReader implements MethodReader {
             v.wireIn().copyTo(new TextWire(bytes));
             v.wireIn().bytes().readPosition(pos);
             rest = bytes.toString();
-            bytes.release();
+            bytes.releaseLast();
 
         } else {
             rest = v.toString();

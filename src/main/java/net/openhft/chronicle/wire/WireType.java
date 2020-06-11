@@ -85,7 +85,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                 //noinspection unchecked
                 return (T) wire.getValueIn().object();
             } finally {
-                bytes.release();
+                bytes.releaseLast();
             }
         }
 
@@ -488,7 +488,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         try {
             return apply(bytes).getValueIn().object(expectedType);
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -527,7 +527,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                             return true;
                         }
                         if (bytes.refCount() > 0)
-                            bytes.release();
+                            bytes.releaseLast();
                         return false;
                     }
                 }, false);
@@ -598,7 +598,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             Wire wire = apply(bytes);
             return wire.getValueIn().typedMarshallable();
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 

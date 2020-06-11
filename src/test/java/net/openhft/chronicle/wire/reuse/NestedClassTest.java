@@ -18,12 +18,11 @@
 package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -36,7 +35,7 @@ import static org.junit.Assert.assertEquals;
 
 
 @RunWith(value = Parameterized.class)
-public class NestedClassTest {
+public class NestedClassTest extends WireTestCommon {
     private static final OuterClass outerClass1 = new OuterClass();
     private static final OuterClass outerClass2 = new OuterClass();
 
@@ -100,11 +99,6 @@ public class NestedClassTest {
         assertEquals("test2", sb.toString());
         assertEquals(outerClass2.toString(), outerClass0.toString());
 
-        bytes.release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        bytes.releaseLast();
     }
 }

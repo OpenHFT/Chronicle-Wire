@@ -95,7 +95,7 @@ public class WireDumper {
         } finally {
             bytes.readLimit(limit0);
             bytes.readPosition(position0);
-            bytes2.release();
+            bytes2.releaseLast();
         }
         return sb.toString();
     }

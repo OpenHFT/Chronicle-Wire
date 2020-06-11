@@ -18,10 +18,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -54,7 +52,7 @@ public class UsingTestMarshallable {
         System.out.println(value);
 
         //  Assert.assertTrue(replace.length() > 1);
-        byteBufferBytes.release();
+        byteBufferBytes.releaseLast();
     }
 
     /**
@@ -79,7 +77,7 @@ public class UsingTestMarshallable {
 
         Assert.assertEquals("text", result.text.toString());
 
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -104,11 +102,6 @@ public class UsingTestMarshallable {
             Assert.assertEquals(1, sortedFilter.marshableFilters.size());
             Assert.assertEquals(expected, sortedFilter.marshableFilters.get(0));
         }
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     public static class MyMarshallable implements Marshallable {

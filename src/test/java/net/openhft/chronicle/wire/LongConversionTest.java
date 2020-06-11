@@ -10,7 +10,7 @@ import java.io.StringWriter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
-public class LongConversionTest {
+public class LongConversionTest extends WireTestCommon {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(LongHolder.class);
     }

@@ -27,7 +27,7 @@ import static org.junit.Assert.assertEquals;
 /* Based on
 https://github.com/OpenHFT/RFC/blob/master/Chronicle/Engine/Remote/Chronicle-Engine-0.1.md
  */
-public class RFCExamplesTest {
+public class RFCExamplesTest extends WireTestCommon {
     /*
     ChronicleMap<Integer, String> map = context.getMap("test", Integer.class, String.class);
 

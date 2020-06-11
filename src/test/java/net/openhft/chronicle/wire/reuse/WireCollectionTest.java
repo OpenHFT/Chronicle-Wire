@@ -18,13 +18,9 @@
 package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.threads.ThreadDump;
-import net.openhft.chronicle.wire.BinaryWire;
-import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.WireType;
-import net.openhft.chronicle.wire.Wires;
+import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
@@ -43,7 +39,7 @@ import static org.junit.Assert.assertEquals;
 @Ignore("TODO FIX")
 @SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
-public class WireCollectionTest {
+public class WireCollectionTest extends WireTestCommon {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(WireProperty.class);
     }
@@ -97,10 +93,5 @@ public class WireCollectionTest {
 
         assertEquals(collection.toString(), results.toString());
         WireUtils.compareWireCollection(collection, results);
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 }

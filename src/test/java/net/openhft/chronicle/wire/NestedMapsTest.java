@@ -18,9 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -34,7 +32,7 @@ import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
-public class NestedMapsTest {
+public class NestedMapsTest extends WireTestCommon {
     private final WireType wireType;
 
     public NestedMapsTest(WireType wireType) {
@@ -170,7 +168,7 @@ public class NestedMapsTest {
                 .marshallable(m2)));
         assertEquals(m, m2);
 
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @SuppressWarnings("incomplete-switch")
@@ -229,7 +227,7 @@ public class NestedMapsTest {
         m2.readMarshallable(wire);
         assertEquals(m, m2);
 
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -244,13 +242,8 @@ public class NestedMapsTest {
 
         wire.writeMap(expected);
         @NotNull final Map<Integer, Integer> actual = wire.readMap();
-        bytes.release();
+        bytes.releaseLast();
         assertEquals(expected, actual);
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     static class Mapped extends SelfDescribingMarshallable {

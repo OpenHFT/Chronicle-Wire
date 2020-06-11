@@ -18,12 +18,10 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 
-public class BinaryToTextTest {
+public class BinaryToTextTest extends WireTestCommon {
 
     @Test
     public void test() {
@@ -33,11 +31,6 @@ public class BinaryToTextTest {
         tw.writeDocument(false, w -> w.write(() -> "key").text("hello"));
         System.out.println(Wires.fromSizePrefixedBlobs(tbytes));
 
-        tbytes.release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        tbytes.releaseLast();
     }
 }

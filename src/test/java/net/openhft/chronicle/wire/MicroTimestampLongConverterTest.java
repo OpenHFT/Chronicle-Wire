@@ -5,7 +5,7 @@ import org.junit.Test;
 import static net.openhft.chronicle.wire.MicroTimestampLongConverter.INSTANCE;
 import static org.junit.Assert.assertEquals;
 
-public class MicroTimestampLongConverterTest {
+public class MicroTimestampLongConverterTest extends WireTestCommon {
 
     @Test
     public void parse() {

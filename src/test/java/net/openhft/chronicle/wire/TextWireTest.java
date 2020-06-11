@@ -24,7 +24,6 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -57,7 +56,7 @@ import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class TextWireTest {
+public class TextWireTest extends WireTestCommon {
 
     Bytes bytes;
 
@@ -243,7 +242,7 @@ public class TextWireTest {
         @Nullable Object o = WireType.TEXT.fromString(textYaml);
         Assert.assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString());
 
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -254,7 +253,7 @@ public class TextWireTest {
         wire.write();
         assertEquals("\"\": \"\": \"\": ", wire.toString());
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @NotNull
@@ -876,11 +875,11 @@ public class TextWireTest {
                         .toString());
             }
         } finally {
-            abcd.release();
+            abcd.releaseAll();
 
             WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(ABCD.class);
             ABCD abcd0 = (ABCD) wm.defaultValue();
-            abcd0.release();
+            abcd0.releaseAll();
         }
     }
 
@@ -939,8 +938,8 @@ public class TextWireTest {
             dto2 = Marshallable.fromString(cs);
             assertEquals(cs, dto2.toString());
         } finally {
-            dto.bytes.release();
-            dto2.bytes.release();
+            dto.bytes.releaseLast();
+            dto2.bytes.releaseLast();
         }
     }
 
@@ -1141,7 +1140,7 @@ public class TextWireTest {
 
         assertEquals(expected, actual);
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -1527,7 +1526,7 @@ public class TextWireTest {
             assertEquals(map, map2);
         });
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -1663,11 +1662,6 @@ public class TextWireTest {
                 "}\n", new DoubleWrapper(10e6).toString());
         DoubleWrapper dw5 = Marshallable.fromString(new DoubleWrapper(10e6).toString());
         assertEquals(10e6, dw5.d, 0);
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     @Test
@@ -1874,11 +1868,11 @@ public class TextWireTest {
         Bytes C = Bytes.elasticByteBuffer();
         Bytes D = Bytes.elasticHeapByteBuffer(1);
 
-        void release() {
-            A.release();
-            B.release();
-            C.release();
-            D.release();
+        void releaseAll() {
+            A.releaseLast();
+            B.releaseLast();
+            C.releaseLast();
+            D.releaseLast();
         }
     }
 

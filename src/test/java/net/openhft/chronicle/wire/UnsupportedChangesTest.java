@@ -9,7 +9,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-public class UnsupportedChangesTest {
+public class UnsupportedChangesTest extends WireTestCommon {
     @After
     public void reset() {
         Jvm.resetExceptionHandlers();

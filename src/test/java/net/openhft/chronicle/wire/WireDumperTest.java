@@ -14,7 +14,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
-public class WireDumperTest {
+public class WireDumperTest extends WireTestCommon {
     private final NativeBytes<Void> bytes;
     private final Wire wire;
     private final WireType wireType;
@@ -62,7 +62,7 @@ public class WireDumperTest {
 
     @After
     public void tearDown() {
-        bytes.release();
+        bytes.releaseLast();
     }
 
     private void initTestData() {

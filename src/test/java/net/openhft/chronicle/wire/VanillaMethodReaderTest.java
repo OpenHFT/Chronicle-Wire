@@ -6,7 +6,6 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
-import org.junit.After;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -32,7 +31,7 @@ interface MockMethods {
 
 
 @SuppressWarnings("rawtypes")
-public class VanillaMethodReaderTest {
+public class VanillaMethodReaderTest extends WireTestCommon {
 
     A instance;
 
@@ -73,7 +72,7 @@ public class VanillaMethodReaderTest {
                 assertEquals(5, this.instance.x);
             }
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -310,11 +309,6 @@ public class VanillaMethodReaderTest {
         } finally {
             Jvm.resetExceptionHandlers();
         }
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     // keep package local.

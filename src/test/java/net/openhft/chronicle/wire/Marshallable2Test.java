@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @RunWith(value = Parameterized.class)
-public class Marshallable2Test {
+public class Marshallable2Test extends WireTestCommon {
     private final WireType wireType;
 
     public Marshallable2Test(WireType wireType) {

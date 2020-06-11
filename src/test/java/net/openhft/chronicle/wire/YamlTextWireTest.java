@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(value = Parameterized.class)
-public class YamlTextWireTest {
+public class YamlTextWireTest extends WireTestCommon {
 
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(Fields.class);

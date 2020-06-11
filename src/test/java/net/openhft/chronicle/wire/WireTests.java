@@ -18,10 +18,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -90,7 +88,7 @@ public class WireTests {
                 Assert.assertEquals(String.class, y);
             }
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -109,7 +107,7 @@ public class WireTests {
                 Assert.assertEquals("DoesntExist", t.getTypeName());
             }
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -122,7 +120,7 @@ public class WireTests {
         Assert.assertEquals(new Date(1234567890000L), wire.getValueIn()
                 .object(Date.class));
 
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -134,7 +132,7 @@ public class WireTests {
             wire.getValueOut().object(expected);
             Assert.assertEquals(expected, wire.getValueIn().object());
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -146,7 +144,7 @@ public class WireTests {
         wire.getValueOut().object(expected);
         Assert.assertEquals(expected, wire.getValueIn().object());
 
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -168,7 +166,7 @@ public class WireTests {
         wire.read(field).skipValue();
         System.out.println("read field=" + field.toString());
 
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -190,7 +188,7 @@ public class WireTests {
         @Nullable Circle c = wire.read().object(Circle.class);  // this fails without the check.
         Assert.assertNull(c);
 
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -205,7 +203,7 @@ public class WireTests {
         @Nullable TestClass o = wire.read().typedMarshallable();
         Assert.assertEquals(Boolean.class, o.clazz());
 
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -264,12 +262,7 @@ public class WireTests {
 
         }
 
-        b.release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        b.releaseLast();
     }
 
     static class TestClass extends SelfDescribingMarshallable {

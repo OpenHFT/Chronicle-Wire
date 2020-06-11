@@ -18,10 +18,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -35,7 +33,7 @@ import static org.junit.Assert.assertEquals;
 
 
 @RunWith(value = Parameterized.class)
-public class PrimArraysTest {
+public class PrimArraysTest extends WireTestCommon {
 
     private final WireType wireType;
     private final Object array;
@@ -107,16 +105,11 @@ public class PrimArraysTest {
             for (int i = 0, len = Array.getLength(array); i < len; i++)
                 assertEquals(Array.get(array, i), Array.get(array2, i));
         } finally {
-            wire.bytes().release();
+            wire.bytes().releaseLast();
         }
     }
 
     private Wire createWire() {
         return wireType.apply(Bytes.elasticByteBuffer());
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 }

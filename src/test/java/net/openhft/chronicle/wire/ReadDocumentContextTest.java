@@ -18,10 +18,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.MappedBytes;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -33,7 +31,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("rawtypes")
-public class ReadDocumentContextTest {
+public class ReadDocumentContextTest extends WireTestCommon {
     @Ignore("The ability to write incomplete documents is deprecated, and will be removed in a future release")
     @Test
     public void testWritingNotCompleteDocument() {
@@ -66,7 +64,7 @@ public class ReadDocumentContextTest {
             Assert.assertEquals("someText2", wire.read(() -> "key2").text());
         }
 
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -111,7 +109,7 @@ public class ReadDocumentContextTest {
             assertFalse(dc.isMetaData());
             Assert.assertEquals("someText2", wire.read(() -> "key2").text());
         }
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -138,7 +136,7 @@ public class ReadDocumentContextTest {
             Assert.assertEquals("someText2", textWire.read(() -> "key2").text());
         }
 
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -184,7 +182,7 @@ public class ReadDocumentContextTest {
             Assert.assertEquals("someText2", textWire.read(() -> "key2").text());
         }
 
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -230,11 +228,6 @@ public class ReadDocumentContextTest {
             Assert.assertEquals("someText2", textWire.read(() -> "key2").text());
         }
 
-        b.release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        b.releaseLast();
     }
 }

@@ -1,13 +1,14 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.io.Closeable;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.util.BitSet;
 
-public class LongValueBitSetTest {
+public class LongValueBitSetTest extends WireTestCommon {
 
     @Test
     public void testNextSetBit() {
@@ -45,8 +46,10 @@ public class LongValueBitSetTest {
 
             } while (expectBit != -1);
 
+            Closeable.closeQuietly(actual);
+
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 }

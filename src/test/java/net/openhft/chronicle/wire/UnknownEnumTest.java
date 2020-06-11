@@ -10,7 +10,7 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
-public class UnknownEnumTest {
+public class UnknownEnumTest extends WireTestCommon {
 
     private static final byte[] SERIALISED_MAP_DATA = new byte[]{
             (byte) -59, 101, 118, 101, 110, 116, -126, 60, 0, 0, 0, -71, 3,

@@ -18,9 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -34,7 +32,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-public class EnumSetMarshallingTest {
+public class EnumSetMarshallingTest extends WireTestCommon {
     private static final String FULL_SET_SERIALISED_FORM =
             "--- !!data #binary\n" +
                     "key: {\n" +
@@ -69,7 +67,7 @@ public class EnumSetMarshallingTest {
         tw.readingDocument().wire().read("key").marshallable(read);
 
         assertEquals(written.f, read.f);
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -87,7 +85,7 @@ public class EnumSetMarshallingTest {
         tw.readingDocument().wire().read("key").marshallable(read);
 
         assertEquals(written.f, read.f);
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -107,7 +105,7 @@ public class EnumSetMarshallingTest {
         tw.readingDocument().wire().read("key").marshallable(read);
 
         assertEquals(written.f, read.f);
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -124,12 +122,7 @@ public class EnumSetMarshallingTest {
         tw.readingDocument().wire().read("key").marshallable(read);
 
         assertThat(read.f1.get(0).f, is(not(read.f2.get(0).f)));
-        bytes.release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        bytes.releaseLast();
     }
 
     private static final class Container extends SelfDescribingMarshallable {

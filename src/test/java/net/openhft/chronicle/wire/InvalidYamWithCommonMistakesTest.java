@@ -9,7 +9,7 @@ import org.junit.Test;
  * <p>
  * Tests that common mistakes are still parsed where we can
  */
-public class InvalidYamWithCommonMistakesTest {
+public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
 
     @Test
     public void testDtp() {

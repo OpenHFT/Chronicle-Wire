@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +30,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 
-public class TextDocumentTest {
+public class TextDocumentTest extends WireTestCommon {
 
     @Test
     public void testDocument() {
@@ -50,6 +51,8 @@ public class TextDocumentTest {
 
         assertEquals(wheader.uuid, rheader.uuid);
         assertEquals(wheader.created, rheader.created);
+        wheader.closeAll();
+        rheader.closeAll();
     }
 
     enum Keys implements WireKey {
@@ -92,6 +95,10 @@ public class TextDocumentTest {
             in.read(Keys.writeByte).int64(writeByte, this, (o, x) -> o.writeByte = x);
             in.read(Keys.readByte).int64(readByte, this, (o, x) -> o.readByte = x);
             in.read(Keys.created).zonedDateTime(this, (o, c) -> o.created = c);
+        }
+
+        public void closeAll() {
+            Closeable.closeQuietly(readByte, writeByte);
         }
     }
 }

@@ -49,8 +49,8 @@ import java.util.function.*;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
-import static net.openhft.chronicle.bytes.BytesUtil.unregister;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.core.io.AbstractReferenceCounted.unmonitor;
 
 /**
  * YAML Based wire format
@@ -72,7 +72,7 @@ public class YamlWire extends AbstractWire implements Wire {
     static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
 
     static {
-        assert unregister(TYPE);
+        unmonitor(TYPE);
         for (char ch : "?%&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
         for (char ch : "?,#:{}[]|>\\".toCharArray())

@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
 
-public final class BytesMarshallableCompatibilityTest {
+public final class BytesMarshallableCompatibilityTest extends WireTestCommon {
 
     @Test
     public void shouldSerialiseToBytes() throws Exception {

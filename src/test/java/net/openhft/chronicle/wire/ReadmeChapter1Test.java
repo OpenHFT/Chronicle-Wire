@@ -18,11 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -34,7 +32,7 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertTrue;
 
 
-public class ReadmeChapter1Test {
+public class ReadmeChapter1Test extends WireTestCommon {
     @SuppressWarnings("unused")
     @Test
     public void example1() {
@@ -120,9 +118,9 @@ prints in RawWire
 00000020 00 00 25 40                                      ··%@
 ```
 */
-        bytes.release();
-        bytes2.release();
-        bytes3.release();
+        bytes.releaseLast();
+        bytes2.releaseLast();
+        bytes3.releaseLast();
     }
 
     @Test
@@ -180,8 +178,8 @@ prints
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ```
 */
-        bytes.release();
-        bytes2.release();
+        bytes.releaseLast();
+        bytes2.releaseLast();
     }
 
     @Test
@@ -240,8 +238,8 @@ prints
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ```
 */
-        bytes.release();
-        bytes2.release();
+        bytes.releaseLast();
+        bytes2.releaseLast();
     }
 
     @Test
@@ -303,8 +301,8 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ```
 */
 
-        bytes.release();
-        bytes2.release();
+        bytes.releaseLast();
+        bytes2.releaseLast();
     }
 
     @Test
@@ -371,8 +369,8 @@ price: 10.5
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ```
 */
-        bytes.release();
-        bytes2.release();
+        bytes.releaseLast();
+        bytes2.releaseLast();
     }
 
     @Test
@@ -484,8 +482,8 @@ Data{message='G'Day All', number=1212121, timeUnit=MINUTES, price=12.34}
 Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
 ```
 */
-        bytes.release();
-        bytes2.release();
+        bytes.releaseLast();
+        bytes2.releaseLast();
     }
 
     @Test
@@ -551,13 +549,8 @@ prints
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ```
 */
-        bytes.release();
-        bytes2.release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        bytes.releaseLast();
+        bytes2.releaseLast();
     }
 }
 

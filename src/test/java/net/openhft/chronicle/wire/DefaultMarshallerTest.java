@@ -18,11 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -34,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 
-public class DefaultMarshallerTest {
+public class DefaultMarshallerTest extends WireTestCommon {
 
     @Test
     public void testDeserializeWithNestedArray() {
@@ -60,7 +58,7 @@ public class DefaultMarshallerTest {
 
         assertEquals(oc, oc2);
 
-        text.bytes().release();
+        text.bytes().releaseLast();
     }
 
     @Test
@@ -102,15 +100,10 @@ public class DefaultMarshallerTest {
 
         assertEquals(oc, oc2);
 
-        text.bytes().release();
+        text.bytes().releaseLast();
     }
 
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
-    }
-
-    static enum NestedEnum {
+    enum NestedEnum {
         ONE,
         TWO,
         THREE;

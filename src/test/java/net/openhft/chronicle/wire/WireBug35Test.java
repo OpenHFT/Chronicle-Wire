@@ -1,9 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
@@ -14,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author ryanlea
  */
-public class WireBug35Test {
+public class WireBug35Test extends WireTestCommon {
 
     @Test
     public void objectsInSequence() {
@@ -31,7 +29,7 @@ public class WireBug35Test {
 
         assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
 
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -49,11 +47,6 @@ public class WireBug35Test {
 
         assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
 
-        bytes.release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        bytes.releaseLast();
     }
 }

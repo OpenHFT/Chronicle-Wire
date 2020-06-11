@@ -25,7 +25,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 
-public class OverrideAValueTest {
+public class OverrideAValueTest extends WireTestCommon {
     @Test
     public void testDontTouchImmutables() {
         @Nullable NumberHolder nh = Marshallable.fromString("!" + NumberHolder.class.getName() + " { num: 2 } ");

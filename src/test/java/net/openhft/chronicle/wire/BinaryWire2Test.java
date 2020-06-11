@@ -19,7 +19,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,18 +36,13 @@ import static org.junit.Assert.*;
 
 
 @SuppressWarnings("rawtypes")
-public class BinaryWire2Test {
+public class BinaryWire2Test extends WireTestCommon {
     @NotNull
     Bytes bytes = nativeBytes();
 
     @After
     public void after() {
 //        BinaryWire.SPEC = 16;
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     @NotNull
@@ -178,7 +172,7 @@ public class BinaryWire2Test {
         Bytes b = Bytes.elasticByteBuffer();
         wire.read().bytes(b);
         assertEquals("Hello", b.toString());
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -302,8 +296,8 @@ public class BinaryWire2Test {
 
         System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
 
-        wire.bytes().release();
-        twire.bytes().release();
+        wire.bytes().releaseLast();
+        twire.bytes().releaseLast();
     }
 
     private void writeMessage(@NotNull WireOut wire) {
@@ -333,8 +327,8 @@ public class BinaryWire2Test {
 
         System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
 
-        wire.bytes().release();
-        twire.bytes().release();
+        wire.bytes().releaseLast();
+        twire.bytes().releaseLast();
     }
 
     private void writeMessageContext(@NotNull WireOut wire) {
@@ -501,7 +495,7 @@ public class BinaryWire2Test {
         wire.copyTo(new TextWire(asText));
         assertEquals("message: # gzip\n" + s +
                 "\n", asText.toString());
-        asText.release();
+        asText.releaseLast();
     }
 
     @Test
@@ -668,7 +662,7 @@ public class BinaryWire2Test {
             assertEquals(wire.bytes(), bytesStore);
         });
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -689,7 +683,7 @@ public class BinaryWire2Test {
                 "  value: 15\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -708,7 +702,7 @@ public class BinaryWire2Test {
 
         Assert.assertEquals(putMap, newMap);
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test

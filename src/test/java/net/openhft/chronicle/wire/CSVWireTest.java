@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
 
 
 @Ignore("TODO FIX")
-public class CSVWireTest {
+public class CSVWireTest extends WireTestCommon {
 
     @Test
     public void testFrom() {

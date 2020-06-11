@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
-public class BytesMarshallableTest {
+public class BytesMarshallableTest extends WireTestCommon {
     private final WireType wireType;
 
     public BytesMarshallableTest(WireType wireType) {

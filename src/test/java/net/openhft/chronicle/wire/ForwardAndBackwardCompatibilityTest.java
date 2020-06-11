@@ -18,11 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +33,7 @@ import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
 
 @RunWith(value = Parameterized.class)
-public class ForwardAndBackwardCompatibilityTest {
+public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
 
     private final WireType wireType;
 
@@ -72,7 +70,7 @@ public class ForwardAndBackwardCompatibilityTest {
             Assert.assertNull(dto2.three);
         }
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -95,12 +93,7 @@ public class ForwardAndBackwardCompatibilityTest {
             Assert.assertEquals(dto1.one, 1);
         }
 
-        wire.bytes().release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -128,7 +121,7 @@ public class ForwardAndBackwardCompatibilityTest {
                 Assert.assertEquals("other data", dc.wire().read("other data").text());
             }
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 

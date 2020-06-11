@@ -172,7 +172,7 @@ public enum Wires {
                 return WireDumper.of(tempWire).asString(0, length + 4);
 
             } finally {
-                tempBytes.release();
+                tempBytes.releaseLast();
             }
         } else {
             if (dc instanceof BinaryReadDocumentContext) {

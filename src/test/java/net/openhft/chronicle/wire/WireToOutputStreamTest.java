@@ -8,7 +8,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.Timestamp;
@@ -19,7 +20,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
-public class WireToOutputStreamTest {
+public class WireToOutputStreamTest extends WireTestCommon {
 
     public static class AnObject implements Serializable {
         long value;

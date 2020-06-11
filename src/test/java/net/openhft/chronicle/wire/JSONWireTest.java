@@ -18,11 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -32,7 +30,7 @@ import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 
 
-public class JSONWireTest {
+public class JSONWireTest extends WireTestCommon {
     @NotNull
     private JSONWire getWire() {
         return new JSONWire(Bytes.elasticByteBuffer());
@@ -60,7 +58,7 @@ public class JSONWireTest {
                 "{\"name\":\"item3\",\"number1\":3235666,\"number2\":1.12312},\n" +
                 "{\"name\":\"item4\",\"number1\":4235666,\"number2\":1.51231}]", out.toString());
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -143,7 +141,7 @@ public class JSONWireTest {
                     "  ]\n" +
                     "}\n", lists1.toString());
         } finally {
-            wire.bytes().release();
+            wire.bytes().releaseLast();
         }
     }
 
@@ -161,7 +159,7 @@ public class JSONWireTest {
         assertEquals(item1, item2);
         assertEquals(item1.toString(), item2.toString());
 
-        w.bytes().release();
+        w.bytes().releaseLast();
     }
 
     @Test
@@ -181,13 +179,8 @@ public class JSONWireTest {
         w2.read("somebytes").text(bb);
         assertEquals(bs, bb);
 
-        w2.bytes().release();
-        bb.release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        w2.bytes().releaseLast();
+        bb.releaseLast();
     }
 
     private static class Item extends SelfDescribingMarshallable {

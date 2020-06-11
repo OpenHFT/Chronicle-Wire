@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class CharSequenceObjectMapTest {
+public class CharSequenceObjectMapTest extends WireTestCommon {
     @Test
     public void put() {
         CharSequenceObjectMap<String> map = new CharSequenceObjectMap<>(10);

@@ -31,17 +31,17 @@ package net.openhft.chronicle.wire;/*
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
+ */
+
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 
 /**
  * @author Rob Austin
  */
-public class WireTextBugTest {
+public class WireTextBugTest extends WireTestCommon {
 
     @org.junit.Test
     public void testText() {
@@ -59,13 +59,8 @@ public class WireTextBugTest {
         @Nullable Bug b2 = (Bug) o;
         System.out.println("b2 = " + b2);
 
-        encodeWire.bytes().release();
-        decodeWire.bytes().release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        encodeWire.bytes().releaseLast();
+        decodeWire.bytes().releaseLast();
     }
 
     static class Bug extends SelfDescribingMarshallable {

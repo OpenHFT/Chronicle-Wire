@@ -1,11 +1,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -14,7 +12,7 @@ import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 
-public class WireBug38Test {
+public class WireBug38Test extends WireTestCommon {
     @Test
     public void testNestedObj() {
         @NotNull final WireType wireType = WireType.TEXT;
@@ -34,12 +32,7 @@ public class WireBug38Test {
         obj2.readMarshallable(wireType.apply(Bytes.fromString(output)));
 
         assertEquals(obj1, obj2);
-        bytes.release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        bytes.releaseLast();
     }
 
     static class MarshallableObj implements Marshallable {

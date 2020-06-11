@@ -50,8 +50,8 @@ import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
-import static net.openhft.chronicle.bytes.BytesUtil.unregister;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.core.io.AbstractReferenceCounted.unmonitor;
 
 /**
  * YAML Based wire format
@@ -79,7 +79,8 @@ public class TextWire extends AbstractWire implements Wire {
     static final Pattern REGX_PATTERN = Pattern.compile("\\.|\\$");
 
     static {
-        assert unregister(TYPE) & unregister(BINARY);
+        unmonitor(TYPE);
+        unmonitor(BINARY);
         for (char ch : "?%&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
         for (char ch : "?,#:{}[]|>\\".toCharArray())

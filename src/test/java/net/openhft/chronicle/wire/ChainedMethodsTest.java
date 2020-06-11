@@ -25,7 +25,7 @@ interface ILast {
     void echo(String text);
 }
 
-public class ChainedMethodsTest {
+public class ChainedMethodsTest extends WireTestCommon {
     @Test
     public void chainedText() {
         TextWire wire = new TextWire(Bytes.elasticHeapByteBuffer(128))
