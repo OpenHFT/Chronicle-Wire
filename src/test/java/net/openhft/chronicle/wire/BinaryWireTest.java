@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -778,7 +777,6 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     @Test
-    @Ignore("TODO FIX")
     public void testArrays2() {
         @NotNull Wire wire = createWire();
         @NotNull Object[] a1 = new Object[0];

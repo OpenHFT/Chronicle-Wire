@@ -1529,8 +1529,7 @@ public class TextWireTest extends WireTestCommon {
         wire.bytes().releaseLast();
     }
 
-    @Test
-    @Ignore("TODO FIX")
+    @Test(expected = IllegalArgumentException.class)
     public void writeUnserializable() throws IOException {
         System.out.println(TEXT.asString(Thread.currentThread()));
         @NotNull Socket s = new Socket();
