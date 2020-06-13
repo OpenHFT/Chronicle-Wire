@@ -1,11 +1,9 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -21,7 +19,7 @@ import static org.junit.Assert.assertSame;
  */
 @SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
-public class EnumWireTest {
+public class EnumWireTest extends WireTestCommon {
     private final Function<Bytes, Wire> createWire;
 
     public EnumWireTest(Function<Bytes, Wire> createWire) {
@@ -62,13 +60,8 @@ public class EnumWireTest {
             deserialized.readMarshallable(wire);
             return deserialized;
         } finally {
-            wire.bytes().release();
+            wire.bytes().releaseLast();
         }
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     enum Marsh implements Marshallable {

@@ -21,11 +21,12 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 
-public class DotNetTest {
+public class DotNetTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testCode() {
@@ -42,6 +43,6 @@ public class DotNetTest {
         wire.copyTo(new TextWire(text));
         System.out.println(text);
 
-        bytes.release();
+        bytes.releaseLast();
     }
 }

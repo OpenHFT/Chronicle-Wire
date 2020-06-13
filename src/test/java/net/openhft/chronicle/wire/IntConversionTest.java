@@ -10,7 +10,7 @@ import java.io.StringWriter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
-public class IntConversionTest {
+public class IntConversionTest extends WireTestCommon {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(IntHolder.class);
     }

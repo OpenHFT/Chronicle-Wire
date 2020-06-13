@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class WireParserTest {
+public class WireParserTest extends WireTestCommon {
 
     @Test
     public void noOpReadOne() {

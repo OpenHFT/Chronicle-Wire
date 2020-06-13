@@ -29,7 +29,7 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 
 
-public class WireTypeTest {
+public class WireTypeTest extends WireTestCommon {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(TestMarshallable.class);
     }

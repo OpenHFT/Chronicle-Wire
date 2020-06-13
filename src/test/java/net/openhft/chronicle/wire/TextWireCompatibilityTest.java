@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class TextWireCompatibilityTest {
+public class TextWireCompatibilityTest extends WireTestCommon {
 
     @Test
     public void testAddFieldsInTheMiddle() {

@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class MessagePathClassifierTest {
+public class MessagePathClassifierTest extends WireTestCommon {
 
     private static VanillaMessageHistory messageHistory(String cs) {
         return Marshallable.fromString(VanillaMessageHistory.class, cs);

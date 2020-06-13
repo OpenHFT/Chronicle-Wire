@@ -4,13 +4,14 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.wire.RawWire;
 import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
 
-public class ByteBufferMarshallingTest {
+public class ByteBufferMarshallingTest extends WireTestCommon {
     @Test
     public void writeReadByteBuffer() {
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -24,7 +25,7 @@ public class ByteBufferMarshallingTest {
         o2.readMarshallable(wire);
 
         assertEquals(o1, o2);
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -56,8 +57,8 @@ public class ByteBufferMarshallingTest {
         AClass o2 = ObjectUtils.newInstance(AClass.class);
         o2.readMarshallable(wire2);
         assertEquals(o1, o2);
-        bytes.release();
-        bytes2.release();
+        bytes.releaseLast();
+        bytes2.releaseLast();
     }
 
     @Test
@@ -86,7 +87,7 @@ public class ByteBufferMarshallingTest {
         BClass o2 = ObjectUtils.newInstance(BClass.class);
         o2.readMarshallable(bytes2);
         assertEquals(o1, o2);
-        bytes.release();
-        bytes2.release();
+        bytes.releaseLast();
+        bytes2.releaseLast();
     }
 }

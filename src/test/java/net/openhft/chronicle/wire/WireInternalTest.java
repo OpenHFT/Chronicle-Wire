@@ -18,15 +18,13 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
-public class WireInternalTest {
+public class WireInternalTest extends WireTestCommon {
 
     @Test
     public void testThrowableAsObject() {
@@ -43,7 +41,7 @@ public class WireInternalTest {
             StackTraceElement[] actualST = actual.getStackTrace();
             assertEquals(expectedST.length, actualST.length);
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -62,7 +60,7 @@ public class WireInternalTest {
             StackTraceElement[] actualST = actual.getStackTrace();
             assertEquals(expectedST.length, actualST.length);
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -107,11 +105,6 @@ public class WireInternalTest {
                 "--- !!data #binary\n" +
                 "userid: peter\n", actual);
 
-        bytes.release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        bytes.releaseLast();
     }
 }

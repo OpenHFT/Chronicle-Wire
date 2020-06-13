@@ -8,15 +8,15 @@ import static org.junit.Assert.*;
 
 
 @SuppressWarnings("rawtypes")
-public class WiresTest {
+public class WiresTest extends WireTestCommon {
 
     private final BytesContainer container1 = new BytesContainer();
     private final BytesContainer container2 = new BytesContainer();
 
     @After
     public void after() throws Exception {
-        container1.bytesField.release();
-        container2.bytesField.release();
+        container1.bytesField.releaseLast();
+        container2.bytesField.releaseLast();
     }
 
     @Test

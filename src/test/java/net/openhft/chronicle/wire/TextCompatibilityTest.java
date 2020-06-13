@@ -38,7 +38,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(value = Parameterized.class)
 @Ignore("TODO FIX")
-public class TextCompatibilityTest {
+public class TextCompatibilityTest extends WireTestCommon {
     private final String filename;
     private final String expected;
 
@@ -98,7 +98,7 @@ public class TextCompatibilityTest {
                     assertEquals(expected, s);
                 }
             } finally {
-                bytes.release();
+                bytes.releaseLast();
             }
             Object o = TEXT.fromFile(Object.class, filename);
         } catch (Exception e) {

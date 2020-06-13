@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class Base40LongConverterTest {
+public class Base40LongConverterTest extends WireTestCommon {
     @Test
     public void parse() {
         Base40LongConverter bic = Base40LongConverter.UPPER;

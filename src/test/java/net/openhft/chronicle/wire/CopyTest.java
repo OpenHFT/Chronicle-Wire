@@ -30,7 +30,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(value = Parameterized.class)
-public class CopyTest {
+public class CopyTest extends WireTestCommon {
     private final WireType from, to;
     private boolean withType;
 

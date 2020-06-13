@@ -18,7 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.ref.LongReference;
+import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.SimpleCloseable;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +37,7 @@ import java.util.stream.StreamSupport;
  * This <code>BitSet</code> is intended to be shared between processes. To minimize locking constraints,
  * it is implemented as a lock-free solution without support for resizing.
  */
-public class LongValueBitSet implements Marshallable {
+public class LongValueBitSet extends SimpleCloseable implements Marshallable {
 
     /*
      * BitSets are packed into arrays of "words."  Currently a word is
@@ -70,6 +72,12 @@ public class LongValueBitSet implements Marshallable {
         this(maxNumberOfBits);
         writeMarshallable(w);
         readMarshallable(w);
+    }
+
+    @Override
+    protected void performClose() {
+        super.performClose();
+        Closeable.closeQuietly(words);
     }
 
     /**
@@ -993,6 +1001,7 @@ public class LongValueBitSet implements Marshallable {
 
     @Override
     public void readMarshallable(@NotNull final WireIn wire) throws IORuntimeException {
+        Closeable.closeQuietly(words);
 
         try (DocumentContext dc = wire.readingDocument()) {
 

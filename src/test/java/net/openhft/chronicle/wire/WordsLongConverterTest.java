@@ -6,7 +6,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
-public class WordsLongConverterTest {
+public class WordsLongConverterTest extends WireTestCommon {
 
     @Test
     public void asString() {

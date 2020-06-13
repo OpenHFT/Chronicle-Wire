@@ -10,7 +10,7 @@ import java.util.concurrent.BlockingQueue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class VanillaMethodReaderHierarchyTest {
+public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
     private BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
 
     @Test

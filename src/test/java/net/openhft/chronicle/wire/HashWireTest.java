@@ -17,8 +17,6 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.BytesUtil;
-import org.junit.After;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -29,7 +27,7 @@ import java.util.Map;
 import static org.junit.Assert.assertNotEquals;
 
 
-public class HashWireTest {
+public class HashWireTest extends WireTestCommon {
 
     @Test
     public void testHash64() {
@@ -43,11 +41,6 @@ public class HashWireTest {
                             .write(() -> "value").text("value-2"));
                 }));
         assertNotEquals(0, h);
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     @Test

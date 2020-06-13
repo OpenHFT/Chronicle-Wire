@@ -4,7 +4,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class JSONNanTest {
+public class JSONNanTest extends WireTestCommon {
 
     @Test
     public void writeNaN() {
@@ -16,7 +16,7 @@ public class JSONNanTest {
             wire.write().object(value);
             Assert.assertEquals("\"\":{\"value\":null}", wire.toString());
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 

@@ -21,7 +21,7 @@ interface Flow3 {
 }
 
 @Ignore
-public class FlowMethodTest {
+public class FlowMethodTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void runYaml() throws IOException {

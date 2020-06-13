@@ -18,7 +18,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
-public class VanillaMethodWriterBuilderTest {
+public class VanillaMethodWriterBuilderTest extends WireTestCommon {
 
     @UsedViaReflection
     private final String name;
@@ -122,7 +122,7 @@ public class VanillaMethodWriterBuilderTest {
                 "  money: 3.456\n" +
                 "}\n" +
                 "]\n", sw.toString().replace("\r\n", "\n"));
-        bytes.release();
+        bytes.releaseLast();
         return s;
     }
 

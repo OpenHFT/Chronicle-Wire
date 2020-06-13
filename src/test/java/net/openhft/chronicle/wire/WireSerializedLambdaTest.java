@@ -18,13 +18,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.SerializableFunction;
 import net.openhft.chronicle.core.util.SerializableUpdater;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -37,7 +35,7 @@ import static org.junit.Assert.*;
 
 
 @SuppressWarnings("unchecked")
-public class WireSerializedLambdaTest {
+public class WireSerializedLambdaTest extends WireTestCommon {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(Fun.class);
         ClassAliasPool.CLASS_ALIASES.addAlias(Update.class);
@@ -92,7 +90,7 @@ public class WireSerializedLambdaTest {
         updater.accept(aLong);
         assertEquals(1, aLong.get());
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -130,11 +128,6 @@ public class WireSerializedLambdaTest {
         updater.accept(aLong);
         assertEquals(-1, aLong.get());
 
-        wire.bytes().release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        wire.bytes().releaseLast();
     }
 }

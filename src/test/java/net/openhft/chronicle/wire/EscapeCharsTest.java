@@ -17,10 +17,8 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -34,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 
 
 @RunWith(value = Parameterized.class)
-public class EscapeCharsTest {
+public class EscapeCharsTest extends WireTestCommon {
     @NotNull
     final Character ch;
 
@@ -66,17 +64,11 @@ public class EscapeCharsTest {
         assertEquals("key " + ch + ch, "" + ch + ch, sb.toString());
         assertEquals("value " + ch + ch, "" + ch + ch, ss);
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @NotNull
     private TextWire createWire() {
         return new TextWire(nativeBytes());
     }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
-    }
-
 }

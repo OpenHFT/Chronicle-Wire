@@ -18,13 +18,14 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 
-public class CompareNaNTest {
+public class CompareNaNTest extends WireTestCommon {
     @Test
     public void testPrim() {
         @NotNull PrimDTO a = new PrimDTO(Double.NaN, Float.NaN);

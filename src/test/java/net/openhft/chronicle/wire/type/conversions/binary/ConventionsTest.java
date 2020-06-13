@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire.type.conversions.binary;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.BinaryWire;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
@@ -26,8 +27,9 @@ import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+
 @SuppressWarnings("unchecked")
-public class ConventionsTest {
+public class ConventionsTest extends WireTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test
@@ -159,7 +161,7 @@ public class ConventionsTest {
 
             throw new UnsupportedOperationException("");
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 }

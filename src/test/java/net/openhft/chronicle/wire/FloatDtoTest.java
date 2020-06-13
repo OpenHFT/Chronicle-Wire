@@ -7,7 +7,7 @@ import org.junit.Test;
 import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
 
 @SuppressWarnings("rawtypes")
-public class FloatDtoTest {
+public class FloatDtoTest extends WireTestCommon {
 
     @Test
     public void test() {

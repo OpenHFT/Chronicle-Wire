@@ -18,9 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -33,7 +31,7 @@ import static org.junit.Assert.assertEquals;
 
 
 @RunWith(value = Parameterized.class)
-public class BinaryWireNumbersTest {
+public class BinaryWireNumbersTest extends WireTestCommon {
     private static final float VAL1 = 12345678901234567.0f;
     static int counter = 0;
     private final int len;
@@ -88,11 +86,6 @@ public class BinaryWireNumbersTest {
                 {2 + 4, (WriteValue) w -> w.float32(Long.MIN_VALUE), (WriteValue) w -> w.int64(Long.MIN_VALUE)},  //34
                 {2 + 4, (WriteValue) w -> w.float32(Long.MAX_VALUE), (WriteValue) w -> w.int64(Long.MAX_VALUE)},
         });
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     @Test

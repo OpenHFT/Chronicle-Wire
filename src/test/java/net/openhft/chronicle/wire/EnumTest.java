@@ -18,12 +18,10 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,7 +29,7 @@ import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
 
-public class EnumTest {
+public class EnumTest extends WireTestCommon {
 
     @Test
     public void testEnum() {
@@ -48,13 +46,8 @@ public class EnumTest {
                     .object();
             Assert.assertSame(enumObject, TestEnum.INSTANCE);
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     public enum TestEnum implements Marshallable, ReadResolvable<TestEnum> {

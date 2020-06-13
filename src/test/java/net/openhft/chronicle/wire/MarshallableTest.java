@@ -17,9 +17,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -32,7 +30,7 @@ import java.util.List;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
-public class MarshallableTest {
+public class MarshallableTest extends WireTestCommon {
     @Test(expected = IOException.class)
     public void fromFile() throws IOException {
         fail("Got " + Marshallable.fromFile("empty-file.yaml"));
@@ -89,11 +87,6 @@ public class MarshallableTest {
         source.writeMarshallable(wire);
         destination.readMarshallable(wire);
         assertEquals(source, destination);
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     @Test

@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.threads.NamedThreadFactory;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -20,7 +21,7 @@ import java.util.function.Supplier;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public final class BinaryWireStringInternerTest {
+public final class BinaryWireStringInternerTest extends WireTestCommon {
     private static final int DATA_SET_SIZE = 1_000;
     private static final long SEED_WITHOUT_COLLISIONS = 0x982374EADL;
 
@@ -62,7 +63,9 @@ public final class BinaryWireStringInternerTest {
     public void shouldInternExistingStringsAlright() throws Exception {
         final List<RuntimeException> capturedExceptions = new CopyOnWriteArrayList<>();
 
-        final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        final ExecutorService executorService = Executors.newFixedThreadPool(
+                Runtime.getRuntime().availableProcessors(),
+                new NamedThreadFactory("test"));
 
         for (int i = 0; i < (Jvm.isArm() ? 12 : 200); i++) {
             executorService.submit(new BinaryTextReaderWriter(capturedExceptions::add, () -> BinaryWire.binaryOnly(Bytes.elasticHeapByteBuffer(4096))));
@@ -102,7 +105,9 @@ public final class BinaryWireStringInternerTest {
     public void multipleThreadsSharingBinaryWireShouldCauseProblems() throws Exception {
         final List<RuntimeException> capturedExceptions = new CopyOnWriteArrayList<>();
 
-        final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        final ExecutorService executorService = Executors.newFixedThreadPool(
+                Runtime.getRuntime().availableProcessors(),
+                new NamedThreadFactory("test"));
 
         final BinaryWire sharedMutableWire = BinaryWire.binaryOnly(Bytes.elasticHeapByteBuffer(4096));
         for (int i = 0; i < 1_000; i++) {

@@ -8,7 +8,7 @@ import java.nio.ByteOrder;
 
 import static junit.framework.TestCase.assertEquals;
 
-public class HexDumpTest {
+public class HexDumpTest extends WireTestCommon {
     @Test
     public void testEndian() {
         if (ByteOrder.nativeOrder() != ByteOrder.LITTLE_ENDIAN)
@@ -18,6 +18,6 @@ public class HexDumpTest {
         Bytes b = new HexDumpBytes();
         b.writeInt(0x0a0b0c0d);
         assertEquals("0d 0c 0b 0a\n", b.toHexString());
-        b.release();
+        b.releaseLast();
     }
 }

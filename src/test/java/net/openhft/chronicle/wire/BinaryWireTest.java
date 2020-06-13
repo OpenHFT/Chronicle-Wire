@@ -18,14 +18,12 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -44,7 +42,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
 @RunWith(value = Parameterized.class)
-public class BinaryWireTest {
+public class BinaryWireTest extends WireTestCommon {
 
     final int testId;
     final boolean fixed;
@@ -779,7 +777,6 @@ public class BinaryWireTest {
     }
 
     @Test
-    @Ignore("TODO FIX")
     public void testArrays2() {
         @NotNull Wire wire = createWire();
         @NotNull Object[] a1 = new Object[0];
@@ -829,7 +826,7 @@ public class BinaryWireTest {
             @Nullable DTO o = valueIn3.typedMarshallable();
             Assert.assertEquals("world3", o.text);
         }
-        w.bytes().release();
+        w.bytes().releaseLast();
     }
 
     @Test
@@ -877,11 +874,6 @@ public class BinaryWireTest {
             assertEquals(0, wire.bytes().readRemaining());
             wire.clear();
         }
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     enum BWKey implements WireKey {

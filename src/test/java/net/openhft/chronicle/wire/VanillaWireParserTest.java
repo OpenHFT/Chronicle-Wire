@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-public class VanillaWireParserTest {
+public class VanillaWireParserTest extends WireTestCommon {
 
     private static Listener impl() {
         return m -> {

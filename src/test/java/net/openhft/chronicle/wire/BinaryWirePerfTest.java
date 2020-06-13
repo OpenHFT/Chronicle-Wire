@@ -18,9 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +32,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 @Ignore("Long running test")
 @RunWith(value = Parameterized.class)
-public class BinaryWirePerfTest {
+public class BinaryWirePerfTest extends WireTestCommon {
     final int testId;
     final boolean fixed;
     final boolean numericField;
@@ -179,11 +177,6 @@ public class BinaryWirePerfTest {
                     .read(Fields.W).int32(this, (o, x) -> o.w = x)
                     .read(Fields.X).int32(this, (o, x) -> o.x = x)
             ;
-        }
-
-        @After
-        public void checkRegisteredBytes() {
-            BytesUtil.checkRegisteredBytes();
         }
 
         enum Fields implements WireKey {

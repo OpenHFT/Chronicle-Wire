@@ -66,9 +66,7 @@ BinaryWire, fixed=true, numericField=false, fieldLess=true
  */
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -80,7 +78,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 
 @RunWith(value = Parameterized.class)
-public class FIX42Test {
+public class FIX42Test extends WireTestCommon {
     final int testId;
     final boolean fixed;
     final boolean numericField;
@@ -129,11 +127,6 @@ public class FIX42Test {
             System.out.println(wire.bytes());
         else
             System.out.println(wire.bytes().toHexString());
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     static class MarketDataSnapshot implements WriteMarshallable {
