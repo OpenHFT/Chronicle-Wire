@@ -98,7 +98,7 @@ public enum Wires {
     });
     static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(VanillaFieldInfo::lookupClass);
     static final StringBuilderPool SBP = new StringBuilderPool();
-    static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(new VanillaBytes(BytesStore.empty())));
+    static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.elasticHeapByteBuffer()));
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
     private static final int INVERSE_TID_MASK = ~TID_MASK;
 

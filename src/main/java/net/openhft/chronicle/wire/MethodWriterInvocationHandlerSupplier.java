@@ -34,7 +34,7 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
     private boolean disableThreadSafe;
     private String genericEvent;
     private boolean useMethodIds = true;
-    private final ThreadLocal<MethodWriterInvocationHandler> handlerTL = ThreadLocal.withInitial(() -> newHandler());
+    private final ThreadLocal<MethodWriterInvocationHandler> handlerTL = ThreadLocal.withInitial(this::newHandler);
     private MethodWriterInvocationHandler handler;
 
 
