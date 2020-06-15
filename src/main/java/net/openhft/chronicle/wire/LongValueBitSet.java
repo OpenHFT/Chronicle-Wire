@@ -125,6 +125,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     public void set(LongValue word, long param, LongFunction function) {
+        throwExceptionIfClosed();
 
         Pauser pauser = pauser();
         pauser.reset();
@@ -144,6 +145,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     public void set(LongValue word, long newValue) {
+        throwExceptionIfClosed();
 
         pauser.reset();
         long oldValue = word.getVolatileValue();
@@ -166,6 +168,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.7
      */
     public byte[] toByteArray() {
+        throwExceptionIfClosed();
         int n = getWordsInUse();
         if (n == 0)
             return new byte[0];
@@ -207,6 +210,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.4
      */
     public void flip(int bitIndex) {
+        throwExceptionIfClosed();
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
@@ -236,6 +240,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.4
      */
     public void flip(int fromIndex, int toIndex) {
+        throwExceptionIfClosed();
         checkRange(fromIndex, toIndex);
 
         if (fromIndex == toIndex)
@@ -272,6 +277,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since JDK1.0
      */
     public void set(int bitIndex) {
+        throwExceptionIfClosed();
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
@@ -293,6 +299,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.4
      */
     public void set(int bitIndex, boolean value) {
+        throwExceptionIfClosed();
         if (value)
             set(bitIndex);
         else
@@ -311,6 +318,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.4
      */
     public void set(int fromIndex, int toIndex) {
+        throwExceptionIfClosed();
         checkRange(fromIndex, toIndex);
 
         if (fromIndex == toIndex)
@@ -353,6 +361,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.4
      */
     public void set(int fromIndex, int toIndex, boolean value) {
+        throwExceptionIfClosed();
         if (value)
             set(fromIndex, toIndex);
         else
@@ -367,6 +376,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since JDK1.0
      */
     public void clear(int bitIndex) {
+        throwExceptionIfClosed();
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
@@ -389,6 +399,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.4
      */
     public void clear(int fromIndex, int toIndex) {
+        throwExceptionIfClosed();
         checkRange(fromIndex, toIndex);
 
         if (fromIndex == toIndex)
@@ -430,6 +441,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.4
      */
     public void clear() {
+        throwExceptionIfClosed();
         int value = getWordsInUse();
         while (value > 0)
             words[--value].setValue(0);
@@ -446,6 +458,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @throws IndexOutOfBoundsException if the specified index is negative
      */
     public boolean get(int bitIndex) {
+        throwExceptionIfClosed();
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
@@ -477,6 +490,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.4
      */
     public int nextSetBit(int fromIndex) {
+        throwExceptionIfClosed();
         if (fromIndex < 0)
             throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
 
@@ -519,6 +533,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.4
      */
     public int nextSetBit(int fromIndex, int toIndex) {
+        throwExceptionIfClosed();
         if (fromIndex < 0)
             throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
 
@@ -549,6 +564,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.4
      */
     public int nextClearBit(int fromIndex) {
+        throwExceptionIfClosed();
         // Neither spec nor implementation handle bitsets of maximal length.
         // See 4816253.
         if (fromIndex < 0)
@@ -591,6 +607,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.7
      */
     public int previousSetBit(int fromIndex) {
+        throwExceptionIfClosed();
         if (fromIndex < 0) {
             if (fromIndex == -1)
                 return -1;
@@ -627,6 +644,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.7
      */
     public int previousClearBit(int fromIndex) {
+        throwExceptionIfClosed();
         if (fromIndex < 0) {
             if (fromIndex == -1)
                 return -1;
@@ -658,6 +676,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.2
      */
     public int length() {
+        throwExceptionIfClosed();
         if (getWordsInUse() == 0)
             return 0;
 
@@ -673,6 +692,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.4
      */
     public boolean isEmpty() {
+        throwExceptionIfClosed();
         return getWordsInUse() == 0;
     }
 
@@ -686,6 +706,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.4
      */
     public boolean intersects(LongValueBitSet set) {
+        throwExceptionIfClosed();
         for (int i = Math.min(getWordsInUse(), set.getWordsInUse()) - 1; i >= 0; i--)
             if ((words[i].getVolatileValue() & set.words[i].getVolatileValue()) != 0)
                 return true;
@@ -699,6 +720,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.4
      */
     public int cardinality() {
+        throwExceptionIfClosed();
         int sum = 0;
         for (int i = 0; i < getWordsInUse(); i++)
             sum += Long.bitCount(words[i].getVolatileValue());
@@ -715,6 +737,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @param set a bit set
      */
     public void and(LongValueBitSet set) {
+        throwExceptionIfClosed();
         if (this == set)
             return;
 
@@ -738,6 +761,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @param set a bit set
      */
     public void or(LongValueBitSet set) {
+        throwExceptionIfClosed();
         if (this == set)
             return;
 
@@ -769,6 +793,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @param set a bit set
      */
     public void xor(LongValueBitSet set) {
+        throwExceptionIfClosed();
         int wordsInCommon = Math.min(getWordsInUse(), set.getWordsInUse());
 
         for (int i = 0; i < wordsInCommon; i++)
@@ -790,6 +815,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.2
      */
     public void andNot(LongValueBitSet set) {
+        throwExceptionIfClosed();
         // Perform logical (a & !b) on words in common
         for (int i = Math.min(getWordsInUse(), set.getWordsInUse()) - 1; i >= 0; i--)
             and(words[i], ~set.words[i].getVolatileValue());
@@ -814,6 +840,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @return the hash code value for this bit set
      */
     public int hashCode() {
+        throwExceptionIfClosed();
         long h = 1234;
         for (int i = getWordsInUse(); --i >= 0; )
             h ^= words[i].getVolatileValue() * (i + 1);
@@ -829,6 +856,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @return the number of bits currently in this bit set
      */
     public int size() {
+        throwExceptionIfClosed();
         return words.length * BITS_PER_WORD;
     }
 
@@ -847,6 +875,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @see #size()
      */
     public boolean equals(Object obj) {
+        throwExceptionIfClosed();
         if (!(obj instanceof LongValueBitSet))
             return false;
         if (this == obj)
@@ -954,17 +983,20 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.8
      */
     public IntStream stream() {
+        throwExceptionIfClosed();
 
         class BitSetIterator implements PrimitiveIterator.OfInt {
             int next = nextSetBit(0);
 
             @Override
             public boolean hasNext() {
+                throwExceptionIfClosed();
                 return next != -1;
             }
 
             @Override
             public int nextInt() {
+                throwExceptionIfClosed();
                 if (next != -1) {
                     int ret = next;
                     next = nextSetBit(next + 1);
@@ -986,6 +1018,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
 
     @Override
     public void writeMarshallable(@NotNull final WireOut wire) {
+        ;
         try (DocumentContext dc = wire.writingDocument()) {
 
             wire.write("numberOfLongValues").int32(words.length);
@@ -1001,6 +1034,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
 
     @Override
     public void readMarshallable(@NotNull final WireIn wire) throws IORuntimeException {
+        throwExceptionIfClosed();
         Closeable.closeQuietly(words);
 
         try (DocumentContext dc = wire.readingDocument()) {
