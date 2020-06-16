@@ -11,6 +11,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assume.assumeFalse;
 
 public class UnsupportedChangesTest extends WireTestCommon {
     @After
@@ -37,6 +38,7 @@ public class UnsupportedChangesTest extends WireTestCommon {
 
     @Test
     public void marshallableToScalar() {
+        assumeFalse(Jvm.isArm());
         Map<ExceptionKey, Integer> exceptions = Jvm.recordExceptions(true);
 
         Wrapper wrapper = Marshallable.fromString(Wrapper.class, "{\n" +
