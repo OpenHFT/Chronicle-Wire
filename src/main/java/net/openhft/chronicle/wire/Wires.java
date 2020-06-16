@@ -98,7 +98,7 @@ public enum Wires {
     });
     static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(VanillaFieldInfo::lookupClass);
     static final StringBuilderPool SBP = new StringBuilderPool();
-    static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(new VanillaBytes(BytesStore.empty())));
+    static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.elasticHeapByteBuffer()));
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
     private static final int INVERSE_TID_MASK = ~TID_MASK;
 
@@ -290,14 +290,14 @@ public enum Wires {
 
     @NotNull
     public static Bytes<?> acquireBytes() {
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::allocateElasticDirect);
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::elasticHeapByteBuffer);
         bytes.clear();
         return bytes;
     }
 
     @NotNull
     static Bytes<?> acquireBytesForToString() {
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL, Bytes::allocateElasticDirect);
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL, Bytes::elasticHeapByteBuffer);
         bytes.clear();
         return bytes;
     }
@@ -311,7 +311,7 @@ public enum Wires {
 
     @NotNull
     public static Bytes acquireAnotherBytes() {
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::allocateElasticDirect);
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::elasticHeapByteBuffer);
         bytes.clear();
         return bytes;
     }

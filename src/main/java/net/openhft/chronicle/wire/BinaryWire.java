@@ -347,6 +347,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         @Nullable BytesStore bytes = (BytesStore) object;
                         if (textable(bytes)) {
                             valueOut.text(bytes);
+                            bytes.releaseLast();
                             break;
                         }
                     }

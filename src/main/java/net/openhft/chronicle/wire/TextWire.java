@@ -119,13 +119,15 @@ public class TextWire extends AbstractWire implements Wire {
 
     public static String asText(@NotNull Wire wire) {
         assert wire.startUse();
+        NativeBytes<Void> bytes = nativeBytes();
         try {
             long pos = wire.bytes().readPosition();
-            @NotNull TextWire tw = new TextWire(nativeBytes());
+            @NotNull TextWire tw = new TextWire(bytes);
             wire.copyTo(tw);
             wire.bytes().readPosition(pos);
             return tw.toString();
         } finally {
+            bytes.releaseLast();
             assert wire.endUse();
         }
     }

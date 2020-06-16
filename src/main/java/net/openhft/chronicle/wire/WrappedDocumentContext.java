@@ -86,14 +86,4 @@ public abstract class WrappedDocumentContext implements DocumentContext {
     public void rollbackOnClose() {
         dc.rollbackOnClose();
     }
-
-    @Override
-    public void notifyClosing() {
-        dc.notifyClosing();
-    }
-
-    @Override
-    public boolean isClosed() {
-        return dc.isClosed();
-    }
 }
