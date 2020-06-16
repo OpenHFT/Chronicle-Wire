@@ -290,14 +290,14 @@ public enum Wires {
 
     @NotNull
     public static Bytes<?> acquireBytes() {
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::allocateElasticDirect);
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::elasticHeapByteBuffer);
         bytes.clear();
         return bytes;
     }
 
     @NotNull
     static Bytes<?> acquireBytesForToString() {
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL, Bytes::allocateElasticDirect);
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL, Bytes::elasticHeapByteBuffer);
         bytes.clear();
         return bytes;
     }
@@ -311,7 +311,7 @@ public enum Wires {
 
     @NotNull
     public static Bytes acquireAnotherBytes() {
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::allocateElasticDirect);
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::elasticHeapByteBuffer);
         bytes.clear();
         return bytes;
     }

@@ -22,7 +22,6 @@ import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +37,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static net.openhft.chronicle.bytes.Bytes.elasticHeapByteBuffer;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
@@ -51,7 +51,7 @@ public class BinaryWireTest extends WireTestCommon {
     final int compressedSize;
     @SuppressWarnings("rawtypes")
     @NotNull
-    Bytes bytes = nativeBytes();
+    Bytes bytes = elasticHeapByteBuffer();
 
     public BinaryWireTest(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
@@ -74,9 +74,10 @@ public class BinaryWireTest extends WireTestCommon {
         );
     }
 
-    @After
-    public void after() {
-//        BinaryWire.SPEC = 16;
+    @Override
+    public void assertReferencesReleased() {
+        bytes.releaseLast();
+        super.assertReferencesReleased();
     }
 
     @Test
@@ -105,7 +106,9 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     private void checkWire(@NotNull Wire wire, String... expected) {
-        assertEquals("id: " + testId, expected[testId], wire.toString());
+        assertEquals("id: " + testId,
+                expected[testId].replaceAll("٠+$", ""),
+                wire.toString().replaceAll("٠+$", ""));
     }
 
     @Test
@@ -678,6 +681,7 @@ public class BinaryWireTest extends WireTestCommon {
                 .read()
                 .bytes(allBytes2);
         assertEquals(Bytes.wrapForRead(allBytes), allBytes2);
+        allBytes2.releaseLast();
     }
 
     @Test
@@ -740,12 +744,14 @@ public class BinaryWireTest extends WireTestCommon {
     @Test
     public void testLongString() {
         @NotNull Wire wire = createWire();
-        @NotNull char[] chars = new char[128];
-        for (int i = 0; i < Character.MAX_VALUE; i++) {
-            if (!Character.isValidCodePoint(i))
-                continue;
+        @NotNull char[] chars = new char[64];
+        for (int i = 0; i < Character.MAX_VALUE; i += chars.length) {
+            for (int j = 0; j < chars.length; j++) {
+                if (!Character.isValidCodePoint(i + j))
+                    continue;
+                chars[j] = (char) (i + j);
+            }
             wire.clear();
-            Arrays.fill(chars, (char) i);
             @NotNull String s = new String(chars);
             wire.writeDocument(false, w -> w.write(() -> "message").text(s));
 
