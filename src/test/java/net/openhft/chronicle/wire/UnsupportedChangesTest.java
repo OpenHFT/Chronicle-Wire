@@ -2,13 +2,16 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
+import net.openhft.chronicle.core.onoes.LogLevel;
 import org.junit.After;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 public class UnsupportedChangesTest extends WireTestCommon {
     @After
     public void reset() {
@@ -25,8 +28,11 @@ public class UnsupportedChangesTest extends WireTestCommon {
         assertEquals("!net.openhft.chronicle.wire.UnsupportedChangesTest$Nested {\n" +
                 "  inner: !!null \"\"\n" +
                 "}\n", nested.toString());
-
-        assertEquals("{ExceptionKey{level=WARN, clazz=class net.openhft.chronicle.wire.WireMarshaller$ObjectFieldAccess, message='Unable to parse field: inner, as a marshallable as it is 128', throwable=}=1}", exceptions.toString());
+        ExceptionKey ek = new ExceptionKey(LogLevel.WARN,
+                WireMarshaller.ObjectFieldAccess.class,
+                "Unable to parse field: inner, as a marshallable as it is 128",
+                exceptions.keySet().iterator().next().throwable);
+        assertEquals(Collections.singletonMap(ek, 1), exceptions);
     }
 
     @Test
