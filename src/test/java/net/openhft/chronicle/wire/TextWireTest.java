@@ -1865,7 +1865,7 @@ public class TextWireTest extends WireTestCommon {
         Bytes A = Bytes.allocateElasticDirect();
         Bytes B = Bytes.allocateDirect(64);
         Bytes C = Bytes.elasticByteBuffer();
-        Bytes D = Bytes.elasticHeapByteBuffer(1);
+        Bytes D = Bytes.allocateElasticOnHeap(1);
 
         void releaseAll() {
             A.releaseLast();

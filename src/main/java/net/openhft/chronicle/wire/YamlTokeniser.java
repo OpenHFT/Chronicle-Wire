@@ -319,7 +319,7 @@ public class YamlTokeniser {
 
     private Bytes temp() {
         if (temp == null)
-            temp = Bytes.elasticHeapByteBuffer(32);
+            temp = Bytes.allocateElasticOnHeap(32);
         temp.clear();
         return temp;
     }

@@ -462,7 +462,7 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     public String dumpContext() {
-        Bytes b = Bytes.elasticHeapByteBuffer(128);
+        Bytes b = Bytes.allocateElasticOnHeap(128);
         YamlWire yw = new YamlWire(b);
         yw.valueOut.list(yt.contexts, YamlTokeniser.YTContext.class);
         return b.toString();

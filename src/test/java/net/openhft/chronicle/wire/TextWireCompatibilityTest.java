@@ -28,7 +28,7 @@ public class TextWireCompatibilityTest extends WireTestCommon {
 
     @Test
     public void testAddFieldsInTheMiddle() {
-        @NotNull TextWire wire = new TextWire(Bytes.elasticHeapByteBuffer(100));
+        @NotNull TextWire wire = new TextWire(Bytes.allocateElasticOnHeap(100));
         wire.getValueOut().object(new SubIncompatibleObject());
         System.out.println(wire.toString());
         Assert.assertNotNull(wire.getValueIn().object());

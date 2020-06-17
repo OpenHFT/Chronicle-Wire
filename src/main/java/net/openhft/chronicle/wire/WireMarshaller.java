@@ -724,7 +724,7 @@ public class WireMarshaller<T> {
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             @NotNull Bytes bytes = (Bytes) UNSAFE.getObject(o, offset);
             if (bytes == null)
-                UNSAFE.putObject(o, offset, bytes = Bytes.elasticHeapByteBuffer(128));
+                UNSAFE.putObject(o, offset, bytes = Bytes.allocateElasticOnHeap(128));
             WireIn wireIn = read.wireIn();
             if (wireIn instanceof TextWire) {
                 wireIn.consumePadding();

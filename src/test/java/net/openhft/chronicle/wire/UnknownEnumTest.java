@@ -20,7 +20,7 @@ public class UnknownEnumTest extends WireTestCommon {
             109, 84, 101, 115, 116, 36, 84, 101, 109, 112, -27, 70, 73, 82, 83, 84};
 
     public Wire createWire() {
-        return new TextWire(Bytes.elasticHeapByteBuffer(128));
+        return new TextWire(Bytes.allocateElasticOnHeap(128));
     }
 
     @Test

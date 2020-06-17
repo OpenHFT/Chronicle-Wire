@@ -86,7 +86,7 @@ public class TextCompatibilityTest extends WireTestCommon {
                 Object o = new YamlWire(bytes)
                         .getValueIn()
                         .object();
-                Bytes out = Bytes.elasticHeapByteBuffer(256);
+                Bytes out = Bytes.allocateElasticOnHeap(256);
                 String s = new TextWire(out).getValueOut().object(o).toString();
                 if (s.trim().equals(expected.trim()))
                     return;

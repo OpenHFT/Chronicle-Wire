@@ -53,9 +53,9 @@ public class CopyTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testCopy() {
-        Bytes bytesFrom = Bytes.elasticHeapByteBuffer(64);
+        Bytes bytesFrom = Bytes.allocateElasticOnHeap(64);
         Wire wireFrom = from.apply(bytesFrom);
-        Bytes bytesTo = Bytes.elasticHeapByteBuffer(64);
+        Bytes bytesTo = Bytes.allocateElasticOnHeap(64);
         Wire wireTo = to.apply(bytesTo);
 
         AClass a = create();

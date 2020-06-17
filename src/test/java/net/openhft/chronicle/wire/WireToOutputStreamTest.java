@@ -62,7 +62,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
 
     @Test
     public void testTimestamp() {
-        Wire wire = currentWireType.apply(Bytes.elasticHeapByteBuffer(128));
+        Wire wire = currentWireType.apply(Bytes.allocateElasticOnHeap(128));
         Timestamp ts = new Timestamp(1234567890000L);
         wire.write().object(ts);
         System.out.println(wire);
@@ -74,7 +74,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
 
     @Test
     public void testNoSocket() {
-        Wire wire = currentWireType.apply(Bytes.elasticHeapByteBuffer(128));
+        Wire wire = currentWireType.apply(Bytes.allocateElasticOnHeap(128));
         AnObject ao = writeAnObject(wire);
         System.out.println(wire);
 

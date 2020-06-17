@@ -134,7 +134,7 @@ public class BinaryWire2Test extends WireTestCommon {
                 v -> v.uuid(UUID.randomUUID())
         );
         Wire wire = createWire();
-        Wire wire2 = new TextWire(Bytes.elasticHeapByteBuffer(32));
+        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap(32));
 
         for (Consumer<ValueOut> value : writeValue) {
             wire.clear();
@@ -793,7 +793,7 @@ public class BinaryWire2Test extends WireTestCommon {
     }
 
     static class BytesHolder extends SelfDescribingMarshallable {
-        final Bytes bytes = Bytes.elasticHeapByteBuffer(64);
+        final Bytes bytes = Bytes.allocateElasticOnHeap(64);
 
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {

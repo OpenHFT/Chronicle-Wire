@@ -26,7 +26,7 @@ public class OutOfOrderTest extends WireTestCommon {
                 .object(OOOT.class);
         from.releaseLast();
 
-        JSONWire wire2 = new JSONWire(Bytes.elasticHeapByteBuffer(64));
+        JSONWire wire2 = new JSONWire(Bytes.allocateElasticOnHeap(64));
         wire2.getValueOut().object(ooot);
         assertEquals(expected, wire2.toString());
     }

@@ -50,7 +50,7 @@ public class DefaultMarshallerTest extends WireTestCommon {
                 "  enums: [ ONE, TWO, THREE ]\n" +
                 "}\n", oc.toString());
 
-        @NotNull Wire text = new TextWire(Bytes.elasticHeapByteBuffer(128));
+        @NotNull Wire text = new TextWire(Bytes.allocateElasticOnHeap(128));
         oc.writeMarshallable(text);
 
         @NotNull DMOuterClassWithEmbeddedArray oc2 = new DMOuterClassWithEmbeddedArray();
@@ -92,7 +92,7 @@ public class DefaultMarshallerTest extends WireTestCommon {
                 "  }\n" +
                 "}\n", oc.toString());
 
-        @NotNull Wire text = new TextWire(Bytes.elasticHeapByteBuffer(64));
+        @NotNull Wire text = new TextWire(Bytes.allocateElasticOnHeap(64));
         oc.writeMarshallable(text);
 
         @NotNull DMOuterClass oc2 = new DMOuterClass();
