@@ -106,7 +106,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
     @NotNull
     public static YamlWire from(@NotNull String text) {
-        return new YamlWire(Bytes.fromString(text));
+        return new YamlWire(Bytes.from(text));
     }
 
     public static String asText(@NotNull Wire wire) {

@@ -13,18 +13,18 @@ public class BytesUsageTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testBytes() {
-        BytesStore value = Bytes.fromString("helloWorld");
+        BytesStore value = Bytes.from("helloWorld");
         {
             BytesWrapper bw = new BytesWrapper();
-            bw.clOrdId(Bytes.fromString("A" + value));
-            assertEquals(Bytes.fromString("AhelloWorld"), bw.clOrdId());
+            bw.clOrdId(Bytes.from("A" + value));
+            assertEquals(Bytes.from("AhelloWorld"), bw.clOrdId());
         }
 
         // gc free replacement
         BytesWrapper bw = new BytesWrapper(); // this should be recycled to avoid garbage
 
         bw.clOrdId().clear().append("A").append(value);
-        assertEquals(Bytes.fromString("AhelloWorld"), bw.clOrdId());
+        assertEquals(Bytes.from("AhelloWorld"), bw.clOrdId());
     }
 
     @SuppressWarnings("rawtypes")

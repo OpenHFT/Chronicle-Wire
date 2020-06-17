@@ -167,7 +167,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @Test
     public void testBytesStore() {
         @NotNull Wire wire = createWire();
-        wire.write().object(Bytes.fromString("Hello"));
+        wire.write().object(Bytes.from("Hello"));
 
         Bytes b = Bytes.elasticByteBuffer();
         wire.read().bytes(b);
@@ -482,7 +482,7 @@ public class BinaryWire2Test extends WireTestCommon {
                 "xxxxxxxxxxxxxxxx" +
                 "xxxxxxxxxxxxxxxx" +
                 "xxxxxxxxxxxxxxxx";
-        Bytes str = Bytes.fromString(s);
+        Bytes str = Bytes.from(s);
 
         wire.write("message").compress("gzip", str);
 
@@ -518,7 +518,7 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull Wire wire = new BinaryWire(bytes, false, false, false, 32, comp, false);
         assert wire.startUse();
         @NotNull String str = "xxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy2yyyyyyyyyyyyyyyyy";
-        BytesStore bytes = Bytes.fromString(str);
+        BytesStore bytes = Bytes.from(str);
 
         wire.write().bytes(bytes);
         if (!comp.equals("binary"))
