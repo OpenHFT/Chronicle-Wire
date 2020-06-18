@@ -23,7 +23,6 @@ import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
 import org.jetbrains.annotations.NotNull;
 
-
 public class NestedClass implements Marshallable {
     String text;
     double number;

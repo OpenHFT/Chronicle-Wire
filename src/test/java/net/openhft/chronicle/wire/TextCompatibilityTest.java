@@ -35,7 +35,6 @@ import java.util.List;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
 
-
 @RunWith(value = Parameterized.class)
 @Ignore("TODO FIX")
 public class TextCompatibilityTest extends WireTestCommon {

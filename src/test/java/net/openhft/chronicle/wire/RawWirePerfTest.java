@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-
 public class RawWirePerfTest extends WireTestCommon {
     @Test
     public void testRawPerf() {

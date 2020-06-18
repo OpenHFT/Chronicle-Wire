@@ -11,7 +11,6 @@ import java.nio.ByteBuffer;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-
 public class WireBug39Test extends WireTestCommon {
     @Test
     public void testBinaryEncoding() {

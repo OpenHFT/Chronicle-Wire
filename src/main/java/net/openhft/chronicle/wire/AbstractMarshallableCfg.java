@@ -21,7 +21,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
-
 public abstract class AbstractMarshallableCfg extends SelfDescribingMarshallable {
 
     @Override

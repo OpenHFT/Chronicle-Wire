@@ -29,7 +29,6 @@ interface MockMethods {
     void list(List<String> strings);
 }
 
-
 @SuppressWarnings("rawtypes")
 public class VanillaMethodReaderTest extends WireTestCommon {
 

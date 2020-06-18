@@ -7,7 +7,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-
 public class TextMethodTesterTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test

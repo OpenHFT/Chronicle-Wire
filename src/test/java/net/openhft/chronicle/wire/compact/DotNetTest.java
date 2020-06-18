@@ -25,7 +25,6 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-
 public class DotNetTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test

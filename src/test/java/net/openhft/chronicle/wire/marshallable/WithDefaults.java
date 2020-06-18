@@ -6,7 +6,6 @@ import net.openhft.chronicle.wire.WireOut;
 import net.openhft.chronicle.wire.Wires;
 import org.jetbrains.annotations.NotNull;
 
-
 @SuppressWarnings("rawtypes")
 public class WithDefaults extends SelfDescribingMarshallable {
     Bytes bytes = Bytes.from("Hello");

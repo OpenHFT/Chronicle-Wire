@@ -1511,18 +1511,17 @@ public class WireMarshaller<T> {
 
     }
 
+static class IntConversionFieldAccess extends FieldAccess {
+    @NotNull
+    private final IntConverter intConverter;
 
-    static class IntConversionFieldAccess extends FieldAccess {
-        @NotNull
-        private final IntConverter intConverter;
+    IntConversionFieldAccess(@NotNull Field field, @NotNull IntConversion intConversion) {
+        super(field);
+        this.intConverter = ObjectUtils.newInstance(intConversion.value());
+    }
 
-        IntConversionFieldAccess(@NotNull Field field, @NotNull IntConversion intConversion) {
-            super(field);
-            this.intConverter = ObjectUtils.newInstance(intConversion.value());
-        }
-
-        @Override
-        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
+    @Override
+    protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             int anInt = getInt(o);
             if (write.isBinary()) {
                 write.int32(anInt);

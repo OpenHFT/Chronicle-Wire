@@ -29,7 +29,6 @@ import java.util.List;
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 
-
 public class JSONWireTest extends WireTestCommon {
     @NotNull
     private JSONWire getWire() {

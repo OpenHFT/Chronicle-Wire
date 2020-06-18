@@ -22,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.BitSet;
 
-
 enum TextStopCharTesters implements StopCharTester {
     END_OF_TYPE {
         @NotNull

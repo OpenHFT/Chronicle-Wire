@@ -29,7 +29,6 @@ import static java.util.Collections.addAll;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-
 @SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class NestedMapsTest extends WireTestCommon {

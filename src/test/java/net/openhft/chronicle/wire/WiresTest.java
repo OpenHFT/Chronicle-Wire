@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-
 @SuppressWarnings("rawtypes")
 public class WiresTest extends WireTestCommon {
 

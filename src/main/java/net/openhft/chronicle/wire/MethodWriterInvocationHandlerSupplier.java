@@ -37,10 +37,9 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
     private final ThreadLocal<MethodWriterInvocationHandler> handlerTL = ThreadLocal.withInitial(this::newHandler);
     private MethodWriterInvocationHandler handler;
 
-
-    public MethodWriterInvocationHandlerSupplier(Supplier<MethodWriterInvocationHandler> supplier) {
-        this.supplier = supplier;
-    }
+public MethodWriterInvocationHandlerSupplier(Supplier<MethodWriterInvocationHandler> supplier) {
+    this.supplier = supplier;
+}
 
     public void recordHistory(boolean recordHistory) {
         this.recordHistory = recordHistory;

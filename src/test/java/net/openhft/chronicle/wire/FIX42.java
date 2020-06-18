@@ -17,7 +17,6 @@
  */
 package net.openhft.chronicle.wire;
 
-
 public enum FIX42 implements WireKey {
     Account(1),
     AdvId(2),

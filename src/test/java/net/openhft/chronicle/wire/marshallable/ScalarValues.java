@@ -26,7 +26,6 @@ import java.math.BigInteger;
 import java.time.*;
 import java.util.UUID;
 
-
 @SuppressWarnings("rawtypes")
 public class ScalarValues extends SelfDescribingMarshallable {
     boolean flag;

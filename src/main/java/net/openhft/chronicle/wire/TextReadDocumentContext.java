@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import org.jetbrains.annotations.Nullable;
 
-
 public class TextReadDocumentContext implements ReadDocumentContext {
     @SuppressWarnings("rawtypes")
     public static final BytesStore MSG_SEP = BytesStore.from("---");

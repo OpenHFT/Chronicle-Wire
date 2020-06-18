@@ -50,7 +50,6 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
-
 @State(Scope.Thread)
 public class ComparisonMain {
     final Yaml yaml;

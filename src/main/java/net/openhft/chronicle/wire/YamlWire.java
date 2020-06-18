@@ -414,9 +414,8 @@ public class YamlWire extends AbstractWire implements Wire {
         return "todo";
     }
 
-
-    @NotNull
-    @Override
+@NotNull
+@Override
     public ValueIn read(@NotNull WireKey key) {
         return read(key.name().toString());
     }
@@ -798,7 +797,6 @@ public class YamlWire extends AbstractWire implements Wire {
         bytes.writeUnsignedByte(ch1);
         bytes.writeUnsignedByte(ch2);
     }
-
 
     @Override
     public void startEvent() {
@@ -2329,7 +2327,6 @@ public class YamlWire extends AbstractWire implements Wire {
             }
             return false;
         }
-
 
         @Override
         public <T> T applyToMarshallable(@NotNull Function<WireIn, T> marshallableReader) {

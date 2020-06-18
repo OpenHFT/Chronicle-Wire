@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-
 public class ThreeSequenceTest extends WireTestCommon {
     @Test
     public void testThree() {

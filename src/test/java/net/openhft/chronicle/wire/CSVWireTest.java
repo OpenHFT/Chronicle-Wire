@@ -27,7 +27,6 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-
 @Ignore("TODO FIX")
 public class CSVWireTest extends WireTestCommon {
 

@@ -19,7 +19,6 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 
-
 public class DemarshallableObject implements Demarshallable, WriteMarshallable {
     @NotNull
     final String name;

@@ -31,7 +31,6 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertTrue;
 
-
 public class ReadmeChapter1Test extends WireTestCommon {
     @SuppressWarnings("unused")
     @Test

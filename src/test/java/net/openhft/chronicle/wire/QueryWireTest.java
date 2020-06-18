@@ -29,7 +29,6 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-
 public class QueryWireTest extends WireTestCommon {
     private NativeBytes<Void> bytes;
 

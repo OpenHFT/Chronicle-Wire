@@ -19,7 +19,6 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 
-
 public class TestMarshallable extends SelfDescribingMarshallable {
 
     @NotNull

@@ -32,7 +32,6 @@ import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 
-
 @SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class YamlSpecificationTest extends WireTestCommon {

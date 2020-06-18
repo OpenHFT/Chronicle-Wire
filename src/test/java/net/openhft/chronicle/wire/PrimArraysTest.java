@@ -31,7 +31,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-
 @RunWith(value = Parameterized.class)
 public class PrimArraysTest extends WireTestCommon {
 

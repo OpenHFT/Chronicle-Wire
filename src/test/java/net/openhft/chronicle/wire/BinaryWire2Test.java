@@ -34,7 +34,6 @@ import java.util.function.Consumer;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
-
 @SuppressWarnings("rawtypes")
 public class BinaryWire2Test extends WireTestCommon {
     @NotNull

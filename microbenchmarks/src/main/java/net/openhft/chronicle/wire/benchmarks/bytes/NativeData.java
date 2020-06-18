@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.wire.benchmarks.Data;
 import net.openhft.chronicle.wire.benchmarks.Side;
 
-
 public class NativeData implements Byteable {
     static final int PRICE = 0;
     static final int LONG_INT = PRICE + 8;

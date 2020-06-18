@@ -22,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-
 public enum Update implements SerializableUpdater<AtomicLong> {
     INCR {
         @Override

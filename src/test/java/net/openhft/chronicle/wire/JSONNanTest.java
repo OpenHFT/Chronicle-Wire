@@ -53,9 +53,8 @@ public class JSONNanTest extends WireTestCommon {
         Assert.assertTrue(Double.isNaN(value.value));
     }
 
-
-    public static class Dto extends SelfDescribingMarshallable {
-        double value;
-    }
+public static class Dto extends SelfDescribingMarshallable {
+    double value;
+}
 
 }
