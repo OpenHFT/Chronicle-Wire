@@ -155,8 +155,7 @@ public class VanillaMethodWriterBuilderTest extends WireTestCommon {
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
             super.readMarshallable(wire);
         }
-
-    }
+ }
 
     static class MWB2 extends SelfDescribingMarshallable {
         String hello;

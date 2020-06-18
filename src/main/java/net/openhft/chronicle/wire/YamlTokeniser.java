@@ -390,8 +390,7 @@ public class YamlTokeniser {
             if (ch <= ' ')
                 return;
         }
-
-    }
+ }
 
     private YamlToken indent(
             @NotNull YamlToken indented,

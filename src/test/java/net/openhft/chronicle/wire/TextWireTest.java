@@ -72,8 +72,7 @@ public class TextWireTest extends WireTestCommon {
         } catch (Exception e) {
             Assert.fail();
         }
-
-    }
+ }
 
     @Test
     public void comment() {

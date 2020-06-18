@@ -116,7 +116,6 @@ public class VanillaMethodReader implements MethodReader {
                     } else {
                         context[0] = intercept;
                     }
-
                 } else {
                     mh.invokeExact(arg);
                 }

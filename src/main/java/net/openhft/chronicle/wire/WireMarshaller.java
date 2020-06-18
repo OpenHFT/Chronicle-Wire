@@ -1508,8 +1508,7 @@ public class WireMarshaller<T> {
         protected void copy(Object from, Object to) {
             putChar(to, getChar(from));
         }
-
-    }
+ }
 
 static class IntConversionFieldAccess extends FieldAccess {
     @NotNull
