@@ -406,7 +406,7 @@ public abstract class AbstractWire implements Wire {
         headerNumber = Long.MIN_VALUE;
 
         try {
-            for (; ; ) {
+            for (; ; Jvm.nanoPause()) {
                 if (usePadding)
                     pos += -pos & 0x3;
                 if (bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
