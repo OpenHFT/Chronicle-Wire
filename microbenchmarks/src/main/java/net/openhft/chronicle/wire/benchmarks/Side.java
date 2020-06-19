@@ -16,7 +16,6 @@
 
 package net.openhft.chronicle.wire.benchmarks;
 
-
 public enum Side {
     Buy, Sell
 }

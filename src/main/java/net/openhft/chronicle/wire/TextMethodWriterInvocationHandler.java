@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-
 public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
     // TODO remove this hack for TextMethodTester
     public static boolean ENABLE_EOD = true;
@@ -46,8 +45,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
         this.marshallableOutSupplier = marshallableOutSupplier;
     }
 
-
-    @Override
+@Override
     protected Object doInvoke(Object proxy, Method method, Object[] args) {
         if (method.getName().equals("writingDocument") && method.getParameterCount() == 0) {
             MarshallableOut marshallableOut = this.marshallableOutSupplier.get();

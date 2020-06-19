@@ -148,7 +148,7 @@ public class StrangeTextCombination {
 
     @NotNull
     private Wire wireFactory() {
-        bytes = Bytes.elasticHeapByteBuffer(64);
+        bytes = Bytes.allocateElasticOnHeap(64);
         return wireType.apply(bytes);
     }
 }

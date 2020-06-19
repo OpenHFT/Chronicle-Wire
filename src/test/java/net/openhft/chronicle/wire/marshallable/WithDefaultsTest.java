@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
 
-
 public class WithDefaultsTest extends WireTestCommon {
     @Test
     public void writeMarshallable() {

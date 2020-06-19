@@ -33,7 +33,6 @@ import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 
-
 @RunWith(value = Parameterized.class)
 public class NestedClassTest extends WireTestCommon {
     private static final OuterClass outerClass1 = new OuterClass();

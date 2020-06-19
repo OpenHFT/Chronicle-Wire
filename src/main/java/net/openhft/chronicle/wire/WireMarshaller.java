@@ -724,7 +724,7 @@ public class WireMarshaller<T> {
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             @NotNull Bytes bytes = (Bytes) UNSAFE.getObject(o, offset);
             if (bytes == null)
-                UNSAFE.putObject(o, offset, bytes = Bytes.elasticHeapByteBuffer(128));
+                UNSAFE.putObject(o, offset, bytes = Bytes.allocateElasticOnHeap(128));
             WireIn wireIn = read.wireIn();
             if (wireIn instanceof TextWire) {
                 wireIn.consumePadding();
@@ -1508,21 +1508,19 @@ public class WireMarshaller<T> {
         protected void copy(Object from, Object to) {
             putChar(to, getChar(from));
         }
+ }
 
+static class IntConversionFieldAccess extends FieldAccess {
+    @NotNull
+    private final IntConverter intConverter;
+
+    IntConversionFieldAccess(@NotNull Field field, @NotNull IntConversion intConversion) {
+        super(field);
+        this.intConverter = ObjectUtils.newInstance(intConversion.value());
     }
 
-
-    static class IntConversionFieldAccess extends FieldAccess {
-        @NotNull
-        private final IntConverter intConverter;
-
-        IntConversionFieldAccess(@NotNull Field field, @NotNull IntConversion intConversion) {
-            super(field);
-            this.intConverter = ObjectUtils.newInstance(intConversion.value());
-        }
-
-        @Override
-        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
+    @Override
+    protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             int anInt = getInt(o);
             if (write.isBinary()) {
                 write.int32(anInt);

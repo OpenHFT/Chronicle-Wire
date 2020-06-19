@@ -33,7 +33,6 @@ import java.io.FileNotFoundException;
 
 import static org.junit.Assert.assertEquals;
 
-
 public class BinaryWireWithMappedBytesTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test

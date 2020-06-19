@@ -28,7 +28,7 @@ interface ILast {
 public class ChainedMethodsTest extends WireTestCommon {
     @Test
     public void chainedText() {
-        TextWire wire = new TextWire(Bytes.elasticHeapByteBuffer(128))
+        TextWire wire = new TextWire(Bytes.allocateElasticOnHeap(128))
                 .useTextDocuments();
         ITop top = wire.methodWriter(ITop.class);
         top.mid("mid")
@@ -56,7 +56,7 @@ public class ChainedMethodsTest extends WireTestCommon {
 
     @Test
     public void chainedYaml() {
-        YamlWire wire = new YamlWire(Bytes.elasticHeapByteBuffer(128))
+        YamlWire wire = new YamlWire(Bytes.allocateElasticOnHeap(128))
                 .useTextDocuments();
         ITop top = wire.methodWriter(ITop.class);
         top.mid("mid")
@@ -84,7 +84,7 @@ public class ChainedMethodsTest extends WireTestCommon {
 
     @Test
     public void chainedBinary() {
-        Wire wire = new BinaryWire(Bytes.elasticHeapByteBuffer(128));
+        Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         ITop top = wire.methodWriter(ITop.class);
         top.mid("mid")
                 .next(1)

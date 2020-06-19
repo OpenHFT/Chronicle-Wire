@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 
-
 class BClass extends BytesInBinaryMarshallable {
     int id;
     boolean flag;

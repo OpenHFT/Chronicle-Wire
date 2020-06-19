@@ -33,7 +33,7 @@ public class IntConversionTest extends WireTestCommon {
 
     @Test
     public void method() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(64))
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(64))
                 .useTextDocuments();
         WriteWithInt write = wire.methodWriter(WriteWithInt.class);
         assertSame(write, write.to(0x12345));

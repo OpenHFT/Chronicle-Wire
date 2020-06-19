@@ -9,7 +9,7 @@ public class WireParserTest extends WireTestCommon {
 
     @Test
     public void noOpReadOne() {
-        BinaryWire wire = new BinaryWire(Bytes.elasticHeapByteBuffer(128));
+        BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.bytes().writeUtf8("Hello world");
 
         WireParser.skipReadable(-1, wire);

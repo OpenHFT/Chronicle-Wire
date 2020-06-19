@@ -35,7 +35,6 @@ import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 
-
 @Ignore("TODO FIX")
 @SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)

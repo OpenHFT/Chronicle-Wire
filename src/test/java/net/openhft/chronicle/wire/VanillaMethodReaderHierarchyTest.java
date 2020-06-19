@@ -39,7 +39,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
     }
 
     private void checkWriteRead(Simple simple) {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(32));
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(32));
         Simple writer = wire.methodWriter(Simple.class);
         MethodReader reader = wire.methodReader(simple);
         final String superMario = "Mario";

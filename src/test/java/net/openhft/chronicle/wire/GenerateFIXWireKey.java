@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-
 public class GenerateFIXWireKey {
     public static void main(String[] args) throws IOException {
         Files.lines(Paths.get("src/test/resources/FIX42.xml"))

@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.util.SerializableFunction;
 import org.jetbrains.annotations.NotNull;
 
-
 public enum Fun implements SerializableFunction<String, String> {
     ADD_A {
         @NotNull

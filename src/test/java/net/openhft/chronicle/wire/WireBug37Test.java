@@ -11,7 +11,6 @@ import java.nio.ByteBuffer;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-
 public class WireBug37Test extends WireTestCommon {
     @Test
     public void testNewlineInString() {
@@ -33,7 +32,7 @@ public class WireBug37Test extends WireTestCommon {
         final String output = bytes.toString();
         System.out.println("output: [" + output + "]");
 
-        obj3.readMarshallable(wireType.apply(Bytes.fromString(output)));
+        obj3.readMarshallable(wireType.apply(Bytes.from(output)));
 
         assertEquals(obj2, obj3);
 

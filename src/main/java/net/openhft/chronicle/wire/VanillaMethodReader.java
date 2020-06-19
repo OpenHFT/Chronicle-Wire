@@ -116,7 +116,6 @@ public class VanillaMethodReader implements MethodReader {
                     } else {
                         context[0] = intercept;
                     }
-
                 } else {
                     mh.invokeExact(arg);
                 }
@@ -226,6 +225,7 @@ public class VanillaMethodReader implements MethodReader {
     @NotNull
     public VanillaMethodReader closeIn(boolean closeIn) {
         throwExceptionIfClosed();
+
         this.closeIn = closeIn;
         return this;
     }
@@ -233,6 +233,7 @@ public class VanillaMethodReader implements MethodReader {
     // one arg
     public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, Class<?> parameterType) {
         throwExceptionIfClosed();
+
         Jvm.setAccessible(m); // turn of security check to make a little faster
         String name = m.getName();
         if (parameterType == long.class && o2 != null) {
@@ -305,6 +306,7 @@ public class VanillaMethodReader implements MethodReader {
     // no args
     public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m) {
         throwExceptionIfClosed();
+
         Jvm.setAccessible(m); // turn of security check to make a little faster
         String name = m.getName();
         MethodWireKey key = createWireKey(m, name);
@@ -336,6 +338,7 @@ public class VanillaMethodReader implements MethodReader {
 
     public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, @NotNull Class[] parameterTypes) {
         throwExceptionIfClosed();
+
         Jvm.setAccessible(m); // turn of security check to make a little faster
         @NotNull Object[] args = new Object[parameterTypes.length];
         @NotNull BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
@@ -376,6 +379,7 @@ public class VanillaMethodReader implements MethodReader {
     @SuppressWarnings("unchecked")
     public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, @NotNull Class[] parameterTypes, MethodFilterOnFirstArg methodFilterOnFirstArg) {
         throwExceptionIfClosed();
+
         Jvm.setAccessible(m); // turn off security check to make a little faster
         @NotNull Object[] args = new Object[parameterTypes.length];
         @NotNull BiConsumer<Object[], ValueIn> sequenceReader = (a, v) -> {
@@ -444,12 +448,14 @@ public class VanillaMethodReader implements MethodReader {
      */
     public boolean readOne() {
         throwExceptionIfClosed();
+
         return readOne0();
     }
 
     @Override
     public boolean lazyReadOne() {
         throwExceptionIfClosed();
+
         if (!in.peekDocument()) {
             return false;
         }
@@ -508,6 +514,7 @@ public class VanillaMethodReader implements MethodReader {
 
     public MethodReaderInterceptorReturns methodReaderInterceptorReturns() {
         throwExceptionIfClosed();
+
         return methodReaderInterceptorReturns;
     }
 

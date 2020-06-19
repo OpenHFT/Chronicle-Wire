@@ -35,7 +35,6 @@ import java.util.List;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
 
-
 @RunWith(value = Parameterized.class)
 @Ignore("TODO FIX")
 public class TextCompatibilityTest extends WireTestCommon {
@@ -86,7 +85,7 @@ public class TextCompatibilityTest extends WireTestCommon {
                 Object o = new YamlWire(bytes)
                         .getValueIn()
                         .object();
-                Bytes out = Bytes.elasticHeapByteBuffer(256);
+                Bytes out = Bytes.allocateElasticOnHeap(256);
                 String s = new TextWire(out).getValueOut().object(o).toString();
                 if (s.trim().equals(expected.trim()))
                     return;

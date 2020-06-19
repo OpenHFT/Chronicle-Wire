@@ -3272,7 +3272,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                     } else {
                         ((ReadBytesMarshallable) object).readMarshallable(BinaryWire.this.bytes);
                     }
-
                 } finally {
                     bytes.readLimit(limit);
                     bytes.readPosition(limit2);

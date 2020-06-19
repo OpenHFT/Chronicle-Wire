@@ -29,7 +29,6 @@ interface MockMethods {
     void list(List<String> strings);
 }
 
-
 @SuppressWarnings("rawtypes")
 public class VanillaMethodReaderTest extends WireTestCommon {
 
@@ -116,7 +115,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void testSubclasses() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256))
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         MRTListener writer = wire.methodWriter(MRTListener.class);
         writer.timed(1234567890L);
@@ -172,7 +171,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void methodInterceptor() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256))
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         MRTListener writer = wire.methodWriterBuilder(MRTListener.class)
                 .methodWriterListener((m, a) -> IntStream.range(0, a.length).filter(i -> a[i] instanceof MRT1).forEach(i -> ((MRT1) a[i]).value = "x"))
@@ -211,7 +210,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void methodInterceptorNull() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256))
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         MRTListener writer = wire.methodWriterBuilder(MRTListener.class)
                 .build();
@@ -246,7 +245,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void testNestedUnknownClass() {
-        Wire wire2 = new TextWire(Bytes.elasticHeapByteBuffer(256))
+        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
@@ -268,7 +267,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void testUnknownClass() {
-        Wire wire2 = new TextWire(Bytes.elasticHeapByteBuffer(256))
+        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
@@ -297,7 +296,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     public void testOverloaded() {
         Map<ExceptionKey, Integer> map = Jvm.recordExceptions();
         try {
-            Wire wire2 = new TextWire(Bytes.elasticHeapByteBuffer(32));
+            Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap(32));
             Overloaded writer2 = wire2.methodWriter(Overloaded.class);
             Wire wire = TextWire.from("method: [ ]\n");
             MethodReader reader = wire.methodReader(writer2);

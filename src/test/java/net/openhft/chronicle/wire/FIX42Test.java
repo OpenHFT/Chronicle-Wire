@@ -76,7 +76,6 @@ import java.util.Collection;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
-
 @RunWith(value = Parameterized.class)
 public class FIX42Test extends WireTestCommon {
     final int testId;

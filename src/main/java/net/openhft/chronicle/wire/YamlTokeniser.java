@@ -319,7 +319,7 @@ public class YamlTokeniser {
 
     private Bytes temp() {
         if (temp == null)
-            temp = Bytes.elasticHeapByteBuffer(32);
+            temp = Bytes.allocateElasticOnHeap(32);
         temp.clear();
         return temp;
     }
@@ -390,8 +390,7 @@ public class YamlTokeniser {
             if (ch <= ' ')
                 return;
         }
-
-    }
+ }
 
     private YamlToken indent(
             @NotNull YamlToken indented,
@@ -697,11 +696,10 @@ public class YamlTokeniser {
         pushed.add(token);
     }
 
-
-    public boolean isText(String s) {
-        // TODO make more efficient.
-        return text().equals(s);
-    }
+public boolean isText(String s) {
+    // TODO make more efficient.
+    return text().equals(s);
+}
 
     public YamlKeys keys() {
         YTContext context = topContext();

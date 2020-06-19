@@ -23,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
-
 public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
     @NotNull
     private final Supplier<MarshallableOut> marshallableOutSupplier;

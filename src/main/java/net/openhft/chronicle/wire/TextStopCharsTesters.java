@@ -19,7 +19,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.StopCharsTester;
 
-
 enum TextStopCharsTesters implements StopCharsTester {
     STRICT_END_OF_TEXT {
         @Override

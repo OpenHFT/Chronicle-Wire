@@ -14,11 +14,10 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-
 public class MethodWriterTest extends WireTestCommon {
     @Test
     public void testSubclasses() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256));
         Event writer = wire.methodWriterBuilder(Event.class).genericEvent("event").build();
         writer.event("top", new VanillaMethodReaderTest.MRT1("one"));
         writer.event("top", new VanillaMethodReaderTest.MRT2("one", "two"));
@@ -59,7 +58,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     public void testDefault() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256))
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         HasDefault writer = wire.methodWriter(HasDefault.class);
 
@@ -78,7 +77,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     public void ignoreStatic() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256));
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256));
         Closeable writer = wire.methodWriter(Closeable.class);
         Closeable.closeQuietly(writer);
         assertEquals("", wire.toString());
@@ -86,7 +85,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     public void testNoArgs() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256))
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         NoArgs writer = wire.methodWriter(NoArgs.class);
         writer.methodOne();
@@ -107,7 +106,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     public void testMicroTS() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(256))
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         HasMicroTS writer = wire.methodWriter(HasMicroTS.class);
         long now = 1532251709775811L; //TimeProvider.get().currentTimeMicros();

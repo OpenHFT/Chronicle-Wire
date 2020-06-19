@@ -29,7 +29,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
     private final String[] testData = new String[DATA_SET_SIZE];
     private final String[] internedStrings = new String[DATA_SET_SIZE];
     @SuppressWarnings("rawtypes")
-    private final Bytes heapBytes = Bytes.elasticHeapByteBuffer(4096);
+    private final Bytes heapBytes = Bytes.allocateElasticOnHeap(4096);
     private final BinaryWire wire = BinaryWire.binaryOnly(heapBytes);
 
     private static String message(final int index, final String inputData) {
@@ -68,7 +68,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
                 new NamedThreadFactory("test"));
 
         for (int i = 0; i < (Jvm.isArm() ? 12 : 200); i++) {
-            executorService.submit(new BinaryTextReaderWriter(capturedExceptions::add, () -> BinaryWire.binaryOnly(Bytes.elasticHeapByteBuffer(4096))));
+            executorService.submit(new BinaryTextReaderWriter(capturedExceptions::add, () -> BinaryWire.binaryOnly(Bytes.allocateElasticOnHeap(4096))));
         }
 
         for (int i = 0; i < 50000; i++) {
@@ -92,7 +92,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
         final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         for (int i = 0; i < (Jvm.isArm() ? 12 : 200); i++) {
-            executorService.submit(new BinaryTextReaderWriter(capturedExceptions::add, () -> BinaryWire.binaryOnly(Bytes.elasticHeapByteBuffer(4096))));
+            executorService.submit(new BinaryTextReaderWriter(capturedExceptions::add, () -> BinaryWire.binaryOnly(Bytes.allocateElasticOnHeap(4096))));
         }
 
         executorService.shutdown();
@@ -109,7 +109,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
                 Runtime.getRuntime().availableProcessors(),
                 new NamedThreadFactory("test"));
 
-        final BinaryWire sharedMutableWire = BinaryWire.binaryOnly(Bytes.elasticHeapByteBuffer(4096));
+        final BinaryWire sharedMutableWire = BinaryWire.binaryOnly(Bytes.allocateElasticOnHeap(4096));
         for (int i = 0; i < 1_000; i++) {
             executorService.submit(new BinaryTextReaderWriter(capturedExceptions::add, () -> sharedMutableWire));
         }

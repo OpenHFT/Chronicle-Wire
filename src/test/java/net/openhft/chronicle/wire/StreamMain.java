@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-
 public class StreamMain {
     public static void main(String[] args) {
         ClassAliasPool.CLASS_ALIASES.addAlias(FileFormat.class);

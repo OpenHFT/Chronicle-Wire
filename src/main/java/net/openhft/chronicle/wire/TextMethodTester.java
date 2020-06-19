@@ -166,7 +166,6 @@ public class TextMethodTester<T> {
         if (exceptionHandlerSetup != null)
             exceptionHandlerSetup.accept(reader, writer);
 
-
 //        long pos = wire2.bytes().writePosition();
         TextMethodWriterInvocationHandler.ENABLE_EOD = false;
         try {

@@ -112,7 +112,6 @@ public class JSONWire extends TextWire {
                     throw new IllegalArgumentException("Unexpected character in number '" + (char) ch + '\'');
                 }
             }
-
         };
     }
 

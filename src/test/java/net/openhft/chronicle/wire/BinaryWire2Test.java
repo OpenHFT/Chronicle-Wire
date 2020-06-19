@@ -34,7 +34,6 @@ import java.util.function.Consumer;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
-
 @SuppressWarnings("rawtypes")
 public class BinaryWire2Test extends WireTestCommon {
     @NotNull
@@ -134,7 +133,7 @@ public class BinaryWire2Test extends WireTestCommon {
                 v -> v.uuid(UUID.randomUUID())
         );
         Wire wire = createWire();
-        Wire wire2 = new TextWire(Bytes.elasticHeapByteBuffer(32));
+        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap(32));
 
         for (Consumer<ValueOut> value : writeValue) {
             wire.clear();
@@ -167,7 +166,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @Test
     public void testBytesStore() {
         @NotNull Wire wire = createWire();
-        wire.write().object(Bytes.fromString("Hello"));
+        wire.write().object(Bytes.from("Hello"));
 
         Bytes b = Bytes.elasticByteBuffer();
         wire.read().bytes(b);
@@ -482,7 +481,7 @@ public class BinaryWire2Test extends WireTestCommon {
                 "xxxxxxxxxxxxxxxx" +
                 "xxxxxxxxxxxxxxxx" +
                 "xxxxxxxxxxxxxxxx";
-        Bytes str = Bytes.fromString(s);
+        Bytes str = Bytes.from(s);
 
         wire.write("message").compress("gzip", str);
 
@@ -518,7 +517,7 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull Wire wire = new BinaryWire(bytes, false, false, false, 32, comp, false);
         assert wire.startUse();
         @NotNull String str = "xxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy2yyyyyyyyyyyyyyyyy";
-        BytesStore bytes = Bytes.fromString(str);
+        BytesStore bytes = Bytes.from(str);
 
         wire.write().bytes(bytes);
         if (!comp.equals("binary"))
@@ -793,7 +792,7 @@ public class BinaryWire2Test extends WireTestCommon {
     }
 
     static class BytesHolder extends SelfDescribingMarshallable {
-        final Bytes bytes = Bytes.elasticHeapByteBuffer(64);
+        final Bytes bytes = Bytes.allocateElasticOnHeap(64);
 
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {

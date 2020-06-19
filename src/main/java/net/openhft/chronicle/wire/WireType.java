@@ -367,7 +367,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     static Bytes getBytes2() {
         // when in debug, the output becomes confused if you reuse the buffer.
         if (Jvm.isDebug())
-            return Bytes.elasticHeapByteBuffer();
+            return Bytes.allocateElasticOnHeap();
         return Wires.acquireAnotherBytes();
     }
 

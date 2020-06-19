@@ -32,10 +32,9 @@ enum CcyPair {
     static final EnumInterner<CcyPair> INTERNER = new EnumInterner<>(CcyPair.class);
 }
 
-
 @SuppressWarnings("rawtypes")
 public class CSVBytesMarshallableTest extends WireTestCommon {
-    Bytes bytes = Bytes.fromString(
+    Bytes bytes = Bytes.from(
             "1.09029,1.090305,EURUSD,2,1,EBS\n" +
                     "1.50935,1.50936,GBPUSD,5,1,RTRS\n" +
                     "1.0906,1.09065,EURCHF,3,1,EBS\n");

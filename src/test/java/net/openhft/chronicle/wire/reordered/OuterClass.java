@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class OuterClass extends SelfDescribingMarshallable {
     final List<NestedClass> listAFree = new ArrayList<>();
     final List<NestedClass> listA = new ArrayList<>();

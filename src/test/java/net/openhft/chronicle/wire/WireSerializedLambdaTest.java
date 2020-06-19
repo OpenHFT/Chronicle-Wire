@@ -33,7 +33,6 @@ import java.util.function.Function;
 
 import static org.junit.Assert.*;
 
-
 @SuppressWarnings("unchecked")
 public class WireSerializedLambdaTest extends WireTestCommon {
     static {

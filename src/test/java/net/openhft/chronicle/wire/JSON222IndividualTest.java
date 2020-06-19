@@ -30,7 +30,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-
 public class JSON222IndividualTest extends WireTestCommon {
     @Test
     public void testEmptyBrackets() {

@@ -106,7 +106,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
     @NotNull
     public static YamlWire from(@NotNull String text) {
-        return new YamlWire(Bytes.fromString(text));
+        return new YamlWire(Bytes.from(text));
     }
 
     public static String asText(@NotNull Wire wire) {
@@ -414,9 +414,8 @@ public class YamlWire extends AbstractWire implements Wire {
         return "todo";
     }
 
-
-    @NotNull
-    @Override
+@NotNull
+@Override
     public ValueIn read(@NotNull WireKey key) {
         return read(key.name().toString());
     }
@@ -462,7 +461,7 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     public String dumpContext() {
-        Bytes b = Bytes.elasticHeapByteBuffer(128);
+        Bytes b = Bytes.allocateElasticOnHeap(128);
         YamlWire yw = new YamlWire(b);
         yw.valueOut.list(yt.contexts, YamlTokeniser.YTContext.class);
         return b.toString();
@@ -798,7 +797,6 @@ public class YamlWire extends AbstractWire implements Wire {
         bytes.writeUnsignedByte(ch1);
         bytes.writeUnsignedByte(ch2);
     }
-
 
     @Override
     public void startEvent() {
@@ -2329,7 +2327,6 @@ public class YamlWire extends AbstractWire implements Wire {
             }
             return false;
         }
-
 
         @Override
         public <T> T applyToMarshallable(@NotNull Function<WireIn, T> marshallableReader) {

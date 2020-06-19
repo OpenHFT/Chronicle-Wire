@@ -19,7 +19,6 @@ package net.openhft.chronicle.wire.reuse;
 
 import net.openhft.chronicle.wire.WireKey;
 
-
 enum ModelKeys implements WireKey {
     id, revision, properties, collections, reference, path, name, value, key;
 

@@ -493,7 +493,6 @@ public interface ValueOut {
             for (V v : s) {
                 object(kls, v);
             }
-
         });
         return wireOut();
     }

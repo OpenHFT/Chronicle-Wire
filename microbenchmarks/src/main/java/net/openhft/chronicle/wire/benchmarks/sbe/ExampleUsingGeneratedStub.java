@@ -26,7 +26,6 @@ import uk.co.real_logic.agrona.concurrent.UnsafeBuffer;
 
 import java.nio.ByteBuffer;
 
-
 public class ExampleUsingGeneratedStub {
     public static void main(String[] args) {
         final Data data = new Data(123, 1234567890L, 1234, true, "Hello World", Side.Sell);

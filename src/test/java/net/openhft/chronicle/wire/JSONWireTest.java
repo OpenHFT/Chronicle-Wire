@@ -29,7 +29,6 @@ import java.util.List;
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 
-
 public class JSONWireTest extends WireTestCommon {
     @NotNull
     private JSONWire getWire() {
@@ -38,7 +37,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @NotNull
     private JSONWire getWire(@NotNull String json) {
-        return new JSONWire(Bytes.fromString(json));
+        return new JSONWire(Bytes.from(json));
     }
 
     @Test
@@ -166,7 +165,7 @@ public class JSONWireTest extends WireTestCommon {
     public void testBytes() {
         @NotNull Wire w = getWire();
 
-        Bytes bs = Bytes.fromString("blablabla");
+        Bytes bs = Bytes.from("blablabla");
         w.write("a").int64(123);
         w.write("somebytes").text(bs);
 

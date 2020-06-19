@@ -35,7 +35,6 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.nio.ByteBuffer;
 
-
 public class Data implements Marshallable, BytesMarshallable, Externalizable {
     int smallInt = 0;
     long longInt = 0;

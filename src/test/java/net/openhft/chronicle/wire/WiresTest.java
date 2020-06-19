@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-
 @SuppressWarnings("rawtypes")
 public class WiresTest extends WireTestCommon {
 
@@ -153,11 +152,11 @@ public class WiresTest extends WireTestCommon {
     }
 
     private static final class BytesContainer {
-        Bytes bytesField = Bytes.elasticHeapByteBuffer(64);
+        Bytes bytesField = Bytes.allocateElasticOnHeap(64);
     }
 
     private static final class BytesContainerMarshallable extends SelfDescribingMarshallable {
-        Bytes bytesField = Bytes.elasticHeapByteBuffer(64);
+        Bytes bytesField = Bytes.allocateElasticOnHeap(64);
     }
 
     private static final class StringBuilderContainer {

@@ -281,7 +281,7 @@ public interface ValueIn {
             int i = 0;
             while (in.hasNextSequenceItem() && i < a.length) {
                 if (a[i] == null)
-                    a[i] = Bytes.elasticHeapByteBuffer(32);
+                    a[i] = Bytes.allocateElasticOnHeap(32);
                 bytes(a[i++]);
             }
             return i;

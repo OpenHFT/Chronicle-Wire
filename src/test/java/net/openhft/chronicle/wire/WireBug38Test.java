@@ -11,7 +11,6 @@ import java.nio.ByteBuffer;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-
 public class WireBug38Test extends WireTestCommon {
     @Test
     public void testNestedObj() {
@@ -29,7 +28,7 @@ public class WireBug38Test extends WireTestCommon {
         final String output = bytes.toString();
         System.out.println("output: [" + output + "]");
 
-        obj2.readMarshallable(wireType.apply(Bytes.fromString(output)));
+        obj2.readMarshallable(wireType.apply(Bytes.from(output)));
 
         assertEquals(obj1, obj2);
         bytes.releaseLast();
