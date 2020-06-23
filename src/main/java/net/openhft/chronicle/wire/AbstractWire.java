@@ -176,8 +176,8 @@ public abstract class AbstractWire implements Wire {
     @Override
     public HeaderType readDataHeader(boolean includeMetaData) throws EOFException {
 
+        alignForRead(bytes);
         for (; ; ) {
-            alignForRead(bytes);
             int header = bytes.peekVolatileInt();
             if (isReady(header)) {
                 if (isData(header))
@@ -185,8 +185,14 @@ public abstract class AbstractWire implements Wire {
                 if (includeMetaData && isReadyMetaData(header))
                     return HeaderType.META_DATA;
 
+                long readPosition = bytes.readPosition();
                 int bytesToSkip = lengthOf(header) + SPB_HEADER_SIZE;
-                bytes.readSkip(bytesToSkip);
+                readPosition += bytesToSkip;
+                if (usePadding) {
+                    readPosition += 3;
+                    readPosition &= ~3;
+                }
+                bytes.readPosition(readPosition);
             } else {
                 if (header == END_OF_DATA)
                     throw new EOFException();
@@ -196,8 +202,11 @@ public abstract class AbstractWire implements Wire {
     }
 
     private void alignForRead(Bytes<?> bytes) {
-        if (usePadding)
-            bytes.readSkip((-bytes.readPosition()) & 0x3);
+        if (usePadding) {
+            long bytesToSkip = (-bytes.readPosition()) & 0x3;
+            if (bytesToSkip != 0)
+                bytes.readSkip(bytesToSkip);
+        }
     }
 
     @Override
