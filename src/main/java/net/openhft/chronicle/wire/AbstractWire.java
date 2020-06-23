@@ -31,7 +31,6 @@ import net.openhft.chronicle.threads.TimingPauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.EOFException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.StreamCorruptedException;
@@ -174,38 +173,40 @@ public abstract class AbstractWire implements Wire {
 
     @NotNull
     @Override
-    public HeaderType readDataHeader(boolean includeMetaData) throws EOFException {
+    public HeaderType readDataHeader(boolean includeMetaData) {
 
         alignForRead(bytes);
         for (; ; ) {
             int header = bytes.peekVolatileInt();
-            if (isReady(header)) {
-                if (isData(header))
-                    return HeaderType.DATA;
-                if (includeMetaData && isReadyMetaData(header))
-                    return HeaderType.META_DATA;
-
-                long readPosition = bytes.readPosition();
-                int bytesToSkip = lengthOf(header) + SPB_HEADER_SIZE;
-                readPosition += bytesToSkip;
-                if (usePadding) {
-                    readPosition += 3;
-                    readPosition &= ~3;
-                }
-                bytes.readPosition(readPosition);
-            } else {
+//            if (isReady(header)) {
+            if ((header & NOT_COMPLETE) != 0 || header == 0) {
                 if (header == END_OF_DATA)
-                    throw new EOFException();
+                    return HeaderType.EOF;
                 return HeaderType.NONE;
             }
+//                if (isData(header))
+            if ((header & META_DATA) == 0)
+                return HeaderType.DATA;
+            if (includeMetaData && isReadyMetaData(header))
+                return HeaderType.META_DATA;
+
+            long readPosition = bytes.readPosition();
+            int bytesToSkip = lengthOf(header) + SPB_HEADER_SIZE;
+            readPosition += bytesToSkip;
+            if (usePadding) {
+                readPosition += 3;
+                readPosition &= ~3;
+            }
+            bytes.readPosition(readPosition);
         }
     }
 
     private void alignForRead(Bytes<?> bytes) {
         if (usePadding) {
-            long bytesToSkip = (-bytes.readPosition()) & 0x3;
-            if (bytesToSkip != 0)
-                bytes.readSkip(bytesToSkip);
+            long readPosition = bytes.readPosition();
+            long readPosition2 = (readPosition + 3) & ~3;
+            if (readPosition != readPosition2)
+                bytes.readPosition(readPosition2);
         }
     }
 

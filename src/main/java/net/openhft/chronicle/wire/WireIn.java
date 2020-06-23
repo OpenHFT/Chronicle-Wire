@@ -223,6 +223,6 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     enum HeaderType {
-        NONE, DATA, META_DATA
+        NONE, DATA, META_DATA, EOF
     }
 }
