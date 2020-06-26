@@ -17,26 +17,19 @@ public class WireBug35Test extends WireTestCommon {
     @Test
     public void objectsInSequence() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
-        try {
-            final Wire wire = WireType.TEXT.apply(bytes);
-            wire.write(() -> "seq").sequence(seq -> {
-                seq.marshallable(obj -> obj.write(() -> "key").text("value"));
-                seq.marshallable(obj -> obj.write(() -> "key").text("value"));
-            });
 
-            @NotNull final String text = wire.asText().toString();
-            Object load = new Yaml().load(text);
+        final Wire wire = WireType.TEXT.apply(bytes);
+        wire.write(() -> "seq").sequence(seq -> {
+            seq.marshallable(obj -> obj.write(() -> "key").text("value"));
+            seq.marshallable(obj -> obj.write(() -> "key").text("value"));
+        });
 
-            assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
-        } finally {
-            bytes.release();
-        }
-
+        @NotNull final String text = wire.asText().toString();
+        Object load = new Yaml().load(text);
 
         assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
 
         bytes.releaseLast();
-
     }
 
     @Test
