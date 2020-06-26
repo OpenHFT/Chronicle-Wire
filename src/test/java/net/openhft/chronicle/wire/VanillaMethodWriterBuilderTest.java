@@ -88,11 +88,72 @@ public class VanillaMethodWriterBuilderTest extends WireTestCommon {
     @NotNull
     private String doUseMethodId(boolean useMethodIds) {
         HexDumpBytes bytes = new HexDumpBytes();
-        BinaryWire wire = new BinaryWire(bytes);
-        WithMethodId id = wire.methodWriterBuilder(WithMethodId.class).useMethodIds(useMethodIds).get();
-        try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
-            id.method1("hello");
+        String s = null;
+        try {
+            BinaryWire wire = new BinaryWire(bytes);
+            WithMethodId id = wire.methodWriterBuilder(WithMethodId.class).useMethodIds(useMethodIds).get();
+            try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
+                id.method1("hello");
+            }
+            try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
+                id.method2(new MWB("world", 123, 3.456));
+            }
+            try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
+                id.method3(1234567890L);
+            }
+            try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
+                id.method4(new MWB2("world", 123, 3.456));
+            }
+
+            // "[pos: 0, rlim: 96, wlim: 8EiB, cap: 8EiB ] ǁ⒏٠٠٠º⒈åhello\\u001D٠٠٠º⒉\\u0082\\u0016٠٠٠⒌world{٠٠٠٠٠٠٠ÙÎ÷Sã¥⒒@⒎٠٠٠º⒊¦Ò⒉\\u0096I$٠٠٠º⒋\\u0082\\u001D٠٠٠ÅhelloåworldÅvalue{Åmoney\\u0094\\u0080\\u008E⒉٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠⒛٠⒈٠T>6⒌realUnderlyingObject\\u0081\u007F٠٠"
+            // "[pos: 0, rlim: 100, wlim: 8EiB, cap: 8EiB] ǁ⒏٠٠٠º⒈åhello \u001D٠٠٠º⒉\u0082  \u0016٠٠٠⒌world{٠٠٠٠٠٠٠ÙÎ÷Sã¥⒒@⒒٠٠٠º⒊§Ò⒉  \u0096I٠٠٠٠$٠٠٠º⒋\u0082\u001D٠٠٠ÅhelloåworldÅvalue{Åmoney\u0094\u0080\u008E⒉٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠0ú⒏F⒎٠٠٠À1ôÿè٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠@6ôÿ
+            System.out.println(bytes.toDebugString());
+            s = bytes.toHexString();
+            StringWriter sw = new StringWriter();
+
+            /**
+             * 00 00 00 80                                     # msg-length
+             * ba 01                                           # method1
+             * e5 68 65 6c 6c 6f                               # hello
+             * 00 00 00 80                                     # msg-length
+             * ba 02                                           # method2
+             * 82 16 00 00 00                                  # MWB
+             *    05 77 6f 72 6c 64                               # hello
+             *    7b 00 00 00 00 00 00 00                         # value
+             *    d9 ce f7 53 e3 a5 0b 40                         # money
+             * 00 00 00 80                                     # msg-length
+             * ba 03                                           # method3
+             * a7 d2 02 96 49 00 00 00 00                      # 1234567890
+             * 00 00 00 80                                     # msg-length
+             * ba 04                                           # method4
+             * 82 1d 00 00 00                                  # MWB2
+             *    c5 68 65 6c 6c 6f e5 77 6f 72 6c 64             # hello
+             *    c5 76 61 6c 75 65 7b                            # value
+             *    c5 6d 6f 6e 65 79 94 80 8e 02                   # money
+             */
+
+            MethodReader reader = wire.methodReader(Mocker.logging(WithMethodId.class, "", sw));
+            for (int i = 0; i < 4; i++)
+                assertTrue(reader.readOne());
+            assertFalse(reader.readOne());
+            assertEquals("method1[hello]\n" +
+                    "method2[!net.openhft.chronicle.wire.VanillaMethodWriterBuilderTest$MWB {\n" +
+                    "  hello: world,\n" +
+                    "  value: 123,\n" +
+                    "  money: 3.456\n" +
+                    "}\n" +
+                    "]\n" +
+                    "method3[1234567890]\n" +
+                    "method4[!net.openhft.chronicle.wire.VanillaMethodWriterBuilderTest$MWB2 {\n" +
+                    "  hello: world,\n" +
+                    "  value: 123,\n" +
+                    "  money: 3.456\n" +
+                    "}\n" +
+                    "]\n", sw.toString().replace("\r\n", "\n"));
+        } finally {
+            bytes.release();
         }
+
         try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
             id.method2(new MWB("world", 123, 3.456));
         }

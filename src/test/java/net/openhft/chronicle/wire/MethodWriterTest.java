@@ -17,18 +17,47 @@ import static org.junit.Assert.assertTrue;
 public class MethodWriterTest extends WireTestCommon {
     @Test
     public void testSubclasses() {
+
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256));
         Event writer = wire.methodWriterBuilder(Event.class).genericEvent("event").build();
+        System.out.println("");
         writer.event("top", new VanillaMethodReaderTest.MRT1("one"));
         writer.event("top", new VanillaMethodReaderTest.MRT2("one", "two"));
         writer.event("mid", new VanillaMethodReaderTest.MRT1("1"));
         writer.event("mid", new VanillaMethodReaderTest.MRT2("1", "2"));
 
+        /**
+         * top: !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT1 {
+         *   field1: one,
+         *   value: a
+         * }
+         * ---
+         * top: !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT2 {
+         *   field1: one,
+         *   value: a,
+         *   field2: two
+         * }
+         * ---
+         * mid: !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT1 {
+         *   field1: "1",
+         *   value: a
+         * }
+         * ---
+         * mid: !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT2 {
+         *   field1: "1",
+         *   value: a,
+         *   field2: "2"
+         * }
+         * ---
+         */
         StringWriter sw = new StringWriter();
         MethodReader reader = wire.methodReader(Mocker.logging(VanillaMethodReaderTest.MRTListener.class, "subs ", sw));
         for (int i = 0; i < 4; i++) {
             assertTrue(reader.readOne());
         }
+
+        ValueOut v;
+
         assertFalse(reader.readOne());
         String expected = "subs top[!net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +

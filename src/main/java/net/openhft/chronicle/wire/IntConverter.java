@@ -27,4 +27,10 @@ public interface IntConverter {
         append(sb, value);
         return sb.toString();
     }
+
+    default CharSequence asText(int value) {
+        StringBuilder sb = new StringBuilder();
+        append(sb, value);
+        return sb;
+    }
 }
