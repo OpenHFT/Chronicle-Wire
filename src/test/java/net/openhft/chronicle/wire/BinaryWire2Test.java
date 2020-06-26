@@ -779,7 +779,7 @@ public class BinaryWire2Test extends WireTestCommon {
             final double v = in.float64();
             assertEquals(d, v, 0.0);
             final long size = wire.bytes().readPosition();
-            System.out.println(d + " size: " + size);
+//            System.out.println(d + " size: " + size);
         }
     }
 
