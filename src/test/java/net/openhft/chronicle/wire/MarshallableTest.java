@@ -27,7 +27,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.Assert.*;
 
 public class MarshallableTest extends WireTestCommon {
@@ -60,7 +60,7 @@ public class MarshallableTest extends WireTestCommon {
     public void testBytesMarshallable() {
         @NotNull Marshallable m = new MyTypes();
 
-        @NotNull Bytes bytes = nativeBytes();
+        @NotNull Bytes bytes = allocateElasticOnHeap();
         assertTrue(bytes.isElastic());
         @NotNull TextWire wire = new TextWire(bytes);
         m.writeMarshallable(wire);
@@ -71,7 +71,7 @@ public class MarshallableTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testEquals() {
-        @NotNull final Bytes bytes = nativeBytes();
+        @NotNull final Bytes bytes = allocateElasticOnHeap();
         assertTrue(bytes.isElastic());
         @NotNull final MyTypes source = new MyTypes();
         //change default value fields in order to let destination to be changed from its default values too

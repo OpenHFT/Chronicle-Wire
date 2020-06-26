@@ -74,7 +74,7 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 
 @RunWith(value = Parameterized.class)
 public class FIX42Test extends WireTestCommon {
@@ -84,7 +84,7 @@ public class FIX42Test extends WireTestCommon {
     final boolean fieldLess;
     @SuppressWarnings("rawtypes")
     @NotNull
-    Bytes bytes = nativeBytes();
+    Bytes bytes = allocateElasticOnHeap();
 
     public FIX42Test(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         this.testId = testId;

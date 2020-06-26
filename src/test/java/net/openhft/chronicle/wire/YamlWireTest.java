@@ -48,6 +48,7 @@ import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
+import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static net.openhft.chronicle.wire.YamlTokeniserTest.doTest;
@@ -247,7 +248,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @NotNull
     private YamlWire createWire() {
-        bytes = nativeBytes();
+        bytes = allocateElasticOnHeap();
         return new YamlWire(bytes);
     }
 
@@ -1092,7 +1093,7 @@ public class YamlWireTest extends WireTestCommon {
     @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteStrings() {
-        @NotNull final Bytes bytes = nativeBytes();
+        @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
 
         @NotNull final Map<String, String> expected = new LinkedHashMap<>();
@@ -1233,7 +1234,7 @@ public class YamlWireTest extends WireTestCommon {
                 return stack;
             }
         };
-        @NotNull final Bytes bytes = nativeBytes();
+        @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception")
                 .object(e));
@@ -1747,6 +1748,7 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals("!net.openhft.chronicle.wire.YamlWireTest$BytesWrapper {\n" +
                 "  bytes: hello\n" +
                 "}\n", bw.toString());
+        bw.bytes.releaseLast();
     }
 
     @Test

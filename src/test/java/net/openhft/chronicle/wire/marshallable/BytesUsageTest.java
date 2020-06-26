@@ -25,11 +25,12 @@ public class BytesUsageTest extends WireTestCommon {
 
         bw.clOrdId().clear().append("A").append(value);
         assertEquals(Bytes.from("AhelloWorld"), bw.clOrdId());
+        value.releaseLast();
     }
 
     @SuppressWarnings("rawtypes")
     static class BytesWrapper extends SelfDescribingMarshallable {
-        Bytes clOrdId = Bytes.allocateElasticDirect();
+        Bytes clOrdId = Bytes.allocateElasticOnHeap();
 
         public Bytes clOrdId() {
             return clOrdId;

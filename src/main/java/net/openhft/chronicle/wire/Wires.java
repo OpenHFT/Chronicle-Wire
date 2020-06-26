@@ -83,7 +83,6 @@ public enum Wires {
         }
         return ANY_OBJECT;
     });
-    static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
     static final ClassLocal<Function<String, Marshallable>> MARSHALLABLE_FUNCTION = ClassLocal.withInitial(tClass -> {
         Class[] interfaces = {Marshallable.class, tClass};
         if (tClass == Marshallable.class)
@@ -101,6 +100,7 @@ public enum Wires {
     static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.allocateElasticOnHeap()));
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
     private static final int INVERSE_TID_MASK = ~TID_MASK;
+    static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
 
     static {
         CLASS_STRATEGY_FUNCTIONS.add(SerializeEnum.INSTANCE);
@@ -421,7 +421,7 @@ public enum Wires {
         if (clazz == Object.class)
             strategy = LIST;
         if (using == null)
-            using = (E) strategy.newInstance(clazz);
+            using = (E) strategy.newInstanceOrNull(clazz);
 
         return in.sequence(using, strategy::readUsing) ? readResolve(using) : null;
     }
@@ -432,8 +432,8 @@ public enum Wires {
         if (clazz == Object.class)
             strategy = MAP;
         if (using == null) {
-            using = (E) strategy.newInstance(clazz);
-            nullObject = using == null && strategy == MARSHALLABLE;
+            using = (E) strategy.newInstanceOrNull(clazz);
+            nullObject = using == null;
         }
         if (Throwable.class.isAssignableFrom(clazz))
             return (E) WireInternal.throwable(in, false, (Throwable) using);

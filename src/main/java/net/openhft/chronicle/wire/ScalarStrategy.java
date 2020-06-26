@@ -56,7 +56,7 @@ class ScalarStrategy<T> implements SerializationStrategy<T> {
     @SuppressWarnings("rawtypes")
     @NotNull
     @Override
-    public T newInstance(Class type) {
+    public T newInstanceOrNull(Class type) {
         return ObjectUtils.newInstance(this.type);
     }
 

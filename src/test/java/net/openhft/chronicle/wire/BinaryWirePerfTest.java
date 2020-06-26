@@ -28,7 +28,7 @@ import java.io.StreamCorruptedException;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 
 @Ignore("Long running test")
 @RunWith(value = Parameterized.class)
@@ -39,7 +39,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
     final boolean fieldLess;
     @SuppressWarnings("rawtypes")
     @NotNull
-    Bytes bytes = nativeBytes();
+    Bytes bytes = allocateElasticOnHeap();
 
     public BinaryWirePerfTest(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         this.testId = testId;

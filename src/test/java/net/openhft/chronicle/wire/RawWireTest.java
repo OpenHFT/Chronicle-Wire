@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -44,6 +45,13 @@ public class RawWireTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @NotNull
     Bytes bytes = nativeBytes();
+
+    @After
+    @Override
+    public void assertReferencesReleased() {
+        bytes.releaseLast();
+        super.assertReferencesReleased();
+    }
 
     @Test
     public void testWrite() {

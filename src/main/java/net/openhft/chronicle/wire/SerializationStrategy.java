@@ -24,14 +24,14 @@ public interface SerializationStrategy<T> {
     @Deprecated(/*to be removed?*/)
     @Nullable
     default T read(ValueIn in, Class<T> type) {
-        return readUsing(newInstance(type), in);
+        return readUsing(newInstanceOrNull(type), in);
     }
 
     @Nullable
     @Deprecated(/*to be removed?*/)
     default T readUsing(@Nullable T using, ValueIn in, @Nullable Class<T> type) {
         if (using == null && type != null)
-            using = newInstance(type);
+            using = newInstanceOrNull(type);
         return readUsing(using, in);
     }
 
@@ -39,7 +39,7 @@ public interface SerializationStrategy<T> {
     T readUsing(T using, ValueIn in);
 
     @Nullable
-    T newInstance(Class<T> type);
+    T newInstanceOrNull(Class<T> type);
 
     Class<T> type();
 

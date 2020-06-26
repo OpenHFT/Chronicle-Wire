@@ -49,6 +49,7 @@ import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
+import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.easymock.EasyMock.replay;
@@ -257,7 +258,7 @@ public class TextWireTest extends WireTestCommon {
 
     @NotNull
     private TextWire createWire() {
-        bytes = nativeBytes();
+        bytes = allocateElasticOnHeap();
         return new TextWire(bytes);
     }
 
@@ -1156,7 +1157,7 @@ public class TextWireTest extends WireTestCommon {
                 return stack;
             }
         };
-        @NotNull final Bytes bytes = nativeBytes();
+        @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes);
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception")
                 .object(e));
@@ -1253,7 +1254,7 @@ public class TextWireTest extends WireTestCommon {
         @NotNull byte[] compressedBytes = str.getBytes(ISO_8859_1);
         wire.write().compress("gzip", Bytes.wrapForRead(compressedBytes));
 
-        @NotNull Bytes bytes = allocateElasticDirect();
+        @NotNull Bytes bytes = allocateElasticOnHeap();
         wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
@@ -1267,7 +1268,7 @@ public class TextWireTest extends WireTestCommon {
         @NotNull byte[] compressedBytes = str.getBytes(ISO_8859_1);
         wire.write().compress("lzw", Bytes.wrapForRead(compressedBytes));
 
-        @NotNull Bytes bytes = allocateElasticDirect();
+        @NotNull Bytes bytes = allocateElasticOnHeap();
         wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
@@ -1609,6 +1610,7 @@ public class TextWireTest extends WireTestCommon {
         assertEquals("!net.openhft.chronicle.wire.TextWireTest$BytesWrapper {\n" +
                 "  bytes: hello\n" +
                 "}\n", bw.toString());
+        bw.bytes.releaseLast();
     }
 
     @Test

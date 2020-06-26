@@ -38,7 +38,7 @@ public class DotNetTest extends WireTestCommon {
                 "000096: 66 65 38 2D 65 37 36 30 32 38 38 31 34 34 64 39\n");
         System.out.println(bytes.toHexString());
         @NotNull Wire wire = new BinaryWire(bytes);
-        @NotNull Bytes text = Bytes.allocateElasticDirect();
+        @NotNull Bytes text = Bytes.allocateElasticOnHeap();
         wire.copyTo(new TextWire(text));
         System.out.println(text);
 

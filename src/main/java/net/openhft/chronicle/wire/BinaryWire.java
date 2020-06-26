@@ -3615,7 +3615,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         case EVENT_OBJECT: {
                             if (using == null) {
                                 strategy = SerializationStrategies.MAP;
-                                using = strategy.newInstance(null);
+                                using = strategy.newInstanceOrNull(null);
                             }
 
                             strategy.readUsing(using, valueIn);

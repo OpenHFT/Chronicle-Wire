@@ -17,7 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.NativeBytes;
+import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -25,16 +25,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class QueryWireTest extends WireTestCommon {
-    private NativeBytes<Void> bytes;
+    private Bytes bytes;
 
     @NotNull
     private QueryWire createWire() {
-        bytes = nativeBytes();
+        bytes = allocateElasticOnHeap();
         return new QueryWire(bytes);
     }
 

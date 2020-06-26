@@ -6,7 +6,10 @@ import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.Wires;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.time.ZoneId;
 import java.util.Map;
@@ -46,7 +49,7 @@ public class NullFieldMarshallingTest {
         assertNull(object2.zoneId);
     }
 
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/165")
+    //    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/165")
     @Test
     public void testAbstractNullFieldUnmarshalledCorrectlyBinary() {
         VO object = new VO();

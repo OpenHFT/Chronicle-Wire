@@ -31,13 +31,13 @@ import java.time.*;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.Assert.*;
 
 @SuppressWarnings("rawtypes")
 public class BinaryWire2Test extends WireTestCommon {
     @NotNull
-    Bytes bytes = nativeBytes();
+    Bytes bytes = Bytes.allocateElasticOnHeap();
 
     @After
     public void after() {
@@ -495,6 +495,7 @@ public class BinaryWire2Test extends WireTestCommon {
         assertEquals("message: # gzip\n" + s +
                 "\n", asText.toString());
         asText.releaseLast();
+        str.releaseLast();
     }
 
     @Test
@@ -527,6 +528,7 @@ public class BinaryWire2Test extends WireTestCommon {
         wire.bytes().readPosition(0);
         String str2 = wire.read().text();
         assertEquals(str, str2);
+        bytes.releaseLast();
     }
 
     @Test
@@ -706,7 +708,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @Test
     public void testreadBytes() {
-        @NotNull Wire wire = new BinaryWire(nativeBytes());
+        @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
 
         wire.write("a").typePrefix(BytesHolder.class).marshallable(w -> w.write("bytes").text("Hello World"));
 
@@ -718,7 +720,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @Test
     public void testWritingDecimals() {
 //        BinaryWire.SPEC = 18;
-        @NotNull Wire wire = new BinaryWire(nativeBytes());
+        @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
         @NotNull final ValueOut out = wire.getValueOut();
         @NotNull final ValueIn in = wire.getValueIn();
         // try all the values of 0.xxxxxx which will fit
@@ -766,7 +768,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @Test
     public void testWritingDecimals2() {
 //        BinaryWire.SPEC = 18;
-        @NotNull Wire wire = new BinaryWire(nativeBytes());
+        @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
         @NotNull final ValueOut out = wire.getValueOut();
         @NotNull final ValueIn in = wire.getValueIn();
 

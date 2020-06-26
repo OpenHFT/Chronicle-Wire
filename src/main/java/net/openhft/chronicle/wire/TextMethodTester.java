@@ -115,7 +115,7 @@ public class TextMethodTester<T> {
     public TextMethodTester run() throws IOException {
         if (REGRESS_TESTS)
             System.err.println("NOTE: Regressing tests, please check your commits");
-        Wire wire2 = createWire(Bytes.allocateElasticDirect());
+        Wire wire2 = createWire(Bytes.allocateElasticOnHeap());
 
         MethodWriterBuilder<T> methodWriterBuilder = wire2.methodWriterBuilder(outputClass);
         if (methodWriterListener != null) {

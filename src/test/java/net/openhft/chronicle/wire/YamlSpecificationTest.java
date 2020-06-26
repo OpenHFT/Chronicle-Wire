@@ -88,7 +88,7 @@ public class YamlSpecificationTest extends WireTestCommon {
         @Nullable byte[] byteArr = getBytes(input + ".yaml");
         Bytes bytes = Bytes.wrapForRead(byteArr);
         @NotNull TextWire tw = new TextWire(bytes);
-        @NotNull Bytes bytes2 = Bytes.allocateElasticDirect();
+        @NotNull Bytes bytes2 = Bytes.allocateElasticOnHeap();
         @NotNull TextWire tw2 = new TextWire(bytes2);
 
         @Nullable Object o = tw.readObject();
