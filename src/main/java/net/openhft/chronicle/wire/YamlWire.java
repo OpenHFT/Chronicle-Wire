@@ -198,6 +198,7 @@ public class YamlWire extends AbstractWire implements Wire {
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass, () -> newTextMethodWriterInvocationHandler(tClass));
         for (Class aClass : additional)
             builder.addInterface(aClass);
+        builder.wireType(WireType.YAML).marshallableOut(this);
         return builder.build();
     }
 
@@ -214,7 +215,9 @@ public class YamlWire extends AbstractWire implements Wire {
     @Override
     @NotNull
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
-        return new VanillaMethodWriterBuilder<>(tClass, () -> newTextMethodWriterInvocationHandler(tClass));
+        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass, () -> newTextMethodWriterInvocationHandler(tClass));
+        builder.wireType(WireType.YAML).marshallableOut(this);
+        return builder;
     }
 
     @Override
