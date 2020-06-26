@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,18 +28,18 @@ import java.io.StreamCorruptedException;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 
 @Ignore("Long running test")
 @RunWith(value = Parameterized.class)
-public class BinaryWirePerfTest {
+public class BinaryWirePerfTest extends WireTestCommon {
     final int testId;
     final boolean fixed;
     final boolean numericField;
     final boolean fieldLess;
     @SuppressWarnings("rawtypes")
     @NotNull
-    Bytes bytes = nativeBytes();
+    Bytes bytes = allocateElasticOnHeap();
 
     public BinaryWirePerfTest(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         this.testId = testId;
@@ -177,11 +177,6 @@ public class BinaryWirePerfTest {
                     .read(Fields.W).int32(this, (o, x) -> o.w = x)
                     .read(Fields.X).int32(this, (o, x) -> o.x = x)
             ;
-        }
-
-        @After
-        public void checkRegisteredBytes() {
-            BytesUtil.checkRegisteredBytes();
         }
 
         enum Fields implements WireKey {

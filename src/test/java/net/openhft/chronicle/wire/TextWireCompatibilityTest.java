@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,11 +24,11 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class TextWireCompatibilityTest {
+public class TextWireCompatibilityTest extends WireTestCommon {
 
     @Test
     public void testAddFieldsInTheMiddle() {
-        @NotNull TextWire wire = new TextWire(Bytes.elasticHeapByteBuffer(100));
+        @NotNull TextWire wire = new TextWire(Bytes.allocateElasticOnHeap(100));
         wire.getValueOut().object(new SubIncompatibleObject());
         System.out.println(wire.toString());
         Assert.assertNotNull(wire.getValueIn().object());

@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,14 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
@@ -31,8 +30,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-
-public class JSON222IndividualTest {
+public class JSON222IndividualTest extends WireTestCommon {
     @Test
     public void testEmptyBrackets() {
         checkSerialized("{}", new LinkedHashMap<>());
@@ -83,7 +81,7 @@ public class JSON222IndividualTest {
             assertEquals(expected, wire.toString());
 
         } finally {
-            wire.bytes().release();
+            wire.bytes().releaseLast();
         }
     }
 
@@ -102,11 +100,6 @@ public class JSON222IndividualTest {
 
         assertEquals(expected, o.toString());
 
-        wire.bytes().release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        wire.bytes().releaseLast();
     }
 }

@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -345,6 +347,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         @Nullable BytesStore bytes = (BytesStore) object;
                         if (textable(bytes)) {
                             valueOut.text(bytes);
+                            bytes.releaseLast();
                             break;
                         }
                     }
@@ -3269,7 +3272,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                     } else {
                         ((ReadBytesMarshallable) object).readMarshallable(BinaryWire.this.bytes);
                     }
-
                 } finally {
                     bytes.readLimit(limit);
                     bytes.readPosition(limit2);
@@ -3613,7 +3615,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         case EVENT_OBJECT: {
                             if (using == null) {
                                 strategy = SerializationStrategies.MAP;
-                                using = strategy.newInstance(null);
+                                using = strategy.newInstanceOrNull(null);
                             }
 
                             strategy.readUsing(using, valueIn);

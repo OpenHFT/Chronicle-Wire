@@ -1,10 +1,7 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.wire.Marshallable;
-import net.openhft.chronicle.wire.SelfDescribingMarshallable;
-import net.openhft.chronicle.wire.WireIn;
-import net.openhft.chronicle.wire.Wires;
+import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -13,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class MarshallableWithOverwriteFalseTest {
+public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
 
     @Test
     public void test() {

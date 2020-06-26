@@ -18,7 +18,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
-public class VanillaMethodWriterBuilderTest {
+public class VanillaMethodWriterBuilderTest extends WireTestCommon {
 
     @UsedViaReflection
     private final String name;
@@ -154,6 +154,36 @@ public class VanillaMethodWriterBuilderTest {
             bytes.release();
         }
 
+        try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
+            id.method2(new MWB("world", 123, 3.456));
+        }
+        try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
+            id.method3(1234567890L);
+        }
+        try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
+            id.method4(new MWB2("world", 123, 3.456));
+        }
+        String s = bytes.toHexString();
+        StringWriter sw = new StringWriter();
+        MethodReader reader = wire.methodReader(Mocker.logging(WithMethodId.class, "", sw));
+        for (int i = 0; i < 4; i++)
+            assertTrue(reader.readOne());
+        assertFalse(reader.readOne());
+        assertEquals("method1[hello]\n" +
+                "method2[!net.openhft.chronicle.wire.VanillaMethodWriterBuilderTest$MWB {\n" +
+                "  hello: world,\n" +
+                "  value: 123,\n" +
+                "  money: 3.456\n" +
+                "}\n" +
+                "]\n" +
+                "method3[1234567890]\n" +
+                "method4[!net.openhft.chronicle.wire.VanillaMethodWriterBuilderTest$MWB2 {\n" +
+                "  hello: world,\n" +
+                "  value: 123,\n" +
+                "  money: 3.456\n" +
+                "}\n" +
+                "]\n", sw.toString().replace("\r\n", "\n"));
+        bytes.releaseLast();
         return s;
     }
 
@@ -186,8 +216,7 @@ public class VanillaMethodWriterBuilderTest {
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
             super.readMarshallable(wire);
         }
-
-    }
+ }
 
     static class MWB2 extends SelfDescribingMarshallable {
         String hello;

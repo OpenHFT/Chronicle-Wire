@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,19 +20,18 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.bytes.MappedFile;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-import java.io.EOFException;
 import java.io.File;
 import java.io.StreamCorruptedException;
 import java.nio.file.Files;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
+import static net.openhft.chronicle.core.io.ReferenceOwner.INIT;
 import static org.junit.Assert.assertEquals;
 
-public class WireResourcesTest {
+public class WireResourcesTest extends WireTestCommon {
 
     @Test
     public void testMappedBytesClose() throws Exception {
@@ -58,7 +59,7 @@ public class WireResourcesTest {
         assertEquals(1, mb.refCount());
 
         mb0 = mb;
-        mb.release();
+        mb.releaseLast();
         assertEquals(0, mb0.mappedFile().refCount());
         assertEquals(0, mb0.refCount());
     }
@@ -74,11 +75,12 @@ public class WireResourcesTest {
         assertEquals(1, mb.refCount());
 
         wire = WireType.TEXT.apply(mb);
-        wire.bytes().reserve();
+        ReferenceOwner test = ReferenceOwner.temporary("test");
+        wire.bytes().reserve(test);
 
         assertEquals(1, mb.mappedFile().refCount());
         assertEquals(2, mb.refCount());
-        mb.release();
+        mb.release(INIT);
 
         assertEquals(1, wire.bytes().refCount());
 
@@ -88,7 +90,7 @@ public class WireResourcesTest {
         wire.updateFirstHeader();
         assert wire.endUse();
 
-        wire.bytes().release();
+        wire.bytes().releaseLast(test);
         assertEquals(0, wire.bytes().refCount());
     }
 
@@ -138,7 +140,7 @@ public class WireResourcesTest {
 
         assertEquals(1, mappedFile(wire).refCount());
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
         // the MappedFile was created by MappedBytes
         // so when it is fully released, the MappedFile is close()d
         assertEquals(0, wire.bytes().refCount());

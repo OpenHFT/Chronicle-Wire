@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,14 +18,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -38,11 +37,12 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static net.openhft.chronicle.bytes.Bytes.elasticHeapByteBuffer;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
 @RunWith(value = Parameterized.class)
-public class BinaryWireTest {
+public class BinaryWireTest extends WireTestCommon {
 
     final int testId;
     final boolean fixed;
@@ -51,7 +51,7 @@ public class BinaryWireTest {
     final int compressedSize;
     @SuppressWarnings("rawtypes")
     @NotNull
-    Bytes bytes = nativeBytes();
+    Bytes bytes = elasticHeapByteBuffer();
 
     public BinaryWireTest(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
@@ -74,9 +74,10 @@ public class BinaryWireTest {
         );
     }
 
-    @After
-    public void after() {
-//        BinaryWire.SPEC = 16;
+    @Override
+    public void assertReferencesReleased() {
+        bytes.releaseLast();
+        super.assertReferencesReleased();
     }
 
     @Test
@@ -105,7 +106,9 @@ public class BinaryWireTest {
     }
 
     private void checkWire(@NotNull Wire wire, String... expected) {
-        assertEquals("id: " + testId, expected[testId], wire.toString());
+        assertEquals("id: " + testId,
+                expected[testId].replaceAll("٠+$", ""),
+                wire.toString().replaceAll("٠+$", ""));
     }
 
     @Test
@@ -678,6 +681,7 @@ public class BinaryWireTest {
                 .read()
                 .bytes(allBytes2);
         assertEquals(Bytes.wrapForRead(allBytes), allBytes2);
+        allBytes2.releaseLast();
     }
 
     @Test
@@ -728,24 +732,26 @@ public class BinaryWireTest {
         wire.write().object(null);
 
         @Nullable Object o = wire.read().object(Object.class);
-        assertEquals(null, o);
+        assertNull(o);
         @Nullable String s = wire.read().object(String.class);
-        assertEquals(null, s);
+        assertNull(s);
         @Nullable RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
-        assertEquals(null, rp);
+        assertNull(rp);
         @Nullable Circle c = wire.read().object(Circle.class);
-        assertEquals(null, c);
+        assertNull(c);
     }
 
     @Test
     public void testLongString() {
         @NotNull Wire wire = createWire();
-        @NotNull char[] chars = new char[128];
-        for (int i = 0; i < Character.MAX_VALUE; i++) {
-            if (!Character.isValidCodePoint(i))
-                continue;
+        @NotNull char[] chars = new char[64];
+        for (int i = 0; i < Character.MAX_VALUE; i += chars.length) {
+            for (int j = 0; j < chars.length; j++) {
+                if (!Character.isValidCodePoint(i + j))
+                    continue;
+                chars[j] = (char) (i + j);
+            }
             wire.clear();
-            Arrays.fill(chars, (char) i);
             @NotNull String s = new String(chars);
             wire.writeDocument(false, w -> w.write(() -> "message").text(s));
 
@@ -777,7 +783,6 @@ public class BinaryWireTest {
     }
 
     @Test
-    @Ignore("TODO FIX")
     public void testArrays2() {
         @NotNull Wire wire = createWire();
         @NotNull Object[] a1 = new Object[0];
@@ -827,7 +832,7 @@ public class BinaryWireTest {
             @Nullable DTO o = valueIn3.typedMarshallable();
             Assert.assertEquals("world3", o.text);
         }
-        w.bytes().release();
+        w.bytes().releaseLast();
     }
 
     @Test
@@ -875,11 +880,6 @@ public class BinaryWireTest {
             assertEquals(0, wire.bytes().readRemaining());
             wire.clear();
         }
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     enum BWKey implements WireKey {

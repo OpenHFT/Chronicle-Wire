@@ -29,7 +29,6 @@ import java.util.UUID;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
-
 @SuppressWarnings("rawtypes")
 public class ScalarValues implements Serializable {
     boolean flag;

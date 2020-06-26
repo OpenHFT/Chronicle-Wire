@@ -1,11 +1,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -13,8 +11,7 @@ import java.nio.ByteBuffer;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-
-public class WireBug37Test {
+public class WireBug37Test extends WireTestCommon {
     @Test
     public void testNewlineInString() {
         @NotNull final WireType wireType = WireType.TEXT;
@@ -35,16 +32,11 @@ public class WireBug37Test {
         final String output = bytes.toString();
         System.out.println("output: [" + output + "]");
 
-        obj3.readMarshallable(wireType.apply(Bytes.fromString(output)));
+        obj3.readMarshallable(wireType.apply(Bytes.from(output)));
 
         assertEquals(obj2, obj3);
 
-        bytes.release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        bytes.releaseLast();
     }
 
     static class MarshallableObj implements Marshallable {

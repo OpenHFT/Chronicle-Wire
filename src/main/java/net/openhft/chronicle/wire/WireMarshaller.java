@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
@@ -38,7 +39,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
-
 
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
 public class WireMarshaller<T> {
@@ -622,7 +622,7 @@ public class WireMarshaller<T> {
                 } catch (Exception ex) {
                     object = ex;
                 }
-                Jvm.warn().on(getClass(), "Unable to parse field: " + field.getName() + ", as a marshallable as it is " + object);
+                Jvm.warn().on(getClass(), "Unable to parse field: " + field.getName() + ", as a marshallable as it is " + object, e);
                 if (overwrite)
                     field.set(o, ObjectUtils.defaultValue(field.getType()));
             }
@@ -724,7 +724,7 @@ public class WireMarshaller<T> {
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             @NotNull Bytes bytes = (Bytes) UNSAFE.getObject(o, offset);
             if (bytes == null)
-                UNSAFE.putObject(o, offset, bytes = Bytes.elasticHeapByteBuffer(128));
+                UNSAFE.putObject(o, offset, bytes = Bytes.allocateElasticOnHeap(128));
             WireIn wireIn = read.wireIn();
             if (wireIn instanceof TextWire) {
                 wireIn.consumePadding();
@@ -1508,21 +1508,19 @@ public class WireMarshaller<T> {
         protected void copy(Object from, Object to) {
             putChar(to, getChar(from));
         }
+ }
 
+static class IntConversionFieldAccess extends FieldAccess {
+    @NotNull
+    private final IntConverter intConverter;
+
+    IntConversionFieldAccess(@NotNull Field field, @NotNull IntConversion intConversion) {
+        super(field);
+        this.intConverter = ObjectUtils.newInstance(intConversion.value());
     }
 
-
-    static class IntConversionFieldAccess extends FieldAccess {
-        @NotNull
-        private final IntConverter intConverter;
-
-        IntConversionFieldAccess(@NotNull Field field, @NotNull IntConversion intConversion) {
-            super(field);
-            this.intConverter = ObjectUtils.newInstance(intConversion.value());
-        }
-
-        @Override
-        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
+    @Override
+    protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             int anInt = getInt(o);
             if (write.isBinary()) {
                 write.int32(anInt);

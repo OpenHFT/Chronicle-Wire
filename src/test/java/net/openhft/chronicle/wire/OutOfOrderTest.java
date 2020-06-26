@@ -7,7 +7,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class OutOfOrderTest {
+public class OutOfOrderTest extends WireTestCommon {
     static final String start = "{ \"a\": 1, ";
     static final String records = "\"records\":[{\"id\":1}], ";
     static final String missing = "\"missing\": 111, ";
@@ -24,9 +24,9 @@ public class OutOfOrderTest {
         JSONWire wire = new JSONWire(from);
         OOOT ooot = wire.getValueIn()
                 .object(OOOT.class);
-        from.release();
+        from.releaseLast();
 
-        JSONWire wire2 = new JSONWire(Bytes.elasticHeapByteBuffer(64));
+        JSONWire wire2 = new JSONWire(Bytes.allocateElasticOnHeap(64));
         wire2.getValueOut().object(ooot);
         assertEquals(expected, wire2.toString());
     }

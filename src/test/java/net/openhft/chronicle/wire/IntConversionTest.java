@@ -10,7 +10,7 @@ import java.io.StringWriter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
-public class IntConversionTest {
+public class IntConversionTest extends WireTestCommon {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(IntHolder.class);
     }
@@ -33,7 +33,7 @@ public class IntConversionTest {
 
     @Test
     public void method() {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(64))
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(64))
                 .useTextDocuments();
         WriteWithInt write = wire.methodWriter(WriteWithInt.class);
         assertSame(write, write.to(0x12345));

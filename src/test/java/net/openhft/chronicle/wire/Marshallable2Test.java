@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @RunWith(value = Parameterized.class)
-public class Marshallable2Test {
+public class Marshallable2Test extends WireTestCommon {
     private final WireType wireType;
 
     public Marshallable2Test(WireType wireType) {
@@ -45,7 +45,7 @@ public class Marshallable2Test {
     @SuppressWarnings("rawtypes")
     @Test
     public void testObject() {
-        Bytes bytes = Bytes.elasticHeapByteBuffer(64);
+        Bytes bytes = Bytes.allocateElasticOnHeap(64);
         Wire wire = wireType.apply(bytes);
 
         Outer source = new Outer("Armadillo");

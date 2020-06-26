@@ -20,7 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Test;
 
-public class TextWireTypeArrayTest {
+public class TextWireTypeArrayTest extends WireTestCommon {
     @Test
     public void shouldUnmarshalArrayOfType() {
         final Bytes<?> bytes = Wires.acquireBytes();

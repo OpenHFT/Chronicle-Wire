@@ -17,9 +17,7 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,7 +26,7 @@ import org.junit.runners.Parameterized;
 
 import java.util.*;
 
-public class ProjectTest {
+public class ProjectTest extends WireTestCommon {
 
     @NotNull
     @Rule
@@ -74,12 +72,7 @@ public class ProjectTest {
         final Outer project = Wires.project(Outer.class, simple);
         System.out.println(project);
 
-        Assert.assertTrue(project.inner().name().equals("some data"));
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        Assert.assertEquals("some data", project.inner().name());
     }
 
     @SuppressWarnings("rawtypes")

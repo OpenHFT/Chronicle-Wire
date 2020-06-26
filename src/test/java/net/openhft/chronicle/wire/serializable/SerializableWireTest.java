@@ -18,12 +18,11 @@
 package net.openhft.chronicle.wire.serializable;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -36,9 +35,8 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-
 @RunWith(value = Parameterized.class)
-public class SerializableWireTest {
+public class SerializableWireTest extends WireTestCommon {
     private final WireType wireType;
     private final Serializable m;
 
@@ -81,11 +79,7 @@ public class SerializableWireTest {
                 .object();
         assertEquals(m, m2);
 
-        bytes.release();
+        bytes.releaseLast();
     }
 
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
-    }
 }

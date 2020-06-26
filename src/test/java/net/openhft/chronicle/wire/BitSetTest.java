@@ -6,11 +6,8 @@ import org.junit.Test;
 
 import java.util.BitSet;
 
-/**
- * Created by Rob Austin
- */
 @SuppressWarnings("rawtypes")
-public class BitSetTest {
+public class BitSetTest extends WireTestCommon {
 
     @Test
     public void testBitSetEquals() {
@@ -25,7 +22,7 @@ public class BitSetTest {
             BitSet read = wire.getValueIn().object(BitSet.class);
             Assert.assertEquals(original, read);
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -43,7 +40,7 @@ public class BitSetTest {
             BitSet read = wire.getValueIn().object(BitSet.class);
             Assert.assertEquals(original, read);
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -63,7 +60,7 @@ public class BitSetTest {
                     "\n" +
                     "]", wire.toString());
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -85,7 +82,7 @@ public class BitSetTest {
                     "\n" +
                     "]", wire.toString());
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -107,7 +104,7 @@ public class BitSetTest {
             BitSet read = wire.getValueIn().object(using, BitSet.class);
             Assert.assertEquals(original, read);
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 }

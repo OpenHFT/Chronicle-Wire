@@ -8,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 // Test created as a result of agitator tests i.e. random character changes
-public class TextWireAgitatorTest {
+public class TextWireAgitatorTest extends WireTestCommon {
     @Test(expected = IORuntimeException.class)
     public void lowerCaseClass() {
         if (!OS.isWindows())

@@ -18,13 +18,12 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -36,9 +35,8 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-
 @RunWith(value = Parameterized.class)
-public class MarshallableWireTest {
+public class MarshallableWireTest extends WireTestCommon {
     private final WireType wireType;
     private final Marshallable m;
 
@@ -82,11 +80,6 @@ public class MarshallableWireTest {
         if (!m.equals(m2))
             assertEquals(m, m2);
 
-        bytes.release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        bytes.releaseLast();
     }
 }

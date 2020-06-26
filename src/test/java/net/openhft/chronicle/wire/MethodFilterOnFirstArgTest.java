@@ -18,7 +18,7 @@ interface MockMethods2 extends MethodFilterOnFirstArg {
 }
 
 @SuppressWarnings("rawtypes")
-public class MethodFilterOnFirstArgTest {
+public class MethodFilterOnFirstArgTest extends WireTestCommon {
     @Test
     public void ignoreMethodBasedOnFirstArg() throws IOException {
         TextMethodTester test = new TextMethodTester<>(

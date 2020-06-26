@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,8 +49,8 @@ import java.util.function.*;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
-import static net.openhft.chronicle.bytes.BytesUtil.unregister;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.core.io.AbstractReferenceCounted.unmonitor;
 
 /**
  * YAML Based wire format
@@ -70,7 +72,7 @@ public class YamlWire extends AbstractWire implements Wire {
     static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
 
     static {
-        assert unregister(TYPE);
+        unmonitor(TYPE);
         for (char ch : "?%&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
         for (char ch : "?,#:{}[]|>\\".toCharArray())
@@ -104,7 +106,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
     @NotNull
     public static YamlWire from(@NotNull String text) {
-        return new YamlWire(Bytes.fromString(text));
+        return new YamlWire(Bytes.from(text));
     }
 
     public static String asText(@NotNull Wire wire) {
@@ -415,9 +417,8 @@ public class YamlWire extends AbstractWire implements Wire {
         return "todo";
     }
 
-
-    @NotNull
-    @Override
+@NotNull
+@Override
     public ValueIn read(@NotNull WireKey key) {
         return read(key.name().toString());
     }
@@ -463,7 +464,7 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     public String dumpContext() {
-        Bytes b = Bytes.elasticHeapByteBuffer(128);
+        Bytes b = Bytes.allocateElasticOnHeap(128);
         YamlWire yw = new YamlWire(b);
         yw.valueOut.list(yt.contexts, YamlTokeniser.YTContext.class);
         return b.toString();
@@ -799,7 +800,6 @@ public class YamlWire extends AbstractWire implements Wire {
         bytes.writeUnsignedByte(ch1);
         bytes.writeUnsignedByte(ch2);
     }
-
 
     @Override
     public void startEvent() {
@@ -2330,7 +2330,6 @@ public class YamlWire extends AbstractWire implements Wire {
             }
             return false;
         }
-
 
         @Override
         public <T> T applyToMarshallable(@NotNull Function<WireIn, T> marshallableReader) {

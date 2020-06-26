@@ -1,12 +1,12 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.wire.Marshallable;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-
-public class ThreeSequenceTest {
+public class ThreeSequenceTest extends WireTestCommon {
     @Test
     public void testThree() {
         ThreeSequence ts = Marshallable.fromString("!" + ThreeSequence.class.getName() + " {\n" +

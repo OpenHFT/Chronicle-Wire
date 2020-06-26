@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
@@ -84,7 +85,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                 //noinspection unchecked
                 return (T) wire.getValueIn().object();
             } finally {
-                bytes.release();
+                bytes.releaseLast();
             }
         }
 
@@ -374,7 +375,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     static Bytes getBytes2() {
         // when in debug, the output becomes confused if you reuse the buffer.
         if (Jvm.isDebug())
-            return Bytes.allocateElasticDirect();
+            return Bytes.allocateElasticOnHeap();
         return Wires.acquireAnotherBytes();
     }
 
@@ -498,7 +499,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         try {
             return apply(bytes).getValueIn().object(expectedType);
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -537,7 +538,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                             return true;
                         }
                         if (bytes.refCount() > 0)
-                            bytes.release();
+                            bytes.releaseLast();
                         return false;
                     }
                 }, false);
@@ -608,7 +609,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             Wire wire = apply(bytes);
             return wire.getValueIn().typedMarshallable();
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 

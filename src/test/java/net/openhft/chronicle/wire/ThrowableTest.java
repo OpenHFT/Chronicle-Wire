@@ -6,7 +6,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class ThrowableTest {
+public class ThrowableTest extends WireTestCommon {
     @Test
     public void writeReadThrowable() {
         for (WireType wireType : new WireType[]{WireType.TEXT, WireType.BINARY_LIGHT}) {
@@ -21,7 +21,7 @@ public class ThrowableTest {
             Throwable t = (Throwable) wire.getValueIn().object();
             assertEquals("message", t.getMessage());
             assertTrue(t.getStackTrace()[0].toString().startsWith("net.openhft.chronicle.wire.ThrowableTest.writeReadThrowable(ThrowableTest.java"));
-            wire.bytes().release();
+            wire.bytes().releaseLast();
         }
     }
 }

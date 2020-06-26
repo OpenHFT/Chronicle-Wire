@@ -21,11 +21,11 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-
-public class DotNetTest {
+public class DotNetTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testCode() {
@@ -38,10 +38,10 @@ public class DotNetTest {
                 "000096: 66 65 38 2D 65 37 36 30 32 38 38 31 34 34 64 39\n");
         System.out.println(bytes.toHexString());
         @NotNull Wire wire = new BinaryWire(bytes);
-        @NotNull Bytes text = Bytes.allocateElasticDirect();
+        @NotNull Bytes text = Bytes.allocateElasticOnHeap();
         wire.copyTo(new TextWire(text));
         System.out.println(text);
 
-        bytes.release();
+        bytes.releaseLast();
     }
 }

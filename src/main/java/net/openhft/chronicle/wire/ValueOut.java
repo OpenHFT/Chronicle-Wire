@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -281,11 +283,9 @@ public interface ValueOut {
         });
     }
 
-    @NotNull
-    <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer);
+    @NotNull <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer);
 
-    @NotNull
-    <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer);
+    @NotNull <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer);
 
     default <T, K> WireOut sequenceWithLength(T t, int length, ObjectIntObjectConsumer<T, ValueOut> writer) {
         boolean b = swapLeaf(true);
@@ -493,7 +493,6 @@ public interface ValueOut {
             for (V v : s) {
                 object(kls, v);
             }
-
         });
         return wireOut();
     }
@@ -667,9 +666,10 @@ public interface ValueOut {
             IntValue value2 = (IntValue) value;
             return int32forBinding(value2.getValue(), value2);
         } else {
-            assert (!Wires.isInternal(value)) : "type=" + value.getClass() +
-                    " is unsupported, it must either be of type Marshallable, String or " +
-                    "AutoBoxed primitive Object";
+            if ((Wires.isInternal(value)))
+                throw new IllegalArgumentException("type=" + value.getClass() +
+                        " is unsupported, it must either be of type Marshallable, String or " +
+                        "AutoBoxed primitive Object");
 
             String typeName = Wires.typeNameFor(value);
             if (typeName != null)

@@ -36,7 +36,6 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
-
 @State(Scope.Thread)
 public class ObjectPoolMain {
 
@@ -60,7 +59,7 @@ public class ObjectPoolMain {
                 }
             }
         } else {
-            int time = Boolean.getBoolean("longTest") ? 30 : 2;
+            int time = Jvm.getBoolean("longTest") ? 30 : 2;
             System.out.println("measurementTime: " + time + " secs");
             Options opt = new OptionsBuilder()
                     .include(ObjectPoolMain.class.getSimpleName())

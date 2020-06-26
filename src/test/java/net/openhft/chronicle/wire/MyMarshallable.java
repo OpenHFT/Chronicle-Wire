@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-
 class MyMarshallable extends SelfDescribingMarshallable {
 
     @Nullable

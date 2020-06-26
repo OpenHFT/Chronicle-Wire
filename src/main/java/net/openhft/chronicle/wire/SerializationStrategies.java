@@ -1,8 +1,10 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
+ * https://chronicle.software
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
@@ -12,9 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
@@ -33,7 +33,6 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.util.*;
-
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum SerializationStrategies implements SerializationStrategy {
@@ -58,8 +57,8 @@ public enum SerializationStrategies implements SerializationStrategy {
 
         @Nullable
         @Override
-        public Object newInstance(@NotNull Class type) {
-            return type.isInterface() || Modifier.isAbstract(type.getModifiers()) ? null : super.newInstance(type);
+        public Object newInstanceOrNull(@NotNull Class type) {
+            return type.isInterface() || Modifier.isAbstract(type.getModifiers()) ? null : super.newInstanceOrNull(type);
         }
     },
     BYTES_MARSHALLABLE {
@@ -77,8 +76,8 @@ public enum SerializationStrategies implements SerializationStrategy {
 
         @Nullable
         @Override
-        public Object newInstance(@NotNull Class type) {
-            return type.isInterface() || Modifier.isAbstract(type.getModifiers()) ? null : super.newInstance(type);
+        public Object newInstanceOrNull(@NotNull Class type) {
+            return type.isInterface() || Modifier.isAbstract(type.getModifiers()) ? null : super.newInstanceOrNull(type);
         }
     },
     ANY_OBJECT {
@@ -170,7 +169,7 @@ public enum SerializationStrategies implements SerializationStrategy {
 
         @NotNull
         @Override
-        public Object newInstance(@NotNull Class type) {
+        public Object newInstanceOrNull(@NotNull Class type) {
             return new DemarshallableWrapper(type);
         }
     },
@@ -236,7 +235,7 @@ public enum SerializationStrategies implements SerializationStrategy {
 
         @NotNull
         @Override
-        public Object newInstance(@Nullable Class type) {
+        public Object newInstanceOrNull(@Nullable Class type) {
 
             if (type == null)
                 return new LinkedHashMap<>();
@@ -272,7 +271,7 @@ public enum SerializationStrategies implements SerializationStrategy {
 
         @NotNull
         @Override
-        public Object newInstance(@NotNull Class type) {
+        public Object newInstanceOrNull(@NotNull Class type) {
             return SortedSet.class.isAssignableFrom(type) ? new TreeSet<>() : new LinkedHashSet<>();
         }
 
@@ -309,7 +308,7 @@ public enum SerializationStrategies implements SerializationStrategy {
 
         @NotNull
         @Override
-        public Object newInstance(Class type) {
+        public Object newInstanceOrNull(Class type) {
             return new ArrayList<>();
         }
 
@@ -353,7 +352,7 @@ public enum SerializationStrategies implements SerializationStrategy {
 
         @NotNull
         @Override
-        public Object newInstance(@NotNull Class type) {
+        public Object newInstanceOrNull(@NotNull Class type) {
             return new ArrayWrapper(type);
         }
 
@@ -397,7 +396,7 @@ public enum SerializationStrategies implements SerializationStrategy {
 
         @NotNull
         @Override
-        public Object newInstance(@NotNull Class type) {
+        public Object newInstanceOrNull(@NotNull Class type) {
             return new PrimArrayWrapper(type);
         }
 
@@ -410,8 +409,8 @@ public enum SerializationStrategies implements SerializationStrategy {
 
     @Nullable
     @Override
-    public Object newInstance(Class type) {
-        return ObjectUtils.newInstance(type);
+    public Object newInstanceOrNull(Class type) {
+        return ObjectUtils.newInstanceOrNull(type);
     }
 
     @NotNull

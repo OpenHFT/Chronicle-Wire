@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +19,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,23 +31,17 @@ import java.time.*;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.Assert.*;
 
-
 @SuppressWarnings("rawtypes")
-public class BinaryWire2Test {
+public class BinaryWire2Test extends WireTestCommon {
     @NotNull
-    Bytes bytes = nativeBytes();
+    Bytes bytes = Bytes.allocateElasticOnHeap();
 
     @After
     public void after() {
 //        BinaryWire.SPEC = 16;
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     @NotNull
@@ -55,6 +50,12 @@ public class BinaryWire2Test {
         @NotNull BinaryWire wire = new BinaryWire(bytes, false, false, false, 32, "lzw", false);
         assert wire.startUse();
         return wire;
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void unmarshallableObject() {
+        BinaryWire wire = createWire();
+        wire.getValueOut().object(new Object());
     }
 
     @Test
@@ -132,7 +133,7 @@ public class BinaryWire2Test {
                 v -> v.uuid(UUID.randomUUID())
         );
         Wire wire = createWire();
-        Wire wire2 = new TextWire(Bytes.elasticHeapByteBuffer(32));
+        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap(32));
 
         for (Consumer<ValueOut> value : writeValue) {
             wire.clear();
@@ -165,12 +166,12 @@ public class BinaryWire2Test {
     @Test
     public void testBytesStore() {
         @NotNull Wire wire = createWire();
-        wire.write().object(Bytes.fromString("Hello"));
+        wire.write().object(Bytes.from("Hello"));
 
         Bytes b = Bytes.elasticByteBuffer();
         wire.read().bytes(b);
         assertEquals("Hello", b.toString());
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -294,8 +295,8 @@ public class BinaryWire2Test {
 
         System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
 
-        wire.bytes().release();
-        twire.bytes().release();
+        wire.bytes().releaseLast();
+        twire.bytes().releaseLast();
     }
 
     private void writeMessage(@NotNull WireOut wire) {
@@ -325,8 +326,8 @@ public class BinaryWire2Test {
 
         System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
 
-        wire.bytes().release();
-        twire.bytes().release();
+        wire.bytes().releaseLast();
+        twire.bytes().releaseLast();
     }
 
     private void writeMessageContext(@NotNull WireOut wire) {
@@ -480,7 +481,7 @@ public class BinaryWire2Test {
                 "xxxxxxxxxxxxxxxx" +
                 "xxxxxxxxxxxxxxxx" +
                 "xxxxxxxxxxxxxxxx";
-        Bytes str = Bytes.fromString(s);
+        Bytes str = Bytes.from(s);
 
         wire.write("message").compress("gzip", str);
 
@@ -493,7 +494,8 @@ public class BinaryWire2Test {
         wire.copyTo(new TextWire(asText));
         assertEquals("message: # gzip\n" + s +
                 "\n", asText.toString());
-        asText.release();
+        asText.releaseLast();
+        str.releaseLast();
     }
 
     @Test
@@ -516,7 +518,7 @@ public class BinaryWire2Test {
         @NotNull Wire wire = new BinaryWire(bytes, false, false, false, 32, comp, false);
         assert wire.startUse();
         @NotNull String str = "xxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy2yyyyyyyyyyyyyyyyy";
-        BytesStore bytes = Bytes.fromString(str);
+        BytesStore bytes = Bytes.from(str);
 
         wire.write().bytes(bytes);
         if (!comp.equals("binary"))
@@ -526,6 +528,7 @@ public class BinaryWire2Test {
         wire.bytes().readPosition(0);
         String str2 = wire.read().text();
         assertEquals(str, str2);
+        bytes.releaseLast();
     }
 
     @Test
@@ -660,7 +663,7 @@ public class BinaryWire2Test {
             assertEquals(wire.bytes(), bytesStore);
         });
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -681,7 +684,7 @@ public class BinaryWire2Test {
                 "  value: 15\n" +
                 "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -700,12 +703,12 @@ public class BinaryWire2Test {
 
         Assert.assertEquals(putMap, newMap);
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
     public void testreadBytes() {
-        @NotNull Wire wire = new BinaryWire(nativeBytes());
+        @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
 
         wire.write("a").typePrefix(BytesHolder.class).marshallable(w -> w.write("bytes").text("Hello World"));
 
@@ -717,7 +720,7 @@ public class BinaryWire2Test {
     @Test
     public void testWritingDecimals() {
 //        BinaryWire.SPEC = 18;
-        @NotNull Wire wire = new BinaryWire(nativeBytes());
+        @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
         @NotNull final ValueOut out = wire.getValueOut();
         @NotNull final ValueIn in = wire.getValueIn();
         // try all the values of 0.xxxxxx which will fit
@@ -765,7 +768,7 @@ public class BinaryWire2Test {
     @Test
     public void testWritingDecimals2() {
 //        BinaryWire.SPEC = 18;
-        @NotNull Wire wire = new BinaryWire(nativeBytes());
+        @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
         @NotNull final ValueOut out = wire.getValueOut();
         @NotNull final ValueIn in = wire.getValueIn();
 
@@ -791,7 +794,7 @@ public class BinaryWire2Test {
     }
 
     static class BytesHolder extends SelfDescribingMarshallable {
-        final Bytes bytes = Bytes.elasticHeapByteBuffer(64);
+        final Bytes bytes = Bytes.allocateElasticOnHeap(64);
 
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {

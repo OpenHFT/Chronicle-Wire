@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,13 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -27,12 +26,11 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.Assert.assertEquals;
 
-
 @RunWith(value = Parameterized.class)
-public class BinaryWireNumbersTest {
+public class BinaryWireNumbersTest extends WireTestCommon {
     private static final float VAL1 = 12345678901234567.0f;
     static int counter = 0;
     private final int len;
@@ -89,11 +87,6 @@ public class BinaryWireNumbersTest {
         });
     }
 
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
-    }
-
     @Test
     public void doTest() {
         if (counter++ == 18)
@@ -103,7 +96,7 @@ public class BinaryWireNumbersTest {
 
     public void test(@NotNull WriteValue expected, @NotNull WriteValue perform) {
         @SuppressWarnings("rawtypes")
-        @NotNull Bytes bytes1 = nativeBytes();
+        @NotNull Bytes bytes1 = allocateElasticOnHeap();
         @NotNull Wire wire1 = new BinaryWire(bytes1, true, false, false, Integer.MAX_VALUE, "binary", false);
         assert wire1.startUse();
         expected.writeValue(wire1.write());
@@ -111,7 +104,7 @@ public class BinaryWireNumbersTest {
         assertEquals("Length for fixed length doesn't match for " + TextWire.asText(wire1), len, bytes1.readRemaining());
 
         @SuppressWarnings("rawtypes")
-        @NotNull Bytes bytes2 = nativeBytes();
+        @NotNull Bytes bytes2 = allocateElasticOnHeap();
         @NotNull Wire wire2 = new BinaryWire(bytes2);
         perform.writeValue(wire2.write());
 

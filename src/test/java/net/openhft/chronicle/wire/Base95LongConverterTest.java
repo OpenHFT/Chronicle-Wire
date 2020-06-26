@@ -7,7 +7,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
-public class Base95LongConverterTest {
+public class Base95LongConverterTest extends WireTestCommon {
 
     @Test
     public void parse() {

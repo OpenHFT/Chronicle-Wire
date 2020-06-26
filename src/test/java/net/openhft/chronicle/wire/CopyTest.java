@@ -30,7 +30,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(value = Parameterized.class)
-public class CopyTest {
+public class CopyTest extends WireTestCommon {
     private final WireType from, to;
     private boolean withType;
 
@@ -53,9 +53,9 @@ public class CopyTest {
     @SuppressWarnings("rawtypes")
     @Test
     public void testCopy() {
-        Bytes bytesFrom = Bytes.elasticHeapByteBuffer(64);
+        Bytes bytesFrom = Bytes.allocateElasticOnHeap(64);
         Wire wireFrom = from.apply(bytesFrom);
-        Bytes bytesTo = Bytes.elasticHeapByteBuffer(64);
+        Bytes bytesTo = Bytes.allocateElasticOnHeap(64);
         Wire wireTo = to.apply(bytesTo);
 
         AClass a = create();

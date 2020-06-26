@@ -25,8 +25,7 @@ import java.lang.reflect.Proxy;
 
 import static org.easymock.EasyMock.*;
 
-
-public class BinaryMethodWriterInvocationHandlerTest {
+public class BinaryMethodWriterInvocationHandlerTest extends WireTestCommon {
 
     @Test
     public void testOnClose() throws Exception {

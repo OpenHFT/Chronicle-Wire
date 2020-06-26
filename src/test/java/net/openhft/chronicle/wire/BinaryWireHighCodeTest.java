@@ -9,7 +9,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class BinaryWireHighCodeTest {
+public class BinaryWireHighCodeTest extends WireTestCommon {
     @Test
     public void testUnique() throws IllegalAccessException {
         assertEquals(0, BinaryWireHighCode.values().length);

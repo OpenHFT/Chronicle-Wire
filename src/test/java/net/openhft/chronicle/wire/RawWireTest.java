@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +18,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -39,11 +40,18 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
-public class RawWireTest {
+public class RawWireTest extends WireTestCommon {
 
     @SuppressWarnings("rawtypes")
     @NotNull
     Bytes bytes = nativeBytes();
+
+    @After
+    @Override
+    public void assertReferencesReleased() {
+        bytes.releaseLast();
+        super.assertReferencesReleased();
+    }
 
     @Test
     public void testWrite() {
@@ -486,11 +494,6 @@ public class RawWireTest {
         wire.readEventName(key).marshallable(mt2);
         assertEquals("B", key.toString());
         assertEquals(mt2, mtB);
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     enum BWKey implements WireKey {

@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,15 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -32,8 +31,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-
-public class DefaultMarshallerTest {
+public class DefaultMarshallerTest extends WireTestCommon {
 
     @Test
     public void testDeserializeWithNestedArray() {
@@ -51,7 +49,7 @@ public class DefaultMarshallerTest {
                 "  enums: [ ONE, TWO, THREE ]\n" +
                 "}\n", oc.toString());
 
-        @NotNull Wire text = new TextWire(Bytes.elasticHeapByteBuffer(128));
+        @NotNull Wire text = new TextWire(Bytes.allocateElasticOnHeap(128));
         oc.writeMarshallable(text);
 
         @NotNull DMOuterClassWithEmbeddedArray oc2 = new DMOuterClassWithEmbeddedArray();
@@ -59,7 +57,7 @@ public class DefaultMarshallerTest {
 
         assertEquals(oc, oc2);
 
-        text.bytes().release();
+        text.bytes().releaseLast();
     }
 
     @Test
@@ -93,7 +91,7 @@ public class DefaultMarshallerTest {
                 "  }\n" +
                 "}\n", oc.toString());
 
-        @NotNull Wire text = new TextWire(Bytes.elasticHeapByteBuffer(64));
+        @NotNull Wire text = new TextWire(Bytes.allocateElasticOnHeap(64));
         oc.writeMarshallable(text);
 
         @NotNull DMOuterClass oc2 = new DMOuterClass();
@@ -101,15 +99,10 @@ public class DefaultMarshallerTest {
 
         assertEquals(oc, oc2);
 
-        text.bytes().release();
+        text.bytes().releaseLast();
     }
 
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
-    }
-
-    static enum NestedEnum {
+    enum NestedEnum {
         ONE,
         TWO,
         THREE;

@@ -1,14 +1,14 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.wire.Marshallable;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 
 import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
 
-
-public class WithDefaultsTest {
+public class WithDefaultsTest extends WireTestCommon {
     @Test
     public void writeMarshallable() {
         doTest(w -> {

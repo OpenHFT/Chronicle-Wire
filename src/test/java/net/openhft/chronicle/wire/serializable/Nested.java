@@ -26,7 +26,6 @@ import java.util.Set;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
-
 public class Nested implements Serializable {
     ScalarValues values;
     List<String> strings;

@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire.map;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.Wires;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -11,7 +12,7 @@ import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
 
-public class MapMarshallableTest {
+public class MapMarshallableTest extends WireTestCommon {
 
     @Test
     public void test() {

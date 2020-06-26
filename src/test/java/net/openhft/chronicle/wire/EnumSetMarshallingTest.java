@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,13 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -30,9 +29,10 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-public class EnumSetMarshallingTest {
+public class EnumSetMarshallingTest extends WireTestCommon {
     private static final String FULL_SET_SERIALISED_FORM =
             "--- !!data #binary\n" +
                     "key: {\n" +
@@ -63,11 +63,11 @@ public class EnumSetMarshallingTest {
             w.write(() -> "key").marshallable(written);
         });
 
-        assertThat(Wires.fromSizePrefixedBlobs(bytes), is(EMPTY_SET_SERIALISED_FORM));
+        assertEquals(EMPTY_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes));
         tw.readingDocument().wire().read("key").marshallable(read);
 
-        assertThat(read.f, is(written.f));
-        bytes.release();
+        assertEquals(written.f, read.f);
+        bytes.releaseLast();
     }
 
     @Test
@@ -81,11 +81,11 @@ public class EnumSetMarshallingTest {
             w.write(() -> "key").marshallable(written);
         });
 
-        assertThat(Wires.fromSizePrefixedBlobs(bytes), is(FULL_SET_SERIALISED_FORM));
+        assertEquals(FULL_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes));
         tw.readingDocument().wire().read("key").marshallable(read);
 
-        assertThat(read.f, is(written.f));
-        bytes.release();
+        assertEquals(written.f, read.f);
+        bytes.releaseLast();
     }
 
     @Test
@@ -101,11 +101,11 @@ public class EnumSetMarshallingTest {
             w.write(() -> "key").marshallable(written);
         });
 
-        assertThat(Wires.fromSizePrefixedBlobs(bytes), is(FULL_SET_SERIALISED_FORM));
+        assertEquals(FULL_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes));
         tw.readingDocument().wire().read("key").marshallable(read);
 
-        assertThat(read.f, is(written.f));
-        bytes.release();
+        assertEquals(written.f, read.f);
+        bytes.releaseLast();
     }
 
     @Test
@@ -122,12 +122,7 @@ public class EnumSetMarshallingTest {
         tw.readingDocument().wire().read("key").marshallable(read);
 
         assertThat(read.f1.get(0).f, is(not(read.f2.get(0).f)));
-        bytes.release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        bytes.releaseLast();
     }
 
     private static final class Container extends SelfDescribingMarshallable {

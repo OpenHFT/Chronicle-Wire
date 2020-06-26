@@ -3,11 +3,7 @@ package net.openhft.chronicle.wire;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-
-/*
- * Created by peter.lawrey@chronicle.software on 26/07/2017
- */
-public class TextWithArraysTest {
+public class TextWithArraysTest extends WireTestCommon {
     @Test
     public void testWithArrays() {
         assertEquals("!net.openhft.chronicle.wire.TextWithArraysTest$WithArrays {\n" +

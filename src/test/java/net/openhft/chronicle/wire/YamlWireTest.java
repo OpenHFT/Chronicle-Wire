@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +24,6 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -47,6 +48,7 @@ import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
+import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static net.openhft.chronicle.wire.YamlTokeniserTest.doTest;
@@ -55,7 +57,7 @@ import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class YamlWireTest {
+public class YamlWireTest extends WireTestCommon {
 
     Bytes bytes;
 
@@ -230,7 +232,7 @@ public class YamlWireTest {
         @Nullable Object o = WireType.TEXT.fromString(textYaml);
         Assert.assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString());
 
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -241,12 +243,12 @@ public class YamlWireTest {
         wire.write();
         assertEquals("\"\": \"\": \"\": ", wire.toString());
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @NotNull
     private YamlWire createWire() {
-        bytes = nativeBytes();
+        bytes = allocateElasticOnHeap();
         return new YamlWire(bytes);
     }
 
@@ -261,8 +263,8 @@ public class YamlWireTest {
         @NotNull String expected = "{F=false, T=true}";
         expectWithSnakeYaml(expected, wire);
 
-        assertEquals(false, wire.read(() -> "F").bool());
-        assertEquals(true, wire.read(() -> "T").bool());
+        assertFalse(wire.read(() -> "F").bool());
+        assertTrue(wire.read(() -> "T").bool());
     }
 
     @Test
@@ -276,8 +278,8 @@ public class YamlWireTest {
         @NotNull String expected = "{A=, B=other}";
         expectWithSnakeYaml(expected, wire);
 
-        assertEquals(false, wire.read(() -> "A").bool());
-        assertEquals(false, wire.read(() -> "B").bool());
+        assertFalse(wire.read(() -> "A").bool());
+        assertFalse(wire.read(() -> "B").bool());
     }
 
     @Test
@@ -873,11 +875,11 @@ public class YamlWireTest {
                         .toString());
             }
         } finally {
-            abcd.release();
+            abcd.releaseAll();
 
             WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(ABCD.class);
             ABCD abcd0 = (ABCD) wm.defaultValue();
-            abcd0.release();
+            abcd0.releaseAll();
         }
     }
 
@@ -937,8 +939,8 @@ public class YamlWireTest {
             dto2 = Marshallable.fromString(cs);
             assertEquals(cs, dto2.toString());
         } finally {
-            dto.bytes.release();
-            dto2.bytes.release();
+            dto.bytes.releaseLast();
+            dto2.bytes.releaseLast();
         }
     }
 
@@ -1040,7 +1042,7 @@ public class YamlWireTest {
             assertEquals("{b=1234, c=hi, d=abc}", "" + yw.read("A").object());
 
         } finally {
-            from.release();
+            from.releaseLast();
         }
     }
 
@@ -1061,7 +1063,7 @@ public class YamlWireTest {
             assertEquals("end", "" + yw.read("e").object());
 
         } finally {
-            from.release();
+            from.releaseLast();
         }
     }
 
@@ -1084,14 +1086,14 @@ public class YamlWireTest {
             assertEquals("C", yw.readEvent(String.class));
             yw.endEvent();
         } finally {
-            from.release();
+            from.releaseLast();
         }
     }
 
     @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteStrings() {
-        @NotNull final Bytes bytes = nativeBytes();
+        @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
 
         @NotNull final Map<String, String> expected = new LinkedHashMap<>();
@@ -1215,7 +1217,7 @@ public class YamlWireTest {
 
         assertEquals(expected, actual);
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -1232,7 +1234,7 @@ public class YamlWireTest {
                 return stack;
             }
         };
-        @NotNull final Bytes bytes = nativeBytes();
+        @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception")
                 .object(e));
@@ -1530,19 +1532,21 @@ public class YamlWireTest {
     @Test
     public void writeNull() {
         @NotNull Wire wire = createWire();
-        wire.write().object(null);
-        wire.write().object(null);
-        wire.write().object(null);
-        wire.write().object(null);
+        for (int i = 0; i < 4; i++)
+            wire.getValueOut().object(null);
+        assertEquals("!!null \"\"\n" +
+                "!!null \"\"\n" +
+                "!!null \"\"\n" +
+                "!!null \"\"\n", wire.toString());
 
         @Nullable Object o = wire.read().object(Object.class);
-        assertEquals(null, o);
+        assertNull(o);
         @Nullable String s = wire.read().object(String.class);
-        assertEquals(null, s);
+        assertNull(s);
         @Nullable RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
-        assertEquals(null, rp);
+        assertNull(rp);
         @Nullable Circle c = wire.read().object(Circle.class);
-        assertEquals(null, c);
+        assertNull(c);
     }
 
     @Ignore("TODO FIX")
@@ -1657,7 +1661,7 @@ public class YamlWireTest {
             assertEquals(map, map2);
         });
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -1744,6 +1748,7 @@ public class YamlWireTest {
         assertEquals("!net.openhft.chronicle.wire.YamlWireTest$BytesWrapper {\n" +
                 "  bytes: hello\n" +
                 "}\n", bw.toString());
+        bw.bytes.releaseLast();
     }
 
     @Test
@@ -1795,11 +1800,6 @@ public class YamlWireTest {
                 "}\n", new DoubleWrapper(10e6).toString());
         DoubleWrapper dw5 = Marshallable.fromString(new DoubleWrapper(10e6).toString());
         assertEquals(10e6, dw5.d, 0);
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     @Test
@@ -2004,13 +2004,13 @@ public class YamlWireTest {
         Bytes A = Bytes.allocateElasticDirect();
         Bytes B = Bytes.allocateDirect(64);
         Bytes C = Bytes.elasticByteBuffer();
-        Bytes D = Bytes.elasticHeapByteBuffer(1);
+        Bytes D = Bytes.allocateElasticOnHeap(1);
 
-        void release() {
-            A.release();
-            B.release();
-            C.release();
-            D.release();
+        void releaseAll() {
+            A.releaseLast();
+            B.releaseLast();
+            C.releaseLast();
+            D.releaseLast();
         }
     }
 

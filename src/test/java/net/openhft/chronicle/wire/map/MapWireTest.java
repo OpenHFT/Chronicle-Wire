@@ -18,12 +18,11 @@
 package net.openhft.chronicle.wire.map;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -32,9 +31,8 @@ import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
-
 @RunWith(value = Parameterized.class)
-public class MapWireTest {
+public class MapWireTest extends WireTestCommon {
     private final WireType wireType;
     @SuppressWarnings("rawtypes")
     private final Map m;
@@ -80,11 +78,6 @@ public class MapWireTest {
                 .marshallableAsMap(Object.class, Object.class);
         assertEquals(m, m2);
 
-        bytes.release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        bytes.releaseLast();
     }
 }

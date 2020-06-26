@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
@@ -55,7 +56,6 @@ import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.SerializationStrategies.*;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
-
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum Wires {
     ;
@@ -83,7 +83,6 @@ public enum Wires {
         }
         return ANY_OBJECT;
     });
-    static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
     static final ClassLocal<Function<String, Marshallable>> MARSHALLABLE_FUNCTION = ClassLocal.withInitial(tClass -> {
         Class[] interfaces = {Marshallable.class, tClass};
         if (tClass == Marshallable.class)
@@ -98,9 +97,10 @@ public enum Wires {
     });
     static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(VanillaFieldInfo::lookupClass);
     static final StringBuilderPool SBP = new StringBuilderPool();
-    static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(new VanillaBytes(BytesStore.empty())));
+    static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.allocateElasticOnHeap()));
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
     private static final int INVERSE_TID_MASK = ~TID_MASK;
+    static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
 
     static {
         CLASS_STRATEGY_FUNCTIONS.add(SerializeEnum.INSTANCE);
@@ -172,7 +172,7 @@ public enum Wires {
                 return WireDumper.of(tempWire).asString(0, length + 4);
 
             } finally {
-                tempBytes.release();
+                tempBytes.releaseLast();
             }
         } else {
             if (dc instanceof BinaryReadDocumentContext) {
@@ -290,14 +290,14 @@ public enum Wires {
 
     @NotNull
     public static Bytes<?> acquireBytes() {
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::allocateElasticDirect);
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, () -> Bytes.allocateElasticOnHeap());
         bytes.clear();
         return bytes;
     }
 
     @NotNull
     static Bytes<?> acquireBytesForToString() {
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL, Bytes::allocateElasticDirect);
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL, () -> Bytes.allocateElasticOnHeap());
         bytes.clear();
         return bytes;
     }
@@ -311,7 +311,7 @@ public enum Wires {
 
     @NotNull
     public static Bytes acquireAnotherBytes() {
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, Bytes::allocateElasticDirect);
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, () -> Bytes.allocateElasticOnHeap());
         bytes.clear();
         return bytes;
     }
@@ -421,7 +421,7 @@ public enum Wires {
         if (clazz == Object.class)
             strategy = LIST;
         if (using == null)
-            using = (E) strategy.newInstance(clazz);
+            using = (E) strategy.newInstanceOrNull(clazz);
 
         return in.sequence(using, strategy::readUsing) ? readResolve(using) : null;
     }
@@ -432,8 +432,8 @@ public enum Wires {
         if (clazz == Object.class)
             strategy = MAP;
         if (using == null) {
-            using = (E) strategy.newInstance(clazz);
-            nullObject = using == null && strategy == MARSHALLABLE;
+            using = (E) strategy.newInstanceOrNull(clazz);
+            nullObject = using == null;
         }
         if (Throwable.class.isAssignableFrom(clazz))
             return (E) WireInternal.throwable(in, false, (Throwable) using);
@@ -469,7 +469,7 @@ public enum Wires {
             return null;
         } else if (clazz2 == BytesStore.class) {
             if (using == null)
-                using = (E) Bytes.elasticHeapByteBuffer(32);
+                using = (E) Bytes.allocateElasticOnHeap(32);
             clazz = Base64.class;
         }
         if (clazz2 != null &&

@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -215,34 +217,12 @@ public interface ValueIn {
 
     @NotNull
     default LongValue int64ForBinding(@Nullable LongValue value) {
-        @NotNull LongValue ret = wireIn().newLongReference();
+        @NotNull LongValue ret = value == null ? wireIn().newLongReference() : value;
         int64(ret);
         return ret;
     }
 
-    @NotNull
-    default BooleanValue boolForBinding(@Nullable LongValue value) {
-        @NotNull BooleanValue ret = wireIn().newBooleanReference();
-        bool(ret);
-        return ret;
-    }
-
     WireIn bool(@NotNull BooleanValue ret);
-
-    @NotNull
-    @Deprecated
-    default IntValue int32ForBinding(@Nullable LongValue value) {
-        @NotNull IntValue ret = wireIn().newIntReference();
-        int32(ret);
-        return ret;
-    }
-
-    @NotNull
-    default IntValue int32ForBinding(@Nullable IntValue value) {
-        @NotNull IntValue ret = value == null ? wireIn().newIntReference() : value;
-        int32(ret);
-        return ret;
-    }
 
     @NotNull
     <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter);
@@ -301,7 +281,7 @@ public interface ValueIn {
             int i = 0;
             while (in.hasNextSequenceItem() && i < a.length) {
                 if (a[i] == null)
-                    a[i] = Bytes.elasticHeapByteBuffer(32);
+                    a[i] = Bytes.allocateElasticOnHeap(32);
                 bytes(a[i++]);
             }
             return i;

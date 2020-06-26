@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
@@ -30,7 +31,6 @@ import net.openhft.chronicle.threads.TimingPauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.EOFException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.StreamCorruptedException;
@@ -63,7 +63,7 @@ public abstract class AbstractWire implements Wire {
     @Nullable
     volatile Thread usedBy;
     @Nullable
-    volatile Throwable usedHere, lastEnded;
+    volatile Throwable usedHere;
     int usedCount = 0;
     private Pauser pauser;
     private TimingPauser timedParser;
@@ -173,30 +173,41 @@ public abstract class AbstractWire implements Wire {
 
     @NotNull
     @Override
-    public HeaderType readDataHeader(boolean includeMetaData) throws EOFException {
+    public HeaderType readDataHeader(boolean includeMetaData) {
 
+        alignForRead(bytes);
         for (; ; ) {
-            alignForRead(bytes);
             int header = bytes.peekVolatileInt();
-            if (isReady(header)) {
-                if (isData(header))
-                    return HeaderType.DATA;
-                if (includeMetaData && isReadyMetaData(header))
-                    return HeaderType.META_DATA;
-
-                int bytesToSkip = lengthOf(header) + SPB_HEADER_SIZE;
-                bytes.readSkip(bytesToSkip);
-            } else {
+//            if (isReady(header)) {
+            if ((header & NOT_COMPLETE) != 0 || header == 0) {
                 if (header == END_OF_DATA)
-                    throw new EOFException();
+                    return HeaderType.EOF;
                 return HeaderType.NONE;
             }
+//                if (isData(header))
+            if ((header & META_DATA) == 0)
+                return HeaderType.DATA;
+            if (includeMetaData && isReadyMetaData(header))
+                return HeaderType.META_DATA;
+
+            long readPosition = bytes.readPosition();
+            int bytesToSkip = lengthOf(header) + SPB_HEADER_SIZE;
+            readPosition += bytesToSkip;
+            if (usePadding) {
+                readPosition += 3;
+                readPosition &= ~3;
+            }
+            bytes.readPosition(readPosition);
         }
     }
 
     private void alignForRead(Bytes<?> bytes) {
-        if (usePadding)
-            bytes.readSkip((-bytes.readPosition()) & 0x3);
+        if (usePadding) {
+            long readPosition = bytes.readPosition();
+            long readPosition2 = (readPosition + 3) & ~3;
+            if (readPosition != readPosition2)
+                bytes.readPosition(readPosition2);
+        }
     }
 
     @Override
@@ -405,7 +416,7 @@ public abstract class AbstractWire implements Wire {
         headerNumber = Long.MIN_VALUE;
 
         try {
-            for (; ; ) {
+            for (; ; Jvm.nanoPause()) {
                 if (usePadding)
                     pos += -pos & 0x3;
                 if (bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
@@ -456,27 +467,32 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public boolean startUse() {
-        Throwable usedHere = this.usedHere;
-        Thread usedBy = this.usedBy;
-        if (usedBy != Thread.currentThread() && usedBy != null) {
-            throw new IllegalStateException("Used by " + usedBy + " while trying to use it in " + Thread.currentThread(), usedHere);
+        if (Jvm.isResourceTracing()) {
+            Thread usedBy = this.usedBy;
+            Throwable usedHere = this.usedHere;
+            if (usedBy != Thread.currentThread() && usedBy != null) {
+                throw new IllegalStateException("Used by " + usedBy + " while trying to use it in " + Thread.currentThread(), usedHere);
+            }
+            this.usedBy = Thread.currentThread();
+            // creating an object here, every time in not cool ! so added TRACK_USED
+            this.usedHere = new StackTrace("Used here");
         }
-        this.usedBy = Thread.currentThread();
-        this.usedHere = new StackTrace();
         usedCount++;
         return true;
     }
 
     @Override
     public boolean endUse() {
-        if (usedBy != Thread.currentThread()) {
-            throw new IllegalStateException("Used by " + usedHere, usedHere);
-        }
-        if (--usedCount <= 0) {
-            usedBy = null;
-            usedHere = null;
-            usedCount = 0;
-            lastEnded = new StackTrace();
+        --usedCount;
+        if (Jvm.isResourceTracing()) {
+            if (usedBy != Thread.currentThread()) {
+                throw new IllegalStateException("Used by " + usedHere, usedHere);
+            }
+            if (usedCount <= 0) {
+                usedBy = null;
+                usedHere = null;
+                usedCount = 0;
+            }
         }
         return true;
     }

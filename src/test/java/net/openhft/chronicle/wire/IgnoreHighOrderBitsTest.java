@@ -6,10 +6,7 @@ import org.junit.Test;
 import java.io.DataOutput;
 import java.io.IOException;
 
-/**
- * Created by Rob Austin
- */
-public class IgnoreHighOrderBitsTest {
+public class IgnoreHighOrderBitsTest extends WireTestCommon {
 
     /**
      * Writes to the output stream the eight low-order bits of the argument b. The 24 high-order bits of b are ignored.
@@ -29,7 +26,7 @@ public class IgnoreHighOrderBitsTest {
             out.write(b); // expecting 0 to be written
 
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 

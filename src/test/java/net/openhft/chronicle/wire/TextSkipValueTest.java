@@ -1,8 +1,6 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -13,9 +11,8 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-
 @RunWith(value = Parameterized.class)
-public class TextSkipValueTest {
+public class TextSkipValueTest extends WireTestCommon {
 
     final String input;
 
@@ -80,10 +77,5 @@ public class TextSkipValueTest {
                 .skipValue();
         wire.consumePadding();
         assertEquals("end", wire.bytes().toString());
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 }

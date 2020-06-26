@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-public class YamlTokeniserTest {
+public class YamlTokeniserTest extends WireTestCommon {
     public static String doTest(String resource) {
         try {
             Bytes bytes = BytesUtil.readFile(resource);

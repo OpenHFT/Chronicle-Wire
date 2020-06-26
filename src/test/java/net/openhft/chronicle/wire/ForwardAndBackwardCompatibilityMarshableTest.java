@@ -18,11 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,9 +31,8 @@ import java.util.Collection;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
-
 @RunWith(value = Parameterized.class)
-public class ForwardAndBackwardCompatibilityMarshableTest {
+public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon {
 
     private final WireType wireType;
 
@@ -72,7 +69,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
             Assert.assertTrue("3".contentEquals(dto2.three));
         }
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -96,7 +93,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
 
         }
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -121,12 +118,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest {
             Assert.assertEquals(1, dto1.one);
         }
 
-        wire.bytes().release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        wire.bytes().releaseLast();
     }
 
     public static class DTO1 extends SelfDescribingMarshallable implements Demarshallable {

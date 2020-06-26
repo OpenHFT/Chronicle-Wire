@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,8 +50,8 @@ import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
-import static net.openhft.chronicle.bytes.BytesUtil.unregister;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+import static net.openhft.chronicle.core.io.AbstractReferenceCounted.unmonitor;
 
 /**
  * YAML Based wire format
@@ -77,7 +79,8 @@ public class TextWire extends AbstractWire implements Wire {
     static final Pattern REGX_PATTERN = Pattern.compile("\\.|\\$");
 
     static {
-        assert unregister(TYPE) & unregister(BINARY);
+        unmonitor(TYPE);
+        unmonitor(BINARY);
         for (char ch : "?%&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
         for (char ch : "?,#:{}[]|>\\".toCharArray())
@@ -111,18 +114,20 @@ public class TextWire extends AbstractWire implements Wire {
 
     @NotNull
     public static TextWire from(@NotNull String text) {
-        return new TextWire(Bytes.fromString(text));
+        return new TextWire(Bytes.from(text));
     }
 
     public static String asText(@NotNull Wire wire) {
         assert wire.startUse();
+        NativeBytes<Void> bytes = nativeBytes();
         try {
             long pos = wire.bytes().readPosition();
-            @NotNull TextWire tw = new TextWire(nativeBytes());
+            @NotNull TextWire tw = new TextWire(bytes);
             wire.copyTo(tw);
             wire.bytes().readPosition(pos);
             return tw.toString();
         } finally {
+            bytes.releaseLast();
             assert wire.endUse();
         }
     }

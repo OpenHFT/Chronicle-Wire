@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class WireMarshallerTest {
+public class WireMarshallerTest extends WireTestCommon {
 
     @Test
     public void usesBinary() {
@@ -27,7 +27,7 @@ public class WireMarshallerTest {
         assertEquals("c0 82 14 00 00 00\n" +
                 "   c2 69 64 a6 d2 02 96 49                         # id\n" +
                 "   c2 74 73 a7 2b 20 d2 5c 8a 97 05 00             # ts\n", bytes.toHexString());
-        bytes.release();
+        bytes.releaseLast();
     }
 
     static class TwoFields extends SelfDescribingMarshallable {

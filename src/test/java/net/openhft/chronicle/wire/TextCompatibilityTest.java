@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
@@ -34,10 +35,9 @@ import java.util.List;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
 
-
 @RunWith(value = Parameterized.class)
 @Ignore("TODO FIX")
-public class TextCompatibilityTest {
+public class TextCompatibilityTest extends WireTestCommon {
     private final String filename;
     private final String expected;
 
@@ -85,7 +85,7 @@ public class TextCompatibilityTest {
                 Object o = new YamlWire(bytes)
                         .getValueIn()
                         .object();
-                Bytes out = Bytes.elasticHeapByteBuffer(256);
+                Bytes out = Bytes.allocateElasticOnHeap(256);
                 String s = new TextWire(out).getValueOut().object(o).toString();
                 if (s.trim().equals(expected.trim()))
                     return;
@@ -97,7 +97,7 @@ public class TextCompatibilityTest {
                     assertEquals(expected, s);
                 }
             } finally {
-                bytes.release();
+                bytes.releaseLast();
             }
             Object o = TEXT.fromFile(Object.class, filename);
         } catch (Exception e) {

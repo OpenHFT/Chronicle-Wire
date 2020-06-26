@@ -49,7 +49,6 @@ enum DataFields implements WireKey {
 @interface PrintAsText {
 }
 
-
 @State(Scope.Thread)
 public class Main {
     final Bytes bytes = Bytes.allocateDirect(128).unchecked(true);
@@ -84,7 +83,7 @@ public class Main {
                 }
             }
         } else {
-            int time = Boolean.getBoolean("longTest") ? 30 : 2;
+            int time = Jvm.getBoolean("longTest") ? 30 : 2;
             System.out.println("measurementTime: " + time + " secs");
             Options opt = new OptionsBuilder()
                     .include(Main.class.getSimpleName())

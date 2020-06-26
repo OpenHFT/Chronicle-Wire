@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
@@ -21,7 +22,6 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -32,18 +32,12 @@ enum CcyPair {
     static final EnumInterner<CcyPair> INTERNER = new EnumInterner<>(CcyPair.class);
 }
 
-
 @SuppressWarnings("rawtypes")
-public class CSVBytesMarshallableTest {
-    Bytes bytes = Bytes.fromString(
+public class CSVBytesMarshallableTest extends WireTestCommon {
+    Bytes bytes = Bytes.from(
             "1.09029,1.090305,EURUSD,2,1,EBS\n" +
                     "1.50935,1.50936,GBPUSD,5,1,RTRS\n" +
                     "1.0906,1.09065,EURCHF,3,1,EBS\n");
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
-    }
 
     // low level marshalling
     @Test
@@ -57,7 +51,7 @@ public class CSVBytesMarshallableTest {
         assertEquals("1.09029,1.090305,EURUSD,2,EBS\n" +
                 "1.50935,1.50936,GBPUSD,5,RTRS\n" +
                 "1.0906,1.09065,EURCHF,3,EBS\n", bytes2.toString());
-        bytes2.release();
+        bytes2.releaseLast();
     }
 
     // wire marshalling.
@@ -88,7 +82,7 @@ public class CSVBytesMarshallableTest {
         System.out.println(wt);
         System.out.println(binary ? bytes2.toHexString() : bytes2.toString());
 
-        bytes2.release();
+        bytes2.releaseLast();
     }
 }
 

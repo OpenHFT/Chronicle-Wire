@@ -10,7 +10,7 @@ import java.util.concurrent.BlockingQueue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class VanillaMethodReaderHierarchyTest {
+public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
     private BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
 
     @Test
@@ -39,7 +39,7 @@ public class VanillaMethodReaderHierarchyTest {
     }
 
     private void checkWriteRead(Simple simple) {
-        Wire wire = new TextWire(Bytes.elasticHeapByteBuffer(32));
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(32));
         Simple writer = wire.methodWriter(Simple.class);
         MethodReader reader = wire.methodReader(simple);
         final String superMario = "Mario";

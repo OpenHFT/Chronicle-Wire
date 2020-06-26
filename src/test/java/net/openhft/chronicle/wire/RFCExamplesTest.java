@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +27,7 @@ import static org.junit.Assert.assertEquals;
 /* Based on
 https://github.com/OpenHFT/RFC/blob/master/Chronicle/Engine/Remote/Chronicle-Engine-0.1.md
  */
-public class RFCExamplesTest {
+public class RFCExamplesTest extends WireTestCommon {
     /*
     ChronicleMap<Integer, String> map = context.getMap("test", Integer.class, String.class);
 
@@ -36,7 +38,7 @@ public class RFCExamplesTest {
     @SuppressWarnings("rawtypes")
     @Test
     public void testPuts() {
-        @NotNull Bytes bytes = Bytes.allocateElasticDirect();
+        @NotNull Bytes bytes = Bytes.allocateElasticOnHeap();
 /*
 --- !!meta-data
 csp:///service-lookup
@@ -68,7 +70,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         writeMessageOne(bin);
 
         System.out.println(Wires.fromSizePrefixedBlobs(bytes));
-        assertEquals("[pos: 0, rlim: 128, wlim: 8EiB, cap: 8EiB ] ǁ" +
+        assertEquals("[pos: 0, rlim: 128, wlim: 2147483640, cap: 2147483640 ] ǁ" +
                 "#٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠" +
                 "U٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String" +
                 "‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
@@ -77,7 +79,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         clear(bytes);
         writeMessageOne(raw);
 
-        assertEquals("[pos: 0, rlim: 66, wlim: 8EiB, cap: 8EiB ] ǁ" +
+        assertEquals("[pos: 0, rlim: 66, wlim: 2147483640, cap: 2147483640 ] ǁ" +
                 "\\u001A٠٠@⒘///service-lookupu\\u009F)å\"٠٠٠ ٠٠٠\\u001C٠٠٠⒋test⒊Map⒖٠٠٠⒎Integer⒍String" +
                 "‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
 /*
@@ -117,7 +119,7 @@ put: [ 3, bye ]
                         "  value: bye\n" +
                         "}\n",
                 Wires.fromSizePrefixedBlobs(bytes));
-        assertEquals("[pos: 0, rlim: 143, wlim: 8EiB, cap: 8EiB ] ǁ" +
+        assertEquals("[pos: 0, rlim: 143, wlim: 2147483640, cap: 2147483640 ] ǁ" +
                 "\\u001B٠٠@csp: //server1/test⒑cid: 1⒑" +
                 "\"٠٠٠put: {⒑  key: 1,⒑  value: hello⒑}⒑" +
                 "\"٠٠٠put: {⒑  key: 2,⒑  value: world⒑}⒑" +
@@ -128,7 +130,7 @@ put: [ 3, bye ]
         writeMessageTwo(bin);
 
 //        System.out.println(Wires.fromSizePrefixedBlobs(bytes));
-        assertEquals("[pos: 0, rlim: 116, wlim: 8EiB, cap: 8EiB ] ǁ" +
+        assertEquals("[pos: 0, rlim: 116, wlim: 2147483640, cap: 2147483640 ] ǁ" +
                 "\\u0018٠٠@Ãcspî//server1/testÃcid⒈" +
                 "\\u001A٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒈Åvalueåhello" +
                 "\\u001A٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒉Åvalueåworld" +
@@ -137,7 +139,7 @@ put: [ 3, bye ]
 
         clear(bytes);
         writeMessageTwo(raw);
-        assertEquals("[pos: 0, rlim: 91, wlim: 8EiB, cap: 8EiB ] ǁ" +
+        assertEquals("[pos: 0, rlim: 91, wlim: 2147483640, cap: 2147483640 ] ǁ" +
                 "\\u0017٠٠@⒕//server1/test⒈٠٠٠٠٠٠٠" +
                 "⒙٠٠٠⒕٠٠٠⒈٠٠٠٠٠٠٠⒌hello" +
                 "⒙٠٠٠⒕٠٠٠⒉٠٠٠٠٠٠٠⒌world" +

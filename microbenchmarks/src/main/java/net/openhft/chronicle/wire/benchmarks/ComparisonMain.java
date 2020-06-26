@@ -50,7 +50,6 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
-
 @State(Scope.Thread)
 public class ComparisonMain {
     final Yaml yaml;
@@ -129,7 +128,7 @@ public class ComparisonMain {
                 }
             }
         } else {
-            int time = Boolean.getBoolean("longTest") ? 30 : 2;
+            int time = Jvm.getBoolean("longTest") ? 30 : 2;
             System.out.println("measurementTime: " + time + " secs");
             Options opt = new OptionsBuilder()
                     .include(ComparisonMain.class.getSimpleName())

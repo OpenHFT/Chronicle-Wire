@@ -1,11 +1,13 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +24,6 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -48,6 +49,7 @@ import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
+import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.easymock.EasyMock.replay;
@@ -55,7 +57,7 @@ import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class TextWireTest {
+public class TextWireTest extends WireTestCommon {
 
     Bytes bytes;
 
@@ -66,13 +68,12 @@ public class TextWireTest {
                     "  type:            !type               String\n" +
                     "}\n");
 
-            Assert.assertTrue(o != null);
+            assertNotNull(o);
 
         } catch (Exception e) {
             Assert.fail();
         }
-
-    }
+ }
 
     @Test
     public void comment() {
@@ -241,7 +242,7 @@ public class TextWireTest {
         @Nullable Object o = WireType.TEXT.fromString(textYaml);
         Assert.assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString());
 
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -252,12 +253,12 @@ public class TextWireTest {
         wire.write();
         assertEquals("\"\": \"\": \"\": ", wire.toString());
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @NotNull
     private TextWire createWire() {
-        bytes = nativeBytes();
+        bytes = allocateElasticOnHeap();
         return new TextWire(bytes);
     }
 
@@ -272,8 +273,8 @@ public class TextWireTest {
         @NotNull String expected = "{F=false, T=true}";
         expectWithSnakeYaml(expected, wire);
 
-        assertEquals(false, wire.read(() -> "F").bool());
-        assertEquals(true, wire.read(() -> "T").bool());
+        assertFalse(wire.read(() -> "F").bool());
+        assertTrue(wire.read(() -> "T").bool());
     }
 
     @Test
@@ -287,8 +288,8 @@ public class TextWireTest {
         @NotNull String expected = "{A=, B=other}";
         expectWithSnakeYaml(expected, wire);
 
-        assertEquals(false, wire.read(() -> "A").bool());
-        assertEquals(false, wire.read(() -> "B").bool());
+        assertFalse(wire.read(() -> "A").bool());
+        assertFalse(wire.read(() -> "B").bool());
     }
 
     @Test
@@ -874,11 +875,11 @@ public class TextWireTest {
                         .toString());
             }
         } finally {
-            abcd.release();
+            abcd.releaseAll();
 
             WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(ABCD.class);
             ABCD abcd0 = (ABCD) wm.defaultValue();
-            abcd0.release();
+            abcd0.releaseAll();
         }
     }
 
@@ -937,8 +938,8 @@ public class TextWireTest {
             dto2 = Marshallable.fromString(cs);
             assertEquals(cs, dto2.toString());
         } finally {
-            dto.bytes.release();
-            dto2.bytes.release();
+            dto.bytes.releaseLast();
+            dto2.bytes.releaseLast();
         }
     }
 
@@ -1139,7 +1140,7 @@ public class TextWireTest {
 
         assertEquals(expected, actual);
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -1156,7 +1157,7 @@ public class TextWireTest {
                 return stack;
             }
         };
-        @NotNull final Bytes bytes = nativeBytes();
+        @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes);
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception")
                 .object(e));
@@ -1253,7 +1254,7 @@ public class TextWireTest {
         @NotNull byte[] compressedBytes = str.getBytes(ISO_8859_1);
         wire.write().compress("gzip", Bytes.wrapForRead(compressedBytes));
 
-        @NotNull Bytes bytes = allocateElasticDirect();
+        @NotNull Bytes bytes = allocateElasticOnHeap();
         wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
@@ -1267,7 +1268,7 @@ public class TextWireTest {
         @NotNull byte[] compressedBytes = str.getBytes(ISO_8859_1);
         wire.write().compress("lzw", Bytes.wrapForRead(compressedBytes));
 
-        @NotNull Bytes bytes = allocateElasticDirect();
+        @NotNull Bytes bytes = allocateElasticOnHeap();
         wire.read().bytes(bytes);
         assertEquals(str, bytes.toString());
     }
@@ -1410,13 +1411,13 @@ public class TextWireTest {
         wire.write().object(null);
 
         @Nullable Object o = wire.read().object(Object.class);
-        assertEquals(null, o);
+        assertNull(o);
         @Nullable String s = wire.read().object(String.class);
-        assertEquals(null, s);
+        assertNull(s);
         @Nullable RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
-        assertEquals(null, rp);
+        assertNull(rp);
         @Nullable Circle c = wire.read().object(Circle.class);
-        assertEquals(null, c);
+        assertNull(c);
     }
 
     @Test
@@ -1525,11 +1526,10 @@ public class TextWireTest {
             assertEquals(map, map2);
         });
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
-    @Test
-    @Ignore("TODO FIX")
+    @Test(expected = IllegalArgumentException.class)
     public void writeUnserializable() throws IOException {
         System.out.println(TEXT.asString(Thread.currentThread()));
         @NotNull Socket s = new Socket();
@@ -1610,6 +1610,7 @@ public class TextWireTest {
         assertEquals("!net.openhft.chronicle.wire.TextWireTest$BytesWrapper {\n" +
                 "  bytes: hello\n" +
                 "}\n", bw.toString());
+        bw.bytes.releaseLast();
     }
 
     @Test
@@ -1661,11 +1662,6 @@ public class TextWireTest {
                 "}\n", new DoubleWrapper(10e6).toString());
         DoubleWrapper dw5 = Marshallable.fromString(new DoubleWrapper(10e6).toString());
         assertEquals(10e6, dw5.d, 0);
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
     }
 
     @Test
@@ -1870,13 +1866,13 @@ public class TextWireTest {
         Bytes A = Bytes.allocateElasticDirect();
         Bytes B = Bytes.allocateDirect(64);
         Bytes C = Bytes.elasticByteBuffer();
-        Bytes D = Bytes.elasticHeapByteBuffer(1);
+        Bytes D = Bytes.allocateElasticOnHeap(1);
 
-        void release() {
-            A.release();
-            B.release();
-            C.release();
-            D.release();
+        void releaseAll() {
+            A.releaseLast();
+            B.releaseLast();
+            C.releaseLast();
+            D.releaseLast();
         }
     }
 

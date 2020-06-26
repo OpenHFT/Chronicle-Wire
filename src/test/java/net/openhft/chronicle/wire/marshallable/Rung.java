@@ -5,7 +5,6 @@ import net.openhft.chronicle.wire.WireOut;
 import net.openhft.chronicle.wire.Wires;
 import org.jetbrains.annotations.NotNull;
 
-
 class Rung extends SelfDescribingMarshallable {
     double price, qty;
     boolean delta;

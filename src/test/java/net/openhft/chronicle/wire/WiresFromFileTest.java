@@ -10,8 +10,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
-
-public class WiresFromFileTest {
+public class WiresFromFileTest extends WireTestCommon {
     @Test
     public void testFromFile() throws IOException {
         ClassAliasPool.CLASS_ALIASES.addAlias(MDU.class);

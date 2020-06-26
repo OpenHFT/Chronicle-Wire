@@ -18,9 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,9 +32,8 @@ import java.util.function.ObjIntConsumer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-
 @RunWith(value = Parameterized.class)
-public class TextBinaryWireTest {
+public class TextBinaryWireTest extends WireTestCommon {
 
     private final WireType wireType;
 
@@ -61,7 +58,7 @@ public class TextBinaryWireTest {
         Wire wire = createWire();
         @NotNull WireType wt = WireType.valueOf(wire);
         assertEquals(wireType, wt);
-        wire.bytes().release();
+        wire.bytes().releaseLast();
 
     }
 
@@ -82,7 +79,7 @@ public class TextBinaryWireTest {
         try (DocumentContext dc = wire.readingDocument(position)) {
             assertEquals("text", dc.wire().read(() -> "message").text());
         }
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -94,7 +91,7 @@ public class TextBinaryWireTest {
             wire.readComment(sb);
             assertEquals("This is a comment", sb.toString());
 
-            wire.bytes().release();
+            wire.bytes().releaseLast();
         }
     }
 
@@ -112,7 +109,7 @@ public class TextBinaryWireTest {
 
         assertNull(wire.readEvent(RetentionPolicy.class));
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -133,7 +130,7 @@ public class TextBinaryWireTest {
 
         assertNull(wire.readEvent(RetentionPolicy.class));
 
-        wire.bytes().release();
+        wire.bytes().releaseLast();
     }
 
     @Test
@@ -153,12 +150,7 @@ public class TextBinaryWireTest {
         wire.read(() -> "c").int32(2, assertEquals);
         wire.read(() -> "d").int32(3, assertEquals);
 
-        wire.bytes().release();
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        wire.bytes().releaseLast();
     }
 }
 
