@@ -50,7 +50,7 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
         }
         assertEquals("1.09029,1.090305,EURUSD,2,EBS\n" +
                 "1.50935,1.50936,GBPUSD,5,RTRS\n" +
-                "1.0906,1.09065,EURCHF,3,EBS\n", bytes2.toString());
+                "1.09060,1.09065,EURCHF,3,EBS\n", bytes2.toString());
         bytes2.releaseLast();
     }
 
