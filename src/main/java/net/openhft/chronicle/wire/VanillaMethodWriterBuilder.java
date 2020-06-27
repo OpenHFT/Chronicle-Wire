@@ -31,7 +31,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -42,12 +41,9 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     private static final Map<String, Class> classCache = new ConcurrentHashMap<>();
 
     private final String packageName;
-    private final String className;
     private ClassLoader classLoader;
     @NotNull
     private final MethodWriterInvocationHandlerSupplier handlerSupplier;
-    AtomicLong l = new AtomicLong();
-    private String proxyClassName;
     private MarshallableOut out;
     private Closeable closeable;
     private String genericEvent;
@@ -86,7 +82,6 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
     public VanillaMethodWriterBuilder(@NotNull Class<T> tClass, @NotNull Supplier<MethodWriterInvocationHandler> handlerSupplier) {
         packageName = tClass.getPackage().getName();
-        className = tClass.getSimpleName();
 
         addInterface(tClass);
         classLoader = tClass.getClassLoader();
@@ -124,8 +119,6 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     public T build() {
         return get();
     }
-
-
 
     @NotNull
     public MethodWriterBuilder<T> onClose(Closeable closeable) {
@@ -168,7 +161,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         if (proxyClass != null) {
             try {
                 Constructor<T> constructor = (Constructor) proxyClass.getConstructor(MethodWriterInvocationHandlerSupplier.class);
-                return (T) constructor.newInstance(handlerSupplier);
+                return constructor.newInstance(handlerSupplier);
             } catch (Throwable e) {
                 // do nothing and drop through
                 if (Jvm.isDebug())

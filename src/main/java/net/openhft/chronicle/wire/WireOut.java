@@ -25,9 +25,6 @@ import java.io.StreamCorruptedException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static net.openhft.chronicle.wire.Wires.NOT_COMPLETE;
-import static net.openhft.chronicle.wire.Wires.UNKNOWN_LENGTH;
-
 /**
  * The defines the standard interface for writing and reading sequentially to/from a Bytes stream
  */

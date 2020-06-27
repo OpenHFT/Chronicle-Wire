@@ -1047,7 +1047,6 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
 
     @Override
     public void writeMarshallable(@NotNull final WireOut wire) {
-        ;
         try (DocumentContext dc = wire.writingDocument()) {
 
             wire.write("numberOfLongValues").int32(words.length);

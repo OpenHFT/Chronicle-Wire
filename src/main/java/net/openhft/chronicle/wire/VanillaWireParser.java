@@ -108,7 +108,6 @@ public class VanillaWireParser implements WireParser {
             }
         }
         fieldNumberParselet.readOne(methodId, wireIn);
-        return;
     }
 
     @NotNull

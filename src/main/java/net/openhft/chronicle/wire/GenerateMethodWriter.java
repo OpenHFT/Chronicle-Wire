@@ -41,8 +41,6 @@ public class GenerateMethodWriter {
     private static final String MARSHALLABLE = Marshallable.class.getSimpleName();
     private static final String METHOD_READER = MethodReader.class.getSimpleName();
 
-    private static boolean recordHistory;
-    private static AtomicInteger count = new AtomicInteger();
     private final boolean metaData;
     private final boolean useMethodId;
     private final String packageName;
@@ -51,8 +49,6 @@ public class GenerateMethodWriter {
     private final ClassLoader classLoader;
     private final WireType wireType;
     private final String genericEvent;
-    AtomicInteger i = new AtomicInteger();
-    MarshallableOut o;
     private ConcurrentMap<Class, String> methodWritersMap = new ConcurrentHashMap<>();
     private boolean hasMethodWriterListener;
     private AtomicInteger indent = new AtomicInteger();
@@ -85,7 +81,6 @@ public class GenerateMethodWriter {
      * @param genericEvent
      * @return a proxy class from an interface class or null if it can't be created
      */
-
     @Nullable
     public static Class newClass(String packageName,
                                  Set<Class> interfaces,
@@ -258,8 +253,7 @@ public class GenerateMethodWriter {
 
             return CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
 
-        } catch (
-                Throwable e) {
+        } catch (Throwable e) {
             System.out.println(imports.toString());
             e.printStackTrace();
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + imports, e));

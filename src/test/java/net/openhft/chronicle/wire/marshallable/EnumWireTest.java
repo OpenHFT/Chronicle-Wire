@@ -69,7 +69,7 @@ public class EnumWireTest extends WireTestCommon {
     }
 
     enum NoMarsh {
-        NO_MARSH;
+        NO_MARSH
     }
 
     static class MarshAndResolve implements Marshallable, ReadResolvable<MarshAndResolve> {

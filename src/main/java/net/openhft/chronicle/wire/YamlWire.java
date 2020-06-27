@@ -482,9 +482,7 @@ public class YamlWire extends AbstractWire implements Wire {
         }
 
         unescape(sb);
-        if (sb.length() == 0 || StringUtils.isEqual(sb, keyName))
-            return true;
-        return false;
+        return (sb.length() == 0 || StringUtils.isEqual(sb, keyName));
     }
 
     @NotNull
