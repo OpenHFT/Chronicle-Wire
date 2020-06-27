@@ -37,6 +37,7 @@ import java.util.function.Supplier;
 public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterBuilder<T> {
 
     private static final boolean DISABLE_PROXY_GEN = Boolean.getBoolean("disableProxyCodegen");
+    private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
     private final Set<Class> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
     private static final Map<String, Class> classCache = new ConcurrentHashMap<>();
 
@@ -170,13 +171,14 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         }
         if (!DISABLE_PROXY_GEN) {
 
+            String className = getClassName();
             try {
-                Class clazz = classCache.computeIfAbsent(getClassName(), this::newClass);
-                if (clazz != null)
+                Class clazz = classCache.computeIfAbsent(className, this::newClass);
+                if (clazz != null && clazz != COMPILE_FAILED)
                     return (T) newInstance(clazz);
 
             } catch (Throwable e) {
-
+                classCache.put(className, COMPILE_FAILED);
                 // do nothing and drop through
                 if (Jvm.isDebug())
                     Jvm.debug().on(getClass(), e);
