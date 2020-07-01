@@ -36,7 +36,7 @@ import java.util.function.Supplier;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterBuilder<T> {
 
-    private static final boolean DISABLE_PROXY_GEN = Boolean.getBoolean("disableProxyCodegen");
+    private static final boolean DISABLE_PROXY_GEN = Jvm.getBoolean("disableProxyCodegen", true);
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
     private final Set<Class> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
     private static final Map<String, Class> classCache = new ConcurrentHashMap<>();
@@ -81,8 +81,11 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return this;
     }
 
-    public VanillaMethodWriterBuilder(@NotNull Class<T> tClass, @NotNull Supplier<MethodWriterInvocationHandler> handlerSupplier) {
+    public VanillaMethodWriterBuilder(@NotNull Class<T> tClass,
+                                      WireType wireType,
+                                      @NotNull Supplier<MethodWriterInvocationHandler> handlerSupplier) {
         packageName = tClass.getPackage().getName();
+        this.wireType = wireType;
 
         addInterface(tClass);
         classLoader = tClass.getClassLoader();
@@ -151,7 +154,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         sb.append(this.metaData ? "MetadataAware" : "");
         sb.append(useMethodIds ? "MethodIds" : "");
         sb.append(hasMethodWriterListener() ? "MethodListener" : "");
-        sb.append(toFirstCapCase(wireType.toString()));
+        sb.append(toFirstCapCase(wireType().toString()));
         sb.append("MethodWriter");
         return sb.toString();
     }
@@ -174,8 +177,10 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
             String className = getClassName();
             try {
                 Class clazz = classCache.computeIfAbsent(className, this::newClass);
-                if (clazz != null && clazz != COMPILE_FAILED)
-                    return (T) newInstance(clazz);
+                if (clazz != null && clazz != COMPILE_FAILED) {
+                    T t = (T) newInstance(clazz);
+                    return t;
+                }
 
             } catch (Throwable e) {
                 classCache.put(className, COMPILE_FAILED);

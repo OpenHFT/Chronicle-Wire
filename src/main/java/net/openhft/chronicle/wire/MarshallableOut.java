@@ -191,18 +191,22 @@ public interface MarshallableOut {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @NotNull
     default <T> T methodWriter(boolean metaData, @NotNull Class<T> tClass, Class... additional) {
-        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<T>(tClass, () -> new BinaryMethodWriterInvocationHandler(metaData, this));
+        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<T>(tClass,
+                WireType.BINARY_LIGHT,
+                () -> new BinaryMethodWriterInvocationHandler(metaData, this));
         Stream.of(additional).forEach(builder::addInterface);
 
-        builder.wireType(WireType.BINARY).marshallableOut(this);
+        builder.marshallableOut(this);
         builder.metaData(metaData);
         return builder.build();
     }
 
     @NotNull
     default <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
-        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass, () -> new BinaryMethodWriterInvocationHandler(false, this));
-        builder.wireType(WireType.BINARY).marshallableOut(this);
+        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
+                WireType.BINARY_LIGHT,
+                () -> new BinaryMethodWriterInvocationHandler(false, this));
+        builder.marshallableOut(this);
         return builder;
     }
 

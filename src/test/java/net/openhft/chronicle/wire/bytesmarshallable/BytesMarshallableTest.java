@@ -202,7 +202,7 @@ public class BytesMarshallableTest extends WireTestCommon {
         static <D extends ScalarDto> D init(int i, D d) {
             d.text = "Hello" + i;
             d.buffer = new StringBuilder("bye " + i);
-            d.bytes = Bytes.elasticHeapByteBuffer(8).append("hi ").append(i);
+            d.bytes = Bytes.allocateElasticOnHeap(8).append("hi ").append(i);
             return d;
         }
     }
@@ -218,7 +218,7 @@ public class BytesMarshallableTest extends WireTestCommon {
             text = in.read8bit();
             if (buffer == null) buffer = new StringBuilder();
             in.read8bit(buffer);
-            if (bytes == null) bytes = Bytes.elasticHeapByteBuffer(8);
+            if (bytes == null) bytes = Bytes.allocateElasticOnHeap(8);
             in.read8bit(bytes);
         }
 

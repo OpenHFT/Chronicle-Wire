@@ -74,12 +74,6 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
         readMarshallable(w);
     }
 
-    @Override
-    protected void performClose() {
-        super.performClose();
-        Closeable.closeQuietly(words);
-    }
-
     /**
      * Given a bit index, return word index containing it.
      */
@@ -120,6 +114,12 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
                     " > toIndex: " + toIndex);
     }
 
+    @Override
+    protected void performClose() {
+        super.performClose();
+        Closeable.closeQuietly(words);
+    }
+
     private int getWordsInUse() {
         return words.length;
     }
@@ -127,7 +127,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     public void set(LongValue word, long param, LongFunction function) {
         throwExceptionIfClosed();
 
- Pauser pauser = pauser();
+        Pauser pauser = pauser();
         pauser.reset();
 
         for (; ; ) {
@@ -692,8 +692,6 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.2
      */
     public int length() {
-        throwExceptionIfClosed();
-
         if (getWordsInUse() == 0)
             return 0;
 
@@ -709,8 +707,6 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @since 1.4
      */
     public boolean isEmpty() {
-        throwExceptionIfClosed();
-
         return getWordsInUse() == 0;
     }
 
@@ -864,8 +860,6 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @return the hash code value for this bit set
      */
     public int hashCode() {
-        throwExceptionIfClosed();
-
         long h = 1234;
         for (int i = getWordsInUse(); --i >= 0; )
             h ^= words[i].getVolatileValue() * (i + 1);
@@ -881,8 +875,6 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * @return the number of bits currently in this bit set
      */
     public int size() {
-        throwExceptionIfClosed();
-
         return words.length * BITS_PER_WORD;
     }
 

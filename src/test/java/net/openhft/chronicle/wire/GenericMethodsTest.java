@@ -13,7 +13,7 @@ interface MyInterface<I extends MyInterface> {
 public class GenericMethodsTest {
     @Test
     public void chainedText() {
-        TextWire wire = new TextWire(Bytes.elasticHeapByteBuffer(128))
+        TextWire wire = new TextWire(Bytes.allocateElasticOnHeap(128))
                 .useTextDocuments();
         MyInterface top = wire.methodWriter(MyInterface.class);
 

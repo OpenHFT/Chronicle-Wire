@@ -238,11 +238,13 @@ public class TextWire extends AbstractWire implements Wire {
     @Override
     @NotNull
     public <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
-        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass, () -> newTextMethodWriterInvocationHandler(tClass));
+        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
+                WireType.TEXT,
+                () -> newTextMethodWriterInvocationHandler(tClass));
         for (Class aClass : additional)
             builder.addInterface(aClass);
         useTextDocuments();
-        builder.wireType(WireType.TEXT).marshallableOut(this);
+        builder.marshallableOut(this);
         return builder.build();
     }
 
@@ -259,8 +261,10 @@ public class TextWire extends AbstractWire implements Wire {
     @Override
     @NotNull
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
-        VanillaMethodWriterBuilder<T> text = new VanillaMethodWriterBuilder<>(tClass, () -> newTextMethodWriterInvocationHandler(tClass));
-        text.wireType(WireType.TEXT).marshallableOut(this);
+        VanillaMethodWriterBuilder<T> text = new VanillaMethodWriterBuilder<>(tClass,
+                WireType.TEXT,
+                () -> newTextMethodWriterInvocationHandler(tClass));
+        text.marshallableOut(this);
         return text;
     }
 
@@ -2947,7 +2951,7 @@ public class TextWire extends AbstractWire implements Wire {
                     final String className = tClass.getName();
 
                     String[] split = REGX_PATTERN.split(sb);
-                    if (split[split.length - 1].equalsIgnoreCase(tClass.getSimpleName()))
+                    if (split[split.length - 1].equalsIgnoreCase(tClass.getSimpleName())) {
                         try {
 
                             return tClass.isInterface()
@@ -2959,8 +2963,11 @@ public class TextWire extends AbstractWire implements Wire {
                             return Wires.tupleFor(tClass, className);
                         }
 
-                    else
+                    } else if (tClass.getClassLoader() == null) {
+                        throw new IllegalArgumentException("Unable to find class " + sb);
+                    } else {
                         return Wires.tupleFor(tClass, sb.toString());
+                    }
                 }
             }
             return Wires.dtoInterface(tClass) ? Wires.tupleFor(tClass, null) : null;

@@ -195,10 +195,12 @@ public class YamlWire extends AbstractWire implements Wire {
     @Override
     @NotNull
     public <T> T methodWriter(@NotNull Class<T> tClass, Class... additional) {
-        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass, () -> newTextMethodWriterInvocationHandler(tClass));
+        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
+                WireType.YAML,
+                () -> newTextMethodWriterInvocationHandler(tClass));
         for (Class aClass : additional)
             builder.addInterface(aClass);
-        builder.wireType(WireType.YAML).marshallableOut(this);
+        builder.marshallableOut(this);
         return builder.build();
     }
 
@@ -215,8 +217,10 @@ public class YamlWire extends AbstractWire implements Wire {
     @Override
     @NotNull
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
-        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass, () -> newTextMethodWriterInvocationHandler(tClass));
-        builder.wireType(WireType.YAML).marshallableOut(this);
+        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
+                WireType.YAML,
+                () -> newTextMethodWriterInvocationHandler(tClass));
+        builder.marshallableOut(this);
         return builder;
     }
 
@@ -1947,7 +1951,9 @@ public class YamlWire extends AbstractWire implements Wire {
                     return Base64.getDecoder().decode(sb2.toString());
                 });
                 if (uncompressed != null) {
-                    bytesConsumer.readMarshallable(Bytes.wrapForRead(uncompressed));
+                    Bytes<byte[]> bytes = Bytes.wrapForRead(uncompressed);
+                    bytesConsumer.readMarshallable(bytes);
+                    bytes.releaseLast();
 
                 } else if (StringUtils.isEqual(sb, "!null")) {
                     bytesConsumer.readMarshallable(null);
@@ -1958,7 +1964,9 @@ public class YamlWire extends AbstractWire implements Wire {
                 }
             } else {
                 textTo(sb);
-                bytesConsumer.readMarshallable(Bytes.wrapForRead(sb.toString().getBytes(ISO_8859_1)));
+                Bytes<byte[]> bytes = Bytes.wrapForRead(sb.toString().getBytes(ISO_8859_1));
+                bytesConsumer.readMarshallable(bytes);
+                bytes.releaseLast();
             }
             return YamlWire.this;
         }

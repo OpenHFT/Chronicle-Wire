@@ -98,7 +98,7 @@ public class BinaryWire2Test extends WireTestCommon {
                 v -> v.date(LocalDate.MIN),
                 v -> v.dateTime(LocalDateTime.MIN),
                 v -> v.zonedDateTime(ZonedDateTime.now()),
-                v -> v.typedMarshallable(w -> {
+                v -> v.marshallable(w -> {
                 }),
                 v -> v.set(new TreeSet<>()),
                 v -> v.object(null),

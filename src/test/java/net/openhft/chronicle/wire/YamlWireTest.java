@@ -17,7 +17,10 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.NoBytesStore;
+import net.openhft.chronicle.bytes.PointerBytesStore;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -49,7 +52,6 @@ import java.util.stream.Stream;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
-import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static net.openhft.chronicle.wire.YamlTokeniserTest.doTest;
 import static org.easymock.EasyMock.replay;
@@ -917,7 +919,7 @@ public class YamlWireTest extends WireTestCommon {
                 .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
                 .write().bytes(allBytes);
         System.out.println(bytes.toString());
-        @NotNull NativeBytes allBytes2 = nativeBytes();
+        @NotNull Bytes allBytes2 = allocateElasticOnHeap();
         wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
                 .read().bytes(b -> assertEquals("Hello", b.toString()))
                 .read().bytes(b -> assertEquals("quotable, text", b.toString()))
@@ -1151,7 +1153,7 @@ public class YamlWireTest extends WireTestCommon {
     @Test
     @Ignore
     public void testMapReadAndWriteIntegers() {
-        @NotNull final Bytes bytes = nativeBytes();
+        @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final YamlWire wire = new YamlWire(bytes);
 
         @NotNull final Map<Integer, Integer> expected = new HashMap<>();
@@ -1191,7 +1193,7 @@ public class YamlWireTest extends WireTestCommon {
     @Test
     @Ignore("TODO FIX")
     public void testMapReadAndWriteMarshable() {
-        @NotNull final Bytes bytes = nativeBytes();
+        @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
 
         @NotNull final Map<MyMarshallable, MyMarshallable> expected = new LinkedHashMap<>();

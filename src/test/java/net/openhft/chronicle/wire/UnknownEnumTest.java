@@ -48,7 +48,7 @@ public class UnknownEnumTest extends WireTestCommon {
     public void shouldConvertEnumValueToStringWhenTypeIsNotKnownInBinaryWire() throws Exception {
 
         // generates the serialised form
-//        final Bytes<ByteBuffer> b = Bytes.elasticHeapByteBuffer(128);
+//        final Bytes<ByteBuffer> b = Bytes.allocateElasticOnHeap(128);
 //        final Wire w = WireType.BINARY.apply(b);
 //
 //        final Map<String, Temp> m = new HashMap<>();

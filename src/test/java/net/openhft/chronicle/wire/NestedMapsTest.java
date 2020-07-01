@@ -58,7 +58,7 @@ public class NestedMapsTest extends WireTestCommon {
         m.map2.put("one", 1.0);
         m.map2.put("two point two", 2.2);
 
-        Bytes bytes = Bytes.elasticHeapByteBuffer(128);
+        Bytes bytes = Bytes.allocateElasticOnHeap(128);
         Wire wire = wireType.apply(bytes);
         wire.writeDocument(false, w -> w.writeEventName("mapped").object(m));
         switch (wireType) {

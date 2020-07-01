@@ -17,7 +17,10 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.NoBytesStore;
+import net.openhft.chronicle.bytes.PointerBytesStore;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -50,7 +53,6 @@ import java.util.stream.Stream;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
-import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
@@ -64,7 +66,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void testWhiteSpaceInType() {
         try {
-            Object o = Marshallable.fromString("key: !net.openhft.chronicle.wire.BinaryWire2Test$DTO {\n" +
+            Object o = Marshallable.fromString("key: !" + DTO.class.getName() + " {\n" +
                     "  type:            !type               String\n" +
                     "}\n");
 
@@ -73,7 +75,26 @@ public class TextWireTest extends WireTestCommon {
         } catch (Exception e) {
             Assert.fail();
         }
- }
+    }
+
+    @Test
+    public void testBytes() {
+        @NotNull Wire wire = createWire();
+        @NotNull byte[] allBytes = new byte[256];
+        for (int i = 0; i < 256; i++)
+            allBytes[i] = (byte) i;
+        wire.write().bytes(NoBytesStore.NO_BYTES)
+                .write().bytes(Bytes.wrapForRead("Hello".getBytes(ISO_8859_1)))
+                .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
+                .write().bytes(allBytes);
+        System.out.println(bytes.toString());
+        @NotNull Bytes allBytes2 = allocateElasticOnHeap();
+        wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
+                .read().bytes(b -> assertEquals("Hello", b.toString()))
+                .read().bytes(b -> assertEquals("quotable, text", b.toString()))
+                .read().bytes(allBytes2);
+        assertEquals(Bytes.wrapForRead(allBytes), allBytes2);
+    }
 
     @Test
     public void comment() {
@@ -905,23 +926,35 @@ public class TextWireTest extends WireTestCommon {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Test
-    public void testBytes() {
-        @NotNull Wire wire = createWire();
-        @NotNull byte[] allBytes = new byte[256];
-        for (int i = 0; i < 256; i++)
-            allBytes[i] = (byte) i;
-        wire.write().bytes(NoBytesStore.NO_BYTES)
-                .write().bytes(Bytes.wrapForRead("Hello".getBytes(ISO_8859_1)))
-                .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
-                .write().bytes(allBytes);
-        System.out.println(bytes.toString());
-        @NotNull NativeBytes allBytes2 = nativeBytes();
-        wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
-                .read().bytes(b -> assertEquals("Hello", b.toString()))
-                .read().bytes(b -> assertEquals("quotable, text", b.toString()))
-                .read().bytes(allBytes2);
-        assertEquals(Bytes.wrapForRead(allBytes), allBytes2);
+    public void testMapReadAndWriteStrings() {
+        @NotNull final Bytes bytes = allocateElasticOnHeap();
+        @NotNull final Wire wire = new TextWire(bytes);
+
+        @NotNull final Map<String, String> expected = new LinkedHashMap<>();
+
+        expected.put("hello", "world");
+        expected.put("hello1", "world1");
+        expected.put("hello2", "world2");
+
+        wire.writeDocument(false, o -> {
+            o.writeEventName(() -> "example")
+                    .map(expected);
+        });
+//        bytes.readPosition(4);
+//        expectWithSnakeYaml("{example={hello=world, hello1=world1, hello2=world2}}", wire);
+//        bytes.readPosition(0);
+        assertEquals("--- !!data\n" +
+                        "example: {\n" +
+                        "  hello: world,\n" +
+                        "  hello1: world1,\n" +
+                        "  hello2: world2\n" +
+                        "}\n",
+                Wires.fromSizePrefixedBlobs(bytes));
+        @NotNull final Map<String, String> actual = new LinkedHashMap<>();
+        wire.readDocument(null, c -> c.read(() -> "example").map(actual));
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -1016,66 +1049,9 @@ public class TextWireTest extends WireTestCommon {
 
     @SuppressWarnings("deprecation")
     @Test
-    public void testMapReadAndWriteStrings() {
-        @NotNull final Bytes bytes = nativeBytes();
-        @NotNull final Wire wire = new TextWire(bytes);
-
-        @NotNull final Map<String, String> expected = new LinkedHashMap<>();
-
-        expected.put("hello", "world");
-        expected.put("hello1", "world1");
-        expected.put("hello2", "world2");
-
-        wire.writeDocument(false, o -> {
-            o.writeEventName(() -> "example")
-                    .map(expected);
-        });
-//        bytes.readPosition(4);
-//        expectWithSnakeYaml("{example={hello=world, hello1=world1, hello2=world2}}", wire);
-//        bytes.readPosition(0);
-        assertEquals("--- !!data\n" +
-                        "example: {\n" +
-                        "  hello: world,\n" +
-                        "  hello1: world1,\n" +
-                        "  hello2: world2\n" +
-                        "}\n",
-                Wires.fromSizePrefixedBlobs(bytes));
-        @NotNull final Map<String, String> actual = new LinkedHashMap<>();
-        wire.readDocument(null, c -> c.read(() -> "example").map(actual));
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void testMapInMap() {
-        String pos = "WithMap: {\n" +
-                "  innerMap: {\n" +
-                "    AUDUSD: AUDUSD1,\n" +
-                "    USDPLN: USDPLN1\n" +
-                "  },\n" +
-                "}";
-        Map<String, Object> fromString = Marshallable.fromString(pos);
-        assertEquals("{WithMap={innerMap={AUDUSD=AUDUSD1, USDPLN=USDPLN1}}}",
-                fromString.toString());
-    }
-
-    @Test
-    public void testMapInMapWithQuestionMarks() {
-        String pos = "WithMap: {\n" +
-                "  innerMap: {\n" +
-                "    ? AUDUSD: AUDUSD1,\n" +
-                "    ? USDPLN: USDPLN1\n" +
-                "  },\n" +
-                "}";
-        Map<String, Object> fromString = Marshallable.fromString(pos);
-        assertEquals("{WithMap={innerMap={AUDUSD=AUDUSD1, USDPLN=USDPLN1}}}",
-                fromString.toString());
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
     @Ignore
     public void testMapReadAndWriteIntegers() {
-        @NotNull final Bytes bytes = nativeBytes();
+        @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes);
 
         @NotNull final Map<Integer, Integer> expected = new HashMap<>();
@@ -1111,10 +1087,36 @@ public class TextWireTest extends WireTestCommon {
         expectWithSnakeYaml("{1=11, 2=2, 3=3}", wire);
     }
 
+    @Test
+    public void testMapInMap() {
+        String pos = "WithMap: {\n" +
+                "  innerMap: {\n" +
+                "    AUDUSD: AUDUSD1,\n" +
+                "    USDPLN: USDPLN1\n" +
+                "  },\n" +
+                "}";
+        Map<String, Object> fromString = Marshallable.fromString(pos);
+        assertEquals("{WithMap={innerMap={AUDUSD=AUDUSD1, USDPLN=USDPLN1}}}",
+                fromString.toString());
+    }
+
+    @Test
+    public void testMapInMapWithQuestionMarks() {
+        String pos = "WithMap: {\n" +
+                "  innerMap: {\n" +
+                "    ? AUDUSD: AUDUSD1,\n" +
+                "    ? USDPLN: USDPLN1\n" +
+                "  },\n" +
+                "}";
+        Map<String, Object> fromString = Marshallable.fromString(pos);
+        assertEquals("{WithMap={innerMap={AUDUSD=AUDUSD1, USDPLN=USDPLN1}}}",
+                fromString.toString());
+    }
+
     @SuppressWarnings("deprecation")
     @Test
     public void testMapReadAndWriteMarshable() {
-        @NotNull final Bytes bytes = nativeBytes();
+        @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes);
 
         @NotNull final Map<MyMarshallable, MyMarshallable> expected = new LinkedHashMap<>();
@@ -1141,6 +1143,10 @@ public class TextWireTest extends WireTestCommon {
         assertEquals(expected, actual);
 
         wire.bytes().releaseLast();
+    }
+
+    static class DTO extends SelfDescribingMarshallable {
+        Class type;
     }
 
     @Test

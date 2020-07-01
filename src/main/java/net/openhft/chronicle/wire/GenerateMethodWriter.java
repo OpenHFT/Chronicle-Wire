@@ -102,11 +102,14 @@ public class GenerateMethodWriter {
     }
 
     @SuppressWarnings("unused")
-    public static DocumentContext acquireDocumentContext(boolean metaData, ThreadLocal<DocumentContextHolder> documentContextTL, MarshallableOut out) {
+    public static DocumentContext acquireDocumentContext(boolean metaData,
+                                                         ThreadLocal<DocumentContextHolder> documentContextTL,
+                                                         MarshallableOut out) {
         DocumentContextHolder contextHolder = documentContextTL.get();
         if (!contextHolder.isClosed())
             return contextHolder;
-        contextHolder.documentContext(out.writingDocument(metaData));
+        contextHolder.documentContext(
+                out.writingDocument(metaData));
         return contextHolder;
     }
 

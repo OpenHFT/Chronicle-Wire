@@ -16,7 +16,7 @@ public class VanillaWireParserTest extends WireTestCommon {
 
     @Test
     public void shouldDetermineMethodNamesFromMethodIds() {
-        final BinaryWire wire = new BinaryWire(Bytes.allocateElasticDirect());
+        final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         final Speaker speaker =
                 wire.methodWriterBuilder(Speaker.class).useMethodIds(true).get();
         speaker.say("hello");
