@@ -213,7 +213,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     private Object newInstance(final Class aClass) {
         try {
             if (out == null)
-                throw new NullPointerException("marshallableOut(out) not set.");
+                throw new NullPointerException("marshallableOut(out) has not been set.");
             return aClass.getDeclaredConstructors()[0].newInstance(out, closeable, methodWriterListener);
         } catch (Exception e) {
             throw Jvm.rethrow(e);
