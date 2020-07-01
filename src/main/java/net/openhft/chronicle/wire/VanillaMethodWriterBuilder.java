@@ -141,8 +141,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     }
 
     /**
-     * because we cache the classes in {@code classCache}, its very important to come up with a name that is
-     * unique for what the class does.
+     * because we cache the classes in {@code classCache}, its very important to come up with a name that is unique for what the class does.
      *
      * @return the name of the new class
      */
@@ -239,7 +238,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return this;
     }
 
-    public MethodWriterBuilder<T> marshallableOut(final MarshallableOut out) {
+    public MethodWriterBuilder<T> marshallableOut(@NotNull final MarshallableOut out) {
         this.out = out;
         return this;
     }
