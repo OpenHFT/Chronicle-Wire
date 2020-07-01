@@ -36,7 +36,7 @@ import java.util.function.Supplier;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterBuilder<T> {
 
-    private static final boolean DISABLE_PROXY_GEN = Jvm.getBoolean("disableProxyCodegen", true);
+    private static final boolean DISABLE_PROXY_GEN = Jvm.getBoolean("disableProxyCodegen", false);
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
     private static final Map<String, Class> classCache = new ConcurrentHashMap<>();
     private final Set<Class> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
@@ -53,6 +53,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     private boolean useMethodIds;
     private WireType wireType;
     private Class<?> proxyClass;
+    private boolean recordHistory;
 
     @NotNull
     public MethodWriterBuilder<T> classLoader(ClassLoader classLoader) {
@@ -77,6 +78,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
     @NotNull
     public MethodWriterBuilder<T> recordHistory(boolean recordHistory) {
+        this.recordHistory = recordHistory;
         handlerSupplier.recordHistory(recordHistory);
         return this;
     }
@@ -153,7 +155,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         sb.append(this.metaData ? "MetadataAware" : "");
         sb.append(useMethodIds ? "MethodIds" : "");
         sb.append(hasMethodWriterListener() ? "MethodListener" : "");
-        sb.append(toFirstCapCase(wireType().toString()));
+        sb.append(toFirstCapCase(wireType().toString().replace("_", "")));
         sb.append("MethodWriter");
         return sb.toString();
     }
@@ -203,7 +205,9 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
                 classLoader,
                 wireType,
                 genericEvent,
-                hasMethodWriterListener(), metaData, useMethodIds);
+                hasMethodWriterListener(),
+                metaData,
+                useMethodIds);
     }
 
     private boolean hasMethodWriterListener() {
@@ -214,6 +218,10 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         try {
             if (out == null)
                 throw new NullPointerException("marshallableOut(out) has not been set.");
+            if (recordHistory != out.recordHistory()) {
+                System.out.println("");
+            }
+            assert recordHistory == out.recordHistory();
             return aClass.getDeclaredConstructors()[0].newInstance(out, closeable, methodWriterListener);
         } catch (Exception e) {
             throw Jvm.rethrow(e);
