@@ -22,14 +22,12 @@ import net.openhft.chronicle.bytes.BytesComment;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.StackTrace;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.threads.TimingPauser;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -60,10 +58,6 @@ public abstract class AbstractWire implements Wire {
 
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
     protected Object parent;
-    @Nullable
-    volatile Thread usedBy;
-    @Nullable
-    volatile Throwable usedHere;
     int usedCount = 0;
     private Pauser pauser;
     private TimingPauser timedParser;
@@ -467,16 +461,6 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public boolean startUse() {
-        if (Jvm.isResourceTracing()) {
-            Thread usedBy = this.usedBy;
-            Throwable usedHere = this.usedHere;
-            if (usedBy != Thread.currentThread() && usedBy != null) {
-                throw new IllegalStateException("Used by " + usedBy + " while trying to use it in " + Thread.currentThread(), usedHere);
-            }
-            this.usedBy = Thread.currentThread();
-            // creating an object here, every time in not cool ! so added TRACK_USED
-            this.usedHere = new StackTrace("Used here");
-        }
         usedCount++;
         return true;
     }
@@ -484,16 +468,6 @@ public abstract class AbstractWire implements Wire {
     @Override
     public boolean endUse() {
         --usedCount;
-        if (Jvm.isResourceTracing()) {
-            if (usedBy != Thread.currentThread()) {
-                throw new IllegalStateException("Used by " + usedHere, usedHere);
-            }
-            if (usedCount <= 0) {
-                usedBy = null;
-                usedHere = null;
-                usedCount = 0;
-            }
-        }
         return true;
     }
 
