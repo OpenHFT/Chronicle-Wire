@@ -177,12 +177,17 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
             String className = getClassName();
             try {
-                Class clazz = classCache.computeIfAbsent(className, this::newClass);
-                if (clazz != null && clazz != COMPILE_FAILED) {
-                    T t = (T) newInstance(clazz);
-                    return t;
-                }
 
+                try {
+                    T t = (T) newInstance(Class.forName(className));
+                    return t;
+                } catch (ClassNotFoundException e) {
+                    Class clazz = classCache.computeIfAbsent(className, this::newClass);
+                    if (clazz != null && clazz != COMPILE_FAILED) {
+                        T t = (T) newInstance(clazz);
+                        return t;
+                    }
+                }
             } catch (Throwable e) {
                 classCache.put(className, COMPILE_FAILED);
                 // do nothing and drop through
