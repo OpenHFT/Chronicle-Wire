@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.BytesComment;
 import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -38,7 +39,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
+import static net.openhft.chronicle.core.UnsafeMemory.*;
 
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
 public class WireMarshaller<T> {
@@ -341,7 +342,7 @@ public class WireMarshaller<T> {
         FieldAccess(@NotNull Field field, Boolean isLeaf) {
             this.field = field;
 
-            offset = UNSAFE.objectFieldOffset(field);
+            offset = unsafeObjectFieldOffset(field);
             key = field::getName;
             this.isLeaf = isLeaf;
             try {
@@ -495,7 +496,7 @@ public class WireMarshaller<T> {
         }
 
         protected void copy(Object from, Object to) throws IllegalAccessException {
-            UNSAFE.putObject(to, offset, UNSAFE.getObject(from, offset));
+            unsafePutObject(to, offset, unsafeGetObject(from, offset));
         }
 
         protected abstract void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException;
@@ -641,17 +642,17 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, Object previous) {
-            write.text((String) UNSAFE.getObject(o, offset));
+            write.text(UnsafeMemory.<String>unsafeGetObject(o, offset));
         }
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            UNSAFE.putObject(o, offset, read.text());
+            unsafePutObject(o, offset, read.text());
         }
 
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) {
-            bytes.writeUtf8((String) UNSAFE.getObject(o, offset));
+            bytes.writeUtf8((String) unsafeGetObject(o, offset));
         }
 
         @Override
@@ -668,22 +669,22 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, Object previous) {
-            @NotNull CharSequence cs = (CharSequence) UNSAFE.getObject(o, offset);
+            @NotNull CharSequence cs = (CharSequence) unsafeGetObject(o, offset);
             write.text(cs);
         }
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            @NotNull StringBuilder sb = (StringBuilder) UNSAFE.getObject(o, offset);
+            @NotNull StringBuilder sb = (StringBuilder) unsafeGetObject(o, offset);
             if (sb == null)
-                UNSAFE.putObject(o, offset, sb = new StringBuilder());
+                unsafePutObject(o, offset, sb = new StringBuilder());
             if (read.textTo(sb) == null)
-                UNSAFE.putObject(o, offset, null);
+                unsafePutObject(o, offset, null);
         }
 
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) {
-            bytes.writeUtf8((CharSequence) UNSAFE.getObject(o, offset));
+            bytes.writeUtf8((CharSequence) unsafeGetObject(o, offset));
         }
 
         @Override
@@ -693,14 +694,14 @@ public class WireMarshaller<T> {
 
         @Override
         protected void copy(Object from, Object to) {
-            final StringBuilder fromSequence = (StringBuilder) UNSAFE.getObject(from, offset);
-            StringBuilder toSequence = (StringBuilder) UNSAFE.getObject(to, offset);
+            final StringBuilder fromSequence = (StringBuilder) unsafeGetObject(from, offset);
+            StringBuilder toSequence = (StringBuilder) unsafeGetObject(to, offset);
 
             if (fromSequence == null) {
-                UNSAFE.putObject(to, offset, null);
+                unsafePutObject(to, offset, null);
                 return;
             } else if (toSequence == null) {
-                UNSAFE.putObject(to, offset, toSequence = new StringBuilder());
+                unsafePutObject(to, offset, toSequence = new StringBuilder());
             }
 
             toSequence.setLength(0);
@@ -722,9 +723,9 @@ public class WireMarshaller<T> {
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            @NotNull Bytes bytes = (Bytes) UNSAFE.getObject(o, offset);
+            @NotNull Bytes bytes = (Bytes) unsafeGetObject(o, offset);
             if (bytes == null)
-                UNSAFE.putObject(o, offset, bytes = Bytes.allocateElasticOnHeap(128));
+                unsafePutObject(o, offset, bytes = Bytes.allocateElasticOnHeap(128));
             WireIn wireIn = read.wireIn();
             if (wireIn instanceof TextWire) {
                 wireIn.consumePadding();
@@ -734,7 +735,7 @@ public class WireMarshaller<T> {
                 }
             }
             if (read.textTo(bytes) == null)
-                UNSAFE.putObject(o, offset, null);
+                unsafePutObject(o, offset, null);
         }
 
         private void decodeBytes(@NotNull ValueIn read, Bytes bytes) {
@@ -754,14 +755,14 @@ public class WireMarshaller<T> {
 
         @Override
         protected void copy(Object from, Object to) {
-            Bytes fromBytes = (Bytes) UNSAFE.getObject(from, offset);
-            Bytes toBytes = (Bytes) UNSAFE.getObject(to, offset);
+            Bytes fromBytes = (Bytes) unsafeGetObject(from, offset);
+            Bytes toBytes = (Bytes) unsafeGetObject(to, offset);
             if (fromBytes == null) {
-                UNSAFE.putObject(to, offset, null);
+                unsafePutObject(to, offset, null);
                 return;
 
             } else if (toBytes == null) {
-                UNSAFE.putObject(to, offset, toBytes = Bytes.elasticByteBuffer());
+                unsafePutObject(to, offset, toBytes = Bytes.elasticByteBuffer());
             }
             toBytes.clear();
             toBytes.write(fromBytes);
@@ -1265,27 +1266,27 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, Object previous) {
-            write.bool(UNSAFE.getBoolean(o, offset));
+            write.bool(unsafeGetBoolean(o, offset));
         }
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            UNSAFE.putBoolean(o, offset, read.bool());
+            unsafePutBoolean(o, offset, read.bool());
         }
 
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) {
-            bytes.writeBoolean(UNSAFE.getBoolean(o, offset));
+            bytes.writeBoolean(unsafeGetBoolean(o, offset));
         }
 
         @Override
         protected boolean sameValue(Object o, Object o2) {
-            return UNSAFE.getBoolean(o, offset) == UNSAFE.getBoolean(o2, offset);
+            return unsafeGetBoolean(o, offset) == unsafeGetBoolean(o2, offset);
         }
 
         @Override
         protected void copy(Object from, Object to) {
-            UNSAFE.putBoolean(to, offset, UNSAFE.getBoolean(from, offset));
+            unsafePutBoolean(to, offset, unsafeGetBoolean(from, offset));
         }
     }
 
@@ -1296,27 +1297,27 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, Object previous) {
-            write.int8(UNSAFE.getByte(o, offset));
+            write.int8(unsafeGetByte(o, offset));
         }
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            UNSAFE.putByte(o, offset, read.int8());
+            unsafePutByte(o, offset, read.int8());
         }
 
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) {
-            bytes.writeByte(UNSAFE.getByte(o, offset));
+            bytes.writeByte(unsafeGetByte(o, offset));
         }
 
         @Override
         protected boolean sameValue(Object o, Object o2) {
-            return UNSAFE.getByte(o, offset) == UNSAFE.getByte(o2, offset);
+            return unsafeGetByte(o, offset) == unsafeGetByte(o2, offset);
         }
 
         @Override
         protected void copy(Object from, Object to) {
-            UNSAFE.putByte(to, offset, UNSAFE.getByte(from, offset));
+            unsafePutByte(to, offset, unsafeGetByte(from, offset));
         }
     }
 
@@ -1327,27 +1328,27 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, Object previous) {
-            write.int16(UNSAFE.getShort(o, offset));
+            write.int16(unsafeGetShort(o, offset));
         }
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            UNSAFE.putShort(o, offset, read.int16());
+            unsafePutShort(o, offset, read.int16());
         }
 
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) {
-            bytes.writeShort(UNSAFE.getShort(o, offset));
+            bytes.writeShort(unsafeGetShort(o, offset));
         }
 
         @Override
         protected boolean sameValue(Object o, Object o2) {
-            return UNSAFE.getShort(o, offset) == UNSAFE.getShort(o2, offset);
+            return unsafeGetShort(o, offset) == unsafeGetShort(o2, offset);
         }
 
         @Override
         protected void copy(Object from, Object to) {
-            UNSAFE.putShort(to, offset, UNSAFE.getShort(from, offset));
+            unsafePutShort(to, offset, unsafeGetShort(from, offset));
         }
     }
 
@@ -1359,7 +1360,7 @@ public class WireMarshaller<T> {
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, Object previous) {
             @NotNull StringBuilder sb = WSBP.acquireStringBuilder();
-            sb.append(UNSAFE.getChar(o, offset));
+            sb.append(unsafeGetChar(o, offset));
             write.text(sb);
         }
 
@@ -1372,22 +1373,22 @@ public class WireMarshaller<T> {
                 else
                     return;
             }
-            UNSAFE.putChar(o, offset, text.charAt(0));
+            unsafePutChar(o, offset, text.charAt(0));
         }
 
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) {
-            bytes.writeUnsignedShort(UNSAFE.getChar(o, offset));
+            bytes.writeUnsignedShort(unsafeGetChar(o, offset));
         }
 
         @Override
         protected boolean sameValue(Object o, Object o2) {
-            return UNSAFE.getChar(o, offset) == UNSAFE.getChar(o2, offset);
+            return unsafeGetChar(o, offset) == unsafeGetChar(o2, offset);
         }
 
         @Override
         protected void copy(Object from, Object to) {
-            UNSAFE.putChar(to, offset, UNSAFE.getChar(from, offset));
+            unsafePutChar(to, offset, unsafeGetChar(from, offset));
         }
     }
 
@@ -1399,30 +1400,30 @@ public class WireMarshaller<T> {
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             if (previous == null)
-                write.int32(UNSAFE.getInt(o, offset));
+                write.int32(unsafeGetInt(o, offset));
             else
-                write.int32(UNSAFE.getInt(o, offset), UNSAFE.getInt(previous, offset));
+                write.int32(unsafeGetInt(o, offset), unsafeGetInt(previous, offset));
         }
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            int i = overwrite ? read.int32() : read.int32(UNSAFE.getInt(o, offset));
-            UNSAFE.putInt(o, offset, i);
+            int i = overwrite ? read.int32() : read.int32(unsafeGetInt(o, offset));
+            unsafePutInt(o, offset, i);
         }
 
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) {
-            bytes.writeInt(UNSAFE.getInt(o, offset));
+            bytes.writeInt(unsafeGetInt(o, offset));
         }
 
         @Override
         protected boolean sameValue(Object o, Object o2) {
-            return UNSAFE.getInt(o, offset) == UNSAFE.getInt(o2, offset);
+            return unsafeGetInt(o, offset) == unsafeGetInt(o2, offset);
         }
 
         @Override
         protected void copy(Object from, Object to) {
-            UNSAFE.putInt(to, offset, UNSAFE.getInt(from, offset));
+            unsafePutInt(to, offset, unsafeGetInt(from, offset));
         }
     }
 
@@ -1433,12 +1434,12 @@ public class WireMarshaller<T> {
 
         @Override
         protected int getInt(Object o) {
-            return UNSAFE.getByte(o, offset) & 0xFF;
+            return unsafeGetByte(o, offset) & 0xFF;
         }
 
         @Override
         protected void putInt(Object o, int i) {
-            UNSAFE.putByte(o, offset, (byte) i);
+            unsafePutByte(o, offset, (byte) i);
         }
     }
 
@@ -1449,12 +1450,12 @@ public class WireMarshaller<T> {
 
         @Override
         protected int getInt(Object o) {
-            return UNSAFE.getShort(o, offset) & 0xFFFF;
+            return unsafeGetShort(o, offset) & 0xFFFF;
         }
 
         @Override
         protected void putInt(Object o, int i) {
-            UNSAFE.putShort(o, offset, (short) i);
+            unsafePutShort(o, offset, (short) i);
         }
     }
 
@@ -1476,7 +1477,7 @@ public class WireMarshaller<T> {
         }
 
         protected char getChar(Object o) {
-            return UNSAFE.getChar(o, offset);
+            return unsafeGetChar(o, offset);
         }
 
         @Override
@@ -1488,7 +1489,7 @@ public class WireMarshaller<T> {
         }
 
         protected void putChar(Object o, char i) {
-            UNSAFE.putChar(o, offset, i);
+            unsafePutChar(o, offset, i);
         }
 
         @Override
@@ -1532,7 +1533,7 @@ static class IntConversionFieldAccess extends FieldAccess {
         }
 
         protected int getInt(Object o) {
-            return UNSAFE.getInt(o, offset);
+            return unsafeGetInt(o, offset);
         }
 
         @Override
@@ -1550,7 +1551,7 @@ static class IntConversionFieldAccess extends FieldAccess {
         }
 
         protected void putInt(Object o, int i) {
-            UNSAFE.putInt(o, offset, i);
+            unsafePutInt(o, offset, i);
         }
 
         @Override
@@ -1580,30 +1581,30 @@ static class IntConversionFieldAccess extends FieldAccess {
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             if (previous == null)
-                write.float32(UNSAFE.getFloat(o, offset));
+                write.float32(unsafeGetFloat(o, offset));
             else
-                write.float32(UNSAFE.getFloat(o, offset), UNSAFE.getFloat(previous, offset));
+                write.float32(unsafeGetFloat(o, offset), unsafeGetFloat(previous, offset));
         }
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            final float v = overwrite ? read.float32() : read.float32(UNSAFE.getFloat(o, offset));
-            UNSAFE.putFloat(o, offset, v);
+            final float v = overwrite ? read.float32() : read.float32(unsafeGetFloat(o, offset));
+            unsafePutFloat(o, offset, v);
         }
 
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) {
-            bytes.writeFloat(UNSAFE.getFloat(o, offset));
+            bytes.writeFloat(unsafeGetFloat(o, offset));
         }
 
         @Override
         protected boolean sameValue(Object o, Object o2) {
-            return Maths.same(UNSAFE.getFloat(o, offset), UNSAFE.getFloat(o2, offset));
+            return Maths.same(unsafeGetFloat(o, offset), unsafeGetFloat(o2, offset));
         }
 
         @Override
         protected void copy(Object from, Object to) {
-            UNSAFE.putFloat(to, offset, UNSAFE.getFloat(from, offset));
+            unsafePutFloat(to, offset, unsafeGetFloat(from, offset));
         }
     }
 
@@ -1615,30 +1616,30 @@ static class IntConversionFieldAccess extends FieldAccess {
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             if (previous == null)
-                write.int64(UNSAFE.getLong(o, offset));
+                write.int64(unsafeGetLong(o, offset));
             else
-                write.int64(UNSAFE.getLong(o, offset), UNSAFE.getLong(previous, offset));
+                write.int64(unsafeGetLong(o, offset), unsafeGetLong(previous, offset));
         }
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            long i = overwrite ? read.int64() : read.int64(UNSAFE.getLong(o, offset));
-            UNSAFE.putLong(o, offset, i);
+            long i = overwrite ? read.int64() : read.int64(unsafeGetLong(o, offset));
+            unsafePutLong(o, offset, i);
         }
 
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) {
-            bytes.writeLong(UNSAFE.getLong(o, offset));
+            bytes.writeLong(unsafeGetLong(o, offset));
         }
 
         @Override
         protected boolean sameValue(Object o, Object o2) {
-            return UNSAFE.getLong(o, offset) == UNSAFE.getLong(o2, offset);
+            return unsafeGetLong(o, offset) == unsafeGetLong(o2, offset);
         }
 
         @Override
         protected void copy(Object from, Object to) {
-            UNSAFE.putLong(to, offset, UNSAFE.getLong(from, offset));
+            unsafePutLong(to, offset, unsafeGetLong(from, offset));
         }
     }
 
@@ -1653,7 +1654,7 @@ static class IntConversionFieldAccess extends FieldAccess {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
-            long aLong = UNSAFE.getLong(o, offset);
+            long aLong = unsafeGetLong(o, offset);
             if (write.isBinary()) {
                 write.int64(aLong);
             } else {
@@ -1673,7 +1674,7 @@ static class IntConversionFieldAccess extends FieldAccess {
                 read.text(sb);
                 i = longConverter.parse(sb);
             }
-            UNSAFE.putLong(o, offset, i);
+            unsafePutLong(o, offset, i);
         }
 
         @Override
@@ -1686,12 +1687,12 @@ static class IntConversionFieldAccess extends FieldAccess {
 
         @Override
         protected boolean sameValue(Object o, Object o2) {
-            return UNSAFE.getLong(o, offset) == UNSAFE.getLong(o2, offset);
+            return unsafeGetLong(o, offset) == unsafeGetLong(o2, offset);
         }
 
         @Override
         protected void copy(Object from, Object to) {
-            UNSAFE.putLong(to, offset, UNSAFE.getLong(from, offset));
+            unsafePutLong(to, offset, unsafeGetLong(from, offset));
         }
     }
 
@@ -1703,30 +1704,30 @@ static class IntConversionFieldAccess extends FieldAccess {
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             if (previous == null)
-                write.float64(UNSAFE.getDouble(o, offset));
+                write.float64(unsafeGetDouble(o, offset));
             else
-                write.float64(UNSAFE.getDouble(o, offset), UNSAFE.getDouble(previous, offset));
+                write.float64(unsafeGetDouble(o, offset), unsafeGetDouble(previous, offset));
         }
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            final double v = overwrite ? read.float64() : read.float64(UNSAFE.getDouble(o, offset));
-            UNSAFE.putDouble(o, offset, v);
+            final double v = overwrite ? read.float64() : read.float64(unsafeGetDouble(o, offset));
+            unsafePutDouble(o, offset, v);
         }
 
         @Override
         public void getAsBytes(Object o, @NotNull Bytes bytes) {
-            bytes.writeDouble(UNSAFE.getDouble(o, offset));
+            bytes.writeDouble(unsafeGetDouble(o, offset));
         }
 
         @Override
         protected boolean sameValue(Object o, Object o2) {
-            return Maths.same(UNSAFE.getDouble(o, offset), UNSAFE.getDouble(o2, offset));
+            return Maths.same(unsafeGetDouble(o, offset), unsafeGetDouble(o2, offset));
         }
 
         @Override
         protected void copy(Object from, Object to) {
-            UNSAFE.putDouble(to, offset, UNSAFE.getDouble(from, offset));
+            unsafePutDouble(to, offset, unsafeGetDouble(from, offset));
         }
     }
 }
