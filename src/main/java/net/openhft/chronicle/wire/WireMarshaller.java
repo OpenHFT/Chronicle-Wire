@@ -1190,13 +1190,7 @@ public class WireMarshaller<T> {
 
         @NotNull
         private Supplier<Map> newInstance() {
-            return () -> {
-                try {
-                    return (Map) type.newInstance();
-                } catch (@NotNull InstantiationException | IllegalAccessException e) {
-                    throw new AssertionError(e);
-                }
-            };
+            return () -> (Map) ObjectUtils.newInstance(type);
         }
 
         @Override
