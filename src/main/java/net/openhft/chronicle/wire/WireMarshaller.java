@@ -1014,13 +1014,7 @@ public class WireMarshaller<T> {
         }
 
         private Supplier<Collection> newInstance() {
-            return () -> {
-                try {
-                    return (Collection) type.newInstance();
-                } catch (@NotNull InstantiationException | IllegalAccessException e) {
-                    throw new AssertionError(e);
-                }
-            };
+            return () -> (Collection) ObjectUtils.newInstance(type);
         }
 
         @Override
@@ -1113,13 +1107,7 @@ public class WireMarshaller<T> {
         }
 
         private Supplier<Collection> newInstance() {
-            return () -> {
-                try {
-                    return (Collection) type.newInstance();
-                } catch (@NotNull InstantiationException | IllegalAccessException e) {
-                    throw new AssertionError(e);
-                }
-            };
+            return () -> (Collection) ObjectUtils.newInstance(type);
         }
 
         @Override
