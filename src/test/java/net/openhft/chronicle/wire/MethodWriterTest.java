@@ -21,7 +21,6 @@ public class MethodWriterTest extends WireTestCommon {
 
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256));
         Event writer = wire.methodWriterBuilder(Event.class).genericEvent("event").build();
-        System.out.println("");
         writer.event("top", new VanillaMethodReaderTest.MRT1("one"));
         writer.event("top", new VanillaMethodReaderTest.MRT2("one", "two"));
         writer.event("mid", new VanillaMethodReaderTest.MRT1("1"));
@@ -56,8 +55,6 @@ public class MethodWriterTest extends WireTestCommon {
         for (int i = 0; i < 4; i++) {
             assertTrue(reader.readOne());
         }
-
-        ValueOut v;
 
         assertFalse(reader.readOne());
         String expected = "subs top[!net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT1 {\n" +
@@ -158,6 +155,33 @@ public class MethodWriterTest extends WireTestCommon {
         verify(mock);
     }
 
+    @Test
+    public void testPrimitives() {
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
+        Args writer = wire.methodWriter(Args.class);
+        writer.primitives(true, (byte)1, (short)2, 3, 4, '5', 6, 7, "8", "9");
+        assertEquals("primitives: [\n" +
+                "  true,\n" +
+                "  1,\n" +
+                "  2,\n" +
+                "  !int 3,\n" +
+                "  4,\n" +
+                "  \"5\",\n" +
+                "  !float 6.0,\n" +
+                "  7.0,\n" +
+                "  \"8\",\n" +
+                "  \"9\"\n" +
+                "]\n" +
+                "---\n", wire.toString());
+        Args mock = createMock(Args.class);
+        mock.primitives(true, (byte)1, (short)2, 3, 4, '5', 6, 7, "8", "9");
+        EasyMock.replay(mock);
+        MethodReader reader = wire.methodReader(mock);
+        for (int i = 0; i < 2; i++)
+            assertEquals(i < 1, reader.readOne());
+        verify(mock);
+    }
+
     @FunctionalInterface
     interface Event {
         void event(String eventName, Object o);
@@ -176,6 +200,10 @@ public class MethodWriterTest extends WireTestCommon {
         void methodOne();
 
         void methodTwo();
+    }
+
+    public interface Args {
+        void primitives(boolean n, byte b, short s, int i, long l, char c,float f, double d, String s1, CharSequence s2);
     }
 
     public interface HasMicroTS {
