@@ -14,7 +14,7 @@ public class MethodWriterTest {
     @Test
     public void test() {
         Wire w = WireType.BINARY.apply(Bytes.elasticByteBuffer());
-        // checks that no expections are thrown here
+        // checks that no exceptions are thrown here
         FundingListener fundingListener = w.methodWriter(FundingOut.class);
         fundingListener.funding(new Funding());
     }
