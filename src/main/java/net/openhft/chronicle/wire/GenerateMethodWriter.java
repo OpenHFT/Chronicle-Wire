@@ -166,7 +166,7 @@ public class GenerateMethodWriter {
         if (boolean.class.equals(type)) {
             return "bool";
         } else if (byte.class.equals(type)) {
-            return "bytes";
+            return "writeByte";
         } else if (char.class.equals(type)) {
             return "character";
         } else if (short.class.equals(type)) {

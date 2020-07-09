@@ -20,11 +20,11 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.compiler.CompilerUtils;
 import org.jetbrains.annotations.NotNull;
-import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.TypeVariable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -80,7 +80,7 @@ public enum GeneratedProxyClass {
                 if (dm.isDefault() || Modifier.isStatic(dm.getModifiers()))
                     continue;
 
-                if (dm.getGenericReturnType() instanceof TypeVariableImpl)
+                if (dm.getGenericReturnType() instanceof TypeVariable)
                     return null;
 
                 if (!methods.add(dm))
