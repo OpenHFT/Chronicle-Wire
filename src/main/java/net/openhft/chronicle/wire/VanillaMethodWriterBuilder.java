@@ -174,9 +174,9 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
                     Jvm.debug().on(getClass(), e);
             }
         }
-        if (!DISABLE_PROXY_GEN) {
+        if (!DISABLE_PROXY_GEN && handlerSupplier.methodWriterInterceptorReturns() == null) {
             T t = createInstance();
-            if (t != null && handlerSupplier.methodWriterInterceptorReturns() ==null)
+            if (t != null)
                 return t;
         }
 
