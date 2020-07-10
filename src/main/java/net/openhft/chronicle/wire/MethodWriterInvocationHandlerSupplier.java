@@ -58,6 +58,10 @@ public MethodWriterInvocationHandlerSupplier(Supplier<MethodWriterInvocationHand
         return this;
     }
 
+    public MethodWriterInterceptorReturns methodWriterInterceptorReturns(){
+      return methodWriterInterceptorReturns;
+    }
+
     public void onClose(Closeable closeable) {
         this.closeable = closeable;
     }

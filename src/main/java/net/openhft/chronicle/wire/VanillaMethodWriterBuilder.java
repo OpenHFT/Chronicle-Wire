@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -174,31 +175,36 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
             }
         }
         if (!DISABLE_PROXY_GEN) {
-
-            String className = getClassName();
-            try {
-
-                try {
-                    T t = (T) newInstance(Class.forName(className));
-                    return t;
-                } catch (ClassNotFoundException e) {
-                    Class clazz = classCache.computeIfAbsent(className, this::newClass);
-                    if (clazz != null && clazz != COMPILE_FAILED) {
-                        T t = (T) newInstance(clazz);
-                        return t;
-                    }
-                }
-            } catch (Throwable e) {
-                classCache.put(className, COMPILE_FAILED);
-                // do nothing and drop through
-                if (Jvm.isDebug())
-                    Jvm.debug().on(getClass(), e);
-            }
+            T t = createInstance();
+            if (t != null && handlerSupplier.methodWriterInterceptorReturns() ==null)
+                return t;
         }
 
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
+
         //noinspection unchecked
         return (T) Proxy.newProxyInstance(classLoader, interfacesArr, new CallSupplierInvocationHandler());
+    }
+
+    @Nullable
+    private T createInstance() {
+        String className = getClassName();
+        try {
+            try {
+                return (T) newInstance(Class.forName(className));
+            } catch (ClassNotFoundException e) {
+                Class clazz = classCache.computeIfAbsent(className, this::newClass);
+                if (clazz != null && clazz != COMPILE_FAILED) {
+                    return (T) newInstance(clazz);
+                }
+            }
+        } catch (Throwable e) {
+            classCache.put(className, COMPILE_FAILED);
+            // do nothing and drop through
+            if (Jvm.isDebug())
+                Jvm.debug().on(getClass(), e);
+        }
+        return null;
     }
 
     private Class newClass(final String name) {
