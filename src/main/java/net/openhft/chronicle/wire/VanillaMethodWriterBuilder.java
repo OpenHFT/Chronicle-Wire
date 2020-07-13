@@ -77,6 +77,9 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return this;
     }
 
+
+    // sourceId enables this, this isn't useful unless it's set.
+    @Deprecated
     @NotNull
     public MethodWriterBuilder<T> recordHistory(boolean recordHistory) {
         this.recordHistory = recordHistory;
@@ -229,8 +232,10 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         try {
             if (out == null)
                 throw new NullPointerException("marshallableOut(out) has not been set.");
-            if (out.recordHistory())
+            if (out.recordHistory()) {
                 recordHistory(true);
+                handlerSupplier.recordHistory(true);
+            }
             return aClass.getDeclaredConstructors()[0].newInstance(out, closeable, methodWriterListener);
         } catch (Exception e) {
             throw Jvm.rethrow(e);
