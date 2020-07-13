@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.wire.Wires.toIntU30;
@@ -63,7 +64,8 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     @Override
     @SuppressWarnings("rawtypes")
     public void close() {
-        checkResetOpened();
+        if (checkResetOpened())
+            return;
         @NotNull Bytes bytes = wire().bytes();
         long position1 = bytes.writePosition();
 //        if (position1 < position)
@@ -75,10 +77,14 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         bytes.testAndSetInt(position, tmpHeader, length);
     }
 
-    protected void checkResetOpened() {
+    protected boolean checkResetOpened() {
         if (!opened)
-            throw new IllegalStateException("Not opened");
+            Jvm.warn().on(getClass(), "Closing but n" +
+                    "" +
+                    "ot opened");
+        boolean wasOpened = opened;
         opened = false;
+        return !wasOpened;
     }
 
     @Override
