@@ -79,9 +79,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
 
     protected boolean checkResetOpened() {
         if (!opened)
-            Jvm.warn().on(getClass(), "Closing but n" +
-                    "" +
-                    "ot opened");
+            Jvm.warn().on(getClass(), "Closing but not opened");
         boolean wasOpened = opened;
         opened = false;
         return !wasOpened;
