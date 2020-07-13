@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.wire.Wires.toIntU30;
@@ -28,6 +29,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     protected long position = -1;
     protected int tmpHeader;
     private int metaDataBit;
+    private volatile boolean opened;
 
     public BinaryWriteDocumentContext(Wire wire) {
         this.wire = wire;
@@ -42,6 +44,11 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         metaDataBit = metaData ? Wires.META_DATA : 0;
         tmpHeader = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
         bytes.writeOrderedInt(tmpHeader);
+        open();
+    }
+
+    protected void open() {
+        opened = true;
     }
 
     @Override
@@ -57,6 +64,8 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     @Override
     @SuppressWarnings("rawtypes")
     public void close() {
+        if (checkResetOpened())
+            return;
         @NotNull Bytes bytes = wire().bytes();
         long position1 = bytes.writePosition();
 //        if (position1 < position)
@@ -66,6 +75,14 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
             length0 = (int) length0;
         int length = metaDataBit | toIntU30(length0, "Document length %,d out of 30-bit int range.");
         bytes.testAndSetInt(position, tmpHeader, length);
+    }
+
+    protected boolean checkResetOpened() {
+        if (!opened)
+            Jvm.warn().on(getClass(), "Closing but not opened");
+        boolean wasOpened = opened;
+        opened = false;
+        return !wasOpened;
     }
 
     @Override
