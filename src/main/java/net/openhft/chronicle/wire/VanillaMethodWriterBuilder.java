@@ -229,10 +229,8 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         try {
             if (out == null)
                 throw new NullPointerException("marshallableOut(out) has not been set.");
-            if (recordHistory != out.recordHistory()) {
-                System.out.println("");
-            }
-            assert recordHistory == out.recordHistory();
+            if (out.recordHistory())
+                recordHistory(true);
             return aClass.getDeclaredConstructors()[0].newInstance(out, closeable, methodWriterListener);
         } catch (Exception e) {
             throw Jvm.rethrow(e);
