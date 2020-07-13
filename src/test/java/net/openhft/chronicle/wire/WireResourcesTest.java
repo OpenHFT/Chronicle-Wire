@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.bytes.MappedFile;
+import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -60,6 +61,8 @@ public class WireResourcesTest extends WireTestCommon {
 
         mb0 = mb;
         mb.releaseLast();
+        BackgroundResourceReleaser.releasePendingResources();
+
         assertEquals(0, mb0.mappedFile().refCount());
         assertEquals(0, mb0.refCount());
     }
@@ -91,6 +94,7 @@ public class WireResourcesTest extends WireTestCommon {
         assert wire.endUse();
 
         wire.bytes().releaseLast(test);
+        BackgroundResourceReleaser.releasePendingResources();
         assertEquals(0, wire.bytes().refCount());
     }
 
@@ -141,6 +145,7 @@ public class WireResourcesTest extends WireTestCommon {
         assertEquals(1, mappedFile(wire).refCount());
 
         wire.bytes().releaseLast();
+        BackgroundResourceReleaser.releasePendingResources();
         // the MappedFile was created by MappedBytes
         // so when it is fully released, the MappedFile is close()d
         assertEquals(0, wire.bytes().refCount());
