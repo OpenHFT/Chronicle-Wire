@@ -86,7 +86,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         long readPosition = this.readPosition;
 
         AbstractWire wire0 = this.wire;
-        if (ensureFullRead && wire0 != null && wire0.hasMore()) {
+        if (present && ensureFullRead && wire0 != null && wire0.hasMore()) {
             long readPosition1 = wire0.bytes().readPosition();
             try {
                 // we have to read back from the start, as close may have been called in
@@ -108,7 +108,8 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
                     }
                 }
             } catch (Exception e) {
-                Jvm.debug().on(getClass(), e);
+                // TODO: don't believe this is need any more. Have changed from debug to warn
+                Jvm.warn().on(getClass(), e);
             } finally {
                 wire0.bytes().readPosition(readPosition1);
             }
