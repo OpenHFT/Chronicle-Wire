@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
@@ -12,6 +13,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.StringWriter;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +37,46 @@ public class VanillaMethodWriterBuilderTest extends WireTestCommon {
         tests.add(new Object[]{"implied context", false});
         tests.add(new Object[]{"explicit context", true});
         return tests;
+    }
+
+    private static void update(String name1, Object s) {
+        if (!(s instanceof MyDto))
+            return;
+        MyDto dto1 = (MyDto) s;
+        assertEquals("some text", dto1.message);
+        dto1.message = "hello world";
+    }
+
+    private static void check(MyDto dto) {
+        assertEquals("hello world", dto.message);
+    }
+
+    public static class MyDto extends SelfDescribingMarshallable {
+        String message;
+
+        MyDto(final String message) {
+            this.message = message;
+        }
+    }
+
+    public interface MyEvent {
+        void print(MyDto text);
+    }
+
+    @Test
+    public void testUpdateInterceptor() {
+        final Bytes<ByteBuffer> t = Bytes.elasticByteBuffer();
+        try {
+            Wire w = WireType.BINARY.apply(t);
+            w.methodWriterBuilder(MyEvent.class)
+                    .updateInterceptor(VanillaMethodWriterBuilderTest::update)
+                    .build()
+                    .print(new MyDto("some text"));
+            w.methodReader((MyEvent) VanillaMethodWriterBuilderTest::check)
+                    .readOne();
+        } finally {
+            t.releaseLast();
+        }
     }
 
     @Test
@@ -88,20 +130,20 @@ public class VanillaMethodWriterBuilderTest extends WireTestCommon {
     @NotNull
     private String doUseMethodId(boolean useMethodIds) {
         HexDumpBytes bytes = new HexDumpBytes();
-            BinaryWire wire = new BinaryWire(bytes);
+        BinaryWire wire = new BinaryWire(bytes);
         WithMethodId id = wire.methodWriterBuilder(WithMethodId.class).useMethodIds(useMethodIds).get();
-            try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
-                id.method1("hello");
-            }
-            try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
-                id.method2(new MWB("world", 123, 3.456));
-            }
-            try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
-                id.method3(1234567890L);
-            }
-            try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
-                id.method4(new MWB2("world", 123, 3.456));
-            }
+        try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
+            id.method1("hello");
+        }
+        try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
+            id.method2(new MWB("world", 123, 3.456));
+        }
+        try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
+            id.method3(1234567890L);
+        }
+        try (DocumentContext dc = explicitContext ? id.writingDocument() : null) {
+            id.method4(new MWB2("world", 123, 3.456));
+        }
         String s = bytes.toHexString();
         StringWriter sw = new StringWriter();
         MethodReader reader = wire.methodReader(Mocker.logging(WithMethodId.class, "", sw));

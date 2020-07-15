@@ -1,9 +1,6 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.MethodId;
-import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.bytes.MethodWriterListener;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.wire.utils.JavaSouceCodeFormatter;
@@ -40,15 +37,18 @@ public class GenerateMethodWriter {
     private static final String CLOSEABLE = Closeable.class.getSimpleName();
     private static final String MARSHALLABLE = Marshallable.class.getSimpleName();
     private static final String METHOD_READER = MethodReader.class.getSimpleName();
+    private static final String UPDATE_INTERCEPTOR = "updateInterceptor";
 
     private final boolean metaData;
     private final boolean useMethodId;
+
     private final String packageName;
     private final Set<Class> interfaces;
     private final String className;
     private final ClassLoader classLoader;
     private final WireType wireType;
     private final String genericEvent;
+    private final boolean useUpdateInterceptor;
     private ConcurrentMap<Class, String> methodWritersMap = new ConcurrentHashMap<>();
     private boolean hasMethodWriterListener;
     private AtomicInteger indent = new AtomicInteger();
@@ -61,7 +61,8 @@ public class GenerateMethodWriter {
                                  final String genericEvent,
                                  final boolean hasMethodWriterListener,
                                  final boolean metaData,
-                                 final boolean useMethodId) {
+                                 final boolean useMethodId,
+                                 final boolean useUpdateInterceptor) {
 
         this.packageName = packageName;
         this.interfaces = interfaces;
@@ -72,6 +73,7 @@ public class GenerateMethodWriter {
         this.hasMethodWriterListener = hasMethodWriterListener;
         this.metaData = metaData;
         this.useMethodId = useMethodId;
+        this.useUpdateInterceptor = useUpdateInterceptor;
     }
 
     /**
@@ -79,6 +81,7 @@ public class GenerateMethodWriter {
      * @param classLoader
      * @param wireType
      * @param genericEvent
+     * @param useUpdateInterceptor
      * @return a proxy class from an interface class or null if it can't be created
      */
     @Nullable
@@ -89,7 +92,9 @@ public class GenerateMethodWriter {
                                  final WireType wireType,
                                  final String genericEvent,
                                  boolean hasMethodWriterListener,
-                                 boolean metaData, boolean useMethodId) {
+                                 boolean metaData,
+                                 boolean useMethodId,
+                                 final boolean useUpdateInterceptor) {
 
         return new GenerateMethodWriter(packageName,
                 interfaces,
@@ -98,7 +103,7 @@ public class GenerateMethodWriter {
                 wireType,
                 genericEvent,
                 hasMethodWriterListener,
-                metaData, useMethodId).createClass();
+                metaData, useMethodId, useUpdateInterceptor).createClass();
     }
 
     @SuppressWarnings("unused")
@@ -201,6 +206,7 @@ public class GenerateMethodWriter {
                     "import " + GenerateMethodWriter.class.getName() + ";\n" +
                     "import " + MessageHistory.class.getName() + ";\n" +
                     "import " + MethodReader.class.getName() + ";\n" +
+                    "import " + UpdateInterceptor.class.getName() + ";\n" +
                     "import " + MethodId.class.getName() + ";\n" +
                     "import " + GenerateMethodWriter.class.getName() + ";\n" +
                     "import " + DocumentContext.class.getName() + ";\n" +
@@ -251,7 +257,7 @@ public class GenerateMethodWriter {
             imports.append(interfaceMethods);
             imports.append("\n}\n");
 
-            if (DUMP_CODE)
+     //       if (DUMP_CODE)
                 System.out.println(imports);
 
             return CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
@@ -278,6 +284,8 @@ public class GenerateMethodWriter {
         result.append("private transient final ")
                 .append(CLOSEABLE).append(" closeable;\n");
         result.append("private transient final MethodWriterListener methodWriterListener;\n");
+        result.append("private transient final " + UpdateInterceptor.class.getSimpleName() + " " + UPDATE_INTERCEPTOR + ";\n");
+
         result.append("private transient final ")
                 .append(MARSHALLABLE_OUT).append(" out;\n");
         result.append("private transient ThreadLocal<")
@@ -290,8 +298,11 @@ public class GenerateMethodWriter {
         result.append("\n");
 
         return result.append(format("// constructor\npublic %s(" + MARSHALLABLE_OUT + " out, "
-                + CLOSEABLE + " closeable, MethodWriterListener methodWriterListener) {\n" +
+                + CLOSEABLE + " closeable, MethodWriterListener methodWriterListener, " +
+                UpdateInterceptor.class.getSimpleName() + " " + UPDATE_INTERCEPTOR + ") {\n" +
+
                 "this.methodWriterListener = methodWriterListener;\n" +
+                "this." + UPDATE_INTERCEPTOR + "= " + UPDATE_INTERCEPTOR + ";\n" +
                 "this.out = out;\n" +
                 "this.closeable = closeable;\n" +
                 "}\n\n", className));
@@ -329,6 +340,9 @@ public class GenerateMethodWriter {
             body.append("if (this.closeable != null){\n this.closeable.close();\n}\n");
         } else {
 
+            if (dm.getParameterCount() == 1 && !dm.getParameters()[0].getType().isPrimitive() && useUpdateInterceptor)
+                body.append("// updateInterceptor\nthis." + UPDATE_INTERCEPTOR + ".update(\"" + dm.getName() + "\", " + dm.getParameters()[0].getName() + ");\n");
+
             body.append(format("final " + DOCUMENT_CONTEXT + " dc = " + GENERATE_METHOD_WRITER + ".acquire"
                     + DOCUMENT_CONTEXT + "(%s,this.documentContextTL,this.out);\n", metaData))
                     .append(recordHistory());
@@ -364,6 +378,7 @@ public class GenerateMethodWriter {
             }
 
         }
+
         return format("\n%s public %s %s(%s){\n %s%s}\n",
                 methodIDAnotation,
                 typeName,
@@ -513,7 +528,6 @@ public class GenerateMethodWriter {
         }
 
         return result;
-
     }
 
 }

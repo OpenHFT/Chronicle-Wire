@@ -23,10 +23,12 @@ import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
 import net.openhft.chronicle.bytes.MethodWriterListener;
 import net.openhft.chronicle.core.io.Closeable;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWriterInvocationHandler> {
+public class MethodWriterInvocationHandlerSupplier<T> implements Supplier<MethodWriterInvocationHandler> {
     private final Supplier<MethodWriterInvocationHandler> supplier;
+    private Function<T,T> modifier;
     private boolean recordHistory;
     private MethodWriterListener methodWriterListener;
     private MethodWriterInterceptorReturns methodWriterInterceptorReturns;
@@ -37,9 +39,9 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
     private final ThreadLocal<MethodWriterInvocationHandler> handlerTL = ThreadLocal.withInitial(this::newHandler);
     private MethodWriterInvocationHandler handler;
 
-public MethodWriterInvocationHandlerSupplier(Supplier<MethodWriterInvocationHandler> supplier) {
-    this.supplier = supplier;
-}
+    public MethodWriterInvocationHandlerSupplier(Supplier<MethodWriterInvocationHandler> supplier) {
+        this.supplier = supplier;
+    }
 
     public void recordHistory(boolean recordHistory) {
         this.recordHistory = recordHistory;
@@ -58,8 +60,8 @@ public MethodWriterInvocationHandlerSupplier(Supplier<MethodWriterInvocationHand
         return this;
     }
 
-    public MethodWriterInterceptorReturns methodWriterInterceptorReturns(){
-      return methodWriterInterceptorReturns;
+    public MethodWriterInterceptorReturns methodWriterInterceptorReturns() {
+        return methodWriterInterceptorReturns;
     }
 
     public void onClose(Closeable closeable) {
@@ -76,6 +78,11 @@ public MethodWriterInvocationHandlerSupplier(Supplier<MethodWriterInvocationHand
 
     public void useMethodIds(boolean useMethodIds) {
         this.useMethodIds = useMethodIds;
+    }
+
+    public MethodWriterInvocationHandlerSupplier modifier(final Function<T, T> modifier) {
+        this.modifier = modifier;
+        return this;
     }
 
     private MethodWriterInvocationHandler newHandler() {
