@@ -56,9 +56,9 @@ import static net.openhft.chronicle.wire.BinaryWireCode.*;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class BinaryWire extends AbstractWire implements Wire {
 
+    private static final boolean SUPPORT_DELTA = supportDelta();
     private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
     private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
-
     private static int SPEC = Integer.getInteger("BinaryWire.SPEC", 18);
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
@@ -76,7 +76,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private String compression;
 
     public BinaryWire(@NotNull Bytes bytes) {
-        this(bytes, false, false, false, Integer.MAX_VALUE, "binary", true);
+        this(bytes, false, false, false, Integer.MAX_VALUE, "binary", SUPPORT_DELTA);
     }
 
     public BinaryWire(@NotNull Bytes bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression, boolean supportDelta) {
@@ -88,6 +88,21 @@ public class BinaryWire extends AbstractWire implements Wire {
         this.compression = compression;
         valueIn = supportDelta ? new DeltaValueIn() : new BinaryValueIn();
         readContext = new BinaryReadDocumentContext(this, supportDelta);
+    }
+
+    private static boolean supportDelta() {
+        String supportDeltaStr = System.getProperty("deltaWire.enable");
+        if (ObjectUtils.isTrue(supportDeltaStr))
+            return true;
+        if (ObjectUtils.isFalse(supportDeltaStr))
+            return false;
+
+        try {
+            Class.forName("software.chronicle.wire.DeltaWire");
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @NotNull
@@ -719,8 +734,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         return sb;
     }
 
-    @NotNull
-    <ACS extends Appendable & CharSequence> ACS getStringBuilder(int code, @NotNull ACS sb) {
+    @NotNull <ACS extends Appendable & CharSequence> ACS getStringBuilder(int code, @NotNull ACS sb) {
         bytes.parseUtf8(sb, code & 0x1f);
         return sb;
     }
@@ -1115,8 +1129,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         return bytes.writeByte((byte) code);
     }
 
-    @Nullable
-    <ACS extends Appendable & CharSequence> ACS readText(int code, @NotNull ACS sb) {
+    @Nullable <ACS extends Appendable & CharSequence> ACS readText(int code, @NotNull ACS sb) {
         if (code <= 127) {
             AppendableUtil.append(sb, code);
             return sb;

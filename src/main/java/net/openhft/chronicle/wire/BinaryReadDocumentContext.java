@@ -80,6 +80,35 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         return rollback;
     }
 
+    private static void fullReadForDeltaWire(AbstractWire wire0, long start) {
+        long readPosition1 = wire0.bytes().readPosition();
+        try {
+            // we have to read back from the start, as close may have been called in
+            // the middle of reading a value
+            wire0.bytes().readPosition(start);
+            wire0.bytes().readSkip(4);
+            while (wire0.hasMore()) {
+                final long remaining = wire0.bytes().readRemaining();
+                final ValueIn read = wire0.read();
+                if (read.isTyped()) {
+                    read.skipValue();
+                } else {
+                    read.text(Wires.acquireStringBuilder());  // todo remove this and use skipValue
+                }
+
+                if (wire0.bytes().readRemaining() == remaining) {
+                    // stopped making progress, exit loop
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            // TODO: don't believe this is need any more. Have changed from debug to warn
+            Jvm.warn().on(BinaryReadDocumentContext.class, e);
+        } finally {
+            wire0.bytes().readPosition(readPosition1);
+        }
+    }
+
     @Override
     public void close() {
         long readLimit = this.readLimit;
@@ -87,32 +116,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
 
         AbstractWire wire0 = this.wire;
         if (present && ensureFullRead && wire0 != null && wire0.hasMore()) {
-            long readPosition1 = wire0.bytes().readPosition();
-            try {
-                // we have to read back from the start, as close may have been called in
-                // the middle of reading a value
-                wire0.bytes().readPosition(start);
-                wire0.bytes().readSkip(4);
-                while (wire0.hasMore()) {
-                    final long remaining = wire0.bytes().readRemaining();
-                    final ValueIn read = wire0.read();
-                    if (read.isTyped()) {
-                        read.skipValue();
-                    } else {
-                        read.text(Wires.acquireStringBuilder());  // todo remove this and use skipValue
-                    }
-
-                    if (wire0.bytes().readRemaining() == remaining) {
-                        // stopped making progress, exit loop
-                        break;
-                    }
-                }
-            } catch (Exception e) {
-                // TODO: don't believe this is need any more. Have changed from debug to warn
-                Jvm.warn().on(getClass(), e);
-            } finally {
-                wire0.bytes().readPosition(readPosition1);
-            }
+            fullReadForDeltaWire(wire0, start);
         }
 
         start = -1;
