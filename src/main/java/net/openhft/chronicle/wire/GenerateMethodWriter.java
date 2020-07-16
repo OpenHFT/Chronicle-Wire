@@ -77,7 +77,7 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * @param interfaces   an interface class
+     * @param interfaces           an interface class
      * @param classLoader
      * @param wireType
      * @param genericEvent
@@ -85,9 +85,8 @@ public class GenerateMethodWriter {
      * @return a proxy class from an interface class or null if it can't be created
      */
     @Nullable
-    public static Class newClass(String packageName,
+    public static Class newClass(String fullClassName,
                                  Set<Class> interfaces,
-                                 String className,
                                  ClassLoader classLoader,
                                  final WireType wireType,
                                  final String genericEvent,
@@ -95,6 +94,14 @@ public class GenerateMethodWriter {
                                  boolean metaData,
                                  boolean useMethodId,
                                  final boolean useUpdateInterceptor) {
+        int lastDot = fullClassName.lastIndexOf('.');
+        String packageName = "";
+        String className = fullClassName;;
+
+        if (lastDot != -1) {
+            packageName = fullClassName.substring(0, lastDot);
+            className = fullClassName.substring(lastDot + 1);
+        }
 
         return new GenerateMethodWriter(packageName,
                 interfaces,
@@ -257,18 +264,14 @@ public class GenerateMethodWriter {
             imports.append(interfaceMethods);
             imports.append("\n}\n");
 
-     //       if (DUMP_CODE)
-                System.out.println(imports);
+            //  if (DUMP_CODE)
+            System.out.println(imports);
 
             return CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
 
-        } catch (LinkageError e) {
-            try {
-                return Class.forName(packageName + '.' + className, true, classLoader);
-            } catch (ClassNotFoundException x) {
-                throw Jvm.rethrow(x);
-            }
         } catch (Throwable e) {
+            System.out.println(imports.toString());
+            e.printStackTrace();
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + imports, e));
         }
     }
@@ -327,7 +330,8 @@ public class GenerateMethodWriter {
         if (dm.getParameterTypes().length == 0 && dm.isDefault())
             return "";
 
-        if ("writingDocument".contentEquals(dm.getName()) && dm.getReturnType() == DocumentContext.class && dm.getParameterCount() == 0)
+        int parameterCount = dm.getParameterCount();
+        if ("writingDocument".contentEquals(dm.getName()) && dm.getReturnType() == DocumentContext.class && parameterCount == 0)
             return createMethodWritingDocument();
 
         final int len = dm.getParameters().length;
@@ -336,12 +340,12 @@ public class GenerateMethodWriter {
 
         final StringBuilder body = new StringBuilder();
         String methodIDAnotation = "";
-        if (dm.getReturnType() == void.class && "close".equals(dm.getName()) && dm.getParameterCount() == 0) {
+        if (dm.getReturnType() == void.class && "close".equals(dm.getName()) && parameterCount == 0) {
             body.append("if (this.closeable != null){\n this.closeable.close();\n}\n");
         } else {
 
-            if (dm.getParameterCount() == 1 && !dm.getParameters()[0].getType().isPrimitive() && useUpdateInterceptor)
-                body.append("// updateInterceptor\nthis." + UPDATE_INTERCEPTOR + ".update(\"" + dm.getName() + "\", " + dm.getParameters()[0].getName() + ");\n");
+            if (parameterCount >= 1 && Marshallable.class.isAssignableFrom(dm.getParameters()[parameterCount - 1].getType()) && useUpdateInterceptor)
+                body.append("// updateInterceptor\nthis." + UPDATE_INTERCEPTOR + ".update(\"" + dm.getName() + "\", " + dm.getParameters()[parameterCount - 1].getName() + ");\n");
 
             body.append(format("final " + DOCUMENT_CONTEXT + " dc = " + GENERATE_METHOD_WRITER + ".acquire"
                     + DOCUMENT_CONTEXT + "(%s,this.documentContextTL,this.out);\n", metaData))
@@ -350,7 +354,7 @@ public class GenerateMethodWriter {
             int startJ = 0;
 
             final String eventName;
-            if (dm.getParameterCount() > 0 && dm.getName().equals(genericEvent)) {
+            if (parameterCount > 0 && dm.getName().equals(genericEvent)) {
                 // this is used when we are processing the genericEvent
                 eventName = dm.getParameters()[0].getName();
                 startJ = 1;
@@ -361,11 +365,11 @@ public class GenerateMethodWriter {
             retainsComments(dm, body);
             methodIDAnotation = writeEventNameOrId(dm, body, eventName);
 
-            if (dm.getParameterCount() - startJ == 1) {
+            if (parameterCount - startJ == 1) {
                 addFieldComments(dm, body);
             }
 
-            if (hasMethodWriterListener && dm.getParameterCount() > 0)
+            if (hasMethodWriterListener && parameterCount > 0)
                 createMethodWriterListener(dm, body);
             else if (dm.getParameters().length > 0)
                 writeArrayOfParameters(dm, len, body, startJ);
@@ -511,10 +515,10 @@ public class GenerateMethodWriter {
         } else if (dm.getReturnType().isInterface()) {
             String index = methodWritersMap.computeIfAbsent(dm.getReturnType(), k -> "methodWriter" + k.getSimpleName() + "TL");
             result.append("// method return\n");
-
-            result.append(format("%s result = (%s)%s.get();\n", dm.getReturnType().getName(), dm.getReturnType().getName(), index));
+            String aClass = nameForClass(dm.getReturnType());
+            result.append(format("%s result = (%s)%s.get();\n", aClass, aClass, index));
             result.append(format("if ( result == null) {\n" +
-                    "result = out.methodWriter(%s.class);\n %s.set(result);\n }\n", dm.getReturnType().getName(), index));
+                    "result = out.methodWriter(%s.class);\n %s.set(result);\n }\n", aClass, index));
 
             result.append(format("return ((%s)result).documentContext(documentContextTL);\n", SHARED_DOCUMENT_CONTEXT));
         } else if (!dm.getReturnType().isPrimitive()) {

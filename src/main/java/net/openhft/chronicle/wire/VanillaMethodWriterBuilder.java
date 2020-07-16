@@ -196,18 +196,18 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
     @Nullable
     private T createInstance() {
-        String className = getClassName();
+        String fullClassName = packageName + "." + getClassName();
         try {
             try {
-                return (T) newInstance(Class.forName(className));
+                return (T) newInstance(Class.forName(fullClassName));
             } catch (ClassNotFoundException e) {
-                Class clazz = classCache.computeIfAbsent(className, name -> newClass(name));
+                Class clazz = classCache.computeIfAbsent(fullClassName, this::newClass);
                 if (clazz != null && clazz != COMPILE_FAILED) {
                     return (T) newInstance(clazz);
                 }
             }
         } catch (Throwable e) {
-            classCache.put(className, COMPILE_FAILED);
+            classCache.put(fullClassName, COMPILE_FAILED);
             // do nothing and drop through
             if (Jvm.isDebug())
                 Jvm.debug().on(getClass(), e);
@@ -215,12 +215,11 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return null;
     }
 
-    private Class newClass(final String name) {
+    private Class newClass(final String fullClassName) {
         final LinkedHashSet<Class> setOfInterfaces = new LinkedHashSet<>(interfaces);
         setOfInterfaces.add(SharedDocumentContext.class);
-        return GenerateMethodWriter.newClass(packageName,
+        return GenerateMethodWriter.newClass(fullClassName,
                 setOfInterfaces,
-                name,
                 classLoader,
                 wireType,
                 genericEvent,
