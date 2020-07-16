@@ -96,7 +96,8 @@ public class GenerateMethodWriter {
                                  final boolean useUpdateInterceptor) {
         int lastDot = fullClassName.lastIndexOf('.');
         String packageName = "";
-        String className = fullClassName;;
+        String className = fullClassName;
+        ;
 
         if (lastDot != -1) {
             packageName = fullClassName.substring(0, lastDot);
@@ -264,8 +265,8 @@ public class GenerateMethodWriter {
             imports.append(interfaceMethods);
             imports.append("\n}\n");
 
-            //  if (DUMP_CODE)
-            System.out.println(imports);
+            if (DUMP_CODE)
+                System.out.println(imports);
 
             return CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
 
