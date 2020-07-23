@@ -261,13 +261,18 @@ public abstract class AbstractWire implements Wire {
     @Override
     public void readFirstHeader(long timeout, TimeUnit timeUnit) throws TimeoutException, StreamCorruptedException {
         int header;
+        resetTimedPauser();
         try {
+            boolean hasAtLeast4 = false;
             for (; ; ) {
-                if (bytes.realCapacity() >= 4) {
+
+                if (hasAtLeast4 || bytes.realCapacity() >= 4) {
+                    hasAtLeast4 = true;
                     header = bytes.readVolatileInt(0L);
                     if (isReady(header))
                         break;
                 }
+
                 acquireTimedParser().pause(timeout, timeUnit);
             }
         } finally {
