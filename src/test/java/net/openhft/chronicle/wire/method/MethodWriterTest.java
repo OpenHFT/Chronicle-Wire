@@ -7,6 +7,7 @@ import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.wire.*;
 import org.easymock.EasyMock;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.StringWriter;
@@ -149,6 +150,36 @@ public class MethodWriterTest extends WireTestCommon {
     }
 
     @Test
+    public void testUpdateListener() {
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
+                .useTextDocuments();
+
+        final StringBuilder value = new StringBuilder();
+
+        StringMethod instance = wire.methodWriterBuilder(StringMethod.class).updateInterceptor((methodName, t) -> {
+            value.append(t);
+            return true;
+        }).build();
+
+        String expected = "hello world";
+        instance.method(expected);
+        Assert.assertEquals(expected, value.toString());
+
+        Assert.assertTrue(wire.toString().startsWith("method: hello world\n" +
+                "...\n"));
+    }
+
+    @Test
+    public void testUpdateListenerCheckUpdateInterceptorReturnValue() {
+        final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
+
+        StringMethod instance = wire.methodWriterBuilder(StringMethod.class).updateInterceptor((methodName, t) -> false).build();
+        instance.method(" this should not be written because the return value above is false");
+
+        Assert.assertEquals("", wire.toString());
+    }
+
+    @Test
     public void testMicroTS() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
@@ -210,6 +241,10 @@ public class MethodWriterTest extends WireTestCommon {
         }
 
         void method(String... args);
+    }
+
+    public interface StringMethod {
+        void method(String value);
     }
 
     public interface NoArgs {

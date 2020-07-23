@@ -277,10 +277,16 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return this;
     }
 
+    /**
+     * throws AbortCallingProxyException if the updateInterceptor returns {@code false}
+     */
     class CallSupplierInvocationHandler implements InvocationHandler {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            return handlerSupplier.get().invoke(proxy, method, args);
+
+            return updateInterceptor == null || updateInterceptor.update(method.getName(), args[0])
+                    ? handlerSupplier.get().invoke(proxy, method, args)
+                    : proxy;
         }
     }
 

@@ -28,10 +28,15 @@ public class MethodWriterProxyTest extends MethodWriterTest {
         super.testDefault();
     }
 
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
+    //@Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     @Test
     public void testPrimitives() {
         super.testPrimitives();
+    }
+
+    @Override
+    public void testUpdateListener() {
+        super.testUpdateListener();
     }
 }
 
