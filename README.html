@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Chronicle-Wire</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment @import statement to use as custom stylesheet */
+/*@import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700";*/
+article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section{display:block}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+abbr[title]{border-bottom:1px dotted}
+b,strong{font-weight:bold}
+dfn{font-style:italic}
+hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type="button"],input[type="reset"],input[type="submit"]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type="checkbox"],input[type="radio"]{box-sizing:border-box;padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,*::before,*::after{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;font-weight:400;font-style:normal;line-height:1;position:relative;cursor:auto;tab-size:4;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0;direction:ltr}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{font-family:inherit;font-weight:400;font-size:1em;line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em;height:0}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{font-size:1em;line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0;font-size:1em}
+ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
+ul.square{list-style-type:square}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+abbr,acronym{text-transform:uppercase;font-size:90%;color:rgba(0,0,0,.8);border-bottom:1px dotted #ddd;cursor:help}
+abbr{text-transform:none}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote cite{display:block;font-size:.9375em;color:rgba(0,0,0,.6)}
+blockquote cite::before{content:"\2014 \0020"}
+blockquote cite a,blockquote cite a:visited{color:rgba(0,0,0,.6)}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:solid 1px #dedede}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{display:table-cell;line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;-webkit-border-radius:4px;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed;word-wrap:break-word}
+:not(pre)>code.nobreak{word-wrap:normal}
+:not(pre)>code.nowrap{white-space:nowrap}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;-webkit-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em white inset;box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em #fff inset;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin-left:auto;margin-right:auto;margin-top:0;margin-bottom:0;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:-ms-flexbox;display:-webkit-flex;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border-style:solid;border-width:1px;border-color:#e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;-webkit-border-radius:4px;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:100%;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:rgba(255,255,255,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details>summary:first-of-type{cursor:pointer;display:list-item;outline:none;margin-bottom:.75em}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class="paragraph"]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+table.tableblock #preamble>.sectionbody>[class="paragraph"]:first-of-type p{font-size:inherit}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6)}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border-style:solid;border-width:1px;border-color:#e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;-webkit-border-radius:4px;border-radius:4px}
+.exampleblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child{margin-bottom:0}
+.sidebarblock{border-style:solid;border-width:1px;border-color:#dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;-webkit-border-radius:4px;border-radius:4px}
+.sidebarblock>:first-child{margin-top:0}
+.sidebarblock>:last-child{margin-bottom:0}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{-webkit-border-radius:4px;border-radius:4px;word-wrap:break-word;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class="highlight"],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;-webkit-border-radius:4px;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos{border-right:1px solid currentColor;opacity:.35;padding-right:.5em}
+pre.pygments .lineno{border-right:1px solid currentColor;opacity:.35;display:inline-block;margin-right:.75em}
+pre.pygments .lineno::before{content:"";margin-right:-.125em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;text-align:left;margin-right:0}
+table.tableblock{max-width:100%;border-collapse:separate}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+td.tableblock>.content>:last-child.sidebarblock{margin-bottom:0}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>thead>tr>.tableblock,table.grid-all>tbody>tr>.tableblock{border-width:0 1px 1px 0}
+table.grid-all>tfoot>tr>.tableblock{border-width:1px 1px 0 0}
+table.grid-cols>*>tr>.tableblock{border-width:0 1px 0 0}
+table.grid-rows>thead>tr>.tableblock,table.grid-rows>tbody>tr>.tableblock{border-width:0 0 1px}
+table.grid-rows>tfoot>tr>.tableblock{border-width:1px 0 0}
+table.grid-all>*>tr>.tableblock:last-child,table.grid-cols>*>tr>.tableblock:last-child{border-right-width:0}
+table.grid-all>tbody>tr:last-child>.tableblock,table.grid-all>thead:last-child>tr>.tableblock,table.grid-rows>tbody>tr:last-child>.tableblock,table.grid-rows>thead:last-child>tr>.tableblock{border-bottom-width:0}
+table.frame-all{border-width:1px}
+table.frame-sides{border-width:0 1px}
+table.frame-topbot,table.frame-ends{border-width:1px 0}
+table.stripes-all tr,table.stripes-odd tr:nth-of-type(odd),table.stripes-even tr:nth-of-type(even),table.stripes-hover tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{display:table-cell;line-height:1.6;background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+ul.checklist{margin-left:.625em}
+ul.checklist li>p:first-child>.fa-square-o:first-child,ul.checklist li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist li>p:first-child>input[type="checkbox"]:first-child{margin-right:.25em}
+ul.inline{display:-ms-flexbox;display:-webkit-box;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:solid 4px #fff;-webkit-box-shadow:0 0 0 1px #ddd;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+.gist .file-data>table{border:0;background:#fff;width:100%;margin-bottom:0}
+.gist .file-data>table td.line-data{width:99%}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);-webkit-border-radius:100px;border-radius:100px;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,span.alt{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;-webkit-box-shadow:0 1px 4px #e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{-webkit-box-shadow:none!important;box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media print,amzn-kf8{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+</head>
+<body id="demo" class="article">
+<div id="header">
+<h1>Chronicle-Wire</h1>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_version">Version</h2>
+<div class="sectionbody">
+<div id="image-maven" class="imageblock">
+<div class="content">
+<a class="image" href="https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire"><img src="https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire/badge.svg" alt="badge"></a>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_about">About</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Chronicle Wire is a a Wire Format abstraction library, The purpose of Chronicle Wire is to address the following concerns in a consistent manner:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Application configuration. (Using YAML)</p>
+</li>
+<li>
+<p>Data serialization (YAML, binary YAML, JSON, Raw binary data, CSV)</p>
+</li>
+<li>
+<p>Accessing off-heap memory in a thread-safe manner. (Bind to shared off-heap memory)</p>
+</li>
+<li>
+<p>High performance data exchange using binary formats. Only include as much meta data as you need.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_design">Design</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Chronicle Wire uses Chronicle Bytes for bytes manipulation, and Chronicle Core for low level JVM access.</p>
+</div>
+<div class="sect2">
+<h3 id="_why_are_these_concerns_conflated">Why are these concerns conflated?</h3>
+<div class="paragraph">
+<p>Often you want to use these interchangeably.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Configuration includes aliased type information.  This supports easy extension by adding new classes/versions, and cross-platform using type aliasing.</p>
+</li>
+<li>
+<p>By supporting types, a configuration file can bootstrap itself. You control how the configuration file is decoded. See <a href="https://github.com/OpenHFT/Chronicle-Datagrid/blob/master/demo/src/test/resources/datagrid.yaml"><code>datagrid.yaml</code></a>.</p>
+</li>
+<li>
+<p>To send the configuration of a server to a client, or from a client to a server.</p>
+</li>
+<li>
+<p>To store the configuration of a data store in its header.</p>
+</li>
+<li>
+<p>In configuration, to be able to create any object or component.</p>
+</li>
+<li>
+<p>Save a configuration after you have changed it.</p>
+</li>
+<li>
+<p>To be able to share data in memory between processes in a thread-safe manner.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_features">Features</h3>
+<div class="paragraph">
+<p>Chronicle Wire supports a separation of describing what data you want to store and retrieve, and how it should be rendered/parsed. Chronicle Wire handles a variety of formatting options, for a wide range of formats.</p>
+</div>
+<div class="paragraph">
+<p>A key aim of Chronicle Wire is to support schema changes.  It should make reasonable attempts to handle:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>optional fields</p>
+</li>
+<li>
+<p>fields in a different order</p>
+</li>
+<li>
+<p>fields that the consumer doesn&#8217;t expect; optionally parsing them, or ignoring them</p>
+</li>
+<li>
+<p>more or less data than expected; in field-less formats</p>
+</li>
+<li>
+<p>reading a different type to the one written</p>
+</li>
+<li>
+<p>updating fixed-length fields, automatically where possible using a <code>bound</code> data structure.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Chronicle Wire will also be efficient where any, or all, of the following points are true:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>fields are in the order expected</p>
+</li>
+<li>
+<p>fields are the type expected</p>
+</li>
+<li>
+<p>fields names/numbers are not used</p>
+</li>
+<li>
+<p>self-describing types are not needed</p>
+</li>
+<li>
+<p>random access of data values is supported.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Chronicle Wire is designed to make it easy to convert from one wire format to another. For example, you can use fixed-width binary data in memory for performance, and variable-width or text over the network. Different TCP connections could use different formats.</p>
+</div>
+<div class="paragraph">
+<p>Chronicle Wire also supports hybrid wire formats.  For example, you can have one format embedded in another.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_support">Support</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This library will require Java 8. Support for <code>C++</code> and <code>C#</code> is planned.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_text_formats">Text Formats</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The text formats include:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>YAML</code> - subset of mapping structures included</p>
+</li>
+<li>
+<p><code>JSON</code> - superset to support serialization</p>
+</li>
+<li>
+<p><code>CSV</code> - superset to support serialization</p>
+</li>
+<li>
+<p><code>XML</code> - planned</p>
+</li>
+<li>
+<p><code>FIX</code> - proposed</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Options include:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>field names (for example, JSON), or field numbers (for example, FIX)</p>
+</li>
+<li>
+<p>optional fields with default values that can be dropped</p>
+</li>
+<li>
+<p>zero-copy access to fields - planned</p>
+</li>
+<li>
+<p>thread-safe operations in text - planned</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To support wire format discovery, the first byte should be in the <code>ASCII</code> range; adding an <code>ASCII</code> whitespace if needed.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_binary_formats">Binary Formats</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The binary formats include:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>binary YAML.</p>
+</li>
+<li>
+<p>delta compressing Binary YAML. This is a Chronicle Wire Enterprise feature</p>
+</li>
+<li>
+<p>typed data without fields</p>
+</li>
+<li>
+<p>raw untyped fieldless data</p>
+</li>
+<li>
+<p>BSON (Binary JSON) - planned</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Options for Binary format:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>field names or field numbers</p>
+</li>
+<li>
+<p>variable width</p>
+</li>
+<li>
+<p>optional fields with a default value can be dropped</p>
+</li>
+<li>
+<p>fixed width data with zero copy support</p>
+</li>
+<li>
+<p>thread-safe operations</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Note: Chronicle Wire supports debug/transparent combinations like self-describing data with zero copy support.</p>
+</div>
+<div class="paragraph">
+<p>To support wire format discovery, the first bytes should have the top bit set.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_using_wire">Using Wire</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_simple_use_case">Simple use case.</h3>
+<div class="paragraph">
+<p>First you need to have a buffer to write to.  This can be a <code>byte[]</code>, a <code>ByteBuffer</code>, off-heap memory, or even an address and length that you have obtained from some other library.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="Java"><span style="color:#777">// Bytes which wraps a ByteBuffer which is resized as needed.</span>
+Bytes&lt;<span style="color:#0a8;font-weight:bold">ByteBuffer</span>&gt; bytes = Bytes.elasticByteBuffer();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now you can choose which format you are using.  As the wire formats are themselves unbuffered, you can use them with the same buffer, but in general using one wire format is easier.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="Java">Wire wire = <span style="color:#080;font-weight:bold">new</span> TextWire(bytes);
+<span style="color:#777">// or</span>
+WireType wireType = WireType.TEXT;
+Wire wireB = wireType.apply(bytes);
+<span style="color:#777">// or</span>
+Bytes&lt;<span style="color:#0a8;font-weight:bold">ByteBuffer</span>&gt; bytes2 = Bytes.elasticByteBuffer();
+Wire wire2 = <span style="color:#080;font-weight:bold">new</span> BinaryWire(bytes2);
+<span style="color:#777">// or</span>
+Bytes&lt;<span style="color:#0a8;font-weight:bold">ByteBuffer</span>&gt; bytes3 = Bytes.elasticByteBuffer();
+Wire wire3 = <span style="color:#080;font-weight:bold">new</span> RawWire(bytes3);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So now you can write to the wire with a simple document.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="Java">wire.write(() -&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">message</span><span style="color:#710">&quot;</span></span>).text(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Hello World</span><span style="color:#710">&quot;</span></span>)
+      .write(() -&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">number</span><span style="color:#710">&quot;</span></span>).int64(<span style="color:#00D">1234567890L</span>)
+       .write(() -&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">code</span><span style="color:#710">&quot;</span></span>).asEnum(<span style="color:#0a8;font-weight:bold">TimeUnit</span>.SECONDS)
+      .write(() -&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">price</span><span style="color:#710">&quot;</span></span>).float64(<span style="color:#60E">10.50</span>);
+<span style="color:#0a8;font-weight:bold">System</span>.out.println(bytes);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>prints</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml"><span style="color:#606">message</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">Hello World</span></span>
+<span style="color:#606">number</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">1234567890</span></span>
+<span style="color:#606">code</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">SECONDS</span></span>
+<span style="color:#606">price</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">10.5</span></span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="Java"><span style="color:#777">// the same code as for text wire</span>
+wire2.write(() -&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">message</span><span style="color:#710">&quot;</span></span>).text(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Hello World</span><span style="color:#710">&quot;</span></span>)
+        .write(() -&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">number</span><span style="color:#710">&quot;</span></span>).int64(<span style="color:#00D">1234567890L</span>)
+        .write(() -&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">code</span><span style="color:#710">&quot;</span></span>).asEnum(<span style="color:#0a8;font-weight:bold">TimeUnit</span>.SECONDS)
+        .write(() -&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">price</span><span style="color:#710">&quot;</span></span>).float64(<span style="color:#60E">10.50</span>);
+        <span style="color:#0a8;font-weight:bold">System</span>.out.println(bytes2.toHexString());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>prints</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>00000000 C7 6D 65 73 73 61 67 65  EB 48 65 6C 6C 6F 20 57 ·message ·Hello W
+00000010 6F 72 6C 64 C6 6E 75 6D  62 65 72 A3 D2 02 96 49 orld·num ber····I
+00000020 C4 63 6F 64 65 E7 53 45  43 4F 4E 44 53 C5 70 72 ·code·SE CONDS·pr
+00000030 69 63 65 90 00 00 28 41                          ice···(A</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Using <code>RawWire</code> strips away all the meta data to reduce the size of the message, and improve speed.
+The down-side is that we cannot easily see what the message contains.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="Java">        <span style="color:#777">// the same code as for text wire</span>
+        wire3.write(() -&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">message</span><span style="color:#710">&quot;</span></span>).text(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Hello World</span><span style="color:#710">&quot;</span></span>)
+                .write(() -&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">number</span><span style="color:#710">&quot;</span></span>).int64(<span style="color:#00D">1234567890L</span>)
+                .write(() -&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">code</span><span style="color:#710">&quot;</span></span>).asEnum(<span style="color:#0a8;font-weight:bold">TimeUnit</span>.SECONDS)
+                .write(() -&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">price</span><span style="color:#710">&quot;</span></span>).float64(<span style="color:#60E">10.50</span>);
+        <span style="color:#0a8;font-weight:bold">System</span>.out.println(bytes3.toHexString());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>prints in <code>RawWire</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>00000000 0B 48 65 6C 6C 6F 20 57  6F 72 6C 64 D2 02 96 49 ·Hello W orld···I
+00000010 00 00 00 00 07 53 45 43  4F 4E 44 53 00 00 00 00 ·····SEC ONDS····
+00000020 00 00 25 40                                      ··%@</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For more examples see <a href="https://github.com/OpenHFT/Chronicle-Wire/blob/master/README-Chapter1.md">Examples Chapter1</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_a_note_on_wires_reset">A note on <code>Wires.reset()</code></h3>
+<div class="paragraph">
+<p>Chronicle Wire allows (and encourages) objects to be re-used in order to reduce allocation rates.</p>
+</div>
+<div class="paragraph">
+<p>When a marshallable object is re-used or initialised by the framework, it is first reset by way of <code>Wires.reset()</code>. In the case of most DTOs with simple scalar values, this will not cause any issues. However, more complicated objects with object instance fields may experience undesired behaviour.</p>
+</div>
+<div class="paragraph">
+<p>In order to <code>reset</code> a marshallable object, the process is as follows:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>create a new instance of the object to be reset</p>
+</li>
+<li>
+<p>copy all fields from the new instance to the existing instance</p>
+</li>
+<li>
+<p>the existing instance is now considered 'reset' back to default values</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The object created in step <code>1</code> is cached for performance reasons, meaning that both the new and existing instance of the marshallable object could have a reference to the same object.</p>
+</div>
+<div class="paragraph">
+<p>While this will not be a problem for primitive or immutable values (for example, <code>int</code>, <code>Long</code>, <code>String</code>), a mutable field such as <code>ByteBuffer</code> will cause problems. Consider the following case:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span style="color:#088;font-weight:bold">private</span> <span style="color:#088;font-weight:bold">static</span> <span style="color:#088;font-weight:bold">final</span> <span style="color:#339;font-weight:bold">class</span> <span style="color:#B06;font-weight:bold">BufferContainer</span> {
+    <span style="color:#088;font-weight:bold">private</span> <span style="color:#0a8;font-weight:bold">ByteBuffer</span> b = <span style="color:#0a8;font-weight:bold">ByteBuffer</span>.allocate(<span style="color:#00D">16</span>);
+}
+
+<span style="color:#007">@Test</span>
+<span style="color:#088;font-weight:bold">public</span> <span style="color:#339;font-weight:bold">void</span> shouldDemonstrateMutableFieldIssue2() {
+    <span style="color:#777">// create 2 instances of a marshallable POJO</span>
+    <span style="color:#088;font-weight:bold">final</span> BufferContainer c1 = <span style="color:#080;font-weight:bold">new</span> BufferContainer();
+    <span style="color:#088;font-weight:bold">final</span> BufferContainer c2 = <span style="color:#080;font-weight:bold">new</span> BufferContainer();
+    <span style="color:#777">// reset both instances - this will set each container's</span>
+    <span style="color:#777">// b field to a 'default' value</span>
+    Wires.reset(c1);
+    Wires.reset(c2);
+    <span style="color:#777">// write to the buffer in c1</span>
+    c1.b.putInt(<span style="color:#00D">42</span>);
+    <span style="color:#777">// inspect the buffer in both c1 and c2</span>
+    <span style="color:#0a8;font-weight:bold">System</span>.out.println(c1.b.position());
+    <span style="color:#0a8;font-weight:bold">System</span>.out.println(c2.b.position());
+    <span style="color:#0a8;font-weight:bold">System</span>.out.println(c1.b == c2.b);
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output of the test above is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>4
+4
+true</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>showing that the field <strong>b</strong> of each container object is now referencing the same <code>ByteBuffer</code> instance.</p>
+</div>
+<div class="paragraph">
+<p>In order to work around this, if necessary, the marshallable class
+should implement <code>ResetOverride</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span style="color:#088;font-weight:bold">private</span> <span style="color:#088;font-weight:bold">static</span> <span style="color:#088;font-weight:bold">final</span> <span style="color:#339;font-weight:bold">class</span> <span style="color:#B06;font-weight:bold">BufferContainer</span> <span style="color:#088;font-weight:bold">implements</span> ResetOverride {
+    <span style="color:#088;font-weight:bold">private</span> <span style="color:#0a8;font-weight:bold">ByteBuffer</span> b = <span style="color:#0a8;font-weight:bold">ByteBuffer</span>.allocate(<span style="color:#00D">16</span>);
+
+    <span style="color:#007">@Override</span>
+    <span style="color:#088;font-weight:bold">public</span> <span style="color:#339;font-weight:bold">void</span> onReset() {
+        <span style="color:#777">// or acquire from a pool if allocation should</span>
+        <span style="color:#777">// be kept to a minimum</span>
+        b = <span style="color:#0a8;font-weight:bold">ByteBuffer</span>.allocate(<span style="color:#00D">16</span>);
+    }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_binding_to_a_field_value">Binding to a field value</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>While serialized data can be updated by replacing a whole record, this might not be the most efficient option, nor thread-safe.</p>
+</div>
+<div class="paragraph">
+<p>Chronicle Wire offers the ability to bind a reference to a fixed value of a field, and perform atomic operations on that field; for example, volatile read/write, and compare-and-swap.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="Java">   <span style="color:#777">// field to cache the location and object used to reference a field.</span>
+   <span style="color:#088;font-weight:bold">private</span> LongValue counter = <span style="color:#069">null</span>;
+
+   <span style="color:#777">// find the field and bind an approritae wrapper for the wire format.</span>
+   wire.read(COUNTER).int64(counter, x -&gt; counter = x);
+
+   <span style="color:#777">// thread safe across processes on the same machine.</span>
+   <span style="color:#339;font-weight:bold">long</span> id = counter.getAndAdd(<span style="color:#00D">1</span>);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Other types are supported; for example, 32-bit integer values, and an array of 64-bit integer values.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_compression_options">Compression Options</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>No compression</p>
+</li>
+<li>
+<p>Snappy compression - planned</p>
+</li>
+<li>
+<p>LZW compression - planned</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bytes_options">Bytes options</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Chronicle Wire is built on top of the <code>Bytes</code> library, however <code>Bytes</code>, in turn, can wrap:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>ByteBuffer</code> - heap and direct</p>
+</li>
+<li>
+<p><code>byte\[\]</code> - using <code>ByteBuffer</code></p>
+</li>
+<li>
+<p>raw memory addresses.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_handling_instance_classes_of_an_unknown_type">Handling instance classes of an unknown type</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This feature allows Chronicle Wire to de-serialize, manipulate, and serialize an instance class of an unknown type.</p>
+</div>
+<div class="paragraph">
+<p>If the type is unknown at runtime, a proxy is created; assuming that the required type is an interface.</p>
+</div>
+<div class="paragraph">
+<p>When the tuple is serialized, it will be give the same type as when it was deserialized, even if that class is not available.</p>
+</div>
+<div class="paragraph">
+<p>Methods following our <code>getter</code>/<code>setter</code> convention will be treated as <code>getters</code> and <code>setters</code>.</p>
+</div>
+<div class="paragraph">
+<p>This feature is needed for a service that stores and passes on data, for classes it might not have in its class path.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+This is not garbage collection free, but if the volume is low, this may be easier to work with.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+This only works when the expected type is not a class.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_example">Example</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="Java"><span style="color:#007">@Test</span>
+<span style="color:#088;font-weight:bold">public</span> <span style="color:#339;font-weight:bold">void</span> unknownType() <span style="color:#088;font-weight:bold">throws</span> <span style="color:#C00;font-weight:bold">NoSuchFieldException</span> {
+    Marshallable marshallable = Wires.tupleFor(Marshallable.class, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">UnknownType</span><span style="color:#710">&quot;</span></span>);
+    marshallable.setField(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">one</span><span style="color:#710">&quot;</span></span>, <span style="color:#00D">1</span>);
+    marshallable.setField(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">two</span><span style="color:#710">&quot;</span></span>, <span style="color:#60E">2.2</span>);
+    marshallable.setField(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">three</span><span style="color:#710">&quot;</span></span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">three</span><span style="color:#710">&quot;</span></span>);
+    <span style="color:#0a8;font-weight:bold">String</span> toString = marshallable.toString();
+    assertEquals(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">!UnknownType {</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  one: !int 1,</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  two: 2.2,</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  three: three</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">}</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span>, toString);
+    <span style="color:#0a8;font-weight:bold">Object</span> o = Marshallable.fromString(toString);
+    assertEquals(toString, o.toString());
+}
+
+<span style="color:#007">@Test</span>
+<span style="color:#088;font-weight:bold">public</span> <span style="color:#339;font-weight:bold">void</span> unknownType2() {
+    <span style="color:#0a8;font-weight:bold">String</span> text = <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">!FourValues {</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  string: Hello,</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  num: 123,</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  big: 1e6,</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  also: extra</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">}</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span>;
+    ThreeValues tv = Marshallable.fromString(ThreeValues.class, text);
+    assertEquals(text, tv.toString());
+    assertEquals(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Hello</span><span style="color:#710">&quot;</span></span>, tv.string());
+    tv.string(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Hello World</span><span style="color:#710">&quot;</span></span>);
+    assertEquals(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Hello World</span><span style="color:#710">&quot;</span></span>, tv.string());
+
+    assertEquals(<span style="color:#00D">123</span>, tv.num());
+    tv.num(<span style="color:#00D">1234</span>);
+    assertEquals(<span style="color:#00D">1234</span>, tv.num());
+
+    assertEquals(<span style="color:#60E">1e6</span>, tv.big(), <span style="color:#60E">0.0</span>);
+    tv.big(<span style="color:#60E">0.128</span>);
+    assertEquals(<span style="color:#60E">0.128</span>, tv.big(), <span style="color:#60E">0.0</span>);
+
+    assertEquals(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">!FourValues {</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  string: Hello World,</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  num: !int 1234,</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  big: 0.128,</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  also: extra</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">}</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span>, tv.toString());
+
+}
+
+<span style="color:#339;font-weight:bold">interface</span> <span style="color:#B06;font-weight:bold">ThreeValues</span> {
+    ThreeValues string(<span style="color:#0a8;font-weight:bold">String</span> s);
+    <span style="color:#0a8;font-weight:bold">String</span> string();
+
+    ThreeValues num(<span style="color:#339;font-weight:bold">int</span> n);
+    <span style="color:#339;font-weight:bold">int</span> num();
+
+    ThreeValues big(<span style="color:#339;font-weight:bold">double</span> d);
+    <span style="color:#339;font-weight:bold">double</span> big();
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_example_with_methodreaders">Example with <code>MethodReaders</code></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="Java"><span style="color:#007">@Test</span>
+<span style="color:#088;font-weight:bold">public</span> <span style="color:#339;font-weight:bold">void</span> testUnknownClass() {
+    Wire wire2 = <span style="color:#080;font-weight:bold">new</span> TextWire(Bytes.elasticHeapByteBuffer(<span style="color:#00D">256</span>));
+    MRTListener writer2 = wire2.methodWriter(MRTListener.class);
+
+    <span style="color:#0a8;font-weight:bold">String</span> text = <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">top: !UnknownClass {</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  one: 1,</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  two: 2.2,</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  three: words</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">}</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">---</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">top: {</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  one: 11,</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  two: 22.2,</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">  three: many words</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">}</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span> +
+            <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">---</span><span style="color:#b0b">\n</span><span style="color:#710">&quot;</span></span>;
+    Wire wire = TextWire.from(text);
+    MethodReader reader = wire.methodReader(writer2);
+    assertTrue(reader.readOne());
+    assertTrue(reader.readOne());
+    assertFalse(reader.readOne());
+    assertEquals(text, wire2.toString());
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_filtering_with_methodreaders">Filtering with MethodReaders</h3>
+<div class="paragraph">
+<p>To support filtering, you need to make sure the first of multiple arguments can be used to filter the method call. If you have only one argument, you may need to add an additional argument to support efficient filtering.</p>
+</div>
+<div class="paragraph">
+<p>This feature calls an implementation of <code>MethodFilterOnFirstArg</code> to see if the rest of the method call should be parsed. For example, today you have:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="Java"><span style="color:#339;font-weight:bold">interface</span> <span style="color:#B06;font-weight:bold">MyInterface</span> {
+    <span style="color:#339;font-weight:bold">void</span> method(ExpensiveDto dto);
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This can be migrated to:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="Java"><span style="color:#339;font-weight:bold">interface</span> <span style="color:#B06;font-weight:bold">MyInterface</span> <span style="color:#088;font-weight:bold">extends</span> MethodFilterOnFirstArg&lt;<span style="color:#0a8;font-weight:bold">String</span>&gt; {
+    <span style="color:#007">@Deprecated</span>
+    <span style="color:#339;font-weight:bold">void</span> method(ExpensiveDto dto);
+    <span style="color:#339;font-weight:bold">void</span> method2(<span style="color:#0a8;font-weight:bold">String</span> filter, ExpensiveDto dto);
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>where the implementation can look like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="Java"><span style="color:#339;font-weight:bold">class</span> <span style="color:#B06;font-weight:bold">MyInterfaceImpl</span> <span style="color:#088;font-weight:bold">extends</span> MyInterface {
+    <span style="color:#088;font-weight:bold">public</span> <span style="color:#339;font-weight:bold">void</span> method(ExpensiveDto dto) {
+       <span style="color:#777">// something</span>
+    }
+
+    <span style="color:#088;font-weight:bold">public</span> <span style="color:#339;font-weight:bold">void</span> method2(<span style="color:#0a8;font-weight:bold">String</span> filter, ExpensiveDto dto) {
+        method(dto);
+    }
+
+    <span style="color:#088;font-weight:bold">public</span> <span style="color:#339;font-weight:bold">boolean</span> ignoreMethodBasedOnFirstArg(<span style="color:#0a8;font-weight:bold">String</span> methodName, <span style="color:#0a8;font-weight:bold">String</span> filter) {
+        <span style="color:#080;font-weight:bold">return</span> someConditionOn(methodName, filter);
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For an example, see <code>net.openhft.chronicle.wire.MethodFilterOnFirstArgTest</code></p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_uses_of_chronicle_wire">Uses of Chronicle Wire</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Chronicle Wire can be used for:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>file headers</p>
+</li>
+<li>
+<p>TCP connection headers; where the optimal wire format taht is actually used can be negotiated</p>
+</li>
+<li>
+<p>message/excerpt contents</p>
+</li>
+<li>
+<p>Chronicle Queue version 4.x and later</p>
+</li>
+<li>
+<p>the API for marshalling generated data types.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_similar_projects">Similar projects</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_simple_binary_encoding_sbe">Simple Binary Encoding (SBE)</h3>
+<div class="paragraph">
+<p>Simple Binary Encoding (SBE) is designed to be a more efficient replacement for FIX. It is not limited to FIX protocols, and can be easily extended by updating an XML schema. It is simple, binary, and it supports C++ and Java.</p>
+</div>
+<div class="paragraph">
+<p>XML, when it first started, did not use XML for its own schema files, and it is not insignificant that SBE does not use SBE for its schema either.  This is because it is not trying to be human readable. It has XML which, though standard, is not designed to be human readable either.  Chronicle believes that it is a limitation that it does not naturally lend itself to a human readable form.</p>
+</div>
+<div class="paragraph">
+<p>The encoding that SBE uses is similar to binary; with field numbers and fixed-width types.</p>
+</div>
+<div class="paragraph">
+<p>SBE assumes the field types, which can be more compact than Chronicle Wire&#8217;s most similar option; though not as compact as others.</p>
+</div>
+<div class="paragraph">
+<p>SBE has support for schema changes provided that the type of a field doesn&#8217;t change.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_message_pack_msgpack">Message Pack (<code>msgpack</code>)</h3>
+<div class="paragraph">
+<p>Message Pack is a packed binary wire format which also supports <code>JSON</code> for human readability and compatibility. It has many similarities to the binary (and <code>JSON</code>) formats of this library.  Chronicle Wire is designed to be human readable first, based on <code>YAML</code>, and has a range of options to make it more efficient. The most extreme being fixed position binary.</p>
+</div>
+<div class="paragraph">
+<p>Message Pack has support for embedded binary, whereas Chronicle Wire has support for comments and hints, to improve rendering for human consumption.</p>
+</div>
+<div class="paragraph">
+<p>The documentation looks well thought out, and it is worth emulating.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_comparison_with_capnproto">Comparison with Cap&#8217;n&#8217;Proto</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 14.2858%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Feature</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Wire Text</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Wire Binary</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Protobuf</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Cap&#8217;n Proto</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SBE</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FlatBuffers</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Schema evolution</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">caveats</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Zero-copy</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Random-access reads</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Random-access writes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">?</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">?</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Safe against malicious input</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">opt-in / upfront</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reflection / generic algorithms</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Initialization order</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">any</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">any</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">any</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">any</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">preorder</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">bottom-up</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Unknown field retention</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Object-capability RPC system</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Schema language</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">custom</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">custom</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">XML</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">custom</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Usable as mutable state</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Padding takes space on wire?</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Unset fields take space on wire?</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Pointers take space on wire?</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">C++</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">planned</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">planned</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes (C++11)*</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Java</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Java 8</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Java 8</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes*</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">C#</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes*</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes*</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Go</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yes*</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Other languages</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">6+</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">others*</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Authors' preferred use case</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">distributed  computing</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">financial / trading</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">distributed  computing</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">platforms /  sandboxing</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">financial / trading</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">games</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The <code>Binary YAML</code> format can be automatically converted to <code>YAML</code> without any knowledge of the schema, because the messages are self-describing.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+You can parse all the expected fields (if any) and then parse any remaining fields. As <code>YAML</code> supports object field names (or keys), these could be strings or even objects as keys and values.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Based on <a href="https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html" class="bare">https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html</a></p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+It not clear what padding which does not take up space on the wire means.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_design_notes">Design notes.</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>See <a href="https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html" class="bare">https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html</a> for a comparison to other encoders.</p>
+</div>
+<div class="sect2">
+<h3 id="_schema_evolution">Schema evolution.</h3>
+<div class="paragraph">
+<p>Wire optionally supports:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>field name changes</p>
+</li>
+<li>
+<p>field order changes</p>
+</li>
+<li>
+<p>capturing or ignoring unexpected fields</p>
+</li>
+<li>
+<p>setting of fields to the default, if not available</p>
+</li>
+<li>
+<p>raw messages can be longer or shorter than expected</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The more flexibility, the larger the overhead in terms of CPU and memory.
+Chronicle Wire allows you to dynamically pick the optimal configuration, and convert between these options.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_zero_copy">Zero copy.</h3>
+<div class="paragraph">
+<p>Chronicle Wire supports zero-copy random access to fields, and direct-copy from in-memory to the network.
+It also supports translation from one wire format to another. For example, switching between fixed-length data and variable-length data.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_random_access">Random Access.</h3>
+<div class="paragraph">
+<p>You can access a random field in memory, For example, in a <code>2TB</code> file, page-in/pull-into CPU cache, only the data relating to your read or write.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">format</th>
+<th class="tableblock halign-left valign-top">access style</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">fixed-length binary</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">random access without parsing first</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">variable-length binary</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">random access with partial parsing allowing you to skip large portions</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">fixed-length text</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">random access with parsing</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">variable-length text</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">no random access</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Chronicle Wire references are relative to the start of the data contained, to allow loading in an arbitrary point in memory.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_safe_against_malicious_input">Safe against malicious input.</h3>
+<div class="paragraph">
+<p>Chronicle Wire has built in tiers of bounds checks to prevent accidental read/writing that corrupts the data. It is not complete enough for a security review.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_reflection_generic_algorithms">Reflection / generic algorithms.</h3>
+<div class="paragraph">
+<p>Chronicle Wire supports generic reading and writing of an arbitrary stream. This can be used in combination with predetermined fields.
+For example, you can read the fields you know about, and ask it to provide the fields that you do not.
+You can also give generic field names like keys to a map as <code>YAML</code> does.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_initialization_order">Initialization order.</h3>
+<div class="paragraph">
+<p>Chronicle Wire can handle unknown information like lengths, by using padding.
+It will go back and fill in any data that it was not aware of when it was writing the data. For example, when it writes an object, it does not know how long it is going to be, so it adds padding at the start. Once the object has been written, it goes back and overwrites the length. It can also handle situations where the length was more than needed; this is known as packing.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_unknown_field_retention">Unknown field retention?</h3>
+<div class="paragraph">
+<p>Chronicle Wire can read data that it did not expect, interspersed with data it did expect. Rather than specify the expected field name, a <code>StringBuilder</code> is provided.</p>
+</div>
+<div class="paragraph">
+<p>Note: There are times when you want to skip/copy an entire field or message, without reading any more of it.  This is also supported.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_object_maximumlimit_rpc_system">Object-maximumLimit RPC system.</h3>
+<div class="paragraph">
+<p>Chronicle Wire supports references based on name, number, or UUID. This is useful when including a reference to an object that the reader should look up by other means.</p>
+</div>
+<div class="paragraph">
+<p>A common case is if you have a proxy to a remote object, and you want to pass or return this in an RPC call.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_schema_language">Schema language</h3>
+<div class="paragraph">
+<p>Chronicle Wire&#8217;s schema is not externalised from the code. However it is planned to use <code>YAML</code> in a format that it can parse.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_usable_as_mutable_state">Usable as mutable state</h3>
+<div class="paragraph">
+<p>Chronicle Wire supports storing an application&#8217;s internal state. This will not allow it to grow or shrink. You can&#8217;t free any of it without copying the pieces that you need, and discarding the original copy.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_padding_takes_space_on_the_wire">Padding takes space on the wire.</h3>
+<div class="paragraph">
+<p>The Chronicle Wire format that is chosen determines if there is any padding on the wire. If you copy the in-memory data directly, its format does not change.</p>
+</div>
+<div class="paragraph">
+<p>If you want to drop padding, you can copy the message to a wire format without padding. You can decide whether the original padding is to be preserved or not, if turned back into a format with padding.</p>
+</div>
+<div class="paragraph">
+<p>We could look at supporting <strong>Cap&#8217;n&#8217;Proto</strong>'s zero-byte removal compression.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_un_set_fields_take_space_on_the_wire">Un-set fields take space on the wire?</h3>
+<div class="paragraph">
+<p>Chronicle Wire supports fields with, and without, optional fields, and automatic means of removing them. Chronicle Wire does not support automatically adding them back in, because information has been lost.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pointers_take_space_on_the_wire">Pointers take space on the wire.</h3>
+<div class="paragraph">
+<p>Chronicle Wire does not have pointers, but it does have content-lengths which are a useful hint for random access and robustness; but these are optional.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_working_with_intellij">Working with intellij</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>These templates can be added to IntelliJ to create simple getters and setters.</p>
+</div>
+<div class="listingblock">
+<div class="title">Simple Getter</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="velocity">$field.type ##
+${field.name}() {
+  return $field.name;
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Simple Setter</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="velocity">#set($paramName = $helper.getParamName($field, $project))
+$class.name ${field.name}($field.type $paramName) {
+  this.$field.name = $paramName;
+  return this;
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_self_describing_messages">Self describing messages</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When writing and reading from text, Marshallable are always self describing, however when using Binary there is two choices,
+<code>SelfDescribingMarshallable</code> with is self decribing in binary and <code>BytesInBinaryMarshallable</code> which uses raw values.</p>
+</div>
+<div class="paragraph">
+<p><code>SelfDescribingMarshallable</code> is slightly slower, and larger when writing but supports schema changes such as</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Adding fields.</p>
+</li>
+<li>
+<p>Removing fields</p>
+</li>
+<li>
+<p>Changing the order of fields</p>
+</li>
+<li>
+<p>Change the type of fields</p>
+</li>
+<li>
+<p>Dumbing as text without access to the class specification.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><code>BytesInBinaryMarshallable</code> is slower and more compact, however you need to add your own support for schema changes.
+See the Code Generating section below.</p>
+</div>
+<div class="sect2">
+<h3 id="_code_generation_for_marshallable">Code Generation for Marshallable</h3>
+<div class="paragraph">
+<p>Install the Code Generation plugin, and add a template in <code>File</code> &#8594; <code>Settings</code> &#8594; <code>Code Generation</code> as follows.</p>
+</div>
+<div class="paragraph">
+<p>Use the <code>Add Member Dialog</code> button and <code>Exclude transient fields</code></p>
+</div>
+<div class="paragraph">
+<p>This will add more efficient code for Marshallable format.</p>
+</div>
+<div class="listingblock">
+<div class="title">SelfDescribingMarshallable</div>
+<div class="content">
+<pre class="CodeRay highlight"><code>#set($javaPsiFacade = $JavaPsiFacade.getInstance($project))
+#set($global = $GlobalSearchScope.allScope($project))
+
+@Override public void writeMarshallable(net.openhft.chronicle.wire.WireOut out) {
+#if($class0.superName != &quot;SelfDescribingMarshallable&quot;)
+   super.writeMarshallable(out);
+#end
+#foreach( $member in $members )
+    #set($memberType = $member.type.split(&quot;&lt;&quot;).get(0))
+    #set($type = $javaPsiFacade.findClass($memberType, $global))
+    #if ($member.primitive)
+        out.write(&quot;$member.name&quot;).write${StringUtil.capitalizeWithJavaBeanConvention($memberType)}($member.name);
+    #else
+        out.write(&quot;$member.name&quot;).object(${memberType}.class, $member.name);
+    #end
+#end
+}
+
+@Override public void readMarshallable(net.openhft.chronicle.wire.WireIn in) {
+#if($class0.superName != &quot;SelfDescribingMarshallable&quot;)
+   super.readMarshallable(in);
+#end
+#foreach( $member in $members )
+    #set($memberType = $member.type.split(&quot;&lt;&quot;).get(0))
+    #set($type = $javaPsiFacade.findClass($memberType, $global))
+    #if ($member.primitive)
+        $member.name = in.read(&quot;$member.name&quot;).read${StringUtil.capitalizeWithJavaBeanConvention($memberType)}();
+    #else
+        $member.name = in.read(&quot;$member.name&quot;).object($member.name, ${memberType}.class);
+    #end
+#end
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">BytesInBinaryMarshallable</div>
+<div class="content">
+<pre class="CodeRay highlight"><code>#set($javaPsiFacade = $JavaPsiFacade.getInstance($project))
+#set($global = $GlobalSearchScope.allScope($project))
+
+private static final int MASHALLABLE_VERSION = 1;
+
+@Override public void writeMarshallable(net.openhft.chronicle.bytes.BytesOut out) {
+#if($class0.superName != &quot;BytesInBinaryMarshallable&quot;)
+   super.writeMarshallable(out);
+#end
+   out.writeStopBit(MASHALLABLE_VERSION);
+#foreach( $member in $members )
+   #set($memberType = $member.type.split(&quot;&lt;&quot;).get(0))
+   #set($type = $javaPsiFacade.findClass($memberType, $global))
+   #if ($member.primitive)
+       out.write${StringUtil.capitalizeWithJavaBeanConvention($memberType)}($member.name);
+   #else
+       out.writeObject(${memberType}.class, $member.name);
+   #end
+#end
+}
+
+@Override public void readMarshallable(net.openhft.chronicle.bytes.BytesIn in) {
+#if($class0.superName != &quot;BytesInBinaryMarshallable&quot;)
+   super.readMarshallable(in);
+#end
+   int version = (int) in.readStopBit();
+   if (version == MASHALLABLE_VERSION) {
+#foreach( $member in $members )
+   #set($memberType = $member.type.split(&quot;&lt;&quot;).get(0))
+   #set($type = $javaPsiFacade.findClass($memberType, $global))
+   #if ($member.primitive)
+       $member.name = in.read${StringUtil.capitalizeWithJavaBeanConvention($memberType)}();
+   #else
+       $member.name = (${memberType})in.readObject(${memberType}.class);
+   #end
+#end
+   } else {
+       throw new IllegalStateException(&quot;Unknown version &quot; + version);
+   }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">BytesMarshallable</div>
+<div class="content">
+<pre class="CodeRay highlight"><code>#set($javaPsiFacade = $JavaPsiFacade.getInstance($project))
+#set($global = $GlobalSearchScope.allScope($project))
+
+private static final int MASHALLABLE_VERSION = 1;
+
+@Override public void writeMarshallable(net.openhft.chronicle.bytes.BytesOut out) {
+#if($class0.hasSuper)
+   super.writeMarshallable(out); // <b class="conum">(1)</b>
+#end
+  out.writeStopBit(MASHALLABLE_VERSION);
+#foreach( $member in $members )
+   #set($memberType = $member.type.split(&quot;&lt;&quot;).get(0))
+   #set($type = $javaPsiFacade.findClass($memberType, $global))
+   #if ($member.primitive)
+       out.write${StringUtil.capitalizeWithJavaBeanConvention($memberType)}($member.name);
+   #else
+       out.writeObject(${memberType}.class, $member.name);
+   #end
+#end
+}
+
+@Override public void readMarshallable(net.openhft.chronicle.bytes.BytesIn in) {
+#if($class0.hasSuper)
+   super.readMarshallable(in);
+#end
+   int version = (int) in.readStopBit();
+   if (version == MASHALLABLE_VERSION) {
+#foreach( $member in $members )
+   #set($memberType = $member.type.split(&quot;&lt;&quot;).get(0))
+   #set($type = $javaPsiFacade.findClass($memberType, $global))
+   #if ($member.primitive)
+       $member.name = in.read${StringUtil.capitalizeWithJavaBeanConvention($memberType)}();
+   #else
+       $member.name = (${memberType})in.readObject(${memberType}.class);
+   #end
+#end
+   } else {
+       throw new IllegalStateException(&quot;Unknown version &quot; + version);
+   }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>You will have to remove this line if the class extends <code>AbstractBytesMarshallable</code></p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_platform_support">Platform support</h3>
+<div class="paragraph">
+<p>Chronicle Wire supports <code>Java 8</code>, <code>Java 11</code> and <code>C++</code>.
+Future versions may support <code>Java 14</code>, <code>python</code>.</p>
+</div>
+<hr>
+<div class="paragraph">
+<p><a href="https://github.com/OpenHFT/Chronicle-Wire">Back to Chronicle Wire project</a></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-08-01 11:26:21 -0700
+</div>
+</div>
+</body>
+</html>

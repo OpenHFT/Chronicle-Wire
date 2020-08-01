@@ -12,7 +12,7 @@ image::https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wi
 
 == About
 
-Chronicle Wire is a a Wire Format abstraction library, The purpose of Chronicle Wire is to address the following concerns in a consistent manner:
+Chronicle Wire is a Wire Format abstraction library, The purpose of Chronicle Wire is to address the following concerns in a consistent manner:
 
 - Application configuration. (Using YAML)
 - Data serialization (YAML, binary YAML, JSON, Raw binary data, CSV)
