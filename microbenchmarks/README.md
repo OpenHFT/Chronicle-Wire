@@ -13,9 +13,9 @@ The tests were run with -Xmx1g -XX:MaxInlineSize=400 on an isolated CPU on an i7
 
 # Tests
 
-These are latency test with the [Full Results Here](https://github.com/OpenHFT/Chronicle-Wire/tree/master/microbenchmarks/results)
+These are latency test with the [full Results Here](https://github.com/OpenHFT/Chronicle-Wire/tree/master/microbenchmarks/results)
 
-Something I found intresting is that while a typical time might be stable for a given run, you can get different results at different time.  
+Something I found interesting is that while a typical time might be stable for a given run, you can get different results at different time.  
 For this reason I ran the tests with 10 forks.  By looking at the high percentiles, we tend to pick up the results of the worst run.
 
 | Wire Format | Text encoding | Fixed width values? | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
