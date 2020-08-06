@@ -26,10 +26,12 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.Annotations;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
@@ -101,12 +103,37 @@ public class VanillaMethodReader implements MethodReader {
         }
     }
 
+    private static LongConversion longConversionForFirstParam(Method m) {
+        Annotation[][] annotations = m.getParameterAnnotations();
+        if (annotations == null || annotations.length < 1 || annotations[0].length < 1)
+            return null;
+        for (Annotation annotation : annotations[0]) {
+            if (annotation instanceof LongConversion)
+                return (LongConversion) annotation;
+        }
+        return null;
+    }
+
     private static void invokeMethodWithOneLong(Object o, Object[] context, @NotNull Method m, String name, MethodHandle mh, Object[] argArr, CharSequence s, ValueIn v, MethodReaderInterceptorReturns methodReaderInterceptor) {
         try {
             if (Jvm.isDebug())
                 logMessage(s, v);
 
-            long arg = v.int64();
+            long arg = 0;
+            if (v.isBinary()) {
+                arg = v.int64();
+            } else {
+                LongConversion lc = longConversionForFirstParam(m);
+                if (lc == null) {
+                    arg = v.int64();
+                } else {
+                    String text = v.text();
+                    if (text != null && !text.isEmpty()) {
+                        LongConverter longConverter = ObjectUtils.newInstance(lc.value());
+                        arg = longConverter.parse(text);
+                    }
+                }
+            }
             try {
                 if (methodReaderInterceptor != null) {
                     argArr[0] = arg;
@@ -138,6 +165,31 @@ public class VanillaMethodReader implements MethodReader {
         } catch (IllegalAccessException iae) {
             throw Jvm.rethrow(iae);
         }
+    }
+
+    protected static void logMessage(@NotNull CharSequence s, @NotNull ValueIn v) {
+        if (!LOGGER.isDebugEnabled()) {
+            return;
+        }
+
+        @NotNull String name = s.toString();
+        String rest;
+
+        if (v.wireIn() instanceof BinaryWire) {
+            Bytes bytes = Bytes.elasticByteBuffer((int) (v.wireIn().bytes().readRemaining() * 3 / 2 + 64));
+            long pos = v.wireIn().bytes().readPosition();
+            v.wireIn().copyTo(new TextWire(bytes));
+            v.wireIn().bytes().readPosition(pos);
+            rest = bytes.toString();
+            bytes.releaseLast();
+
+        } else {
+            rest = v.toString();
+        }
+        // TextWire.toString has an \n at the end
+        if (rest.endsWith("\n"))
+            rest = rest.substring(0, rest.length() - 1);
+        LOGGER.debug("read " + name + " - " + rest);
     }
 
     private void addParsletsFor(Set<Class> interfaces, Class<?> oClass, boolean ignoreDefault, Set<String> methodsHandled, MethodFilterOnFirstArg methodFilterOnFirstArg, Object o, Object[] context, Supplier contextSupplier, Supplier nextContext) {
@@ -195,31 +247,6 @@ public class VanillaMethodReader implements MethodReader {
                 addParsletsFor(interfaces, returnType, ignoreDefault, methodsHandled, methodFilterOnFirstArg, null, context, nextContext, nextContext);
             }
         }
-    }
-
-    protected static void logMessage(@NotNull CharSequence s, @NotNull ValueIn v) {
-        if (!LOGGER.isDebugEnabled()) {
-            return;
-        }
-
-        @NotNull String name = s.toString();
-        String rest;
-
-        if (v.wireIn() instanceof BinaryWire) {
-            Bytes bytes = Bytes.elasticByteBuffer((int) (v.wireIn().bytes().readRemaining() * 3 / 2 + 64));
-            long pos = v.wireIn().bytes().readPosition();
-            v.wireIn().copyTo(new TextWire(bytes));
-            v.wireIn().bytes().readPosition(pos);
-            rest = bytes.toString();
-            bytes.releaseLast();
-
-        } else {
-            rest = v.toString();
-        }
-        // TextWire.toString has an \n at the end
-        if (rest.endsWith("\n"))
-            rest = rest.substring(0, rest.length() - 1);
-        LOGGER.debug("read " + name + " - " + rest);
     }
 
     @NotNull

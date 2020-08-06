@@ -176,14 +176,16 @@ public class TextMethodTester<T> {
                     Jvm.warn().on(getClass(), "Bailing out of malformed message");
                     break;
                 }
+                Bytes<?> bytes2 = wire2.bytes();
                 if (retainLast == null) {
-                    Bytes<?> bytes = wire2.bytes();
-                    int last = bytes.peekUnsignedByte(bytes.writePosition() - 1);
-                    if (last >= ' ')
-                        bytes.append('\n');
-                    bytes.append("---\n");
+                    if (bytes2.writePosition() > 0) {
+                        int last = bytes2.peekUnsignedByte(bytes2.writePosition() - 1);
+                        if (last >= ' ')
+                            bytes2.append('\n');
+                    }
+                    bytes2.append("---\n");
                 }
-                pos = wire2.bytes().readPosition();
+                pos = bytes2.readPosition();
             }
             if (retainLast != null)
                 wire2.bytes().clear();

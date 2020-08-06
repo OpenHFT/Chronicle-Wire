@@ -118,7 +118,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         MRTListener writer = wire.methodWriter(MRTListener.class);
-        writer.timed(1234567890L);
+        writer.timed(1234567890_000_000L);
         writer.top(new MRT1("one"));
         writer.method2("one", new MRT1("one"));
         writer.top(new MRT2("one", "two"));
@@ -132,7 +132,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
             assertTrue(reader.readOne());
         }
         assertFalse(reader.readOne());
-        String expected = "subs timed[1234567890]\n" +
+        String expected = "subs timed[1234567890000000]\n" +
                 "subs top[!net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +
                 "  value: a\n" +

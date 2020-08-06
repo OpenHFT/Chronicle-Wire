@@ -25,24 +25,22 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 
-public class MicroTimestampLongConverter implements LongConverter {
-    public static final MicroTimestampLongConverter INSTANCE = new MicroTimestampLongConverter();
+public class MilliTimestampLongConverter implements LongConverter {
+    public static final MilliTimestampLongConverter INSTANCE = new MilliTimestampLongConverter();
     final DateTimeFormatter dtf = new DateTimeFormatterBuilder()
             .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
-            .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true)
+            .appendFraction(ChronoField.MILLI_OF_SECOND, 0, 3, true)
             .toFormatter();
 
     @Override
     public long parse(CharSequence text) {
         try {
             TemporalAccessor parse = dtf.parse(text);
-            long time = parse.getLong(ChronoField.EPOCH_DAY) * 86400_000_000L;
-            if (parse.isSupported(ChronoField.MICRO_OF_DAY))
-                time += parse.getLong(ChronoField.MICRO_OF_DAY);
-            else if (parse.isSupported(ChronoField.MILLI_OF_DAY))
-                time += parse.getLong(ChronoField.MILLI_OF_DAY) * 1_000L;
+            long time = parse.getLong(ChronoField.EPOCH_DAY) * 86400_000L;
+            if (parse.isSupported(ChronoField.MILLI_OF_DAY))
+                time += parse.getLong(ChronoField.MILLI_OF_DAY);
             else if (parse.isSupported(ChronoField.SECOND_OF_DAY))
-                time += parse.getLong(ChronoField.SECOND_OF_DAY) * 1_000_000L;
+                time += parse.getLong(ChronoField.SECOND_OF_DAY) * 1_000L;
 
             return time;
         } catch (DateTimeParseException dtpe) {
@@ -50,8 +48,6 @@ public class MicroTimestampLongConverter implements LongConverter {
                 long number = Long.parseLong(text.toString());
                 if (number < 31e9) {
                     System.out.println("In input data, replace " + text + " with a real date.");
-                } else if (number < 31e12) {
-                    System.out.println("In input data, replace " + text + " with " + asString(number * 1000));
                 } else {
                     System.out.println("In input data, replace " + text + " with " + asString(number));
                 }
@@ -65,8 +61,8 @@ public class MicroTimestampLongConverter implements LongConverter {
     @Override
     public void append(StringBuilder text, long value) {
         LocalDateTime ldt = LocalDateTime.ofEpochSecond(
-                value / 1_000_000,
-                (int) (value % 1_000_000 * 1000),
+                value / 1_000,
+                (int) (value % 1_000 * 1_000_000),
                 ZoneOffset.UTC);
         dtf.formatTo(ldt, text);
     }
