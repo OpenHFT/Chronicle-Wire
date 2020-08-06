@@ -118,15 +118,7 @@ public class TextMethodTester<T> {
         Wire wire2 = createWire(Bytes.allocateElasticOnHeap());
 
         MethodWriterBuilder<T> methodWriterBuilder = wire2.methodWriterBuilder(outputClass);
-        //  if (methodWriterListener != null) {
 
-        //     MethodWriterInterceptorReturns interceptorReturns = (method, args, invoker) -> {
-        //      methodWriterListener.onWrite(method.getName(), args);
-        //      return invoker.apply(method, args);
-        //  };
-        //   methodWriterBuilder.updateInterceptor(this::updateInterceptor);
-
-        //}
         if (updateInterceptor != null)
             methodWriterBuilder.updateInterceptor(updateInterceptor);
 
