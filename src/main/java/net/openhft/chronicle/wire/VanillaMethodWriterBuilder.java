@@ -45,7 +45,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     private final String packageName;
     private ClassLoader classLoader;
     @NotNull
-    private final MethodWriterInvocationHandlerSupplier handlerSupplier;
+    private final MethodWriterInvocationHandlerSupplier<T> handlerSupplier;
     private MarshallableOut out;
     private Closeable closeable;
     private String genericEvent;
@@ -54,11 +54,20 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     private boolean useMethodIds;
     private WireType wireType;
     private Class<?> proxyClass;
-    private boolean recordHistory;
+    private UpdateInterceptor updateInterceptor;
 
     @NotNull
     public MethodWriterBuilder<T> classLoader(ClassLoader classLoader) {
         this.classLoader = classLoader;
+        return this;
+    }
+
+    /**
+     * @param updateInterceptor used to modifier the the data before it is written to the wire
+     */
+    @NotNull
+    public MethodWriterBuilder<T> updateInterceptor(UpdateInterceptor updateInterceptor) {
+        this.updateInterceptor = updateInterceptor;
         return this;
     }
 
@@ -77,12 +86,10 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return this;
     }
 
-
     // sourceId enables this, this isn't useful unless it's set.
     @Deprecated
     @NotNull
     public MethodWriterBuilder<T> recordHistory(boolean recordHistory) {
-        this.recordHistory = recordHistory;
         handlerSupplier.recordHistory(recordHistory);
         return this;
     }
@@ -90,14 +97,11 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     public VanillaMethodWriterBuilder(@NotNull Class<T> tClass,
                                       WireType wireType,
                                       @NotNull Supplier<MethodWriterInvocationHandler> handlerSupplier) {
-        packageName = tClass.getPackage().getName();
+        this.packageName = tClass.getPackage().getName();
         this.wireType = wireType;
-
         addInterface(tClass);
-        classLoader = tClass.getClassLoader();
-
+        this.classLoader = tClass.getClassLoader();
         this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(handlerSupplier);
-
     }
 
     @NotNull
@@ -115,7 +119,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     @NotNull
     public MethodWriterBuilder<T> methodWriterListener(MethodWriterListener methodWriterListener) {
         this.methodWriterListener = methodWriterListener;
-        handlerSupplier.methodWriterListener(methodWriterListener);
+        this.handlerSupplier.methodWriterListener(methodWriterListener);
         return this;
     }
 
@@ -158,6 +162,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         sb.append(this.genericEvent == null ? "" : this.genericEvent);
         sb.append(this.metaData ? "MetadataAware" : "");
         sb.append(useMethodIds ? "MethodIds" : "");
+        sb.append(updateInterceptor != null ? "Intercepting" : "");
         sb.append(hasMethodWriterListener() ? "MethodListener" : "");
         sb.append(toFirstCapCase(wireType().toString().replace("_", "")));
         sb.append("MethodWriter");
@@ -191,18 +196,18 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
     @Nullable
     private T createInstance() {
-        String className = getClassName();
+        String fullClassName = packageName + "." + getClassName();
         try {
             try {
-                return (T) newInstance(Class.forName(className));
+                return (T) newInstance(Class.forName(fullClassName));
             } catch (ClassNotFoundException e) {
-                Class clazz = classCache.computeIfAbsent(className, this::newClass);
+                Class clazz = classCache.computeIfAbsent(fullClassName, this::newClass);
                 if (clazz != null && clazz != COMPILE_FAILED) {
                     return (T) newInstance(clazz);
                 }
             }
         } catch (Throwable e) {
-            classCache.put(className, COMPILE_FAILED);
+            classCache.put(fullClassName, COMPILE_FAILED);
             // do nothing and drop through
             if (Jvm.isDebug())
                 Jvm.debug().on(getClass(), e);
@@ -210,18 +215,17 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return null;
     }
 
-    private Class newClass(final String name) {
+    private Class newClass(final String fullClassName) {
         final LinkedHashSet<Class> setOfInterfaces = new LinkedHashSet<>(interfaces);
         setOfInterfaces.add(SharedDocumentContext.class);
-        return GenerateMethodWriter.newClass(packageName,
+        return GenerateMethodWriter.newClass(fullClassName,
                 setOfInterfaces,
-                name,
                 classLoader,
                 wireType,
                 genericEvent,
                 hasMethodWriterListener(),
                 metaData,
-                useMethodIds);
+                useMethodIds, updateInterceptor != null);
     }
 
     private boolean hasMethodWriterListener() {
@@ -236,7 +240,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
                 recordHistory(true);
                 handlerSupplier.recordHistory(true);
             }
-            return aClass.getDeclaredConstructors()[0].newInstance(out, closeable, methodWriterListener);
+            return aClass.getDeclaredConstructors()[0].newInstance(out, closeable, methodWriterListener, updateInterceptor);
         } catch (Exception e) {
             throw Jvm.rethrow(e);
         }
