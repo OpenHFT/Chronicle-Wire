@@ -85,6 +85,19 @@ public interface MarshallableOut {
         }
     }
 
+    default void writeMessage(String eventName, Object value) throws UnrecoverableTimeoutException {
+        @NotNull DocumentContext dc = writingDocument();
+        try {
+            Wire wire = dc.wire();
+            wire.write(eventName).object(value);
+        } catch (Throwable t) {
+            dc.rollbackOnClose();
+            Jvm.rethrow(t);
+        } finally {
+            dc.close();
+        }
+    }
+
     /**
      * Write the Marshallable as a document/message
      *
