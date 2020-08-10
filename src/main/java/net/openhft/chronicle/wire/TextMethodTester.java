@@ -271,7 +271,9 @@ public class TextMethodTester<T> {
                 key.append(",").append(m.get(s));
             }
             long end = wireOut.bytes().readPosition();
-            events.put(key.toString(), wireOut.bytes().subBytes(start, end - start).toString().trim());
+            BytesStore bytesStore = wireOut.bytes().subBytes(start, end - start);
+            events.put(key.toString(), bytesStore.toString().trim());
+            bytesStore.releaseLast();
             consumeDocumentSeparator(wireOut);
         }
         StringBuilder expected2 = new StringBuilder();
