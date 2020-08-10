@@ -119,15 +119,13 @@ public class TextMethodTester<T> {
         Wire wire2 = createWire(Bytes.allocateElasticOnHeap());
 
         MethodWriterBuilder<T> methodWriterBuilder = wire2.methodWriterBuilder(outputClass);
-        //  if (methodWriterListener != null) {
-
-        //     MethodWriterInterceptorReturns interceptorReturns = (method, args, invoker) -> {
-        //      methodWriterListener.onWrite(method.getName(), args);
-        //      return invoker.apply(method, args);
-        //  };
-        //   methodWriterBuilder.updateInterceptor(this::updateInterceptor);
-
-        //}
+        if (methodWriterListener != null) {
+            // TODO it's deprecated so it just needs to work.
+            UpdateInterceptor interceptor = (name, o) -> {
+                methodWriterListener.onWrite(name, new Object[]{o});
+            };
+            methodWriterBuilder.updateInterceptor(interceptor);
+        }
         if (updateInterceptor != null)
             methodWriterBuilder.updateInterceptor(updateInterceptor);
 
