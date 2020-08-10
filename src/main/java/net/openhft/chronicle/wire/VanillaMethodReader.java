@@ -268,7 +268,6 @@ public class VanillaMethodReader implements MethodReader {
                 MethodHandle mh = MethodHandles.lookup().unreflect(m).bindTo(o2);
                 @NotNull Object[] argArr = {null};
                 MethodWireKey key = createWireKey(m, name);
-                // TODO: check for LongConversion
                 wireParser.registerOnce(key, (s, v) -> invokeMethodWithOneLong(o2, context, m, name, mh, argArr, s, v, methodReaderInterceptorReturns));
             } catch (IllegalAccessException e) {
                 Jvm.warn().on(o2.getClass(), "Unable to unreflect " + m, e);
