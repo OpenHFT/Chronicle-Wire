@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -18,16 +17,6 @@ import java.util.stream.IntStream;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.*;
-
-interface MockMethods {
-    void method1(MockDto dto);
-
-    void method2(MockDto dto);
-
-    void method3(List<MockDto> dtos);
-
-    void list(List<String> strings);
-}
 
 @SuppressWarnings("rawtypes")
 public class VanillaMethodReaderTest extends WireTestCommon {
