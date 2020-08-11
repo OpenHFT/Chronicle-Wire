@@ -47,7 +47,8 @@ public class MilliTimestampLongConverter implements LongConverter {
             try {
                 long number = Long.parseLong(text.toString());
                 if (number < 31e9) {
-                    System.out.println("In input data, replace " + text + " with a real date.");
+                    if (number != 0)
+                        System.out.println("In input data, replace " + text + " with a real date.");
                 } else {
                     System.out.println("In input data, replace " + text + " with " + asString(number));
                 }

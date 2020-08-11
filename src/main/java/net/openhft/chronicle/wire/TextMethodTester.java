@@ -114,8 +114,6 @@ public class TextMethodTester<T> {
 
     @NotNull
     public TextMethodTester run() throws IOException {
-        if (REGRESS_TESTS)
-            System.err.println("NOTE: Regressing tests, please check your commits");
         Wire wire2 = createWire(Bytes.allocateElasticOnHeap());
 
         MethodWriterBuilder<T> methodWriterBuilder = wire2.methodWriterBuilder(outputClass);
@@ -155,14 +153,13 @@ public class TextMethodTester<T> {
 
         Wire wire = createWire(BytesUtil.readFile(input));
 
-        if (!REGRESS_TESTS) {
-            // expected
-            if (retainLast == null) {
-                expected = BytesUtil.readFile(output).toString().trim().replace("\r", "");
-            } else {
-                expected = loadLastValues().toString().trim();
-            }
+        // expected
+        if (retainLast == null) {
+            expected = BytesUtil.readFile(output).toString().trim().replace("\r", "");
+        } else {
+            expected = loadLastValues().toString().trim();
         }
+        String originalExpected = expected;
         MethodReader reader = wire.methodReaderBuilder()
                 .methodReaderInterceptorReturns(methodReaderInterceptorReturns)
                 .warnMissing(true)
@@ -230,7 +227,8 @@ public class TextMethodTester<T> {
             expected = afterRun.apply(expected);
             actual = afterRun.apply(actual);
         }
-        if (REGRESS_TESTS) {
+        if (REGRESS_TESTS && !originalExpected.equals(expected)) {
+            System.err.println("The expected output for " + output + " has been updated, check your commits");
             String output2;
             try {
                 output2 = BytesUtil.findFile(output);
