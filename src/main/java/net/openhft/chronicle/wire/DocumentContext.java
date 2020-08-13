@@ -61,6 +61,10 @@ public interface DocumentContext extends Closeable, SourceContext {
      */
     boolean isNotComplete();
 
+    default boolean isOpen() {
+        return isNotComplete();
+    }
+
     /**
      * Call this if you have detected an error condition and you want the context
      * rolled back when it is closed, rather than half a message committed

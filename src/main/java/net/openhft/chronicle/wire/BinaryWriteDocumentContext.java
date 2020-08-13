@@ -29,7 +29,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     protected long position = -1;
     protected int tmpHeader;
     private int metaDataBit;
-    private volatile boolean open;
+    private volatile boolean isNotComplete;
 
     public BinaryWriteDocumentContext(Wire wire) {
         this.wire = wire;
@@ -44,12 +44,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         metaDataBit = metaData ? Wires.META_DATA : 0;
         tmpHeader = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
         bytes.writeOrderedInt(tmpHeader);
-        open = true;
-    }
-
-    @Override
-    public boolean isOpen() {
-        return open;
+        isNotComplete = true;
     }
 
     @Override
@@ -76,14 +71,14 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
             length0 = (int) length0;
         int length = metaDataBit | toIntU30(length0, "Document length %,d out of 30-bit int range.");
         bytes.testAndSetInt(position, tmpHeader, length);
-        open = false;
+        isNotComplete = false;
     }
 
     protected boolean checkResetOpened() {
-        if (!open)
+        if (!isNotComplete)
             Jvm.warn().on(getClass(), "Closing but not opened");
-        boolean wasOpened = open;
-        open = false;
+        boolean wasOpened = isNotComplete;
+        isNotComplete = false;
         return !wasOpened;
     }
 
@@ -113,6 +108,6 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
 
     @Override
     public boolean isNotComplete() {
-        return true;
+        return isNotComplete;
     }
 }

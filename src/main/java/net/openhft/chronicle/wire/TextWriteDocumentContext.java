@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 public class TextWriteDocumentContext implements WriteDocumentContext {
     protected Wire wire;
     private boolean metaData;
-    private boolean open;
+    private boolean notComplete;
 
     public TextWriteDocumentContext(Wire wire) {
         this.wire = wire;
@@ -33,12 +33,7 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         this.metaData = metaData;
         if (metaData)
             wire().writeComment("meta-data");
-        open = true;
-    }
-
-    @Override
-    public boolean isOpen() {
-        return open;
+        notComplete = true;
     }
 
     @Override
@@ -62,7 +57,7 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         if (TextMethodWriterInvocationHandler.ENABLE_EOD)
             bytes.append("---\n");
         wire().getValueOut().resetBetweenDocuments();
-        open = false;
+        notComplete = false;
     }
 
     @Override
@@ -87,6 +82,6 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
 
     @Override
     public boolean isNotComplete() {
-        return true;
+        return notComplete;
     }
 }
