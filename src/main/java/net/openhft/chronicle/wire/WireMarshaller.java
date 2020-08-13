@@ -44,6 +44,7 @@ import static net.openhft.chronicle.core.UnsafeMemory.*;
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
 public class WireMarshaller<T> {
     public static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
+    static final StringBuilderPool SBP = new StringBuilderPool();
     private static final FieldAccess[] NO_FIELDS = {};
     public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
             (tClass ->
@@ -55,7 +56,6 @@ public class WireMarshaller<T> {
     private static final StringBuilderPool WSBP = new StringBuilderPool();
     @NotNull
     final FieldAccess[] fields;
-    static final StringBuilderPool SBP = new StringBuilderPool();
     final TreeMap<CharSequence, FieldAccess> fieldMap = new TreeMap<>(WireMarshaller::compare);
 
     private final boolean isLeaf;
@@ -147,6 +147,15 @@ public class WireMarshaller<T> {
                 null;
     }
 
+    private static int compare(CharSequence cs0, CharSequence cs1) {
+        for (int i = 0, len = Math.min(cs0.length(), cs1.length()); i < len; i++) {
+            int cmp = Character.compare(cs0.charAt(i), cs1.charAt(i));
+            if (cmp != 0)
+                return cmp;
+        }
+        return Integer.compare(cs0.length(), cs1.length());
+    }
+
     public WireMarshaller<T> excludeFields(String... fieldNames) {
         Set<String> fieldSet = new HashSet<>(Arrays.asList(fieldNames));
         return new WireMarshaller(Stream.of(fields)
@@ -159,14 +168,8 @@ public class WireMarshaller<T> {
         BytesComment bytes = out.bytesComment();
         bytes.indent(+1);
         try {
-            boolean retainsComments = bytes.retainsComments();
-            for (@NotNull FieldAccess field : fields) {
-                if (retainsComments)
-                    bytes.comment(field.field.getName());
-
+            for (@NotNull FieldAccess field : fields)
                 field.write(t, out);
-
-            }
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
         }
@@ -191,15 +194,6 @@ public class WireMarshaller<T> {
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
         }
-    }
-
-    private static int compare(CharSequence cs0, CharSequence cs1) {
-        for (int i = 0, len = Math.min(cs0.length(), cs1.length()); i < len; i++) {
-            int cmp = Character.compare(cs0.charAt(i), cs1.charAt(i));
-            if (cmp != 0)
-                return cmp;
-        }
-        return Integer.compare(cs0.length(), cs1.length());
     }
 
     public void readMarshallable(T t, @NotNull WireIn in, T defaults, boolean overwrite) {
@@ -1491,19 +1485,19 @@ public class WireMarshaller<T> {
         protected void copy(Object from, Object to) {
             putChar(to, getChar(from));
         }
- }
-
-static class IntConversionFieldAccess extends FieldAccess {
-    @NotNull
-    private final IntConverter intConverter;
-
-    IntConversionFieldAccess(@NotNull Field field, @NotNull IntConversion intConversion) {
-        super(field);
-        this.intConverter = ObjectUtils.newInstance(intConversion.value());
     }
 
-    @Override
-    protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
+    static class IntConversionFieldAccess extends FieldAccess {
+        @NotNull
+        private final IntConverter intConverter;
+
+        IntConversionFieldAccess(@NotNull Field field, @NotNull IntConversion intConversion) {
+            super(field);
+            this.intConverter = ObjectUtils.newInstance(intConversion.value());
+        }
+
+        @Override
+        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
             int anInt = getInt(o);
             if (write.isBinary()) {
                 write.int32(anInt);

@@ -17,6 +17,8 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.MethodReader;
+
 public interface MessageHistory extends Marshallable {
     /**
      * Get the MessageHistory to update it or read it.
@@ -34,6 +36,11 @@ public interface MessageHistory extends Marshallable {
      */
     static void set(MessageHistory md) {
         VanillaMessageHistory.setThreadLocal(md);
+    }
+
+    static void writeHistory(DocumentContext dc) {
+        dc.wire().writeEventName(MethodReader.HISTORY)
+                .marshallable(get());
     }
 
     int timings();

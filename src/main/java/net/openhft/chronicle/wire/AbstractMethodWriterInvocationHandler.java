@@ -94,8 +94,6 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     private void writeEvent0(Wire wire, @NotNull Method method, Object[] args, String methodName, int oneParam) {
         ParameterHolderSequenceWriter phsw = parameterMap.computeIfAbsent(method, ParameterHolderSequenceWriter::new);
         Bytes<?> bytes = wire.bytes();
-        if (bytes.retainsComments())
-            bytes.comment(methodName);
         boolean useMethodId = useMethodIds && phsw.methodId >= 0 && wire.getValueOut().isBinary();
         ValueOut valueOut = useMethodId
                 ? wire.writeEventId((int) phsw.methodId)
@@ -106,8 +104,6 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
                 break;
             case 1:
                 Object arg = args[oneParam];
-                if (bytes.retainsComments())
-                    addComment(bytes, arg);
                 if (arg != null && arg.getClass() == RawText.class)
                     valueOut.rawText(((RawText) arg).text);
                 else
@@ -116,13 +112,6 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
             default:
                 valueOut.sequence(args, oneParam == 0 ? phsw.from0 : phsw.from1);
         }
-    }
-
-    private void addComment(Bytes<?> bytes, Object arg) {
-        if (arg instanceof Marshallable)
-            bytes.comment(arg.getClass().getSimpleName());
-        else
-            bytes.comment(String.valueOf(arg));
     }
 
     @Override

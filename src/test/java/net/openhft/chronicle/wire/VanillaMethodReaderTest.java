@@ -68,7 +68,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     public void readMethods() throws IOException {
         Wire wire = new TextWire(BytesUtil.readFile("methods-in.yaml"))
                 .useTextDocuments();
-        Wire wire2 = new TextWire(Bytes.allocateElasticDirect())
+        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
                 .useTextDocuments();
         // expected
         Bytes expected = BytesUtil.readFile("methods-in.yaml");
@@ -88,7 +88,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     public void readMethodsCollections() throws IOException, InterruptedException {
         Wire wire = new TextWire(BytesUtil.readFile("methods-collections-in.yaml"))
                 .useTextDocuments();
-        Wire wire2 = new TextWire(Bytes.allocateElasticDirect())
+        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
                 .useTextDocuments();
         BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
         MockMethods mocker = Mocker.queuing(MockMethods.class, "", queue);

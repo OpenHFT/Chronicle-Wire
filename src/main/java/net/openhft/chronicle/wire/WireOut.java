@@ -64,6 +64,10 @@ public interface WireOut extends WireCommon, MarshallableOut {
         return write(new MethodWireKey(null, methodId));
     }
 
+    default ValueOut writeEventId(String name, int methodId) {
+        return write(new MethodWireKey(name, methodId));
+    }
+
     /**
      * Write a key for wires that support fields.
      */

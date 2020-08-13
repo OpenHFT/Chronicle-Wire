@@ -12,9 +12,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,7 +24,7 @@ import static net.openhft.compiler.CompilerUtils.CACHED_COMPILER;
 @SuppressWarnings("StringBufferReplaceableByString")
 public class GenerateMethodWriter {
 
-    static final boolean DUMP_CODE = Boolean.getBoolean("dumpCode");
+    static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
     private static final String SHARED_DOCUMENT_CONTEXT = SharedDocumentContext.class.getSimpleName();
     private static final String DOCUMENT_CONTEXT_HOLDER = DocumentContextHolder.class.getSimpleName();
     private static final String GENERATE_METHOD_WRITER = GenerateMethodWriter.class.getSimpleName();
@@ -111,7 +109,8 @@ public class GenerateMethodWriter {
                 wireType,
                 genericEvent,
                 hasMethodWriterListener,
-                metaData, useMethodId, useUpdateInterceptor).createClass();
+                metaData, useMethodId, useUpdateInterceptor)
+                .createClass();
     }
 
     @SuppressWarnings("unused")
@@ -127,6 +126,7 @@ public class GenerateMethodWriter {
     }
 
     @SuppressWarnings("unused")
+    @Deprecated
     public static void addComment(Bytes<?> bytes, Object arg) {
         if (arg instanceof Marshallable)
             bytes.comment(arg.getClass().getSimpleName());
@@ -134,13 +134,56 @@ public class GenerateMethodWriter {
             bytes.comment(String.valueOf(arg));
     }
 
+    private static CharSequence toString(Class type) {
+        if (boolean.class.equals(type)) {
+            return "bool";
+        } else if (byte.class.equals(type)) {
+            return "writeByte";
+        } else if (char.class.equals(type)) {
+            return "character";
+        } else if (short.class.equals(type)) {
+            return "int16";
+        } else if (int.class.equals(type)) {
+            return "fixedInt32";
+        } else if (long.class.equals(type)) {
+            return "fixedInt64";
+        } else if (float.class.equals(type)) {
+            return "fixedFloat32";
+        } else if (double.class.equals(type)) {
+            return "fixedFloat64";
+        } else if (CharSequence.class.isAssignableFrom(type)) {
+            return "text";
+        } else if (Marshallable.class.isAssignableFrom(type)) {
+            return "marshallable";
+        }
+        return "object";
+    }
+
     @NotNull
-    private Appendable methodSignature(final Method dm, final int len) throws IOException {
+    private static String nameForClass(Class type) {
+        return type.getName().replace('$', '.');
+    }
+
+    @NotNull
+    private static String nameForClass(Set<String> importSet, Class type) {
+        String s = nameForClass(type);
+        Package aPackage = type.getPackage();
+        if (aPackage != null)
+            if (importSet.contains(s)
+                    || "java.lang".equals(aPackage.getName())
+                    || (!type.getName().contains("$")
+                    && importSet.contains(aPackage.getName() + ".*")))
+                return type.getSimpleName();
+        return s;
+    }
+
+    @NotNull
+    private Appendable methodSignature(SortedSet<String> importSet, final Method dm, final int len) throws IOException {
 
         Appendable result = new JavaSouceCodeFormatter(this.indent);
         for (int j = 0; j < len; j++) {
             Parameter p = dm.getParameters()[j];
-            final String className = p.getType().getTypeName().replace('$', '.');
+            final String className = nameForClass(importSet, p.getType());
 
             Optional<String> intConversion = stream(p.getAnnotations())
                     .filter(a -> a.annotationType() == IntConversion.class)
@@ -175,31 +218,6 @@ public class GenerateMethodWriter {
         return result;
     }
 
-    private static CharSequence toString(Class type) {
-        if (boolean.class.equals(type)) {
-            return "bool";
-        } else if (byte.class.equals(type)) {
-            return "writeByte";
-        } else if (char.class.equals(type)) {
-            return "character";
-        } else if (short.class.equals(type)) {
-            return "int16";
-        } else if (int.class.equals(type)) {
-            return "fixedInt32";
-        } else if (long.class.equals(type)) {
-            return "fixedInt64";
-        } else if (float.class.equals(type)) {
-            return "fixedFloat32";
-        } else if (double.class.equals(type)) {
-            return "fixedFloat64";
-        } else if (CharSequence.class.isAssignableFrom(type)) {
-            return "text";
-        } else if (Marshallable.class.isAssignableFrom(type)) {
-            return "marshallable";
-        }
-        return "object";
-    }
-
     @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
     private Class createClass() {
 
@@ -207,36 +225,61 @@ public class GenerateMethodWriter {
         JavaSouceCodeFormatter imports = new JavaSouceCodeFormatter();
 
         try {
-            imports.append("package " + packageName + ";\n\n" +
-                    "import net.openhft.chronicle.wire.*;\n" +
-                    "import " + IntConversion.class.getName() + ";\n" +
-                    "import " + LongConversion.class.getName() + ";\n" +
-                    "import " + GenerateMethodWriter.class.getName() + ";\n" +
-                    "import " + MessageHistory.class.getName() + ";\n" +
-                    "import " + MethodReader.class.getName() + ";\n" +
-                    "import " + UpdateInterceptor.class.getName() + ";\n" +
-                    "import " + MethodId.class.getName() + ";\n" +
-                    "import " + GenerateMethodWriter.class.getName() + ";\n" +
-                    "import " + DocumentContext.class.getName() + ";\n" +
-                    "import " + SharedDocumentContext.class.getName() + ";\n" +
-                    "import " + MethodWriterInvocationHandlerSupplier.class.getName() + ";\n" +
-                    "import " + Jvm.class.getName() + ";\n" +
-                    "import " + Closeable.class.getName() + ";\n" +
-                    "import " + DocumentContextHolder.class.getName() + ";\n" +
-                    "import " + MethodWriterListener.class.getName() + ";\n" +
-                    "import java.lang.reflect.InvocationHandler;\n" +
-                    "import java.lang.reflect.Method;\n" +
-                    "import java.util.stream.IntStream;\n" +
-                    "import java.util.ArrayList;\n" +
-                    "import java.util.List;\n\n");
+            imports.append("package " + packageName + ";\n\n");
+            SortedSet<String> importSet = new TreeSet<>();
+            importSet.add(IntConversion.class.getName());
+            importSet.add(LongConversion.class.getName());
+            importSet.add(GenerateMethodWriter.class.getName());
+            importSet.add(MessageHistory.class.getName());
+            importSet.add(MethodReader.class.getName());
+            importSet.add(UpdateInterceptor.class.getName());
+            importSet.add(MethodId.class.getName());
+            importSet.add(GenerateMethodWriter.class.getName());
+            importSet.add(DocumentContext.class.getName());
+            importSet.add(SharedDocumentContext.class.getName());
+            importSet.add(MethodWriterInvocationHandlerSupplier.class.getName());
+            importSet.add(Jvm.class.getName());
+            importSet.add(Closeable.class.getName());
+            importSet.add(DocumentContextHolder.class.getName());
+            importSet.add(MethodWriterListener.class.getName());
+            importSet.add(java.lang.reflect.InvocationHandler.class.getName());
+            importSet.add(java.lang.reflect.Method.class.getName());
+            importSet.add(java.util.stream.IntStream.class.getName());
+            importSet.add(java.util.ArrayList.class.getName());
+            importSet.add(java.util.List.class.getName());
+            for (Class interfaceClazz : interfaces) {
 
-            imports.append("public final class ")
+                importSet.add(nameForClass(interfaceClazz));
+
+                if (!interfaceClazz.isInterface())
+                    throw new IllegalArgumentException("expecting and interface instead of class=" + interfaceClazz.getName());
+
+                for (Method dm : interfaceClazz.getMethods()) {
+                    if (dm.isDefault() || Modifier.isStatic(dm.getModifiers()))
+                        continue;
+                    for (Class pType : dm.getParameterTypes()) {
+                        if (pType.isPrimitive() || pType.isArray() || pType.getPackage().getName().equals("java.lang"))
+                            continue;
+                        importSet.add(nameForClass(pType));
+                    }
+                }
+            }
+            importSet.removeIf(s -> s.startsWith("net.openhft.chronicle.bytes"));
+            importSet.add("net.openhft.chronicle.bytes.*");
+            importSet.removeIf(s -> s.startsWith("net.openhft.chronicle.wire"));
+            importSet.add("net.openhft.chronicle.wire.*");
+
+            for (String s : importSet) {
+                imports.append("import ").append(s).append(";\n");
+            }
+
+            imports.append("\npublic final class ")
                     .append(className)
                     .append(" implements ");
 
             for (Class interfaceClazz : interfaces) {
 
-                String interfaceName = nameForClass(interfaceClazz);
+                String interfaceName = nameForClass(importSet, interfaceClazz);
                 imports.append(interfaceName);
                 imports.append(",");
 
@@ -253,7 +296,7 @@ public class GenerateMethodWriter {
                             && SharedDocumentContext.class.isAssignableFrom(dm.getReturnType()))
                         continue;
 
-                    interfaceMethods.append(createMethod(dm, interfaceClazz));
+                    interfaceMethods.append(createMethod(importSet, dm, interfaceClazz));
                 }
 
             }
@@ -281,11 +324,6 @@ public class GenerateMethodWriter {
         }
     }
 
-    @NotNull
-    private String nameForClass(Class interfaceClazz) {
-        return interfaceClazz.getName().replace('$', '.');
-    }
-
     private CharSequence constructorAndFields(final String className) {
 
         final StringBuilder result = new StringBuilder("// result\n");
@@ -301,20 +339,24 @@ public class GenerateMethodWriter {
                 .append("> documentContextTL = ThreadLocal.withInitial(")
                 .append(DOCUMENT_CONTEXT).append("Holder::new);\n");
         for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
-            result.append(format("private ThreadLocal %s = new ThreadLocal();\n", e.getValue()));
+            result.append(format("private transient ThreadLocal %s;\n", e.getValue()));
         }
         result.append("\n");
 
-        return result.append(format("// constructor\npublic %s(" + MARSHALLABLE_OUT + " out, "
+        result.append(format("// constructor\npublic %s(" + MARSHALLABLE_OUT + " out, "
                 + CLOSEABLE + " closeable, MethodWriterListener methodWriterListener, " +
                 UpdateInterceptor.class.getSimpleName() + " " + UPDATE_INTERCEPTOR + ") {\n" +
 
                 "this.methodWriterListener = methodWriterListener;\n" +
                 "this." + UPDATE_INTERCEPTOR + "= " + UPDATE_INTERCEPTOR + ";\n" +
                 "this.out = out;\n" +
-                "this.closeable = closeable;\n" +
-                "}\n\n", className));
+                "this.closeable = closeable;\n", className));
+        for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
+            result.append(format("%s = ThreadLocal.withInitial(() -> out.methodWriter(%s.class));\n", e.getValue(), nameForClass(e.getKey())));
+        }
 
+        result.append("}\n\n");
+        return result;
     }
 
     private CharSequence methodDocumentContext() {
@@ -327,7 +369,7 @@ public class GenerateMethodWriter {
                 "}\n");
     }
 
-    private CharSequence createMethod(final Method dm, final Class<?> interfaceClazz) throws IOException {
+    private CharSequence createMethod(SortedSet<String> importSet, final Method dm, final Class<?> interfaceClazz) throws IOException {
 
         if (Modifier.isStatic(dm.getModifiers()))
             return "";
@@ -339,9 +381,10 @@ public class GenerateMethodWriter {
         if ("writingDocument".contentEquals(dm.getName()) && dm.getReturnType() == DocumentContext.class && parameterCount == 0)
             return createMethodWritingDocument();
 
-        final int len = dm.getParameters().length;
+        Parameter[] parameters = dm.getParameters();
+        final int len = parameters.length;
         Class<?> returnType = dm.getReturnType();
-        final String typeName = nameForClass(returnType);
+        final String typeName = nameForClass(importSet, returnType);
 
         final StringBuilder body = new StringBuilder();
         String methodIDAnotation = "";
@@ -349,19 +392,33 @@ public class GenerateMethodWriter {
             body.append("if (this.closeable != null){\n this.closeable.close();\n}\n");
         } else {
 
-            if (parameterCount >= 1 && Marshallable.class.isAssignableFrom(dm.getParameters()[parameterCount - 1].getType()) && useUpdateInterceptor)
-                body.append("// updateInterceptor\nthis." + UPDATE_INTERCEPTOR + ".update(\"" + dm.getName() + "\", " + dm.getParameters()[parameterCount - 1].getName() + ");\n");
+            if (parameterCount >= 1 && useUpdateInterceptor) {
+                Class<?> type = parameters[parameterCount - 1].getType();
+                if (!type.isPrimitive()) {
+                    String name = parameters[parameterCount - 1].getName();
+                    body.append("// updateInterceptor\nthis." + UPDATE_INTERCEPTOR + ".update(\"" + dm.getName() + "\", " + name + ");\n");
+                }
+            }
 
-            body.append(format("final " + DOCUMENT_CONTEXT + " dc = " + GENERATE_METHOD_WRITER + ".acquire"
-                    + DOCUMENT_CONTEXT + "(%s,this.documentContextTL,this.out);\n", metaData))
-                    .append(recordHistory());
+            boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
+            if (terminating)
+                body.append("try (");
+            body.append("final " + DOCUMENT_CONTEXT + " dc = " + GENERATE_METHOD_WRITER + ".acquire"
+                    + DOCUMENT_CONTEXT + "(")
+                    .append(metaData)
+                    .append(",this.documentContextTL,this.out)");
+            if (terminating)
+                body.append(") {\n");
+            else
+                body.append(";\n");
+            body.append("if (out.recordHistory()) MessageHistory.writeHistory(dc);\n");
 
             int startJ = 0;
 
             final String eventName;
             if (parameterCount > 0 && dm.getName().equals(genericEvent)) {
                 // this is used when we are processing the genericEvent
-                eventName = dm.getParameters()[0].getName();
+                eventName = parameters[0].getName();
                 startJ = 1;
             } else {
                 eventName = '\"' + dm.getName() + '\"';
@@ -376,14 +433,14 @@ public class GenerateMethodWriter {
 
             if (hasMethodWriterListener && parameterCount > 0)
                 createMethodWriterListener(dm, body);
-            else if (dm.getParameters().length > 0)
+            else if (parameters.length > 0)
                 writeArrayOfParameters(dm, len, body, startJ);
 
             if (dm.getParameterTypes().length == 0)
                 body.append("valueOut.text(\"\");\n");
 
-            if (returnType == Void.class || returnType == void.class || returnType.isPrimitive()) {
-                body.append("dc.close();\n");
+            if (terminating) {
+                body.append("}\n");
             }
 
         }
@@ -392,9 +449,9 @@ public class GenerateMethodWriter {
                 methodIDAnotation,
                 typeName,
                 dm.getName(),
-                methodSignature(dm, len),
+                methodSignature(importSet, dm, len),
                 body,
-                methodReturn(dm, interfaceClazz));
+                methodReturn(importSet, dm, interfaceClazz));
     }
 
     @NotNull
@@ -404,7 +461,7 @@ public class GenerateMethodWriter {
     }
 
     private void retainsComments(final Method dm, final StringBuilder body) {
-        body.append(format("if (dc.wire().bytes().retainsComments()){\n dc.wire().bytes().comment(\"%s\");\n}\n", dm.getName()));
+//        body.append(format("if (dc.wire().bytes().retainsComments()){\n dc.wire().bytes().comment(\"%s\");\n}\n", dm.getName()));
     }
 
     private String writeEventNameOrId(final Method dm, final StringBuilder body, final String eventName) {
@@ -413,7 +470,7 @@ public class GenerateMethodWriter {
         if ((wireType != WireType.TEXT && wireType != WireType.YAML) && methodId.isPresent()) {
 
             long value = ((MethodId) methodId.get()).value();
-            body.append(format("final " + VALUE_OUT + " valueOut = dc.wire().writeEventId(%d);\n", value));
+            body.append(format("final " + VALUE_OUT + " valueOut = dc.wire().writeEventId(%s, %d);\n", eventName, value));
             methodID = format("@" + METHOD_ID + "(%d)\n", value);
 
         } else
@@ -455,22 +512,18 @@ public class GenerateMethodWriter {
     private void writeValue(final Method dm, final StringBuilder body, final int startJ, final Parameter p) {
         String className = p.getType().getTypeName().replace('$', '.');
 
-        boolean closeIfBlock = false;
-        if (Marshallable.class.isAssignableFrom(p.getType())) {
-            body.append(format("if (%s.getClass() == %s.class){\n", p.getName(), className))
-                    .append(format("%s.marshallable(%s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", p.getName()))
-                    .append("} else {\n");
-            closeIfBlock = true;
-        }
-        body.append(format("%s.object(%s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", p.getName()));
-
-        if (closeIfBlock)
-            body.append("}\n");
+        body
+                .append(dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut")
+                .append(".object(")
+                .append(className)
+                .append(".class, ")
+                .append(p.getName())
+                .append(");\n");
     }
 
     private void addFieldComments(final Method dm, final StringBuilder body) {
-        body.append(String.format("if (dc.wire().bytes().retainsComments()){\n " + GENERATE_METHOD_WRITER
-                + ".addComment(dc.wire().bytes(), %s);\n}\n", dm.getParameters()[0].getName()));
+//        body.append(String.format("if (dc.wire().bytes().retainsComments()){\n " + GENERATE_METHOD_WRITER
+//                + ".addComment(dc.wire().bytes(), %s);\n}\n", dm.getParameters()[0].getName()));
     }
 
     private void createMethodWriterListener(final Method dm, final StringBuilder body) {
@@ -500,17 +553,7 @@ public class GenerateMethodWriter {
         }
     }
 
-    private StringBuilder recordHistory() {
-        final StringBuilder result = new StringBuilder();
-        result.append("// record history\n");
-        result.append("if (out.recordHistory()){\n")
-                .append("dc.wire().writeEventName(")
-                .append(METHOD_READER)
-                .append(".HISTORY).marshallable(MessageHistory.get());\n}\n");
-        return result;
-    }
-
-    private StringBuilder methodReturn(final Method dm, final Class<?> interfaceClazz) {
+    private StringBuilder methodReturn(Set<String> importSet, final Method dm, final Class<?> interfaceClazz) {
         final StringBuilder result = new StringBuilder();
         if (dm.getReturnType() == Void.class || dm.getReturnType() == void.class)
             return result;
@@ -520,11 +563,8 @@ public class GenerateMethodWriter {
         } else if (dm.getReturnType().isInterface()) {
             String index = methodWritersMap.computeIfAbsent(dm.getReturnType(), k -> "methodWriter" + k.getSimpleName() + "TL");
             result.append("// method return\n");
-            String aClass = nameForClass(dm.getReturnType());
+            String aClass = nameForClass(importSet, dm.getReturnType());
             result.append(format("%s result = (%s)%s.get();\n", aClass, aClass, index));
-            result.append(format("if ( result == null) {\n" +
-                    "result = out.methodWriter(%s.class);\n %s.set(result);\n }\n", aClass, index));
-
             result.append(format("return ((%s)result).documentContext(documentContextTL);\n", SHARED_DOCUMENT_CONTEXT));
         } else if (!dm.getReturnType().isPrimitive()) {
             result.append("return null;\n");
