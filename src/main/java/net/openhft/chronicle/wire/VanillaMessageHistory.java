@@ -180,8 +180,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
-        BytesOut bytes = wire.bytes();
-        bytes.comment("sources");
         wire.write("sources")
                 .sequence(this, (t, out) -> {
                     Bytes<?> b = out.wireOut().bytes();
@@ -191,7 +189,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
                         out.int64_0x(t.sourceIndexArray[i]);
                     }
                 });
-        bytes.comment("timings");
         wire.write("timings").sequence(this, (t, out) -> {
             Bytes<?> b = out.wireOut().bytes();
             for (int i = 0; i < t.timings; i++) {
