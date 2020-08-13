@@ -19,4 +19,6 @@ package net.openhft.chronicle.wire;
 
 public interface WriteDocumentContext extends DocumentContext {
     void start(boolean metaData);
+
+    boolean isOpen();
 }

@@ -216,10 +216,8 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     }
 
     private Class newClass(final String fullClassName) {
-        final LinkedHashSet<Class> setOfInterfaces = new LinkedHashSet<>(interfaces);
-        setOfInterfaces.add(SharedDocumentContext.class);
         return GenerateMethodWriter.newClass(fullClassName,
-                setOfInterfaces,
+                interfaces,
                 classLoader,
                 wireType,
                 genericEvent,

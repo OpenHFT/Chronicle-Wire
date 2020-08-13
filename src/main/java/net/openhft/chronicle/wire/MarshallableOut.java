@@ -29,7 +29,6 @@ import java.util.stream.Stream;
 /**
  * Anything you can write Marshallable objects to.
  */
-@FunctionalInterface
 public interface MarshallableOut {
     /**
      * Start a document which is completed when DocumentContext.close() is called. You can use a
@@ -56,7 +55,15 @@ public interface MarshallableOut {
         return writingDocument(false);
     }
 
+    /**
+     * Start a new DocumentContext, must always call close() when done.
+     */
     DocumentContext writingDocument(boolean metaData) throws UnrecoverableTimeoutException;
+
+    /**
+     * Start or reuse an existing a DocumentContext, optionally call close() when done.
+     */
+    DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
     /**
      * @return true if this output is configured to expect the history of the message to be written

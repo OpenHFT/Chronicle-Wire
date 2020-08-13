@@ -25,16 +25,12 @@ import static net.openhft.compiler.CompilerUtils.CACHED_COMPILER;
 public class GenerateMethodWriter {
 
     static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
-    private static final String SHARED_DOCUMENT_CONTEXT = SharedDocumentContext.class.getSimpleName();
-    private static final String DOCUMENT_CONTEXT_HOLDER = DocumentContextHolder.class.getSimpleName();
-    private static final String GENERATE_METHOD_WRITER = GenerateMethodWriter.class.getSimpleName();
     private static final String DOCUMENT_CONTEXT = DocumentContext.class.getSimpleName();
     private static final String MARSHALLABLE_OUT = MarshallableOut.class.getSimpleName();
     private static final String METHOD_ID = MethodId.class.getSimpleName();
     private static final String VALUE_OUT = ValueOut.class.getSimpleName();
     private static final String CLOSEABLE = Closeable.class.getSimpleName();
     private static final String MARSHALLABLE = Marshallable.class.getSimpleName();
-    private static final String METHOD_READER = MethodReader.class.getSimpleName();
     private static final String UPDATE_INTERCEPTOR = "updateInterceptor";
 
     private final boolean metaData;
@@ -236,7 +232,6 @@ public class GenerateMethodWriter {
             importSet.add(MethodId.class.getName());
             importSet.add(GenerateMethodWriter.class.getName());
             importSet.add(DocumentContext.class.getName());
-            importSet.add(SharedDocumentContext.class.getName());
             importSet.add(MethodWriterInvocationHandlerSupplier.class.getName());
             importSet.add(Jvm.class.getName());
             importSet.add(Closeable.class.getName());
@@ -290,21 +285,13 @@ public class GenerateMethodWriter {
                     if (dm.isDefault() || Modifier.isStatic(dm.getModifiers()))
                         continue;
 
-                    if (dm.getName().equals("documentContext")
-                            && dm.getParameterTypes().length == 1
-                            && dm.getParameterTypes()[0] == ThreadLocal.class
-                            && SharedDocumentContext.class.isAssignableFrom(dm.getReturnType()))
-                        continue;
-
                     interfaceMethods.append(createMethod(importSet, dm, interfaceClazz));
                 }
-
             }
 
             imports.setLength(imports.length() - 1);
             imports.append("{\n\n");
             imports.append(constructorAndFields(className));
-            imports.append(methodDocumentContext());
             imports.append(interfaceMethods);
             imports.append("\n}\n");
 
@@ -334,10 +321,6 @@ public class GenerateMethodWriter {
 
         result.append("private transient final ")
                 .append(MARSHALLABLE_OUT).append(" out;\n");
-        result.append("private transient ThreadLocal<")
-                .append(DOCUMENT_CONTEXT_HOLDER)
-                .append("> documentContextTL = ThreadLocal.withInitial(")
-                .append(DOCUMENT_CONTEXT).append("Holder::new);\n");
         for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
             result.append(format("private transient ThreadLocal %s;\n", e.getValue()));
         }
@@ -359,16 +342,6 @@ public class GenerateMethodWriter {
         return result;
     }
 
-    private CharSequence methodDocumentContext() {
-        return ("// method documentContext\n" +
-                "@Override\n" +
-                "public <T extends " + SHARED_DOCUMENT_CONTEXT + "> T documentContext(final ThreadLocal<"
-                + DOCUMENT_CONTEXT_HOLDER + "> documentContextTL) {\n" +
-                "this.documentContextTL = documentContextTL; \n" +
-                "return (T)this;\n" +
-                "}\n");
-    }
-
     private CharSequence createMethod(SortedSet<String> importSet, final Method dm, final Class<?> interfaceClazz) throws IOException {
 
         if (Modifier.isStatic(dm.getModifiers()))
@@ -378,9 +351,6 @@ public class GenerateMethodWriter {
             return "";
 
         int parameterCount = dm.getParameterCount();
-        if ("writingDocument".contentEquals(dm.getName()) && dm.getReturnType() == DocumentContext.class && parameterCount == 0)
-            return createMethodWritingDocument();
-
         Parameter[] parameters = dm.getParameters();
         final int len = parameters.length;
         Class<?> returnType = dm.getReturnType();
@@ -403,10 +373,9 @@ public class GenerateMethodWriter {
             boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
             if (terminating)
                 body.append("try (");
-            body.append("final " + DOCUMENT_CONTEXT + " dc = " + GENERATE_METHOD_WRITER + ".acquire"
-                    + DOCUMENT_CONTEXT + "(")
+            body.append("final " + DOCUMENT_CONTEXT + " dc = this.out.acquireWritingDocument(")
                     .append(metaData)
-                    .append(",this.documentContextTL,this.out)");
+                    .append(")");
             if (terminating)
                 body.append(") {\n");
             else
@@ -452,12 +421,6 @@ public class GenerateMethodWriter {
                 methodSignature(importSet, dm, len),
                 body,
                 methodReturn(importSet, dm, interfaceClazz));
-    }
-
-    @NotNull
-    private CharSequence createMethodWritingDocument() {
-        return "public " + DOCUMENT_CONTEXT + " writingDocument(){\n return " + GENERATE_METHOD_WRITER
-                + ".acquire" + DOCUMENT_CONTEXT + "(false,this.documentContextTL,this.out);\n}\n";
     }
 
     private void retainsComments(final Method dm, final StringBuilder body) {
@@ -560,12 +523,13 @@ public class GenerateMethodWriter {
 
         if (dm.getReturnType().isAssignableFrom(interfaceClazz) || dm.getReturnType() == interfaceClazz) {
             result.append("return this;\n");
+
         } else if (dm.getReturnType().isInterface()) {
             String index = methodWritersMap.computeIfAbsent(dm.getReturnType(), k -> "methodWriter" + k.getSimpleName() + "TL");
             result.append("// method return\n");
             String aClass = nameForClass(importSet, dm.getReturnType());
-            result.append(format("%s result = (%s)%s.get();\n", aClass, aClass, index));
-            result.append(format("return ((%s)result).documentContext(documentContextTL);\n", SHARED_DOCUMENT_CONTEXT));
+            result.append(format("return (%s)%s.get();\n", aClass, aClass, index));
+
         } else if (!dm.getReturnType().isPrimitive()) {
             result.append("return null;\n");
         } else if (dm.getReturnType() == boolean.class) {

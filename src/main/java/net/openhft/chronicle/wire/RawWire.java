@@ -83,6 +83,13 @@ public class RawWire extends AbstractWire implements Wire {
         return writeContext;
     }
 
+    @Override
+    public DocumentContext acquireWritingDocument(boolean metaData) {
+        if (writeContext.isOpen())
+            return writeContext;
+        return writingDocument(metaData);
+    }
+
     @NotNull
     @Override
     public DocumentContext readingDocument() {

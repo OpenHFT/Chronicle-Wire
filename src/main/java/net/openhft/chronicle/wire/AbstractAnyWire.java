@@ -190,6 +190,11 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
     }
 
     @Override
+    public DocumentContext acquireWritingDocument(boolean metaData) {
+        return wireAcquisition.acquireWire().acquireWritingDocument(metaData);
+    }
+
+    @Override
     public String readingPeekYaml() {
         return wireAcquisition.acquireWire().readingPeekYaml();
     }

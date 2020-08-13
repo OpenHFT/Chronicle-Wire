@@ -243,6 +243,13 @@ public class YamlWire extends AbstractWire implements Wire {
         return writeContext;
     }
 
+    @Override
+    public DocumentContext acquireWritingDocument(boolean metaData) {
+        if (writeContext != null && writeContext.isOpen())
+            return writeContext;
+        return writingDocument(metaData);
+    }
+
     @NotNull
     @Override
     public DocumentContext readingDocument() {

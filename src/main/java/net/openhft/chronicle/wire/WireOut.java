@@ -152,6 +152,8 @@ public interface WireOut extends WireCommon, MarshallableOut {
         return writingDocument(false);
     }
 
+    DocumentContext acquireWritingDocument(boolean metaData);
+
     /**
      * This will increment the headerNumber as appropriate if successful
      * <p>

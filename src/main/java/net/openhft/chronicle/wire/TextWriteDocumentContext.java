@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 public class TextWriteDocumentContext implements WriteDocumentContext {
     protected Wire wire;
     private boolean metaData;
+    private boolean open;
 
     public TextWriteDocumentContext(Wire wire) {
         this.wire = wire;
@@ -32,6 +33,12 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         this.metaData = metaData;
         if (metaData)
             wire().writeComment("meta-data");
+        open = true;
+    }
+
+    @Override
+    public boolean isOpen() {
+        return open;
     }
 
     @Override
@@ -55,6 +62,7 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         if (TextMethodWriterInvocationHandler.ENABLE_EOD)
             bytes.append("---\n");
         wire().getValueOut().resetBetweenDocuments();
+        open = false;
     }
 
     @Override

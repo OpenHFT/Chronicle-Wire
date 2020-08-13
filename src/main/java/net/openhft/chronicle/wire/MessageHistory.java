@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 
 public interface MessageHistory extends Marshallable {
     /**
@@ -38,9 +39,12 @@ public interface MessageHistory extends Marshallable {
         VanillaMessageHistory.setThreadLocal(md);
     }
 
+    @UsedViaReflection
     static void writeHistory(DocumentContext dc) {
-        dc.wire().writeEventName(MethodReader.HISTORY)
-                .marshallable(get());
+        Wire wire = dc.wire();
+        if (wire.bytes().readRemaining() == 0) // only add to the start of a message. i.e. for chained calls.
+            wire.writeEventName(MethodReader.HISTORY)
+                    .marshallable(get());
     }
 
     int timings();
