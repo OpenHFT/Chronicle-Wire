@@ -102,7 +102,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         sourceIdArray[0] = sourceId;
         sourceIndexArray[0] = sourceIndex;
         timings = 1;
-        timingsArray[0] = System.nanoTime();
+        timingsArray[0] = nanoTime();
     }
 
     @Override
@@ -174,8 +174,12 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
                 addSource(dc.sourceId(), dc.index());
             }
 
-            addTiming(System.nanoTime());
+            addTiming(nanoTime());
         }
+    }
+
+    protected long nanoTime() {
+        return System.nanoTime();
     }
 
     @Override
@@ -195,7 +199,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
                 b.comment("timing in nanos");
                 out.int64(t.timingsArray[i]);
             }
-            out.int64(System.nanoTime());
+            out.int64(nanoTime());
         });
     }
 
@@ -229,7 +233,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         for (int i = 0; i < timings; i++) {
             bytes.writeLong(timingsArray[i]);
         }
-        bytes.writeLong(System.nanoTime()); // add time for this output
+        bytes.writeLong(nanoTime()); // add time for this output
         assert checkMarshallableSize(start, (Bytes) bytes);
     }
 

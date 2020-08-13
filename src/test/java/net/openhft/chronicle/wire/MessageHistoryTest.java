@@ -28,7 +28,7 @@ public class MessageHistoryTest extends WireTestCommon {
 
     @Test
     public void checkToString() {
-        VanillaMessageHistory history = new VanillaMessageHistory();
+        VanillaMessageHistory history = new SetTimeMessageHistory();
         history.addSourceDetails(true);
         history.addSource(1, 0xff);
         history.addSource(2, 0xfff);
@@ -42,14 +42,25 @@ public class MessageHistoryTest extends WireTestCommon {
 
         BinaryWire bw = new BinaryWire(new HexDumpBytes());
         bw.writeEventName("history").marshallable(history);
-        assertEquals("b9 07 68 69 73 74 6f 72 79                      # history\n" +
-                "82 3d 00 00 00                                  # VanillaMessageHistory\n" +
+        assertEquals("" +
+                "b9 07 68 69 73 74 6f 72 79                      # history\n" +
+                "82 3d 00 00 00                                  # SetTimeMessageHistory\n" +
                 "c7 73 6f 75 72 63 65 73 82 14 00 00 00          # sources\n" +
                 "01 af ff 00 00 00 00 00 00 00                   # source id & index\n" +
                 "02 af ff 0f 00 00 00 00 00 00                   # source id & index\n" +
                 "c7 74 69 6d 69 6e 67 73 82 0f 00 00 00          # timings\n" +
                 "a5 10 27                                        # timing in nanos\n" +
                 "a5 20 4e                                        # timing in nanos\n" +
-                "a7 78 7d 40 b3 7d 62 00 00                      # 108292017782136\n", bw.bytes().toHexString());
+                "a7 64 0c 2c b5 03 6e 00 00                      # 120962203520100\n", bw.bytes().toHexString());
+        bw.bytes().releaseLast();
+    }
+
+    static class SetTimeMessageHistory extends VanillaMessageHistory {
+        long nanoTime = 120962203520000L;
+
+        @Override
+        protected long nanoTime() {
+            return nanoTime += 100;
+        }
     }
 }
