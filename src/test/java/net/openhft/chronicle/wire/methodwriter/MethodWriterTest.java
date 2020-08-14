@@ -31,14 +31,14 @@ public class MethodWriterTest {
     }
 
     public void check(boolean allowThrough) {
-        Wire w = WireType.BINARY.apply(Bytes.elasticByteBuffer());
+        Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
         // checks that no exceptions are thrown here
         UpdateInterceptor ui = (methodName, t) -> allowThrough;
         FundingListener fundingListener = w.methodWriterBuilder(FundingOut.class).updateInterceptor(ui).build();
         fundingListener.funding(new Funding());
 
         List<String> output = new ArrayList<>();
-        @NotNull Consumer<String> consumer = s -> output.add(s);
+        @NotNull Consumer<String> consumer = output::add;
         FundingListener listener = Mocker.intercepting(FundingListener.class, "", consumer);
         @NotNull MethodReader mr = w.methodReader(listener);
 
