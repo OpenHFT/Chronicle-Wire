@@ -91,7 +91,6 @@ public class GenerateMethodWriter {
         int lastDot = fullClassName.lastIndexOf('.');
         String packageName = "";
         String className = fullClassName;
-        ;
 
         if (lastDot != -1) {
             packageName = fullClassName.substring(0, lastDot);
@@ -384,7 +383,7 @@ public class GenerateMethodWriter {
                 Class<?> type = parameters[parameterCount - 1].getType();
                 if (!type.isPrimitive()) {
                     String name = parameters[parameterCount - 1].getName();
-                    body.append("// updateInterceptor\nthis." + UPDATE_INTERCEPTOR_FIELD + ".update(\"" + dm.getName() + "\", " + name + ");\n");
+                    body.append("// updateInterceptor\nif (! this." + UPDATE_INTERCEPTOR + ".update(\"" + dm.getName() + "\", " + name + ")) return;\n");
                 }
             }
 
