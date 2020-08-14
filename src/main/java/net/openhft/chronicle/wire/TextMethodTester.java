@@ -121,6 +121,7 @@ public class TextMethodTester<T> {
             // TODO it's deprecated so it just needs to work.
             UpdateInterceptor interceptor = (name, o) -> {
                 methodWriterListener.onWrite(name, new Object[]{o});
+                return true;
             };
             methodWriterBuilder.updateInterceptor(interceptor);
         }

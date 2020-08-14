@@ -54,6 +54,7 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
 
         if (methodWriterInterceptorReturns != null) {
             this.proxy.set(proxy);
+            // TODO: ignores retval
             methodWriterInterceptorReturns.intercept(method, args, onMethod);
         } else {
             handleInvoke(method, args);
