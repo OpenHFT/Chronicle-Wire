@@ -8,22 +8,22 @@ import java.util.concurrent.atomic.AtomicInteger;
  * simple java source code formatter, will indent on a "{" and reduce the indent on a "}" all spaces before a "/n" are removed to enforce a consistent
  * format
  */
-public class JavaSouceCodeFormatter implements Appendable, CharSequence {
+public class JavaSourceCodeFormatter implements Appendable, CharSequence {
 
     private static final int INDENT_SPACES = 4;
     private final AtomicInteger indent;
     private final StringBuilder response = new StringBuilder();
     private StringBuilder sb = new StringBuilder();
 
-    public JavaSouceCodeFormatter(AtomicInteger indent) {
+    public JavaSourceCodeFormatter(AtomicInteger indent) {
         this.indent = indent;
     }
 
-    public JavaSouceCodeFormatter() {
+    public JavaSourceCodeFormatter() {
         this.indent = new AtomicInteger(0);
     }
 
-    public JavaSouceCodeFormatter(int i) {
+    public JavaSourceCodeFormatter(int i) {
         this.indent = new AtomicInteger(i);
     }
 
@@ -33,38 +33,45 @@ public class JavaSouceCodeFormatter implements Appendable, CharSequence {
     }
 
     @Override
-    public Appendable append(final CharSequence csq) {
-        return sb.append(replaceNewLine(csq, 0, csq.length() - 1));
+    public JavaSourceCodeFormatter append(final CharSequence csq) {
+        sb.append(replaceNewLine(csq, 0, csq.length() - 1));
+        return this;
     }
 
     private CharSequence replaceNewLine(final CharSequence csq, int start, int end) {
         response.setLength(0);
-        boolean lastChargeWasNewLine = true;
+        boolean lastChargeWasNewLine = false;
         int lastNewlineIndex = 0;
         for (int i = start; i <= end; i++) {
             char c = csq.charAt(i);
 
             response.append(c);
-            if (c == '\n') {
-
-                lastNewlineIndex = response.length();
-                lastChargeWasNewLine = true;
-                padding(response, indent.get());
-            } else if (c == '{') {
-                indent.incrementAndGet();
-            } else if (c == '}') {
-                indent.decrementAndGet();
-                if (lastNewlineIndex >= 0) {
-                    response.setLength(lastNewlineIndex);
+            switch (c) {
+                case '\n':
+                    lastNewlineIndex = response.length();
+                    lastChargeWasNewLine = true;
                     padding(response, indent.get());
-                    response.append("}");
-                }
-
-            } else if (lastChargeWasNewLine && c == ' ') {
-                // ignore whitespace after newline
-                response.setLength(response.length() - 1);
-            } else {
-                lastChargeWasNewLine = false;
+                    break;
+                case '{':
+                    indent.incrementAndGet();
+                    break;
+                case '}':
+                    indent.decrementAndGet();
+                    if (lastNewlineIndex >= 0) {
+                        response.setLength(lastNewlineIndex);
+                        padding(response, indent.get());
+                        response.append("}");
+                    }
+                    break;
+                case ' ':
+                    if (lastChargeWasNewLine) {
+                        // ignore whitespace after newline
+                        response.setLength(response.length() - 1);
+                    }
+                    break;
+                default:
+                    lastChargeWasNewLine = false;
+                    break;
             }
         }
 
@@ -82,13 +89,15 @@ public class JavaSouceCodeFormatter implements Appendable, CharSequence {
     }
 
     @Override
-    public Appendable append(final CharSequence csq, final int start, final int end) {
-        return sb.append(replaceNewLine(csq, start, end), start, end);
+    public JavaSourceCodeFormatter append(final CharSequence csq, final int start, final int end) {
+        sb.append(replaceNewLine(csq, start, end), start, end);
+        return this;
     }
 
     @Override
-    public Appendable append(final char c) {
-        return sb.append(c);
+    public JavaSourceCodeFormatter append(final char c) {
+        sb.append(c);
+        return this;
     }
 
     public int length() {
