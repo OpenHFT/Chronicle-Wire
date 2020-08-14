@@ -27,9 +27,7 @@ public class MethodFilterOnFirstArgTest extends WireTestCommon {
                 MockMethods2.class,
                 "ignore-method/methods-out.yaml")
                 .run();
-        if (test.expected().replaceAll("\\n\\s+", "\n")
-                .equals(test.actual().replaceAll("\\n\\s+", "\n")))
-            assertEquals(test.expected(), test.actual());
+        assertEquals(test.expected(), test.actual());
     }
 }
 

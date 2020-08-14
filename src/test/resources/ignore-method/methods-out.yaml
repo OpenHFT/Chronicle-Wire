@@ -33,14 +33,14 @@ ignoreMethodBasedOnFirstArg: [
 ...
 ---
 method3: [
-{
-  field1: world,
-  field2: 1E6
-},
-{
-  field1: world,
-  field2: 1E6
-}
+  {
+    field1: world,
+    field2: 1E6
+  },
+  {
+    field1: world,
+    field2: 1E6
+  }
 ]
 ...
 ignoreMethodBasedOnFirstArg: [
