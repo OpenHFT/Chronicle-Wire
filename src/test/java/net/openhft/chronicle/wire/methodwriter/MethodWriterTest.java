@@ -38,8 +38,7 @@ public class MethodWriterTest {
         fundingListener.funding(new Funding());
 
         List<String> output = new ArrayList<>();
-        @NotNull Consumer<String> consumer = output::add;
-        FundingListener listener = Mocker.intercepting(FundingListener.class, "", consumer);
+        FundingListener listener = Mocker.intercepting(FundingListener.class, "", output::add);
         @NotNull MethodReader mr = w.methodReader(listener);
 
         if (allowThrough) {
