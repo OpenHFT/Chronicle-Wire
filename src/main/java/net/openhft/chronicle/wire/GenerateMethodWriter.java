@@ -383,7 +383,8 @@ public class GenerateMethodWriter {
                 Class<?> type = parameters[parameterCount - 1].getType();
                 if (!type.isPrimitive()) {
                     String name = parameters[parameterCount - 1].getName();
-                    body.append("// updateInterceptor\nif (! this." + UPDATE_INTERCEPTOR + ".update(\"" + dm.getName() + "\", " + name + ")) return;\n");
+                    body.append("// updateInterceptor\n" +
+                            "if (! this." + UPDATE_INTERCEPTOR_FIELD + ".update(\"" + dm.getName() + "\", " + name + ")) return;\n");
                 }
             }
 
