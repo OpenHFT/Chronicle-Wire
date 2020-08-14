@@ -8,7 +8,7 @@ method3: [
     field2: 1e6
   }
 ]
----
+...
 method3: [
   {
     field1: gidday,

@@ -11,11 +11,11 @@ public class TextMethodTesterTest extends WireTestCommon {
     @Test
     public void run() throws IOException {
         TextMethodTester test = new TextMethodTester<>(
-                "methods-in.yaml",
+                "methods-out.yaml",
                 MockMethodsImpl::new,
                 MockMethods.class,
-                "methods-in.yaml")
-                .setup("methods-in.yaml") // calls made here are not validated in the output.
+                "methods-out.yaml")
+                .setup("methods-out.yaml") // calls made here are not validated in the output.
                 .run();
         assertEquals(test.expected(), test.actual());
     }
@@ -23,11 +23,11 @@ public class TextMethodTesterTest extends WireTestCommon {
     @Test
     public void runTestEmptyOut() throws IOException {
         TextMethodTester test = new TextMethodTester<>(
-                "methods-in.yaml",
+                "methods-out.yaml",
                 NoopMockMethods::new,
                 MockMethods.class,
                 "methods-out-empty.yaml")
-                .setup("methods-in.yaml") // calls made here are not validated in the output.
+                .setup("methods-out.yaml") // calls made here are not validated in the output.
                 .run();
         assertEquals(test.expected(), test.actual());
     }
@@ -36,11 +36,11 @@ public class TextMethodTesterTest extends WireTestCommon {
     @Test
     public void runYaml() throws IOException {
         TextMethodTester test = new YamlMethodTester<>(
-                "methods-in.yaml",
+                "methods-out.yaml",
                 MockMethodsImpl::new,
                 MockMethods.class,
-                "methods-in.yaml")
-                .setup("methods-in.yaml") // calls made here are not validated in the output.
+                "methods-out.yaml")
+                .setup("methods-out.yaml") // calls made here are not validated in the output.
                 .run();
         assertEquals(test.expected(), test.actual());
     }

@@ -94,7 +94,7 @@ public class MethodWriterTest extends WireTestCommon {
                 "  world,\n" +
                 "  bye\n" +
                 "]\n" +
-                "---\n", wire.toString());
+                "...\n", wire.toString());
     }
 
     @Test
@@ -109,7 +109,7 @@ public class MethodWriterTest extends WireTestCommon {
                 "  one,\n" +
                 "  one\n" +
                 "]\n" +
-                "---\n", wire.toString());
+                "...\n", wire.toString());
         assertEquals("" +
                 "14 00 00 00                                     # msg-length\n" +
                 "b9 05 65 76 65 6e 74 82 08 00 00 00             # event\n" +
@@ -134,9 +134,9 @@ public class MethodWriterTest extends WireTestCommon {
         writer.methodOne();
         writer.methodTwo();
         assertEquals("methodOne: \"\"\n" +
-                "---\n" +
+                "...\n" +
                 "methodTwo: \"\"\n" +
-                "---\n", wire.toString());
+                "...\n", wire.toString());
         NoArgs mock = createMock(NoArgs.class);
         mock.methodOne();
         mock.methodTwo();
@@ -160,7 +160,7 @@ public class MethodWriterTest extends WireTestCommon {
         assertEquals("microTS: {\n" +
                 "  timeUS: 2018-07-22T09:28:29.775811\n" +
                 "}\n" +
-                "---\n", wire.toString());
+                "...\n", wire.toString());
         HasMicroTS mock = createMock(HasMicroTS.class);
         MethodReader reader = wire.methodReader(mock);
         mock.microTS(microTS);
@@ -187,7 +187,7 @@ public class MethodWriterTest extends WireTestCommon {
                 "  \"8\",\n" +
                 "  \"9\"\n" +
                 "]\n" +
-                "---\n", wire.toString());
+                "...\n", wire.toString());
         Args mock = createMock(Args.class);
         mock.primitives(true, (byte) 1, (short) 2, 3, 4, '5', 6, 7, "8", "9");
         EasyMock.replay(mock);

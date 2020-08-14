@@ -22,8 +22,8 @@ import net.openhft.chronicle.bytes.BytesStore;
 import org.jetbrains.annotations.Nullable;
 
 public class TextReadDocumentContext implements ReadDocumentContext {
-    @SuppressWarnings("rawtypes")
-    public static final BytesStore MSG_SEP = BytesStore.from("---");
+    public static final BytesStore SOD_SEP = BytesStore.from("---");
+    public static final BytesStore EOD_SEP = BytesStore.from("...");
     @Nullable
     protected AbstractWire wire;
     protected boolean present, notComplete;
@@ -33,6 +33,26 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
     public TextReadDocumentContext(@Nullable AbstractWire wire) {
         this.wire = wire;
+    }
+
+    public static void consumeToEndOfMessage(Bytes<?> bytes) {
+        while (bytes.readRemaining() > 0) {
+            while (bytes.readRemaining() > 0 && bytes.readUnsignedByte() >= ' ') {
+                // read skips forward.
+            }
+            if (isEndOfMessage(bytes)) {
+                break;
+            }
+        }
+    }
+
+    public static boolean isEndOfMessage(Bytes<?> bytes) {
+        return (bytes.startsWith(SOD_SEP) || bytes.startsWith(EOD_SEP))
+                && isWhiteSpaceAt(bytes);
+    }
+
+    protected static boolean isWhiteSpaceAt(Bytes<?> bytes) {
+        return bytes.peekUnsignedByte(bytes.readPosition() + 3) <= ' ';
     }
 
     @Override
@@ -79,22 +99,6 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         present = false;
     }
 
-    public static void consumeToEndOfMessage(Bytes<?> bytes) {
-        while (bytes.readRemaining() > 0) {
-            while (bytes.readRemaining() > 0 && bytes.readUnsignedByte() >= ' ') {
-                // read skips forward.
-            }
-            if (isEndOfMessage(bytes)) {
-                break;
-            }
-        }
-    }
-
-    public static boolean isEndOfMessage(Bytes<?> bytes) {
-        return bytes.startsWith(MSG_SEP)
-                && bytes.peekUnsignedByte(bytes.readPosition() + 3) <= ' ';
-    }
-
     @Override
     public void start() {
         wire.getValueIn().resetState();
@@ -102,11 +106,11 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
         present = false;
         wire.consumePadding();
-        if (isEndOfMessage(bytes)) {
-            bytes.readSkip(3);
-            wire.getValueIn().resetState();
-            wire.consumePadding();
-        }
+        if (bytes.startsWith(EOD_SEP) && isWhiteSpaceAt(bytes))
+            skipSep(bytes);
+        if (bytes.startsWith(SOD_SEP) && isWhiteSpaceAt(bytes))
+            skipSep(bytes);
+
         if (bytes.readRemaining() < 1) {
             readLimit = readPosition = bytes.readLimit();
             notComplete = false;
@@ -123,6 +127,12 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         bytes.readLimit(bytes.readPosition());
         bytes.readPosition(position);
         present = true;
+    }
+
+    protected void skipSep(Bytes<?> bytes) {
+        bytes.readSkip(3);
+        wire.getValueIn().resetState();
+        wire.consumePadding();
     }
 
     @Override

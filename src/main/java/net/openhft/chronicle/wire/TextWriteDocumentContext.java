@@ -54,8 +54,7 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         long l = bytes.writePosition();
         if (l < 1 || bytes.peekUnsignedByte(l - 1) >= ' ')
             bytes.append('\n');
-        if (TextMethodWriterInvocationHandler.ENABLE_EOD)
-            bytes.append("---\n");
+        bytes.append("...\n");
         wire().getValueOut().resetBetweenDocuments();
         notComplete = false;
     }

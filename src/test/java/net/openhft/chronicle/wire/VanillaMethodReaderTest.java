@@ -76,8 +76,6 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         MethodReader reader = wire.methodReader(writer);
         for (int i = 0; i < 3; i++) {
             assertTrue(reader.readOne());
-            while (wire2.bytes().peekUnsignedByte(wire2.bytes().writePosition() - 1) == ' ')
-                wire2.bytes().writeSkip(-1);
         }
         assertFalse(reader.readOne());
         assertEquals(expected.toString().trim().replace("\r", ""), wire2.toString().trim());
@@ -172,29 +170,29 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         writer.mid(new MRT2("1", "2"));
 
         assertEquals("timed: 1234567890\n" +
-                "---\n" +
+                "...\n" +
                 "top: !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +
                 "  value: x\n" +
                 "}\n" +
-                "---\n" +
+                "...\n" +
                 "top: !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: one,\n" +
                 "  value: x,\n" +
                 "  field2: two\n" +
                 "}\n" +
-                "---\n" +
+                "...\n" +
                 "mid: {\n" +
                 "  field1: \"1\",\n" +
                 "  value: x\n" +
                 "}\n" +
-                "---\n" +
+                "...\n" +
                 "mid: !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: \"1\",\n" +
                 "  value: x,\n" +
                 "  field2: \"2\"\n" +
                 "}\n" +
-                "---\n", wire.toString());
+                "...\n", wire.toString());
     }
 
     @Test
@@ -212,24 +210,24 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "  field1: one,\n" +
                 "  value: a\n" +
                 "}\n" +
-                "---\n" +
+                "...\n" +
                 "top: !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: one,\n" +
                 "  value: a,\n" +
                 "  field2: two\n" +
                 "}\n" +
-                "---\n" +
+                "...\n" +
                 "mid: {\n" +
                 "  field1: \"1\",\n" +
                 "  value: a\n" +
                 "}\n" +
-                "---\n" +
+                "...\n" +
                 "mid: !net.openhft.chronicle.wire.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: \"1\",\n" +
                 "  value: a,\n" +
                 "  field2: \"2\"\n" +
                 "}\n" +
-                "---\n", wire.toString());
+                "...\n", wire.toString());
     }
 
     @Test
@@ -245,7 +243,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "    three: words\n" +
                 "  }\n" +
                 "}\n" +
-                "---\n";
+                "...\n";
         Wire wire = TextWire.from(text)
                 .useTextDocuments();
         MethodReader reader = wire.methodReader(writer2);
@@ -265,13 +263,13 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "  two: 2.2,\n" +
                 "  three: words\n" +
                 "}\n" +
-                "---\n" +
+                "...\n" +
                 "top: {\n" +
                 "  one: 11,\n" +
                 "  two: 22.2,\n" +
                 "  three: many words\n" +
                 "}\n" +
-                "---\n";
+                "...\n";
         Wire wire = TextWire.from(text)
                 .useTextDocuments();
         MethodReader reader = wire.methodReader(writer2);

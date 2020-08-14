@@ -22,11 +22,11 @@ public class ChainedMethodsTest extends WireTestCommon {
         assertEquals("mid: mid\n" +
                 "next: 1\n" +
                 "echo: echo-1\n" +
-                "---\n" +
+                "...\n" +
                 "mid2: mid2\n" +
                 "next2: word\n" +
                 "echo: echo-2\n" +
-                "---\n", wire.toString());
+                "...\n", wire.toString());
 
         StringBuilder sb = new StringBuilder();
         MethodReader reader = wire.methodReader(Mocker.intercepting(ITop.class, "*", sb::append));
@@ -50,11 +50,11 @@ public class ChainedMethodsTest extends WireTestCommon {
         assertEquals("mid: mid\n" +
                 "next: 1\n" +
                 "echo: echo-1\n" +
-                "---\n" +
+                "...\n" +
                 "mid2: mid2\n" +
                 "next2: word\n" +
                 "echo: echo-2\n" +
-                "---\n", wire.toString());
+                "...\n", wire.toString());
 
         StringBuilder sb = new StringBuilder();
         MethodReader reader = wire.methodReader(Mocker.intercepting(ITop.class, "*", sb::append));
