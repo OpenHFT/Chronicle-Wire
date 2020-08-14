@@ -291,7 +291,7 @@ public class GenerateMethodWriter {
 
             imports.setLength(imports.length() - 1);
             imports.append("{\n\n");
-            imports.append(constructorAndFields(className));
+            imports.append(constructorAndFields(importSet, className));
             imports.append(interfaceMethods);
             imports.append("\n}\n");
 
@@ -311,29 +311,33 @@ public class GenerateMethodWriter {
         }
     }
 
-    private CharSequence constructorAndFields(final String className) {
+    private CharSequence constructorAndFields(Set<String> importSet, final String className) {
 
         final StringBuilder result = new StringBuilder("// result\n");
         result.append("private transient final ")
                 .append(CLOSEABLE).append(" closeable;\n");
-        result.append("private transient final MethodWriterListener methodWriterListener;\n");
-        result.append("private transient final " + UpdateInterceptor.class.getSimpleName() + " " + UPDATE_INTERCEPTOR + ";\n");
+        if (hasMethodWriterListener)
+            result.append("private transient final MethodWriterListener methodWriterListener;\n");
+        if (useUpdateInterceptor)
+            result.append("private transient final " + UpdateInterceptor.class.getSimpleName() + " " + UPDATE_INTERCEPTOR + ";\n");
 
         result.append("private transient final ")
                 .append(MARSHALLABLE_OUT).append(" out;\n");
         for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
-            result.append(format("private transient ThreadLocal %s;\n", e.getValue()));
+            result.append(format("private transient ThreadLocal<%s> %s;\n", nameForClass(importSet, e.getKey()), e.getValue()));
         }
-        result.append("\n");
+        result.append('\n');
 
         result.append(format("// constructor\npublic %s(" + MARSHALLABLE_OUT + " out, "
                 + CLOSEABLE + " closeable, MethodWriterListener methodWriterListener, " +
-                UpdateInterceptor.class.getSimpleName() + " " + UPDATE_INTERCEPTOR + ") {\n" +
+                UpdateInterceptor.class.getSimpleName() + " " + UPDATE_INTERCEPTOR + ") {\n", className));
 
-                "this.methodWriterListener = methodWriterListener;\n" +
-                "this." + UPDATE_INTERCEPTOR + "= " + UPDATE_INTERCEPTOR + ";\n" +
-                "this.out = out;\n" +
-                "this.closeable = closeable;\n", className));
+        if (hasMethodWriterListener)
+            result.append("this.methodWriterListener = methodWriterListener;\n");
+        if (useUpdateInterceptor)
+            result.append("this." + UPDATE_INTERCEPTOR + "= " + UPDATE_INTERCEPTOR + ";\n");
+        result.append("this.out = out;\n" +
+                "this.closeable = closeable;\n");
         for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
             result.append(format("%s = ThreadLocal.withInitial(() -> out.methodWriter(%s.class));\n", e.getValue(), nameForClass(e.getKey())));
         }
@@ -528,7 +532,7 @@ public class GenerateMethodWriter {
             String index = methodWritersMap.computeIfAbsent(dm.getReturnType(), k -> "methodWriter" + k.getSimpleName() + "TL");
             result.append("// method return\n");
             String aClass = nameForClass(importSet, dm.getReturnType());
-            result.append(format("return (%s)%s.get();\n", aClass, aClass, index));
+            result.append(format("return methodWriter%sTL.get();\n", aClass, aClass, index));
 
         } else if (!dm.getReturnType().isPrimitive()) {
             result.append("return null;\n");

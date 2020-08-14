@@ -7,24 +7,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-interface ITop {
-    IMid mid(String name);
-
-    IMid2 mid2(String name);
-}
-
-interface IMid {
-    ILast next(long x);
-}
-
-interface IMid2 {
-    ILast next2(String a);
-}
-
-interface ILast {
-    void echo(String text);
-}
-
 public class ChainedMethodsTest extends WireTestCommon {
     @Test
     public void chainedText() {
