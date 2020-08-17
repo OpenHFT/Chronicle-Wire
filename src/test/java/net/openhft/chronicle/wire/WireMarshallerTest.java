@@ -20,6 +20,7 @@ public class WireMarshallerTest extends WireTestCommon {
                 "  ts: 2019-11-17T12:56:42.108971\n" +
                 "}\n";
         WMTwoFields tf = Marshallable.fromString(text);
+        assert tf != null;
         assertEquals(text, tf.toString());
         HexDumpBytes bytes = new HexDumpBytes();
         Wire w = new BinaryWire(bytes);
