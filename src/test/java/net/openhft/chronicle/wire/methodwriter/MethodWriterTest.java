@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static org.junit.Assert.*;
+
 public class MethodWriterTest {
 
     static {
@@ -42,17 +44,18 @@ public class MethodWriterTest {
         @NotNull MethodReader mr = w.methodReader(listener);
 
         if (allowThrough) {
-            Assert.assertTrue(mr.readOne());
-            Assert.assertEquals(1, output.size());
-            Assert.assertEquals("[funding[!net.openhft.chronicle.wire.methodwriter.Funding {\n" +
+            assertTrue(mr.readOne());
+            assertEquals(1, output.size());
+            assertEquals("[funding[!net.openhft.chronicle.wire.methodwriter.Funding {\n" +
                     "  symbol: 0,\n" +
                     "  fr: NaN,\n" +
                     "  mins: 0\n" +
                     "}\n" +
                     "]]", output.toString());
+            assertFalse(mr.readOne());
         } else {
-            Assert.assertFalse(mr.readOne());
-            Assert.assertEquals(0, output.size());
+            assertFalse(mr.readOne());
+            assertEquals(0, output.size());
         }
     }
 }

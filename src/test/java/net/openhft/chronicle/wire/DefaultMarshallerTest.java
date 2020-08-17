@@ -67,7 +67,7 @@ public class DefaultMarshallerTest extends WireTestCommon {
         oc.map.put("key", new DMNestedClass("value", 1));
         oc.map.put("keyz", new DMNestedClass("valuez", 1111));
 
-        assertEquals("!net.openhft.chronicle.wire.DefaultMarshallerTest$DMOuterClass {\n" +
+        assertEquals("!net.openhft.chronicle.wire.DMOuterClass {\n" +
                 "  text: words,\n" +
                 "  b: true,\n" +
                 "  bb: 1,\n" +

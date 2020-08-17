@@ -55,12 +55,12 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
                     lastChargeWasNewLine = true;
                     padding(response, indent.get());
                     break;
-                case '[':
+//                case '[':
                 case '{':
                     indent.incrementAndGet();
                     break;
                 case '}':
-                case ']':
+//                case ']':
                     indent.decrementAndGet();
                     if (lastNewlineIndex >= 0) {
                         response.setLength(lastNewlineIndex);
