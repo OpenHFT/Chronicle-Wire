@@ -4,6 +4,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
+import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -177,7 +178,7 @@ public class GenerateMethodWriter {
     @NotNull
     private Appendable methodSignature(SortedSet<String> importSet, final Method dm, final int len) throws IOException {
 
-        Appendable result = new JavaSourceCodeFormatter(this.indent);
+        SourceCodeFormatter result = new JavaSourceCodeFormatter(this.indent);
         for (int j = 0; j < len; j++) {
             Parameter p = dm.getParameters()[j];
             final String className = nameForClass(importSet, p.getType());
@@ -218,8 +219,8 @@ public class GenerateMethodWriter {
     @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
     private Class createClass() {
 
-        JavaSourceCodeFormatter interfaceMethods = new JavaSourceCodeFormatter(1);
-        JavaSourceCodeFormatter imports = new JavaSourceCodeFormatter();
+        SourceCodeFormatter interfaceMethods = new SourceCodeFormatter(1);
+        SourceCodeFormatter imports = new JavaSourceCodeFormatter();
 
         try {
             imports.append("package " + packageName + ";\n\n");
@@ -314,17 +315,17 @@ public class GenerateMethodWriter {
         }
     }
 
-    private void addMarshallableOut(JavaSourceCodeFormatter imports) {
-        imports.append("@Override\n" +
-                "public void marshallableOut(MarshallableOut out) {\n" +
-                "    this.out = out;\n");
+    private void addMarshallableOut(SourceCodeFormatter imports) {
+        imports.append("   @Override\n" +
+                "   public void marshallableOut(MarshallableOut out){\n" +
+                "        this.out=out;\n");
         for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
             imports.append(format("    this.%s.remove();\n", e.getValue()));
         }
         imports.append("}\n");
     }
 
-    private CharSequence constructorAndFields(Set<String> importSet, final String className, JavaSourceCodeFormatter result) {
+    private CharSequence constructorAndFields(Set<String> importSet, final String className, SourceCodeFormatter result) {
 
         result.append("// result\n" +
                 "private transient final Closeable closeable;\n");
@@ -376,7 +377,9 @@ public class GenerateMethodWriter {
         final StringBuilder body = new StringBuilder();
         String methodIDAnotation = "";
         if (dm.getReturnType() == void.class && "close".equals(dm.getName()) && parameterCount == 0) {
-            body.append("if (this.closeable != null){\n this.closeable.close();\n}\n");
+            body.append("if (this.closeable != null) {\n" +
+                    "    this.closeable.close();\n" +
+                    "}\n");
         } else {
 
             if (parameterCount >= 1 && useUpdateInterceptor) {

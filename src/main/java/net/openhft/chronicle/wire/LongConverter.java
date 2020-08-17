@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+// TODO add a pattern for validation
 public interface LongConverter {
     long parse(CharSequence text);
     void append(StringBuilder text, long value);

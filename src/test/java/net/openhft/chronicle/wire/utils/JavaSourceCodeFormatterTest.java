@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class JavaSourceCodeFormatterTest {
 
     @Test
-    public void testAppend() throws IOException {
-        JavaSourceCodeFormatter codeFormatter = new JavaSourceCodeFormatter(new AtomicInteger());
+    public void testAppend() {
+        SourceCodeFormatter codeFormatter = new JavaSourceCodeFormatter();
         Assert.assertEquals("public Appendable append(final CharSequence csq) {\n" +
                 "    return sb.append(replaceNewLine(csq, 0, csq.length() - 1));\n" +
                 "}", codeFormatter.append("public Appendable append(final CharSequence csq) {\n" +

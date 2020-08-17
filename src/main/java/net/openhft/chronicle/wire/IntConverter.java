@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+// TODO add a pattern for validation
 public interface IntConverter {
     int parse(CharSequence text);
 
