@@ -26,7 +26,8 @@ public class WireMarshallerTest extends WireTestCommon {
         w.write("").object(WMTwoFields.class, tf);
         WMTwoFields tf2 = w.read().object(WMTwoFields.class);
         assertEquals(text, tf2.toString());
-        assertEquals("c0 82 14 00 00 00                               # WMTwoFields\n" +
+        assertEquals("" +
+                "c0 82 14 00 00 00                               # WMTwoFields\n" +
                 "   c2 69 64                                        # id\n" +
                 "   a6 d2 02 96 49                                  # 1234567890\n" +
                 "   c2 74 73                                        # ts\n" +
