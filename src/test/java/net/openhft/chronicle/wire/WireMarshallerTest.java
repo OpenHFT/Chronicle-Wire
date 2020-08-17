@@ -15,6 +15,7 @@ public class WireMarshallerTest extends WireTestCommon {
     @Test
     public void usesBinary() {
         ClassAliasPool.CLASS_ALIASES.addAlias(WMTwoFields.class);
+        // language=YAML
         String text = "!WMTwoFields {\n" +
                 "  id: shelf.script.door,\n" +
                 "  ts: 2019-11-17T12:56:42.108971\n" +
