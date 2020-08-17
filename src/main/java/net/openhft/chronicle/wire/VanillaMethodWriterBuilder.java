@@ -37,9 +37,9 @@ import java.util.function.Supplier;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterBuilder<T> {
 
-    private static final boolean DISABLE_PROXY_GEN = Jvm.getBoolean("disableProxyCodegen", false);
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
     private static final Map<String, Class> classCache = new ConcurrentHashMap<>();
+    private final boolean DISABLE_PROXY_GEN = Jvm.getBoolean("disableProxyCodegen", false);
     private final Set<Class> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
 
     private final String packageName;
