@@ -5,6 +5,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -13,30 +14,23 @@ public class WireMarshallerTest extends WireTestCommon {
 
     @Test
     public void usesBinary() {
-        String text = "!net.openhft.chronicle.wire.WireMarshallerTest$TwoFields {\n" +
+        ClassAliasPool.CLASS_ALIASES.addAlias(WMTwoFields.class);
+        String text = "!WMTwoFields {\n" +
                 "  id: shelf.script.door,\n" +
                 "  ts: 2019-11-17T12:56:42.108971\n" +
                 "}\n";
-        TwoFields tf = Marshallable.fromString(text);
+        WMTwoFields tf = Marshallable.fromString(text);
         assertEquals(text, tf.toString());
         HexDumpBytes bytes = new HexDumpBytes();
         Wire w = new BinaryWire(bytes);
-        w.write("").object(TwoFields.class, tf);
-        TwoFields tf2 = w.read().object(TwoFields.class);
+        w.write("").object(WMTwoFields.class, tf);
+        WMTwoFields tf2 = w.read().object(WMTwoFields.class);
         assertEquals(text, tf2.toString());
-        assertEquals("c0 82 14 00 00 00                               # TwoFields\n" +
+        assertEquals("c0 82 14 00 00 00                               # WMTwoFields\n" +
                 "   c2 69 64                                        # id\n" +
                 "   a6 d2 02 96 49                                  # 1234567890\n" +
                 "   c2 74 73                                        # ts\n" +
                 "   a7 2b 20 d2 5c 8a 97 05 00                      # 1573995402108971\n", bytes.toHexString());
         bytes.releaseLast();
     }
-
-    static class TwoFields extends SelfDescribingMarshallable {
-        @IntConversion(WordsIntConverter.class)
-        int id;
-        @LongConversion(MicroTimestampLongConverter.class)
-        long ts;
-    }
-
 }
