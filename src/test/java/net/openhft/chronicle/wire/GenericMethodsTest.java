@@ -22,7 +22,7 @@ public class GenericMethodsTest {
         Assert.assertEquals("hello: hello world\n" +
                 "hello: hello world 2\n" +
                 "terminator: \"\"\n" +
-                "---\n", wire.toString());
+                "...\n", wire.toString());
     }
 
 }

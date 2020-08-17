@@ -217,6 +217,18 @@ public class TextWire extends AbstractWire implements Wire {
         }
     }
 
+    /**
+     * Loads an Object from a file
+     *
+     * @param filename the file-path containing the object
+     * @param <T>      the type of the object to load
+     * @return an instance of the object created fromt the data in the file
+     * @throws IOException if the file can not be found or read
+     */
+    public static <T> T load(String filename) throws IOException {
+        return (T) TextWire.fromFile(filename).readObject();
+    }
+
     public boolean strict() {
         return strict;
     }
@@ -558,22 +570,30 @@ public class TextWire extends AbstractWire implements Wire {
     public void consumePadding(int commas) {
         for (; ; ) {
             int codePoint = peekCode();
-            if (codePoint == '#') {
-                //noinspection StatementWithEmptyBody
-                while (notNewLine(readCode())) ;
-                this.lineStart = bytes.readPosition();
-            } else if (codePoint == ',') {
-                if (commas-- <= 0)
-                    return;
-                bytes.readSkip(1);
-                if (commas == 0)
-                    return;
-            } else if (Character.isWhitespace(codePoint)) {
-                if (codePoint == '\n' || codePoint == '\r')
+            switch (codePoint) {
+                case '#':
+                    //noinspection StatementWithEmptyBody
+                    while (notNewLine(readCode())) ;
+                    this.lineStart = bytes.readPosition();
+                    break;
+                case ',':
+                    if (commas-- <= 0)
+                        return;
+                    bytes.readSkip(1);
+                    if (commas == 0)
+                        return;
+                    break;
+                case ' ':
+                case '\t':
+                    bytes.readSkip(1);
+                    break;
+                case '\n':
+                case '\r':
                     this.lineStart = bytes.readPosition() + 1;
-                bytes.readSkip(1);
-            } else {
-                break;
+                    bytes.readSkip(1);
+                    break;
+                default:
+                    return;
             }
         }
     }
@@ -2163,8 +2183,7 @@ public class TextWire extends AbstractWire implements Wire {
             }
         }
 
-        @Nullable
-        <ACS extends Appendable & CharSequence> CharSequence textTo0(@NotNull ACS a) {
+        @Nullable <ACS extends Appendable & CharSequence> CharSequence textTo0(@NotNull ACS a) {
             consumePadding();
             int ch = peekCode();
             @Nullable CharSequence ret = a;
@@ -3499,18 +3518,6 @@ public class TextWire extends AbstractWire implements Wire {
         public String toString() {
             return TextWire.this.toString();
         }
-    }
-
-    /**
-     * Loads an Object from a file
-     *
-     * @param filename the file-path containing the object
-     * @param <T>      the type of the object to load
-     * @return an instance of the object created fromt the data in the file
-     * @throws IOException if the file can not be found or read
-     */
-    public static <T> T load(String filename) throws IOException {
-        return (T) TextWire.fromFile(filename).readObject();
     }
 
 }

@@ -29,8 +29,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvocationHandler {
-    // TODO remove this hack for TextMethodTester
-    public static boolean ENABLE_EOD = true;
     @NotNull
     private final Supplier<MarshallableOut> marshallableOutSupplier;
     private final CountingDocumentContext context = new CountingDocumentContext();

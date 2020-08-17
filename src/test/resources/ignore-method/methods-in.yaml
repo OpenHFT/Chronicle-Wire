@@ -2,7 +2,7 @@ method1: {
   field1: hello,
   field2: 1.23
 }
----
+...
 # included
 method2: [ false,
   {
@@ -10,7 +10,7 @@ method2: [ false,
     field2: 1e6
   }
 ]
----
+...
 # IGNORED
 method2: [ true,
   {
@@ -18,7 +18,7 @@ method2: [ true,
     field2: [ corrupt ]
   }
 ]
----
+...
 # included
 method3: [
   {
@@ -30,7 +30,7 @@ method3: [
     field2: 1e6
   }
 ]
----
+...
 # IGNORED
 method3: [
   {
@@ -42,4 +42,4 @@ method3: [
     field2: [ corrupt ]
   }
 ]
----
+...

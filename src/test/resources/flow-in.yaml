@@ -1,7 +1,7 @@
 first: arg
 second: 1
 third: []
----
+...
 first: arg2
 second: 2
 third: [
@@ -9,4 +9,4 @@ third: [
   b,
   c
 ]
----
+...

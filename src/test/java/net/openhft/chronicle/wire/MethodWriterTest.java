@@ -1,11 +1,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.io.Closeable;
 import org.easymock.EasyMock;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.StringWriter;
@@ -18,7 +18,6 @@ import static org.junit.Assert.assertTrue;
 public class MethodWriterTest extends WireTestCommon {
     @Test
     public void testSubclasses() {
-
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256));
         Event writer = wire.methodWriterBuilder(Event.class).genericEvent("event").build();
         writer.event("top", new VanillaMethodReaderTest.MRT1("one"));
@@ -83,24 +82,40 @@ public class MethodWriterTest extends WireTestCommon {
         assertEquals(expected, actual);
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void testDefault() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         HasDefault writer = wire.methodWriter(HasDefault.class);
 
-        // MethodWriter records an invocation on the default method
-        // callsMethod of the _proxy_, not the interface
-        // this should work for replaying events back through a VanillaMethodReader.
-        // Change made in Chronicle-Core https://github.com/OpenHFT/Chronicle-Core/commit/86c532d20a304c990cb2a82ebd84ffb355660fd3
         writer.callsMethod("hello,world,bye");
         assertEquals("method: [\n" +
                 "  hello,\n" +
                 "  world,\n" +
                 "  bye\n" +
                 "]\n" +
-                "---\n", wire.toString());
+                "...\n", wire.toString());
+    }
+
+    @Test
+    public void multiOut() {
+        TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
+        Event event = wire.methodWriter(Event.class);
+        event.event("one", "one");
+        BinaryWire wire2 = new BinaryWire(new HexDumpBytes());
+        ((MethodWriter) event).marshallableOut(wire2);
+        event.event("two", "two");
+        assertEquals("event: [\n" +
+                "  one,\n" +
+                "  one\n" +
+                "]\n" +
+                "...\n", wire.toString());
+        assertEquals("" +
+                "14 00 00 00                                     # msg-length\n" +
+                "b9 05 65 76 65 6e 74 82 08 00 00 00             # event\n" +
+                "e3 74 77 6f                                     # two\n" +
+                "e3 74 77 6f                                     # two\n", wire2.bytes().toHexString());
+        wire2.bytes().releaseLast();
     }
 
     @Test
@@ -119,9 +134,9 @@ public class MethodWriterTest extends WireTestCommon {
         writer.methodOne();
         writer.methodTwo();
         assertEquals("methodOne: \"\"\n" +
-                "---\n" +
+                "...\n" +
                 "methodTwo: \"\"\n" +
-                "---\n", wire.toString());
+                "...\n", wire.toString());
         NoArgs mock = createMock(NoArgs.class);
         mock.methodOne();
         mock.methodTwo();
@@ -145,7 +160,7 @@ public class MethodWriterTest extends WireTestCommon {
         assertEquals("microTS: {\n" +
                 "  timeUS: 2018-07-22T09:28:29.775811\n" +
                 "}\n" +
-                "---\n", wire.toString());
+                "...\n", wire.toString());
         HasMicroTS mock = createMock(HasMicroTS.class);
         MethodReader reader = wire.methodReader(mock);
         mock.microTS(microTS);
@@ -159,7 +174,7 @@ public class MethodWriterTest extends WireTestCommon {
     public void testPrimitives() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
         Args writer = wire.methodWriter(Args.class);
-        writer.primitives(true, (byte)1, (short)2, 3, 4, '5', 6, 7, "8", "9");
+        writer.primitives(true, (byte) 1, (short) 2, 3, 4, '5', 6, 7, "8", "9");
         assertEquals("primitives: [\n" +
                 "  true,\n" +
                 "  1,\n" +
@@ -172,9 +187,9 @@ public class MethodWriterTest extends WireTestCommon {
                 "  \"8\",\n" +
                 "  \"9\"\n" +
                 "]\n" +
-                "---\n", wire.toString());
+                "...\n", wire.toString());
         Args mock = createMock(Args.class);
-        mock.primitives(true, (byte)1, (short)2, 3, 4, '5', 6, 7, "8", "9");
+        mock.primitives(true, (byte) 1, (short) 2, 3, 4, '5', 6, 7, "8", "9");
         EasyMock.replay(mock);
         MethodReader reader = wire.methodReader(mock);
         for (int i = 0; i < 2; i++)
@@ -203,7 +218,7 @@ public class MethodWriterTest extends WireTestCommon {
     }
 
     public interface Args {
-        void primitives(boolean n, byte b, short s, int i, long l, char c,float f, double d, String s1, CharSequence s2);
+        void primitives(boolean n, byte b, short s, int i, long l, char c, float f, double d, String s1, CharSequence s2);
     }
 
     public interface HasMicroTS {

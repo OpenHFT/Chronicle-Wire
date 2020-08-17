@@ -114,13 +114,14 @@ public class TextMethodTester<T> {
 
     @NotNull
     public TextMethodTester run() throws IOException {
-        Wire wire2 = createWire(Bytes.allocateElasticOnHeap());
+        Wire wireOut = createWire(Bytes.allocateElasticOnHeap());
 
-        MethodWriterBuilder<T> methodWriterBuilder = wire2.methodWriterBuilder(outputClass);
+        MethodWriterBuilder<T> methodWriterBuilder = wireOut.methodWriterBuilder(outputClass);
         if (methodWriterListener != null) {
             // TODO it's deprecated so it just needs to work.
             UpdateInterceptor interceptor = (name, o) -> {
                 methodWriterListener.onWrite(name, new Object[]{o});
+                return true;
             };
             methodWriterBuilder.updateInterceptor(interceptor);
         }
@@ -146,9 +147,9 @@ public class TextMethodTester<T> {
                     .warnMissing(true)
                     .build(components);
             while (reader0.readOne()) {
-                wire2.bytes().clear();
+                wireOut.bytes().clear();
             }
-            wire2.bytes().clear();
+            wireOut.bytes().clear();
         }
 
         Wire wire = createWire(BytesUtil.readFile(input));
@@ -161,7 +162,12 @@ public class TextMethodTester<T> {
         }
         String originalExpected = expected;
         MethodReader reader = wire.methodReaderBuilder()
-                .methodReaderInterceptorReturns(methodReaderInterceptorReturns)
+                .methodReaderInterceptorReturns((Method m, Object o, Object[] args, net.openhft.chronicle.bytes.Invocation invocation) -> {
+                    wireOut.bytes().append("---\n");
+                    if (methodReaderInterceptorReturns == null)
+                        return invocation.invoke(m, o, args);
+                    return methodReaderInterceptorReturns.intercept(m, o, args, invocation);
+                })
                 .warnMissing(true)
                 .build(components);
 
@@ -169,7 +175,7 @@ public class TextMethodTester<T> {
             exceptionHandlerSetup.accept(reader, writer);
 
 //        long pos = wire2.bytes().writePosition();
-        TextMethodWriterInvocationHandler.ENABLE_EOD = false;
+//        TextMethodWriterInvocationHandler.ENABLE_EOD = false;
         try {
             long pos = -1;
             while (reader.readOne()) {
@@ -177,19 +183,18 @@ public class TextMethodTester<T> {
                     Jvm.warn().on(getClass(), "Bailing out of malformed message");
                     break;
                 }
-                Bytes<?> bytes2 = wire2.bytes();
+                Bytes<?> bytes2 = wireOut.bytes();
                 if (retainLast == null) {
                     if (bytes2.writePosition() > 0) {
                         int last = bytes2.peekUnsignedByte(bytes2.writePosition() - 1);
                         if (last >= ' ')
                             bytes2.append('\n');
                     }
-                    bytes2.append("---\n");
                 }
                 pos = bytes2.readPosition();
             }
             if (retainLast != null)
-                wire2.bytes().clear();
+                wireOut.bytes().clear();
 
             if (retainLast != null) {
                 CachedInvocationHandler invocationHandler =
@@ -201,17 +206,17 @@ public class TextMethodTester<T> {
                 }
             }
         } finally {
-            TextMethodWriterInvocationHandler.ENABLE_EOD = true;
+//            TextMethodWriterInvocationHandler.ENABLE_EOD = true;
 
         }
 
         if (component instanceof Closeable)
             Closeable.closeQuietly(components);
 
-        actual = wire2.toString().trim();
+        actual = wireOut.toString().trim();
         if (REGRESS_TESTS) {
             Jvm.pause(100);
-            expected = actual = wire2.toString().trim();
+            expected = actual = wireOut.toString().trim();
         } else {
             long start = System.currentTimeMillis();
             while (System.currentTimeMillis() < start + timeoutMS) {
@@ -219,7 +224,7 @@ public class TextMethodTester<T> {
                     Jvm.pause(25);
                 else
                     break;
-                actual = wire2.toString().trim();
+                actual = wireOut.toString().trim();
             }
         }
 

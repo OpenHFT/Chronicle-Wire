@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://json-schema.org/draft-07/schema#",
+  "title": "Core schema meta-schema",
+  "definitions": {
+    "DMOuterClass": {
+      "type": "object",
+      "required": [
+        "b",
+        "bb",
+        "s",
+        "f",
+        "d",
+        "l",
+        "i"
+      ],
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "b": {
+          "type": "boolean"
+        },
+        "bb": {
+          "type": "integer"
+        },
+        "s": {
+          "type": "integer"
+        },
+        "f": {
+          "type": "number"
+        },
+        "d": {
+          "type": "number"
+        },
+        "l": {
+          "type": "integer"
+        },
+        "i": {
+          "type": "integer"
+        },
+        "nested": {
+          "type": "array"
+        },
+        "map": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "properties": {
+    "echo": {
+      "type": "string"
+    },
+    "next2": {
+      "type": "string"
+    },
+    "dto": {
+      "$ref": "#/definitions/DMOuterClass"
+    },
+    "mid2": {
+      "type": "string"
+    },
+    "next": {
+      "type": "integer"
+    },
+    "mid": {
+      "type": "string"
+    }
+  }
+}

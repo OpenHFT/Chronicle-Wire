@@ -23,11 +23,6 @@ import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -72,7 +67,7 @@ public class DefaultMarshallerTest extends WireTestCommon {
         oc.map.put("key", new DMNestedClass("value", 1));
         oc.map.put("keyz", new DMNestedClass("valuez", 1111));
 
-        assertEquals("!net.openhft.chronicle.wire.DefaultMarshallerTest$DMOuterClass {\n" +
+        assertEquals("!net.openhft.chronicle.wire.DMOuterClass {\n" +
                 "  text: words,\n" +
                 "  b: true,\n" +
                 "  bb: 1,\n" +
@@ -106,51 +101,6 @@ public class DefaultMarshallerTest extends WireTestCommon {
         ONE,
         TWO,
         THREE;
-    }
-
-    static class DMOuterClass extends SelfDescribingMarshallable {
-        String text;
-        boolean b;
-        byte bb;
-        short s;
-        float f;
-        double d;
-        long l;
-        int i;
-        @NotNull
-        List<DMNestedClass> nested = new ArrayList<>();
-        @NotNull
-        Map<String, DMNestedClass> map = new LinkedHashMap<>();
-
-        DMOuterClass() {
-
-        }
-
-        public DMOuterClass(String text, boolean b, byte bb, double d, float f, int i, long l, short s) {
-            this.text = text;
-            this.b = b;
-            this.bb = bb;
-            this.d = d;
-            this.f = f;
-            this.i = i;
-            this.l = l;
-            this.s = s;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return super.equals(o);
-        }
-    }
-
-    static class DMNestedClass extends SelfDescribingMarshallable {
-        String str;
-        int num;
-
-        public DMNestedClass(String str, int num) {
-            this.str = str;
-            this.num = num;
-        }
     }
 
     static class DMOuterClassWithEmbeddedArray extends SelfDescribingMarshallable {
