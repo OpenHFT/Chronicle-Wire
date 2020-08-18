@@ -115,7 +115,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         long readPosition = this.readPosition;
 
         AbstractWire wire0 = this.wire;
-        if (present && ensureFullRead && wire0 != null && wire0.hasMore()) {
+        if (present && ensureFullRead && start >= 0 && wire0 != null && wire0.hasMore()) {
             fullReadForDeltaWire(wire0, start);
         }
 
