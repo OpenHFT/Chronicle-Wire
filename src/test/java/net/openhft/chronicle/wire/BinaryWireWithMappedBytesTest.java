@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.bytes.ref.BinaryTwoLongReference;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.values.IntValue;
@@ -34,6 +35,8 @@ import java.io.FileNotFoundException;
 import static org.junit.Assert.assertEquals;
 
 public class BinaryWireWithMappedBytesTest extends WireTestCommon {
+    static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
+
     @SuppressWarnings("rawtypes")
     @Test
     public void testRefAtStart() throws FileNotFoundException {
@@ -63,17 +66,18 @@ public class BinaryWireWithMappedBytesTest extends WireTestCommon {
 
         assertEquals("", bytes.toHexString());
 
-        assertEquals(6, ((Byteable) a).bytesStore().refCount());
+        int expected = RETAIN ? 2 : 1;
+        assertEquals(expected + 4, ((Byteable) a).bytesStore().refCount());
 
         assertEquals("value: 1 value: 2 value: 3 value: 4, value2: 5", a + " " + b + " " + c + " " + d);
 
         // cause the old memory to drop out.
         bytes.compareAndSwapInt(1 << 20, 1, 1);
-        assertEquals(5, ((Byteable) a).bytesStore().refCount());
+        assertEquals(expected + 3, ((Byteable) a).bytesStore().refCount());
         System.out.println(a + " " + b + " " + c);
 
         bytes.compareAndSwapInt(2 << 20, 1, 1);
-        assertEquals(5, ((Byteable) a).bytesStore().refCount());
+        assertEquals(expected + 3, ((Byteable) a).bytesStore().refCount());
         System.out.println(a + " " + b + " " + c);
 
         Closeable.closeQuietly(a, b, c, d);
