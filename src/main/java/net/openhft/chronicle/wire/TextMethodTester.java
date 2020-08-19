@@ -233,17 +233,21 @@ public class TextMethodTester<T> {
             actual = afterRun.apply(actual);
         }
         if (REGRESS_TESTS && !originalExpected.equals(expected)) {
-            System.err.println("The expected output for " + output + " has been updated, check your commits");
+            String output = replaceTargetWithSource(this.output);
             String output2;
             try {
                 output2 = BytesUtil.findFile(output);
             } catch (FileNotFoundException fnfe) {
                 try {
-                    output2 = BytesUtil.findFile(input.replace("in.yaml", "out.yaml"));
+                    output2 = BytesUtil.findFile(replaceTargetWithSource(input
+                            .replace("in.yaml", "out.yaml"))
+
+                    );
                 } catch (FileNotFoundException e) {
                     throw fnfe;
                 }
             }
+            System.err.println("The expected output for " + output2 + " has been updated, check your commits");
 
             try (FileWriter fw = new FileWriter(output2)) {
                 String actual2 = actual.endsWith("\n") ? actual : (actual + "\n");
@@ -253,6 +257,11 @@ public class TextMethodTester<T> {
             }
         }
         return this;
+    }
+
+    private String replaceTargetWithSource(String replace) {
+        return replace.replace("\\target\\test-classes\\", "\\src\\test\\resources\\")
+                .replace("/target/test-classes/", "/src/test/resources/");
     }
 
     protected Wire createWire(Bytes bytes) {
