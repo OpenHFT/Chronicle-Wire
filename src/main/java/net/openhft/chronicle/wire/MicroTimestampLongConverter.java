@@ -49,7 +49,8 @@ public class MicroTimestampLongConverter implements LongConverter {
             try {
                 long number = Long.parseLong(text.toString());
                 if (number < 31e9) {
-                    System.out.println("In input data, replace " + text + " with a real date.");
+                    if (number != 0)
+                        System.out.println("In input data, replace " + text + " with a real date.");
                 } else if (number < 31e12) {
                     System.out.println("In input data, replace " + text + " with " + asString(number * 1000));
                 } else {
@@ -64,6 +65,10 @@ public class MicroTimestampLongConverter implements LongConverter {
 
     @Override
     public void append(StringBuilder text, long value) {
+        if (value <= 0) {
+            text.append(value);
+            return;
+        }
         LocalDateTime ldt = LocalDateTime.ofEpochSecond(
                 value / 1_000_000,
                 (int) (value % 1_000_000 * 1000),
