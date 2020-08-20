@@ -17,9 +17,12 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
+import static java.util.Collections.*;
 import static net.openhft.compiler.CompilerUtils.CACHED_COMPILER;
 
 @SuppressWarnings("StringBufferReplaceableByString")
@@ -34,6 +37,26 @@ public class GenerateMethodWriter {
     private static final String CLOSEABLE = Closeable.class.getSimpleName();
     private static final String MARSHALLABLE = Marshallable.class.getSimpleName();
     private static final String UPDATE_INTERCEPTOR_FIELD = "updateInterceptor";
+    private static final Map<String, Map<List<Class>, String>> TEMPLATE_METHODS = new LinkedHashMap<>();
+
+    static {
+        TEMPLATE_METHODS.put("close",
+                singletonMap(singletonList(void.class),
+                        "if (this.closeable != null) {\n" +
+                                "    this.closeable.close();\n" +
+                                "}\n"));
+        Map<List<Class>, String> wd = new LinkedHashMap<>();
+        wd.put(singletonList(DocumentContext.class),
+                "public " + DOCUMENT_CONTEXT + " writingDocument(){\n" +
+                        "return out.writingDocument();\n" +
+                        "}\n");
+        wd.put(Stream.of(DocumentContext.class, boolean.class).collect(Collectors.toList()),
+                "public " + DOCUMENT_CONTEXT + " writingDocument(boolean metaData){\n" +
+                        "return out.writingDocument(metaData);\n" +
+                        "}\n");
+        TEMPLATE_METHODS.put("writingDocument", wd);
+    }
+
     private final boolean metaData;
     private final boolean useMethodId;
 
@@ -245,7 +268,6 @@ public class GenerateMethodWriter {
             importSet.add(java.util.ArrayList.class.getName());
             importSet.add(java.util.List.class.getName());
             for (Class interfaceClazz : interfaces) {
-
                 importSet.add(nameForClass(interfaceClazz));
 
                 if (!interfaceClazz.isInterface())
@@ -253,6 +275,9 @@ public class GenerateMethodWriter {
 
                 for (Method dm : interfaceClazz.getMethods()) {
                     if (dm.isDefault() || Modifier.isStatic(dm.getModifiers()))
+                        continue;
+                    String template = templateFor(dm);
+                    if (template != null)
                         continue;
                     for (Class pType : dm.getParameterTypes()) {
                         if (pType.isPrimitive() || pType.isArray() || pType.getPackage().getName().equals("java.lang"))
@@ -286,8 +311,12 @@ public class GenerateMethodWriter {
                 for (Method dm : interfaceClazz.getMethods()) {
                     if (dm.isDefault() || Modifier.isStatic(dm.getModifiers()))
                         continue;
-
-                    interfaceMethods.append(createMethod(importSet, dm, interfaceClazz));
+                    String template = templateFor(dm);
+                    if (template == null) {
+                        interfaceMethods.append(createMethod(importSet, dm, interfaceClazz));
+                    } else {
+                        interfaceMethods.append(template);
+                    }
                 }
             }
 
@@ -297,7 +326,6 @@ public class GenerateMethodWriter {
             addMarshallableOut(imports);
             imports.append(interfaceMethods);
             imports.append("\n}\n");
-
 
             if (DUMP_CODE)
                 System.out.println(imports);
@@ -313,6 +341,16 @@ public class GenerateMethodWriter {
         } catch (Throwable e) {
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + imports, e));
         }
+    }
+
+    private String templateFor(Method dm) {
+        Map<List<Class>, String> map = TEMPLATE_METHODS.get(dm.getName());
+        if (map == null)
+            return null;
+        List<Class> sig = new ArrayList<>();
+        sig.add(dm.getReturnType());
+        addAll(sig, dm.getParameterTypes());
+        return map.get(sig);
     }
 
     private void addMarshallableOut(SourceCodeFormatter imports) {
@@ -376,58 +414,50 @@ public class GenerateMethodWriter {
 
         final StringBuilder body = new StringBuilder();
         String methodIDAnotation = "";
-        if (dm.getReturnType() == void.class && "close".equals(dm.getName()) && parameterCount == 0) {
-            body.append("if (this.closeable != null) {\n" +
-                    "    this.closeable.close();\n" +
-                    "}\n");
+        if (parameterCount >= 1 && useUpdateInterceptor) {
+            Class<?> type = parameters[parameterCount - 1].getType();
+            if (!type.isPrimitive()) {
+                String name = parameters[parameterCount - 1].getName();
+                body.append("// updateInterceptor\n" +
+                        "if (! this." + UPDATE_INTERCEPTOR_FIELD + ".update(\"" + dm.getName() + "\", " + name + ")) return;\n");
+            }
+        }
+
+        boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
+        if (terminating)
+            body.append("try (");
+        body.append("final " + DOCUMENT_CONTEXT + " dc = this.out.acquireWritingDocument(")
+                .append(metaData)
+                .append(")");
+        if (terminating)
+            body.append(") {\n");
+        else
+            body.append(";\n");
+        body.append("if (out.recordHistory()) MessageHistory.writeHistory(dc);\n");
+
+        int startJ = 0;
+
+        final String eventName;
+        if (parameterCount > 0 && dm.getName().equals(genericEvent)) {
+            // this is used when we are processing the genericEvent
+            eventName = parameters[0].getName();
+            startJ = 1;
         } else {
+            eventName = '\"' + dm.getName() + '\"';
+        }
 
-            if (parameterCount >= 1 && useUpdateInterceptor) {
-                Class<?> type = parameters[parameterCount - 1].getType();
-                if (!type.isPrimitive()) {
-                    String name = parameters[parameterCount - 1].getName();
-                    body.append("// updateInterceptor\n" +
-                            "if (! this." + UPDATE_INTERCEPTOR_FIELD + ".update(\"" + dm.getName() + "\", " + name + ")) return;\n");
-                }
-            }
+        methodIDAnotation = writeEventNameOrId(dm, body, eventName);
 
-            boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
-            if (terminating)
-                body.append("try (");
-            body.append("final " + DOCUMENT_CONTEXT + " dc = this.out.acquireWritingDocument(")
-                    .append(metaData)
-                    .append(")");
-            if (terminating)
-                body.append(") {\n");
-            else
-                body.append(";\n");
-            body.append("if (out.recordHistory()) MessageHistory.writeHistory(dc);\n");
+        if (hasMethodWriterListener && parameterCount > 0)
+            createMethodWriterListener(dm, body);
+        else if (parameters.length > 0)
+            writeArrayOfParameters(dm, len, body, startJ);
 
-            int startJ = 0;
+        if (dm.getParameterTypes().length == 0)
+            body.append("valueOut.text(\"\");\n");
 
-            final String eventName;
-            if (parameterCount > 0 && dm.getName().equals(genericEvent)) {
-                // this is used when we are processing the genericEvent
-                eventName = parameters[0].getName();
-                startJ = 1;
-            } else {
-                eventName = '\"' + dm.getName() + '\"';
-            }
-
-            methodIDAnotation = writeEventNameOrId(dm, body, eventName);
-
-            if (hasMethodWriterListener && parameterCount > 0)
-                createMethodWriterListener(dm, body);
-            else if (parameters.length > 0)
-                writeArrayOfParameters(dm, len, body, startJ);
-
-            if (dm.getParameterTypes().length == 0)
-                body.append("valueOut.text(\"\");\n");
-
-            if (terminating) {
-                body.append("}\n");
-            }
-
+        if (terminating) {
+            body.append("}\n");
         }
 
         return format("\n%s public %s %s(%s) {\n %s%s}\n",
