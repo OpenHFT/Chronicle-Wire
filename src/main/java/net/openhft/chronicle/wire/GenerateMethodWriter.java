@@ -41,19 +41,30 @@ public class GenerateMethodWriter {
 
     static {
         TEMPLATE_METHODS.put("close",
-                singletonMap(singletonList(void.class),
+                singletonMap(singletonList(void.class), "" +
                         "if (this.closeable != null) {\n" +
-                                "    this.closeable.close();\n" +
-                                "}\n"));
+                        "    this.closeable.close();\n" +
+                        "}\n"));
+        TEMPLATE_METHODS.put("recordHistory",
+                singletonMap(singletonList(boolean.class), "" +
+                        "public boolean recordHistory() {\n" +
+                        "    return out.recordHistory();\n" +
+                        "}\n"));
+        List<Class> dcBoolean = Stream.of(DocumentContext.class, boolean.class).collect(Collectors.toList());
+        TEMPLATE_METHODS.put("acquireWritingDocument",
+                singletonMap(dcBoolean, "" +
+                        "public " + DOCUMENT_CONTEXT + " acquireWritingDocument(boolean metaData){\n" +
+                        "    return out.acquireWritingDocument(metaData);\n" +
+                        "}\n"));
         Map<List<Class>, String> wd = new LinkedHashMap<>();
-        wd.put(singletonList(DocumentContext.class),
+        wd.put(singletonList(DocumentContext.class), "" +
                 "public " + DOCUMENT_CONTEXT + " writingDocument(){\n" +
-                        "return out.writingDocument();\n" +
-                        "}\n");
-        wd.put(Stream.of(DocumentContext.class, boolean.class).collect(Collectors.toList()),
+                "    return out.writingDocument();\n" +
+                "}\n");
+        wd.put(dcBoolean, "" +
                 "public " + DOCUMENT_CONTEXT + " writingDocument(boolean metaData){\n" +
-                        "return out.writingDocument(metaData);\n" +
-                        "}\n");
+                "return out.writingDocument(metaData);\n" +
+                "}\n");
         TEMPLATE_METHODS.put("writingDocument", wd);
     }
 

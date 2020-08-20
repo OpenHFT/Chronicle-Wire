@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 /**
  * Anything you can write Marshallable objects to.
  */
-public interface MarshallableOut {
+public interface MarshallableOut extends DocumentWritten {
     /**
      * Start a document which is completed when DocumentContext.close() is called. You can use a
      * <pre>

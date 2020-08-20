@@ -17,9 +17,10 @@
  */
 package net.openhft.chronicle.wire;
 
-public interface MethodWriterWithContext {
+public interface MethodWriterWithContext extends DocumentWritten, MethodWriter {
     /**
-     * @return a context to use in a try-with-resource block
+     * @return true if this output is configured to expect the history of the message to be written
+     * to.
      */
-    DocumentContext writingDocument();
+    boolean recordHistory();
 }
