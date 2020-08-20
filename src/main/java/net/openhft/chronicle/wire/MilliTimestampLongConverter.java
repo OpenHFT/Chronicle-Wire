@@ -17,6 +17,8 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.time.LongTime;
+
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -34,6 +36,8 @@ public class MilliTimestampLongConverter implements LongConverter {
 
     @Override
     public long parse(CharSequence text) {
+        if (text == null || text.length() == 0)
+            return 0;
         try {
             TemporalAccessor parse = dtf.parse(text);
             long time = parse.getLong(ChronoField.EPOCH_DAY) * 86400_000L;
@@ -45,12 +49,12 @@ public class MilliTimestampLongConverter implements LongConverter {
             return time;
         } catch (DateTimeParseException dtpe) {
             try {
-                long number = Long.parseLong(text.toString());
-                if (number < 31e9) {
+                long number = LongTime.toMillis(Long.parseLong(text.toString()));
+                if (LongTime.isMillis(number)) {
+                    System.out.println("In input data, replace " + text + " with " + asString(number));
+                } else {
                     if (number != 0)
                         System.out.println("In input data, replace " + text + " with a real date.");
-                } else {
-                    System.out.println("In input data, replace " + text + " with " + asString(number));
                 }
                 return number;
             } catch (NumberFormatException e) {
