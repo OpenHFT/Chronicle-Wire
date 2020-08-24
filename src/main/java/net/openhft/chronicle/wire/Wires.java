@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
 import net.openhft.chronicle.core.ClassLocal;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -59,6 +60,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum Wires {
     ;
+    public static boolean GENERATE_TUPLES = Jvm.getBoolean("wire.generate.tuples");
     public static final int LENGTH_MASK = -1 >>> 2;
     public static final int NOT_COMPLETE = 0x8000_0000;
     @Deprecated
@@ -539,6 +541,9 @@ public enum Wires {
     }
 
     public static <T> T tupleFor(Class<T> tClass, String typeName) {
+        if (!GENERATE_TUPLES)
+            throw new IllegalArgumentException("Cannot find a class for " + typeName + " are you missing an alias?");
+
         if (tClass == null || tClass == Object.class)
             tClass = (Class<T>) Marshallable.class;
         if (!tClass.isInterface())

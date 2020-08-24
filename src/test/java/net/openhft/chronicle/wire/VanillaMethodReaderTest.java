@@ -6,6 +6,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
+import org.junit.After;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -232,6 +233,8 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void testNestedUnknownClass() {
+        Wires.GENERATE_TUPLES = true;
+
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
@@ -254,6 +257,8 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void testUnknownClass() {
+        Wires.GENERATE_TUPLES = true;
+
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
@@ -277,6 +282,11 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
         assertEquals(text, wire2.toString());
+    }
+
+    @After
+    public void resetGenerateTuples() {
+        Wires.GENERATE_TUPLES = false;
     }
 
     @Test(expected = IllegalStateException.class)

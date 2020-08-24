@@ -2971,7 +2971,7 @@ public class TextWire extends AbstractWire implements Wire {
                 } catch (NoClassDefFoundError e) {
                     throw new IORuntimeException("Unable to load class " + e, e);
                 } catch (ClassNotFoundException e) {
-                    if (tClass == null)
+                    if (tClass == null && Wires.GENERATE_TUPLES)
                         return Wires.tupleFor(null, sb.toString());
 
                     final String className = tClass.getName();
@@ -2996,7 +2996,7 @@ public class TextWire extends AbstractWire implements Wire {
                     }
                 }
             }
-            return Wires.dtoInterface(tClass) ? Wires.tupleFor(tClass, null) : null;
+            return Wires.dtoInterface(tClass) && Wires.GENERATE_TUPLES ? Wires.tupleFor(tClass, null) : null;
         }
 
         @Override

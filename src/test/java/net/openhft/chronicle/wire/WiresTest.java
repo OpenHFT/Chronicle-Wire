@@ -92,6 +92,8 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     public void unknownType() throws NoSuchFieldException {
+        Wires.GENERATE_TUPLES = true;
+
         Marshallable marshallable = Wires.tupleFor(Marshallable.class, "UnknownType");
         marshallable.setField("one", 1);
         marshallable.setField("two", 2.2);
@@ -108,6 +110,8 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     public void unknownType2() {
+        Wires.GENERATE_TUPLES = true;
+
         String text = "!FourValues {\n" +
                 "  string: Hello,\n" +
                 "  num: 123,\n" +

@@ -70,6 +70,7 @@ public class UnknownEnumTest extends WireTestCommon {
 
     @Test
     public void shouldGenerateFriendlyErrorMessageWhenTypeIsNotKnownInTextWire() {
+        Wires.GENERATE_TUPLES = true;
         try {
             final TextWire textWire = TextWire.from("enumField: !UnknownEnum QUX");
             textWire.valueIn.wireIn().read("enumField").object();
@@ -79,6 +80,8 @@ public class UnknownEnumTest extends WireTestCommon {
             String message = e.getMessage().replaceAll("Proxy\\d+", "ProxyXX");
             assertThat(message,
                     is(equalTo("Trying to read marshallable class com.sun.proxy.$ProxyXX at [pos: 27, rlim: 27, wlim: 27, cap: 27 ] enumField: !UnknownEnum QUXǁ‡ expected to find a {")));
+        } finally {
+            Wires.GENERATE_TUPLES = false;
         }
     }
 

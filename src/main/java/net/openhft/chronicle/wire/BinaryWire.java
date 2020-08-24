@@ -49,6 +49,7 @@ import java.util.function.*;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.BinaryWire.AnyCodeMatch.ANY_CODE_MATCH;
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
+import static net.openhft.chronicle.wire.Wires.GENERATE_TUPLES;
 
 /**
  * This Wire is a binary translation of TextWire which is a sub set of YAML.
@@ -3241,7 +3242,12 @@ public class BinaryWire extends AbstractWire implements Wire {
             try {
                 return sb == null ? null : classLookup().forName(sb);
             } catch (ClassNotFoundException e) {
-                return Wires.dtoInterface(tClass) ? Wires.tupleFor(tClass, sb.toString()) : null;
+                if (Wires.dtoInterface(tClass)) {
+                    if (GENERATE_TUPLES)
+                        return Wires.tupleFor(tClass, sb.toString());
+                    Jvm.warn().on(getClass(), "Unknown class, perhaps you need to define an alias", e);
+                }
+                return null;
             }
         }
 
