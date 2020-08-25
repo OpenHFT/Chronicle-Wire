@@ -11,10 +11,13 @@ public interface Event<E extends Event<E>> extends Marshallable {
 
     /**
      * A system-assigned unique identifier for this event.
+     *
      * @param eventId unique id
      * @return this
      */
-    E eventId(CharSequence eventId);
+    default E eventId(CharSequence eventId) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * @return The time at which the event which triggered this was generated
@@ -22,14 +25,20 @@ public interface Event<E extends Event<E>> extends Marshallable {
      */
     long eventTime();
 
-    E eventTime(long eventTime);
+    default E eventTime(long eventTime) {
+        throw new UnsupportedOperationException();
+    }
 
-    E eventTimeNow();
+    default E eventTimeNow() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Uodate event with new event name, updating event time to now if required
+     *
      * @param eventName name
      */
     default void updateEvent(String eventName) {
+        throw new UnsupportedOperationException();
     }
 }
