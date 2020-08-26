@@ -7,7 +7,6 @@ import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -24,20 +23,40 @@ public class MethodWriterTest {
 
     @Test
     public void allowThrough() {
-        check(true);
+        check(true, ARGUMENT.DTO);
+    }
+
+    @Test
+    public void allowThroughPrimitive() {
+        check(true, ARGUMENT.PRIMITIVE);
+    }
+
+    @Test
+    public void allowThroughNoArg() {
+        check(true, ARGUMENT.NONE);
     }
 
     @Test
     public void block() {
-        check(false);
+        check(false, ARGUMENT.DTO);
     }
 
-    public void check(boolean allowThrough) {
+    @Test
+    public void blockPrimitive() {
+        check(false, ARGUMENT.PRIMITIVE);
+    }
+
+    @Test
+    public void blockNoArg() {
+        check(false, ARGUMENT.NONE);
+    }
+
+    private void check(boolean allowThrough, ARGUMENT argument) {
         Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
         // checks that no exceptions are thrown here
         UpdateInterceptor ui = (methodName, t) -> allowThrough;
         FundingListener fundingListener = w.methodWriterBuilder(FundingOut.class).updateInterceptor(ui).build();
-        fundingListener.funding(new Funding());
+        argument.accept(fundingListener);
 
         List<String> output = new ArrayList<>();
         FundingListener listener = Mocker.intercepting(FundingListener.class, "", output::add);
@@ -46,16 +65,54 @@ public class MethodWriterTest {
         if (allowThrough) {
             assertTrue(mr.readOne());
             assertEquals(1, output.size());
-            assertEquals("[funding[!net.openhft.chronicle.wire.methodwriter.Funding {\n" +
-                    "  symbol: 0,\n" +
-                    "  fr: NaN,\n" +
-                    "  mins: 0\n" +
-                    "}\n" +
-                    "]]", output.toString());
+            assertEquals(argument.expected(), output.toString());
             assertFalse(mr.readOne());
         } else {
             assertFalse(mr.readOne());
             assertEquals(0, output.size());
         }
+    }
+
+    enum ARGUMENT implements Consumer<FundingListener> {
+        DTO {
+            @Override
+            public String expected() {
+                return "[funding[!net.openhft.chronicle.wire.methodwriter.Funding {\n" +
+                        "  symbol: 0,\n" +
+                        "  fr: NaN,\n" +
+                        "  mins: 0\n" +
+                        "}\n" +
+                        "]]";
+            }
+
+            @Override
+            public void accept(FundingListener fundingListener) {
+                fundingListener.funding(new Funding());
+            }
+        },
+        PRIMITIVE {
+            @Override
+            public String expected() {
+                return "[fundingPrimitive[42]]";
+            }
+
+            @Override
+            public void accept(FundingListener fundingListener) {
+                fundingListener.fundingPrimitive(42);
+            }
+        },
+        NONE {
+            @Override
+            public String expected() {
+                return "[fundingNoArg[]]";
+            }
+
+            @Override
+            public void accept(FundingListener fundingListener) {
+                fundingListener.fundingNoArg();
+            }
+        };
+
+        public abstract String expected();
     }
 }

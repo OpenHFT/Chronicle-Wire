@@ -22,4 +22,16 @@ public class MethodWriterProxyTest extends MethodWriterTest {
     public void block() {
         super.block();
     }
+
+    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
+    @Test
+    public void blockPrimitive() {
+        super.blockPrimitive();
+    }
+
+    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
+    @Test
+    public void blockNoArg() {
+        super.blockNoArg();
+    }
 }

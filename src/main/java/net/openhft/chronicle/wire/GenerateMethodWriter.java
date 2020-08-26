@@ -425,13 +425,19 @@ public class GenerateMethodWriter {
 
         final StringBuilder body = new StringBuilder();
         String methodIDAnotation = "";
-        if (parameterCount >= 1 && useUpdateInterceptor) {
-            Class<?> type = parameters[parameterCount - 1].getType();
-            if (!type.isPrimitive()) {
-                String name = parameters[parameterCount - 1].getName();
-                body.append("// updateInterceptor\n" +
-                        "if (! this." + UPDATE_INTERCEPTOR_FIELD + ".update(\"" + dm.getName() + "\", " + name + ")) return;\n");
-            }
+        if (useUpdateInterceptor) {
+            if (parameterCount > 1)
+                Jvm.warn().on(getClass(), "Generated code to call updateInterceptor for "+dm+" only using last argument");
+            final String name;
+            if (parameterCount > 0) {
+                Class<?> type = parameters[parameterCount - 1].getType();
+                if (type.isPrimitive())
+                    Jvm.warn().on(getClass(), "Generated code to call updateInterceptor for " + dm + " will box and generate garbage");
+                name = parameters[parameterCount - 1].getName();
+            } else
+                name = "null";
+            body.append("// updateInterceptor\n" +
+                    "if (! this." + UPDATE_INTERCEPTOR_FIELD + ".update(\"" + dm.getName() + "\", " + name + ")) return;\n");
         }
 
         boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
