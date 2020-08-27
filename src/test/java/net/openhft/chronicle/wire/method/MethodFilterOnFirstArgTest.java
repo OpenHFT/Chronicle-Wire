@@ -1,5 +1,8 @@
-package net.openhft.chronicle.wire;
+package net.openhft.chronicle.wire.method;
 
+import net.openhft.chronicle.wire.MethodFilterOnFirstArg;
+import net.openhft.chronicle.wire.TextMethodTester;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -23,7 +26,7 @@ public class MethodFilterOnFirstArgTest extends WireTestCommon {
     public void ignoreMethodBasedOnFirstArg() throws IOException {
         TextMethodTester test = new TextMethodTester<>(
                 "ignore-method/methods-in.yaml",
-                net.openhft.chronicle.wire.MockMethods2Impl::new,
+                MockMethods2Impl::new,
                 MockMethods2.class,
                 "ignore-method/methods-out.yaml")
                 .run();

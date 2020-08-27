@@ -1,4 +1,4 @@
-package net.openhft.chronicle.wire.methodwriter;
+package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 
 import static org.junit.Assert.*;
 
-public class MethodWriterTest {
+public class MethodWriter2Test {
 
     static {
         System.setProperty("dumpCode", "true");

@@ -311,6 +311,7 @@ public class VanillaMethodReader implements MethodReader {
                     if (Jvm.isDebug())
                         logMessage(s, v);
 
+                    //noinspection ConstantConditions
                     argArr[0] = v.object(checkRecycle(argArr[0]), parameterType);
                     Object invoke = invoke(contextSupplier.get(), m, argArr);
                     if (invoke != null)

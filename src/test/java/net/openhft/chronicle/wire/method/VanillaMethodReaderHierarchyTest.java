@@ -1,7 +1,10 @@
-package net.openhft.chronicle.wire;
+package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.wire.TextWire;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 
 import java.util.concurrent.ArrayBlockingQueue;

@@ -1,5 +1,8 @@
-package net.openhft.chronicle.wire;
+package net.openhft.chronicle.wire.method;
 
+import net.openhft.chronicle.wire.TextMethodTester;
+import net.openhft.chronicle.wire.WireTestCommon;
+import net.openhft.chronicle.wire.YamlMethodTester;
 import org.junit.Test;
 
 import java.io.IOException;

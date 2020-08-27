@@ -1,11 +1,11 @@
-package net.openhft.chronicle.wire.methodwriter;
+package net.openhft.chronicle.wire.method;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class MethodWriterProxyTest extends MethodWriterTest {
+public class MethodWriterProxy2Test extends MethodWriter2Test {
 
     @Before
     public void before() {

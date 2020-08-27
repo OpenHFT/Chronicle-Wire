@@ -1,4 +1,4 @@
-package net.openhft.chronicle.wire;
+package net.openhft.chronicle.wire.method;
 
 import org.junit.After;
 import org.junit.Before;

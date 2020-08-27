@@ -15,9 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.openhft.chronicle.wire;
+package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+import net.openhft.chronicle.wire.TextWire;
+import net.openhft.chronicle.wire.WireTestCommon;
+import net.openhft.chronicle.wire.YamlWire;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;

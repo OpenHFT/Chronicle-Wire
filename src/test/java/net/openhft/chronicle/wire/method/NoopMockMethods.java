@@ -1,4 +1,4 @@
-package net.openhft.chronicle.wire;
+package net.openhft.chronicle.wire.method;
 
 import java.util.List;
 

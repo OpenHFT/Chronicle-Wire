@@ -1,4 +1,4 @@
-package net.openhft.chronicle.wire.methodwriter;
+package net.openhft.chronicle.wire.method;
 
 public enum Service  {
 
