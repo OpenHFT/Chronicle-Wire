@@ -49,6 +49,10 @@ public class ServicesTimestampLongConverter implements LongConverter {
         // if it is default use unique time provider instead.
         if (clock == SystemTimeProvider.INSTANCE)
             clock = UniqueMicroTimeProvider.INSTANCE;
+        return currentTime(clock);
+    }
+
+    public static long currentTime(TimeProvider clock) {
         return currentTime.applyAsLong(clock);
     }
 
