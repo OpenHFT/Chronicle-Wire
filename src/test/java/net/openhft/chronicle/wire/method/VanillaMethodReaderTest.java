@@ -122,33 +122,33 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         }
         assertFalse(reader.readOne());
         String expected = "subs timed[1234567890000000]\n" +
-                "subs top[!net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT1 {\n" +
+                "subs top[!net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +
                 "  value: a\n" +
                 "}\n" +
                 "]\n" +
-                "subs method2[one, !net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT1 {\n" +
+                "subs method2[one, !net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +
                 "  value: a\n" +
                 "}\n" +
                 "]\n" +
-                "subs top[!net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT2 {\n" +
+                "subs top[!net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: one,\n" +
                 "  value: a,\n" +
                 "  field2: two\n" +
                 "}\n" +
                 "]\n" +
-                "subs mid[!net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT1 {\n" +
+                "subs mid[!net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: \"1\",\n" +
                 "  value: a\n" +
                 "}\n" +
                 "]\n" +
-                "subs method2[1, !net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT1 {\n" +
+                "subs method2[1, !net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: \"1\",\n" +
                 "  value: a\n" +
                 "}\n" +
                 "]\n" +
-                "subs mid[!net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT2 {\n" +
+                "subs mid[!net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: \"1\",\n" +
                 "  value: a,\n" +
                 "  field2: \"2\"\n" +
@@ -173,12 +173,12 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
         assertEquals("timed: 1234567890\n" +
                 "...\n" +
-                "top: !net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT1 {\n" +
+                "top: !net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +
                 "  value: x\n" +
                 "}\n" +
                 "...\n" +
-                "top: !net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT2 {\n" +
+                "top: !net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: one,\n" +
                 "  value: x,\n" +
                 "  field2: two\n" +
@@ -189,7 +189,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "  value: x\n" +
                 "}\n" +
                 "...\n" +
-                "mid: !net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT2 {\n" +
+                "mid: !net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: \"1\",\n" +
                 "  value: x,\n" +
                 "  field2: \"2\"\n" +
@@ -208,12 +208,12 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         writer.mid(new MRT1("1"));
         writer.mid(new MRT2("1", "2"));
 
-        assertEquals("top: !net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT1 {\n" +
+        assertEquals("top: !net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +
                 "  value: a\n" +
                 "}\n" +
                 "...\n" +
-                "top: !net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT2 {\n" +
+                "top: !net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: one,\n" +
                 "  value: a,\n" +
                 "  field2: two\n" +
@@ -224,7 +224,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "  value: a\n" +
                 "}\n" +
                 "...\n" +
-                "mid: !net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT2 {\n" +
+                "mid: !net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: \"1\",\n" +
                 "  value: a,\n" +
                 "  field2: \"2\"\n" +

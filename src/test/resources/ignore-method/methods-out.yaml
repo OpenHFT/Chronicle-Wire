@@ -25,7 +25,7 @@ ignoreMethodBasedOnFirstArg: [
 ...
 ignoreMethodBasedOnFirstArg: [
   method3,
-  !net.openhft.chronicle.wire.MockDto {
+  !net.openhft.chronicle.wire.method.MockDto {
     field1: world,
     field2: 1E6
   }
@@ -45,7 +45,7 @@ method3: [
 ...
 ignoreMethodBasedOnFirstArg: [
   method3,
-  !net.openhft.chronicle.wire.MockDto {
+  !net.openhft.chronicle.wire.method.MockDto {
     field1: world,
     field2: 0.0
   }

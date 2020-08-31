@@ -77,7 +77,7 @@ public class MethodWriter2Test {
         DTO {
             @Override
             public String expected() {
-                return "[funding[!net.openhft.chronicle.wire.methodwriter.Funding {\n" +
+                return "[funding[!net.openhft.chronicle.wire.method.Funding {\n" +
                         "  symbol: 0,\n" +
                         "  fr: NaN,\n" +
                         "  mins: 0\n" +

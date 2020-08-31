@@ -27,23 +27,23 @@ public class MethodWriterTest extends WireTestCommon {
         writer.event("mid", new VanillaMethodReaderTest.MRT2("1", "2"));
 
         /**
-         * top: !net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT1 {
+         * top: !net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT1 {
          *   field1: one,
          *   value: a
          * }
          * ---
-         * top: !net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT2 {
+         * top: !net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT2 {
          *   field1: one,
          *   value: a,
          *   field2: two
          * }
          * ---
-         * mid: !net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT1 {
+         * mid: !net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT1 {
          *   field1: "1",
          *   value: a
          * }
          * ---
-         * mid: !net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT2 {
+         * mid: !net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT2 {
          *   field1: "1",
          *   value: a,
          *   field2: "2"
@@ -57,23 +57,23 @@ public class MethodWriterTest extends WireTestCommon {
         }
 
         assertFalse(reader.readOne());
-        String expected = "subs top[!net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT1 {\n" +
+        String expected = "subs top[!net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +
                 "  value: a\n" +
                 "}\n" +
                 "]\n" +
-                "subs top[!net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT2 {\n" +
+                "subs top[!net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: one,\n" +
                 "  value: a,\n" +
                 "  field2: two\n" +
                 "}\n" +
                 "]\n" +
-                "subs mid[!net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT1 {\n" +
+                "subs mid[!net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: \"1\",\n" +
                 "  value: a\n" +
                 "}\n" +
                 "]\n" +
-                "subs mid[!net.openhft.chronicle.wire.methodwriter.VanillaMethodReaderTest$MRT2 {\n" +
+                "subs mid[!net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT2 {\n" +
                 "  field1: \"1\",\n" +
                 "  value: a,\n" +
                 "  field2: \"2\"\n" +
