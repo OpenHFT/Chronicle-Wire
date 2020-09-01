@@ -27,9 +27,11 @@ enum TextStopCharTesters implements StopCharTester {
         @NotNull
         BitSet EOW = new BitSet();
         {
-            for (int i = 0; i < 127; i++)
+            for (int i = 0; i < 127; i++) {
                 if (!Character.isJavaIdentifierPart(i))
                     EOW.set(i);
+            }
+
             EOW.clear('['); // not in spec
             EOW.clear(']'); // not in spec
             EOW.clear('-'); // not in spec
@@ -40,7 +42,7 @@ enum TextStopCharTesters implements StopCharTester {
 
         @Override
         public boolean isStopChar(int ch) {
-            return EOW.get(ch);
+            return ch >= EOW.length() || EOW.get(ch);
         }
     },
     END_OF_TEXT {

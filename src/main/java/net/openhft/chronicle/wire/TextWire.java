@@ -52,6 +52,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.core.io.AbstractReferenceCounted.unmonitor;
+import static net.openhft.chronicle.wire.TextStopCharTesters.END_OF_TYPE;
 
 /**
  * YAML Based wire format
@@ -2444,6 +2445,13 @@ public class TextWire extends AbstractWire implements Wire {
                         consumeAny();
                     }
                     break;
+                case '!':
+                    bytes.readSkip(1);
+                    while (!END_OF_TYPE.isStopChar(peekCode()))
+                        bytes.readSkip(1);
+                    consumeAny();
+                    break;
+
                 case '"':
                 case '\'':
                 default:
@@ -2926,7 +2934,7 @@ public class TextWire extends AbstractWire implements Wire {
             } else if (code == '!') {
                 readCode();
 
-                parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
+                parseUntil(sb, END_OF_TYPE);
                 bytes.readSkip(-1);
                 consumePadding();
             }
@@ -2942,7 +2950,7 @@ public class TextWire extends AbstractWire implements Wire {
 
                 @NotNull StringBuilder sb = acquireStringBuilder();
                 sb.setLength(0);
-                parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
+                parseUntil(sb, END_OF_TYPE);
                 bytes.readSkip(-1);
                 try {
                     return classLookup().forName(sb);
@@ -2963,7 +2971,7 @@ public class TextWire extends AbstractWire implements Wire {
 
                 @NotNull StringBuilder sb = acquireStringBuilder();
                 sb.setLength(0);
-                parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
+                parseUntil(sb, END_OF_TYPE);
                 bytes.readSkip(-1);
                 try {
 
@@ -3021,7 +3029,7 @@ public class TextWire extends AbstractWire implements Wire {
                 throw new UnsupportedOperationException(stringForCode(code));
             bytes.readSkip("type ".length());
             @NotNull StringBuilder sb = acquireStringBuilder();
-            parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
+            parseUntil(sb, END_OF_TYPE);
             classNameConsumer.accept(t, sb);
             return TextWire.this;
         }
@@ -3034,7 +3042,7 @@ public class TextWire extends AbstractWire implements Wire {
                 throw new UnsupportedOperationException(stringForCode(code));
             bytes.readSkip("type ".length());
             @NotNull StringBuilder sb = acquireStringBuilder();
-            parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
+            parseUntil(sb, END_OF_TYPE);
             try {
                 return classLookup().forName(sb);
             } catch (ClassNotFoundException e) {
@@ -3322,7 +3330,7 @@ public class TextWire extends AbstractWire implements Wire {
             long peek = bytes.peekUnsignedByte();
             if (peek == '!') {
                 @NotNull StringBuilder sb = acquireStringBuilder();
-                parseUntil(sb, TextStopCharTesters.END_OF_TYPE);
+                parseUntil(sb, END_OF_TYPE);
                 consumePadding();
             }
         }
