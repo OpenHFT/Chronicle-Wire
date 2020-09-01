@@ -4,18 +4,23 @@
 
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.BytesStore;
+import org.jetbrains.annotations.NotNull;
 
 public interface Event<E extends Event<E>> extends Marshallable {
-    BytesStore eventId();
+    /**
+     * @return a unique ID for the source of the message.
+     * It only needs to be useful for tracing the path of events through the system
+     */
+    @NotNull
+    CharSequence eventId();
 
     /**
-     * A system-assigned unique identifier for this event.
+     * A system-assigned unique identifier for this event. It can be empty string.
      *
      * @param eventId unique id
      * @return this
      */
-    default E eventId(CharSequence eventId) {
+    default E eventId(@NotNull CharSequence eventId) {
         throw new UnsupportedOperationException();
     }
 
@@ -30,15 +35,19 @@ public interface Event<E extends Event<E>> extends Marshallable {
     }
 
     default E eventTimeNow() {
-        throw new UnsupportedOperationException();
+        return eventTime(ServicesTimestampLongConverter.currentTime());
     }
 
     /**
-     * Uodate event with new event name, updating event time to now if required
+     * Update event with new event name, updating event time to now if required
      *
      * @param eventName name
      */
     default void updateEvent(String eventName) {
-        throw new UnsupportedOperationException();
+        if (this.eventId().length() == 0)
+            this.eventId(eventName);
+
+        if (this.eventTime() <= 0)
+            this.eventTimeNow();
     }
 }
