@@ -2447,16 +2447,7 @@ public class TextWire extends AbstractWire implements Wire {
                     }
                     break;
                 case '!':
-                    bytes.readSkip(1);
-                    boolean type = bytes.startsWith(TYPE_STR);
-                    if (type)
-                        bytes.readSkip(TYPE_STR.length());
-                    while (!END_OF_TYPE.isStopChar(peekCode()))
-                        bytes.readSkip(1);
-                    if (peekCode() == ';')
-                        bytes.readSkip(1);
-                    if (!type)
-                        consumeAny();
+                    consumeType2();
                     break;
 
                 case '"':
@@ -2474,6 +2465,19 @@ public class TextWire extends AbstractWire implements Wire {
                     }
                     break;
             }
+        }
+
+        private void consumeType2() {
+            bytes.readSkip(1);
+            boolean type = bytes.startsWith(TYPE_STR);
+            if (type)
+                bytes.readSkip(TYPE_STR.length());
+            while (!END_OF_TYPE.isStopChar(peekCode()))
+                bytes.readSkip(1);
+            if (peekCode() == ';')
+                bytes.readSkip(1);
+            if (!type)
+                consumeAny();
         }
 
         private void consumeSeq() {
