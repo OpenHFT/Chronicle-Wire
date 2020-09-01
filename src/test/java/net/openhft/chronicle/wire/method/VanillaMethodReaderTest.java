@@ -8,7 +8,6 @@ import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
 import net.openhft.chronicle.wire.*;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -257,12 +256,11 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         assertEquals(text, wire2.toString());
     }
 
-    @Ignore("temporary disable test for @peter-lawrey")
     @Test
     public void testUnknownClass() {
         Wires.GENERATE_TUPLES = true;
 
-        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap(256))
+        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
                 .useTextDocuments();
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 

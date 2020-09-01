@@ -92,6 +92,7 @@ public enum Wires {
         Class<?> proxyClass = Proxy.getProxyClass(tClass.getClassLoader(), interfaces);
         try {
             Constructor<?> constructor = proxyClass.getConstructor(InvocationHandler.class);
+            constructor.setAccessible(true);
             return typeName -> newInstance(constructor, typeName);
         } catch (Exception e) {
             throw new IllegalStateException(e);
