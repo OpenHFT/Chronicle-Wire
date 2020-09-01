@@ -61,6 +61,7 @@ import static net.openhft.chronicle.wire.TextStopCharTesters.END_OF_TYPE;
 public class TextWire extends AbstractWire implements Wire {
     public static final BytesStore TYPE = BytesStore.from("!type ");
     public static final BytesStore BINARY = BytesStore.from("!!binary");
+    public static final @NotNull Bytes<byte[]> TYPE_STR = Bytes.from("type ");
     static final String SEQ_MAP = "!seqmap";
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
@@ -2447,9 +2448,15 @@ public class TextWire extends AbstractWire implements Wire {
                     break;
                 case '!':
                     bytes.readSkip(1);
+                    boolean type = bytes.startsWith(TYPE_STR);
+                    if (type)
+                        bytes.readSkip(TYPE_STR.length());
                     while (!END_OF_TYPE.isStopChar(peekCode()))
                         bytes.readSkip(1);
-                    consumeAny();
+                    if (peekCode() == ';')
+                        bytes.readSkip(1);
+                    if (!type)
+                        consumeAny();
                     break;
 
                 case '"':
