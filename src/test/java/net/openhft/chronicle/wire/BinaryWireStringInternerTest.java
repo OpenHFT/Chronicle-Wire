@@ -90,7 +90,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
 
         final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-        for (int i = 0; i < (Jvm.isArm() ? 12 : 200); i++) {
+        for (int i = 0; i < (Jvm.isArm() ? 4 : 200); i++) {
             executorService.submit(new BinaryTextReaderWriter(capturedExceptions::add, () -> BinaryWire.binaryOnly(Bytes.allocateElasticOnHeap(4096))));
         }
 
