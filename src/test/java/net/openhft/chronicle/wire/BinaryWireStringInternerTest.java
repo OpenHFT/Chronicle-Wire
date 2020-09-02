@@ -58,7 +58,6 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
         wire.clear();
     }
 
-    @Ignore("todo fix see #137")
     @Test
     public void shouldInternExistingStringsAlright() throws Exception {
         final List<RuntimeException> capturedExceptions = new CopyOnWriteArrayList<>();
@@ -77,12 +76,12 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
             wire.getFixedBinaryValueOut(true).text(testData[dataPointIndex]);
 
             final String inputData = wire.read().text();
-            assertEquals(internedStrings[dataPointIndex], message(i, inputData), inputData);
+            assertEquals(message(i, inputData), internedStrings[dataPointIndex], inputData);
         }
 
         executorService.shutdown();
         assertTrue("jobs did not complete in time", executorService.awaitTermination(15L, TimeUnit.SECONDS));
-        assertEquals(true, capturedExceptions.isEmpty());
+        assertTrue(capturedExceptions.isEmpty());
     }
 
     @Test
@@ -97,7 +96,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
 
         executorService.shutdown();
         assertTrue("jobs did not complete in time", executorService.awaitTermination(5L, TimeUnit.SECONDS));
-        assertEquals(true, capturedExceptions.isEmpty());
+        assertTrue(capturedExceptions.isEmpty());
     }
 
     @Ignore("used to demonstrate errors that can occur when buffers are shared between threads")
@@ -117,7 +116,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
         executorService.shutdown();
         assertTrue("jobs did not complete in time", executorService.awaitTermination(15L, TimeUnit.SECONDS));
         capturedExceptions.stream().filter(e -> e instanceof BufferUnderflowException).forEach(RuntimeException::printStackTrace);
-        assertEquals(true, capturedExceptions.isEmpty());
+        assertTrue(capturedExceptions.isEmpty());
     }
 
     private static final class BinaryTextReaderWriter implements Runnable {
