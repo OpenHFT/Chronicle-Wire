@@ -5,7 +5,7 @@ public enum Service  {
     S1,
     S2;
 
-    String serviceName() {
+    String serviceId() {
         return toString();
     }
 }

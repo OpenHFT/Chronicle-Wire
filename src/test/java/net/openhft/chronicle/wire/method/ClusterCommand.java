@@ -7,19 +7,19 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 public class ClusterCommand extends SelfDescribingMarshallable {
     private long cycle;
     private Service service;
-    private final Bytes serviceName = Bytes.elasticByteBuffer();
+    private final Bytes serviceId = Bytes.elasticByteBuffer();
 
     public ClusterCommand(long cycle, Service service) {
         this.cycle = cycle;
         this.service = service;
-        this.serviceName.clear().append(service.serviceName());
+        this.serviceId.clear().append(service.serviceId());
         //setUniqueTimeStampNow();
     }
 
-    public ClusterCommand(long cycle, CharSequence serviceName) {
+    public ClusterCommand(long cycle, CharSequence serviceId) {
         this.cycle = cycle;
-        this.serviceName.clear().append(serviceName);
-    //    setUniqueTimeStampNow();
+        this.serviceId.clear().append(serviceId);
+        //    setUniqueTimeStampNow();
     }
 
     public ClusterCommand cycle(long cycle) {
@@ -32,13 +32,13 @@ public class ClusterCommand extends SelfDescribingMarshallable {
         this.service = service;
 
         if (service != null)
-            return serviceName(service.serviceName());
+            return serviceId(service.serviceId());
         else
             return this;
     }
 
-    public ClusterCommand serviceName(String serviceName) {
-        this.serviceName.clear().append(serviceName);
+    public ClusterCommand serviceId(String serviceId) {
+        this.serviceId.clear().append(serviceId);
 
         return this;
     }
@@ -51,7 +51,7 @@ public class ClusterCommand extends SelfDescribingMarshallable {
         return service;
     }
 
-    public CharSequence serviceName() {
-        return serviceName;
+    public CharSequence serviceId() {
+        return serviceId;
     }
 }
