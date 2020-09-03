@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,22 +49,22 @@ public class GenerateMethodWriter {
         TEMPLATE_METHODS.put("recordHistory",
                 singletonMap(singletonList(boolean.class), "" +
                         "public boolean recordHistory() {\n" +
-                        "    return out.recordHistory();\n" +
+                        "    return out.get().recordHistory();\n" +
                         "}\n"));
         List<Class> dcBoolean = Stream.of(DocumentContext.class, boolean.class).collect(Collectors.toList());
         TEMPLATE_METHODS.put("acquireWritingDocument",
                 singletonMap(dcBoolean, "" +
                         "public " + DOCUMENT_CONTEXT + " acquireWritingDocument(boolean metaData){\n" +
-                        "    return out.acquireWritingDocument(metaData);\n" +
+                        "    return out.get().acquireWritingDocument(metaData);\n" +
                         "}\n"));
         Map<List<Class>, String> wd = new LinkedHashMap<>();
         wd.put(singletonList(DocumentContext.class), "" +
                 "public " + DOCUMENT_CONTEXT + " writingDocument(){\n" +
-                "    return out.writingDocument();\n" +
+                "    return out.get().writingDocument();\n" +
                 "}\n");
         wd.put(dcBoolean, "" +
                 "public " + DOCUMENT_CONTEXT + " writingDocument(boolean metaData){\n" +
-                "return out.writingDocument(metaData);\n" +
+                "return out.get().writingDocument(metaData);\n" +
                 "}\n");
         TEMPLATE_METHODS.put("writingDocument", wd);
     }
@@ -278,6 +279,7 @@ public class GenerateMethodWriter {
             importSet.add(java.util.stream.IntStream.class.getName());
             importSet.add(java.util.ArrayList.class.getName());
             importSet.add(java.util.List.class.getName());
+            importSet.add(Supplier.class.getName());
             for (Class interfaceClazz : interfaces) {
                 importSet.add(nameForClass(interfaceClazz));
 
@@ -367,7 +369,7 @@ public class GenerateMethodWriter {
     private void addMarshallableOut(SourceCodeFormatter imports) {
         imports.append("   @Override\n" +
                 "   public void marshallableOut(MarshallableOut out){\n" +
-                "        this.out=out;\n");
+                "        this.out = () -> out;\n");
         for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
             imports.append(format("    this.%s.remove();\n", e.getValue()));
         }
@@ -383,15 +385,15 @@ public class GenerateMethodWriter {
         if (useUpdateInterceptor)
             result.append("private transient final " + UPDATE_INTERCEPTOR + " " + UPDATE_INTERCEPTOR_FIELD + ";\n");
 
-        result.append("private transient ")
+        result.append("private transient Supplier<")
                 .append(MARSHALLABLE_OUT)
-                .append(" out;\n");
+                .append("> out;\n");
         for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
             result.append(format("private transient ThreadLocal<%s> %s;\n", nameForClass(importSet, e.getKey()), e.getValue()));
         }
         result.append('\n');
 
-        result.append(format("// constructor\npublic %s(" + MARSHALLABLE_OUT + " out, "
+        result.append(format("// constructor\npublic %s(Supplier<" + MARSHALLABLE_OUT + "> out, "
                 + CLOSEABLE + " closeable, MethodWriterListener methodWriterListener, " +
                 UpdateInterceptor.class.getSimpleName() + " " + UPDATE_INTERCEPTOR_FIELD + ") {\n", className));
 
@@ -402,7 +404,7 @@ public class GenerateMethodWriter {
         result.append("this.out = out;\n" +
                 "this.closeable = closeable;\n");
         for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
-            result.append(format("%s = ThreadLocal.withInitial(() -> out.methodWriter(%s.class));\n", e.getValue(), nameForClass(e.getKey())));
+            result.append(format("%s = ThreadLocal.withInitial(() -> out.get().methodWriter(%s.class));\n", e.getValue(), nameForClass(e.getKey())));
         }
 
         result.append("}\n\n");
@@ -443,14 +445,14 @@ public class GenerateMethodWriter {
         boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
         if (terminating)
             body.append("try (");
-        body.append("final " + DOCUMENT_CONTEXT + " dc = this.out.acquireWritingDocument(")
+        body.append("final " + DOCUMENT_CONTEXT + " dc = this.out.get().acquireWritingDocument(")
                 .append(metaData)
                 .append(")");
         if (terminating)
             body.append(") {\n");
         else
             body.append(";\n");
-        body.append("if (out.recordHistory()) MessageHistory.writeHistory(dc);\n");
+        body.append("if (out.get().recordHistory()) MessageHistory.writeHistory(dc);\n");
 
         int startJ = 0;
 

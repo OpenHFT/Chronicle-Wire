@@ -46,7 +46,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     private ClassLoader classLoader;
     @NotNull
     private final MethodWriterInvocationHandlerSupplier<T> handlerSupplier;
-    private MarshallableOut out;
+    private Supplier<MarshallableOut> outSupplier;
     private Closeable closeable;
     private String genericEvent;
     private MethodWriterListener methodWriterListener;
@@ -232,13 +232,13 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
     private Object newInstance(final Class aClass) {
         try {
-            if (out == null)
+            if (outSupplier == null)
                 throw new NullPointerException("marshallableOut(out) has not been set.");
-            if (out.recordHistory()) {
+            if (outSupplier.get().recordHistory()) {
                 recordHistory(true);
                 handlerSupplier.recordHistory(true);
             }
-            return aClass.getDeclaredConstructors()[0].newInstance(out, closeable, methodWriterListener, updateInterceptor);
+            return aClass.getDeclaredConstructors()[0].newInstance(outSupplier, closeable, methodWriterListener, updateInterceptor);
         } catch (Exception e) {
             throw Jvm.rethrow(e);
         }
@@ -263,7 +263,12 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     }
 
     public MethodWriterBuilder<T> marshallableOut(@NotNull final MarshallableOut out) {
-        this.out = out;
+        this.outSupplier = () -> out;
+        return this;
+    }
+
+    public MethodWriterBuilder<T> marshallableOutSupplier(@NotNull final Supplier<MarshallableOut> out) {
+        this.outSupplier = out;
         return this;
     }
 
