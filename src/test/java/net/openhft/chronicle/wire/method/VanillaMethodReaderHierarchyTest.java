@@ -24,21 +24,27 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
 
     @Test
     public void testInterfaceDescend() {
-        SimpleDescendant simple2 = name -> queue.add(name);
-        checkWriteRead(simple2);
+        SimpleDescendant simple = name -> queue.add(name);
+        checkWriteRead(simple);
     }
 
     @Test
     public void testDescendantClass() {
-        SimpleDescendant simple3 = new SimpleDescendantClass(queue);
-        checkWriteRead(simple3);
+        SimpleDescendant simple = new SimpleDescendantClass(queue);
+        checkWriteRead(simple);
     }
 
     @Test
     public void testDescendantAbstractClass() {
         // this was the problem - https://github.com/OpenHFT/Chronicle-Wire/issues/154
-        SimpleDescendant simple4 = new SimpleDescendantClass2(queue);
-        checkWriteRead(simple4);
+        SimpleDescendant simple = new SimpleDescendantClass2(queue);
+        checkWriteRead(simple);
+    }
+
+    @Test
+    public void testDescendantExtendsSameInterface() {
+        SimpleDescendant simple = new SimpleDescendantClass3(queue);
+        checkWriteRead(simple);
     }
 
     private void checkWriteRead(Simple simple) {
@@ -83,6 +89,12 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
         @Override
         public void hello(String name) {
             queue.add(name);
+        }
+    }
+
+    private static class SimpleDescendantClass3 extends SimpleDescendantClass2 implements Simple {
+        public SimpleDescendantClass3(BlockingQueue<String> queue) {
+            super(queue);
         }
     }
 }
