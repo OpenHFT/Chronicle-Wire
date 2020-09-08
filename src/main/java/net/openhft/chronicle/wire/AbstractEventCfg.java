@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMarshallableCfg implements Event<E> {
@@ -7,6 +8,12 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
     @LongConversion(ServicesTimestampLongConverter.class)
     private long eventTime;
     private String serviceId = "";
+
+
+    @Override
+    public void readMarshallable(WireIn wireIn) throws IORuntimeException {
+        Wires.readMarshallable(this, wireIn, true);
+    }
 
     @NotNull
     @Override

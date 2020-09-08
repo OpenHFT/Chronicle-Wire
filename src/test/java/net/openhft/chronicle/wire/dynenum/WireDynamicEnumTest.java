@@ -215,21 +215,11 @@ public class WireDynamicEnumTest {
     }
 
     static class UnwrapsWDENum extends SelfDescribingMarshallable {
+        @AsMarshallable
         WDENums c;
 
         public UnwrapsWDENum(WDENums c) {
             this.c = c;
-        }
-
-        @Override
-        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
-            c = wire.read("c")
-                    .typedMarshallable();
-        }
-
-        @Override
-        public void writeMarshallable(@NotNull WireOut wire) {
-            wire.write("c").typedMarshallable((WriteMarshallable) c);
         }
     }
 }

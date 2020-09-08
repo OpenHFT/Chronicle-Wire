@@ -25,8 +25,9 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
 
     public WireMarshallerForUnexpectedFields(@NotNull Class<T> tClass, @NotNull FieldAccess[] fields, boolean isLeaf) {
         super(tClass, fields, isLeaf);
-        fieldMap = new CharSequenceObjectMap<>(fields.length * 3 / 2);
+        fieldMap = new CharSequenceObjectMap<>(fields.length * 3);
         for (FieldAccess field : fields) {
+            fieldMap.put(field.key.name().toString(), field);
             fieldMap.put(field.key.name().toString().toLowerCase(), field);
         }
     }

@@ -599,9 +599,11 @@ public class WireMarshaller<T> {
 
     static class ObjectFieldAccess extends FieldAccess {
         private final Class type;
+        private final AsMarshallable asMarshallable;
 
         ObjectFieldAccess(@NotNull Field field, Boolean isLeaf) {
             super(field, isLeaf);
+            asMarshallable = field.getAnnotation(AsMarshallable.class);
             type = field.getType();
         }
 
@@ -612,7 +614,11 @@ public class WireMarshaller<T> {
             if (isLeaf != null)
                 wasLeaf = write.swapLeaf(isLeaf);
             assert o != null;
-            write.object(type, field.get(o));
+            Object v = field.get(o);
+            if (asMarshallable == null || !(v instanceof WriteMarshallable))
+                write.object(type, v);
+            else
+                write.typedMarshallable((WriteMarshallable) v);
             if (wasLeaf != null)
                 write.swapLeaf(wasLeaf);
         }
