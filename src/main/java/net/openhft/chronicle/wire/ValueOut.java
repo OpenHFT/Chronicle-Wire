@@ -49,6 +49,10 @@ public interface ValueOut {
     int SMALL_MESSAGE = 64;
     String ZEROS_64 = "0000000000000000000000000000000000000000000000000000000000000000";
 
+    static <V> boolean isAnEnum(V v) {
+        return (v instanceof Enum) | (v instanceof DynamicEnum);
+    }
+
     /**
      * scalar data types
      */
@@ -499,7 +503,7 @@ public interface ValueOut {
 
     @NotNull
     default <V> WireOut object(@NotNull Class<V> expectedType, V v) {
-        if (v instanceof WriteMarshallable && !(v instanceof Enum))
+        if (v instanceof WriteMarshallable && !isAnEnum(v))
             if (ObjectUtils.matchingClass(expectedType, v.getClass()))
                 marshallable((WriteMarshallable) v);
             else
@@ -604,7 +608,7 @@ public interface ValueOut {
                 return optionalTyped(value.getClass()).text(value.toString());
         }
         if (value instanceof WriteMarshallable) {
-            if (value instanceof Enum) {
+            if (isAnEnum(value)) {
                 Jvm.warn().on(getClass(), "Treating " + value.getClass() + " as enum not WriteMarshallable");
                 return typedScalar(value);
             }
@@ -625,7 +629,7 @@ public interface ValueOut {
         }
         if (value instanceof Throwable)
             return throwable((Throwable) value);
-        if (value instanceof Enum)
+        if (isAnEnum(value))
             return typedScalar(value);
         if (value instanceof BitSet) {
             typePrefix(BitSet.class);
@@ -758,8 +762,12 @@ public interface ValueOut {
             case "java.io.File":
                 return text(value.toString());
         }
-        if (value instanceof Enum)
-            return text(((Enum) value).name());
+        if (isAnEnum(value)) {
+            String name = value instanceof DynamicEnum
+                    ? ((DynamicEnum) value).name()
+                    : ((Enum) value).name();
+            return text(name);
+        }
         if (value instanceof Marshallable)
             return marshallable((Marshallable) value);
         if (Object[].class.isAssignableFrom(value.getClass())) {
@@ -773,7 +781,7 @@ public interface ValueOut {
     default WireOut typedScalar(@NotNull Object value) {
         typePrefix(Wires.typeNameFor(value));
 
-        if (value instanceof Enum)
+        if (isAnEnum(value))
             value = ((Enum) value).name();
         else if (!(value instanceof CharSequence))
             value = value.toString();

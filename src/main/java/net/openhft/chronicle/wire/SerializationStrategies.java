@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.ReadBytesMarshallable;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.pool.EnumCache;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import org.jetbrains.annotations.NotNull;
@@ -146,8 +147,17 @@ public enum SerializationStrategies implements SerializationStrategy {
         @Nullable
         @Override
         public Object readUsing(Object o, @NotNull ValueIn in, BracketType bracketType) {
-            if (bracketType != BracketType.MAP || !(o instanceof ReadMarshallable))
-                return in.text();
+            if (bracketType != BracketType.MAP || !(o instanceof ReadMarshallable)) {
+                String text = in.text();
+                if (o != null) {
+                    EnumCache<?> cache = EnumCache.of(o.getClass());
+                    Object ret = cache.valueOf(text);
+                    if (ret == null)
+                        throw new IORuntimeException("No enum value '"+text+"' defined for "+o.getClass());
+                    return ret;
+                }
+                return text;
+            }
             ((ReadMarshallable) o).readMarshallable(in.wireIn());
             return o;
         }
@@ -169,7 +179,8 @@ public enum SerializationStrategies implements SerializationStrategy {
             try {
                 DynamicEnum o = (DynamicEnum) UnsafeMemory.UNSAFE.allocateInstance(type);
                 o.setField("name", "[unset]");
-                ordinal.set(o, -1);
+                if (o instanceof Enum)
+                    ordinal.set(o, -1);
                 return o;
             } catch (Exception e) {
                 throw new IORuntimeException(e);
