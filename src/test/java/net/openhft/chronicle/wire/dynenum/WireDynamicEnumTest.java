@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import java.io.StringWriter;
 
+import static net.openhft.chronicle.wire.DynamicEnum.updateEnum;
 import static org.junit.Assert.*;
 
 public class WireDynamicEnumTest {
@@ -72,11 +73,11 @@ public class WireDynamicEnumTest {
                 "  }\n" +
                 "}\n" +
                 "...\n" +
-                "push: THREE\n" +
+                "push: FOUR\n" +
                 "...\n" +
                 "holds: {\n" +
                 "  a: TWO,\n" +
-                "  b: THREE\n" +
+                "  b: FOUR\n" +
                 "}\n" +
                 "...\n";
         TextWire tw = new TextWire(Bytes.from(text)).useTextDocuments();
@@ -94,12 +95,65 @@ public class WireDynamicEnumTest {
                 "  }\n" +
                 "}\n" +
                 "]\n" +
-                "push[THREE]\n" +
+                "push[FOUR]\n" +
                 "holds[!HoldsWDENum {\n" +
                 "  a: TWO,\n" +
-                "  b: THREE\n" +
+                "  b: FOUR\n" +
                 "}\n" +
                 "]\n", sw.toString());
+    }
+
+    @Test
+    public void deserialize2() {
+        String text = "push: ONE\n" +
+                "...\n" +
+                "unwraps: {\n" +
+                "  c: !WDENums {\n" +
+                "    name: FIVE,\n" +
+                "    nice: Five,\n" +
+                "    value: 5\n" +
+                "  }\n" +
+                "}\n" +
+                "...\n" +
+                "push: FIVE\n" +
+                "...\n" +
+                "holds: {\n" +
+                "  a: TWO,\n" +
+                "  b: FIVE\n" +
+                "}\n" +
+                "...\n";
+        TextWire tw = new TextWire(Bytes.from(text)).useTextDocuments();
+        StringWriter sw = new StringWriter();
+        MethodReader reader = tw.methodReader(new UsesWDENums() {
+            @Override
+            public void push(WDENums nums) {
+                sw.append(nums.name() + " ~ " + nums.nice + " ~ " + nums.value + "\n");
+            }
+
+            @Override
+            public void holds(HoldsWDENum holdsWDENum) {
+                sw.append(holdsWDENum.toString());
+                sw.append("# " + holdsWDENum.a.value + ", " + holdsWDENum.b.value + "\n");
+            }
+
+            @Override
+            public void unwraps(UnwrapsWDENum unwrapsWDENum) {
+                WDENums c = unwrapsWDENum.c;
+                sw.append("Update " + c + "\n");
+                updateEnum(c);
+            }
+        });
+        for (int i = 0; i < 4; i++)
+            assertTrue(reader.readOne());
+        assertFalse(reader.readOne());
+        assertEquals("ONE ~ One ~ 1\n" +
+                "Update FIVE\n" +
+                "FIVE ~ Five ~ 5\n" +
+                "!HoldsWDENum {\n" +
+                "  a: TWO,\n" +
+                "  b: FIVE\n" +
+                "}\n" +
+                "# 2, 5\n", sw.toString());
     }
 
     enum WDENums implements WDEI, DynamicEnum {

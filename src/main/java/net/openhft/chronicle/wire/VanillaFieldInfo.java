@@ -47,8 +47,15 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
     @NotNull
     public static Wires.FieldInfoPair lookupClass(@NotNull Class aClass) {
         final SerializationStrategy ss = Wires.CLASS_STRATEGY.get(aClass);
-        if (ss.bracketType() != BracketType.MAP) {
-            return Wires.FieldInfoPair.EMPTY;
+        switch (ss.bracketType()) {
+            case NONE:
+            case SEQ:
+                return Wires.FieldInfoPair.EMPTY;
+            case MAP:
+                break;
+            default:
+                // assume it could be a map
+                break;
         }
 
         @NotNull List<FieldInfo> fields = new ArrayList<>();
