@@ -3386,7 +3386,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 long limit2 = bytes.readPosition() + length;
                 bytes.readLimit(limit2);
                 try {
-                    strategy.readUsing(object, this);
+                    strategy.readUsing(object, this, BracketType.MAP);
 
                 } finally {
                     bytes.readLimit(limit);
@@ -3630,7 +3630,10 @@ public class BinaryWire extends AbstractWire implements Wire {
                                 long lim = bytes.readLimit();
                                 try {
                                     bytes.readLimit(bytes.readPosition() + len);
-                                    return strategy.readUsing(using, this, type);
+                                    Object using1 = using;
+                                    if (using1 == null && type != null)
+                                        using1 = strategy.newInstanceOrNull(type);
+                                    return strategy.readUsing(using1, this, BracketType.MAP);
 
                                 } finally {
                                     bytes.readLimit(lim);
@@ -3684,7 +3687,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                                 using = strategy.newInstanceOrNull(null);
                             }
 
-                            strategy.readUsing(using, valueIn);
+                            strategy.readUsing(using, valueIn, BracketType.MAP);
                             return ObjectUtils.convertTo(type, using);
                         }
                         case TIME:

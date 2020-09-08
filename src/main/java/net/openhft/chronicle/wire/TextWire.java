@@ -2990,8 +2990,12 @@ public class TextWire extends AbstractWire implements Wire {
                 } catch (NoClassDefFoundError e) {
                     throw new IORuntimeException("Unable to load class " + e, e);
                 } catch (ClassNotFoundException e) {
-                    if (tClass == null && Wires.GENERATE_TUPLES)
-                        return Wires.tupleFor(null, sb.toString());
+                    if (tClass == null) {
+                        if (Wires.GENERATE_TUPLES) {
+                            return Wires.tupleFor(null, sb.toString());
+                        }
+                        throw new NoClassDefFoundError("Unable to load " + sb + ", is a class alias missing.");
+                    }
 
                     final String className = tClass.getName();
 
@@ -3070,7 +3074,7 @@ public class TextWire extends AbstractWire implements Wire {
                 return null;
             }
             if (indentation() == 0 && peekCode() != '{') {
-                strategy.readUsing(object, this);
+                strategy.readUsing(object, this, BracketType.MAP);
                 return object;
             }
             pushState();
@@ -3101,7 +3105,7 @@ public class TextWire extends AbstractWire implements Wire {
                 bytes.readLimit(newLimit);
                 bytes.readSkip(1); // skip the {
                 consumePadding();
-                object = strategy.readUsing(object, this);
+                object = strategy.readUsing(object, this, BracketType.MAP);
 
             } finally {
                 bytes.readLimit(limit);

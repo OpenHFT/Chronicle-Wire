@@ -77,7 +77,7 @@ public class WireMarshaller<T> {
 
     @NotNull
     public static <T> WireMarshaller<T> of(@NotNull Class<T> tClass) {
-        if (tClass.isInterface() || tClass.isEnum())
+        if (tClass.isInterface() || (tClass.isEnum() && !DynamicEnum.class.isAssignableFrom(tClass)))
             return new WireMarshaller<>(tClass, NO_FIELDS, true);
 
         @NotNull Map<String, Field> map = new LinkedHashMap<>();
@@ -127,6 +127,8 @@ public class WireMarshaller<T> {
             getAllField(clazz.getSuperclass(), map);
         for (@NotNull Field field : clazz.getDeclaredFields()) {
             if ((field.getModifiers() & (Modifier.STATIC | Modifier.TRANSIENT)) != 0)
+                continue;
+            if ("ordinal".equals(field.getName()) && Enum.class.isAssignableFrom(clazz))
                 continue;
             String name = field.getName();
             if (name.equals("this$0")) {

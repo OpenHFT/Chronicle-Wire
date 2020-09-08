@@ -1071,14 +1071,14 @@ public class RawWire extends AbstractWire implements Wire {
                 long limit2 = bytes.readPosition() + length;
                 bytes.readLimit(limit2);
                 try {
-                    strategy.readUsing(object, this);
+                    strategy.readUsing(object, this, BracketType.MAP);
 
                 } finally {
                     bytes.readLimit(limit);
                     bytes.readPosition(limit2);
                 }
             } else {
-                strategy.readUsing(object, this);
+                strategy.readUsing(object, this, BracketType.MAP);
             }
             return object;
         }

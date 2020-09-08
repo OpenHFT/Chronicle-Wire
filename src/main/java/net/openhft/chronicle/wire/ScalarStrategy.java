@@ -67,7 +67,7 @@ class ScalarStrategy<T> implements SerializationStrategy<T> {
 
     @Nullable
     @Override
-    public T readUsing(T using, @NotNull ValueIn in) {
+    public T readUsing(T using, @NotNull ValueIn in, BracketType bracketType) {
         if (in.isNull())
             return null;
 

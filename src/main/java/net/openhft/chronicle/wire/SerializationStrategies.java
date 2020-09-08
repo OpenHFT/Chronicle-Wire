@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.CommonMarshallable;
 import net.openhft.chronicle.bytes.ReadBytesMarshallable;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.ReadResolvable;
@@ -31,6 +32,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
@@ -39,7 +41,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     MARSHALLABLE {
         @NotNull
         @Override
-        public Object readUsing(@NotNull Object o, @NotNull ValueIn in) {
+        public Object readUsing(@NotNull Object o, @NotNull ValueIn in, BracketType bracketType) {
             WireIn wireIn = in.wireIn();
             if (in.isBinary() && !((CommonMarshallable) o).usesSelfDescribingMessage()) {
                 ((ReadBytesMarshallable) o).readMarshallable(wireIn.bytes());
@@ -64,7 +66,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     BYTES_MARSHALLABLE {
         @NotNull
         @Override
-        public Object readUsing(@NotNull Object o, @NotNull ValueIn in) {
+        public Object readUsing(@NotNull Object o, @NotNull ValueIn in, BracketType bracketType) {
             return o;
         }
 
@@ -83,7 +85,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     ANY_OBJECT {
         @Nullable
         @Override
-        public Object readUsing(Object o, @NotNull ValueIn in) {
+        public Object readUsing(Object o, @NotNull ValueIn in, BracketType bracketType) {
             return in.objectWithInferredType(o, ANY_NESTED, null);
         }
 
@@ -103,7 +105,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     ANY_SCALAR {
         @Nullable
         @Override
-        public Object readUsing(Object o, @NotNull ValueIn in) {
+        public Object readUsing(Object o, @NotNull ValueIn in, BracketType bracketType) {
             return in.objectWithInferredType(o, ANY_NESTED, null);
         }
 
@@ -122,7 +124,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     ENUM {
         @Nullable
         @Override
-        public Object readUsing(Object o, @NotNull ValueIn in) {
+        public Object readUsing(Object o, @NotNull ValueIn in, BracketType bracketType) {
             return in.text();
         }
 
@@ -138,10 +140,46 @@ public enum SerializationStrategies implements SerializationStrategy {
             return BracketType.NONE;
         }
     },
+    DYNAMIC_ENUM {
+        private Field ordinal = Jvm.getField(Enum.class, "ordinal");
+
+        @Nullable
+        @Override
+        public Object readUsing(Object o, @NotNull ValueIn in, BracketType bracketType) {
+            if (bracketType != BracketType.MAP || !(o instanceof ReadMarshallable))
+                return in.text();
+            ((ReadMarshallable) o).readMarshallable(in.wireIn());
+            return o;
+        }
+
+        @NotNull
+        @Override
+        public Class type() {
+            return Enum.class;
+        }
+
+        @NotNull
+        @Override
+        public BracketType bracketType() {
+            return BracketType.UNKNOWN;
+        }
+
+        @Override
+        public @Nullable Object newInstanceOrNull(Class type) {
+            try {
+                DynamicEnum o = (DynamicEnum) UnsafeMemory.UNSAFE.allocateInstance(type);
+                o.setField("name", "[unset]");
+                ordinal.set(o, -1);
+                return o;
+            } catch (Exception e) {
+                throw new IORuntimeException(e);
+            }
+        }
+    },
     ANY_NESTED {
         @NotNull
         @Override
-        public Object readUsing(@NotNull Object o, @NotNull ValueIn in) {
+        public Object readUsing(@NotNull Object o, @NotNull ValueIn in, BracketType bracketType) {
             Wires.readMarshallable(o, in.wireIn(), true);
             return o;
         }
@@ -155,7 +193,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     DEMARSHALLABLE {
         @NotNull
         @Override
-        public Object readUsing(Object using, @NotNull ValueIn in) {
+        public Object readUsing(Object using, @NotNull ValueIn in, BracketType bracketType) {
             @NotNull final DemarshallableWrapper wrapper = (DemarshallableWrapper) using;
             wrapper.demarshallable = Demarshallable.newInstance(wrapper.type, in.wireIn());
             return wrapper;
@@ -175,11 +213,9 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
     SERIALIZABLE {
         @Override
-        public Object readUsing(Object o, ValueIn in) {
-            if (o instanceof Externalizable)
-                EXTERNALIZABLE.readUsing(o, in);
-            else
-                ANY_OBJECT.readUsing(o, in);
+        public Object readUsing(Object o, ValueIn in, BracketType bracketType) {
+            SerializationStrategies strategies = o instanceof Externalizable ? EXTERNALIZABLE : ANY_OBJECT;
+            strategies.readUsing(o, in, bracketType);
             return o;
         }
 
@@ -192,7 +228,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     EXTERNALIZABLE {
         @NotNull
         @Override
-        public Object readUsing(@NotNull Object o, @NotNull ValueIn in) {
+        public Object readUsing(@NotNull Object o, @NotNull ValueIn in, BracketType bracketType) {
             try {
                 ((Externalizable) o).readExternal(in.wireIn().objectInput());
             } catch (@NotNull IOException | ClassNotFoundException e) {
@@ -215,7 +251,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
     MAP {
         @Override
-        public Object readUsing(Object o, @NotNull ValueIn in) {
+        public Object readUsing(Object o, @NotNull ValueIn in, BracketType bracketType) {
             @NotNull Map<Object, Object> map = (Map<Object, Object>) o;
             @NotNull final WireIn wireIn = in.wireIn();
             long pos = wireIn.bytes().readPosition();
@@ -251,7 +287,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
     SET {
         @Override
-        public Object readUsing(Object o, @NotNull ValueIn in) {
+        public Object readUsing(Object o, @NotNull ValueIn in, BracketType bracketType) {
             @NotNull Set<Object> set = (Set<Object>) o;
             @NotNull final WireIn wireIn = in.wireIn();
             @NotNull final Bytes<?> bytes = wireIn.bytes();
@@ -289,7 +325,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     },
     LIST {
         @Override
-        public Object readUsing(Object o, @NotNull ValueIn in) {
+        public Object readUsing(Object o, @NotNull ValueIn in, BracketType bracketType) {
             @NotNull List<Object> list = (List<Object>) o;
             @NotNull final WireIn wireIn = in.wireIn();
             long pos = wireIn.bytes().readPosition();
@@ -327,7 +363,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     ARRAY {
         @NotNull
         @Override
-        public Object readUsing(Object using, @NotNull ValueIn in) {
+        public Object readUsing(Object using, @NotNull ValueIn in, BracketType bracketType) {
             if (using instanceof ArrayWrapper) {
                 @NotNull ArrayWrapper wrapper = (ArrayWrapper) using;
                 final Class componentType = wrapper.type.getComponentType();
@@ -364,7 +400,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     }, PRIM_ARRAY {
         @NotNull
         @Override
-        public Object readUsing(Object using, @NotNull ValueIn in) {
+        public Object readUsing(Object using, @NotNull ValueIn in, BracketType bracketType) {
             @NotNull PrimArrayWrapper wrapper = (PrimArrayWrapper) using;
             final Class componentType = wrapper.type.getComponentType();
             int i = 0, len = 0;

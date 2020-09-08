@@ -21,22 +21,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface SerializationStrategy<T> {
-    @Deprecated(/*to be removed?*/)
-    @Nullable
-    default T read(ValueIn in, Class<T> type) {
-        return readUsing(newInstanceOrNull(type), in);
-    }
 
     @Nullable
-    @Deprecated(/*to be removed?*/)
-    default T readUsing(@Nullable T using, ValueIn in, @Nullable Class<T> type) {
-        if (using == null && type != null)
-            using = newInstanceOrNull(type);
-        return readUsing(using, in);
-    }
-
-    @Nullable
-    T readUsing(T using, ValueIn in);
+    T readUsing(T using, ValueIn in, BracketType bracketType);
 
     @Nullable
     T newInstanceOrNull(Class<T> type);

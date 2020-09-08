@@ -1,7 +1,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.pool.DynamicEnum;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -10,6 +9,7 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
+
 public class UnknownEnumTest extends WireTestCommon {
 
     private static final byte[] SERIALISED_MAP_DATA = new byte[]{

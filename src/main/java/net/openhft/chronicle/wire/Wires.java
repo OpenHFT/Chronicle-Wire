@@ -113,13 +113,6 @@ public enum Wires {
         WireInternal.addAliases();
     }
 
-    @Deprecated(/*to be removed?*/)
-    @Nullable
-    public static <T> T read(@NotNull Class<T> tClass, ValueIn in) {
-        final SerializationStrategy<T> strategy = CLASS_STRATEGY.get(tClass);
-        return strategy.read(in, tClass);
-    }
-
     /**
      * This decodes some Bytes where the first 4-bytes is the length.  e.g. Wire.writeDocument wrote
      * it. <a href="https://github.com/OpenHFT/RFC/tree/master/Size-Prefixed-Blob">Size Prefixed
@@ -426,7 +419,8 @@ public enum Wires {
         if (using == null)
             using = (E) strategy.newInstanceOrNull(clazz);
 
-        return in.sequence(using, strategy::readUsing) ? readResolve(using) : null;
+        SerializationStrategy<E> finalStrategy = strategy;
+        return in.sequence(using, (using1, in1) -> finalStrategy.readUsing(using1, in1, BracketType.UNKNOWN)) ? readResolve(using) : null;
     }
 
     @Nullable
@@ -511,7 +505,7 @@ public enum Wires {
                 return objectSequence(in, using, clazz, strategy);
 
             case NONE:
-                @NotNull final Object e = strategy.readUsing(using, in);
+                @NotNull final Object e = strategy.readUsing(using, in, BracketType.NONE);
                 return clazz == Base64.class
                         ? (E) e
                         : (E) ObjectUtils.convertTo(clazz, e);
@@ -581,6 +575,8 @@ public enum Wires {
 
         @Nullable
         static SerializationStrategy getSerializationStrategy(@NotNull Class aClass) {
+            if (DynamicEnum.class.isAssignableFrom(aClass))
+                return DYNAMIC_ENUM;
             if (Enum.class.isAssignableFrom(aClass))
                 return ENUM;
             return null;
