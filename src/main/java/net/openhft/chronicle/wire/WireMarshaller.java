@@ -19,10 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesComment;
-import net.openhft.chronicle.core.ClassLocal;
-import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -141,12 +138,22 @@ public class WireMarshaller<T> {
     }
 
     private static <T> T defaultValueForType(final @NotNull Class<T> tClass) {
-        return ObjectUtils.isConcreteClass(tClass)
+        if (ObjectUtils.isConcreteClass(tClass)
                 && !tClass.getName().startsWith("java")
                 && !tClass.isEnum()
-                && !tClass.isArray()
-                ? ObjectUtils.newInstance(tClass) :
-                null;
+                && !tClass.isArray())
+            return ObjectUtils.newInstance(tClass);
+        if (DynamicEnum.class.isAssignableFrom(tClass)) {
+            try {
+                T t = OS.memory().allocateInstance(tClass);
+                Jvm.getField(Enum.class, "name").set(t, "[unset]");
+                Jvm.getField(Enum.class, "ordinal").set(t, -1);
+                return t;
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new AssertionError(e);
+            }
+        }
+        return null;
     }
 
     private static int compare(CharSequence cs0, CharSequence cs1) {
@@ -492,6 +499,12 @@ public class WireMarshaller<T> {
         }
 
         protected void copy(Object from, Object to) throws IllegalAccessException {
+            // checks for null
+            //noinspection ResultOfMethodCallIgnored
+            from.getClass();
+            //noinspection ResultOfMethodCallIgnored
+            to.getClass();
+
             unsafePutObject(to, offset, unsafeGetObject(from, offset));
         }
 
@@ -499,7 +512,8 @@ public class WireMarshaller<T> {
 
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
             if (read instanceof DefaultValueIn) {
-                if (overwrite) copy(defaults, o);
+                if (overwrite)
+                    copy(defaults, o);
             } else {
                 long pos = read.wireIn().bytes().readPosition();
                 try {
