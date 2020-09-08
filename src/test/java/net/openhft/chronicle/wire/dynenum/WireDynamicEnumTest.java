@@ -172,6 +172,10 @@ public class WireDynamicEnumTest {
                 "  }\n" +
                 "}\n" +
                 "...\n" +
+                "push2: ONE\n" +
+                "...\n" +
+                "push2: TWO\n" +
+                "...\n" +
                 "push2: KING\n" +
                 "...\n";
         TextWire tw = new TextWire(Bytes.from(text)).useTextDocuments();
@@ -207,7 +211,7 @@ public class WireDynamicEnumTest {
                 updateEnum(d);
             }
         });
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < 8; i++)
             assertTrue(reader.readOne());
         assertFalse(reader.readOne());
         assertEquals("ONE ~ One ~ 1\n" +
@@ -224,6 +228,8 @@ public class WireDynamicEnumTest {
                 "  value: 112\n" +
                 "}\n" +
                 "\n" +
+                "ONE = One = 1\n" +
+                "TWO = Two = 2\n" +
                 "KING = King = 112\n", sw.toString());
     }
 
