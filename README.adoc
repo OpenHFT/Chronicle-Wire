@@ -307,7 +307,13 @@ enum ServerId {
     LN_A
 }
 
+interface Output {
+    void serverId(ServerId serverId);
+}
+
 // later
+Output out; // is a MethodWriter
+
 out.serverId(ServerId.LN_A);
 ----
 
@@ -326,14 +332,22 @@ enum ServerId implements DynamicEnum {
 }
 ----
 
-[source,yaml]
+=== Not passing by name
+
+Sometimes you need to pass the actually data, esp the first time. This can be achieved by using the `@AsMarshallable` annotation which will always pass the object as a typedMarshallable.
+
+[source, java]
 ----
-refData: {
-    eventId: GUI,
-    eventTime: 2020-09-09T09:09:09.999,
-    data: !ServerId {
-        name: LN_A,
-        properity: 128
+public class RefData extends AbstractEventCfg<RefData> {
+    @AsMarshallable
+    private DynamicEnum data;
+
+    public RefData(DynamicEnum data) {
+        this.data = data;
+    }
+
+    public DynamicEnum data() {
+        return data;
     }
 }
 ----
@@ -343,7 +357,19 @@ You can choose to update the existing `enum` with this information.
 [source,java]
 ----
 public void refData(RefData refData) {
-    updateEnum(refData.data);
+    DynamicEnum.updateEnum(refData.data);
+}
+----
+
+[source,yaml]
+----
+refData: {
+    eventId: GUI,
+    eventTime: 2020-09-09T09:09:09.999,
+    data: !ServerId {
+        name: LN_A,
+        priority: 128
+    }
 }
 ----
 
@@ -356,7 +382,7 @@ refData: {
     eventTime: 2020-09-09T09:09:09.999,
     data: !ServerId {
         name: HK_A,
-        properity: 200
+        priority: 200
     }
 }
 ----
@@ -401,24 +427,16 @@ myData: Four # will error as doesn't exist.
 ...
 ----
 
-=== Not passing by name
+The consumer doesn't need to do anything special to use the new enum, however the producer need to create it in code as follows
 
-Sometimes you need to pass the actually data, esp the first time. This can be achieved by using the `@AsMarshallable` annotation which will always pass the object as a typedMarshallable.
-
-[source, java]
+[source, Java]
 ----
-public class RefData extends AbstractEventCfg<RefData> {
-    @AsMarshallable
-    private DynamicEnum data;
+ServerId serverId = EnumCache.of(ServerId.class).nameFor("HK_A");
+serverId.priority(200);
+out.refData(new RefData(serverId));
 
-    public RefData(DynamicEnum data) {
-        this.data = data;
-    }
-
-    public DynamicEnum data() {
-        return data;
-    }
-}
+MyData myData = EnumCache.of(MyData.class).nameFor("Three");
+out.refData(new RefData(myData));
 ----
 
 == Compression Options
