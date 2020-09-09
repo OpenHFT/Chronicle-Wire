@@ -439,6 +439,10 @@ MyData myData = EnumCache.of(MyData.class).nameFor("Three");
 out.refData(new RefData(myData));
 ----
 
+NOTE: The unique key for these objects is their type and name. Two objects of different types can have the same name
+
+IMPORTANT: These objects passed by reference are never cleaned up. Only use them when there is likely to be a limited number of them over the life of the application.
+
 == Compression Options
 
 * No compression
