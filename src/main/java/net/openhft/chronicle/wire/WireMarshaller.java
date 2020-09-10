@@ -86,12 +86,22 @@ public class WireMarshaller<T> {
         fieldCount.forEach((n, c) -> {
             if (c > 1) Jvm.warn().on(tClass, "Has " + c + " fields called '" + n + "'");
         });
-        boolean isLeaf = Stream.of(fields).noneMatch(
-                c -> (isCollection(c.field.getType()) && !Boolean.TRUE.equals(c.isLeaf))
-                        || WriteMarshallable.class.isAssignableFrom(c.field.getType()));
+        List<FieldAccess> collect = Stream.of(fields)
+                .filter(WireMarshaller::leafable)
+                .collect(Collectors.toList());
+        boolean isLeaf = collect.isEmpty();
         return overridesUnexpectedFields(tClass)
                 ? new WireMarshallerForUnexpectedFields<>(tClass, fields, isLeaf)
                 : new WireMarshaller<>(tClass, fields, isLeaf);
+    }
+
+    protected static boolean leafable(FieldAccess c) {
+        Class<?> type = c.field.getType();
+        if (isCollection(type))
+            return !Boolean.TRUE.equals(c.isLeaf);
+        if (DynamicEnum.class.isAssignableFrom(type))
+            return false;
+        return WriteMarshallable.class.isAssignableFrom(type);
     }
 
     private static <T> boolean overridesUnexpectedFields(Class<T> tClass) {
