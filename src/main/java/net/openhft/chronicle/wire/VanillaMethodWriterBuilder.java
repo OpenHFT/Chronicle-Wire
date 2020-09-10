@@ -284,7 +284,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
-            return updateInterceptor == null || updateInterceptor.update(method.getName(), args[0])
+            return updateInterceptor == null || updateInterceptor.update(method.getName(), args[args.length - 1])
                     ? handlerSupplier.get().invoke(proxy, method, args)
                     : proxy;
         }
