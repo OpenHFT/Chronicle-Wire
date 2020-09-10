@@ -797,7 +797,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         valueIn.marshallable(m);
                         wire.getValueOut().marshallable(m);
                     } catch (Exception e) {
-                        Jvm.warn().on(getClass(), "Unable to copy " + sb + " safetly, will try anyway");
+                        Jvm.warn().on(getClass(), "Unable to copy " + sb + " safely will try anyway");
                     }
                 }
                 break;
