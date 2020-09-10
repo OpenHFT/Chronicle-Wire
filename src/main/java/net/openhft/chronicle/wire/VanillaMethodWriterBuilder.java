@@ -283,8 +283,8 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     class CallSupplierInvocationHandler implements InvocationHandler {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-
-            return updateInterceptor == null || updateInterceptor.update(method.getName(), args[args.length - 1])
+            Object args0 = args == null ? null : args[args.length - 1];
+            return updateInterceptor == null || updateInterceptor.update(method.getName(), args0)
                     ? handlerSupplier.get().invoke(proxy, method, args)
                     : proxy;
         }
