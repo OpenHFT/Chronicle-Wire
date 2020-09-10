@@ -89,14 +89,9 @@ public class MethodWriterTest extends WireTestCommon {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         HasDefault writer = wire.methodWriter(HasDefault.class);
+        writer.callToDefaultMethod("hello world");
 
-        writer.callsMethod("hello,world,bye");
-        assertEquals("method: [\n" +
-                "  hello,\n" +
-                "  world,\n" +
-                "  bye\n" +
-                "]\n" +
-                "...\n", wire.toString());
+        Assert.assertTrue(wire.toString().startsWith("callToDefaultMethod: hello world"));
     }
 
     @Test
@@ -236,11 +231,11 @@ public class MethodWriterTest extends WireTestCommon {
 
     @FunctionalInterface
     public interface HasDefault {
-        default void callsMethod(String args) {
-            method(args.split(","));
+        default void callToDefaultMethod(String value) {
+
         }
 
-        void method(String... args);
+        void method(String args);
     }
 
     public interface StringMethod {
