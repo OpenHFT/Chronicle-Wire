@@ -454,7 +454,7 @@ IMPORTANT: These objects passed by reference are never cleaned up. Only use them
 Chronicle Wire is built on top of the `Bytes` library, however `Bytes`, in turn, can wrap:
 
 * `ByteBuffer` - heap and direct
-* `byte\[\]` - using `ByteBuffer`
+* `byte[]` - using `ByteBuffer`
 * raw memory addresses.
 
 == Handling instance classes of an unknown type
