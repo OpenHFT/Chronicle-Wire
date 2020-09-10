@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 
 public class MethodWriterInvocationHandlerSupplier<T> implements Supplier<MethodWriterInvocationHandler> {
     private final Supplier<MethodWriterInvocationHandler> supplier;
-    private Function<T,T> modifier;
+    private Function<T, T> modifier;
     private boolean recordHistory;
     private MethodWriterListener methodWriterListener;
     private MethodWriterInterceptorReturns methodWriterInterceptorReturns;

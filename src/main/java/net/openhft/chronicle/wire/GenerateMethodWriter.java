@@ -43,8 +43,10 @@ public class GenerateMethodWriter {
     static {
         TEMPLATE_METHODS.put("close",
                 singletonMap(singletonList(void.class), "" +
-                        "if (this.closeable != null) {\n" +
-                        "    this.closeable.close();\n" +
+                        "public void close() {\n" +
+                        "   if (this.closeable != null) {\n" +
+                        "        this.closeable.close();\n" +
+                        "   }\n" +
                         "}\n"));
         TEMPLATE_METHODS.put("recordHistory",
                 singletonMap(singletonList(boolean.class), "" +
@@ -322,7 +324,7 @@ public class GenerateMethodWriter {
                     throw new IllegalArgumentException("expecting and interface instead of class=" + interfaceClazz.getName());
 
                 for (Method dm : interfaceClazz.getMethods()) {
-                    if (dm.isDefault() || Modifier.isStatic(dm.getModifiers()))
+                    if (Modifier.isStatic(dm.getModifiers()))
                         continue;
                     String template = templateFor(dm);
                     if (template == null) {
@@ -340,8 +342,8 @@ public class GenerateMethodWriter {
             imports.append(interfaceMethods);
             imports.append("\n}\n");
 
-            if (DUMP_CODE)
-                System.out.println(imports);
+            //     if (DUMP_CODE)
+            System.out.println(imports);
 
             return CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
 
@@ -366,14 +368,15 @@ public class GenerateMethodWriter {
         return map.get(sig);
     }
 
-    private void addMarshallableOut(SourceCodeFormatter imports) {
-        imports.append("   @Override\n" +
-                "   public void marshallableOut(MarshallableOut out){\n" +
-                "        this.out = () -> out;\n");
+    private void addMarshallableOut(SourceCodeFormatter codeFormatter) {
+        codeFormatter.append("@Override\n");
+        codeFormatter.append("public void marshallableOut(MarshallableOut out) {\n");
+        codeFormatter.append("this.out = () -> out;\n");
         for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
-            imports.append(format("    this.%s.remove();\n", e.getValue()));
+            codeFormatter.append(format("    this.%s.remove();\n", e.getValue()));
         }
-        imports.append("}\n");
+        codeFormatter.append("}\n\n");
+
     }
 
     private CharSequence constructorAndFields(Set<String> importSet, final String className, SourceCodeFormatter result) {
@@ -429,7 +432,7 @@ public class GenerateMethodWriter {
         String methodIDAnotation = "";
         if (useUpdateInterceptor) {
             if (parameterCount > 1)
-                Jvm.warn().on(getClass(), "Generated code to call updateInterceptor for "+dm+" only using last argument");
+                Jvm.warn().on(getClass(), "Generated code to call updateInterceptor for " + dm + " only using last argument");
             final String name;
             if (parameterCount > 0) {
                 Class<?> type = parameters[parameterCount - 1].getType();

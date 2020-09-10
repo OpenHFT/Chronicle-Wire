@@ -223,7 +223,8 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
                 genericEvent,
                 hasMethodWriterListener(),
                 metaData,
-                useMethodIds, updateInterceptor != null);
+                useMethodIds,
+                updateInterceptor != null);
     }
 
     private boolean hasMethodWriterListener() {
