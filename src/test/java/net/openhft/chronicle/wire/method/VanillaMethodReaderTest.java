@@ -297,12 +297,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
             Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap(32));
             Overloaded writer2 = wire2.methodWriter(Overloaded.class);
             Wire wire = TextWire.from("method: [ ]\n");
-            MethodReader reader = wire.methodReader(writer2);
-            assertNotNull(reader);
-//            reader.readOne();
-
-            String s = map.keySet().toString();
-            assertTrue(s, s.contains("Unable to support overloaded methods, ignoring one of method"));
+            wire.methodReader(writer2);
         } finally {
             Jvm.resetExceptionHandlers();
         }

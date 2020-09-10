@@ -219,10 +219,12 @@ public class VanillaMethodReader implements MethodReader {
             }
 
             if (!methodNamesHandled.add(m.getName())) {
+                Method previous = methodsHandled.stream().filter(method -> method.getName().equals(m.getName())).findFirst().orElseThrow(() -> new IllegalStateException());
+                String msg = m.toString() + " previous: " + previous.toString();
                 if (DONT_THROW_ON_OVERLOAD)
-                    Jvm.warn().on(getClass(), "Unable to support overloaded methods, ignoring one of " + m.getName());
+                    Jvm.warn().on(getClass(), "Unable to support overloaded methods, ignoring " + msg);
                 else
-                    throw new IllegalStateException("MethodReader does not support overloaded methods. Method name: " + m.getName());
+                    throw new IllegalStateException("MethodReader does not support overloaded methods. Method: " + msg);
                 continue;
             }
 
