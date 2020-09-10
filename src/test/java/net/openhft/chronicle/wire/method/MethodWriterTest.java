@@ -199,13 +199,17 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     public void testPrimitives() {
+        doTestPrimitives(false);
+    }
+
+    protected void doTestPrimitives(boolean byteShort) {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
         Args writer = wire.methodWriter(Args.class);
         writer.primitives(true, (byte) 1, (short) 2, 3, 4, '5', 6, 7, "8", "9");
         assertEquals("primitives: [\n" +
                 "  true,\n" +
-                "  1,\n" +
-                "  2,\n" +
+                "  " + (byteShort ? "!byte " : "") + "1,\n" +
+                "  " + (byteShort ? "!short " : "")+ "2,\n" +
                 "  !int 3,\n" +
                 "  4,\n" +
                 "  \"5\",\n" +

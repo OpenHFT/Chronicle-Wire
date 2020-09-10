@@ -2,7 +2,6 @@ package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.TextWire;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -15,7 +14,6 @@ interface WithDefault {
 }
 
 public class DefaultMethodHandlingTest {
-    @Ignore("TODO FIX https://github.com/OpenHFT/Chronicle-Wire/issues/192")
     @Test
     public void withDefault() {
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
