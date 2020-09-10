@@ -22,9 +22,11 @@ import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.bytes.util.Bit8StringInterner;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
+import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
@@ -60,6 +62,12 @@ public class BinaryWire extends AbstractWire implements Wire {
     private static final boolean SUPPORT_DELTA = supportDelta();
     private static final UTF8StringInterner UTF8 = new UTF8StringInterner(4096);
     private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
+    private static final ClassValue<Boolean> USES_SELF_DESCRIBING = ClassLocal.withInitial(k -> {
+        Object m = ObjectUtils.newInstance(k);
+        if (m instanceof Marshallable)
+            return ((Marshallable) m).usesSelfDescribingMessage();
+        return true;
+    });
     private static int SPEC = Integer.getInteger("BinaryWire.SPEC", 18);
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
     @NotNull
@@ -781,6 +789,16 @@ public class BinaryWire extends AbstractWire implements Wire {
                     wire.getValueOut().text(valueIn.text());
                 } else {
                     wire.getValueOut().typePrefix(sb);
+                    try {
+                        Class aClass = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                        if (Boolean.TRUE.equals(USES_SELF_DESCRIBING.get(aClass)))
+                            break;
+                        Marshallable m = (Marshallable) ObjectUtils.newInstance(aClass);
+                        valueIn.marshallable(m);
+                        wire.getValueOut().marshallable(m);
+                    } catch (Exception e) {
+                        Jvm.warn().on(getClass(), "Unable to copy " + sb + " safetly, will try anyway");
+                    }
                 }
                 break;
             }

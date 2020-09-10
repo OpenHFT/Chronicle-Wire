@@ -1367,9 +1367,14 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, Object previous) {
-            @NotNull StringBuilder sb = WSBP.acquireStringBuilder();
-            sb.append(unsafeGetChar(o, offset));
-            write.text(sb);
+            char c = unsafeGetChar(o, offset);
+            if (c == (char) 0xFFFF) {
+                write.nu11();
+            } else {
+                StringBuilder sb = WSBP.acquireStringBuilder();
+                sb.append(c);
+                write.text(sb);
+            }
         }
 
         @Override
