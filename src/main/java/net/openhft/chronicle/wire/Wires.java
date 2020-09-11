@@ -107,6 +107,7 @@ public enum Wires {
     static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
 
     static {
+        Jvm.addToClassPath(Wires.class);
         CLASS_STRATEGY_FUNCTIONS.add(SerializeEnum.INSTANCE);
         CLASS_STRATEGY_FUNCTIONS.add(SerializeJavaLang.INSTANCE);
         CLASS_STRATEGY_FUNCTIONS.add(SerializeBytes.INSTANCE);
