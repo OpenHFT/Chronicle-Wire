@@ -142,7 +142,7 @@ public class WireDynamicEnumTest {
                 "  nice: !!null \"\",\n" +
                 "  value: 0\n" +
                 "}\n" +
-                "]\n", sw.toString());
+                "]\n", sw.toString().replace("\r", ""));
     }
 
     @Test
