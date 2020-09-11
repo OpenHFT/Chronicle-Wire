@@ -47,6 +47,12 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
         checkWriteRead(simple);
     }
 
+    @Test
+    public void testDuckTyping() {
+        DuckTyping simple = new DuckTyping(queue);
+        checkWriteRead(simple);
+    }
+
     private void checkWriteRead(Simple simple) {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(32));
         Simple writer = wire.methodWriter(Simple.class);
@@ -61,6 +67,10 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
     }
 
     interface Simple {
+        void hello(String name);
+    }
+
+    interface SimpleSameMethod {
         void hello(String name);
     }
 
@@ -94,6 +104,12 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
 
     private static class SimpleDescendantClass3 extends SimpleDescendantClass2 implements Simple {
         public SimpleDescendantClass3(BlockingQueue<String> queue) {
+            super(queue);
+        }
+    }
+
+    private static class DuckTyping extends SimpleDescendantClass2 implements Simple, SimpleSameMethod {
+        public DuckTyping(BlockingQueue<String> queue) {
             super(queue);
         }
     }

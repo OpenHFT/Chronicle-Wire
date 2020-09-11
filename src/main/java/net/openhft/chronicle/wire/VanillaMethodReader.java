@@ -80,7 +80,7 @@ public class VanillaMethodReader implements MethodReader {
 
         wireParser = WireParser.wireParser(defaultParselet, fieldNumberParselet);
 
-        @NotNull Set<Method> methodsHandled = new HashSet<>();
+        @NotNull Set<String> methodsSignaturesHandled = new HashSet<>();
         @NotNull Set<String> methodsNamesHandled = new HashSet<>();
         MethodFilterOnFirstArg methodFilterOnFirstArg = null;
         for (@NotNull Object o : objects) {
@@ -96,7 +96,7 @@ public class VanillaMethodReader implements MethodReader {
             Supplier<Object> inarray = () -> context[0];
             Set<Class> interfaces = new LinkedHashSet<>();
             for (Class<?> anInterface : ReflectionUtil.interfaces(oClass)) {
-                addParsletsFor(interfaces, anInterface, ignoreDefault, methodsNamesHandled, methodsHandled, methodFilterOnFirstArg, o, context, original, inarray);
+                addParsletsFor(interfaces, anInterface, ignoreDefault, methodsNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, o, context, original, inarray);
             }
         }
         if (wireParser.lookup(HISTORY) == null) {
@@ -193,7 +193,7 @@ public class VanillaMethodReader implements MethodReader {
         LOGGER.debug("read " + name + " - " + rest);
     }
 
-    private void addParsletsFor(Set<Class> interfaces, Class<?> oClass, boolean ignoreDefault, Set<String> methodNamesHandled, Set<Method> methodsHandled, MethodFilterOnFirstArg methodFilterOnFirstArg, Object o, Object[] context, Supplier contextSupplier, Supplier nextContext) {
+    private void addParsletsFor(Set<Class> interfaces, Class<?> oClass, boolean ignoreDefault, Set<String> methodNamesHandled, Set<String> methodsSignaturesHandled, MethodFilterOnFirstArg methodFilterOnFirstArg, Object o, Object[] context, Supplier contextSupplier, Supplier nextContext) {
         if (!interfaces.add(oClass))
             return;
 
@@ -207,7 +207,7 @@ public class VanillaMethodReader implements MethodReader {
                 continue;
             if ("ignoreMethodBasedOnFirstArg".equals(m.getName()))
                 continue;
-            if (!methodsHandled.add(m))
+            if (!methodsSignaturesHandled.add(signature(m)))
                 continue;
 
             try {
@@ -219,8 +219,8 @@ public class VanillaMethodReader implements MethodReader {
             }
 
             if (!methodNamesHandled.add(m.getName())) {
-                Method previous = methodsHandled.stream().filter(method -> method.getName().equals(m.getName())).findFirst().orElseThrow(() -> new IllegalStateException());
-                String msg = m.toString() + " previous: " + previous.toString();
+                String previous = methodsSignaturesHandled.stream().filter(signature -> signature.contains(" " + m.getName() + " ")).findFirst().orElseThrow(() -> new IllegalStateException());
+                String msg = m.toString() + " previous: " + previous;
                 if (DONT_THROW_ON_OVERLOAD)
                     Jvm.warn().on(getClass(), "Unable to support overloaded methods, ignoring " + msg);
                 else
@@ -249,9 +249,13 @@ public class VanillaMethodReader implements MethodReader {
         for (@NotNull Method m : oClass.getMethods()) {
             Class returnType = m.getReturnType();
             if (returnType.isInterface() && !Jvm.dontChain(returnType)) {
-                addParsletsFor(interfaces, returnType, ignoreDefault, methodNamesHandled, methodsHandled, methodFilterOnFirstArg, null, context, nextContext, nextContext);
+                addParsletsFor(interfaces, returnType, ignoreDefault, methodNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, null, context, nextContext, nextContext);
             }
         }
+    }
+
+    private String signature(Method m) {
+        return m.getReturnType() + " " + m.getName() + " " + Arrays.toString(m.getParameterTypes());
     }
 
     @NotNull
