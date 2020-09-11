@@ -791,13 +791,13 @@ public class BinaryWire extends AbstractWire implements Wire {
                     wire.getValueOut().typePrefix(sb);
                     try {
                         Class aClass = ClassAliasPool.CLASS_ALIASES.forName(sb);
-                        if (Boolean.TRUE.equals(USES_SELF_DESCRIBING.get(aClass)))
+                        if (Boolean.TRUE.equals(USES_SELF_DESCRIBING.get(aClass)) || aClass.isInterface())
                             break;
                         Marshallable m = (Marshallable) ObjectUtils.newInstance(aClass);
                         valueIn.marshallable(m);
                         wire.getValueOut().marshallable(m);
                     } catch (Exception e) {
-                        Jvm.warn().on(getClass(), "Unable to copy " + sb + " safely will try anyway");
+                        Jvm.warn().on(getClass(), "Unable to copy " + sb + " safely will try anyway " + e);
                     }
                 }
                 break;

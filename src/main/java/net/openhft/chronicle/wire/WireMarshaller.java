@@ -147,7 +147,8 @@ public class WireMarshaller<T> {
         }
     }
 
-    private static <T> T defaultValueForType(final @NotNull Class<T> tClass) {
+    private static <T> T defaultValueForType(@NotNull Class<T> tClass) {
+//        tClass = ObjectUtils.implementationToUse(tClass);
         if (ObjectUtils.isConcreteClass(tClass)
                 && !tClass.getName().startsWith("java")
                 && !tClass.isEnum()

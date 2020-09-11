@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesMarshallable;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
 import net.openhft.chronicle.core.ClassLocal;
@@ -348,9 +349,15 @@ public enum Wires {
     @NotNull
     public static <T extends Marshallable> T deepCopy(@NotNull T marshallable) {
         Wire wire = acquireBinaryWire();
-        marshallable.writeMarshallable(wire);
         @NotNull T t = (T) ObjectUtils.newInstance(marshallable.getClass());
-        t.readMarshallable(wire);
+        boolean useSelfDescribing = t.usesSelfDescribingMessage() || !(t instanceof BytesMarshallable);
+        if (useSelfDescribing) {
+            marshallable.writeMarshallable(wire);
+            t.readMarshallable(wire);
+        } else {
+            ((BytesMarshallable) marshallable).writeMarshallable(wire.bytes());
+            ((BytesMarshallable) t).readMarshallable(wire.bytes());
+        }
         return t;
     }
 
