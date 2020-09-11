@@ -503,12 +503,13 @@ public interface ValueOut {
 
     @NotNull
     default <V> WireOut object(@NotNull Class<V> expectedType, V v) {
+        Class<?> vClass = v == null ? void.class : v.getClass();
         if (v instanceof WriteMarshallable && !isAnEnum(v))
-            if (ObjectUtils.matchingClass(expectedType, v.getClass()))
+            if (ObjectUtils.matchingClass(expectedType, vClass))
                 marshallable((WriteMarshallable) v);
             else
                 typedMarshallable((WriteMarshallable) v);
-        else if (v != null && ObjectUtils.matchingClass(expectedType, v.getClass()))
+        else if (v != null && ObjectUtils.matchingClass(expectedType, vClass))
             untypedObject(v);
         else
             object(v);

@@ -23,7 +23,6 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.Annotations;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -34,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -272,6 +270,7 @@ public class VanillaMethodReader implements MethodReader {
 
         Jvm.setAccessible(m); // turn of security check to make a little faster
         String name = m.getName();
+        Class parameterType2 = ObjectUtils.implementationToUse(parameterType);
         if (parameterType == long.class && o2 != null) {
             try {
                 MethodHandle mh = MethodHandles.lookup().unreflect(m).bindTo(o2);
@@ -281,7 +280,7 @@ public class VanillaMethodReader implements MethodReader {
             } catch (IllegalAccessException e) {
                 Jvm.warn().on(o2.getClass(), "Unable to unreflect " + m, e);
             }
-        } else if (parameterType.isPrimitive() || parameterType.isInterface() || !ReadMarshallable.class.isAssignableFrom(parameterType)) {
+        } else if (parameterType.isPrimitive() || parameterType2.isInterface() || !ReadMarshallable.class.isAssignableFrom(parameterType2)) {
             @NotNull Object[] argArr = {null};
             MethodWireKey key = createWireKey(m, name);
             wireParser.registerOnce(key, (s, v) -> {
@@ -289,7 +288,7 @@ public class VanillaMethodReader implements MethodReader {
                     if (Jvm.isDebug())
                         logMessage(s, v);
 
-                    argArr[0] = v.object(checkRecycle(argArr[0]), parameterType);
+                    argArr[0] = v.object(checkRecycle(argArr[0]), parameterType2);
                     Object invoke = invoke(contextSupplier.get(), m, argArr);
                     if (invoke != null)
                         context[0] = invoke;
@@ -301,18 +300,7 @@ public class VanillaMethodReader implements MethodReader {
             });
 
         } else {
-            ReadMarshallable arg;
-            try {
-                Constructor constructor = parameterType.getDeclaredConstructor();
-                Jvm.setAccessible(constructor);
-                arg = (ReadMarshallable) constructor.newInstance();
-            } catch (Exception e) {
-                try {
-                    arg = (ReadMarshallable) OS.memory().allocateInstance(parameterType);
-                } catch (InstantiationException e1) {
-                    throw Jvm.rethrow(e1);
-                }
-            }
+            ReadMarshallable arg = (ReadMarshallable) ObjectUtils.newInstance(parameterType2);
             @NotNull ReadMarshallable[] argArr = {arg};
             MethodWireKey key = createWireKey(m, name);
             wireParser.registerOnce(key, (s, v) -> {
@@ -321,7 +309,7 @@ public class VanillaMethodReader implements MethodReader {
                         logMessage(s, v);
 
                     //noinspection ConstantConditions
-                    argArr[0] = v.object(checkRecycle(argArr[0]), parameterType);
+                    argArr[0] = v.object(checkRecycle(argArr[0]), parameterType2);
                     Object invoke = invoke(contextSupplier.get(), m, argArr);
                     if (invoke != null)
                         context[0] = invoke;
