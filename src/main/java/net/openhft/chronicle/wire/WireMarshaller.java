@@ -851,8 +851,11 @@ public class WireMarshaller<T> {
                 Object a2 = field.get(o2);
                 if (a1 == null) return a2 == null;
                 if (a2 == null) return false;
-                if (a1.getClass() != a2.getClass())
-                    return false;
+                Class<?> aClass1 = a1.getClass();
+                Class<?> aClass2 = a2.getClass();
+                if (aClass1 != aClass2)
+                    if (!aClass1.isAssignableFrom(aClass2) && !aClass2.isAssignableFrom(aClass1))
+                        return false;
                 int len1 = Array.getLength(a1);
                 int len2 = Array.getLength(a2);
                 if (len1 != len2)

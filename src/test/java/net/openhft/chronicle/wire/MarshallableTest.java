@@ -109,13 +109,31 @@ public class MarshallableTest extends WireTestCommon {
                 "}\n", WireType.TEXT.asString(dto1));
     }
 
-    static class DTO1 {
+    @Test
+    public void equalsWithArray() {
+        WithArray a = new WithArray();
+        WithArray b = new WithArray();
+        assertEquals(a, b);
+
+        a.dto1s = new DTO1[1];
+        a.dto1s[0] = new DTO1();
+        b.dto1s = new DTO1[1];
+        b.dto1s[0] = new DTO1();
+        if (!a.equals(b))
+            assertEquals(a, b);
+    }
+
+    static class WithArray extends SelfDescribingMarshallable {
+        DTO1[] dto1s;
+    }
+
+    static class DTO1 extends SelfDescribingMarshallable {
         String one;
         List<Integer> two;
         LocalDate three;
     }
 
-    static class DTO2 {
+    static class DTO2 extends SelfDescribingMarshallable {
         RetentionPolicy one;
         List<Long> two;
         String three;
