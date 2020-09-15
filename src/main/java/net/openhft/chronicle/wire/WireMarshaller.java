@@ -803,7 +803,8 @@ public class WireMarshaller<T> {
         ArrayFieldAccess(@NotNull Field field) {
             super(field);
             componentType = field.getType().getComponentType();
-            objectType = ObjectUtils.primToWrapper(componentType);
+            objectType = ObjectUtils.implementationToUse(
+                    ObjectUtils.primToWrapper(componentType));
         }
 
         @Override
