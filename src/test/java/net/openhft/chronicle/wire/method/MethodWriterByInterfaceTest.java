@@ -45,7 +45,7 @@ public class MethodWriterByInterfaceTest {
                 "  name: name,\n" +
                 "  time: 2009-02-13T23:31:30.123456\n" +
                 "}\n" +
-                "]\n", sw.toString());
+                "]\n", sw.toString().replace("\r", ""));
     }
 
     interface MWBI {
