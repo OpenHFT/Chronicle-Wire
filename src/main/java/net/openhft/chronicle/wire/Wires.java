@@ -477,6 +477,8 @@ public enum Wires {
                 using = (E) Bytes.allocateElasticOnHeap(32);
             clazz = Base64.class;
         }
+        if (clazz2 == null && clazz != null)
+            clazz = ObjectUtils.implementationToUse(clazz);
         if (clazz2 != null &&
                 clazz != clazz2 &&
                 (clazz == null
