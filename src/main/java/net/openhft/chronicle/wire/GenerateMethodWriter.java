@@ -342,8 +342,8 @@ public class GenerateMethodWriter {
             imports.append(interfaceMethods);
             imports.append("\n}\n");
 
-            //   if (DUMP_CODE)
-            System.out.println(imports);
+            if (DUMP_CODE)
+                System.out.println(imports);
 
             return CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
 
