@@ -321,7 +321,7 @@ public class GenerateMethodWriter {
                 imports.append(", ");
 
                 if (!interfaceClazz.isInterface())
-                    throw new IllegalArgumentException("expecting and interface instead of class=" + interfaceClazz.getName());
+                    throw new IllegalArgumentException("expecting an interface instead of class=" + interfaceClazz.getName());
 
                 for (Method dm : interfaceClazz.getMethods()) {
                     if (Modifier.isStatic(dm.getModifiers()))
@@ -346,20 +346,18 @@ public class GenerateMethodWriter {
             imports.append(interfaceMethods);
             imports.append("\n}\n");
 
-            //       if (DUMP_CODE)
-            System.out.println(imports);
+            if (DUMP_CODE)
+                System.out.println(imports);
 
             return CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
 
-        } catch (
-                LinkageError e) {
+        } catch (LinkageError e) {
             try {
                 return Class.forName(packageName + '.' + className, true, classLoader);
             } catch (ClassNotFoundException x) {
                 throw Jvm.rethrow(x);
             }
-        } catch (
-                Throwable e) {
+        } catch (Throwable e) {
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + imports, e));
         }
 
