@@ -342,8 +342,8 @@ public class GenerateMethodWriter {
             imports.append(interfaceMethods);
             imports.append("\n}\n");
 
-            if (DUMP_CODE)
-                System.out.println(imports);
+            //   if (DUMP_CODE)
+            System.out.println(imports);
 
             return CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
 
@@ -441,8 +441,9 @@ public class GenerateMethodWriter {
                 name = parameters[parameterCount - 1].getName();
             } else
                 name = "null";
-            body.append("// updateInterceptor\n" +
-                    "if (! this." + UPDATE_INTERCEPTOR_FIELD + ".update(\"" + dm.getName() + "\", " + name + ")) return;\n");
+            body.append("// updateInterceptor\n"
+                    + "if (! this." + UPDATE_INTERCEPTOR_FIELD +
+                    ".update(\"" + dm.getName() + "\", " + name + ")) return " + returnDefault(returnType) + ";\n");
         }
 
         boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
@@ -489,6 +490,17 @@ public class GenerateMethodWriter {
                 methodSignature(importSet, dm, len),
                 body,
                 methodReturn(importSet, dm, interfaceClazz));
+    }
+
+    private String returnDefault(final Class<?> returnType) {
+
+        if (returnType == void.class)
+            return "";
+
+        if (returnType.isPrimitive() || returnType == Void.class)
+            throw new UnsupportedOperationException("having a method of this return type=" + returnType + " is not supported by method writers");
+
+        return "this";
     }
 
     private String writeEventNameOrId(final Method dm, final StringBuilder body, final String eventName) {
