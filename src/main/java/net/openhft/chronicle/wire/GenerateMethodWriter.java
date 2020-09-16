@@ -450,7 +450,7 @@ public class GenerateMethodWriter {
                 name = "null";
             body.append("// updateInterceptor\n"
                     + "if (! this." + UPDATE_INTERCEPTOR_FIELD +
-                    ".update(\"" + dm.getName() + "\", " + name + ")) return " + returnDefault(returnType) + ";\n");
+                    ".update(\"" + dm.getName() + "\", " + name + ")) return" + returnDefault(returnType) + ";\n");
         }
 
         boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
@@ -507,7 +507,7 @@ public class GenerateMethodWriter {
         if (returnType.isPrimitive() || returnType == Void.class)
             throw new UnsupportedOperationException("having a method of this return type=" + returnType + " is not supported by method writers");
 
-        return "this";
+        return " this";
     }
 
     private String writeEventNameOrId(final Method dm, final StringBuilder body, final String eventName) {
