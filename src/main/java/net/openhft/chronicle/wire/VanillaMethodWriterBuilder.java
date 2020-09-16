@@ -158,7 +158,12 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     @NotNull
     private String getClassName() {
         final StringBuilder sb = new StringBuilder();
-        interfaces.forEach(i -> sb.append(i.getSimpleName()));
+
+        interfaces.forEach(i -> {
+            if (i.getEnclosingClass() != null)
+                sb.append(i.getEnclosingClass().getSimpleName());
+            sb.append(i.getSimpleName());
+        });
         sb.append(this.genericEvent == null ? "" : this.genericEvent);
         sb.append(this.metaData ? "MetadataAware" : "");
         sb.append(useMethodIds ? "MethodIds" : "");
