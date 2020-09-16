@@ -326,6 +326,10 @@ public class GenerateMethodWriter {
                 for (Method dm : interfaceClazz.getMethods()) {
                     if (Modifier.isStatic(dm.getModifiers()))
                         continue;
+
+                    if (dm.isDefault() && (!dm.getReturnType().equals(void.class) && !dm.getReturnType().isInterface()))
+                        continue;
+
                     String template = templateFor(dm);
                     if (template == null) {
                         interfaceMethods.append(createMethod(importSet, dm, interfaceClazz));
@@ -342,20 +346,23 @@ public class GenerateMethodWriter {
             imports.append(interfaceMethods);
             imports.append("\n}\n");
 
-            if (DUMP_CODE)
-                System.out.println(imports);
+            //       if (DUMP_CODE)
+            System.out.println(imports);
 
             return CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
 
-        } catch (LinkageError e) {
+        } catch (
+                LinkageError e) {
             try {
                 return Class.forName(packageName + '.' + className, true, classLoader);
             } catch (ClassNotFoundException x) {
                 throw Jvm.rethrow(x);
             }
-        } catch (Throwable e) {
+        } catch (
+                Throwable e) {
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + imports, e));
         }
+
     }
 
     private String templateFor(Method dm) {
@@ -371,11 +378,11 @@ public class GenerateMethodWriter {
     private void addMarshallableOut(SourceCodeFormatter codeFormatter) {
         codeFormatter.append("@Override\n");
         codeFormatter.append("public void marshallableOut(MarshallableOut out) {\n");
-        codeFormatter.append("this.out = () -> out;\n");
+        codeFormatter.append("this.out = () -> out;");
         for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
-            codeFormatter.append(format("    this.%s.remove();\n", e.getValue()));
+            codeFormatter.append(format("\n    this.%s.remove();", e.getValue()));
         }
-        codeFormatter.append("}\n\n");
+        codeFormatter.append("\n}\n");
 
     }
 
@@ -405,12 +412,12 @@ public class GenerateMethodWriter {
         if (useUpdateInterceptor)
             result.append("this." + UPDATE_INTERCEPTOR_FIELD + "= " + UPDATE_INTERCEPTOR_FIELD + ";\n");
         result.append("this.out = out;\n" +
-                "this.closeable = closeable;\n");
+                "this.closeable = closeable;");
         for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
-            result.append(format("%s = ThreadLocal.withInitial(() -> out.get().methodWriter(%s.class));\n", e.getValue(), nameForClass(e.getKey())));
+            result.append(format("\n%s = ThreadLocal.withInitial(() -> out.get().methodWriter(%s.class));", e.getValue(), nameForClass(e.getKey())));
         }
 
-        result.append("}\n\n");
+        result.append("\n}\n\n");
         return result;
     }
 

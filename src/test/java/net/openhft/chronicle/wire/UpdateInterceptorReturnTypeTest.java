@@ -35,6 +35,27 @@ public class UpdateInterceptorReturnTypeTest {
                 .x("hello world");
     }
 
+    @Test
+    public void testUpdateInterceptorWithLadderByQtyListener() {
+        BINARY.apply(elasticByteBuffer())
+                .methodWriterBuilder(LadderByQtyListener.class)
+                .updateInterceptor((methodName, t) -> true)
+                .build()
+                .ladderByQty("a ladder");
+    }
+
+    public interface LadderByQtyListener {
+        void ladderByQty(String ladder);
+
+        default void lbq(String name, String ladder) {
+            ladderByQty(ladder);
+        }
+
+        default boolean ignoreMethodBasedOnFirstArg(String methodName, String ladderDefinitionName) {
+            return false;
+        }
+    }
+
     interface NoReturnType {
         void x(String x);
     }
