@@ -43,6 +43,10 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
         return this.eventTime(ServicesTimestampLongConverter.currentTime());
     }
 
+    /**
+     * Used for cfg event routing. serviceId of the destination event
+     * @return serviceId
+     */
     @NotNull
     public String serviceId() {
         return serviceId;
