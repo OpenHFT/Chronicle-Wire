@@ -437,7 +437,7 @@ public class GenerateMethodWriter {
         String methodIDAnotation = "";
         if (useUpdateInterceptor) {
             if (parameterCount > 1)
-                Jvm.warn().on(getClass(), "Generated code to call updateInterceptor for " + dm + " only using last argument");
+                Jvm.debug().on(getClass(), "Generated code to call updateInterceptor for " + dm + " only using last argument");
             final String name;
             if (parameterCount > 0) {
                 Class<?> type = parameters[parameterCount - 1].getType();
