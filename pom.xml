@@ -111,11 +111,6 @@
             <artifactId>snakeyaml</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>net.openhft</groupId>
-            <artifactId>chronicle-bytes</artifactId>
-        </dependency>
-
     </dependencies>
 
     <repositories>
