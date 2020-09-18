@@ -17,4 +17,10 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
         long parse3 = INSTANCE.parse(INSTANCE.asString(now * 1000));
         assertEquals(now, parse3 / 1000);
     }
+
+    @Test
+    public void parse2() {
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456789"),
+                INSTANCE.parse("2020-09-18T01:02:03.456789"));
+    }
 }

@@ -39,6 +39,8 @@ public class NanoTimestampLongConverter implements LongConverter {
         if (text == null || text.length() == 0)
             return 0;
         try {
+            if (text.length() > 4 && text.charAt(4) == '/')
+                text = text.toString().replace('/', '-');
             TemporalAccessor parse = dtf.parse(text);
             long time = parse.getLong(ChronoField.EPOCH_DAY) * 86400_000_000_000L;
             if (parse.isSupported(ChronoField.NANO_OF_DAY))
