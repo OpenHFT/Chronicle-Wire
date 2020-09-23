@@ -753,7 +753,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @NotNull <ACS extends Appendable & CharSequence> ACS getStringBuilder(int code, @NotNull ACS sb) {
-        bytes.parseUtf8(sb, false, code & 0x1f);
+        bytes.parseUtf8(sb, true, code & 0x1f);
         return sb;
     }
 
@@ -1323,9 +1323,9 @@ public class BinaryWire extends AbstractWire implements Wire {
             } else {
                 if (bytes.retainsComments())
                     bytes.comment(s);
-                int len = s.length();
-                if (len < 0x20) {
-                    bytes.writeUnsignedByte(STRING_0 + len).appendUtf8(s);
+                long utflen = AppendableUtil.findUtf8Length(s);
+                if (utflen < 0x20) {
+                    bytes.writeUnsignedByte((int) (STRING_0 + utflen)).appendUtf8(s);
                 } else {
                     writeCode(STRING_ANY);
                     bytes.writeUtf8(s);

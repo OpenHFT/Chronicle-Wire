@@ -43,7 +43,7 @@ public class EscapeCharsTest extends WireTestCommon {
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
-        for (char i = 0; i < 260; i++) {
+        for (char i = 36; i < 260; i++) {
             list.add(new Object[]{i});
         }
         return list;
