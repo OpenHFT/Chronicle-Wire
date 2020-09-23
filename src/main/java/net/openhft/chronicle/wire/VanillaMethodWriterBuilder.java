@@ -27,10 +27,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
@@ -39,6 +36,12 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
 
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
     private static final Map<String, Class> classCache = new ConcurrentHashMap<>();
+    private static final List<Class> invalidSuperInterfaces = Arrays.asList(
+            ReadBytesMarshallable.class,
+            WriteBytesMarshallable.class,
+            ReadMarshallable.class,
+            WriteMarshallable.class
+    );
     private final boolean DISABLE_PROXY_GEN = Jvm.getBoolean("disableProxyCodegen", false);
     private final Set<Class> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
 
@@ -55,6 +58,16 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     private WireType wireType;
     private Class<?> proxyClass;
     private UpdateInterceptor updateInterceptor;
+
+    public VanillaMethodWriterBuilder(@NotNull Class<T> tClass,
+                                      WireType wireType,
+                                      @NotNull Supplier<MethodWriterInvocationHandler> handlerSupplier) {
+        this.packageName = tClass.getPackage().getName();
+        this.wireType = wireType;
+        addInterface(tClass);
+        this.classLoader = tClass.getClassLoader();
+        this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(handlerSupplier);
+    }
 
     @NotNull
     public MethodWriterBuilder<T> classLoader(ClassLoader classLoader) {
@@ -76,6 +89,10 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         if (interfaces.contains(additionalClass))
             return this;
 
+        for (Class invalidSuperInterface : invalidSuperInterfaces) {
+            if (invalidSuperInterface.isAssignableFrom(additionalClass))
+                throw new IllegalArgumentException("The event interface shouldn't implement " + invalidSuperInterface.getName());
+        }
         interfaces.add(additionalClass);
         for (Method method : additionalClass.getMethods()) {
             Class<?> returnType = method.getReturnType();
@@ -92,16 +109,6 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     public MethodWriterBuilder<T> recordHistory(boolean recordHistory) {
         handlerSupplier.recordHistory(recordHistory);
         return this;
-    }
-
-    public VanillaMethodWriterBuilder(@NotNull Class<T> tClass,
-                                      WireType wireType,
-                                      @NotNull Supplier<MethodWriterInvocationHandler> handlerSupplier) {
-        this.packageName = tClass.getPackage().getName();
-        this.wireType = wireType;
-        addInterface(tClass);
-        this.classLoader = tClass.getClassLoader();
-        this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(handlerSupplier);
     }
 
     @NotNull
@@ -283,19 +290,6 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
         return this;
     }
 
-    /**
-     * throws AbortCallingProxyException if the updateInterceptor returns {@code false}
-     */
-    class CallSupplierInvocationHandler implements InvocationHandler {
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            Object args0 = args == null ? null : args[args.length - 1];
-            return updateInterceptor == null || updateInterceptor.update(method.getName(), args0)
-                    ? handlerSupplier.get().invoke(proxy, method, args)
-                    : proxy;
-        }
-    }
-
     public Class<?> proxyClass() {
         return proxyClass;
     }
@@ -310,5 +304,18 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     @NotNull
     private String toFirstCapCase(@NotNull String name) {
         return Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
+    }
+
+    /**
+     * throws AbortCallingProxyException if the updateInterceptor returns {@code false}
+     */
+    class CallSupplierInvocationHandler implements InvocationHandler {
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            Object args0 = args == null ? null : args[args.length - 1];
+            return updateInterceptor == null || updateInterceptor.update(method.getName(), args0)
+                    ? handlerSupplier.get().invoke(proxy, method, args)
+                    : proxy;
+        }
     }
 }
