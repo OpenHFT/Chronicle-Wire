@@ -13,5 +13,4 @@ public class MethodWriterTest {
     interface MyBadInterface extends Marshallable {
 
     }
-
 }

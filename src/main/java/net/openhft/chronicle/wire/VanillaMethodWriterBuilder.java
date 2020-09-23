@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -40,7 +41,17 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
             ReadBytesMarshallable.class,
             WriteBytesMarshallable.class,
             ReadMarshallable.class,
-            WriteMarshallable.class
+            WriteMarshallable.class,
+            Collection.class,
+            Map.class,
+            Iterator.class,
+            Iterable.class,
+            Comparable.class,
+            Serializable.class,
+            CharSequence.class,
+            Comparable.class,
+            Comparator.class,
+            Observer.class
     );
     private final boolean DISABLE_PROXY_GEN = Jvm.getBoolean("disableProxyCodegen", false);
     private final Set<Class> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
