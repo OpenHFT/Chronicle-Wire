@@ -2191,12 +2191,6 @@ public class TextWire extends AbstractWire implements Wire {
             @Nullable CharSequence ret = a;
 
             switch (ch) {
-                case '$': {
-                    if (bytes.peekUnsignedByte(bytes.readPosition() + 1) == '{') {
-                        unsubstitutedString(a);
-                        return a;
-                    }
-                }
                 case '{': {
                     final long len = readLength();
                     try {
@@ -2241,6 +2235,13 @@ public class TextWire extends AbstractWire implements Wire {
 
                 case -1:
                     return "";
+
+                case '$':
+                    if (bytes.peekUnsignedByte(bytes.readPosition() + 1) == '{') {
+                        unsubstitutedString(a);
+                        return a;
+                    }
+                    // fall through
 
                 default: {
                     final long rem = bytes.readRemaining();
