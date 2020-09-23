@@ -53,7 +53,7 @@ public class VanillaMethodReader implements MethodReader {
     private final MarshallableIn in;
     @NotNull
     private final WireParser wireParser;
-    private final MessageHistory messageHistory = MessageHistory.get();
+    private MessageHistory messageHistory;
     private boolean closeIn = false, closed;
     private MethodReaderInterceptorReturns methodReaderInterceptorReturns;
 
@@ -498,10 +498,15 @@ public class VanillaMethodReader implements MethodReader {
             }
             assert context.isData();
 
-            messageHistory.reset(context.sourceId(), context.index());
+            messageHistory().reset(context.sourceId(), context.index());
             wireParser.accept(context.wire());
         }
         return true;
+    }
+
+    private MessageHistory messageHistory() {
+        if (messageHistory == null) messageHistory = MessageHistory.get();
+        return messageHistory;
     }
 
     private boolean readOneMetaData(DocumentContext context) {
