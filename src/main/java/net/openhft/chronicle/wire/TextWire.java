@@ -2191,6 +2191,12 @@ public class TextWire extends AbstractWire implements Wire {
             @Nullable CharSequence ret = a;
 
             switch (ch) {
+                case '$': {
+                    if (bytes.peekUnsignedByte(bytes.readPosition() + 1) == '{') {
+                        unsubstitutedString(a);
+                        return a;
+                    }
+                }
                 case '{': {
                     final long len = readLength();
                     try {
@@ -2266,6 +2272,22 @@ public class TextWire extends AbstractWire implements Wire {
             if (prev == ':' || prev == '#' || prev == '}' || prev == ']')
                 bytes.readSkip(-1);
             return ret;
+        }
+
+        private <ACS extends Appendable & CharSequence> void unsubstitutedString(@NotNull ACS a) {
+            String text = bytes.toString();
+            if (text.length() > 32)
+                text = text.substring(0, 32);
+            Jvm.warn().on(getClass(), "Found an unsubstituted ${} as " + text);
+            char c;
+            do {
+                c = bytes.readChar();
+                try {
+                    a.append(c);
+                } catch (IOException e) {
+                    throw new AssertionError(e);
+                }
+            } while (!bytes.isEmpty() && c != '}');
         }
 
         private <ACS extends Appendable & CharSequence> void readText(@NotNull ACS a, @NotNull StopCharTester quotes) {
@@ -2426,6 +2448,12 @@ public class TextWire extends AbstractWire implements Wire {
             consumePadding();
             int code = peekCode();
             switch (code) {
+                case '$': {
+                    bytes.readSkip(1);
+                    if (peekCode() == '{')
+                        bytes.parse8bit(StopCharTesters.CURLY_STOP);
+                    break;
+                }
                 case '{': {
                     consumeMap();
                     break;
@@ -2612,11 +2640,24 @@ public class TextWire extends AbstractWire implements Wire {
                 case 'f':
                 case 'F':
                     return bool() ? 1 : 0;
+                case '$':
+                    unsubstitutedNumber();
+                    return 0;
                 case '{':
                 case '[':
                     throw new IORuntimeException("Cannot read a " + (char) code + " as a number");
             }
             return bytes.parseLong();
+        }
+
+        private void unsubstitutedNumber() {
+            String s = bytes.parse8bit(StopCharTesters.CURLY_STOP);
+            Jvm.warn().on(getClass(), "Cannot read " + s + "} as a number, treating as 0");
+            // to prevent the } being rewound.
+            if (",\n ".indexOf(peekCode()) >= 0)
+                bytes.readSkip(1);
+            else
+                throw new IllegalStateException("Unable to continue after ${} in number.");
         }
 
         @NotNull
@@ -2639,7 +2680,11 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn float32(@NotNull T t, @NotNull ObjFloatConsumer<T> tf) {
             consumePadding();
-            tf.accept(t, (float) bytes.parseDouble());
+            if (peekCode() == '$') {
+                unsubstitutedNumber();
+            } else {
+                tf.accept(t, (float) bytes.parseDouble());
+            }
             return TextWire.this;
         }
 
@@ -2647,7 +2692,11 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td) {
             consumePadding();
-            td.accept(t, bytes.parseDouble());
+            if (peekCode() == '$') {
+                unsubstitutedNumber();
+            } else {
+                td.accept(t, bytes.parseDouble());
+            }
             return TextWire.this;
         }
 
@@ -3331,6 +3380,9 @@ public class TextWire extends AbstractWire implements Wire {
             consumePadding();
             valueIn.skipType();
             switch (peekCode()) {
+                case '$':
+                    unsubstitutedNumber();
+                    return 0;
                 case '[':
                 case '{':
                     Jvm.warn().on(getClass(), "Unable to read " + valueIn.object() + " as a double.");
