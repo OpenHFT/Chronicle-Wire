@@ -753,7 +753,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     @NotNull <ACS extends Appendable & CharSequence> ACS getStringBuilder(int code, @NotNull ACS sb) {
-        bytes.parseUtf8(sb, code & 0x1f);
+        bytes.parseUtf8(sb, false, code & 0x1f);
         return sb;
     }
 

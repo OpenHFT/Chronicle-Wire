@@ -97,6 +97,17 @@ public class BinaryWireTest extends WireTestCommon {
         assertEquals(fieldLess ? "" : "\"\": \"\": \"\": ", TextWire.asText(wire));
     }
 
+    @Test
+    public void readWriteString() {
+        String utfCharacter = "ä";
+        @NotNull Wire wire = createWire();
+        wire.getValueOut()
+                .writeString(utfCharacter);
+
+        assertEquals(utfCharacter, wire.getValueIn()
+                .readString());
+    }
+
     @NotNull
     private BinaryWire createWire() {
         bytes.clear();
