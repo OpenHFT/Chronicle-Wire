@@ -24,6 +24,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.lang.annotation.RetentionPolicy;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -139,4 +140,34 @@ public class MarshallableTest extends WireTestCommon {
         String three;
     }
 
+    @Test
+    public void test() {
+        StaticData staticData0 = Marshallable.fromString(StaticData.class,
+                "!StaticData { }");
+        assertNotNull(staticData0);
+        assertEquals(100, staticData0.anInt);
+        assertNotNull(staticData0.aList);   // <== OK, EXPECTED
+
+        StaticData staticData = Marshallable.fromString(StaticData.class,
+                "!StaticData { anInt: 42 }");
+        assertNotNull(staticData);
+        assertEquals(42, staticData.anInt);
+        assertNotNull(staticData.aList);   // <== OK, EXPECTED
+
+        NonStaticData nonStaticData = Marshallable.fromString(NonStaticData.class,
+                "!NonStaticData { }");
+        assertNotNull(nonStaticData);
+        assertEquals(0, nonStaticData.anInt);
+        assertNull(nonStaticData.aList);   // <== UNEXPECTED
+    }
+
+    static class StaticData extends AbstractMarshallableCfg {
+        int anInt = 100;
+        List<String> aList = new ArrayList<>();
+    }
+
+    class NonStaticData extends AbstractMarshallableCfg {
+        int anInt;
+        List<String> aList = new ArrayList<>();
+    }
 }
