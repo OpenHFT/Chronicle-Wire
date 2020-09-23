@@ -124,6 +124,24 @@ public class MarshallableTest extends WireTestCommon {
             assertEquals(a, b);
     }
 
+    @Test
+    public void test() {
+        StaticData staticData0 = Marshallable.fromString(StaticData.class, "{ }");
+        assertNotNull(staticData0);
+        assertEquals(100, staticData0.anInt);
+        assertNotNull(staticData0.aList);   // <== OK, EXPECTED
+
+        StaticData staticData = Marshallable.fromString(StaticData.class, "anInt: 42");
+        assertNotNull(staticData);
+        assertEquals(42, staticData.anInt);
+        assertNotNull(staticData.aList);   // <== OK, EXPECTED
+
+        NonStaticData nonStaticData = Marshallable.fromString(NonStaticData.class, "{ }");
+        assertNotNull(nonStaticData);
+        assertEquals(0, nonStaticData.anInt);
+        assertNull(nonStaticData.aList);   // <== UNEXPECTED
+    }
+
     static class WithArray extends SelfDescribingMarshallable {
         DTO1[] dto1s;
     }
@@ -138,27 +156,6 @@ public class MarshallableTest extends WireTestCommon {
         RetentionPolicy one;
         List<Long> two;
         String three;
-    }
-
-    @Test
-    public void test() {
-        StaticData staticData0 = Marshallable.fromString(StaticData.class,
-                "!StaticData { }");
-        assertNotNull(staticData0);
-        assertEquals(100, staticData0.anInt);
-        assertNotNull(staticData0.aList);   // <== OK, EXPECTED
-
-        StaticData staticData = Marshallable.fromString(StaticData.class,
-                "!StaticData { anInt: 42 }");
-        assertNotNull(staticData);
-        assertEquals(42, staticData.anInt);
-        assertNotNull(staticData.aList);   // <== OK, EXPECTED
-
-        NonStaticData nonStaticData = Marshallable.fromString(NonStaticData.class,
-                "!NonStaticData { }");
-        assertNotNull(nonStaticData);
-        assertEquals(0, nonStaticData.anInt);
-        assertNull(nonStaticData.aList);   // <== UNEXPECTED
     }
 
     static class StaticData extends AbstractMarshallableCfg {
