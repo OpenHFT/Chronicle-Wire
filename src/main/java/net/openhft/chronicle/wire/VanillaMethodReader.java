@@ -344,7 +344,7 @@ public class VanillaMethodReader implements MethodReader {
                 Object invoke = invoke(contextSupplier.get(), m, NO_ARGS);
                 if (invoke != null)
                     context[0] = invoke;
-                if (o2 != null)
+                else if (o2 != null)
                     context[0] = o2;
             } catch (Exception i) {
                 Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + "()", i);
@@ -384,7 +384,7 @@ public class VanillaMethodReader implements MethodReader {
                 Object invoke = invoke(contextSupplier.get(), m, args);
                 if (invoke != null)
                     context[0] = invoke;
-                if (o2 != null)
+                else if (o2 != null)
                     context[0] = o2;
             } catch (Exception i) {
                 Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + " " + Arrays.toString(args), i);
@@ -438,7 +438,7 @@ public class VanillaMethodReader implements MethodReader {
                 Object invoke = invoke(contextSupplier.get(), m, args);
                 if (invoke != null)
                     context[0] = invoke;
-                if (o2 != null)
+                else if (o2 != null)
                     context[0] = o2;
             } catch (Exception i) {
                 Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + " " + Arrays.toString(args), i);
