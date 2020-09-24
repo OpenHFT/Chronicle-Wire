@@ -91,4 +91,61 @@ public class ChainedMethodsTest extends WireTestCommon {
         assertEquals("*mid[mid]*next[1]*echo[echo-1]*mid2[mid2]*next2[word]*echo[echo-2]", sb.toString());
         assertFalse(reader.readOne());
     }
+
+    @Test
+    public void chainedBinaryVariousArgsNumber() {
+        Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        ITop top = wire.methodWriter(ITop.class);
+        top.midNoArg()
+                .next(1)
+                .echo("echo-1");
+
+        top.midTwoArgs(5, -7L)
+                .next(2)
+                .echo("echo-2");
+
+        assertEquals("--- !!data #binary\n" +
+                "midNoArg: \"\"\n" +
+                "next: 1\n" +
+                "echo: echo-1\n" +
+                "# position: 43, header: 1\n" +
+                "--- !!data #binary\n" +
+                "midTwoArgs: [\n" +
+                "  !int 5,\n" +
+                "  -7\n" +
+                "],\n" +
+                "next: 2\n" +
+                "echo: echo-2\n" , WireDumper.of(wire).asString());
+
+        StringBuilder sb = new StringBuilder();
+
+        ITop implementingOnlyITop = new ITop() {
+            @Override
+            public IMid mid(String name) {
+                throw new UnsupportedOperationException("not supported");
+            }
+
+            @Override
+            public IMid2 mid2(String name) {
+                throw new UnsupportedOperationException("not supported");
+            }
+
+            @Override
+            public IMid midNoArg() {
+                return Mocker.intercepting(IMid.class, "*", sb::append);
+            }
+
+            @Override
+            public IMid midTwoArgs(int i, long l) {
+                return Mocker.intercepting(IMid.class, "*", sb::append);
+            }
+        };
+
+        MethodReader reader = wire.methodReader(implementingOnlyITop);
+        assertTrue(reader.readOne());
+        assertTrue(reader.readOne());
+        assertEquals("*next[1]*echo[echo-1]*next[2]*echo[echo-2]", sb.toString());
+        assertFalse(reader.readOne());
+    }
+
 }
