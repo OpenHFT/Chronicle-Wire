@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.utils.JsonSourceCodeFormatter;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 
@@ -94,7 +95,8 @@ public class GenerateJsonSchemaMain {
                     generateMethodDesc(desc, pTypes[0], pAnnotations[0]);
                     break;
                 default:
-                    throw new UnsupportedOperationException(method.toString());
+                    Jvm.warn().on(getClass(), method.toString());
+                    break;
             }
 
             events.put(method.getName(), desc.toString());
