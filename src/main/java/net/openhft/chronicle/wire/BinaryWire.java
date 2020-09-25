@@ -2925,11 +2925,12 @@ public class BinaryWire extends AbstractWire implements Wire {
             int code = readCode();
             if (code == I64_ARRAY) {
                 if (!(values instanceof BinaryLongArrayReference))
-                    setter.accept(t, values = new BinaryLongArrayReference());
+                    values = new BinaryLongArrayReference();
                 @Nullable Byteable b = (Byteable) values;
                 long length = BinaryLongArrayReference.peakLength(bytes, bytes.readPosition());
                 b.bytesStore(bytes, bytes.readPosition(), length);
                 bytes.readSkip(length);
+                setter.accept(t, values);
 
             } else {
                 cantRead(code);
