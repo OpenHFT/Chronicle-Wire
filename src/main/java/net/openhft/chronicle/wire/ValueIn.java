@@ -115,8 +115,7 @@ public interface ValueIn {
     @NotNull
     WireIn bytes(@NotNull ReadBytesMarshallable bytesMarshallable);
 
-    @Nullable
-    byte[] bytes();
+    byte @NotNull [] bytes();
 
     @Nullable
     default BytesStore bytesStore() {
@@ -230,7 +229,6 @@ public interface ValueIn {
     @NotNull
     <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter);
 
-    @NotNull
     <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader);
 
     <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0);

@@ -51,13 +51,13 @@ public class WireBug37Test extends WireTestCommon {
         }
 
         @Override
-        public void readMarshallable(WireIn wire) throws IORuntimeException {
+        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
             builder.setLength(0);
             assertNotNull(wire.getValueIn().textTo(builder));
         }
 
         @Override
-        public void writeMarshallable(WireOut wire) {
+        public void writeMarshallable(@NotNull WireOut wire) {
             wire.getValueOut().text(builder);
         }
 

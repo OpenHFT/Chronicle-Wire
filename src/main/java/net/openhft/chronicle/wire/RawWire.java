@@ -512,14 +512,14 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull CharSequence type) {
+        public WireOut typeLiteral(@Nullable CharSequence type) {
             bytes.writeUtf8(type);
             return RawWire.this;
         }
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @NotNull Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @Nullable Class type) {
             long position = bytes.writePosition();
             bytes.writeSkip(1);
             typeTranslator.accept(type, bytes);
@@ -801,7 +801,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public byte[] bytes() {
+        public byte @NotNull [] bytes() {
             throw new UnsupportedOperationException("todo");
         }
 
@@ -938,7 +938,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireIn int64(@Nullable LongValue value) {
+        public WireIn int64(@NotNull LongValue value) {
             @Nullable Byteable b = (Byteable) value;
             long length = b.maxSize();
             b.bytesStore(bytes, bytes.readPosition(), length);
@@ -974,7 +974,6 @@ public class RawWire extends AbstractWire implements Wire {
             return RawWire.this;
         }
 
-        @NotNull
         @Override
         public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
             throw new UnsupportedOperationException("todo");

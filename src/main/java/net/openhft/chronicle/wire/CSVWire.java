@@ -256,7 +256,6 @@ public class CSVWire extends TextWire {
             return ch > 0 && ch != ']';
         }
 
-        @NotNull
         @Override
         public boolean marshallable(@NotNull ReadMarshallable object) {
             if (isNull())

@@ -418,7 +418,6 @@ public interface ValueOut {
         return this;
     }
 
-    @NotNull
     default boolean swapLeaf(boolean isLeaf) {
         return false;
     }

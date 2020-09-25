@@ -479,15 +479,15 @@ public class HashWire implements WireOut, BytesComment {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull CharSequence type) {
-            hash = hash * M1 + type.hashCode() * M2;
+        public WireOut typeLiteral(@Nullable CharSequence type) {
+            hash = hash * M1 + (type == null ? 0 : type.hashCode() * M2);
             return HashWire.this;
         }
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @NotNull Class type) {
-            hash = hash * M1 + type.hashCode() * M2;
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @Nullable Class type) {
+            hash = hash * M1 + (type == null ? 0 : type.hashCode() * M2);
             return HashWire.this;
         }
 
@@ -506,7 +506,7 @@ public class HashWire implements WireOut, BytesComment {
 
         @NotNull
         @Override
-        public WireOut int32forBinding(int value, IntValue intValue) {
+        public WireOut int32forBinding(int value, @NotNull IntValue intValue) {
             throw new UnsupportedOperationException("todo");
         }
 
@@ -518,7 +518,7 @@ public class HashWire implements WireOut, BytesComment {
 
         @NotNull
         @Override
-        public WireOut int64forBinding(long value, LongValue longValue) {
+        public WireOut int64forBinding(long value, @NotNull LongValue longValue) {
             throw new UnsupportedOperationException("todo");
         }
 

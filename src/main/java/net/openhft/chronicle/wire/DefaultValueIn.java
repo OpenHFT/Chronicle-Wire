@@ -119,9 +119,8 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
-    @Nullable
     @Override
-    public byte[] bytes() {
+    public byte @NotNull [] bytes() {
         return (byte[]) defaultValue;
     }
 
@@ -322,7 +321,6 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
-    @NotNull
     @Override
     public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
         return false;

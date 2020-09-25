@@ -1708,7 +1708,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @NotNull Class type) {
+        public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @Nullable Class type) {
             writeCode(TYPE_LITERAL);
             typeTranslator.accept(type, bytes);
             return BinaryWire.this;
@@ -2542,7 +2542,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public byte[] bytes() {
+        public byte @NotNull [] bytes() {
             long length = readLength();
             int code = readCode();
             if (code == NULL) {
@@ -2957,7 +2957,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireIn int64(LongValue value) {
+        public WireIn int64(@NotNull LongValue value) {
             consumePadding();
             int code = readCode();
             if (code != INT64 && code != 0)
@@ -2972,7 +2972,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireIn int32(IntValue value) {
+        public WireIn int32(@NotNull IntValue value) {
             consumePadding();
             int code = readCode();
             if (code != INT32)
@@ -3027,7 +3027,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
-        @NotNull
         @Override
         public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
             if (isNull())
@@ -3330,7 +3329,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
         }
 
-        @NotNull
         @Override
         public boolean marshallable(@NotNull ReadMarshallable object)
                 throws BufferUnderflowException, IORuntimeException {

@@ -1161,7 +1161,6 @@ public class TextWire extends AbstractWire implements Wire {
             sep = BytesStore.empty();
         }
 
-        @NotNull
         @Override
         public boolean swapLeaf(boolean isLeaf) {
             if (isLeaf == leaf)
@@ -1319,7 +1318,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut bytes(@NotNull String type, @NotNull BytesStore bytesStore) {
+        public WireOut bytes(@NotNull String type, @Nullable BytesStore bytesStore) {
             if (dropDefault) {
                 writeSavedEventName();
             }
@@ -1679,12 +1678,14 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull CharSequence type) {
+        public WireOut typeLiteral(@Nullable CharSequence type) {
             if (dropDefault) {
                 if (type == null)
                     return wireOut();
                 writeSavedEventName();
             }
+            if (type == null)
+                return nu11();
             prependSeparator();
             append(TYPE);
             escape(type);
@@ -1712,7 +1713,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut int32forBinding(int value, IntValue intValue) {
+        public WireOut int32forBinding(int value, @NotNull IntValue intValue) {
             if (dropDefault) {
                 writeSavedEventName();
             }
@@ -1741,7 +1742,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut int64forBinding(long value, LongValue longValue) {
+        public WireOut int64forBinding(long value, @NotNull LongValue longValue) {
             if (dropDefault) {
                 writeSavedEventName();
             }
@@ -2375,8 +2376,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         @Override
-        @Nullable
-        public byte[] bytes() {
+        public byte @NotNull [] bytes() {
             consumePadding();
             try {
                 // TODO needs to be made much more efficient.
@@ -2758,7 +2758,7 @@ public class TextWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireIn int64(@Nullable LongValue value) {
+        public WireIn int64(@NotNull LongValue value) {
             consumePadding();
             @NotNull Byteable b = (Byteable) value;
             long length = b.maxSize();
@@ -2815,7 +2815,6 @@ public class TextWire extends AbstractWire implements Wire {
             return TextWire.this;
         }
 
-        @NotNull
         @Override
         public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
             consumePadding();

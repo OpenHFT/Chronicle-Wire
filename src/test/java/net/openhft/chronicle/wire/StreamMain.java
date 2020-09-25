@@ -56,7 +56,7 @@ class FileFormat extends SelfDescribingMarshallable {
     WireType wireType;
 
     @Override
-    public void readMarshallable(WireIn wire) throws IllegalStateException {
+    public void readMarshallable(@NotNull WireIn wire) throws IllegalStateException {
         wire.read(() -> "version").int32(this, (o, s) -> o.version = s)
                 .read(() -> "createdTime").zonedDateTime(this, (o, z) -> o.createdTime = z)
                 .read(() -> "creator").text(this, (o, s) -> o.creator = s)

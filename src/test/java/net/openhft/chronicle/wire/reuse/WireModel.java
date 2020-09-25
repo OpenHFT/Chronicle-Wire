@@ -39,7 +39,7 @@ public class WireModel extends SelfDescribingMarshallable {
     public WireModel() {
     }
 
-    public WireModel(long id, int revision, String key) {
+    public WireModel(long id, int revision, @Nullable String key) {
         this.id = id;
         this.revision = revision;
         this.key = key;
@@ -53,7 +53,7 @@ public class WireModel extends SelfDescribingMarshallable {
     }
 
     @Override
-    public void writeMarshallable(WireOut wire) {
+    public void writeMarshallable(@NotNull WireOut wire) {
         wire.write(ModelKeys.id).int64(id)
                 .write(ModelKeys.revision).int32(revision)
                 .write(ModelKeys.key).text(key);
@@ -80,7 +80,7 @@ public class WireModel extends SelfDescribingMarshallable {
         return key;
     }
 
-    public void setKey(String key) {
+    public void setKey(@Nullable String key) {
         this.key = key;
     }
 }

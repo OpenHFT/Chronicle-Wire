@@ -206,7 +206,7 @@ public class JSONWireTest extends WireTestCommon {
         TwoLists() {
         }
 
-        TwoLists(String name, long number1, double number2) {
+        TwoLists(@Nullable String name, long number1, double number2) {
             this.name = name;
             this.list1 = new ArrayList<>();
             for (int i = 0; i < number1; i++) {

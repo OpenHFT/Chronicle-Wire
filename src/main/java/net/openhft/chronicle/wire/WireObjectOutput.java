@@ -110,17 +110,17 @@ class WireObjectOutput implements ObjectOutput {
     }
 
     @Override
-    public void writeBytes(String s) {
+    public void writeBytes(@NotNull String s) {
         wire.getValueOut().text(s);
     }
 
     @Override
-    public void writeChars(String s) {
+    public void writeChars(@NotNull String s) {
         wire.getValueOut().text(s);
     }
 
     @Override
-    public void writeUTF(String s) {
+    public void writeUTF(@NotNull String s) {
         wire.getValueOut().text(s);
     }
 }

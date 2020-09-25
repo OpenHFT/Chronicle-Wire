@@ -25,7 +25,7 @@ class MyMarshallable extends SelfDescribingMarshallable {
     @Nullable
     String someData;
 
-    MyMarshallable(String someData) {
+    MyMarshallable(@Nullable String someData) {
         this.someData = someData;
     }
 

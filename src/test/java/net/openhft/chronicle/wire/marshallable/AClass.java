@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire.marshallable;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
+import org.jetbrains.annotations.NotNull;
 
 class AClass extends SelfDescribingMarshallable {
     int id;
@@ -47,7 +48,7 @@ class AClass extends SelfDescribingMarshallable {
     }
 
     @Override
-    public void writeMarshallable(WireOut out) {
+    public void writeMarshallable(@NotNull WireOut out) {
         out.write("id").writeInt(id);
         out.write("flag").writeBoolean(flag);
         out.write("b").writeByte(b);
@@ -61,7 +62,7 @@ class AClass extends SelfDescribingMarshallable {
     }
 
     @Override
-    public void readMarshallable(WireIn in) {
+    public void readMarshallable(@NotNull WireIn in) {
         id = in.read("id").readInt();
         flag = in.read("flag").readBoolean();
         b = in.read("b").readByte();

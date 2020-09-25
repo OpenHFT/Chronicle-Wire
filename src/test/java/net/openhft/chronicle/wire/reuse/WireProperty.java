@@ -17,9 +17,9 @@
  */
 package net.openhft.chronicle.wire.reuse;
 
-import org.jetbrains.annotations.NotNull;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -36,7 +36,7 @@ public class WireProperty extends WireModel {
     @Nullable
     private String value;
 
-    public WireProperty(String reference, String path, String name, String value, long id, int revision, String key) {
+    public WireProperty(@Nullable String reference, @Nullable String path, @Nullable String name, @Nullable String value, long id, int revision, String key) {
         super(id, revision, key);
         this.reference = reference;
         this.path = path;
@@ -54,7 +54,7 @@ public class WireProperty extends WireModel {
     }
 
     @Override
-    public void writeMarshallable(WireOut wire) {
+    public void writeMarshallable(@NotNull WireOut wire) {
         super.writeMarshallable(wire);
         wire.write(ModelKeys.reference).text(reference)
                 .write(ModelKeys.path).text(path)
@@ -67,7 +67,7 @@ public class WireProperty extends WireModel {
         return reference;
     }
 
-    public void setReference(String reference) {
+    public void setReference(@Nullable String reference) {
         this.reference = reference;
     }
 
@@ -76,7 +76,7 @@ public class WireProperty extends WireModel {
         return path;
     }
 
-    public void setPath(String path) {
+    public void setPath(@Nullable String path) {
         this.path = path;
     }
 
@@ -85,7 +85,7 @@ public class WireProperty extends WireModel {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(@Nullable String name) {
         this.name = name;
     }
 
@@ -94,7 +94,7 @@ public class WireProperty extends WireModel {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(@Nullable String value) {
         this.value = value;
     }
 }

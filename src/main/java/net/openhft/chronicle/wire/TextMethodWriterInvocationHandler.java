@@ -39,7 +39,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
         this(() -> marshallableOut);
     }
 
-    public TextMethodWriterInvocationHandler(Supplier<MarshallableOut> marshallableOutSupplier) {
+    public TextMethodWriterInvocationHandler(@NotNull Supplier<MarshallableOut> marshallableOutSupplier) {
         this.marshallableOutSupplier = marshallableOutSupplier;
     }
 

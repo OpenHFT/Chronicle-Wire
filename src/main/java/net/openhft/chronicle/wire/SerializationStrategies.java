@@ -477,7 +477,7 @@ public enum SerializationStrategies implements SerializationStrategy {
 
         @NotNull
         @Override
-        public Object[] readResolve() {
+        public Object @NotNull [] readResolve() {
             return array;
         }
     }

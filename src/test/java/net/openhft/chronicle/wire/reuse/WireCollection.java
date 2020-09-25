@@ -17,9 +17,9 @@
  */
 package net.openhft.chronicle.wire.reuse;
 
-import org.jetbrains.annotations.NotNull;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -44,7 +44,7 @@ public class WireCollection extends WireModel {
     public WireCollection() {
     }
 
-    public WireCollection(String reference, String path, String name, long id, int revision, String key) {
+    public WireCollection(@Nullable String reference, @Nullable String path, @Nullable String name, long id, int revision, String key) {
         super(id, revision, key);
         this.reference = reference;
         this.path = path;
@@ -62,7 +62,7 @@ public class WireCollection extends WireModel {
     }
 
     @Override
-    public void writeMarshallable(WireOut wire) {
+    public void writeMarshallable(@NotNull WireOut wire) {
         super.writeMarshallable(wire);
         wire
                 .write(ModelKeys.reference).text(reference)
@@ -81,7 +81,7 @@ public class WireCollection extends WireModel {
         return reference;
     }
 
-    public void setReference(String reference) {
+    public void setReference(@Nullable String reference) {
         this.reference = reference;
     }
 
@@ -90,7 +90,7 @@ public class WireCollection extends WireModel {
         return path;
     }
 
-    public void setPath(String path) {
+    public void setPath(@Nullable String path) {
         this.path = path;
     }
 
@@ -99,7 +99,7 @@ public class WireCollection extends WireModel {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(@Nullable String name) {
         this.name = name;
     }
 
@@ -112,7 +112,7 @@ public class WireCollection extends WireModel {
         return properties;
     }
 
-    public void setProperties(Map<String, WireProperty> properties) {
+    public void setProperties(@Nullable Map<String, WireProperty> properties) {
         this.properties = properties;
     }
 
@@ -125,7 +125,7 @@ public class WireCollection extends WireModel {
         return collections;
     }
 
-    public void setCollections(Map<String, WireCollection> collections) {
+    public void setCollections(@Nullable Map<String, WireCollection> collections) {
         this.collections = collections;
     }
 

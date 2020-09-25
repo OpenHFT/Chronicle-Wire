@@ -11,7 +11,7 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
 
 
     @Override
-    public void readMarshallable(WireIn wireIn) throws IORuntimeException {
+    public void readMarshallable(@NotNull WireIn wireIn) throws IORuntimeException {
         Wires.readMarshallable(this, wireIn, true);
     }
 
@@ -22,7 +22,7 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
     }
 
     @Override
-    public E eventId(CharSequence eventId) {
+    public E eventId(@NotNull CharSequence eventId) {
         this.eventId = eventId.toString();
         return (E) this;
     }

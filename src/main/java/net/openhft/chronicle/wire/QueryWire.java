@@ -106,7 +106,7 @@ public class QueryWire extends TextWire {
 
     @NotNull
     @Override
-    public Wire writeComment(CharSequence s) {
+    public Wire writeComment(@NotNull CharSequence s) {
         return this;
     }
 
@@ -240,7 +240,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut int64array(long capacity, LongArrayValues values) {
+        public WireOut int64array(long capacity, @NotNull LongArrayValues values) {
             throw new UnsupportedOperationException();
         }
 
@@ -273,7 +273,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut int32forBinding(int value, IntValue intValue) {
+        public WireOut int32forBinding(int value, @NotNull IntValue intValue) {
             throw new UnsupportedOperationException();
         }
 
@@ -285,7 +285,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut int64forBinding(long value, LongValue longValue) {
+        public WireOut int64forBinding(long value, @NotNull LongValue longValue) {
             throw new UnsupportedOperationException();
         }
 
