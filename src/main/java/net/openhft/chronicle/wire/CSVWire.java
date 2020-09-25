@@ -144,7 +144,9 @@ public class CSVWire extends TextWire {
     class CSVValueOut extends TextValueOut {
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull CharSequence type) {
+        public WireOut typeLiteral(@Nullable CharSequence type) {
+            if (type == null)
+                return nu11();
             throw new UnsupportedOperationException("Type literals not supported in CSV, cannot write " + type);
         }
 
