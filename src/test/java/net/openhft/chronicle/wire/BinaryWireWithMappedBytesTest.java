@@ -40,7 +40,7 @@ public class BinaryWireWithMappedBytesTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testRefAtStart() throws FileNotFoundException {
-        @NotNull File file = new File(OS.TARGET, "testRefAtStart.map");
+        @NotNull File file = new File(OS.getTarget(), "testRefAtStart.map");
         file.delete();
         @NotNull MappedBytes bytes = MappedBytes.mappedBytes(file, 64 << 10);
         Wire wire = WireType.BINARY.apply(bytes);
