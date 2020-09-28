@@ -278,6 +278,11 @@ public class HashWire implements WireOut, BytesComment {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public @NotNull IntArrayValues newIntArrayReference() {
+        throw new UnsupportedOperationException();
+    }
+
     @NotNull
     @Override
     public Pauser pauser() {

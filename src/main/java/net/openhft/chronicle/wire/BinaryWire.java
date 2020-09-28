@@ -1279,6 +1279,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         return new BinaryLongArrayReference();
     }
 
+    @Override
+    public @NotNull IntArrayValues newIntArrayReference() {
+        return new BinaryIntArrayReference();
+    }
+
     @Nullable
     StringBuilder readUtf8() {
         @NotNull StringBuilder sb = acquireStringBuilder();

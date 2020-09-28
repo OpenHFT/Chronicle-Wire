@@ -18,10 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.bytes.ref.TextBooleanReference;
-import net.openhft.chronicle.bytes.ref.TextIntReference;
-import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
-import net.openhft.chronicle.bytes.ref.TextLongReference;
+import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
@@ -729,6 +726,11 @@ public class YamlWire extends AbstractWire implements Wire {
     @Override
     public LongArrayValues newLongArrayReference() {
         return new TextLongArrayReference();
+    }
+
+    @Override
+    public @NotNull IntArrayValues newIntArrayReference() {
+        return new TextIntArrayReference();
     }
 
     public void append(@NotNull CharSequence cs) {

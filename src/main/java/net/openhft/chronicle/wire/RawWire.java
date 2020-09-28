@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.ref.BinaryIntArrayReference;
 import net.openhft.chronicle.bytes.ref.BinaryIntReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongReference;
@@ -291,6 +292,11 @@ public class RawWire extends AbstractWire implements Wire {
     @Override
     public BinaryLongArrayReference newLongArrayReference() {
         return new BinaryLongArrayReference();
+    }
+
+    @Override
+    public @NotNull IntArrayValues newIntArrayReference() {
+        return new BinaryIntArrayReference();
     }
 
     class RawValueOut implements ValueOut {

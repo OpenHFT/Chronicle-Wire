@@ -24,6 +24,7 @@ import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.StringUtils;
+import net.openhft.chronicle.core.values.IntArrayValues;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -135,6 +136,11 @@ public class QueryWire extends TextWire {
     @NotNull
     @Override
     public BinaryLongArrayReference newLongArrayReference() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @NotNull IntArrayValues newIntArrayReference() {
         throw new UnsupportedOperationException();
     }
 

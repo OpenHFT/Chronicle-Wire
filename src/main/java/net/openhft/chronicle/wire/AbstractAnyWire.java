@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.values.IntArrayValues;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
@@ -122,6 +123,11 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
     @Override
     public LongArrayValues newLongArrayReference() {
         return wireAcquisition.acquireWire().newLongArrayReference();
+    }
+
+    @Override
+    public @NotNull IntArrayValues newIntArrayReference() {
+        return wireAcquisition.acquireWire().newIntArrayReference();
     }
 
     void checkWire() {

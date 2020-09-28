@@ -87,6 +87,12 @@ public interface WireCommon {
     LongArrayValues newLongArrayReference();
 
     /**
+     * @return a IntArrayValue which appropriate for this wire.
+     */
+    @NotNull
+    IntArrayValues newIntArrayReference();
+
+    /**
      * reset the state of the current wire for reuse.
      */
     void clear();
