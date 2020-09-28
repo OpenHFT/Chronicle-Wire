@@ -49,6 +49,5 @@ public interface FieldInfo {
 
     void set(Object object, double value) throws IllegalArgumentException;
 
-    @SuppressWarnings("rawtypes")
-    Class genericType(int index);
+    Class<?> genericType(int index);
 }

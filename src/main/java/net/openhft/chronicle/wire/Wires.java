@@ -999,7 +999,7 @@ public enum Wires {
         }
 
         @Override
-        public Class genericType(int index) {
+        public Class<?> genericType(int index) {
             return Object.class;
         }
     }

@@ -183,9 +183,8 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         return field;
     }
 
-    @NotNull
     @Override
-    public Class genericType(int index) {
+    public Class<?> genericType(int index) {
         ParameterizedType genericType = (ParameterizedType) field.getGenericType();
         Type type = genericType.getActualTypeArguments()[index];
         return (Class) type;
