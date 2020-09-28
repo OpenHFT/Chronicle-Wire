@@ -37,7 +37,7 @@ public abstract class AbstractFieldInfo implements FieldInfo {
     }
 
     @Override
-    public Class type() {
+    public Class<?> type() {
         return type;
     }
 

@@ -24,7 +24,7 @@ public interface FieldInfo {
     String name();
 
     @SuppressWarnings("rawtypes")
-    Class type();
+    Class<?> type();
 
     BracketType bracketType();
 
