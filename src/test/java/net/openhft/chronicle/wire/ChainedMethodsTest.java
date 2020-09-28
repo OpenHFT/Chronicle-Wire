@@ -5,6 +5,9 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Mocker;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 public class ChainedMethodsTest extends WireTestCommon {
@@ -146,6 +149,54 @@ public class ChainedMethodsTest extends WireTestCommon {
         assertTrue(reader.readOne());
         assertEquals("*next[1]*echo[echo-1]*next[2]*echo[echo-2]", sb.toString());
         assertFalse(reader.readOne());
+    }
+
+    // TODO to be removed before merge
+    @Test
+    public void testGenerated() {
+        Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        Object writer = wire.methodWriter(TestClassesStorage.MyInterface1.class, TestClassesStorage.MyInterface2.class);
+
+        TestClassesStorage.MyInterface1 myInterface1 = (TestClassesStorage.MyInterface1)writer;
+        TestClassesStorage.MyInterface2 myInterface2 = (TestClassesStorage.MyInterface2)writer;
+
+        myInterface1.call1();
+        myInterface1.call2("dw");
+        myInterface1.call3(4L, 5);
+
+        List<Boolean> boolList = new ArrayList<>();
+        boolList.add(true);
+        boolList.add(false);
+        myInterface1.call4(new byte[32], 3.5, boolList);
+        myInterface1.call5(new ArrayList<>());
+        myInterface1.call6(new TestClassesStorage.MyCustomType1(), new TestClassesStorage.MyCustomType2(), 2);
+
+        // not supported by writer
+        //myInterface1.call7();
+
+        final TestClassesStorage.DoChain r32 = myInterface1.call8(new TestClassesStorage.MyCustomType1());
+        r32.call14();
+
+        final TestClassesStorage.DoChain r33 = myInterface1.call8(new TestClassesStorage.MyCustomType1());
+        final TestClassesStorage.DoChain2 doChain2 = r33.call10(true);
+        doChain2.call12();
+
+        myInterface2.call9(true, new TestClassesStorage.MyCustomType2());
+
+        System.out.println(WireDumper.of(wire).asString());
+
+        StringBuilder sb = new StringBuilder();
+        TestClassesStorage.MyInterface1 impl1 = Mocker.intercepting(
+                TestClassesStorage.MyInterface1.class, "*", sb::append);
+        TestClassesStorage.MyInterface2 impl2 = Mocker.intercepting(
+                TestClassesStorage.MyInterface2.class, "*", sb::append);
+
+        final MethodReader methodReader = wire.methodReader(impl1, impl2);
+
+        while (methodReader.readOne()) {
+        }
+
+        System.out.println(sb);
     }
 
 }

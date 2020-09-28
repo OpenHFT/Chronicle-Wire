@@ -38,6 +38,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static net.openhft.chronicle.wire.VanillaWireParser.SKIP_READABLE_BYTES;
@@ -76,7 +77,30 @@ public class VanillaMethodReader implements MethodReader {
         if (objects[0] instanceof WireParselet)
             defaultParselet = (WireParselet) objects[0];
 
-        wireParser = WireParser.wireParser(defaultParselet, fieldNumberParselet);
+        if (methodReaderInterceptorReturns != null/* or code generation is not supported for any other reason */)
+            wireParser = initVanillaWireParser(ignoreDefault, defaultParselet, fieldNumberParselet, objects);
+        else {
+            final WireParselet defaultParseLet0 = defaultParselet;
+
+            // TODO to be replaced by generated function instance creation via reflection
+            Function<WireIn, Boolean> generatedParseFunction = new GeneratedParseFunction(
+                    objects[0],
+                    objects[1],
+                    (s, v) -> v.marshallable(messageHistory),
+                    VanillaMethodReader::logMessage
+            );
+
+            wireParser = new LazyDelegatingWireParser(generatedParseFunction,
+                    () -> initVanillaWireParser(ignoreDefault, defaultParseLet0, fieldNumberParselet, objects));
+        }
+    }
+
+    @NotNull
+    private WireParser initVanillaWireParser(boolean ignoreDefault,
+                                             WireParselet defaultParselet,
+                                             FieldNumberParselet fieldNumberParselet,
+                                             @NotNull Object @NotNull [] objects) {
+        final WireParser parser = WireParser.wireParser(defaultParselet, fieldNumberParselet);
 
         @NotNull Set<String> methodsSignaturesHandled = new HashSet<>();
         @NotNull Set<String> methodsNamesHandled = new HashSet<>();
@@ -94,12 +118,14 @@ public class VanillaMethodReader implements MethodReader {
             Supplier<Object> inarray = () -> context[0];
             Set<Class> interfaces = new LinkedHashSet<>();
             for (Class<?> anInterface : ReflectionUtil.interfaces(oClass)) {
-                addParsletsFor(interfaces, anInterface, ignoreDefault, methodsNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, o, context, original, inarray);
+                addParsletsFor(parser, interfaces, anInterface, ignoreDefault, methodsNamesHandled,
+                        methodsSignaturesHandled, methodFilterOnFirstArg, o, context, original, inarray);
             }
         }
-        if (wireParser.lookup(HISTORY) == null) {
-            wireParser.registerOnce(() -> HISTORY, (s, v) -> v.marshallable(messageHistory));
+        if (parser.lookup(HISTORY) == null) {
+            parser.registerOnce(() -> HISTORY, (s, v) -> v.marshallable(messageHistory));
         }
+        return parser;
     }
 
     private static LongConversion longConversionForFirstParam(Method m) {
@@ -191,7 +217,7 @@ public class VanillaMethodReader implements MethodReader {
         LOGGER.debug("read " + name + " - " + rest);
     }
 
-    private void addParsletsFor(Set<Class> interfaces, Class<?> oClass, boolean ignoreDefault, Set<String> methodNamesHandled, Set<String> methodsSignaturesHandled, MethodFilterOnFirstArg methodFilterOnFirstArg, Object o, Object[] context, Supplier contextSupplier, Supplier nextContext) {
+    private void addParsletsFor(WireParser parser, Set<Class> interfaces, Class<?> oClass, boolean ignoreDefault, Set<String> methodNamesHandled, Set<String> methodsSignaturesHandled, MethodFilterOnFirstArg methodFilterOnFirstArg, Object o, Object[] context, Supplier contextSupplier, Supplier nextContext) {
         if (!interfaces.add(oClass))
             return;
 
@@ -229,16 +255,16 @@ public class VanillaMethodReader implements MethodReader {
             Class<?>[] parameterTypes = m.getParameterTypes();
             switch (parameterTypes.length) {
                 case 0:
-                    addParseletForMethod(o, context, contextSupplier, m);
+                    addParseletForMethod(parser, o, context, contextSupplier, m);
                     break;
                 case 1:
-                    addParseletForMethod(o, context, contextSupplier, m, parameterTypes[0]);
+                    addParseletForMethod(parser, o, context, contextSupplier, m, parameterTypes[0]);
                     break;
                 default:
                     if (methodFilterOnFirstArg == null)
-                        addParseletForMethod(o, context, contextSupplier, m, parameterTypes);
+                        addParseletForMethod(parser, o, context, contextSupplier, m, parameterTypes);
                     else
-                        addParseletForMethod(o, context, contextSupplier, m, parameterTypes, methodFilterOnFirstArg);
+                        addParseletForMethod(parser, o, context, contextSupplier, m, parameterTypes, methodFilterOnFirstArg);
                     break;
             }
         }
@@ -247,7 +273,7 @@ public class VanillaMethodReader implements MethodReader {
         for (@NotNull Method m : oClass.getMethods()) {
             Class returnType = m.getReturnType();
             if (returnType.isInterface() && !Jvm.dontChain(returnType)) {
-                addParsletsFor(interfaces, returnType, ignoreDefault, methodNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, null, context, nextContext, nextContext);
+                addParsletsFor(parser, interfaces, returnType, ignoreDefault, methodNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, null, context, nextContext, nextContext);
             }
         }
     }
@@ -265,7 +291,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     // one arg
-    public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, Class<?> parameterType) {
+    public void addParseletForMethod(WireParser parser, Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, Class<?> parameterType) {
         throwExceptionIfClosed();
 
         Jvm.setAccessible(m); // turn of security check to make a little faster
@@ -276,14 +302,14 @@ public class VanillaMethodReader implements MethodReader {
                 MethodHandle mh = MethodHandles.lookup().unreflect(m).bindTo(o2);
                 @NotNull Object[] argArr = {null};
                 MethodWireKey key = createWireKey(m, name);
-                wireParser.registerOnce(key, (s, v) -> invokeMethodWithOneLong(o2, context, m, name, mh, argArr, s, v, methodReaderInterceptorReturns));
+                parser.registerOnce(key, (s, v) -> invokeMethodWithOneLong(o2, context, m, name, mh, argArr, s, v, methodReaderInterceptorReturns));
             } catch (IllegalAccessException e) {
                 Jvm.warn().on(o2.getClass(), "Unable to unreflect " + m, e);
             }
         } else if (parameterType.isPrimitive() || parameterType2.isInterface() || !ReadMarshallable.class.isAssignableFrom(parameterType2)) {
             @NotNull Object[] argArr = {null};
             MethodWireKey key = createWireKey(m, name);
-            wireParser.registerOnce(key, (s, v) -> {
+            parser.registerOnce(key, (s, v) -> {
                 try {
                     if (Jvm.isDebug())
                         logMessage(s, v);
@@ -303,7 +329,7 @@ public class VanillaMethodReader implements MethodReader {
             ReadMarshallable arg = (ReadMarshallable) ObjectUtils.newInstance(parameterType2);
             @NotNull ReadMarshallable[] argArr = {arg};
             MethodWireKey key = createWireKey(m, name);
-            wireParser.registerOnce(key, (s, v) -> {
+            parser.registerOnce(key, (s, v) -> {
                 try {
                     if (Jvm.isDebug())
                         logMessage(s, v);
@@ -328,13 +354,13 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     // no args
-    public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m) {
+    public void addParseletForMethod(WireParser parser, Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m) {
         throwExceptionIfClosed();
 
         Jvm.setAccessible(m); // turn of security check to make a little faster
         String name = m.getName();
         MethodWireKey key = createWireKey(m, name);
-        wireParser.registerOnce(key, (s, v) -> {
+        parser.registerOnce(key, (s, v) -> {
             try {
                 if (Jvm.isDebug())
                     logMessage(s, v);
@@ -360,7 +386,7 @@ public class VanillaMethodReader implements MethodReader {
                 : Maths.toInt32(annotation.value()));
     }
 
-    public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, @NotNull Class[] parameterTypes) {
+    public void addParseletForMethod(WireParser parser, Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, @NotNull Class[] parameterTypes) {
         throwExceptionIfClosed();
 
         Jvm.setAccessible(m); // turn of security check to make a little faster
@@ -374,7 +400,7 @@ public class VanillaMethodReader implements MethodReader {
         };
         String name = m.getName();
         MethodWireKey key = createWireKey(m, name);
-        wireParser.registerOnce(key, (s, v) -> {
+        parser.registerOnce(key, (s, v) -> {
             try {
                 if (Jvm.isDebug())
                     logMessage(s, v);
@@ -401,7 +427,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     @SuppressWarnings("unchecked")
-    public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, @NotNull Class[] parameterTypes, MethodFilterOnFirstArg methodFilterOnFirstArg) {
+    public void addParseletForMethod(WireParser parser, Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, @NotNull Class[] parameterTypes, MethodFilterOnFirstArg methodFilterOnFirstArg) {
         throwExceptionIfClosed();
 
         Jvm.setAccessible(m); // turn off security check to make a little faster
@@ -425,7 +451,7 @@ public class VanillaMethodReader implements MethodReader {
         };
         String name = m.getName();
         MethodWireKey key = createWireKey(m, name);
-        wireParser.registerOnce(key, (s, v) -> {
+        parser.registerOnce(key, (s, v) -> {
             try {
                 if (Jvm.isDebug())
                     logMessage(s, v);
