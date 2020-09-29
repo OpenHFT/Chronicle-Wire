@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesComment;
 import net.openhft.chronicle.core.*;
+import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -152,13 +153,17 @@ public class WireMarshaller<T> {
         if (ObjectUtils.isConcreteClass(tClass)
                 && !tClass.getName().startsWith("java")
                 && !tClass.isEnum()
-                && !tClass.isArray())
-            return ObjectUtils.newInstance(tClass);
+                && !tClass.isArray()) {
+            T t = ObjectUtils.newInstance(tClass);
+            Closeable.closeQuietly(t);
+            return t;
+        }
         if (DynamicEnum.class.isAssignableFrom(tClass)) {
             try {
                 T t = OS.memory().allocateInstance(tClass);
                 Jvm.getField(Enum.class, "name").set(t, "[unset]");
                 Jvm.getField(Enum.class, "ordinal").set(t, -1);
+                Closeable.closeQuietly(t);
                 return t;
             } catch (InstantiationException | IllegalAccessException e) {
                 throw new AssertionError(e);
