@@ -17,15 +17,14 @@ public class FloatDtoTest extends WireTestCommon {
         w.read().marshallable(object1);
     }
 
-     static class Key extends SelfDescribingMarshallable implements
-             KeyedMarshallable {
-         @SuppressWarnings("unused")
-         int uiid;
+    static class Key extends SelfDescribingMarshallable implements KeyedMarshallable {
+        @SuppressWarnings("unused")
+        int uiid;
 
-         Key(int uiid) {
-             this.uiid = uiid;
-         }
-     }
+        Key(int uiid) {
+            this.uiid = uiid;
+        }
+    }
 
     static class Value extends Key implements Marshallable {
 
