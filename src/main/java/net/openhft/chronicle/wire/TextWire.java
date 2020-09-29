@@ -1791,6 +1791,7 @@ public class TextWire extends AbstractWire implements Wire {
                 addNewLine(pos);
 
             popState();
+            this.leaf = leaf;
             if (!leaf)
                 indent();
             else
