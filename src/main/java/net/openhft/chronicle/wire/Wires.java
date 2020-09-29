@@ -17,10 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesMarshallable;
-import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.VanillaBytes;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
@@ -61,7 +58,6 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum Wires {
     ;
-    public static boolean GENERATE_TUPLES = Jvm.getBoolean("wire.generate.tuples");
     public static final int LENGTH_MASK = -1 >>> 2;
     public static final int NOT_COMPLETE = 0x8000_0000;
     @Deprecated
@@ -104,6 +100,7 @@ public enum Wires {
     static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.allocateElasticOnHeap()));
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
     private static final int INVERSE_TID_MASK = ~TID_MASK;
+    public static boolean GENERATE_TUPLES = Jvm.getBoolean("wire.generate.tuples");
     static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
 
     static {
@@ -477,8 +474,10 @@ public enum Wires {
                 using = (E) Bytes.allocateElasticOnHeap(32);
             clazz = Base64.class;
         }
-        if (clazz2 == null && clazz != null)
+        if (clazz2 == null && clazz != null) {
             clazz = ObjectUtils.implementationToUse(clazz);
+        }
+
         if (clazz2 != null &&
                 clazz != clazz2 &&
                 (clazz == null
@@ -491,7 +490,8 @@ public enum Wires {
         }
         if (clazz == null)
             clazz = Object.class;
-        SerializationStrategy<E> strategy = CLASS_STRATEGY.get(clazz);
+        Class classForStrategy = clazz.isInterface() && using != null ? using.getClass() : clazz;
+        SerializationStrategy<E> strategy = CLASS_STRATEGY.get(classForStrategy);
         BracketType brackets = strategy.bracketType();
         if (brackets == BracketType.UNKNOWN)
             brackets = in.getBracketType();
@@ -748,7 +748,8 @@ public enum Wires {
         static SerializationStrategy getSerializationStrategy(@NotNull Class aClass) {
             if (Demarshallable.class.isAssignableFrom(aClass))
                 return DEMARSHALLABLE;
-            if (ReadMarshallable.class.isAssignableFrom(aClass))
+            if (ReadMarshallable.class.isAssignableFrom(aClass)
+                    || ReadBytesMarshallable.class.isAssignableFrom(aClass))
                 return MARSHALLABLE;
             return null;
         }

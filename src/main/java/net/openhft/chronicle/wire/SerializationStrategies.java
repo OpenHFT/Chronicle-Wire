@@ -64,25 +64,6 @@ public enum SerializationStrategies implements SerializationStrategy {
             return type.isInterface() || Modifier.isAbstract(type.getModifiers()) ? null : super.newInstanceOrNull(type);
         }
     },
-    BYTES_MARSHALLABLE {
-        @NotNull
-        @Override
-        public Object readUsing(@NotNull Object o, @NotNull ValueIn in, BracketType bracketType) {
-            return o;
-        }
-
-        @NotNull
-        @Override
-        public Class type() {
-            return Marshallable.class;
-        }
-
-        @Nullable
-        @Override
-        public Object newInstanceOrNull(@NotNull Class type) {
-            return type.isInterface() || Modifier.isAbstract(type.getModifiers()) ? null : super.newInstanceOrNull(type);
-        }
-    },
     ANY_OBJECT {
         @Nullable
         @Override

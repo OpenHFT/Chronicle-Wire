@@ -18,7 +18,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesMarshallable;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.WriteBytesMarshallable;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
@@ -617,6 +619,9 @@ public interface ValueOut {
             else
                 return typedMarshallable((WriteMarshallable) value);
         }
+        if (value instanceof WriteBytesMarshallable) {
+            return bytesMarshallable((BytesMarshallable) value);
+        }
         if (value instanceof BytesStore)
             return bytes((BytesStore) value);
         if (value instanceof CharSequence)
@@ -684,6 +689,10 @@ public interface ValueOut {
             marshallable(w -> Wires.writeMarshallable(value, w));
             return wireOut();
         }
+    }
+
+    default WireOut bytesMarshallable(WriteBytesMarshallable value) {
+        throw new UnsupportedOperationException();
     }
 
     /**

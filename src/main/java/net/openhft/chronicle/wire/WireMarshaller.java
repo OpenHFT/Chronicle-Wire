@@ -482,19 +482,23 @@ public class WireMarshaller<T> {
             ValueOut valueOut = out.write(field.getName());
 
             if (valueOut instanceof CommentAnnotationNotifier && this.commentAnnotation != null) {
-                CommentAnnotationNotifier notifier = (CommentAnnotationNotifier) valueOut;
-                notifier.hasPrecedingComment(true);
-                try {
-                    getValue(o, valueOut, null);
-                    out.writeComment(String.format(this.commentAnnotation.value(), field.get(o)));
-                } finally {
-                    notifier.hasPrecedingComment(false);
-                }
+                getValueCommentAnnotated(o, out, valueOut);
                 return;
             }
 
             getValue(o, valueOut, null);
 
+        }
+
+        private void getValueCommentAnnotated(Object o, @NotNull WireOut out, ValueOut valueOut) throws IllegalAccessException {
+            CommentAnnotationNotifier notifier = (CommentAnnotationNotifier) valueOut;
+            notifier.hasPrecedingComment(true);
+            try {
+                getValue(o, valueOut, null);
+                out.writeComment(String.format(this.commentAnnotation.value(), field.get(o)));
+            } finally {
+                notifier.hasPrecedingComment(false);
+            }
         }
 
         void write(Object o, @NotNull WireOut out, Object previous, boolean copy) throws IllegalAccessException {

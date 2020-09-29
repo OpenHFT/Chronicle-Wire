@@ -1838,6 +1838,23 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        @Override
+        public WireOut bytesMarshallable(WriteBytesMarshallable object) {
+            if (bytes.retainsComments())
+                bytes.comment(object.getClass().getSimpleName());
+            writeCode(BYTES_LENGTH32);
+            long position = bytes.writePosition();
+            bytes.writeInt(0);
+
+            object.writeMarshallable(BinaryWire.this.bytes());
+
+            long length = bytes.writePosition() - position - 4;
+            if (length > Integer.MAX_VALUE && bytes instanceof HexDumpBytes)
+                length = (int) length;
+            bytes.writeOrderedInt(position, Maths.toInt32(length, "Document length %,d out of 32-bit int range."));
+            return BinaryWire.this;
+        }
+
         @NotNull
         @Override
         public WireOut marshallable(@NotNull Serializable object) {
