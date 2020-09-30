@@ -802,14 +802,14 @@ public interface ValueOut {
     @NotNull
     default WireOut throwable(@NotNull Throwable t) {
         typedMarshallable(t.getClass().getName(), (WireOut w) -> {
-            w.write(() -> "message").text(t.getMessage())
-                    .write(() -> "stackTrace").sequence(w3 -> {
+            w.write("message").text(t.getMessage())
+                    .write("stackTrace").sequence(w3 -> {
                 for (StackTraceElement ste : t.getStackTrace()) {
                     w3.marshallable(w4 ->
-                            w4.write(() -> "class").text(ste.getClassName())
-                                    .write(() -> "method").text(ste.getMethodName())
-                                    .write(() -> "file").text(ste.getFileName())
-                                    .write(() -> "line").int32(ste.getLineNumber()));
+                            w4.write("class").text(ste.getClassName())
+                                    .write("method").text(ste.getMethodName())
+                                    .write("file").text(ste.getFileName())
+                                    .write("line").int32(ste.getLineNumber()));
                 }
             });
             if (t.getCause() != null)
