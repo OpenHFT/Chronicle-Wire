@@ -35,6 +35,8 @@ public class DocumentContextTest {
         wire.acquireWritingDocument(false).wire().writeEventName("two").int16(2);
         try (DocumentContext dc = wire.acquireWritingDocument(false)) {
             dc.wire().writeEventName("three").int16(3);
+            dc.close();
+            dc.close();
         }
         return wire.bytes();
     }

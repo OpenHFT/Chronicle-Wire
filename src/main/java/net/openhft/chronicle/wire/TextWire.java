@@ -300,7 +300,7 @@ public class TextWire extends AbstractWire implements Wire {
 
     @Override
     public DocumentContext acquireWritingDocument(boolean metaData) {
-        if (writeContext != null && writeContext.isOpen())
+        if (writeContext != null && writeContext.isOpen() && writeContext.chainedElement())
             return writeContext;
         return writingDocument(metaData);
     }

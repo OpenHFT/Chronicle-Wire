@@ -42,11 +42,6 @@ public abstract class WrappedDocumentContext implements DocumentContext {
     }
 
     @Override
-    public void metaData(boolean metaData) {
-         dc.metaData(metaData);
-    }
-
-    @Override
     public boolean isPresent() {
        return dc.isPresent();
     }

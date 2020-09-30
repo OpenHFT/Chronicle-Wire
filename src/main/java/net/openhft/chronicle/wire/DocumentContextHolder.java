@@ -13,11 +13,6 @@ public class DocumentContextHolder implements DocumentContext {
     }
 
     @Override
-    public void metaData(final boolean metaData) {
-        dc.metaData(metaData);
-    }
-
-    @Override
     public boolean isPresent() {
         return dc.isPresent();
     }
@@ -39,7 +34,6 @@ public class DocumentContextHolder implements DocumentContext {
 
     public void documentContext(DocumentContext dc) {
         this.dc = dc;
-
     }
 
     @Override

@@ -29,13 +29,20 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     protected long position = -1;
     protected int tmpHeader;
     private int metaDataBit;
-    private volatile boolean isNotComplete;
+    private volatile boolean notComplete;
+    protected int count = 0;
+    private boolean chainedElement;
 
     public BinaryWriteDocumentContext(Wire wire) {
         this.wire = wire;
     }
 
     public void start(boolean metaData) {
+        count++;
+        if (count > 1) {
+            assert metaData == isMetaData();
+            return;
+        }
         @NotNull Bytes<?> bytes = wire().bytes();
         if (wire.usePadding())
             bytes.writeSkip((-bytes.writePosition()) & 0x3);
@@ -44,7 +51,8 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         metaDataBit = metaData ? Wires.META_DATA : 0;
         tmpHeader = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
         bytes.writeOrderedInt(tmpHeader);
-        isNotComplete = true;
+        notComplete = true;
+        chainedElement = false;
     }
 
     @Override
@@ -53,13 +61,15 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
     }
 
     @Override
-    public void metaData(boolean metaData) {
-        metaDataBit = metaData ? Wires.META_DATA : 0;
-    }
-
-    @Override
     @SuppressWarnings("rawtypes")
     public void close() {
+        if (chainedElement)
+            return;
+        if (count == 0)
+            throw new IllegalStateException("count == 0");
+        count--;
+        if (count > 0)
+            return;
         if (checkResetOpened())
             return;
         @NotNull Bytes bytes = wire().bytes();
@@ -71,15 +81,25 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
             length0 = (int) length0;
         int length = metaDataBit | toIntU30(length0, "Document length %,d out of 30-bit int range.");
         bytes.testAndSetInt(position, tmpHeader, length);
-        isNotComplete = false;
+        notComplete = false;
     }
 
     protected boolean checkResetOpened() {
-        if (!isNotComplete)
+        if (!notComplete)
             Jvm.warn().on(getClass(), "Closing but not opened");
-        boolean wasOpened = isNotComplete;
-        isNotComplete = false;
+        boolean wasOpened = notComplete;
+        notComplete = false;
         return !wasOpened;
+    }
+
+    @Override
+    public boolean chainedElement() {
+        return chainedElement;
+    }
+
+    @Override
+    public void chainedElement(boolean chainedElement) {
+        this.chainedElement = chainedElement;
     }
 
     @Override
@@ -108,6 +128,6 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
 
     @Override
     public boolean isNotComplete() {
-        return isNotComplete;
+        return notComplete;
     }
 }

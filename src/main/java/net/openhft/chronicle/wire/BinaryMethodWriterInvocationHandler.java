@@ -27,8 +27,6 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
     @NotNull
     private final Supplier<MarshallableOut> marshallableOutSupplier;
     private final boolean metaData;
-    @NotNull
-    private final CountingDocumentContext context = new CountingDocumentContext();
 
     BinaryMethodWriterInvocationHandler(final boolean metaData, @NotNull MarshallableOut marshallableOut) {
         this(metaData, () -> marshallableOut);
@@ -44,8 +42,7 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
     protected Object doInvoke(Object proxy, Method method, Object[] args) {
         if (method.getName().equals("writingDocument") && method.getParameterCount() == 0) {
             MarshallableOut marshallableOut = this.marshallableOutSupplier.get();
-            context.count = 0;
-            return context.dc(marshallableOut.writingDocument(metaData));
+            return marshallableOut.writingDocument(metaData);
         }
         return super.doInvoke(proxy, method, args);
     }
@@ -56,33 +53,18 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
 
     @Override
     protected void handleInvoke(Method method, Object[] args) {
-        DocumentContext dc = context.dc();
         boolean chained = method.getReturnType().isInterface();
-        if (dc == null) {
-            MarshallableOut marshallableOut = this.marshallableOutSupplier.get();
-            dc = marshallableOut.writingDocument(metaData);
-            if (chained)
-                context.dc(dc);
-            context.local = true;
-        }
-        try {
-            Wire wire = dc.wire();
-            handleInvoke(method, args, wire);
-            wire.padToCacheAlign();
+        MarshallableOut marshallableOut = this.marshallableOutSupplier.get();
+        try (WriteDocumentContext dc = (WriteDocumentContext) marshallableOut.writingDocument(metaData)) {
+            try {
+                dc.chainedElement(chained);
+                Wire wire = dc.wire();
+                handleInvoke(method, args, wire);
+                wire.padToCacheAlign();
 
-        } catch (Throwable t) {
-            dc.rollbackOnClose();
-            Jvm.rethrow(t);
-
-        } finally {
-            if (!chained) {
-                if (context.local) {
-                    dc.close();
-                    context.dc(null);
-                    context.local = false;
-                } else {
-                    context.count++;
-                }
+            } catch (Throwable t) {
+                dc.rollbackOnClose();
+                Jvm.rethrow(t);
             }
         }
     }

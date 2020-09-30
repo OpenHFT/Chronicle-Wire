@@ -32,7 +32,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     protected AbstractWire wire;
     protected boolean present, notComplete;
     protected long readPosition, readLimit;
-    private boolean metaData;
+    protected boolean metaData;
     private boolean rollback;
 
     public BinaryReadDocumentContext(@Nullable Wire wire) {
@@ -47,12 +47,6 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     @Override
     public boolean isMetaData() {
         return metaData;
-    }
-
-    @Override
-    public void metaData(boolean metaData) {
-        // NOTE: this will not change the entry in the queue just read.
-        this.metaData = metaData;
     }
 
     @Override

@@ -32,6 +32,7 @@ public class GenerateMethodWriter {
     public static final String UPDATE_INTERCEPTOR = UpdateInterceptor.class.getSimpleName();
     static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
     private static final String DOCUMENT_CONTEXT = DocumentContext.class.getSimpleName();
+    private static final String WRITE_DOCUMENT_CONTEXT = WriteDocumentContext.class.getSimpleName();
     private static final String MARSHALLABLE_OUT = MarshallableOut.class.getSimpleName();
     private static final String METHOD_ID = MethodId.class.getSimpleName();
     private static final String VALUE_OUT = ValueOut.class.getSimpleName();
@@ -271,6 +272,7 @@ public class GenerateMethodWriter {
             importSet.add(MethodId.class.getName());
             importSet.add(GenerateMethodWriter.class.getName());
             importSet.add(DocumentContext.class.getName());
+            importSet.add(WriteDocumentContext.class.getName());
             importSet.add(MethodWriterInvocationHandlerSupplier.class.getName());
             importSet.add(Jvm.class.getName());
             importSet.add(Closeable.class.getName());
@@ -452,15 +454,10 @@ public class GenerateMethodWriter {
         }
 
         boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
-        if (terminating)
-            body.append("try (");
-        body.append("final " + DOCUMENT_CONTEXT + " dc = this.out.get().acquireWritingDocument(")
+        body.append("try (final " + WRITE_DOCUMENT_CONTEXT + " dc = (" + WRITE_DOCUMENT_CONTEXT + ") this.out.get().acquireWritingDocument(")
                 .append(metaData)
-                .append(")");
-        if (terminating)
-            body.append(") {\n");
-        else
-            body.append(";\n");
+                .append(")) {\n");
+        body.append("dc.chainedElement(" + !terminating + ");");
         body.append("if (out.get().recordHistory()) MessageHistory.writeHistory(dc);\n");
 
         int startJ = 0;
@@ -484,9 +481,7 @@ public class GenerateMethodWriter {
         if (dm.getParameterTypes().length == 0)
             body.append("valueOut.text(\"\");\n");
 
-        if (terminating) {
-            body.append("}\n");
-        }
+        body.append("}\n");
 
         return format("\n%s public %s %s(%s) {\n %s%s}\n",
                 methodIDAnotation,

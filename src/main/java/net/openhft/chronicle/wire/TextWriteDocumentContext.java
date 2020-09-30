@@ -23,17 +23,25 @@ import org.jetbrains.annotations.NotNull;
 public class TextWriteDocumentContext implements WriteDocumentContext {
     protected Wire wire;
     private boolean metaData;
-    private boolean notComplete;
+    private volatile boolean notComplete;
+    private int count = 0;
+    private boolean chainedElement;
 
     public TextWriteDocumentContext(Wire wire) {
         this.wire = wire;
     }
 
     public void start(boolean metaData) {
+        count++;
+        if (count > 1) {
+            assert metaData == isMetaData();
+            return;
+        }
         this.metaData = metaData;
         if (metaData)
             wire().writeComment("meta-data");
         notComplete = true;
+        chainedElement = false;
     }
 
     @Override
@@ -42,14 +50,13 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
     }
 
     @Override
-    public void metaData(boolean metaData) {
-        if (metaData != this.metaData)
-            throw new UnsupportedOperationException("cannot change metaData status");
-    }
-
-    @Override
     @SuppressWarnings("rawtypes")
     public void close() {
+        if (chainedElement)
+            return;
+        count--;
+        if (count > 0)
+            return;
         @NotNull Bytes bytes = wire().bytes();
         long l = bytes.writePosition();
         if (l < 1 || bytes.peekUnsignedByte(l - 1) >= ' ')
@@ -57,6 +64,16 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         bytes.append("...\n");
         wire().getValueOut().resetBetweenDocuments();
         notComplete = false;
+    }
+
+    @Override
+    public boolean chainedElement() {
+        return chainedElement;
+    }
+
+    @Override
+    public void chainedElement(boolean chainedElement) {
+        this.chainedElement = chainedElement;
     }
 
     @Override

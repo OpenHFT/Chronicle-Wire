@@ -171,7 +171,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @Override
     public DocumentContext acquireWritingDocument(boolean metaData) {
-        if (writeContext.isOpen())
+        if (writeContext.isOpen() && writeContext.chainedElement())
             return writeContext;
         return writingDocument(metaData);
     }

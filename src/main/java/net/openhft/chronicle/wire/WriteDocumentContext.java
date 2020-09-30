@@ -19,4 +19,12 @@ package net.openhft.chronicle.wire;
 
 public interface WriteDocumentContext extends DocumentContext {
     void start(boolean metaData);
+
+    /**
+     * End of an element of a chain.
+     */
+    boolean chainedElement();
+
+    void chainedElement(boolean chainedElement);
+
 }
