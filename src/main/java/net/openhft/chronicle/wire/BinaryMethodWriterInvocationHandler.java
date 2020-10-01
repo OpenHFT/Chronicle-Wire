@@ -55,7 +55,7 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
     protected void handleInvoke(Method method, Object[] args) {
         boolean chained = method.getReturnType().isInterface();
         MarshallableOut marshallableOut = this.marshallableOutSupplier.get();
-        try (WriteDocumentContext dc = (WriteDocumentContext) marshallableOut.writingDocument(metaData)) {
+        try (WriteDocumentContext dc = (WriteDocumentContext) marshallableOut.acquireWritingDocument(metaData)) {
             try {
                 dc.chainedElement(chained);
                 Wire wire = dc.wire();
