@@ -57,7 +57,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
 
         boolean chained = method.getReturnType().isInterface();
         MarshallableOut marshallableOut = this.marshallableOutSupplier.get();
-        try (WriteDocumentContext dc = (WriteDocumentContext) marshallableOut.writingDocument()) {
+        try (WriteDocumentContext dc = (WriteDocumentContext) marshallableOut.acquireWritingDocument(false)) {
             try {
                 dc.chainedElement(chained);
                 Wire wire = dc.wire();
