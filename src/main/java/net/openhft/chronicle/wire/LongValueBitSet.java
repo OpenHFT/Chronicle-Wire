@@ -18,9 +18,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.ref.LongReference;
-import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.SimpleCloseable;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
@@ -33,11 +32,13 @@ import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
+import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
+
 /**
- * This <code>BitSet</code> is intended to be shared between processes. To minimize locking constraints,
- * it is implemented as a lock-free solution without support for resizing.
+ * This <code>BitSet</code> is intended to be shared between processes. To minimize locking constraints, it is implemented as a lock-free solution
+ * without support for resizing.
  */
-public class LongValueBitSet extends SimpleCloseable implements Marshallable {
+public class LongValueBitSet extends AbstractCloseable implements Marshallable {
 
     /*
      * BitSets are packed into arrays of "words."  Currently a word is
@@ -57,8 +58,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     private LongValue[] words;
 
     /**
-     * Whether the size of "words" is user-specified.  If so, we assume
-     * the user knows what he's doing and try harder to preserve it.
+     * Whether the size of "words" is user-specified.  If so, we assume the user knows what he's doing and try harder to preserve it.
      */
     private transient boolean sizeIsSticky = true;
 
@@ -91,9 +91,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * <p>This method is equivalent to
      * {@code BitSet.valueOf(ByteBuffer.wrap(bytes))}.
      *
-     * @param bytes a byte array containing a little-endian
-     *              representation of a sequence of bits to be used as the
-     *              initial bits of the new bit set
+     * @param bytes a byte array containing a little-endian representation of a sequence of bits to be used as the initial bits of the new bit set
      * @return a {@code BitSet} containing all the bits in the byte array
      * @since 1.7
      */
@@ -115,9 +113,13 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     @Override
+    protected boolean threadSafetyCheck(final boolean isUsed) {
+        return true;
+    }
+
+    @Override
     protected void performClose() {
-        super.performClose();
-        Closeable.closeQuietly(words);
+        closeQuietly(words);
     }
 
     private int getWordsInUse() {
@@ -163,8 +165,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * <br>{@code s.get(n) == ((bytes[n/8] & (1<<(n%8))) != 0)}
      * <br>for all {@code n < 8 * bytes.length}.
      *
-     * @return a byte array containing a little-endian representation
-     * of all the bits in this bit set
+     * @return a byte array containing a little-endian representation of all the bits in this bit set
      * @since 1.7
      */
     public byte[] toByteArray() {
@@ -186,10 +187,8 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Ensures that the BitSet can accommodate a given wordIndex,
-     * temporarily violating the invariants.  The caller must
-     * restore the invariants before returning to the user,
-     * possibly using recalculatewordsInUse.getValue()().
+     * Ensures that the BitSet can accommodate a given wordIndex, temporarily violating the invariants.  The caller must restore the invariants before
+     * returning to the user, possibly using recalculatewordsInUse.getValue()().
      *
      * @param wordIndex the index to be accommodated.
      */
@@ -203,8 +202,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Sets the bit at the specified index to the complement of its
-     * current value.
+     * Sets the bit at the specified index to the complement of its current value.
      *
      * @param bitIndex the index of the bit to flip
      * @throws IndexOutOfBoundsException if the specified index is negative
@@ -230,15 +228,13 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Sets each bit from the specified {@code fromIndex} (inclusive) to the
-     * specified {@code toIndex} (exclusive) to the complement of its current
+     * Sets each bit from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to the complement of its current
      * value.
      *
      * @param fromIndex index of the first bit to flip
      * @param toIndex   index after the last bit to flip
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative,
-     *                                   or {@code toIndex} is negative, or {@code fromIndex} is
-     *                                   larger than {@code toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, or {@code toIndex} is negative, or {@code fromIndex} is larger than {@code
+     *                                   toIndex}
      * @since 1.4
      */
     public void flip(int fromIndex, int toIndex) {
@@ -312,14 +308,12 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Sets the bits from the specified {@code fromIndex} (inclusive) to the
-     * specified {@code toIndex} (exclusive) to {@code true}.
+     * Sets the bits from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to {@code true}.
      *
      * @param fromIndex index of the first bit to be set
      * @param toIndex   index after the last bit to be set
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative,
-     *                                   or {@code toIndex} is negative, or {@code fromIndex} is
-     *                                   larger than {@code toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, or {@code toIndex} is negative, or {@code fromIndex} is larger than {@code
+     *                                   toIndex}
      * @since 1.4
      */
     public void set(int fromIndex, int toIndex) {
@@ -355,15 +349,13 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Sets the bits from the specified {@code fromIndex} (inclusive) to the
-     * specified {@code toIndex} (exclusive) to the specified value.
+     * Sets the bits from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to the specified value.
      *
      * @param fromIndex index of the first bit to be set
      * @param toIndex   index after the last bit to be set
      * @param value     value to set the selected bits to
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative,
-     *                                   or {@code toIndex} is negative, or {@code fromIndex} is
-     *                                   larger than {@code toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, or {@code toIndex} is negative, or {@code fromIndex} is larger than {@code
+     *                                   toIndex}
      * @since 1.4
      */
     public void set(int fromIndex, int toIndex, boolean value) {
@@ -396,14 +388,12 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Sets the bits from the specified {@code fromIndex} (inclusive) to the
-     * specified {@code toIndex} (exclusive) to {@code false}.
+     * Sets the bits from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to {@code false}.
      *
      * @param fromIndex index of the first bit to be cleared
      * @param toIndex   index after the last bit to be cleared
-     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative,
-     *                                   or {@code toIndex} is negative, or {@code fromIndex} is
-     *                                   larger than {@code toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, or {@code toIndex} is negative, or {@code fromIndex} is larger than {@code
+     *                                   toIndex}
      * @since 1.4
      */
     public void clear(int fromIndex, int toIndex) {
@@ -458,10 +448,8 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Returns the value of the bit with the specified index. The value
-     * is {@code true} if the bit with the index {@code bitIndex}
-     * is currently set in this {@code BitSet}; otherwise, the result
-     * is {@code false}.
+     * Returns the value of the bit with the specified index. The value is {@code true} if the bit with the index {@code bitIndex} is currently set in
+     * this {@code BitSet}; otherwise, the result is {@code false}.
      *
      * @param bitIndex the bit index
      * @return the value of the bit with the specified index
@@ -479,9 +467,8 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Returns the index of the first bit that is set to {@code true}
-     * that occurs on or after the specified starting index. If no such
-     * bit exists then {@code -1} is returned.
+     * Returns the index of the first bit that is set to {@code true} that occurs on or after the specified starting index. If no such bit exists then
+     * {@code -1} is returned.
      *
      * <p>To iterate over the {@code true} bits in a {@code BitSet},
      * use the following loop:
@@ -495,8 +482,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * }}</pre>
      *
      * @param fromIndex the index to start checking from (inclusive)
-     * @return the index of the next set bit, or {@code -1} if there
-     * is no such bit
+     * @return the index of the next set bit, or {@code -1} if there is no such bit
      * @throws IndexOutOfBoundsException if the specified index is negative
      * @since 1.4
      */
@@ -522,9 +508,8 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Returns the index of the first bit that is set to {@code true}
-     * that occurs on or after the specified starting index. If no such
-     * bit exists then {@code -1} is returned.
+     * Returns the index of the first bit that is set to {@code true} that occurs on or after the specified starting index. If no such bit exists then
+     * {@code -1} is returned.
      *
      * <p>To iterate over the {@code true} bits in a {@code BitSet},
      * use the following loop:
@@ -539,8 +524,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      *
      * @param fromIndex the index to start checking from (inclusive)
      * @param toIndex   (inclusive) returns -1 if a bit is not found before this value
-     * @return the index of the next set bit, or {@code -1} if there
-     * is no such bit
+     * @return the index of the next set bit, or {@code -1} if there is no such bit
      * @throws IndexOutOfBoundsException if the specified index is negative
      * @since 1.4
      */
@@ -568,8 +552,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Returns the index of the first bit that is set to {@code false}
-     * that occurs on or after the specified starting index.
+     * Returns the index of the first bit that is set to {@code false} that occurs on or after the specified starting index.
      *
      * @param fromIndex the index to start checking from (inclusive)
      * @return the index of the next clear bit
@@ -600,10 +583,8 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Returns the index of the nearest bit that is set to {@code true}
-     * that occurs on or before the specified starting index.
-     * If no such bit exists, or if {@code -1} is given as the
-     * starting index, then {@code -1} is returned.
+     * Returns the index of the nearest bit that is set to {@code true} that occurs on or before the specified starting index. If no such bit exists,
+     * or if {@code -1} is given as the starting index, then {@code -1} is returned.
      *
      * <p>To iterate over the {@code true} bits in a {@code BitSet},
      * use the following loop:
@@ -614,10 +595,8 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
      * }}</pre>
      *
      * @param fromIndex the index to start checking from (inclusive)
-     * @return the index of the previous set bit, or {@code -1} if there
-     * is no such bit
-     * @throws IndexOutOfBoundsException if the specified index is less
-     *                                   than {@code -1}
+     * @return the index of the previous set bit, or {@code -1} if there is no such bit
+     * @throws IndexOutOfBoundsException if the specified index is less than {@code -1}
      * @since 1.7
      */
     public int previousSetBit(int fromIndex) {
@@ -646,16 +625,12 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Returns the index of the nearest bit that is set to {@code false}
-     * that occurs on or before the specified starting index.
-     * If no such bit exists, or if {@code -1} is given as the
-     * starting index, then {@code -1} is returned.
+     * Returns the index of the nearest bit that is set to {@code false} that occurs on or before the specified starting index. If no such bit exists,
+     * or if {@code -1} is given as the starting index, then {@code -1} is returned.
      *
      * @param fromIndex the index to start checking from (inclusive)
-     * @return the index of the previous clear bit, or {@code -1} if there
-     * is no such bit
-     * @throws IndexOutOfBoundsException if the specified index is less
-     *                                   than {@code -1}
+     * @return the index of the previous clear bit, or {@code -1} if there is no such bit
+     * @throws IndexOutOfBoundsException if the specified index is less than {@code -1}
      * @since 1.7
      */
     public int previousClearBit(int fromIndex) {
@@ -684,9 +659,8 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Returns the "logical size" of this {@code BitSet}: the index of
-     * the highest set bit in the {@code BitSet} plus one. Returns zero
-     * if the {@code BitSet} contains no set bits.
+     * Returns the "logical size" of this {@code BitSet}: the index of the highest set bit in the {@code BitSet} plus one. Returns zero if the {@code
+     * BitSet} contains no set bits.
      *
      * @return the logical size of this {@code BitSet}
      * @since 1.2
@@ -700,8 +674,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Returns true if this {@code BitSet} contains no bits that are set
-     * to {@code true}.
+     * Returns true if this {@code BitSet} contains no bits that are set to {@code true}.
      *
      * @return boolean indicating whether this {@code BitSet} is empty
      * @since 1.4
@@ -711,12 +684,10 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Returns true if the specified {@code BitSet} has any bits set to
-     * {@code true} that are also set to {@code true} in this {@code BitSet}.
+     * Returns true if the specified {@code BitSet} has any bits set to {@code true} that are also set to {@code true} in this {@code BitSet}.
      *
      * @param set {@code BitSet} to intersect with
-     * @return boolean indicating whether this {@code BitSet} intersects
-     * the specified {@code BitSet}
+     * @return boolean indicating whether this {@code BitSet} intersects the specified {@code BitSet}
      * @since 1.4
      */
     public boolean intersects(LongValueBitSet set) {
@@ -744,11 +715,9 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Performs a logical <b>AND</b> of this target bit set with the
-     * argument bit set. This bit set is modified so that each bit in it
-     * has the value {@code true} if and only if it both initially
-     * had the value {@code true} and the corresponding bit in the
-     * bit set argument also had the value {@code true}.
+     * Performs a logical <b>AND</b> of this target bit set with the argument bit set. This bit set is modified so that each bit in it has the value
+     * {@code true} if and only if it both initially had the value {@code true} and the corresponding bit in the bit set argument also had the value
+     * {@code true}.
      *
      * @param set a bit set
      */
@@ -769,11 +738,8 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Performs a logical <b>OR</b> of this bit set with the bit set
-     * argument. This bit set is modified so that a bit in it has the
-     * value {@code true} if and only if it either already had the
-     * value {@code true} or the corresponding bit in the bit set
-     * argument has the value {@code true}.
+     * Performs a logical <b>OR</b> of this bit set with the bit set argument. This bit set is modified so that a bit in it has the value {@code true}
+     * if and only if it either already had the value {@code true} or the corresponding bit in the bit set argument has the value {@code true}.
      *
      * @param set a bit set
      */
@@ -797,10 +763,8 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Performs a logical <b>XOR</b> of this bit set with the bit set
-     * argument. This bit set is modified so that a bit in it has the
-     * value {@code true} if and only if one of the following
-     * statements holds:
+     * Performs a logical <b>XOR</b> of this bit set with the bit set argument. This bit set is modified so that a bit in it has the value {@code
+     * true} if and only if one of the following statements holds:
      * <ul>
      * <li>The bit initially has the value {@code true}, and the
      * corresponding bit in the argument has the value {@code false}.
@@ -826,11 +790,9 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Clears all of the bits in this {@code BitSet} whose corresponding
-     * bit is set in the specified {@code BitSet}.
+     * Clears all of the bits in this {@code BitSet} whose corresponding bit is set in the specified {@code BitSet}.
      *
-     * @param set the {@code BitSet} with which to mask this
-     *            {@code BitSet}
+     * @param set the {@code BitSet} with which to mask this {@code BitSet}
      * @since 1.2
      */
     public void andNot(LongValueBitSet set) {
@@ -842,8 +804,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Returns the hash code value for this bit set. The hash code depends
-     * only on which bits are set within this {@code BitSet}.
+     * Returns the hash code value for this bit set. The hash code depends only on which bits are set within this {@code BitSet}.
      *
      * <p>The hash code is defined to be the result of the following
      * calculation:
@@ -868,9 +829,8 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Returns the number of bits of space actually in use by this
-     * {@code BitSet} to represent bit values.
-     * The maximum element in the set is the size - 1st element.
+     * Returns the number of bits of space actually in use by this {@code BitSet} to represent bit values. The maximum element in the set is the size
+     * - 1st element.
      *
      * @return the number of bits currently in this bit set
      */
@@ -879,17 +839,14 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Compares this object against the specified object.
-     * The result is {@code true} if and only if the argument is
-     * not {@code null} and is a {@code Bitset} object that has
-     * exactly the same set of bits set to {@code true} as this bit
-     * set. That is, for every nonnegative {@code int} index {@code k},
+     * Compares this object against the specified object. The result is {@code true} if and only if the argument is not {@code null} and is a {@code
+     * Bitset} object that has exactly the same set of bits set to {@code true} as this bit set. That is, for every nonnegative {@code int} index
+     * {@code k},
      * <pre>((BitSet)obj).get(k) == this.get(k)</pre>
      * must be true. The current sizes of the two bit sets are not compared.
      *
      * @param obj the object to compare with
-     * @return {@code true} if the objects are the same;
-     * {@code false} otherwise
+     * @return {@code true} if the objects are the same; {@code false} otherwise
      * @see #size()
      */
     public boolean equals(Object obj) {
@@ -914,8 +871,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Attempts to reduce internal storage used for the bits in this bit set.
-     * Calling this method may, but is not required to, affect the value
+     * Attempts to reduce internal storage used for the bits in this bit set. Calling this method may, but is not required to, affect the value
      * returned by a subsequent call to the {@link #size()} method.
      */
     private void trimToSize() {
@@ -925,8 +881,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Save the state of the {@code BitSet} instance to a stream (i.e.,
-     * serialize it).
+     * Save the state of the {@code BitSet} instance to a stream (i.e., serialize it).
      */
     private void writeObject(ObjectOutputStream s)
             throws IOException {
@@ -940,13 +895,9 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Returns a string representation of this bit set. For every index
-     * for which this {@code BitSet} contains a bit in the set
-     * state, the decimal representation of that index is included in
-     * the result. Such indices are listed in order from lowest to
-     * highest, separated by ",&nbsp;" (a comma and a space) and
-     * surrounded by braces, resulting in the usual mathematical
-     * notation for a set of integers.
+     * Returns a string representation of this bit set. For every index for which this {@code BitSet} contains a bit in the set state, the decimal
+     * representation of that index is included in the result. Such indices are listed in order from lowest to highest, separated by ",&nbsp;" (a
+     * comma and a space) and surrounded by braces, resulting in the usual mathematical notation for a set of integers.
      *
      * <p>Example:
      * <pre>
@@ -988,15 +939,11 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     }
 
     /**
-     * Returns a stream of indices for which this {@code BitSet}
-     * contains a bit in the set state. The indices are returned
-     * in order, from lowest to highest. The size of the stream
-     * is the number of bits in the set state, equal to the value
-     * returned by the {@link #cardinality()} method.
+     * Returns a stream of indices for which this {@code BitSet} contains a bit in the set state. The indices are returned in order, from lowest to
+     * highest. The size of the stream is the number of bits in the set state, equal to the value returned by the {@link #cardinality()} method.
      *
      * <p>The bit set must remain constant during the execution of the
-     * terminal stream operation.  Otherwise, the result of the terminal
-     * stream operation is undefined.
+     * terminal stream operation.  Otherwise, the result of the terminal stream operation is undefined.
      *
      * @return a stream of integers representing set indices
      * @since 1.8
@@ -1056,7 +1003,7 @@ public class LongValueBitSet extends SimpleCloseable implements Marshallable {
     public void readMarshallable(@NotNull final WireIn wire) throws IORuntimeException {
         throwExceptionIfClosed();
 
-        Closeable.closeQuietly(words);
+        closeQuietly(words);
 
         try (DocumentContext dc = wire.readingDocument()) {
 
