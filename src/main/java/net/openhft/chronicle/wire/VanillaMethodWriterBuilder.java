@@ -55,7 +55,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
             Observer.class
     );
 
-    private final boolean DISABLE_PROXY_GEN = Jvm.getBoolean(DISABLE_PROXY_CODEGEN, true);
+    private final boolean DISABLE_PROXY_GEN = Jvm.getBoolean(DISABLE_PROXY_CODEGEN, false);
     private final Set<Class> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
 
     private final String packageName;
