@@ -306,6 +306,10 @@ public class WireDynamicEnumTest {
             return value;
         }
 
+        @Override
+        public int ordinal() {
+            return -1;
+        }
     }
 
     static class HoldsWDENum extends SelfDescribingMarshallable {
