@@ -9,7 +9,6 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
     private long eventTime;
     private String serviceId = "";
 
-
     @Override
     public void readMarshallable(@NotNull WireIn wireIn) throws IORuntimeException {
         Wires.readMarshallable(this, wireIn, true);
@@ -55,5 +54,9 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
     public E serviceId(String serviceId) {
         this.serviceId = serviceId;
         return (E) this;
+    }
+
+    public boolean routedToMe(String serviceIdentifier) {
+        return this.serviceId == null || this.serviceId().isEmpty() || this.serviceId().equals(serviceIdentifier);
     }
 }
