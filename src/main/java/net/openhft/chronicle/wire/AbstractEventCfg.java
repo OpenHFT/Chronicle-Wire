@@ -56,7 +56,7 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
         return (E) this;
     }
 
-    public boolean routedToMe(String serviceIdentifier) {
-        return this.serviceId == null || this.serviceId().isEmpty() || this.serviceId().equals(serviceIdentifier);
+    public boolean routedTo(String destServiceId) {
+        return this.serviceId == null || this.serviceId().isEmpty() || this.serviceId().equals(destServiceId);
     }
 }
