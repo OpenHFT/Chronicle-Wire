@@ -1,14 +1,14 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.Test;
 
 import java.io.StringWriter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 public class IntConversionTest extends WireTestCommon {
     static {
@@ -61,6 +61,33 @@ public class IntConversionTest extends WireTestCommon {
 
         UnsignedHolder uh2 = Marshallable.fromString(uh.toString());
         assertEquals(uh2, uh);
+    }
+
+    @Test
+    public void twoArgumentsConversion() {
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(128));
+
+        final TwoArgumentsConversion writer = wire.methodWriter(TwoArgumentsConversion.class);
+
+        writer.to(Integer.MIN_VALUE / 3, Long.MAX_VALUE / 2);
+
+        StringBuilder sb = new StringBuilder();
+
+        assertEquals("to: [\n" +
+                "  7-DBEN,\n" +
+                "  3fffffffffffffff\n" +
+                "]\n" +
+                "...\n", wire.toString());
+
+        final MethodReader reader = wire.methodReader(Mocker.intercepting(
+                TwoArgumentsConversion.class, "*", sb::append));
+        assertTrue(reader.readOne());
+
+        assertEquals("*to[-715827882, 4611686018427387903]", sb.toString());
+    }
+
+    public interface TwoArgumentsConversion {
+        void to(@IntConversion(Base40IntConverter.class) int i, @LongConversion(HexadecimalLongConverter.class) long l);
     }
 
     public interface WriteWithInt {
