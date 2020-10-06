@@ -33,7 +33,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     protected boolean present, notComplete;
     protected long readPosition, readLimit;
     protected boolean metaData;
-    private boolean rollback;
+    protected boolean rollback;
 
     public BinaryReadDocumentContext(@Nullable Wire wire) {
         this(wire, wire != null && wire.getValueIn() instanceof BinaryWire.DeltaValueIn);
@@ -105,6 +105,9 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
 
     @Override
     public void close() {
+        if (rollbackIfNeeded())
+            return;
+
         long readLimit = this.readLimit;
         long readPosition = this.readPosition;
 
@@ -121,7 +124,23 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         }
 
         present = false;
-        rollback = false;
+    }
+
+    /**
+     * Rolls back document context state to a one before opening if rollback marker is set.
+     * @return If rolled back.
+     */
+    protected boolean rollbackIfNeeded() {
+        if (rollback) {
+            present = false;
+            rollback = false;
+            if (start > -1)
+                wire.bytes().readPosition(start).readLimit(readLimit);
+            start = -1;
+            return true;
+        }
+
+        return false;
     }
 
     @Override

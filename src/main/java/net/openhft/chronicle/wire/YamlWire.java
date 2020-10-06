@@ -222,6 +222,11 @@ public class YamlWire extends AbstractWire implements Wire {
     }
 
     @Override
+    public @NotNull VanillaMethodReaderBuilder methodReaderBuilder() {
+        return super.methodReaderBuilder().wireType(WireType.YAML);
+    }
+
+    @Override
     public void classLookup(ClassLookup classLookup) {
         this.classLookup = classLookup;
     }

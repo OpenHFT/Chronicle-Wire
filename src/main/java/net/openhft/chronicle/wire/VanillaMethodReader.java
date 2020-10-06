@@ -166,7 +166,7 @@ public class VanillaMethodReader implements MethodReader {
         }
     }
 
-    protected static void logMessage(@NotNull CharSequence s, @NotNull ValueIn v) {
+    public static void logMessage(@NotNull CharSequence s, @NotNull ValueIn v) {
         if (!LOGGER.isDebugEnabled()) {
             return;
         }

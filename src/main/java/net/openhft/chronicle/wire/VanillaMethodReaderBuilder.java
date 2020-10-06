@@ -20,14 +20,26 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderBuilder;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
+    private static final Map<String, Class<?>> classCache = new ConcurrentHashMap<>();
+    private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
+
     private final MarshallableIn in;
     private boolean warnMissing = false;
     private boolean ignoreDefaults;
     private WireParselet defaultParselet;
     private MethodReaderInterceptorReturns methodReaderInterceptorReturns;
+    private WireType wireType;
 
     public VanillaMethodReaderBuilder(MarshallableIn in) {
         this.in = in;
@@ -89,11 +101,68 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         return this;
     }
 
+    public WireType wireType() {
+        return wireType;
+    }
+
+    public VanillaMethodReaderBuilder wireType(WireType wireType) {
+        this.wireType = wireType;
+        return this;
+    }
+
+    @Nullable
+    private MethodReader createGeneratedInstance(Supplier<MethodReader> vanillaSupplier, Object... impls) {
+        // todo support this options in the generated code
+        if (methodReaderInterceptorReturns != null ||
+                ignoreDefaults ||
+                Jvm.getBoolean("chronicle.mr_overload_dont_throw"))
+            return null;
+
+        GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, impls);
+
+        String fullClassName = generateMethodReader.packageName() + "." + generateMethodReader.generatedClassName();
+        try {
+            try {
+                final Class<?> generatedClass = Class.forName(fullClassName);
+
+                return instanceForGeneratedClass(vanillaSupplier, generatedClass, impls);
+            } catch (ClassNotFoundException e) {
+                Class<?> clazz = classCache.computeIfAbsent(fullClassName, name -> generateMethodReader.createClass());
+                if (clazz != null && clazz != COMPILE_FAILED) {
+                    return instanceForGeneratedClass(vanillaSupplier, clazz, impls);
+                }
+            }
+        } catch (Throwable e) {
+            classCache.put(fullClassName, COMPILE_FAILED);
+            // do nothing and drop through
+            if (Jvm.isDebug())
+                Jvm.debug().on(getClass(), e);
+        }
+
+        return null;
+    }
+
+    @NotNull
+    private MethodReader instanceForGeneratedClass(Supplier<MethodReader> vanillaSupplier,
+                                                   Class<?> generatedClass, Object[] impls
+    ) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+        final Constructor<?> constructor = generatedClass.getConstructors()[0];
+
+        WireParselet debugLoggingParselet = VanillaMethodReader::logMessage;
+
+        return (MethodReader) constructor.newInstance(in, debugLoggingParselet, vanillaSupplier, impls);
+    }
+
     @NotNull
     public MethodReader build(Object... impls) {
-        WireParselet defaultParselet = this.defaultParselet;
-        if (defaultParselet == null)
-            defaultParselet = createDefaultParselet(warnMissing);
-        return new VanillaMethodReader(in, ignoreDefaults, defaultParselet, methodReaderInterceptorReturns, impls);
+        final WireParselet defaultParselet = this.defaultParselet == null ?
+                createDefaultParselet(warnMissing) : this.defaultParselet;
+
+        Supplier<MethodReader> vanillaSupplier = () -> new VanillaMethodReader(
+                in, ignoreDefaults, defaultParselet, methodReaderInterceptorReturns, impls);
+
+        final MethodReader generatedInstance = createGeneratedInstance(vanillaSupplier, impls);
+
+        return generatedInstance == null ? vanillaSupplier.get() : generatedInstance;
     }
 }

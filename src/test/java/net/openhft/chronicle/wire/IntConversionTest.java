@@ -44,7 +44,7 @@ public class IntConversionTest extends WireTestCommon {
         WriteWithInt read = Mocker.logging(WriteWithInt.class, "", sw);
         wire.methodReader(read).readOne();
 
-        assertEquals("to[12345]\n", sw.toString().replaceAll("\r", ""));
+        assertEquals(String.format("to[%d]\n", 0x12345), sw.toString().replaceAll("\r", ""));
     }
 
     @Test

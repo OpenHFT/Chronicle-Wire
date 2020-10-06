@@ -280,6 +280,11 @@ public class TextWire extends AbstractWire implements Wire {
     }
 
     @Override
+    public @NotNull VanillaMethodReaderBuilder methodReaderBuilder() {
+        return super.methodReaderBuilder().wireType(WireType.TEXT);
+    }
+
+    @Override
     public void classLookup(ClassLookup classLookup) {
         this.classLookup = classLookup;
     }
