@@ -316,6 +316,8 @@ public class GenerateMethodWriter {
                     .append(className)
                     .append(" implements ");
 
+            Set<Method> handledMethods = new HashSet<>();
+
             for (Class interfaceClazz : interfaces) {
 
                 String interfaceName = nameForClass(importSet, interfaceClazz);
@@ -330,6 +332,9 @@ public class GenerateMethodWriter {
                         continue;
 
                     if (dm.isDefault() && (!dm.getReturnType().equals(void.class) && !dm.getReturnType().isInterface()))
+                        continue;
+
+                    if (!handledMethods.add(dm))
                         continue;
 
                     String template = templateFor(dm);
