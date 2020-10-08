@@ -6,7 +6,7 @@ import org.junit.Ignore;
 
 import static net.openhft.chronicle.wire.WireType.BINARY;
 
-@Ignore("")
+@Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/215")
 public class GenerateMethodWriterInheritanceTest extends TestCase {
 
     public void test() {
