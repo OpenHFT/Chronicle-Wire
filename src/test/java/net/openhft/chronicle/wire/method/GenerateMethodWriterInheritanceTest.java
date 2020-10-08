@@ -3,13 +3,16 @@ package net.openhft.chronicle.wire.method;
 import junit.framework.TestCase;
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Ignore;
+import org.junit.Test;
 
 import java.lang.reflect.Proxy;
 
 import static net.openhft.chronicle.wire.WireType.BINARY;
+import static org.junit.Assert.assertFalse;
 
-public class GenerateMethodWriterInheritanceTest extends TestCase {
+public class GenerateMethodWriterInheritanceTest {
 
+    @Test
     public void test() {
         AnInterface writer = BINARY.apply(Bytes.elasticByteBuffer())
                 .methodWriter(AnInterface.class, ADescendant.class);
@@ -20,6 +23,7 @@ public class GenerateMethodWriterInheritanceTest extends TestCase {
         assertFalse(Proxy.isProxyClass(writer.getClass()));
     }
 
+    @Test
     @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/215")
     public void testSameNamedMethod() {
         AnInterface writer = BINARY.apply(Bytes.elasticByteBuffer())
