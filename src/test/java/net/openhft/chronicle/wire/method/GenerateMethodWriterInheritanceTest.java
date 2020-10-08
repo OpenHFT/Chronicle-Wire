@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire.method;
 
 import junit.framework.TestCase;
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.Ignore;
 
 import java.lang.reflect.Proxy;
 
@@ -19,7 +20,22 @@ public class GenerateMethodWriterInheritanceTest extends TestCase {
         assertFalse(Proxy.isProxyClass(writer.getClass()));
     }
 
+    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/215")
+    public void testSameNamedMethod() {
+        AnInterface writer = BINARY.apply(Bytes.elasticByteBuffer())
+                .methodWriter(AnInterface.class, AnInterfaceSameName.class);
+
+        writer.sayHello("hello world");
+
+        // Proxy method writer is constructed in case compilation of generated code failed.
+        assertFalse(Proxy.isProxyClass(writer.getClass()));
+    }
+
     interface AnInterface {
+        void sayHello(String name);
+    }
+
+    interface AnInterfaceSameName {
         void sayHello(String name);
     }
 
