@@ -1,9 +1,12 @@
-package net.openhft.chronicle.wire;
+package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.wire.Marshallable;
+import net.openhft.chronicle.wire.TextWire;
+import net.openhft.chronicle.wire.Wire;
 import org.junit.Test;
 
-public class MethodWriterTest {
+public class MethodWriterMarshallableTest {
     @Test(expected = IllegalArgumentException.class)
     public void invalidInterface() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap());
