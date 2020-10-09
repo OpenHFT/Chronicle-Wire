@@ -316,7 +316,7 @@ public class GenerateMethodWriter {
                     .append(className)
                     .append(" implements ");
 
-            Set<Method> handledMethods = new HashSet<>();
+            Set<String> handledMethodSignatures = new HashSet<>();
 
             for (Class interfaceClazz : interfaces) {
 
@@ -334,7 +334,7 @@ public class GenerateMethodWriter {
                     if (dm.isDefault() && (!dm.getReturnType().equals(void.class) && !dm.getReturnType().isInterface()))
                         continue;
 
-                    if (!handledMethods.add(dm))
+                    if (!handledMethodSignatures.add(signature(dm)))
                         continue;
 
                     String template = templateFor(dm);
@@ -619,5 +619,7 @@ public class GenerateMethodWriter {
         return result;
     }
 
+    private static String signature(Method m) {
+        return m.getReturnType() + " " + m.getName() + " " + Arrays.toString(m.getParameterTypes());
+    }
 }
-

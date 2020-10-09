@@ -30,10 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 import static java.lang.String.format;
@@ -49,6 +46,7 @@ public class GenerateMethodReader {
     private final Object[] instances;
 
     private final Set<String> handledMethodNames = new HashSet<>();
+    private final Set<String> handledMethodSignatures = new HashSet<>();
     private final Set<Class<?>> handledInterfaces = new HashSet<>();
     private final Set<String> handledChainedInterfaces = new HashSet<>();
 
@@ -219,6 +217,8 @@ public class GenerateMethodReader {
             if (Modifier.isStatic(m.getModifiers()))
                 continue;
             if ("ignoreMethodBasedOnFirstArg".equals(m.getName()))
+                continue;
+            if (!handledMethodSignatures.add(signature(m)))
                 continue;
 
             try {
@@ -450,5 +450,9 @@ public class GenerateMethodReader {
 
         sb.append("MethodReader");
         return sb.toString();
+    }
+
+    private static String signature(Method m) {
+        return m.getReturnType() + " " + m.getName() + " " + Arrays.toString(m.getParameterTypes());
     }
 }
