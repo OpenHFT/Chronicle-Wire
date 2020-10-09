@@ -440,9 +440,26 @@ public class GenerateMethodReader {
         final StringBuilder sb = new StringBuilder();
 
         for (Object i : instances) {
-            if (i.getClass().getEnclosingClass() != null)
-                sb.append(i.getClass().getEnclosingClass().getSimpleName());
-            sb.append(i.getClass().getSimpleName());
+            final Class<?> aClass = i.getClass();
+
+            if (aClass.getEnclosingClass() != null)
+                sb.append(aClass.getEnclosingClass().getSimpleName());
+
+            final String name = aClass.getName();
+
+            final int packageDelimeterIndex = name.lastIndexOf('.');
+
+            // Intentionally using this instead of class.simpleName() in order to support anonymous class
+            String nameWithoutPackage = packageDelimeterIndex == -1 ? name : name.substring(packageDelimeterIndex + 1);
+
+            if (aClass.isSynthetic() && !aClass.isAnonymousClass() && !aClass.isLocalClass()) {
+                int lambdaSlashIndex = nameWithoutPackage.lastIndexOf("/");
+
+                if (lambdaSlashIndex != -1)
+                    nameWithoutPackage = nameWithoutPackage.substring(0, lambdaSlashIndex);
+            }
+
+            sb.append(nameWithoutPackage);
         }
 
         if (wireType != null)
