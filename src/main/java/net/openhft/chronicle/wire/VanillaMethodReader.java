@@ -247,7 +247,7 @@ public class VanillaMethodReader implements MethodReader {
         for (@NotNull Method m : oClass.getMethods()) {
             Class returnType = m.getReturnType();
             if (returnType.isInterface() && !Jvm.dontChain(returnType)) {
-                addParsletsFor(interfaces, returnType, ignoreDefault, methodNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, null, context, nextContext, nextContext);
+                addParsletsFor(interfaces, returnType, ignoreDefault, methodNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, o, context, nextContext, nextContext);
             }
         }
     }
@@ -271,7 +271,7 @@ public class VanillaMethodReader implements MethodReader {
         Jvm.setAccessible(m); // turn of security check to make a little faster
         String name = m.getName();
         Class parameterType2 = ObjectUtils.implementationToUse(parameterType);
-        if (parameterType == long.class && o2 != null) {
+        if (parameterType == long.class && m.getDeclaringClass().isInstance(o2)) {
             try {
                 MethodHandle mh = MethodHandles.lookup().unreflect(m).bindTo(o2);
                 @NotNull Object[] argArr = {null};

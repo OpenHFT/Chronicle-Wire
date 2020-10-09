@@ -163,7 +163,8 @@ public class TextMethodTester<T> {
         String originalExpected = expected;
         MethodReader reader = wire.methodReaderBuilder()
                 .methodReaderInterceptorReturns((Method m, Object o, Object[] args, net.openhft.chronicle.bytes.Invocation invocation) -> {
-                    wireOut.bytes().append("---\n");
+                    if (!(m.getReturnType().isInterface()))
+                        wireOut.bytes().append("---\n");
                     if (methodReaderInterceptorReturns == null)
                         return invocation.invoke(m, o, args);
                     return methodReaderInterceptorReturns.intercept(m, o, args, invocation);
