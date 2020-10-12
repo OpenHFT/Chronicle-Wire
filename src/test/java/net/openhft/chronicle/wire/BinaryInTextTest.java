@@ -17,10 +17,10 @@ public class BinaryInTextTest extends WireTestCommon {
         assertEquals("A==", a2.toString());
 
         Bytes b = Marshallable.fromString(Bytes.class, "!!binary BA==");
-        assertEquals("[pos: 0, rlim: 1, wlim: 2147483640, cap: 2147483640 ] ǁ⒋‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", b.toDebugString());
+        assertEquals("[pos: 0, rlim: 1, wlim: 2147483632, cap: 2147483632 ] ǁ⒋‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", b.toDebugString());
 
         Bytes b2 = Marshallable.fromString(Bytes.class, "!!binary A1==");
-        assertEquals("[pos: 0, rlim: 1, wlim: 2147483640, cap: 2147483640 ] ǁ⒊‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", b2.toDebugString());
+        assertEquals("[pos: 0, rlim: 1, wlim: 2147483632, cap: 2147483632 ] ǁ⒊‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", b2.toDebugString());
     }
 
     @Test

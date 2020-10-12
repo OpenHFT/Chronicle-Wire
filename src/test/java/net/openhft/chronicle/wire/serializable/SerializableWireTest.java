@@ -75,8 +75,7 @@ public class SerializableWireTest extends WireTestCommon {
         wire.getValueOut().object(m);
         System.out.println(wire);
 
-        @Nullable Object m2 = wire.getValueIn()
-                .object();
+        @Nullable Object m2 = wire.getValueIn().object();
         assertEquals(m, m2);
 
         bytes.releaseLast();

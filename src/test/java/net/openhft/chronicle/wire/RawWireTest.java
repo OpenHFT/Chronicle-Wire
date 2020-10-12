@@ -149,7 +149,7 @@ public class RawWireTest extends WireTestCommon {
         wire.write(BWKey.field1).int8(2);
 
         wire.write(() -> "Test").int8(3);
-        assertEquals("[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -170,7 +170,7 @@ public class RawWireTest extends WireTestCommon {
         wire.write(BWKey.field1).int16(2);
 
         wire.write(() -> "Test").int16(3);
-        assertEquals("[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] ǁ⒈٠⒉٠⒊٠‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] ǁ⒈٠⒉٠⒊٠‡٠٠٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -191,7 +191,7 @@ public class RawWireTest extends WireTestCommon {
         wire.write(BWKey.field1).uint8(2);
 
         wire.write(() -> "Test").uint8(3);
-        assertEquals("[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -213,7 +213,7 @@ public class RawWireTest extends WireTestCommon {
 
         wire.write(() -> "Test").uint16(3);
         @NotNull String actual = wire.bytes().toDebugString();
-        assertEquals("[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] ǁ⒈٠⒉٠⒊٠‡٠٠٠٠٠٠٠٠", actual);
+        assertEquals("[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] ǁ⒈٠⒉٠⒊٠‡٠٠٠٠٠٠٠٠٠٠", actual);
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -234,7 +234,7 @@ public class RawWireTest extends WireTestCommon {
         wire.write(BWKey.field1).uint32(2);
 
         wire.write(() -> "Test").uint32(3);
-        assertEquals("[pos: 0, rlim: 12, wlim: 8EiB, cap: 8EiB ] ǁ⒈٠٠٠⒉٠٠٠⒊٠٠٠‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 12, wlim: 8EiB, cap: 8EiB ] ǁ⒈٠٠٠⒉٠٠٠⒊٠٠٠‡٠٠٠٠٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         @NotNull AtomicLong i = new AtomicLong();
@@ -255,7 +255,7 @@ public class RawWireTest extends WireTestCommon {
         wire.write(BWKey.field1).int32(2);
 
         wire.write(() -> "Test").int32(3);
-        assertEquals("[pos: 0, rlim: 12, wlim: 8EiB, cap: 8EiB ] ǁ⒈٠٠٠⒉٠٠٠⒊٠٠٠‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+        assertEquals("[pos: 0, rlim: 12, wlim: 8EiB, cap: 8EiB ] ǁ⒈٠٠٠⒉٠٠٠⒊٠٠٠‡٠٠٠٠٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
