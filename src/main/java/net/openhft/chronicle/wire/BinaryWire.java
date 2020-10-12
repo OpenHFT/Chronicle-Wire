@@ -791,6 +791,11 @@ public class BinaryWire extends AbstractWire implements Wire {
                     wire.getValueOut().typePrefix(sb);
                     try {
                         Class aClass = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                        if (aClass == byte[].class) {
+                            wire.getValueOut().text(BytesStore.wrap(valueIn.bytes()));
+                            break;
+                        }
+
                         if (Boolean.TRUE.equals(USES_SELF_DESCRIBING.get(aClass)) || aClass.isInterface())
                             break;
                         Marshallable m = (Marshallable) ObjectUtils.newInstance(aClass);

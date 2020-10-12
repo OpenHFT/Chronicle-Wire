@@ -463,10 +463,11 @@ public class GenerateMethodReader {
         }
 
         if (wireType != null)
-            sb.append(wireType.toString().replace("_", ""));
+            sb.append(wireType.toString()
+                    .replace("_", ""));
 
         sb.append("MethodReader");
-        return sb.toString();
+        return sb.toString().replace("/", "$");
     }
 
     private static String signature(Method m) {

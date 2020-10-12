@@ -118,6 +118,8 @@ public class VanillaMethodReader implements MethodReader {
             if (Jvm.isDebug())
                 logMessage(s, v);
 
+            if (context[0] == null)
+                updateContext(context, o);
             long arg = 0;
             if (v.isBinary()) {
                 arg = v.int64();
@@ -136,26 +138,34 @@ public class VanillaMethodReader implements MethodReader {
             try {
                 if (methodReaderInterceptor != null) {
                     argArr[0] = arg;
-                    Object intercept = methodReaderInterceptor.intercept(m, o, argArr, VanillaMethodReader::actualInvoke);
-                    if (intercept == null) {
-                        context[0] = o;
-                    } else {
-                        context[0] = intercept;
-                    }
+                    Object intercept = methodReaderInterceptor.intercept(m, context[0], argArr, VanillaMethodReader::actualInvoke);
+                    updateContext(context, intercept);
                 } else {
-                    mh.invokeExact(arg);
+                    if (mh == null) {
+                        argArr[0] = arg;
+                        updateContext(context, m.invoke(context[0], argArr));
+                    } else {
+                        if (m.getReturnType() == void.class) {
+                            mh.invokeExact(arg);
+                            updateContext(context, null);
+                        } else {
+                            updateContext(context, mh.invokeExact(arg));
+                        }
+                    }
                 }
             } catch (Throwable e) {
-                Throwable cause = e.getCause();
+                Throwable cause = e instanceof InvocationTargetException ? e.getCause() : e;
                 String msg = "Failure to dispatch message: " + m.getName() + " " + Arrays.asList(argArr);
-                if (cause instanceof IllegalArgumentException)
-                    Jvm.warn().on(o.getClass(), msg + " " + cause);
-                else
-                    Jvm.warn().on(o.getClass(), msg, cause);
+                Jvm.warn().on(o.getClass(), msg, cause);
             }
         } catch (Exception i) {
             Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], i);
         }
+    }
+
+    private static void updateContext(Object[] context, Object intercept) {
+//        System.err.println("context: " + (intercept == null ? null : intercept.getClass()));
+        context[0] = intercept;
     }
 
     private static Object actualInvoke(Method method, Object o, Object[] objects) throws InvocationTargetException {
@@ -271,9 +281,9 @@ public class VanillaMethodReader implements MethodReader {
         Jvm.setAccessible(m); // turn of security check to make a little faster
         String name = m.getName();
         Class parameterType2 = ObjectUtils.implementationToUse(parameterType);
-        if (parameterType == long.class && m.getDeclaringClass().isInstance(o2)) {
+        if (parameterType == long.class && o2 != null) {
             try {
-                MethodHandle mh = MethodHandles.lookup().unreflect(m).bindTo(o2);
+                MethodHandle mh = m.getDeclaringClass().isInstance(o2) ? MethodHandles.lookup().unreflect(m).bindTo(o2) : null;
                 @NotNull Object[] argArr = {null};
                 MethodWireKey key = createWireKey(m, name);
                 wireParser.registerOnce(key, (s, v) -> invokeMethodWithOneLong(o2, context, m, name, mh, argArr, s, v, methodReaderInterceptorReturns));
@@ -289,11 +299,10 @@ public class VanillaMethodReader implements MethodReader {
                         logMessage(s, v);
 
                     argArr[0] = v.object(checkRecycle(argArr[0]), parameterType2);
-                    Object invoke = invoke(contextSupplier.get(), m, argArr);
-                    if (invoke != null)
-                        context[0] = invoke;
-                    else if (o2 != null)
-                        context[0] = o2;
+                    if (context[0] == null)
+                        updateContext(context, o2);
+                    Object invoke = invoke(context[0], m, argArr);
+                    updateContext(context, invoke);
                 } catch (Exception i) {
                     Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + " " + argArr[0], i);
                 }
@@ -310,11 +319,10 @@ public class VanillaMethodReader implements MethodReader {
 
                     //noinspection ConstantConditions
                     argArr[0] = v.object(checkRecycle(argArr[0]), parameterType2);
+                    if (context[0] == null)
+                        updateContext(context, o2);
                     Object invoke = invoke(contextSupplier.get(), m, argArr);
-                    if (invoke != null)
-                        context[0] = invoke;
-                    else if (o2 != null)
-                        context[0] = o2;
+                    updateContext(context, invoke);
                 } catch (Throwable t) {
                     Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + " " + argArr[0], t);
                 }
@@ -343,9 +351,9 @@ public class VanillaMethodReader implements MethodReader {
 
                 Object invoke = invoke(contextSupplier.get(), m, NO_ARGS);
                 if (invoke != null)
-                    context[0] = invoke;
+                    updateContext(context, invoke);
                 else if (o2 != null)
-                    context[0] = o2;
+                    updateContext(context, o2);
             } catch (Exception i) {
                 Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + "()", i);
             }
@@ -383,9 +391,9 @@ public class VanillaMethodReader implements MethodReader {
 
                 Object invoke = invoke(contextSupplier.get(), m, args);
                 if (invoke != null)
-                    context[0] = invoke;
+                    updateContext(context, invoke);
                 else if (o2 != null)
-                    context[0] = o2;
+                    updateContext(context, o2);
             } catch (Exception i) {
                 Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + " " + Arrays.toString(args), i);
             }
@@ -437,9 +445,9 @@ public class VanillaMethodReader implements MethodReader {
                 }
                 Object invoke = invoke(contextSupplier.get(), m, args);
                 if (invoke != null)
-                    context[0] = invoke;
+                    updateContext(context, invoke);
                 else if (o2 != null)
-                    context[0] = o2;
+                    updateContext(context, o2);
             } catch (Exception i) {
                 Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + " " + Arrays.toString(args), i);
             }
