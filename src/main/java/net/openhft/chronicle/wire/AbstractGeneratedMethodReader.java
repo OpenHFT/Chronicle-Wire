@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -48,7 +49,24 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         this.delegateSupplier = delegateSupplier;
     }
 
+    /**
+     * Reads call name and arguments from the wire and performs invocation on a target object instance.
+     * Implementation of this method is generated in runtime, see {@link GenerateMethodReader}.
+     *
+     * @param wireIn Data input.
+     * @return <code>true</code> if reading is successful, <code>false</code> if reading should be delegated.
+     */
     protected abstract boolean readOneCall(WireIn wireIn);
+
+    /**
+     * Initializes method mapping in a generated method reader instance.
+     * This method should be called on a generated instance after the first compilation (mapping will be saved in
+     * a static variable) in case {@link MethodReaderInterceptorReturns} is specified.
+     * Implementation of this method is generated in runtime, see {@link GenerateMethodReader}.
+     *
+     * @param m All applicable methods of target instances' interfaces mapped by names.
+     */
+    public abstract void initMethodsMap(Map<String, Method> m);
 
     /**
      * @param context Reading document context.
@@ -159,6 +177,14 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             ((Map<?, ?>) o).clear();
 
         return o;
+    }
+
+    protected Object actualInvoke(Method method, Object o, Object[] objects) {
+        try {
+            return method.invoke(o, objects);
+        } catch (Exception e) {
+            throw Jvm.rethrow(e);
+        }
     }
 
     private MessageHistory messageHistory() {

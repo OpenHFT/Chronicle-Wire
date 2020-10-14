@@ -113,12 +113,10 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     @Nullable
     private MethodReader createGeneratedInstance(Supplier<MethodReader> vanillaSupplier, Object... impls) {
         // todo support this options in the generated code
-        if (methodReaderInterceptorReturns != null ||
-                ignoreDefaults ||
-                Jvm.getBoolean("chronicle.mr_overload_dont_throw"))
+        if (ignoreDefaults || Jvm.getBoolean("chronicle.mr_overload_dont_throw"))
             return null;
 
-        GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, impls);
+        GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, impls);
 
         String fullClassName = generateMethodReader.packageName() + "." + generateMethodReader.generatedClassName();
         try {
@@ -129,7 +127,11 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
             } catch (ClassNotFoundException e) {
                 Class<?> clazz = classCache.computeIfAbsent(fullClassName, name -> generateMethodReader.createClass());
                 if (clazz != null && clazz != COMPILE_FAILED) {
-                    return instanceForGeneratedClass(vanillaSupplier, clazz, impls);
+                    final AbstractGeneratedMethodReader instance = instanceForGeneratedClass(vanillaSupplier, clazz, impls);
+
+                    instance.initMethodsMap(generateMethodReader.interceptorMethodMap());
+
+                    return instance;
                 }
             }
         } catch (Throwable e) {
@@ -143,14 +145,15 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     @NotNull
-    private MethodReader instanceForGeneratedClass(Supplier<MethodReader> vanillaSupplier,
+    private AbstractGeneratedMethodReader instanceForGeneratedClass(Supplier<MethodReader> vanillaSupplier,
                                                    Class<?> generatedClass, Object[] impls
     ) throws InstantiationException, IllegalAccessException, InvocationTargetException {
         final Constructor<?> constructor = generatedClass.getConstructors()[0];
 
         WireParselet debugLoggingParselet = VanillaMethodReader::logMessage;
 
-        return (MethodReader) constructor.newInstance(in, debugLoggingParselet, vanillaSupplier, impls);
+        return (AbstractGeneratedMethodReader) constructor.newInstance(
+                in, debugLoggingParselet, vanillaSupplier, methodReaderInterceptorReturns, impls);
     }
 
     @NotNull
