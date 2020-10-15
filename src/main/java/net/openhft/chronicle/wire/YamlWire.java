@@ -864,7 +864,7 @@ public class YamlWire extends AbstractWire implements Wire {
                 valueIn.consumeAny(minIndent);
             }
         }
-        if (yt.current() == YamlToken.MAPPING_END) {
+        if (yt.current() == YamlToken.MAPPING_END || yt.current() == YamlToken.DOCUMENT_END) {
             yt.next(Integer.MIN_VALUE);
             return;
         }

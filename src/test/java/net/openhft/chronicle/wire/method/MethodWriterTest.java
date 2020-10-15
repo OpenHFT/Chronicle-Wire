@@ -260,7 +260,7 @@ public class MethodWriterTest extends WireTestCommon {
         void microTS(MicroTS microTS);
     }
 
-    static class MicroTS extends SelfDescribingMarshallable {
+    public static class MicroTS extends SelfDescribingMarshallable {
         @LongConversion(MicroTimestampLongConverter.class)
         long timeUS;
     }
