@@ -18,7 +18,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.stream.IntStream;
 
 import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("rawtypes")
 public class VanillaMethodReaderTest extends WireTestCommon {
@@ -360,7 +361,10 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 }
 
+@Comment("MockDto comment")
 class MockDto extends SelfDescribingMarshallable {
+    @Comment("field1 comment")
     String field1;
+    @Comment("field2 comment")
     double field2;
 }
