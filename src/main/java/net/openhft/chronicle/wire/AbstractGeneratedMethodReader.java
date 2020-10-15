@@ -200,4 +200,15 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
         return delegate;
     }
+
+    /**
+     * Helper method used by implementations to get a Method
+     */
+    protected Method lookupMethod(Class clazz, String name, Class... parameterTypes) {
+        try {
+            return clazz.getMethod(name, parameterTypes);
+        } catch (NoSuchMethodException e) {
+            throw new AssertionError(e);
+        }
+    }
 }
