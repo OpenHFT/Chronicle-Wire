@@ -31,8 +31,11 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static net.openhft.compiler.CompilerUtils.CACHED_COMPILER;
@@ -46,7 +49,6 @@ public class GenerateMethodReader {
     private final WireType wireType;
     private final Object[] instances;
     private final MethodReaderInterceptorReturns interceptor;
-    private final Map<String, Method> interceptorMethodMap;
 
     private final Set<String> handledMethodNames = new HashSet<>();
     private final Set<String> handledMethodSignatures = new HashSet<>();
@@ -67,8 +69,6 @@ public class GenerateMethodReader {
         this.wireType = wireType;
         this.interceptor = interceptor;
         this.instances = instances;
-
-        interceptorMethodMap = new HashMap<>();
     }
 
     /**
@@ -140,7 +140,6 @@ public class GenerateMethodReader {
         if (hasRealInterceptorReturns()) {
             sourceCode.append("// method reader interceptor\n");
             sourceCode.append("private final MethodReaderInterceptorReturns interceptor;\n");
-            sourceCode.append("private static Map<String, Method> interceptorMethodMap;\n");
             sourceCode.append("\n");
         }
 
@@ -213,11 +212,6 @@ public class GenerateMethodReader {
                 "will retry to process without generated code: \" + lastEventName + \"()\", e);\n" +
                 "return false;\n" +
                 "}\n" +
-                "}\n\n");
-
-        sourceCode.append("@Override\n" +
-                "public void initMethodsMap(Map<String, Method> m) {\n" +
-                (hasRealInterceptorReturns() ? "interceptorMethodMap = m;\n" : "") +
                 "}\n}\n");
 
         isSourceCodeGenerated = true;
@@ -310,6 +304,14 @@ public class GenerateMethodReader {
         if (hasRealInterceptorReturns()) {
             fields.append(format("private final Object[] interceptor%sArgs = new Object[%d];\n",
                     m.getName(), parameterTypes.length));
+
+            String parameterTypesArg = parameterTypes.length == 0 ? "" :
+                    ", " + Arrays.stream(parameterTypes)
+                            .map(Class::getCanonicalName).map(s -> s + ".class")
+                            .collect(Collectors.joining(", "));
+
+            fields.append(format("private static final Method %smethod = lookupMethod(%s.class, \"%s\"%s);\n",
+                    m.getName(), anInterface.getCanonicalName(), m.getName(), parameterTypesArg));
         }
 
         if (parameterTypes.length > 0 || hasRealInterceptorReturns())
@@ -428,9 +430,7 @@ public class GenerateMethodReader {
             String castPrefix = chainedCallPrefix.isEmpty() ?
                     "" : "(" + m.getReturnType().getCanonicalName() + ")";
 
-            interceptorMethodMap.put(m.getName(), m);
-
-            res.append(format("%s%sinterceptor.intercept(interceptorMethodMap.get(\"%s\"), %s, " +
+            res.append(format("%s%sinterceptor.intercept(%smethod, %s, " +
                             "interceptor%sArgs, this::actualInvoke);\n",
                     chainedCallPrefix, castPrefix, m.getName(), instanceFieldName, m.getName()));
         }
@@ -566,13 +566,6 @@ public class GenerateMethodReader {
 
         sb.append("MethodReader");
         return sb.toString().replace("/", "$");
-    }
-
-    /**
-     * @return All method which are handled by generated method reader mapped by their names.
-     */
-    public Map<String, Method> interceptorMethodMap() {
-        return interceptorMethodMap;
     }
 
     private static String signature(Method m) {

@@ -24,7 +24,12 @@ import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import static org.junit.Assert.*;
 
@@ -34,23 +39,81 @@ public class MethodReaderInterceptorReturnsTest {
      */
     @Test
     public void testInterceptorSupportedInGeneratedCode() {
+        doTestInterceptorSupportedInGeneratedCode(new CountDownLatch(1), false);
+    }
+
+    /**
+     * Covers simultaneous creation of several equal intercepting method readers.
+     */
+    @Test
+    public void testInterceptingReaderConcurrentCreation() {
+        int concurrencyLevel = 5;
+
+        ExecutorService executor = Executors.newFixedThreadPool(concurrencyLevel);
+
+        final CountDownLatch readerCreateLatch = new CountDownLatch(concurrencyLevel);
+
+        List<Future<?>> futureList = new ArrayList<>();
+
+        for (int i = 0; i < concurrencyLevel; i++) {
+            futureList.add(executor.submit(() -> doTestInterceptorSupportedInGeneratedCode(
+                    readerCreateLatch, true)));
+        }
+
+        for (int i = 0; i < concurrencyLevel; i++) {
+            try {
+                futureList.get(i).get(10, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                executor.shutdownNow();
+
+                fail("Failed to wait for async scenario run: " + e.getMessage());
+            }
+        }
+    }
+
+    private void doTestInterceptorSupportedInGeneratedCode(CountDownLatch readerCreateLatch, boolean addDummyInstance) {
         BinaryWire binaryWire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
 
         InterceptedInterface writer = binaryWire.methodWriter(InterceptedInterface.class);
 
         final StringBuilder interceptedMethodNames = new StringBuilder();
 
-        final MethodReaderInterceptorReturns interceptor = (m, o, args, invocation) -> {
-            interceptedMethodNames.append(m.getName()).append(Arrays.toString(args)).append("*");
+        final AtomicReference<Exception> interceptorError = new AtomicReference<>();
 
-            return invocation.invoke(m, o, args);
+        final MethodReaderInterceptorReturns interceptor = (m, o, args, invocation) -> {
+            try {
+                interceptedMethodNames.append(m.getName()).append(Arrays.toString(args)).append("*");
+
+                return invocation.invoke(m, o, args);
+            }
+            catch (Exception e) {
+                interceptorError.set(e);
+
+                e.printStackTrace();
+
+                return null;
+            }
         };
 
         final InterceptedInterface impl = new InterceptedInterfaceImpl(new StringBuilder(), false);
 
-        final MethodReader reader = binaryWire.methodReaderBuilder()
-                .methodReaderInterceptorReturns(interceptor)
-                .build(impl);
+        readerCreateLatch.countDown();
+        try {
+            readerCreateLatch.await();
+        } catch (InterruptedException e) {
+            fail("Failed to wait for reader create latch");
+        }
+
+        final MethodReader reader;
+        if (addDummyInstance) { // To ensure recompilation in different tests
+            reader = binaryWire.methodReaderBuilder()
+                    .methodReaderInterceptorReturns(interceptor)
+                    .build(impl, (Supplier<String>) () -> null);
+        } else {
+            reader = binaryWire.methodReaderBuilder()
+                    .methodReaderInterceptorReturns(interceptor)
+                    .build(impl);
+        }
 
         assertFalse(reader instanceof VanillaMethodReader);
 
@@ -61,6 +124,9 @@ public class MethodReaderInterceptorReturnsTest {
         assertTrue(reader.readOne());
         assertTrue(reader.readOne());
         assertTrue(reader.readOne());
+
+        if (interceptorError.get() != null)
+            fail("Failed to execute interceptor code: " + interceptorError.get().toString());
 
         assertEquals("noArgs[]*oneArg[2]*twoArgs[dd, 3]*end[]*", interceptedMethodNames.toString());
     }

@@ -59,16 +59,6 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     protected abstract boolean readOneCall(WireIn wireIn);
 
     /**
-     * Initializes method mapping in a generated method reader instance.
-     * This method should be called on a generated instance after the first compilation (mapping will be saved in
-     * a static variable) in case {@link MethodReaderInterceptorReturns} is specified.
-     * Implementation of this method is generated in runtime, see {@link GenerateMethodReader}.
-     *
-     * @param m All applicable methods of target instances' interfaces mapped by names.
-     */
-    public abstract void initMethodsMap(Map<String, Method> m);
-
-    /**
      * @param context Reading document context.
      * @return <code>true</code> if reading is successful, <code>false</code> if reading should be delegated.
      */
@@ -204,9 +194,13 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     /**
      * Helper method used by implementations to get a Method
      */
-    protected Method lookupMethod(Class clazz, String name, Class... parameterTypes) {
+    protected static Method lookupMethod(Class<?> clazz, String name, Class<?>... parameterTypes) {
         try {
-            return clazz.getMethod(name, parameterTypes);
+            final Method method = clazz.getMethod(name, parameterTypes);
+
+            Jvm.setAccessible(method);
+
+            return method;
         } catch (NoSuchMethodException e) {
             throw new AssertionError(e);
         }

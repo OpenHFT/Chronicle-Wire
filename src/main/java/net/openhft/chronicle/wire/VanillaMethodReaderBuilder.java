@@ -127,11 +127,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
             } catch (ClassNotFoundException e) {
                 Class<?> clazz = classCache.computeIfAbsent(fullClassName, name -> generateMethodReader.createClass());
                 if (clazz != null && clazz != COMPILE_FAILED) {
-                    final AbstractGeneratedMethodReader instance = instanceForGeneratedClass(vanillaSupplier, clazz, impls);
-
-                    instance.initMethodsMap(generateMethodReader.interceptorMethodMap());
-
-                    return instance;
+                    return instanceForGeneratedClass(vanillaSupplier, clazz, impls);
                 }
             }
         } catch (Throwable e) {
@@ -145,14 +141,14 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     @NotNull
-    private AbstractGeneratedMethodReader instanceForGeneratedClass(Supplier<MethodReader> vanillaSupplier,
+    private MethodReader instanceForGeneratedClass(Supplier<MethodReader> vanillaSupplier,
                                                    Class<?> generatedClass, Object[] impls
     ) throws InstantiationException, IllegalAccessException, InvocationTargetException {
         final Constructor<?> constructor = generatedClass.getConstructors()[0];
 
         WireParselet debugLoggingParselet = VanillaMethodReader::logMessage;
 
-        return (AbstractGeneratedMethodReader) constructor.newInstance(
+        return (MethodReader) constructor.newInstance(
                 in, debugLoggingParselet, vanillaSupplier, methodReaderInterceptorReturns, impls);
     }
 
