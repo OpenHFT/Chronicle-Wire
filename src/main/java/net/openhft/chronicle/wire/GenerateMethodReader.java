@@ -397,6 +397,7 @@ public class GenerateMethodReader {
         for (int i = 0; i < parameterTypes.length; i++)
             args[i] = m.getName() + "arg" + i;
 
+        // called for no interceptor and a generating interceptor
         if (!hasRealInterceptorReturns()) {
             GeneratingMethodReaderInterceptorReturns generatingInterceptor = interceptor != null ?
                     (GeneratingMethodReaderInterceptorReturns) interceptor : null;
@@ -419,6 +420,7 @@ public class GenerateMethodReader {
                     res.append(codeAfter).append("\n");
             }
         } else {
+            // called for non generating interceptor
             for (int i = 0; i < parameterTypes.length; i++) {
                 res.append(format("interceptor%sArgs[%d] = %sarg%d;\n", m.getName(), i, m.getName(), i));
             }
