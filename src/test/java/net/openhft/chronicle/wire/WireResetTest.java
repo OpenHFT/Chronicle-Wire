@@ -5,6 +5,7 @@ import net.openhft.chronicle.core.io.Closeable;
 import org.junit.Assert;
 import org.junit.Test;
 
+// see https://github.com/OpenHFT/Chronicle-Wire/issues/225
 public class WireResetTest {
     @Test
     public void test() throws Exception {
