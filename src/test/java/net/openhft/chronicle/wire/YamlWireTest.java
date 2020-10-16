@@ -826,11 +826,14 @@ public class YamlWireTest extends WireTestCommon {
                 .object();
         assertEquals("!net.openhft.chronicle.wire.MyTypes {\n" +
                 "  text: \"\",\n" +
-                "  b: false,\n" +
+                "  flag: false,\n" +
+                "  b: 0,\n" +
                 "  s: 0,\n" +
+                "  ch: \"\\0\",\n" +
+                "  i: 0,\n" +
+                "  f: 0.0,\n" +
                 "  d: 0.0,\n" +
-                "  l: 0,\n" +
-                "  i: 0\n" +
+                "  l: 0\n" +
                 "}\n", mt.toString());
     }
 
@@ -950,7 +953,7 @@ public class YamlWireTest extends WireTestCommon {
     public void testWriteMarshallable() {
         @NotNull Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
-        mtA.b = true;
+        mtA.flag = true;
         mtA.d = 123.456;
         mtA.i = -12345789;
         mtA.s = (short) 12345;
@@ -959,7 +962,7 @@ public class YamlWireTest extends WireTestCommon {
         wire.write(() -> "A").marshallable(mtA);
 
         @NotNull MyTypesCustom mtB = new MyTypesCustom();
-        mtB.b = false;
+        mtB.flag = false;
         mtB.d = 123.4567;
         mtB.i = -123457890;
         mtB.s = (short) 1234;
@@ -997,7 +1000,7 @@ public class YamlWireTest extends WireTestCommon {
     public void testWriteMarshallableAndFieldLength() {
         @NotNull Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
-        mtA.b = true;
+        mtA.flag = true;
         mtA.d = 123.456;
         mtA.i = -12345789;
         mtA.s = (short) 12345;

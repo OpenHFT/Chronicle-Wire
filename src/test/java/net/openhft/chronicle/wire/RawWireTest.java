@@ -464,7 +464,7 @@ public class RawWireTest extends WireTestCommon {
     public void testWriteMarshallable() {
         @NotNull Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
-        mtA.b = (true);
+        mtA.flag = (true);
         mtA.d = (123.456);
         mtA.i = (-12345789);
         mtA.s = ((short) 12345);
@@ -473,7 +473,7 @@ public class RawWireTest extends WireTestCommon {
         wire.writeEventName(() -> "A").marshallable(mtA);
 
         @NotNull MyTypesCustom mtB = new MyTypesCustom();
-        mtB.b = (false);
+        mtB.flag = (false);
         mtB.d = (123.4567);
         mtB.i = (-123457890);
         mtB.s = ((short) 1234);

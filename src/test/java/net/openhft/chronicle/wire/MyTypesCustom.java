@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 class MyTypesCustom extends MyTypes implements Marshallable {
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
-        wire.write(Fields.B_FLAG).bool(b)
+        wire.write(Fields.B_FLAG).bool(flag)
                 .write(Fields.S_NUM).int16(s)
                 .write(Fields.D_NUM).float64(d)
                 .write(Fields.L_NUM).int64(l)
@@ -32,7 +32,7 @@ class MyTypesCustom extends MyTypes implements Marshallable {
 
     @Override
     public void readMarshallable(@NotNull WireIn wire) {
-        wire.read(Fields.B_FLAG).bool(this, (o, x) -> o.b = x)
+        wire.read(Fields.B_FLAG).bool(this, (o, x) -> o.flag = x)
                 .read(Fields.S_NUM).int16(this, (o, x) -> o.s = x)
                 .read(Fields.D_NUM).float64(this, (o, x) -> o.d = x)
                 .read(Fields.L_NUM).int64(this, (o, x) -> o.l = x)

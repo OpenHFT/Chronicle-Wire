@@ -21,46 +21,81 @@ import org.jetbrains.annotations.NotNull;
 
 class MyTypes extends SelfDescribingMarshallable {
     final StringBuilder text = new StringBuilder();
-    boolean b;
+    boolean flag;
+    byte b;
     short s;
+    char ch;
+    int i;
+    float f;
     double d;
     long l;
-    int i;
 
-    public void b(boolean b) {
+    public MyTypes flag(boolean b) {
+        this.flag = b;
+        return this;
+    }
+
+    public boolean flag() {
+        return this.flag;
+    }
+
+    public byte b() {
+        return b;
+    }
+
+    public MyTypes b(byte b) {
         this.b = b;
+        return this;
     }
 
-    public boolean b() {
-        return this.b;
-    }
-
-    public void s(short s) {
+    public MyTypes s(short s) {
         this.s = s;
+        return this;
     }
 
     public short s() {
         return this.s;
     }
 
-    public void d(double d) {
+    public char ch() {
+        return ch;
+    }
+
+    public MyTypes ch(char ch) {
+        this.ch = ch;
+        return this;
+    }
+
+    public float f() {
+        return f;
+    }
+
+    public MyTypes f(float f) {
+        this.f = f;
+        return this;
+    }
+
+    public MyTypes d(double d) {
         this.d = d;
+        return this;
     }
 
     public double d() {
         return this.d;
     }
 
-    public void l(long l) {
+    public MyTypes l(long l) {
         this.l = l;
+        return this;
     }
 
     public long l() {
         return this.l;
     }
 
-    public void i(int i) {
+    public MyTypes i(int i) {
         this.i = i;
+        return this;
     }
 
     public int i() {
@@ -72,9 +107,10 @@ class MyTypes extends SelfDescribingMarshallable {
         return text;
     }
 
-    public void text(CharSequence value) {
+    public MyTypes text(CharSequence value) {
         text.setLength(0);
         text.append(value);
+        return this;
     }
 
     enum Fields implements WireKey {

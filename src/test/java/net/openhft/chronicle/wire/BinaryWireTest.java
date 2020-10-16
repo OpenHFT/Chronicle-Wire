@@ -701,7 +701,7 @@ public class BinaryWireTest extends WireTestCommon {
 
         @NotNull Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
-        mtA.b = true;
+        mtA.flag = true;
         mtA.d = 123.456;
         mtA.i = -12345789;
         mtA.s = (short) 12345;
@@ -710,7 +710,7 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write(() -> "A").marshallable(mtA);
 
         @NotNull MyTypesCustom mtB = new MyTypesCustom();
-        mtB.b = false;
+        mtB.flag = false;
         mtB.d = 123.4567;
         mtB.i = -123457890;
         mtB.s = (short) 1234;

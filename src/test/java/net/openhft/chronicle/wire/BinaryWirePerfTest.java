@@ -95,7 +95,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
         int runs = 200000;
         for (int i = 0; i < runs; i++) {
             wire.clear();
-            a.b = (i & 1) != 0;
+            a.flag = (i & 1) != 0;
             a.d = i;
             a.i = i;
             a.l = i;
