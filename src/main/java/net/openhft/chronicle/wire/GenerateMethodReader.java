@@ -53,17 +53,16 @@ public class GenerateMethodReader {
     private final Set<String> handledMethodNames = new HashSet<>();
     private final Set<String> handledMethodSignatures = new HashSet<>();
     private final Set<Class<?>> handledInterfaces = new HashSet<>();
-    private final Set<String> handledChainedInterfaces = new HashSet<>();
 
     private final SourceCodeFormatter sourceCode = new JavaSourceCodeFormatter();
     private final SourceCodeFormatter fields = new JavaSourceCodeFormatter();
     private final SourceCodeFormatter eventNameSwitchBlock = new JavaSourceCodeFormatter();
     private final SourceCodeFormatter eventIdSwitchBlock = new JavaSourceCodeFormatter();
     private final SourceCodeFormatter numericConverters = new JavaSourceCodeFormatter();
-    private final SourceCodeFormatter chainedCallResults = new JavaSourceCodeFormatter();
 
     private boolean methodFilterPresent;
     private boolean isSourceCodeGenerated;
+    private boolean hasChainedCalls;
 
     public GenerateMethodReader(WireType wireType, MethodReaderInterceptorReturns interceptor, Object... instances) {
         this.wireType = wireType;
@@ -156,9 +155,9 @@ public class GenerateMethodReader {
             sourceCode.append("\n");
         }
 
-        if (!handledChainedInterfaces.isEmpty()) {
-            sourceCode.append("// chained call results\n");
-            sourceCode.append(chainedCallResults);
+        if (hasChainedCalls) {
+            sourceCode.append("// chained call result\n");
+            sourceCode.append("private Object chainedCallReturnResult;");
             sourceCode.append("\n");
         }
 
@@ -298,8 +297,8 @@ public class GenerateMethodReader {
             }
         }
 
-        if (chainReturnType != null && handledChainedInterfaces.add(chainReturnType.getSimpleName()))
-            chainedCallResults.append(format("private %s res%s;\n", chainReturnType.getCanonicalName(), chainReturnType.getSimpleName()));
+        if (chainReturnType != null)
+            hasChainedCalls = true;
 
         if (hasRealInterceptorReturns()) {
             fields.append(format("private final Object[] interceptor%sArgs = new Object[%d];\n",
@@ -327,15 +326,15 @@ public class GenerateMethodReader {
             eventIdSwitchBlock.append("break;\n\n");
         }
 
-        String chainedCallPrefix = chainReturnType != null ? format("res%s = ", chainReturnType.getSimpleName()) : "";
+        String chainedCallPrefix = chainReturnType != null ? "chainedCallReturnResult = " : "";
 
         eventNameSwitchBlock.append(format("case \"%s\":\n", m.getName()));
         if (parameterTypes.length == 0) {
             eventNameSwitchBlock.append("valueIn.skipValue();\n");
-            eventNameSwitchBlock.append(methodCall(m, anInterface, instanceFieldName, chainedCallPrefix));
+            eventNameSwitchBlock.append(methodCall(m, instanceFieldName, chainedCallPrefix));
         } else if (parameterTypes.length == 1) {
             eventNameSwitchBlock.append(argumentRead(m, 0, false));
-            eventNameSwitchBlock.append(methodCall(m, anInterface, instanceFieldName, chainedCallPrefix));
+            eventNameSwitchBlock.append(methodCall(m, instanceFieldName, chainedCallPrefix));
         } else {
             if (methodFilter) {
                 eventNameSwitchBlock.append("ignored = false;\n");
@@ -368,7 +367,7 @@ public class GenerateMethodReader {
                 eventNameSwitchBlock.append("});\n");
             }
 
-            eventNameSwitchBlock.append(methodCall(m, anInterface, instanceFieldName, chainedCallPrefix));
+            eventNameSwitchBlock.append(methodCall(m, instanceFieldName, chainedCallPrefix));
 
             if (methodFilter)
                 eventNameSwitchBlock.append("}\n");
@@ -377,7 +376,7 @@ public class GenerateMethodReader {
         eventNameSwitchBlock.append("break;\n\n");
 
         if (chainReturnType != null)
-            handleInterface(chainReturnType, "res" + chainReturnType.getSimpleName(), false);
+            handleInterface(chainReturnType, "chainedCallReturnResult", false);
     }
 
     /**
@@ -385,12 +384,11 @@ public class GenerateMethodReader {
      * and handles {@link MethodReaderInterceptorReturns} if it's specified.
      *
      * @param m Method that is being processed.
-     * @param anInterface Interface which method is processed.
      * @param instanceFieldName In generated code, method is executed on field with this name.
      * @param chainedCallPrefix Prefix for method call statement, passed in order to save method result for chaining.
      * @return Code that performs a method call.
      */
-    private String methodCall(Method m, Class<?> anInterface, String instanceFieldName, String chainedCallPrefix) {
+    private String methodCall(Method m, String instanceFieldName, String chainedCallPrefix) {
         StringBuilder res = new StringBuilder();
 
         Class<?>[] parameterTypes = m.getParameterTypes();
@@ -412,7 +410,7 @@ public class GenerateMethodReader {
             }
 
             res.append(format("%s((%s) %s).%s(%s);\n",
-                    chainedCallPrefix, anInterface.getCanonicalName(), instanceFieldName, m.getName(),
+                    chainedCallPrefix, m.getDeclaringClass().getCanonicalName(), instanceFieldName, m.getName(),
                     String.join(", ", args)));
 
             if (generatingInterceptor != null) {
