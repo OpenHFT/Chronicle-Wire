@@ -1,8 +1,7 @@
 package net.openhft.chronicle.wire;
 
-
+import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.Closeable;
-import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -16,6 +15,14 @@ public class WireResetTest {
         Assert.assertFalse(event.isClosed());
     }
 
+    @Test
+    public void testEventAbstractCloseable() throws Exception {
+        EventAbstractCloseable event = new EventAbstractCloseable();
+        Assert.assertFalse(event.isClosed());
+
+        event.reset();
+        Assert.assertFalse(event.isClosed());
+    }
 
     public static class Event extends SelfDescribingMarshallable implements Closeable {
         private boolean isClosed;
@@ -32,4 +39,14 @@ public class WireResetTest {
             return isClosed;
         }
     }
+
+    public static class EventAbstractCloseable extends AbstractCloseable implements Marshallable{
+        @Override
+        protected void performClose() {
+
+        }
+
+
+    }
+
 }
