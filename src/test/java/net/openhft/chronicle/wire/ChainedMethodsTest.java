@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -175,4 +176,25 @@ public class ChainedMethodsTest extends WireTestCommon {
         assertFalse(reader.readOne());
     }
 
+    @Test
+    public void testNestedReturnType() {
+        Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        final NestedStart writer = wire.methodWriter(NestedStart.class);
+
+        assertEquals(disableProxyCodegen, Proxy.isProxyClass(writer.getClass()));
+
+        writer.start().end();
+
+        assertEquals("--- !!data #binary\n" +
+                "start: \"\"\n" +
+                "end: \"\"\n", WireDumper.of(wire).asString());
+    }
+
+    interface NestedStart {
+        NestedEnd start();
+    }
+
+    interface NestedEnd {
+        void end();
+    }
 }

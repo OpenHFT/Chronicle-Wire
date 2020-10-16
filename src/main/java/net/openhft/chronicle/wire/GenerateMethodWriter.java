@@ -601,11 +601,9 @@ public class GenerateMethodWriter {
             result.append("return this;\n");
 
         } else if (dm.getReturnType().isInterface()) {
-            String index = methodWritersMap.computeIfAbsent(dm.getReturnType(), k -> "methodWriter" + k.getSimpleName() + "TL");
+            methodWritersMap.computeIfAbsent(dm.getReturnType(), k -> "methodWriter" + k.getSimpleName() + "TL");
             result.append("// method return\n");
-            String aClass = nameForClass(importSet, dm.getReturnType());
-            result.append(format("return methodWriter%sTL.get();\n", aClass, aClass, index));
-
+            result.append(format("return methodWriter%sTL.get();\n", dm.getReturnType().getSimpleName()));
         } else if (!dm.getReturnType().isPrimitive()) {
             result.append("return null;\n");
         } else if (dm.getReturnType() == boolean.class) {
