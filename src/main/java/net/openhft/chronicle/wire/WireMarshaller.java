@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesComment;
 import net.openhft.chronicle.core.*;
+import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
@@ -155,7 +156,7 @@ public class WireMarshaller<T> {
                 && !tClass.isEnum()
                 && !tClass.isArray()) {
             T t = ObjectUtils.newInstance(tClass);
-            Closeable.closeQuietly(t);
+            unmonitor(t);
             return t;
         }
         if (DynamicEnum.class.isAssignableFrom(tClass)) {
@@ -163,13 +164,18 @@ public class WireMarshaller<T> {
                 T t = OS.memory().allocateInstance(tClass);
                 Jvm.getField(Enum.class, "name").set(t, "[unset]");
                 Jvm.getField(Enum.class, "ordinal").set(t, -1);
-                Closeable.closeQuietly(t);
+                unmonitor(t);
                 return t;
             } catch (InstantiationException | IllegalAccessException e) {
                 throw new AssertionError(e);
             }
         }
         return null;
+    }
+
+    private static <T> void unmonitor(final T t) {
+        if (t instanceof Closeable)
+            AbstractCloseable.unmonitor((Closeable) t);
     }
 
     private static int compare(CharSequence cs0, CharSequence cs1) {
