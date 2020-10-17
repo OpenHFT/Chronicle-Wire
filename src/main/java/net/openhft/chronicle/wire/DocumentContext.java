@@ -26,24 +26,36 @@ import java.io.Closeable;
 public interface DocumentContext extends Closeable, SourceContext {
 
     /**
-     * @return true - is the entry is of type meta data
+     * Checks it the {@code DocumentContext} is metadata. If it is, {@code true} is
+     * returned, otherwise {@code false}.
+     *
+     * @return true if the entry is metadata
      */
     boolean isMetaData();
 
     /**
-     * @return true - if is a document document
+     * Checks if the {@code DocumentContext} is present. If it is, {@code true} is returned,
+     * otherwise {@code false}.
+     *
+     * @return true if the entry is present
      */
     boolean isPresent();
 
     /**
-     * @return true - is the entry is of type data
+     * Checks if the {@code DocumentContext} is data. If it is, {@code true} is returned,
+     * otherwise {@code false}
+     *
+     * @return true - is the entry is data
      */
     default boolean isData() {
         return isPresent() && !isMetaData();
     }
 
     /**
-     * @return the wire of the document
+     * Returns the {@link Wire} associated with the {@code Document}. It is possible that
+     * {@code null} is returned, depending on the implementation.
+     *
+     * @return the {@link Wire} associated with the {@code Document}.
      */
     @Nullable
     Wire wire();

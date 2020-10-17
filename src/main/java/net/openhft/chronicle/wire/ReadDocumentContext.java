@@ -18,9 +18,16 @@
 package net.openhft.chronicle.wire;
 
 public interface ReadDocumentContext extends DocumentContext {
+
     void start();
 
+    /**
+     * Sets the read limit for this {@code ReadDocumentContext}.
+     */
     void closeReadLimit(long readLimit);
 
+    /**
+     * Sets the read position for this {@code ReadDocumentContext}.
+     */
     void closeReadPosition(long readPosition);
 }

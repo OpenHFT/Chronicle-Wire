@@ -28,52 +28,71 @@ import org.jetbrains.annotations.Nullable;
 public interface WireCommon {
 
     /**
-     * Define how classes should be looked up.
+     * Sets the {@link ClassLookup} implementation to be used for class lookup.
      *
-     * @param classLookup to use
+     * @param classLookup implementation to be used for class lookup.
      */
     void classLookup(ClassLookup classLookup);
 
     /**
-     * @return the current implementation for looking up classes.
+     * Returns the current {@link ClassLookup} implementation being used for class lookup.
+     *
+     * @return the current {@link ClassLookup} implementation being used for class lookup
      */
     ClassLookup classLookup();
 
     /**
-     * @param pauser to use for blocking operations.
+     * Sets the {@link Pauser} implementation to be used for blocking operations.
+     *
+     * @param pauser implementation to be used for blocking operations.
      */
     void pauser(Pauser pauser);
 
     /**
-     * @return pauser used.
+     * Returns the current {@link Pauser} implementation being used for blocking operations.
+     *
+     * @return the current {@link Pauser} implementation being used for blocking operations
      */
     Pauser pauser();
 
     /**
-     * @return the underlying Bytes
+     * Returns the underlying {@link Bytes} stored by the wire.
+     *
+     * @return the underlying {@link Bytes} stored by the wire
      */
     @NotNull
     Bytes<?> bytes();
 
     /**
-     * @return the bytes90 but only for comment
+     * Returns the bytes() but only for comment.
+     *
+     * @return the bytes() but only for comment
      */
     BytesComment<?> bytesComment();
 
     /**
-     * @return an IntValue which appropriate for this wire.
+     * Creates and returns a new {@link IntValue}. The {@link IntValue} implementation that is
+     * returned depends on the wire implementation.
+     *
+     * @return a new {@link IntValue}.
      */
     @NotNull
     IntValue newIntReference();
 
     /**
-     * @return a LongValue which appropriate for this wire.
+     * Creates and returns a new {@link LongValue}. The {@link LongValue} implementation that is
+     * returned depends on the wire implementation.
+     *
+     * @return a new {@link LongValue}
      */
     @NotNull
     LongValue newLongReference();
 
     /**
-     * @return a LongValue which appropriate for this wire.
+     * Creates and returns a new {@link TwoLongValue}. The {@link TwoLongValue} implementation that
+     * is returned depends on the wire implementation.
+     *
+     * @return a new {@link TwoLongValue}
      */
     @NotNull
     default TwoLongValue newTwoLongReference() {
@@ -81,32 +100,39 @@ public interface WireCommon {
     }
 
     /**
-     * @return a LongArrayValue which appropriate for this wire.
+     * Creates and returns a new {@link LongArrayValues}. The {@link LongArrayValues} implementation that
+     * is returned depends on the wire implementation.
+     *
+     * @return a new {@link LongArrayValues}
      */
     @NotNull
     LongArrayValues newLongArrayReference();
 
     /**
-     * @return a IntArrayValue which appropriate for this wire.
+     * Creates and returns a new {@link IntArrayValues}. The {@link IntArrayValues} implementation that
+     * is returned depends on the wire implementation.
+     *
+     * @return a new {@link IntArrayValues}
      */
     @NotNull
     IntArrayValues newIntArrayReference();
 
     /**
-     * reset the state of the current wire for reuse.
+     * Resets the state of the underlying {@link Bytes} stored by the wire.
      */
     void clear();
 
     /**
-     * Obtain the parent class of this wire if there is one
+     * Returns the wire parent object. If the parent was not assigned, {@code null} is
+     * returned instead.
      *
-     * @return the parent or null if none was assigned.
+     * @return the wire parent object or {@code null} if none was assigned.
      */
     @Nullable
     Object parent();
 
     /**
-     * Assign a parent object to this wire for later retrieval.
+     * Assigns the wire parent object for later retrieval.
      *
      * @param parent to set, or null if there isn't one.
      */
@@ -148,7 +174,10 @@ public interface WireCommon {
     boolean usePadding();
 
     /**
-     * @return a BooleanValue which appropriate for this wire.
+     * Creates and returns a new {@link BooleanValue}. The {@link BooleanValue} implementation that is
+     * returned depends on the wire implementation.
+     *
+     * @return a new {@link BooleanValue}.
      */
     @NotNull
     BooleanValue newBooleanReference();

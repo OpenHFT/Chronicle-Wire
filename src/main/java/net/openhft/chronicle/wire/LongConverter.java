@@ -19,7 +19,18 @@ package net.openhft.chronicle.wire;
 
 // TODO add a pattern for validation
 public interface LongConverter {
+
+    /**
+     * Parses the provided {@link CharSequence} and returns the parsed results as a
+     * {@code long} primitive.
+     *
+     * @return the parsed {@code text} as an {@code long} primitive.
+     */
     long parse(CharSequence text);
+
+    /**
+     * Appends the provided {@code value} to the provided {@code text}.
+     */
     void append(StringBuilder text, long value);
 
     default String asString(long value) {

@@ -22,5 +22,9 @@ import net.openhft.chronicle.core.annotation.DontChain;
 @FunctionalInterface
 @DontChain
 public interface WriteValue {
+
+    /**
+     * Writes a value to the provided {@link ValueOut}.
+     */
     void writeValue(ValueOut out);
 }

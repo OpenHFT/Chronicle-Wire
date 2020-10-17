@@ -68,6 +68,14 @@ public interface WireParser extends Consumer<WireIn> {
         wireIn.endEvent();
     }
 
+    /**
+     * Performs a {@link WireParselet} lookup based on the provided {@code name}. If
+     * a {@link WireParselet} is not associated with the provided {@code name}, {@code null}
+     * is returned.
+     *
+     * @return {@link WireParselet} associated with the provided {@code name},
+     *         {@code null} if no {@link WireParselet} was found.
+     */
     WireParselet lookup(CharSequence name);
 
     @NotNull

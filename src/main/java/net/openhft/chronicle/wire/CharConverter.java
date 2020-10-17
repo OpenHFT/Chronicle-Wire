@@ -18,12 +18,22 @@
 package net.openhft.chronicle.wire;
 
 public interface CharConverter {
+
+    /**
+     * Parses the provided {@link CharSequence} and returns the parsed results as a
+     * {@code char} primitive.
+     *
+     * @return the parsed {@code text} as an {@code char} primitive.
+     */
     char parse(CharSequence text);
 
+    /**
+     * Appends the provided {@code value} to the provided {@code text}.
+     */
     void append(StringBuilder text, char value);
 
-    default String asString(char value) {
-        StringBuilder sb = new StringBuilder();
+    default String asString(final char value) {
+        final StringBuilder sb = new StringBuilder();
         append(sb, value);
         return sb.toString();
     }

@@ -19,18 +19,28 @@ package net.openhft.chronicle.wire;
 
 // TODO add a pattern for validation
 public interface IntConverter {
+
+    /**
+     * Parses the provided {@link CharSequence} and returns the parsed results as an
+     * {@code int} primitive.
+     *
+     * @return the parsed {@code text} as an {@code int} primitive.
+     */
     int parse(CharSequence text);
 
+    /**
+     * Appends the provided {@code value} to the provided {@code text}.
+     */
     void append(StringBuilder text, int value);
 
-    default String asString(int value) {
-        StringBuilder sb = new StringBuilder();
+    default String asString(final int value) {
+        final StringBuilder sb = new StringBuilder();
         append(sb, value);
         return sb.toString();
     }
 
-    default CharSequence asText(int value) {
-        StringBuilder sb = new StringBuilder();
+    default CharSequence asText(final int value) {
+        final StringBuilder sb = new StringBuilder();
         append(sb, value);
         return sb;
     }

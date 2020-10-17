@@ -25,11 +25,28 @@ public interface SerializationStrategy<T> {
     @Nullable
     T readUsing(T using, ValueIn in, BracketType bracketType);
 
+    /**
+     * Constructs and returns a new instance using the provided {@code type}
+     * as a reference. If the instance cannot be constructed, {@code null}
+     * is returned.
+     *
+     * @return a new instance of the provided {@code type} or {@code null}
+     */
     @Nullable
     T newInstanceOrNull(Class<T> type);
 
+    /**
+     * Returns the {@code type} handled by this serialization strategy.
+     *
+     * @return the {@code type} handled by this serialization strategy.
+     */
     Class<T> type();
 
+    /**
+     * Returns the {@link BracketType} used by this serialization strategy.
+     *
+     * @return the {@link BracketType} used by this serialization strategy.
+     */
     @NotNull
     BracketType bracketType();
 }

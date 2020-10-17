@@ -21,8 +21,80 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 
 public interface MessageHistory extends Marshallable {
+
     /**
-     * Get the MessageHistory to update it or read it.
+     * Returns the number of timings contained in this {@code MessageHistory}.
+     *
+     * @return the number of timings contained in this {@code MessageHistory}.
+     */
+    int timings();
+
+    /**
+     * Returns a timing at a position specified by the input {@code n}.
+     *
+     * @return a timing at a position specified by the input {@code n}.
+     */
+    long timing(int n);
+
+    /**
+     * Returns the number of sources contained in this {@code MessageHistory}.
+     *
+     * @return the number of sources contained in this {@code MessageHistory}.
+     */
+    int sources();
+
+    /**
+     * Returns the source id at a position specified by the input {@code n}.
+     *
+     * @return the source id at a position specified by the input {@code n}.
+     */
+    int sourceId(int n);
+
+    /**
+     * Returns {@code true} if the source ids contained in this
+     * {@code MessageHistory} end with the provided {@code sourceIds}.
+     *
+     * @return {@code true} if the source ids contained in this
+     * {@code MessageHistory} end with the provided {@code sourceIds}.
+     */
+    boolean sourceIdsEndsWith(int[] sourceIds);
+
+    /**
+     * Returns the index of the source at a position specified by the
+     * input {@code n}.
+     *
+     * @return the index of the source at a position specified by the
+     * input {@code n}.
+     */
+    long sourceIndex(int n);
+
+    /**
+     * Clears all data contained in this {@code MessageHistory}
+     */
+    void reset();
+
+    /**
+     * Resets the {@code MessageHistory} with the provided {@code sourceId}
+     * and {@code sourceIndex} as a starting point.
+     */
+    void reset(int sourceId, long sourceIndex);
+
+    /**
+     * Returns the last source id contained in this {@code MessageHistory}.
+     *
+     * @return the last source id contained in this {@code MessageHistory}.
+     */
+    int lastSourceId();
+
+    /**
+     * Returns the last source index contained in this {@code MessageHistory}.
+     *
+     * @return the last source index contained in this {@code MessageHistory}.
+     */
+    long lastSourceIndex();
+
+    /**
+     * Returns the {@code MessageHistory} to update it or read it.
      *
      * @return the MessageHistory for the current Excerpt.
      */
@@ -47,29 +119,4 @@ public interface MessageHistory extends Marshallable {
                     .marshallable(get());
     }
 
-    int timings();
-
-    long timing(int n);
-
-    int sources();
-
-    int sourceId(int n);
-
-    boolean sourceIdsEndsWith(int[] sourceIds);
-
-    long sourceIndex(int n);
-
-    /**
-     * clear all data
-     */
-    void reset();
-
-    /**
-     * reset for a given source prior to reading a new message in
-     */
-    void reset(int sourceId, long sourceIndex);
-
-    int lastSourceId();
-
-    long lastSourceIndex();
 }

@@ -20,8 +20,13 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.io.IORuntimeException;
 
 public interface SourceContext {
+
     /**
-     * @return the current source id or -1
+     * Returns the source id of this source context. If the id does not
+     * exist, -1 is returned instead.
+     *
+     * @return the current source id of this source context or -1 if the
+     * source id does not exist.
      */
     int sourceId();
 

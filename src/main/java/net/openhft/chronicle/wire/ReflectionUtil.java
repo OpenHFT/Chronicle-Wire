@@ -17,25 +17,33 @@
  */
 package net.openhft.chronicle.wire;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ReflectionUtil {
+public final class ReflectionUtil {
+
+    private ReflectionUtil() { }
+
     /**
-     * Get all interfaces implemented by all classes (up as far as but not including Object)
+     * Creates and returns a new List of all interfaces implemented by
+     * the provided {@code oClass} and all its super classes.
+     *
      * @param oClass class
      * @return interfaces
      */
-    public static List<Class<?>> interfaces(Class<?> oClass) {
-        List<Class<?>> list = new ArrayList<>();
+    public static List<Class<?>> interfaces(@NotNull final Class<?> oClass) {
+        final List<Class<?>> list = new ArrayList<>();
         interfaces(oClass, list);
         return list;
     }
 
-    private static void interfaces(Class<?> oClass, List<Class<?>> list) {
-        Class<?> baseClass = oClass.getSuperclass();
+    private static void interfaces(final Class<?> oClass, final List<Class<?>> list) {
+        final Class<?> baseClass = oClass.getSuperclass();
         if (baseClass == null)
+            // We have reached java.lang.Object
             return;
         list.addAll(Arrays.asList(oClass.getInterfaces()));
         interfaces(baseClass, list);

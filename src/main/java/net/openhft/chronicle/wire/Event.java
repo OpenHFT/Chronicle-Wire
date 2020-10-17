@@ -7,43 +7,69 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 public interface Event<E extends Event<E>> extends Marshallable {
+
     /**
-     * @return a unique ID for the source of the message.
-     * It only needs to be useful for tracing the path of events through the system
+     * Returns a unique identifier attached to this event.
+     *
+     * @return a unique identifier attached to this event.
      */
     @NotNull
     CharSequence eventId();
 
     /**
-     * A system-assigned unique identifier for this event. It can be empty string.
+     * Assigns a unique identifier to this event. The input identifier cannot be {@code null}.
      *
-     * @param eventId unique id
+     * @param eventId unique identifier to assign to this event.
      * @return this
      */
-    default E eventId(@NotNull CharSequence eventId) {
+    default E eventId(@NotNull final CharSequence eventId) {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @return The time at which the event which triggered this was generated
-     * (e.g. the time an event generated externally to the system first entered the system).
+     * Returns the time at which the event which triggered this was generated (e.g. the time
+     * an event generated externally to the system first entered the system).
+     *
+     * By default, the time is represented in nanoseconds. System property 'service.time.unit'
+     * can be changed in order to represent time in different units.
+     *
+     * @return the time at which the event which triggered this was generated.
      */
     long eventTime();
 
-    default E eventTime(long eventTime) {
+    /**
+     * Sets the time at which the event which triggered this was generated (e.g. the time
+     * an event generated externally to the system first entered the system).
+     *
+     * By default, the time is represented in nanoseconds. System property 'service.time.unit'
+     * can be changed in order to represent time in different units.
+     *
+     * @return this
+     */
+    default E eventTime(final long eventTime) {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Sets the time at which the event which triggered this was generated (e.g. the time
+     * an event generated externally to the system first entered the system) to the
+     * current time.
+     *
+     * By default, the time is represented in nanoseconds. System property 'service.time.unit'
+     * can be changed in order to represent time in different units.
+     *
+     * @return this
+     */
     default E eventTimeNow() {
         return eventTime(ServicesTimestampLongConverter.currentTime());
     }
 
     /**
-     * Update event with new event name, updating event time to now if required
+     * Updates event with new event name, updating event time to now if required.
      *
-     * @param eventName name
+     * @param eventName name of the event
      */
-    default void updateEvent(String eventName) {
+    default void updateEvent(final String eventName) {
         if (this.eventId().length() == 0)
             this.eventId(eventName);
 
