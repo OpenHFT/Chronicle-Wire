@@ -213,43 +213,33 @@ public class GenerateMethodWriter {
         return s;
     }
 
+    private static String signature(Method m) {
+        return m.getReturnType() + " " + m.getName() + " " + Arrays.toString(m.getParameterTypes());
+    }
+
     @NotNull
-    private Appendable methodSignature(SortedSet<String> importSet, final Method dm, final int len) throws IOException {
+    private Appendable methodSignature(SortedSet<String> importSet, final Method dm) throws IOException {
 
         SourceCodeFormatter result = new JavaSourceCodeFormatter(this.indent);
-        for (int j = 0; j < len; j++) {
-            Parameter p = dm.getParameters()[j];
-            final String className = nameForClass(importSet, p.getType());
+        String sep = "";
+        for (Parameter p : dm.getParameters()) {
+            result.append(sep);
+            sep = ", ";
+            IntConversion intConversion = p.getAnnotation(IntConversion.class);
+            LongConversion longConversion = p.getAnnotation(LongConversion.class);
 
-            Optional<String> intConversion = stream(p.getAnnotations())
-                    .filter(a -> a.annotationType() == IntConversion.class)
-                    .map(x -> (((IntConversion) x).value().getName()))
-                    .findFirst();
-
-            Optional<String> longConversion = stream(p.getAnnotations())
-                    .filter(a -> a.annotationType() == LongConversion.class)
-                    .map(x -> (((LongConversion) x).value().getName()))
-                    .findFirst();
-
-            if (intConversion.isPresent())
-                result.append("@IntConversion(").append(intConversion.get()).append(".class) ");
-            else longConversion.ifPresent(s -> {
-                try {
-                    result.append("@LongConversion(").append(s).append(".class) ");
-                } catch (Exception w) {
-                    throw Jvm.rethrow(w);
-                }
-            });
-
-            result.append("final ");
-            result.append(className);
-
-            result.append(' ')
+            if (intConversion != null)
+                result.append("@IntConversion(")
+                        .append(nameForClass(importSet, intConversion.value()))
+                        .append(".class) ");
+            else if (longConversion != null)
+                result.append("@LongConversion(")
+                        .append(nameForClass(importSet, longConversion.value()))
+                        .append(".class) ");
+            result.append("final ")
+                    .append(nameForClass(importSet, p.getType()))
+                    .append(' ')
                     .append(p.getName());
-            if (j == len - 1)
-                break;
-
-            result.append(',');
         }
         return result;
     }
@@ -492,7 +482,7 @@ public class GenerateMethodWriter {
                 methodIDAnotation,
                 typeName,
                 dm.getName(),
-                methodSignature(importSet, dm, len),
+                methodSignature(importSet, dm),
                 body,
                 methodReturn(importSet, dm, interfaceClazz));
     }
@@ -615,9 +605,5 @@ public class GenerateMethodWriter {
         }
 
         return result;
-    }
-
-    private static String signature(Method m) {
-        return m.getReturnType() + " " + m.getName() + " " + Arrays.toString(m.getParameterTypes());
     }
 }
