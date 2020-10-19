@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.*;
@@ -48,7 +49,6 @@ import java.util.regex.Pattern;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
-import static net.openhft.chronicle.core.io.AbstractReferenceCounted.unmonitor;
 import static net.openhft.chronicle.wire.TextStopCharTesters.END_OF_TYPE;
 
 /**
@@ -78,8 +78,8 @@ public class TextWire extends AbstractWire implements Wire {
     static final Pattern REGX_PATTERN = Pattern.compile("\\.|\\$");
 
     static {
-        unmonitor(TYPE);
-        unmonitor(BINARY);
+        IOTools.unmonitor(TYPE);
+        IOTools.unmonitor(BINARY);
         for (char ch : "?%&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
         for (char ch : "?,#:{}[]|>\\".toCharArray())

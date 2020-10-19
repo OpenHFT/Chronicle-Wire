@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
@@ -47,7 +48,6 @@ import java.util.function.*;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
-import static net.openhft.chronicle.core.io.AbstractReferenceCounted.unmonitor;
 
 /**
  * YAML Based wire format
@@ -69,7 +69,7 @@ public class YamlWire extends AbstractWire implements Wire {
     static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
 
     static {
-        unmonitor(TYPE);
+        IOTools.unmonitor(TYPE);
         for (char ch : "?%&@`0123456789+- ',#:{}[]|>!\\".toCharArray())
             STARTS_QUOTE_CHARS.set(ch);
         for (char ch : "?,#:{}[]|>\\".toCharArray())
