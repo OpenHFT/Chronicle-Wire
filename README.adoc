@@ -613,6 +613,57 @@ class MyInterfaceImpl extends MyInterface {
 
 For an example, see `net.openhft.chronicle.wire.MethodFilterOnFirstArgTest`
 
+=== Intercepting `MethodReader` calls
+
+You may wish to intercept handling a call in the method reader in order to execute additional logic, to record a call somewhere for monitoring purposes, or to even skip the original method invocation.
+
+==== Intercepting by passing control over the original method call
+
+`MethodReader` provides a flexible feature for supporting all of the above use cases -- the option to specify `MethodReaderInterceptorReturns`.
+If set, it will be triggered *instead* of the original call. It's possible to either skip the original method or to call it via passed `Invocation` instance:
+[source,Java]
+----
+class MyInterceptor implements MethodReaderInterceptorReturns {
+    @Override
+    Object intercept(Method m, Object o, Object[] args, Invocation invocation) throws InvocationTargetException {
+        // Execute any logic you want before the call
+        if (some_condition)
+            invocation.invoke(m, o, args); // Invoke the original method if needed
+        // Execute any logic you want after the call
+    }
+}
+----
+
+==== Intercepting by modifying `MethodReader` generated source code
+
+`GeneratingMethodReaderInterceptorReturns` allows to change the logic of `MethodReader` without an overhead provided by reflexive calls.
+
+Code returned by `codeBeforeCall` and `codeAfterCall` will be added before and after actual method call in the generated source code of the method reader. It's possible to use original call arguments and object instance in the added code.
+
+Simple example that enforces skipping the original call in case the second agrument is `null`:
+[source,Java]
+----
+class SkippingInterceptor implements GeneratingMethodReaderInterceptorReturns {
+    @Override
+    public String generatorId() {
+        return "skipping";
+    }
+
+    @Override
+    public String codeBeforeCall(Method m, String objectName, String[] argumentNames) {
+        return "if (" + argumentNames[1] + " != null) {";
+    }
+
+    @Override
+    public String codeAfterCall(Method m, String objectName, String[] argumentNames) {
+        return "}";
+    }
+}
+----
+If the code provided by generating interceptor differs from the code provided by another generating interceptor, their `generatorId` should be different as well. It's needed to ensure re-compilation in case a new interceptor is passed.
+
+See `MethodReaderInterceptorReturnsTest` for more examples.
+
 == Uses of Chronicle Wire
 
 Chronicle Wire can be used for:
