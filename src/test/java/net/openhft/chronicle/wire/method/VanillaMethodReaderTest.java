@@ -361,7 +361,6 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 }
 
-@Comment("MockDto comment")
 class MockDto extends SelfDescribingMarshallable {
     @Comment("field1 comment")
     String field1;
