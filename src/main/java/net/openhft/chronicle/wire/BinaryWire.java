@@ -796,6 +796,10 @@ public class BinaryWire extends AbstractWire implements Wire {
                             break;
                         }
 
+                        if (aClass.isEnum()) {
+                            wire.getValueOut().object(aClass, valueIn.object(aClass));
+                            break;
+                        }
                         if (Boolean.TRUE.equals(USES_SELF_DESCRIBING.get(aClass)) || aClass.isInterface())
                             break;
                         Marshallable m = (Marshallable) ObjectUtils.newInstance(aClass);
