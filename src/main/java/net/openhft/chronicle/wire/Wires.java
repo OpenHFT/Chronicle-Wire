@@ -889,7 +889,7 @@ public enum Wires {
                         return null;
                     }
                     break;
-                case "getClassName":
+                case "className":
                     if (args == null || args.length == 0)
                         return typeName;
                     break;
