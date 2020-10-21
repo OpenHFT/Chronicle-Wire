@@ -9,25 +9,23 @@ import java.util.concurrent.atomic.AtomicInteger;
  * format
  */
 public class SourceCodeFormatter implements Appendable, CharSequence {
-
-    private final int indentSpaces;
+    private final String indentSpaces;
     private final AtomicInteger indent;
-    private final StringBuilder response = new StringBuilder();
-    private StringBuilder sb = new StringBuilder();
+    private final StringBuilder sb = new StringBuilder();
+    private int lastNewlineIndex = 0;
+    private boolean lastChargeWasNewLine = false;
 
     public SourceCodeFormatter(int indentSpaces, AtomicInteger indent) {
-        this.indentSpaces = indentSpaces;
+        this.indentSpaces = "        ".substring(0, indentSpaces);
         this.indent = indent;
     }
 
     public SourceCodeFormatter(int indentSpaces) {
-        this.indentSpaces = indentSpaces;
-        this.indent = new AtomicInteger(0);
+        this(indentSpaces, new AtomicInteger(0));
     }
 
     public SourceCodeFormatter(int indentSpaces, int i) {
-        this.indentSpaces = indentSpaces;
-        this.indent = new AtomicInteger(i);
+        this(indentSpaces, new AtomicInteger(i));
     }
 
     @NotNull
@@ -37,72 +35,59 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
 
     @Override
     public SourceCodeFormatter append(final CharSequence csq) {
-        sb.append(replaceNewLine(csq, 0, csq.length() - 1));
+        append(csq, 0, csq.length());
         return this;
     }
 
-    private CharSequence replaceNewLine(final CharSequence csq, int start, int end) {
-        response.setLength(0);
-        boolean lastChargeWasNewLine = false;
-        int lastNewlineIndex = 0;
-        for (int i = start; i <= end; i++) {
-            char c = csq.charAt(i);
+    @Override
+    public SourceCodeFormatter append(final CharSequence csq, final int start, final int end) {
+        for (int i = start; i < end; i++)
+            append(csq.charAt(i));
 
-            response.append(c);
-            switch (c) {
-                case '\n':
-                    lastNewlineIndex = response.length();
-                    lastChargeWasNewLine = true;
-                    padding(response, indent.get());
-                    break;
-//                case '[':
-                case '{':
-                    indent.incrementAndGet();
-                    break;
-                case '}':
-//                case ']':
-                    indent.decrementAndGet();
-                    if (lastNewlineIndex >= 0) {
-                        response.setLength(lastNewlineIndex);
-                        padding(response, indent.get());
-                        response.append(c);
-                    }
-                    break;
-                case ' ':
-                    if (lastChargeWasNewLine) {
-                        // ignore whitespace after newline
-                        response.setLength(response.length() - 1);
-                    }
-                    break;
-                default:
-                    lastChargeWasNewLine = false;
-                    break;
-            }
+        return this;
+    }
+
+    @Override
+    public SourceCodeFormatter append(char c) {
+        sb.append(c);
+        switch (c) {
+            case '\n':
+                lastNewlineIndex = sb.length();
+                lastChargeWasNewLine = true;
+                padding(indent.get());
+                break;
+            case '{':
+                indent.incrementAndGet();
+                break;
+            case '}':
+                indent.decrementAndGet();
+                if (lastNewlineIndex >= 0) {
+                    sb.setLength(lastNewlineIndex);
+                    padding(indent.get());
+                    sb.append(c);
+                }
+                break;
+            case ' ':
+                if (lastChargeWasNewLine) {
+                    // ignore whitespace after newline
+                    sb.setLength(sb.length() - 1);
+                }
+                break;
+            default:
+                lastChargeWasNewLine = false;
+                break;
         }
-
-        return response;
+        return this;
     }
 
     public void setLength(int len) {
         sb.setLength(len);
     }
 
-    private void padding(StringBuilder target, final int indent) {
-        for (int i = 0; i < (indent * indentSpaces); i++) {
-            target.append(' ');
+    private void padding(final int indent) {
+        for (int i = 0; i < indent; i++) {
+            sb.append(indentSpaces);
         }
-    }
-
-    @Override
-    public SourceCodeFormatter append(final CharSequence csq, final int start, final int end) {
-        sb.append(replaceNewLine(csq, start, end), start, end);
-        return this;
-    }
-
-    @Override
-    public SourceCodeFormatter append(final char c) {
-        sb.append(c);
-        return this;
     }
 
     public int length() {
@@ -117,5 +102,15 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
     @Override
     public CharSequence subSequence(final int start, final int end) {
         return sb.subSequence(start, end);
+    }
+
+    public SourceCodeFormatter append(long i) {
+        sb.append(i);
+        return this;
+    }
+
+    public SourceCodeFormatter append(double d) {
+        sb.append(d);
+        return this;
     }
 }

@@ -534,7 +534,7 @@ public enum Wires {
     }
 
     public static String typeNameFor(@NotNull Object value) {
-        return value instanceof Marshallable ? ((Marshallable) value).getClassName() : ClassAliasPool.CLASS_ALIASES.nameFor(value.getClass());
+        return value instanceof Marshallable ? ((Marshallable) value).className() : ClassAliasPool.CLASS_ALIASES.nameFor(value.getClass());
     }
 
     static Marshallable newInstance(Constructor constructor, String typeName) {
@@ -926,7 +926,7 @@ public enum Wires {
             if (!(o instanceof Marshallable))
                 return false;
             Marshallable m = (Marshallable) o;
-            if (!m.getClassName().equals(typeName))
+            if (!m.className().equals(typeName))
                 return false;
             if (!Proxy.isProxyClass(m.getClass()))
                 return false;

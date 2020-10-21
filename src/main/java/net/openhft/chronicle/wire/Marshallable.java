@@ -172,7 +172,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         return Wires.fieldInfos(getClass());
     }
 
-    default String getClassName() {
+    default String className() {
         return ClassAliasPool.CLASS_ALIASES.nameFor(getClass());
     }
 

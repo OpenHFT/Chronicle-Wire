@@ -16,4 +16,12 @@ public class JavaSourceCodeFormatter extends SourceCodeFormatter {
     public JavaSourceCodeFormatter(AtomicInteger indent) {
         super(INDENT_SPACES, indent);
     }
+
+    @Override
+    public SourceCodeFormatter append(long i) {
+        super.append(i);
+        if ((int) i != i)
+            append('L');
+        return this;
+    }
 }

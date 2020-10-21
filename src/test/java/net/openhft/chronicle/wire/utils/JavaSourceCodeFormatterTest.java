@@ -3,18 +3,18 @@ package net.openhft.chronicle.wire.utils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class JavaSourceCodeFormatterTest {
 
     @Test
     public void testAppend() {
-        SourceCodeFormatter codeFormatter = new JavaSourceCodeFormatter();
-        Assert.assertEquals("public Appendable append(final CharSequence csq) {\n" +
-                "    return sb.append(replaceNewLine(csq, 0, csq.length() - 1));\n" +
-                "}", codeFormatter.append("public Appendable append(final CharSequence csq) {\n" +
-                "return sb.append(replaceNewLine(csq, 0, csq.length() - 1));\n" +
-                "}").toString());
+        Assert.assertEquals("" +
+                        "public Appendable append(final CharSequence csq) {\n" +
+                        "    return sb.append(replaceNewLine(csq, 0, csq.length() - 1));\n" +
+                        "}\n",
+                new JavaSourceCodeFormatter()
+                        .append("public Appendable append(final CharSequence csq) {\n")
+                        .append("return sb.append(replaceNewLine(csq, 0, csq.length() - 1));\n")
+                        .append('}').append('\n')
+                        .toString());
     }
 }
