@@ -32,9 +32,9 @@ public class GenerateMethodBridgeTest {
         GenerateMethodBridge gmb = new GenerateMethodBridge();
         GenerateMethodBridge.MethodBridgeMetaData md = gmb.metaData();
         md.interfaces().add(GMBZ.class);
-        md.handlers().add(GMBA.class);
-        md.handlers().add(GMBB.class);
-        md.handlers().add(GMBZ.class);
+        md.invokes().add(GMBA.class);
+        md.invokes().add(GMBB.class);
+        md.invokes().add(GMBZ.class);
         md.packageName(getClass().getPackage().getName());
         md.baseClassName("GMB");
         Class<GMBZ> aClass = gmb.acquireClass(getClass().getClassLoader());

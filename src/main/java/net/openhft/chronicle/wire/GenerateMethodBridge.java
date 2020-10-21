@@ -5,18 +5,45 @@ import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodBridge.MethodBridgeMetaData> {
 
     private List<String> fnameList;
 
-    protected GenerateMethodBridge() {
+    public GenerateMethodBridge() {
         super(new MethodBridgeMetaData());
+    }
+
+    public static Object bridgeFor(Class destType, List<Object> toInvoke, UpdateInterceptor ui) {
+        GenerateMethodBridge gmb = new GenerateMethodBridge();
+        MethodBridgeMetaData md = gmb.metaData();
+        md.packageName(destType.getPackage().getName());
+        md.baseClassName(destType.getSimpleName());
+        md.invokes(toInvoke.stream().map(o -> findClass(o)).collect(Collectors.toList()));
+        md.interfaces().add(destType);
+        md.useUpdateInterceptor(ui != null);
+        Class aClass = gmb.acquireClass(destType.getClassLoader());
+        try {
+            return ui == null
+                    ? aClass.getConstructor(List.class).newInstance(toInvoke)
+                    : aClass.getConstructor(List.class, UpdateInterceptor.class).newInstance(toInvoke, ui);
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    private static Class<?> findClass(Object o) {
+        Class<?> aClass = o.getClass();
+        Class<?>[] interfaces = aClass.getInterfaces();
+        if (interfaces != null && interfaces.length > 0)
+            return interfaces[0];
+        return aClass;
     }
 
     protected void generateFields(SourceCodeFormatter mainCode) {
         MethodBridgeMetaData md = metaData();
-        List<Class<?>> handlers = md.handlers;
+        List<Class<?>> handlers = md.invokes;
         fnameList = new ArrayList<>();
         for (int i = 0; i < handlers.size(); i++) {
             Class handler = handlers.get(i);
@@ -37,8 +64,8 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
         if (md.useUpdateInterceptor())
             mainCode.append(", ").append(nameForClass(UpdateInterceptor.class)).append(" updateInterceptor");
 
-        mainCode.append("{\n");
-        List<Class<?>> handlers = metaData().handlers;
+        mainCode.append(") {\n");
+        List<Class<?>> handlers = metaData().invokes;
         for (int i = 0; i < handlers.size(); i++) {
             Class handler = handlers.get(i);
             mainCode.append("this.").append(fieldCase(handler)).append(" = (").append(nameForClass(handler)).append(") handlers.get(").append(i).append(");\n");
@@ -51,7 +78,7 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
     protected void generateMethod(String name, Class<?> returnType, Class<?>[] pts, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
         MethodBridgeMetaData md = metaData();
 
-        List<Class<?>> handlers = md.handlers;
+        List<Class<?>> handlers = md.invokes;
         boolean first = true;
         for (int i = 0; i < handlers.size(); i++) {
             Class<?> handler = handlers.get(i);
@@ -69,14 +96,14 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
     }
 
     static class MethodBridgeMetaData extends AbstractClassGenerator.MetaData<MethodBridgeMetaData> {
-        private List<Class<?>> handlers = new ArrayList<>();
+        private List<Class<?>> invokes = new ArrayList<>();
 
-        public List<Class<?>> handlers() {
-            return handlers;
+        public List<Class<?>> invokes() {
+            return invokes;
         }
 
-        public MethodBridgeMetaData handlers(List<Class<?>> handlers) {
-            this.handlers = handlers;
+        public MethodBridgeMetaData invokes(List<Class<?>> handlers) {
+            this.invokes = handlers;
             return this;
         }
     }
