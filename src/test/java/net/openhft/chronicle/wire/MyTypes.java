@@ -103,7 +103,7 @@ class MyTypes extends SelfDescribingMarshallable {
     }
 
     @NotNull
-    public CharSequence text() {
+    public StringBuilder text() {
         return text;
     }
 

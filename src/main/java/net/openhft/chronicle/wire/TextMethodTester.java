@@ -34,6 +34,7 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -42,7 +43,7 @@ public class TextMethodTester<T> {
     private final String input;
     private final Class<T> outputClass;
     private final String output;
-    private final Function<T, Object> componentFunction;
+    private final BiFunction<T, UpdateInterceptor, Object> componentFunction;
     private BiConsumer<MethodReader, T> exceptionHandlerSetup;
     private String genericEvent;
 
@@ -58,6 +59,10 @@ public class TextMethodTester<T> {
     private UpdateInterceptor updateInterceptor;
 
     public TextMethodTester(String input, Function<T, Object> componentFunction, Class<T> outputClass, String output) {
+        this(input, (out, ui) -> componentFunction.apply(out), outputClass, output);
+    }
+
+    public TextMethodTester(String input, BiFunction<T, UpdateInterceptor, Object> componentFunction, Class<T> outputClass, String output) {
         this.input = input;
         this.outputClass = outputClass;
         this.output = output;
@@ -134,7 +139,7 @@ public class TextMethodTester<T> {
         T writer = retainLast == null
                 ? writer0
                 : cachedMethodWriter(writer0);
-        Object component = componentFunction.apply(writer);
+        Object component = componentFunction.apply(writer, updateInterceptor);
         Object[] components = component instanceof Object[]
                 ? (Object[]) component
                 : new Object[]{component};
