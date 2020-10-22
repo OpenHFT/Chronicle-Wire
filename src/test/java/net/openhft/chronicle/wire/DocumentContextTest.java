@@ -16,6 +16,7 @@ public class DocumentContextTest {
         assertEquals("one: 1\n" +
                 "two: 2\n" +
                 "three: 3\n", bytes.toString());
+        bytes.releaseLast();
     }
 
     @Test
@@ -27,6 +28,7 @@ public class DocumentContextTest {
                 "b9 03 6f 6e 65 01                               # one\n" +
                 "b9 03 74 77 6f 02                               # two\n" +
                 "b9 05 74 68 72 65 65 03                         # three\n", bytes.toHexString());
+        bytes.releaseLast();
     }
 
     @NotNull
