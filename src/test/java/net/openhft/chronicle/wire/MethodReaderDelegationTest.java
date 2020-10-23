@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Mocker;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Objects;
@@ -29,9 +30,29 @@ import static org.junit.Assert.*;
 
 public class MethodReaderDelegationTest {
     @Test
-    public void testUnsuccessfulCallIsDelegated() {
+    public void testUnsuccessfulCallIsDelegatedBinaryWire() {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
 
+        doTestUnsuccessfullCallIsDelegated(wire);
+    }
+
+    @Test
+    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/229")
+    public void testUnsuccessfulCallIsDelegatedTextWire() {
+        final TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
+
+        doTestUnsuccessfullCallIsDelegated(wire);
+    }
+
+    @Test
+    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/229")
+    public void testUnsuccessfulCallIsDelegatedYamlWire() {
+        final TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
+
+        doTestUnsuccessfullCallIsDelegated(wire);
+    }
+
+    private void doTestUnsuccessfullCallIsDelegated(Wire wire) {
         final MyInterface writer = wire.methodWriter(MyInterface.class);
         writer.myCall();
 
