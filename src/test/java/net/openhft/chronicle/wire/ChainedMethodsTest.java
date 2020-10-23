@@ -13,7 +13,7 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_PROXY_CODEGEN;
+import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
@@ -21,19 +21,19 @@ public class ChainedMethodsTest extends WireTestCommon {
     @Parameterized.Parameter
     public boolean disableProxyCodegen;
 
-    @Parameterized.Parameters(name = DISABLE_PROXY_CODEGEN + "={0}")
+    @Parameterized.Parameters(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[]{true}, new Object[]{false});
     }
 
     @Before
     public void setUp() {
-        System.setProperty(DISABLE_PROXY_CODEGEN, String.valueOf(disableProxyCodegen));
+        System.setProperty(DISABLE_WRITER_PROXY_CODEGEN, String.valueOf(disableProxyCodegen));
     }
 
     @After
     public void cleanUp() {
-        System.clearProperty(DISABLE_PROXY_CODEGEN);
+        System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
     }
 
     @Test

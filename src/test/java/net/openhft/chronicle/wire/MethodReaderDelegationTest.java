@@ -24,8 +24,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static net.openhft.chronicle.wire.VanillaMethodReaderBuilder.DISABLE_READER_PROXY_CODEGEN;
 import static org.junit.Assert.*;
 
 public class MethodReaderDelegationTest {
@@ -79,6 +81,44 @@ public class MethodReaderDelegationTest {
         assertEquals("myFall", delegatedMethodCall.get());
 
         assertEquals("*myCall[]", sb.toString());
+    }
+
+    @Test
+    public void testUserExceptionsAreNotDelegated() {
+        final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
+
+        final MyInterface writer = wire.methodWriter(MyInterface.class);
+
+        writer.myCall();
+
+        AtomicInteger exceptionsThrown = new AtomicInteger();
+
+        final MethodReader reader = wire.methodReader((MyInterface) () -> {
+            exceptionsThrown.incrementAndGet();
+
+            throw new IllegalStateException("This is an exception by design");
+        });
+
+        assertTrue(reader.readOne());
+
+        assertEquals(1, exceptionsThrown.get());
+    }
+
+    @Test
+    public void testCodeGenerationCanBeDisabled() {
+        System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
+
+        try {
+            final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
+
+            final MethodReader reader = wire.methodReader((MyInterface) () -> {
+            });
+
+            assertTrue(reader instanceof VanillaMethodReader);
+        }
+        finally {
+            System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
+        }
     }
 
     interface MyInterface {

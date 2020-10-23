@@ -397,6 +397,8 @@ public class GenerateMethodReader {
         for (int i = 0; i < parameterTypes.length; i++)
             args[i] = m.getName() + "arg" + i;
 
+        res.append("try {\n");
+
         // called for no interceptor and a generating interceptor
         if (!hasRealInterceptorReturns()) {
             GeneratingMethodReaderInterceptorReturns generatingInterceptor = interceptor != null ?
@@ -432,6 +434,13 @@ public class GenerateMethodReader {
                             "interceptor%sArgs, this::actualInvoke);\n",
                     chainedCallPrefix, castPrefix, m.getName(), instanceFieldName, m.getName()));
         }
+
+        res.append("} \n" +
+                "catch (Exception e) {\n" +
+                "Jvm.warn().on(this.getClass(), \"Exception thrown by target instance method call, " +
+                "will ignore: \" + lastEventName + \"()\", e);\n" +
+                "return true;\n" +
+                "}\n");
 
         return res.toString();
     }
