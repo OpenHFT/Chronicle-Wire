@@ -113,4 +113,14 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
         sb.append(d);
         return this;
     }
+
+    public SourceCodeFormatter append(boolean flag) {
+        sb.append(flag);
+        return this;
+    }
+
+    public <Stringable> SourceCodeFormatter append(Stringable stringable) {
+        sb.append(stringable);
+        return this;
+    }
 }

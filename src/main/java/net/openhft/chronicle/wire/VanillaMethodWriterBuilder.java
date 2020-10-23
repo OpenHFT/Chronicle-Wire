@@ -241,15 +241,28 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     }
 
     private Class newClass(final String fullClassName) {
-        return GenerateMethodWriter.newClass(fullClassName,
-                interfaces,
-                classLoader,
-                wireType,
-                genericEvent,
-                hasMethodWriterListener(),
-                metaData,
-                useMethodIds,
-                updateInterceptor != null);
+        boolean hasMethodWriterListener = hasMethodWriterListener();
+        if (wireType.isText() || hasMethodWriterListener || !Jvm.getBoolean("wire.generator.v2"))
+            return GenerateMethodWriter.newClass(fullClassName,
+                    interfaces,
+                    classLoader,
+                    wireType,
+                    genericEvent,
+                    hasMethodWriterListener,
+                    metaData,
+                    useMethodIds,
+                    updateInterceptor != null);
+        GenerateMethodWriter2 gmw = new GenerateMethodWriter2();
+        gmw.metaData()
+                .packageName(fullClassName.substring(0, fullClassName.lastIndexOf('.')))
+                .baseClassName(fullClassName.substring(1 + fullClassName.lastIndexOf('.')))
+                .interfaces(interfaces)
+                .genericEvent(genericEvent)
+                .metaData(metaData)
+                .useMethodIds(useMethodIds)
+                .useUpdateInterceptor(updateInterceptor != null);
+        gmw.maxCode(0);
+        return gmw.acquireClass(classLoader);
     }
 
     private boolean hasMethodWriterListener() {

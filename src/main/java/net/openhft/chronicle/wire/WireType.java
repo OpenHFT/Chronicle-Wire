@@ -103,6 +103,11 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                     bytes.readPosition(pos);
             }
         }
+
+        @Override
+        public boolean isText() {
+            return true;
+        }
     },
     /**
      * Use this ONLY if intend to use Delta and Binary. Otherwise, use {@link #BINARY_LIGHT}
@@ -291,12 +296,22 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         public Wire apply(@NotNull Bytes bytes) {
             return new JSONWire(bytes).useBinaryDocuments();
         }
+
+        @Override
+        public boolean isText() {
+            return true;
+        }
     },
     YAML {
         @NotNull
         @Override
         public Wire apply(@NotNull Bytes bytes) {
             return new YamlWire(bytes).useBinaryDocuments();
+        }
+
+        @Override
+        public boolean isText() {
+            return true;
         }
     },
     RAW {
@@ -323,6 +338,11 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         @Override
         public Wire apply(@NotNull Bytes bytes) {
             return new CSVWire(bytes);
+        }
+
+        @Override
+        public boolean isText() {
+            return true;
         }
     },
     READ_ANY {
@@ -602,8 +622,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         return bytes.toHexString();
     }
 
-    @Nullable
-    <T> T fromHexString(@NotNull CharSequence s) {
+    @Nullable <T> T fromHexString(@NotNull CharSequence s) {
         Bytes bytes = Bytes.fromHexString(s.toString());
         try {
             Wire wire = apply(bytes);
@@ -628,5 +647,9 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     @Override
     public boolean isAvailable() {
         return true;
+    }
+
+    public boolean isText() {
+        return false;
     }
 }

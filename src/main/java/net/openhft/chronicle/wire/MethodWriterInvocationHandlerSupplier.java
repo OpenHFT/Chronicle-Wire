@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.io.Closeable;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@Deprecated
 public class MethodWriterInvocationHandlerSupplier<T> implements Supplier<MethodWriterInvocationHandler> {
     private final Supplier<MethodWriterInvocationHandler> supplier;
     private Function<T, T> modifier;

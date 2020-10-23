@@ -5,6 +5,7 @@ import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import org.junit.Test;
 
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -19,8 +20,8 @@ class SimpleClassGenerator extends AbstractClassGenerator<SimpleMetaData> {
     }
 
     @Override
-    protected void generateMethod(String name, Class<?> returnType, Class<?>[] pts, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
-        assertEquals("call", name);
+    protected void generateMethod(Method method, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
+        assertEquals("call", method.getName());
         withLineNumber(mainCode)
                 .append("return \"").append(metaData().message).append("\";\n");
     }
@@ -41,8 +42,8 @@ class UIClassGenerator extends AbstractClassGenerator<SimpleMetaData> {
     }
 
     @Override
-    protected void generateMethod(String name, Class<?> returnType, Class<?>[] pts, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
-        assertEquals("accept", name);
+    protected void generateMethod(Method method, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
+        assertEquals("accept", method.getName());
         withLineNumber(mainCode)
                 .append("((").append(nameForClass(MyTypes.class)).append(")").append(params).append(").text().append('-').append(\"").append(metaData().message).append("\");\n");
     }

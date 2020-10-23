@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -18,8 +19,9 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
     public static final CachedCompiler CACHED_COMPILER = new CachedCompiler(Jvm.isDebug() ? new File(OS.getTarget(), "generated-test-sources") : null, null);
     private static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
     protected final SourceCodeFormatter sourceCode = new JavaSourceCodeFormatter();
-    private SortedSet<String> importSet = new TreeSet<>();
+    protected SortedSet<String> importSet = new TreeSet<>();
     private final MD metaData;
+    private int maxCode = 6;
 
     protected AbstractClassGenerator(MD metaData) {
         this.metaData = metaData;
@@ -98,12 +100,19 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
         return s;
     }
 
-    protected int maxCode() {
-        return 6;
+    public int maxCode() {
+        return maxCode;
+    }
+
+    public AbstractClassGenerator maxCode(int maxCode) {
+        this.maxCode = maxCode;
+        return this;
     }
 
     @NotNull
     protected String className() {
+        if (maxCode() == 0)
+            return metaData.baseClassName();
         long h = HashWire.hash64(metaData);
         String code = Long.toUnsignedString(h, 36);
         if (code.length() > maxCode())
@@ -120,10 +129,13 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
             mainCode.append("private transient final " + nameForClass(UpdateInterceptor.class) + " updateInterceptor;\n");
 
         generateFields(mainCode);
+        mainCode.append('\n');
 
         generateConstructors(mainCode);
 
         generateMethods(mainCode);
+
+        generateEnd(mainCode);
     }
 
     protected String fieldCase(Class clazz) {
@@ -153,18 +165,21 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
             generateMethod(m, mainCode);
     }
 
-    private void generateMethod(Method m, SourceCodeFormatter mainCode) {
-        String name = m.getName();
-        mainCode.append("public ").append(nameForClass(m.getReturnType())).append(" ").append(name).append("(");
-        Class<?>[] pts = m.getParameterTypes();
+    private void generateMethod(Method method, SourceCodeFormatter mainCode) {
+        String name = method.getName();
+        withLineNumber(mainCode)
+                .append("public ").append(nameForClass(method.getReturnType())).append(" ").append(name).append("(");
+        Class<?>[] pts = method.getParameterTypes();
         String sep = "";
         List<String> paramList = new ArrayList<>();
         StringBuilder params = new StringBuilder();
-        for (Class<?> pt : pts) {
+        Parameter[] parameters = method.getParameters();
+        for (int i = 0, ptsLength = pts.length; i < ptsLength; i++) {
+            Class<?> pt = pts[i];
             mainCode.append(sep);
             params.append(sep);
             sep = ", ";
-            String pname = fieldCase(pt);
+            String pname = parameters[i].getName();
             if (paramList.contains(pname))
                 pname += paramList.size();
             paramList.add(pname);
@@ -176,12 +191,16 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
             withLineNumber(mainCode)
                     .append("// updateInterceptor\n")
                     .append("if (!this.updateInterceptor.update(\"").append(name).append("\", ").append(paramList.get(0)).append(")) {\n")
-                    .append("return").append(returnDefault(m.getReturnType())).append(";\n")
+                    .append("return").append(returnDefault(method.getReturnType())).append(";\n")
                     .append("}\n");
         }
 
-        generateMethod(name, m.getReturnType(), pts, params, paramList, mainCode);
+        generateMethod(method, params, paramList, mainCode);
         mainCode.append("}\n");
+    }
+
+    protected void generateEnd(SourceCodeFormatter mainCode) {
+
     }
 
 
@@ -198,7 +217,7 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
     }
 
 
-    protected abstract void generateMethod(String name, Class<?> returnType, Class<?>[] pts, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode);
+    protected abstract void generateMethod(Method method, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode);
 
     @NotNull
     protected Set<Method> methodsToOverride() {

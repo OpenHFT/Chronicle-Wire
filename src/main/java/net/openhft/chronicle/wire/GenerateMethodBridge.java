@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.UpdateInterceptor;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -75,8 +76,10 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
         mainCode.append("}\n");
     }
 
-    protected void generateMethod(String name, Class<?> returnType, Class<?>[] pts, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
+    protected void generateMethod(Method method, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
         MethodBridgeMetaData md = metaData();
+        String name = method.getName();
+        Class<?>[] parameterTypes = method.getParameterTypes();
 
         List<Class<?>> handlers = md.invokes;
         boolean first = true;
@@ -84,7 +87,7 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
             Class<?> handler = handlers.get(i);
             String fname = fnameList.get(i);
             try {
-                handler.getMethod(name, pts);
+                handler.getMethod(name, parameterTypes);
                 if (first)
                     withLineNumber(mainCode);
                 first = false;
