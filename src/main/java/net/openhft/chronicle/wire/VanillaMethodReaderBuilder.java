@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
+    public static final String DISABLE_READER_PROXY_CODEGEN = "disableReaderProxyCodegen";
     private static final Map<String, Class<?>> classCache = new ConcurrentHashMap<>();
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
 
@@ -113,7 +114,9 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     @Nullable
     private MethodReader createGeneratedInstance(Supplier<MethodReader> vanillaSupplier, Object... impls) {
         // todo support this options in the generated code
-        if (ignoreDefaults || Jvm.getBoolean("chronicle.mr_overload_dont_throw"))
+        if (ignoreDefaults ||
+                Jvm.getBoolean("chronicle.mr_overload_dont_throw") ||
+                Jvm.getBoolean(DISABLE_READER_PROXY_CODEGEN))
             return null;
 
         GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, impls);
