@@ -30,6 +30,8 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
     private boolean metaData;
     private long readPosition, readLimit;
+    private long start = -1;
+    private boolean rollback;
 
     public TextReadDocumentContext(@Nullable AbstractWire wire) {
         this.wire = wire;
@@ -88,7 +90,17 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
         AbstractWire wire0 = this.wire;
         wire0.bytes.readLimit(readLimit);
-        wire0.bytes.readPosition(readPosition);
+
+        if (rollback) {
+            if (start > -1)
+                wire0.bytes.readPosition(start);
+
+            rollback = false;
+        } else {
+            wire0.bytes.readPosition(readPosition);
+        }
+        start = -1;
+
         wire.getValueIn().resetState();
         present = false;
     }
@@ -111,7 +123,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
             return;
         }
 
-        long position = bytes.readPosition();
+        start = bytes.readPosition();
         consumeToEndOfMessage(bytes);
 
         metaData = false;
@@ -119,7 +131,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         readPosition = bytes.readPosition();
 
         bytes.readLimit(bytes.readPosition());
-        bytes.readPosition(position);
+        bytes.readPosition(start);
         present = true;
     }
 
@@ -127,6 +139,11 @@ public class TextReadDocumentContext implements ReadDocumentContext {
         bytes.readSkip(3);
         wire.getValueIn().resetState();
         wire.consumePadding();
+    }
+
+    @Override
+    public void rollbackOnClose() {
+        rollback = true;
     }
 
     @Override

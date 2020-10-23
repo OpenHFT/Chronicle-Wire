@@ -20,7 +20,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Mocker;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Objects;
@@ -39,7 +38,6 @@ public class MethodReaderDelegationTest {
     }
 
     @Test
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/229")
     public void testUnsuccessfulCallIsDelegatedTextWire() {
         final TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
 
@@ -47,7 +45,6 @@ public class MethodReaderDelegationTest {
     }
 
     @Test
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/229")
     public void testUnsuccessfulCallIsDelegatedYamlWire() {
         final TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
 
@@ -61,6 +58,8 @@ public class MethodReaderDelegationTest {
         try (DocumentContext dc = wire.acquireWritingDocument(false)) {
             Objects.requireNonNull(dc.wire()).writeEventName("myFall").text("");
         }
+
+        writer.myCall();
 
         AtomicReference<String> delegatedMethodCall = new AtomicReference<>();
         StringBuilder sb = new StringBuilder();
@@ -80,7 +79,9 @@ public class MethodReaderDelegationTest {
         assertTrue(reader.readOne());
         assertEquals("myFall", delegatedMethodCall.get());
 
-        assertEquals("*myCall[]", sb.toString());
+        assertTrue(reader.readOne());
+
+        assertEquals("*myCall[]*myCall[]", sb.toString());
     }
 
     @Test
