@@ -86,7 +86,7 @@ public interface MarshallableOut extends DocumentWritten {
             wire.write(key).object(value);
         } catch (Throwable t) {
             dc.rollbackOnClose();
-            Jvm.rethrow(t);
+            throw Jvm.rethrow(t);
         } finally {
             dc.close();
         }
@@ -99,7 +99,7 @@ public interface MarshallableOut extends DocumentWritten {
             wire.write(eventName).object(value);
         } catch (Throwable t) {
             dc.rollbackOnClose();
-            Jvm.rethrow(t);
+            throw Jvm.rethrow(t);
         } finally {
             dc.close();
         }
@@ -126,7 +126,7 @@ public interface MarshallableOut extends DocumentWritten {
             marshallable.writeMarshallable(dc.wire().bytes());
         } catch (Throwable t) {
             dc.rollbackOnClose();
-            Jvm.rethrow(t);
+            throw Jvm.rethrow(t);
         } finally {
             dc.close();
         }
@@ -145,7 +145,7 @@ public interface MarshallableOut extends DocumentWritten {
             writer.accept(wire.getValueOut(), t);
         } catch (Throwable e) {
             dc.rollbackOnClose();
-            Jvm.rethrow(e);
+            throw Jvm.rethrow(e);
         } finally {
             dc.close();
         }
@@ -160,7 +160,7 @@ public interface MarshallableOut extends DocumentWritten {
             dc.wire().getValueOut().text(text);
         } catch (Throwable t) {
             dc.rollbackOnClose();
-            Jvm.rethrow(t);
+            throw Jvm.rethrow(t);
         } finally {
             dc.close();
         }
@@ -179,7 +179,7 @@ public interface MarshallableOut extends DocumentWritten {
             }
         } catch (Throwable t) {
             dc.rollbackOnClose();
-            Jvm.rethrow(t);
+            throw Jvm.rethrow(t);
         } finally {
             dc.close();
         }

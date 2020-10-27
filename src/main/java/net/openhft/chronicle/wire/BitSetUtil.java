@@ -37,7 +37,7 @@ class BitSetUtil {
             Jvm.setAccessible(wordsInUse);
             Jvm.setAccessible(sizeIsSticky);
         } catch (Exception e) {
-            Jvm.rethrow(e);
+            throw Jvm.rethrow(e);
         }
     }
 

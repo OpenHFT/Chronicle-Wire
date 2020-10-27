@@ -66,7 +66,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
 
             } catch (Throwable t) {
                 dc.rollbackOnClose();
-                Jvm.rethrow(t);
+                throw Jvm.rethrow(t);
             }
         }
     }

@@ -64,7 +64,7 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
 
             } catch (Throwable t) {
                 dc.rollbackOnClose();
-                Jvm.rethrow(t);
+                throw Jvm.rethrow(t);
             }
         }
     }
