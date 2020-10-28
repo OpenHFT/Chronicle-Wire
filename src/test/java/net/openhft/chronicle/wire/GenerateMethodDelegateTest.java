@@ -35,7 +35,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         assertEquals("run[]\n" +
                 "accept[consumer]\n" +
                 "get[]\n" +
-                "accept[bi, consumer]\n", sw.toString());
+                "accept[bi, consumer]\n", sw.toString().replace("\r", ""));
     }
 
     interface RCSB extends Runnable, Consumer, Supplier, BiConsumer {
