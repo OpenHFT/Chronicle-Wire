@@ -41,12 +41,10 @@ public class WireResetTest {
         }
     }
 
-    public static class EventAbstractCloseable extends AbstractCloseable implements Marshallable{
+    public static class EventAbstractCloseable extends AbstractCloseable implements Marshallable {
         @Override
         protected void performClose() {
 
         }
-
-}
-
+    }
 }
