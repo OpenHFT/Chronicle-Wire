@@ -61,7 +61,10 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
                 sourceCode.append("\n");
 
                 withLineNumber(sourceCode)
-                        .append("public class " + className());
+                        .append("public class ").append(className());
+                String genericType = generateGenericType();
+                if (genericType != null && !genericType.isEmpty())
+                    sourceCode.append('<').append(genericType).append('>');
                 if (extendsClass() != Object.class)
                     sourceCode.append(" extends ")
                             .append(extendsClassName);
@@ -81,6 +84,10 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
         }
     }
 
+    protected String generateGenericType() {
+        return null;
+    }
+
     protected Class extendsClass() {
         return Object.class;
     }
@@ -93,7 +100,13 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
         if (aPackage != null && !clazz.getName().contains("$")) {
             if (!"java.lang".equals(aPackage.getName())
                     && !importSet.contains(aPackage.getName() + ".*")) {
-                importSet.add(s);
+                try {
+                    if (!importSet.contains(s))
+                        importSet.add(s);
+                } catch (Exception e) {
+                    Jvm.warn().on(getClass(), "Can't add an import for " + s);
+                    throw e;
+                }
             }
             return clazz.getSimpleName();
         }
@@ -165,7 +178,7 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
             generateMethod(m, mainCode);
     }
 
-    private void generateMethod(Method method, SourceCodeFormatter mainCode) {
+    protected void generateMethod(Method method, SourceCodeFormatter mainCode) {
         String name = method.getName();
         withLineNumber(mainCode)
                 .append("public ").append(nameForClass(method.getReturnType())).append(" ").append(name).append("(");

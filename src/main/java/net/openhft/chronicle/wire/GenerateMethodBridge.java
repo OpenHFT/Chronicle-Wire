@@ -69,7 +69,7 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
         List<Class<?>> handlers = metaData().invokes;
         for (int i = 0; i < handlers.size(); i++) {
             Class handler = handlers.get(i);
-            mainCode.append("this.").append(fieldCase(handler)).append(" = (").append(nameForClass(handler)).append(") handlers.get(").append(i).append(");\n");
+            mainCode.append("this.").append(fnameList.get(i)).append(" = (").append(nameForClass(handler)).append(") handlers.get(").append(i).append(");\n");
         }
         if (md.useUpdateInterceptor())
             mainCode.append("this.updateInterceptor = updateInterceptor;\n");
