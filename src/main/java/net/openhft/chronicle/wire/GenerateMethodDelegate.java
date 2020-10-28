@@ -19,7 +19,7 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
 
     @Override
     protected String generateGenericType() {
-        return "OUT extends " + metaData().interfaces().stream()
+        return "OUT extends Object & " + metaData().interfaces().stream()
                 .map(this::nameForClass)
                 .map(s -> s.equals("MethodDelegate") ? "MethodDelegate<OUT>" : s)
                 .collect(Collectors.joining(" & "));
