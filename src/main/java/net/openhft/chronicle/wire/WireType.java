@@ -359,15 +359,14 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     private static final boolean IS_DELTA_AVAILABLE = isDeltaAvailable();
     private static final boolean IS_DEFAULT_ZERO_AVAILABLE = isDefaultZeroAvailable();
 
-
-    private static boolean isDeltaAvailable() {
-        try {
-            Class.forName("software.chronicle.wire.DeltaWire").getDeclaredConstructor(Bytes.class);
-            return true;
-        } catch (Exception fallback) {
-            return false;
-        }
+private static boolean isDeltaAvailable() {
+    try {
+        Class.forName("software.chronicle.wire.DeltaWire").getDeclaredConstructor(Bytes.class);
+        return true;
+    } catch (Exception fallback) {
+        return false;
     }
+}
 
     private static boolean isDefaultZeroAvailable() {
         try {

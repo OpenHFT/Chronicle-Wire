@@ -135,18 +135,17 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
         return metaData.baseClassName() + '$' + ch + code;
     }
 
+protected void generateMainCode(SourceCodeFormatter mainCode) {
 
-    protected void generateMainCode(SourceCodeFormatter mainCode) {
+    if (metaData.useUpdateInterceptor())
+        mainCode.append("private transient final " + nameForClass(UpdateInterceptor.class) + " updateInterceptor;\n");
 
-        if (metaData.useUpdateInterceptor())
-            mainCode.append("private transient final " + nameForClass(UpdateInterceptor.class) + " updateInterceptor;\n");
+    generateFields(mainCode);
+    mainCode.append('\n');
 
-        generateFields(mainCode);
-        mainCode.append('\n');
+    generateConstructors(mainCode);
 
-        generateConstructors(mainCode);
-
-        generateMethods(mainCode);
+    generateMethods(mainCode);
 
         generateEnd(mainCode);
     }
@@ -216,7 +215,6 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
 
     }
 
-
     private String returnDefault(final Class<?> returnType) {
         if (returnType == void.class)
             return "";
@@ -228,7 +226,6 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
             return " this";
         return " null";
     }
-
 
     protected abstract void generateMethod(Method method, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode);
 

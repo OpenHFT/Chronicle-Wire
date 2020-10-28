@@ -3,7 +3,6 @@ package net.openhft.chronicle.wire.method;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
-
 public class ClusterCommand extends SelfDescribingMarshallable {
     private long cycle;
     private Service service;

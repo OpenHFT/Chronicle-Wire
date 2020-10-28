@@ -246,18 +246,17 @@ public class MethodReaderInterceptorReturnsTest {
         }
     }
 
+static class InterceptedChainedImpl implements InterceptedChained, AggregatingInfo {
+    private final StringBuilder info;
 
-    static class InterceptedChainedImpl implements InterceptedChained, AggregatingInfo {
-        private final StringBuilder info;
+    public InterceptedChainedImpl(StringBuilder info) {
+        this.info = info;
+    }
 
-        public InterceptedChainedImpl(StringBuilder info) {
-            this.info = info;
-        }
-
-        @Override
-        public void appendInfo(String info) {
-            this.info.append(info);
-        }
+    @Override
+    public void appendInfo(String info) {
+        this.info.append(info);
+    }
 
         @Override
         public String info() {

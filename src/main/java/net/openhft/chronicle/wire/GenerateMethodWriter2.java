@@ -244,18 +244,17 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         }
     }
 
+public static class GMWMetaData extends AbstractClassGenerator.MetaData<GMWMetaData> {
+    private boolean metaData;
+    private boolean useMethodIds;
+    private String genericEvent;
 
-    public static class GMWMetaData extends AbstractClassGenerator.MetaData<GMWMetaData> {
-        private boolean metaData;
-        private boolean useMethodIds;
-        private String genericEvent;
+    public boolean metaData() {
+        return metaData;
+    }
 
-        public boolean metaData() {
-            return metaData;
-        }
-
-        public GMWMetaData metaData(boolean metaData) {
-            this.metaData = metaData;
+    public GMWMetaData metaData(boolean metaData) {
+        this.metaData = metaData;
             return this;
         }
 
