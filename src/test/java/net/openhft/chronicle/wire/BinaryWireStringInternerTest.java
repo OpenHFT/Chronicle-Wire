@@ -95,7 +95,8 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
         }
 
         executorService.shutdown();
-        assertTrue("jobs did not complete in time", executorService.awaitTermination(5L, TimeUnit.SECONDS));
+        assertTrue("jobs did not complete in time",
+                executorService.awaitTermination(Jvm.isCodeCoverage() ? 20 : 5, TimeUnit.SECONDS));
         assertTrue(capturedExceptions.isEmpty());
     }
 
