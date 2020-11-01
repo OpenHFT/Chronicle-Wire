@@ -1160,7 +1160,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private void writeField0(@NotNull CharSequence name, int len) {
         if (len > 0 && isDigit(name.charAt(0))) {
             try {
-                writeField(Integer.parseInt(name.toString()));
+                writeField(StringUtils.parseInt(name, 10));
                 return;
             } catch (NumberFormatException ignored) {
             }

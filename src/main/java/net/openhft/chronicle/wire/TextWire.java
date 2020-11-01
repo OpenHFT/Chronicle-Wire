@@ -387,7 +387,7 @@ public class TextWire extends AbstractWire implements Wire {
         StringBuilder sb = acquireStringBuilder();
         readField(sb);
         try {
-            return Integer.parseInt(sb.toString());
+            return StringUtils.parseInt(sb, 10);
         } catch (NumberFormatException ignored) {
             return Long.MIN_VALUE;
         }
