@@ -25,10 +25,10 @@ import java.util.Arrays;
  * Unsigned 64-bit number.
  */
 public class Base40LongConverter implements LongConverter {
-    public static final Base40LongConverter INSTANCE = UPPER;
     private static final String CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_:+";
     public static final Base40LongConverter UPPER = new Base40LongConverter(CHARS);
     public static final Base40LongConverter LOWER = new Base40LongConverter(CHARS.toLowerCase());
+    public static final Base40LongConverter INSTANCE = UPPER;
     private static final int BASE = 40;
     private final char[] decode;
     private final byte[] encode = new byte[128];
