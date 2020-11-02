@@ -23,6 +23,32 @@ import net.openhft.chronicle.core.annotation.UsedViaReflection;
 public interface MessageHistory extends Marshallable {
 
     /**
+     * Returns the {@code MessageHistory} to update it or read it.
+     *
+     * @return the MessageHistory for the current Excerpt.
+     */
+    static MessageHistory get() {
+        return VanillaMessageHistory.getThreadLocal();
+    }
+
+    /**
+     * You only need to call this if you wish to override it's behaviour.
+     *
+     * @param md to change to the default implementation for this thread.
+     */
+    static void set(MessageHistory md) {
+        VanillaMessageHistory.setThreadLocal(md);
+    }
+
+    @UsedViaReflection
+    static void writeHistory(DocumentContext dc) {
+        Wire wire = dc.wire();
+        if (wire.bytes().readRemaining() == 0) // only add to the start of a message. i.e. for chained calls.
+            wire.writeEventName(MethodReader.HISTORY)
+                    .marshallable(get());
+    }
+
+    /**
      * Returns the number of timings contained in this {@code MessageHistory}.
      *
      * @return the number of timings contained in this {@code MessageHistory}.
@@ -92,31 +118,5 @@ public interface MessageHistory extends Marshallable {
      * @return the last source index contained in this {@code MessageHistory}.
      */
     long lastSourceIndex();
-
-    /**
-     * Returns the {@code MessageHistory} to update it or read it.
-     *
-     * @return the MessageHistory for the current Excerpt.
-     */
-    static MessageHistory get() {
-        return VanillaMessageHistory.getThreadLocal();
-    }
-
-    /**
-     * You only need to call this if you wish to override it's behaviour.
-     *
-     * @param md to change to the default implementation for this thread.
-     */
-    static void set(MessageHistory md) {
-        VanillaMessageHistory.setThreadLocal(md);
-    }
-
-    @UsedViaReflection
-    static void writeHistory(DocumentContext dc) {
-        Wire wire = dc.wire();
-        if (wire.bytes().readRemaining() == 0) // only add to the start of a message. i.e. for chained calls.
-            wire.writeEventName(MethodReader.HISTORY)
-                    .marshallable(get());
-    }
 
 }

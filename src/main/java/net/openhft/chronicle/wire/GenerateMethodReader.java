@@ -383,7 +383,7 @@ public class GenerateMethodReader {
      * Generates code that invokes passed method, saves method return value (in case it's a chained call)
      * and handles {@link MethodReaderInterceptorReturns} if it's specified.
      *
-     * @param m Method that is being processed.
+     * @param m                 Method that is being processed.
      * @param instanceFieldName In generated code, method is executed on field with this name.
      * @param chainedCallPrefix Prefix for method call statement, passed in order to save method result for chaining.
      * @return Code that performs a method call.
@@ -567,7 +567,7 @@ public class GenerateMethodReader {
                     .replace("_", ""));
 
         if (interceptor instanceof GeneratingMethodReaderInterceptorReturns)
-            sb.append(((GeneratingMethodReaderInterceptorReturns)interceptor).generatorId());
+            sb.append(((GeneratingMethodReaderInterceptorReturns) interceptor).generatorId());
         else if (hasRealInterceptorReturns())
             sb.append("Intercepting");
 

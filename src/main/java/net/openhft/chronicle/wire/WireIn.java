@@ -96,8 +96,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
      * @param expectedClass to use as a hint, or Object.class if no hint available.
      * @return an instance of expectedClass
      */
-    @Nullable
-    <K> K readEvent(Class<K> expectedClass);
+    @Nullable <K> K readEvent(Class<K> expectedClass);
 
     /**
      * Obtain the value in (for internal use)
@@ -196,6 +195,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     void readAndSetLength(long position);
 
     void readFirstHeader(long timeout, TimeUnit timeUnit) throws TimeoutException, StreamCorruptedException;
+
     void readFirstHeader() throws StreamCorruptedException;
 
     void readMetaDataHeader();

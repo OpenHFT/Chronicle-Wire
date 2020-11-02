@@ -23,6 +23,5 @@ import org.jetbrains.annotations.NotNull;
  * This WireKey expects paramaters to follow in a marshallable.
  */
 public interface ParameterizeWireKey extends WireKey {
-    @NotNull
-    <P extends WireKey> P[] params();
+    @NotNull <P extends WireKey> P[] params();
 }

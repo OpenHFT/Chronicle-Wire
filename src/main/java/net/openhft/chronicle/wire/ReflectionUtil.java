@@ -25,7 +25,8 @@ import java.util.List;
 
 public final class ReflectionUtil {
 
-    private ReflectionUtil() { }
+    private ReflectionUtil() {
+    }
 
     /**
      * Creates and returns a new List of all interfaces implemented by

@@ -390,7 +390,7 @@ public class YamlTokeniser {
             if (ch <= ' ')
                 return;
         }
- }
+    }
 
     private YamlToken indent(
             @NotNull YamlToken indented,
@@ -696,10 +696,10 @@ public class YamlTokeniser {
         pushed.add(token);
     }
 
-public boolean isText(String s) {
-    // TODO make more efficient.
-    return text().equals(s);
-}
+    public boolean isText(String s) {
+        // TODO make more efficient.
+        return text().equals(s);
+    }
 
     public YamlKeys keys() {
         YTContext context = topContext();

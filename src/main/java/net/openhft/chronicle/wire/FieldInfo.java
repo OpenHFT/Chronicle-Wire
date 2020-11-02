@@ -57,7 +57,7 @@ public interface FieldInfo {
      *
      * @return the value of the field represented by this {@code FieldInfo} object
      * as an {@link Object}.
-     * */
+     */
     @Nullable
     Object get(Object object);
 

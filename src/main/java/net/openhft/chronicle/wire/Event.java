@@ -29,7 +29,7 @@ public interface Event<E extends Event<E>> extends Marshallable {
     /**
      * Returns the time at which the event which triggered this was generated (e.g. the time
      * an event generated externally to the system first entered the system).
-     *
+     * <p>
      * By default, the time is represented in nanoseconds. System property 'service.time.unit'
      * can be changed in order to represent time in different units.
      *
@@ -40,7 +40,7 @@ public interface Event<E extends Event<E>> extends Marshallable {
     /**
      * Sets the time at which the event which triggered this was generated (e.g. the time
      * an event generated externally to the system first entered the system).
-     *
+     * <p>
      * By default, the time is represented in nanoseconds. System property 'service.time.unit'
      * can be changed in order to represent time in different units.
      *
@@ -54,7 +54,7 @@ public interface Event<E extends Event<E>> extends Marshallable {
      * Sets the time at which the event which triggered this was generated (e.g. the time
      * an event generated externally to the system first entered the system) to the
      * current time.
-     *
+     * <p>
      * By default, the time is represented in nanoseconds. System property 'service.time.unit'
      * can be changed in order to represent time in different units.
      *

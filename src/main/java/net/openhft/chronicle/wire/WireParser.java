@@ -74,7 +74,7 @@ public interface WireParser extends Consumer<WireIn> {
      * is returned.
      *
      * @return {@link WireParselet} associated with the provided {@code name},
-     *         {@code null} if no {@link WireParselet} was found.
+     * {@code null} if no {@link WireParselet} was found.
      */
     WireParselet lookup(CharSequence name);
 

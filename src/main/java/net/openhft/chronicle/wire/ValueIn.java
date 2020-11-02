@@ -138,44 +138,31 @@ public interface ValueIn {
     @NotNull
     WireIn skipValue();
 
-    @NotNull
-    <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag);
+    @NotNull <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag);
 
-    @NotNull
-    <T> WireIn int8(@NotNull T t, @NotNull ObjByteConsumer<T> tb);
+    @NotNull <T> WireIn int8(@NotNull T t, @NotNull ObjByteConsumer<T> tb);
 
-    @NotNull
-    <T> WireIn uint8(@NotNull T t, @NotNull ObjShortConsumer<T> ti);
+    @NotNull <T> WireIn uint8(@NotNull T t, @NotNull ObjShortConsumer<T> ti);
 
-    @NotNull
-    <T> WireIn int16(@NotNull T t, @NotNull ObjShortConsumer<T> ti);
+    @NotNull <T> WireIn int16(@NotNull T t, @NotNull ObjShortConsumer<T> ti);
 
-    @NotNull
-    <T> WireIn uint16(@NotNull T t, @NotNull ObjIntConsumer<T> ti);
+    @NotNull <T> WireIn uint16(@NotNull T t, @NotNull ObjIntConsumer<T> ti);
 
-    @NotNull
-    <T> WireIn int32(@NotNull T t, @NotNull ObjIntConsumer<T> ti);
+    @NotNull <T> WireIn int32(@NotNull T t, @NotNull ObjIntConsumer<T> ti);
 
-    @NotNull
-    <T> WireIn uint32(@NotNull T t, @NotNull ObjLongConsumer<T> tl);
+    @NotNull <T> WireIn uint32(@NotNull T t, @NotNull ObjLongConsumer<T> tl);
 
-    @NotNull
-    <T> WireIn int64(@NotNull T t, @NotNull ObjLongConsumer<T> tl);
+    @NotNull <T> WireIn int64(@NotNull T t, @NotNull ObjLongConsumer<T> tl);
 
-    @NotNull
-    <T> WireIn float32(@NotNull T t, @NotNull ObjFloatConsumer<T> tf);
+    @NotNull <T> WireIn float32(@NotNull T t, @NotNull ObjFloatConsumer<T> tf);
 
-    @NotNull
-    <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td);
+    @NotNull <T> WireIn float64(@NotNull T t, @NotNull ObjDoubleConsumer<T> td);
 
-    @NotNull
-    <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime);
+    @NotNull <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime);
 
-    @NotNull
-    <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime);
+    @NotNull <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime);
 
-    @NotNull
-    <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate);
+    @NotNull <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate);
 
     default LocalDate date() {
         return LocalDate.parse(text());
@@ -197,11 +184,9 @@ public interface ValueIn {
 
     boolean hasNextSequenceItem();
 
-    @NotNull
-    <T> WireIn uuid(@NotNull T t, @NotNull BiConsumer<T, UUID> tuuid);
+    @NotNull <T> WireIn uuid(@NotNull T t, @NotNull BiConsumer<T, UUID> tuuid);
 
-    @NotNull
-    <T> WireIn int64array(@Nullable LongArrayValues values, T t, @NotNull BiConsumer<T, LongArrayValues> setter);
+    @NotNull <T> WireIn int64array(@Nullable LongArrayValues values, T t, @NotNull BiConsumer<T, LongArrayValues> setter);
 
     @NotNull
     default WireIn int128(@NotNull TwoLongValue value) {
@@ -223,11 +208,9 @@ public interface ValueIn {
 
     WireIn bool(@NotNull BooleanValue ret);
 
-    @NotNull
-    <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter);
+    @NotNull <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter);
 
-    @NotNull
-    <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter);
+    @NotNull <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter);
 
     <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader);
 
@@ -265,8 +248,7 @@ public interface ValueIn {
         return sequence(list, buffer, bufferAdd, this::reader0);
     }
 
-    @NotNull
-    <T, K> WireIn sequence(@NotNull T t, K k, @NotNull TriConsumer<T, K, ValueIn> tReader);
+    @NotNull <T, K> WireIn sequence(@NotNull T t, K k, @NotNull TriConsumer<T, K, ValueIn> tReader);
 
     default <T> int sequenceWithLength(@NotNull T t, @NotNull ToIntBiFunction<ValueIn, T> tReader) {
         int[] length = {0};
@@ -403,11 +385,9 @@ public interface ValueIn {
         return marshallable(m -> m.readAllAsMap(kClass, vClass, map)) ? map : null;
     }
 
-    @Nullable
-    <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
+    @Nullable <T> T applyToMarshallable(Function<WireIn, T> marshallableReader);
 
-    @Nullable
-    <T> T typedMarshallable() throws IORuntimeException;
+    @Nullable <T> T typedMarshallable() throws IORuntimeException;
 
     @Nullable
     default <T> T typedMarshallable(@NotNull Function<Class, ReadMarshallable> marshallableFunction)
@@ -422,11 +402,9 @@ public interface ValueIn {
         return (T) object(null, aClass);
     }
 
-    @NotNull
-    <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts);
+    @NotNull <T> ValueIn typePrefix(T t, @NotNull BiConsumer<T, CharSequence> ts);
 
-    @NotNull
-    <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer)
+    @NotNull <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer)
             throws IORuntimeException, BufferUnderflowException;
 
     @NotNull
@@ -480,10 +458,9 @@ public interface ValueIn {
      * @deprecated use marshallableAsMap
      */
     @Deprecated
-    @Nullable
-    <K, V> Map<K, V> map(@NotNull Class<K> kClazz,
-                         @NotNull Class<V> vClass,
-                         Map<K, V> usingMap);
+    @Nullable <K, V> Map<K, V> map(@NotNull Class<K> kClazz,
+                                   @NotNull Class<V> vClass,
+                                   Map<K, V> usingMap);
 
     boolean bool();
 
@@ -610,10 +587,6 @@ public interface ValueIn {
         return longConverter.parse(sb);
     }
 
-    interface Reader {
-        <T> void accept(ValueIn valueIn, List<T> list, List<T> buffer, Supplier<T> bufferAdd);
-    }
-
     default boolean readBoolean() {
         return bool();
     }
@@ -648,5 +621,9 @@ public interface ValueIn {
 
     default String readString() {
         return text();
+    }
+
+    interface Reader {
+        <T> void accept(ValueIn valueIn, List<T> list, List<T> buffer, Supplier<T> bufferAdd);
     }
 }

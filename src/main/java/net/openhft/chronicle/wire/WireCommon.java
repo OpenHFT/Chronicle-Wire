@@ -171,6 +171,7 @@ public interface WireCommon {
     long headerNumber();
 
     void usePadding(boolean usePadding);
+
     boolean usePadding();
 
     /**

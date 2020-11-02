@@ -44,6 +44,7 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
 
     /**
      * Used for cfg event routing. serviceId of the destination event
+     *
      * @return serviceId
      */
     @NotNull

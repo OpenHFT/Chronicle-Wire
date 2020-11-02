@@ -166,8 +166,7 @@ public class CSVWire extends TextWire {
         }
 
         @Override
-        @Nullable
-        <ACS extends Appendable & CharSequence> ACS textTo0(@NotNull ACS a) {
+        @Nullable <ACS extends Appendable & CharSequence> ACS textTo0(@NotNull ACS a) {
             consumePadding();
             int ch = peekCode();
 

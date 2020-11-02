@@ -430,8 +430,8 @@ public class YamlWire extends AbstractWire implements Wire {
         return "todo";
     }
 
-@NotNull
-@Override
+    @NotNull
+    @Override
     public ValueIn read(@NotNull WireKey key) {
         return read(key.name().toString());
     }
