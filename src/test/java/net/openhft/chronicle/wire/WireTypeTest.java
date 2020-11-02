@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.util.Time;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
@@ -94,7 +95,7 @@ public class WireTypeTest extends WireTestCommon {
                     || wt == WireType.DELTA_BINARY
                     || wt == WireType.DEFAULT_ZERO_BINARY)
                 continue;
-            @NotNull String tmp = OS.getTarget() + "/testFromFile-" + System.nanoTime();
+            @NotNull String tmp = OS.getTarget() + "/testFromFile-" + Time.uniqueId();
             wt.toFile(tmp, tm);
             @Nullable Object o;
             if (wt == WireType.JSON)
