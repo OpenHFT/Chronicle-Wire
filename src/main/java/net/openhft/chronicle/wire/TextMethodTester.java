@@ -155,10 +155,10 @@ public class TextMethodTester<T> {
                 wireOut.bytes().clear();
             }
             wireOut.bytes().clear();
-
-            if (component instanceof PostSetup)
-                ((PostSetup)component).postSetup();
         }
+
+        if (component instanceof PostSetup)
+            ((PostSetup)component).postSetup();
 
         Wire wire = createWire(BytesUtil.readFile(input));
 
