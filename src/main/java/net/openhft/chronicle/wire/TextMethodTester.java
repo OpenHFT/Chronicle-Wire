@@ -155,6 +155,9 @@ public class TextMethodTester<T> {
                 wireOut.bytes().clear();
             }
             wireOut.bytes().clear();
+
+            if (component instanceof PostSetup)
+                ((PostSetup)component).postSetup();
         }
 
         Wire wire = createWire(BytesUtil.readFile(input));
@@ -402,5 +405,9 @@ public class TextMethodTester<T> {
                 invocation.method.invoke(writer0, invocation.args);
             }
         }
+    }
+
+    public interface PostSetup {
+        void postSetup();
     }
 }
