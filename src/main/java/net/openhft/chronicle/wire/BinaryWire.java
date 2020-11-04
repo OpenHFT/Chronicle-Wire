@@ -48,6 +48,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
 
+import static net.openhft.chronicle.core.Jvm.isJava9Plus;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.BinaryWire.AnyCodeMatch.ANY_CODE_MATCH;
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
@@ -1362,14 +1363,17 @@ public class BinaryWire extends AbstractWire implements Wire {
                 if (len < 0x20)
                     len = (int) AppendableUtil.findUtf8Length(s);
                 char ch;
-                if (len == 0) {
+                if (isJava9Plus()) {
+                    writeCode(STRING_ANY);
+                    bytes.writeUtf8(s);
+                } else if (len == 0) {
                     bytes.writeUnsignedByte(STRING_0);
 
                 } else if (len == 1 && (ch = s.charAt(0)) < 128) {
                     bytes.writeUnsignedByte(STRING_0 + 1).writeUnsignedByte(ch);
 
                 } else if (len < 0x20) {
-                    bytes.writeUnsignedByte((int) (STRING_0 + len)).appendUtf8(s);
+                    bytes.writeUnsignedByte(STRING_0 + len).appendUtf8(s);
                 } else {
                     writeCode(STRING_ANY);
                     bytes.writeUtf8(s);
