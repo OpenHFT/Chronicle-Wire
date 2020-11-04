@@ -13,6 +13,7 @@ import org.junit.Test;
 import java.io.StringWriter;
 
 import static junit.framework.TestCase.assertFalse;
+import static net.openhft.chronicle.core.Jvm.isJava9Plus;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -107,11 +108,12 @@ public class MethodWriterTest extends WireTestCommon {
                 "  one\n" +
                 "]\n" +
                 "...\n", wire.toString());
-        assertEquals("" +
-                "14 00 00 00                                     # msg-length\n" +
-                "b9 05 65 76 65 6e 74 82 08 00 00 00             # event\n" +
-                "e3 74 77 6f                                     # two\n" +
-                "e3 74 77 6f                                     # two\n", wire2.bytes().toHexString());
+        if (!isJava9Plus())
+            assertEquals("" +
+                    "14 00 00 00                                     # msg-length\n" +
+                    "b9 05 65 76 65 6e 74 82 08 00 00 00             # event\n" +
+                    "e3 74 77 6f                                     # two\n" +
+                    "e3 74 77 6f                                     # two\n", wire2.bytes().toHexString());
         wire2.bytes().releaseLast();
     }
 
