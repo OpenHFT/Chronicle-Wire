@@ -27,7 +27,11 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
 
     @Override
     protected void generateFields(SourceCodeFormatter mainCode) {
-        mainCode.append("private OUT delegate;\n");
+        mainCode.append("private ").append(getDelegateType()).append(" delegate;\n");
+    }
+
+    protected String getDelegateType() {
+        return "OUT";
     }
 
     @Override
@@ -40,8 +44,8 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
         if (s.equals("public abstract void net.openhft.chronicle.wire.MethodDelegate.delegate(java.lang.Object)")) {
             withLineNumber(mainCode)
                     .append("public void delegate(Object delegate) {\n" +
-                            "this.delegate = (OUT) delegate;\n" +
-                            "}\n");
+                            "this.delegate = (").append(getDelegateType()).append(") delegate;\n" +
+                    "}\n");
         } else {
             super.generateMethod(method, mainCode);
         }
@@ -51,7 +55,12 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
     protected void generateMethod(Method method, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
         if (method.getReturnType() != void.class)
             mainCode.append("return ");
-        mainCode.append("this.delegate.").append(method.getName()).append("(").append(params).append(");\n");
+        getDelegate(mainCode, method)
+                .append(".").append(method.getName()).append("(").append(params).append(");\n");
+    }
+
+    protected SourceCodeFormatter getDelegate(SourceCodeFormatter mainCode, Method method) {
+        return mainCode.append("this.delegate");
     }
 
     public static class GMDMetaData extends AbstractClassGenerator.MetaData<GMDMetaData> {
