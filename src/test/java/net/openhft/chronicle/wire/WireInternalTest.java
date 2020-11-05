@@ -19,10 +19,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assume;
 import org.junit.Test;
 
-import static net.openhft.chronicle.core.Jvm.isJava9Plus;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
@@ -68,7 +66,6 @@ public class WireInternalTest extends WireTestCommon {
 
     @Test
     public void testFromSizePrefixedBinaryToText() {
-        Assume.assumeFalse(isJava9Plus());
         Bytes bytes = Bytes.elasticByteBuffer();
         @NotNull Wire out = new BinaryWire(bytes);
         out.writeDocument(true, w -> w

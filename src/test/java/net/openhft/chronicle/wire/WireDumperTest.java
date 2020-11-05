@@ -2,9 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
-import net.openhft.chronicle.core.Jvm;
 import org.junit.After;
-import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -13,7 +11,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.openhft.chronicle.core.Jvm.isJava9Plus;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -46,7 +43,6 @@ public class WireDumperTest extends WireTestCommon {
 
     @Test
     public void shouldSerialiseContent() {
-        Assume.assumeFalse(isJava9Plus());
         wire.writeDocument(17L, ValueOut::int64);
         wire.writeDocument("bark", ValueOut::text);
         wire.writeDocument(3.14D, ValueOut::float64);
@@ -56,7 +52,6 @@ public class WireDumperTest extends WireTestCommon {
 
     @Test
     public void shouldSerialisePartialContent() {
-        Assume.assumeFalse(isJava9Plus());
         wire.writeDocument(17L, ValueOut::int64);
         final DocumentContext context = wire.writingDocument();
         context.wire().getValueOut().text("meow");
