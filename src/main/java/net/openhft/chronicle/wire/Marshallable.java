@@ -172,6 +172,10 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         return Wires.fieldInfos(getClass());
     }
 
+    default @NotNull Map<String, FieldInfo> $fieldInfoMap() {
+        return Wires.fieldInfoMap(getClass());
+    }
+
     default String className() {
         return ClassAliasPool.CLASS_ALIASES.nameFor(getClass());
     }

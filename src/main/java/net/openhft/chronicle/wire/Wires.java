@@ -384,6 +384,10 @@ public enum Wires {
         return FIELD_INFOS.get(aClass).list;
     }
 
+    public static @NotNull Map<String, FieldInfo> fieldInfoMap(@NotNull Class aClass) {
+        return FIELD_INFOS.get(aClass).map;
+    }
+
     public static FieldInfo fieldInfo(@NotNull Class aClass, String name) {
         return FIELD_INFOS.get(aClass).map.get(name);
     }
