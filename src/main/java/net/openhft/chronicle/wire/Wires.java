@@ -403,9 +403,20 @@ public enum Wires {
         return ObjectUtils.convertTo(tClass, value);
     }
 
+    @Nullable
+    public static long getLongField(@NotNull Object o, String name) throws NoSuchFieldException {
+        WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(o.getClass());
+        return wm.getLongField(o, name);
+    }
+
     public static void setField(@NotNull Object o, String name, Object value) throws NoSuchFieldException {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(o.getClass());
         wm.setField(o, name, value);
+    }
+
+    public static void setLongField(@NotNull Object o, String name, long value) throws NoSuchFieldException {
+        WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(o.getClass());
+        wm.setLongField(o, name, value);
     }
 
     public static void reset(@NotNull Object o) {

@@ -129,6 +129,14 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         Wires.setField(this, name, value);
     }
 
+    default long getLongField(String name) throws NoSuchFieldException {
+        return Wires.getLongField(this, name);
+    }
+
+    default void setLongField(String name, long value) throws NoSuchFieldException {
+        Wires.setLongField(this, name, value);
+    }
+
     @Override
     default void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
         // Wires.readMarshallable(this, wire, true);

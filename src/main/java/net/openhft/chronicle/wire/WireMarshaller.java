@@ -295,13 +295,30 @@ public class WireMarshaller<T> {
 
     public Object getField(Object o, String name) throws NoSuchFieldException {
         try {
-            // TODO use a more optimal data structure
-            for (@NotNull FieldAccess field : fields) {
-                if (field.field.getName().equals(name)) {
-                    return field.field.get(o);
-                }
-            }
-            throw new NoSuchFieldException(name);
+            FieldAccess field = fieldMap.get(name);
+            if (field == null)
+                throw new NoSuchFieldException(name);
+
+            return field.field.get(o);
+
+        } catch (IllegalAccessException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    public long getLongField(@NotNull Object o, String name) throws NoSuchFieldException {
+        try {
+            FieldAccess field = fieldMap.get(name);
+            if (field == null)
+                throw new NoSuchFieldException(name);
+
+            Field field2 = field.field;
+            return field2.getType() == long.class
+                    ? field2.getLong(o)
+                    : field2.getType() == int.class
+                    ? field2.getInt(o)
+                    : ObjectUtils.convertTo(Long.class, field2.get(o));
+
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
         }
@@ -309,16 +326,29 @@ public class WireMarshaller<T> {
 
     public void setField(Object o, String name, Object value) throws NoSuchFieldException {
         try {
-            // TODO use a more optimal data structure
-            for (@NotNull FieldAccess field : fields) {
-                @NotNull final Field field2 = field.field;
-                if (field2.getName().equals(name)) {
-                    value = ObjectUtils.convertTo(field2.getType(), value);
-                    field2.set(o, value);
-                    return;
-                }
-            }
-            throw new NoSuchFieldException(name);
+            FieldAccess field = fieldMap.get(name);
+            if (field == null)
+                throw new NoSuchFieldException(name);
+            @NotNull final Field field2 = field.field;
+            value = ObjectUtils.convertTo(field2.getType(), value);
+            field2.set(o, value);
+        } catch (IllegalAccessException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    public void setLongField(Object o, String name, long value) throws NoSuchFieldException {
+        try {
+            FieldAccess field = fieldMap.get(name);
+            if (field == null)
+                throw new NoSuchFieldException(name);
+            @NotNull final Field field2 = field.field;
+            if (field2.getType() == long.class)
+                field2.setLong(o, value);
+            else if (field2.getType() == int.class)
+                field2.setInt(o, (int) value);
+            else
+                field2.set(o, ObjectUtils.convertTo(field2.getType(), value));
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
         }

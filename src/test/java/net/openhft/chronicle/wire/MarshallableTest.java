@@ -179,6 +179,43 @@ public class MarshallableTest extends WireTestCommon {
                 "}\n", mt.toString());
     }
 
+    @Test
+    public void getField() throws NoSuchFieldException {
+        DTO1 dto1 = new DTO1();
+        LocalDate three = dto1.getField("three", LocalDate.class);
+        assertNull(three);
+        LocalDate date = LocalDate.of(2020, 11, 20);
+        dto1.setField("three", date);
+        LocalDate three2 = dto1.getField("three", LocalDate.class);
+        assertEquals(date, three2);
+    }
+
+    @Test
+    public void getLongField() throws NoSuchFieldException {
+        StaticData sd = new StaticData();
+        long anInt = sd.getLongField("anInt");
+        assertEquals(100, anInt);
+        sd.setLongField("anInt", Integer.MAX_VALUE);
+        long anInt2 = sd.getLongField("anInt");
+        assertEquals(Integer.MAX_VALUE, anInt2);
+
+        sd.setLongField("anInt", Long.MIN_VALUE);
+        long anInt3 = sd.getLongField("anInt");
+        assertEquals((int) Long.MIN_VALUE, anInt3);
+
+        long aLong = sd.getLongField("aLong");
+        assertEquals(~100L, aLong);
+        sd.setLongField("aLong", Integer.MAX_VALUE);
+        long aLong2 = sd.getLongField("aLong");
+        assertEquals(Integer.MAX_VALUE, aLong2);
+
+        sd.setLongField("aLong", Long.MIN_VALUE);
+        long aLong3 = sd.getLongField("aLong");
+        assertEquals(Long.MIN_VALUE, aLong3);
+
+
+    }
+
     static class WithArray extends SelfDescribingMarshallable {
         DTO1[] dto1s;
     }
@@ -197,6 +234,7 @@ public class MarshallableTest extends WireTestCommon {
 
     static class StaticData extends AbstractMarshallableCfg {
         int anInt = 100;
+        long aLong = ~100L;
         List<String> aList = new ArrayList<>();
     }
 
