@@ -212,8 +212,6 @@ public class MarshallableTest extends WireTestCommon {
         sd.setLongField("aLong", Long.MIN_VALUE);
         long aLong3 = sd.getLongField("aLong");
         assertEquals(Long.MIN_VALUE, aLong3);
-
-
     }
 
     static class WithArray extends SelfDescribingMarshallable {
