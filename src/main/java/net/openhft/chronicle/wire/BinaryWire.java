@@ -1363,10 +1363,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 if (len < 0x20)
                     len = (int) AppendableUtil.findUtf8Length(s);
                 char ch;
-                if (isJava9Plus()) {
-                    writeCode(STRING_ANY);
-                    bytes.writeUtf8(s);
-                } else if (len == 0) {
+                if (len == 0) {
                     bytes.writeUnsignedByte(STRING_0);
 
                 } else if (len == 1 && (ch = s.charAt(0)) < 128) {
