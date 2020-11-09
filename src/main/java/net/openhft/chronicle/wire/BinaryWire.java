@@ -3582,6 +3582,28 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         @Override
+        public float float32() {
+            consumePadding();
+            int code = readCode();
+            final double value;
+            switch (code >> 16) {
+                case BinaryWireHighCode.INT:
+                    value = readInt0(code);
+                    break;
+                case BinaryWireHighCode.FLOAT:
+                    value = readFloat0(code);
+                    break;
+                case BinaryWireHighCode.STR0:
+                case BinaryWireHighCode.STR1:
+                default:
+                    value = readTextAsDouble();
+                    break;
+            }
+
+            return (float) value;
+        }
+
+        @Override
         public int int32() {
             consumePadding();
             int code = readCode();
@@ -3620,28 +3642,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (code >> 4 == BinaryWireHighCode.FLOAT)
                 return readFloat0(code);
             return isText(code) ? readTextAsDouble() : readInt0(code);
-        }
-
-        @Override
-        public float float32() {
-            consumePadding();
-            int code = readCode();
-            final double value;
-            switch (code >> 16) {
-                case BinaryWireHighCode.INT:
-                    value = readInt0(code);
-                    break;
-                case BinaryWireHighCode.FLOAT:
-                    value = readFloat0(code);
-                    break;
-                case BinaryWireHighCode.STR0:
-                case BinaryWireHighCode.STR1:
-                default:
-                    value = readTextAsDouble();
-                    break;
-            }
-
-            return (float) value;
         }
 
         @NotNull
