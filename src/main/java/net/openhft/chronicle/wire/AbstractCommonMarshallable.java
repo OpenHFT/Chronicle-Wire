@@ -20,8 +20,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.BytesMarshallable;
 
 /**
- * Created by Peter Lawrey on 16/03/16.
- * <p>
  * This uses bytes marshallable, non self describing messages by default.
  */
 public abstract class AbstractCommonMarshallable implements Marshallable, BytesMarshallable {

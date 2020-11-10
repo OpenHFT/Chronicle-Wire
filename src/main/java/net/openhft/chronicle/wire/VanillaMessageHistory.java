@@ -156,17 +156,9 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
         sources = 0;
-        wire.read("sources").sequence(this, (t, in) -> {
-            while (in.hasNextSequenceItem()) {
-                t.addSource(in.int32(), in.int64());
-            }
-        });
+        wire.read("sources").sequence(this, VanillaMessageHistory::acceptSourcesRead);
         timings = 0;
-        wire.read("timings").sequence(this, (t, in) -> {
-            while (in.hasNextSequenceItem()) {
-                t.addTiming(in.int64());
-            }
-        });
+        wire.read("timings").sequence(this, VanillaMessageHistory::acceptTimingsRead);
         if (addSourceDetails) {
             @Nullable Object o = wire.parent();
             if (o instanceof SourceContext) {
@@ -178,29 +170,10 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         }
     }
 
-    protected long nanoTime() {
-        return System.nanoTime();
-    }
-
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
-        wire.write("sources")
-                .sequence(this, (t, out) -> {
-                    Bytes<?> b = out.wireOut().bytes();
-                    for (int i = 0; i < t.sources; i++) {
-                        b.comment("source id & index");
-                        out.uint32(t.sourceIdArray[i]);
-                        out.int64_0x(t.sourceIndexArray[i]);
-                    }
-                });
-        wire.write("timings").sequence(this, (t, out) -> {
-            Bytes<?> b = out.wireOut().bytes();
-            for (int i = 0; i < t.timings; i++) {
-                b.comment("timing in nanos");
-                out.int64(t.timingsArray[i]);
-            }
-            out.int64(nanoTime());
-        });
+        wire.write("sources").sequence(this, this::acceptSources);
+        wire.write("timings").sequence(this, this::acceptTimings);
     }
 
     @Override
@@ -216,7 +189,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             timingsArray[i] = bytes.readLong();
     }
 
-    @SuppressWarnings("AssertWithSideEffects")
+    @SuppressWarnings({"AssertWithSideEffects", "UnnecessaryLocalVariable"})
     @Override
     public void writeMarshallable(@NotNull BytesOut b) {
         BytesOut<?> bytes = b;
@@ -235,6 +208,40 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         }
         bytes.writeLong(nanoTime()); // add time for this output
         assert checkMarshallableSize(start, (Bytes) bytes);
+    }
+
+    protected long nanoTime() {
+        return System.nanoTime();
+    }
+
+    private static void acceptSourcesRead(VanillaMessageHistory t, ValueIn in) {
+        while (in.hasNextSequenceItem()) {
+            t.addSource(in.int32(), in.int64());
+        }
+    }
+
+    private static void acceptTimingsRead(VanillaMessageHistory t, ValueIn in) {
+        while (in.hasNextSequenceItem()) {
+            t.addTiming(in.int64());
+        }
+    }
+
+    private void acceptSources(VanillaMessageHistory t, ValueOut out) {
+        Bytes<?> b = out.wireOut().bytes();
+        for (int i = 0; i < t.sources; i++) {
+            b.comment("source id & index");
+            out.uint32(t.sourceIdArray[i]);
+            out.int64_0x(t.sourceIndexArray[i]);
+        }
+    }
+
+    private void acceptTimings(VanillaMessageHistory t, ValueOut out) {
+        Bytes<?> b = out.wireOut().bytes();
+        for (int i = 0; i < t.timings; i++) {
+            b.comment("timing in nanos");
+            out.int64(t.timingsArray[i]);
+        }
+        out.int64(nanoTime());
     }
 
     private boolean start(final long start) {
