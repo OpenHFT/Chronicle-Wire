@@ -1018,5 +1018,10 @@ public enum Wires {
         public Class<?> genericType(int index) {
             return Object.class;
         }
+
+        @Override
+        public boolean isEqual(Object a, Object b) {
+            return Objects.deepEquals(get(a), get(b));
+        }
     }
 }

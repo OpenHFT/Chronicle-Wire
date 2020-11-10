@@ -144,4 +144,6 @@ public interface FieldInfo {
      * field represented by this {@code FieldInfo} object.
      */
     Class<?> genericType(int index);
+
+    boolean isEqual(Object a, Object b);
 }

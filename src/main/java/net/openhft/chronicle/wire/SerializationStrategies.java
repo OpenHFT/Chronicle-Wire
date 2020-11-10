@@ -156,9 +156,9 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         @Override
-        public @Nullable Object newInstanceOrNull(Class type) {
+        public Object newInstanceOrNull(Class type) {
             try {
-                DynamicEnum o = (DynamicEnum) UnsafeMemory.UNSAFE.allocateInstance(type);
+                DynamicEnum o = (DynamicEnum) UnsafeMemory.INSTANCE.allocateInstance(type);
                 o.setField("name", "[unset]");
                 if (o instanceof Enum)
                     ordinal.set(o, -1);

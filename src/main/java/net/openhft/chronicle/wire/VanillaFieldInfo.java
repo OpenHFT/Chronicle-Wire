@@ -28,6 +28,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
@@ -188,5 +189,18 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         ParameterizedType genericType = (ParameterizedType) field.getGenericType();
         Type type = genericType.getActualTypeArguments()[index];
         return (Class) type;
+    }
+
+    @Override
+    public boolean isEqual(Object a, Object b) {
+        if (type.isPrimitive()) {
+            if (type == int.class)
+                return getInt(a) == getInt(b);
+            if (type == long.class)
+                return getLong(a) == getLong(b);
+            if (type == double.class)
+                return getDouble(a) == getDouble(b);
+        }
+        return Objects.deepEquals(get(a), get(b));
     }
 }
