@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -180,6 +181,21 @@ public class JSONWireTest extends WireTestCommon {
 
         w2.bytes().releaseLast();
         bb.releaseLast();
+    }
+
+    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/236")
+    @Test
+    public void testFloatFromJson() {
+        FooEvent foo = new FooEvent();
+        foo.foo = 0.1f;
+        @NotNull CharSequence str = WireType.JSON.asString(foo);
+        assertEquals("\"foo\":0.1", str);
+        FooEvent foo2 = WireType.JSON.fromString(FooEvent.class, str);
+        assertEquals(foo, foo2);
+    }
+
+    private static class FooEvent extends AbstractEventCfg<FooEvent> {
+        float foo;
     }
 
     private static class Item extends SelfDescribingMarshallable {
