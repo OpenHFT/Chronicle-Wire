@@ -3413,12 +3413,8 @@ public class TextWire extends AbstractWire implements Wire {
 
         @Override
         public float float32() {
-
-            double d = float64();
-            if ((double) (((float) d)) != d)
-                throw new IllegalStateException("value=" + d + " can not be represented as a float");
-
-            return (float) d;
+            // this parses a double and casts to a float, so there may be some loss of precision
+            return (float) float64();
         }
 
         /**

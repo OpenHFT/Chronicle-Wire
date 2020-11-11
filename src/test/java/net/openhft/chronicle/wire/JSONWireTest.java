@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -183,13 +182,13 @@ public class JSONWireTest extends WireTestCommon {
         bb.releaseLast();
     }
 
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/236")
     @Test
     public void testFloatFromJson() {
         FooEvent foo = new FooEvent();
         foo.foo = 0.1f;
         @NotNull CharSequence str = WireType.JSON.asString(foo);
         assertEquals("\"foo\":0.1", str);
+        // 0.1 when cast to a double is 0.10000000149011612. We used to throw an exception here because of this difference
         FooEvent foo2 = WireType.JSON.fromString(FooEvent.class, str);
         assertEquals(foo, foo2);
     }
