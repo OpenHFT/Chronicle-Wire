@@ -21,9 +21,11 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.io.IOTools;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -31,8 +33,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -47,7 +48,7 @@ public class TextMethodTester<T> {
     private BiConsumer<MethodReader, T> exceptionHandlerSetup;
     private String genericEvent;
 
-    private String setup;
+    private List<String> setups;
     private Function<String, String> afterRun;
 
     private String expected;
@@ -67,6 +68,7 @@ public class TextMethodTester<T> {
         this.outputClass = outputClass;
         this.output = output;
         this.componentFunction = componentFunction;
+        this.setups = Collections.emptyList();
     }
 
     public String[] retainLast() {
@@ -80,12 +82,20 @@ public class TextMethodTester<T> {
     }
 
     public String setup() {
-        return setup;
+        if (setups.size() != 1)
+            throw new IllegalStateException();
+        return setups.get(0);
     }
 
     @NotNull
     public TextMethodTester setup(String setup) {
-        this.setup = setup;
+        this.setups = Collections.singletonList(setup);
+        return this;
+    }
+
+    @NotNull
+    public TextMethodTester setups(@NotNull List<String> setups) {
+        this.setups = setups;
         return this;
     }
 
@@ -144,7 +154,7 @@ public class TextMethodTester<T> {
                 ? (Object[]) component
                 : new Object[]{component};
 
-        if (setup != null) {
+        for (String setup : setups) {
             Wire wire0 = createWire(BytesUtil.readFile(setup));
 
             MethodReader reader0 = wire0.methodReaderBuilder()
@@ -352,6 +362,14 @@ public class TextMethodTester<T> {
     public TextMethodTester<T> timeoutMS(long timeoutMS) {
         this.timeoutMS = timeoutMS;
         return this;
+    }
+
+    public static boolean resourceExists(String resourceName) {
+        try {
+            return new File(resourceName).exists() || IOTools.urlFor(TextMethodTester.class, resourceName) != null;
+        } catch (FileNotFoundException ignored) {
+            return false;
+        }
     }
 
     @Deprecated(/* used by one client*/)
