@@ -88,8 +88,8 @@ public class TextMethodTester<T> {
     }
 
     @NotNull
-    public TextMethodTester setup(String setup) {
-        this.setups = Collections.singletonList(setup);
+    public TextMethodTester setup(@Nullable String setup) {
+        this.setups = (setup == null) ? Collections.emptyList() : Collections.singletonList(setup);
         return this;
     }
 
