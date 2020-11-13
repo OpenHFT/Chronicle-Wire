@@ -37,12 +37,12 @@ public class EnumSetMarshallingTest extends WireTestCommon {
             "--- !!data #binary\n" +
                     "key: {\n" +
                     "  f: [\n" +
-                    "    TERMINATED,\n" +
-                    "    TIMED_WAITING,\n" +
-                    "    WAITING,\n" +
-                    "    BLOCKED,\n" +
+                    "    NEW,\n" +
                     "    RUNNABLE,\n" +
-                    "    NEW\n" +
+                    "    BLOCKED,\n" +
+                    "    WAITING,\n" +
+                    "    TIMED_WAITING,\n" +
+                    "    TERMINATED\n" +
                     "  ]\n" +
                     "}\n";
 

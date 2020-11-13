@@ -929,17 +929,16 @@ public class WireMarshaller<T> {
                                            Object[] values,
                                            Field field,
                                            Class componentType) {
-            EnumSet coll;
+            final EnumSet coll;
             try {
                 coll = (EnumSet) field.get(o);
             } catch (IllegalAccessException e) {
                 throw new AssertionError(e);
             }
 
-            // TODO: this is backwards - should not be
-            for (int i = values.length - 1; i != -1; i--) {
-                if (coll.contains(values[i])) {
-                    out.object(componentType, values[i]);
+            for (Object v : values) {
+                if (coll.contains(v)) {
+                    out.object(componentType, v);
                 }
             }
         }
