@@ -37,11 +37,11 @@ public class EnumSetMarshallingTest extends WireTestCommon {
             "--- !!data #binary\n" +
                     "key: {\n" +
                     "  f: [\n" +
+                    "    TERMINATED,\n" +
                     "    TIMED_WAITING,\n" +
                     "    WAITING,\n" +
                     "    BLOCKED,\n" +
                     "    RUNNABLE,\n" +
-                    "    TERMINATED,\n" +
                     "    NEW\n" +
                     "  ]\n" +
                     "}\n";
@@ -71,7 +71,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
     }
 
     @Test
-    public void shouldMarshallFullSet() throws Exception {
+    public void shouldMarshallFullSet() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         final Foo written = new Foo(EnumSet.allOf(Thread.State.class));
         final Foo read = new Foo(EnumSet.noneOf(Thread.State.class));
@@ -89,7 +89,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
     }
 
     @Test
-    public void shouldUnmarshallToContainerWithNullValue() throws Exception {
+    public void shouldUnmarshallToContainerWithNullValue() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         final Foo written = new Foo(EnumSet.allOf(Thread.State.class));
         final Foo read = new Foo(EnumSet.noneOf(Thread.State.class));
@@ -109,7 +109,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
     }
 
     @Test
-    public void shouldAllowMultipleInstancesInObjectGraph() throws Exception {
+    public void shouldAllowMultipleInstancesInObjectGraph() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         final Container written = new Container();
         final Container read = new Container();
@@ -131,7 +131,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
     }
 
     private static final class Foo extends SelfDescribingMarshallable {
-        private EnumSet<Thread.State> f = EnumSet.noneOf(Thread.State.class);
+        private EnumSet<Thread.State> f;
 
         private Foo(final EnumSet<Thread.State> membership) {
             f = membership;

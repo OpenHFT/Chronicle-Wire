@@ -415,13 +415,10 @@ public class WireMarshaller<T> {
                     boolean isLeaf = !Throwable.class.isAssignableFrom(componentType)
                             && WIRE_MARSHALLER_CL.get(componentType).isLeaf;
                     try {
-                        final Method method = Class.class.getDeclaredMethod("enumConstantDirectory");
-                        Jvm.setAccessible(method);
-                        final Map<String, ? extends Enum> values = (Map<String, ? extends Enum>) method.invoke(componentType);
-                        return new EnumSetFieldAccess(field, isLeaf, values.values().toArray(), componentType);
-                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                        e.printStackTrace();
-                        throw new RuntimeException(e);
+                        Object[] values = (Object[]) Jvm.getMethod(componentType, "values").invoke(componentType, null);
+                        return new EnumSetFieldAccess(field, isLeaf, values, componentType);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        throw Jvm.rethrow(e);
                     }
                 }
                 throw new RuntimeException("Could not get enum constant directory");
@@ -939,6 +936,7 @@ public class WireMarshaller<T> {
                 throw new AssertionError(e);
             }
 
+            // TODO: this is backwards - should not be
             for (int i = values.length - 1; i != -1; i--) {
                 if (coll.contains(values[i])) {
                     out.object(componentType, values[i]);
