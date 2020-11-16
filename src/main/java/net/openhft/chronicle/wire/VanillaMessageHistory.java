@@ -83,6 +83,11 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         }
     }
 
+    /**
+     * Whether to automatically add timestamp on read. Set this {@code false} for utilities that expect to
+     * read MessageHistory without mutation
+     * @param addSourceDetails addSourceDetails
+     */
     public void addSourceDetails(boolean addSourceDetails) {
         this.addSourceDetails = addSourceDetails;
     }
@@ -183,7 +188,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             sourceIdArray[i] = bytes.readInt();
         for (int i = 0; i < sources; i++)
             sourceIndexArray[i] = bytes.readLong();
-
+        // TODO: should check addSourceDetails and add incoming time
         timings = bytes.readUnsignedByte();
         for (int i = 0; i < timings; i++)
             timingsArray[i] = bytes.readLong();
