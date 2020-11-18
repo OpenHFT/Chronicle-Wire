@@ -278,7 +278,7 @@ public class GenerateMethodWriter {
                 importSet.add(nameForClass(interfaceClazz));
 
                 if (!interfaceClazz.isInterface())
-                    throw new IllegalArgumentException("expecting and interface instead of class=" + interfaceClazz.getName());
+                    throw new IllegalArgumentException("expecting an interface instead of class=" + interfaceClazz.getName());
 
                 for (Method dm : interfaceClazz.getMethods()) {
                     if (dm.isDefault() || Modifier.isStatic(dm.getModifiers()))
