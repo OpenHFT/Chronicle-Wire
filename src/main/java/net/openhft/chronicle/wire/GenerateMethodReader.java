@@ -64,6 +64,11 @@ public class GenerateMethodReader {
     private boolean isSourceCodeGenerated;
     private boolean hasChainedCalls;
 
+    static {
+        // make sure Wires static block called and classpath set up
+        Wires.init();
+    }
+
     public GenerateMethodReader(WireType wireType, MethodReaderInterceptorReturns interceptor, Object... instances) {
         this.wireType = wireType;
         this.interceptor = interceptor;

@@ -42,6 +42,9 @@ public class GenerateMethodWriter {
     private static final Map<String, Map<List<Class>, String>> TEMPLATE_METHODS = new LinkedHashMap<>();
 
     static {
+        // make sure Wires static block called and classpath set up
+        Wires.init();
+
         TEMPLATE_METHODS.put("close",
                 singletonMap(singletonList(void.class), "" +
                         "public void close() {\n" +
@@ -280,6 +283,7 @@ public class GenerateMethodWriter {
                 if (!interfaceClazz.isInterface())
                     throw new IllegalArgumentException("expecting an interface instead of class=" + interfaceClazz.getName());
 
+                // TODO: everything in this loop can be commented out and all tests pass
                 for (Method dm : interfaceClazz.getMethods()) {
                     if (dm.isDefault() || Modifier.isStatic(dm.getModifiers()))
                         continue;

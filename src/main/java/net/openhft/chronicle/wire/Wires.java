@@ -112,6 +112,10 @@ public enum Wires {
         WireInternal.addAliases();
     }
 
+    // force static initialise
+    public static void init() {
+    }
+
     /**
      * This decodes some Bytes where the first 4-bytes is the length.  e.g. Wire.writeDocument wrote
      * it. <a href="https://github.com/OpenHFT/RFC/tree/master/Size-Prefixed-Blob">Size Prefixed
