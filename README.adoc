@@ -8,6 +8,7 @@
 [#image-maven]
 [caption="",link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire]
 image::https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire/badge.svg[]
+image:https://javadoc.io/badge2/net.openhft/chronicle-wire/javadoc.svg[link="https://www.javadoc.io/doc/net.openhft/chronicle-wire/latest/index.html"]
 
 == About
 
