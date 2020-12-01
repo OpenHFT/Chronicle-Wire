@@ -18,7 +18,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.reflect.Proxy;
@@ -26,7 +25,6 @@ import java.lang.reflect.Proxy;
 import static org.junit.Assert.assertFalse;
 
 public class MethodWriterNestedReturnTypeTest {
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/219")
     @Test
     public void testNestedReturnTypeIsSupportedInGeneratedWriter() {
         BinaryWire binaryWire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
