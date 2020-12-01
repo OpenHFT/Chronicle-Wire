@@ -546,11 +546,8 @@ public class WireMarshaller<T> {
         }
 
         protected void copy(Object from, Object to) throws IllegalAccessException {
-            // checks for null
-            //noinspection ResultOfMethodCallIgnored
-            from.getClass();
-            //noinspection ResultOfMethodCallIgnored
-            to.getClass();
+            ObjectUtils.requireNonNull(from);
+            ObjectUtils.requireNonNull(to);
 
             unsafePutObject(to, offset, unsafeGetObject(from, offset));
         }
