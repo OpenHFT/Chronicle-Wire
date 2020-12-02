@@ -136,7 +136,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         } catch (Throwable e) {
             classCache.put(fullClassName, COMPILE_FAILED);
             // do nothing and drop through
-            if (Jvm.isDebug())
+            if (Jvm.isDebugEnabled(getClass()))
                 Jvm.debug().on(getClass(), e);
         }
 

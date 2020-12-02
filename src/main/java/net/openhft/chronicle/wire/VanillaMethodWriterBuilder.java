@@ -203,7 +203,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
                 return constructor.newInstance(handlerSupplier);
             } catch (Throwable e) {
                 // do nothing and drop through
-                if (Jvm.isDebug())
+                if (Jvm.isDebugEnabled(getClass()))
                     Jvm.debug().on(getClass(), e);
             }
         }
@@ -231,10 +231,12 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
                     return (T) newInstance(clazz);
                 }
             }
+        } catch (MethodWriterValidationException e) {
+            throw e;
         } catch (Throwable e) {
             classCache.put(fullClassName, COMPILE_FAILED);
             // do nothing and drop through
-            if (Jvm.isDebug())
+            if (Jvm.isDebugEnabled(getClass()))
                 Jvm.debug().on(getClass(), e);
         }
         return null;

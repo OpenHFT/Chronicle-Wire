@@ -281,7 +281,7 @@ public class GenerateMethodWriter {
                 importSet.add(nameForClass(interfaceClazz));
 
                 if (!interfaceClazz.isInterface())
-                    throw new IllegalArgumentException("expecting an interface instead of class=" + interfaceClazz.getName());
+                    throw new MethodWriterValidationException("expecting an interface instead of class=" + interfaceClazz.getName());
 
                 // TODO: everything in this loop can be commented out and all tests pass
                 for (Method dm : interfaceClazz.getMethods()) {
@@ -311,6 +311,7 @@ public class GenerateMethodWriter {
                     .append(" implements ");
 
             Set<String> handledMethodSignatures = new HashSet<>();
+            Set<String> methodIds = new HashSet<>();
 
             for (Class interfaceClazz : interfaces) {
 
@@ -319,7 +320,7 @@ public class GenerateMethodWriter {
                 imports.append(", ");
 
                 if (!interfaceClazz.isInterface())
-                    throw new IllegalArgumentException("expecting an interface instead of class=" + interfaceClazz.getName());
+                    throw new MethodWriterValidationException("expecting an interface instead of class=" + interfaceClazz.getName());
 
                 for (Method dm : interfaceClazz.getMethods()) {
                     if (Modifier.isStatic(dm.getModifiers()))
@@ -333,7 +334,7 @@ public class GenerateMethodWriter {
 
                     String template = templateFor(dm);
                     if (template == null) {
-                        interfaceMethods.append(createMethod(importSet, dm, interfaceClazz));
+                        interfaceMethods.append(createMethod(importSet, dm, interfaceClazz, methodIds));
                     } else {
                         interfaceMethods.append(template);
                     }
@@ -358,6 +359,8 @@ public class GenerateMethodWriter {
             } catch (ClassNotFoundException x) {
                 throw Jvm.rethrow(x);
             }
+        } catch (MethodWriterValidationException e) {
+            throw e;
         } catch (Throwable e) {
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + imports, e));
         }
@@ -420,7 +423,7 @@ public class GenerateMethodWriter {
         return result;
     }
 
-    private CharSequence createMethod(SortedSet<String> importSet, final Method dm, final Class<?> interfaceClazz) throws IOException {
+    private CharSequence createMethod(SortedSet<String> importSet, final Method dm, final Class<?> interfaceClazz, Set<String> methodIds) throws IOException {
 
         if (Modifier.isStatic(dm.getModifiers()))
             return "";
@@ -471,6 +474,8 @@ public class GenerateMethodWriter {
         }
 
         methodIDAnotation = writeEventNameOrId(dm, body, eventName);
+        if (methodIDAnotation.length() > 0 && !methodIds.add(methodIDAnotation))
+            throw new MethodWriterValidationException("Duplicate methodIds. Cannot add " + methodIDAnotation + " to " + methodIds);
 
         if (hasMethodWriterListener && parameterCount > 0)
             createMethodWriterListener(dm, body);

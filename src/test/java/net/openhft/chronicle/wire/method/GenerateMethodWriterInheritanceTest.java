@@ -1,9 +1,9 @@
 package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.wire.VanillaMethodReader;
-import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.*;
 import org.junit.Test;
 
 import java.lang.reflect.Proxy;
@@ -20,6 +20,7 @@ public class GenerateMethodWriterInheritanceTest {
         final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
 
         final AnInterface writer = wire.methodWriter(AnInterface.class, ADescendant.class);
+        assertTrue(writer instanceof MethodWriter);
 
         writer.sayHello("hello world");
 
@@ -42,6 +43,7 @@ public class GenerateMethodWriterInheritanceTest {
         final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
 
         final AnInterface writer = wire.methodWriter(AnInterface.class, AnInterfaceSameName.class);
+        assertTrue(writer instanceof MethodWriter);
 
         writer.sayHello("hello world");
 
@@ -59,12 +61,39 @@ public class GenerateMethodWriterInheritanceTest {
         assertFalse(Proxy.isProxyClass(writer.getClass()));
     }
 
+    // TODO: same names but different MethodIds should barf
+
+    @Test(expected = MethodWriterValidationException.class)
+    public void testDuplicateMethodIds() {
+        final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+
+        final VanillaMethodWriterBuilder<AnInterfaceMethodId> builder = (VanillaMethodWriterBuilder<AnInterfaceMethodId>) wire.methodWriterBuilder(AnInterfaceMethodId.class);
+        final AnInterfaceMethodId writer = builder.addInterface(AnInterfaceSameMethodId.class).useMethodIds(true).build();
+    }
+
+    @Test(expected = MethodWriterValidationException.class)
+    public void testGenerateForClass() {
+        final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+
+        final GenerateMethodWriterInheritanceTest writer = wire.methodWriter(GenerateMethodWriterInheritanceTest.class);
+    }
+
     interface AnInterface {
         void sayHello(String name);
     }
 
     interface AnInterfaceSameName {
         void sayHello(String name);
+    }
+
+    interface AnInterfaceMethodId {
+        @MethodId(1)
+        void sayHello(String name);
+    }
+
+    interface AnInterfaceSameMethodId {
+        @MethodId(1)
+        void sayHello2(String name);
     }
 
     interface ADescendant extends AnInterface {
