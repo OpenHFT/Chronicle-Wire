@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.bytes.RuntimeInvocationTargetException;
 import net.openhft.chronicle.core.Mocker;
 import org.junit.Test;
 
@@ -84,7 +85,7 @@ public class MethodReaderDelegationTest {
         assertEquals("*myCall[]*myCall[]", sb.toString());
     }
 
-    @Test
+    @Test(expected = RuntimeInvocationTargetException.class)
     public void testUserExceptionsAreNotDelegated() {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
 
@@ -100,9 +101,7 @@ public class MethodReaderDelegationTest {
             throw new IllegalStateException("This is an exception by design");
         });
 
-        assertTrue(reader.readOne());
-
-        assertEquals(1, exceptionsThrown.get());
+        reader.readOne();
     }
 
     @Test
@@ -118,6 +117,36 @@ public class MethodReaderDelegationTest {
             assertTrue(reader instanceof VanillaMethodReader);
         }
         finally {
+            System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
+        }
+    }
+
+    @Test(expected = RuntimeInvocationTargetException.class)
+    public void testExceptionThrownFromUserCode() {
+        testExceptionThrownFromUserCode(false);
+    }
+
+    @Test(expected = RuntimeInvocationTargetException.class)
+    public void testExceptionThrownFromUserCodeProxy() {
+        testExceptionThrownFromUserCode(true);
+    }
+
+    private void testExceptionThrownFromUserCode(boolean proxy) {
+        if (proxy)
+            System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
+
+        try {
+            final TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
+            final MyInterface writer = wire.methodWriter(MyInterface.class);
+            writer.myCall();
+
+            final MethodReader reader = wire.methodReader((MyInterface) () -> {
+                throw new IllegalStateException("This is an exception by design");
+            });
+            assertEquals(proxy, reader instanceof VanillaMethodReader);
+
+            reader.readOne();
+        } finally {
             System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
         }
     }

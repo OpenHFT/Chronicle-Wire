@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.StringWriter;
+import java.lang.reflect.Proxy;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.easymock.EasyMock.*;
@@ -89,6 +90,7 @@ public class MethodWriterTest extends WireTestCommon {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         HasDefault writer = wire.methodWriter(HasDefault.class);
+        checkWriterType(writer);
         writer.callToDefaultMethod("hello world");
 
         Assert.assertTrue(wire.toString().startsWith("callToDefaultMethod: hello world"));
@@ -98,6 +100,7 @@ public class MethodWriterTest extends WireTestCommon {
     public void multiOut() {
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
         Event event = wire.methodWriter(Event.class);
+        checkWriterType(event);
         event.event("one", "one");
         BinaryWire wire2 = new BinaryWire(new HexDumpBytes());
         ((MethodWriter) event).marshallableOut(wire2);
@@ -119,6 +122,7 @@ public class MethodWriterTest extends WireTestCommon {
     public void ignoreStatic() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256));
         Closeable writer = wire.methodWriter(Closeable.class);
+        checkWriterType(writer);
         Closeable.closeQuietly(writer);
         assertEquals("", wire.toString());
     }
@@ -128,6 +132,7 @@ public class MethodWriterTest extends WireTestCommon {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         NoArgs writer = wire.methodWriter(NoArgs.class);
+        checkWriterType(writer);
         writer.methodOne();
         writer.methodTwo();
         assertEquals("methodOne: \"\"\n" +
@@ -155,6 +160,7 @@ public class MethodWriterTest extends WireTestCommon {
             value.append(t);
             return true;
         }).build();
+        checkWriterType(instance);
 
         String expected = "hello world";
         instance.method(expected);
@@ -169,6 +175,7 @@ public class MethodWriterTest extends WireTestCommon {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
         StringMethod instance = wire.methodWriterBuilder(StringMethod.class).updateInterceptor((methodName, t) -> false).build();
+        checkWriterType(instance);
         instance.method(" this should not be written because the return value above is false");
 
         Assert.assertEquals("", wire.toString());
@@ -179,6 +186,7 @@ public class MethodWriterTest extends WireTestCommon {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         HasMicroTS writer = wire.methodWriter(HasMicroTS.class);
+        checkWriterType(writer);
         long now = 1532251709775811L;
         MicroTS microTS = new MicroTS();
         microTS.timeUS = now;
@@ -197,16 +205,6 @@ public class MethodWriterTest extends WireTestCommon {
     }
 
     @Test
-    public void testExceptionWhenReading() {
-        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
-        StringMethod writer = wire.methodWriter(StringMethod.class);
-        writer.method(StringMethodReader.EXCEPTION);
-        MethodReader reader = wire.methodReader(new StringMethodReader());
-        // TODO: this does not throw an exception. It probably should
-        reader.readOne();
-    }
-
-    @Test
     public void testPrimitives() {
         doTestPrimitives(false);
     }
@@ -214,6 +212,7 @@ public class MethodWriterTest extends WireTestCommon {
     protected void doTestPrimitives(boolean byteShort) {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
         Args writer = wire.methodWriter(Args.class);
+        checkWriterType(writer);
         writer.primitives(true, (byte) 1, (short) 2, 3, 4, '5', 6, 7, "8", "9");
         assertEquals("primitives: [\n" +
                 "  true,\n" +
@@ -235,6 +234,10 @@ public class MethodWriterTest extends WireTestCommon {
         for (int i = 0; i < 2; i++)
             assertEquals(i < 1, reader.readOne());
         verify(mock);
+    }
+
+    protected void checkWriterType(Object writer) {
+        assertFalse(writer instanceof Proxy);
     }
 
     @FunctionalInterface
@@ -273,14 +276,4 @@ public class MethodWriterTest extends WireTestCommon {
         @LongConversion(MicroTimestampLongConverter.class)
         long timeUS;
     }
-
-    private static class StringMethodReader implements StringMethod {
-        static final String EXCEPTION = "exception";
-        @Override
-        public void method(String value) {
-            if (value.equals(EXCEPTION))
-                throw new IllegalStateException();
-        }
-    }
 }
-

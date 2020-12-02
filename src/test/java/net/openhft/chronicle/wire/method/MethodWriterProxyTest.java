@@ -5,17 +5,19 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.lang.reflect.Proxy;
+
+import static org.junit.Assert.assertTrue;
+
 public class MethodWriterProxyTest extends MethodWriterTest {
     @Before
     public void before() {
         System.setProperty("disableProxyCodegen", "true");
-        System.setProperty("disableReaderProxyCodegen", "true");
     }
 
     @After
     public void after() {
         System.clearProperty("disableProxyCodegen");
-        System.clearProperty("disableReaderProxyCodegen");
     }
 
     @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
@@ -27,6 +29,11 @@ public class MethodWriterProxyTest extends MethodWriterTest {
     @Test
     public void testPrimitives() {
         super.doTestPrimitives(true);
+    }
+
+    @Override
+    protected void checkWriterType(Object writer) {
+        assertTrue(writer instanceof Proxy);
     }
 }
 

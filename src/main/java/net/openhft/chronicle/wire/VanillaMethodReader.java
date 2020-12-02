@@ -17,10 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.MethodId;
-import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.Closeable;
@@ -294,18 +291,14 @@ public class VanillaMethodReader implements MethodReader {
             @NotNull Object[] argArr = {null};
             MethodWireKey key = createWireKey(m, name);
             wireParser.registerOnce(key, (s, v) -> {
-                try {
-                    if (Jvm.isDebug())
-                        logMessage(s, v);
+                if (Jvm.isDebug())
+                    logMessage(s, v);
 
-                    argArr[0] = v.object(checkRecycle(argArr[0]), parameterType2);
-                    if (context[0] == null)
-                        updateContext(context, o2);
-                    Object invoke = invoke(context[0], m, argArr);
-                    updateContext(context, invoke);
-                } catch (Exception i) {
-                    Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + " " + argArr[0], i);
-                }
+                argArr[0] = v.object(checkRecycle(argArr[0]), parameterType2);
+                if (context[0] == null)
+                    updateContext(context, o2);
+                Object invoke = invoke(context[0], m, argArr);
+                updateContext(context, invoke);
             });
 
         } else {
@@ -343,20 +336,16 @@ public class VanillaMethodReader implements MethodReader {
         String name = m.getName();
         MethodWireKey key = createWireKey(m, name);
         wireParser.registerOnce(key, (s, v) -> {
-            try {
-                if (Jvm.isDebug())
-                    logMessage(s, v);
+            if (Jvm.isDebug())
+                logMessage(s, v);
 
-                v.skipValue();
+            v.skipValue();
 
-                Object invoke = invoke(contextSupplier.get(), m, NO_ARGS);
-                if (invoke != null)
-                    updateContext(context, invoke);
-                else if (o2 != null)
-                    updateContext(context, o2);
-            } catch (Exception i) {
-                Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + "()", i);
-            }
+            Object invoke = invoke(contextSupplier.get(), m, NO_ARGS);
+            if (invoke != null)
+                updateContext(context, invoke);
+            else if (o2 != null)
+                updateContext(context, o2);
         });
     }
 
@@ -383,20 +372,16 @@ public class VanillaMethodReader implements MethodReader {
         String name = m.getName();
         MethodWireKey key = createWireKey(m, name);
         wireParser.registerOnce(key, (s, v) -> {
-            try {
-                if (Jvm.isDebug())
-                    logMessage(s, v);
+            if (Jvm.isDebug())
+                logMessage(s, v);
 
-                v.sequence(args, sequenceReader);
+            v.sequence(args, sequenceReader);
 
-                Object invoke = invoke(contextSupplier.get(), m, args);
-                if (invoke != null)
-                    updateContext(context, invoke);
-                else if (o2 != null)
-                    updateContext(context, o2);
-            } catch (Exception i) {
-                Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + " " + Arrays.toString(args), i);
-            }
+            Object invoke = invoke(contextSupplier.get(), m, args);
+            if (invoke != null)
+                updateContext(context, invoke);
+            else if (o2 != null)
+                updateContext(context, o2);
         });
     }
 
@@ -434,23 +419,19 @@ public class VanillaMethodReader implements MethodReader {
         String name = m.getName();
         MethodWireKey key = createWireKey(m, name);
         wireParser.registerOnce(key, (s, v) -> {
-            try {
-                if (Jvm.isDebug())
-                    logMessage(s, v);
+            if (Jvm.isDebug())
+                logMessage(s, v);
 
-                v.sequence(args, sequenceReader);
-                if (args[0] == IGNORED) {
-                    args[0] = null;
-                    return;
-                }
-                Object invoke = invoke(contextSupplier.get(), m, args);
-                if (invoke != null)
-                    updateContext(context, invoke);
-                else if (o2 != null)
-                    updateContext(context, o2);
-            } catch (Exception i) {
-                Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + " " + Arrays.toString(args), i);
+            v.sequence(args, sequenceReader);
+            if (args[0] == IGNORED) {
+                args[0] = null;
+                return;
             }
+            Object invoke = invoke(contextSupplier.get(), m, args);
+            if (invoke != null)
+                updateContext(context, invoke);
+            else if (o2 != null)
+                updateContext(context, o2);
         });
     }
 
@@ -460,8 +441,9 @@ public class VanillaMethodReader implements MethodReader {
                 return methodReaderInterceptorReturns.intercept(m, o, args, VanillaMethodReader::actualInvoke);
             else
                 return m.invoke(o, args);
-
-        } catch (InvocationTargetException | IllegalAccessException e) {
+        } catch (InvocationTargetException e) {
+            throw new RuntimeInvocationTargetException(e.getCause());
+        } catch (IllegalAccessException e) {
             Throwable cause = e.getCause();
             String msg = "Failure to dispatch message: " + m.getName() + " " + Arrays.asList(args);
             if (cause instanceof IllegalArgumentException)

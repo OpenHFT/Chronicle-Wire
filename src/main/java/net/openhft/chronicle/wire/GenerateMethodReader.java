@@ -122,6 +122,7 @@ public class GenerateMethodReader {
             sourceCode.append(format("package %s;\n", packageName()));
 
         sourceCode.append("import net.openhft.chronicle.bytes.MethodReader;\n" +
+                "import net.openhft.chronicle.bytes.RuntimeInvocationTargetException;\n" +
                 "import net.openhft.chronicle.core.Jvm;\n" +
                 "import net.openhft.chronicle.core.util.ObjectUtils;\n" +
                 "import net.openhft.chronicle.wire.*;\n" +
@@ -211,6 +212,9 @@ public class GenerateMethodReader {
                 "}\n" +
                 "return true;\n" +
                 "} \n" +
+                "catch (RuntimeInvocationTargetException e) {\n" +
+                "throw e;\n" +
+                "}\n" +
                 "catch (Exception e) {\n" +
                 "Jvm.warn().on(this.getClass(), \"Failure to dispatch message, " +
                 "will retry to process without generated code: \" + lastEventName + \"()\", e);\n" +
@@ -442,9 +446,7 @@ public class GenerateMethodReader {
 
         res.append("} \n" +
                 "catch (Exception e) {\n" +
-                "Jvm.warn().on(this.getClass(), \"Exception thrown by target instance method call, " +
-                "will ignore: \" + lastEventName + \"()\", e);\n" +
-                "return true;\n" +
+                "throw new RuntimeInvocationTargetException(e);\n" +
                 "}\n");
 
         return res.toString();
