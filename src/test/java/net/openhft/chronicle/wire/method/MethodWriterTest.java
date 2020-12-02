@@ -179,8 +179,7 @@ public class MethodWriterTest extends WireTestCommon {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
         HasMicroTS writer = wire.methodWriter(HasMicroTS.class);
-        long now = 1532251709775811L; //TimeProvider.get().currentTimeMicros();
-//        System.out.println(now);
+        long now = 1532251709775811L;
         MicroTS microTS = new MicroTS();
         microTS.timeUS = now;
         writer.microTS(microTS);
@@ -195,6 +194,16 @@ public class MethodWriterTest extends WireTestCommon {
         for (int i = 0; i < 2; i++)
             assertEquals(i < 1, reader.readOne());
         verify(mock);
+    }
+
+    @Test
+    public void testExceptionWhenReading() {
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
+        StringMethod writer = wire.methodWriter(StringMethod.class);
+        writer.method(StringMethodReader.EXCEPTION);
+        MethodReader reader = wire.methodReader(new StringMethodReader());
+        // TODO: this does not throw an exception. It probably should
+        reader.readOne();
     }
 
     @Test
@@ -263,6 +272,15 @@ public class MethodWriterTest extends WireTestCommon {
     public static class MicroTS extends SelfDescribingMarshallable {
         @LongConversion(MicroTimestampLongConverter.class)
         long timeUS;
+    }
+
+    private static class StringMethodReader implements StringMethod {
+        static final String EXCEPTION = "exception";
+        @Override
+        public void method(String value) {
+            if (value.equals(EXCEPTION))
+                throw new IllegalStateException();
+        }
     }
 }
 

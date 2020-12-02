@@ -9,11 +9,13 @@ public class MethodWriterProxyTest extends MethodWriterTest {
     @Before
     public void before() {
         System.setProperty("disableProxyCodegen", "true");
+        System.setProperty("disableReaderProxyCodegen", "true");
     }
 
     @After
     public void after() {
         System.clearProperty("disableProxyCodegen");
+        System.clearProperty("disableReaderProxyCodegen");
     }
 
     @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
