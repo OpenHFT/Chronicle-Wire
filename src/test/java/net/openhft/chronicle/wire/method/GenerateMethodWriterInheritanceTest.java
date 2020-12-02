@@ -68,14 +68,14 @@ public class GenerateMethodWriterInheritanceTest {
         final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
 
         final VanillaMethodWriterBuilder<AnInterfaceMethodId> builder = (VanillaMethodWriterBuilder<AnInterfaceMethodId>) wire.methodWriterBuilder(AnInterfaceMethodId.class);
-        final AnInterfaceMethodId writer = builder.addInterface(AnInterfaceSameMethodId.class).useMethodIds(true).build();
+        builder.addInterface(AnInterfaceSameMethodId.class).useMethodIds(true).build();
     }
 
     @Test(expected = MethodWriterValidationException.class)
     public void testGenerateForClass() {
         final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
 
-        final GenerateMethodWriterInheritanceTest writer = wire.methodWriter(GenerateMethodWriterInheritanceTest.class);
+        wire.methodWriter(GenerateMethodWriterInheritanceTest.class);
     }
 
     interface AnInterface {
