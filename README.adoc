@@ -71,7 +71,7 @@ For example, you can have one format embedded in another.
 
 == Support
 
-This library will require Java 8. Support for `C++` and `C#` is planned.
+This library requires Java 8. Support for `C++` and `C#` is planned.
 
 == Text Formats
 
@@ -148,10 +148,10 @@ So now you can write to the wire with a simple document.
 
 [source,Java]
 ----
-wire.write(() -> "message").text("Hello World")
-      .write(() -> "number").int64(1234567890L)
-       .write(() -> "code").asEnum(TimeUnit.SECONDS)
-      .write(() -> "price").float64(10.50);
+wire.write("message").text("Hello World")
+      .write("number").int64(1234567890L)
+       .write("code").asEnum(TimeUnit.SECONDS)
+      .write("price").float64(10.50);
 System.out.println(bytes);
 ----
 
@@ -168,10 +168,10 @@ price: 10.5
 [source,Java]
 ----
 // the same code as for text wire
-wire2.write(() -> "message").text("Hello World")
-        .write(() -> "number").int64(1234567890L)
-        .write(() -> "code").asEnum(TimeUnit.SECONDS)
-        .write(() -> "price").float64(10.50);
+wire2.write("message").text("Hello World")
+        .write("number").int64(1234567890L)
+        .write("code").asEnum(TimeUnit.SECONDS)
+        .write("price").float64(10.50);
         System.out.println(bytes2.toHexString());
 ----
 
@@ -189,12 +189,12 @@ The down-side is that we cannot easily see what the message contains.
 
 [source,Java]
 ----
-        // the same code as for text wire
-        wire3.write(() -> "message").text("Hello World")
-                .write(() -> "number").int64(1234567890L)
-                .write(() -> "code").asEnum(TimeUnit.SECONDS)
-                .write(() -> "price").float64(10.50);
-        System.out.println(bytes3.toHexString());
+// the same code as for raw wire
+wire3.write("message").text("Hello World")
+        .write("number").int64(1234567890L)
+        .write("code").asEnum(TimeUnit.SECONDS)
+        .write("price").float64(10.50);
+System.out.println(bytes3.toHexString());
 ----
 
 prints in `RawWire`.
@@ -211,7 +211,8 @@ For more examples see https://github.com/OpenHFT/Chronicle-Wire/blob/master/READ
 
 Chronicle Wire allows (and encourages) objects to be re-used in order to reduce allocation rates.
 
-When a marshallable object is re-used or initialised by the framework, it is first reset by way of `Wires.reset()`.
+When a marshallable object is re-used or initialised by the framework, it is first reset by way of `Marshallable.reset()`
+which is recommend over calling `Wires.reset()`.
 In the case of most DTOs with simple scalar values, this will not cause any issues.
 However, more complicated objects with object instance fields may experience undesired behaviour.
 
