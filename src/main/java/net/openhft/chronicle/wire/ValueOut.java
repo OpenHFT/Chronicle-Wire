@@ -396,25 +396,25 @@ public interface ValueOut {
      * @deprecated use marshallable(map) or object(map)
      */
     @NotNull
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     WireOut map(Map map);
 
     /**
      * @deprecated use typedMarshallable(map) or object(map)
      */
     @NotNull
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map);
 
     @NotNull
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     default ValueOut leaf() {
         swapLeaf(true);
         return this;
     }
 
     @NotNull
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     default ValueOut leaf(boolean leaf) {
         swapLeaf(leaf);
         return this;
@@ -838,7 +838,7 @@ public interface ValueOut {
     }
 
     @NotNull
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     default WireOut compress(@NotNull String compression, @Nullable String str) {
         if (str == null || str.length() < SMALL_MESSAGE)
             return text(str);

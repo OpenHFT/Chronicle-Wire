@@ -33,7 +33,10 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -334,7 +337,7 @@ public class TextMethodTester<T> {
         return actual;
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     public TextMethodTester<T> methodWriterListener(MethodWriterListener methodWriterListener) {
         this.methodWriterListener = methodWriterListener;
         return this;
@@ -345,7 +348,7 @@ public class TextMethodTester<T> {
         return this;
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     public TextMethodTester<T> methodReaderInterceptor(MethodReaderInterceptor methodReaderInterceptor) {
         this.methodReaderInterceptorReturns = (m, o, a, i) -> {
             methodReaderInterceptor.intercept(m, o, a, i);

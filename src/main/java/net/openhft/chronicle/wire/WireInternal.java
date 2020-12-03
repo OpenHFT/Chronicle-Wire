@@ -266,7 +266,7 @@ public enum WireInternal {
         return a == null ? b : b == null ? a : a + " " + b;
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     public static void compress(@NotNull ValueOut out, @NotNull String compression, String str) {
         Bytes bytes = Wires.acquireBytes();
         bytes.writeUtf8(str);

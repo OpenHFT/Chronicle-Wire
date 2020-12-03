@@ -251,7 +251,7 @@ public interface MarshallableOut extends DocumentWritten {
                 "breaking the" +
                 "existing " +
                 "message format specification");
-        @Deprecated
+        @Deprecated(/* to be removed in x.22 */)
         public static final Padding ALWAYS = CACHE_LINE;
 
         Padding(String comment) {

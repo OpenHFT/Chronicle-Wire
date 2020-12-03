@@ -117,7 +117,7 @@ public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterB
     }
 
     // sourceId enables this, this isn't useful unless it's set.
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     @NotNull
     public MethodWriterBuilder<T> recordHistory(boolean recordHistory) {
         handlerSupplier.recordHistory(recordHistory);

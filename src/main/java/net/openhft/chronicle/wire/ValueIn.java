@@ -440,7 +440,7 @@ public interface ValueIn {
      *
      * @deprecated use marshallableAsMap
      */
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     default void map(@NotNull Map<String, String> usingMap) {
         map(String.class, String.class, usingMap);
     }
@@ -448,7 +448,7 @@ public interface ValueIn {
     /**
      * @deprecated use marshallableAsMap
      */
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     <K extends ReadMarshallable, V extends ReadMarshallable>
     void typedMap(@NotNull final Map<K, V> usingMap);
 
@@ -457,7 +457,7 @@ public interface ValueIn {
      *
      * @deprecated use marshallableAsMap
      */
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     @Nullable <K, V> Map<K, V> map(@NotNull Class<K> kClazz,
                                    @NotNull Class<V> vClass,
                                    Map<K, V> usingMap);

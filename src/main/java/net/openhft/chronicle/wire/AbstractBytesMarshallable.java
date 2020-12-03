@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @deprecated "Use BytesInBinaryMarshallable"
  */
-@Deprecated
+@Deprecated(/* to be removed in x.22 */)
 public class AbstractBytesMarshallable extends AbstractMarshallable {
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {

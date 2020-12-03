@@ -102,19 +102,19 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         return TEXT.streamFromFile(expectedType, filename);
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     @NotNull
     static Map<String, Object> fromFileAsMap(String filename) throws IOException {
         return TEXT.fromFileAsMap(filename, Object.class);
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     @NotNull
     static <V> Map<String, V> fromFileAsMap(String filename, @NotNull Class<V> valueClass) throws IOException {
         return TEXT.fromFileAsMap(filename, valueClass);
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     @Nullable
     static Map<String, Object> fromHexString(@NotNull CharSequence cs) {
         return READ_ANY.fromHexString(cs);
@@ -158,7 +158,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     }
 
     /* this method does the opposite of what the name suggests */
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     @NotNull
     default <T extends Marshallable> T copyFrom(@NotNull T t) {
         return Wires.copyTo(this, t);

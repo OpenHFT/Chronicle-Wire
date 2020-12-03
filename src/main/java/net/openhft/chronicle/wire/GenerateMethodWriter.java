@@ -163,7 +163,7 @@ public class GenerateMethodWriter {
     }
 
     @SuppressWarnings("unused")
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     public static void addComment(Bytes<?> bytes, Object arg) {
         if (arg instanceof Marshallable)
             bytes.comment(arg.getClass().getSimpleName());

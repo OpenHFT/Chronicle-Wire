@@ -163,7 +163,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @param metaData {@code true} if the write should write metaData rather than data
      * @param writer   writes bytes to the wire
      */
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     default void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) {
         WireInternal.writeData(this, metaData, true, writer);
     }

@@ -60,7 +60,7 @@ public enum Wires {
     ;
     public static final int LENGTH_MASK = -1 >>> 2;
     public static final int NOT_COMPLETE = 0x8000_0000;
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     public static final int NOT_READY = NOT_COMPLETE;
     public static final int META_DATA = 1 << 30;
     public static final int UNKNOWN_LENGTH = 0x0;
@@ -229,7 +229,7 @@ public enum Wires {
         return ((header & (META_DATA | NOT_COMPLETE)) == 0) && (header != 0);
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     public static boolean isData(long len) {
         return isData((int) len);
     }

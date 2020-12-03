@@ -22,7 +22,7 @@ package net.openhft.chronicle.wire;
  *
  * @deprecated most like SelfDescribingMarshallable should be used instead.
  */
-@Deprecated
+@Deprecated(/* to be removed in x.22 */)
 public abstract class AbstractMarshallable extends AbstractCommonMarshallable {
 
 }
