@@ -104,6 +104,8 @@ public class MethodReaderDelegationTest {
         reader.readOne();
     }
 
+    // TODO: test below with interceptor
+
     @Test
     public void testCodeGenerationCanBeDisabled() {
         System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
@@ -151,7 +153,41 @@ public class MethodReaderDelegationTest {
         }
     }
 
+    @Test(expected = RuntimeInvocationTargetException.class)
+    public void testExceptionThrownFromUserCodeLong() {
+        testExceptionThrownFromUserCodeLong(false);
+    }
+
+    @Test(expected = RuntimeInvocationTargetException.class)
+    public void testExceptionThrownFromUserCodeLongProxy() {
+        testExceptionThrownFromUserCodeLong(true);
+    }
+
+    private void testExceptionThrownFromUserCodeLong(boolean proxy) {
+        if (proxy)
+            System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
+
+        try {
+            final TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
+            final MyInterfaceLong writer = wire.methodWriter(MyInterfaceLong.class);
+            writer.myCall(1L);
+
+            final MethodReader reader = wire.methodReader((MyInterfaceLong) (l) -> {
+                throw new IllegalStateException("This is an exception by design");
+            });
+            assertEquals(proxy, reader instanceof VanillaMethodReader);
+
+            reader.readOne();
+        } finally {
+            System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
+        }
+    }
+
     interface MyInterface {
         void myCall();
+    }
+
+    interface MyInterfaceLong {
+        void myCall(long l);
     }
 }

@@ -132,31 +132,33 @@ public class VanillaMethodReader implements MethodReader {
                     }
                 }
             }
-            try {
-                if (methodReaderInterceptor != null) {
+
+            if (methodReaderInterceptor != null) {
+                argArr[0] = arg;
+                Object intercept = methodReaderInterceptor.intercept(m, context[0], argArr, VanillaMethodReader::actualInvoke);
+                updateContext(context, intercept);
+            } else {
+                if (mh == null) {
                     argArr[0] = arg;
-                    Object intercept = methodReaderInterceptor.intercept(m, context[0], argArr, VanillaMethodReader::actualInvoke);
-                    updateContext(context, intercept);
+                    updateContext(context, m.invoke(context[0], argArr));
                 } else {
-                    if (mh == null) {
-                        argArr[0] = arg;
-                        updateContext(context, m.invoke(context[0], argArr));
-                    } else {
+                    try {
                         if (m.getReturnType() == void.class) {
                             mh.invokeExact(arg);
                             updateContext(context, null);
                         } else {
                             updateContext(context, mh.invokeExact(arg));
                         }
+                    } catch (Throwable t) {
+                        throw new InvocationTargetException(t);
                     }
                 }
-            } catch (Throwable e) {
-                Throwable cause = e instanceof InvocationTargetException ? e.getCause() : e;
-                String msg = "Failure to dispatch message: " + m.getName() + " " + Arrays.asList(argArr);
-                Jvm.warn().on(o.getClass(), msg, cause);
             }
-        } catch (Exception i) {
-            Jvm.warn().on(o.getClass(), "Failure to dispatch message: " + name + " " + argArr[0], i);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeInvocationTargetException(e);
+        } catch (Throwable e) {
+            String msg = "Failure to dispatch message: " + m.getName() + " " + Arrays.asList(argArr);
+            Jvm.warn().on(o.getClass(), msg, e);
         }
     }
 
