@@ -17,6 +17,10 @@
  */
 package net.openhft.chronicle.wire;
 
+/**
+ * @deprecated can't see the point of this any more
+ */
+@Deprecated(/* remove in x.21*/)
 public interface ResetOverride {
     void onReset();
 }
