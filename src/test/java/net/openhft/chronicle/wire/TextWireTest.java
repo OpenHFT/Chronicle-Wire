@@ -1540,10 +1540,16 @@ public class TextWireTest extends WireTestCommon {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void writeUnserializable() throws IOException {
+    public void writeUnserializable1() throws IOException {
         System.out.println(TEXT.asString(Thread.currentThread()));
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void writeUnserializable2() throws IOException {
         @NotNull Socket s = new Socket();
         System.out.println(TEXT.asString(s));
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void writeUnserializable3() throws IOException {
         SocketChannel sc = SocketChannel.open();
         System.out.println(TEXT.asString(sc));
     }
