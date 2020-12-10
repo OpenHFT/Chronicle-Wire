@@ -4,7 +4,6 @@ import java.util.List;
 
 public class NoopMockMethods implements MockMethods {
     public NoopMockMethods(MockMethods mockMethods) {
-
     }
 
     @Override
@@ -21,5 +20,9 @@ public class NoopMockMethods implements MockMethods {
 
     @Override
     public void list(List<String> strings) {
+    }
+
+    @Override
+    public void throwException(String s) {
     }
 }
