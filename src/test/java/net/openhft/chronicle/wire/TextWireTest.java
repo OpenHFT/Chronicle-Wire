@@ -1541,11 +1541,11 @@ public class TextWireTest extends WireTestCommon {
 
     @Test(expected = IllegalArgumentException.class)
     public void writeUnserializable() throws IOException {
-       // System.out.println(TEXT.asString(Thread.currentThread()));
+        System.out.println(TEXT.asString(Thread.currentThread()));
         @NotNull Socket s = new Socket();
-       // System.out.println(TEXT.asString(s));
+        System.out.println(TEXT.asString(s));
         SocketChannel sc = SocketChannel.open();
-       // System.out.println(TEXT.asString(sc));
+        System.out.println(TEXT.asString(sc));
     }
 
     @Test
