@@ -783,6 +783,12 @@ public class TextWire extends AbstractWire implements Wire {
             return writeEventName((WireKey) eventKey);
         if (eventKey instanceof CharSequence)
             return writeEventName((CharSequence) eventKey);
+        if (expectedType != null && expectedType.isInstance(eventKey)) {
+            if (eventKey instanceof Enum)
+                return writeEventName(((Enum) eventKey).name());
+            if (eventKey instanceof DynamicEnum)
+                return writeEventName(((DynamicEnum) eventKey).name());
+        }
         boolean wasLeft = valueOut.swapLeaf(true);
         try {
             return valueOut.write(expectedType, eventKey);

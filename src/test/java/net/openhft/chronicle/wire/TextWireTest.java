@@ -31,6 +31,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
+import sun.reflect.generics.tree.Tree;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -1847,6 +1848,32 @@ public class TextWireTest extends WireTestCommon {
         final double d2 = textWire.getValueIn().float64();
 
         Assert.assertEquals(d2, d, 0);
+    }
+
+    static class MapHolder extends SelfDescribingMarshallable {
+        Map<RetentionPolicy, Double> map;
+    }
+
+    @Test public void testMapOfNamedKeys() {
+        MapHolder mh = new MapHolder();
+        Map<RetentionPolicy, Double> map = Collections.singletonMap(RetentionPolicy.CLASS, 0.1);
+        mh.map = map;
+        doTestMapOfNamedKeys(mh);
+        mh.map = new TreeMap<>(map);
+        doTestMapOfNamedKeys(mh);
+        mh.map = new HashMap<>(map);
+        doTestMapOfNamedKeys(mh);
+        mh.map = new LinkedHashMap<>(map);
+        doTestMapOfNamedKeys(mh);
+    }
+
+    private void doTestMapOfNamedKeys(MapHolder mh) {
+        assertEquals("!net.openhft.chronicle.wire.TextWireTest$MapHolder {\n" +
+                        "  map: {\n" +
+                        "    CLASS: 0.1\n" +
+                        "  }\n" +
+                        "}\n",
+                TEXT.asString(mh));
     }
 
     enum BWKey implements WireKey {

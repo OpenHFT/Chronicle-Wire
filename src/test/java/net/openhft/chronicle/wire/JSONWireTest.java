@@ -23,10 +23,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.annotation.RetentionPolicy;
+import java.util.*;
 
 import static junit.framework.TestCase.assertNull;
+import static net.openhft.chronicle.wire.WireType.JSON;
+import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
 
 public class JSONWireTest extends WireTestCommon {
@@ -191,6 +193,29 @@ public class JSONWireTest extends WireTestCommon {
         // 0.1 when cast to a double is 0.10000000149011612. We used to throw an exception here because of this difference
         FooEvent foo2 = WireType.JSON.fromString(FooEvent.class, str);
         assertEquals(foo, foo2);
+    }
+
+
+    static class MapHolder extends SelfDescribingMarshallable {
+        Map<RetentionPolicy, Double> map;
+    }
+
+    @Test public void testMapOfNamedKeys() {
+        MapHolder mh = new MapHolder();
+        Map<RetentionPolicy, Double> map = Collections.singletonMap(RetentionPolicy.CLASS, 0.1);
+        mh.map = map;
+        doTestMapOfNamedKeys(mh);
+        mh.map = new TreeMap<>(map);
+        doTestMapOfNamedKeys(mh);
+        mh.map = new HashMap<>(map);
+        doTestMapOfNamedKeys(mh);
+        mh.map = new LinkedHashMap<>(map);
+        doTestMapOfNamedKeys(mh);
+    }
+
+    private void doTestMapOfNamedKeys(MapHolder mh) {
+        assertEquals("\"map\":{\"CLASS\":0.1}",
+                JSON.asString(mh));
     }
 
     private static class FooEvent extends AbstractEventCfg<FooEvent> {
