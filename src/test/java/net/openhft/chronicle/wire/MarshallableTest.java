@@ -98,7 +98,7 @@ public class MarshallableTest extends WireTestCommon {
         dto2.three = "2018-11-02";
 
         String s = WireType.TEXT.asString(dto2);
-        System.out.println(s);
+       // System.out.println(s);
         DTO1 dto1 = WireType.TEXT.fromString(DTO1.class, s);
         assertEquals("!net.openhft.chronicle.wire.MarshallableTest$DTO1 {\n" +
                 "  one: CLASS,\n" +

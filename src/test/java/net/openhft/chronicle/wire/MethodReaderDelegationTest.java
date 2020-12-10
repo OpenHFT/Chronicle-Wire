@@ -72,7 +72,7 @@ public class MethodReaderDelegationTest {
                 })
                 .build(Mocker.intercepting(MyInterface.class, "*", sb::append));
 
-        System.out.println(WireDumper.of(wire).asString());
+       // System.out.println(WireDumper.of(wire).asString());
 
         assertTrue(reader.readOne());
         assertNull(delegatedMethodCall.get());

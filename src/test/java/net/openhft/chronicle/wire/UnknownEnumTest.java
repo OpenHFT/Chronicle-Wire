@@ -37,9 +37,9 @@ public class UnknownEnumTest extends WireTestCommon {
         assertEquals("Maybe", maybe);
     }
 
-//    private enum Temp {
-//        FIRST
-//    }
+   // private enum Temp {
+       // FIRST
+   // }
 
     /*
     Documents the behaviour of BinaryWire when an enum type is unknown
@@ -48,18 +48,18 @@ public class UnknownEnumTest extends WireTestCommon {
     public void shouldConvertEnumValueToStringWhenTypeIsNotKnownInBinaryWire() throws Exception {
 
         // generates the serialised form
-//        final Bytes<ByteBuffer> b = Bytes.allocateElasticOnHeap(128);
-//        final Wire w = WireType.BINARY.apply(b);
+       // final Bytes<ByteBuffer> b = Bytes.allocateElasticOnHeap(128);
+       // final Wire w = WireType.BINARY.apply(b);
 //
-//        final Map<String, Temp> m = new HashMap<>();
-//        m.put("key", Temp.FIRST);
-//        w.write("event").marshallable(m);
-//        final ByteBuffer hb = b.underlyingObject();
-//        hb.limit((int) b.writePosition());
-//        while (hb.remaining() != 0) {
-//            System.out.print(" " + hb.get() + ",");
-//        }
-//        System.out.println();
+       // final Map<String, Temp> m = new HashMap<>();
+       // m.put("key", Temp.FIRST);
+       // w.write("event").marshallable(m);
+       // final ByteBuffer hb = b.underlyingObject();
+       // hb.limit((int) b.writePosition());
+       // while (hb.remaining() != 0) {
+           // System.out.print(" " + hb.get() + ",");
+       // }
+       // System.out.println();
 
         final Bytes<ByteBuffer> bytes = Bytes.wrapForRead(ByteBuffer.wrap(SERIALISED_MAP_DATA));
 

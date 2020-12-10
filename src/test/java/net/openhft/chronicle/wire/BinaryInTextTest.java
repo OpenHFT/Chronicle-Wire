@@ -29,7 +29,7 @@ public class BinaryInTextTest extends WireTestCommon {
         byte[] a = new byte[5];
         b.b = Bytes.wrapForRead(a);
         b.c = Bytes.wrapForRead(a);
-        System.out.println(b);
+       // System.out.println(b);
 
         BIT bit = Marshallable.fromString(BIT.class, "{\n" +
                 "b: !!binary AAAAAAA=,\n" +

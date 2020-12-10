@@ -65,7 +65,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
         Wire wire = currentWireType.apply(Bytes.allocateElasticOnHeap(128));
         Timestamp ts = new Timestamp(1234567890000L);
         wire.write().object(ts);
-        System.out.println(wire);
+       // System.out.println(wire);
 
         Timestamp ts2 = wire.read()
                 .object(Timestamp.class);
@@ -76,7 +76,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
     public void testNoSocket() {
         Wire wire = currentWireType.apply(Bytes.allocateElasticOnHeap(128));
         AnObject ao = writeAnObject(wire);
-        System.out.println(wire);
+       // System.out.println(wire);
 
         Object ao2 = readAnObject(wire);
         assertEquals(ao.toString(), ao2.toString());
@@ -96,7 +96,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
             InputStreamToWire istw = new InputStreamToWire(currentWireType, s2.getInputStream());
             Wire wire2 = istw.readOne();
             Object ao2 = readAnObject(wire2);
-            System.out.println(ao2);
+           // System.out.println(ao2);
             assertEquals(ao.toString(), ao2.toString());
         }
     }

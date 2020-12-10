@@ -44,7 +44,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @After
     public void after() {
-//        BinaryWire.SPEC = 16;
+       // BinaryWire.SPEC = 16;
     }
 
     @NotNull
@@ -183,7 +183,7 @@ public class BinaryWire2Test extends WireTestCommon {
         ObjectWithTreeMap value = new ObjectWithTreeMap();
         value.map.put("hello", "world");
         wire.write().object(value);
-//        System.out.println(Bytes.);
+       // System.out.println(Bytes.);
         ObjectWithTreeMap value2 = new ObjectWithTreeMap();
         wire.read().object(value2, ObjectWithTreeMap.class);
         assertEquals("{hello=world}", value2.map.toString());
@@ -268,7 +268,7 @@ public class BinaryWire2Test extends WireTestCommon {
             dc.wire().write().object(new Date(1234567890000L));
         }
         try (final DocumentContext dc = wire.readingDocument()) {
-            System.out.println(Wires.fromSizePrefixedBlobs(dc));
+           // System.out.println(Wires.fromSizePrefixedBlobs(dc));
             Assert.assertEquals(1234567890000L, dc.wire().read().object(Date.class).getTime());
         }
     }
@@ -291,12 +291,12 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull Wire wire = createWire();
         writeMessage(wire);
 
-        System.out.println(wire.bytes().toHexString());
+       // System.out.println(wire.bytes().toHexString());
 
         @NotNull Wire twire = new TextWire(Bytes.elasticByteBuffer());
         writeMessage(twire);
 
-        System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
+       // System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
 
         wire.bytes().releaseLast();
         twire.bytes().releaseLast();
@@ -322,12 +322,12 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull Wire wire = createWire();
         writeMessageContext(wire);
 
-        System.out.println(wire.bytes().toHexString());
+       // System.out.println(wire.bytes().toHexString());
 
         @NotNull Wire twire = new TextWire(Bytes.elasticByteBuffer());
         writeMessageContext(twire);
 
-        System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
+       // System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
 
         wire.bytes().releaseLast();
         twire.bytes().releaseLast();
@@ -543,7 +543,7 @@ public class BinaryWire2Test extends WireTestCommon {
                 .marshallable(w -> w.write("key").text("1")
                         .write("value")
                         .object(expected)));
-        System.out.println(wire);
+       // System.out.println(wire);
 
         wire.readDocument(null, wir -> wire.read(() -> "put")
                 .marshallable(w -> w.read(() -> "key").object(Object.class, "1", Assert::assertEquals)
@@ -557,7 +557,7 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull Wire wire = createWire();
         @NotNull Random rand = new Random();
         for (int i = 0; i < 70000; i += rand.nextInt(i + 1) + 1) {
-            System.out.println(i);
+           // System.out.println(i);
             wire.clear();
             @NotNull final byte[] fromBytes = new byte[i];
             wire.writeDocument(false, w -> w.write("bytes").bytes(fromBytes));
@@ -702,9 +702,9 @@ public class BinaryWire2Test extends WireTestCommon {
                                 v.write("mm").text("你好")
                                         .write("value").float64(15.0);
                             }));
-//        assertEquals("29 00 00 00 c4 64 61 74 61 b6 0c 21 55 70 64 61\n" +
-//                "74 65 45 76 65 6e 74 82 11 00 00 00 c2 6d 6d e6\n" +
-//                "e4 bd a0 e5 a5 bd c5 76 61 6c 75 65 0f\n", bytes.toHexString());
+       // assertEquals("29 00 00 00 c4 64 61 74 61 b6 0c 21 55 70 64 61\n" +
+               // "74 65 45 76 65 6e 74 82 11 00 00 00 c2 6d 6d e6\n" +
+               // "e4 bd a0 e5 a5 bd c5 76 61 6c 75 65 0f\n", bytes.toHexString());
 
             assertEquals("--- !!data #binary\n" +
                     "data: !!UpdateEvent {\n" +
@@ -748,7 +748,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @Test
     public void testWritingDecimals() {
-//        BinaryWire.SPEC = 18;
+       // BinaryWire.SPEC = 18;
         @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
         @NotNull final ValueOut out = wire.getValueOut();
         @NotNull final ValueIn in = wire.getValueIn();
@@ -796,7 +796,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @Test
     public void testWritingDecimals2() {
-//        BinaryWire.SPEC = 18;
+       // BinaryWire.SPEC = 18;
         @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
         @NotNull final ValueOut out = wire.getValueOut();
         @NotNull final ValueIn in = wire.getValueIn();
@@ -808,7 +808,7 @@ public class BinaryWire2Test extends WireTestCommon {
             final double v = in.float64();
             assertEquals(d, v, 0.0);
             final long size = wire.bytes().readPosition();
-//            System.out.println(d + " size: " + size);
+           // System.out.println(d + " size: " + size);
         }
     }
 

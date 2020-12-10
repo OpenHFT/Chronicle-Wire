@@ -72,7 +72,7 @@ public class MapWireTest extends WireTestCommon {
         Wire wire = wireType.apply(bytes);
         wire.getValueOut()
                 .marshallable(m);
-//        System.out.println(wire);
+       // System.out.println(wire);
 
         @Nullable Map m2 = wire.getValueIn()
                 .marshallableAsMap(Object.class, Object.class);

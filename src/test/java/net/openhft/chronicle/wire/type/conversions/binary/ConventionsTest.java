@@ -40,7 +40,7 @@ public class ConventionsTest extends WireTestCommon {
                 .class, Float.class, Double.class}) {
             Object extected;
             if (Number.class.isAssignableFrom(type)) {
-                System.out.println("" + type + "");
+               // System.out.println("" + type + "");
                 final Field max_value = type.getField("MAX_VALUE");
                 extected = max_value.get(type);
             } else {
@@ -59,7 +59,7 @@ public class ConventionsTest extends WireTestCommon {
                 .class, Float.class, Double.class}) {
             Object extected;
             if (Number.class.isAssignableFrom(type)) {
-                System.out.println("" + type + "");
+               // System.out.println("" + type + "");
                 final Field value = type.getField("MIN_VALUE");
                 extected = value.get(type);
             } else {

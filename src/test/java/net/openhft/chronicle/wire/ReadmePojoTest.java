@@ -39,7 +39,7 @@ public class ReadmePojoTest extends WireTestCommon {
         mps.myPojos.add(new MyPojo("text1", 1, 1.1));
         mps.myPojos.add(new MyPojo("text2", 2, 2.2));
 
-        System.out.println(mps);
+       // System.out.println(mps);
         @Nullable MyPojos mps2 = Marshallable.fromString(mps.toString());
         assertEquals(mps, mps2);
 

@@ -81,7 +81,7 @@ public class ReorderedTest extends WireTestCommon {
             wire.bytes().writeUnsignedByte('\n');
         wire.writeEventName(() -> "test2").marshallable(outerClass2);
 
-        System.out.println(bytes.readByte(0) < 0 ? bytes.toHexString() : bytes.toString());
+       // System.out.println(bytes.readByte(0) < 0 ? bytes.toHexString() : bytes.toString());
         @NotNull StringBuilder sb = new StringBuilder();
         @NotNull OuterClass outerClass0 = new OuterClass();
 
@@ -107,7 +107,7 @@ public class ReorderedTest extends WireTestCommon {
             wire.write("b").int32(i * 11);
             wire.write("c").int32(i * 111);
 
-//            System.out.println(wire);
+           // System.out.println(wire);
             assertEquals(i * 111, wire.read(() -> "c").int32());
             assertEquals(i, wire.read(() -> "a").int32());
             assertEquals(i * 11, wire.read(() -> "b").int32());

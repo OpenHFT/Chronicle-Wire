@@ -26,7 +26,7 @@ public class WireBug38Test extends WireTestCommon {
         obj1.writeMarshallable(wireType.apply(bytes));
 
         final String output = bytes.toString();
-        System.out.println("output: [" + output + "]");
+       // System.out.println("output: [" + output + "]");
 
         obj2.readMarshallable(wireType.apply(Bytes.from(output)));
 

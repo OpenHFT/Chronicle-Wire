@@ -67,7 +67,7 @@ public class JSON222Test extends WireTestCommon {
         try (@NotNull InputStream in = new FileInputStream(file)) {
             in.read(bytes);
         }
-//        System.out.println(file + " " + new String(bytes, "UTF-8"));
+       // System.out.println(file + " " + new String(bytes, "UTF-8"));
         Bytes b = Bytes.wrapForRead(bytes);
         @NotNull Wire wire = new JSONWire(b);
         Bytes bytes2 = Bytes.elasticByteBuffer();
@@ -84,7 +84,7 @@ public class JSON222Test extends WireTestCommon {
                 @NotNull TextWire out3 = new TextWire(bytes3);
                 out3.getValueOut()
                         .object(object);
-//                System.out.println("As YAML " + bytes3);
+               // System.out.println("As YAML " + bytes3);
                 parseWithSnakeYaml(bytes3.toString());
                 @Nullable Object object3 = out3.getValueIn()
                         .object();
@@ -100,7 +100,7 @@ public class JSON222Test extends WireTestCommon {
                 @NotNull final File file2 = new File(path.replaceAll("\\b._", "e-").replaceAll("\\.json", ".yaml"));
 
 /*
-                System.out.println(file2 + "\n" + new String(bytes, "UTF-8") + "\n" + bytes2);
+               // System.out.println(file2 + "\n" + new String(bytes, "UTF-8") + "\n" + bytes2);
                 try (OutputStream out2 = new FileOutputStream(file2)) {
                     out2.write(bytes2.toByteArray());
                 }
@@ -118,8 +118,8 @@ public class JSON222Test extends WireTestCommon {
                 String actual = bytes2.toString();
                 assertEquals(expected, actual);
             }
-//            if (fail)
-//                throw new AssertionError("Expected to fail, was " + list);
+           // if (fail)
+               // throw new AssertionError("Expected to fail, was " + list);
         } catch (Exception e) {
             if (!fail)
                 throw new AssertionError(e);

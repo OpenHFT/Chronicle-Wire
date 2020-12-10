@@ -54,7 +54,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");
 
         wire.writeDocument(false, w -> new DTO2(1, 2, "3").writeMarshallable(w));
-        System.out.println(Wires.fromSizePrefixedBlobs(wire));
+       // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
         if (wire instanceof TextWire)
             ((TextWire) wire).useBinaryDocuments();
@@ -78,7 +78,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon
         CLASS_ALIASES.addAlias(DTO1.class, "DTO");
 
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO1(1)));
-        System.out.println(Wires.fromSizePrefixedBlobs(wire));
+       // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");
         if (wire instanceof TextWire)
@@ -103,7 +103,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");
 
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO2(1, 2, "3")));
-        System.out.println(Wires.fromSizePrefixedBlobs(wire));
+       // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
         CLASS_ALIASES.addAlias(DTO1.class, "DTO");
 

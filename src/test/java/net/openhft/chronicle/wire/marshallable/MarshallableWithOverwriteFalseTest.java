@@ -23,7 +23,7 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
         myDto1.strings.add("world");
 
         String cs = myDto2.toString();
-        System.out.println(cs);
+       // System.out.println(cs);
         MyDto2 o = (MyDto2) Marshallable.fromString(cs);
 
         assert o.myDto.get("").strings.size() == 2;
@@ -35,7 +35,7 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
 
             // WORKS
-            //  Wires.readMarshallable(this, wire, true); //  WORKS
+             // Wires.readMarshallable(this, wire, true);  // WORKS
 
             // FAILS
             Wires.readMarshallable(this, wire, false);

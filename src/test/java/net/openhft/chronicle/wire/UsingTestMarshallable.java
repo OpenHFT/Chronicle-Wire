@@ -37,7 +37,7 @@ public class UsingTestMarshallable {
         Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer();
 
         @Nullable ByteBuffer byteBuffer = byteBufferBytes.underlyingObject();
-        System.out.println(byteBuffer.getClass());
+       // System.out.println(byteBuffer.getClass());
 
         @NotNull Wire textWire = new TextWire(byteBufferBytes);
         textWire.bytes().readPosition();
@@ -48,10 +48,10 @@ public class UsingTestMarshallable {
 
         //String replace = value.replace("\n", "\\n");
 
-        System.out.println(byteBufferBytes.toHexString());
-        System.out.println(value);
+       // System.out.println(byteBufferBytes.toHexString());
+       // System.out.println(value);
 
-        //  Assert.assertTrue(replace.length() > 1);
+         // Assert.assertTrue(replace.length() > 1);
         byteBufferBytes.releaseLast();
     }
 
@@ -73,7 +73,7 @@ public class UsingTestMarshallable {
         @NotNull final ValueIn read = wire.read(() -> "key");
         @Nullable final MyMarshallable result = read.typedMarshallable();
 
-        System.out.println(result.toString());
+       // System.out.println(result.toString());
 
         Assert.assertEquals("text", result.text.toString());
 

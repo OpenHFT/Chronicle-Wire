@@ -94,7 +94,7 @@ public class PrimArraysTest extends WireTestCommon {
         try {
             wire.write("test")
                     .object(array);
-            System.out.println(wire);
+           // System.out.println(wire);
             if (wireType == WireType.TEXT)
                 assertEquals(asText.trim(), wire.toString().trim());
 

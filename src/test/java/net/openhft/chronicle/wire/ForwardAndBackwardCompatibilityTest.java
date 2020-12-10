@@ -43,7 +43,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-//                {WireType.TEXT},
+               // {WireType.TEXT},
                 {WireType.BINARY}
         });
     }
@@ -54,7 +54,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         CLASS_ALIASES.addAlias(DTO1.class, "DTO");
 
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO1(1)));
-        System.out.println(Wires.fromSizePrefixedBlobs(wire));
+       // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");
         if (wire instanceof TextWire)
@@ -79,7 +79,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");
 
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO2(1, 2, 3)));
-        System.out.println(Wires.fromSizePrefixedBlobs(wire));
+       // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
         CLASS_ALIASES.addAlias(DTO1.class, "DTO");
         if (wire instanceof TextWire)

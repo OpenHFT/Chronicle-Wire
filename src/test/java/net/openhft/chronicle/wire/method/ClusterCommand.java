@@ -18,7 +18,7 @@ public class ClusterCommand extends SelfDescribingMarshallable {
     public ClusterCommand(long cycle, CharSequence serviceId) {
         this.cycle = cycle;
         this.serviceId.clear().append(serviceId);
-        //    setUniqueTimeStampNow();
+           // setUniqueTimeStampNow();
     }
 
     public ClusterCommand cycle(long cycle) {

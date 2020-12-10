@@ -58,7 +58,7 @@ public class ScalarValues extends SelfDescribingMarshallable {
     BigDecimal bd;
     File file;
 
-//    Path path;
+   // Path path;
 
     public ScalarValues() {
     }

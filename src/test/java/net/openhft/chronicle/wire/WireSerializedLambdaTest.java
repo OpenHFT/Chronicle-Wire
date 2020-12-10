@@ -61,7 +61,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
                 .write(() -> "two").object(Fun.ADD_A)
                 .write(() -> "three").object(Update.INCR);
 
-        System.out.println(wire.bytes().toString());
+       // System.out.println(wire.bytes().toString());
 
         assertEquals("one: !SerializedLambda {\n" +
                 "  cc: !type net.openhft.chronicle.wire.WireSerializedLambdaTest,\n" +

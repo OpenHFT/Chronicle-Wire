@@ -15,7 +15,7 @@ public class WiresFromFileTest extends WireTestCommon {
     public void testFromFile() throws IOException {
         ClassAliasPool.CLASS_ALIASES.addAlias(MDU.class);
         MDU[] o = Marshallable.fromFile(MDU[].class, "md.yaml");
-        System.out.println(Arrays.asList(o));
+       // System.out.println(Arrays.asList(o));
     }
 
     @Test

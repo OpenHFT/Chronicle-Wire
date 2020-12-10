@@ -26,6 +26,6 @@ public class GenerateFIXWireKey {
         Files.lines(Paths.get("src/test/resources/FIX42.xml"))
                 .filter(s -> s.contains("field number='"))
                 .map(s -> s.split("'"))
-                .forEach(arr -> System.out.printf("\t%s(%s),%n", arr[3], arr[1]));
+                .forEach(arr ->System.out.printf("\t%s(%s),%n", arr[3], arr[1]));
     }
 }

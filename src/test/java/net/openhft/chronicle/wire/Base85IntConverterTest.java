@@ -12,7 +12,7 @@ public class Base85IntConverterTest extends WireTestCommon {
     @Test
     public void parse() {
         IntConverter c = Base85IntConverter.INSTANCE;
-        System.out.println(c.asString(-1));
+       // System.out.println(c.asString(-1));
         for (String s : ",a,ab,abc,abcd,ab.de,zzzzz,.Gk<0".split(",")) {
             int v = c.parse(s);
             StringBuilder sb = new StringBuilder();

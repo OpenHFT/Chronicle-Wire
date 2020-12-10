@@ -49,7 +49,7 @@ public class NullFieldMarshallingTest {
         assertNull(object2.zoneId);
     }
 
-    //    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/165")
+       // @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/165")
     @Test
     public void testAbstractNullFieldUnmarshalledCorrectlyBinary() {
         VO object = new VO();

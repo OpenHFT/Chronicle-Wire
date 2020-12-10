@@ -36,7 +36,7 @@ public class MessageHistoryTest extends WireTestCommon {
         history.addTiming(20_000);
         assertEquals(2, history.sources());
         assertEquals(2, history.timings());
-        System.out.println(history.toString());
+       // System.out.println(history.toString());
         assertEquals(2, history.sources());
         assertEquals(2, history.timings());
 

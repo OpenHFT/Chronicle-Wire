@@ -42,7 +42,7 @@ public class StreamMain {
             boolean isText = b.readByte(4) >= ' ';
             System.out.println("### " + wt + " Format");
             System.out.println("```" + (isText ? "yaml" : ""));
-            System.out.print(isText ? b.toString().replaceAll("\u0000", "\\\\0") : b.toHexString());
+            System.out.print(isText ? b.toString().replaceAll("\0", "\\\\0") : b.toHexString());
             System.out.println("```\n");
         }
     }

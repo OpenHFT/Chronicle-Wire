@@ -49,7 +49,7 @@ public class WireTextBugTest extends WireTestCommon {
         @NotNull Wire encodeWire = new BinaryWire(Bytes.elasticByteBuffer(), false, true, false, Integer.MAX_VALUE, "lzw", true);
         @NotNull Bug b = new Bug();
         b.setClOrdID("FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12");
-        System.out.println("b = " + b);
+       // System.out.println("b = " + b);
         encodeWire.getValueOut().object(b);
         byte[] bytes = encodeWire.bytes().toByteArray();
 
@@ -57,7 +57,7 @@ public class WireTextBugTest extends WireTestCommon {
         @Nullable Object o = decodeWire.getValueIn()
                 .object(Object.class);
         @Nullable Bug b2 = (Bug) o;
-        System.out.println("b2 = " + b2);
+       // System.out.println("b2 = " + b2);
 
         encodeWire.bytes().releaseLast();
         decodeWire.bytes().releaseLast();

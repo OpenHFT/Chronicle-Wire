@@ -72,7 +72,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
 
     @Test
     public void wirePerf() throws StreamCorruptedException {
-        System.out.println("Custom TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
+       // System.out.println("Custom TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
         @NotNull Wire wire = createBytes();
         @NotNull MyTypesCustom a = new MyTypesCustom();
         for (int t = 0; t < 3; t++) {
@@ -81,7 +81,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
             wirePerf0(wire, a, new MyTypesCustom(), t);
         }
 
-        System.out.println("Reflective TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
+       // System.out.println("Reflective TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
         @NotNull MyTypes b = new MyTypes();
         for (int t = 0; t < 3; t++) {
             b.text.setLength(0);
@@ -105,12 +105,12 @@ public class BinaryWirePerfTest extends WireTestCommon {
         }
         long rate = (System.nanoTime() - start) / runs;
         assert wire.startUse();
-        System.out.printf("(vars) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());
+       // System.out.printf("(vars) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());
     }
 
     @Test
     public void wirePerfInts() {
-        System.out.println("TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
+       // System.out.println("TestId: " + testId + ", fixed: " + fixed + ", numberField: " + numericField + ", fieldLess: " + fieldLess);
         @NotNull Wire wire = createBytes();
         @NotNull MyType2 a = new MyType2();
         for (int t = 0; t < 3; t++) {
@@ -130,7 +130,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
             b.readMarshallable(wire);
         }
         long rate = (System.nanoTime() - start) / runs;
-        System.out.printf("(ints) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());
+       // System.out.printf("(ints) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());
     }
 
     static class MyType2 implements Marshallable {

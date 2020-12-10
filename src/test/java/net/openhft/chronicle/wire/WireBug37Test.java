@@ -30,7 +30,7 @@ public class WireBug37Test extends WireTestCommon {
         obj2.writeMarshallable(wireType.apply(bytes));
 
         final String output = bytes.toString();
-        System.out.println("output: [" + output + "]");
+       // System.out.println("output: [" + output + "]");
 
         obj3.readMarshallable(wireType.apply(Bytes.from(output)));
 

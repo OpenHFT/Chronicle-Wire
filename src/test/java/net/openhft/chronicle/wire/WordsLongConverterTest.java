@@ -39,7 +39,7 @@ public class WordsLongConverterTest extends WireTestCommon {
                 -1, 0, 1,
                 Integer.MAX_VALUE, Long.MAX_VALUE}) {
             String text = bic.asString(l);
-            System.out.println(text);
+           // System.out.println(text);
             assertEquals(l, bic.parse(text));
         }
         Random random = new Random(1);

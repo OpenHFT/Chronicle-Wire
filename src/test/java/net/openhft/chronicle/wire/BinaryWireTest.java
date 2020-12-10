@@ -583,7 +583,7 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().bool(false)
                 .write().bool(true)
                 .write().bool(null);
-        System.out.println(wire);
+       // System.out.println(wire);
         wire.read().bool(false, Assert::assertEquals)
                 .read().bool(true, Assert::assertEquals)
                 .read().bool(null, Assert::assertEquals);
@@ -683,7 +683,7 @@ public class BinaryWireTest extends WireTestCommon {
                 .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
                 .write()
                 .bytes(allBytes);
-        System.out.println(bytes.toDebugString());
+       // System.out.println(bytes.toDebugString());
         @SuppressWarnings("rawtypes")
         @NotNull NativeBytes allBytes2 = nativeBytes();
         wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
@@ -697,7 +697,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @Test
     public void testWriteMarshallable() {
-//        BinaryWire.SPEC = 18;
+       // BinaryWire.SPEC = 18;
 
         @NotNull Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
@@ -717,7 +717,7 @@ public class BinaryWireTest extends WireTestCommon {
         mtB.text.append("Bye now");
         wire.write(() -> "B").marshallable(mtB);
 
-        //        System.out.println(wire.bytes().toDebugString(400));
+               // System.out.println(wire.bytes().toDebugString(400));
         checkWire(wire,
                 "[pos: 0, rlim: 134, wlim: 2147483632, cap: 2147483632 ] ǁÁA\\u0082>٠٠٠ÆB_FLAG±ÅS_NUM¥90ÅD_NUM\\u0094\\u0080\u00ADKÅL_NUM٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082:٠٠٠ÆB_FLAG°ÅS_NUM¥Ò⒋ÅD_NUM\\u0094\\u0087\u00ADKÅL_NUM٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now‡٠٠٠٠٠٠٠٠",
                 "[pos: 0, rlim: 134, wlim: 2147483632, cap: 2147483632 ] ǁÁA\\u0082>٠٠٠ÆB_FLAG±ÅS_NUM¥90ÅD_NUM\\u0094\\u0080\u00ADKÅL_NUM٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082:٠٠٠ÆB_FLAG°ÅS_NUM¥Ò⒋ÅD_NUM\\u0094\\u0087\u00ADKÅL_NUM٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now‡٠٠٠٠٠٠٠٠",
@@ -766,7 +766,7 @@ public class BinaryWireTest extends WireTestCommon {
             @NotNull String s = new String(chars);
             wire.writeDocument(false, w -> w.write(() -> "message").text(s));
 
-//            System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
+           // System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
             wire.readDocument(null, w -> w.read(() -> "message").text(s, Assert::assertEquals));
         }
     }
@@ -778,14 +778,14 @@ public class BinaryWireTest extends WireTestCommon {
         @NotNull Object[] noObjects = {};
         wire.write("a").object(noObjects);
 
-        System.out.println(wire.asText());
+       // System.out.println(wire.asText());
         @Nullable Object[] object = wire.read()
                 .object(Object[].class);
         assertEquals(0, object.length);
 
         @NotNull Object[] threeObjects = {"abc", "def", "ghi"};
         wire.write("b").object(threeObjects);
-        System.out.println(wire.asText());
+       // System.out.println(wire.asText());
 
         @Nullable Object[] object2 = wire.read()
                 .object(Object[].class);
@@ -824,7 +824,7 @@ public class BinaryWireTest extends WireTestCommon {
 
         try (DocumentContext dc = w.readingDocument()) {
 
-            System.out.println(Wires.fromSizePrefixedBlobs(dc));
+           // System.out.println(Wires.fromSizePrefixedBlobs(dc));
 
             StringBuilder sb = Wires.acquireStringBuilder();
 

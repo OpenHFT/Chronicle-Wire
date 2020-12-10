@@ -74,11 +74,11 @@ public class BinaryWireWithMappedBytesTest extends WireTestCommon {
         // cause the old memory to drop out.
         bytes.compareAndSwapInt(1 << 20, 1, 1);
         assertEquals(expected + 3, ((Byteable) a).bytesStore().refCount());
-        System.out.println(a + " " + b + " " + c);
+       // System.out.println(a + " " + b + " " + c);
 
         bytes.compareAndSwapInt(2 << 20, 1, 1);
         assertEquals(expected + 3, ((Byteable) a).bytesStore().refCount());
-        System.out.println(a + " " + b + " " + c);
+       // System.out.println(a + " " + b + " " + c);
 
         Closeable.closeQuietly(a, b, c, d);
         bytes.releaseLast();

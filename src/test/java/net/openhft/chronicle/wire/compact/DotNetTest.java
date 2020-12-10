@@ -36,11 +36,11 @@ public class DotNetTest extends WireTestCommon {
                 "000064: B9 08 63 6C 69 65 6E 74 49 64 B8 24 34 62 34 32\n" +
                 "000080: 35 61 31 38 2D 61 62 34 39 2D 34 65 39 37 2D 39\n" +
                 "000096: 66 65 38 2D 65 37 36 30 32 38 38 31 34 34 64 39\n");
-        System.out.println(bytes.toHexString());
+       // System.out.println(bytes.toHexString());
         @NotNull Wire wire = new BinaryWire(bytes);
         @NotNull Bytes text = Bytes.allocateElasticOnHeap();
         wire.copyTo(new TextWire(text));
-        System.out.println(text);
+       // System.out.println(text);
 
         bytes.releaseLast();
     }

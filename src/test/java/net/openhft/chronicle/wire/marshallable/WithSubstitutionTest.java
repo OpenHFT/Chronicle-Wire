@@ -24,7 +24,7 @@ public class WithSubstitutionTest {
                         "    d: ${d2}\n" +
                         "  }\n" +
                         "]\n");
-        System.out.println(wsdtos);
+       // System.out.println(wsdtos);
     }
 
     static class WSDTO extends SelfDescribingMarshallable {

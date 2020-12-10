@@ -30,7 +30,7 @@ public class TextWireCompatibilityTest extends WireTestCommon {
     public void testAddFieldsInTheMiddle() {
         @NotNull TextWire wire = new TextWire(Bytes.allocateElasticOnHeap(100));
         wire.getValueOut().object(new SubIncompatibleObject());
-        System.out.println(wire.toString());
+       // System.out.println(wire.toString());
         Assert.assertNotNull(wire.getValueIn().object());
     }
 

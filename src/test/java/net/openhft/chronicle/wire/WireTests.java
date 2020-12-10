@@ -59,7 +59,7 @@ public class WireTests {
         @NotNull final List<Object[]> list = new ArrayList<>();
         list.add(new Object[]{WireType.BINARY});
         list.add(new Object[]{WireType.TEXT});
-        //      list.add(new Object[]{WireType.RAW});
+             // list.add(new Object[]{WireType.RAW});
         return list;
     }
 
@@ -160,11 +160,11 @@ public class WireTests {
 
         field = new StringBuilder();
         wire.read(field).skipValue();
-        System.out.println("read field=" + field.toString());
+       // System.out.println("read field=" + field.toString());
 
         field = new StringBuilder();
         wire.read(field).skipValue();
-        System.out.println("read field=" + field.toString());
+       // System.out.println("read field=" + field.toString());
 
         b.releaseLast();
     }

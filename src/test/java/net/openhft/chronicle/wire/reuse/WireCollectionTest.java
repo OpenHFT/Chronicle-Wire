@@ -85,7 +85,7 @@ public class WireCollectionTest extends WireTestCommon {
         assert wire.startUse();
 
         wire.writeDocument(true, collection);
-        System.out.println(Wires.fromSizePrefixedBlobs(bytes));
+       // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
 
         @NotNull WireCollection results = new WireCollection();
         wire.readDocument(results, null);

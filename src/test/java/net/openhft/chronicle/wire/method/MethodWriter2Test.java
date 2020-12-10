@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 public class MethodWriter2Test {
 
     static {
-        System.setProperty("dumpCode", "true");
+       // System.setProperty("dumpCode", "true");
     }
 
     @Test

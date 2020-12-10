@@ -24,7 +24,7 @@ public class RawWirePerfTest extends WireTestCommon {
     @Test
     public void testRawPerf() {
         @NotNull BinaryWirePerfTest test = new BinaryWirePerfTest(-1, true, false, true);
-//        test.wirePerf();
+       // test.wirePerf();
         test.wirePerfInts();
     }
 }

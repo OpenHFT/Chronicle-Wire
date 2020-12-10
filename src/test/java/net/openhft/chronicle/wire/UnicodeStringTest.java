@@ -69,7 +69,7 @@ public class UnicodeStringTest extends WireTestCommon {
         @NotNull String s = new String(chars);
         wire.writeDocument(false, w -> w.write(() -> "msg").text(s));
 
-        System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
+       // System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
         wire.readDocument(null, w -> w.read(() -> "msg").text(s, Assert::assertEquals));
     }
 }

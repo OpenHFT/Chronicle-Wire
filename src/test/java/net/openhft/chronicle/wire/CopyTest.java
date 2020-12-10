@@ -43,8 +43,8 @@ public class CopyTest extends WireTestCommon {
     @Parameterized.Parameters
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
-//                new Object[] {WireType.TEXT, WireType.BINARY, true}, // not supported yet
-//                new Object[] {WireType.TEXT, WireType.BINARY, false}, // not supported yet
+               // new Object[] {WireType.TEXT, WireType.BINARY, true}, // not supported yet
+               // new Object[] {WireType.TEXT, WireType.BINARY, false}, // not supported yet
                 new Object[]{WireType.BINARY, WireType.TEXT, true},
                 new Object[]{WireType.BINARY, WireType.TEXT, false}
         );

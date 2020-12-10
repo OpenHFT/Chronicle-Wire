@@ -54,7 +54,7 @@ public class EnumWireTest extends WireTestCommon {
 
     private <T extends Marshallable> T roundTrip(@NotNull Supplier<T> supplier) {
         Wire wire = serialise(createWire, supplier.get());
-//        System.out.println(wire.bytes());
+       // System.out.println(wire.bytes());
         try {
             T deserialized = supplier.get();
             deserialized.readMarshallable(wire);

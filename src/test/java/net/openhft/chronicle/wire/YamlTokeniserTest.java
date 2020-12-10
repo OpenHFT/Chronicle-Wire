@@ -13,7 +13,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     public static String doTest(String resource) {
         try {
             Bytes bytes = BytesUtil.readFile(resource);
-//            bytes = Bytes.from(bytes.toString().replace("\r", ""));
+           // bytes = Bytes.from(bytes.toString().replace("\r", ""));
             YamlTokeniser yt = new YamlTokeniser(bytes);
             StringBuilder sb = new StringBuilder();
             int i = 0;

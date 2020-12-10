@@ -91,7 +91,7 @@ public class JSON222IndividualTest extends WireTestCommon {
         try {
             @NotNull Yaml yaml = new Yaml();
             Object o = yaml.load(new StringReader(input));
-            System.out.println(o);
+           // System.out.println(o);
         } catch (Exception e) {
             throw e;
         }

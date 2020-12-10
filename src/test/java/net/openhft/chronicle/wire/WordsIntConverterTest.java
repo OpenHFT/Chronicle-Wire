@@ -10,7 +10,7 @@ public class WordsIntConverterTest extends WireTestCommon {
         IntConverter bic = new WordsIntConverter();
         for (int l : new int[]{Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE}) {
             String text = bic.asString(l);
-            System.out.println(text);
+           // System.out.println(text);
             assertEquals(l, bic.parse(text));
         }
     }

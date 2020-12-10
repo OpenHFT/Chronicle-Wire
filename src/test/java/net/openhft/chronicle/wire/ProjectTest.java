@@ -39,7 +39,7 @@ public class ProjectTest extends WireTestCommon {
         @NotNull final List<Object[]> list = new ArrayList<>();
         list.add(new Object[]{WireType.BINARY});
         list.add(new Object[]{WireType.TEXT});
-        //      list.add(new Object[]{WireType.RAW});
+             // list.add(new Object[]{WireType.RAW});
         return list;
     }
 
@@ -70,7 +70,7 @@ public class ProjectTest extends WireTestCommon {
         simple.name2("world");
 
         final Outer project = Wires.project(Outer.class, simple);
-        System.out.println(project);
+       // System.out.println(project);
 
         Assert.assertEquals("some data", project.inner().name());
     }

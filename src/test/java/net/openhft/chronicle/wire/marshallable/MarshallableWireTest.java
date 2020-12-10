@@ -73,7 +73,7 @@ public class MarshallableWireTest extends WireTestCommon {
         Wire wire = wireType.apply(bytes);
 
         wire.getValueOut().object(m);
-        System.out.println(wire);
+       // System.out.println(wire);
 
         @Nullable Object m2 = wire.getValueIn()
                 .object();
