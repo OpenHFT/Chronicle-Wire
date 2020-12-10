@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -61,6 +62,7 @@ public class TextMethodTester<T> {
     private MethodReaderInterceptorReturns methodReaderInterceptorReturns;
     private long timeoutMS = 25;
     private UpdateInterceptor updateInterceptor;
+    private Consumer<RuntimeInvocationTargetException> onInvocationException;
 
     public TextMethodTester(String input, Function<T, Object> componentFunction, Class<T> outputClass, String output) {
         this(input, (out, ui) -> componentFunction.apply(out), outputClass, output);
@@ -72,6 +74,7 @@ public class TextMethodTester<T> {
         this.output = output;
         this.componentFunction = componentFunction;
         this.setups = Collections.emptyList();
+        this.onInvocationException = e -> Jvm.warn().on(TextMethodTester.class, "Exception calling target method. Continuing", e);
     }
 
     public String[] retainLast() {
@@ -130,6 +133,15 @@ public class TextMethodTester<T> {
         return this;
     }
 
+    public Consumer<RuntimeInvocationTargetException> onInvocationException() {
+        return onInvocationException;
+    }
+
+    public TextMethodTester onInvocationException(Consumer<RuntimeInvocationTargetException> onInvocationException) {
+        this.onInvocationException = onInvocationException;
+        return this;
+    }
+
     @NotNull
     public TextMethodTester run() throws IOException {
         Wire wireOut = createWire(Bytes.allocateElasticOnHeap());
@@ -164,7 +176,7 @@ public class TextMethodTester<T> {
                     .methodReaderInterceptorReturns(methodReaderInterceptorReturns)
                     .warnMissing(true)
                     .build(components);
-            while (reader0.readOne()) {
+            while (readOne(reader0)) {
                 wireOut.bytes().clear();
             }
             wireOut.bytes().clear();
@@ -200,7 +212,7 @@ public class TextMethodTester<T> {
 //        TextMethodWriterInvocationHandler.ENABLE_EOD = false;
         try {
             long pos = -1;
-            while (reader.readOne()) {
+            while (readOne(reader)) {
                 if (pos == wire.bytes().readPosition()) {
                     Jvm.warn().on(getClass(), "Bailing out of malformed message");
                     break;
@@ -279,6 +291,15 @@ public class TextMethodTester<T> {
             }
         }
         return this;
+    }
+
+    public boolean readOne(MethodReader reader0) {
+        try {
+            return reader0.readOne();
+        } catch (RuntimeInvocationTargetException e) {
+            this.onInvocationException.accept(e);
+            return true;
+        }
     }
 
     private String replaceTargetWithSource(String replace) {

@@ -28,4 +28,9 @@ class MockMethodsImpl implements MockMethods {
     public void list(List<String> strings) {
         out.list(strings);
     }
+
+    @Override
+    public void throwException(String s) {
+        throw new RuntimeException(s);
+    }
 }

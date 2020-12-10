@@ -10,4 +10,6 @@ interface MockMethods {
     void method3(List<MockDto> dtos);
 
     void list(List<String> strings);
+
+    void throwException(String s);
 }

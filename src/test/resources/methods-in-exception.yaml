@@ -1,0 +1,5 @@
+throwException: 1
+...
+throwException: 2
+---
+throwException: 3

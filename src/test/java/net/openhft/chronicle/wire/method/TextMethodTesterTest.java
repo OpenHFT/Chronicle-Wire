@@ -6,6 +6,8 @@ import net.openhft.chronicle.wire.YamlMethodTester;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -46,6 +48,20 @@ public class TextMethodTesterTest extends WireTestCommon {
                 .setup("methods-out.yaml") // calls made here are not validated in the output.
                 .run();
         assertEquals(test.expected(), test.actual());
+    }
+
+    @Test
+    public void checkExceptionsProvidedToHandler() throws IOException {
+        List<Exception> exceptions = new ArrayList<>();
+        TextMethodTester test = new TextMethodTester<>(
+                "methods-in-exception.yaml",
+                MockMethodsImpl::new,
+                MockMethods.class,
+                "methods-out-empty.yaml")
+                .onInvocationException(e -> exceptions.add(e))
+                .run();
+        assertEquals(test.expected(), test.actual());
+        assertEquals(3, exceptions.size());
     }
 }
 
