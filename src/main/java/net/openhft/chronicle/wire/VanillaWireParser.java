@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.CharSequenceComparator;
+import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,7 +57,7 @@ public class VanillaWireParser implements WireParser {
         return defaultConsumer;
     }
 
-    public void parseOne(@NotNull WireIn wireIn) {
+    public void parseOne(@NotNull WireIn wireIn) throws InvocationTargetRuntimeException {
         long start = wireIn.bytes().readPosition();
         if (peekCode(wireIn) == BinaryWireCode.FIELD_NUMBER) {
             parseOneBinary(wireIn);

@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -48,7 +49,7 @@ public interface WireParser extends Consumer<WireIn> {
 
     WireParselet getDefaultConsumer();
 
-    void parseOne(@NotNull WireIn wireIn);
+    void parseOne(@NotNull WireIn wireIn) throws InvocationTargetRuntimeException;
 
     @Override
     default void accept(@NotNull WireIn wireIn) {

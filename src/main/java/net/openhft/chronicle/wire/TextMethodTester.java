@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -62,7 +63,7 @@ public class TextMethodTester<T> {
     private MethodReaderInterceptorReturns methodReaderInterceptorReturns;
     private long timeoutMS = 25;
     private UpdateInterceptor updateInterceptor;
-    private Consumer<RuntimeInvocationTargetException> onInvocationException;
+    private Consumer<InvocationTargetRuntimeException> onInvocationException;
 
     public TextMethodTester(String input, Function<T, Object> componentFunction, Class<T> outputClass, String output) {
         this(input, (out, ui) -> componentFunction.apply(out), outputClass, output);
@@ -133,11 +134,11 @@ public class TextMethodTester<T> {
         return this;
     }
 
-    public Consumer<RuntimeInvocationTargetException> onInvocationException() {
+    public Consumer<InvocationTargetRuntimeException> onInvocationException() {
         return onInvocationException;
     }
 
-    public TextMethodTester onInvocationException(Consumer<RuntimeInvocationTargetException> onInvocationException) {
+    public TextMethodTester onInvocationException(Consumer<InvocationTargetRuntimeException> onInvocationException) {
         this.onInvocationException = onInvocationException;
         return this;
     }
@@ -297,6 +298,9 @@ public class TextMethodTester<T> {
         try {
             return reader0.readOne();
         } catch (RuntimeInvocationTargetException e) {
+            this.onInvocationException.accept(new InvocationTargetRuntimeException(e));
+            return true;
+        } catch (InvocationTargetRuntimeException e) {
             this.onInvocationException.accept(e);
             return true;
         }

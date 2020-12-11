@@ -19,8 +19,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import net.openhft.chronicle.bytes.RuntimeInvocationTargetException;
 import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import org.junit.Test;
 
 import java.util.Objects;
@@ -85,7 +85,7 @@ public class MethodReaderDelegationTest {
         assertEquals("*myCall[]*myCall[]", sb.toString());
     }
 
-    @Test(expected = RuntimeInvocationTargetException.class)
+    @Test(expected = InvocationTargetRuntimeException.class)
     public void testUserExceptionsAreNotDelegated() {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
 
@@ -123,17 +123,17 @@ public class MethodReaderDelegationTest {
         }
     }
 
-    @Test(expected = RuntimeInvocationTargetException.class)
+    @Test(expected = InvocationTargetRuntimeException.class)
     public void testExceptionThrownFromUserCode() {
         testExceptionThrownFromUserCode(false);
     }
 
-    @Test(expected = RuntimeInvocationTargetException.class)
+    @Test(expected = InvocationTargetRuntimeException.class)
     public void testExceptionThrownFromUserCodeProxy() {
         testExceptionThrownFromUserCode(true);
     }
 
-    private void testExceptionThrownFromUserCode(boolean proxy) {
+    private void testExceptionThrownFromUserCode(boolean proxy) throws InvocationTargetRuntimeException {
         if (proxy)
             System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
 
@@ -153,12 +153,12 @@ public class MethodReaderDelegationTest {
         }
     }
 
-    @Test(expected = RuntimeInvocationTargetException.class)
+    @Test(expected = InvocationTargetRuntimeException.class)
     public void testExceptionThrownFromUserCodeLong() {
         testExceptionThrownFromUserCodeLong(false);
     }
 
-    @Test(expected = RuntimeInvocationTargetException.class)
+    @Test(expected = InvocationTargetRuntimeException.class)
     public void testExceptionThrownFromUserCodeLongProxy() {
         testExceptionThrownFromUserCodeLong(true);
     }

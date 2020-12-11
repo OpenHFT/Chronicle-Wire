@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.Annotations;
+import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -437,14 +438,14 @@ public class VanillaMethodReader implements MethodReader {
         });
     }
 
-    protected Object invoke(Object o, @NotNull Method m, Object[] args) {
+    protected Object invoke(Object o, @NotNull Method m, Object[] args) throws InvocationTargetRuntimeException {
         try {
             if (methodReaderInterceptorReturns != null)
                 return methodReaderInterceptorReturns.intercept(m, o, args, VanillaMethodReader::actualInvoke);
             else
                 return m.invoke(o, args);
         } catch (InvocationTargetException e) {
-            throw new RuntimeInvocationTargetException(e.getCause());
+            throw new InvocationTargetRuntimeException(e.getCause());
         } catch (IllegalAccessException e) {
             Throwable cause = e.getCause();
             String msg = "Failure to dispatch message: " + m.getName() + " " + Arrays.asList(args);
@@ -462,7 +463,7 @@ public class VanillaMethodReader implements MethodReader {
      * @return true if there was a message, or false if no more data is available.
      * If we read a metadata message, true is returned even if it was ignored
      */
-    public boolean readOne() {
+    public boolean readOne() throws InvocationTargetRuntimeException {
         throwExceptionIfClosed();
 
         return readOne0();

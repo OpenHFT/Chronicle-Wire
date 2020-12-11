@@ -123,6 +123,7 @@ public class GenerateMethodReader {
 
         sourceCode.append("import net.openhft.chronicle.bytes.MethodReader;\n" +
                 "import net.openhft.chronicle.bytes.RuntimeInvocationTargetException;\n" +
+                "import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;\n" +
                 "import net.openhft.chronicle.core.Jvm;\n" +
                 "import net.openhft.chronicle.core.util.ObjectUtils;\n" +
                 "import net.openhft.chronicle.wire.*;\n" +
@@ -212,7 +213,7 @@ public class GenerateMethodReader {
                 "}\n" +
                 "return true;\n" +
                 "} \n" +
-                "catch (RuntimeInvocationTargetException e) {\n" +
+                "catch (RuntimeInvocationTargetException | InvocationTargetRuntimeException e) {\n" +
                 "throw e;\n" +
                 "}\n" +
                 "catch (Exception e) {\n" +
@@ -446,7 +447,7 @@ public class GenerateMethodReader {
 
         res.append("} \n" +
                 "catch (Exception e) {\n" +
-                "throw new RuntimeInvocationTargetException(e);\n" +
+                "throw new InvocationTargetRuntimeException(e);\n" +
                 "}\n");
 
         return res.toString();
