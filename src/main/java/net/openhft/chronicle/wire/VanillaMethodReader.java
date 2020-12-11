@@ -17,7 +17,10 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.MethodId;
+import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.Closeable;
@@ -156,7 +159,7 @@ public class VanillaMethodReader implements MethodReader {
                 }
             }
         } catch (InvocationTargetException e) {
-            throw new RuntimeInvocationTargetException(e);
+            throw new InvocationTargetRuntimeException(e);
         } catch (Throwable e) {
             String msg = "Failure to dispatch message: " + m.getName() + " " + Arrays.asList(argArr);
             Jvm.warn().on(o.getClass(), msg, e);
