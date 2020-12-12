@@ -312,19 +312,15 @@ public class VanillaMethodReader implements MethodReader {
             @NotNull ReadMarshallable[] argArr = {arg};
             MethodWireKey key = createWireKey(m, name);
             wireParser.registerOnce(key, (s, v) -> {
-                try {
-                    if (Jvm.isDebug())
-                        logMessage(s, v);
+                if (Jvm.isDebug())
+                    logMessage(s, v);
 
-                    //noinspection ConstantConditions
-                    argArr[0] = v.object(checkRecycle(argArr[0]), parameterType2);
-                    if (context[0] == null)
-                        updateContext(context, o2);
-                    Object invoke = invoke(contextSupplier.get(), m, argArr);
-                    updateContext(context, invoke);
-                } catch (Throwable t) {
-                    Jvm.warn().on(contextClass(contextSupplier), "Failure to dispatch message: " + name + " " + argArr[0], t);
-                }
+                //noinspection ConstantConditions
+                argArr[0] = v.object(checkRecycle(argArr[0]), parameterType2);
+                if (context[0] == null)
+                    updateContext(context, o2);
+                Object invoke = invoke(contextSupplier.get(), m, argArr);
+                updateContext(context, invoke);
             });
         }
     }
