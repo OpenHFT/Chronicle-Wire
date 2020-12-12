@@ -136,8 +136,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         } catch (Throwable e) {
             classCache.put(fullClassName, COMPILE_FAILED);
             // do nothing and drop through
-            if (Jvm.isDebugEnabled(getClass()))
-                Jvm.debug().on(getClass(), e);
+            Jvm.warn().on(getClass(), "Failed to compile generated method reader - falling back to proxy method reader. Please report this failure.", e);
         }
 
         return null;
