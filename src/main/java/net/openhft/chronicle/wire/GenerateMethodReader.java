@@ -91,9 +91,15 @@ public class GenerateMethodReader {
                     packageName() + '.' + generatedClassName(), sourceCode.toString());
         } catch (AssertionError e) {
             if (e.getCause() instanceof LinkageError) {
+                String fullClassName = packageName() + "." + generatedClassName();
                 try {
-                    return Class.forName(packageName() + '.' + generatedClassName(), true, classLoader);
+                    return Class.forName(fullClassName, true, classLoader);
                 } catch (ClassNotFoundException x) {
+                    // code generator does not work with some Proxys #247
+                    if (fullClassName.startsWith("com.sun.proxy.$Proxy")) {
+                        Jvm.warn().on(getClass(), "Cannot generate for " + fullClassName + " see #247");
+                        return null;
+                    }
                     throw Jvm.rethrow(x);
                 }
             }
