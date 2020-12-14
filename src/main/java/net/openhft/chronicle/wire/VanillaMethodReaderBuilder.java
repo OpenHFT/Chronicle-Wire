@@ -122,6 +122,10 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, impls);
 
         String fullClassName = generateMethodReader.packageName() + "." + generateMethodReader.generatedClassName();
+        // code generator does not work with some Proxys #247
+        if (fullClassName.startsWith("com.sun.proxy.$Proxy"))
+            return null;
+
         try {
             try {
                 final Class<?> generatedClass = Class.forName(fullClassName);

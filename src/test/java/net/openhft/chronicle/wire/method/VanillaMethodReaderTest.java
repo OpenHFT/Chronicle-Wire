@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -52,6 +53,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                     VanillaMethodReaderTest.this.instance = null;
                 }
             });
+            checkReaderType(methodReader);
             {
                 boolean succeeded = methodReader.readOne();
                 assertTrue(succeeded);
@@ -77,6 +79,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         Bytes expected = BytesUtil.readFile("methods-in.yaml");
         MockMethods writer = wire2.methodWriter(MockMethods.class);
         MethodReader reader = wire.methodReader(writer);
+        checkReaderType(reader);
         for (int i = 0; i < 3; i++) {
             assertTrue(reader.readOne());
         }
@@ -94,6 +97,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
         MockMethods mocker = Mocker.queuing(MockMethods.class, "", queue);
         MethodReader reader = wire.methodReader(mocker);
+        checkReaderType(reader);
         for (int i = 0; i < 2; i++) {
             assertTrue(reader.readOne());
         }
@@ -118,6 +122,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
         StringWriter sw = new StringWriter();
         MethodReader reader = wire.methodReader(Mocker.logging(MRTListener.class, "subs ", sw));
+        checkReaderType(reader);
         for (int i = 0; i < 7; i++) {
             assertTrue(reader.readOne());
         }
@@ -252,6 +257,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         Wire wire = TextWire.from(text)
                 .useTextDocuments();
         MethodReader reader = wire.methodReader(writer2);
+        checkReaderType(reader);
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
         assertEquals(text, wire2.toString());
@@ -280,6 +286,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         Wire wire = TextWire.from(text)
                 .useTextDocuments();
         MethodReader reader = wire.methodReader(writer2);
+        checkReaderType(reader);
         assertTrue(reader.readOne());
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
@@ -302,6 +309,10 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         } finally {
             Jvm.resetExceptionHandlers();
         }
+    }
+
+    private void checkReaderType(MethodReader reader) {
+        assertFalse(reader instanceof Proxy);
     }
 
     // keep package local.

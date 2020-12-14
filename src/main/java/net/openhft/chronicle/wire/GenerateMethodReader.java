@@ -84,20 +84,20 @@ public class GenerateMethodReader {
         if (!isSourceCodeGenerated)
             generateSourceCode();
 
-        if (DUMP_CODE)
-            System.out.println(sourceCode);
-
         final ClassLoader classLoader = instances[0].getClass().getClassLoader();
 
         try {
             return CACHED_COMPILER.loadFromJava(classLoader,
                     packageName() + '.' + generatedClassName(), sourceCode.toString());
-        } catch (LinkageError e) {
-            try {
-                return Class.forName(packageName() + '.' + generatedClassName(), true, classLoader);
-            } catch (ClassNotFoundException x) {
-                throw Jvm.rethrow(x);
+        } catch (AssertionError e) {
+            if (e.getCause() instanceof LinkageError) {
+                try {
+                    return Class.forName(packageName() + '.' + generatedClassName(), true, classLoader);
+                } catch (ClassNotFoundException x) {
+                    throw Jvm.rethrow(x);
+                }
             }
+            throw Jvm.rethrow(e);
         } catch (Throwable e) {
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + sourceCode, e));
         }
@@ -224,6 +224,9 @@ public class GenerateMethodReader {
                 "}\n}\n");
 
         isSourceCodeGenerated = true;
+
+        if (DUMP_CODE)
+            System.out.println(sourceCode);
     }
 
     /**
