@@ -34,6 +34,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,9 @@ import static net.openhft.compiler.CompilerUtils.CACHED_COMPILER;
  */
 public class GenerateMethodReader {
     private static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
+
+    // TODO: temporary - see issue #247
+    private static final AtomicInteger uniqueNo = new AtomicInteger(0);
 
     private final WireType wireType;
     private final Object[] instances;
@@ -59,6 +63,7 @@ public class GenerateMethodReader {
     private final SourceCodeFormatter eventNameSwitchBlock = new JavaSourceCodeFormatter();
     private final SourceCodeFormatter eventIdSwitchBlock = new JavaSourceCodeFormatter();
     private final SourceCodeFormatter numericConverters = new JavaSourceCodeFormatter();
+    private final String generatedClassName;
 
     private boolean methodFilterPresent;
     private boolean isSourceCodeGenerated;
@@ -73,6 +78,7 @@ public class GenerateMethodReader {
         this.wireType = wireType;
         this.interceptor = interceptor;
         this.instances = instances;
+        this.generatedClassName = generatedClassName0();
     }
 
     /**
@@ -85,21 +91,15 @@ public class GenerateMethodReader {
             generateSourceCode();
 
         final ClassLoader classLoader = instances[0].getClass().getClassLoader();
+        final String fullClassName = packageName() + "." + generatedClassName();
 
         try {
-            return CACHED_COMPILER.loadFromJava(classLoader,
-                    packageName() + '.' + generatedClassName(), sourceCode.toString());
+            return CACHED_COMPILER.loadFromJava(classLoader, fullClassName, sourceCode.toString());
         } catch (AssertionError e) {
             if (e.getCause() instanceof LinkageError) {
-                String fullClassName = packageName() + "." + generatedClassName();
                 try {
                     return Class.forName(fullClassName, true, classLoader);
                 } catch (ClassNotFoundException x) {
-                    // code generator does not work with some Proxys #247
-                    if (fullClassName.startsWith("com.sun.proxy.$Proxy")) {
-                        Jvm.warn().on(getClass(), "Cannot generate for " + fullClassName + " see #247");
-                        return null;
-                    }
                     throw Jvm.rethrow(x);
                 }
             }
@@ -554,6 +554,11 @@ public class GenerateMethodReader {
      * @return Simple name of a generated class.
      */
     public String generatedClassName() {
+        return generatedClassName;
+    }
+
+    @NotNull
+    private String generatedClassName0() {
         final StringBuilder sb = new StringBuilder();
 
         for (Object i : instances) {
@@ -589,6 +594,7 @@ public class GenerateMethodReader {
             sb.append("Intercepting");
 
         sb.append("MethodReader");
+        sb.append(uniqueNo.incrementAndGet());
         return sb.toString().replace("/", "$");
     }
 

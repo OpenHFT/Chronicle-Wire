@@ -353,12 +353,15 @@ public class GenerateMethodWriter {
 
             return CACHED_COMPILER.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
 
-        } catch (LinkageError e) {
-            try {
-                return Class.forName(packageName + '.' + className, true, classLoader);
-            } catch (ClassNotFoundException x) {
-                throw Jvm.rethrow(x);
+        } catch (AssertionError e) {
+            if (e.getCause() instanceof LinkageError) {
+                try {
+                    return Class.forName(packageName + '.' + className, true, classLoader);
+                } catch (ClassNotFoundException x) {
+                    throw Jvm.rethrow(x);
+                }
             }
+            throw Jvm.rethrow(e);
         } catch (MethodWriterValidationException e) {
             throw e;
         } catch (Throwable e) {
