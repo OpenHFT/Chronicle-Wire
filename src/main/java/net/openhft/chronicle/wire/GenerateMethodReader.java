@@ -34,7 +34,6 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -46,9 +45,6 @@ import static net.openhft.compiler.CompilerUtils.CACHED_COMPILER;
  */
 public class GenerateMethodReader {
     private static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
-
-    // TODO: temporary - see issue #247
-    private static final AtomicInteger uniqueNo = new AtomicInteger(0);
 
     private final WireType wireType;
     private final Object[] instances;
@@ -594,7 +590,6 @@ public class GenerateMethodReader {
             sb.append("Intercepting");
 
         sb.append("MethodReader");
-        sb.append(uniqueNo.incrementAndGet());
         return sb.toString().replace("/", "$");
     }
 
