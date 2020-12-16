@@ -26,6 +26,7 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
     private volatile boolean notComplete;
     private int count = 0;
     private boolean chainedElement;
+    private boolean rollback;
 
     public TextWriteDocumentContext(Wire wire) {
         this.wire = wire;
@@ -42,6 +43,7 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
             wire().writeComment("meta-data");
         notComplete = true;
         chainedElement = false;
+        rollback = false;
     }
 
     @Override
@@ -58,12 +60,21 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         if (count > 0)
             return;
         @NotNull Bytes bytes = wire().bytes();
+        if (rollback) {
+            bytes.writePosition(bytes.readPosition());
+            return;
+        }
         long l = bytes.writePosition();
         if (l < 1 || bytes.peekUnsignedByte(l - 1) >= ' ')
             bytes.append('\n');
         bytes.append("...\n");
         wire().getValueOut().resetBetweenDocuments();
         notComplete = false;
+    }
+
+    @Override
+    public void rollbackOnClose() {
+        rollback = true;
     }
 
     @Override

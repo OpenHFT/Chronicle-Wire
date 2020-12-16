@@ -462,6 +462,7 @@ public class GenerateMethodWriter {
         body.append("try (final " + WRITE_DOCUMENT_CONTEXT + " dc = (" + WRITE_DOCUMENT_CONTEXT + ") this.out.get().acquireWritingDocument(")
                 .append(metaData)
                 .append(")) {\n");
+        body.append("try {\n");
         body.append("dc.chainedElement(" + !terminating + ");");
         body.append("if (out.get().recordHistory()) MessageHistory.writeHistory(dc);\n");
 
@@ -488,6 +489,10 @@ public class GenerateMethodWriter {
         if (dm.getParameterTypes().length == 0)
             body.append("valueOut.text(\"\");\n");
 
+        body.append("} catch (Throwable t) {\n");
+        body.append("dc.rollbackOnClose();\n");
+        body.append("throw Jvm.rethrow(t);\n");
+        body.append("}\n");
         body.append("}\n");
 
         return format("\n%s public %s %s(%s) {\n %s%s}\n",

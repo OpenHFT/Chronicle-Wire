@@ -236,6 +236,20 @@ public class MethodWriterTest extends WireTestCommon {
         verify(mock);
     }
 
+    @Test
+    public void testExceptionInMarshallingRollsBack() {
+        final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
+
+        HasMarshallable instance = wire.methodWriterBuilder(HasMarshallable.class).build();
+        checkWriterType(instance);
+        try {
+            instance.method(AMarshallable.EXCEPTION);
+        } catch (NullPointerException npe) {
+            // ignore
+        }
+        Assert.assertEquals("half message should not be written", "", wire.toString());
+    }
+
     protected void checkWriterType(Object writer) {
         assertFalse(writer instanceof Proxy);
     }
@@ -275,5 +289,19 @@ public class MethodWriterTest extends WireTestCommon {
     public static class MicroTS extends SelfDescribingMarshallable {
         @LongConversion(MicroTimestampLongConverter.class)
         long timeUS;
+    }
+
+    public static class AMarshallable extends SelfDescribingMarshallable {
+        private static final AMarshallable EXCEPTION = new AMarshallable();
+
+        @Override
+        public void writeMarshallable(WireOut wire) {
+            if (this == EXCEPTION)
+                throw new NullPointerException("writeMarshallable failed. Should now rollback");
+        }
+    }
+
+    public interface HasMarshallable {
+        void method(AMarshallable exception);
     }
 }
