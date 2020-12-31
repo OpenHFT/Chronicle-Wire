@@ -297,9 +297,6 @@ public class TextMethodTester<T> {
     public boolean readOne(MethodReader reader0) {
         try {
             return reader0.readOne();
-        } catch (RuntimeInvocationTargetException e) {
-            this.onInvocationException.accept(new InvocationTargetRuntimeException(e));
-            return true;
         } catch (InvocationTargetRuntimeException e) {
             this.onInvocationException.accept(e);
             return true;
