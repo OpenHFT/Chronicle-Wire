@@ -4,7 +4,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.junit.After;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
 public class WiresTest extends WireTestCommon {
@@ -53,28 +53,6 @@ public class WiresTest extends WireTestCommon {
         container1.stringBuilder.append("value1");
 
         assertEquals("", container2.stringBuilder.toString());
-    }
-
-    @Test
-    public void shouldDemonstrateMutableFieldIssue() {
-        final MutableContainer container1 = new MutableContainer();
-        final MutableContainer container2 = new MutableContainer();
-
-        container1.mutableClass = new MutableClass();
-        container1.mutableClass.answer = 42;
-        container1.mutableClass.question = "meaning";
-
-        container2.mutableClass = new MutableClass();
-        container2.mutableClass.answer = 120;
-        container2.mutableClass.question = "5!";
-
-        Wires.reset(container1);
-        Wires.reset(container2);
-
-        container1.mutableClass.question = "safe mutation?";
-
-        assertNotSame(container1.mutableClass.question, container2.mutableClass.question);
-        assertNotEquals("safe mutation?", container2.mutableClass.question);
     }
 
     @Test
@@ -165,15 +143,6 @@ public class WiresTest extends WireTestCommon {
 
     private static final class StringBuilderContainer {
         StringBuilder stringBuilder = new StringBuilder();
-    }
-
-    private static final class MutableContainer implements ResetOverride {
-        MutableClass mutableClass = new MutableClass();
-
-        @Override
-        public void onReset() {
-            mutableClass = new MutableClass();
-        }
     }
 
     private static final class MutableClass {

@@ -425,11 +425,7 @@ public enum Wires {
 
     public static void reset(@NotNull Object o) {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(o.getClass());
-        if (o instanceof ResetOverride) {
-            ((ResetOverride) o).onReset();
-        } else {
-            wm.reset(o);
-        }
+        wm.reset(o);
     }
 
     public static int removeMaskedTidFromHeader(final int header) {
