@@ -2391,7 +2391,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             long length = readLength();
             int code = readCode();
             if (code == NULL) {
-                ((BytesStore) toBytes).isPresent(false);
                 return BinaryWire.this;
             }
             if (code == TYPE_PREFIX) {
@@ -2446,7 +2445,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             long length = readLength();
             int code = readCode();
             if (code == NULL) {
-                toBytes.isPresent(false);
                 return BinaryWire.this;
             }
             if (code != U8_ARRAY)
@@ -2537,7 +2535,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             long length = readLength() - 1;
             int code = readCode();
             if (code == NULL) {
-                toBytes.isPresent(false);
                 return;
             }
             if (code != U8_ARRAY)
