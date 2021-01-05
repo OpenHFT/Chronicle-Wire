@@ -34,7 +34,8 @@ public interface MessageHistory extends Marshallable {
     /**
      * You only need to call this if you wish to override it's behaviour.
      *
-     * @param md to change to the default implementation for this thread.
+     * @param md to change to the default implementation for this thread. Null to clear the thread local
+     *           and force withInitial to be called again
      */
     static void set(MessageHistory md) {
         VanillaMessageHistory.setThreadLocal(md);

@@ -3,10 +3,19 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class MessageHistoryTest extends WireTestCommon {
+
+    @Test
+    public void checkHistoryGetClear() {
+        MessageHistory mg = MessageHistory.get();
+        assertNotNull(mg);
+        MessageHistory.set(null);
+        MessageHistory mg2 = MessageHistory.get();
+        assertNotNull(mg2);
+        assertNotSame(mg, mg2);
+    }
 
     @Test
     public void checkHistoryMaxSizeException() {

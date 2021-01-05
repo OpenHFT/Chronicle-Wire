@@ -48,7 +48,10 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     }
 
     static void setThreadLocal(MessageHistory md) {
-        THREAD_LOCAL.set(md);
+        if (md == null)
+            THREAD_LOCAL.remove();
+        else
+            THREAD_LOCAL.set(md);
     }
 
     public static int marshallableSize(@NotNull BytesIn bytes) {
