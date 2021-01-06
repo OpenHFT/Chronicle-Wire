@@ -336,6 +336,18 @@ public abstract class AbstractWire implements Wire {
 
         long pos = bytes.writePosition();
 
+        // clear up to the next 4 bytes to explicitly indicate "no more data"
+        // if there aren't at least 4 bytes remaining, then region not yet mapped and will be cleared when mapped
+        // also clears any dirty bits left by a failed writer/appender
+        // does not get added to the length
+        if(bytes.writeRemaining() >= 4)
+        {
+            bytes.writeInt(pos, 0);
+        }else{
+            for(int i=0; i<bytes.writeRemaining(); ++i)
+                bytes.writeByte(pos+i, 0);
+        }
+
         int header = Maths.toUInt31(pos - position - 4);
         if (metaData) header |= META_DATA;
         if (header == UNKNOWN_LENGTH)
