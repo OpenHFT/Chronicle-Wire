@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.util.Builder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class VanillaMethodWriterBuilder<T> implements Supplier<T>, MethodWriterBuilder<T> {
+public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBuilder<T> {
     public static final String DISABLE_WRITER_PROXY_CODEGEN = "disableProxyCodegen";
 
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
