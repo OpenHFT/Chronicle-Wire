@@ -1,6 +1,8 @@
 package net.openhft.chronicle.wire;
 
-public interface ChronicleBitSet extends Marshallable {
+import net.openhft.chronicle.core.io.Closeable;
+
+public interface ChronicleBitSet extends Marshallable, Closeable {
     /**
      * Returns the number of bits of space actually in use by this {@code BitSet} to represent bit values. The maximum element in the set is the size
      * - 1st element.
