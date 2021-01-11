@@ -33,7 +33,7 @@ public class MethodWriterProxyTest extends MethodWriterTest {
 
     @Override
     protected void checkWriterType(Object writer) {
-        assertTrue(writer instanceof Proxy);
+        assertTrue(Proxy.isProxyClass(writer.getClass()));
     }
 }
 

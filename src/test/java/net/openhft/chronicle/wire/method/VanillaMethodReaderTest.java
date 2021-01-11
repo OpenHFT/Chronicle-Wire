@@ -16,7 +16,6 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.stream.IntStream;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
@@ -274,7 +273,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 
     private void checkReaderType(MethodReader reader) {
-        assertFalse(reader instanceof Proxy);
+        assertFalse(Proxy.isProxyClass(reader.getClass()));
     }
 
     // keep package local.

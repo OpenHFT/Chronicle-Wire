@@ -251,7 +251,7 @@ public class MethodWriterTest extends WireTestCommon {
     }
 
     protected void checkWriterType(Object writer) {
-        assertFalse(writer instanceof Proxy);
+        assertFalse(Proxy.isProxyClass(writer.getClass()));
     }
 
     @FunctionalInterface
