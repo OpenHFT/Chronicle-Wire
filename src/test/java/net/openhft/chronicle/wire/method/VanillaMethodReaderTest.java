@@ -5,7 +5,6 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
-import net.openhft.chronicle.core.onoes.ExceptionKey;
 import net.openhft.chronicle.wire.*;
 import org.junit.After;
 import org.junit.Test;
@@ -13,7 +12,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Proxy;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -108,7 +106,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void testSubclasses() {
-        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap())
                 .useTextDocuments();
         MRTListener writer = wire.methodWriter(MRTListener.class);
         writer.timed(1234567890_000_000L);
@@ -166,7 +164,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void methodInterceptorNull() {
-        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap())
                 .useTextDocuments();
         MRTListener writer = wire.methodWriterBuilder(MRTListener.class)
                 .build();
@@ -203,7 +201,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     public void testNestedUnknownClass() {
         Wires.GENERATE_TUPLES = true;
 
-        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap(256))
+        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
                 .useTextDocuments();
         MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
@@ -254,6 +252,31 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         assertEquals(text, wire2.toString());
     }
 
+    @Test
+    public void testMessageHistoryCleared() {
+        try {
+            Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+            final long sourceIndex = 2L;
+            MessageHistory.get().reset(1, sourceIndex);
+
+            wire.write(MethodReader.HISTORY).marshallable(MessageHistory.get());
+            MRTListener writer = wire.methodWriter(MRTListener.class);
+            writer.timed(1234L);
+
+            MethodReader reader = wire.methodReader(Mocker.intercepting(MRTListener.class, (s, objects) -> {
+                assertEquals("timed", s);
+                assertEquals(1, MessageHistory.get().sources());
+                assertEquals(sourceIndex, MessageHistory.get().sourceIndex(0));
+            }, null));
+            checkReaderType(reader);
+            assertTrue(reader.readOne());
+            assertFalse(reader.readOne());
+            assertEquals(0, MessageHistory.get().sources());
+        } finally {
+            MessageHistory.set(null);
+        }
+    }
+
     @After
     public void resetGenerateTuples() {
         Wires.GENERATE_TUPLES = false;
@@ -261,7 +284,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test(expected = IllegalStateException.class)
     public void testOverloaded() {
-        Map<ExceptionKey, Integer> map = Jvm.recordExceptions();
+        Jvm.recordExceptions();
         try {
             Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap(32));
             Overloaded writer2 = wire2.methodWriter(Overloaded.class);

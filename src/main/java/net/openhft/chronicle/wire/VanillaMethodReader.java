@@ -493,6 +493,8 @@ public class VanillaMethodReader implements MethodReader {
 
             messageHistory().reset(context.sourceId(), context.index());
             wireParser.accept(context.wire());
+        } finally {
+            messageHistory().reset();
         }
         return true;
     }

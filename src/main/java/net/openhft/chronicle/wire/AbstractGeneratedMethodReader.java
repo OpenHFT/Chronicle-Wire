@@ -66,30 +66,33 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         if (context.isMetaData())
             return false;
 
-        messageHistory().reset(context.sourceId(), context.index());
-
         WireIn wireIn = context.wire();
-
         if (wireIn == null)
             return false;
 
-        wireIn.startEvent();
-        Bytes<?> bytes = wireIn.bytes();
-        while (bytes.readRemaining() > 0) {
-            if (wireIn.isEndEvent())
-                break;
-            long start = bytes.readPosition();
+        messageHistory().reset(context.sourceId(), context.index());
 
-            if (!readOneCall(wireIn))
-                return false;
+        try {
+            wireIn.startEvent();
+            Bytes<?> bytes = wireIn.bytes();
+            while (bytes.readRemaining() > 0) {
+                if (wireIn.isEndEvent())
+                    break;
+                long start = bytes.readPosition();
 
-            wireIn.consumePadding();
-            if (bytes.readPosition() == start) {
-                Jvm.warn().on(getClass(), "Failed to progress reading " + bytes.readRemaining() + " bytes left.");
-                break;
+                if (!readOneCall(wireIn))
+                    return false;
+
+                wireIn.consumePadding();
+                if (bytes.readPosition() == start) {
+                    Jvm.warn().on(getClass(), "Failed to progress reading " + bytes.readRemaining() + " bytes left.");
+                    break;
+                }
             }
+            wireIn.endEvent();
+        } finally {
+            messageHistory().reset();
         }
-        wireIn.endEvent();
 
         return true;
     }
