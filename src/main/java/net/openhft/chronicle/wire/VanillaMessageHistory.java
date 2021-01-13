@@ -294,6 +294,20 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
                 '}';
     }
 
+    /**
+     * Override deepCopy as writeMarshallable adds a timing every time it is called. See also {@link #toString()}
+     * @param <T> T
+     * @return copy of this
+     */
+    @Override
+    public @NotNull VanillaMessageHistory deepCopy() {
+        @NotNull VanillaMessageHistory copy = super.deepCopy();
+        // remove the extra timing
+        copy.timingsArray[this.timings] = 0;
+        copy.timings = this.timings;
+        return copy;
+    }
+
     private String toStringSources() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < sources; i++) {

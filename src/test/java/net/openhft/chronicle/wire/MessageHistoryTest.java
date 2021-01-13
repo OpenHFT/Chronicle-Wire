@@ -18,6 +18,17 @@ public class MessageHistoryTest extends WireTestCommon {
     }
 
     @Test
+    public void checkDeepCopy() {
+        VanillaMessageHistory history = new VanillaMessageHistory();
+        history.addSource(1, 0xff);
+        history.addSource(2, 0xfff);
+        history.addTiming(10_000);
+        history.addTiming(20_000);
+        VanillaMessageHistory history2 = history.deepCopy();
+        assertEquals(history, history2);
+    }
+
+    @Test
     public void checkHistoryMaxSizeException() {
         VanillaMessageHistory container1 = new VanillaMessageHistory();
         container1.addSourceDetails(true);
@@ -45,9 +56,6 @@ public class MessageHistoryTest extends WireTestCommon {
         history.addTiming(20_000);
         assertEquals(2, history.sources());
         assertEquals(2, history.timings());
-       // System.out.println(history.toString());
-        assertEquals(2, history.sources());
-        assertEquals(2, history.timings());
 
         BinaryWire bw = new BinaryWire(new HexDumpBytes());
         bw.writeEventName("history").marshallable(history);
@@ -62,6 +70,11 @@ public class MessageHistoryTest extends WireTestCommon {
                 "a5 20 4e                                        # timing in nanos\n" +
                 "a7 64 0c 2c b5 03 6e 00 00                      # 120962203520100\n", bw.bytes().toHexString());
         bw.bytes().releaseLast();
+
+        assertEquals("VanillaMessageHistory{sources: [1=0xff,2=0xfff] timings: [10000,20000] addSourceDetails=true}",
+                history.toString());
+        assertEquals(2, history.sources());
+        assertEquals(2, history.timings());
     }
 
     static class SetTimeMessageHistory extends VanillaMessageHistory {
