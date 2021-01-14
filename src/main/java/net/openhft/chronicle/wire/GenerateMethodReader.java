@@ -202,6 +202,8 @@ public class GenerateMethodReader {
                 "try {\n" +
                 "if (Jvm.isDebug())\n" +
                 "debugLoggingParselet.accept(lastEventName, valueIn);\n" +
+                "if (lastEventName == null)\n" +
+                "throw new IllegalStateException(\"Failed to read method name or ID\");" +
                 "switch (lastEventName) {\n" +
                 "case MethodReader.HISTORY:\n" +
                 "valueIn.marshallable(messageHistory);\n" +
@@ -219,7 +221,8 @@ public class GenerateMethodReader {
                 "}\n" +
                 "catch (Exception e) {\n" +
                 "Jvm.warn().on(this.getClass(), \"Failure to dispatch message, " +
-                "will retry to process without generated code: \" + lastEventName + \"()\", e);\n" +
+                "will retry to process without generated code: \" + lastEventName + \"(), " +
+                "bytes: \" + wireIn.bytes().toDebugString(), e);\n" +
                 "return false;\n" +
                 "}\n" +
                 "}\n}\n");
