@@ -29,7 +29,7 @@ public class NullFieldMarshallingTest {
     public void checkExceptions() {
         // find any discarded resources.
         System.gc();
-        Jvm.pause(10);
+        Jvm.pause(Jvm.isAzulZing() ? 100 : 10);
 
         if (Jvm.hasException(exceptions)) {
             Jvm.dumpException(exceptions);
