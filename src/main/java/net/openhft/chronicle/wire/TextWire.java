@@ -3083,7 +3083,7 @@ public class TextWire extends AbstractWire implements Wire {
                     }
                 }
             }
-            return Wires.dtoInterface(tClass) && Wires.GENERATE_TUPLES ? Wires.tupleFor(tClass, null) : null;
+            return Wires.dtoInterface(tClass) && Wires.GENERATE_TUPLES && ObjectUtils.implementationToUse(tClass) == tClass ? Wires.tupleFor(tClass, null) : null;
         }
 
         @Override

@@ -4,10 +4,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.util.ObjectUtils;
-import net.openhft.chronicle.wire.LongConversion;
-import net.openhft.chronicle.wire.MicroTimestampLongConverter;
-import net.openhft.chronicle.wire.SelfDescribingMarshallable;
-import net.openhft.chronicle.wire.TextWire;
+import net.openhft.chronicle.wire.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +27,16 @@ public class MethodWriterByInterfaceTest {
 
     @Test
     public void writeReadViaImplementation() {
+        checkWriteReadViaImplementation();
+    }
+
+    @Test
+    public void writeReadViaImplementationGenerateTuples() {
+        Wires.GENERATE_TUPLES = true;
+        checkWriteReadViaImplementation();
+    }
+
+    private void checkWriteReadViaImplementation() {
         TextWire tw = new TextWire(Bytes.allocateElasticOnHeap());
         MWBI0 mwbi0 = tw.methodWriter(MWBI0.class);
         mwbi0.method(new MWBImpl("name", 1234567890123456L));
@@ -60,12 +67,12 @@ public class MethodWriterByInterfaceTest {
         void method(MWBI mwbi);
     }
 
-    public static class MWBImpl extends SelfDescribingMarshallable implements MWBI {
+    static class MWBImpl extends SelfDescribingMarshallable implements MWBI {
         String name;
         @LongConversion(MicroTimestampLongConverter.class)
         long time;
 
-        public MWBImpl(String name, long time) {
+        MWBImpl(String name, long time) {
             this.name = name;
             this.time = time;
         }
