@@ -293,13 +293,6 @@ public class GenerateMethodReader {
             Class<?> parameterType = parameterTypes[i];
 
             final String typeName = parameterType.getCanonicalName();
-
-            if (!parameterType.isPrimitive()) {
-                // this used to use ObjectUtils.implementationToUse to determine the type and mutable
-                // object but this is not appropriate, especially for an interface type - see #253
-                fields.append(format("private %s %sarg%dtype = %s.class;\n", "Class", m.getName(), i, typeName));
-            }
-
             fields.append(format("private %s %sarg%d;\n", typeName, m.getName(), i));
         }
 
@@ -514,7 +507,8 @@ public class GenerateMethodReader {
         } else if (CharSequence.class.isAssignableFrom(argumentType)) {
             return format("%s = %s.text();\n", argumentName, valueInName);
         } else {
-            return format("%s = %s.object(checkRecycle(%s), %stype);\n", argumentName, valueInName, argumentName, argumentName);
+            final String typeName = argumentType.getCanonicalName();
+            return format("%s = %s.object(checkRecycle(%s), %s.class);\n", argumentName, valueInName, argumentName, typeName);
         }
     }
 
