@@ -23,7 +23,6 @@ import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.util.Annotations;
-import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import org.jetbrains.annotations.NotNull;
@@ -297,21 +296,7 @@ public class GenerateMethodReader {
             Class<?> parameterType = parameterTypes[i];
 
             final String typeName = parameterType.getCanonicalName();
-
-            if (parameterType.isPrimitive())
-                fields.append(format("private %s %sarg%d;\n", typeName, m.getName(), i));
-            else {
-                fields.append(format("private %s %sarg%dtype = ObjectUtils.implementationToUse(%s.class);\n",
-                        "Class", m.getName(), i, typeName));
-
-                final Class<?> implToUse = ObjectUtils.implementationToUse(parameterType);
-
-                if (ReadMarshallable.class.isAssignableFrom(implToUse)) {
-                    fields.append(format("private %s %sarg%d = ObjectUtils.newInstance(%s.class);\n",
-                            typeName, m.getName(), i, implToUse.getCanonicalName()));
-                } else
-                    fields.append(format("private %s %sarg%d;\n", typeName, m.getName(), i));
-            }
+            fields.append(format("private %s %sarg%d;\n", typeName, m.getName(), i));
         }
 
         if (chainReturnType != null)
@@ -525,7 +510,8 @@ public class GenerateMethodReader {
         } else if (CharSequence.class.isAssignableFrom(argumentType)) {
             return format("%s = %s.text();\n", argumentName, valueInName);
         } else {
-            return format("%s = %s.object(checkRecycle(%s), %stype);\n", argumentName, valueInName, argumentName, argumentName);
+            final String typeName = argumentType.getCanonicalName();
+            return format("%s = %s.object(checkRecycle(%s), %s.class);\n", argumentName, valueInName, argumentName, typeName);
         }
     }
 
