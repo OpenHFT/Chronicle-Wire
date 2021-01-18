@@ -294,14 +294,13 @@ public class GenerateMethodReader {
 
             final String typeName = parameterType.getCanonicalName();
 
-            if (parameterType.isPrimitive())
-                fields.append(format("private %s %sarg%d;\n", typeName, m.getName(), i));
-            else {
+            if (!parameterType.isPrimitive()) {
                 // this used to use ObjectUtils.implementationToUse to determine the type and mutable
                 // object but this is not appropriate, especially for an interface type - see #253
                 fields.append(format("private %s %sarg%dtype = %s.class;\n", "Class", m.getName(), i, typeName));
-                fields.append(format("private %s %sarg%d;\n", typeName, m.getName(), i));
             }
+
+            fields.append(format("private %s %sarg%d;\n", typeName, m.getName(), i));
         }
 
         if (chainReturnType != null)

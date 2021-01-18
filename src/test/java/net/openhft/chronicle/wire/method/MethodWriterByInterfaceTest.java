@@ -13,9 +13,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.StringWriter;
+import java.lang.reflect.Proxy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class MethodWriterByInterfaceTest {
     @Before
@@ -33,6 +33,7 @@ public class MethodWriterByInterfaceTest {
         TextWire tw = new TextWire(Bytes.allocateElasticOnHeap());
         MWBI0 mwbi0 = tw.methodWriter(MWBI0.class);
         mwbi0.method(new MWBImpl("name", 1234567890123456L));
+        assertFalse(Proxy.isProxyClass(mwbi0.getClass()));
         assertEquals("method: {\n" +
                 "  name: name,\n" +
                 "  time: 2009-02-13T23:31:30.123456\n" +
@@ -40,6 +41,7 @@ public class MethodWriterByInterfaceTest {
                 "...\n", tw.toString());
         StringWriter sw = new StringWriter();
         MethodReader reader = tw.methodReader(Mocker.logging(MWBI0.class, "", sw));
+        assertFalse(Proxy.isProxyClass(reader.getClass()));
         assertTrue(reader.readOne());
         assertEquals("method[!net.openhft.chronicle.wire.method.MethodWriterByInterfaceTest$MWBImpl {\n" +
                 "  name: name,\n" +
