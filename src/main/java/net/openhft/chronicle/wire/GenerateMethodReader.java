@@ -202,7 +202,7 @@ public class GenerateMethodReader {
                 "if (Jvm.isDebug())\n" +
                 "debugLoggingParselet.accept(lastEventName, valueIn);\n" +
                 "if (lastEventName == null)\n" +
-                "throw new IllegalStateException(\"Failed to read method name or ID\");" +
+                "throw new IllegalStateException(\"Failed to read method name or ID\");\n" +
                 "switch (lastEventName) {\n" +
                 "case MethodReader.HISTORY:\n" +
                 "valueIn.marshallable(messageHistory);\n" +
