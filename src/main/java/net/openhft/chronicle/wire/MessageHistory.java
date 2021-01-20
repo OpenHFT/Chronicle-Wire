@@ -120,4 +120,9 @@ public interface MessageHistory extends Marshallable {
      */
     long lastSourceIndex();
 
+    /**
+     * @param sourceId the new sourceId
+     * @return only returns true if it is dirty and the queue has changed
+     */
+    boolean isDirtyAndQueueChanged(int sourceId);
 }

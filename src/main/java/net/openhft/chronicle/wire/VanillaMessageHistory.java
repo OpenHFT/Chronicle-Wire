@@ -32,6 +32,9 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
                 return veh;
             });
 
+    // true if these change have been written
+    private transient boolean dirty;
+
     private int sources;
     private int timings;
     @NotNull
@@ -43,9 +46,11 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     private boolean addSourceDetails = false;
     private long start;
 
+
     static MessageHistory getThreadLocal() {
         return THREAD_LOCAL.get();
     }
+
 
     static void setThreadLocal(MessageHistory md) {
         if (md == null)
@@ -89,6 +94,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     /**
      * Whether to automatically add timestamp on read. Set this {@code false} for utilities that expect to
      * read MessageHistory without mutation
+     *
      * @param addSourceDetails addSourceDetails
      */
     public void addSourceDetails(boolean addSourceDetails) {
@@ -182,6 +188,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     public void writeMarshallable(@NotNull WireOut wire) {
         wire.write("sources").sequence(this, this::acceptSources);
         wire.write("timings").sequence(this, this::acceptTimings);
+        dirty = false;
     }
 
     @Override
@@ -216,6 +223,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         }
         bytes.writeLong(nanoTime()); // add time for this output
         assert checkMarshallableSize(start, (Bytes) bytes);
+        dirty = false;
     }
 
     protected long nanoTime() {
@@ -270,6 +278,13 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     public void addSource(int id, long index) {
         sourceIdArray[sources] = id;
         sourceIndexArray[sources++] = index;
+        dirty = true;
+    }
+
+
+    @Override
+    public boolean isDirtyAndQueueChanged(int sourceId) {
+        return dirty && lastSourceId() != sourceId;
     }
 
     public void addTiming(long l) {
@@ -296,7 +311,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     /**
      * Override deepCopy as writeMarshallable adds a timing every time it is called. See also {@link #toString()}
-     * @param <T> T
+     *
      * @return copy of this
      */
     @Override

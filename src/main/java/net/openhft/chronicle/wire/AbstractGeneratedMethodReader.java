@@ -21,12 +21,14 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.io.Closeable;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**
  * Base class for generated method readers.
@@ -41,12 +43,24 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private MethodReader delegate;
     private boolean closeIn = false, closed;
 
+    private Consumer<MessageHistory> historyConsumer = noOp -> {
+    };
+
     public AbstractGeneratedMethodReader(MarshallableIn in,
                                          WireParselet debugLoggingParselet,
                                          Supplier<MethodReader> delegateSupplier) {
         this.in = in;
         this.debugLoggingParselet = debugLoggingParselet;
         this.delegateSupplier = delegateSupplier;
+    }
+
+    /**
+     * @param historyConsumer sets a history consumer, which will be called the next message if for a different queue
+     *                        and the history message is not written to the output queue.
+     *                        This allows LAST_WRITTEN to still work when there is no output for a give message
+     */
+    public void historyConsumer(Consumer<MessageHistory> historyConsumer) {
+        this.historyConsumer = historyConsumer;
     }
 
     /**
@@ -70,6 +84,10 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         if (wireIn == null)
             return false;
 
+        MessageHistory messageHistory = this.messageHistory();
+        if (messageHistory.isDirtyAndQueueChanged(context.sourceId()))
+            historyConsumer.accept(messageHistory);
+
         messageHistory().reset(context.sourceId(), context.index());
 
         try {
@@ -90,8 +108,9 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                 }
             }
             wireIn.endEvent();
-        } finally {
-            messageHistory().reset();
+        } catch (Exception e) {
+            messageHistory.reset();
+            throw e;
         }
 
         return true;
@@ -107,6 +126,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             if (!context.isPresent()) {
                 return false;
             }
+
 
             shouldDelegate = !readOne0(context);
 
@@ -128,7 +148,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     @Override
     public void close() {
         if (closeIn)
-            Closeable.closeQuietly(in);
+            closeQuietly(in);
         closed = true;
     }
 
@@ -151,7 +171,6 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     @Override
     public MethodReader closeIn(boolean closeIn) {
         throwExceptionIfClosed();
-
         this.closeIn = closeIn;
         return this;
     }
