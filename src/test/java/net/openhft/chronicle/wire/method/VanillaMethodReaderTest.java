@@ -271,8 +271,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
             checkReaderType(reader);
             assertTrue(reader.readOne());
             assertFalse(reader.readOne());
-            // TODO re-add this line
-            //assertEquals(0, MessageHistory.get().sources());
+            assertEquals(0, MessageHistory.get().sources());
         } finally {
             MessageHistory.set(null);
         }
