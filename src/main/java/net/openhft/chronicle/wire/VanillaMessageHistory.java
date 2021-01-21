@@ -283,8 +283,8 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
 
     @Override
-    public boolean isDirtyAndQueueChanged(int sourceId) {
-        return dirty && lastSourceId() != sourceId;
+    public boolean isDirty() {
+        return dirty;
     }
 
     public void addTiming(long l) {

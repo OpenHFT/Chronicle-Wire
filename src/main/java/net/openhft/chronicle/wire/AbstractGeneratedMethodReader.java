@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static java.lang.ThreadLocal.withInitial;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**
@@ -45,6 +47,24 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
     private Consumer<MessageHistory> historyConsumer = noOp -> {
     };
+
+
+    private static class MessageHistoryThreadLocal {
+
+        private ThreadLocal<MessageHistory> messageHistoryTL = withInitial(VanillaMessageHistory::new);
+
+        private MessageHistory getAndSet(MessageHistory mh) {
+            final MessageHistory result = messageHistoryTL.get();
+            messageHistoryTL.set(mh);
+            return result;
+        }
+
+        public MessageHistory get() {
+            return messageHistoryTL.get();
+        }
+    }
+
+    private static MessageHistoryThreadLocal TEMP_MESSAGE_HISTORY = new MessageHistoryThreadLocal();
 
     public AbstractGeneratedMethodReader(MarshallableIn in,
                                          WireParselet debugLoggingParselet,
@@ -84,9 +104,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         if (wireIn == null)
             return false;
 
-        MessageHistory messageHistory = this.messageHistory();
-        if (messageHistory.isDirtyAndQueueChanged(context.sourceId()))
-            historyConsumer.accept(messageHistory);
+        writeUnwrittenMessageHistory(context);
 
         messageHistory().reset(context.sourceId(), context.index());
 
@@ -108,12 +126,36 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                 }
             }
             wireIn.endEvent();
-        } catch (Exception e) {
-            messageHistory.reset();
-            throw e;
+        } finally {
+            swapMessageHistoryIfDirty().reset();
         }
 
         return true;
+    }
+
+    /**
+     * uses a double buffer technique to swap the current message history with a temp message history ( this is, if it has not already been stored ) .
+     * @return the MessageHistory
+     */
+    @NotNull
+    private MessageHistory swapMessageHistoryIfDirty() {
+        MessageHistory mh = messageHistory();
+        if (mh.isDirty())
+            MessageHistory.set(mh = TEMP_MESSAGE_HISTORY.getAndSet(mh));
+        return mh;
+    }
+
+    /**
+     * writes the history message for the last message ( if required ), that is, if the last input,
+     * has not yet written its message history yet to the output queue.
+     *
+     * @param context the DocumentContext of the output queue that we are going to write the message history to
+     */
+    private void writeUnwrittenMessageHistory(DocumentContext context) {
+        final MessageHistory mh = TEMP_MESSAGE_HISTORY.get();
+        if (mh.sources() == 0 || context.sourceId() == mh.lastSourceId() || !mh.isDirty())
+            return;
+        historyConsumer.accept(mh);
     }
 
     @Override

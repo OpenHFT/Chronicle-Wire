@@ -120,9 +120,10 @@ public interface MessageHistory extends Marshallable {
      */
     long lastSourceIndex();
 
+
     /**
-     * @param sourceId the new sourceId
-     * @return only returns true if it is dirty and the queue has changed
+     * @return {@code true} if the message history has not been written using
+     * {@link Marshallable#writeMarshallable(net.openhft.chronicle.wire.WireOut)}
      */
-    boolean isDirtyAndQueueChanged(int sourceId);
+    boolean isDirty();
 }
