@@ -68,7 +68,8 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     private String genericEvent;
     private MethodWriterListener methodWriterListener;
     private boolean metaData;
-    private boolean useMethodIds;
+    @Deprecated(/* To be removed in x.23 */)
+    private boolean useMethodIds = true;
     private WireType wireType;
     private Class<?> proxyClass;
     private UpdateInterceptor updateInterceptor;
