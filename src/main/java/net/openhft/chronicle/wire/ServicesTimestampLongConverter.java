@@ -1,10 +1,10 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.MappedUniqueTimeProvider;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.time.LongTime;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.core.time.TimeProvider;
-import net.openhft.chronicle.core.time.UniqueMicroTimeProvider;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.ToLongFunction;
@@ -53,7 +53,7 @@ public class ServicesTimestampLongConverter implements LongConverter {
         TimeProvider clock = CLOCK;
         // if it is default use unique time provider instead.
         if (clock == SystemTimeProvider.INSTANCE)
-            clock = UniqueMicroTimeProvider.INSTANCE;
+            clock = MappedUniqueTimeProvider.INSTANCE;
         return currentTime(clock);
     }
 
