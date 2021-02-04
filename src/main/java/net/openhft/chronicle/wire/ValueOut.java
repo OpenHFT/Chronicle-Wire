@@ -447,9 +447,28 @@ public interface ValueOut {
         typePrefix(object.getClass());
         if (object instanceof WriteMarshallable) {
             return marshallable((WriteMarshallable) object);
+        } else if (object instanceof Enum) {
+            return asEnum((Enum) object);
+        } else if (isScalar(object)) {
+            if (object instanceof LocalDate) {
+                LocalDate d = (LocalDate) object;
+                return text(WireInternal.acquireStringBuilder()
+                        .append(d.getYear())
+                        .append('-')
+                        .append(d.getMonthValue() < 10 ? "0" : "")
+                        .append(d.getMonthValue())
+                        .append('-')
+                        .append(d.getDayOfMonth() < 10 ? "0" : "")
+                        .append(d.getDayOfMonth()));
+            }
+            return text(object.toString());
         } else {
             return marshallable(object);
         }
+    }
+
+    default boolean isScalar(Serializable object) {
+        return object instanceof Comparable;
     }
 
     @NotNull

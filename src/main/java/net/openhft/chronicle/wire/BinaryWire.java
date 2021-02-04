@@ -48,7 +48,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
 
-import static net.openhft.chronicle.core.Jvm.isJava9Plus;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.BinaryWire.AnyCodeMatch.ANY_CODE_MATCH;
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
@@ -583,6 +582,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         final int length = peekCode & 0x1F;
         final String s = BIT8.intern(bytes, length);
         bytes.readSkip(length);
+        if (expectedClass == String.class)
+            return (K) WireInternal.INTERNER.intern(s);
         return ObjectUtils.convertTo(expectedClass, s);
     }
 

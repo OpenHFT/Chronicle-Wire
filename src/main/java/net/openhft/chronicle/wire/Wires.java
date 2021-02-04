@@ -533,7 +533,7 @@ public enum Wires {
                 @NotNull final Object e = strategy.readUsing(using, in, BracketType.NONE);
                 return clazz == Base64.class
                         ? (E) e
-                        : (E) ObjectUtils.convertTo(clazz, e);
+                        : (E) WireInternal.intern(clazz, e);
 
             default:
                 throw new AssertionError();

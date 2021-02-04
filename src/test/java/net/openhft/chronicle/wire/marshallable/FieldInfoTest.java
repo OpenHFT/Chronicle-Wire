@@ -222,7 +222,7 @@ public class FieldInfoTest extends WireTestCommon {
                         "}\n" +
                         ", !FieldInfo {\n" +
                         "  name: uuid,\n" +
-                        "  type: !type java.util.UUID,\n" +
+                        "  type: !type UUID,\n" +
                         "  bracketType: NONE,\n" +
                         "  parent: !type net.openhft.chronicle.wire.marshallable.ScalarValues\n" +
                         "}\n" +

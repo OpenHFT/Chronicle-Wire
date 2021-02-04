@@ -165,19 +165,19 @@ public interface ValueIn {
     @NotNull <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate);
 
     default LocalDate date() {
-        return LocalDate.parse(text());
+        return WireInternal.intern(LocalDate.class, text());
     }
 
     default LocalTime time() {
-        return LocalTime.parse(text());
+        return WireInternal.intern(LocalTime.class, text());
     }
 
     default LocalDateTime dateTime() {
-        return LocalDateTime.parse(text());
+        return WireInternal.intern(LocalDateTime.class, text());
     }
 
     default ZonedDateTime zonedDateTime() {
-        return ZonedDateTime.parse(text());
+        return WireInternal.intern(ZonedDateTime.class, text());
     }
 
     boolean hasNext();

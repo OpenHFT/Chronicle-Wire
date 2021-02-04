@@ -21,19 +21,22 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.*;
+import net.openhft.chronicle.wire.internal.FromStringInterner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.nio.BufferUnderflowException;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
@@ -49,6 +52,27 @@ public enum WireInternal {
     static final ThreadLocal<WeakReference<Bytes>> ABYTES_TL = new ThreadLocal();
 
     static final StackTraceElement[] NO_STE = {};
+    static final Set<Class> INTERNABLE = new HashSet<>(Arrays.asList(
+            String.class,
+//            Date.class,
+//            TimeZone.class,
+            UUID.class,
+            DayOfWeek.class,
+            LocalDate.class,
+            LocalDateTime.class,
+            LocalTime.class,
+            Month.class,
+            MonthDay.class,
+            OffsetDateTime.class,
+            OffsetTime.class,
+            Period.class,
+            Year.class,
+            YearMonth.class,
+            ZonedDateTime.class
+//            ZoneId.class,
+//            ZoneOffset.class
+    ));
+    static final Map<Class, ObjectInterner> OBJECT_INTERNERS = new ConcurrentHashMap<>();
     private static final Field DETAILED_MESSAGE = Jvm.getField(Throwable.class, "detailMessage");
     private static final Field STACK_TRACE = Jvm.getField(Throwable.class, "stackTrace");
 
@@ -63,6 +87,7 @@ public enum WireInternal {
         ClassAliasPool.CLASS_ALIASES.addAlias(SerializableUpdaterWithArg.class, "UpdaterWithArg");
         ClassAliasPool.CLASS_ALIASES.addAlias(VanillaFieldInfo.class, "FieldInfo");
         ClassAliasPool.CLASS_ALIASES.addAlias(WireSerializedLambda.class, "SerializedLambda");
+        ClassAliasPool.CLASS_ALIASES.addAlias(INTERNABLE.stream().toArray(Class[]::new));
     }
 
     static void addAliases() {
@@ -273,5 +298,32 @@ public enum WireInternal {
         Bytes bytes2 = Wires.acquireAnotherBytes();
         Compression.compress(compression, bytes, bytes2);
         out.bytes(compression, bytes2);
+    }
+
+    static <T> T intern(Class<T> tClass, Object o) {
+        if (INTERNABLE.contains(tClass) && o instanceof String) {
+            String s = (String) o;
+            if (tClass == String.class)
+                return (T) INTERNER.intern(s);
+            ObjectInterner interner = OBJECT_INTERNERS
+                    .computeIfAbsent(tClass,
+                            ObjectInterner::new);
+            return (T) interner.intern(s);
+        }
+        return ObjectUtils.convertTo(tClass, o);
+    }
+
+    static class ObjectInterner<T> extends FromStringInterner<T> {
+        final Class<T> tClass;
+
+        ObjectInterner(Class<T> tClass) {
+            super(256);
+            this.tClass = tClass;
+        }
+
+        @Override
+        protected @NotNull T getValue(String s) throws IORuntimeException {
+            return ObjectUtils.convertTo(tClass, s);
+        }
     }
 }
