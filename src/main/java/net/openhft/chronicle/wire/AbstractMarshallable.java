@@ -24,5 +24,8 @@ package net.openhft.chronicle.wire;
  */
 @Deprecated(/* to be removed in x.22 */)
 public abstract class AbstractMarshallable extends AbstractCommonMarshallable {
-
+    @Override
+    public boolean usesSelfDescribingMessage() {
+        return true;
+    }
 }
