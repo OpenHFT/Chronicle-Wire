@@ -26,7 +26,7 @@ public class Base128LongConverterTest extends WireTestCommon {
         LongConverter c = Base128LongConverter.INSTANCE;
         Random rand = new Random();
         for (int i = 0; i < 100000; i++) {
-            long l = rand.nextLong();
+            long l = (long) Math.random() * Base128LongConverter.MAX_LENGTH;
             String s = c.asString(l);
             Assert.assertEquals(s, l, c.parse(s));
         }

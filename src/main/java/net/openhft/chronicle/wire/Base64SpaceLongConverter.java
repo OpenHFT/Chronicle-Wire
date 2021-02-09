@@ -17,39 +17,59 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.StringUtils;
 
-public class Base128LongConverter implements LongConverter {
-    public static final int MAX_LENGTH = LongConverter.maxParseLength(128);
-    public static final Base128LongConverter INSTANCE = new Base128LongConverter();
+import java.util.Arrays;
+
+public class Base64SpaceLongConverter implements LongConverter {
+
+    public static final int MAX_LENGTH = LongConverter.maxParseLength(64);
 
     @Override
     public int maxParseLength() {
         return MAX_LENGTH;
     }
 
+    public static final Base64SpaceLongConverter INSTANCE = new Base64SpaceLongConverter();
+    static final char[] CODES = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ".toCharArray();
+    public static final byte[] LOOKUP = new byte[128];
+
+    static {
+        Arrays.fill(LOOKUP, (byte) -1);
+        for (int i = 0; i < CODES.length; i++) {
+            char code = CODES[i];
+            LOOKUP[code] = (byte) i;
+        }
+    }
+
     @Override
     public long parse(CharSequence text) {
         lengthCheck(text);
         long v = 0;
-        for (int i = 0; i < text.length(); i++)
-            v = (v << 7) + text.charAt(i);
+        for (int i = 0; i < text.length(); i++) {
+            v = parse(text.charAt(i), v);
+        }
         return v;
     }
+
+    public long parse(char text, long v) {
+        byte b = LOOKUP[text];
+        if (b >= 0)
+            v = (v << 6) + b;
+        return v;
+    }
+
 
     @Override
     public void append(StringBuilder text, long value) {
         int start = text.length();
         while (value != 0) {
-            text.append((char) (value & 0x7F));
-            value >>>= 7;
+            text.append(CODES[(int) (value & 0x3F)]);
+            value >>>= 6;
         }
         StringUtils.reverse(text, start);
 
-        if (text.length() > start + maxParseLength()) {
-            Jvm.warn().on(getClass(), "truncated because the value was too large");
-            text.setLength(start + maxParseLength());
-        }
+        if (text.length() > maxParseLength())
+            text.setLength(maxParseLength());
     }
 }

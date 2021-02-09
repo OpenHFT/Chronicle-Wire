@@ -17,11 +17,20 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.StringUtils;
 
 import java.util.Arrays;
 
 public class Base64LongConverter implements LongConverter {
+
+    public static final int MAX_LENGTH = LongConverter.maxParseLength(64);
+
+    @Override
+    public int maxParseLength() {
+        return MAX_LENGTH;
+    }
+
     public static final Base64LongConverter INSTANCE = new Base64LongConverter();
     static final char[] CODES = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+".toCharArray();
     static final byte[] LOOKUP = new byte[128];
@@ -36,6 +45,7 @@ public class Base64LongConverter implements LongConverter {
 
     @Override
     public long parse(CharSequence text) {
+        lengthCheck(text);
         long v = 0;
         for (int i = 0; i < text.length(); i++) {
             byte b = LOOKUP[text.charAt(i)];
@@ -53,5 +63,10 @@ public class Base64LongConverter implements LongConverter {
             value >>>= 6;
         }
         StringUtils.reverse(text, start);
+
+        if (text.length() > start + maxParseLength()) {
+            Jvm.warn().on(getClass(), "truncated because the value was too large");
+            text.setLength(start + maxParseLength());
+        }
     }
 }

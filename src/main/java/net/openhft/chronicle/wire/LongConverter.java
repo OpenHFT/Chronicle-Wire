@@ -17,6 +17,9 @@
  */
 package net.openhft.chronicle.wire;
 
+import static java.lang.Math.log;
+import static java.text.MessageFormat.format;
+
 // TODO add a pattern for validation
 public interface LongConverter {
 
@@ -34,9 +37,7 @@ public interface LongConverter {
     void append(StringBuilder text, long value);
 
     default String asString(long value) {
-        StringBuilder sb = new StringBuilder();
-        append(sb, value);
-        return sb.toString();
+        return asText(value).toString();
     }
 
     default CharSequence asText(long value) {
@@ -44,4 +45,30 @@ public interface LongConverter {
         append(sb, value);
         return sb;
     }
+
+    /**
+     * @return the maximum number of character that this base is able to parse or Integer.MAX_VALUE if this is not enforced
+     */
+    default int maxParseLength() {
+        return Integer.MAX_VALUE;
+    }
+
+    /**
+     * checks that the length of the text is not greater than {@link LongConverter#maxParseLength()}
+     *
+     * @param text to check
+     */
+    default void lengthCheck(CharSequence text) {
+        if (text.length() > maxParseLength())
+            throw new IllegalArgumentException(format("text={0} exceeds the maximum allowable length of {1}", text, maxParseLength()));
+    }
+
+    static int maxParseLength(int based) {
+        return (int) (64 / log(based) * log(2));
+    }
+
+    static void main(String[] args) {
+        System.out.println("maxParseLength(85) = " + maxParseLength(85));
+    }
+
 }
