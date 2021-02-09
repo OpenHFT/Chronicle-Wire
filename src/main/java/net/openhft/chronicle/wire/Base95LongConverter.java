@@ -17,11 +17,20 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.StringUtils;
 
 import java.math.BigInteger;
 
 public class Base95LongConverter implements LongConverter {
+
+    public static final int MAX_LENGTH = LongConverter.maxParseLength(95);
+
+    @Override
+    public int maxParseLength() {
+        return MAX_LENGTH;
+    }
+
     public static final Base95LongConverter INSTANCE = new Base95LongConverter();
     private static final int BASE = 95;
     private static final BigInteger BASE_BI = BigInteger.valueOf(BASE);
@@ -29,6 +38,7 @@ public class Base95LongConverter implements LongConverter {
 
     @Override
     public long parse(CharSequence text) {
+        lengthCheck(text);
         long v = 0;
         for (int i = 0; i < text.length(); i++)
             v = v * BASE + text.charAt(i) - ' ' + 1;
@@ -50,5 +60,9 @@ public class Base95LongConverter implements LongConverter {
             text.append((char) (' ' + v - 1));
         }
         StringUtils.reverse(text, start);
+        if (text.length() > start + maxParseLength()) {
+            Jvm.warn().on(getClass(), "truncated because the value was too large");
+            text.setLength(start + maxParseLength());
+        }
     }
 }

@@ -17,11 +17,20 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.StringUtils;
 
 import java.util.Arrays;
 
 public class Base85LongConverter implements LongConverter {
+
+    public static final int MAX_LENGTH = LongConverter.maxParseLength(85);
+
+    @Override
+    public int maxParseLength() {
+        return MAX_LENGTH;
+    }
+
     public static final Base85LongConverter INSTANCE = new Base85LongConverter();
     private static final String CHARS =
             "0123456789" +
@@ -42,8 +51,10 @@ public class Base85LongConverter implements LongConverter {
         }
     }
 
+
     @Override
     public long parse(CharSequence text) {
+        lengthCheck(text);
         long v = 0;
         for (int i = 0; i < text.length(); i++) {
             byte b = ENCODE[text.charAt(i)];
@@ -52,6 +63,7 @@ public class Base85LongConverter implements LongConverter {
         }
         return v;
     }
+
 
     @Override
     public void append(StringBuilder text, long value) {
@@ -70,5 +82,10 @@ public class Base85LongConverter implements LongConverter {
             text.append(DECODE[v]);
         }
         StringUtils.reverse(text, start);
+        if (text.length() > start + maxParseLength()) {
+            Jvm.warn().on(getClass(), "truncated because the value was too large");
+            text.setLength(start + maxParseLength());
+        }
     }
+
 }

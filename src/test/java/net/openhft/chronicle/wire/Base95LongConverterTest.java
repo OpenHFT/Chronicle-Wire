@@ -13,7 +13,7 @@ public class Base95LongConverterTest extends WireTestCommon {
     public void parse() {
         LongConverter c = Base95LongConverter.INSTANCE;
        // System.out.println(c.asString(-1L));
-        for (String s : ",a,ab,abc,abcd,ab.de,123+56,1234567,12345678,123456789,z23456789,0z23456789,<8S@[|bcnB".split(",")) {
+        for (String s : ",a,ab,abc,abcd,ab.de,123+56,1234567,12345678,123456789,z23456789,0z2345689,<8S@[|bcB".split(",")) {
             long v = c.parse(s);
             StringBuilder sb = new StringBuilder();
             c.append(sb, v);
@@ -26,7 +26,7 @@ public class Base95LongConverterTest extends WireTestCommon {
         LongConverter c = Base95LongConverter.INSTANCE;
         Random rand = new Random();
         for (int i = 0; i < 100000; i++) {
-            long l = rand.nextLong();
+            long l = (long) Math.random() * Base95LongConverter.MAX_LENGTH;
             String s = c.asString(l);
             Assert.assertEquals(s, l, c.parse(s));
         }

@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.StringUtils;
 
 import java.util.Arrays;
@@ -25,6 +26,14 @@ import java.util.Arrays;
  * Unsigned 64-bit number.
  */
 public class Base40LongConverter implements LongConverter {
+
+    public static final int MAX_LENGTH = LongConverter.maxParseLength(40);
+
+    @Override
+    public int maxParseLength() {
+        return MAX_LENGTH;
+    }
+
     private static final String CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_:+";
     public static final Base40LongConverter UPPER = new Base40LongConverter(CHARS);
     public static final Base40LongConverter LOWER = new Base40LongConverter(CHARS.toLowerCase());
@@ -47,6 +56,7 @@ public class Base40LongConverter implements LongConverter {
 
     @Override
     public long parse(CharSequence text) {
+        lengthCheck(text);
         long v = 0;
         for (int i = 0; i < text.length(); i++) {
             byte b = encode[text.charAt(i)];
@@ -73,5 +83,10 @@ public class Base40LongConverter implements LongConverter {
             text.append(decode[v]);
         }
         StringUtils.reverse(text, start);
+        if (text.length() > start + maxParseLength()) {
+            Jvm.warn().on(getClass(), "truncated because the value was too large");
+            text.setLength(start + maxParseLength());
+        }
     }
+
 }

@@ -17,13 +17,21 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.StringUtils;
 
 public class Base128LongConverter implements LongConverter {
+    public static final int MAX_LENGTH = LongConverter.maxParseLength(128);
     public static final Base128LongConverter INSTANCE = new Base128LongConverter();
 
     @Override
+    public int maxParseLength() {
+        return MAX_LENGTH;
+    }
+
+    @Override
     public long parse(CharSequence text) {
+        lengthCheck(text);
         long v = 0;
         for (int i = 0; i < text.length(); i++)
             v = (v << 7) + text.charAt(i);
@@ -38,5 +46,10 @@ public class Base128LongConverter implements LongConverter {
             value >>>= 7;
         }
         StringUtils.reverse(text, start);
+
+        if (text.length() > start + maxParseLength()) {
+            Jvm.warn().on(getClass(), "truncated because the value was too large");
+            text.setLength(start + maxParseLength());
+        }
     }
 }
