@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesComment;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.CommonMarshallable;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
@@ -270,6 +271,11 @@ public class HashWire implements WireOut, BytesComment {
     @Override
     public BooleanValue newBooleanReference() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean useSelfDescribingMessage(@NotNull CommonMarshallable object) {
+        return object.usesSelfDescribingMessage();
     }
 
     @NotNull

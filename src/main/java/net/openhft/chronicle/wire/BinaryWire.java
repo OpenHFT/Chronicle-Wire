@@ -83,6 +83,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private final StringBuilder stringBuilder = new StringBuilder();
     private DefaultValueIn defaultValueIn;
     private String compression;
+    private Boolean overrideSelfDescribing = null;
 
     public BinaryWire(@NotNull Bytes bytes) {
         this(bytes, false, false, false, Integer.MAX_VALUE, "binary", SUPPORT_DELTA);
@@ -114,6 +115,21 @@ public class BinaryWire extends AbstractWire implements Wire {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * @return null is no override, true is always use self describing, false is never use self describing.
+     */
+    public Boolean getOverrideSelfDescribing() {
+        return overrideSelfDescribing;
+    }
+
+    /**
+     * @param overrideSelfDescribing null is no override, true is always use self describing, false is never use self describing.
+     */
+    public BinaryWire setOverrideSelfDescribing(Boolean overrideSelfDescribing) {
+        this.overrideSelfDescribing = overrideSelfDescribing;
+        return this;
     }
 
     @NotNull
@@ -802,7 +818,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                             wire.getValueOut().object(aClass, valueIn.object(aClass));
                             break;
                         }
-                        if (Boolean.TRUE.equals(USES_SELF_DESCRIBING.get(aClass)) || aClass.isInterface())
+                        if (usesSelfDescribing(aClass) || aClass.isInterface())
                             break;
                         Marshallable m = (Marshallable) ObjectUtils.newInstance(aClass);
                         valueIn.marshallable(m);
@@ -891,6 +907,11 @@ public class BinaryWire extends AbstractWire implements Wire {
             default:
                 unknownCode(wire);
         }
+    }
+
+    private boolean usesSelfDescribing(Class aClass) {
+        Boolean selfDesc = overrideSelfDescribing == null ? USES_SELF_DESCRIBING.get(aClass) : overrideSelfDescribing;
+        return Boolean.TRUE.equals(selfDesc);
     }
 
     long readInt(int code) {
@@ -1837,7 +1858,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             long position = bytes.writePosition();
             bytes.writeInt(0);
 
-            if (object.usesSelfDescribingMessage())
+            if (useSelfDescribingMessage(object))
                 object.writeMarshallable(BinaryWire.this);
             else
                 ((WriteBytesMarshallable) object).writeMarshallable(BinaryWire.this.bytes());
@@ -3377,7 +3398,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 long limit2 = bytes.readPosition() + length;
                 bytes.readLimit(limit2);
                 try {
-                    if (object.usesSelfDescribingMessage()) {
+                    if (useSelfDescribingMessage(object)) {
                         if (overwrite)
                             object.readMarshallable(BinaryWire.this);
                         else
@@ -3883,6 +3904,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             // assume it a String
             text();
         }
+    }
+
+    public boolean useSelfDescribingMessage(@NotNull CommonMarshallable object) {
+        return overrideSelfDescribing == null ? object.usesSelfDescribingMessage() : overrideSelfDescribing;
     }
 
     class DeltaValueIn extends BinaryWire.BinaryValueIn {

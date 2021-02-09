@@ -195,6 +195,11 @@ public class RawWire extends AbstractWire implements Wire {
         throw new UnsupportedOperationException("todo");
     }
 
+    @Override
+    public boolean useSelfDescribingMessage(@NotNull CommonMarshallable object) {
+        return object.usesSelfDescribingMessage();
+    }
+
     @NotNull
     @Override
     public Bytes bytes() {

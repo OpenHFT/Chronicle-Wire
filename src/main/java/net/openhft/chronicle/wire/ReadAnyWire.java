@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.CommonMarshallable;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.BooleanValue;
@@ -60,6 +61,11 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
     @Override
     public BooleanValue newBooleanReference() {
         throw new UnsupportedOperationException("todo");
+    }
+
+    @Override
+    public boolean useSelfDescribingMessage(@NotNull CommonMarshallable object) {
+        return object.usesSelfDescribingMessage();
     }
 
     @NotNull

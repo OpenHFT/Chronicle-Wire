@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 public final class BytesMarshallableCompatibilityTest extends WireTestCommon {
 
     @Test
-    public void shouldSerialiseToBytes() throws Exception {
+    public void shouldSerialiseToBytes() {
         final Container container = new Container();
         container.number = 17;
         container.label = "non-deterministic";

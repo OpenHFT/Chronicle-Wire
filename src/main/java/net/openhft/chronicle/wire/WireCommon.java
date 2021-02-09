@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesComment;
+import net.openhft.chronicle.bytes.CommonMarshallable;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.*;
 import net.openhft.chronicle.threads.Pauser;
@@ -182,4 +183,11 @@ public interface WireCommon {
      */
     @NotNull
     BooleanValue newBooleanReference();
+
+    /**
+     * Should this wire write the object as a Marshallable or BytesMarshallable
+     *
+     * @return use Marshallable
+     */
+    boolean useSelfDescribingMessage(@NotNull CommonMarshallable object);
 }

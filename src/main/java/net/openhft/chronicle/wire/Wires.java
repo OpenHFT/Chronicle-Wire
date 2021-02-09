@@ -289,28 +289,33 @@ public enum Wires {
 
     @NotNull
     public static Bytes<?> acquireBytes() {
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, () -> Bytes.allocateElasticOnHeap());
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
+                Bytes::allocateElasticOnHeap);
         bytes.clear();
         return bytes;
     }
 
     @NotNull
     static Bytes<?> acquireBytesForToString() {
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL, () -> Bytes.allocateElasticOnHeap());
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL,
+                Bytes::allocateElasticOnHeap);
         bytes.clear();
         return bytes;
     }
 
     @NotNull
     public static Wire acquireBinaryWire() {
-        Wire wire = ThreadLocalHelper.getTL(WireInternal.BINARY_WIRE_TL, () -> new BinaryWire(acquireBytes()));
+        Wire wire = ThreadLocalHelper.getTL(WireInternal.BINARY_WIRE_TL,
+                () -> new BinaryWire(Bytes.allocateElasticOnHeap())
+                        .setOverrideSelfDescribing(true));
         wire.clear();
         return wire;
     }
 
     @NotNull
     public static Bytes acquireAnotherBytes() {
-        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL, () -> Bytes.allocateElasticOnHeap());
+        Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
+                Bytes::allocateElasticOnHeap);
         bytes.clear();
         return bytes;
     }

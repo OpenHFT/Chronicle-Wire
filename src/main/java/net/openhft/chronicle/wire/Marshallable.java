@@ -191,9 +191,4 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     default void reset() {
         Wires.reset(this);
     }
-
-    @Override
-    default boolean usesSelfDescribingMessage() {
-        return true;
-    }
 }

@@ -45,9 +45,4 @@ public interface ReadMarshallable extends CommonMarshallable {
     default void unexpectedField(Object event, ValueIn valueIn) {
         valueIn.skipValue();
     }
-
-    @Override
-    default boolean usesSelfDescribingMessage() {
-        return true;
-    }
 }

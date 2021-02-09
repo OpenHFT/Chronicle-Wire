@@ -949,6 +949,11 @@ public class TextWire extends AbstractWire implements Wire {
         return new TextBooleanReference();
     }
 
+    @Override
+    public boolean useSelfDescribingMessage(@NotNull CommonMarshallable object) {
+        return true;
+    }
+
     @NotNull
     @Override
     public IntValue newIntReference() {

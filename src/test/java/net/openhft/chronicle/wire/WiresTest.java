@@ -149,4 +149,36 @@ public class WiresTest extends WireTestCommon {
         int answer;
         String question = "";
     }
+
+    @Test
+    public void copyTo() {
+        OneTwoFour o124 = new OneTwoFour(11, 222, 44444);
+        TwoFourThree o243 = new TwoFourThree(0, 0, 0);
+        Wires.copyTo(o124, o243);
+        assertEquals("!net.openhft.chronicle.wire.WiresTest$TwoFourThree {\n" +
+                "  two: 222,\n" +
+                "  four: 44444,\n" +
+                "  three: 0\n" +
+                "}\n", o243.toString());
+    }
+
+    static class OneTwoFour extends BytesInBinaryMarshallable {
+        long one, two, four;
+
+        public OneTwoFour(long one, long two, long four) {
+            this.one = one;
+            this.two = two;
+            this.four = four;
+        }
+    }
+
+    static class TwoFourThree extends BytesInBinaryMarshallable {
+        long two, four, three;
+
+        public TwoFourThree(long two, long four, long three) {
+            this.two = two;
+            this.four = four;
+            this.three = three;
+        }
+    }
 }

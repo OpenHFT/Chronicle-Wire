@@ -39,9 +39,4 @@ public interface WriteMarshallable extends WriteValue, CommonMarshallable {
     default void writeValue(@NotNull ValueOut out) {
         out.marshallable(this);
     }
-
-    @Override
-    default boolean usesSelfDescribingMessage() {
-        return true;
-    }
 }
