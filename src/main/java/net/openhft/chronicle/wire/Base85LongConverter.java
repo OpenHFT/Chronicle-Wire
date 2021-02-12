@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.StringUtils;
 
@@ -90,7 +91,7 @@ public class Base85LongConverter implements LongConverter {
     }
 
 
-    public void append(Bytes text, long value) {
+    public void append(Bytes<?> text, long value) {
         final long rp = text.readPosition();
         int start = text.length();
         if (value < 0) {
@@ -106,23 +107,12 @@ public class Base85LongConverter implements LongConverter {
             value /= BASE;
             text.append(DECODE[v]);
         }
-        reverse(rp, text, start);
+        BytesUtil.reverse(text, start);
         if (text.length() > start + maxParseLength()) {
             Jvm.warn().on(getClass(), "truncated because the value was too large");
             text.readLimit(rp + start + maxParseLength());
         }
     }
 
-    public static void reverse(long rp, Bytes text, int start) {
-        int end = text.length() - 1;
-        int mid = (start + end + 1) / 2;
-
-        for (int i = 0; i < mid - start; ++i) {
-            char ch = text.charAt(start + i);
-            text.writeUnsignedByte(rp + start + i, text.charAt(end - i));
-            text.writeUnsignedByte(rp + end - i, ch);
-        }
-
-    }
 
 }
