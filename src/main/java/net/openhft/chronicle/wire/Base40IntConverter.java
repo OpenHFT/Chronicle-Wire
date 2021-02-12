@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.StringUtils;
 
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import java.util.Arrays;
  * Unsigned 32-bit number.
  */
 public class Base40IntConverter implements IntConverter {
+    public static final int MAX_LENGTH = IntConverter.maxParseLength(40);
     public static final Base40IntConverter INSTANCE = new Base40IntConverter();
     private static final String CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:-+";
     private static final char[] DECODE = CHARS.toCharArray();
@@ -43,6 +45,7 @@ public class Base40IntConverter implements IntConverter {
 
     @Override
     public int parse(CharSequence text) {
+        lengthCheck(text);
         int v = 0;
         for (int i = 0; i < text.length(); i++) {
             byte b = ENCODE[text.charAt(i)];
@@ -62,5 +65,9 @@ public class Base40IntConverter implements IntConverter {
             text.append(DECODE[v]);
         }
         StringUtils.reverse(text, start);
+        if (text.length() > start + maxParseLength()) {
+            Jvm.warn().on(getClass(), "truncated because the value was too large");
+            text.setLength(start + maxParseLength());
+        }
     }
 }

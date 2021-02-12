@@ -92,6 +92,7 @@ public class Base85LongConverter implements LongConverter {
 
 
     public void append(Bytes<?> text, long value) {
+        lengthCheck(text);
         final long rp = text.readPosition();
         int start = text.length();
         if (value < 0) {

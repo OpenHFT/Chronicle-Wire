@@ -17,6 +17,9 @@
  */
 package net.openhft.chronicle.wire;
 
+import static java.lang.Math.log;
+import static java.text.MessageFormat.format;
+
 // TODO add a pattern for validation
 public interface IntConverter {
 
@@ -43,5 +46,26 @@ public interface IntConverter {
         final StringBuilder sb = new StringBuilder();
         append(sb, value);
         return sb;
+    }
+
+    /**
+     * @return the maximum number of character that this base is able to parse or Integer.MAX_VALUE if this is not enforced
+     */
+    default int maxParseLength() {
+        return Integer.MAX_VALUE;
+    }
+
+    static int maxParseLength(int based) {
+        return (int) (32 / log(based) * log(2));
+    }
+
+    /**
+     * checks that the length of the text is not greater than {@link LongConverter#maxParseLength()}
+     *
+     * @param text to check
+     */
+    default void lengthCheck(CharSequence text) {
+        if (text.length() > maxParseLength())
+            throw new IllegalArgumentException(format("text={0} exceeds the maximum allowable length of {1}", text, maxParseLength()));
     }
 }
