@@ -60,7 +60,9 @@ public class TwoArraysTest {
         assertEquals(2, ta3.la.getUsed());
         assertEquals(111, ta3.la.getValueAt(0));
         assertEquals(222, ta3.la.getValueAt(1));
-
+        ta.close();
+        ta2.close();
+        ta3.close();
         bytes2.releaseLast();
         bytes.releaseLast();
     }
