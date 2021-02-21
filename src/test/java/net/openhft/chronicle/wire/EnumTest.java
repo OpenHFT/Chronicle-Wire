@@ -33,6 +33,7 @@ public class EnumTest extends WireTestCommon {
 
     @Test
     public void testEnum() {
+        expectException("Treating class net.openhft.chronicle.wire.EnumTest$TestEnum as enum not WriteMarshallable");
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         try {
             @NotNull TextWire wire = new TextWire(bytes);

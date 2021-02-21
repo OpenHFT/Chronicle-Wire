@@ -26,7 +26,7 @@ import java.util.Arrays;
 
 public class Base85LongConverter implements LongConverter {
 
-    public static final int MAX_LENGTH = LongConverter.maxParseLength(85);
+    public static final int MAX_LENGTH = 10;
 
     @Override
     public int maxParseLength() {

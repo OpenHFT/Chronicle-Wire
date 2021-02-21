@@ -29,7 +29,7 @@ public class Data2 implements Marshallable, BytesMarshallable {
     long longInt = 0;
     double price = 0;
     boolean flag = false;
-    transient Bytes text = Bytes.allocateDirect(16).unchecked(true);
+    transient Bytes text = Bytes.allocateElasticOnHeap(16).unchecked(true);
     Side side;
 
     public Data2(int smallInt, long longInt, double price, boolean flag, CharSequence text, Side side) {

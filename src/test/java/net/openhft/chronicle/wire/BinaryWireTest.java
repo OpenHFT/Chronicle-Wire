@@ -551,6 +551,10 @@ public class BinaryWireTest extends WireTestCommon {
 
     @Test
     public void type() {
+        expectException("Unable to copy MyType safely will try anyway");
+        expectException("Unable to copy AlsoMyType safely will try anyway");
+        expectException("Unable to copy com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState safely will try anyway");
+
         @NotNull Wire wire = createWire();
         wire.write().typePrefix("MyType");
         wire.write(BWKey.field1).typePrefix("AlsoMyType");

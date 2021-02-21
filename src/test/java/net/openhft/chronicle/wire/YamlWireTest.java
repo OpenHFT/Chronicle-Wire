@@ -687,6 +687,8 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testTypeWithEmpty() {
+        expectException("Expected a {} but was blank for type class net.openhft.chronicle.wire.YamlWireTest$YNestedB");
+
         ClassAliasPool.CLASS_ALIASES.addAlias(YNestedA.class, YNestedB.class);
         YNestedA a = Marshallable.fromString("!YNestedA {\n" +
                 "  b: !YNestedB,\n" +
@@ -702,7 +704,8 @@ public class YamlWireTest extends WireTestCommon {
 
     @Test
     public void testSingleQuote() {
-        ClassAliasPool.CLASS_ALIASES.addAlias(YNestedA.class);
+        expectException("Expected a {} but was blank for type class net.openhft.chronicle.wire.YamlWireTest$YNestedB");
+       ClassAliasPool.CLASS_ALIASES.addAlias(YNestedA.class);
         YNestedA a = Marshallable.fromString("!YNestedA {\n" +
                 "  b: !YNestedB,\n" +
                 "  value: 12345\n" +

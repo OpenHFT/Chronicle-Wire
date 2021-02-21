@@ -75,7 +75,7 @@ public class ObjectPoolMain {
         }
     }
 
-    @NotNull
+//    @NotNull
     protected static String newStringUTF8(NativeBytesStore bs) {
         int length = bs.length();
         bs.read(0, BUFFER, 0, length);
@@ -113,37 +113,37 @@ public class ObjectPoolMain {
             return si.intern(CHAR32);
         }
     */
-    @Benchmark
+//    @Benchmark
     public String newString01() {
         return newStringUTF8(CHAR1);
     }
 
-    @Benchmark
+//    @Benchmark
     public String newString02() {
         return newStringUTF8(CHAR2);
     }
 
-    @Benchmark
+//    @Benchmark
     public String newString04() {
         return newStringUTF8(CHAR4);
     }
 
-    @Benchmark
+//    @Benchmark
     public String newString08() {
         return newStringUTF8(CHAR8);
     }
 
-    @Benchmark
+//    @Benchmark
     public String newString16() {
         return newStringUTF8(CHAR16);
     }
 
-    @Benchmark
+//    @Benchmark
     public String newString32() {
         return newStringUTF8(CHAR32);
     }
 
-    @Benchmark
+//    @Benchmark
     public String newStringB01() {
         NativeBytesStore bs = CHAR1;
         return newStringHiByte0(bs);
@@ -156,27 +156,27 @@ public class ObjectPoolMain {
         return new String(BUFFER, 0, 0, length);
     }
 
-    @Benchmark
+//    @Benchmark
     public String newStringB02() {
         return newStringHiByte0(CHAR2);
     }
 
-    @Benchmark
+//    @Benchmark
     public String newStringB04() {
         return newStringHiByte0(CHAR4);
     }
 
-    @Benchmark
+//    @Benchmark
     public String newStringB08() {
         return newStringHiByte0(CHAR8);
     }
 
-    @Benchmark
+//    @Benchmark
     public String newStringB16() {
         return newStringHiByte0(CHAR16);
     }
 
-    @Benchmark
+//    @Benchmark
     public String newStringB32() {
         return newStringHiByte0(CHAR32);
     }

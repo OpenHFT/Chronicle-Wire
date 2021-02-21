@@ -16,9 +16,9 @@
 
 package net.openhft.chronicle.wire.benchmarks;
 
-import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -65,11 +65,13 @@ public class Main {
 
     final Data data = new Data(123, 1234567890L, 1234, true, "Hello World!", Side.Sell);
     final Data2 data2 = new Data2(123, 1234567890L, 1234, true, "Hello World!", Side.Sell);
+    final TCData tcdata = new TCData(123, 1234567890L, 1234, true, "HelloWorld", Side.Sell);
     final Data dataB = new Data();
     final Data2 data2B = new Data2();
+    final TCData tcdata2 = new TCData();
 
     public static void main(String... args) throws RunnerException, InvocationTargetException, IllegalAccessException {
-        Affinity.setAffinity(2);
+//        Affinity.setAffinity(2);
         if (Jvm.isDebug()) {
             Main main = new Main();
             for (Method m : Main.class.getMethods()) {
@@ -83,80 +85,82 @@ public class Main {
                 }
             }
         } else {
-            int time = Jvm.getBoolean("longTest") ? 30 : 2;
+            int time = Jvm.getBoolean("longTest") ? 30 : 5;
             System.out.println("measurementTime: " + time + " secs");
             Options opt = new OptionsBuilder()
                     .include(Main.class.getSimpleName())
-//                    .warmupIterations(5)
-                    .measurementIterations(5)
-                    .forks(10)
+                    .warmupIterations(3)
+                    .measurementIterations(3)
+                    .forks(3)
                     .mode(Mode.SampleTime)
+                    .warmupTime(TimeValue.seconds(2))
                     .measurementTime(TimeValue.seconds(time))
                     .timeUnit(TimeUnit.NANOSECONDS)
+                    .threads(3)
                     .build();
 
             new Runner(opt).run();
         }
     }
 
-    @Benchmark
+//    @Benchmark
     @PrintAsText
     public Data twireUTF() {
         return writeReadTest(twireUTF);
     }
 
-    @Benchmark
+//    @Benchmark
     @PrintAsText
     public Data twire8bit() {
         return writeReadTest(twire8bit);
     }
 
-    @Benchmark
+//    @Benchmark
     @PrintAsText
     public Data bwireFFF() {
         return writeReadTest(bwireFFF);
     }
 
-    @Benchmark
+//    @Benchmark
     @PrintAsText
     public Data bwireFTF() {
         return writeReadTest(bwireFTF);
     }
 
-    @Benchmark
+//    @Benchmark
     @PrintAsText
     public Data bwireFTT() {
         return writeReadTest(bwireFTT);
     }
 
-    @Benchmark
+//    @Benchmark
     @PrintAsText
     public Data bwireTFF() {
         return writeReadTest(bwireTFF);
     }
 
-    @Benchmark
+//    @Benchmark
     @PrintAsText
     public Data bwireTTF() {
         return writeReadTest(bwireTTF);
     }
 
-    @Benchmark
+//    @Benchmark
     public Data rwire8bit() {
         return writeReadTest(rwire8bit);
     }
 
-    @Benchmark
+//    @Benchmark
     public Data rwireUTF() {
         return writeReadTest(rwireUTF);
     }
 
-    @Benchmark
+//    @Benchmark
     public Data2 rwire8bit2() {
         return writeReadTest2(rwire8bit);
     }
 
-    @Benchmark
+//    @Benchmark
     public Data bytesMarshallableStopBit() {
         bytes.clear();
         bytes.writeSkip(4);
@@ -182,7 +186,37 @@ public class Main {
         return dataB;
     }
 
-    @Benchmark
+//    @Benchmark
+    public TCData triviallyCopyable() {
+        bytes.clear();
+        bytes.writeSkip(4);
+        tcdata.writeMarshallable(bytes);
+        // write the actual length.
+        int len0 = (int) (bytes.writePosition() - 4);
+        bytes.writeInt(0, len0);
+
+        int len = bytes.readInt();
+        assert len == len0;
+        tcdata2.readMarshallable(bytes);
+        return tcdata2;
+    }
+
+//    @Benchmark
+    public Bytes baseline() {
+        bytes.clear();
+//        bytes.writeSkip(4);
+//        tcdata.writeMarshallable(bytes);
+        // write the actual length.
+//        int len0 = (int) (bytes.writePosition() - 4);
+//        bytes.writeInt(0, len0);
+
+//        int len = bytes.readInt();
+//        assert len == len0;
+//        tcdata2.readMarshallable(bytes);
+        return bytes;
+    }
+
+//    @Benchmark
     @PrintAsText
     public Data2 json8bit() {
         return writeReadTest2(json);

@@ -31,7 +31,6 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
-import sun.reflect.generics.tree.Tree;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -711,6 +710,8 @@ public class TextWireTest extends WireTestCommon {
 
     @Test
     public void testTypeWithEmpty() {
+        expectException("Expected a {} but was blank for type class net.openhft.chronicle.wire.TextWireTest$NestedB");
+
         ClassAliasPool.CLASS_ALIASES.addAlias(NestedA.class, NestedB.class);
         NestedA a = Marshallable.fromString("!NestedA {\n" +
                 "  b: !NestedB,\n" +
@@ -726,6 +727,8 @@ public class TextWireTest extends WireTestCommon {
 
     @Test
     public void testSingleQuote() {
+        expectException("Expected a {} but was blank for type class net.openhft.chronicle.wire.TextWireTest$NestedB");
+
         ClassAliasPool.CLASS_ALIASES.addAlias(NestedA.class);
         NestedA a = Marshallable.fromString("!NestedA {\n" +
                 "  b: !NestedB,\n" +

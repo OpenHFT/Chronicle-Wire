@@ -1,0 +1,28 @@
+Benchmark                                           Mode       Cnt      Score   Error  Units
+Main.baseline                                     sample  26824629     37.480 ± 0.052  ns/op
+Main.baseline:baseline·p0.00                      sample               18.000          ns/op
+Main.baseline:baseline·p0.50                      sample               41.000          ns/op
+Main.baseline:baseline·p0.90                      sample               46.000          ns/op
+Main.baseline:baseline·p0.95                      sample               47.000          ns/op
+Main.baseline:baseline·p0.99                      sample               48.000          ns/op
+Main.baseline:baseline·p0.999                     sample               50.000          ns/op
+Main.baseline:baseline·p0.9999                    sample              126.000          ns/op
+Main.baseline:baseline·p1.00                      sample            66048.000          ns/op
+Main.triviallyCopyable                            sample  25437881     58.324 ± 0.061  ns/op
+Main.triviallyCopyable:triviallyCopyable·p0.00    sample               39.000          ns/op
+Main.triviallyCopyable:triviallyCopyable·p0.50    sample               57.000          ns/op
+Main.triviallyCopyable:triviallyCopyable·p0.90    sample               69.000          ns/op
+Main.triviallyCopyable:triviallyCopyable·p0.95    sample               72.000          ns/op
+Main.triviallyCopyable:triviallyCopyable·p0.99    sample               84.000          ns/op
+Main.triviallyCopyable:triviallyCopyable·p0.999   sample               90.000          ns/op
+Main.triviallyCopyable:triviallyCopyable·p0.9999  sample              421.635          ns/op
+Main.triviallyCopyable:triviallyCopyable·p1.00    sample            41152.000          ns/op
+Main.bytesMarshallable                            sample  26666058      75.525 ± 0.076  ns/op
+Main.bytesMarshallable:bytesMarshallable·p0.00    sample                56.000          ns/op
+Main.bytesMarshallable:bytesMarshallable·p0.50    sample                72.000          ns/op
+Main.bytesMarshallable:bytesMarshallable·p0.90    sample                86.000          ns/op
+Main.bytesMarshallable:bytesMarshallable·p0.95    sample                88.000          ns/op
+Main.bytesMarshallable:bytesMarshallable·p0.99    sample                97.000          ns/op
+Main.bytesMarshallable:bytesMarshallable·p0.999   sample               104.000          ns/op
+Main.bytesMarshallable:bytesMarshallable·p0.9999  sample              1260.000          ns/op
+Main.bytesMarshallable:bytesMarshallable·p1.00    sample            153856.000          ns/op

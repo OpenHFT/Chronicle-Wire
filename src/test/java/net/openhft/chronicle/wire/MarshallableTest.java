@@ -126,6 +126,8 @@ public class MarshallableTest extends WireTestCommon {
 
     @Test
     public void test() {
+        expectException("Found this$0, in class net.openhft.chronicle.wire.MarshallableTest$NonStaticData which will be ignored!");
+
         StaticData staticData0 = Marshallable.fromString(StaticData.class, "{ }");
         assertNotNull(staticData0);
         assertEquals(100, staticData0.anInt);

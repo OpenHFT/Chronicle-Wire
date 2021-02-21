@@ -69,7 +69,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
 
     @Test
     public void testWritingNotCompleteDocumentShared() throws IOException {
-
+expectException("Writing an incomplete document is deprecated, this feature will be removed in a future release");
         @NotNull MappedBytes b = MappedBytes.mappedBytes(File.createTempFile("delete", "me"), 64 << 10);
         assertTrue(b.sharedMemory());
         @NotNull Wire wire = new TextWire(b).useBinaryDocuments();

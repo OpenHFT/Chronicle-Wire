@@ -29,6 +29,10 @@ public class DefaultZeroLicenceTest extends WireTestCommon {
 
     @Test
     public void testLicenceCheck() {
+        String msg = "A Chronicle Wire Enterprise licence is required to run this code because you are using DefaultZeroWire which is a licence product. " +
+                "Please contact sales@chronicle.software";
+        expectException(e -> e.throwable != null && e.throwable.getMessage().equals(msg), "license check");
+
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         try {
             WireType.DEFAULT_ZERO_BINARY.apply(bytes);
