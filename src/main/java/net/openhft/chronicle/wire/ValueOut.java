@@ -702,7 +702,14 @@ public interface ValueOut {
                         " is unsupported, it must either be of type Marshallable, String or " +
                         "AutoBoxed primitive Object");
 
-            String typeName = Wires.typeNameFor(value);
+            String typeName;
+            try {
+                typeName = Wires.typeNameFor(value);
+            } catch (IllegalArgumentException e) {
+                if (isBinary())
+                    throw e;
+                typeName = value.getClass().getName();
+            }
             if (typeName != null)
                 typePrefix(typeName);
             marshallable(w -> Wires.writeMarshallable(value, w));
