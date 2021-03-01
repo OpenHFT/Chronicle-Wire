@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesMarshallable;
 import org.junit.After;
 import org.junit.Test;
 
@@ -13,7 +14,7 @@ public class WiresTest extends WireTestCommon {
     private final BytesContainer container2 = new BytesContainer();
 
     @After
-    public void after() throws Exception {
+    public void after() {
         container1.bytesField.releaseLast();
         container2.bytesField.releaseLast();
     }
@@ -145,11 +146,6 @@ public class WiresTest extends WireTestCommon {
         StringBuilder stringBuilder = new StringBuilder();
     }
 
-    private static final class MutableClass {
-        int answer;
-        String question = "";
-    }
-
     @Test
     public void copyTo() {
         OneTwoFour o124 = new OneTwoFour(11, 222, 44444);
@@ -162,10 +158,18 @@ public class WiresTest extends WireTestCommon {
                 "}\n", o243.toString());
     }
 
+    @Test
+    public void copyToContainsBytesMarshallable() {
+        ContainsBM containsBM = new ContainsBM(new BasicBytesMarshallable("Harold"));
+        ContainsBM containsBM2 = new ContainsBM(null);
+        Wires.copyTo(containsBM, containsBM2);
+        assertEquals(containsBM.inner.name, containsBM2.inner.name);
+    }
+
     static class OneTwoFour extends BytesInBinaryMarshallable {
         long one, two, four;
 
-        public OneTwoFour(long one, long two, long four) {
+        OneTwoFour(long one, long two, long four) {
             this.one = one;
             this.two = two;
             this.four = four;
@@ -175,10 +179,26 @@ public class WiresTest extends WireTestCommon {
     static class TwoFourThree extends BytesInBinaryMarshallable {
         long two, four, three;
 
-        public TwoFourThree(long two, long four, long three) {
+        TwoFourThree(long two, long four, long three) {
             this.two = two;
             this.four = four;
             this.three = three;
+        }
+    }
+
+    static class BasicBytesMarshallable implements BytesMarshallable {
+        String name;
+
+        BasicBytesMarshallable(String name) {
+            this.name = name;
+        }
+    }
+
+    static class ContainsBM extends BytesInBinaryMarshallable {
+        BasicBytesMarshallable inner;
+
+        ContainsBM(BasicBytesMarshallable inner) {
+            this.inner = inner;
         }
     }
 }

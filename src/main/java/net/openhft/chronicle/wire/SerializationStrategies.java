@@ -44,7 +44,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         @Override
         public Object readUsing(@NotNull Object o, @NotNull ValueIn in, BracketType bracketType) {
             WireIn wireIn = in.wireIn();
-            if (wireIn.useSelfDescribingMessage((CommonMarshallable) o)) {
+            if (wireIn.useSelfDescribingMessage((CommonMarshallable) o) && o instanceof ReadMarshallable) {
                 ((ReadMarshallable) o).readMarshallable(wireIn);
             } else {
                 ((ReadBytesMarshallable) o).readMarshallable(wireIn.bytes());
