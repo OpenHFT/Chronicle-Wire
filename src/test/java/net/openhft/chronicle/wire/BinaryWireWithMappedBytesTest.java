@@ -22,7 +22,6 @@ import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.bytes.ref.BinaryTwoLongReference;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.core.values.TwoLongValue;
@@ -48,39 +47,39 @@ public class BinaryWireWithMappedBytesTest extends WireTestCommon {
                 .write(() -> "int32b").int32forBinding(2)
                 .write(() -> "int64").int64forBinding(3)
                 .write(() -> "int128").int128forBinding(4, 5);
-        @NotNull IntValue a = wire.newIntReference();
-        @NotNull IntValue b = wire.newIntReference();
-        @NotNull LongValue c = wire.newLongReference();
-        TwoLongValue d = new BinaryTwoLongReference();
+        try (@NotNull IntValue a = wire.newIntReference();
+             @NotNull IntValue b = wire.newIntReference();
+             @NotNull LongValue c = wire.newLongReference();
+             TwoLongValue d = new BinaryTwoLongReference()) {
 
-        wire.read().int32(a, null, (o, i) -> {
-        });
-        wire.read().int32(b, null, (o, i) -> {
-        });
-        wire.read().int64(c, null, (o, i) -> {
-        });
-        wire.read().int128(d);
+            wire.read().int32(a, null, (o, i) -> {
+            });
+            wire.read().int32(b, null, (o, i) -> {
+            });
+            wire.read().int64(c, null, (o, i) -> {
+            });
+            wire.read().int128(d);
 
-        assertEquals(4, d.getValue());
-        assertEquals(5, d.getValue2());
+            assertEquals(4, d.getValue());
+            assertEquals(5, d.getValue2());
 
-        assertEquals("", bytes.toHexString());
+            assertEquals("", bytes.toHexString());
 
-        int expected = RETAIN ? 2 : 1;
-        assertEquals(expected + 4, ((Byteable) a).bytesStore().refCount());
+            int expected = RETAIN ? 2 : 1;
+            assertEquals(expected + 4, ((Byteable) a).bytesStore().refCount());
 
-        assertEquals("value: 1 value: 2 value: 3 value: 4, value2: 5", a + " " + b + " " + c + " " + d);
+            assertEquals("value: 1 value: 2 value: 3 value: 4, value2: 5", a + " " + b + " " + c + " " + d);
 
-        // cause the old memory to drop out.
-        bytes.compareAndSwapInt(1 << 20, 1, 1);
-        assertEquals(expected + 3, ((Byteable) a).bytesStore().refCount());
-       // System.out.println(a + " " + b + " " + c);
+            // cause the old memory to drop out.
+            bytes.compareAndSwapInt(1 << 20, 1, 1);
+            assertEquals(expected + 3, ((Byteable) a).bytesStore().refCount());
+            // System.out.println(a + " " + b + " " + c);
 
-        bytes.compareAndSwapInt(2 << 20, 1, 1);
-        assertEquals(expected + 3, ((Byteable) a).bytesStore().refCount());
-       // System.out.println(a + " " + b + " " + c);
+            bytes.compareAndSwapInt(2 << 20, 1, 1);
+            assertEquals(expected + 3, ((Byteable) a).bytesStore().refCount());
+            // System.out.println(a + " " + b + " " + c);
 
-        Closeable.closeQuietly(a, b, c, d);
+        }
         bytes.releaseLast();
     }
 }

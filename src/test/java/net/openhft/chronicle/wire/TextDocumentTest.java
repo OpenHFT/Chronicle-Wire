@@ -62,7 +62,7 @@ public class TextDocumentTest extends WireTestCommon {
         readByte
     }
 
-    private static class Header implements Marshallable {
+    static class Header implements Marshallable {
         public static final long WRITE_BYTE = 512;
         public static final long READ_BYTE = 1024;
 
