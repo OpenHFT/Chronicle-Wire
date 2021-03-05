@@ -6,6 +6,7 @@ import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
+import net.openhft.chronicle.wire.Wires;
 
 public class StringsInBytesMarshallableMain {
 
@@ -19,7 +20,7 @@ public class StringsInBytesMarshallableMain {
         WithStrings n2 = new WithStrings();
         Bytes bytes = Bytes.elasticByteBuffer();
 
-        for (int i = -20_000; i < 10_000_000; i++) {
+        for (int i = -20_000; i < 100_000_000; i++) {
             bytes.clear();
             long start = System.nanoTime();
             n.writeMarshallable(bytes);
@@ -61,6 +62,10 @@ public class StringsInBytesMarshallableMain {
 
         @Override
         public void readMarshallable(BytesIn bytes) throws IORuntimeException {
+            final Bytes<?> bytes2 = Wires.acquireBytes();
+            for (int i = 0; i < 8; i++)
+                bytes.read8bit(bytes2);
+/*
             a = bytes.read8bit();
             b = bytes.read8bit();
             c = bytes.read8bit();
@@ -69,6 +74,7 @@ public class StringsInBytesMarshallableMain {
             f = bytes.read8bit();
             g = bytes.read8bit();
             h = bytes.read8bit();
+*/
         }
 
         @Override

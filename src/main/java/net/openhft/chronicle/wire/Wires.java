@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
@@ -287,10 +288,16 @@ public enum Wires {
         return bytes.readPosition();
     }
 
+    static Bytes<?> unmonitoredDirectBytes() {
+        Bytes<?> bytes = Bytes.allocateElasticDirect(128);
+        IOTools.unmonitor(bytes);
+        return bytes;
+    }
+
     @NotNull
     public static Bytes<?> acquireBytes() {
         Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
-                Bytes::allocateElasticOnHeap);
+                Wires::unmonitoredDirectBytes);
         bytes.clear();
         return bytes;
     }
@@ -298,7 +305,7 @@ public enum Wires {
     @NotNull
     static Bytes<?> acquireBytesForToString() {
         Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL,
-                Bytes::allocateElasticOnHeap);
+                Wires::unmonitoredDirectBytes);
         bytes.clear();
         return bytes;
     }
@@ -306,7 +313,7 @@ public enum Wires {
     @NotNull
     public static Wire acquireBinaryWire() {
         Wire wire = ThreadLocalHelper.getTL(WireInternal.BINARY_WIRE_TL,
-                () -> new BinaryWire(Bytes.allocateElasticOnHeap())
+                () -> new BinaryWire(Wires.unmonitoredDirectBytes())
                         .setOverrideSelfDescribing(true));
         wire.clear();
         return wire;
@@ -315,7 +322,7 @@ public enum Wires {
     @NotNull
     public static Bytes acquireAnotherBytes() {
         Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
-                Bytes::allocateElasticOnHeap);
+                Wires::unmonitoredDirectBytes);
         bytes.clear();
         return bytes;
     }
