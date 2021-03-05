@@ -2899,9 +2899,7 @@ public class TextWire extends AbstractWire implements Wire {
                 if (buffer.size() <= size) buffer.add(bufferAdd.get());
 
                 final T t = buffer.get(size);
-                // todo fix
-//                if (t instanceof Resettable) ((Resettable) t).reset();
-                if (t instanceof Marshallable) Wires.reset(t);
+                if (t instanceof Marshallable) ((Marshallable)t).reset();
                 list.add(object(t, t.getClass()));
             }
 

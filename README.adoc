@@ -261,15 +261,15 @@ true
 
 showing that the field **b** of each container object is now referencing the same `ByteBuffer` instance.
 
-In order to work around this, if necessary, the marshallable class should implement `ResetOverride`:
+In order to work around this, if necessary, the marshallable class can override `Marshallable.reset`:
 
 [source,java]
 ----
-private static final class BufferContainer implements ResetOverride {
+private static final class BufferContainer implements Marshallable {
     private ByteBuffer b = ByteBuffer.allocate(16);
 
     @Override
-    public void onReset() {
+    public void reset() {
         // or acquire from a pool if allocation should
         // be kept to a minimum
         b = ByteBuffer.allocate(16);
