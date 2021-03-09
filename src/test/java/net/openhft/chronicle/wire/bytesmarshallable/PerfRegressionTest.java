@@ -4,12 +4,15 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 import org.junit.Test;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+
+import static org.junit.Assert.fail;
 
 public class PerfRegressionTest {
 
@@ -91,6 +94,56 @@ public class PerfRegressionTest {
 
     @Test
     public void bytesPerformance() {
+        BytesFields bf1 = new BytesFields("1", "123", "12345", "12345678901");
+        BytesFields bf2 = new BytesFields();
 
+        DefaultBytesFields df1 = new DefaultBytesFields("1", "123", "12345", "12345678901");
+        DefaultBytesFields df2 = new DefaultBytesFields();
+
+        ReferenceBytesFields rf1 = new ReferenceBytesFields("1", "123", "12345", "12345678901");
+        ReferenceBytesFields rf2 = new ReferenceBytesFields();
+
+        final Bytes bytes = Bytes.allocateElasticDirect();
+        final int count = 100_000;
+        for (int j = 0; j < 20; j++) {
+            long btime = 0, dtime = 0, rtime = 0;
+            for (int i = 0; i < count; i++) {
+                long start = System.nanoTime();
+
+                bytes.clear();
+                bf1.writeMarshallable(bytes);
+                bf2.readMarshallable(bytes);
+
+                long mid1 = System.nanoTime();
+
+                bytes.clear();
+                rf1.writeMarshallable(bytes);
+                rf2.readMarshallable(bytes);
+
+                long mid2 = System.nanoTime();
+
+                bytes.clear();
+                df1.writeMarshallable(bytes);
+                df2.readMarshallable(bytes);
+
+                long end = System.nanoTime();
+
+                btime += mid1 - start;
+                rtime += mid2 - mid1;
+                dtime += end - mid2;
+            }
+            btime /= count;
+            dtime /= count;
+            rtime /= count;
+            double r_b = 100 * rtime / btime / 100.0;
+            double d_b = 100 * dtime / btime / 100.0;
+            if (Math.abs(r_b - 0.93) <= 0.05 && Math.abs(d_b - 0.64) <= 0.05)
+                break;
+//            System.out.println("btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", r/b: " + r_b + ", d/b: " + d_b);
+            if (j == 9)
+                fail("btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", r/b: " + r_b + ", d/b: " + d_b);
+            Jvm.pause(j * 50);
+        }
+        bytes.releaseLast();
     }
 }
