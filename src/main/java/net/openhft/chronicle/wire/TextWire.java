@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.io.Resettable;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.*;
@@ -2899,7 +2900,7 @@ public class TextWire extends AbstractWire implements Wire {
                 if (buffer.size() <= size) buffer.add(bufferAdd.get());
 
                 final T t = buffer.get(size);
-                if (t instanceof Marshallable) ((Marshallable)t).reset();
+                if (t instanceof Resettable) ((Resettable)t).reset();
                 list.add(object(t, t.getClass()));
             }
 
