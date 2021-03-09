@@ -6,7 +6,16 @@ import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
-import net.openhft.chronicle.wire.Wires;
+
+/*
+.2.21ea74
+read: 50/90 97/99 99.7/99.9 99.97/99.99 99.997/99.999 99.9997/99.9999 - worst was 0.542 / 0.566  0.586 / 0.610  0.690 / 1.092  16.1 / 19.9  29.4 / 29.9  32.9 / 33.9 - 178
+write: 50/90 97/99 99.7/99.9 99.97/99.99 99.997/99.999 99.9997/99.9999 - worst was 0.204 / 0.212  0.222 / 0.230  0.261 / 0.373  0.461 / 15.8  19.6 / 28.9  29.4 / 32.4 - 143
+
+.latest
+read: 50/90 97/99 99.7/99.9 99.97/99.99 99.997/99.999 99.9997/99.9999 - worst was 0.233 / 0.245  0.253 / 0.259  0.303 / 0.439  0.574 / 15.9  21.2 / 29.1  29.2 / 32.6 - 58.2
+write: 50/90 97/99 99.7/99.9 99.97/99.99 99.997/99.999 99.9997/99.9999 - worst was 0.062 / 0.066  0.068 / 0.073  0.081 / 0.126  0.172 / 0.305  15.6 / 19.4  28.7 / 29.0 - 41.9
+ */
 
 public class StringsInBytesMarshallableMain {
 
@@ -18,7 +27,7 @@ public class StringsInBytesMarshallableMain {
         WithStrings n = new WithStrings("1", "12", "123", "1234", "123456", "1234567", "123456789", "12345678901");
 
         WithStrings n2 = new WithStrings();
-        Bytes bytes = Bytes.elasticByteBuffer();
+        Bytes bytes = Bytes.allocateElasticDirect(128);
 
         for (int i = -20_000; i < 100_000_000; i++) {
             bytes.clear();
@@ -62,10 +71,6 @@ public class StringsInBytesMarshallableMain {
 
         @Override
         public void readMarshallable(BytesIn bytes) throws IORuntimeException {
-            final Bytes<?> bytes2 = Wires.acquireBytes();
-            for (int i = 0; i < 8; i++)
-                bytes.read8bit(bytes2);
-/*
             a = bytes.read8bit();
             b = bytes.read8bit();
             c = bytes.read8bit();
@@ -74,7 +79,6 @@ public class StringsInBytesMarshallableMain {
             f = bytes.read8bit();
             g = bytes.read8bit();
             h = bytes.read8bit();
-*/
         }
 
         @Override

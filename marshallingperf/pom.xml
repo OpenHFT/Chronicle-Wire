@@ -21,7 +21,7 @@
 
     <groupId>net.openhft</groupId>
     <artifactId>chronicle-wire-marshallingperf</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>2.21-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Wire/MarshallingPerf</name>
     <description>Chronicle-Wire-MarshallingPerf</description>
 

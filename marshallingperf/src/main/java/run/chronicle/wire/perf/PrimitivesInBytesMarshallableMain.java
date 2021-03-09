@@ -19,7 +19,7 @@ public class PrimitivesInBytesMarshallableMain {
         WithPrimitives n2 = new WithPrimitives();
         Bytes bytes = Bytes.elasticByteBuffer(256);
 
-        for (int i = -20_000; i < 10_000_000; i++) {
+        for (int i = -20_000; i < 100_000_000; i++) {
             bytes.clear();
             long start = System.nanoTime();
             n.writeMarshallable(bytes);
