@@ -12,6 +12,8 @@ import org.junit.Test;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static org.junit.Assert.fail;
+
 public class PerfRegressionTest {
 
     static class BytesFields extends BytesInBinaryMarshallable {
@@ -146,8 +148,8 @@ public class PerfRegressionTest {
             System.out.println(cpuClass + " - btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/b: " + d_r);
             // assume it's our primary build server
             if (cpuClass.equals("AMD Ryzen 5 3600 6-Core Processor")) {
-                if (0.93 <= b_r && b_r <= 0.96
-                        && 0.47 <= d_r && d_r <= 0.52)
+                if (0.71 <= b_r && b_r <= 0.8
+                        && 0.42 <= d_r && d_r <= 0.52)
                     break;
 
             } else if (cpuClass.startsWith("ARMv7")) {
@@ -174,8 +176,7 @@ public class PerfRegressionTest {
                     break;
             }
             if (j == repeats) {
-                // @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/267")
-                //  fail(cpuClass + " - btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/b: " + d_r);
+                fail(cpuClass + " - btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/b: " + d_r);
             }
             Jvm.pause(j * 50L);
         }
