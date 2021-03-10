@@ -153,7 +153,7 @@ public class PerfRegressionTest {
                 boolean brOk = 0.65 <= b_r && b_r <= 0.87;
                 if (Jvm.isJava9Plus())
                     brOk = 0.8 <= b_r && b_r <= 0.98;
-                if (cpuClass.contains("CPU E3-1"))
+                if (cpuClass.contains("CPU E3-1") && cpuClass.startsWith("AMD Ryzen 5"))
                     brOk = 0.9 <= b_r && b_r <= 1.1;
                 if (brOk
                         && 0.39 <= d_r && d_r <= 0.6)
