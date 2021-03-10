@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.nio.BufferOverflowException;
@@ -14,6 +15,7 @@ import java.nio.BufferUnderflowException;
 
 import static org.junit.Assert.fail;
 
+@Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/267")
 public class PerfRegressionTest {
 
     static class BytesFields extends BytesInBinaryMarshallable {
