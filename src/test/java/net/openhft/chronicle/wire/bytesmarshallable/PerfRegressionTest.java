@@ -103,7 +103,7 @@ public class PerfRegressionTest {
 
         final Bytes bytes = Bytes.allocateElasticDirect();
         int count = 250_000;
-        int repeats = 10;
+        int repeats = 10, outlier = 100_000;
         final String cpuClass = Jvm.getCpuClass();
         for (int j = 0; j <= repeats; j++) {
             long btime = 0, dtime = 0, rtime = 0;
@@ -130,9 +130,9 @@ public class PerfRegressionTest {
 
                 long end = System.nanoTime();
 
-                btime += mid1 - start;
-                rtime += mid2 - mid1;
-                dtime += end - mid2;
+                btime += Math.min(outlier, mid1 - start);
+                rtime += Math.min(outlier, mid2 - mid1);
+                dtime += Math.min(outlier, end - mid2);
             }
             btime /= count;
             dtime /= count;
@@ -143,16 +143,26 @@ public class PerfRegressionTest {
                 Thread.yield();
                 continue;
             }
+            System.out.println(cpuClass + " - btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/b: " + d_r);
             // assume it's our primary build server
             if (cpuClass.equals("AMD Ryzen 5 3600 6-Core Processor")) {
-                if (0.8 <= b_r && b_r <= 0.85
-                        && 0.50 <= d_r && d_r <= 0.57)
+                if (0.93 <= b_r && b_r <= 0.96
+                        && 0.47 <= d_r && d_r <= 0.52)
                     break;
 
             } else if (cpuClass.startsWith("ARMv7")) {
-                if (0.5 <= b_r && b_r <= 0.6
-                        && 0.12 <= d_r && d_r <= 0.2)
+                if (0.98 <= b_r && b_r <= 0.99
+                        && 0.55 <= d_r && d_r <= 0.56)
                     break;
+
+            } else if (cpuClass.contains(" i7-10710U ")) {
+                boolean brOk = 0.68 <= b_r && b_r <= 0.72;
+                if (Jvm.isJava9Plus())
+                    brOk = 0.71 <= b_r && b_r <= 0.73;
+                if (brOk
+                        && 0.48 <= d_r && d_r <= 0.52)
+                    break;
+
             } else {
                 boolean brOk = 0.65 <= b_r && b_r <= 0.87;
                 if (Jvm.isJava9Plus())
@@ -163,7 +173,6 @@ public class PerfRegressionTest {
                         && 0.39 <= d_r && d_r <= 0.61)
                     break;
             }
-            System.out.println("btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/b: " + d_r);
             if (j == repeats) {
                 // @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/267")
                 //  fail(cpuClass + " - btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/b: " + d_r);
