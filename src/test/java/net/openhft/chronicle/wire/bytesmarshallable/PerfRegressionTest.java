@@ -94,19 +94,22 @@ public class PerfRegressionTest {
 
     @Test
     public void bytesPerformance() {
-        BytesFields bf1 = new BytesFields("1", "123", "12345", "12345678901");
+        BytesFields bf1 = new BytesFields("12", "12345", "123456789012", "12345678901234567890123");
         BytesFields bf2 = new BytesFields();
 
-        DefaultBytesFields df1 = new DefaultBytesFields("1", "123", "12345", "12345678901");
+        DefaultBytesFields df1 = new DefaultBytesFields("12", "12345", "123456789012", "12345678901234567890123");
         DefaultBytesFields df2 = new DefaultBytesFields();
 
-        ReferenceBytesFields rf1 = new ReferenceBytesFields("1", "123", "12345", "12345678901");
+        ReferenceBytesFields rf1 = new ReferenceBytesFields("12", "12345", "123456789012", "12345678901234567890123");
         ReferenceBytesFields rf2 = new ReferenceBytesFields();
 
         final Bytes bytes = Bytes.allocateElasticDirect();
-        final int count = 250_000;
-        for (int j = 0; j < 20; j++) {
+        int count = 250_000;
+        int repeats = 3;
+        for (int j = 0; j <= repeats; j++) {
             long btime = 0, dtime = 0, rtime = 0;
+            if (j == 0)
+                count = 20_000;
             for (int i = 0; i < count; i++) {
                 long start = System.nanoTime();
 
@@ -135,15 +138,19 @@ public class PerfRegressionTest {
             btime /= count;
             dtime /= count;
             rtime /= count;
-            double r_b = 100 * rtime / btime / 100.0;
-            double d_b = 100 * dtime / btime / 100.0;
-            if (0.7 <= r_b && r_b <= 0.98
-                    && 0.55 <= d_b && d_b <= 0.7)
+            double b_r = 100 * btime / rtime / 100.0;
+            double d_b = 100 * dtime / rtime / 100.0;
+            if (j == 0) {
+                Thread.yield();
+                continue;
+            }
+            if (0.6 <= b_r && b_r <= 0.8
+                    && 0.4 <= d_b && d_b <= 0.6)
                 break;
-            System.out.println("btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", r/b: " + r_b + ", d/b: " + d_b);
-            if (j == 9)
-                fail("btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", r/b: " + r_b + ", d/b: " + d_b);
-            Jvm.pause(j * 50);
+            System.out.println("btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/b: " + d_b);
+            if (j == repeats)
+                fail("btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/b: " + d_b);
+            Jvm.pause(j * 50L);
         }
         bytes.releaseLast();
     }
