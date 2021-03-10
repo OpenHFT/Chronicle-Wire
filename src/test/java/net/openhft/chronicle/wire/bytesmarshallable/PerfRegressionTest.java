@@ -104,14 +104,30 @@ public class PerfRegressionTest {
     private boolean directOk() {
         // assume it's our primary build server
         if (cpuClass.equals("AMD Ryzen 5 3600 6-Core Processor")) {
-            if (0.71 <= b_r && b_r <= 0.8
-                    && 0.42 <= d_r && d_r <= 0.52)
-                return true;
+            boolean brOk = 0.81 <= b_r && b_r <= 0.87;
+            boolean drOk = 0.35 <= d_r && d_r <= 0.38;
+            if (Jvm.isJava9Plus()) {
+                brOk = 0.64 <= b_r && b_r <= 0.68;
+                drOk = 0.48 <= d_r && d_r <= 0.52;
+            }
+            return brOk && drOk;
 
         } else if (cpuClass.startsWith("ARMv7")) {
-            if (0.96 <= b_r && b_r <= 0.98
-                    && 0.50 <= d_r && d_r <= 0.53)
-                return true;
+            return true;
+
+        } else if (cpuClass.contains("  E3-1270 v3 ")) {
+            boolean brOk = 1.17 <= b_r && b_r <= 1.25;
+            boolean drOk = 0.34 <= d_r && d_r <= 0.38;
+//            if (Jvm.isJava9Plus())
+//                drOk = 0.4 <= d_r && d_r <= 0.66;
+            return brOk && drOk;
+
+        } else if (cpuClass.contains("  E5-2650 v4 ")) {
+            boolean brOk = 1.08 <= b_r && b_r <= 1.11;
+            boolean drOk = 0.49 <= d_r && d_r <= 0.55;
+//            if (Jvm.isJava9Plus())
+//                drOk = 0.4 <= d_r && d_r <= 0.66;
+            return brOk && drOk;
 
         } else if (cpuClass.contains(" i7-10710U ")) {
             boolean brOk = 0.68 <= b_r && b_r <= 0.72;
@@ -142,14 +158,30 @@ public class PerfRegressionTest {
     private boolean onHeapOk() {
         // assume it's our primary build server
         if (cpuClass.equals("AMD Ryzen 5 3600 6-Core Processor")) {
-            if (0.71 <= b_r && b_r <= 0.8
-                    && 0.42 <= d_r && d_r <= 0.52)
-                return true;
+            boolean brOk = 0.71 <= b_r && b_r <= 0.78;
+            boolean drOk = 0.42 <= d_r && d_r <= 0.52;
+            if (Jvm.isJava9Plus()) {
+                brOk = 0.92 <= b_r && b_r <= 0.99;
+                drOk = 0.62 <= d_r && d_r <= 0.65;
+            }
+            return brOk && drOk;
 
         } else if (cpuClass.startsWith("ARMv7")) {
-            if (0.98 <= b_r && b_r <= 0.99
-                    && 0.55 <= d_r && d_r <= 0.56)
-                return true;
+            return true;
+
+        } else if (cpuClass.contains("  E3-1270 v3 ")) {
+            boolean brOk = 0.83 <= b_r && b_r <= 0.89;
+            boolean drOk = 0.61 <= d_r && d_r <= 0.69;
+//            if (Jvm.isJava9Plus())
+//                drOk = 0.4 <= d_r && d_r <= 0.66;
+            return brOk && drOk;
+
+        } else if (cpuClass.contains("  E5-2650 v4 ")) {
+            boolean brOk = 0.80 <= b_r && b_r <= 0.86;
+            boolean drOk = 0.66 <= d_r && d_r <= 0.69;
+//            if (Jvm.isJava9Plus())
+//                drOk = 0.4 <= d_r && d_r <= 0.66;
+            return brOk && drOk;
 
         } else if (cpuClass.contains(" i7-10710U ")) {
             boolean brOk = 0.7 <= b_r && b_r <= 0.77;
