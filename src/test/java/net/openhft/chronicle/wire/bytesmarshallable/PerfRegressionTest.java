@@ -104,7 +104,7 @@ public class PerfRegressionTest {
         ReferenceBytesFields rf2 = new ReferenceBytesFields();
 
         final Bytes bytes = Bytes.allocateElasticDirect();
-        final int count = 100_000;
+        final int count = 250_000;
         for (int j = 0; j < 20; j++) {
             long btime = 0, dtime = 0, rtime = 0;
             for (int i = 0; i < count; i++) {
@@ -137,13 +137,15 @@ public class PerfRegressionTest {
             rtime /= count;
             double r_b = 100 * rtime / btime / 100.0;
             double d_b = 100 * dtime / btime / 100.0;
-            if (Math.abs(r_b - 0.93) <= 0.05 && Math.abs(d_b - 0.64) <= 0.05)
+            if (0.7 <= r_b && r_b <= 0.98
+                    && 0.55 <= d_b && d_b <= 0.7)
                 break;
-//            System.out.println("btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", r/b: " + r_b + ", d/b: " + d_b);
+            System.out.println("btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", r/b: " + r_b + ", d/b: " + d_b);
             if (j == 9)
                 fail("btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", r/b: " + r_b + ", d/b: " + d_b);
             Jvm.pause(j * 50);
         }
         bytes.releaseLast();
     }
+
 }
