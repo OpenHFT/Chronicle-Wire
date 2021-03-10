@@ -109,8 +109,8 @@ public class PerfRegressionTest {
                 return true;
 
         } else if (cpuClass.startsWith("ARMv7")) {
-            if (0.98 <= b_r && b_r <= 0.99
-                    && 0.55 <= d_r && d_r <= 0.56)
+            if (0.96 <= b_r && b_r <= 0.98
+                    && 0.50 <= d_r && d_r <= 0.53)
                 return true;
 
         } else if (cpuClass.contains(" i7-10710U ")) {
