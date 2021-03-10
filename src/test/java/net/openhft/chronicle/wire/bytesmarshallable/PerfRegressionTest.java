@@ -144,12 +144,15 @@ public class PerfRegressionTest {
                 Thread.yield();
                 continue;
             }
-            if (0.65 <= b_r && b_r <= 0.85
-                    && 0.4 <= d_b && d_b <= 0.6)
+            boolean brOk = 0.65 <= b_r && b_r <= 0.87;
+            if (Jvm.isJava9Plus())
+                brOk = 0.8 <= b_r && b_r <= 0.98;
+            if (brOk
+                    && 0.39 <= d_b && d_b <= 0.6)
                 break;
             System.out.println("btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/b: " + d_b);
             if (j == repeats)
-                fail("btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/b: " + d_b);
+                fail(Jvm.getCpuClass() + " - btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/b: " + d_b);
             Jvm.pause(j * 50L);
         }
         bytes.releaseLast();
