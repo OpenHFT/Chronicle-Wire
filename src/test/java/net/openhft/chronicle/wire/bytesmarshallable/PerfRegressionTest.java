@@ -149,8 +149,8 @@ public class PerfRegressionTest {
             }
             // assume it's our primary build server
             if (cpuClass.equals("AMD Ryzen 5 3600 6-Core Processor")) {
-                if (0.8 <= b_r && b_r <= 0.82
-                        && 0.50 <= d_r && d_r <= 0.52)
+                if (0.8 <= b_r && b_r <= 0.85
+                        && 0.50 <= d_r && d_r <= 0.57)
                     break;
 
             } else if (cpuClass.startsWith("ARMv7")) {
