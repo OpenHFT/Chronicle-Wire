@@ -11,10 +11,13 @@ import org.junit.Test;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-
-import static org.junit.Assert.fail;
+import java.util.function.BooleanSupplier;
 
 public class PerfRegressionTest {
+
+    final String cpuClass = Jvm.getCpuClass();
+    private double b_r;
+    private double d_r;
 
     static class BytesFields extends BytesInBinaryMarshallable {
         Bytes a = Bytes.allocateElasticOnHeap();
@@ -93,7 +96,84 @@ public class PerfRegressionTest {
     }
 
     @Test
-    public void bytesPerformance() {
+    public void bytesPerformanceDirect() {
+        final Bytes bytes = Bytes.allocateElasticDirect();
+        doRegressionTest(bytes, this::directOk);
+    }
+
+    private boolean directOk() {
+        // assume it's our primary build server
+        if (cpuClass.equals("AMD Ryzen 5 3600 6-Core Processor")) {
+            if (0.71 <= b_r && b_r <= 0.8
+                    && 0.42 <= d_r && d_r <= 0.52)
+                return true;
+
+        } else if (cpuClass.startsWith("ARMv7")) {
+            if (0.98 <= b_r && b_r <= 0.99
+                    && 0.55 <= d_r && d_r <= 0.56)
+                return true;
+
+        } else if (cpuClass.contains(" i7-10710U ")) {
+            boolean brOk = 0.68 <= b_r && b_r <= 0.72;
+            if (Jvm.isJava9Plus())
+                brOk = 0.71 <= b_r && b_r <= 0.73;
+            if (brOk
+                    && 0.48 <= d_r && d_r <= 0.52)
+                return true;
+
+        } else {
+            boolean brOk = 0.65 <= b_r && b_r <= 0.87;
+            if (Jvm.isJava9Plus())
+                brOk = 0.7 <= b_r && b_r <= 0.98;
+            if (cpuClass.contains("CPU E3-1") && cpuClass.startsWith("AMD Ryzen 5"))
+                brOk = 0.9 <= b_r && b_r <= 1.1;
+            if (brOk
+                    && 0.39 <= d_r && d_r <= 0.61)
+                return true;
+        }
+        return false;
+    }
+
+    @Test
+    public void bytesPerformanceOnHeap() {
+        final Bytes bytes = Bytes.allocateElasticOnHeap();
+        doRegressionTest(bytes, this::onHeapOk);
+    }
+
+
+    private boolean onHeapOk() {
+        // assume it's our primary build server
+        if (cpuClass.equals("AMD Ryzen 5 3600 6-Core Processor")) {
+            if (0.71 <= b_r && b_r <= 0.8
+                    && 0.42 <= d_r && d_r <= 0.52)
+                return true;
+
+        } else if (cpuClass.startsWith("ARMv7")) {
+            if (0.98 <= b_r && b_r <= 0.99
+                    && 0.55 <= d_r && d_r <= 0.56)
+                return true;
+
+        } else if (cpuClass.contains(" i7-10710U ")) {
+            boolean brOk = 0.7 <= b_r && b_r <= 0.77;
+            boolean drOk = 0.55 <= d_r && d_r <= 0.59;
+            if (Jvm.isJava9Plus())
+                drOk = 0.62 <= d_r && d_r <= 0.66;
+            return brOk && drOk;
+
+        } else {
+            boolean brOk = 0.65 <= b_r && b_r <= 0.87;
+            if (Jvm.isJava9Plus())
+                brOk = 0.7 <= b_r && b_r <= 0.98;
+            if (cpuClass.contains("CPU E3-1") && cpuClass.startsWith("AMD Ryzen 5"))
+                brOk = 0.9 <= b_r && b_r <= 1.1;
+            if (brOk
+                    && 0.39 <= d_r && d_r <= 0.61)
+                return true;
+        }
+        return false;
+    }
+
+    private void doRegressionTest(Bytes bytes, BooleanSupplier test) {
         BytesFields bf1 = new BytesFields("12", "12345", "123456789012", "12345678901234567890123");
         BytesFields bf2 = new BytesFields();
 
@@ -103,10 +183,8 @@ public class PerfRegressionTest {
         ReferenceBytesFields rf1 = new ReferenceBytesFields("12", "12345", "123456789012", "12345678901234567890123");
         ReferenceBytesFields rf2 = new ReferenceBytesFields();
 
-        final Bytes bytes = Bytes.allocateElasticDirect();
         int count = 250_000;
-        int repeats = 10, outlier = 100_000;
-        final String cpuClass = Jvm.getCpuClass();
+        int repeats = 10, outlier = 10_000;
         for (int j = 0; j <= repeats; j++) {
             long btime = 0, dtime = 0, rtime = 0;
             if (j == 0)
@@ -139,44 +217,17 @@ public class PerfRegressionTest {
             btime /= count;
             dtime /= count;
             rtime /= count;
-            double b_r = 100 * btime / rtime / 100.0;
-            double d_r = 100 * dtime / rtime / 100.0;
+            b_r = 100 * btime / rtime / 100.0;
+            d_r = 100 * dtime / rtime / 100.0;
             if (j == 0) {
                 Thread.yield();
                 continue;
             }
             System.out.println(cpuClass + " - btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/b: " + d_r);
-            // assume it's our primary build server
-            if (cpuClass.equals("AMD Ryzen 5 3600 6-Core Processor")) {
-                if (0.71 <= b_r && b_r <= 0.8
-                        && 0.42 <= d_r && d_r <= 0.52)
-                    break;
-
-            } else if (cpuClass.startsWith("ARMv7")) {
-                if (0.98 <= b_r && b_r <= 0.99
-                        && 0.55 <= d_r && d_r <= 0.56)
-                    break;
-
-            } else if (cpuClass.contains(" i7-10710U ")) {
-                boolean brOk = 0.68 <= b_r && b_r <= 0.72;
-                if (Jvm.isJava9Plus())
-                    brOk = 0.71 <= b_r && b_r <= 0.73;
-                if (brOk
-                        && 0.48 <= d_r && d_r <= 0.52)
-                    break;
-
-            } else {
-                boolean brOk = 0.65 <= b_r && b_r <= 0.87;
-                if (Jvm.isJava9Plus())
-                    brOk = 0.7 <= b_r && b_r <= 0.98;
-                if (cpuClass.contains("CPU E3-1") && cpuClass.startsWith("AMD Ryzen 5"))
-                    brOk = 0.9 <= b_r && b_r <= 1.1;
-                if (brOk
-                        && 0.39 <= d_r && d_r <= 0.61)
-                    break;
-            }
+            if (test.getAsBoolean())
+                break;
             if (j == repeats) {
-                fail(cpuClass + " - btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/b: " + d_r);
+                // fail(cpuClass + " - btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/b: " + d_r );
             }
             Jvm.pause(j * 50L);
         }
