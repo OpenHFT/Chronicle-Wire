@@ -98,7 +98,7 @@ public class PerfRegressionTest {
     @Test
     public void bytesPerformanceDirect() {
         final Bytes bytes = Bytes.allocateElasticDirect();
-        doRegressionTest(bytes, this::directOk);
+        doRegressionTest("direct", bytes, this::directOk);
     }
 
     private boolean directOk() {
@@ -125,8 +125,6 @@ public class PerfRegressionTest {
             boolean brOk = 0.65 <= b_r && b_r <= 0.87;
             if (Jvm.isJava9Plus())
                 brOk = 0.7 <= b_r && b_r <= 0.98;
-            if (cpuClass.contains("CPU E3-1") && cpuClass.startsWith("AMD Ryzen 5"))
-                brOk = 0.9 <= b_r && b_r <= 1.1;
             if (brOk
                     && 0.39 <= d_r && d_r <= 0.61)
                 return true;
@@ -137,7 +135,7 @@ public class PerfRegressionTest {
     @Test
     public void bytesPerformanceOnHeap() {
         final Bytes bytes = Bytes.allocateElasticOnHeap();
-        doRegressionTest(bytes, this::onHeapOk);
+        doRegressionTest("onHeap", bytes, this::onHeapOk);
     }
 
 
@@ -164,8 +162,6 @@ public class PerfRegressionTest {
             boolean brOk = 0.65 <= b_r && b_r <= 0.87;
             if (Jvm.isJava9Plus())
                 brOk = 0.7 <= b_r && b_r <= 0.98;
-            if (cpuClass.contains("CPU E3-1") && cpuClass.startsWith("AMD Ryzen 5"))
-                brOk = 0.9 <= b_r && b_r <= 1.1;
             if (brOk
                     && 0.39 <= d_r && d_r <= 0.61)
                 return true;
@@ -173,7 +169,7 @@ public class PerfRegressionTest {
         return false;
     }
 
-    private void doRegressionTest(Bytes bytes, BooleanSupplier test) {
+    private void doRegressionTest(String desc, Bytes bytes, BooleanSupplier test) {
         BytesFields bf1 = new BytesFields("12", "12345", "123456789012", "12345678901234567890123");
         BytesFields bf2 = new BytesFields();
 
@@ -223,11 +219,13 @@ public class PerfRegressionTest {
                 Thread.yield();
                 continue;
             }
-            System.out.println(cpuClass + " - btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/b: " + d_r);
+            final String msg = cpuClass + " - " + desc + " - btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/r: " + d_r;
+            System.out.println(msg);
             if (test.getAsBoolean())
                 break;
             if (j == repeats) {
-                // fail(cpuClass + " - btime: " + btime + ", rtime: " + rtime + ", dtime: " + dtime + ", b/r: " + b_r + ", d/b: " + d_r );
+                System.out.println("FAIL");
+                // fail(msg);
             }
             Jvm.pause(j * 50L);
         }
