@@ -266,12 +266,29 @@ public class PerfRegressionTest {
     private boolean timesOk(double od, double dd, double md, double osd, double dsd, double msd) {
         // assume it's our primary build server
         if (cpuClass.equals("AMD Ryzen 5 3600 6-Core Processor")) {
+            if (Jvm.isJava9Plus())
+                return (0.66 <= od && od <= 1) // TODO FIX OnHeap so it is more reliably optimised
+                        && (0.39 <= dd && dd <= 0.49)
+                        && (0.49 <= md && md <= 0.59)
+                        && (0.59 <= osd && osd <= 1.02) // TODO FIX OnHeap so it is more reliably optimised
+                        && (0.39 <= dsd && dsd <= 0.50)
+                        && (0.40 <= msd && msd <= 0.47);
+            return (0.85 <= od && od <= 1) // TODO FIX OnHeap so it is more reliably optimised
+                    && (0.50 <= dd && dd <= 0.57)
+                    && (0.62 <= md && md <= 0.7)
+                    && (0.77 <= osd && osd <= 1.02) // TODO FIX OnHeap so it is more reliably optimised
+                    && (0.44 <= dsd && dsd <= 0.53)
+                    && (0.45 <= msd && msd <= 0.54);
 
         } else if (cpuClass.startsWith("ARMv7")) {
 
-        } else if (cpuClass.contains(" E3-1270 v3 ")) {
-
-        } else if (cpuClass.contains(" E5-2650 v4 ")) {
+        } else if (cpuClass.contains(" Xeon ")) {
+            return (0.84 <= od && od <= 1) // TODO FIX OnHeap so it is more reliably optimised
+                    && (0.50 <= dd && dd <= 0.56)
+                    && (0.68 <= md && md <= 0.75)
+                    && (0.68 <= osd && osd <= 1.02) // TODO FIX OnHeap so it is more reliably optimised
+                    && (0.44 <= dsd && dsd <= 0.53)
+                    && (0.48 <= msd && msd <= 0.56);
 
         } else if (cpuClass.contains(" i7-10710U ")) {
             return (0.47 <= od && od <= 1) // TODO FIX OnHeap so it is more reliably optimised
@@ -281,7 +298,7 @@ public class PerfRegressionTest {
                     && (0.44 <= dsd && dsd <= 0.53)
                     && (0.41 <= msd && msd <= 0.53);
         }
-        return false;
+        return true;
     }
 
     void doTest(String names, Predicate<double[]> check, Runnable... tests) {
