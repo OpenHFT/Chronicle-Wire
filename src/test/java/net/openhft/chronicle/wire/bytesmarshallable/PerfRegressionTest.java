@@ -291,10 +291,10 @@ public class PerfRegressionTest {
                     && (0.48 <= msd && msd <= 0.56);
 
         } else if (cpuClass.contains(" i7-10710U ")) {
-            return (0.47 <= od && od <= 1) // TODO FIX OnHeap so it is more reliably optimised
+            return (0.65 <= od && od <= 1.00)  // TODO FIX OnHeap so it is more reliably optimised
                     && (0.52 <= dd && dd <= 0.64)
-                    && (0.55 <= md && md <= 0.67)
-                    && (0.46 <= osd && osd <= 1.02) // TODO FIX OnHeap so it is more reliably optimised
+                    && (0.60 <= md && md <= 0.71)
+                    && (0.58 <= osd && osd <= 1.00)  // TODO FIX OnHeap so it is more reliably optimised
                     && (0.44 <= dsd && dsd <= 0.53)
                     && (0.41 <= msd && msd <= 0.53);
         }
