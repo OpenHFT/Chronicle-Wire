@@ -7,6 +7,11 @@ public class Base256IntConverter implements IntConverter {
     public static final Base256IntConverter INSTANCE = new Base256IntConverter();
 
     @Override
+    public int maxParseLength() {
+        return MAX_LENGTH;
+    }
+
+    @Override
     public int parse(CharSequence text) {
         lengthCheck(text);
         int value = 0;

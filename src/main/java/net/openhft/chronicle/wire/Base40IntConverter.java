@@ -34,6 +34,11 @@ public class Base40IntConverter implements IntConverter {
 
     private static final int BASE = 40;
 
+    @Override
+    public int maxParseLength() {
+        return MAX_LENGTH;
+    }
+
     static {
         assert DECODE.length == BASE;
         Arrays.fill(ENCODE, (byte) -1);
