@@ -280,7 +280,13 @@ public class PerfRegressionTest {
                     && (0.44 <= dsd && dsd <= 0.53)
                     && (0.45 <= msd && msd <= 0.54);
 
-        } else if (cpuClass.startsWith("ARMv7")) {
+        } else if (cpuClass.startsWith("ARM")) {
+            return (0.75 <= od && od <= 1)
+                    && (0.65 <= dd && dd <= 0.75)
+                    && (0.72 <= md && md <= 0.82)
+                    && (1.30 <= osd && osd <= 1.40)
+                    && (0.83 <= dsd && dsd <= 0.99)
+                    && (0.80 <= msd && msd <= 0.99);
 
         } else if (cpuClass.contains(" Xeon ")) {
             return (0.84 <= od && od <= 1) // TODO FIX OnHeap so it is more reliably optimised
@@ -304,7 +310,7 @@ public class PerfRegressionTest {
     void doTest(String names, Predicate<double[]> check, Runnable... tests) {
         long[] times = new long[tests.length];
         int count = 250_000;
-        int repeats = 10, outlier = 10_000;
+        int repeats = 10, outlier = Jvm.isArm() ? 200_000 : 20_000;
         String[] namesArr = names.split(", ?");
         for (int j = 0; j <= repeats; j++) {
             if (j == 0)

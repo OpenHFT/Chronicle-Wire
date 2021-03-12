@@ -31,6 +31,11 @@ public class Base85IntConverter implements IntConverter {
 
     private static final int BASE = 85;
 
+    @Override
+    public int maxParseLength() {
+        return MAX_LENGTH;
+    }
+
     static {
         assert DECODE.length == BASE;
         Arrays.fill(ENCODE, (byte) -1);

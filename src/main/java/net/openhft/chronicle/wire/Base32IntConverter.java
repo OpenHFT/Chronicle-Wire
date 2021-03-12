@@ -35,6 +35,12 @@ public class Base32IntConverter implements IntConverter {
     private static final String CHARS = "234567ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     static final char[] DECODE = CHARS.toCharArray();
 
+    @Override
+    public int maxParseLength() {
+        return MAX_LENGTH;
+    }
+
+    
     static {
         assert DECODE.length == BASE;
         Arrays.fill(ENCODE, (byte) -1);
