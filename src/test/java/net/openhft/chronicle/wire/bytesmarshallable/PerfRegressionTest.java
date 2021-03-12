@@ -291,14 +291,14 @@ public class PerfRegressionTest {
                     && (0.48 <= msd && msd <= 0.56);
 
         } else if (cpuClass.contains(" i7-10710U ")) {
-            return (0.65 <= od && od <= 1.00)  // TODO FIX OnHeap so it is more reliably optimised
-                    && (0.52 <= dd && dd <= 0.64)
-                    && (0.60 <= md && md <= 0.71)
-                    && (0.58 <= osd && osd <= 1.00)  // TODO FIX OnHeap so it is more reliably optimised
-                    && (0.44 <= dsd && dsd <= 0.53)
-                    && (0.41 <= msd && msd <= 0.53);
+            return (0.85 <= od && od <= 0.95)
+                    && (0.75 <= dd && dd <= 0.87)
+                    && (0.83 <= md && md <= 0.93)
+                    && (0.62 <= osd && osd <= 0.74)
+                    && (0.45 <= dsd && dsd <= 0.55)
+                    && (0.43 <= msd && msd <= 0.53);
         }
-        return true;
+        return false;
     }
 
     void doTest(String names, Predicate<double[]> check, Runnable... tests) {
@@ -317,7 +317,8 @@ public class PerfRegressionTest {
                     times[t] += Math.min(outlier, end - start);
                 }
             }
-            long mid = LongStream.of(times.clone()).sorted().toArray()[times.length / 2];
+            final long[] longs = LongStream.of(times.clone()).sorted().toArray();
+            long mid = (longs[times.length / 2 - 1] + longs[times.length / 2] + longs[times.length / 2 + 1]) / 3;
             //noinspection IntegerDivisionInFloatingPointContext
             double[] relTimes =
                     LongStream.of(times)
