@@ -81,6 +81,8 @@ public class WireMarshaller<T> {
         @NotNull Map<String, Field> map = new LinkedHashMap<>();
         getAllField(tClass, map);
         final FieldAccess[] fields = map.values().stream()
+                // for Java 15+ strip "hidden" fields that can't be accessed in Java 15+ this way.
+                .filter(field -> !(Jvm.isJava15Plus() && field.getName().matches("^.*\\$\\d+$")))
                 .map(FieldAccess::create)
                 .toArray(FieldAccess[]::new);
         Map<String, Long> fieldCount = Stream.of(fields).collect(Collectors.groupingBy(f -> f.field.getName(), Collectors.counting()));
