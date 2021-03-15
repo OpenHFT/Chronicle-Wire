@@ -44,8 +44,9 @@ public class TextDocumentTest extends WireTestCommon {
         @NotNull Bytes<?> bytes = wire.bytes();
         String actual = Wires.fromSizePrefixedBlobs(bytes);
         Assert.assertTrue(actual.contains(
-                "  writeByte: !!atomic {  locked: false, value: 00000000000000000512 },\n" +
-                        "  readByte: !!atomic {  locked: false, value: 00000000000000001024 }"));
+                "  writeByte: !!atomic {  locked: false, value: 00000000000000000512 }"));
+        Assert.assertTrue(actual.contains(
+                "  readByte: !!atomic {  locked: false, value: 00000000000000001024 }"));
 
         wire.readDocument(w -> w.read(() -> "header").marshallable(rheader), null);
 
