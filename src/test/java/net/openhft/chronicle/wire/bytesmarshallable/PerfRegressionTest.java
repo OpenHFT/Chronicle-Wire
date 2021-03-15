@@ -311,12 +311,12 @@ public class PerfRegressionTest {
                         && (0.59 <= osd && osd <= 1.02) // TODO FIX OnHeap so it is more reliably optimised
                         && (0.39 <= dsd && dsd <= 0.50)
                         && (0.40 <= msd && msd <= 0.47);
-            return (0.62 <= od && od <= 0.68) // TODO FIX OnHeap so it is more reliably optimised
-                    && (0.73 <= dd && dd <= 0.76)
-                    && (0.57 <= md && md <= 0.61)
-                    && (0.62 <= osd && osd <= 0.68) // TODO FIX OnHeap so it is more reliably optimised
-                    && (0.70 <= dsd && dsd <= 0.76)
-                    && (0.57 <= msd && msd <= 0.64);
+            return (0.54 <= od && od <= 0.68)
+                    && (0.49 <= dd && dd <= 0.76)
+                    && (0.43 <= md && md <= 0.61)
+                    && (0.62 <= osd && osd <= 0.69)
+                    && (0.51 <= dsd && dsd <= 0.76)
+                    && (0.55 <= msd && msd <= 0.64);
 
         } else if (cpuClass.startsWith("ARM")) {
             return (0.75 <= od && od <= 1)
