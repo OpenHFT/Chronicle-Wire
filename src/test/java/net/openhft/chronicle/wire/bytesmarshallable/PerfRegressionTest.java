@@ -6,11 +6,11 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
+import net.openhft.compiler.CompilerUtils;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.util.function.Predicate;
@@ -25,16 +25,20 @@ public class PerfRegressionTest {
         Bytes b = Bytes.allocateElasticOnHeap();
         Bytes c = Bytes.allocateElasticOnHeap();
         Bytes d = Bytes.allocateElasticOnHeap();
+        Bytes e = Bytes.allocateElasticOnHeap();
+        Bytes f = Bytes.allocateElasticOnHeap();
 
         public BytesFields() {
         }
 
-        public BytesFields(String a, String b, String c, String d) {
+        public BytesFields(String... s) {
             this();
-            this.a.append(a);
-            this.b.append(b);
-            this.c.append(c);
-            this.d.append(d);
+            this.a.append(s[0]);
+            this.b.append(s[1]);
+            this.c.append(s[2]);
+            this.d.append(s[3]);
+            this.e.append(s[4]);
+            this.f.append(s[5]);
         }
     }
 
@@ -42,8 +46,8 @@ public class PerfRegressionTest {
         public DefaultBytesFields() {
         }
 
-        public DefaultBytesFields(String a, String b, String c, String d) {
-            super(a, b, c, d);
+        public DefaultBytesFields(String... s) {
+            super(s);
         }
 
         @Override
@@ -52,6 +56,8 @@ public class PerfRegressionTest {
             read8Bit(bytes, b);
             read8Bit(bytes, c);
             read8Bit(bytes, d);
+            read8Bit(bytes, e);
+            read8Bit(bytes, f);
         }
 
         protected void read8Bit(BytesIn bytes, Bytes a) {
@@ -64,6 +70,8 @@ public class PerfRegressionTest {
             write8Bit(bytes, b);
             write8Bit(bytes, c);
             write8Bit(bytes, d);
+            write8Bit(bytes, e);
+            write8Bit(bytes, f);
         }
 
         protected void write8Bit(BytesOut bytes, BytesStore a) {
@@ -75,8 +83,29 @@ public class PerfRegressionTest {
         public ReferenceBytesFields() {
         }
 
-        public ReferenceBytesFields(String a, String b, String c, String d) {
-            super(a, b, c, d);
+        public ReferenceBytesFields(String... s) {
+            super(s);
+        }
+
+
+        @Override
+        public void readMarshallable(BytesIn bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
+            read8Bit(bytes, a);
+            read8Bit(bytes, b);
+            read8Bit(bytes, c);
+            read8Bit(bytes, d);
+            read8Bit(bytes, e);
+            read8Bit(bytes, f);
+        }
+
+        @Override
+        public void writeMarshallable(BytesOut bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
+            write8Bit(bytes, a);
+            write8Bit(bytes, b);
+            write8Bit(bytes, c);
+            write8Bit(bytes, d);
+            write8Bit(bytes, e);
+            write8Bit(bytes, f);
         }
 
         @Override
@@ -101,16 +130,20 @@ public class PerfRegressionTest {
         String b = "";
         String c = "";
         String d = "";
+        String e = "";
+        String f = "";
 
         public StringFields() {
         }
 
-        public StringFields(String a, String b, String c, String d) {
+        public StringFields(String... s) {
             this();
-            this.a = a;
-            this.b = b;
-            this.c = c;
-            this.d = d;
+            this.a = s[0];
+            this.b = s[1];
+            this.c = s[2];
+            this.d = s[3];
+            this.e = s[4];
+            this.f = s[5];
         }
     }
 
@@ -118,8 +151,8 @@ public class PerfRegressionTest {
         public DefaultStringFields() {
         }
 
-        public DefaultStringFields(String a, String b, String c, String d) {
-            super(a, b, c, d);
+        public DefaultStringFields(String... s) {
+            super(s);
         }
 
         @Override
@@ -128,6 +161,8 @@ public class PerfRegressionTest {
             b = read8Bit(bytes);
             c = read8Bit(bytes);
             d = read8Bit(bytes);
+            e = read8Bit(bytes);
+            f = read8Bit(bytes);
         }
 
         protected @Nullable String read8Bit(BytesIn bytes) {
@@ -140,6 +175,8 @@ public class PerfRegressionTest {
             write8Bit(bytes, b);
             write8Bit(bytes, c);
             write8Bit(bytes, d);
+            write8Bit(bytes, e);
+            write8Bit(bytes, f);
         }
 
         protected void write8Bit(BytesOut bytes, String a) {
@@ -148,20 +185,21 @@ public class PerfRegressionTest {
     }
 
     @Test
-    public void regressionTests() throws FileNotFoundException {
-        BytesFields bf1 = new BytesFields("12", "12345", "123456789012", "12345678901234567890123");
+    public void regressionTests() throws Exception {
+        String[] s = "1,12,12345,123456789,123456789012,12345678901234567890123".split(",");
+        BytesFields bf1 = new BytesFields(s);
         BytesFields bf2 = new BytesFields();
 
-        DefaultBytesFields df1 = new DefaultBytesFields("12", "12345", "123456789012", "12345678901234567890123");
+        DefaultBytesFields df1 = new DefaultBytesFields(s);
         DefaultBytesFields df2 = new DefaultBytesFields();
 
-        ReferenceBytesFields rf1 = new ReferenceBytesFields("12", "12345", "123456789012", "12345678901234567890123");
+        ReferenceBytesFields rf1 = new ReferenceBytesFields(s);
         ReferenceBytesFields rf2 = new ReferenceBytesFields();
 
-        StringFields sf1 = new StringFields("12", "12345", "123456789012", "12345678901234567890123");
+        StringFields sf1 = new StringFields(s);
         StringFields sf2 = new StringFields();
 
-        DefaultStringFields dsf1 = new DefaultStringFields("12", "12345", "123456789012", "12345678901234567890123");
+        DefaultStringFields dsf1 = new DefaultStringFields(s);
         DefaultStringFields dsf2 = new DefaultStringFields();
 
         final Bytes direct = Bytes.allocateElasticDirect();
@@ -297,31 +335,46 @@ public class PerfRegressionTest {
                     && (0.48 <= msd && msd <= 0.56);
 
         } else if (cpuClass.contains(" i7-10710U ")) {
-            return (0.85 <= od && od <= 0.95)
-                    && (0.75 <= dd && dd <= 0.87)
-                    && (0.83 <= md && md <= 0.93)
-                    && (0.62 <= osd && osd <= 0.74)
-                    && (0.45 <= dsd && dsd <= 0.55)
-                    && (0.43 <= msd && msd <= 0.53);
+            return (0.44 <= od && od <= 0.48)
+                    && (0.44 <= dd && dd <= 0.48)
+                    && (0.68 <= md && md <= 0.71)
+                    && (0.61 <= osd && osd <= 0.65)
+                    && (0.52 <= dsd && dsd <= 0.57)
+                    && (0.52 <= msd && msd <= 0.57);
         }
         return false;
     }
 
-    void doTest(String names, Predicate<double[]> check, Runnable... tests) {
+    void doTest(String names, Predicate<double[]> check, Runnable... tests) throws Exception {
         long[] times = new long[tests.length];
         int count = 250_000;
         int repeats = 10, outlier = Jvm.isArm() ? 200_000 : 20_000;
         String[] namesArr = names.split(", ?");
+        String className = "Runnable" + Long.toString(System.nanoTime(), 36);
+        String code = "public class " + className + " implements Runnable {\n" +
+                "long[] times;\n" +
+                "Runnable[] tests;\n" +
+                "public " + className + "(long[] times, Runnable[] tests) { this.times = times; this.tests = tests; }\n" +
+                "public void run() {";
+        for (int t = 0; t < tests.length; t++) {
+            code += "{\n" +
+                    "   long start = System.nanoTime();\n" +
+                    "    tests[" + t + "].run();\n" +
+                    "    long end = System.nanoTime();\n" +
+                    "    times[" + t + "] += Math.min(" + outlier + ", end - start);\n" +
+                    "}\n";
+        }
+        code += "    }\n" +
+                "}";
+        if (Jvm.getBoolean("dumpCode", false))
+            System.out.println(code);
+        Class clazz = CompilerUtils.CACHED_COMPILER.loadFromJava(className, code);
+        Runnable runTests = (Runnable) clazz.getConstructors()[0].newInstance(times, tests);
         for (int j = 0; j <= repeats; j++) {
             if (j == 0)
                 count = 20_000;
             for (int i = 0; i < count; i++) {
-                for (int t = 0; t < tests.length; t++) {
-                    long start = System.nanoTime();
-                    tests[t].run();
-                    long end = System.nanoTime();
-                    times[t] += Math.min(outlier, end - start);
-                }
+                runTests.run();
             }
             final long[] longs = LongStream.of(times.clone()).sorted().toArray();
             long mid = (longs[times.length / 2 - 1] + longs[times.length / 2] + longs[times.length / 2 + 1]) / 3;
