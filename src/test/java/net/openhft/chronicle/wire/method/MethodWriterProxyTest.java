@@ -1,15 +1,19 @@
 package net.openhft.chronicle.wire.method;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import net.openhft.chronicle.core.Jvm;
+import org.junit.*;
 
 import java.lang.reflect.Proxy;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 public class MethodWriterProxyTest extends MethodWriterTest {
+    @BeforeClass
+    public void checkNotMac() {
+        assumeFalse(Jvm.isMacArm());
+    }
+
     @Before
     public void before() {
         System.setProperty("disableProxyCodegen", "true");
