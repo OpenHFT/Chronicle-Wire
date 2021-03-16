@@ -23,7 +23,7 @@ import net.openhft.chronicle.core.util.StringUtils;
 import java.util.Arrays;
 
 public class Base85IntConverter implements IntConverter {
-    public static final int MAX_LENGTH = IntConverter.maxParseLength(85);
+    public static final int MAX_LENGTH = 5;
     public static final Base85IntConverter INSTANCE = new Base85IntConverter();
     private static final String CHARS = "0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz\"#$%&'()*+,-./ ";
     private static final char[] DECODE = CHARS.toCharArray();
