@@ -1,13 +1,12 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.bytes.FieldGroup;
+import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.internal.BytesFieldInfo;
-import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.Test;
-
-import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -29,7 +28,7 @@ public class EmbeddedBytesMarshallableTest {
         assertEquals(expected, e1.toString());
         Bytes bytes = new HexDumpBytes();
         e1.writeMarshallable(bytes);
-        assertEquals("00 00 03 07 1e 61 31 32 33 34 35 36 37 38 39 30\n" +
+        assertEquals("00 80 04 07 1e 61 31 32 33 34 35 36 37 38 39 30\n" +
                 "31 32 33 34 35 36 37 38 39 30 31 32 33 34 35 36\n" +
                 "37 38 39 00 17 61 31 32 33 34 35 36 37 38 39 30\n" +
                 "31 32 33 34 35 36 37 38 39 61 62 63 c4 5f 74 4c\n" +
@@ -40,16 +39,97 @@ public class EmbeddedBytesMarshallableTest {
         bytes.releaseLast();
     }
 
-    static class SelfDescribingTriviallyCopyable extends SelfDescribingMarshallable {
-        @FieldGroup("header")
-        transient int description = BytesFieldInfo.lookup(getClass()).description();
+    @Test
+    public void schemaChanges() {
+        ClassAliasPool.CLASS_ALIASES.addAlias(EBM1.class, EBM2.class, EBM3.class);
+        EBM3 e3 = Marshallable.fromString("" +
+                "!EBM3 {\n" +
+                "  l0: 80,\n" +
+                "  l1: 81,\n" +
+                "  l2: 82,\n" +
+                "  i0: 40,\n" +
+                "  i1: 41,\n" +
+                "  i2: 42,\n" +
+                "  s0: 20,\n" +
+                "  s1: 21,\n" +
+                "  s2: 22,\n" +
+                "  b0: 10,\n" +
+                "  b1: 11,\n" +
+                "  b2: 12\n" +
+                "}");
+        Bytes bytes = new HexDumpBytes();
+        e3.writeMarshallable(bytes);
+        assertEquals("" +
+                "03 83 03 03 50 00 00 00 00 00 00 00 51 00 00 00\n" +
+                "00 00 00 00 52 00 00 00 00 00 00 00 28 00 00 00\n" +
+                "29 00 00 00 2a 00 00 00 14 00 15 00 16 00 0a 0b\n" +
+                "0c\n", bytes.toHexString());
+        EBM2 e2 = new EBM2();
+        e2.readMarshallable(bytes);
+        assertEquals("!EBM2 {\n" +
+                "  l0: 80,\n" +
+                "  l1: 81,\n" +
+                "  i0: 40,\n" +
+                "  i1: 41,\n" +
+                "  s0: 20,\n" +
+                "  s1: 21,\n" +
+                "  b0: 10,\n" +
+                "  b1: 11\n" +
+                "}\n", e2.toString());
+        bytes.readPosition(0);
+        EBM1 e1 = new EBM1();
+        e1.readMarshallable(bytes);
+        assertEquals("!EBM1 {\n" +
+                "  l0: 80,\n" +
+                "  i0: 40,\n" +
+                "  s0: 20,\n" +
+                "  b0: 10\n" +
+                "}\n", e1.toString());
+
+        bytes.clear();
+        e1.writeMarshallable(bytes);
+        assertEquals("" +
+                "01 81 01 01 50 00 00 00 00 00 00 00 28 00 00 00 14 00 0a", bytes.toHexString());
+        e2.readMarshallable(bytes);
+        assertEquals("!EBM2 {\n" +
+                "  l0: 80,\n" +
+                "  l1: 0,\n" +
+                "  i0: 40,\n" +
+                "  i1: 0,\n" +
+                "  s0: 20,\n" +
+                "  s1: 0,\n" +
+                "  b0: 10,\n" +
+                "  b1: 0\n" +
+                "}\n", e2.toString());
+        bytes.readPosition(0);
+        e3.readMarshallable(bytes);
+        assertEquals("!EBM3 {\n" +
+                "  l0: 80,\n" +
+                "  l1: 0,\n" +
+                "  l2: 0,\n" +
+                "  i0: 40,\n" +
+                "  i1: 0,\n" +
+                "  i2: 0,\n" +
+                "  s0: 20,\n" +
+                "  s1: 0,\n" +
+                "  s2: 0,\n" +
+                "  b0: 10,\n" +
+                "  b1: 0,\n" +
+                "  b2: 0\n" +
+                "}\n", e3.toString());
+
+        bytes.releaseLast();
     }
 
     static class EBM extends SelfDescribingTriviallyCopyable {
         static final int DESCRIPTION = BytesFieldInfo.lookup(EBM.class).description();
-        static final int[] range = BytesUtil.triviallyCopyableRange(EBM.class);
-        public static final int LENGTH = range[1] - range[0];
-        public static final int START = range[0];
+        static final int LENGTH, START;
+
+        static {
+            final int[] range = BytesUtil.triviallyCopyableRange(EBM.class);
+            LENGTH = range[1] - range[0];
+            START = range[0];
+        }
 
         @IntConversion(Base85IntConverter.class)
         int number;
@@ -59,21 +139,117 @@ public class EmbeddedBytesMarshallableTest {
         transient long b0, b1, b2;
         @FieldGroup("c")
         transient int c0, c1, c3;
-        Bytes a = Bytes.forFieldGroup(this, "a");
-        Bytes b = Bytes.forFieldGroup(this, "b");
-        Bytes c = Bytes.forFieldGroup(this, "c");
+        Bytes<?> a = Bytes.forFieldGroup(this, "a");
+        Bytes<?> b = Bytes.forFieldGroup(this, "b");
+        Bytes<?> c = Bytes.forFieldGroup(this, "c");
 
         @Override
-        public void readMarshallable(BytesIn bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
-            int description0 = bytes.readInt();
-            if (description0 != DESCRIPTION)
-                throw new UnsupportedOperationException("TODO FIX");
-            bytes.unsafeReadObject(this, START + 4, LENGTH - 4);
+        protected int $description() {
+            return DESCRIPTION;
         }
 
         @Override
-        public void writeMarshallable(BytesOut bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
-            bytes.unsafeWriteObject(this, START, LENGTH);
+        protected int $start() {
+            return START;
+        }
+
+        @Override
+        protected int $length() {
+            return LENGTH;
         }
     }
+
+    static class EBM1 extends SelfDescribingTriviallyCopyable {
+        static final int DESCRIPTION = BytesFieldInfo.lookup(EBM1.class).description();
+        static final int LENGTH, START;
+
+        static {
+            final int[] range = BytesUtil.triviallyCopyableRange(EBM1.class);
+            LENGTH = range[1] - range[0];
+            START = range[0];
+        }
+
+        long l0;
+        int i0;
+        short s0;
+        byte b0;
+
+        @Override
+        protected int $description() {
+            return DESCRIPTION;
+        }
+
+        @Override
+        protected int $start() {
+            return START;
+        }
+
+        @Override
+        protected int $length() {
+            return LENGTH;
+        }
+    }
+
+    static class EBM2 extends SelfDescribingTriviallyCopyable {
+        static final int DESCRIPTION = BytesFieldInfo.lookup(EBM2.class).description();
+        static final int LENGTH, START;
+
+        static {
+            final int[] range = BytesUtil.triviallyCopyableRange(EBM2.class);
+            LENGTH = range[1] - range[0];
+            START = range[0];
+        }
+
+        long l0, l1;
+        int i0, i1;
+        short s0, s1;
+        byte b0, b1;
+
+        @Override
+        protected int $description() {
+            return DESCRIPTION;
+        }
+
+        @Override
+        protected int $start() {
+            return START;
+        }
+
+        @Override
+        protected int $length() {
+            return LENGTH;
+        }
+    }
+
+    static class EBM3 extends SelfDescribingTriviallyCopyable {
+        static final int DESCRIPTION = BytesFieldInfo.lookup(EBM3.class).description();
+        static final int LENGTH, START;
+
+        static {
+            final int[] range = BytesUtil.triviallyCopyableRange(EBM3.class);
+            LENGTH = range[1] - range[0];
+            START = range[0];
+        }
+
+        long l0, l1, l2;
+        int i0, i1, i2;
+        short s0, s1, s2;
+        byte b0, b1, b2;
+
+        @Override
+        protected int $description() {
+            return DESCRIPTION;
+        }
+
+        @Override
+        protected int $start() {
+            return START;
+        }
+
+        @Override
+        protected int $length() {
+            return LENGTH;
+        }
+    }
+
 }
