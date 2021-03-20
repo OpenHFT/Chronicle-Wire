@@ -45,5 +45,4 @@ public class InputStreamToWire {
         bytes.readPositionRemaining(0, length);
         return wire;
     }
-
 }

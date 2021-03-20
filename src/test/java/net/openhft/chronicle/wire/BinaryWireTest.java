@@ -920,5 +920,4 @@ public class BinaryWireTest extends WireTestCommon {
             this.text = text;
         }
     }
-
 }

@@ -29,5 +29,4 @@ public class IgnoreHighOrderBitsTest extends WireTestCommon {
             bytes.releaseLast();
         }
     }
-
 }

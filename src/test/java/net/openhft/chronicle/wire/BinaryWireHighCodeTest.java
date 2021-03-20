@@ -19,5 +19,4 @@ public class BinaryWireHighCodeTest extends WireTestCommon {
             assertTrue(values.add(value));
         }
     }
-
 }

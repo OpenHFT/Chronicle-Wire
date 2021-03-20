@@ -195,7 +195,6 @@ public class JSONWireTest extends WireTestCommon {
         assertEquals(foo, foo2);
     }
 
-
     static class MapHolder extends SelfDescribingMarshallable {
         Map<RetentionPolicy, Double> map;
     }

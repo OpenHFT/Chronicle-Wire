@@ -27,5 +27,4 @@ public class WithDefaultsTest extends WireTestCommon {
         assertEquals(cs, o.toString());
         assertEquals(wd, o);
     }
-
 }

@@ -212,5 +212,4 @@ public interface WireOut extends WireCommon, MarshallableOut {
     default WireOut dropDefault(boolean dropDefault) {
         return this;
     }
-
 }

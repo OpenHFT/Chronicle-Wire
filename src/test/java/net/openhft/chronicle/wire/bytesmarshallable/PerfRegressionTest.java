@@ -87,7 +87,6 @@ public class PerfRegressionTest {
             super(s);
         }
 
-
         @Override
         public void readMarshallable(BytesIn bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
             read8Bit(bytes, a);

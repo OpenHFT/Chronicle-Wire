@@ -53,7 +53,6 @@ public class Base85LongConverter implements LongConverter {
         }
     }
 
-
     @Override
     public long parse(CharSequence text) {
         lengthCheck(text);
@@ -65,7 +64,6 @@ public class Base85LongConverter implements LongConverter {
         }
         return v;
     }
-
 
     @Override
     public void append(StringBuilder text, long value) {
@@ -90,7 +88,6 @@ public class Base85LongConverter implements LongConverter {
         }
     }
 
-
     public void append(Bytes<?> text, long value) {
         lengthCheck(text);
         final long rp = text.readPosition();
@@ -114,6 +111,4 @@ public class Base85LongConverter implements LongConverter {
             text.readLimit(rp + start + maxParseLength());
         }
     }
-
-
 }

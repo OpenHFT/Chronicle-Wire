@@ -60,5 +60,4 @@ public class Base85LongConverterTest extends WireTestCommon {
             b.releaseLast();
         }
     }
-
 }

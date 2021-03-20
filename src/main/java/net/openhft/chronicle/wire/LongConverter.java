@@ -70,5 +70,4 @@ public interface LongConverter {
     static void main(String[] args) {
         System.out.println("maxParseLength(85) = " + maxParseLength(85));
     }
-
 }

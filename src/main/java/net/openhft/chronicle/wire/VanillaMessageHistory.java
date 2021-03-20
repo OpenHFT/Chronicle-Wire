@@ -46,11 +46,9 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     private boolean addSourceDetails = false;
     private long start;
 
-
     static MessageHistory getThreadLocal() {
         return THREAD_LOCAL.get();
     }
-
 
     static void setThreadLocal(MessageHistory md) {
         if (md == null)
@@ -280,7 +278,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         sourceIndexArray[sources++] = index;
         dirty = true;
     }
-
 
     @Override
     public boolean isDirty() {

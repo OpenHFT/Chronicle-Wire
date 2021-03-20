@@ -15,5 +15,4 @@ public class CharSequenceObjectMapTest extends WireTestCommon {
             assertEquals("" + i, map.get("" + i));
         }
     }
-
 }

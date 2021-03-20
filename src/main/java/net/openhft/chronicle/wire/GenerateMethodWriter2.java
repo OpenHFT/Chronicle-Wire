@@ -276,5 +276,4 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
             return this;
         }
     }
-
 }

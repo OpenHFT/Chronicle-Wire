@@ -37,5 +37,4 @@ public class FloatDtoTest extends WireTestCommon {
             this.myFloat = myFloat;
         }
     }
-
 }

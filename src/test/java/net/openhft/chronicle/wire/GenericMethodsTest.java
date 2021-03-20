@@ -24,5 +24,4 @@ public class GenericMethodsTest {
                 "terminator: \"\"\n" +
                 "...\n", wire.toString());
     }
-
 }

@@ -66,5 +66,4 @@ public class TwoArraysTest {
         bytes2.releaseLast();
         bytes.releaseLast();
     }
-
 }

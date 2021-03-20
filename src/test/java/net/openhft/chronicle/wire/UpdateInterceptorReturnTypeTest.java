@@ -71,5 +71,4 @@ public class UpdateInterceptorReturnTypeTest {
     interface WithObjectVoidReturnType {
         Void x(String x);
     }
-
 }

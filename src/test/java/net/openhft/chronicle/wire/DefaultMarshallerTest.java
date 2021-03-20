@@ -120,5 +120,4 @@ public class DefaultMarshallerTest extends WireTestCommon {
             return super.equals(o);
         }
     }
-
 }

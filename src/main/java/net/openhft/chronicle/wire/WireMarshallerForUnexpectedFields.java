@@ -74,5 +74,4 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
             throw new AssertionError(e);
         }
     }
-
 }

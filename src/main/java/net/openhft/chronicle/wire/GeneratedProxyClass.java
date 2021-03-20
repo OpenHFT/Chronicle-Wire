@@ -198,5 +198,4 @@ public enum GeneratedProxyClass {
         result.append(") {\n");
         return result;
     }
-
 }

@@ -185,5 +185,4 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
             return this;
         }
     }
-
 }

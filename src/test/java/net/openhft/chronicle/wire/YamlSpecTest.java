@@ -298,5 +298,4 @@ public class YamlSpecTest extends WireTestCommon {
             b.releaseLast();
         }
     }
-
 }

@@ -37,5 +37,4 @@ public abstract class AbstractCommonMarshallable implements Marshallable, BytesM
     public String toString() {
         return Marshallable.$toString(this);
     }
-
 }

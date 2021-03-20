@@ -22,6 +22,5 @@ public class GenerateMethodWriterSameInterfaceDifferentOuterClassTest extends Te
                 .y("hello world");
 
     }
-
 }
 

@@ -1017,5 +1017,4 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     interface LongFunction {
         long apply(long oldValue, long param);
     }
-
 }

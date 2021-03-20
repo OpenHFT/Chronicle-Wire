@@ -120,7 +120,6 @@ public interface MessageHistory extends Marshallable {
      */
     long lastSourceIndex();
 
-
     /**
      * @return {@code true} if the message history has not been written using
      * {@link Marshallable#writeMarshallable(net.openhft.chronicle.wire.WireOut)}

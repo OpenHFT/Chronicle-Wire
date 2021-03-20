@@ -110,5 +110,4 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
             return this;
         }
     }
-
 }

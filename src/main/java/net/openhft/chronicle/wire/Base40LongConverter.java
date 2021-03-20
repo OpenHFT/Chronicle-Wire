@@ -88,5 +88,4 @@ public class Base40LongConverter implements LongConverter {
             text.setLength(start + maxParseLength());
         }
     }
-
 }

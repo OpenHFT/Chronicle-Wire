@@ -251,5 +251,4 @@ public class EmbeddedBytesMarshallableTest {
             return LENGTH;
         }
     }
-
 }

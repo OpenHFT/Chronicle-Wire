@@ -56,5 +56,4 @@ public class JSONNanTest extends WireTestCommon {
 public static class Dto extends SelfDescribingMarshallable {
     double value;
 }
-
 }

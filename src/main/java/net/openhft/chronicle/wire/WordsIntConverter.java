@@ -37,5 +37,4 @@ public class WordsIntConverter implements IntConverter {
     public void append(StringBuilder text, int value) {
         longConverter.append(text, value & 0xFFFFFFFFL);
     }
-
 }

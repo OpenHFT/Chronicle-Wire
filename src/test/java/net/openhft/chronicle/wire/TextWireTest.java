@@ -2067,5 +2067,4 @@ public class TextWireTest extends WireTestCommon {
             text.append(Long.toHexString(value));
         }
     }
-
 }

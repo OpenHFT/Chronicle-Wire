@@ -48,7 +48,6 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private Consumer<MessageHistory> historyConsumer = noOp -> {
     };
 
-
     private static class MessageHistoryThreadLocal {
 
         private ThreadLocal<MessageHistory> messageHistoryTL = withInitial(VanillaMessageHistory::new);
@@ -168,7 +167,6 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             if (!context.isPresent()) {
                 return false;
             }
-
 
             shouldDelegate = !readOne0(context);
 

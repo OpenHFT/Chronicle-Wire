@@ -80,5 +80,4 @@ public class SerializableWireTest extends WireTestCommon {
 
         bytes.releaseLast();
     }
-
 }

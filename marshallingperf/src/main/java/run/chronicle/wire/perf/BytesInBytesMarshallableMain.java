@@ -50,7 +50,6 @@ public class BytesInBytesMarshallableMain {
         System.out.println("write: " + writeHist.toLongMicrosFormat());
     }
 
-
     static class WithBytes extends BytesInBinaryMarshallable {
         Bytes a, b, c, d, e, f, g, h;
 

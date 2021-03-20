@@ -41,7 +41,6 @@ public class PrimitivesInBytesMarshallableMain {
         System.out.println("write: " + writeHist.toLongMicrosFormat());
     }
 
-
     static class WithPrimitives extends BytesInBinaryMarshallable {
         boolean a;
         byte b;

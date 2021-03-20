@@ -132,5 +132,4 @@ public class VanillaWireParser implements WireParser {
     public WireParselet lookup(CharSequence name) {
         return namedConsumer.get(name);
     }
-
 }

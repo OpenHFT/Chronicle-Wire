@@ -35,5 +35,4 @@ public class Funding extends SelfDescribingMarshallable {
     public void mins(long minsUntilFunding) {
         this.mins = minsUntilFunding;
     }
-
 }

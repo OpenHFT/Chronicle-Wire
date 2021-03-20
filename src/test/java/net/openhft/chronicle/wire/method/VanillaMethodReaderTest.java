@@ -161,7 +161,6 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         assertEquals(expected, actual);
     }
 
-
     @Test
     public void methodInterceptorNull() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap())

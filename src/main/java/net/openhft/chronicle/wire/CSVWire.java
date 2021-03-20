@@ -284,5 +284,4 @@ public class CSVWire extends TextWire {
             return true;
         }
     }
-
 }

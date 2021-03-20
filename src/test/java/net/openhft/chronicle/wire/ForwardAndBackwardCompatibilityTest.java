@@ -195,6 +195,5 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
             return this;
         }
     }
-
 }
 
