@@ -31,8 +31,8 @@ public class EmbeddedBytesMarshallableTest {
         assertEquals("00 80 04 07 1e 61 31 32 33 34 35 36 37 38 39 30\n" +
                 "31 32 33 34 35 36 37 38 39 30 31 32 33 34 35 36\n" +
                 "37 38 39 00 17 61 31 32 33 34 35 36 37 38 39 30\n" +
-                "31 32 33 34 35 36 37 38 39 61 62 63 c4 5f 74 4c\n" +
-                "0b 61 31 32 33 34 35 36 37 38 39 30\n", bytes.toHexString());
+                "31 32 33 34 35 36 37 38 39 61 62 63 0b 61 31 32\n" +
+                "33 34 35 36 37 38 39 30 c4 5f 74 4c\n", bytes.toHexString());
         EBM e2 = new EBM();
         e2.readMarshallable(bytes);
         assertEquals(expected, e2.toString());
