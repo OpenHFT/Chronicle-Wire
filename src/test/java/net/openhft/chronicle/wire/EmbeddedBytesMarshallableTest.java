@@ -135,10 +135,10 @@ public class EmbeddedBytesMarshallableTest {
         transient long a0, a1, a2, a3;
         @FieldGroup("b")
         transient long b0, b1, b2;
-        @IntConversion(Base85IntConverter.class)
-        int number;
         @FieldGroup("c")
         transient int c0, c1, c3;
+        @IntConversion(Base85IntConverter.class)
+        int number;
         Bytes<?> a = Bytes.forFieldGroup(this, "a");
         Bytes<?> b = Bytes.forFieldGroup(this, "b");
         Bytes<?> c = Bytes.forFieldGroup(this, "c");
