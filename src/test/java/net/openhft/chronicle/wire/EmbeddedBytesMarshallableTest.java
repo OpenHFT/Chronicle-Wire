@@ -137,7 +137,7 @@ public class EmbeddedBytesMarshallableTest {
         ebm.readMarshallable(bytes);
     }
 
-    @Test(expected = DecoratedBufferUnderflowException.class)
+    @Test(expected = IllegalStateException.class)
     public void invalidDescription2() {
         Bytes bytes = Bytes.allocateElasticOnHeap(64);
         bytes.append("abcd"); // tries to read too much data.
@@ -149,7 +149,16 @@ public class EmbeddedBytesMarshallableTest {
     @Test(expected = IllegalStateException.class)
     public void invalidDescription3() {
         Bytes bytes = Bytes.allocateElasticOnHeap(64);
-        bytes.append("abce"); // even bit count
+        bytes.append("abce"); // even bit count &&  tries to read too much data.
+        bytes.readLimit(64);
+        EBM ebm = new EBM();
+        ebm.readMarshallable(bytes);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void invalidDescription4() {
+        Bytes bytes = Bytes.allocateElasticOnHeap(64);
+        bytes.append("3\0\0\0"); // even bit count
         bytes.readLimit(64);
         EBM ebm = new EBM();
         ebm.readMarshallable(bytes);

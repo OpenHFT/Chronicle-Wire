@@ -30,11 +30,16 @@ abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMarshallabl
     }
 
     private void carefulCopy(BytesIn in, int description0) {
-        if (Integer.bitCount(description0) % 2 == 0)
-            throw new IllegalStateException("Invalid description: " + Integer.toHexString(description0));
         int offset = $start();
-        int longs = $description() >>> 24;// max 255
         int longs0 = description0 >>> 24;
+        int ints0 = (description0 >>> 16) & 0xFF;
+        int shorts0 = (description0 >>> 8) & 0x7F;
+        int bytes0 = description0 & 0xFF;
+        int length = longs0 * 8 + ints0 * 4 + shorts0 * 2 + bytes0;
+        if (Integer.bitCount(description0) % 2 == 0 || length > in.readRemaining())
+            throw new IllegalStateException("Invalid description: " + Integer.toHexString(description0) + ", length: " + length + ", remaining: " + in.readRemaining());
+
+        int longs = $description() >>> 24;// max 255
         for (int i = 0; i < Math.max(longs, longs0); i++) {
             long value = 0;
             if (i < longs0)
@@ -45,7 +50,6 @@ abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMarshallabl
             }
         }
         int ints = ($description() >>> 16) & 0xFF;// max 255
-        int ints0 = (description0 >>> 16) & 0xFF;
         for (int i = 0; i < Math.max(ints, ints0); i++) {
             int value = 0;
             if (i < ints0)
@@ -56,7 +60,6 @@ abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMarshallabl
             }
         }
         int shorts = ($description() >>> 8) & 0x7F; // max 127
-        int shorts0 = (description0 >>> 8) & 0x7F;
         for (int i = 0; i < Math.max(shorts, shorts0); i++) {
             short value = 0;
             if (i < shorts0)
@@ -67,7 +70,6 @@ abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMarshallabl
             }
         }
         int bytes = $description() & 0xFF; // max 255
-        int bytes0 = description0 & 0xFF;
         for (int i = 0; i < Math.max(bytes, bytes0); i++) {
             byte value = 0;
             if (i < bytes0)
