@@ -30,6 +30,8 @@ abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMarshallabl
     }
 
     private void carefulCopy(BytesIn in, int description0) {
+        if (Integer.bitCount(description0) % 2 == 0)
+            throw new IllegalStateException("Invalid description: " + Integer.toHexString(description0));
         int offset = $start();
         int longs = $description() >>> 24;// max 255
         int longs0 = description0 >>> 24;
@@ -53,7 +55,7 @@ abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMarshallabl
                 offset += 4;
             }
         }
-        int shorts = ($description() >>> 8) & 0x7F; // max 128
+        int shorts = ($description() >>> 8) & 0x7F; // max 127
         int shorts0 = (description0 >>> 8) & 0x7F;
         for (int i = 0; i < Math.max(shorts, shorts0); i++) {
             short value = 0;

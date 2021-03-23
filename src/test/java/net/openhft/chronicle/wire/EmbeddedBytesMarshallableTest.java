@@ -5,6 +5,7 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.FieldGroup;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.internal.BytesFieldInfo;
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.Test;
 
@@ -119,6 +120,39 @@ public class EmbeddedBytesMarshallableTest {
                 "}\n", e3.toString());
 
         bytes.releaseLast();
+    }
+
+    @Test(expected = DecoratedBufferUnderflowException.class)
+    public void noData() {
+        Bytes bytes = Bytes.allocateElasticOnHeap(64);
+        EBM ebm = new EBM();
+        ebm.readMarshallable(bytes);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void invalidDescription() {
+        Bytes bytes = Bytes.allocateElasticOnHeap(64);
+        bytes.readLimit(64); // even bit count i.e. 0
+        EBM ebm = new EBM();
+        ebm.readMarshallable(bytes);
+    }
+
+    @Test(expected = DecoratedBufferUnderflowException.class)
+    public void invalidDescription2() {
+        Bytes bytes = Bytes.allocateElasticOnHeap(64);
+        bytes.append("abcd"); // tries to read too much data.
+        bytes.readLimit(64);
+        EBM ebm = new EBM();
+        ebm.readMarshallable(bytes);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void invalidDescription3() {
+        Bytes bytes = Bytes.allocateElasticOnHeap(64);
+        bytes.append("abce"); // even bit count
+        bytes.readLimit(64);
+        EBM ebm = new EBM();
+        ebm.readMarshallable(bytes);
     }
 
     static class EBM extends SelfDescribingTriviallyCopyable {
