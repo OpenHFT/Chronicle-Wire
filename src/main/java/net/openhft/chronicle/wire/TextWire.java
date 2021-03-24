@@ -3437,6 +3437,9 @@ public class TextWire extends AbstractWire implements Wire {
 
             if (peekStringIgnoreCase("!!null \"\"")) {
                 bytes.readSkip("!!null \"\"".length());
+                // Skip to the next token, consuming any padding and/or a comma
+                consumePadding(1);
+
                 // discard the text after it.
                 //  text(acquireStringBuilder());
                 return true;

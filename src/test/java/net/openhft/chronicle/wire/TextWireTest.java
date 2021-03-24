@@ -1870,6 +1870,28 @@ public class TextWireTest extends WireTestCommon {
         doTestMapOfNamedKeys(mh);
     }
 
+    @Test
+    public void testNullConsumedIssue269() {
+
+        final FieldWithEnum fwe = Marshallable.fromString("!" + FieldWithEnum.class.getName() + " {" +
+                "allowedFoos: !!null \"\",\n" +
+                "orderLevel: CHILD\n" +
+                "}");
+        System.out.println("fwe = " + fwe);
+
+        assertNull(fwe.allowedFoos);
+        assertEquals(OrderLevel.CHILD, fwe.orderLevel);
+    }
+
+    public enum OrderLevel implements Marshallable {
+        PARENT, CHILD;
+    }
+
+    public static final class FieldWithEnum extends SelfDescribingMarshallable {
+        private byte[] allowedFoos;
+        private OrderLevel orderLevel = OrderLevel.PARENT;
+    }
+
     private void doTestMapOfNamedKeys(MapHolder mh) {
         assertEquals("!net.openhft.chronicle.wire.TextWireTest$MapHolder {\n" +
                         "  map: {\n" +
