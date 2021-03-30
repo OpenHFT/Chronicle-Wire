@@ -205,7 +205,7 @@ prints in `RawWire`.
 00000020 00 00 25 40                                      ··%@ 
 ----
 
-For more examples see https://github.com/OpenHFT/Chronicle-Wire/blob/master/README-Chapter1.md[Examples Chapter1]
+//For more examples see https://github.com/OpenHFT/Chronicle-Wire/blob/master/README-Chapter1.md[Examples Chapter1]
 
 === A note on `Wires.reset()`
 
