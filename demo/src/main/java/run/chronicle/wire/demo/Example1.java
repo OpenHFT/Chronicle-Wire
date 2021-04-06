@@ -41,7 +41,7 @@ public class Example1 {
            price: 10.5 */
         System.out.println(bytes);
 
-        //The same code as Binary wire. Using toHexString prints out hex view of the buffer's contents.
+        //The same code for Binary wire. Using toHexString prints out hex view of the buffer's contents.
         wire2.write("message").text("Hello World")
                 .write("number").int64(1234567890L)
                 .write("code").asEnum(TimeUnit.SECONDS)
@@ -55,8 +55,8 @@ public class Example1 {
         00000030 69 63 65 90 00 00 28 41                          ice···(A             */
         System.out.println(bytes2.toHexString());
 
-        // The same code as RawWire
-        //Using RawWire strips away all the meta data to reduce the size of the message, and improve speed.
+        // The same code for RawWire
+        //Using RawWire strips away all the meta data to reduce the size of the message, and improves speed.
         // The down-side is that we cannot easily see what the message contains.
         wire3.write("message").text("Hello World")
                 .write("number").int64(1234567890L)
@@ -69,7 +69,7 @@ public class Example1 {
         00000020 00 00 25 40                                      ··%@                     */
         System.out.println(bytes3.toHexString());
 
-        // to obtain the underlying ByteBuffer to write to a Channel
+        // To obtain the underlying ByteBuffer to write to a Channel
         ByteBuffer byteBuffer = bytes2.underlyingObject();
         byteBuffer.position(0);
         byteBuffer.limit(bytes2.length());

@@ -10,10 +10,10 @@ import java.util.concurrent.TimeUnit;
  * This is the code for the data type Data, used in the Examples.
  */
 class Data extends SelfDescribingMarshallable {
-    String message;
-    long number;
-    TimeUnit timeUnit;
-    double price;
+    private String message;
+    private long number;
+    private TimeUnit timeUnit;
+    private double price;
 
     public Data() {
     }
@@ -25,20 +25,36 @@ class Data extends SelfDescribingMarshallable {
         this.price = price;
     }
 
+    public String getMessage() {
+        return message;
+    }
+
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public long getNumber() {
+        return number;
     }
 
     public void setNumber(long number) {
         this.number = number;
     }
 
-    public void setPrice(double price){
-        this.price =price;
+    public TimeUnit getTimeUnit() {
+        return timeUnit;
     }
 
-    public void setTimeUnit(TimeUnit timeUnit){
+    public void setTimeUnit(TimeUnit timeUnit) {
         this.timeUnit = timeUnit;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
     }
 
     @Override
@@ -46,14 +62,15 @@ class Data extends SelfDescribingMarshallable {
         wire.read("message").text(this, Data::setMessage)
                 .read("number").int64(this, Data::setNumber)
                 .read("timeUnit").asEnum(TimeUnit.class, this, Data::setTimeUnit)
-                .read("price").float64(this,Data::setPrice);
+                .read("price").float64(this, Data::setPrice);
     }
+
     @Override
     public void writeMarshallable(WireOut wire) {
-        wire.write(() -> "message").text(message)
-                .write(() -> "number").int64(number)
-                .write(() -> "timeUnit").asEnum(timeUnit)
-                .write(() -> "price").float64(price);
+        wire.write("message").text(message)
+                .write("number").int64(number)
+                .write("timeUnit").asEnum(timeUnit)
+                .write("price").float64(price);
     }
 
     @Override

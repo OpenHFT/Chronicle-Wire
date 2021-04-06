@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 public class Example6 {
     public static void main(String[] args) {
 
-        // Bytes which wraps a ByteBuffer which is resized as needed.
+        // Bytes which wraps a ByteBuffer which is resized as needed
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
         Wire wire = new TextWire(bytes);
@@ -31,7 +31,7 @@ public class Example6 {
                 new Data("G'Day All", 1212121, TimeUnit.MINUTES, 12.34),
                 new Data("Howyall", 1234567890L, TimeUnit.SECONDS, 1000)
         };
-        wire.writeDocument(false, w -> w.write(() -> "mydata")
+        wire.writeDocument(false, w -> w.write("mydata")
                 .sequence(v -> Stream.of(data).forEach(v::object)));
 
         //Prints out:
@@ -56,10 +56,11 @@ public class Example6 {
           price: 1E3
         }
       ]
- */     System.out.println(Wires.fromSizePrefixedBlobs(bytes));
+ */
+        System.out.println(Wires.fromSizePrefixedBlobs(bytes));
 
         List<Data> dataList = new ArrayList<>();
-        wire.readDocument(null, w -> w.read(() -> "mydata")
+        wire.readDocument(null, w -> w.read("mydata")
                 .sequence(dataList, (l, v) -> {
                     while (v.hasNextSequenceItem())
                         l.add(v.object(Data.class));
@@ -76,7 +77,7 @@ public class Example6 {
 
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         Wire wire2 = new BinaryWire(bytes2);
-        wire2.writeDocument(false, w -> w.write(() -> "mydata")
+        wire2.writeDocument(false, w -> w.write("mydata")
                 .sequence(v -> Stream.of(data).forEach(v::object)));
 
         //Prints out
@@ -101,10 +102,11 @@ public class Example6 {
             price: !int 1000
           }
         ]
- */     System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
+ */
+        System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
 
         List<Data> dataList2 = new ArrayList<>();
-        wire2.readDocument(null, w -> w.read(() -> "mydata")
+        wire2.readDocument(null, w -> w.read("mydata")
                 .sequence(dataList2, (l, v) -> {
                     while (v.hasNextSequenceItem())
                         l.add(v.object(Data.class));

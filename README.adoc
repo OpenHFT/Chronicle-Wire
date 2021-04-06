@@ -5,10 +5,10 @@
 
 == Version 
 
-[#image-maven]
-[caption="",link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire]
+[#img-maven]
+[caption="",link:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire]
 image::https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire/badge.svg[]
-image:https://javadoc.io/badge2/net.openhft/chronicle-wire/javadoc.svg[link="https://www.javadoc.io/doc/net.openhft/chronicle-wire/latest/index.html"]
+image::https://javadoc.io/badge2/net.openhft/chronicle-wire/javadoc.svg[link="https://www.javadoc.io/doc/net.openhft/chronicle-wire/latest/index.html"]
 
 == About
 
@@ -116,7 +116,7 @@ To support wire format discovery, the first bytes should have the top bit set.
 
 == Using Wire
 
-=== Simple use case
+=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example1.java[Simple use case]
 
 First you need to have a buffer to write to.
 This can be a `byte[]`, a `ByteBuffer`, off-heap memory, or even an address and length that you have obtained from some other library.
@@ -167,7 +167,7 @@ price: 10.5
 
 [source,Java]
 ----
-// the same code as for text wire
+// The same code for BinaryWire
 wire2.write("message").text("Hello World")
         .write("number").int64(1234567890L)
         .write("code").asEnum(TimeUnit.SECONDS)
@@ -179,18 +179,18 @@ prints
 
 [source,text]
 ----
-00000000 C7 6D 65 73 73 61 67 65  EB 48 65 6C 6C 6F 20 57 ·message ·Hello W
-00000010 6F 72 6C 64 C6 6E 75 6D  62 65 72 A3 D2 02 96 49 orld·num ber····I
-00000020 C4 63 6F 64 65 E7 53 45  43 4F 4E 44 53 C5 70 72 ·code·SE CONDS·pr
-00000030 69 63 65 90 00 00 28 41                          ice···(A 
+00000000 c7 6d 65 73 73 61 67 65  eb 48 65 6c 6c 6f 20 57 ·message ·Hello W
+00000010 6f 72 6c 64 c6 6e 75 6d  62 65 72 a6 d2 02 96 49 orld·num ber····I
+00000020 c4 63 6f 64 65 e7 53 45  43 4f 4e 44 53 c5 70 72 ·code·SE CONDS·pr
+00000030 69 63 65 90 00 00 28 41                          ice···(A
 ----
 
-Using `RawWire` strips away all the meta data to reduce the size of the message, and improve speed.
+Using `RawWire` strips away all the meta data to reduce the size of the message, and improves speed.
 The down-side is that we cannot easily see what the message contains.
 
 [source, Java]
 ----
-// the same code as for raw wire
+// The same code for RawWire
 wire3.write("message").text("Hello World")
         .write("number").int64(1234567890L)
         .write("code").asEnum(TimeUnit.SECONDS)
@@ -202,15 +202,15 @@ prints in `RawWire`.
 
 [source, text]
 ----
-00000000 0B 48 65 6C 6C 6F 20 57  6F 72 6C 64 D2 02 96 49 ·Hello W orld···I
-00000010 00 00 00 00 07 53 45 43  4F 4E 44 53 00 00 00 00 ·····SEC ONDS····
-00000020 00 00 25 40                                      ··%@ 
+00000000 0b 48 65 6c 6c 6f 20 57  6f 72 6c 64 d2 02 96 49 ·Hello W orld···I
+00000010 00 00 00 00 07 53 45 43  4f 4e 44 53 00 00 00 00 ·····SEC ONDS····
+00000020 00 00 25 40                                      ··%@
 ----
 
 //For more examples see https://github.com/OpenHFT/Chronicle-Wire/blob/master/README-Chapter1.md[Examples Chapter1]
-=== Simple example with a data type
+=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example2.java[Simple example with a data type]
 
-See below for the code for Data.  It is much the same and the previous section, with the code required wrapped in a method.
+This example is much the same as the previous section, with the code required wrapped in a method. See Section "The code for the class Data" for the code for Data.
 [source,Java]
 ----
 // Bytes which wraps a ByteBuffer which is resized as needed.
@@ -259,15 +259,15 @@ System.out.println(data3);
 prints
 [source,text]
 ----
-00000000 C7 6D 65 73 73 61 67 65  EB 48 65 6C 6C 6F 20 57 ·message ·Hello W
-00000010 6F 72 6C 64 C6 6E 75 6D  62 65 72 A3 D2 02 96 49 orld·num ber····I
-00000020 C8 74 69 6D 65 55 6E 69  74 EB 4E 41 4E 4F 53 45 ·timeUni t·NANOSE
-00000030 43 4F 4E 44 53 C5 70 72  69 63 65 90 00 00 28 41 CONDS·pr ice···(A
+00000000 c7 6d 65 73 73 61 67 65  eb 48 65 6c 6c 6f 20 57 ·message ·Hello W
+00000010 6f 72 6c 64 c6 6e 75 6d  62 65 72 a6 d2 02 96 49 orld·num ber····I
+00000020 c8 74 69 6d 65 55 6e 69  74 eb 4e 41 4e 4f 53 45 ·timeUni t·NANOSE
+00000030 43 4f 4e 44 53 c5 70 72  69 63 65 90 00 00 28 41 CONDS·pr ice···(A
 
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ----
 
-=== Simple example with a nested data type
+=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example3.java[Simple example with a nested data type]
 
 In this example the data is marshalled as a nested data structure.
 
@@ -280,11 +280,11 @@ Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 Wire wire = new TextWire(bytes);
 
 Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
-wire.write(() -> "mydata").marshallable(data);
+wire.write("mydata").marshallable(data);
 System.out.println(bytes);
 
 Data data2= new Data();
-wire.read(() -> "mydata").marshallable(data2);
+wire.read("mydata").marshallable(data2);
 System.out.println(data2);
 ----
 
@@ -311,11 +311,11 @@ To write in binary instead
 Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
 Wire wire2 = new BinaryWire(bytes2);
 
-wire2.write(() -> "mydata").marshallable(data);
+wire2.write("mydata").marshallable(data);
 System.out.println(bytes2.toHexString());
 
 Data data3= new Data();
-wire2.read(() -> "mydata").marshallable(data3);
+wire2.read("mydata").marshallable(data3);
 System.out.println(data3);
 ----
 
@@ -323,16 +323,16 @@ prints
 
 [source,text]
 ----
-00000000 C6 6D 79 64 61 74 61 82  40 00 00 00 C7 6D 65 73 ·mydata· @····mes
-00000010 73 61 67 65 EB 48 65 6C  6C 6F 20 57 6F 72 6C 64 sage·Hel lo World
-00000020 C6 6E 75 6D 62 65 72 A3  D2 02 96 49 C8 74 69 6D ·number· ···I·tim
-00000030 65 55 6E 69 74 EB 4E 41  4E 4F 53 45 43 4F 4E 44 eUnit·NA NOSECOND
-00000040 53 C5 70 72 69 63 65 90  00 00 28 41             S·price· ··(A
+00000000 c6 6d 79 64 61 74 61 82  40 00 00 00 c7 6d 65 73 ·mydata· @····mes
+00000010 73 61 67 65 eb 48 65 6c  6c 6f 20 57 6f 72 6c 64 sage·Hel lo World
+00000020 c6 6e 75 6d 62 65 72 a6  d2 02 96 49 c8 74 69 6d ·number· ···I·tim
+00000030 65 55 6e 69 74 eb 4e 41  4e 4f 53 45 43 4f 4e 44 eUnit·NA NOSECOND
+00000040 53 c5 70 72 69 63 65 90  00 00 28 41             S·price· ··(A
 
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ----
 
-=== Simple example with a data type with a type
+=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example4.java[Simple example with a data type with a type]
 
 In this example, the type is encoded with the data.
 Instead of showing the entire package name which will almost certainly not work on any other platform, an alias for the type is used.
@@ -348,10 +348,10 @@ Wire wire = new TextWire(bytes);
 ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
 
 Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
-wire.write(() -> "mydata").object(data);
+wire.write("mydata").object(data);
 System.out.println(bytes);
 
-Data data2= wire.read(() -> "mydata").object(Data.class);
+Data data2= wire.read("mydata").object(Data.class);
 System.out.println(data2);
 ----
 
@@ -378,10 +378,10 @@ To write in binary instead
 Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
 Wire wire2 = new BinaryWire(bytes2);
 
-wire2.write(() -> "mydata").object(data);
+wire2.write("mydata").object(data);
 System.out.println(bytes2.toHexString());
 
-Data data3 = wire2.read(() -> "mydata").object(Data.class);
+Data data3 = wire2.read("mydata").object(Data.class);
 System.out.println(data3);
 ----
 
@@ -389,21 +389,38 @@ prints
 
 [source,text]
 ----
-00000000 C6 6D 79 64 61 74 61 B6  04 44 61 74 61 82 40 00 ·mydata· ·Data·@·
-00000010 00 00 C7 6D 65 73 73 61  67 65 EB 48 65 6C 6C 6F ···messa ge·Hello
-00000020 20 57 6F 72 6C 64 C6 6E  75 6D 62 65 72 A3 D2 02  World·n umber···
-00000030 96 49 C8 74 69 6D 65 55  6E 69 74 EB 4E 41 4E 4F ·I·timeU nit·NANO
-00000040 53 45 43 4F 4E 44 53 C5  70 72 69 63 65 90 00 00 SECONDS· price···
+00000000 c6 6d 79 64 61 74 61 b6  04 44 61 74 61 82 40 00 ·mydata· ·Data·@·
+00000010 00 00 c7 6d 65 73 73 61  67 65 eb 48 65 6c 6c 6f ···messa ge·Hello
+00000020 20 57 6f 72 6c 64 c6 6e  75 6d 62 65 72 a6 d2 02  World·n umber···
+00000030 96 49 c8 74 69 6d 65 55  6e 69 74 eb 4e 41 4e 4f ·I·timeU nit·NANO
+00000040 53 45 43 4f 4e 44 53 c5  70 72 69 63 65 90 00 00 SECONDS· price···
 00000050 28 41                                            (A
 
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ----
 
-=== Write a message with a thread safe size prefix
+=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example5.java[Write a message with a thread-safe size prefix]
 
-The benefits of using this approach are that
-- the reader can block until the message is complete.
-- if you have concurrent writers, they will block unless the size if know in which case it skip the message(s) still being written.
+The benefits of using this approach are that:
+
+* The reader (tailer) is blocked until the message is completely written.
+* If you have concurrent writers (appenders):
+** If the message size is not known, other writers will be blocked until the message is written completely.
+** If the message size is known, other writers will leave buffer space for this writer to complete writing the message and
+   concurrently write beyond the known size.
+
+Figure 1 indicates the mechanism of thread-safe message writing. There is a 32-bit field called "len" in the
+start of the message that an appender writes to buffer. The "len" field includes: a) "complete" flag that
+shows whether the appender has completed writing this message or not. b) "metadata" flag that shows whether this
+data is metadata and c) the remaining 30 bits that contains the actual size of data. After completing writing the message, the
+appender returns to the "len" field and sets the "complete" flag to one so that it indicates the message was written
+completely. Afterwards, the reader starts reading the message. If the message size is not known, appender 2 also
+stops writing until the message is written completely. If the size of the message is known, appender 2 leaves the
+required space for appender 1's message and concurrently writes beyond that, as Figure 1 shows.
+
+[#img-buffer]
+.Thread-safe message writting
+image::buffer.jpg[buffer,700,700]
 
 [source,Java]
 ----
@@ -411,15 +428,16 @@ The benefits of using this approach are that
 Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
 Wire wire = new TextWire(bytes);
-
 ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
-
 Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
+
+// writeDocument() blocks other readers and writers, until the writing of this
+// data is completed. See the above comment.
 wire.writeDocument(false, data);
 System.out.println(Wires.fromSizePrefixedBlobs(bytes));
 
 Data data2= new Data();
-assertTrue(wire.readDocument(null, data2));
+wire.readDocument(null, data2);
 System.out.println(data2);
 ----
 
@@ -449,7 +467,7 @@ wire2.writeDocument(false, data);
 System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
 
 Data data3= new Data();
-assertTrue(wire2.readDocument(null, data3));
+wire2.readDocument(null, data3);
 System.out.println(data3);
 ----
 
@@ -468,7 +486,7 @@ price: 10.5
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ----
 
-=== Write a message with a sequence of records
+=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example6.java[Write a message with a sequence of records]
 
 [source,Java]
 ----
@@ -484,12 +502,12 @@ Data[] data = {
         new Data("G'Day All", 1212121, TimeUnit.MINUTES, 12.34),
         new Data("Howyall", 1234567890L, TimeUnit.SECONDS, 1000)
 };
-wire.writeDocument(false, w -> w.write(() -> "mydata")
+wire.writeDocument(false, w -> w.write("mydata")
         .sequence(v -> Stream.of(data).forEach(v::object)));
 System.out.println(Wires.fromSizePrefixedBlobs(bytes));
 
 List<Data> dataList = new ArrayList<>();
-        wire.readDocument(null, w -> w.read(() -> "mydata")
+        wire.readDocument(null, w -> w.read("mydata")
                 .sequence(dataList, (l, v) -> {
                     while (v.hasNextSequenceItem())
                         l.add(v.object(Data.class));
@@ -537,12 +555,12 @@ To write in binary instead
 Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
 Wire wire2 = new BinaryWire(bytes2);
 
-wire2.writeDocument(false, w -> w.write(() -> "mydata")
+wire2.writeDocument(false, w -> w.write("mydata")
         .sequence(v -> Stream.of(data).forEach(v::object)));
 System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
 
 List<Data> dataList2 = new ArrayList<>();
-wire2.readDocument(null, w -> w.read(() -> "mydata")
+wire2.readDocument(null, w -> w.read("mydata")
                 .sequence(dataList2, (l, v) -> {
                     while (v.hasNextSequenceItem())
                         l.add(v.object(Data.class));
@@ -583,15 +601,16 @@ Data{message='G'Day All', number=1212121, timeUnit=MINUTES, price=12.34}
 Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
 ----
 
-=== The code for the class Data
+=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Data.java[The code for the class Data]
+
 
 [source,Java]
 ----
 class Data implements Marshallable {
-    String message;
-    long number;
-    TimeUnit timeUnit;
-    double price;
+    private String message;
+    private long number;
+    private TimeUnit timeUnit;
+    private double price;
 
     public Data() {
     }
@@ -603,7 +622,7 @@ class Data implements Marshallable {
         this.price = price;
     }
 
-        public void setMessage(String message) {
+    public void setMessage(String message) {
         this.message = message;
     }
 
@@ -619,6 +638,22 @@ class Data implements Marshallable {
         this.timeUnit = timeUnit;
     }
 
+    public String getMessage() {
+        return message;
+    }
+
+    public long getNumber() {
+        return number;
+    }
+
+    public TimeUnit getTimeUnit() {
+        return timeUnit;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
     @Override
     public void readMarshallable(WireIn wire) throws IllegalStateException {
         wire.read("message").text(this, Data::setMessage)
@@ -629,10 +664,10 @@ class Data implements Marshallable {
 
     @Override
     public void writeMarshallable(WireOut wire) {
-        wire.write(() -> "message").text(message)
-                .write(() -> "number").int64(number)
-                .write(() -> "timeUnit").asEnum(timeUnit)
-                .write(() -> "price").float64(price);
+        wire.write("message").text(message)
+                .write("number").int64(number)
+                .write("timeUnit").asEnum(timeUnit)
+                .write("price").float64(price);
     }
 
     @Override
@@ -647,12 +682,12 @@ class Data implements Marshallable {
 }
 ----
 
-=== A note on `Wires.reset()`
+== A note on `Wires.reset()`
 
 Chronicle Wire allows (and encourages) objects to be re-used in order to reduce allocation rates.
 
 When a marshallable object is re-used or initialised by the framework, it is first reset by way of `Marshallable.reset()`
-which is recommend over calling `Wires.reset()`.
+which is recommended over calling `Wires.reset()`.
 In the case of most DTOs with simple scalar values, this will not cause any issues.
 However, more complicated objects with object instance fields may experience undesired behaviour.
 
@@ -815,7 +850,7 @@ refData: {
 }
 ----
 
-NOTE: You can add an enum which didn't exist
+NOTE: You can add an enum which didn't exist.
 
 [source,yaml]
 ----
@@ -869,7 +904,7 @@ myData: Four # will error as doesn't exist.
 ...
 ----
 
-The consumer doesn't need to do anything special to use the new enum, however the producer need to create it in code as follows
+The consumer doesn't need to do anything special to use the new enum, however the producer need to create it in code as follows.
 
 [source, Java]
 ----
@@ -881,7 +916,7 @@ MyData myData = EnumCache.of(MyData.class).nameFor("Three");
 out.refData(new RefData(myData));
 ----
 
-NOTE: The unique key for these objects is their type and name. Two objects of different types can have the same name
+NOTE: The unique key for these objects is their type and name. Two objects of different types can have the same name.
 
 IMPORTANT: These objects passed by reference are never cleaned up. Only use them when there is likely to be a limited number of them over the life of the application.
 
@@ -1053,7 +1088,7 @@ class MyInterfaceImpl extends MyInterface {
 }
 ----
 
-For an example, see `net.openhft.chronicle.wire.MethodFilterOnFirstArgTest`
+For an example, see `net.openhft.chronicle.wire.MethodFilterOnFirstArgTest`.
 
 === Intercepting `MethodReader` calls
 
@@ -1061,7 +1096,7 @@ You may wish to intercept handling a call in the method reader in order to execu
 
 ==== Intercepting by passing control over the original method call
 
-`MethodReader` provides a flexible feature for supporting all of the above use cases -- the option to specify `MethodReaderInterceptorReturns`.
+`MethodReader` provides a flexible feature for supporting all the above use cases -- the option to specify `MethodReaderInterceptorReturns`.
 If set, it will be triggered *instead* of the original call. It's possible to either skip the original method or to call it via passed `Invocation` instance:
 [source,Java]
 ----
@@ -1111,10 +1146,10 @@ See `MethodReaderInterceptorReturnsTest` for more examples.
 Chronicle Wire can be used for:
 
 * file headers
-* TCP connection headers; where the optimal wire format taht is actually used can be negotiated
+* TCP connection headers; where the optimal wire format that is actually used can be negotiated
 * message/excerpt contents
 * Chronicle Queue version 4.x and later
-* the API for marshalling generated data types.
+* the API for marshalling generated data types
 
 == Similar projects
 
@@ -1124,9 +1159,9 @@ Simple Binary Encoding (SBE) is designed to be a more efficient replacement for 
 It is simple, binary, and it supports C++ and Java.
 
 XML, when it first started, did not use XML for its own schema files, and it is not insignificant that SBE does not use SBE for its schema either.
-This is because it is not trying to be human readable.
-It has XML which, though standard, is not designed to be human readable either.
-Chronicle believes that it is a limitation that it does not naturally lend itself to a human readable form.
+This is because it is not trying to be human-readable.
+It has XML which, though standard, is not designed to be human-readable either.
+Chronicle believes that it is a limitation that it does not naturally lend itself to a human-readable form.
 
 The encoding that SBE uses is similar to binary; with field numbers and fixed-width types.
 
@@ -1138,12 +1173,12 @@ SBE has support for schema changes provided that the type of a field doesn't cha
 
 Message Pack is a packed binary wire format which also supports `JSON` for human readability and compatibility.
 It has many similarities to the binary (and `JSON`) formats of this library.
-Chronicle Wire is designed to be human readable first, based on `YAML`, and has a range of options to make it more efficient.
+Chronicle Wire is designed to be human-readable first, based on `YAML`, and has a range of options to make it more efficient.
 The most extreme being fixed position binary.
 
 Message Pack has support for embedded binary, whereas Chronicle Wire has support for comments and hints, to improve rendering for human consumption.
 
-The documentation looks well thought out, and it is worth emulating.
+The documentation looks well-thought-out, and it is worth emulating.
 
 === Comparison with Cap'n'Proto
 
@@ -1179,13 +1214,13 @@ As `YAML` supports object field names (or keys), these could be strings or even 
 
 Based on https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html
 
-NOTE: It not clear what padding which does not take up space on the wire means.
+NOTE: It is not clear what padding which does not take up space on the wire means.
 
-== Design notes.
+== Design notes
 
 See https://capnproto.org/news/2014-06-17-capnproto-flatbuffers-sbe.html for a comparison to other encoders.
 
-=== Schema evolution.
+=== Schema evolution
 
 Wire optionally supports:
 
@@ -1198,13 +1233,13 @@ Wire optionally supports:
 The more flexibility, the larger the overhead in terms of CPU and memory.
 Chronicle Wire allows you to dynamically pick the optimal configuration, and convert between these options.
 
-=== Zero copy.
+=== Zero copy
 
 Chronicle Wire supports zero-copy random access to fields, and direct-copy from in-memory to the network.
 It also supports translation from one wire format to another.
 For example, switching between fixed-length data and variable-length data.
 
-=== Random Access.
+=== Random Access
 
 You can access a random field in memory, For example, in a `2TB` file, page-in/pull-into CPU cache, only the data relating to your read or write.
 
@@ -1219,19 +1254,19 @@ You can access a random field in memory, For example, in a `2TB` file, page-in/p
 
 Chronicle Wire references are relative to the start of the data contained, to allow loading in an arbitrary point in memory.
 
-=== Safe against malicious input.
+=== Safe against malicious input
 
 Chronicle Wire has built in tiers of bounds checks to prevent accidental read/writing that corrupts the data.
 It is not complete enough for a security review.
 
-=== Reflection / generic algorithms.
+=== Reflection / generic algorithms
 
 Chronicle Wire supports generic reading and writing of an arbitrary stream.
 This can be used in combination with predetermined fields.
 For example, you can read the fields you know about, and ask it to provide the fields that you do not.
 You can also give generic field names like keys to a map as `YAML` does.
 
-=== Initialization order.
+=== Initialization order
 
 Chronicle Wire can handle unknown information like lengths, by using padding.
 It will go back and fill in any data that it was not aware of when it was writing the data.
@@ -1239,7 +1274,7 @@ For example, when it writes an object, it does not know how long it is going to 
 Once the object has been written, it goes back and overwrites the length.
 It can also handle situations where the length was more than needed; this is known as packing.
 
-=== Unknown field retention?
+=== Unknown field retention
 
 Chronicle Wire can read data that it did not expect, interspersed with data it did expect.
 Rather than specify the expected field name, a `StringBuilder` is provided.
@@ -1247,7 +1282,7 @@ Rather than specify the expected field name, a `StringBuilder` is provided.
 NOTE: There are times when you want to skip/copy an entire field or message, without reading any more of it.
 This is also supported.
 
-=== Object-maximumLimit RPC system.
+=== Object-maximumLimit RPC system
 
 Chronicle Wire supports references based on name, number, or UUID. This is useful when including a reference to an object that the reader should look up by other means.
 
@@ -1264,7 +1299,7 @@ Chronicle Wire supports storing an application's internal state.
 This will not allow it to grow or shrink.
 You can't free any of it without copying the pieces that you need, and discarding the original copy.
 
-=== Padding takes space on the wire.
+=== Padding takes space on the wire
 
 The Chronicle Wire format that is chosen determines if there is any padding on the wire.
 If you copy the in-memory data directly, its format does not change.
@@ -1274,16 +1309,16 @@ You can decide whether the original padding is to be preserved or not, if turned
 
 We could look at supporting *Cap'n'Proto*'s zero-byte removal compression.
 
-=== Un-set fields take space on the wire?
+=== Un-set fields take space on the wire
 
 Chronicle Wire supports fields with, and without, optional fields, and automatic means of removing them.
 Chronicle Wire does not support automatically adding them back in, because information has been lost.
 
-=== Pointers take space on the wire.
+=== Pointers take space on the wire
 
 Chronicle Wire does not have pointers, but it does have content-lengths which are a useful hint for random access and robustness; but these are optional.
 
-== Working with intellij
+== Working with IntelliJ
 
 These templates can be added to IntelliJ to create simple getters and setters.
 
@@ -1305,11 +1340,112 @@ $class.name ${field.name}($field.type $paramName) {
   return this;
 }
 ----
+== Why use Marshallable objects
+
+Marshallable objects have been designed to allow you to
+
+- write a simple POJO
+- have the `toString()`, `hashCode()` and `equals(Object)` methods created for you.
+- serialization to a human-readable format (based on YAML), as well as efficient binary formats.
+- the string format for text and binary can be logged and reconstructed from the text or hexadecimal dump
+- copying and conversion of data from one type to another
+
+== Pojo Example
+The following is a simple example of a POJO with a nested data type in a List.
+
+.A Simple Pojo without needing to define toString/hashCode/equals
+[source,java]
+----
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+
+class MyPojo extends SelfDescribingMarshallable {
+    String text;
+    int num;
+    double factor;
+
+    public MyPojo(String text, int num, double factor) {
+        this.text = text;
+        this.num = num;
+        this.factor = factor;
+    }
+}
+
+class MyPojos extends SelfDescribingMarshallable {
+    String name;
+    List<MyPojo> myPojos = new ArrayList<>();
+
+    public MyPojos(String name) {
+        this.name = name;
+    }
+}
+----
+
+By extending `SelfDescribingMarshallable` the class has an implementation
+for `readMarshallable(WireIn)`, `writeMarshallable(WireOut)` and from these
+`toString()`, `hashCode()` and `equals(Object)`.  You only need to define the method
+yourself for improved efficiency.  These default implementations can give you
+2/3rds of the performance of hand coding but save time and potential errors
+writing them yourself.
+
+=== The toString()
+An important feature of the toString() method is no information is lost.  The object can be reconstructed from
+the text of the toString() method.  This is useful for building sample data in unit tests for from a file.
+It also means that you can take the dump of an object in a log file and reconstruct the original object.
+
+[source, java]
+----
+MyPojos mps = new MyPojos("test-list");
+mps.myPojos.add(new MyPojo("text1", 1, 1.1));
+mps.myPojos.add(new MyPojo("text2", 2, 2.2));
+
+System.out.println(mps); // <1>
+----
+<1> Uses the default `toString()` provided.
+
+prints
+
+[source, yaml]
+----
+!MyPojos {
+  name: test-list,
+  myPojos: [
+    { text: text1, num: 1, factor: 1.1 },
+    { text: text2, num: 2, factor: 2.2 }
+  ]
+}
+----
+
+You can take the same output and reconstruct the original object.
+
+[source, java]
+----
+MyPojos mps2 = Marshallable.fromString(mps.toString());
+assertEquals(mps, mps2); // <1>
+
+String text = "!MyPojos {\n" +
+        "  name: test-list,\n" +
+        "  myPojos: [\n" +
+        "    { text: text1, num: 1, factor: 1.1 },\n" +
+        "    { text: text2, num: 2, factor: 2.2 }\n" +
+        "  ]\n" +
+        "}\n";
+MyPojos mps3 = Marshallable.fromString(text);
+assertEquals(mps, mps3); // <1>
+----
+<1> `SelfDescribingMarshallable` also provides a default `equals(Object)` and `hashCode()`
+
+Finally, you can take data from a file and build the object.
+
+[source, java]
+----
+MyPojos mps4 = Marshallable.fromFile("my-pojos.yaml");
+assertEquals(mps, mps4);
+----
 
 == Self describing messages
 
 When writing and reading from text, Marshallable are always self describing, however when using Binary there is two choices,
-`SelfDescribingMarshallable` with is self decribing in binary and `BytesInBinaryMarshallable` which uses raw values.
+`SelfDescribingMarshallable` which is self describing in binary and `BytesInBinaryMarshallable` which uses raw values.
 
 `SelfDescribingMarshallable` is slightly slower, and larger when writing but supports schema changes such as
 
