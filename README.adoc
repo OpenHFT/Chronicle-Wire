@@ -150,8 +150,9 @@ So now you can write to the wire with a simple document.
 ----
 wire.write("message").text("Hello World")
       .write("number").int64(1234567890L)
-       .write("code").asEnum(TimeUnit.SECONDS)
+      .write("code").asEnum(TimeUnit.SECONDS)
       .write("price").float64(10.50);
+
 System.out.println(bytes);
 ----
 
@@ -172,7 +173,8 @@ wire2.write("message").text("Hello World")
         .write("number").int64(1234567890L)
         .write("code").asEnum(TimeUnit.SECONDS)
         .write("price").float64(10.50);
-        System.out.println(bytes2.toHexString());
+
+System.out.println(bytes2.toHexString());
 ----
 
 prints
@@ -195,6 +197,7 @@ wire3.write("message").text("Hello World")
         .write("number").int64(1234567890L)
         .write("code").asEnum(TimeUnit.SECONDS)
         .write("price").float64(10.50);
+
 System.out.println(bytes3.toHexString());
 ----
 
@@ -410,17 +413,20 @@ The benefits of using this approach are that:
    concurrently write beyond the known size.
 
 Figure 1 indicates the mechanism of thread-safe message writing. There is a 32-bit field called "len" in the
-start of the message that an appender writes to buffer. The "len" field includes: a) "complete" flag that
-shows whether the appender has completed writing this message or not. b) "metadata" flag that shows whether this
-data is metadata and c) the remaining 30 bits that contains the actual size of data. After completing writing the message, the
-appender returns to the "len" field and sets the "complete" flag to one so that it indicates the message was written
+start of the message that an appender writes to buffer. The "len" field includes:
+
+1. "complete" flag that shows whether the appender has completed writing this message or not.
+2. "metadata" flag that shows whether this data is metadata.
+3. the remaining 30 bits that contains the actual size of data.
+
+After completing writing the message, the appender returns to the "len" field and sets the "complete" flag to one so that it indicates the message was written
 completely. Afterwards, the reader starts reading the message. If the message size is not known, appender 2 also
 stops writing until the message is written completely. If the size of the message is known, appender 2 leaves the
 required space for appender 1's message and concurrently writes beyond that, as Figure 1 shows.
 
 [#img-buffer]
 .Thread-safe message writting
-image::buffer.jpg[buffer,700,700]
+image::buffer.jpg[buffer,700,500]
 
 [source,Java]
 ----
@@ -490,7 +496,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 
 [source,Java]
 ----
-// Bytes which wraps a ByteBuffer which is resized as needed.
+// Bytes which wraps a ByteBuffer which is resized as needed
 Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
 Wire wire = new TextWire(bytes);
@@ -504,14 +510,16 @@ Data[] data = {
 };
 wire.writeDocument(false, w -> w.write("mydata")
         .sequence(v -> Stream.of(data).forEach(v::object)));
+
 System.out.println(Wires.fromSizePrefixedBlobs(bytes));
 
 List<Data> dataList = new ArrayList<>();
-        wire.readDocument(null, w -> w.read("mydata")
-                .sequence(dataList, (l, v) -> {
-                    while (v.hasNextSequenceItem())
-                        l.add(v.object(Data.class));
-                }));
+wire.readDocument(null, w -> w.read("mydata")
+        .sequence(dataList, (l, v) -> {
+            while (v.hasNextSequenceItem())
+                l.add(v.object(Data.class));
+       }));
+
 dataList.forEach(System.out::println);
 ----
 
@@ -561,10 +569,11 @@ System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
 
 List<Data> dataList2 = new ArrayList<>();
 wire2.readDocument(null, w -> w.read("mydata")
-                .sequence(dataList2, (l, v) -> {
-                    while (v.hasNextSequenceItem())
-                        l.add(v.object(Data.class));
-                }));
+        .sequence(dataList2, (l, v) -> {
+            while (v.hasNextSequenceItem())
+                l.add(v.object(Data.class));
+        }));
+
 dataList2.forEach(System.out::println);
 ----
 
