@@ -417,7 +417,7 @@ start of the message that an appender writes to buffer. The "len" field includes
 
 1. "complete" flag that shows whether the appender has completed writing this message or not.
 2. "metadata" flag that shows whether this data is metadata.
-3. the actual size of data (the remaining 30 bits of "len").
+3. the actual size of data in the remaining 30 bits of the "len" field.
 
 After completing writing the message, the appender returns to the "len" field and sets the "complete" flag to one so that it indicates the message was written
 completely. Afterwards, the reader starts reading the message. If the message size is not known, appender 2 also
