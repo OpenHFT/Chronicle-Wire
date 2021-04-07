@@ -426,7 +426,7 @@ required space for appender 1's message and concurrently writes beyond that, as 
 
 [#img-buffer]
 .Thread-safe message writting
-image::buffer.jpg[buffer,700,500]
+image::buffer.jpg[buffer,700,400]
 
 [source,Java]
 ----
