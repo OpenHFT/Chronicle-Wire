@@ -77,6 +77,7 @@ public class Example6 {
 
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         Wire wire2 = new BinaryWire(bytes2);
+
         wire2.writeDocument(false, w -> w.write("mydata")
                 .sequence(v -> Stream.of(data).forEach(v::object)));
 
