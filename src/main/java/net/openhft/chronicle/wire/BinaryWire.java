@@ -226,7 +226,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         long start = readContext.start;
         if (start == -1)
             return "";
-        return Wires.fromSizePrefixedBlobs(bytes, start);
+        return Wires.fromSizePrefixedBlobs(bytes, start, usePadding());
     }
 
     @Override
