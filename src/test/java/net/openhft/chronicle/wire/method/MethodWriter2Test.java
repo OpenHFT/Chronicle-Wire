@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -65,7 +67,8 @@ public class MethodWriter2Test {
         if (allowThrough) {
             assertTrue(mr.readOne());
             assertEquals(1, output.size());
-            assertEquals(argument.expected(), output.toString());
+            HashSet<String> expecteds=new HashSet<String>(Arrays.asList(argument.expected().split(";")));
+            assertTrue(expecteds.contains(output.toString()));
             assertFalse(mr.readOne());
         } else {
             assertFalse(mr.readOne());
@@ -82,7 +85,37 @@ public class MethodWriter2Test {
                         "  fr: NaN,\n" +
                         "  mins: 0\n" +
                         "}\n" +
-                        "]]";
+                        "]];" +
+                        "[funding[!net.openhft.chronicle.wire.method.Funding {\n" +
+                        "  symbol: 0,\n" +
+                        "  mins: 0,\n" +
+                        "  fr: NaN\n" +
+                        "}\n" +
+                        "]];" +
+                        "[funding[!net.openhft.chronicle.wire.method.Funding {\n" +
+                        "  fr: NaN,\n" +
+                        "  symbol: 0,\n" +
+                        "  mins: 0\n" +
+                        "}\n" +
+                        "]];" +
+                        "[funding[!net.openhft.chronicle.wire.method.Funding {\n" +
+                        "  fr: NaN,\n" +
+                        "  mins: 0,\n" +
+                        "  symbol: 0\n" +
+                        "}\n" +
+                        "]];" +
+                        "[funding[!net.openhft.chronicle.wire.method.Funding {\n" +
+                        "  mins: 0,\n" +
+                        "  symbol: 0,\n" +
+                        "  fr: NaN\n" +
+                        "}\n" +
+                        "]];" +
+                        "[funding[!net.openhft.chronicle.wire.method.Funding {\n" +
+                        "  mins: 0,\n" +
+                        "  fr: NaN,\n" +
+                        "  symbol: 0\n" +
+                        "}\n" +
+                        "]]" ;
             }
 
             @Override
