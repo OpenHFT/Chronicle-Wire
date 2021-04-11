@@ -1,0 +1,8 @@
+language: java
+
+jdk: openjdk8
+
+script:
+- mvn test-compile -pl . -am
+- mvn -pl . test -Dtest=net.openhft.chronicle.wire.method.MethodWriter2Test#allowThrough
+- mvn -pl . edu.illinois:nondex-maven-plugin:1.1.2:nondex -Dtest=net.openhft.chronicle.wire.method.MethodWriter2Test#allowThrough
