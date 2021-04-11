@@ -469,6 +469,10 @@ public class VanillaMethodReader implements MethodReader {
         return readOne0();
     }
 
+    /**
+     * @deprecated see {@link net.openhft.chronicle.wire.MarshallableIn#peekDocument()}
+     */
+    @Deprecated(/* remove in x.23 */)
     @Override
     public boolean lazyReadOne() {
         throwExceptionIfClosed();
