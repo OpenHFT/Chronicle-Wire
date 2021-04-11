@@ -8,6 +8,7 @@ import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import net.openhft.compiler.CachedCompiler;
 import org.jetbrains.annotations.NotNull;
 
+import javax.lang.model.SourceVersion;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -274,6 +275,8 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
         }
 
         public MD baseClassName(String baseClassName) {
+            if (!SourceVersion.isIdentifier(baseClassName))
+                throw new IllegalArgumentException(baseClassName + " is not a valid class name");
             this.baseClassName = baseClassName;
             return (MD) this;
         }

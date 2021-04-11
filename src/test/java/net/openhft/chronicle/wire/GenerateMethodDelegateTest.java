@@ -16,6 +16,13 @@ import static org.junit.Assert.assertEquals;
 
 public class GenerateMethodDelegateTest extends WireTestCommon {
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidName() {
+        GenerateMethodDelegate gmd = new GenerateMethodDelegate();
+        gmd.metaData().packageName(GenerateMethodDelegateTest.class.getPackage().getName())
+                .baseClassName("GMDT-");
+    }
+
     @Test
     public void testAcquireClass() throws IllegalAccessException, InstantiationException {
         GenerateMethodDelegate gmd = new GenerateMethodDelegate();
