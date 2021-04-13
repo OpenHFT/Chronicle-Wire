@@ -338,14 +338,22 @@ public class PerfRegressionTest {
         System.out.printf("PerfRegressionTest d: %.2f,  ds: %.2f, dn: %.2f%n", d, ds, dn);
         // assume it's our primary build server
         if (cpuClass.equals("AMD Ryzen 5 3600 6-Core Processor")) {
-            if  ((1.4 <= d && d <= 1.7) &&
+            if ((1.4 <= d && d <= 1.7) &&
                     (2.3 <= ds && ds <= 2.7) &&
                     (1.4 <= dn && dn <= 1.75))
                 return true;
 
         } else if (cpuClass.startsWith("ARM")) {
+            if ((1.6 <= d && d <= 2.0) &&
+                    (3.6 <= ds && ds <= 4.4) &&
+                    (0.85 <= dn && dn <= 1.05))
+                return true;
 
         } else if (cpuClass.contains(" Xeon ")) {
+            if ((1.7 <= d && d <= 2.2) &&
+                    (2.5 <= ds && ds <= 3.1) &&
+                    (1.3 <= dn && dn <= 1.6))
+                return true;
 
         } else if (cpuClass.contains(" i7-10710U ")) {
             return ((1.4 <= d && d <= 1.7) &&
