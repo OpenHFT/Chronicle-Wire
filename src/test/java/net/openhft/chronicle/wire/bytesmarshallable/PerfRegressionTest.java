@@ -13,7 +13,11 @@ import org.junit.Test;
 import java.io.File;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.Assert.fail;
@@ -349,41 +353,55 @@ public class PerfRegressionTest {
                     (0.85 <= dn && dn <= 1.05))
                 return true;
 
-        } else if (cpuClass.contains(" Xeon ")) {
-            if ((1.7 <= d && d <= 2.2) &&
-                    (2.5 <= ds && ds <= 3.1) &&
-                    (1.3 <= dn && dn <= 1.6))
+        } else if (cpuClass.contains(" Xeon")) {
+            if ((1.65 <= d && d <= 2.2) &&
+                    (2.0 <= ds && ds <= 3.1) &&
+                    (0.5 <= dn && dn <= 1.6))
                 return true;
 
         } else if (cpuClass.contains(" i7-10710U ")) {
-            return ((1.4 <= d && d <= 1.7) &&
-                    (2.3 <= ds && ds <= 2.7) &&
-                    (1.4 <= dn && dn <= 1.75));
+            return ((1.45 <= d && d <= 1.6) &&
+                    (2.4 <= ds && ds <= 2.55) &&
+                    (1.45 <= dn && dn <= 1.65));
         }
         throw new UnsupportedOperationException();
     }
 
     void doTest(String names, Predicate<double[]> check, Runnable... tests) throws Exception {
         long[] times = new long[tests.length];
-        int count = 250_000;
+        int count = 50_000;
         int repeats = 10, outlier = Jvm.isArm() ? 200_000 : 10_000;
         String[] namesArr = names.split(", ?");
         String className = "Runnable" + Long.toString(System.nanoTime(), 36);
         String code = "public class " + className + " implements Runnable {\n" +
                 "long[] times;\n" +
                 "Runnable[] tests;\n" +
+                "static volatile int barrier;\n" +
                 "public " + className + "(long[] times, Runnable[] tests) { this.times = times; this.tests = tests; }\n" +
-                "public void run() {";
-        for (int t = 0; t < tests.length; t++) {
-            code += "{\n" +
-                    "   long start = System.nanoTime();\n" +
-                    "    tests[" + t + "].run();\n" +
-                    "    long end = System.nanoTime();\n" +
-                    "    times[" + t + "] += Math.min(" + outlier + ", end - start);\n" +
-                    "}\n";
-        }
-        code += "    }\n" +
+                "public void run() {\n" +
+                "    run1();\n" +
+                "    run2();\n" +
+                "    run3();\n" +
+                "    run4();\n" +
+                "    run5();\n" +
                 "}";
+        List<Integer> ints = IntStream.range(0, tests.length).boxed().collect(Collectors.toList());
+        for (int r = 1; r <= 5; r++) {
+            code += "public void run" + r + "() {\n";
+            Collections.shuffle(ints);
+            for (int t : ints) {
+                code += "{\n" +
+                        "    long start = System.nanoTime();\n" +
+                        "    barrier++;\n" +
+                        "    tests[" + t + "].run();\n" +
+                        "    barrier++;\n" +
+                        "    long end = System.nanoTime();\n" +
+                        "    times[" + t + "] += Math.min(" + outlier + ", end - start);\n" +
+                        "}\n";
+            }
+            code += "    }\n";
+        }
+        code += "}";
         if (Jvm.getBoolean("dumpCode", false))
             System.out.println(code);
         Class clazz = CompilerUtils.CACHED_COMPILER.loadFromJava(className, code);
