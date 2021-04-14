@@ -235,11 +235,13 @@ public interface MarshallableOut extends DocumentWritten {
      *
      * @return the state of padding
      */
+    @Deprecated(/* to be removed in x.22 */)
     @NotNull
     default Padding padToCacheAlignMode() {
         return Padding.NEVER;
     }
 
+    @Deprecated(/* to be removed in x.22 */)
     enum Padding {
         WORD("align to every word"),
         CACHE_LINE("always pads to cache lines"),
@@ -251,7 +253,6 @@ public interface MarshallableOut extends DocumentWritten {
                 "breaking the" +
                 "existing " +
                 "message format specification");
-        @Deprecated(/* to be removed in x.22 */)
         public static final Padding ALWAYS = CACHE_LINE;
 
         Padding(String comment) {

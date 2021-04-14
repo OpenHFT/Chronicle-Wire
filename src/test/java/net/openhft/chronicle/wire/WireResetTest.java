@@ -8,7 +8,7 @@ import org.junit.Test;
 // see https://github.com/OpenHFT/Chronicle-Wire/issues/225
 public class WireResetTest {
     @Test
-    public void test() throws Exception {
+    public void test() {
         Event event = new Event();
         Assert.assertFalse(event.isClosed());
 
@@ -17,7 +17,7 @@ public class WireResetTest {
     }
 
     @Test
-    public void testEventAbstractCloseable() throws Exception {
+    public void testEventAbstractCloseable() {
         EventAbstractCloseable event = new EventAbstractCloseable();
         Assert.assertFalse(event.isClosed());
 

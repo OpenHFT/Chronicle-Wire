@@ -6,12 +6,20 @@ import net.openhft.chronicle.bytes.FieldGroup;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.internal.BytesFieldInfo;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class EmbeddedBytesMarshallableTest {
+    @Before
+    public void checkArch() {
+        assumeFalse(Jvm.isArm());
+    }
+
     @Test
     public void ebm() {
         ClassAliasPool.CLASS_ALIASES.addAlias(EBM.class);

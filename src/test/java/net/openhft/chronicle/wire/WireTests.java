@@ -207,12 +207,22 @@ public class WireTests {
     }
 
     @Test
+    public void testReadingPeekYamlWithPadding() {
+        testReadingPeekYaml(true);
+    }
+
+    @Test
     public void testReadingPeekYaml() {
+        testReadingPeekYaml(false);
+    }
+
+    private void testReadingPeekYaml(boolean usePadding) {
         Bytes b = Bytes.elasticByteBuffer();
         @NotNull BinaryWire wire = (BinaryWire) WireType.BINARY.apply(b);
+        wire.usePadding(usePadding);
         Assert.assertEquals("", wire.readingPeekYaml());
         try (@NotNull DocumentContext dc = wire.writingDocument(false)) {
-            dc.wire().write("some-data").marshallable(m -> {
+            dc.wire().write("some-data!").marshallable(m -> {
                 m.write("some-other-data").int64(0);
                 Assert.assertEquals("", wire.readingPeekYaml());
             });
@@ -228,12 +238,12 @@ public class WireTests {
 
         try (@NotNull DocumentContext dc = wire.readingDocument()) {
             Assert.assertEquals("--- !!data #binary\n" +
-                    "some-data: {\n" +
+                    "some-data!: {\n" +
                     "  some-other-data: 0\n" +
                     "}\n", wire.readingPeekYaml());
             dc.wire().read("some-data");
             Assert.assertEquals("--- !!data #binary\n" +
-                    "some-data: {\n" +
+                    "some-data!: {\n" +
                     "  some-other-data: 0\n" +
                     "}\n", wire.readingPeekYaml());
 
@@ -241,20 +251,21 @@ public class WireTests {
         Assert.assertEquals("", wire.readingPeekYaml());
 
         try (@NotNull DocumentContext dc = wire.writingDocument(false)) {
-            dc.wire().write("some-data").marshallable(m -> {
+            dc.wire().write("some-data!").marshallable(m -> {
                 m.write("some-other-data").int64(0);
                 Assert.assertEquals("", wire.readingPeekYaml());
             });
         }
 
         try (@NotNull DocumentContext dc = wire.readingDocument()) {
-            Assert.assertEquals("# position: 36, header: 0\n" +
+            int position = usePadding ? 40 : 37;
+            Assert.assertEquals("# position: "+position+", header: 0\n" +
                     "--- !!data #binary\n" +
                     "some-new: {\n" +
                     "  some-other--new-data: 0\n" +
                     "}\n", wire.readingPeekYaml());
             dc.wire().read("some-data");
-            Assert.assertEquals("# position: 36, header: 0\n" +
+            Assert.assertEquals("# position: "+position+", header: 0\n" +
                     "--- !!data #binary\n" +
                     "some-new: {\n" +
                     "  some-other--new-data: 0\n" +

@@ -138,10 +138,14 @@ public enum Wires {
     }
 
     public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position) {
+        return fromSizePrefixedBlobs(bytes, position, false);
+    }
+
+    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position, boolean padding) {
         final long limit = bytes.readLimit();
         if (position > limit)
             return "";
-        return WireDumper.of(bytes).asString(position, limit - position);
+        return WireDumper.of(bytes, padding).asString(position, limit - position);
     }
 
     public static String fromSizePrefixedBlobs(@NotNull DocumentContext dc) {

@@ -20,11 +20,6 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
-    public void name() {
-       // System.out.println(Integer.toHexString(Wires.END_OF_DATA));
-    }
-
-    @Test
     public void resetShouldClearBytes() {
         container1.bytesField.clear().append("value1");
 

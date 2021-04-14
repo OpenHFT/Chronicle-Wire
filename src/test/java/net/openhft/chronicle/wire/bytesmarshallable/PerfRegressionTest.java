@@ -13,8 +13,14 @@ import org.junit.Test;
 import java.io.File;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+
+import static org.junit.Assert.fail;
 
 public class PerfRegressionTest {
 
@@ -192,6 +198,7 @@ public class PerfRegressionTest {
         DefaultBytesFields df1 = new DefaultBytesFields(s);
         DefaultBytesFields df2 = new DefaultBytesFields();
 
+
         ReferenceBytesFields rf1 = new ReferenceBytesFields(s);
         ReferenceBytesFields rf2 = new ReferenceBytesFields();
 
@@ -201,15 +208,19 @@ public class PerfRegressionTest {
         DefaultStringFields dsf1 = new DefaultStringFields(s);
         DefaultStringFields dsf2 = new DefaultStringFields();
 
+        DefaultStringFields dsf0 = new DefaultStringFields(new String[6]);
+
         final Bytes direct = Bytes.allocateElasticDirect();
         final Bytes onHeap = Bytes.allocateElasticOnHeap();
         String file = IOTools.tempName("regressionTests");
         try (MappedBytes mapped = MappedBytes.mappedBytes(file, OS.pageSize())) {
             doTest("onHeap-default, direct-default, mapped-default, " +
                             "onHeap-default-string, direct-default-string, mapped-default-string, " +
+                            "onHeap-null, direct-null, mapped-null," +
                             "onHeap-fields, direct-fields, mapped-fields, " +
                             "onHeap-reference, direct-reference, mapped-reference," +
-                            "onHeap-string, direct-string, mapped-string",
+                            "onHeap-string, direct-string, mapped-string," +
+                            "",
                     times -> {
                         double od = times[0];
                         double dd = times[1];
@@ -217,7 +228,7 @@ public class PerfRegressionTest {
                         double osd = times[3];
                         double dsd = times[4];
                         double msd = times[5];
-                        return timesOk(od, dd, md, osd, dsd, msd);
+                        return timesOk(od + dd + md, osd + dsd + msd, times[6] + times[7] + times[8]);
                     },
                     () -> {
                         onHeap.clear();
@@ -234,6 +245,7 @@ public class PerfRegressionTest {
                         df1.writeMarshallable(mapped);
                         df2.readMarshallable(mapped);
                     },
+
                     () -> {
                         onHeap.clear();
                         dsf1.writeMarshallable(onHeap);
@@ -249,6 +261,32 @@ public class PerfRegressionTest {
                         dsf1.writeMarshallable(mapped);
                         dsf2.readMarshallable(mapped);
                     },
+
+                    () -> {
+                        onHeap.clear();
+                        dsf0.writeMarshallable(onHeap);
+                        for (int i = 0; i < 2; i++) {
+                            onHeap.readPosition(0);
+                            dsf2.readMarshallable(onHeap);
+                        }
+                    },
+                    () -> {
+                        direct.clear();
+                        dsf0.writeMarshallable(direct);
+                        for (int i = 0; i < 2; i++) {
+                            direct.readPosition(0);
+                            dsf2.readMarshallable(direct);
+                        }
+                    },
+                    () -> {
+                        mapped.clear();
+                        dsf0.writeMarshallable(mapped);
+                        for (int i = 0; i < 2; i++) {
+                            mapped.readPosition(0);
+                            dsf2.readMarshallable(mapped);
+                        }
+                    },
+
                     () -> {
                         onHeap.clear();
                         bf1.writeMarshallable(onHeap);
@@ -300,75 +338,75 @@ public class PerfRegressionTest {
         direct.releaseLast();
     }
 
-    private boolean timesOk(double od, double dd, double md, double osd, double dsd, double msd) {
+    private boolean timesOk(double d, double ds, double dn) {
+        System.out.printf("PerfRegressionTest d: %.2f,  ds: %.2f, dn: %.2f%n", d, ds, dn);
         // assume it's our primary build server
         if (cpuClass.equals("AMD Ryzen 5 3600 6-Core Processor")) {
-            if (Jvm.isJava9Plus())
-                return (0.66 <= od && od <= 1) // TODO FIX OnHeap so it is more reliably optimised
-                        && (0.39 <= dd && dd <= 0.49)
-                        && (0.49 <= md && md <= 0.59)
-                        && (0.59 <= osd && osd <= 1.02) // TODO FIX OnHeap so it is more reliably optimised
-                        && (0.39 <= dsd && dsd <= 0.50)
-                        && (0.40 <= msd && msd <= 0.47);
-            return (0.54 <= od && od <= 0.68)
-                    && (0.49 <= dd && dd <= 0.76)
-                    && (0.43 <= md && md <= 0.61)
-                    && (0.62 <= osd && osd <= 0.69)
-                    && (0.51 <= dsd && dsd <= 0.76)
-                    && (0.55 <= msd && msd <= 0.64);
+            if ((1.4 <= d && d <= 1.7) &&
+                    (2.3 <= ds && ds <= 2.7) &&
+                    (1.4 <= dn && dn <= 1.75))
+                return true;
 
         } else if (cpuClass.startsWith("ARM")) {
-            return (0.75 <= od && od <= 1)
-                    && (0.65 <= dd && dd <= 0.75)
-                    && (0.72 <= md && md <= 0.82)
-                    && (1.30 <= osd && osd <= 1.40)
-                    && (0.83 <= dsd && dsd <= 0.99)
-                    && (0.80 <= msd && msd <= 0.99);
+            if ((1.7 <= d && d <= 2.1) &&
+                    (3.6 <= ds && ds <= 4.4) &&
+                    (0.85 <= dn && dn <= 1.05))
+                return true;
 
-        } else if (cpuClass.contains(" Xeon ")) {
-            return (0.84 <= od && od <= 1) // TODO FIX OnHeap so it is more reliably optimised
-                    && (0.50 <= dd && dd <= 0.56)
-                    && (0.68 <= md && md <= 0.75)
-                    && (0.68 <= osd && osd <= 1.02) // TODO FIX OnHeap so it is more reliably optimised
-                    && (0.44 <= dsd && dsd <= 0.53)
-                    && (0.48 <= msd && msd <= 0.56);
+        } else if (cpuClass.contains(" Xeon")) {
+            if ((1.6 <= d && d <= 1.95) &&
+                    (2.0 <= ds && ds <= 3.0) &&
+                    (1.1 <= dn && dn <= 1.6))
+                return true;
 
         } else if (cpuClass.contains(" i7-10710U ")) {
-            return (0.44 <= od && od <= 0.69) // TODO FIX OnHeap so it is more reliably optimised
-                    && (0.44 <= dd && dd <= 0.51)
-                    && (0.38 <= md && md <= 0.45)
-                    && (0.61 <= osd && osd <= 0.74) // TODO FIX OnHeap so it is more reliably optimised
-                    && (0.52 <= dsd && dsd <= 0.60)
-                    && (0.52 <= msd && msd <= 0.60);
+            return ((1.45 <= d && d <= 1.6) &&
+                    (2.4 <= ds && ds <= 2.55) &&
+                    (1.45 <= dn && dn <= 1.65));
         }
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     void doTest(String names, Predicate<double[]> check, Runnable... tests) throws Exception {
         long[] times = new long[tests.length];
-        int count = 250_000;
+        int count = 50_000;
         int repeats = 10, outlier = Jvm.isArm() ? 200_000 : 10_000;
         String[] namesArr = names.split(", ?");
         String className = "Runnable" + Long.toString(System.nanoTime(), 36);
         String code = "public class " + className + " implements Runnable {\n" +
                 "long[] times;\n" +
                 "Runnable[] tests;\n" +
+                "static volatile int barrier;\n" +
                 "public " + className + "(long[] times, Runnable[] tests) { this.times = times; this.tests = tests; }\n" +
-                "public void run() {";
-        for (int t = 0; t < tests.length; t++) {
-            code += "{\n" +
-                    "   long start = System.nanoTime();\n" +
-                    "    tests[" + t + "].run();\n" +
-                    "    long end = System.nanoTime();\n" +
-                    "    times[" + t + "] += Math.min(" + outlier + ", end - start);\n" +
-                    "}\n";
-        }
-        code += "    }\n" +
+                "public void run() {\n" +
+                "    run1();\n" +
+                "    run2();\n" +
+                "    run3();\n" +
+                "    run4();\n" +
+                "    run5();\n" +
                 "}";
+        List<Integer> ints = IntStream.range(0, tests.length).boxed().collect(Collectors.toList());
+        for (int r = 1; r <= 5; r++) {
+            code += "public void run" + r + "() {\n";
+            Collections.shuffle(ints);
+            for (int t : ints) {
+                code += "{\n" +
+                        "    long start = System.nanoTime();\n" +
+                        "    barrier++;\n" +
+                        "    tests[" + t + "].run();\n" +
+                        "    barrier++;\n" +
+                        "    long end = System.nanoTime();\n" +
+                        "    times[" + t + "] += Math.min(" + outlier + ", end - start);\n" +
+                        "}\n";
+            }
+            code += "    }\n";
+        }
+        code += "}";
         if (Jvm.getBoolean("dumpCode", false))
             System.out.println(code);
         Class clazz = CompilerUtils.CACHED_COMPILER.loadFromJava(className, code);
         Runnable runTests = (Runnable) clazz.getConstructors()[0].newInstance(times, tests);
+        boolean fails = true;
         for (int j = 0; j <= repeats; j++) {
             if (j == 0)
                 count = 20_000;
@@ -386,9 +424,15 @@ public class PerfRegressionTest {
             for (int t = 0; t < namesArr.length; t++)
                 System.out.print(", " + namesArr[t] + ": " + relTimes[t]);
             System.out.println();
-            if (check.test(relTimes))
-                break;
+            try {
+                if (check.test(relTimes))
+                    return;
+            } catch (UnsupportedOperationException e) {
+                fails = false;
+            }
             Jvm.pause(j * 50L);
         }
+        if (fails)
+            fail("Performance outside range");
     }
 }
