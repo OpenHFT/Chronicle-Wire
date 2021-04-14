@@ -929,6 +929,41 @@ NOTE: The unique key for these objects is their type and name. Two objects of di
 
 IMPORTANT: These objects passed by reference are never cleaned up. Only use them when there is likely to be a limited number of them over the life of the application.
 
+== Using method Id
+You can assign a method Id to every method using the annotation `@MethodId(long int: id)`.
+The method Id should be unique inside each class otherwise you will receive run time Exception.
+A method name can be determined from its method Id and this results in saving memory
+when calling the method. The following example shows the difference between memory usage when using
+method Id and when not using it. In this example the method `saysomethingnice()` has been annotated with
+`MethodId(7)` and it has been called from `shouldDetermineMethodNamesFromMethodIds()`.
+
+[source, Java]
+----
+public void shouldDetermineMethodNamesFromMethodIds() {
+        Bytes bytes = Bytes.allocateElasticOnHeap();
+
+        final BinaryWire wire = new BinaryWire(bytes);
+        final Speaker speaker =
+                wire.methodWriterBuilder(Speaker.class).get();
+        speaker.saysomethingnice("hello");
+
+        /**
+        * Output when using @MethodId
+        * 00000000 08 00 00 00 ba 07 e5 68  65 6c 6c 6f             ·······h ello
+        *
+        * Output without using @MethodId
+        * 00000000 18 00 00 00 b9 10 73 61  79 73 6f 6d 65 74 68 69 ······sa ysomethi
+        * 00000010 6e 67 6e 69 63 65 e5 68  65 6c 6c 6f             ngnice·h ello
+        */
+        System.out.println(bytes.toHexString());
+    }
+
+    interface Speaker {
+        @MethodId(7)
+        void saysomethingnice(final String message);
+    }
+----
+
 == Compression Options
 
 * No compression
