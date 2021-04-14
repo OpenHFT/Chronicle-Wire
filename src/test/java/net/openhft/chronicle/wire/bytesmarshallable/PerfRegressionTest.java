@@ -348,15 +348,15 @@ public class PerfRegressionTest {
                 return true;
 
         } else if (cpuClass.startsWith("ARM")) {
-            if ((1.6 <= d && d <= 2.0) &&
+            if ((1.7 <= d && d <= 2.1) &&
                     (3.6 <= ds && ds <= 4.4) &&
                     (0.85 <= dn && dn <= 1.05))
                 return true;
 
         } else if (cpuClass.contains(" Xeon")) {
-            if ((1.65 <= d && d <= 2.2) &&
-                    (2.0 <= ds && ds <= 3.1) &&
-                    (0.5 <= dn && dn <= 1.6))
+            if ((1.6 <= d && d <= 1.95) &&
+                    (2.0 <= ds && ds <= 3.0) &&
+                    (1.1 <= dn && dn <= 1.6))
                 return true;
 
         } else if (cpuClass.contains(" i7-10710U ")) {
