@@ -13,11 +13,7 @@ import org.junit.Test;
 import java.io.File;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-import java.util.Collections;
-import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.Assert.fail;
@@ -214,33 +210,23 @@ public class PerfRegressionTest {
         final Bytes onHeap = Bytes.allocateElasticOnHeap();
         String file = IOTools.tempName("regressionTests");
         try (MappedBytes mapped = MappedBytes.mappedBytes(file, OS.pageSize())) {
-            doTest("onHeap-default, direct-default, mapped-default, " +
-                            "onHeap-default-string, direct-default-string, mapped-default-string, " +
-                            "onHeap-null, direct-null, mapped-null," +
-                            "onHeap-fields, direct-fields, mapped-fields, " +
-                            "onHeap-reference, direct-reference, mapped-reference," +
-                            "onHeap-string, direct-string, mapped-string," +
+            doTest("onHeap/direct/mapped-default, " +
+                            "onHeap/direct/mapped-default-string, " +
+                            "onHeap/direct/mapped-null," +
+                            "onHeap/direct/mapped-fields, " +
+                            "onHeap/direct/mapped-reference," +
+                            "onHeap/direct/mapped-string" +
                             "",
-                    times -> {
-                        double od = times[0];
-                        double dd = times[1];
-                        double md = times[2];
-                        double osd = times[3];
-                        double dsd = times[4];
-                        double msd = times[5];
-                        return timesOk(od + dd + md, osd + dsd + msd, times[6] + times[7] + times[8]);
-                    },
+                    times -> timesOk(times[0], times[1], times[2]),
                     () -> {
                         onHeap.clear();
                         df1.writeMarshallable(onHeap);
                         df2.readMarshallable(onHeap);
-                    },
-                    () -> {
+
                         direct.clear();
                         df1.writeMarshallable(direct);
                         df2.readMarshallable(direct);
-                    },
-                    () -> {
+
                         mapped.clear();
                         df1.writeMarshallable(mapped);
                         df2.readMarshallable(mapped);
@@ -250,13 +236,11 @@ public class PerfRegressionTest {
                         onHeap.clear();
                         dsf1.writeMarshallable(onHeap);
                         dsf2.readMarshallable(onHeap);
-                    },
-                    () -> {
+
                         direct.clear();
                         dsf1.writeMarshallable(direct);
                         dsf2.readMarshallable(direct);
-                    },
-                    () -> {
+
                         mapped.clear();
                         dsf1.writeMarshallable(mapped);
                         dsf2.readMarshallable(mapped);
@@ -264,26 +248,30 @@ public class PerfRegressionTest {
 
                     () -> {
                         onHeap.clear();
-                        dsf0.writeMarshallable(onHeap);
-                        for (int i = 0; i < 2; i++) {
+                        for (int i = 0; i < 2; i++)
+                            dsf0.writeMarshallable(onHeap);
+                        for (int j = 0; j < 2; j++) {
                             onHeap.readPosition(0);
-                            dsf2.readMarshallable(onHeap);
+                            for (int i = 0; i < 2; i++)
+                                dsf2.readMarshallable(onHeap);
                         }
-                    },
-                    () -> {
+
                         direct.clear();
-                        dsf0.writeMarshallable(direct);
-                        for (int i = 0; i < 2; i++) {
+                        for (int i = 0; i < 2; i++)
+                            dsf0.writeMarshallable(direct);
+                        for (int j = 0; j < 2; j++) {
                             direct.readPosition(0);
-                            dsf2.readMarshallable(direct);
+                            for (int i = 0; i < 2; i++)
+                                dsf2.readMarshallable(direct);
                         }
-                    },
-                    () -> {
+
                         mapped.clear();
-                        dsf0.writeMarshallable(mapped);
-                        for (int i = 0; i < 2; i++) {
+                        for (int i = 0; i < 2; i++)
+                            dsf0.writeMarshallable(mapped);
+                        for (int j = 0; j < 2; j++) {
                             mapped.readPosition(0);
-                            dsf2.readMarshallable(mapped);
+                            for (int i = 0; i < 2; i++)
+                                dsf2.readMarshallable(mapped);
                         }
                     },
 
@@ -291,13 +279,11 @@ public class PerfRegressionTest {
                         onHeap.clear();
                         bf1.writeMarshallable(onHeap);
                         bf2.readMarshallable(onHeap);
-                    },
-                    () -> {
+
                         direct.clear();
                         bf1.writeMarshallable(direct);
                         bf2.readMarshallable(direct);
-                    },
-                    () -> {
+
                         mapped.clear();
                         bf1.writeMarshallable(mapped);
                         bf2.readMarshallable(mapped);
@@ -306,13 +292,11 @@ public class PerfRegressionTest {
                         onHeap.clear();
                         rf1.writeMarshallable(onHeap);
                         rf2.readMarshallable(onHeap);
-                    },
-                    () -> {
+
                         direct.clear();
                         rf1.writeMarshallable(direct);
                         rf2.readMarshallable(direct);
-                    },
-                    () -> {
+
                         mapped.clear();
                         rf1.writeMarshallable(mapped);
                         rf2.readMarshallable(mapped);
@@ -321,13 +305,11 @@ public class PerfRegressionTest {
                         onHeap.clear();
                         sf1.writeMarshallable(onHeap);
                         sf2.readMarshallable(onHeap);
-                    },
-                    () -> {
+
                         direct.clear();
                         sf1.writeMarshallable(direct);
                         sf2.readMarshallable(direct);
-                    },
-                    () -> {
+
                         mapped.clear();
                         sf1.writeMarshallable(mapped);
                         sf2.readMarshallable(mapped);
@@ -342,27 +324,27 @@ public class PerfRegressionTest {
         System.out.printf("PerfRegressionTest d: %.2f,  ds: %.2f, dn: %.2f%n", d, ds, dn);
         // assume it's our primary build server
         if (cpuClass.equals("AMD Ryzen 5 3600 6-Core Processor")) {
-            if ((1.4 <= d && d <= 1.7) &&
-                    (2.3 <= ds && ds <= 2.7) &&
-                    (1.4 <= dn && dn <= 1.75))
+            if  ((0.8 <= d && d <= 0.92) &&
+                    (0.72 <= ds && ds <= 0.82) &&
+                    (0.74 <= dn && dn <= 0.9))
                 return true;
 
         } else if (cpuClass.startsWith("ARM")) {
-            if ((1.7 <= d && d <= 2.1) &&
-                    (3.6 <= ds && ds <= 4.4) &&
-                    (0.85 <= dn && dn <= 1.05))
+            if  ((0.8 <= d && d <= 0.92) &&
+                    (0.72 <= ds && ds <= 0.82) &&
+                    (0.74 <= dn && dn <= 0.9))
                 return true;
 
         } else if (cpuClass.contains(" Xeon")) {
-            if ((1.6 <= d && d <= 1.95) &&
-                    (2.0 <= ds && ds <= 3.0) &&
-                    (1.1 <= dn && dn <= 1.6))
+            if  ((0.8 <= d && d <= 0.92) &&
+                    (0.72 <= ds && ds <= 0.82) &&
+                    (0.74 <= dn && dn <= 0.9))
                 return true;
 
         } else if (cpuClass.contains(" i7-10710U ")) {
-            return ((1.45 <= d && d <= 1.6) &&
-                    (2.4 <= ds && ds <= 2.55) &&
-                    (1.45 <= dn && dn <= 1.65));
+            return ((0.8 <= d && d <= 0.92) &&
+                    (0.72 <= ds && ds <= 0.82) &&
+                    (0.74 <= dn && dn <= 0.9));
         }
         throw new UnsupportedOperationException();
     }
@@ -372,46 +354,39 @@ public class PerfRegressionTest {
         int count = 50_000;
         int repeats = 10, outlier = Jvm.isArm() ? 200_000 : 10_000;
         String[] namesArr = names.split(", ?");
-        String className = "Runnable" + Long.toString(System.nanoTime(), 36);
-        String code = "public class " + className + " implements Runnable {\n" +
-                "long[] times;\n" +
-                "Runnable[] tests;\n" +
-                "static volatile int barrier;\n" +
-                "public " + className + "(long[] times, Runnable[] tests) { this.times = times; this.tests = tests; }\n" +
-                "public void run() {\n" +
-                "    run1();\n" +
-                "    run2();\n" +
-                "    run3();\n" +
-                "    run4();\n" +
-                "    run5();\n" +
-                "}";
-        List<Integer> ints = IntStream.range(0, tests.length).boxed().collect(Collectors.toList());
-        for (int r = 1; r <= 5; r++) {
-            code += "public void run" + r + "() {\n";
-            Collections.shuffle(ints);
-            for (int t : ints) {
-                code += "{\n" +
-                        "    long start = System.nanoTime();\n" +
-                        "    barrier++;\n" +
-                        "    tests[" + t + "].run();\n" +
-                        "    barrier++;\n" +
-                        "    long end = System.nanoTime();\n" +
-                        "    times[" + t + "] += Math.min(" + outlier + ", end - start);\n" +
-                        "}\n";
-            }
-            code += "    }\n";
+        Runnable[] runs = new Runnable[tests.length];
+        for (int t = 0; t < tests.length; t++) {
+            String className = "Runnable" + Long.toString(System.nanoTime(), 36);
+            String code = "public class " + className + " implements Runnable {\n" +
+                    "long[] times;\n" +
+                    "Runnable[] tests;\n" +
+                    "static volatile int barrier;\n" +
+                    "public " + className + "(long[] times, Runnable[] tests) { this.times = times; this.tests = tests; }\n" +
+                    "public void run() {\n";
+            code += "{\n" +
+                    "    long start = System.nanoTime();\n" +
+                    "    barrier++;\n" +
+                    "    tests[" + t + "].run();\n" +
+                    "    barrier++;\n" +
+                    "    long end = System.nanoTime();\n" +
+                    "    times[" + t + "] += Math.min(" + outlier + ", end - start);\n" +
+                    "}\n";
+            code += "    }\n" +
+                    "}\n";
+            if (Jvm.getBoolean("dumpCode", false))
+                System.out.println(code);
+            Class clazz = CompilerUtils.CACHED_COMPILER.loadFromJava(className, code);
+            Runnable runTests = (Runnable) clazz.getConstructors()[0].newInstance(times, tests);
+            runs[t] = runTests;
         }
-        code += "}";
-        if (Jvm.getBoolean("dumpCode", false))
-            System.out.println(code);
-        Class clazz = CompilerUtils.CACHED_COMPILER.loadFromJava(className, code);
-        Runnable runTests = (Runnable) clazz.getConstructors()[0].newInstance(times, tests);
         boolean fails = true;
         for (int j = 0; j <= repeats; j++) {
             if (j == 0)
                 count = 20_000;
-            for (int i = 0; i < count; i++) {
-                runTests.run();
+            for (final Runnable run : runs) {
+                for (int i = 0; i < count; i++) {
+                    run.run();
+                }
             }
             final long[] longs = LongStream.of(times.clone()).sorted().toArray();
             long mid = (longs[times.length / 2 - 1] + longs[times.length / 2] + longs[times.length / 2 + 1]) / 3;
