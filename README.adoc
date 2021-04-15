@@ -930,12 +930,13 @@ NOTE: The unique key for these objects is their type and name. Two objects of di
 IMPORTANT: These objects passed by reference are never cleaned up. Only use them when there is likely to be a limited number of them over the life of the application.
 
 == Using @MethodId
-You can assign a method id to every method using the annotation `@MethodId(long int: id)`.
-The provided id should be unique inside each class, otherwise you will receive a runtime Exception.
-A method name can be determined from its method id and this results in saving memory
-when calling the method. The following example shows the difference between memory usage when using
-method id and when not using it. In this example the method `saysomethingnice()` has been annotated with
-`MethodId(7)` and it has been called from `shouldDetermineMethodNamesFromMethodIds()`.
+You can assign a method id to a method using the annotation `@MethodId(long int: id)`.
+The provided id should be unique across all classes using the same MethodReader/Writer, therefore
+it is safe practice to use unique method id in your entire system. A method name can be determined
+from its method id and this results in saving memory when calling the method. The following example
+shows the difference between memory usage when using method id and when not using it. In this example
+the method `saysomethingnice()` has been annotated with `MethodId(7)` and it has been called
+from `shouldDetermineMethodNamesFromMethodIds()`.
 
 [source, Java]
 ----
