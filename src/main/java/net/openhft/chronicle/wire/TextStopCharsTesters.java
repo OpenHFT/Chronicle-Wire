@@ -22,7 +22,7 @@ import net.openhft.chronicle.bytes.StopCharsTester;
 enum TextStopCharsTesters implements StopCharsTester {
     STRICT_END_OF_TEXT {
         @Override
-        public boolean isStopChar(int ch, int ch2) throws IllegalStateException {
+        public boolean isStopChar(int ch, int peekNextCh) throws IllegalStateException {
             switch (ch) {
                 // one character stop.
                 case '"':
@@ -35,9 +35,9 @@ enum TextStopCharsTesters implements StopCharsTester {
                     return true;
                 // two character stop.
                 case ':':
-                    return ch2 == '!' || ch2 == '{' || ch2 <= ' ' || ch2 == '"' || ch2 == '[';
+                    return peekNextCh == '!' || peekNextCh == '{' || peekNextCh <= ' ' || peekNextCh == '"' || peekNextCh == '[';
                 case ',':
-                    return ch2 <= ' ' || ch2 == '"';
+                    return peekNextCh <= ' ' || peekNextCh == '"';
                 default:
                     return false;
             }
@@ -45,8 +45,8 @@ enum TextStopCharsTesters implements StopCharsTester {
     },
     END_EVENT_NAME {
         @Override
-        public boolean isStopChar(int ch, int ch2) throws IllegalStateException {
-            return ch <= ' ' || STRICT_END_OF_TEXT.isStopChar(ch, ch2);
+        public boolean isStopChar(int ch, int peekNextCh) throws IllegalStateException {
+            return ch <= ' ' || STRICT_END_OF_TEXT.isStopChar(ch, peekNextCh);
         }
     }
 }
