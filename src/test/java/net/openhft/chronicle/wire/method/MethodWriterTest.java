@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.wire.*;
 import org.easymock.EasyMock;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.StringWriter;
@@ -250,6 +251,23 @@ public class MethodWriterTest extends WireTestCommon {
         Assert.assertEquals("half message should not be written", "", wire.toString());
     }
 
+    @Test
+    public void testMultipleImplsInheritBoth() {
+        final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
+
+        InheritBoth instance = wire.methodWriterBuilder(InheritBoth.class).build();
+        checkWriterType(instance);
+    }
+
+    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/274")
+    @Test
+    public void testMultipleImplsReturnValues() {
+        final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
+
+        ReturnValues instance = wire.methodWriterBuilder(ReturnValues.class).build();
+        checkWriterType(instance);
+    }
+
     protected void checkWriterType(Object writer) {
         assertFalse(Proxy.isProxyClass(writer.getClass()));
     }
@@ -303,5 +321,29 @@ public class MethodWriterTest extends WireTestCommon {
 
     public interface HasMarshallable {
         void method(AMarshallable exception);
+    }
+
+    public interface IgnoreMethod1 {
+        default boolean ignoreMethodBasedOnFirstArg(String methodName, String ladderDefinitionName) {
+            return false;
+        }
+    }
+
+    public interface IgnoreMethod2 {
+        default boolean ignoreMethodBasedOnFirstArg(String methodName, String ladderDefinitionName) {
+            return false;
+        }
+    }
+
+    interface InheritBoth extends IgnoreMethod1, IgnoreMethod2 {
+        @Override
+        default boolean ignoreMethodBasedOnFirstArg(String methodName, String ladderDefinitionName) {
+            return false;
+        }
+    }
+
+    interface ReturnValues {
+        IgnoreMethod1 ignoreMethod1();
+        IgnoreMethod2 ignoreMethod2();
     }
 }
