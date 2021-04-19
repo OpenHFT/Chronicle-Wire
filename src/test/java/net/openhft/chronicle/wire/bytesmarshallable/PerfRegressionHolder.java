@@ -2,17 +2,17 @@ package net.openhft.chronicle.wire.bytesmarshallable;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
-import net.openhft.chronicle.wire.FieldInfo;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.util.Arrays;
-import java.util.List;
+import java.util.stream.Stream;
 
 public class PerfRegressionHolder {
     String[] s = "1,12,12345,123456789,123456789012,12345678901234567890123".split(",");
@@ -31,6 +31,9 @@ public class PerfRegressionHolder {
 
     DefaultStringFields dsf1 = new DefaultStringFields(s);
     DefaultStringFields dsf2 = new DefaultStringFields();
+
+    ArrayStringFields asf1 = new ArrayStringFields(s);
+    ArrayStringFields asf2 = new ArrayStringFields();
 
     DefaultUtf8StringFields dusf1 = new DefaultUtf8StringFields(s);
     DefaultUtf8StringFields dusf2 = new DefaultUtf8StringFields();
@@ -64,11 +67,11 @@ public class PerfRegressionHolder {
                     }
                     System.out.println("times " + i + ": " + time / runs);
                     runs = 100_000;
-                    times[i] = time/runs;
+                    times[i] = time / runs;
                     Jvm.pause(100);
                 }
                 Arrays.sort(times);
-                System.out.println("result: " + times[(times.length-1) / 2] + " us");
+                System.out.println("result: " + times[(times.length - 1) / 2] + " us");
             }
         } catch (IOException ioe) {
             throw new AssertionError(ioe);
@@ -188,6 +191,7 @@ public class PerfRegressionHolder {
         String f = "";
 
         public StringFields() {
+
         }
 
         public StringFields(String... s) {
@@ -198,6 +202,39 @@ public class PerfRegressionHolder {
             this.d = s[3];
             this.e = s[4];
             this.f = s[5];
+        }
+    }
+
+    static class ArrayStringFields extends StringFields {
+        static final long[] offsets = Stream.of(StringFields.class.getDeclaredFields())
+                .filter(f -> f.getType() == String.class)
+                .mapToLong(UnsafeMemory::unsafeObjectFieldOffset)
+                .toArray();
+
+        public ArrayStringFields() {
+            super();
+        }
+
+        public ArrayStringFields(String... s) {
+            super(s);
+        }
+ // UU 2340
+ // 8U 3110
+ // U8 3060
+ // 88 3510
+        @Override
+        public void readMarshallable(BytesIn bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
+            for (long offset : offsets)
+                UnsafeMemory.UNSAFE.putObject(this, offset, bytes.read8bit());
+        }
+
+        @Override
+        public void writeMarshallable(BytesOut bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
+            for (long offset : offsets) {
+                final String s = (String) UnsafeMemory.UNSAFE.getObject(this, offset);
+                bytes.write8bit(s);
+                bytes.writeUtf8(s);
+            }
         }
     }
 
@@ -257,6 +294,7 @@ public class PerfRegressionHolder {
             bytes.writeUtf8(e);
             bytes.writeUtf8(f);
         }
+
     }
 
     public void benchNull() {
@@ -282,8 +320,12 @@ public class PerfRegressionHolder {
         testAll(this.dsf1, this.dsf2);
     }
 
+    public void benchArrayString() {
+        testAll(this.asf1, this.asf2);
+    }
+
     public void benchUtf8String() {
-        testAll(this.dusf1, this.dusf1);
+        testAll(this.dusf1, this.dusf2);
     }
 
     public void benchRefString() {

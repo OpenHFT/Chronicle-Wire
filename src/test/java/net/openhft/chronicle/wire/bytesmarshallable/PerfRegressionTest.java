@@ -31,6 +31,7 @@ public class PerfRegressionTest {
         Class[] classes = {
 //                BenchBytesMain.class,
                 BenchStringMain.class,
+                BenchArrayStringMain.class,
 //                BenchNullMain.class,
 //                BenchFieldsMain.class,
 //                BenchRefBytesMain.class,
