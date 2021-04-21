@@ -278,6 +278,11 @@ public class VanillaMethodReader implements MethodReader {
         return this;
     }
 
+    public void throwExceptionIfClosed() {
+        if (isClosed())
+            throw new IllegalStateException("Closed");
+    }
+
     // one arg
     public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, Class<?> parameterType) {
         throwExceptionIfClosed();

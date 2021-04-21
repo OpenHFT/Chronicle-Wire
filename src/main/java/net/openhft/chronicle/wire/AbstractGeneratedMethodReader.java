@@ -180,6 +180,11 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             return true;
     }
 
+    public void throwExceptionIfClosed() {
+        if (isClosed())
+            throw new IllegalStateException("Closed");
+    }
+
     @Override
     public MethodReaderInterceptorReturns methodReaderInterceptorReturns() {
         return null;
