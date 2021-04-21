@@ -1058,7 +1058,35 @@ interface ThreeValues {
 }
 ----
 
-=== Example with `MethodReaders`
+== Handling unexpected fields
+By default, Chronicle Wire skips fields which names don't match any field of the DTO class. It's possible to capture such fields by overriding method or `ReadMarshallable`:
+[source,Java]
+----
+    default void unexpectedField(Object event, ValueIn valueIn) {
+        valueIn.skipValue();
+    }
+----
+One of best practices is saving unexpected fields in order to process them after the deserialization:
+[source, Java]
+----
+        transient Map<String, Object> others = new LinkedHashMap<>();
+
+        @Override
+        public void unexpectedField(Object event, ValueIn valueIn) {
+            others.put(event.toString(), valueIn.object());
+        }
+----
+It's also possible to use fail-fast approach and throw an exception:
+[source, Java]
+----
+        @Override
+        public void unexpectedField(Object event, ValueIn valueIn) {
+            throw new IllegalStateException("Unexpected field: name=" + event + ", value=" + valueIn);
+        }
+----
+Exceptions that are thrown from this method are never swallowed, they are wrapped into runtime `UnexpectedFieldHandlingException` and thrown back to a high-level API call.
+
+== Example with `MethodReaders`
 
 [source,Java]
 ----
