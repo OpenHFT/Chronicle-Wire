@@ -564,7 +564,11 @@ public class WireMarshaller<T> {
                 long pos = read.wireIn().bytes().readPosition();
                 try {
                     setValue(o, read, overwrite);
-                } catch (Exception e) {
+                }
+                catch (UnexpectedFieldHandlingException e) {
+                    Jvm.rethrow(e);
+                }
+                catch (Exception e) {
                     read.wireIn().bytes().readPosition(pos);
                     StringBuilder sb = RSBP.acquireStringBuilder();
                     read.text(sb);
@@ -677,7 +681,11 @@ public class WireMarshaller<T> {
                 Object object = read.object(using, type);
                 field.set(o, object);
 
-            } catch (Exception e) {
+            }
+            catch (UnexpectedFieldHandlingException e) {
+                Jvm.rethrow(e);
+            }
+            catch (Exception e) {
                 read.wireIn().bytes().readPosition(pos);
                 Object object = null;
                 try {

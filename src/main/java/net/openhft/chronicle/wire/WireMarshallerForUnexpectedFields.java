@@ -60,8 +60,14 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
                 if (field == null) {
                     if (rm == null)
                         vin.skipValue();
-                    else
-                        rm.unexpectedField(sb, vin);
+                    else {
+                        try {
+                            rm.unexpectedField(sb, vin);
+                        }
+                        catch (Exception e) {
+                            throw new UnexpectedFieldHandlingException(e);
+                        }
+                    }
                 } else {
                     field.readValue(t, defaults, vin, overwrite);
                 }
