@@ -1,0 +1,5 @@
+!run.chronicle.wire.demo.Example7$Data2 {
+  name: Helen,
+  age: 19,
+  address: "15 Royal Way, Liverpool"
+}

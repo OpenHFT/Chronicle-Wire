@@ -1,0 +1,5 @@
+!Data1 {
+  name: Tom,
+  age: 25,
+  address: "21 High street, Liverpool"
+}

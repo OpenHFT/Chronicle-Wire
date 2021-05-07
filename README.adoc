@@ -610,6 +610,117 @@ Data{message='G'Day All', number=1212121, timeUnit=MINUTES, price=12.34}
 Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
 ----
 
+=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example7.java[Using the `ClassAliasPool`]
+This example shows how to pass your classes to `ClassAliasPool.CLASS_ALIASES.addAlias(Class... classes)`, to create alias names for them so that you can refer to them without using the complete name of their packages.
+
+[source,java]
+----
+// Create two classes Data1 and Data2 and add only the Data1.class to alias pool.
+static {
+        ClassAliasPool.CLASS_ALIASES.addAlias(Data1.class);
+}
+
+private static class Data1 extends SelfDescribingMarshallable {
+    String name;
+    int age;
+    String address;
+}
+
+private static class Data2 extends SelfDescribingMarshallable {
+    String name;
+    int age;
+    String address;
+}
+
+// Create instances of Data1 and Data2
+Data1 data1 = new Data1();
+data1.name = "James";
+data1.age = 20;
+data1.address = "12 Kingston, London";
+
+Data2 data2 = new Data2();
+data2.name = "James";
+data2.age = 20;
+data2.address = "12 Kingston, London";
+----
+Printing out data1 and data2, you will see that the alias name is printed out for data1 but data2 appears with complete package name.
+
+[source, jave]
+----
+System.out.println(data1);
+System.out.println(data2);
+----
+prints:
+[source, text]
+----
+!Data1 {
+  name: James,
+  age: 20,
+  address: "12 Kingston, London"
+}
+
+!run.chronicle.wire.demo.Example7$Data2 {
+  name: James,
+  age: 20,
+  address: "12 Kingston, London"
+}
+----
+
+Create configuration files cfg1.yaml and cfg2.yaml. See how the classes' names appear differently in yaml files for classes with alias name and without alias name. For Data1 object alias name is used in the yaml file (cfg1.yaml). Data2 object should be loaded from a yaml file
+with the complete name of class (including package name) otherwise you will receive an Exception.
+
+.cfg1.yaml
+[source,yaml]
+----
+!Data1 {
+  name: Tom,
+  age: 25,
+  address: "21 High street, Liverpool"
+}
+----
+
+.cfg2.yaml
+[source,yaml]
+----
+!run.chronicle.wire.demo.Example7$Data2 {
+  name: Helen,
+  age: 19,
+  address: "15 Royal Way, Liverpool"
+}
+----
+Create instances of Data1 and Data2 by reading the above configuration files and print the created objects:
+[source, java]
+----
+Data1 o1 = WireType.TEXT.fromFile("cfg1.yaml");
+System.out.println("o1 = " + o1);
+----
+prints:
+[source, text]
+----
+o1 = !Data1 {
+name: Tom,
+age: 25,
+address: "21 High street, Liverpool"
+}
+----
+and
+[source,java]
+----
+Data2 o2 = WireType.TEXT.fromFile("cfg2.yaml");
+System.out.println("o2 = " + o2);
+----
+
+prints:
+[source, text]
+----
+o2 = !run.chronicle.wire.demo.Example7$Data2 {
+name: Helen,
+age: 19,
+address: "15 Royal Way, Liverpool"
+}
+----
+You will see the complete package name for `o2` object.
+
 === link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Data.java[The code for the class Data]
 
 

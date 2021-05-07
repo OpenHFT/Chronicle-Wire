@@ -7,6 +7,7 @@ import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.wire.*;
 import org.easymock.EasyMock;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -268,6 +269,14 @@ public class MethodWriterTest extends WireTestCommon {
         checkWriterType(instance);
     }
 
+    @Test
+    public void testMultipleImplsReturnValuesWorkAround() {
+        final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
+
+        ReturnValuesWorkAround instance = wire.methodWriterBuilder(ReturnValuesWorkAround.class).build();
+        checkWriterType(instance);
+    }
+
     protected void checkWriterType(Object writer) {
         assertFalse(Proxy.isProxyClass(writer.getClass()));
     }
@@ -313,7 +322,7 @@ public class MethodWriterTest extends WireTestCommon {
         private static final AMarshallable EXCEPTION = new AMarshallable();
 
         @Override
-        public void writeMarshallable(WireOut wire) {
+        public void writeMarshallable(@NotNull WireOut wire) {
             if (this == EXCEPTION)
                 throw new NullPointerException("writeMarshallable failed. Should now rollback");
         }
@@ -345,5 +354,12 @@ public class MethodWriterTest extends WireTestCommon {
     interface ReturnValues {
         IgnoreMethod1 ignoreMethod1();
         IgnoreMethod2 ignoreMethod2();
+    }
+
+    interface ReturnValuesWorkAround extends ReturnValues, IgnoreMethod1, IgnoreMethod2 {
+        @Override
+        default boolean ignoreMethodBasedOnFirstArg(String methodName, String ladderDefinitionName) {
+            return false;
+        }
     }
 }
