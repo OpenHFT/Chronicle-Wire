@@ -483,11 +483,26 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         return bytes;
     }
 
+    /**
+     * deserializes with an optimistic cast
+     *
+     * @param cs  text to deserialize
+     * @param <T> the type to expect
+     * @return the object deserialized
+     * @throws ClassCastException if the object is not a T
+     */
     @Nullable
     public <T> T fromString(@NotNull CharSequence cs) {
         return (T) fromString(Object.class, cs);
     }
 
+    /**
+     * deserializes as a given class
+     *
+     * @param tClass to serialize as
+     * @param cs     text to deserialize
+     * @return the object deserialized
+     */
     public <T> T fromString(Class<T> tClass, @NotNull CharSequence cs) {
         if (cs.length() == 0)
             throw new IllegalArgumentException("cannot deserialize an empty string");
