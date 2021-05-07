@@ -58,10 +58,10 @@ public class TextMethodTesterTest extends WireTestCommon {
                 MockMethodsImpl::new,
                 MockMethods.class,
                 "methods-out-empty.yaml")
-                .onInvocationException(e -> exceptions.add(e))
+                .onInvocationException(exceptions::add)
                 .run();
         assertEquals(test.expected(), test.actual());
-        assertEquals(3, exceptions.size());
+        assertEquals(4, exceptions.size());
     }
 }
 

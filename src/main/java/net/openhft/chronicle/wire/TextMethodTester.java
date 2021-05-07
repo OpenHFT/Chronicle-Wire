@@ -184,7 +184,7 @@ public class TextMethodTester<T> {
         }
 
         if (component instanceof PostSetup)
-            ((PostSetup)component).postSetup();
+            ((PostSetup) component).postSetup();
 
         Wire wire = createWire(BytesUtil.readFile(input));
 
@@ -195,10 +195,12 @@ public class TextMethodTester<T> {
             expected = loadLastValues().toString().trim();
         }
         String originalExpected = expected;
+        boolean[] sepOnNext = {true};
         MethodReader reader = wire.methodReaderBuilder()
                 .methodReaderInterceptorReturns((Method m, Object o, Object[] args, net.openhft.chronicle.bytes.Invocation invocation) -> {
-                    if (!(m.getReturnType().isInterface()))
+                    if (sepOnNext[0])
                         wireOut.bytes().append("---\n");
+                    sepOnNext[0] = !(m.getReturnType().isInterface());
                     if (methodReaderInterceptorReturns == null)
                         return invocation.invoke(m, o, args);
                     return methodReaderInterceptorReturns.intercept(m, o, args, invocation);
@@ -209,40 +211,33 @@ public class TextMethodTester<T> {
         if (exceptionHandlerSetup != null)
             exceptionHandlerSetup.accept(reader, writer);
 
-//        long pos = wire2.bytes().writePosition();
-//        TextMethodWriterInvocationHandler.ENABLE_EOD = false;
-        try {
-            long pos = -1;
-            while (readOne(reader)) {
-                if (pos == wire.bytes().readPosition()) {
-                    Jvm.warn().on(getClass(), "Bailing out of malformed message");
-                    break;
-                }
-                Bytes<?> bytes2 = wireOut.bytes();
-                if (retainLast == null) {
-                    if (bytes2.writePosition() > 0) {
-                        int last = bytes2.peekUnsignedByte(bytes2.writePosition() - 1);
-                        if (last >= ' ')
-                            bytes2.append('\n');
-                    }
-                }
-                pos = bytes2.readPosition();
+        long pos = -1;
+        while (readOne(reader)) {
+            if (pos == wire.bytes().readPosition()) {
+                Jvm.warn().on(getClass(), "Bailing out of malformed message");
+                break;
             }
-            if (retainLast != null)
-                wireOut.bytes().clear();
-
-            if (retainLast != null) {
-                CachedInvocationHandler invocationHandler =
-                        (CachedInvocationHandler) Proxy.getInvocationHandler(writer);
-                try {
-                    invocationHandler.flush();
-                } catch (Exception e) {
-                    throw new IOException(e);
+            Bytes<?> bytes2 = wireOut.bytes();
+            if (retainLast == null) {
+                if (bytes2.writePosition() > 0) {
+                    int last = bytes2.peekUnsignedByte(bytes2.writePosition() - 1);
+                    if (last >= ' ')
+                        bytes2.append('\n');
                 }
             }
-        } finally {
-//            TextMethodWriterInvocationHandler.ENABLE_EOD = true;
+            pos = bytes2.readPosition();
+        }
+        if (retainLast != null)
+            wireOut.bytes().clear();
 
+        if (retainLast != null) {
+            CachedInvocationHandler invocationHandler =
+                    (CachedInvocationHandler) Proxy.getInvocationHandler(writer);
+            try {
+                invocationHandler.flush();
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
         }
 
         if (component instanceof Closeable)

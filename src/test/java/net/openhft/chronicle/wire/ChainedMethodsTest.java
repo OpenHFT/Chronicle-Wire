@@ -23,7 +23,7 @@ public class ChainedMethodsTest extends WireTestCommon {
 
     @Parameterized.Parameters(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[]{true}, new Object[]{false});
+        return Arrays.asList(new Object[]{false}, new Object[]{false});
     }
 
     @Before

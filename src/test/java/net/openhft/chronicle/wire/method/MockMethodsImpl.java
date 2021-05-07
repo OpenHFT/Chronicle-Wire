@@ -1,5 +1,7 @@
 package net.openhft.chronicle.wire.method;
 
+import net.openhft.chronicle.wire.IMid;
+
 import java.util.List;
 
 class MockMethodsImpl implements MockMethods {
@@ -32,5 +34,10 @@ class MockMethodsImpl implements MockMethods {
     @Override
     public void throwException(String s) {
         throw new RuntimeException(s);
+    }
+
+    @Override
+    public IMid mid(String text) {
+        return out.mid(text);
     }
 }

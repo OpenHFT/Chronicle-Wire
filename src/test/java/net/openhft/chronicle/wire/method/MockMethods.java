@@ -1,5 +1,7 @@
 package net.openhft.chronicle.wire.method;
 
+import net.openhft.chronicle.wire.IMid;
+
 import java.util.List;
 
 interface MockMethods {
@@ -12,4 +14,6 @@ interface MockMethods {
     void list(List<String> strings);
 
     void throwException(String s);
+
+    IMid mid(String text);
 }

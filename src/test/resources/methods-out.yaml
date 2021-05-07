@@ -18,3 +18,8 @@ list: [
   world
 ]
 ...
+---
+mid: hello
+next: 128
+echo: goodbye
+...

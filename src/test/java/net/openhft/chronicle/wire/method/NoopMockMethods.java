@@ -1,9 +1,14 @@
 package net.openhft.chronicle.wire.method;
 
+import net.openhft.chronicle.wire.IMid;
+
 import java.util.List;
 
 public class NoopMockMethods implements MockMethods {
+    private final MockMethods mockMethods;
+
     public NoopMockMethods(MockMethods mockMethods) {
+        this.mockMethods = mockMethods;
     }
 
     @Override
@@ -24,5 +29,11 @@ public class NoopMockMethods implements MockMethods {
 
     @Override
     public void throwException(String s) {
+    }
+
+    @Override
+    public IMid mid(String text) {
+        return x -> t -> {
+        };
     }
 }

@@ -1,5 +1,5 @@
 package net.openhft.chronicle.wire;
 
-interface IMid {
+public interface IMid {
     ILast next(long x);
 }
