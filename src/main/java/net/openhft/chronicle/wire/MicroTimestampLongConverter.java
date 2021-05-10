@@ -20,7 +20,9 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.time.LongTime;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
@@ -28,11 +30,24 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 
 public class MicroTimestampLongConverter implements LongConverter {
+    public static final ZoneId UTC = ZoneId.of("UTC");
     public static final MicroTimestampLongConverter INSTANCE = new MicroTimestampLongConverter();
-    final DateTimeFormatter dtf = new DateTimeFormatterBuilder()
-            .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
-            .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true)
-            .toFormatter();
+    private final ZoneId zoneId;
+    private final DateTimeFormatter dtf;
+
+    public MicroTimestampLongConverter() {
+        this(System.getProperty("mtlc.zoneId", "UTC"));
+    }
+
+    public MicroTimestampLongConverter(String zoneId) {
+        this.zoneId = ZoneId.of(zoneId);
+        final DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder()
+                .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
+                .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true);
+        if (!this.zoneId.equals(UTC))
+            builder.appendLiteral(' ').appendZoneOrOffsetId();
+        dtf = builder.toFormatter();
+    }
 
     @Override
     public long parse(CharSequence text) {
@@ -77,6 +92,10 @@ public class MicroTimestampLongConverter implements LongConverter {
                 value / 1_000_000,
                 (int) (value % 1_000_000 * 1000),
                 ZoneOffset.UTC);
-        dtf.formatTo(ldt, text);
+        if (zoneId.equals(UTC)) {
+            dtf.formatTo(ldt, text);
+        } else {
+            dtf.formatTo(ZonedDateTime.of(ldt, zoneId), text);
+        }
     }
 }
