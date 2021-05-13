@@ -22,7 +22,6 @@ import net.openhft.chronicle.bytes.BytesComment;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.StackTrace;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
@@ -36,6 +35,7 @@ import java.io.StreamCorruptedException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static java.lang.String.format;
 import static net.openhft.chronicle.wire.Wires.*;
 
 public abstract class AbstractWire implements Wire {
@@ -310,7 +310,10 @@ public abstract class AbstractWire implements Wire {
                 break;
 
             if (isNotComplete(header)) {
-                Jvm.warn().on(getClass(), new Exception("Incomplete header found at pos: " + pos + ": " + Integer.toHexString(header) + ", overwriting"));
+                if (isEndOfFile(header))
+                    Jvm.debug().on(getClass(), new Exception(format("Overwriting END_OF_DATA header at pos: %d (header: %s)", pos, Integer.toHexString(header))));
+                else
+                    Jvm.warn().on(getClass(), new Exception("Incomplete header found at pos: " + pos + ": " + Integer.toHexString(header) + ", overwriting"));
                 bytes.writeVolatileInt(pos, NOT_INITIALIZED);
                 break;
             }
