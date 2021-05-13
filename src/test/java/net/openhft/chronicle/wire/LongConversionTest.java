@@ -41,13 +41,35 @@ public class LongConversionTest extends WireTestCommon {
 
         StringWriter sw = new StringWriter();
         LongConversionTest.WriteWithLong read = Mocker.logging(LongConversionTest.WriteWithLong.class, "", sw);
-        wire.methodReader(read).readOne();
+        wire.methodReader(read)
+                .readOne();
 
         assertEquals("to[12345]\n", sw.toString().replaceAll("\r", ""));
     }
 
+    @Test
+    public void oxmethod() {
+        Wire wire = new TextWire(Bytes.allocateElasticOnHeap(64))
+                .useTextDocuments();
+        LongConversionTest.OxWriteWithLong write = wire.methodWriter(LongConversionTest.OxWriteWithLong.class);
+        assertSame(write, write.to(0x12345));
+
+        assertEquals("to: 0x12345\n", wire.toString());
+
+        StringWriter sw = new StringWriter();
+        LongConversionTest.OxWriteWithLong read = Mocker.logging(LongConversionTest.OxWriteWithLong.class, "", sw);
+        wire.methodReader(read).readOne();
+
+        // TODO FIX The reader is ignoring the LongConverter
+        assertEquals("to[74565]\n", sw.toString().replaceAll("\r", ""));
+    }
+
     interface WriteWithLong {
         LongConversionTest.WriteWithLong to(@LongConversion(HexadecimalLongConverter.class) int x);
+    }
+
+    interface OxWriteWithLong {
+        LongConversionTest.OxWriteWithLong to(@LongConversion(OxHexadecimalLongConverter.class) int x);
     }
 
     static class LongHolder extends SelfDescribingMarshallable {

@@ -134,7 +134,7 @@ public enum SerializationStrategies implements SerializationStrategy {
                     EnumCache<?> cache = EnumCache.of(o.getClass());
                     Object ret = cache.valueOf(text);
                     if (ret == null)
-                        throw new IORuntimeException("No enum value '"+text+"' defined for "+o.getClass());
+                        throw new IORuntimeException("No enum value '" + text + "' defined for " + o.getClass());
                     return ret;
                 }
                 return text;
@@ -186,9 +186,15 @@ public enum SerializationStrategies implements SerializationStrategy {
         @NotNull
         @Override
         public Object readUsing(Object using, @NotNull ValueIn in, BracketType bracketType) {
-            @NotNull final DemarshallableWrapper wrapper = (DemarshallableWrapper) using;
-            wrapper.demarshallable = Demarshallable.newInstance(wrapper.type, in.wireIn());
-            return wrapper;
+            if (using instanceof DemarshallableWrapper) {
+                @NotNull final DemarshallableWrapper wrapper = (DemarshallableWrapper) using;
+                wrapper.demarshallable = Demarshallable.newInstance(wrapper.type, in.wireIn());
+                return wrapper;
+            } else if (using instanceof ReadMarshallable) {
+                return in.object(using, Object.class);
+            } else {
+                return Demarshallable.newInstance((Class) using.getClass(), in.wireIn());
+            }
         }
 
         @NotNull
