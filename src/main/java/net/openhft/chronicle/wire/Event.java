@@ -14,7 +14,9 @@ public interface Event<E extends Event<E>> extends Marshallable {
      * @return a unique identifier attached to this event.
      */
     @NotNull
-    CharSequence eventId();
+    default CharSequence eventId() {
+        return "";
+    }
 
     /**
      * Assigns a unique identifier to this event. The input identifier cannot be {@code null}.
@@ -23,7 +25,7 @@ public interface Event<E extends Event<E>> extends Marshallable {
      * @return this
      */
     default E eventId(@NotNull final CharSequence eventId) {
-        throw new UnsupportedOperationException();
+        return (E) this;
     }
 
     /**
