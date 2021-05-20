@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -43,22 +44,25 @@ import java.util.List;
 public class WireTests {
 
     private final WireType wireType;
+    private final boolean usePadding;
 
     @NotNull
     @Rule
     public TestName name = new TestName();
 
-    public WireTests(WireType wireType) {
+    public WireTests(WireType wireType, boolean usePadding) {
         this.wireType = wireType;
+        this.usePadding = usePadding;
     }
 
     @NotNull
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{index}: {0} padding: {1}")
     public static Collection<Object[]> data() {
 
         @NotNull final List<Object[]> list = new ArrayList<>();
-        list.add(new Object[]{WireType.BINARY});
-        list.add(new Object[]{WireType.TEXT});
+        list.add(new Object[]{WireType.BINARY, true});
+        list.add(new Object[]{WireType.BINARY, false});
+        list.add(new Object[]{WireType.TEXT, false});
              // list.add(new Object[]{WireType.RAW});
         return list;
     }
@@ -69,7 +73,7 @@ public class WireTests {
         final long expectedLong1 = -1;
         final long expectedLong2 = Long.MIN_VALUE;
         try {
-            final Wire wire = wireType.apply(b);
+            final Wire wire = createWire(b);
 
             try (DocumentContext dc = wire.writingDocument()) {
                 dc.wire().write("w")
@@ -96,7 +100,7 @@ public class WireTests {
     public void testLenientTypeLiteral() {
         final Bytes b = Bytes.elasticByteBuffer();
         try {
-            final Wire wire = wireType.apply(b);
+            final Wire wire = createWire(b);
 
             try (DocumentContext dc = wire.writingDocument()) {
                 dc.wire().write("w").typeLiteral("DoesntExist");
@@ -114,7 +118,7 @@ public class WireTests {
     @Test
     public void testDate() {
         final Bytes b = Bytes.elasticByteBuffer();
-        final Wire wire = wireType.apply(b);
+        final Wire wire = createWire(b);
         wire.getValueOut()
                 .object(new Date(1234567890000L));
         Assert.assertEquals(new Date(1234567890000L), wire.getValueIn()
@@ -127,7 +131,7 @@ public class WireTests {
     public void testLocalDateTime() {
         final Bytes b = Bytes.elasticByteBuffer();
         try {
-            final Wire wire = wireType.apply(b);
+            final Wire wire = createWire(b);
             LocalDateTime expected = LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
             wire.getValueOut().object(expected);
             Assert.assertEquals(expected, wire.getValueIn().object());
@@ -139,7 +143,7 @@ public class WireTests {
     @Test
     public void testZonedDateTime() {
         final Bytes b = Bytes.elasticByteBuffer();
-        final Wire wire = wireType.apply(b);
+        final Wire wire = createWire(b);
         ZonedDateTime expected = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
         wire.getValueOut().object(expected);
         Assert.assertEquals(expected, wire.getValueIn().object());
@@ -151,7 +155,7 @@ public class WireTests {
     public void testSkipValueWithNumbersAndStrings() {
 
         final Bytes b = Bytes.elasticByteBuffer();
-        final Wire wire = wireType.apply(b);
+        final Wire wire = createWire(b);
 
         wire.write("value1").text("text");
         wire.write("number").int64(125);
@@ -173,7 +177,7 @@ public class WireTests {
     public void testWriteNull() {
 
         final Bytes b = Bytes.elasticByteBuffer();
-        final Wire wire = wireType.apply(b);
+        final Wire wire = createWire(b);
         wire.write().object(null);
         wire.write().object(null);
         wire.write().object(null);
@@ -197,7 +201,7 @@ public class WireTests {
         @NotNull TestClass testClass = new TestClass(Boolean.class);
 
         final Bytes b = Bytes.elasticByteBuffer();
-        final Wire wire = wireType.apply(b);
+        final Wire wire = createWire(b);
         wire.write().typedMarshallable(testClass);
 
         @Nullable TestClass o = wire.read().typedMarshallable();
@@ -207,19 +211,10 @@ public class WireTests {
     }
 
     @Test
-    public void testReadingPeekYamlWithPadding() {
-        testReadingPeekYaml(true);
-    }
-
-    @Test
     public void testReadingPeekYaml() {
-        testReadingPeekYaml(false);
-    }
-
-    private void testReadingPeekYaml(boolean usePadding) {
+        Assume.assumeTrue(wireType == WireType.BINARY);
         Bytes b = Bytes.elasticByteBuffer();
-        @NotNull BinaryWire wire = (BinaryWire) WireType.BINARY.apply(b);
-        wire.usePadding(usePadding);
+        final Wire wire = createWire(b);
         Assert.assertEquals("", wire.readingPeekYaml());
         try (@NotNull DocumentContext dc = wire.writingDocument(false)) {
             dc.wire().write("some-data!").marshallable(m -> {
@@ -274,6 +269,12 @@ public class WireTests {
         }
 
         b.releaseLast();
+    }
+
+    private Wire createWire(Bytes b) {
+        final Wire wire = wireType.apply(b);
+        wire.usePadding(usePadding);
+        return wire;
     }
 
     static class TestClass extends SelfDescribingMarshallable {
