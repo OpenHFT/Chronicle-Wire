@@ -39,6 +39,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import static org.junit.Assume.assumeTrue;
+
 @SuppressWarnings("rawtypes")
 @RunWith(value = Parameterized.class)
 public class WireTests {
@@ -212,7 +214,8 @@ public class WireTests {
 
     @Test
     public void testReadingPeekYaml() {
-        Assume.assumeTrue(wireType == WireType.BINARY);
+        assumeTrue(usePadding);
+        assumeTrue(wireType == WireType.BINARY);
         Bytes b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
         Assert.assertEquals("", wire.readingPeekYaml());

@@ -28,9 +28,11 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     public void testMethodReaderWriterMetadata() {
         Bytes b = Bytes.elasticByteBuffer();
         try {
-            Wire w = WireType.BINARY.apply(b);
+            Wire wire = WireType.BINARY.apply(b);
+            wire.usePadding(true);
+
             {
-                AListener aListener = w.methodWriter(true, AListener.class);
+                AListener aListener = wire.methodWriter(true, AListener.class);
                 A a = new A();
                 a.x = 5;
                 aListener.a(a);
@@ -38,7 +40,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 aListener.index2index(a);
             }
 
-            MethodReader methodReader = w.methodReader(new AListener() {
+            MethodReader methodReader = wire.methodReader(new AListener() {
                 @Override
                 public void a(final A a) {
                     VanillaMethodReaderTest.this.instance = a;

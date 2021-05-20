@@ -1825,15 +1825,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             int length = bytes instanceof HexDumpBytes
                     ? (int) length0
                     : Maths.toInt32(length0, "Document length %,d out of 32-bit int range.");
-            boolean debug = false;
-            assert debug = true;
-            if (debug && !Jvm.isArm()) {
-                if (!bytes.compareAndSwapInt(position, 0, length)) {
-                    throw new IllegalStateException("CAS failed for sequence was " + Integer.toHexString(bytes.readInt(position)));
-                }
-            } else {
-                bytes.writeInt(position, length);
-            }
+            bytes.writeInt(position, length);
         }
 
         @NotNull

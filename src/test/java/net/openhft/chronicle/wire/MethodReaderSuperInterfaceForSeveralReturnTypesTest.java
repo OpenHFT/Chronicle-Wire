@@ -28,6 +28,7 @@ public class MethodReaderSuperInterfaceForSeveralReturnTypesTest {
     @Test
     public void test() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
 
         final A writer = wire.methodWriter(A.class);
 

@@ -73,6 +73,7 @@ expectException("Writing an incomplete document is deprecated, this feature will
         @NotNull MappedBytes b = MappedBytes.mappedBytes(File.createTempFile("delete", "me"), 64 << 10);
         assertTrue(b.sharedMemory());
         @NotNull Wire wire = new TextWire(b).useBinaryDocuments();
+        wire.usePadding(true);
         assertTrue(wire.notCompleteIsNotPresent());
 
         try (DocumentContext dc = wire.readingDocument()) {
@@ -118,6 +119,7 @@ expectException("Writing an incomplete document is deprecated, this feature will
         Bytes b = Bytes.elasticByteBuffer();
 
         @NotNull TextWire textWire = new TextWire(b).useBinaryDocuments();
+        textWire.usePadding(true);
 
         textWire.writeDocument(true, w -> {
         });
@@ -146,6 +148,7 @@ expectException("Writing an incomplete document is deprecated, this feature will
         Bytes b = Bytes.elasticByteBuffer();
 
         @NotNull TextWire textWire = new TextWire(b).useBinaryDocuments();
+        textWire.usePadding(true);
 
         textWire.writeDocument(true, w -> w.write("key").text("someText"));
         textWire.writeDocument(true, w -> w.write("key").text("someText"));
@@ -186,21 +189,21 @@ expectException("Writing an incomplete document is deprecated, this feature will
     }
 
     @Test
-    public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt5Bytes() throws
-            Exception {
+    public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt5Bytes() {
 
         Bytes b = Bytes.elasticByteBuffer();
 
-        @NotNull TextWire textWire = new TextWire(b).useBinaryDocuments();
+        @NotNull TextWire wire = new TextWire(b).useBinaryDocuments();
+        wire.usePadding(true);
 
-        textWire.writeDocument(true, w -> w.write("key").text("someText"));
-        textWire.writeDocument(true, w -> w.write("key").text("someText"));
-        textWire.writeDocument(false, w -> w.write("key2").text("someText2"));
+        wire.writeDocument(true, w -> w.write("key").text("someText"));
+        wire.writeDocument(true, w -> w.write("key").text("someText"));
+        wire.writeDocument(false, w -> w.write("key2").text("someText2"));
 
-        try (@NotNull DocumentContext dc = textWire.readingDocument()) {
+        try (@NotNull DocumentContext dc = wire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertTrue(dc.isMetaData());
-            Assert.assertEquals("someText", textWire.read(() -> "key").text());
+            Assert.assertEquals("someText", wire.read(() -> "key").text());
         }
 
         long limit = b.readLimit();
@@ -209,23 +212,23 @@ expectException("Writing an incomplete document is deprecated, this feature will
         long newReadPosition = b.readPosition() + 5;
         b.readLimit(newReadPosition);
 
-        try (@NotNull DocumentContext dc = textWire.readingDocument()) {
+        try (@NotNull DocumentContext dc = wire.readingDocument()) {
             assertFalse(dc.isPresent());
         }
 
         Assert.assertEquals(newReadPosition, b.readLimit());
 
         b.readLimit(limit);
-        try (@NotNull DocumentContext dc = textWire.readingDocument()) {
+        try (@NotNull DocumentContext dc = wire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertTrue(dc.isMetaData());
-            Assert.assertEquals("someText", textWire.read(() -> "key").text());
+            Assert.assertEquals("someText", wire.read(() -> "key").text());
         }
 
-        try (@NotNull DocumentContext dc = textWire.readingDocument()) {
+        try (@NotNull DocumentContext dc = wire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertFalse(dc.isMetaData());
-            Assert.assertEquals("someText2", textWire.read(() -> "key2").text());
+            Assert.assertEquals("someText2", wire.read(() -> "key2").text());
         }
 
         b.releaseLast();

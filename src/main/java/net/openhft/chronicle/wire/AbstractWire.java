@@ -39,6 +39,7 @@ import java.util.concurrent.TimeoutException;
 import static net.openhft.chronicle.wire.Wires.*;
 
 public abstract class AbstractWire implements Wire {
+    public static final boolean DEFAULT_USE_PADDING = Jvm.getBoolean("wire.usePadding", true);
     protected static final boolean ASSERTIONS;
     private static final String INSIDE_HEADER_MESSAGE = "you cant put a header inside a header, check that " +
             "you have not nested the documents. If you are using Chronicle-Queue please " +
@@ -196,12 +197,8 @@ public abstract class AbstractWire implements Wire {
     }
 
     private void alignForRead(Bytes<?> bytes) {
-        if (usePadding) {
-            long readPosition = bytes.readPosition();
-            long readPosition2 = readPosition + Wires.padOffset(readPosition);
-            if (readPosition != readPosition2)
-                bytes.readPosition(readPosition2);
-        }
+        // move the read position
+        bytes.readPositionForHeader(usePadding);
     }
 
     @Override
@@ -523,6 +520,7 @@ public abstract class AbstractWire implements Wire {
         insideHeader = false;
     }
 
+    // @Deprecated(/* to be removed in x.24 */)
     public void usePadding(boolean usePadding) {
         this.usePadding = usePadding;
     }

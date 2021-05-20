@@ -26,6 +26,10 @@ import org.junit.Test;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
+import static net.openhft.chronicle.bytes.Bytes.elasticByteBuffer;
+import static net.openhft.chronicle.wire.WireType.BINARY;
+
 public class UsingTestMarshallable {
 
     @Test
@@ -36,15 +40,13 @@ public class UsingTestMarshallable {
 
         Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer();
 
-        @Nullable ByteBuffer byteBuffer = byteBufferBytes.underlyingObject();
-       // System.out.println(byteBuffer.getClass());
+        @NotNull Wire wire = new TextWire(byteBufferBytes);
+        wire.usePadding(true);
+        wire.bytes().readPosition();
 
-        @NotNull Wire textWire = new TextWire(byteBufferBytes);
-        textWire.bytes().readPosition();
+        wire.writeDocument(false, d -> d.write(() -> "any-key").marshallable(testMarshallable));
 
-        textWire.writeDocument(false, d -> d.write(() -> "any-key").marshallable(testMarshallable));
-
-        String value = Wires.fromSizePrefixedBlobs(textWire.bytes());
+        String value = Wires.fromSizePrefixedBlobs(wire.bytes());
 
         //String replace = value.replace("\n", "\\n");
 

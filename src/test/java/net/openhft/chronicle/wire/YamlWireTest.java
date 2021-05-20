@@ -219,6 +219,8 @@ public class YamlWireTest extends WireTestCommon {
 
         Bytes b = Bytes.elasticByteBuffer();
         Wire wire = WireType.BINARY.apply(b);
+        wire.usePadding(true);
+
         @NotNull Map<String, String> data = Collections.singletonMap("key", "value");
 
         @NotNull HashMap map = new HashMap();
@@ -1104,6 +1106,7 @@ public class YamlWireTest extends WireTestCommon {
     public void testMapReadAndWriteStrings() {
         @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
+        wire.usePadding(true);
 
         @NotNull final Map<String, String> expected = new LinkedHashMap<>();
 
@@ -1245,6 +1248,8 @@ public class YamlWireTest extends WireTestCommon {
         };
         @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
+        wire.usePadding(true);
+
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception")
                 .object(e));
 

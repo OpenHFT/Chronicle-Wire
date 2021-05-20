@@ -10,16 +10,22 @@ public class UpdateInterceptorReturnTypeTest {
     @Test
     public void testUpdateInterceptorNoReturnType() {
 
-        BINARY.apply(elasticByteBuffer())
+        createWire()
                 .methodWriterBuilder(NoReturnType.class)
                 .updateInterceptor((methodName, t) -> true)
                 .build()
                 .x("hello world");
     }
 
+    static Wire createWire() {
+        final Wire wire = BINARY.apply(elasticByteBuffer());
+        wire.usePadding(true);
+        return wire;
+    }
+
     @Test
     public void testUpdateInterceptorWithIntReturnType() {
-        BINARY.apply(elasticByteBuffer())
+        createWire()
                 .methodWriterBuilder(WithIntReturnType.class)
                 .updateInterceptor((methodName, t) -> true)
                 .build()
@@ -28,7 +34,7 @@ public class UpdateInterceptorReturnTypeTest {
 
     @Test
     public void testUpdateInterceptorWithObjectReturnType() {
-        BINARY.apply(elasticByteBuffer())
+        createWire()
                 .methodWriterBuilder(WithObjectReturnType.class)
                 .updateInterceptor((methodName, t) -> true)
                 .build()
@@ -37,7 +43,7 @@ public class UpdateInterceptorReturnTypeTest {
 
     @Test
     public void testUpdateInterceptorWithLadderByQtyListener() {
-        BINARY.apply(elasticByteBuffer())
+        createWire()
                 .methodWriterBuilder(LadderByQtyListener.class)
                 .updateInterceptor((methodName, t) -> true)
                 .build()

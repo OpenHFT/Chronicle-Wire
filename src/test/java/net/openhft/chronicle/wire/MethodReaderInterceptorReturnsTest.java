@@ -72,9 +72,10 @@ public class MethodReaderInterceptorReturnsTest {
     }
 
     private void doTestInterceptorSupportedInGeneratedCode(CountDownLatch readerCreateLatch, boolean addDummyInstance) {
-        BinaryWire binaryWire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
 
-        InterceptedInterface writer = binaryWire.methodWriter(InterceptedInterface.class);
+        InterceptedInterface writer = wire.methodWriter(InterceptedInterface.class);
 
         final StringBuilder interceptedMethodNames = new StringBuilder();
 
@@ -105,11 +106,11 @@ public class MethodReaderInterceptorReturnsTest {
 
         final MethodReader reader;
         if (addDummyInstance) { // To ensure recompilation in different tests
-            reader = binaryWire.methodReaderBuilder()
+            reader = wire.methodReaderBuilder()
                     .methodReaderInterceptorReturns(interceptor)
                     .build(impl, (Supplier<String>) () -> null);
         } else {
-            reader = binaryWire.methodReaderBuilder()
+            reader = wire.methodReaderBuilder()
                     .methodReaderInterceptorReturns(interceptor)
                     .build(impl);
         }
@@ -136,15 +137,16 @@ public class MethodReaderInterceptorReturnsTest {
      */
     @Test
     public void testGeneratingAggregatingInfoInterceptor() {
-        BinaryWire binaryWire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
 
-        InterceptedInterface writer = binaryWire.methodWriter(InterceptedInterface.class);
+        InterceptedInterface writer = wire.methodWriter(InterceptedInterface.class);
 
         final AggregatingInfoInterceptor interceptor = new AggregatingInfoInterceptor();
 
         final InterceptedInterfaceImpl impl = new InterceptedInterfaceImpl(new StringBuilder(), false);
 
-        final MethodReader reader = binaryWire.methodReaderBuilder()
+        final MethodReader reader = wire.methodReaderBuilder()
                 .methodReaderInterceptorReturns(interceptor)
                 .build(impl);
 
@@ -167,15 +169,16 @@ public class MethodReaderInterceptorReturnsTest {
      */
     @Test
     public void testGeneratingSkippingInterceptor() {
-        BinaryWire binaryWire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
 
-        InterceptedInterface writer = binaryWire.methodWriter(InterceptedInterface.class);
+        InterceptedInterface writer = wire.methodWriter(InterceptedInterface.class);
 
         final SkippingInterceptor interceptor = new SkippingInterceptor();
 
         final InterceptedInterfaceImpl impl = new InterceptedInterfaceImpl(new StringBuilder(), true);
 
-        final MethodReader reader = binaryWire.methodReaderBuilder()
+        final MethodReader reader = wire.methodReaderBuilder()
                 .methodReaderInterceptorReturns(interceptor)
                 .build(impl);
 

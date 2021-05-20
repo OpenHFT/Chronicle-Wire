@@ -95,6 +95,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     @Test
     public void chainedBinary() {
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
         ITop top = wire.methodWriter(ITop.class);
         top.mid("mid")
                 .next(1)
@@ -107,7 +108,7 @@ public class ChainedMethodsTest extends WireTestCommon {
                 "mid: mid\n" +
                 "next: 1\n" +
                 "echo: echo-1\n" +
-                "# position: 41, header: 1\n" +
+                "# position: 44, header: 1\n" +
                 "--- !!data #binary\n" +
                 "mid2: mid2\n" +
                 "next2: word\n" +
@@ -123,6 +124,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     @Test
     public void chainedBinaryVariousArgsNumber() {
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
         ITop top = wire.methodWriter(ITop.class);
         top.midNoArg()
                 .next(1)
@@ -136,7 +138,7 @@ public class ChainedMethodsTest extends WireTestCommon {
                 "midNoArg: \"\"\n" +
                 "next: 1\n" +
                 "echo: echo-1\n" +
-                "# position: 43, header: 1\n" +
+                "# position: 44, header: 1\n" +
                 "--- !!data #binary\n" +
                 "midTwoArgs: [\n" +
                 "  !int 5,\n" +
@@ -179,6 +181,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     @Test
     public void testNestedReturnType() {
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
         final NestedStart writer = wire.methodWriter(NestedStart.class);
 
         assertEquals(disableProxyCodegen, Proxy.isProxyClass(writer.getClass()));

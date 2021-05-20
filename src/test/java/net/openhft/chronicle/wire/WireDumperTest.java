@@ -24,6 +24,8 @@ public class WireDumperTest extends WireTestCommon {
     public WireDumperTest(final String name, final WireType wireType) {
         bytes = Bytes.allocateElasticDirect();
         wire = wireType.apply(bytes);
+        wire.usePadding(true);
+
         this.wireType = wireType;
         initTestData();
     }
@@ -70,10 +72,10 @@ public class WireDumperTest extends WireTestCommon {
         expectedContentByType.put(WireType.TEXT,
                 "--- !!data #binary\n" +
                         "00000000             31 37 0a                                 17·          \n" +
-                        "# position: 7, header: 1\n" +
+                        "# position: 8, header: 1\n" +
                         "--- !!data\n" +
                         "bark\n" +
-                        "# position: 16, header: 2\n" +
+                        "# position: 20, header: 2\n" +
                         "--- !!data\n" +
                         "3.14\n" +
                         "");
@@ -81,10 +83,10 @@ public class WireDumperTest extends WireTestCommon {
         expectedContentByType.put(WireType.BINARY,
                 "--- !!data #binary\n" +
                         "00000000             11                                       ·            \n" +
-                        "# position: 5, header: 1\n" +
+                        "# position: 8, header: 1\n" +
                         "--- !!data #binary\n" +
                         "bark\n" +
-                        "# position: 14, header: 2\n" +
+                        "# position: 20, header: 2\n" +
                         "--- !!data #binary\n" +
                         "3.14\n" +
                         "");
@@ -92,10 +94,10 @@ public class WireDumperTest extends WireTestCommon {
         expectedContentByType.put(WireType.BINARY_LIGHT,
                 "--- !!data #binary\n" +
                         "00000000             11                                       ·            \n" +
-                        "# position: 5, header: 1\n" +
+                        "# position: 8, header: 1\n" +
                         "--- !!data #binary\n" +
                         "bark\n" +
-                        "# position: 14, header: 2\n" +
+                        "# position: 20, header: 2\n" +
                         "--- !!data #binary\n" +
                         "3.14\n" +
                         "");
@@ -103,10 +105,10 @@ public class WireDumperTest extends WireTestCommon {
         expectedContentByType.put(WireType.FIELDLESS_BINARY,
                 "--- !!data #binary\n" +
                         "00000000             11                                       ·            \n" +
-                        "# position: 5, header: 1\n" +
+                        "# position: 8, header: 1\n" +
                         "--- !!data #binary\n" +
                         "bark\n" +
-                        "# position: 14, header: 2\n" +
+                        "# position: 20, header: 2\n" +
                         "--- !!data #binary\n" +
                         "3.14\n" +
                         "");
@@ -114,10 +116,10 @@ public class WireDumperTest extends WireTestCommon {
         expectedContentByType.put(WireType.COMPRESSED_BINARY,
                 "--- !!data #binary\n" +
                         "00000000             11                                       ·            \n" +
-                        "# position: 5, header: 1\n" +
+                        "# position: 8, header: 1\n" +
                         "--- !!data #binary\n" +
                         "bark\n" +
-                        "# position: 14, header: 2\n" +
+                        "# position: 20, header: 2\n" +
                         "--- !!data #binary\n" +
                         "3.14\n" +
                         "");
@@ -125,10 +127,10 @@ public class WireDumperTest extends WireTestCommon {
         expectedContentByType.put(WireType.JSON,
                 "--- !!data #binary\n" +
                         "00000000             31 37                                    17           \n" +
-                        "# position: 6, header: 1\n" +
+                        "# position: 8, header: 1\n" +
                         "--- !!data\n" +
                         ",\"bark\"\n" +
-                        "# position: 17, header: 2\n" +
+                        "# position: 20, header: 2\n" +
                         "--- !!data\n" +
                         ",3.14\n" +
                         "");
@@ -139,16 +141,15 @@ public class WireDumperTest extends WireTestCommon {
                         "# position: 12, header: 1\n" +
                         "--- !!data #binary\n" +
                         "00000010 04 62 61 72 6b                                   ·bark            \n" +
-                        "# position: 21, header: 2\n" +
+                        "# position: 24, header: 2\n" +
                         "--- !!data #binary\n" +
-                        "00000010                             1f 85 eb 51 b8 1e 09           ···Q···\n" +
-                        "00000020 40                                               @                \n" +
-                        "");
+                        "00000010                                      1f 85 eb 51              ···Q\n" +
+                        "00000020 b8 1e 09 40                                      ···@             \n");
 
         expectedPartialContent.put(WireType.TEXT,
                 "--- !!data #binary\n" +
                         "00000000             31 37 0a                                 17·          \n" +
-                        "# position: 7, header: 0 or 1\n" +
+                        "# position: 8, header: 0 or 1\n" +
                         "--- !!not-ready-data!\n" +
                         "...\n" +
                         "# 5 bytes remaining\n" +
@@ -157,7 +158,7 @@ public class WireDumperTest extends WireTestCommon {
         expectedPartialContent.put(WireType.BINARY,
                 "--- !!data #binary\n" +
                         "00000000             11                                       ·            \n" +
-                        "# position: 5, header: 0 or 1\n" +
+                        "# position: 8, header: 0 or 1\n" +
                         "--- !!not-ready-data! #binary\n" +
                         "...\n" +
                         "# 5 bytes remaining\n" +
@@ -166,7 +167,7 @@ public class WireDumperTest extends WireTestCommon {
         expectedPartialContent.put(WireType.BINARY_LIGHT,
                 "--- !!data #binary\n" +
                         "00000000             11                                       ·            \n" +
-                        "# position: 5, header: 0 or 1\n" +
+                        "# position: 8, header: 0 or 1\n" +
                         "--- !!not-ready-data! #binary\n" +
                         "...\n" +
                         "# 5 bytes remaining\n" +
@@ -175,7 +176,7 @@ public class WireDumperTest extends WireTestCommon {
         expectedPartialContent.put(WireType.FIELDLESS_BINARY,
                 "--- !!data #binary\n" +
                         "00000000             11                                       ·            \n" +
-                        "# position: 5, header: 0 or 1\n" +
+                        "# position: 8, header: 0 or 1\n" +
                         "--- !!not-ready-data! #binary\n" +
                         "...\n" +
                         "# 5 bytes remaining\n" +
@@ -184,7 +185,7 @@ public class WireDumperTest extends WireTestCommon {
         expectedPartialContent.put(WireType.COMPRESSED_BINARY,
                 "--- !!data #binary\n" +
                         "00000000             11                                       ·            \n" +
-                        "# position: 5, header: 0 or 1\n" +
+                        "# position: 8, header: 0 or 1\n" +
                         "--- !!not-ready-data! #binary\n" +
                         "...\n" +
                         "# 5 bytes remaining\n" +
@@ -193,7 +194,7 @@ public class WireDumperTest extends WireTestCommon {
         expectedPartialContent.put(WireType.JSON,
                 "--- !!data #binary\n" +
                         "00000000             31 37                                    17           \n" +
-                        "# position: 6, header: 0 or 1\n" +
+                        "# position: 8, header: 0 or 1\n" +
                         "--- !!not-ready-data!\n" +
                         "...\n" +
                         "# 7 bytes remaining\n" +

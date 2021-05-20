@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.bytes.MappedBytesStore;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -122,7 +123,7 @@ public enum WireInternal {
         long position;
         try {
             @NotNull Bytes bytes = wireOut.bytes();
-            position = bytes.writePosition();
+            position = bytes.writePositionForHeader(wireOut.usePadding());
 
             int metaDataBit = metaData ? Wires.META_DATA : 0;
             int len0 = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
@@ -137,7 +138,10 @@ public enum WireInternal {
             } else {
                 length = metaDataBit | toIntU30(position1 - position - 4, "Document length %,d out of 30-bit int range.");
             }
-            bytes.testAndSetInt(position, len0, length | (notComplete ? Wires.NOT_COMPLETE : 0));
+            if (wireOut.usePadding())
+                bytes.testAndSetInt(position, len0, length | (notComplete ? Wires.NOT_COMPLETE : 0));
+            else
+                bytes.writeInt(position, length | (notComplete ? Wires.NOT_COMPLETE : 0));
 
         } finally {
             assert wireOut.endUse();
@@ -168,7 +172,9 @@ public enum WireInternal {
                                    @Nullable ReadMarshallable dataConsumer) {
         @NotNull final Bytes<?> bytes = wireIn.bytes();
         boolean read = false;
-        while (bytes.readRemaining() >= 4) {
+        while (true) {
+            bytes.readPositionForHeader(wireIn.usePadding());
+            if (bytes.readRemaining() < 4) break;
             long position = bytes.readPosition();
             int header = bytes.readVolatileInt(position);
             if (!isKnownLength(header))

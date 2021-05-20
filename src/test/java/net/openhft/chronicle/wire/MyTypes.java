@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 
 class MyTypes extends SelfDescribingMarshallable {

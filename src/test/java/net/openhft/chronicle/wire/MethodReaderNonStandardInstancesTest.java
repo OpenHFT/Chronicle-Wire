@@ -29,15 +29,16 @@ import static org.junit.Assert.assertTrue;
 public class MethodReaderNonStandardInstancesTest {
     @Test
     public void testAnonymousClassCanBePassedToMethodReader() {
-        BinaryWire binaryWire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
 
-        MyInterface writer = binaryWire.methodWriter(MyInterface.class);
+        MyInterface writer = wire.methodWriter(MyInterface.class);
 
         writer.call();
 
         AtomicBoolean b = new AtomicBoolean();
 
-        MethodReader reader = binaryWire.methodReader(new MyInterface() {
+        MethodReader reader = wire.methodReader(new MyInterface() {
             @Override
             public void call() {
                 b.set(true);
@@ -52,15 +53,16 @@ public class MethodReaderNonStandardInstancesTest {
 
     @Test
     public void testLambdaCanBePassedToMethodReader() {
-        BinaryWire binaryWire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
 
-        MyInterface writer = binaryWire.methodWriter(MyInterface.class);
+        MyInterface writer = wire.methodWriter(MyInterface.class);
 
         writer.call();
 
         AtomicBoolean b = new AtomicBoolean();
 
-        MethodReader reader = binaryWire.methodReader((MyInterface) () -> b.set(true));
+        MethodReader reader = wire.methodReader((MyInterface) () -> b.set(true));
 
         assertFalse(reader instanceof VanillaMethodReader);
 

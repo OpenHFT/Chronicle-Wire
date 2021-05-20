@@ -319,6 +319,7 @@ The benefits of using this approach ares that
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
         @NotNull Wire wire = new TextWire(bytes);
+        wire.usePadding(true);
 
         ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
 
@@ -347,6 +348,8 @@ To write in binary instead
 */
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         @NotNull Wire wire2 = new BinaryWire(bytes2);
+        wire2.usePadding(true);
+
         assert wire2.startUse();
 
         wire2.writeDocument(false, data);
@@ -383,6 +386,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
         @NotNull Wire wire = new TextWire(bytes);
+        wire.usePadding(true);
 
         ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
 
@@ -438,6 +442,8 @@ To write in binary instead
 */
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         @NotNull Wire wire2 = new BinaryWire(bytes2);
+        wire2.usePadding(true);
+
         assert wire2.startUse();
         wire2.writeDocument(false, w -> w.write(() -> "mydata")
                 .sequence(v -> Stream.of(data).forEach(v::object)));

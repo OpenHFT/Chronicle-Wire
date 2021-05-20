@@ -44,8 +44,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
             return;
         }
         @NotNull Bytes<?> bytes = wire().bytes();
-        if (wire.usePadding())
-            bytes.writeSkip(Wires.padOffset(bytes.writePosition()));
+        bytes.writePositionForHeader(wire.usePadding());
         bytes.comment("msg-length");
         this.position = bytes.writePosition();
         metaDataBit = metaData ? Wires.META_DATA : 0;
@@ -80,7 +79,11 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         if (length0 > Integer.MAX_VALUE && bytes instanceof HexDumpBytes)
             length0 = (int) length0;
         int length = metaDataBit | toIntU30(length0, "Document length %,d out of 30-bit int range.");
-        bytes.testAndSetInt(position, tmpHeader, length);
+        if (wire.usePadding())
+            bytes.testAndSetInt(position, tmpHeader, length);
+        else
+            bytes.writeInt(position, length);
+
         notComplete = false;
     }
 

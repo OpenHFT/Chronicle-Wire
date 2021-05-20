@@ -11,6 +11,7 @@ public class DocumentContextTest {
     @Test
     public void multiMessageText() {
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap()).useBinaryDocuments();
+        wire.usePadding(true);
         Bytes<?> bytes = doTest(wire);
         bytes.readSkip(4);
         assertEquals("one: 1\n" +
@@ -22,6 +23,7 @@ public class DocumentContextTest {
     @Test
     public void multiMessageBinary() {
         BinaryWire wire = new BinaryWire(new HexDumpBytes());
+        wire.usePadding(true);
         Bytes<?> bytes = doTest(wire);
         assertEquals("" +
                 "14 00 00 00                                     # msg-length\n" +

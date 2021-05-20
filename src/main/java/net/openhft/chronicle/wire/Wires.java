@@ -148,6 +148,10 @@ public enum Wires {
         return WireDumper.of(bytes, padding).asString(position, limit - position);
     }
 
+    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, boolean padding, boolean abbrev) {
+        return WireDumper.of(bytes, padding).asString( abbrev);
+    }
+
     public static String fromSizePrefixedBlobs(@NotNull DocumentContext dc) {
         Wire wire = dc.wire();
         Bytes<?> bytes = wire.bytes();
@@ -166,7 +170,8 @@ public enum Wires {
             Bytes tempBytes = Bytes.allocateElasticDirect();
             try {
                 tempBytes.writeOrderedInt(header);
-                tempBytes.write(((BinaryReadDocumentContext) dc).wire.bytes, 0, ((BinaryReadDocumentContext) dc).wire.bytes.readLimit());
+                final AbstractWire wire2 = ((BinaryReadDocumentContext) dc).wire;
+                tempBytes.write(wire2.bytes, 0, wire2.bytes.readLimit());
 
                 final WireType wireType = WireType.valueOf(wire);
 
@@ -611,7 +616,7 @@ public enum Wires {
         return wire;
     }
 
-    static long padOffset(long from) {
+    public static long padOffset(long from) {
         return (-from) & 0x3L;
     }
 

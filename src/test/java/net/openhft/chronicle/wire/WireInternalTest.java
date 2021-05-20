@@ -67,33 +67,36 @@ public class WireInternalTest extends WireTestCommon {
     @Test
     public void testFromSizePrefixedBinaryToText() {
         Bytes bytes = Bytes.elasticByteBuffer();
-        @NotNull Wire out = new BinaryWire(bytes);
-        out.writeDocument(true, w -> w
+        @NotNull Wire wire = new BinaryWire(bytes);
+        wire.usePadding(true);
+
+        wire.writeDocument(true, w -> w
                 .write(() -> "csp").text("csp://hello-world")
                 .write(() -> "tid").int64(123456789));
-        out.writeDocument(false, w -> w.write(() -> "reply").marshallable(
+        wire.writeDocument(false, w -> w.write(() -> "reply").marshallable(
                 w2 -> w2.write(() -> "key").int16(1)
                         .write(() -> "value").text("Hello World")));
-        out.writeDocument(false, w -> w.write(() -> "reply").sequence(
+        wire.writeDocument(false, w -> w.write(() -> "reply").sequence(
                 w2 -> {
                     w2.text("key");
                     w2.int16(2);
                     w2.text("value");
                     w2.text("Hello World2");
                 }));
-        out.writeDocument(false, wireOut -> wireOut.writeEventName(() -> "userid").text("peter"));
+        wire.writeDocument(false, wireOut -> wireOut.writeEventName(() -> "userid").text("peter"));
 
         String actual = Wires.fromSizePrefixedBlobs(bytes);
-        assertEquals("--- !!meta-data #binary\n" +
+        assertEquals("" +
+                "--- !!meta-data #binary\n" +
                 "csp: \"csp://hello-world\"\n" +
                 "tid: !int 123456789\n" +
-                "# position: 35, header: 0\n" +
+                "# position: 36, header: 0\n" +
                 "--- !!data #binary\n" +
                 "reply: {\n" +
                 "  key: 1,\n" +
                 "  value: Hello World\n" +
                 "}\n" +
-                "# position: 73, header: 1\n" +
+                "# position: 76, header: 1\n" +
                 "--- !!data #binary\n" +
                 "reply: [\n" +
                 "  key,\n" +
@@ -101,7 +104,7 @@ public class WireInternalTest extends WireTestCommon {
                 "  value,\n" +
                 "  Hello World2\n" +
                 "]\n" +
-                "# position: 112, header: 2\n" +
+                "# position: 116, header: 2\n" +
                 "--- !!data #binary\n" +
                 "userid: peter\n", actual);
 

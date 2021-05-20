@@ -248,6 +248,8 @@ public class TextWireTest extends WireTestCommon {
 
         Bytes b = Bytes.elasticByteBuffer();
         Wire wire = WireType.BINARY.apply(b);
+        wire.usePadding(true);
+
         @NotNull Map<String, String> data = Collections.singletonMap("key", "value");
 
         @NotNull HashMap map = new HashMap();
@@ -280,7 +282,9 @@ public class TextWireTest extends WireTestCommon {
     @NotNull
     private TextWire createWire() {
         bytes = allocateElasticOnHeap();
-        return new TextWire(bytes);
+        final TextWire wire = new TextWire(bytes);
+        wire.usePadding(true);
+        return wire;
     }
 
     @Test
@@ -939,6 +943,7 @@ public class TextWireTest extends WireTestCommon {
     public void testMapReadAndWriteStrings() {
         @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes);
+        wire.usePadding(true);
 
         @NotNull final Map<String, String> expected = new LinkedHashMap<>();
 
@@ -1126,6 +1131,7 @@ public class TextWireTest extends WireTestCommon {
     public void testMapReadAndWriteMarshable() {
         @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes);
+        wire.usePadding(true);
 
         @NotNull final Map<MyMarshallable, MyMarshallable> expected = new LinkedHashMap<>();
 
@@ -1173,6 +1179,7 @@ public class TextWireTest extends WireTestCommon {
         };
         @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes);
+        wire.usePadding(true);
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception")
                 .object(e));
 
@@ -1501,10 +1508,10 @@ public class TextWireTest extends WireTestCommon {
 
         assertEquals("--- !!data\n" +
                         "nothing: !byte[] !!binary \n" +
-                        "# position: 31, header: 1\n" +
+                        "# position: 32, header: 1\n" +
                         "--- !!data\n" +
                         "one: !byte[] !!binary AQ==\n" +
-                        "# position: 62, header: 2\n" +
+                        "# position: 64, header: 2\n" +
                         "--- !!data\n" +
                         "four: !byte[] !!binary AQIDBA==\n"
                 , Wires.fromSizePrefixedBlobs(wire.bytes()));

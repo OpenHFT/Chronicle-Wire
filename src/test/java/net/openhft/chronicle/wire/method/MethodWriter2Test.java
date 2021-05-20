@@ -52,15 +52,17 @@ public class MethodWriter2Test {
     }
 
     private void check(boolean allowThrough, ARGUMENT argument) {
-        Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
+        Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
+        wire.usePadding(true);
+
         // checks that no exceptions are thrown here
         UpdateInterceptor ui = (methodName, t) -> allowThrough;
-        FundingListener fundingListener = w.methodWriterBuilder(FundingOut.class).updateInterceptor(ui).build();
+        FundingListener fundingListener = wire.methodWriterBuilder(FundingOut.class).updateInterceptor(ui).build();
         argument.accept(fundingListener);
 
         List<String> output = new ArrayList<>();
         FundingListener listener = Mocker.intercepting(FundingListener.class, "", output::add);
-        @NotNull MethodReader mr = w.methodReader(listener);
+        @NotNull MethodReader mr = wire.methodReader(listener);
 
         if (allowThrough) {
             assertTrue(mr.readOne());

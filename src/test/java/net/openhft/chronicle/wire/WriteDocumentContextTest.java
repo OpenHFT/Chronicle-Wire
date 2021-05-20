@@ -50,6 +50,8 @@ public class WriteDocumentContextTest {
     @Test
     public void nestedText() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useBinaryDocuments();
+        wire.usePadding(true);
+
         writeThreeKeys(wire);
         assertEquals(21, wire.bytes().readInt());
         assertEquals("key: 0\n" +
@@ -60,6 +62,8 @@ public class WriteDocumentContextTest {
     @Test
     public void chainedText() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useBinaryDocuments();
+        wire.usePadding(true);
+
         writeThreeChainedKeys(wire);
         assertEquals(21, wire.bytes().readInt());
         assertEquals("key: 0\n" +
@@ -70,6 +74,8 @@ public class WriteDocumentContextTest {
     @Test
     public void nestedBinary() {
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
+        wire.usePadding(true);
+
         writeThreeKeys(wire);
         String s = Wires.fromSizePrefixedBlobs(wire);
         assertEquals("--- !!data #binary\n" +
@@ -81,6 +87,8 @@ public class WriteDocumentContextTest {
     @Test
     public void chainedBinary() {
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
+        wire.usePadding(true);
+
         writeThreeChainedKeys(wire);
         String s = Wires.fromSizePrefixedBlobs(wire);
         assertEquals("--- !!data #binary\n" +

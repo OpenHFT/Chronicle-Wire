@@ -45,7 +45,7 @@ public class WireDumper {
 
     @NotNull
     public static WireDumper of(@NotNull Bytes bytes) {
-        return of(bytes, false);
+        return of(bytes, AbstractWire.DEFAULT_USE_PADDING);
     }
 
     @NotNull
@@ -110,8 +110,7 @@ public class WireDumper {
     }
 
     public boolean dumpOne(@NotNull StringBuilder sb, @Nullable Bytes<ByteBuffer> buffer, boolean abbrev) {
-        if (wireIn.usePadding())
-            bytes.readSkip((-bytes.readPosition()) & 0x3);
+        bytes.readPositionForHeader(wireIn.usePadding());
         long start = this.bytes.readPosition();
         int header = this.bytes.readInt();
         if (header == 0) {

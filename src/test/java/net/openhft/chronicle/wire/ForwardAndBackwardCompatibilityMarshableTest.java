@@ -51,6 +51,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon
     @Test
     public void marshableStringBuilderTest() throws Exception {
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        wire.usePadding(true);
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");
 
         wire.writeDocument(false, w -> new DTO2(1, 2, "3").writeMarshallable(w));
@@ -75,6 +76,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon
     @Test
     public void backwardsCompatibility() throws Exception {
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        wire.usePadding(true);
         CLASS_ALIASES.addAlias(DTO1.class, "DTO");
 
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO1(1)));
@@ -100,6 +102,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon
     public void forwardComparability() throws Exception {
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        wire.usePadding(true);
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");
 
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO2(1, 2, "3")));

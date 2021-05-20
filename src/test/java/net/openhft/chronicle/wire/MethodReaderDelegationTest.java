@@ -53,6 +53,8 @@ public class MethodReaderDelegationTest {
     }
 
     private void doTestUnsuccessfullCallIsDelegated(Wire wire) {
+        wire.usePadding(true);
+
         final MyInterface writer = wire.methodWriter(MyInterface.class);
         writer.myCall();
 
@@ -88,6 +90,7 @@ public class MethodReaderDelegationTest {
     @Test(expected = InvocationTargetRuntimeException.class)
     public void testUserExceptionsAreNotDelegated() {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
+        wire.usePadding(true);
 
         final MyInterface writer = wire.methodWriter(MyInterface.class);
 

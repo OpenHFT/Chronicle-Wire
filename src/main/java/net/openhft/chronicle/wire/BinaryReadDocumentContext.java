@@ -120,7 +120,9 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         if (readLimit > 0 && wire0 != null) {
             @NotNull final Bytes<?> bytes = wire0.bytes();
             bytes.readLimit(readLimit);
-            bytes.readPosition(readPosition);
+            if (wire.usePadding())
+                readPosition += Wires.padOffset(readPosition);
+            bytes.readPosition(Math.min(readLimit, readPosition));
         }
 
         present = false;
@@ -128,6 +130,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
 
     /**
      * Rolls back document context state to a one before opening if rollback marker is set.
+     *
      * @return If rolled back.
      */
     protected boolean rollbackIfNeeded() {
@@ -158,10 +161,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         }
 
         // align
-        if (wire.usePadding())
-            bytes.readSkip(Wires.padOffset(bytes.readPosition()));
-
-        long position = bytes.readPosition();
+        long position = bytes.readPositionForHeader(wire.usePadding());
 
         int header = bytes.readVolatileInt(position);
         notComplete = Wires.isNotComplete(header); // || isEndOfFile

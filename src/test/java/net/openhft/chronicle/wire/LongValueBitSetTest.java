@@ -16,6 +16,8 @@ public class LongValueBitSetTest extends WireTestCommon {
         Bytes<ByteBuffer> b = Bytes.elasticByteBuffer();
         try {
             Wire w = WireType.BINARY.apply(b);
+            w.usePadding(true);
+
             int size = 1024;
             LongValueBitSet actual = new LongValueBitSet(size, w);
 
