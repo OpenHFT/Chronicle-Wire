@@ -45,7 +45,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         }
         @NotNull Bytes<?> bytes = wire().bytes();
         if (wire.usePadding())
-            bytes.writeSkip((-bytes.writePosition()) & 0x3);
+            bytes.writeSkip(Wires.padOffset(bytes.writePosition()));
         bytes.comment("msg-length");
         this.position = bytes.writePosition();
         metaDataBit = metaData ? Wires.META_DATA : 0;

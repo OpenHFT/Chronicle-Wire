@@ -189,8 +189,7 @@ public abstract class AbstractWire implements Wire {
             int bytesToSkip = lengthOf(header) + SPB_HEADER_SIZE;
             readPosition += bytesToSkip;
             if (usePadding) {
-                readPosition += 3;
-                readPosition &= ~3;
+                readPosition += Wires.padOffset(readPosition);
             }
             bytes.readPosition(readPosition);
         }
@@ -199,7 +198,7 @@ public abstract class AbstractWire implements Wire {
     private void alignForRead(Bytes<?> bytes) {
         if (usePadding) {
             long readPosition = bytes.readPosition();
-            long readPosition2 = (readPosition + 3) & ~3;
+            long readPosition2 = readPosition + Wires.padOffset(readPosition);
             if (readPosition != readPosition2)
                 bytes.readPosition(readPosition2);
         }
@@ -302,8 +301,7 @@ public abstract class AbstractWire implements Wire {
 
         for (; ; ) {
             if (usePadding)
-                // align
-                pos += -pos & 0x3;
+                pos += Wires.padOffset(pos);
 
             int header = bytes.readVolatileInt(pos);
             if (header == NOT_INITIALIZED)
@@ -430,7 +428,7 @@ public abstract class AbstractWire implements Wire {
         try {
             for (; ; Jvm.nanoPause()) {
                 if (usePadding)
-                    pos += -pos & 0x3;
+                    pos += Wires.padOffset(pos);
                 if (bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
                     bytes.writePosition(pos + SPB_HEADER_SIZE);
                     return true;

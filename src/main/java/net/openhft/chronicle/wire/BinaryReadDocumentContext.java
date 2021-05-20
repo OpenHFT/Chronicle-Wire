@@ -159,7 +159,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
 
         // align
         if (wire.usePadding())
-            bytes.readSkip((-bytes.readPosition()) & 0x3);
+            bytes.readSkip(Wires.padOffset(bytes.readPosition()));
 
         long position = bytes.readPosition();
 

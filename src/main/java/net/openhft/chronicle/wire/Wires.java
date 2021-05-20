@@ -611,6 +611,10 @@ public enum Wires {
         return wire;
     }
 
+    static long padOffset(long from) {
+        return (-from) & 0x3L;
+    }
+
     enum SerializeEnum implements Function<Class, SerializationStrategy> {
         INSTANCE;
 
