@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -121,7 +122,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
             @NotNull final Bytes<?> bytes = wire0.bytes();
             bytes.readLimit(readLimit);
             if (wire.usePadding())
-                readPosition += Wires.padOffset(readPosition);
+                readPosition += BytesUtil.padOffset(readPosition);
             bytes.readPosition(Math.min(readLimit, readPosition));
         }
 

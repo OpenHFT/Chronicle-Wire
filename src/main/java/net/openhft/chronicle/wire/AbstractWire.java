@@ -19,10 +19,10 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesComment;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.StackTrace;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
@@ -190,7 +190,7 @@ public abstract class AbstractWire implements Wire {
             int bytesToSkip = lengthOf(header) + SPB_HEADER_SIZE;
             readPosition += bytesToSkip;
             if (usePadding) {
-                readPosition += Wires.padOffset(readPosition);
+                readPosition += BytesUtil.padOffset(readPosition);
             }
             bytes.readPosition(readPosition);
         }
@@ -298,7 +298,7 @@ public abstract class AbstractWire implements Wire {
 
         for (; ; ) {
             if (usePadding)
-                pos += Wires.padOffset(pos);
+                pos += BytesUtil.padOffset(pos);
 
             int header = bytes.readVolatileInt(pos);
             if (header == NOT_INITIALIZED)
@@ -425,7 +425,7 @@ public abstract class AbstractWire implements Wire {
         try {
             for (; ; Jvm.nanoPause()) {
                 if (usePadding)
-                    pos += Wires.padOffset(pos);
+                    pos += BytesUtil.padOffset(pos);
                 if (bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
                     bytes.writePosition(pos + SPB_HEADER_SIZE);
                     return true;
