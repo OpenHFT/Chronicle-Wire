@@ -24,11 +24,14 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.lang.annotation.RetentionPolicy;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import static junit.framework.TestCase.assertNull;
 import static net.openhft.chronicle.wire.WireType.JSON;
-import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
 
 public class JSONWireTest extends WireTestCommon {
@@ -74,21 +77,21 @@ public class JSONWireTest extends WireTestCommon {
         assertEquals("echo2", sb.toString());
         assertEquals("Hello2", text2);
 
-        @NotNull Wire wire2 = getWire("{ \"echoB\":\"HelloB\" }\n{ \"echo2B\":\"Hello2B\" }\n");
+        @NotNull JSONWire wire2 = getWire("{ \"echoB\":\"HelloB\" }\n{ \"echo2B\":\"Hello2B\" }\n");
         @Nullable String textB = wire2.readEventName(sb).text();
         assertEquals("echoB", sb.toString());
         assertEquals("HelloB", textB);
 
         // finish up one object but keep reading.
         readExpect(wire2, '}');
-        ((JSONWire) wire2).valueIn.stack.reset();
+        wire2.valueIn.stack.reset();
 
         @Nullable String textB2 = wire2.readEventName(sb).text();
         assertEquals("echo2B", sb.toString());
         assertEquals("Hello2B", textB2);
     }
 
-    void readExpect(Wire wire2, char expected) {
+    private void readExpect(Wire wire2, char expected) {
         wire2.consumePadding();
         assertEquals(expected, (char) wire2.bytes().readByte());
     }
@@ -122,7 +125,7 @@ public class JSONWireTest extends WireTestCommon {
 
         // fails due to a trailing space if we don't call toString.
         // assertEquals(lists1, lists2);
-       // assertEquals(lists1.toString(), lists2.toString());
+        // assertEquals(lists1.toString(), lists2.toString());
         try {
             assertEquals("!net.openhft.chronicle.wire.JSONWireTest$TwoLists {\n" +
                     "  name: !!null \"\",\n" +
@@ -199,7 +202,8 @@ public class JSONWireTest extends WireTestCommon {
         Map<RetentionPolicy, Double> map;
     }
 
-    @Test public void testMapOfNamedKeys() {
+    @Test
+    public void testMapOfNamedKeys() {
         MapHolder mh = new MapHolder();
         Map<RetentionPolicy, Double> map = Collections.singletonMap(RetentionPolicy.CLASS, 0.1);
         mh.map = map;
@@ -215,6 +219,23 @@ public class JSONWireTest extends WireTestCommon {
     private void doTestMapOfNamedKeys(MapHolder mh) {
         assertEquals("\"map\":{\"CLASS\":0.1}",
                 JSON.asString(mh));
+    }
+
+    @Test
+    public void testDate() {
+        Dates dates = new Dates();
+        dates.date = LocalDate.of(2021, 5, 28);
+        dates.dateTime = LocalDateTime.of(2020, 4, 26, 6, 35, 11);
+        dates.zdateTime = ZonedDateTime.of(dates.dateTime, ZoneId.of("UTC"));
+        @NotNull CharSequence str = WireType.JSON.asString(dates);
+        assertEquals("\"date\":\"2021-05-28\",\"dateTime\":\"2020-04-26T06:35:11\",\"zdateTime\":\"2020-04-26T06:35:11Z[UTC]\"", str);
+    }
+
+    @Test
+    public void testDateNull() {
+        Dates dates = new Dates();
+        @NotNull CharSequence str = WireType.JSON.asString(dates);
+        assertEquals("\"date\":null,\"dateTime\":null,\"zdateTime\":null", str);
     }
 
     private static class FooEvent extends AbstractEventCfg<FooEvent> {
@@ -274,6 +295,15 @@ public class JSONWireTest extends WireTestCommon {
             wire.write(() -> "name").text(name);
             wire.write(() -> "list1").list(list1, Item.class);
             wire.write(() -> "list2").list(list2, Item.class);
+        }
+    }
+
+    private static class Dates extends SelfDescribingMarshallable {
+        LocalDate date;
+        LocalDateTime dateTime;
+        ZonedDateTime zdateTime;
+
+        Dates() {
         }
     }
 }

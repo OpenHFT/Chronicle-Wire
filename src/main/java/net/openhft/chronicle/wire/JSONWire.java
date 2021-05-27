@@ -24,6 +24,9 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 /**
@@ -242,6 +245,16 @@ public class JSONWire extends TextWire {
             WireOut wireOut = super.rawText(value);
             bytes.writeByte((byte) '\"');
             return wireOut;
+        }
+
+        @Override
+        public @NotNull WireOut date(LocalDate localDate) {
+            return text(localDate.toString());
+        }
+
+        @Override
+        public @NotNull WireOut dateTime(LocalDateTime localDateTime) {
+            return text(localDateTime.toString());
         }
     }
 
