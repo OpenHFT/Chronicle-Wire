@@ -3401,8 +3401,8 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         /**
-         *
-         * @return the value as a float, or -0.0 indicates that we have not been able to parse this data ( we don't throw an exception )
+         * @return the value as a float, or -0.0 indicates that we have not been able to parse this data ( we don't throw an exception ),
+         * Note: "1e" is assumed to be "1e0"
          */
         @Override
         public double float64() {
