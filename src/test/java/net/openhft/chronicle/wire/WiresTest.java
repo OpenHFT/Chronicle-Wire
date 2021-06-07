@@ -3,8 +3,12 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshallable;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
 
+import java.nio.ByteBuffer;
+
+import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
@@ -19,17 +23,30 @@ public class WiresTest extends WireTestCommon {
         container2.bytesField.releaseLast();
     }
 
+
+    @Test
+    public void textWireNumberTest() {
+        final Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer();
+        Bytes b = byteBufferBytes;
+        TEXT.apply(b).getValueOut().float64(Double.NaN);
+        Assert.assertTrue(Double.isNaN(TEXT.apply(Bytes.from("NaN\n")).getValueIn().float64()));
+        Assert.assertTrue(Double.isInfinite(TEXT.apply(Bytes.from("Infinity\n")).getValueIn().float64()));
+        Assert.assertEquals(-0.0, TEXT.apply(Bytes.from("'1.0'")).getValueIn().float64(),0);
+        Assert.assertEquals(-0.0, TEXT.apply(Bytes.from("Broken")).getValueIn().float64(),0);
+        Assert.assertEquals(1, TEXT.apply(Bytes.from("1e")).getValueIn().float64(),0);
+    }
+
+
     @Test
     public void resetShouldClearBytes() {
-        container1.bytesField.clear().append("value1");
 
+        container1.bytesField.clear().append("value1");
         container2.bytesField.clear().append("value2");
 
         Wires.reset(container1);
         Wires.reset(container2);
 
         container1.bytesField.clear().append("value1");
-
         assertEquals("", container2.bytesField.toString());
     }
 
