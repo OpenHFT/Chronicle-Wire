@@ -2900,7 +2900,7 @@ public class TextWire extends AbstractWire implements Wire {
                 if (buffer.size() <= size) buffer.add(bufferAdd.get());
 
                 final T t = buffer.get(size);
-                if (t instanceof Resettable) ((Resettable)t).reset();
+                if (t instanceof Resettable) ((Resettable) t).reset();
                 list.add(object(t, t.getClass()));
             }
 
@@ -3394,6 +3394,13 @@ public class TextWire extends AbstractWire implements Wire {
             }
         }
 
+        public void checkRewindDouble() {
+            int ch = bytes.readUnsignedByte(bytes.readPosition() - 1);
+            if (ch == ':' || ch == '}' || ch == ']')
+                bytes.readSkip(-1);
+        }
+
+
         @Override
         public double float64() {
             consumePadding();
@@ -3408,7 +3415,8 @@ public class TextWire extends AbstractWire implements Wire {
                     return 0;
             }
             final double v = bytes.parseDouble();
-            checkRewind();
+
+            checkRewindDouble();
             return v;
         }
 

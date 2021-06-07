@@ -6,8 +6,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
-
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
 
@@ -26,14 +24,18 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     public void textWireNumberTest() {
-        final Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer();
-        Bytes b = byteBufferBytes;
-        TEXT.apply(b).getValueOut().float64(Double.NaN);
-        Assert.assertTrue(Double.isNaN(TEXT.apply(Bytes.from("NaN\n")).getValueIn().float64()));
-        Assert.assertTrue(Double.isInfinite(TEXT.apply(Bytes.from("Infinity\n")).getValueIn().float64()));
-        Assert.assertEquals(-0.0, TEXT.apply(Bytes.from("'1.0'")).getValueIn().float64(),0);
-        Assert.assertEquals(-0.0, TEXT.apply(Bytes.from("Broken")).getValueIn().float64(),0);
-        Assert.assertEquals(1, TEXT.apply(Bytes.from("1e")).getValueIn().float64(),0);
+        Assert.assertTrue(Double.isNaN(TEXT.apply(Bytes.from("NaN")).getValueIn().float64()));
+        Assert.assertTrue(Double.isInfinite(TEXT.apply(Bytes.from("Infinity")).getValueIn().float64()));
+        Assert.assertTrue(Double.isInfinite(TEXT.apply(Bytes.from("-Infinity")).getValueIn().float64()));
+
+        // -0.0 is sent to denote and error
+        Assert.assertEquals(-0.0, TEXT.apply(Bytes.from("'1.0'")).getValueIn().float64(), 0);
+
+        // -0.0 is sent to denote and error
+        Assert.assertEquals(-0.0, TEXT.apply(Bytes.from("Broken")).getValueIn().float64(), 0);
+
+        // there is no number after the zero so it is assumed ot be 1e0
+        Assert.assertEquals(1, TEXT.apply(Bytes.from("1e")).getValueIn().float64(), 0);
     }
 
 
