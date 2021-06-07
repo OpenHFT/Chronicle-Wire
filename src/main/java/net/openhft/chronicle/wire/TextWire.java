@@ -3400,7 +3400,10 @@ public class TextWire extends AbstractWire implements Wire {
                 bytes.readSkip(-1);
         }
 
-
+        /**
+         *
+         * @return the value as a float, or -0.0 indicates that we have not been able to parse this data ( we don't throw an exception )
+         */
         @Override
         public double float64() {
             consumePadding();
