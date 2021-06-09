@@ -170,7 +170,12 @@ public interface WireOut extends WireCommon, MarshallableOut {
 
     void updateHeader(long position, boolean metaData, int expectedHeader) throws StreamCorruptedException;
 
-    long enterHeader(int safeLength);
+    @Deprecated(/* to be removed in x.23*/)
+    default long enterHeader(int safeLength) {
+        return enterHeader((long) safeLength);
+    }
+
+    long enterHeader(long safeLength);
 
     /**
      * Start the first header, if there is none This will increment the headerNumber as appropriate

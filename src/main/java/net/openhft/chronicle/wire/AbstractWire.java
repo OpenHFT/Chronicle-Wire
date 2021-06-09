@@ -78,7 +78,7 @@ public abstract class AbstractWire implements Wire {
         notCompleteIsNotPresent = bytes.sharedMemory();
     }
 
-    private static long throwNotEnoughSpace(int maxlen, @NotNull Bytes<?> bytes) {
+    private static long throwNotEnoughSpace(long maxlen, @NotNull Bytes<?> bytes) {
         throw new IllegalStateException("not enough space to write " + maxlen + " was " + bytes.writeRemaining() + " limit " + bytes.writeLimit() + " type " + bytes.getClass());
     }
 
@@ -282,8 +282,12 @@ public abstract class AbstractWire implements Wire {
         bytes.readPositionRemaining(SPB_HEADER_SIZE, len);
     }
 
-    @Override
     public long enterHeader(int safeLength) {
+        return enterHeader((long) safeLength);
+    }
+
+    @Override
+    public long enterHeader(long safeLength) {
         if (safeLength > bytes.writeRemaining()) {
             if (bytes.isElastic()) {
                 long l = bytes.writeLimit();
