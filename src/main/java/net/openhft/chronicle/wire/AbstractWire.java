@@ -40,17 +40,12 @@ import static net.openhft.chronicle.wire.Wires.*;
 
 public abstract class AbstractWire implements Wire {
     public static final boolean DEFAULT_USE_PADDING = Jvm.getBoolean("wire.usePadding", true);
-    protected static final boolean ASSERTIONS;
     private static final String INSIDE_HEADER_MESSAGE = "you cant put a header inside a header, check that " +
             "you have not nested the documents. If you are using Chronicle-Queue please " +
             "ensure that you have a unique instance of the Appender per thread, in " +
             "other-words you can not share appenders across threads.";
 
     static {
-        boolean assertions = false;
-        // enable our class assertions if java assertions are turned on
-        assert assertions = true;
-        ASSERTIONS = assertions;
         WireInternal.addAliases();
     }
 
@@ -364,7 +359,7 @@ public abstract class AbstractWire implements Wire {
     }
 
     private void updateHeaderAssertions(long position, long pos, int expectedHeader, int header) throws StreamCorruptedException {
-        if (ASSERTIONS) {
+        if (Jvm.isAssertEnabled()) {
             checkNoDataAfterEnd(pos);
         }
 
