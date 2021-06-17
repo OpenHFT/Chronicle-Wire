@@ -149,7 +149,7 @@ public enum Wires {
     }
 
     public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, boolean padding, boolean abbrev) {
-        return WireDumper.of(bytes, padding).asString( abbrev);
+        return WireDumper.of(bytes, padding).asString(abbrev);
     }
 
     public static String fromSizePrefixedBlobs(@NotNull DocumentContext dc) {
@@ -313,6 +313,10 @@ public enum Wires {
 
     @NotNull
     static Bytes<?> acquireBytesForToString() {
+        // otherwise we get confusing debug messages.
+        if (Jvm.isDebug())
+            return Bytes.allocateElasticOnHeap();
+
         Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_F2S_TL,
                 Wires::unmonitoredDirectBytes);
         bytes.clear();

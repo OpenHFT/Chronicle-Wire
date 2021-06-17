@@ -228,7 +228,12 @@ public class JSONWireTest extends WireTestCommon {
         dates.dateTime = LocalDateTime.of(2020, 4, 26, 6, 35, 11);
         dates.zdateTime = ZonedDateTime.of(dates.dateTime, ZoneId.of("UTC"));
         @NotNull CharSequence str = WireType.JSON.asString(dates);
-        assertEquals("\"date\":\"2021-05-28\",\"dateTime\":\"2020-04-26T06:35:11\",\"zdateTime\":\"2020-04-26T06:35:11Z[UTC]\"", str);
+        String expected = "\"date\":\"2021-05-28\",\"dateTime\":\"2020-04-26T06:35:11\",\"zdateTime\":\"2020-04-26T06:35:11Z[UTC]\"";
+        assertEquals(expected, str);
+        JSONWire jw = new JSONWire(Bytes.allocateElasticOnHeap());
+        jw.trimFirstCurly(false);
+        jw.getValueOut().typedMarshallable(dates);
+        assertEquals("{" + expected + "}", jw.toString());
     }
 
     @Test

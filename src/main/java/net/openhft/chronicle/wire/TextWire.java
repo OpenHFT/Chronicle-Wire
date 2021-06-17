@@ -97,6 +97,7 @@ public class TextWire extends AbstractWire implements Wire {
     private final StringBuilder sb = new StringBuilder();
     private boolean strict = false;
     private boolean addTimeStamps = false;
+    private boolean trimFirstCurly = true;
     protected long lineStart = 0;
 
     public TextWire(@NotNull Bytes bytes, boolean use8bit) {
@@ -1143,6 +1144,21 @@ public class TextWire extends AbstractWire implements Wire {
         bytes.writeUnsignedByte(ch2);
     }
 
+    /**
+     * @return whether the top level curly brackets is dropped
+     */
+    public boolean trimFirstCurly() {
+        return trimFirstCurly;
+    }
+
+    /**
+     * @param trimFirstCurly whether the top level curly brackets is dropped
+     */
+    public TextWire trimFirstCurly(boolean trimFirstCurly) {
+        this.trimFirstCurly = trimFirstCurly;
+        return this;
+    }
+
     enum NoObject {NO_OBJECT}
 
     class TextValueOut implements ValueOut, CommentAnnotationNotifier {
@@ -1896,7 +1912,7 @@ public class TextWire extends AbstractWire implements Wire {
             if (dropDefault) {
                 writeSavedEventName();
             }
-            if (bytes.writePosition() == 0) {
+            if (trimFirstCurly && bytes.writePosition() == 0) {
                 object.writeMarshallable(TextWire.this);
                 if (bytes.writePosition() == 0)
                     bytes.append("{}");
