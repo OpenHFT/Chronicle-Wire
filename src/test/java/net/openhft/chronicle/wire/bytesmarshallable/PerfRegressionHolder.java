@@ -14,6 +14,8 @@ import java.nio.BufferUnderflowException;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
+
 public class PerfRegressionHolder {
     String[] s = "1,12,12345,123456789,123456789012,12345678901234567890123".split(",");
     BytesFields bf1 = new BytesFields(s);
@@ -225,13 +227,13 @@ public class PerfRegressionHolder {
         @Override
         public void readMarshallable(BytesIn bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
             for (long offset : offsets)
-                UnsafeMemory.UNSAFE.putObject(this, offset, bytes.read8bit());
+                MEMORY.putObject(this, offset, bytes.read8bit());
         }
 
         @Override
         public void writeMarshallable(BytesOut bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
             for (long offset : offsets) {
-                final String s = (String) UnsafeMemory.UNSAFE.getObject(this, offset);
+                final String s = MEMORY.getObject(this, offset);
                 bytes.write8bit(s);
                 bytes.writeUtf8(s);
             }
