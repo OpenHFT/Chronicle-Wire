@@ -19,9 +19,9 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.time.LongTime;
 
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalAccessor;
 import java.util.concurrent.TimeUnit;
 
 public class NanoTimestampLongConverter extends AbstractTimestampLongConverter {
@@ -36,7 +36,7 @@ public class NanoTimestampLongConverter extends AbstractTimestampLongConverter {
     }
 
     @Override
-    protected long parseFormattedDate(TemporalAccessor value) {
+    protected long parseFormattedDate(ZonedDateTime value) {
         long time = value.getLong(ChronoField.EPOCH_DAY) * 86400_000_000_000L;
         if (value.isSupported(ChronoField.NANO_OF_DAY))
             time += value.getLong(ChronoField.NANO_OF_DAY);

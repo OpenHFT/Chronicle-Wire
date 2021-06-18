@@ -11,6 +11,16 @@ import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalQueries;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * The children of this class can be given a timezone, which will be applied to values
+ * when they are output. When no timezone is given the zone to use is read from the
+ * system property `timestampLongConverters.zoneId`. If this is not set, UTC is used.
+ * <p>
+ * All long values are assumed to be timestamps in UTC.
+ * <p>
+ * Parsing of ISO dates with or without timestamps is supported. When an ISO date
+ * is read with no timezone, it is assumed to be in the converter's zone.
+ */
 public abstract class AbstractTimestampLongConverter implements LongConverter {
     public static final ZoneId UTC = ZoneId.of("UTC");
     public static final String TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY = "timestampLongConverters.zoneId";
@@ -41,7 +51,7 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
             if (parse.query(TemporalQueries.zoneId()) != null) {
                 return parseFormattedDate(ZonedDateTime.from(parse).withZoneSameInstant(UTC));
             } else {
-                return parseFormattedDate(parse);
+                return parseFormattedDate(LocalDateTime.from(parse).atZone(zoneId).withZoneSameInstant(UTC));
             }
         } catch (DateTimeParseException dtpe) {
             try {
@@ -55,10 +65,10 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     /**
      * Interpret formatted date
      *
-     * @param value The parsed formatted date
+     * @param value The parsed formatted date (in UTC zone)
      * @return The value as a long timestamp
      */
-    abstract protected long parseFormattedDate(TemporalAccessor value);
+    abstract protected long parseFormattedDate(ZonedDateTime value);
 
     /**
      * Interpret long timestamp
@@ -72,12 +82,7 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
         final DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder()
                 .appendPattern("yyyy-MM-dd'T'HH:mm:ss");
         appendFraction(builder);
-
-        if (!this.zoneId.equals(UTC))
-            builder.appendLiteral(' ').appendZoneOrOffsetId();
-        else
-            // this allows an optional 'Z' on the end so we can support JSON timestamps
-            builder.optionalStart().appendZoneId().optionalEnd();
+        builder.optionalStart().appendOffsetId().optionalEnd();
         return builder.toFormatter();
     }
 
