@@ -35,7 +35,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
         MicroTimestampLongConverter mtlc = new MicroTimestampLongConverter("America/New_York");
         long time = INSTANCE.parse("2020/09/18T01:02:03.456789");
         final String str = mtlc.asString(time);
-        assertEquals("2020-09-18T01:02:03.456789 America/New_York", str);
+        assertEquals("2020-09-17T21:02:03.456789 America/New_York", str);
         assertEquals(time, mtlc.parse(str));
     }
 }

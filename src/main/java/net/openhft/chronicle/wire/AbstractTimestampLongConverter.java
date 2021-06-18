@@ -98,7 +98,11 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
                 value / amountPerSecond,
                 (int) (value % amountPerSecond * nanosPerAmount),
                 ZoneOffset.UTC);
-        dtf.formatTo(ZonedDateTime.of(ldt, UTC)
-                .withZoneSameInstant(zoneId), text);
+        if (zoneId.equals(UTC)) {
+            dtf.formatTo(ldt, text);
+        } else {
+            dtf.formatTo(ZonedDateTime.of(ldt, UTC)
+                    .withZoneSameInstant(zoneId), text);
+        }
     }
 }
