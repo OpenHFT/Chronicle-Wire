@@ -19,64 +19,47 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.time.LongTime;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
+import java.util.concurrent.TimeUnit;
 
-public class MilliTimestampLongConverter implements LongConverter {
+public class MilliTimestampLongConverter extends AbstractTimestampLongConverter {
     public static final MilliTimestampLongConverter INSTANCE = new MilliTimestampLongConverter();
-    final DateTimeFormatter dtf = new DateTimeFormatterBuilder()
-            .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
-            .appendFraction(ChronoField.MILLI_OF_SECOND, 0, 3, true)
-            // this allows an optional 'Z' on the end so we can support JSON timestamps
-            .optionalStart().appendZoneId().optionalEnd()
-            .toFormatter();
 
-    @Override
-    public long parse(CharSequence text) {
-        if (text == null || text.length() == 0)
-            return 0;
-        try {
-            if (text.length() > 4 && text.charAt(4) == '/')
-                text = text.toString().replace('/', '-');
-            TemporalAccessor parse = dtf.parse(text);
-            long time = parse.getLong(ChronoField.EPOCH_DAY) * 86400_000L;
-            if (parse.isSupported(ChronoField.MILLI_OF_DAY))
-                time += parse.getLong(ChronoField.MILLI_OF_DAY);
-            else if (parse.isSupported(ChronoField.SECOND_OF_DAY))
-                time += parse.getLong(ChronoField.SECOND_OF_DAY) * 1_000L;
+    public MilliTimestampLongConverter() {
+        super(TimeUnit.MILLISECONDS);
+    }
 
-            return time;
-        } catch (DateTimeParseException dtpe) {
-            try {
-                long number = LongTime.toMillis(Long.parseLong(text.toString()));
-                if (LongTime.isMillis(number)) {
-                    System.out.println("In input data, replace " + text + " with " + asString(number));
-                } else {
-                    if (number != 0)
-                        System.out.println("In input data, replace " + text + " with a real date.");
-                }
-                return number;
-            } catch (NumberFormatException e) {
-                throw dtpe;
-            }
-        }
+    public MilliTimestampLongConverter(String zoneId) {
+        super(zoneId, TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public void append(StringBuilder text, long value) {
-        if (value <= 0) {
-            text.append(value);
-            return;
+    protected long parseFormattedDate(TemporalAccessor value) {
+        long time = value.getLong(ChronoField.EPOCH_DAY) * 86400_000L;
+        if (value.isSupported(ChronoField.MILLI_OF_DAY))
+            time += value.getLong(ChronoField.MILLI_OF_DAY);
+        else if (value.isSupported(ChronoField.SECOND_OF_DAY))
+            time += value.getLong(ChronoField.SECOND_OF_DAY) * 1_000L;
+
+        return time;
+    }
+
+    @Override
+    protected long parseTimestamp(long value, CharSequence text) {
+        long number = LongTime.toMillis(value);
+        if (LongTime.isMillis(number)) {
+            System.out.println("In input data, replace " + text + " with " + asString(number));
+        } else {
+            if (number != 0)
+                System.out.println("In input data, replace " + text + " with a real date.");
         }
-        LocalDateTime ldt = LocalDateTime.ofEpochSecond(
-                value / 1_000,
-                (int) (value % 1_000 * 1_000_000),
-                ZoneOffset.UTC);
-        dtf.formatTo(ldt, text);
+        return number;
+    }
+
+    @Override
+    protected void appendFraction(DateTimeFormatterBuilder builder) {
+        builder.appendFraction(ChronoField.MILLI_OF_SECOND, 0, 3, true);
     }
 }

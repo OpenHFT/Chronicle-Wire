@@ -19,86 +19,51 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.time.LongTime;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
+import java.util.concurrent.TimeUnit;
 
-public class MicroTimestampLongConverter implements LongConverter {
-    public static final ZoneId UTC = ZoneId.of("UTC");
+public class MicroTimestampLongConverter extends AbstractTimestampLongConverter {
     public static final MicroTimestampLongConverter INSTANCE = new MicroTimestampLongConverter();
-    private final ZoneId zoneId;
-    private final DateTimeFormatter dtf;
 
     public MicroTimestampLongConverter() {
-        this(System.getProperty("mtlc.zoneId", "UTC"));
+        // Support the old system property for micro timestamps specifically
+        super(System.getProperty(AbstractTimestampLongConverter.TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY, System.getProperty("mtlc.zoneId", "UTC")),
+                TimeUnit.MICROSECONDS);
     }
 
     public MicroTimestampLongConverter(String zoneId) {
-        this.zoneId = ZoneId.of(zoneId);
-        final DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder()
-                .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
-                .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true);
-        if (!this.zoneId.equals(UTC))
-            builder.appendLiteral(' ').appendZoneOrOffsetId();
-        else
-            // this allows an optional 'Z' on the end so we can support JSON timestamps
-            builder.optionalStart().appendZoneId().optionalEnd();
-        dtf = builder.toFormatter();
+        super(zoneId, TimeUnit.MICROSECONDS);
     }
 
     @Override
-    public long parse(CharSequence text) {
-        if (text == null || text.length() == 0)
-            return 0;
-        try {
-            if (text.length() > 4 && text.charAt(4) == '/')
-                text = text.toString().replace('/', '-');
-            TemporalAccessor parse = dtf.parse(text);
-            long time = parse.getLong(ChronoField.EPOCH_DAY) * 86400_000_000L;
-            if (parse.isSupported(ChronoField.MICRO_OF_DAY))
-                time += parse.getLong(ChronoField.MICRO_OF_DAY);
-            else if (parse.isSupported(ChronoField.MILLI_OF_DAY))
-                time += parse.getLong(ChronoField.MILLI_OF_DAY) * 1_000L;
-            else if (parse.isSupported(ChronoField.SECOND_OF_DAY))
-                time += parse.getLong(ChronoField.SECOND_OF_DAY) * 1_000_000L;
-
-            return time;
-        } catch (DateTimeParseException dtpe) {
-            try {
-                long number = LongTime.toMicros(Long.parseLong(text.toString()));
-                if (LongTime.isMicros(number)) {
-                    System.out.println("In input data, replace " + text + " with " + asString(number));
-                } else {
-                    if (number != 0)
-                        System.out.println("In input data, replace " + text + " with a real date.");
-                }
-                return number;
-            } catch (NumberFormatException e) {
-                throw dtpe;
-            }
-        }
+    protected void appendFraction(DateTimeFormatterBuilder builder) {
+        builder.appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true);
     }
 
     @Override
-    public void append(StringBuilder text, long value) {
-        if (value <= 0) {
-            text.append(value);
-            return;
-        }
-        LocalDateTime ldt = LocalDateTime.ofEpochSecond(
-                value / 1_000_000,
-                (int) (value % 1_000_000 * 1000),
-                ZoneOffset.UTC);
-        if (zoneId.equals(UTC)) {
-            dtf.formatTo(ldt, text);
+    protected long parseFormattedDate(TemporalAccessor value) {
+        long time = value.getLong(ChronoField.EPOCH_DAY) * 86400_000_000L;
+        if (value.isSupported(ChronoField.MICRO_OF_DAY))
+            time += value.getLong(ChronoField.MICRO_OF_DAY);
+        else if (value.isSupported(ChronoField.MILLI_OF_DAY))
+            time += value.getLong(ChronoField.MILLI_OF_DAY) * 1_000L;
+        else if (value.isSupported(ChronoField.SECOND_OF_DAY))
+            time += value.getLong(ChronoField.SECOND_OF_DAY) * 1_000_000L;
+
+        return time;
+    }
+
+    @Override
+    protected long parseTimestamp(long value, CharSequence text) {
+        long number = LongTime.toMicros(value);
+        if (LongTime.isMicros(number)) {
+            System.out.println("In input data, replace " + text + " with " + asString(number));
         } else {
-            dtf.formatTo(ZonedDateTime.of(ldt, zoneId), text);
+            if (number != 0)
+                System.out.println("In input data, replace " + text + " with a real date.");
         }
+        return number;
     }
 }
