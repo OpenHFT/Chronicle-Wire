@@ -46,6 +46,9 @@ public class MicroTimestampLongConverter implements LongConverter {
                 .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true);
         if (!this.zoneId.equals(UTC))
             builder.appendLiteral(' ').appendZoneOrOffsetId();
+        else
+            // this allows an optional 'Z' on the end so we can support JSON timestamps
+            builder.optionalStart().appendZoneId().optionalEnd();
         dtf = builder.toFormatter();
     }
 

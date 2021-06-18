@@ -2,8 +2,6 @@ package net.openhft.chronicle.wire;
 
 import org.junit.Test;
 
-import java.time.ZoneId;
-
 import static net.openhft.chronicle.wire.MicroTimestampLongConverter.INSTANCE;
 import static org.junit.Assert.assertEquals;
 
@@ -24,6 +22,12 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
     public void parse2() {
         assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456789"),
                 INSTANCE.parse("2020-09-18T01:02:03.456789"));
+    }
+
+    @Test
+    public void testTrailingZ() {
+        final String text = "2020-09-18T01:02:03.456789";
+        assertEquals(INSTANCE.parse(text), INSTANCE.parse(text + "Z"));
     }
 
     @Test

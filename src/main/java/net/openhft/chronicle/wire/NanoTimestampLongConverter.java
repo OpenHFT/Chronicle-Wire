@@ -32,6 +32,8 @@ public class NanoTimestampLongConverter implements LongConverter {
     final DateTimeFormatter dtf = new DateTimeFormatterBuilder()
             .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
             .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
+            // this allows an optional 'Z' on the end so we can support JSON timestamps
+            .optionalStart().appendZoneId().optionalEnd()
             .toFormatter();
 
     @Override
