@@ -22,4 +22,11 @@ public class NanoTimestampLongConverterTest extends WireTestCommon {
         assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456789"),
                 INSTANCE.parse("2020-09-18T01:02:03.456789"));
     }
+
+    @Test
+    public void datesWithNoTimezoneAreAssumedToBeLocal() {
+        NanoTimestampLongConverter mtlc = new NanoTimestampLongConverter("America/New_York");
+        assertEquals(mtlc.parse("2020-09-17T21:02:03.123456789-04:00"),
+                mtlc.parse("2020-09-17T21:02:03.123456789"));
+    }
 }

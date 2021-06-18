@@ -30,4 +30,11 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
         final String text = "2020-09-18T01:02:03.456";
         assertEquals(INSTANCE.parse(text), INSTANCE.parse(text + "Z"));
     }
+
+    @Test
+    public void datesWithNoTimezoneAreAssumedToBeLocal() {
+        MilliTimestampLongConverter mtlc = new MilliTimestampLongConverter("America/New_York");
+        assertEquals(mtlc.parse("2020-09-17T21:02:03.456-04:00"),
+                mtlc.parse("2020-09-17T21:02:03.456"));
+    }
 }
