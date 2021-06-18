@@ -36,6 +36,7 @@ import java.io.StreamCorruptedException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.wire.Wires.*;
 
 public abstract class AbstractWire implements Wire {
@@ -425,9 +426,22 @@ public abstract class AbstractWire implements Wire {
             for (; ; Jvm.nanoPause()) {
                 if (usePadding)
                     pos += BytesUtil.padOffset(pos);
-                if (bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
-                    bytes.writePosition(pos + SPB_HEADER_SIZE);
-                    return true;
+
+                if (MEMORY.safeAlignedInt(pos)) {
+                    if (bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
+                        bytes.writePosition(pos + SPB_HEADER_SIZE);
+                        return true;
+                    }
+
+                } else {
+                    // mis-aligned check, assume only one writer (best effort)
+                    MEMORY.loadFence();
+                    if (bytes.readInt(pos) == 0) {
+                        bytes.writeInt(pos, END_OF_DATA);
+                        MEMORY.storeFence();
+                        bytes.writePosition(pos + SPB_HEADER_SIZE);
+                        return true;
+                    }
                 }
 
                 int header = bytes.readVolatileInt(pos);
@@ -454,6 +468,7 @@ public abstract class AbstractWire implements Wire {
         } finally {
             resetTimedPauser();
         }
+
     }
 
     private void resetTimedPauser() {
