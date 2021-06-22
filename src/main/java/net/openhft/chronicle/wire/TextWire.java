@@ -621,7 +621,7 @@ public class TextWire extends AbstractWire implements Wire {
     }
 
     /**
-     * returns true if the next string is {@code str}
+     * returns <code>true</code> if the next string is {@code str}
      *
      * @param source string
      * @return true if the strings are the same

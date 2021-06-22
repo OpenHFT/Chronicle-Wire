@@ -672,7 +672,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Returns true if this {@code BitSet} contains no bits that are set to {@code true}.
+     * Returns <code>true</code> if this {@code BitSet} contains no bits that are set to {@code true}.
      *
      * @return boolean indicating whether this {@code BitSet} is empty
      * @since 1.4
@@ -682,7 +682,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Returns true if the specified {@code BitSet} has any bits set to {@code true} that are also set to {@code true} in this {@code BitSet}.
+     * Returns <code>true</code> if the specified {@code BitSet} has any bits set to {@code true} that are also set to {@code true} in this {@code BitSet}.
      *
      * @param set {@code BitSet} to intersect with
      * @return boolean indicating whether this {@code BitSet} intersects the specified {@code BitSet}

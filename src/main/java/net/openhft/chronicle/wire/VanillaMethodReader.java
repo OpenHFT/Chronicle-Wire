@@ -466,7 +466,7 @@ public class VanillaMethodReader implements MethodReader {
      * reads one message
      *
      * @return true if there was a message, or false if no more data is available.
-     * If we read a metadata message, true is returned even if it was ignored
+     * If we read a metadata message, <code>true</code> is returned even if it was ignored
      */
     public boolean readOne() throws InvocationTargetRuntimeException {
         throwExceptionIfClosed();
