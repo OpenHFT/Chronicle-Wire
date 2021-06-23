@@ -22,7 +22,7 @@
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
-        <version>1.1.24</version>
+        <version>1.1.26</version>
         <relativePath />
     </parent>
 
@@ -43,7 +43,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom</artifactId>
-                <version>3.19.4</version>
+                <version>3.19.9</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -141,7 +141,7 @@
             <plugin>
                 <groupId>net.openhft</groupId>
                 <artifactId>binary-compatibility-enforcer-plugin</artifactId>
-                <version>1.0.8</version>
+                <version>1.0.9</version>
                 <executions>
                     <execution>
                         <phase>verify</phase>
@@ -159,7 +159,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M4</version>
                 <configuration>
                     <argLine>@{argLine} -Duser.timezone=UTC</argLine>
                     <forkCount>1</forkCount>
@@ -257,11 +256,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.sonarsource.scanner.maven</groupId>
-                <artifactId>sonar-maven-plugin</artifactId>
-                <version>3.8.0.2131</version>
-            </plugin>
         </plugins>
     </build>
 
@@ -278,9 +272,12 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.sonarsource.scanner.maven</groupId>
+                        <artifactId>sonar-maven-plugin</artifactId>
+                    </plugin>
+                    <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.6</version>
                         <executions>
                             <execution>
                                 <goals>

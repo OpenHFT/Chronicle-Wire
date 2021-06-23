@@ -35,7 +35,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom</artifactId>
-                <version>3.19.4</version>
+                <version>3.19.9</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -119,7 +119,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
                 <configuration>
                     <compilerVersion>1.8</compilerVersion>
                     <source>1.8</source>
@@ -130,7 +129,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -164,19 +162,5 @@
                 </executions>
             </plugin>
         </plugins>
-
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-install-plugin</artifactId>
-                    <version>3.0.0-M1</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.0</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
 </project>
