@@ -2495,7 +2495,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             switch (code) {
                 case I64_ARRAY:
                 case U8_ARRAY:
-                    @NotNull BytesStore toBytes = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
+                    @NotNull BytesStore toBytes = BytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
                     toBytes.write(0, bytes, bytes.readPosition(), length);
                     bytes.readSkip(length);
                     return toBytes;
@@ -3705,7 +3705,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                             long length = bytes.readRemaining();
                             if (length == 0)
                                 return BytesStore.empty();
-                            @NotNull BytesStore toBytes = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
+                            @NotNull BytesStore toBytes = BytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
                             toBytes.write(0, bytes, bytes.readPosition(), length);
                             bytes.readSkip(length);
                             return toBytes;

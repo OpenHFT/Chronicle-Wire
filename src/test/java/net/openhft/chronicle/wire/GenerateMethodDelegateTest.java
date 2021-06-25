@@ -6,6 +6,7 @@ import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import org.junit.Test;
 
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.function.BiConsumer;
@@ -24,7 +25,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
     }
 
     @Test
-    public void testAcquireClass() throws IllegalAccessException, InstantiationException {
+    public void testAcquireClass() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         GenerateMethodDelegate gmd = new GenerateMethodDelegate();
         gmd.metaData().packageName(GenerateMethodDelegateTest.class.getPackage().getName())
                 .baseClassName("GMDT");
@@ -35,7 +36,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
                 Supplier.class,
                 BiConsumer.class);
         Class aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
-        MethodDelegate md = (MethodDelegate) aClass.newInstance();
+        MethodDelegate md = (MethodDelegate) aClass.getDeclaredConstructor().newInstance();
         StringWriter sw = new StringWriter();
         md.delegate(Mocker.logging(RCSB.class, "", sw));
         ((Runnable) md).run();
@@ -49,7 +50,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
     }
 
     @Test
-    public void chainedDelegate() throws IllegalAccessException, InstantiationException {
+    public void chainedDelegate() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         GenerateMethodDelegate gmd = new GenerateMethodDelegate() {
             @Override
             protected String getDelegateType() {
@@ -67,7 +68,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         gmd.metaData().interfaces().add(Chained1.class);
         StringWriter sw = new StringWriter();
         Class aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
-        MethodDelegate md = (MethodDelegate) aClass.newInstance();
+        MethodDelegate md = (MethodDelegate) aClass.getDeclaredConstructor().newInstance();
         md.delegate(Mocker.logging(Chained.class, "", sw));
         Chained1 c1 = (Chained1) md;
         c1.say("hello");

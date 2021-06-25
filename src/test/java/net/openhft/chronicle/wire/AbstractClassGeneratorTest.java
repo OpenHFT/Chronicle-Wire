@@ -68,7 +68,7 @@ public class AbstractClassGeneratorTest {
                 .baseClassName("ACGT")
                 .message = message;
         Class<Callable> aClass = scg.acquireClass(getClass().getClassLoader());
-        Callable<String> callable = aClass.newInstance();
+        Callable<String> callable = aClass.getDeclaredConstructor().newInstance();
         // break point on the next line to be able to debug the generated class.
         String call = callable.call();
         assertEquals(message, call);
