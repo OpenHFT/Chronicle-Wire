@@ -6,7 +6,6 @@ import net.openhft.chronicle.wire.WireType;
 
 import java.io.IOException;
 
-
 //This example shows how to use alias names for classes
 public class Example7 {
 

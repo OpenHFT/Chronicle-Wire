@@ -24,7 +24,6 @@ public class PerfRegressionHolder {
     DefaultBytesFields df1 = new DefaultBytesFields(s);
     DefaultBytesFields df2 = new DefaultBytesFields();
 
-
     ReferenceBytesFields rf1 = new ReferenceBytesFields(s);
     ReferenceBytesFields rf2 = new ReferenceBytesFields();
 

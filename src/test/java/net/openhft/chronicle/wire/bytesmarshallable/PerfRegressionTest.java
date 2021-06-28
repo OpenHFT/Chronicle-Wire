@@ -111,7 +111,6 @@ public class PerfRegressionTest {
 //                    times -> timesOk(times[0], times[1], times[2]));
 //        }
 
-
     private boolean timesOk(double d, double ds, double dn) {
         // assume it's our primary build server
         if (cpuClass.equals("AMD Ryzen 5 3600 6-Core Processor")) {

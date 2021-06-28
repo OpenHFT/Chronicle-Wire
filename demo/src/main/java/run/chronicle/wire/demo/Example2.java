@@ -32,7 +32,6 @@ public class Example2 {
          price: 10.5            */
         System.out.println(bytes);
 
-
         Data data2 = new Data();
         data2.readMarshallable(wire);
 

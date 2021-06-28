@@ -47,7 +47,6 @@ public class Example1 {
                 .write("code").asEnum(TimeUnit.SECONDS)
                 .write("price").float64(10.50);
 
-
         //Prints out:
 /*      00000000 c7 6d 65 73 73 61 67 65  eb 48 65 6c 6c 6f 20 57 ·message ·Hello W
         00000010 6f 72 6c 64 c6 6e 75 6d  62 65 72 a6 d2 02 96 49 orld·num ber····I
@@ -76,7 +75,6 @@ public class Example1 {
 
         bytes.releaseLast();
         bytes2.releaseLast();
-
 
     }
 }

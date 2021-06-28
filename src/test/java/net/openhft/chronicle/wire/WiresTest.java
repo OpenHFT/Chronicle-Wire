@@ -20,7 +20,6 @@ public class WiresTest extends WireTestCommon {
         container2.bytesField.releaseLast();
     }
 
-
     @Test
     public void textWireNumberTest() {
         Assert.assertTrue(Double.isNaN(TEXT.apply(Bytes.from("NaN")).getValueIn().float64()));
@@ -36,7 +35,6 @@ public class WiresTest extends WireTestCommon {
         // there is no number after the zero so it is assumed ot be 1e0
         Assert.assertEquals(1, TEXT.apply(Bytes.from("1e")).getValueIn().float64(), 0);
     }
-
 
     @Test
     public void resetShouldClearBytes() {

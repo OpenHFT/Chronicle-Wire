@@ -723,7 +723,6 @@ You will see the complete package name for `o2` object.
 
 === link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Data.java[The code for the class Data]
 
-
 [source,Java]
 ----
 class Data implements Marshallable {

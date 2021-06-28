@@ -40,7 +40,6 @@ public class Base32IntConverter implements IntConverter {
         return MAX_LENGTH;
     }
 
-    
     static {
         assert DECODE.length == BASE;
         Arrays.fill(ENCODE, (byte) -1);

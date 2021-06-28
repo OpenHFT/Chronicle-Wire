@@ -488,7 +488,6 @@ public interface ValueIn {
         return float32();
     }
 
-
     /**
      *
      * @return the value as a float, or -0.0 indicates that we have not been able to parse this data ( we don't throw an exception )

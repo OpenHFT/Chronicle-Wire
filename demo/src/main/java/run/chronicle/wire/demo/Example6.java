@@ -66,7 +66,6 @@ public class Example6 {
                         l.add(v.object(Data.class));
                 }));
 
-
         //Prints out:
 /*      Data{message='Hello World', number=98765, timeUnit=HOURS, price=1.5}
         Data{message='G'Day All', number=1212121, timeUnit=MINUTES, price=12.34}

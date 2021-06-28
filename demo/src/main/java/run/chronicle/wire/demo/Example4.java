@@ -41,7 +41,6 @@ public class Example4 {
         /*  Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}    */
         System.out.println(data2);
 
-
         //To write in binary instead
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         Wire wire2 = new BinaryWire(bytes2);
