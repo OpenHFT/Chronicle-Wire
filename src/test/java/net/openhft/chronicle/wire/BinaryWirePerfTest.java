@@ -154,8 +154,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
                     .write(Fields.U).int32(u)
                     .write(Fields.V).int32(v)
                     .write(Fields.W).int32(w)
-                    .write(Fields.X).int32(v)
-            ;
+                    .write(Fields.X).int32(v);
         }
 
         @Override
@@ -175,8 +174,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
                     .read(Fields.U).int32(this, (o, x) -> o.u = x)
                     .read(Fields.V).int32(this, (o, x) -> o.v = x)
                     .read(Fields.W).int32(this, (o, x) -> o.w = x)
-                    .read(Fields.X).int32(this, (o, x) -> o.x = x)
-            ;
+                    .read(Fields.X).int32(this, (o, x) -> o.x = x);
         }
 
         enum Fields implements WireKey {

@@ -680,7 +680,7 @@ public class YamlTokeniser {
 
     public void text(StringBuilder sb) {
         if (blockEnd < 0 && temp != null) {
-            sb.append(temp.toString());
+            sb.append(temp);
             return;
         }
         sb.setLength(0);

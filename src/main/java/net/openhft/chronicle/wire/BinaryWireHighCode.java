@@ -20,8 +20,7 @@ package net.openhft.chronicle.wire;
 /**
  * These are the ranges of values to help decode the protocol.
  */
-public enum BinaryWireHighCode {
-    ;
+public enum BinaryWireHighCode {;
     static final int END_OF_STREAM = -1;
     static final int NUM0 = 0x0;
     static final int NUM1 = 0x1;

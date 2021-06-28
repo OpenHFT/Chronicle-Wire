@@ -3,7 +3,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
 import net.openhft.chronicle.core.onoes.LogLevel;
-import org.junit.After;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -14,11 +13,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeFalse;
 
 public class UnsupportedChangesTest extends WireTestCommon {
-    @After
-    public void reset() {
-        Jvm.resetExceptionHandlers();
-    }
-
     @Test
     public void scalarToMarshallable() {
         Map<ExceptionKey, Integer> exceptions = Jvm.recordExceptions(true);

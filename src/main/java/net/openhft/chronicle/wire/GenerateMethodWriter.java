@@ -114,10 +114,6 @@ public class GenerateMethodWriter {
 
     /**
      * @param interfaces           an interface class
-     * @param classLoader
-     * @param wireType
-     * @param genericEvent
-     * @param useUpdateInterceptor
      * @return a proxy class from an interface class or null if it can't be created
      */
     @Nullable

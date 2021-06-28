@@ -286,7 +286,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     public void addTiming(long l) {
         if (timings >= timingsArray.length) {
-            throw new IllegalStateException("Have exceeded message history size: " + this.toString());
+            throw new IllegalStateException("Have exceeded message history size: " + this);
         }
         timingsArray[timings++] = l;
     }

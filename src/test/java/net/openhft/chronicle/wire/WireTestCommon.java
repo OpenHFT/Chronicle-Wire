@@ -68,6 +68,7 @@ public class WireTestCommon {
 
     @After
     public void afterChecks() {
+        preAfter();
         CleaningThread.performCleanup(Thread.currentThread());
 
         // find any discarded resources.
@@ -77,6 +78,9 @@ public class WireTestCommon {
         assertReferencesReleased();
         checkThreadDump();
         checkExceptions();
+    }
+
+    protected void preAfter() {
     }
 
     @Before

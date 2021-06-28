@@ -2,7 +2,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshallable;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,8 +14,8 @@ public class WiresTest extends WireTestCommon {
     private final BytesContainer container1 = new BytesContainer();
     private final BytesContainer container2 = new BytesContainer();
 
-    @After
-    public void after() {
+    @Override
+    public void preAfter() {
         container1.bytesField.releaseLast();
         container2.bytesField.releaseLast();
     }

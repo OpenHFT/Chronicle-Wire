@@ -28,8 +28,6 @@ import net.openhft.chronicle.core.util.Annotations;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
@@ -47,11 +45,11 @@ import static net.openhft.chronicle.wire.VanillaWireParser.SKIP_READABLE_BYTES;
 public class VanillaMethodReader implements MethodReader {
 
     static final Object[] NO_ARGS = {};
-    static final Logger LOGGER = LoggerFactory.getLogger(VanillaMethodReader.class);
     static final Object IGNORED = new Object(); // object used to flag that the call should be ignored.
     @Deprecated(/* to be removed in x.22 */)
     private static final boolean DONT_THROW_ON_OVERLOAD = Jvm.getBoolean("chronicle.mr_overload_dont_throw");
     private static final String[] metaIgnoreList = {"header", "index", "index2index", "roll"};
+    public static final boolean DEBUG_ENABLED = Jvm.isDebugEnabled(VanillaMethodReader.class);
     private final MarshallableIn in;
     @NotNull
     private final WireParser wireParser;
@@ -181,7 +179,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     public static void logMessage(@NotNull CharSequence s, @NotNull ValueIn v) {
-        if (!LOGGER.isDebugEnabled()) {
+        if (!DEBUG_ENABLED) {
             return;
         }
 
@@ -202,7 +200,7 @@ public class VanillaMethodReader implements MethodReader {
         // TextWire.toString has an \n at the end
         if (rest.endsWith("\n"))
             rest = rest.substring(0, rest.length() - 1);
-        LOGGER.debug("read " + name + " - " + rest);
+        Jvm.debug().on(VanillaMethodReader.class, "read " + name + " - " + rest);
     }
 
     private void addParsletsFor(Set<Class> interfaces, Class<?> oClass, boolean ignoreDefault, Set<String> methodNamesHandled, Set<String> methodsSignaturesHandled, MethodFilterOnFirstArg methodFilterOnFirstArg, Object o, Object[] context, Supplier contextSupplier, Supplier nextContext) {
@@ -232,7 +230,7 @@ public class VanillaMethodReader implements MethodReader {
 
             if (!methodNamesHandled.add(m.getName())) {
                 String previous = methodsSignaturesHandled.stream().filter(signature -> signature.contains(" " + m.getName() + " ")).findFirst().orElseThrow(() -> new IllegalStateException());
-                String msg = m.toString() + " previous: " + previous;
+                String msg = m + " previous: " + previous;
                 if (DONT_THROW_ON_OVERLOAD)
                     Jvm.warn().on(getClass(), "Unable to support overloaded methods, ignoring " + msg);
                 else

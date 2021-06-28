@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.time.LongTime;
 
 import java.time.ZonedDateTime;
@@ -59,10 +60,10 @@ public class MicroTimestampLongConverter extends AbstractTimestampLongConverter 
     protected long parseTimestamp(long value, CharSequence text) {
         long number = LongTime.toMicros(value);
         if (LongTime.isMicros(number)) {
-            System.out.println("In input data, replace " + text + " with " + asString(number));
+            Jvm.debug().on(getClass(), "In input data, replace " + text + " with " + asString(number));
         } else {
             if (number != 0)
-                System.out.println("In input data, replace " + text + " with a real date.");
+                Jvm.debug().on(getClass(), "In input data, replace " + text + " with a real date.");
         }
         return number;
     }

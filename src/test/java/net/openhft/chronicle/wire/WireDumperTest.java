@@ -2,7 +2,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -63,8 +62,8 @@ public class WireDumperTest extends WireTestCommon {
         assertEquals(expectedPartialContent.get(wireType), actual);
     }
 
-    @After
-    public void tearDown() {
+    @Override
+    public void preAfter() {
         bytes.releaseLast();
     }
 

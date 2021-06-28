@@ -28,8 +28,6 @@ import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -231,7 +229,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                     "Enterprise licence is required to run this code because you are using " +
                     "DELTA_BINARY which is a licence product. " +
                     "Please contact sales@chronicle.software");
-            LOG.error("", licence);
+            Jvm.error().on(WireType.class,  licence);
             throw licence;
         }
 
@@ -354,7 +352,6 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     };
 
     static final BytesStore PREABLE = BytesStore.from("--- ");
-    private static final Logger LOG = LoggerFactory.getLogger(WireType.class);
     private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
     private static final boolean IS_DELTA_AVAILABLE = isDeltaAvailable();
     private static final boolean IS_DEFAULT_ZERO_AVAILABLE = isDefaultZeroAvailable();

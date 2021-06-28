@@ -366,7 +366,7 @@ public class TextWire extends AbstractWire implements Wire {
             final long l = bytes.readLimit();
             try {
                 bytes.readLimit(bytes.readPosition() + (1024 * 1024));
-                return bytes.toString() + "..";
+                return bytes + "..";
             } finally {
                 bytes.readLimit(l);
             }

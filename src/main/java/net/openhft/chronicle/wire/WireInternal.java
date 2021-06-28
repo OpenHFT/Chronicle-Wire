@@ -19,7 +19,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
-import net.openhft.chronicle.bytes.MappedBytesStore;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -42,8 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public enum WireInternal {
-    ;
+public enum WireInternal {;
     static final StringInterner INTERNER = new StringInterner(Integer.getInteger("wire.interner.size", 4096));
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();

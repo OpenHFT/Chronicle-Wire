@@ -24,8 +24,7 @@ import java.lang.reflect.Field;
 /**
  * These are the predefined bytes codes for the Binary YAML wire format.
  */
-public enum BinaryWireCode {
-    ;
+public enum BinaryWireCode {;
     // sequence of length 0 - 255 bytes
     public static final int BYTES_LENGTH8 = 0x80;
     //     sequence of length 0 - 2^16-1 bytes

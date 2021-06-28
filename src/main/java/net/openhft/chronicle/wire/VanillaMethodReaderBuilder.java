@@ -55,9 +55,9 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
             long sourceIndex = history.lastSourceIndex();
             v.skipValue();
             if (s.length() == 0 || warnMissing)
-                VanillaMethodReader.LOGGER.warn(errorMsg(s, history, sourceIndex));
-            else if (VanillaMethodReader.LOGGER.isDebugEnabled())
-                VanillaMethodReader.LOGGER.debug(errorMsg(s, history, sourceIndex));
+                Jvm.warn().on(VanillaMethodReader.class, errorMsg(s, history, sourceIndex));
+            else if (Jvm.isDebugEnabled(VanillaMethodReader.class))
+                Jvm.debug().on(VanillaMethodReader.class, errorMsg(s, history, sourceIndex));
         };
     }
 

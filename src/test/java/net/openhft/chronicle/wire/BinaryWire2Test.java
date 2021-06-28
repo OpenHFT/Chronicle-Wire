@@ -23,7 +23,6 @@ import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -58,11 +57,6 @@ public class BinaryWire2Test extends WireTestCommon {
                 new Object[]{true},
                 new Object[]{false}
         );
-    }
-
-    @After
-    public void after() {
-        // BinaryWire.SPEC = 16;
     }
 
     @NotNull

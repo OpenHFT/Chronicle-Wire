@@ -32,12 +32,10 @@ import java.util.Set;
  * The purpose of this class is to generate a proxy that will re-use the arg[]
  */
 @SuppressWarnings("restriction")
-public enum GeneratedProxyClass {
-    ;
+public enum GeneratedProxyClass {;
     static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
 
     /**
-     * @param classLoader
      * @param interfaces  an interface class
      * @return a proxy class from an interface class or null if it can't be created
      */

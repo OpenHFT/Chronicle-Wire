@@ -183,6 +183,7 @@ public class TextWireTest extends WireTestCommon {
         assertTrue(WireType.TEXT.isAvailable());
 
         try {
+            expectException("A Chronicle-Wire-Enterprise licence is required to run this code because you are using DELTA_BINARY which is a licence product");
             WireType.DELTA_BINARY.licenceCheck();
             fail();
         } catch (IllegalStateException expected) {
