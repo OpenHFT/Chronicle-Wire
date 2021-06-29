@@ -430,6 +430,7 @@ public abstract class AbstractWire implements Wire {
                 if (MEMORY.safeAlignedInt(pos)) {
                     if (bytes.compareAndSwapInt(pos, 0, END_OF_DATA)) {
                         bytes.writePosition(pos + SPB_HEADER_SIZE);
+                        write("EOF");
                         return true;
                     }
 
@@ -454,6 +455,10 @@ public abstract class AbstractWire implements Wire {
 
                     } catch (TimeoutException e) {
                         boolean success = bytes.compareAndSwapInt(pos, header, END_OF_DATA);
+                        if (success) {
+                            bytes.writePosition(pos + SPB_HEADER_SIZE);
+                            write("EOF");
+                        }
                         Jvm.warn().on(getClass(), "resetting header after timeout, " +
                                 "header: " + Integer.toHexString(header) +
                                 ", pos: " + pos +

@@ -139,15 +139,19 @@ public class WireDumper {
             return true;
         }
         @NotNull String type = Wires.isData(header)
-                ? Wires.isReady(header) ? "!!data" : "!!not-ready-data!"
-                : Wires.isReady(header) ? "!!meta-data" : "!!not-ready-meta-data!";
+                ? Wires.isReady(header) ? "!!data" : "!!not-ready-data"
+                : Wires.isReady(header) ? "!!meta-data" : "!!not-ready-meta-data";
 
         boolean binary = false;
-        for (int i = 0; i < 4 && i < this.bytes.readRemaining(); i++) {
-            byte b = this.bytes.readByte(this.bytes.readPosition() + i);
-            if (b < ' ' && b != '\n') {
-                binary = true;
-                break;
+        if (Wires.isEndOfFile(header)) {
+            binary = true;
+        } else {
+            for (int i = 0; i < 4 && i < this.bytes.readRemaining(); i++) {
+                byte b = (byte) this.bytes.peekUnsignedByte(this.bytes.readPosition() + i);
+                if (b < ' ' && b != '\n') {
+                    binary = true;
+                    break;
+                }
             }
         }
 

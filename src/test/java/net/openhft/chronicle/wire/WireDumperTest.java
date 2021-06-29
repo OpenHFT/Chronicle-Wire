@@ -149,7 +149,7 @@ public class WireDumperTest extends WireTestCommon {
                 "--- !!data #binary\n" +
                         "00000000             31 37 0a                                 17·          \n" +
                         "# position: 8, header: 0 or 1\n" +
-                        "--- !!not-ready-data!\n" +
+                        "--- !!not-ready-data\n" +
                         "...\n" +
                         "# 5 bytes remaining\n" +
                         "");
@@ -158,7 +158,7 @@ public class WireDumperTest extends WireTestCommon {
                 "--- !!data #binary\n" +
                         "00000000             11                                       ·            \n" +
                         "# position: 8, header: 0 or 1\n" +
-                        "--- !!not-ready-data! #binary\n" +
+                        "--- !!not-ready-data #binary\n" +
                         "...\n" +
                         "# 5 bytes remaining\n" +
                         "");
@@ -167,7 +167,7 @@ public class WireDumperTest extends WireTestCommon {
                 "--- !!data #binary\n" +
                         "00000000             11                                       ·            \n" +
                         "# position: 8, header: 0 or 1\n" +
-                        "--- !!not-ready-data! #binary\n" +
+                        "--- !!not-ready-data #binary\n" +
                         "...\n" +
                         "# 5 bytes remaining\n" +
                         "");
@@ -176,7 +176,7 @@ public class WireDumperTest extends WireTestCommon {
                 "--- !!data #binary\n" +
                         "00000000             11                                       ·            \n" +
                         "# position: 8, header: 0 or 1\n" +
-                        "--- !!not-ready-data! #binary\n" +
+                        "--- !!not-ready-data #binary\n" +
                         "...\n" +
                         "# 5 bytes remaining\n" +
                         "");
@@ -185,7 +185,7 @@ public class WireDumperTest extends WireTestCommon {
                 "--- !!data #binary\n" +
                         "00000000             11                                       ·            \n" +
                         "# position: 8, header: 0 or 1\n" +
-                        "--- !!not-ready-data! #binary\n" +
+                        "--- !!not-ready-data #binary\n" +
                         "...\n" +
                         "# 5 bytes remaining\n" +
                         "");
@@ -194,7 +194,7 @@ public class WireDumperTest extends WireTestCommon {
                 "--- !!data #binary\n" +
                         "00000000             31 37                                    17           \n" +
                         "# position: 8, header: 0 or 1\n" +
-                        "--- !!not-ready-data!\n" +
+                        "--- !!not-ready-data\n" +
                         "...\n" +
                         "# 7 bytes remaining\n" +
                         "");
@@ -203,7 +203,7 @@ public class WireDumperTest extends WireTestCommon {
                 "--- !!data #binary\n" +
                         "00000000             11 00 00 00  00 00 00 00                 ···· ····    \n" +
                         "# position: 12, header: 0 or 1\n" +
-                        "--- !!not-ready-data! #binary\n" +
+                        "--- !!not-ready-data #binary\n" +
                         "...\n" +
                         "# 5 bytes remaining\n" +
                         "");
