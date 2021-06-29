@@ -24,7 +24,8 @@ import org.jetbrains.annotations.NotNull;
  * Class to control whether to log Yaml messages for debugging or documentation.
  */
 // TODO Add tests
-public enum YamlLogging {;
+public enum YamlLogging {
+    ; // none
     @NotNull
     public static volatile String title = "";
     // TODO Doesn't show all writes. Use clientReads

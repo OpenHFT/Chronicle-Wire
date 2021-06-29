@@ -57,7 +57,8 @@ import static net.openhft.chronicle.wire.SerializationStrategies.*;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public enum Wires {;
+public enum Wires {
+    ; // none
     public static final int LENGTH_MASK = -1 >>> 2;
     public static final int NOT_COMPLETE = 0x8000_0000;
     @Deprecated(/* to be removed in x.22 */)

@@ -41,7 +41,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public enum WireInternal {;
+public enum WireInternal {
+    ; // none
     static final StringInterner INTERNER = new StringInterner(Integer.getInteger("wire.interner.size", 4096));
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
