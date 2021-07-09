@@ -258,6 +258,9 @@ public class JSONWireTest extends WireTestCommon {
         // Simple version
         String text = "[1,{\"a\":[2,3]}]";
 
+        // This works, for some reason
+//        String text = "[1,2,3,\"c\"]";
+
         final Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer();
         byteBufferBytes.append(text);
 
