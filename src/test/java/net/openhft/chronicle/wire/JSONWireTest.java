@@ -21,9 +21,11 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.annotation.RetentionPolicy;
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -33,6 +35,7 @@ import java.util.*;
 import static junit.framework.TestCase.assertNull;
 import static net.openhft.chronicle.wire.WireType.JSON;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class JSONWireTest extends WireTestCommon {
     @NotNull
@@ -267,6 +270,30 @@ public class JSONWireTest extends WireTestCommon {
         final JSONWire jsonWire = new JSONWire(Bytes.from(text));
         final Object list = jsonWire.getValueIn().object();
         assertEquals("[320, {as=[[32905.50000, 1.60291699, 1625822573.857656], [32905.60000, 0.10415889, 1625822573.194909]], bs=[[32893.60000, 0.15042948, 1625822574.220475]]}, book-10]", "" + list);
+    }
+
+    @Test
+    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/292")
+    public void testArrayDelimeterNoSpace() {
+        // This parses OK
+//        String text = "[320, {\"as\":[[\"32905.50000\", \"1.60291699\", \"1625822573.857656\"], [\"32905.60000\", \"0.10415889\", \"1625822573.194909\"]],\"bs\":[[\"32893.60000\", \"0.15042948\", \"1625822574.220475\"]]}, \"book-10\"]";
+
+        // This fails
+//        String text = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
+
+        // Simple version
+        String text = "[1,{\"a\":[2,3]}]";
+
+        // This works, for some reason
+//        String text = "[1,2,3,\"c\"]";
+
+        final Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer();
+        byteBufferBytes.append(text);
+
+        final JSONWire jsonWire = new JSONWire(byteBufferBytes);
+
+        final List<Object> list = jsonWire.getValueIn().list(Object.class);
+        assertNotNull(list);
     }
 
     static class MapHolder extends SelfDescribingMarshallable {
