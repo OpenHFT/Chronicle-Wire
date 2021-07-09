@@ -248,14 +248,22 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/292")
-    public void testArrayInDictionary() {
-        //        String text = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
-        String text = "[320, {\"as\":[1, 2, 3]]}]";
+    public void testArrayDelimeterNoSpace() {
+        // This parses OK
+//        String text = "[320, {\"as\":[[\"32905.50000\", \"1.60291699\", \"1625822573.857656\"], [\"32905.60000\", \"0.10415889\", \"1625822573.194909\"]],\"bs\":[[\"32893.60000\", \"0.15042948\", \"1625822574.220475\"]]}, \"book-10\"]";
 
-        final JSONWire jsonWire = new JSONWire(Marshallable.<Bytes<ByteBuffer>>fromString(text));
+        // This fails
+//        String text = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
+
+        // Simple version
+        String text = "[1,{\"a\":[2,3]}]";
+
+        final Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer();
+        byteBufferBytes.append(text);
+
+        final JSONWire jsonWire = new JSONWire(byteBufferBytes);
 
         final List<Object> list = jsonWire.getValueIn().list(Object.class);
-
         assertNotNull(list);
     }
 
