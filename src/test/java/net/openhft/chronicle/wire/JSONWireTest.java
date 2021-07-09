@@ -21,9 +21,11 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.annotation.RetentionPolicy;
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -33,6 +35,7 @@ import java.util.*;
 import static junit.framework.TestCase.assertNull;
 import static net.openhft.chronicle.wire.WireType.JSON;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class JSONWireTest extends WireTestCommon {
     @NotNull
@@ -241,6 +244,19 @@ public class JSONWireTest extends WireTestCommon {
         Dates dates = new Dates();
         @NotNull CharSequence str = WireType.JSON.asString(dates);
         assertEquals("\"date\":null,\"dateTime\":null,\"zdateTime\":null", str);
+    }
+
+    @Test
+    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/292")
+    public void testArrayInDictionary() {
+        //        String text = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
+        String text = "[320, {\"as\":[1, 2, 3]]}]";
+
+        final JSONWire jsonWire = new JSONWire(Marshallable.<Bytes<ByteBuffer>>fromString(text));
+
+        final List<Object> list = jsonWire.getValueIn().list(Object.class);
+
+        assertNotNull(list);
     }
 
     private static class FooEvent extends AbstractEventCfg<FooEvent> {
