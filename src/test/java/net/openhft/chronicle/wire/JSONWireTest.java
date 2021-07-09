@@ -21,11 +21,9 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.annotation.RetentionPolicy;
-import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -35,22 +33,21 @@ import java.util.*;
 import static junit.framework.TestCase.assertNull;
 import static net.openhft.chronicle.wire.WireType.JSON;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 public class JSONWireTest extends WireTestCommon {
     @NotNull
-    private JSONWire getWire() {
+    private JSONWire createWire() {
         return new JSONWire(Bytes.elasticByteBuffer());
     }
 
     @NotNull
-    private JSONWire getWire(@NotNull String json) {
+    private JSONWire createWire(@NotNull String json) {
         return new JSONWire(Bytes.from(json));
     }
 
     @Test
     public void testListFormatting() {
-        @NotNull Wire wire = getWire();
+        @NotNull Wire wire = createWire();
 
         @NotNull List<Item> items = new ArrayList<>();
         items.add(new Item("item1", 1235666L, 1.1231231));
@@ -72,7 +69,7 @@ public class JSONWireTest extends WireTestCommon {
     public void testOpenBracket() {
         @NotNull StringBuilder sb = new StringBuilder();
 
-        @NotNull Wire wire1 = getWire("\"echo\":\"Hello\"\n\"echo2\":\"Hello2\"\n");
+        @NotNull Wire wire1 = createWire("\"echo\":\"Hello\"\n\"echo2\":\"Hello2\"\n");
         @Nullable String text1 = wire1.readEventName(sb).text();
         assertEquals("echo", sb.toString());
         assertEquals("Hello", text1);
@@ -80,7 +77,7 @@ public class JSONWireTest extends WireTestCommon {
         assertEquals("echo2", sb.toString());
         assertEquals("Hello2", text2);
 
-        @NotNull JSONWire wire2 = getWire("{ \"echoB\":\"HelloB\" }\n{ \"echo2B\":\"Hello2B\" }\n");
+        @NotNull JSONWire wire2 = createWire("{ \"echoB\":\"HelloB\" }\n{ \"echo2B\":\"Hello2B\" }\n");
         @Nullable String textB = wire2.readEventName(sb).text();
         assertEquals("echoB", sb.toString());
         assertEquals("HelloB", textB);
@@ -101,7 +98,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testNoSpaces() {
-        @NotNull Wire wire = getWire("\"echo\":\"\"");
+        @NotNull Wire wire = createWire("\"echo\":\"\"");
         @NotNull VanillaWireParser parser = new VanillaWireParser(soutWireParselet(), VanillaWireParser.SKIP_READABLE_BYTES);
         parser.parseOne(wire);
         assertEquals("", wire.bytes().toString());
@@ -114,7 +111,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testMarshallableWithTwoLists() {
-        @NotNull Wire wire = getWire();
+        @NotNull Wire wire = createWire();
 
         @NotNull TwoLists lists1 = new TwoLists(null, 5, 5);
         wire.writeEventName("two_lists").marshallable(lists1);
@@ -154,7 +151,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testNullString() {
-        @NotNull Wire w = getWire();
+        @NotNull Wire w = createWire();
 
         @NotNull Item item1 = new Item(null, 1, 2);
         w.write("item").marshallable(item1);
@@ -171,7 +168,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     public void testBytes() {
-        @NotNull Wire w = getWire();
+        @NotNull Wire w = createWire();
 
         Bytes bs = Bytes.from("blablabla");
         w.write("a").int64(123);
@@ -199,10 +196,6 @@ public class JSONWireTest extends WireTestCommon {
         // 0.1 when cast to a double is 0.10000000149011612. We used to throw an exception here because of this difference
         FooEvent foo2 = WireType.JSON.fromString(FooEvent.class, str);
         assertEquals(foo, foo2);
-    }
-
-    static class MapHolder extends SelfDescribingMarshallable {
-        Map<RetentionPolicy, Double> map;
     }
 
     @Test
@@ -247,16 +240,37 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/292")
+    public void commaIsNotInAValue() {
+        String text = "[1,2,3]";
+        Wire wire = createWire();
+        wire.bytes().append(text);
+        final Object list = wire.getValueIn().object();
+        assertEquals("[1, 2, 3]", "" + list);
+
+        String text2 = "[ 1, 2, 3 ]";
+        wire.bytes().clear().append(text2);
+        final Object list2 = wire.getValueIn().object();
+        assertEquals("[1, 2, 3]", "" + list2);
+    }
+
+    @Test
     public void testArrayInDictionary() {
-        //        String text = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
-        String text = "[320, {\"as\":[1, 2, 3]]}]";
+        String text = "[320,{\"as\":[1,2,3]}]";
+        final JSONWire jsonWire = new JSONWire(Bytes.from(text));
+        final Object list = jsonWire.getValueIn().object();
+        assertEquals("[320, {as=[1, 2, 3]}]", "" + list);
+    }
 
-        final JSONWire jsonWire = new JSONWire(Marshallable.<Bytes<ByteBuffer>>fromString(text));
+    @Test
+    public void testArrayInDictionary2() {
+        String text = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
+        final JSONWire jsonWire = new JSONWire(Bytes.from(text));
+        final Object list = jsonWire.getValueIn().object();
+        assertEquals("[320, {as=[[32905.50000, 1.60291699, 1625822573.857656], [32905.60000, 0.10415889, 1625822573.194909]], bs=[[32893.60000, 0.15042948, 1625822574.220475]]}, book-10]", "" + list);
+    }
 
-        final List<Object> list = jsonWire.getValueIn().list(Object.class);
-
-        assertNotNull(list);
+    static class MapHolder extends SelfDescribingMarshallable {
+        Map<RetentionPolicy, Double> map;
     }
 
     private static class FooEvent extends AbstractEventCfg<FooEvent> {

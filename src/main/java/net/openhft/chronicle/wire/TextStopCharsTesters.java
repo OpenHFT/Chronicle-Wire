@@ -43,6 +43,26 @@ enum TextStopCharsTesters implements StopCharsTester {
             }
         }
     },
+    STRICT_END_OF_TEXT_JSON {
+        @Override
+        public boolean isStopChar(int ch, int peekNextCh) throws IllegalStateException {
+            switch (ch) {
+                // one character stop.
+                case '"':
+                case '#':
+                case '\0':
+                case '\r':
+                case '\n':
+                case '}':
+                case ']':
+                case ':':
+                case ',':
+                    return true;
+                default:
+                    return false;
+            }
+        }
+    },
     END_EVENT_NAME {
         @Override
         public boolean isStopChar(int ch, int peekNextCh) throws IllegalStateException {

@@ -89,16 +89,16 @@ public class TextWire extends AbstractWire implements Wire {
         WireInternal.INTERNER.valueCount();
     }
 
-    private final TextValueOut valueOut = createValueOut();
     protected final TextValueIn valueIn = createValueIn();
+    private final TextValueOut valueOut = createValueOut();
+    private final StringBuilder sb = new StringBuilder();
+    protected long lineStart = 0;
     private DefaultValueIn defaultValueIn;
     private WriteDocumentContext writeContext;
     private ReadDocumentContext readContext;
-    private final StringBuilder sb = new StringBuilder();
     private boolean strict = false;
     private boolean addTimeStamps = false;
     private boolean trimFirstCurly = true;
-    protected long lineStart = 0;
 
     public TextWire(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
@@ -537,11 +537,17 @@ public class TextWire extends AbstractWire implements Wire {
 
     @NotNull
     protected StopCharsTester getStrictEscapingEndOfText() {
+        TextStopCharsTesters strictEndOfText = strictEndOfText();
         StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT,
-                TextStopCharsTesters.STRICT_END_OF_TEXT::escaping);
+                strictEndOfText::escaping);
         // reset it.
         escaping.isStopChar(' ', ' ');
         return escaping;
+    }
+
+    @NotNull
+    protected TextStopCharsTesters strictEndOfText() {
+        return TextStopCharsTesters.STRICT_END_OF_TEXT;
     }
 
     @NotNull
@@ -618,6 +624,10 @@ public class TextWire extends AbstractWire implements Wire {
 
     int peekCode() {
         return bytes.peekUnsignedByte();
+    }
+
+    int peekCodeNext() {
+        return bytes.peekUnsignedByte(bytes.readPosition() + 1);
     }
 
     /**
@@ -1023,7 +1033,7 @@ public class TextWire extends AbstractWire implements Wire {
             return NoObject.NO_OBJECT;
         switch (code) {
             case '-':
-                if (bytes.readByte(bytes.readPosition() + 1) == '-')
+                if (peekCodeNext() == '-')
                     return NoObject.NO_OBJECT;
 
                 return readList(indentation2, null);
@@ -1063,7 +1073,7 @@ public class TextWire extends AbstractWire implements Wire {
         while (peekCode() == '-') {
             if (indentation() < indentation)
                 break;
-            if (bytes.readByte(bytes.readPosition() + 1) == '-')
+            if (peekCodeNext() == '-')
                 break;
             long ls = lineStart;
             bytes.readSkip(1);
@@ -2274,7 +2284,7 @@ public class TextWire extends AbstractWire implements Wire {
                     return "";
 
                 case '$':
-                    if (bytes.peekUnsignedByte(bytes.readPosition() + 1) == '{') {
+                    if (peekCodeNext() == '{') {
                         unsubstitutedString(a);
                         return a;
                     }
@@ -2524,7 +2534,7 @@ public class TextWire extends AbstractWire implements Wire {
                         break;
                     }
                     consumePadding();
-                    if (peekCode() == ':') {
+                    if (peekCode() == ':' && (code == '"' || code == '\'' || peekCodeNext() <= ' ')) {
                         readCode();
                         consumeAny();
                     }
@@ -2585,7 +2595,7 @@ public class TextWire extends AbstractWire implements Wire {
             code = readCode();
             if (code != '}') {
                 bytes.readSkip(-1);
-                throw new IllegalStateException("Expected a } was " + code);
+                throw new IllegalStateException("Expected a } was " + (char) code);
             }
         }
 
@@ -3507,7 +3517,7 @@ public class TextWire extends AbstractWire implements Wire {
                 case '!':
                     return object(using, type);
                 case '-':
-                    if (bytes.readByte(bytes.readPosition() + 1) == ' ')
+                    if (peekCodeNext() == ' ')
                         return readList(indentation(), null);
                     return valueIn.readNumber();
                 case '[':

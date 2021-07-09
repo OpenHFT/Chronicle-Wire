@@ -165,6 +165,12 @@ public class JSONWire extends TextWire {
         return super.readField(sb);
     }
 
+    @Override
+    @NotNull
+    protected TextStopCharsTesters strictEndOfText() {
+        return TextStopCharsTesters.STRICT_END_OF_TEXT_JSON;
+    }
+
     class JSONValueOut extends TextValueOut {
         @NotNull
         @Override
