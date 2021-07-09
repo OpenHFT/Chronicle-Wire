@@ -1907,6 +1907,15 @@ public class TextWireTest extends WireTestCommon {
         assertEquals("[1, 2, 3]", "" + list2);
     }
 
+    @Test
+    public void commaInAValue2() {
+        String text = "[1,2,3,\"c\"]";
+        Wire wire = createWire();
+        wire.bytes().append(text);
+        final Object list = wire.getValueIn().object();
+        assertEquals("[1,2,3, c]", "" + list);
+    }
+
     public enum OrderLevel implements Marshallable {
         PARENT, CHILD;
     }
