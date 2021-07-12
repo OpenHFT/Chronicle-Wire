@@ -589,8 +589,9 @@ public class TextWire extends AbstractWire implements Wire {
                     this.lineStart = bytes.readPosition();
                     break;
                 case ',':
-                    if (commas-- <= 0)
-                        return;
+                    if (valueIn.isASeparator(peekCodeNext()))
+                        if (commas-- <= 0)
+                            return;
                     bytes.readSkip(1);
                     if (commas == 0)
                         return;
@@ -2353,6 +2354,7 @@ public class TextWire extends AbstractWire implements Wire {
                 int prev = bytes.readUnsignedByte(bytes.readPosition() - 1);
                 if (prev != ' ') {
                     if (prev == '\n' || prev == '\r') {
+                        // TODO doesn't look right.
                         TextWire.this.lineStart = bytes.readPosition();
                     }
                     return prev;
@@ -2534,12 +2536,16 @@ public class TextWire extends AbstractWire implements Wire {
                         break;
                     }
                     consumePadding();
-                    if (peekCode() == ':' && (code == '"' || code == '\'' || peekCodeNext() <= ' ')) {
+                    if (peekCode() == ':' && isASeparator(peekCodeNext())) {
                         readCode();
                         consumeAny();
                     }
                     break;
             }
+        }
+
+        protected boolean isASeparator(int nextChar) {
+            return TextStopCharsTesters.isASeparator(nextChar);
         }
 
         private void consumeType2() {
@@ -2561,7 +2567,7 @@ public class TextWire extends AbstractWire implements Wire {
             for (; ; ) {
                 long pos = bytes.readPosition();
                 consumeAny();
-                if (peekCode() == ',')
+                if (peekCode() == ',' && isASeparator(peekCodeNext()))
                     readCode();
                 else
                     break;
@@ -2585,7 +2591,7 @@ public class TextWire extends AbstractWire implements Wire {
                 int code2 = peekCode();
                 if (code2 == '}' || code2 == ']' || code2 <= 0) {
                     break;
-                } else if (code2 == ',') {
+                } else if (code2 == ',' && isASeparator(peekCodeNext())) {
                     readCode();
                 }
                 if (bytes.readPosition() == pos)
@@ -2986,6 +2992,7 @@ public class TextWire extends AbstractWire implements Wire {
                 return false;
             consumePadding();
             int ch = peekCode();
+            // don't test for next char as any comma still left here is to be consumed.
             if (ch == ',') {
                 bytes.readSkip(1);
                 return true;
@@ -3411,7 +3418,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         public void checkRewind() {
-            int ch = bytes.readUnsignedByte(bytes.readPosition() - 1);
+            int ch = peekBack();
             if (ch == ':' || ch == '}' || ch == ']')
                 bytes.readSkip(-1);
 
@@ -3421,7 +3428,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         public void checkRewindDouble() {
-            int ch = bytes.readUnsignedByte(bytes.readPosition() - 1);
+            int ch = peekBack();
             if (ch == ':' || ch == '}' || ch == ']')
                 bytes.readSkip(-1);
         }

@@ -35,9 +35,8 @@ enum TextStopCharsTesters implements StopCharsTester {
                     return true;
                 // two character stop.
                 case ':':
-                    return peekNextCh == '!' || peekNextCh == '{' || peekNextCh <= ' ' || peekNextCh == '"' || peekNextCh == '[';
                 case ',':
-                    return peekNextCh <= ' ' || peekNextCh == '"';
+                    return isASeparator(peekNextCh);
                 default:
                     return false;
             }
@@ -68,5 +67,13 @@ enum TextStopCharsTesters implements StopCharsTester {
         public boolean isStopChar(int ch, int peekNextCh) throws IllegalStateException {
             return ch <= ' ' || STRICT_END_OF_TEXT.isStopChar(ch, peekNextCh);
         }
+    };
+
+    public static boolean isASeparator(int peekNextCh) {
+        return peekNextCh <= ' '
+                || peekNextCh == '!'
+                || peekNextCh == '{'
+                || peekNextCh == '"'
+                || peekNextCh == '[';
     }
 }

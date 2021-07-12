@@ -272,5 +272,10 @@ public class JSONWire extends TextWire {
             @Nullable String text = super.text();
             return text == null || text.equals("null") ? null : text;
         }
+
+        @Override
+        protected boolean isASeparator(int nextChar) {
+            return true;
+        }
     }
 }
