@@ -183,24 +183,28 @@ public class VanillaMethodReader implements MethodReader {
             return;
         }
 
-        @NotNull String name = s.toString();
-        String rest;
+        try {
+            @NotNull String name = s.toString();
+            String rest;
 
-        if (v.wireIn() instanceof BinaryWire) {
-            Bytes bytes = Bytes.elasticByteBuffer((int) (v.wireIn().bytes().readRemaining() * 3 / 2 + 64));
-            long pos = v.wireIn().bytes().readPosition();
-            v.wireIn().copyTo(new TextWire(bytes));
-            v.wireIn().bytes().readPosition(pos);
-            rest = bytes.toString();
-            bytes.releaseLast();
+            if (v.wireIn() instanceof BinaryWire) {
+                Bytes bytes = Bytes.elasticByteBuffer((int) (v.wireIn().bytes().readRemaining() * 3 / 2 + 64));
+                long pos = v.wireIn().bytes().readPosition();
+                v.wireIn().copyTo(new TextWire(bytes));
+                v.wireIn().bytes().readPosition(pos);
+                rest = bytes.toString();
+                bytes.releaseLast();
 
-        } else {
-            rest = v.toString();
+            } else {
+                rest = v.toString();
+            }
+            // TextWire.toString has an \n at the end
+            if (rest.endsWith("\n"))
+                rest = rest.substring(0, rest.length() - 1);
+            Jvm.debug().on(VanillaMethodReader.class, "read " + name + " - " + rest);
+        } catch (Exception e) {
+            Jvm.warn().on(VanillaMethodReader.class, "s=" + s, e);
         }
-        // TextWire.toString has an \n at the end
-        if (rest.endsWith("\n"))
-            rest = rest.substring(0, rest.length() - 1);
-        Jvm.debug().on(VanillaMethodReader.class, "read " + name + " - " + rest);
     }
 
     private void addParsletsFor(Set<Class> interfaces, Class<?> oClass, boolean ignoreDefault, Set<String> methodNamesHandled, Set<String> methodsSignaturesHandled, MethodFilterOnFirstArg methodFilterOnFirstArg, Object o, Object[] context, Supplier contextSupplier, Supplier nextContext) {
