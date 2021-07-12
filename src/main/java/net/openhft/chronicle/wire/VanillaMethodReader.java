@@ -202,8 +202,9 @@ public class VanillaMethodReader implements MethodReader {
             if (rest.endsWith("\n"))
                 rest = rest.substring(0, rest.length() - 1);
             Jvm.debug().on(VanillaMethodReader.class, "read " + name + " - " + rest);
-        } catch (Exception e) {
-            Jvm.warn().on(VanillaMethodReader.class, "s=" + s, e);
+        } catch (Exception ignore) {
+            // todo commented out til the following is fixed  - https://github.com/ChronicleEnterprise/Chronicle-Services/issues/240
+            // Jvm.warn().on(VanillaMethodReader.class, "s=" + s, e);
         }
     }
 
