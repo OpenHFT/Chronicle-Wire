@@ -129,6 +129,12 @@ public enum WireInternal {
             bytes.writeOrderedInt(len0);
             writer.writeMarshallable(wireOut);
             long position1 = bytes.writePosition();
+            long bytesToSkip = (position - position1) & 0x3;
+            if (wireOut.usePadding() && bytesToSkip != 0) {
+                bytes.writeInt(bytes.writePosition(), 0);
+                bytes.writeSkip(bytesToSkip);
+                position1 = bytes.writePosition();
+            }
 //            if (position1 < position)
 //                System.out.println("Message truncated from " + position + " to " + position1);
             int length;

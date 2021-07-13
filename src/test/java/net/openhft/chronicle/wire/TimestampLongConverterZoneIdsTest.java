@@ -8,6 +8,7 @@ import org.junit.runners.Parameterized;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -56,6 +57,7 @@ public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
         return ZoneId.getAvailableZoneIds().stream()
                 .flatMap(z -> Arrays.stream(ConverterType.values()).map(ct -> new Object[]{z, ct}))
                 .parallel()
+                .filter(s -> ThreadLocalRandom.current().nextInt(10) == 0)
                 .collect(Collectors.toList());
     }
 

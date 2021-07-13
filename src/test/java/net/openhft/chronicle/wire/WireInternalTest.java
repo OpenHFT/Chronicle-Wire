@@ -90,12 +90,15 @@ public class WireInternalTest extends WireTestCommon {
                 "--- !!meta-data #binary\n" +
                 "csp: \"csp://hello-world\"\n" +
                 "tid: !int 123456789\n" +
+                "0\n" +
                 "# position: 36, header: 0\n" +
                 "--- !!data #binary\n" +
                 "reply: {\n" +
                 "  key: 1,\n" +
                 "  value: Hello World\n" +
                 "}\n" +
+                "0\n" +
+                "0\n" +
                 "# position: 76, header: 1\n" +
                 "--- !!data #binary\n" +
                 "reply: [\n" +
@@ -103,10 +106,13 @@ public class WireInternalTest extends WireTestCommon {
                 "  2,\n" +
                 "  value,\n" +
                 "  Hello World2\n" +
-                "]\n" +
+                "],\n" +
+                "0\n" +
                 "# position: 116, header: 2\n" +
                 "--- !!data #binary\n" +
-                "userid: peter\n", actual);
+                "userid: peter\n" +
+                "0\n" +
+                "0\n", actual);
 
         bytes.releaseLast();
     }

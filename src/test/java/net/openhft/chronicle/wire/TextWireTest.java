@@ -1132,7 +1132,7 @@ public class TextWireTest extends WireTestCommon {
     public void testMapReadAndWriteMarshable() {
         @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes);
-        wire.usePadding(true);
+        wire.usePadding(false);
 
         @NotNull final Map<MyMarshallable, MyMarshallable> expected = new LinkedHashMap<>();
 
@@ -1176,7 +1176,7 @@ public class TextWireTest extends WireTestCommon {
         };
         @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes);
-        wire.usePadding(true);
+        wire.usePadding(false);
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception")
                 .object(e));
 
@@ -1497,6 +1497,7 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void testByteArray() {
         @NotNull Wire wire = createWire();
+        wire.usePadding(true);
         wire.writeDocument(false, w -> w.write("nothing").object(new byte[0]));
         @NotNull byte[] one = {1};
         wire.writeDocument(false, w -> w.write("one").object(one));
@@ -1505,9 +1506,11 @@ public class TextWireTest extends WireTestCommon {
 
         assertEquals("--- !!data\n" +
                         "nothing: !byte[] !!binary \n" +
+                        "\0\n" +
                         "# position: 32, header: 1\n" +
                         "--- !!data\n" +
                         "one: !byte[] !!binary AQ==\n" +
+                        "\0\n" +
                         "# position: 64, header: 2\n" +
                         "--- !!data\n" +
                         "four: !byte[] !!binary AQIDBA==\n"
@@ -1524,6 +1527,7 @@ public class TextWireTest extends WireTestCommon {
         map.put(new MyMarshallable("key2"), "value2");
 
         @NotNull Wire wire = createWire();
+        wire.usePadding(false);
         @NotNull final MyMarshallable parent = new MyMarshallable("parent");
         wire.writeDocument(false, w -> w.writeEvent(MyMarshallable.class, parent).object(map));
 

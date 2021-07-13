@@ -78,7 +78,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
         final Foo read = new Foo(EnumSet.noneOf(Thread.State.class));
 
         @NotNull Wire tw = new BinaryWire(bytes);
-        tw.usePadding(true);
+        tw.usePadding(false);
         
         tw.writeDocument(false, w -> {
             w.write(() -> "key").marshallable(written);
@@ -100,7 +100,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
         read.f = null;
 
         @NotNull Wire tw = new BinaryWire(bytes);
-        tw.usePadding(true);
+        tw.usePadding(false);
         tw.writeDocument(false, w -> {
             w.write(() -> "key").marshallable(written);
         });

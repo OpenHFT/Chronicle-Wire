@@ -54,6 +54,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         assertEquals("--- !!meta-data\n" +
                         "csp: ///service-lookup\n" +
                         "tid: 149873598325\n" +
+                        "\0\0\0\n" +
                         "# position: 48, header: 0\n" +
                         "--- !!data\n" +
                         "lookup: {\n" +
@@ -63,7 +64,8 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
                         "    keyType: !type Integer,\n" +
                         "    valueType: !type String\n" +
                         "  }\n" +
-                        "}\n",
+                        "}\n" +
+                        "\0\n",
                 Wires.fromSizePrefixedBlobs(bytes));
 
         @NotNull Wire wire = new BinaryWire(bytes);
@@ -73,19 +75,16 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         writeMessageOne(wire);
 
         // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
-        assertEquals("[pos: 0, rlim: 129, wlim: 2147483632, cap: 2147483632 ] ǁ" +
-                "#٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠٠" +
-                "U٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String" +
-                "‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
+        assertEquals("[pos: 0, rlim: 132, wlim: 2147483632, cap: 2147483632 ] ǁ$٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠٠X٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String٠٠٠‡٠٠٠٠٠٠٠٠",
+                bytes.toDebugString());
 
         @NotNull Wire raw = new RawWire(bytes);
         raw.usePadding(true);
         clear(bytes);
         writeMessageOne(raw);
 
-        assertEquals("[pos: 0, rlim: 68, wlim: 2147483632, cap: 2147483632 ] ǁ" +
-                "\\u001A٠٠@⒘///service-lookupu\\u009F)å\"٠٠٠٠٠ ٠٠٠\\u001C٠٠٠⒋test⒊Map⒖٠٠٠⒎Integer⒍String" +
-                "‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
+        assertEquals("[pos: 0, rlim: 68, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@⒘///service-lookupu\\u009F)å\"٠٠٠٠٠ ٠٠٠\\u001C٠٠٠⒋test⒊Map⒖٠٠٠⒎Integer⒍String‡٠٠٠٠٠٠٠٠",
+                bytes.toDebugString());
 /*
 --- !!meta-data
 cid: 1
@@ -105,18 +104,21 @@ put: [ 3, bye ]
                         "--- !!meta-data\n" +
                         "csp: //server1/test\n" +
                         "cid: 1\n" +
+                        "\0\n" +
                         "# position: 32, header: 0\n" +
                         "--- !!data\n" +
                         "put: {\n" +
                         "  key: 1,\n" +
                         "  value: hello\n" +
                         "}\n" +
+                        "\0\0\n" +
                         "# position: 72, header: 1\n" +
                         "--- !!data\n" +
                         "put: {\n" +
                         "  key: 2,\n" +
                         "  value: world\n" +
                         "}\n" +
+                        "\0\0\n" +
                         "# position: 112, header: 2\n" +
                         "--- !!data\n" +
                         "put: {\n" +
@@ -125,11 +127,7 @@ put: [ 3, bye ]
                         "}\n",
                 Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("" +
-                        "[pos: 0, rlim: 148, wlim: 2147483632, cap: 2147483632 ] ǁ" +
-                        "\\u001B٠٠@csp: //server1/test⒑cid: 1⒑٠\"" +
-                        "٠٠٠put: {⒑  key: 1,⒑  value: hello⒑}⒑٠٠\"" +
-                        "٠٠٠put: {⒑  key: 2,⒑  value: world⒑}⒑٠٠ " +
-                        "٠٠٠put: {⒑  key: 3,⒑  value: bye⒑}⒑‡٠٠٠٠٠٠٠٠",
+                        "[pos: 0, rlim: 148, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@csp: //server1/test⒑cid: 1⒑٠$٠٠٠put: {⒑  key: 1,⒑  value: hello⒑}⒑٠٠$٠٠٠put: {⒑  key: 2,⒑  value: world⒑}⒑٠٠ ٠٠٠put: {⒑  key: 3,⒑  value: bye⒑}⒑‡٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
 
         clear(bytes);
@@ -137,21 +135,14 @@ put: [ 3, bye ]
 
         // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("" +
-                "[pos: 0, rlim: 120, wlim: 2147483632, cap: 2147483632 ] ǁ" +
-                "\\u0018٠٠@Ãcspî//server1/testÃcid⒈" +
-                "\\u001A٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒈Åvalueåhello٠٠" +
-                "\\u001A٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒉Åvalueåworld٠٠" +
-                "\\u0018٠٠٠Ãput\\u0082⒖٠٠٠Ãkey⒊Åvalueãbye‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
+                        "[pos: 0, rlim: 120, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0018٠٠@Ãcspî//server1/testÃcid⒈\\u001C٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒈Åvalueåhello٠٠\\u001C٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒉Åvalueåworld٠٠\\u0018٠٠٠Ãput\\u0082⒖٠٠٠Ãkey⒊Åvalueãbye‡٠٠٠٠٠٠٠٠",
+                bytes.toDebugString());
 
         clear(bytes);
         writeMessageTwo(raw);
         assertEquals("" +
-                "[pos: 0, rlim: 96, wlim: 2147483632, cap: 2147483632 ] ǁ" +
-                "\\u0017٠٠@⒕//server1/test⒈٠٠٠٠٠٠٠٠" +
-                "⒙٠٠٠⒕٠٠٠⒈٠٠٠٠٠٠٠⒌hello٠٠" +
-                "⒙٠٠٠⒕٠٠٠⒉٠٠٠٠٠٠٠⒌world٠٠" +
-                "⒗٠٠٠⒓٠٠٠⒊٠٠٠٠٠٠٠⒊bye" +
-                "‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
+                        "[pos: 0, rlim: 96, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0018٠٠@⒕//server1/test⒈٠٠٠٠٠٠٠٠⒛٠٠٠⒕٠٠٠⒈٠٠٠٠٠٠٠⒌hello٠٠⒛٠٠٠⒕٠٠٠⒉٠٠٠٠٠٠٠⒌world٠٠⒗٠٠٠⒓٠٠٠⒊٠٠٠٠٠٠٠⒊bye‡٠٠٠٠٠٠٠٠",
+                bytes.toDebugString());
     }
 
     @SuppressWarnings("rawtypes")

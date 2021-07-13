@@ -37,6 +37,7 @@ import java.util.function.Consumer;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
 @SuppressWarnings("rawtypes")
@@ -380,6 +381,8 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @Test
     public void fieldAfterText() {
+        assumeFalse(usePadding);
+
         expectException("Unable to copy !UpdateEvent safely will try anyway");
         @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("data")
@@ -602,6 +605,8 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @Test
     public void testTypeLiteral() {
+        assumeFalse(usePadding);
+
         @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("a").typeLiteral(String.class)
                 .write("b").typeLiteral(int.class)
@@ -618,6 +623,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @Test
     public void testByteArray() {
+        assumeFalse(usePadding);
         @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("nothing").object(new byte[0]));
         @NotNull byte[] one = {1};
@@ -680,6 +686,8 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @Test
     public void testBytesLiteral() {
+        assumeFalse(usePadding);
+
         @NotNull Wire wire = new BinaryWire(Bytes.elasticByteBuffer());
         wire.write("test").text("Hello World");
 
@@ -711,6 +719,8 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @Test
     public void testUnicodeReadAndWriteDirect() {
+        assumeFalse(usePadding);
+
         bytes.releaseLast();
         bytes = allocateElasticDirect();
         doTestUnicodeReadAndWrite();

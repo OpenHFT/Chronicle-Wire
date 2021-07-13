@@ -1249,7 +1249,7 @@ public class YamlWireTest extends WireTestCommon {
         };
         @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
-        wire.usePadding(true);
+        wire.usePadding(false);
 
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception")
                 .object(e));
