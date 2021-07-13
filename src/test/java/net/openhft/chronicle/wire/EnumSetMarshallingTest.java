@@ -29,8 +29,8 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 public class EnumSetMarshallingTest extends WireTestCommon {
     private static final String FULL_SET_SERIALISED_FORM =
