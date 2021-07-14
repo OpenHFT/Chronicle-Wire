@@ -54,7 +54,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         assertEquals("--- !!meta-data\n" +
                         "csp: ///service-lookup\n" +
                         "tid: 149873598325\n" +
-                        "\0\0\0\n" +
+                        "   \n" +
                         "# position: 48, header: 0\n" +
                         "--- !!data\n" +
                         "lookup: {\n" +
@@ -65,7 +65,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
                         "    valueType: !type String\n" +
                         "  }\n" +
                         "}\n" +
-                        "\0\n",
+                        " \n",
                 Wires.fromSizePrefixedBlobs(bytes));
 
         @NotNull Wire wire = new BinaryWire(bytes);
@@ -75,7 +75,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         writeMessageOne(wire);
 
         // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
-        assertEquals("[pos: 0, rlim: 132, wlim: 2147483632, cap: 2147483632 ] ǁ$٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠٠X٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String٠٠٠‡٠٠٠٠٠٠٠٠",
+        assertEquals("[pos: 0, rlim: 132, wlim: 2147483632, cap: 2147483632 ] ǁ$٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠\\u008FX٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
 
         @NotNull Wire raw = new RawWire(bytes);
@@ -104,21 +104,21 @@ put: [ 3, bye ]
                         "--- !!meta-data\n" +
                         "csp: //server1/test\n" +
                         "cid: 1\n" +
-                        "\0\n" +
+                        " \n" +
                         "# position: 32, header: 0\n" +
                         "--- !!data\n" +
                         "put: {\n" +
                         "  key: 1,\n" +
                         "  value: hello\n" +
                         "}\n" +
-                        "\0\0\n" +
+                        "  \n" +
                         "# position: 72, header: 1\n" +
                         "--- !!data\n" +
                         "put: {\n" +
                         "  key: 2,\n" +
                         "  value: world\n" +
                         "}\n" +
-                        "\0\0\n" +
+                        "  \n" +
                         "# position: 112, header: 2\n" +
                         "--- !!data\n" +
                         "put: {\n" +
@@ -127,7 +127,7 @@ put: [ 3, bye ]
                         "}\n",
                 Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("" +
-                        "[pos: 0, rlim: 148, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@csp: //server1/test⒑cid: 1⒑٠$٠٠٠put: {⒑  key: 1,⒑  value: hello⒑}⒑٠٠$٠٠٠put: {⒑  key: 2,⒑  value: world⒑}⒑٠٠ ٠٠٠put: {⒑  key: 3,⒑  value: bye⒑}⒑‡٠٠٠٠٠٠٠٠",
+                        "[pos: 0, rlim: 148, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@csp: //server1/test⒑cid: 1⒑ $٠٠٠put: {⒑  key: 1,⒑  value: hello⒑}⒑  $٠٠٠put: {⒑  key: 2,⒑  value: world⒑}⒑   ٠٠٠put: {⒑  key: 3,⒑  value: bye⒑}⒑‡٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
 
         clear(bytes);
@@ -135,7 +135,7 @@ put: [ 3, bye ]
 
         // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("" +
-                        "[pos: 0, rlim: 120, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0018٠٠@Ãcspî//server1/testÃcid⒈\\u001C٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒈Åvalueåhello٠٠\\u001C٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒉Åvalueåworld٠٠\\u0018٠٠٠Ãput\\u0082⒖٠٠٠Ãkey⒊Åvalueãbye‡٠٠٠٠٠٠٠٠",
+                        "[pos: 0, rlim: 120, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0018٠٠@Ãcspî//server1/testÃcid⒈\\u001C٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒈Åvalueåhello\\u008F\\u008F\\u001C٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒉Åvalueåworld\\u008F\\u008F\\u0018٠٠٠Ãput\\u0082⒖٠٠٠Ãkey⒊Åvalueãbye‡٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
 
         clear(bytes);

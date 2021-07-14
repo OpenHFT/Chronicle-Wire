@@ -129,10 +129,9 @@ public enum WireInternal {
             bytes.writeOrderedInt(len0);
             writer.writeMarshallable(wireOut);
             long position1 = bytes.writePosition();
-            long bytesToSkip = (position - position1) & 0x3;
-            if (wireOut.usePadding() && bytesToSkip != 0) {
-                bytes.writeInt(bytes.writePosition(), 0);
-                bytes.writeSkip(bytesToSkip);
+            if (wireOut.usePadding()) {
+                int bytesToSkip = (int) ((position - position1) & 0x3);
+                wireOut.addPadding(bytesToSkip);
                 position1 = bytes.writePosition();
             }
 //            if (position1 < position)

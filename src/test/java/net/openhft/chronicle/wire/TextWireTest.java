@@ -1506,11 +1506,11 @@ public class TextWireTest extends WireTestCommon {
 
         assertEquals("--- !!data\n" +
                         "nothing: !byte[] !!binary \n" +
-                        "\0\n" +
+                        " \n" +
                         "# position: 32, header: 1\n" +
                         "--- !!data\n" +
                         "one: !byte[] !!binary AQ==\n" +
-                        "\0\n" +
+                        " \n" +
                         "# position: 64, header: 2\n" +
                         "--- !!data\n" +
                         "four: !byte[] !!binary AQIDBA==\n"

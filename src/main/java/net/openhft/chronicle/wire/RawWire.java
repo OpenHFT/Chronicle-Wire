@@ -278,7 +278,9 @@ public class RawWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public WireOut addPadding(int paddingToAdd) {
-        throw new UnsupportedOperationException();
+        for (int i = 0; i < paddingToAdd; i++)
+            bytes.writeByte((byte) 0);
+        return this;
     }
 
     @NotNull
