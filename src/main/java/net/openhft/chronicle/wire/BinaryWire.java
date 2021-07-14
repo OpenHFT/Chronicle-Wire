@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.bytes.util.Bit8StringInterner;
 import net.openhft.chronicle.bytes.util.Compression;
@@ -695,7 +696,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     private StringBuilder readSmallField(int peekCode, @NotNull StringBuilder sb) {
         bytes.uncheckedReadSkipOne();
-        if (bytes.isDirectMemory()) {
+        if (bytes.isDirectMemory() && bytes.bytesStore() instanceof NativeBytesStore) {
             AppendableUtil.parse8bit_SB1(bytes, sb, peekCode & 0x1f);
         } else {
             try {
