@@ -16,7 +16,7 @@ public class ThrowableTest extends WireTestCommon {
             message.initCause(new Throwable("cause"));
             wire.getValueOut()
                     .object(message);
-       // System.out.println(wire);
+            System.out.println(wire);
 
             Throwable t = (Throwable) wire.getValueIn().object();
             assertEquals("message", t.getMessage());
