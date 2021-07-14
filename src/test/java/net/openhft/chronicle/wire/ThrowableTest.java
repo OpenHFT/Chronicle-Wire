@@ -16,7 +16,10 @@ public class ThrowableTest extends WireTestCommon {
             message.initCause(new Throwable("cause"));
             wire.getValueOut()
                     .object(message);
-            System.out.println(wire);
+            if (wireType == WireType.TEXT)
+                System.out.println(wire);
+            else
+                System.out.println(wire.bytes().toHexString());
 
             Throwable t = (Throwable) wire.getValueIn().object();
             assertEquals("message", t.getMessage());
