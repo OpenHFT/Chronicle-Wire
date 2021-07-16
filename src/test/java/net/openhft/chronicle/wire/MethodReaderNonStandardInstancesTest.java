@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class MethodReaderNonStandardInstancesTest {
+public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
     @Test
     public void testAnonymousClassCanBePassedToMethodReader() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));

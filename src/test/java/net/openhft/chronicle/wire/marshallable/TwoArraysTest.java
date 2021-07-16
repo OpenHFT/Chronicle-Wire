@@ -4,11 +4,12 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class TwoArraysTest {
+public class TwoArraysTest extends WireTestCommon {
     @Test
     public void testTwoArrays() {
         Bytes bytes = new HexDumpBytes();

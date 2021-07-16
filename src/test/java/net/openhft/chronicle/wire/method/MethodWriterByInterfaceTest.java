@@ -14,7 +14,7 @@ import java.lang.reflect.Proxy;
 
 import static org.junit.Assert.*;
 
-public class MethodWriterByInterfaceTest {
+public class MethodWriterByInterfaceTest extends WireTestCommon {
     @Before
     public void setup() {
         ObjectUtils.defaultObjectForInterface(c -> Class.forName(c.getName() + "mpl"));

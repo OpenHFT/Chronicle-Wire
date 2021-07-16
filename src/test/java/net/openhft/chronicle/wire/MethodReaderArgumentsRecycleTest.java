@@ -27,7 +27,7 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 
-public class MethodReaderArgumentsRecycleTest {
+public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     private MyInterface writer;
     private MethodReader reader;
     private volatile Object lastArgumentRef;

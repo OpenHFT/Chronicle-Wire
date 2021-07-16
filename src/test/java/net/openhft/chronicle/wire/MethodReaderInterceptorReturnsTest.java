@@ -33,7 +33,7 @@ import java.util.function.Supplier;
 
 import static org.junit.Assert.*;
 
-public class MethodReaderInterceptorReturnsTest {
+public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
     /**
      * Checks that regular {@link MethodReaderInterceptorReturns} is supported in generated method reader.
      */
@@ -46,28 +46,26 @@ public class MethodReaderInterceptorReturnsTest {
      * Covers simultaneous creation of several equal intercepting method readers.
      */
     @Test
-    public void testInterceptingReaderConcurrentCreation() {
+    public void testInterceptingReaderConcurrentCreation() throws ExecutionException, InterruptedException, TimeoutException {
         int concurrencyLevel = 5;
 
         ExecutorService executor = Executors.newFixedThreadPool(concurrencyLevel);
 
-        final CountDownLatch readerCreateLatch = new CountDownLatch(concurrencyLevel);
+        try {
+            final CountDownLatch readerCreateLatch = new CountDownLatch(concurrencyLevel);
 
-        List<Future<?>> futureList = new ArrayList<>();
+            List<Future<?>> futureList = new ArrayList<>();
 
-        for (int i = 0; i < concurrencyLevel; i++) {
-            futureList.add(executor.submit(() -> doTestInterceptorSupportedInGeneratedCode(
-                    readerCreateLatch, true)));
-        }
-
-        for (int i = 0; i < concurrencyLevel; i++) {
-            try {
-                futureList.get(i).get(10, TimeUnit.SECONDS);
-            } catch (Exception e) {
-                executor.shutdownNow();
-
-                fail("Failed to wait for async scenario run: " + e.getMessage());
+            for (int i = 0; i < concurrencyLevel; i++) {
+                futureList.add(executor.submit(() -> doTestInterceptorSupportedInGeneratedCode(
+                        readerCreateLatch, true)));
             }
+
+            for (Future<?> future : futureList) {
+                future.get(10, TimeUnit.SECONDS);
+            }
+        } finally {
+            executor.shutdownNow();
         }
     }
 

@@ -25,6 +25,7 @@ import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
@@ -630,7 +631,7 @@ public interface ValueOut {
         }
         if (value instanceof WriteMarshallable) {
             if (isAnEnum(value)) {
-                Jvm.warn().on(getClass(), "Treating " + value.getClass() + " as enum not WriteMarshallable");
+                Jvm.debug().on(getClass(), "Treating " + value.getClass() + " as enum not WriteMarshallable");
                 return typedScalar(value);
             }
             if (value.getClass().getName().contains("$$Lambda"))
@@ -816,8 +817,10 @@ public interface ValueOut {
     default WireOut typedScalar(@NotNull Object value) {
         typePrefix(Wires.typeNameFor(value));
 
-        if (isAnEnum(value))
+        if (value instanceof Enum)
             value = ((Enum) value).name();
+        if (value instanceof CoreDynamicEnum)
+            value = ((CoreDynamicEnum) value).name();
         else if (!(value instanceof CharSequence))
             value = value.toString();
 

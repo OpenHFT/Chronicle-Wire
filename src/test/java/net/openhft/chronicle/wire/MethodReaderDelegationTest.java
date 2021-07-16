@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static net.openhft.chronicle.wire.VanillaMethodReaderBuilder.DISABLE_READER_PROXY_CODEGEN;
 import static org.junit.Assert.*;
 
-public class MethodReaderDelegationTest {
+public class MethodReaderDelegationTest extends WireTestCommon {
     @Test
     public void testUnsuccessfulCallIsDelegatedBinaryWire() {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());

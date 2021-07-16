@@ -4,6 +4,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.wire.TextWire;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 
 import java.io.StringWriter;
@@ -18,7 +19,7 @@ interface WithDefault {
     }
 }
 
-public class DefaultMethodHandlingTest {
+public class DefaultMethodHandlingTest extends WireTestCommon {
     @Test
     public void withDefault() {
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());

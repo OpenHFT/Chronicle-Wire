@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.EnumCache;
+import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import org.jetbrains.annotations.NotNull;
@@ -166,6 +167,14 @@ public enum SerializationStrategies implements SerializationStrategy {
             } catch (Exception e) {
                 throw new IORuntimeException(e);
             }
+        }
+
+        @Override
+        public Object readResolve(Object t) {
+            CoreDynamicEnum e = (CoreDynamicEnum) t;
+            Object e2 = EnumCache.of(t.getClass()).valueOf(e.name());
+            Wires.copyTo(e, e2);
+            return e2;
         }
     },
     ANY_NESTED {

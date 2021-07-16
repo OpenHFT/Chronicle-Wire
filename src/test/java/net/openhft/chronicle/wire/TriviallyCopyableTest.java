@@ -12,7 +12,7 @@ import java.util.function.BiConsumer;
 
 import static org.junit.Assert.assertEquals;
 
-public class TriviallyCopyableTest {
+public class TriviallyCopyableTest extends WireTestCommon {
 
     static void doTest(BiConsumer<Bytes, AA> read, BiConsumer<Bytes, AA> write) {
         Bytes bytes = Bytes.allocateDirect(40);

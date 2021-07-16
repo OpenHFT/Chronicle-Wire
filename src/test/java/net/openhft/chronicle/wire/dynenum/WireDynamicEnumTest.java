@@ -5,10 +5,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumCache;
-import net.openhft.chronicle.wire.AsMarshallable;
-import net.openhft.chronicle.wire.DynamicEnum;
-import net.openhft.chronicle.wire.SelfDescribingMarshallable;
-import net.openhft.chronicle.wire.TextWire;
+import net.openhft.chronicle.wire.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,7 +14,7 @@ import java.io.StringWriter;
 import static net.openhft.chronicle.wire.DynamicEnum.updateEnum;
 import static org.junit.Assert.*;
 
-public class WireDynamicEnumTest {
+public class WireDynamicEnumTest extends WireTestCommon {
     @Before
     public void addClassAlias() {
         ClassAliasPool.CLASS_ALIASES.addAlias(HoldsWDENum.class);

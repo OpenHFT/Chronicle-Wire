@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class Base256IntConverterTest {
+public class Base256IntConverterTest extends WireTestCommon {
 
     @Test
     public void parse() {

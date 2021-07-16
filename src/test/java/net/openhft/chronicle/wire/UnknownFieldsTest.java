@@ -25,7 +25,7 @@ import org.junit.Test;
  * Checks that exception raised by {@link ReadMarshallable#unexpectedField(Object, ValueIn)}
  * is thrown back to the user call.
  */
-public class UnknownFieldsTest {
+public class UnknownFieldsTest extends WireTestCommon {
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(Variation1.class);
         ClassAliasPool.CLASS_ALIASES.addAlias(Variation2.class);

@@ -2,10 +2,7 @@ package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
-import net.openhft.chronicle.wire.Marshallable;
-import net.openhft.chronicle.wire.SelfDescribingMarshallable;
-import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.Wires;
+import net.openhft.chronicle.wire.*;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,7 +14,7 @@ import java.util.Map;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-public class NullFieldMarshallingTest {
+public class NullFieldMarshallingTest extends WireTestCommon {
     protected Map<ExceptionKey, Integer> exceptions;
 
     @Before

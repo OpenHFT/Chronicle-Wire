@@ -24,7 +24,7 @@ import java.lang.reflect.Proxy;
 
 import static org.junit.Assert.assertFalse;
 
-public class MethodWriterNestedReturnTypeTest {
+public class MethodWriterNestedReturnTypeTest extends WireTestCommon {
     @Test
     public void testNestedReturnTypeIsSupportedInGeneratedWriter() {
         BinaryWire binaryWire = new BinaryWire(Bytes.allocateElasticOnHeap(128));

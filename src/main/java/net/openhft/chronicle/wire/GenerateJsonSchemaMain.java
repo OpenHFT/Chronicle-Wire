@@ -95,7 +95,7 @@ public class GenerateJsonSchemaMain {
                     generateMethodDesc(desc, pTypes[0], pAnnotations[0]);
                     break;
                 default:
-                    Jvm.warn().on(getClass(), method.toString());
+                    Jvm.debug().on(getClass(), "Method ignored as more than 1 argument " + method);
                     break;
             }
 

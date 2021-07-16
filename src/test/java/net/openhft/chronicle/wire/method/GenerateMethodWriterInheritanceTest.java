@@ -13,7 +13,7 @@ import static net.openhft.chronicle.wire.WireType.BINARY;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class GenerateMethodWriterInheritanceTest {
+public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
 
     @Test
     public void testSameClassInHierarchy() {

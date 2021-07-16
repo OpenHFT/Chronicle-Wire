@@ -14,7 +14,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
-public class EmbeddedBytesMarshallableTest {
+public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     @Before
     public void checkArch() {
         assumeFalse(Jvm.isArm());

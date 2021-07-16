@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire.bytesmarshallable;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -14,7 +15,7 @@ import java.util.Arrays;
 
 import static org.junit.Assert.fail;
 
-public class PerfRegressionTest {
+public class PerfRegressionTest extends WireTestCommon {
 
     final String cpuClass = Jvm.getCpuClass();
 

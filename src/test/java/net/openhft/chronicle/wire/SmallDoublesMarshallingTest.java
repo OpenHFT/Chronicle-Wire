@@ -7,7 +7,7 @@ import org.junit.Test;
 import static org.hamcrest.core.StringContains.containsString;
 
 // see https://github.com/OpenHFT/Chronicle-Wire/issues/240
-public class SmallDoublesMarshallingTest {
+public class SmallDoublesMarshallingTest extends WireTestCommon {
     public static class Example extends SelfDescribingMarshallable {
         private double doubleVal;
 

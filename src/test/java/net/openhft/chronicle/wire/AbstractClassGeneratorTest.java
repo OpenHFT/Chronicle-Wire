@@ -53,7 +53,7 @@ class SimpleMetaData extends AbstractClassGenerator.MetaData<SimpleMetaData> {
     public String message;
 }
 
-public class AbstractClassGeneratorTest {
+public class AbstractClassGeneratorTest extends WireTestCommon {
     @Test
     public void simpleGenerator() throws Exception {
         doTest("Hello World");

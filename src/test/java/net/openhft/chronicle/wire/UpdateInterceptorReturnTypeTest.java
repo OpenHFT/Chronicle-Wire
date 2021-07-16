@@ -1,11 +1,11 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Test;
 
-import static net.openhft.chronicle.bytes.Bytes.elasticByteBuffer;
 import static net.openhft.chronicle.wire.WireType.BINARY;
 
-public class UpdateInterceptorReturnTypeTest {
+public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
 
     @Test
     public void testUpdateInterceptorNoReturnType() {
@@ -18,7 +18,7 @@ public class UpdateInterceptorReturnTypeTest {
     }
 
     static Wire createWire() {
-        final Wire wire = BINARY.apply(elasticByteBuffer());
+        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
         return wire;
     }

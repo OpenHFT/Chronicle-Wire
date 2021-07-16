@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class MethodReaderSuperInterfaceForSeveralReturnTypesTest {
+public class MethodReaderSuperInterfaceForSeveralReturnTypesTest extends WireTestCommon {
     @Test
     public void test() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));

@@ -6,7 +6,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class WriteDocumentContextTest {
+public class WriteDocumentContextTest extends WireTestCommon {
     static void writeThreeKeys(Wire wire) {
         try (DocumentContext dc0 = wire.acquireWritingDocument(false)) {
             for (int i = 0; i < 3; i++) {

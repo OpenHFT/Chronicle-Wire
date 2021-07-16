@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,7 +10,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class Issue277Test {
+public class Issue277Test extends WireTestCommon {
 
     @Before
     public void setup() {

@@ -1,9 +1,10 @@
 package net.openhft.chronicle.wire.utils;
 
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class JavaSourceCodeFormatterTest {
+public class JavaSourceCodeFormatterTest extends WireTestCommon {
 
     @Test
     public void testAppend() {

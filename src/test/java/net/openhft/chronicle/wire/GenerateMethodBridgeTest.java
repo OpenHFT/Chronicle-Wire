@@ -25,7 +25,7 @@ interface GMBB {
 interface GMBZ extends GMBA, GMBB {
 }
 
-public class GenerateMethodBridgeTest {
+public class GenerateMethodBridgeTest extends WireTestCommon {
 
     @Test
     public void createBridge() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {

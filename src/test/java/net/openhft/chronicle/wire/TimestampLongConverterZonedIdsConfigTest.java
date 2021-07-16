@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class TimestampLongConverterZonedIdsConfigTest {
+public class TimestampLongConverterZonedIdsConfigTest extends WireTestCommon {
 
     @After
     public void tearDown() {

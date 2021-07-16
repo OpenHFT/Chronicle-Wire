@@ -10,7 +10,7 @@ interface MyInterface<I extends MyInterface> {
     void terminator();
 }
 
-public class GenericMethodsTest {
+public class GenericMethodsTest extends WireTestCommon {
     @Test
     public void chainedText() {
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap(128))

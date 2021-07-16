@@ -26,6 +26,9 @@ import org.junit.runners.Parameterized;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.assertEquals;
@@ -34,23 +37,30 @@ import static org.junit.Assert.assertEquals;
 public class EscapeCharsTest extends WireTestCommon {
     @NotNull
     final Character ch;
+    final Future future;
 
-    public EscapeCharsTest(@NotNull Character ch) {
+    public EscapeCharsTest(@NotNull Character ch, Future future) {
         this.ch = ch;
+        this.future = future;
     }
 
     @NotNull
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "char = {0}")
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
         for (char i = 36; i < 260; i++) {
-            list.add(new Object[]{i});
+            char finalI = i;
+            list.add(new Object[]{i, ForkJoinPool.commonPool().submit(() -> testEscaped(finalI))});
         }
         return list;
     }
 
     @Test
-    public void testEscaped() {
+    public void testEscaped() throws ExecutionException, InterruptedException {
+        future.get();
+    }
+
+    static void testEscaped(char ch) {
         @NotNull Wire wire = createWire();
         wire.write("" + ch).text("" + ch);
         wire.write("" + ch + ch).text("" + ch + ch);
@@ -67,7 +77,7 @@ public class EscapeCharsTest extends WireTestCommon {
     }
 
     @NotNull
-    private TextWire createWire() {
+    static TextWire createWire() {
         return new TextWire(nativeBytes());
     }
 }

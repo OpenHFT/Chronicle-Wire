@@ -5,6 +5,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.UpdateInterceptor;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -15,10 +16,10 @@ import java.util.function.Consumer;
 
 import static org.junit.Assert.*;
 
-public class MethodWriter2Test {
+public class MethodWriter2Test extends WireTestCommon {
 
     static {
-       // System.setProperty("dumpCode", "true");
+        // System.setProperty("dumpCode", "true");
     }
 
     @Test
@@ -33,6 +34,7 @@ public class MethodWriter2Test {
 
     @Test
     public void allowThroughNoArg() {
+        expectException("Generated code to call updateInterceptor for public abstract void net.openhft.chronicle.wire.method.FundingListener.fundingPrimitive(int) will box and generate garbage");
         check(true, ARGUMENT.NONE);
     }
 
