@@ -10,11 +10,10 @@ public interface Event<E extends Event<E>> extends Marshallable {
 
     /**
      * Returns a unique identifier attached to this event.
-     * @deprecated suggest to make #eventTime unique - Chronicle Services uses MappedUniqueTimeProvider
+     * @deprecated to be removed in x.23. Suggest to make #eventTime unique - Chronicle Services uses MappedUniqueTimeProvider
      *
      * @return a unique identifier attached to this event.
      */
-    @Deprecated(/* to be removed in x.23 */)
     @NotNull
     default CharSequence eventId() {
         return "";
@@ -26,7 +25,6 @@ public interface Event<E extends Event<E>> extends Marshallable {
      * @param eventId unique identifier to assign to this event.
      * @return this
      */
-    @Deprecated(/* to be removed in x.23 */)
     default E eventId(@NotNull final CharSequence eventId) {
         return (E) this;
     }
