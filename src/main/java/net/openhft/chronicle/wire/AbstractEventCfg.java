@@ -16,13 +16,11 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
 
     @NotNull
     @Override
-    @Deprecated(/* to be removed in x.23 */)
     public String eventId() {
         return eventId;
     }
 
     @Override
-    @Deprecated(/* to be removed in x.23 */)
     public E eventId(@NotNull CharSequence eventId) {
         this.eventId = eventId.toString();
         return (E) this;
