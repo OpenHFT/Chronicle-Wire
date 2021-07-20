@@ -190,11 +190,13 @@ public class VanillaMethodReader implements MethodReader {
             if (v.wireIn() instanceof BinaryWire) {
                 Bytes bytes = Bytes.elasticByteBuffer((int) (v.wireIn().bytes().readRemaining() * 3 / 2 + 64));
                 long pos = v.wireIn().bytes().readPosition();
-                v.wireIn().copyTo(new TextWire(bytes));
-                v.wireIn().bytes().readPosition(pos);
-                rest = bytes.toString();
-                bytes.releaseLast();
-
+                try {
+                    v.wireIn().copyTo(new TextWire(bytes));
+                    rest = bytes.toString();
+                } finally {
+                    v.wireIn().bytes().readPosition(pos);
+                    bytes.releaseLast();
+                }
             } else {
                 rest = v.toString();
             }
