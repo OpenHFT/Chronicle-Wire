@@ -73,12 +73,13 @@ public interface Event<E extends Event<E>> extends Marshallable {
      * @param eventName name of the event
      */
     // TODO: x.23 remove eventName parameter
-    default void updateEvent(final String eventName) {
+    default E updateEvent(final String eventName) {
         if (this.eventId().length() == 0)
             this.eventId(eventName);
 
         if (this.eventTime() <= 0)
             this.eventTimeNow();
+        return (E) this;
     }
 
     /**
