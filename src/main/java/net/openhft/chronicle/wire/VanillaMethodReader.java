@@ -49,7 +49,7 @@ public class VanillaMethodReader implements MethodReader {
     @Deprecated(/* to be removed in x.22 */)
     private static final boolean DONT_THROW_ON_OVERLOAD = Jvm.getBoolean("chronicle.mr_overload_dont_throw");
     private static final String[] metaIgnoreList = {"header", "index", "index2index", "roll"};
-    public static final boolean DEBUG_ENABLED = Jvm.isDebugEnabled(VanillaMethodReader.class);
+    public static final boolean DEBUG_ENABLED = Jvm.isDebugEnabled(VanillaMethodReader.class) && !Jvm.getBoolean("wire.disable.debug");
     private final MarshallableIn in;
     @NotNull
     private final WireParser wireParser;
