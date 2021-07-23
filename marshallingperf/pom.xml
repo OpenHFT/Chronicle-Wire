@@ -143,6 +143,30 @@
                                     </mainClass>
                                 </configuration>
                             </execution>
+                            <execution>
+                                <id>MessageHistoryBytesMarshallableMain</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>
+                                        run.chronicle.wire.perf.MessageHistoryBytesMarshallableMain
+                                    </mainClass>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>MessageHistoryWireMarshallableMain</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>
+                                        run.chronicle.wire.perf.MessageHistoryWireMarshallableMain
+                                    </mainClass>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
                 </plugins>
