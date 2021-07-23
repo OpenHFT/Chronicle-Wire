@@ -57,6 +57,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             THREAD_LOCAL.set(md);
     }
 
+    @Deprecated
     public static int marshallableSize(@NotNull BytesIn bytes) {
 
         long start = bytes.readPosition();
@@ -191,12 +192,24 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     @Override
     public void readMarshallable(@NotNull BytesIn bytes) throws IORuntimeException {
+        readMarshallable0(bytes);
+        assert !addSourceDetails : "Bytes marshalling does not yet support addSourceDetails";
+    }
+
+    public void readMarshallable(@NotNull BytesIn bytes, @NotNull SourceContext dc) throws IORuntimeException {
+        readMarshallable0(bytes);
+        if (addSourceDetails) {
+            addSource(dc.sourceId(), dc.index());
+            addTiming(nanoTime());
+        }
+    }
+
+    private void readMarshallable0(@NotNull BytesIn bytes) {
         sources = bytes.readUnsignedByte();
         for (int i = 0; i < sources; i++)
             sourceIdArray[i] = bytes.readInt();
         for (int i = 0; i < sources; i++)
             sourceIndexArray[i] = bytes.readLong();
-        // TODO: should check addSourceDetails and add incoming time
         timings = bytes.readUnsignedByte();
         for (int i = 0; i < timings; i++)
             timingsArray[i] = bytes.readLong();
@@ -220,7 +233,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             bytes.writeLong(timingsArray[i]);
         }
         bytes.writeLong(nanoTime()); // add time for this output
-        assert checkMarshallableSize(start, (Bytes) bytes);
         dirty = false;
     }
 
@@ -261,16 +273,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     private boolean start(final long start) {
         this.start = start;
         return true;
-    }
-
-    private boolean checkMarshallableSize(final long start, final BytesIn bytes) {
-        long rp = bytes.readPosition();
-        try {
-            bytes.readPosition(start);
-            return bytes.readLimit() - start == marshallableSize(bytes);
-        } finally {
-            bytes.readPosition(rp);
-        }
     }
 
     public void addSource(int id, long index) {

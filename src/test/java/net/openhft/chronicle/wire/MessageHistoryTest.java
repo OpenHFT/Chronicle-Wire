@@ -1,7 +1,11 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.Test;
+
+import java.nio.ByteBuffer;
 
 import static org.junit.Assert.*;
 
@@ -44,6 +48,41 @@ public class MessageHistoryTest extends WireTestCommon {
         } catch (IllegalStateException e) {
             // all good
         }
+    }
+
+    @Test
+    public void checkSerialiseBytes() {
+        VanillaMessageHistory history = new SetTimeMessageHistory();
+        history.addSource(1, 0xff);
+        history.addSource(2, 0xfff);
+        history.addTiming(10_000);
+        history.addTiming(20_000);
+        Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer();
+        history.writeMarshallable(bytes);
+        VanillaMessageHistory history2 = new SetTimeMessageHistory();
+        history2.readMarshallable(bytes);
+        assertEquals("VanillaMessageHistory{" +
+                "sources: [1=0xff,2=0xfff] " +
+                "timings: [10000,20000,120962203520100] " +
+                "addSourceDetails=false}", history2.toString());
+
+        bytes.readPosition(0);
+        history2.addSourceDetails(true);
+        SourceContext sc = new SourceContext() {
+            @Override
+            public int sourceId() {
+                return 3;
+            }
+            @Override
+            public long index() throws IORuntimeException {
+                return 0xffff;
+            }
+        };
+        history2.readMarshallable(bytes, sc);
+        assertEquals("VanillaMessageHistory{" +
+                "sources: [1=0xff,2=0xfff,3=0xffff] " +
+                "timings: [10000,20000,120962203520100,120962203520100] " +
+                "addSourceDetails=true}", history2.toString());
     }
 
     @Test
