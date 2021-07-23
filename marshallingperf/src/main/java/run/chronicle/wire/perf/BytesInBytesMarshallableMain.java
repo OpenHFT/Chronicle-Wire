@@ -5,6 +5,7 @@ import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
+import net.openhft.chronicle.jlbh.TeamCityHelper;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 
 /*
@@ -46,8 +47,13 @@ public class BytesInBytesMarshallableMain {
                 Thread.yield();
         }
 
-        System.out.println("read: " + readHist.toLongMicrosFormat());
-        System.out.println("write: " + writeHist.toLongMicrosFormat());
+        histoOut("read", BytesInBytesMarshallableMain.class, readHist);
+        histoOut("write", BytesInBytesMarshallableMain.class, writeHist);
+    }
+
+    static void histoOut(String msg, Class<?> clazz, Histogram histo) {
+        System.out.println(msg + ": " + histo.toLongMicrosFormat());
+        TeamCityHelper.histo(clazz.getSimpleName() + "." + msg, histo, System.out);
     }
 
     static class WithBytes extends BytesInBinaryMarshallable {

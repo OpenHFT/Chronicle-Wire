@@ -7,6 +7,8 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 
+import static run.chronicle.wire.perf.BytesInBytesMarshallableMain.histoOut;
+
 public class PrimitivesInBytesMarshallableMain {
 
     public static void main(String... args) {
@@ -37,8 +39,8 @@ public class PrimitivesInBytesMarshallableMain {
                 Thread.yield();
         }
 
-        System.out.println("read: " + readHist.toLongMicrosFormat());
-        System.out.println("write: " + writeHist.toLongMicrosFormat());
+        histoOut("read", PrimitivesInBytesMarshallableMain.class, readHist);
+        histoOut("write", PrimitivesInBytesMarshallableMain.class, writeHist);
     }
 
     static class WithPrimitives extends BytesInBinaryMarshallable {

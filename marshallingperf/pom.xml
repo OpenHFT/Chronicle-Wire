@@ -62,6 +62,10 @@
             <groupId>net.openhft</groupId>
             <artifactId>chronicle-wire</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>jlbh</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -82,4 +86,68 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>run-benchmarks</id>
+            <properties/>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <configuration>
+                            <systemProperties>
+                                <systemProperty>
+                                    <key>jvm.resource.tracing</key>
+                                    <value>false</value>
+                                </systemProperty>
+                            </systemProperties>
+                            <classpathScope>test</classpathScope>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>BytesInBytesMarshallableMain</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>
+                                        run.chronicle.wire.perf.BytesInBytesMarshallableMain
+                                    </mainClass>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>PrimitivesInBytesMarshallableMain</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>
+                                        run.chronicle.wire.perf.PrimitivesInBytesMarshallableMain
+                                    </mainClass>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>StringsInBytesMarshallableMain</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>
+                                        run.chronicle.wire.perf.StringsInBytesMarshallableMain
+                                    </mainClass>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

@@ -7,6 +7,8 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 
+import static run.chronicle.wire.perf.BytesInBytesMarshallableMain.histoOut;
+
 /*
 .2.21ea74
 read: 50/90 97/99 99.7/99.9 99.97/99.99 99.997/99.999 99.9997/99.9999 - worst was 0.542 / 0.566  0.586 / 0.610  0.690 / 1.092  16.1 / 19.9  29.4 / 29.9  32.9 / 33.9 - 178
@@ -47,8 +49,8 @@ public class StringsInBytesMarshallableMain {
                 Thread.yield();
         }
 
-        System.out.println("read: " + readHist.toLongMicrosFormat());
-        System.out.println("write: " + writeHist.toLongMicrosFormat());
+        histoOut("read", StringsInBytesMarshallableMain.class, readHist);
+        histoOut("write", StringsInBytesMarshallableMain.class, writeHist);
     }
 
     static class WithStrings extends BytesInBinaryMarshallable {
