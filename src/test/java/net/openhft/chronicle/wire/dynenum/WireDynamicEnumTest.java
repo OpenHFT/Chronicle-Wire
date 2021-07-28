@@ -136,8 +136,8 @@ public class WireDynamicEnumTest extends WireTestCommon {
                 "]\n" +
                 "push2[!WDENum2 {\n" +
                 "  name: ACE,\n" +
-                "  nice: !!null \"\",\n" +
-                "  value: 0\n" +
+                "  nice: Ace,\n" +
+                "  value: 101\n" +
                 "}\n" +
                 "]\n", sw.toString().replace("\r", ""));
     }

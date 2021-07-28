@@ -24,7 +24,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.EnumCache;
-import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import org.jetbrains.annotations.NotNull;
@@ -168,14 +167,6 @@ public enum SerializationStrategies implements SerializationStrategy {
                 throw new IORuntimeException(e);
             }
         }
-
-        @Override
-        public Object readResolve(Object t) {
-            CoreDynamicEnum e = (CoreDynamicEnum) t;
-            Object e2 = EnumCache.of(t.getClass()).valueOf(e.name());
-            Wires.copyTo(e, e2);
-            return e2;
-        }
     },
     ANY_NESTED {
         @NotNull
@@ -259,7 +250,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     MAP {
         @Override
         public Object readUsing(Object o, @NotNull ValueIn in, BracketType bracketType) {
-            @NotNull Map<Object, Object> map = (Map<Object, Object>) o;
+            @NotNull Map<Object, Object> map = (o == null ? new LinkedHashMap<>() : (Map<Object, Object>) o);
             @NotNull final WireIn wireIn = in.wireIn();
             long pos = wireIn.bytes().readPosition();
             while (in.hasNext()) {
@@ -273,7 +264,7 @@ public enum SerializationStrategies implements SerializationStrategy {
                         throw new IllegalStateException(wireIn.bytes().toDebugString());
                 pos = pos2;
             }
-            return o;
+            return map;
         }
 
         @NotNull
@@ -295,7 +286,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     SET {
         @Override
         public Object readUsing(Object o, @NotNull ValueIn in, BracketType bracketType) {
-            @NotNull Set<Object> set = (Set<Object>) o;
+            @NotNull Set<Object> set = (o == null ? new LinkedHashSet<>() : (Set<Object>) o);
             @NotNull final WireIn wireIn = in.wireIn();
             @NotNull final Bytes<?> bytes = wireIn.bytes();
             long pos = bytes.readPosition();
@@ -309,7 +300,7 @@ public enum SerializationStrategies implements SerializationStrategy {
                 pos = pos2;
                 set.add(object);
             }
-            return o;
+            return set;
         }
 
         @NotNull
@@ -333,7 +324,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     LIST {
         @Override
         public Object readUsing(Object o, @NotNull ValueIn in, BracketType bracketType) {
-            @NotNull List<Object> list = (List<Object>) o;
+            @NotNull List<Object> list = (o == null ? new ArrayList<>() : (List<Object>) o);
             @NotNull final WireIn wireIn = in.wireIn();
             long pos = wireIn.bytes().readPosition();
             while (in.hasNextSequenceItem()) {
@@ -346,7 +337,7 @@ public enum SerializationStrategies implements SerializationStrategy {
                         throw new IllegalStateException(wireIn.bytes().toDebugString());
                 pos = pos2;
             }
-            return o;
+            return list;
         }
 
         @NotNull

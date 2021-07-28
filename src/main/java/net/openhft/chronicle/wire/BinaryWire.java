@@ -3694,7 +3694,12 @@ public class BinaryWire extends AbstractWire implements Wire {
                                     Object using1 = using;
                                     if (using1 == null && type != null)
                                         using1 = strategy.newInstanceOrNull(type);
-                                    return strategy.readUsing(using1, this, BracketType.MAP);
+                                    if (isEvent(code))
+                                        return (strategy == SerializationStrategies.ANY_OBJECT ? SerializationStrategies.MAP : strategy)
+                                                .readUsing(using1, this, BracketType.MAP);
+                                    else
+                                        return (strategy == SerializationStrategies.ANY_OBJECT ? SerializationStrategies.LIST : strategy)
+                                                .readUsing(using1, this, BracketType.SEQ);
 
                                 } finally {
                                     bytes.readLimit(lim);
@@ -3781,6 +3786,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             }
             // assume it a String
             return text();
+        }
+
+        private boolean isEvent(int code) {
+            return code == EVENT_NAME || (FIELD_NAME0 <= code && code <= FIELD_NAME31);
         }
 
         void consumeNext() {

@@ -49,8 +49,4 @@ public interface SerializationStrategy<T> {
      */
     @NotNull
     BracketType bracketType();
-
-    default T readResolve(T t) {
-        return t;
-    }
 }

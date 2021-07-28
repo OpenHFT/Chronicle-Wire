@@ -25,8 +25,10 @@ import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.pool.EnumCache;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
+import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import org.jetbrains.annotations.NotNull;
@@ -482,11 +484,23 @@ public enum Wires {
 
         if (using == null && !nullObject)
             throw new IllegalStateException("failed to create instance of clazz=" + clazz + " is it aliased?");
-
+        long position = in.wireIn().bytes().readPosition();
         Object marshallable = in.marshallable(using, strategy);
         E e = readResolve(marshallable);
-        strategy.readResolve(e);
+        String name = nameOf(e);
+        if (name != null) {
+            E e2 = (E) EnumCache.of(e.getClass()).valueOf(name);
+            if (e != e2) {
+                in.wireIn().bytes().readPosition(position);
+                return (E) in.marshallable(e2, strategy);
+            }
+        }
         return e;
+    }
+
+    private static <E> String nameOf(E e) {
+        return e instanceof CoreDynamicEnum ? ((CoreDynamicEnum) e).name()
+                : e instanceof Enum ? ((Enum) e).name() : null;
     }
 
     @NotNull

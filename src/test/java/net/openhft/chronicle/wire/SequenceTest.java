@@ -3,16 +3,15 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(value = Parameterized.class)
 public class SequenceTest extends WireTestCommon {
@@ -24,12 +23,13 @@ public class SequenceTest extends WireTestCommon {
 
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
-
                 new Object[]{WireType.BINARY},
-                new Object[]{WireType.TEXT}
+                new Object[]{WireType.TEXT},
+//                new Object[]{WireType.YAML}, TODO FIX
+                new Object[]{WireType.JSON}
         );
     }
 
@@ -55,7 +55,7 @@ public class SequenceTest extends WireTestCommon {
             Wire w2 = wireType.apply(bytes);
             m2.readMarshallable(w2);
 
-            Assert.assertEquals("!net.openhft.chronicle.wire.SequenceTest$My {\n" +
+            assertEquals("!net.openhft.chronicle.wire.SequenceTest$My {\n" +
                     "  stuff: [\n" +
                     "    one,\n" +
                     "    two,\n" +
@@ -65,7 +65,7 @@ public class SequenceTest extends WireTestCommon {
 
             m2.readMarshallable(w2);
 
-            Assert.assertEquals("!net.openhft.chronicle.wire.SequenceTest$My {\n" +
+            assertEquals("!net.openhft.chronicle.wire.SequenceTest$My {\n" +
                     "  stuff: [\n" +
                     "    four,\n" +
                     "    five,\n" +
@@ -75,7 +75,7 @@ public class SequenceTest extends WireTestCommon {
 
             m2.readMarshallable(w2);
 
-            Assert.assertEquals("!net.openhft.chronicle.wire.SequenceTest$My {\n" +
+            assertEquals("!net.openhft.chronicle.wire.SequenceTest$My {\n" +
                     "  stuff: [\n" +
                     "    seven,\n" +
                     "    eight\n" +
@@ -83,6 +83,57 @@ public class SequenceTest extends WireTestCommon {
                     "}\n", m2.toString());
         }
         bytes.releaseLast();
+    }
+
+    @Test
+    public void readSetAsObject() {
+        Bytes bytes = Bytes.allocateElasticOnHeap();
+        Wire w1 = wireType.apply(bytes);
+        Set<String> value = new LinkedHashSet<>(Arrays.asList("a", "b", "c"));
+        try (DocumentContext dc = w1.writingDocument()) {
+            w1.write("list").object(value);
+        }
+        System.out.println(Wires.fromSizePrefixedBlobs(w1));
+        try (DocumentContext dc = w1.readingDocument()) {
+            Object o = w1.read("list").object();
+            if (wireType == WireType.JSON)
+                o = new LinkedHashSet<>((Collection) o);
+            assertEquals(value, o);
+        }
+    }
+
+    @Test
+    public void readListAsObject() {
+        Bytes bytes = Bytes.allocateElasticOnHeap();
+        Wire w1 = wireType.apply(bytes);
+        List<String> value = Arrays.asList("a", "b", "c");
+        try (DocumentContext dc = w1.writingDocument()) {
+            w1.write("list").object(value);
+        }
+        System.out.println(Wires.fromSizePrefixedBlobs(w1));
+        try (DocumentContext dc = w1.readingDocument()) {
+            Object o = w1.read("list").object();
+            assertEquals(value, o);
+        }
+    }
+
+    @Test
+    public void readMapAsObject() {
+        assumeFalse(wireType == WireType.RAW);
+        Bytes bytes = Bytes.allocateElasticOnHeap();
+        Wire w1 = wireType.apply(bytes);
+        Map<String, String> value = new LinkedHashMap<>();
+        value.put("a", "aya");
+        value.put("b", "bee");
+        try (DocumentContext dc = w1.writingDocument()) {
+            w1.write("map").object(value);
+        }
+
+        System.out.println(Wires.fromSizePrefixedBlobs(w1));
+        try (DocumentContext dc = w1.readingDocument()) {
+            Object o = w1.read("map").object();
+            assertEquals(value, o);
+        }
     }
 
     static class My extends SelfDescribingMarshallable {
