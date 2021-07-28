@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +33,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
 
@@ -39,35 +43,42 @@ import static org.junit.Assert.assertEquals;
 public class JSON222Test extends WireTestCommon {
 
     @NotNull
-    final File file;
+    final String file;
+    private final Future future;
 
-    public JSON222Test(@NotNull File file) {
+    public JSON222Test(@NotNull String file, Future future) {
         this.file = file;
+        this.future = future;
     }
 
     @NotNull
-    @Parameterized.Parameters
-    public static Collection<File[]> combinations() {
-        @NotNull List<File[]> list = new ArrayList<>();
-        for (@NotNull File file : OS.findFile("OpenHFT", "Chronicle-Wire", "src/test/resources/nst_files").listFiles()) {
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> combinations() {
+        @NotNull List<Object[]> list = new ArrayList<>();
+        for (@NotNull final File file : OS.findFile("OpenHFT", "Chronicle-Wire", "src/test/resources/nst_files").listFiles()) {
             if (file.getName().contains("_")) {
-                @NotNull File[] args = {file};
+                Future task = ForkJoinPool.commonPool().submit(() -> {
+                    try {
+                        testJSON(file);
+                    } catch (IOException ioe) {
+                        throw Jvm.rethrow(ioe);
+                    }
+                });
+                @NotNull Object[] args = {file.getName(), task};
                 list.add(args);
             }
         }
-        list.sort(Comparator.comparingInt(f -> Integer.parseInt(f[0].getName().split("[_.]")[1])));
+        list.sort(Comparator.comparingInt(f -> Integer.parseInt(((String) f[0]).split("[_.]")[1])));
         return list;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    @Test//(timeout = 500)
-    public void testJSON() throws IOException {
+    static void testJSON(File file) throws IOException {
         int len = Maths.toUInt31(file.length());
         @NotNull byte[] bytes = new byte[len];
         try (@NotNull InputStream in = new FileInputStream(file)) {
             in.read(bytes);
         }
-       // System.out.println(file + " " + new String(bytes, "UTF-8"));
+        // System.out.println(file + " " + new String(bytes, "UTF-8"));
         Bytes b = Bytes.wrapForRead(bytes);
         @NotNull Wire wire = new JSONWire(b);
         Bytes bytes2 = Bytes.elasticByteBuffer();
@@ -84,7 +95,7 @@ public class JSON222Test extends WireTestCommon {
                 @NotNull TextWire out3 = new TextWire(bytes3);
                 out3.getValueOut()
                         .object(object);
-               // System.out.println("As YAML " + bytes3);
+                // System.out.println("As YAML " + bytes3);
                 parseWithSnakeYaml(bytes3.toString());
                 @Nullable Object object3 = out3.getValueIn()
                         .object();
@@ -96,7 +107,7 @@ public class JSON222Test extends WireTestCommon {
             } while (wire.isNotEmptyAfterPadding());
 
             if (fail) {
-                @NotNull String path = this.file.getPath();
+                @NotNull String path = file.getPath();
                 @NotNull final File file2 = new File(path.replaceAll("\\b._", "e-").replaceAll("\\.json", ".yaml"));
 
 /*
@@ -118,8 +129,8 @@ public class JSON222Test extends WireTestCommon {
                 String actual = bytes2.toString();
                 assertEquals(expected, actual);
             }
-           // if (fail)
-               // throw new AssertionError("Expected to fail, was " + list);
+            // if (fail)
+            // throw new AssertionError("Expected to fail, was " + list);
         } catch (Exception e) {
             if (!fail)
                 throw new AssertionError(e);
@@ -129,12 +140,18 @@ public class JSON222Test extends WireTestCommon {
         }
     }
 
-    private void parseWithSnakeYaml(@NotNull String s) {
+    static void parseWithSnakeYaml(@NotNull String s) {
         try {
             @NotNull Yaml yaml = new Yaml();
             yaml.load(new StringReader(s));
         } catch (Exception e) {
             throw e;
         }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    @Test
+    public void testJSON() throws IOException, ExecutionException, InterruptedException {
+        future.get();
     }
 }
