@@ -37,7 +37,7 @@ import static org.junit.Assert.assertEquals;
 public class EscapeCharsTest extends WireTestCommon {
     @NotNull
     final Character ch;
-    final Future future;
+    private final Future future;
 
     public EscapeCharsTest(@NotNull Character ch, Future future) {
         this.ch = ch;
@@ -45,19 +45,14 @@ public class EscapeCharsTest extends WireTestCommon {
     }
 
     @NotNull
-    @Parameterized.Parameters(name = "char = {0}")
+    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
-        for (char i = 36; i < 260; i++) {
+        for (char i = 0; i < 300; i++) {
             char finalI = i;
             list.add(new Object[]{i, ForkJoinPool.commonPool().submit(() -> testEscaped(finalI))});
         }
         return list;
-    }
-
-    @Test
-    public void testEscaped() throws ExecutionException, InterruptedException {
-        future.get();
     }
 
     static void testEscaped(char ch) {
@@ -79,5 +74,10 @@ public class EscapeCharsTest extends WireTestCommon {
     @NotNull
     static TextWire createWire() {
         return new TextWire(nativeBytes());
+    }
+
+    @Test
+    public void testEscaped() throws ExecutionException, InterruptedException {
+        future.get();
     }
 }
