@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import org.junit.After;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -114,6 +115,54 @@ public class MessageHistoryTest extends WireTestCommon {
                 history.toString());
         assertEquals(2, history.sources());
         assertEquals(2, history.timings());
+    }
+
+    private static final int MESSAGE_HISTORY_METHOD_ID = -1;
+
+    @After
+    public void tearDown() {
+        VanillaMessageHistory.USE_BYTES_MARSHALLABLE = false;
+    }
+
+    @Test
+    public void testReadMarshallable() {
+        SetTimeMessageHistory vmh = new SetTimeMessageHistory();
+        vmh.addSource(1, 2);
+        vmh.addTiming(1111);
+        vmh.addTiming(2222);
+
+        HexDumpBytes bytes = new HexDumpBytes();
+        Wire wire = new BinaryWire(bytes);
+        VanillaMessageHistory.USE_BYTES_MARSHALLABLE = false;
+        wire.write("history").object(SetTimeMessageHistory.class, vmh);
+
+        vmh.nanoTime = 120962203520000L;
+        VanillaMessageHistory.USE_BYTES_MARSHALLABLE = true;
+        wire.writeEventId(MESSAGE_HISTORY_METHOD_ID).object(SetTimeMessageHistory.class, vmh);
+
+        assertEquals("" +
+                        "c7 68 69 73 74 6f 72 79                         # history\n" +
+                        "82 33 00 00 00                                  # SetTimeMessageHistory\n" +
+                        "c7 73 6f 75 72 63 65 73 82 0a 00 00 00          # sources\n" +
+                        "01 af 02 00 00 00 00 00 00 00                   # source id & index\n" +
+                        "c7 74 69 6d 69 6e 67 73 82 0f 00 00 00          # timings\n" +
+                        "a5 57 04                                        # timing in nanos\n" +
+                        "a5 ae 08                                        # timing in nanos\n" +
+                        "a7 64 0c 2c b5 03 6e 00 00 ba 80 00             # 120962203520100\n" +
+                        "82 27 00 00 00 86                               # SetTimeMessageHistory\n" +
+                        "01 01 00 00 00 02 00 00 00 00 00 00 00          # sources\n" +
+                        "03 57 04 00 00 00 00 00 00 ae 08 00 00 00 00 00 # timings\n" +
+                        "00 64 0c 2c b5 03 6e 00 00\n",
+                bytes.toHexString());
+        vmh.addTiming(120962203520100L);
+
+        VanillaMessageHistory vmh2 = new VanillaMessageHistory();
+        wire.read().object(vmh2, VanillaMessageHistory.class);
+        assertEquals(vmh.toString(), vmh2.toString());
+
+        VanillaMessageHistory vmh3 = new VanillaMessageHistory();
+        wire.read().object(vmh3, VanillaMessageHistory.class);
+        assertEquals(vmh.toString(), vmh3.toString());
     }
 
     static class SetTimeMessageHistory extends VanillaMessageHistory {

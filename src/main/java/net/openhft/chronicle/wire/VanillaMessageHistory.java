@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("rawtypes")
 public class VanillaMessageHistory extends SelfDescribingMarshallable implements MessageHistory {
+    static boolean USE_BYTES_MARSHALLABLE = Boolean.getBoolean("history.as.bytes");
     public static final int MESSAGE_HISTORY_LENGTH = 128;
     private static final ThreadLocal<MessageHistory> THREAD_LOCAL =
             ThreadLocal.withInitial(() -> {
@@ -168,6 +169,12 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
+        Bytes<?> bytes = wire.bytes();
+        if (bytes.peekUnsignedByte() == BinaryWireCode.BYTES_MARSHALLABLE) {
+            bytes.readSkip(1);
+            readMarshallable(bytes);
+            return;
+        }
         sources = 0;
         wire.read("sources").sequence(this, VanillaMessageHistory::acceptSourcesRead);
         timings = 0;
@@ -185,6 +192,11 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
+        if (USE_BYTES_MARSHALLABLE) {
+            wire.bytes().writeUnsignedByte(BinaryWireCode.BYTES_MARSHALLABLE);
+            writeMarshallable(wire.bytes());
+            return;
+        }
         wire.write("sources").sequence(this, this::acceptSources);
         wire.write("timings").sequence(this, this::acceptTimings);
         dirty = false;
