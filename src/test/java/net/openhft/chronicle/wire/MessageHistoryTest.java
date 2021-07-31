@@ -6,8 +6,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.After;
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
-
+import static net.openhft.chronicle.bytes.MethodReader.MESSAGE_HISTORY_METHOD_ID;
 import static org.junit.Assert.*;
 
 public class MessageHistoryTest extends WireTestCommon {
@@ -53,21 +52,22 @@ public class MessageHistoryTest extends WireTestCommon {
 
     @Test
     public void checkSerialiseBytes() {
+        VanillaMessageHistory.USE_BYTES_MARSHALLABLE = true;
         VanillaMessageHistory history = new SetTimeMessageHistory();
         history.addSource(1, 0xff);
         history.addSource(2, 0xfff);
         history.addTiming(10_000);
         history.addTiming(20_000);
-        Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer();
-        history.writeMarshallable(bytes);
+        BinaryWire bw = new BinaryWire(Bytes.elasticHeapByteBuffer());
+        history.writeMarshallable(bw);
         VanillaMessageHistory history2 = new SetTimeMessageHistory();
-        history2.readMarshallable(bytes);
+        history2.readMarshallable(bw);
         assertEquals("VanillaMessageHistory{" +
                 "sources: [1=0xff,2=0xfff] " +
                 "timings: [10000,20000,120962203520100] " +
                 "addSourceDetails=false}", history2.toString());
 
-        bytes.readPosition(0);
+        bw.bytes().readPosition(0);
         history2.addSourceDetails(true);
         SourceContext sc = new SourceContext() {
             @Override
@@ -79,7 +79,8 @@ public class MessageHistoryTest extends WireTestCommon {
                 return 0xffff;
             }
         };
-        history2.readMarshallable(bytes, sc);
+        bw.parent(sc);
+        history2.readMarshallable(bw);
         assertEquals("VanillaMessageHistory{" +
                 "sources: [1=0xff,2=0xfff,3=0xffff] " +
                 "timings: [10000,20000,120962203520100,120962203520100] " +
@@ -116,8 +117,6 @@ public class MessageHistoryTest extends WireTestCommon {
         assertEquals(2, history.sources());
         assertEquals(2, history.timings());
     }
-
-    private static final int MESSAGE_HISTORY_METHOD_ID = -1;
 
     @After
     public void tearDown() {

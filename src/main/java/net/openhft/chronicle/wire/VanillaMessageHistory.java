@@ -172,13 +172,13 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         Bytes<?> bytes = wire.bytes();
         if (bytes.peekUnsignedByte() == BinaryWireCode.BYTES_MARSHALLABLE) {
             bytes.readSkip(1);
-            readMarshallable(bytes);
-            return;
+            readMarshallable0(bytes);
+        } else {
+            sources = 0;
+            wire.read("sources").sequence(this, VanillaMessageHistory::acceptSourcesRead);
+            timings = 0;
+            wire.read("timings").sequence(this, VanillaMessageHistory::acceptTimingsRead);
         }
-        sources = 0;
-        wire.read("sources").sequence(this, VanillaMessageHistory::acceptSourcesRead);
-        timings = 0;
-        wire.read("timings").sequence(this, VanillaMessageHistory::acceptTimingsRead);
         if (addSourceDetails) {
             @Nullable Object o = wire.parent();
             if (o instanceof SourceContext) {
@@ -195,10 +195,10 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         if (USE_BYTES_MARSHALLABLE) {
             wire.bytes().writeUnsignedByte(BinaryWireCode.BYTES_MARSHALLABLE);
             writeMarshallable(wire.bytes());
-            return;
+        } else {
+            wire.write("sources").sequence(this, this::acceptSources);
+            wire.write("timings").sequence(this, this::acceptTimings);
         }
-        wire.write("sources").sequence(this, this::acceptSources);
-        wire.write("timings").sequence(this, this::acceptTimings);
         dirty = false;
     }
 
@@ -206,14 +206,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     public void readMarshallable(@NotNull BytesIn bytes) throws IORuntimeException {
         readMarshallable0(bytes);
         assert !addSourceDetails : "Bytes marshalling does not yet support addSourceDetails";
-    }
-
-    public void readMarshallable(@NotNull BytesIn bytes, @NotNull SourceContext dc) throws IORuntimeException {
-        readMarshallable0(bytes);
-        if (addSourceDetails) {
-            addSource(dc.sourceId(), dc.index());
-            addTiming(nanoTime());
-        }
     }
 
     private void readMarshallable0(@NotNull BytesIn bytes) {
