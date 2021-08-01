@@ -459,7 +459,7 @@ public class GenerateMethodWriter {
                 .append(metaData)
                 .append(")) {\n");
         body.append("try {\n");
-        body.append("dc.chainedElement(" + !terminating + ");");
+        body.append("dc.chainedElement(" + !terminating + ");\n");
         body.append("if (out.get().recordHistory()) MessageHistory.writeHistory(dc);\n");
 
         int startJ = 0;
