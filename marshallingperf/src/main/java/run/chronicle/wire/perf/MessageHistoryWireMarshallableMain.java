@@ -2,7 +2,6 @@ package run.chronicle.wire.perf;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.util.Histogram;
-import net.openhft.chronicle.wire.VanillaMessageHistory;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 
@@ -23,7 +22,7 @@ public class MessageHistoryWireMarshallableMain {
         Histogram writeHist = new Histogram();
 
         MessageHistoryBytesMarshallableMain.SetTimeMessageHistory n = createMessageHistory();
-        SetTimeMessageHistory n2 = new SetTimeMessageHistory();
+        MessageHistoryBytesMarshallableMain.SetTimeMessageHistory n2 = new MessageHistoryBytesMarshallableMain.SetTimeMessageHistory();
         Bytes bytes = Bytes.allocateElasticDirect(128);
         Wire bw = WireType.BINARY.apply(bytes);
 
@@ -47,14 +46,5 @@ public class MessageHistoryWireMarshallableMain {
 
         histoOut("read", MessageHistoryWireMarshallableMain.class, readHist);
         histoOut("write", MessageHistoryWireMarshallableMain.class, writeHist);
-    }
-
-    static class SetTimeMessageHistory extends VanillaMessageHistory {
-        long nanoTime = 120962203520000L;
-
-        @Override
-        protected long nanoTime() {
-            return nanoTime += 100;
-        }
     }
 }

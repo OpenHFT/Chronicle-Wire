@@ -7,6 +7,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.wire.*;
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -255,6 +256,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void testMessageHistoryCleared() {
+        Assume.assumeFalse(Boolean.getBoolean("history.as.bytes"));
         try {
             Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
             final long sourceIndex = 2L;
