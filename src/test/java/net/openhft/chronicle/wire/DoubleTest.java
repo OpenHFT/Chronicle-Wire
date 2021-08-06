@@ -5,7 +5,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
-import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
 import static net.openhft.chronicle.wire.Marshallable.fromString;
 
 public class DoubleTest {
