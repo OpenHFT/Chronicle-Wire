@@ -18,7 +18,6 @@ public class DoubleTest {
      * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/299 Fixed case where a serializable 'double' value sometimes has trailing zero
      */
     @Test
-    @Ignore
     public void testParsingForTwoDoubles() {
         CLASS_ALIASES.addAlias(TwoDoubleDto.class);
         final String EXPECTED = "!TwoDoubleDto {\n" +
