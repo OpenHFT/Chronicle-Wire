@@ -18,7 +18,6 @@ public class DoubleTest {
     @Test
     public void testParsingForTwoDoubles() {
         CLASS_ALIASES.addAlias(TwoDoubleDto.class);
-    //    CLOCK = new SetTimeProvider().advanceMillis(1621273157453L);
         final String EXPECTED = "!TwoDoubleDto {\n" +
                 "price: 43298.21,\n" +
                 "qty: 0.2886,\n" +
