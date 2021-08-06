@@ -13,6 +13,10 @@ public class DoubleTest {
         double qty;
     }
 
+
+    /**
+     * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/299 Fixed case where a serializable 'double' value sometimes has trailing zero
+     */
     @Test
     public void testParsingForTwoDoubles() {
         CLASS_ALIASES.addAlias(TwoDoubleDto.class);
