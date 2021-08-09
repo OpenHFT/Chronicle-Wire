@@ -17,7 +17,6 @@ public class DoubleTest {
     /**
      * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/299 Fixed case where a serializable 'double' value sometimes has trailing zero
      */
-    @Ignore("see https://github.com/OpenHFT/Chronicle-Wire/issues/299")
     @Test
     public void testParsingForTwoDoubles() {
         CLASS_ALIASES.addAlias(TwoDoubleDto.class);
@@ -25,7 +24,9 @@ public class DoubleTest {
                 "  price: 43298.21,\n" +
                 "  qty: 0.2886\n" +
                 "}\n";
-        Assert.assertEquals(EXPECTED, fromString(TwoDoubleDto.class, EXPECTED).toString());
+        final TwoDoubleDto twoDoubleDto = fromString(TwoDoubleDto.class, EXPECTED);
+
+        Assert.assertEquals(EXPECTED, twoDoubleDto.toString());
     }
 
 }
