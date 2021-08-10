@@ -45,7 +45,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     @NotNull
     private final long[] timingsArray = new long[MESSAGE_HISTORY_LENGTH * 2];
     private boolean addSourceDetails = false;
-    private long start;
 
     static MessageHistory getThreadLocal() {
         return THREAD_LOCAL.get();
@@ -193,6 +192,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     @Override
     public void writeMarshallable(@NotNull WireOut wire) {
         if (USE_BYTES_MARSHALLABLE) {
+            assert !(wire instanceof TextWire);
             wire.bytes().writeUnsignedByte(BinaryWireCode.BYTES_MARSHALLABLE);
             writeMarshallable(wire.bytes());
         } else {
@@ -219,11 +219,9 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             timingsArray[i] = bytes.readLong();
     }
 
-    @SuppressWarnings({"AssertWithSideEffects", "UnnecessaryLocalVariable"})
     @Override
     public void writeMarshallable(@NotNull BytesOut b) {
         BytesOut<?> bytes = b;
-        assert start(bytes.writePosition());
         bytes.comment("sources")
                 .writeUnsignedByte(sources);
         for (int i = 0; i < sources; i++)
@@ -272,11 +270,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             out.int64(t.timingsArray[i]);
         }
         out.int64(nanoTime());
-    }
-
-    private boolean start(final long start) {
-        this.start = start;
-        return true;
     }
 
     public void addSource(int id, long index) {

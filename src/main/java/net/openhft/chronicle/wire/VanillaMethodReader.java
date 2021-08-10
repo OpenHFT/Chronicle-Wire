@@ -98,7 +98,7 @@ public class VanillaMethodReader implements MethodReader {
             }
         }
         if (wireParser.lookup(HISTORY) == null) {
-            wireParser.registerOnce(() -> HISTORY, (s, v) -> v.marshallable(messageHistory));
+            wireParser.register(new MethodWireKey(HISTORY, MESSAGE_HISTORY_METHOD_ID), (s, v) -> v.marshallable(messageHistory));
         }
     }
 

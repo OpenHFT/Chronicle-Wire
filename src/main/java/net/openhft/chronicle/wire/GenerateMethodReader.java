@@ -188,6 +188,7 @@ public class GenerateMethodReader {
                 "int methodId = (int) wireIn.readEventNumber();\n" +
                 "switch (methodId) {\n");
 
+        addMethodIdSwitch(MethodReader.HISTORY, MethodReader.MESSAGE_HISTORY_METHOD_ID);
         sourceCode.append(eventIdSwitchBlock);
 
         sourceCode.append("default:\n" +
@@ -322,10 +323,7 @@ public class GenerateMethodReader {
 
         if (methodIdAnnotation != null) {
             int methodId = Maths.toInt32(methodIdAnnotation.value());
-
-            eventIdSwitchBlock.append(format("case %d:\n", methodId));
-            eventIdSwitchBlock.append(format("lastEventName = \"%s\";\n", m.getName()));
-            eventIdSwitchBlock.append("break;\n\n");
+            addMethodIdSwitch(m.getName(), methodId);
         }
 
         String chainedCallPrefix = chainReturnType != null ? "chainedCallReturnResult = " : "";
@@ -379,6 +377,12 @@ public class GenerateMethodReader {
 
         if (chainReturnType != null)
             handleInterface(chainReturnType, "chainedCallReturnResult", false);
+    }
+
+    private void addMethodIdSwitch(String methodName, int methodId) {
+        eventIdSwitchBlock.append(format("case %d:\n", methodId));
+        eventIdSwitchBlock.append(format("lastEventName = \"%s\";\n", methodName));
+        eventIdSwitchBlock.append("break;\n\n");
     }
 
     /**
