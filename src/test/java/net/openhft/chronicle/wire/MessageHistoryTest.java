@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.After;
 import org.junit.Test;
@@ -99,7 +100,7 @@ public class MessageHistoryTest extends WireTestCommon {
         assertEquals(2, history.timings());
 
         BinaryWire bw = new BinaryWire(new HexDumpBytes());
-        bw.writeEventName("history").marshallable(history);
+        bw.writeEventName(MethodReader.HISTORY).marshallable(history);
         assertEquals("" +
                 "b9 07 68 69 73 74 6f 72 79                      # history\n" +
                 "82 3d 00 00 00                                  # SetTimeMessageHistory\n" +
@@ -133,7 +134,7 @@ public class MessageHistoryTest extends WireTestCommon {
         HexDumpBytes bytes = new HexDumpBytes();
         Wire wire = new BinaryWire(bytes);
         VanillaMessageHistory.USE_BYTES_MARSHALLABLE = false;
-        wire.write("history").object(SetTimeMessageHistory.class, vmh);
+        wire.write(MethodReader.HISTORY).object(SetTimeMessageHistory.class, vmh);
 
         vmh.nanoTime = 120962203520000L;
         VanillaMessageHistory.USE_BYTES_MARSHALLABLE = true;

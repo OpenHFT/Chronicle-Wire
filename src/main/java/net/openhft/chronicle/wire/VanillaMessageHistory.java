@@ -57,7 +57,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             THREAD_LOCAL.set(md);
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     public static int marshallableSize(@NotNull BytesIn bytes) {
 
         long start = bytes.readPosition();
