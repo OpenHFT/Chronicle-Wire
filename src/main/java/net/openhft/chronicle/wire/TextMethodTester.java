@@ -240,8 +240,7 @@ public class TextMethodTester<T> {
             }
         }
 
-        if (component instanceof Closeable)
-            Closeable.closeQuietly(components);
+        Closeable.closeQuietly(components);
 
         actual = wireOut.toString().trim();
         if (REGRESS_TESTS) {
