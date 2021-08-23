@@ -66,6 +66,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         int size = (maxNumberOfBits / 64) + 1;
         words = new LongValue[size];
         pauser = Pauser.busy();
+        disableThreadSafetyCheck(true);
     }
 
     public LongValueBitSet(final int maxNumberOfBits, Wire w) {
@@ -110,10 +111,6 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         if (fromIndex > toIndex)
             throw new IndexOutOfBoundsException("fromIndex: " + fromIndex +
                     " > toIndex: " + toIndex);
-    }
-
-    @Override
-    protected void threadSafetyCheck(final boolean isUsed) {
     }
 
     @Override
