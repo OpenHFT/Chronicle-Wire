@@ -1008,6 +1008,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
                 words[i] = wire.getValueIn().int64ForBinding(null);
             }
         }
+        disableThreadSafetyCheck(true);
     }
 
     interface LongFunction {
