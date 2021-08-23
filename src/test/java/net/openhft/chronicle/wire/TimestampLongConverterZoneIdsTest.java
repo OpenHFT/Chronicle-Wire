@@ -8,6 +8,7 @@ import org.junit.runners.Parameterized;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Random;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -27,9 +28,10 @@ public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
     @Parameterized.Parameters(name = "zoneId={0}, converterType={1}")
     public static Collection<Object[]> combinations() {
         ExecutorService es = ForkJoinPool.commonPool();
+        Random random = new Random(-1);
         return ZoneId.getAvailableZoneIds().stream()
                 .filter(z -> !z.equals("GMT0"))
-                .filter(z -> ThreadLocalRandom.current().nextInt(10) == 0)
+                .filter(z -> random.nextInt(10) == 0)
                 .flatMap(z -> Arrays.stream(ConverterType.values()).map(ct ->
                         new Object[]{z, ct, es.submit(() -> TimestampLongConverterZoneIdsTest.testManyZones(z, ct))}))
                 .collect(Collectors.toList());
