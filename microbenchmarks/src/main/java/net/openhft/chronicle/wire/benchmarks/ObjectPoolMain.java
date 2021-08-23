@@ -17,7 +17,6 @@
 package net.openhft.chronicle.wire.benchmarks;
 
 import net.openhft.affinity.Affinity;
-import net.openhft.chronicle.bytes.NativeBytesStore;
 import net.openhft.chronicle.bytes.util.Bit8StringInterner;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;

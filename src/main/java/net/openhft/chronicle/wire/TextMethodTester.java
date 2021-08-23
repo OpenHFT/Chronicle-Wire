@@ -59,7 +59,6 @@ public class TextMethodTester<T> {
     private String expected;
     private String actual;
     private String[] retainLast;
-    private MethodWriterListener methodWriterListener;
     private MethodReaderInterceptorReturns methodReaderInterceptorReturns;
     private long timeoutMS = 25;
     private UpdateInterceptor updateInterceptor;
@@ -148,14 +147,6 @@ public class TextMethodTester<T> {
         Wire wireOut = createWire(Bytes.allocateElasticOnHeap());
 
         MethodWriterBuilder<T> methodWriterBuilder = wireOut.methodWriterBuilder(outputClass);
-        if (methodWriterListener != null) {
-            // TODO it's deprecated so it just needs to work.
-            UpdateInterceptor interceptor = (name, o) -> {
-                methodWriterListener.onWrite(name, new Object[]{o});
-                return true;
-            };
-            methodWriterBuilder.updateInterceptor(interceptor);
-        }
         if (updateInterceptor != null)
             methodWriterBuilder.updateInterceptor(updateInterceptor);
 
@@ -353,23 +344,9 @@ public class TextMethodTester<T> {
         return actual;
     }
 
-    @Deprecated(/* to be removed in x.22 */)
-    public TextMethodTester<T> methodWriterListener(MethodWriterListener methodWriterListener) {
-        this.methodWriterListener = methodWriterListener;
-        return this;
-    }
 
     public TextMethodTester<T> updateInterceptor(UpdateInterceptor updateInterceptor) {
         this.updateInterceptor = updateInterceptor;
-        return this;
-    }
-
-    @Deprecated(/* to be removed in x.22 */)
-    public TextMethodTester<T> methodReaderInterceptor(MethodReaderInterceptor methodReaderInterceptor) {
-        this.methodReaderInterceptorReturns = (m, o, a, i) -> {
-            methodReaderInterceptor.intercept(m, o, a, i);
-            return null;
-        };
         return this;
     }
 

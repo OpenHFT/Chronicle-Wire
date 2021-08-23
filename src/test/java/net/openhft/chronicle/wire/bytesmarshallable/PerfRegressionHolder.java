@@ -134,7 +134,18 @@ public class PerfRegressionHolder {
         }
 
         protected void write8Bit(BytesOut bytes, BytesStore a) {
-            bytes.write8bit(a);
+            if (a == null) {
+                bytes.writeStopBit(-1);
+            } else {
+                long offset = a.readPosition();
+                long readRemaining = Math.min(bytes.writeRemaining(), a.readLimit() - offset);
+                bytes.writeStopBit(readRemaining);
+                try {
+                    bytes.write(a, offset, readRemaining);
+                } catch (BufferUnderflowException | IllegalArgumentException e1) {
+                    throw new AssertionError(e1);
+                }
+            }
         }
     }
 

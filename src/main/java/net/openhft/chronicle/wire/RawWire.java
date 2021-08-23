@@ -332,7 +332,18 @@ public class RawWire extends AbstractWire implements Wire {
         @Override
         public WireOut text(@Nullable BytesStore s) {
             if (use8bit)
-                bytes.write8bit(s);
+                if (s == null) {
+                    bytes.writeStopBit(-1);
+                } else {
+                    long offset = s.readPosition();
+                    long readRemaining = Math.min(bytes.writeRemaining(), s.readLimit() - offset);
+                    bytes.writeStopBit(readRemaining);
+                    try {
+                        bytes.write(s, offset, readRemaining);
+                    } catch (BufferUnderflowException | IllegalArgumentException e) {
+                        throw new AssertionError(e);
+                    }
+                }
             else
                 bytes.writeUtf8(s);
             return RawWire.this;

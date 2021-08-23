@@ -1,6 +1,9 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.MethodId;
+import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.bytes.UpdateInterceptor;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
@@ -86,7 +89,6 @@ public class GenerateMethodWriter {
     private final String genericEvent;
     private final boolean useUpdateInterceptor;
     private ConcurrentMap<Class, String> methodWritersMap = new ConcurrentHashMap<>();
-    private boolean hasMethodWriterListener;
     private AtomicInteger indent = new AtomicInteger();
 
     private GenerateMethodWriter(final String packageName,
@@ -95,7 +97,6 @@ public class GenerateMethodWriter {
                                  final ClassLoader classLoader,
                                  final WireType wireType,
                                  final String genericEvent,
-                                 final boolean hasMethodWriterListener,
                                  final boolean metaData,
                                  final boolean useMethodId,
                                  final boolean useUpdateInterceptor) {
@@ -106,7 +107,6 @@ public class GenerateMethodWriter {
         this.classLoader = classLoader;
         this.wireType = wireType;
         this.genericEvent = genericEvent;
-        this.hasMethodWriterListener = hasMethodWriterListener;
         this.metaData = metaData;
         this.useMethodId = useMethodId;
         this.useUpdateInterceptor = useUpdateInterceptor;
@@ -122,7 +122,6 @@ public class GenerateMethodWriter {
                                  ClassLoader classLoader,
                                  final WireType wireType,
                                  final String genericEvent,
-                                 boolean hasMethodWriterListener,
                                  boolean metaData,
                                  boolean useMethodId,
                                  final boolean useUpdateInterceptor) {
@@ -141,7 +140,6 @@ public class GenerateMethodWriter {
                 classLoader,
                 wireType,
                 genericEvent,
-                hasMethodWriterListener,
                 metaData, useMethodId, useUpdateInterceptor)
                 .createClass();
     }
@@ -266,7 +264,6 @@ public class GenerateMethodWriter {
             importSet.add(Jvm.class.getName());
             importSet.add(Closeable.class.getName());
             importSet.add(DocumentContextHolder.class.getName());
-            importSet.add(MethodWriterListener.class.getName());
             importSet.add(java.lang.reflect.InvocationHandler.class.getName());
             importSet.add(java.lang.reflect.Method.class.getName());
             importSet.add(java.util.stream.IntStream.class.getName());
@@ -391,8 +388,6 @@ public class GenerateMethodWriter {
 
         result.append("// result\n" +
                 "private transient final Closeable closeable;\n");
-        if (hasMethodWriterListener)
-            result.append("private transient final MethodWriterListener methodWriterListener;\n");
         if (useUpdateInterceptor)
             result.append("private transient final " + UPDATE_INTERCEPTOR + " " + UPDATE_INTERCEPTOR_FIELD + ";\n");
 
@@ -405,11 +400,9 @@ public class GenerateMethodWriter {
         result.append('\n');
 
         result.append(format("// constructor\npublic %s(Supplier<" + MARSHALLABLE_OUT + "> out, "
-                + CLOSEABLE + " closeable, MethodWriterListener methodWriterListener, " +
+                + CLOSEABLE + " closeable, " +
                 UpdateInterceptor.class.getSimpleName() + " " + UPDATE_INTERCEPTOR_FIELD + ") {\n", className));
 
-        if (hasMethodWriterListener)
-            result.append("this.methodWriterListener = methodWriterListener;\n");
         if (useUpdateInterceptor)
             result.append("this." + UPDATE_INTERCEPTOR_FIELD + "= " + UPDATE_INTERCEPTOR_FIELD + ";\n");
         result.append("this.out = out;\n" +
@@ -477,9 +470,7 @@ public class GenerateMethodWriter {
         if (methodIDAnotation.length() > 0 && !methodIds.add(methodIDAnotation))
             throw new MethodWriterValidationException("Duplicate methodIds. Cannot add " + methodIDAnotation + " to " + methodIds);
 
-        if (hasMethodWriterListener && parameterCount > 0)
-            createMethodWriterListener(dm, body);
-        else if (parameters.length > 0)
+        if (parameters.length > 0)
             writeArrayOfParameters(dm, len, body, startJ);
 
         if (dm.getParameterTypes().length == 0)
@@ -566,33 +557,6 @@ public class GenerateMethodWriter {
                 .append(".class, ")
                 .append(p.getName())
                 .append(");\n");
-    }
-
-    private void createMethodWriterListener(final Method dm, final StringBuilder body) {
-        body.append("Object[] args$$ = new Object[]{\n");
-        for (int i1 = 0; i1 < dm.getParameters().length; i1++) {
-            body.append("(Object)").append(dm.getParameters()[i1].getName());
-            if (i1 < dm.getParameters().length - 1)
-                body.append(",\n");
-        }
-        body.append("\n};\n");
-
-        body.append(format("this.methodWriterListener.onWrite(\"%s\",args$$);\n", dm.getName()));
-        if (dm.getParameterCount() == 1) {
-            if (Marshallable.class.isAssignableFrom(dm.getParameterTypes()[0])) {
-                body.append(format("if (args$$[0].getClass() == %s.class){\n", dm.getParameterTypes()[0].getName().replace('$', '.')));
-                body.append("valueOut.marshallable((")
-                        .append(MARSHALLABLE)
-                        .append(")args$$[0]);\n");
-                body.append("} else {\n");
-                body.append("valueOut.object(args$$[0]);\n}\n");
-            } else {
-                body.append("valueOut.object(args$$[0]);\n");
-            }
-
-        } else {
-            body.append("valueOut.object(args$$);\n");
-        }
     }
 
     private StringBuilder methodReturn(Set<String> importSet, final Method dm, final Class<?> interfaceClazz) {

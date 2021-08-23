@@ -1,7 +1,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.MethodId;
-import net.openhft.chronicle.bytes.MethodWriterListener;
 import net.openhft.chronicle.bytes.UpdateInterceptor;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
@@ -118,7 +117,6 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
                 .append("public ").append(className()).append("(")
                 .append(nameForClass(Supplier.class)).append("<").append(nameForClass(MarshallableOut.class)).append("> outSupplier, ")
                 .append(nameForClass(Closeable.class)).append(" closeable, ")
-                .append(nameForClass(MethodWriterListener.class)).append(" ignored, ")
                 .append(nameForClass(UpdateInterceptor.class)).append(" updateInterceptor) {\n" +
                 "this.outSupplier = outSupplier;\n" +
                 "this.closeable = closeable;\n");

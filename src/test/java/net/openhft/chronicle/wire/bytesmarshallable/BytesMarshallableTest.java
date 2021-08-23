@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.nio.BufferUnderflowException;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -226,7 +227,18 @@ public class BytesMarshallableTest extends WireTestCommon {
         public void writeMarshallable(BytesOut out) {
             out.write8bit(text);
             out.write8bit(buffer);
-            out.write8bit(bytes);
+            if (bytes == null) {
+                out.writeStopBit(-1);
+            } else {
+                long offset = bytes.readPosition();
+                long readRemaining = Math.min(out.writeRemaining(), bytes.readLimit() - offset);
+                out.writeStopBit(readRemaining);
+                try {
+                    out.write(bytes, offset, readRemaining);
+                } catch (BufferUnderflowException | IllegalArgumentException e) {
+                    throw new AssertionError(e);
+                }
+            }
         }
     }
 }

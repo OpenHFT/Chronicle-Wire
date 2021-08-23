@@ -66,7 +66,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     private Supplier<MarshallableOut> outSupplier;
     private Closeable closeable;
     private String genericEvent;
-    private MethodWriterListener methodWriterListener;
     private boolean metaData;
     @Deprecated(/* To be removed in x.23 */)
     private boolean useMethodIds = true;
@@ -118,30 +117,9 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         return this;
     }
 
-    // sourceId enables this, this isn't useful unless it's set.
-    @Deprecated(/* to be removed in x.22 */)
-    @NotNull
-    public MethodWriterBuilder<T> recordHistory(boolean recordHistory) {
-        handlerSupplier.recordHistory(recordHistory);
-        return this;
-    }
-
-    @NotNull
-    public MethodWriterBuilder<T> methodWriterInterceptor(MethodWriterInterceptor methodWriterInterceptor) {
-        handlerSupplier.methodWriterInterceptor(methodWriterInterceptor);
-        return this;
-    }
-
     @NotNull
     public MethodWriterBuilder<T> methodWriterInterceptorReturns(MethodWriterInterceptorReturns methodWriterInterceptor) {
         handlerSupplier.methodWriterInterceptorReturns(methodWriterInterceptor);
-        return this;
-    }
-
-    @NotNull
-    public MethodWriterBuilder<T> methodWriterListener(MethodWriterListener methodWriterListener) {
-        this.methodWriterListener = methodWriterListener;
-        this.handlerSupplier.methodWriterListener(methodWriterListener);
         return this;
     }
 
@@ -190,7 +168,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         sb.append(this.metaData ? "MetadataAware" : "");
         sb.append(useMethodIds ? "MethodIds" : "");
         sb.append(updateInterceptor != null ? "Intercepting" : "");
-        sb.append(hasMethodWriterListener() ? "MethodListener" : "");
         sb.append(toFirstCapCase(wireType().toString().replace("_", "")));
         sb.append("MethodWriter");
         return sb.toString();
@@ -245,14 +222,12 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     private Class newClass(final String fullClassName) {
-        boolean hasMethodWriterListener = hasMethodWriterListener();
-        if (wireType.isText() || hasMethodWriterListener || !Jvm.getBoolean("wire.generator.v2"))
+        if (wireType.isText() || !Jvm.getBoolean("wire.generator.v2"))
             return GenerateMethodWriter.newClass(fullClassName,
                     interfaces,
                     classLoader,
                     wireType,
                     genericEvent,
-                    hasMethodWriterListener,
                     metaData,
                     useMethodIds,
                     updateInterceptor != null);
@@ -269,19 +244,14 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         return gmw.acquireClass(classLoader);
     }
 
-    private boolean hasMethodWriterListener() {
-        return methodWriterListener != null;
-    }
-
     private Object newInstance(final Class aClass) {
         try {
             if (outSupplier == null)
                 throw new NullPointerException("marshallableOut(out) has not been set.");
             if (outSupplier.get().recordHistory()) {
-                recordHistory(true);
                 handlerSupplier.recordHistory(true);
             }
-            return aClass.getDeclaredConstructors()[0].newInstance(outSupplier, closeable, methodWriterListener, updateInterceptor);
+            return aClass.getDeclaredConstructors()[0].newInstance(outSupplier, closeable, updateInterceptor);
         } catch (Exception e) {
             throw Jvm.rethrow(e);
         }

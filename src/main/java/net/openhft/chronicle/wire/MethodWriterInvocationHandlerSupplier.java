@@ -17,21 +17,15 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.MethodWriterInterceptor;
 import net.openhft.chronicle.bytes.MethodWriterInterceptorReturns;
 import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
-import net.openhft.chronicle.bytes.MethodWriterListener;
 import net.openhft.chronicle.core.io.Closeable;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
 
-@Deprecated(/* to be removed in x.22 */)
 public class MethodWriterInvocationHandlerSupplier<T> implements Supplier<MethodWriterInvocationHandler> {
     private final Supplier<MethodWriterInvocationHandler> supplier;
-    private Function<T, T> modifier;
     private boolean recordHistory;
-    private MethodWriterListener methodWriterListener;
     private MethodWriterInterceptorReturns methodWriterInterceptorReturns;
     private Closeable closeable;
     private boolean disableThreadSafe;
@@ -46,14 +40,6 @@ public class MethodWriterInvocationHandlerSupplier<T> implements Supplier<Method
 
     public void recordHistory(boolean recordHistory) {
         this.recordHistory = recordHistory;
-    }
-
-    public void methodWriterListener(MethodWriterListener methodWriterListener) {
-        this.methodWriterListener = methodWriterListener;
-    }
-
-    public void methodWriterInterceptor(MethodWriterInterceptor methodWriterInterceptor) {
-        this.methodWriterInterceptorReturns = MethodWriterInterceptorReturns.of(methodWriterInterceptor);
     }
 
     public MethodWriterInvocationHandlerSupplier methodWriterInterceptorReturns(MethodWriterInterceptorReturns methodWriterInterceptorReturns) {
@@ -81,15 +67,10 @@ public class MethodWriterInvocationHandlerSupplier<T> implements Supplier<Method
         this.useMethodIds = useMethodIds;
     }
 
-    public MethodWriterInvocationHandlerSupplier modifier(final Function<T, T> modifier) {
-        this.modifier = modifier;
-        return this;
-    }
-
     private MethodWriterInvocationHandler newHandler() {
         MethodWriterInvocationHandler h = supplier.get();
         h.genericEvent(genericEvent);
-        h.methodWriterInterceptorReturns(methodWriterListener, methodWriterInterceptorReturns);
+        h.methodWriterInterceptorReturns(methodWriterInterceptorReturns);
         h.onClose(closeable);
         h.recordHistory(recordHistory);
         h.useMethodIds(useMethodIds);

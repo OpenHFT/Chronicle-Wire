@@ -203,17 +203,6 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     }
 
     @Override
-    public boolean lazyReadOne() {
-        throwExceptionIfClosed();
-
-        if (!in.peekDocument()) {
-            return false;
-        }
-
-        return readOne();
-    }
-
-    @Override
     public MethodReader closeIn(boolean closeIn) {
         throwExceptionIfClosed();
         this.closeIn = closeIn;
