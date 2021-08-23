@@ -73,7 +73,7 @@ public enum Wires {
     // value to use when no more data is possible e.g. on a roll.
     public static final int END_OF_DATA = NOT_COMPLETE | META_DATA;
     public static final int NOT_INITIALIZED = 0x0;
-    public static final Bytes<?> NO_BYTES = new VanillaBytes<>(BytesStore.empty());
+    public static final Bytes<?> NO_BYTES = BytesStore.empty().bytesForRead();
     //public static final WireIn EMPTY = new BinaryWire(NO_BYTES);
     public static final int SPB_HEADER_SIZE = 4;
     public static final List<Function<Class, SerializationStrategy>> CLASS_STRATEGY_FUNCTIONS = new CopyOnWriteArrayList<>();

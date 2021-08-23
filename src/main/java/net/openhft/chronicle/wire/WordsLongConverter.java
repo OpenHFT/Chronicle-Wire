@@ -32,7 +32,7 @@ public class WordsLongConverter implements LongConverter {
 
     static {
         try {
-            String[] words = new String(IOTools.readFile("common-words.txt"), StandardCharsets.ISO_8859_1).split("\\s+");
+            String[] words = new String(IOTools.readFile(WordsLongConverter.class, "common-words.txt"), StandardCharsets.ISO_8859_1).split("\\s+");
             WORDS = words;
             for (int i = 0; i < WORDS.length; i++) {
                 String word = WORDS[i];

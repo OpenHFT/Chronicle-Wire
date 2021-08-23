@@ -113,8 +113,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     @Override
-    protected boolean threadSafetyCheck(final boolean isUsed) {
-        return true;
+    protected void threadSafetyCheck(final boolean isUsed) {
     }
 
     @Override

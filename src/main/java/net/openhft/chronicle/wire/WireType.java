@@ -520,7 +520,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         File file = new File(filename);
         URL url = null;
         if (!file.exists()) {
-            url = urlFor(filename);
+            url = urlFor(expectedType, filename);
             file = new File(url.getFile());
         }
         //: MappedFile.readOnly(file).acquireBytesForRead(0);
