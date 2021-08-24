@@ -1246,8 +1246,8 @@ This can be migrated to:
 [source,Java]
 ----
 interface MyInterface extends MethodFilterOnFirstArg<String> {
-    @Deprecated(/* to be removed in x.22 */)
-void method(ExpensiveDto dto);
+    @Deprecated
+    void method(ExpensiveDto dto);
     void method2(String filter, ExpensiveDto dto);
 }
 ----
