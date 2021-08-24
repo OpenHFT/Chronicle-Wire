@@ -18,11 +18,12 @@ public class WireResetTest extends WireTestCommon {
 
     @Test
     public void testEventAbstractCloseable() {
-        EventAbstractCloseable event = new EventAbstractCloseable();
-        Assert.assertFalse(event.isClosed());
+        try (EventAbstractCloseable event = new EventAbstractCloseable()) {
+            Assert.assertFalse(event.isClosed());
 
-        event.reset();
-        Assert.assertFalse(event.isClosed());
+            event.reset();
+            Assert.assertFalse(event.isClosed());
+        }
     }
 
     public static class Event extends SelfDescribingMarshallable implements Closeable {
