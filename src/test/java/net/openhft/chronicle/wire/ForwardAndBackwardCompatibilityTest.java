@@ -49,7 +49,9 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     }
 
     @Test
-    public void backwardsCompatibility() throws Exception {
+    public void backwardsCompatibility() {
+        expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2");
+
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         wire.usePadding(true);
         CLASS_ALIASES.addAlias(DTO1.class, "DTO");
@@ -74,7 +76,8 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     }
 
     @Test
-    public void forwardComparability() {
+    public void forwardCompatability() {
+        expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1");
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         wire.usePadding(true);

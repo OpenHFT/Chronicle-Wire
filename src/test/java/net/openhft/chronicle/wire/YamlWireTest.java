@@ -1815,6 +1815,7 @@ public class YamlWireTest extends WireTestCommon {
                 "}\n", new DoubleWrapper(10e6).toString());
         DoubleWrapper dw5 = Marshallable.fromString(new DoubleWrapper(10e6).toString());
         assertEquals(10e6, dw5.d, 0);
+        ClassAliasPool.CLASS_ALIASES.removePackage(DoubleWrapper.class.getPackage().getName());
     }
 
     @Test
