@@ -195,7 +195,7 @@ public class JSONWireTest extends WireTestCommon {
         FooEvent foo = new FooEvent();
         foo.foo = 0.1f;
         @NotNull CharSequence str = WireType.JSON.asString(foo);
-        assertEquals("\"foo\":0.1", str);
+        assertEquals("{\"foo\":0.1}", str);
         // 0.1 when cast to a double is 0.10000000149011612. We used to throw an exception here because of this difference
         FooEvent foo2 = WireType.JSON.fromString(FooEvent.class, str);
         assertEquals(foo, foo2);
@@ -216,7 +216,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     private void doTestMapOfNamedKeys(MapHolder mh) {
-        assertEquals("\"map\":{\"CLASS\":0.1}",
+        assertEquals("{\"map\":{\"CLASS\":0.1}\n}",
                 JSON.asString(mh));
     }
 
@@ -227,19 +227,19 @@ public class JSONWireTest extends WireTestCommon {
         dates.dateTime = LocalDateTime.of(2020, 4, 26, 6, 35, 11);
         dates.zdateTime = ZonedDateTime.of(dates.dateTime, ZoneId.of("UTC"));
         @NotNull CharSequence str = WireType.JSON.asString(dates);
-        String expected = "\"date\":\"2021-05-28\",\"dateTime\":\"2020-04-26T06:35:11\",\"zdateTime\":\"2020-04-26T06:35:11Z[UTC]\"";
+        String expected = "{\"date\":\"2021-05-28\",\"dateTime\":\"2020-04-26T06:35:11\",\"zdateTime\":\"2020-04-26T06:35:11Z[UTC]\"}";
         assertEquals(expected, str);
         JSONWire jw = new JSONWire(Bytes.allocateElasticOnHeap());
         jw.trimFirstCurly(false);
         jw.getValueOut().typedMarshallable(dates);
-        assertEquals("{" + expected + "}", jw.toString());
+        assertEquals(expected, jw.toString());
     }
 
     @Test
     public void testDateNull() {
         Dates dates = new Dates();
         @NotNull CharSequence str = WireType.JSON.asString(dates);
-        assertEquals("\"date\":null,\"dateTime\":null,\"zdateTime\":null", str);
+        assertEquals("{\"date\":null,\"dateTime\":null,\"zdateTime\":null}", str);
     }
 
     @Test
