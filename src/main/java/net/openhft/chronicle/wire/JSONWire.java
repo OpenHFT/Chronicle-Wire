@@ -41,8 +41,7 @@ public class JSONWire extends TextWire {
     @SuppressWarnings("rawtypes")
     public JSONWire(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
-        // TODO Make false in x.22 c.f. https://github.com/OpenHFT/Chronicle-Wire/issues/286
-        trimFirstCurly(true);
+        trimFirstCurly(false);
     }
 
     @SuppressWarnings("rawtypes")
