@@ -392,34 +392,10 @@ public interface ValueOut {
      *
      * @param map a java map with, the key and value type of the map must be either Marshallable,
      *            String or Autoboxed primitives.
-     * @return throws IllegalArgumentException  If the type of the map is not one of those listed
-     * above
-     * @deprecated use marshallable(map) or object(map)
+     * @return throws IllegalArgumentException  If the type of the map is not one of those listed above
      */
     @NotNull
-    @Deprecated(/* to be removed in x.22 */)
     WireOut map(Map map);
-
-    /**
-     * @deprecated use typedMarshallable(map) or object(map)
-     */
-    @NotNull
-    @Deprecated(/* to be removed in x.22 */)
-    WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map);
-
-    @NotNull
-    @Deprecated(/* to be removed in x.22 */)
-    default ValueOut leaf() {
-        swapLeaf(true);
-        return this;
-    }
-
-    @NotNull
-    @Deprecated(/* to be removed in x.22 */)
-    default ValueOut leaf(boolean leaf) {
-        swapLeaf(leaf);
-        return this;
-    }
 
     default boolean swapLeaf(boolean isLeaf) {
         return false;
@@ -833,14 +809,14 @@ public interface ValueOut {
         typedMarshallable(t.getClass().getName(), (WireOut w) -> {
             w.write("message").text(t.getMessage())
                     .write("stackTrace").sequence(w3 -> {
-                for (StackTraceElement ste : t.getStackTrace()) {
-                    w3.marshallable(w4 ->
-                            w4.write("class").text(ste.getClassName())
-                                    .write("method").text(ste.getMethodName())
-                                    .write("file").text(ste.getFileName())
-                                    .write("line").int32(ste.getLineNumber()));
-                }
-            });
+                        for (StackTraceElement ste : t.getStackTrace()) {
+                            w3.marshallable(w4 ->
+                                    w4.write("class").text(ste.getClassName())
+                                            .write("method").text(ste.getMethodName())
+                                            .write("file").text(ste.getFileName())
+                                            .write("line").int32(ste.getLineNumber()));
+                        }
+                    });
             if (t.getCause() != null)
                 w.write("cause").throwable(t.getCause());
         });
@@ -864,16 +840,6 @@ public interface ValueOut {
 
     default int compressedSize() {
         return Integer.MAX_VALUE;
-    }
-
-    @NotNull
-    @Deprecated(/* to be removed in x.22 */)
-    default WireOut compress(@NotNull String compression, @Nullable String str) {
-        if (str == null || str.length() < SMALL_MESSAGE)
-            return text(str);
-        // replace with compress(String compression, Bytes compressedBytes)
-        WireInternal.compress(this, compression, str);
-        return wireOut();
     }
 
     default void resetBetweenDocuments() {

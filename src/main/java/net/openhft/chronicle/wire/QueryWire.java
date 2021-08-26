@@ -363,12 +363,6 @@ public class QueryWire extends TextWire {
             throw new UnsupportedOperationException();
         }
 
-        @NotNull
-        @Override
-        public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map) {
-            throw new UnsupportedOperationException();
-        }
-
         @Override
         @NotNull
         public ValueOut write() {

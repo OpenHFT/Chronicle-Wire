@@ -666,12 +666,6 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map) {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @NotNull
-        @Override
         public WireOut object(@Nullable Object o) {
             bytes.writeUtf8(o == null ? null : o.toString());
             return RawWire.this;
@@ -1104,17 +1098,6 @@ public class RawWire extends AbstractWire implements Wire {
                 strategy.readUsing(object, this, BracketType.MAP);
             }
             return object;
-        }
-
-        @Override
-        public <K extends ReadMarshallable, V extends ReadMarshallable> void typedMap(@NotNull Map<K, V> usingMap) {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @NotNull
-        @Override
-        public <K, V> Map<K, V> map(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap) {
-            throw new UnsupportedOperationException("todo");
         }
 
         @Override

@@ -229,33 +229,4 @@ public interface MarshallableOut extends DocumentWritten {
         builder.marshallableOut(this);
         return builder;
     }
-
-    /**
-     * adds padding to align to cache lines. So that wire header messages don't straggle cache lines
-     *
-     * @return the state of padding
-     */
-    @Deprecated(/* to be removed in x.22 */)
-    @NotNull
-    default Padding padToCacheAlignMode() {
-        return Padding.NEVER;
-    }
-
-    @Deprecated(/* to be removed in x.22 */)
-    enum Padding {
-        WORD("align to every word"),
-        CACHE_LINE("always pads to cache lines"),
-        NEVER("never adds padding"),
-        SMART("adds padding to ensure new wire headers dont straggle cache lines, where " +
-                "possible to " +
-                "do so " +
-                "without " +
-                "breaking the" +
-                "existing " +
-                "message format specification");
-        public static final Padding ALWAYS = CACHE_LINE;
-
-        Padding(String comment) {
-        }
-    }
 }

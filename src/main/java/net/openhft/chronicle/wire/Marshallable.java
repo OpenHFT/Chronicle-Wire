@@ -33,7 +33,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.wire.WireMarshaller.WIRE_MARSHALLER_CL;
-import static net.openhft.chronicle.wire.WireType.READ_ANY;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 
 /**
@@ -102,24 +101,6 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         return TEXT.streamFromFile(expectedType, filename);
     }
 
-    @Deprecated(/* to be removed in x.22 */)
-    @NotNull
-    static Map<String, Object> fromFileAsMap(String filename) throws IOException {
-        return TEXT.fromFileAsMap(filename, Object.class);
-    }
-
-    @Deprecated(/* to be removed in x.22 */)
-    @NotNull
-    static <V> Map<String, V> fromFileAsMap(String filename, @NotNull Class<V> valueClass) throws IOException {
-        return TEXT.fromFileAsMap(filename, valueClass);
-    }
-
-    @Deprecated(/* to be removed in x.22 */)
-    @Nullable
-    static Map<String, Object> fromHexString(@NotNull CharSequence cs) {
-        return READ_ANY.fromHexString(cs);
-    }
-
     @Nullable
     default <T> T getField(String name, Class<T> tClass) throws NoSuchFieldException {
         return Wires.getField(this, name, tClass);
@@ -157,12 +138,6 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         return (T) Wires.deepCopy(this);
     }
 
-    /* this method does the opposite of what the name suggests */
-    @Deprecated(/* to be removed in x.22 */)
-    @NotNull
-    default <T extends Marshallable> T copyFrom(@NotNull T t) {
-        return Wires.copyTo(this, t);
-    }
 
     default <T extends Marshallable> T copyTo(@NotNull T t) {
         return Wires.copyTo(this, t);
@@ -172,7 +147,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         @NotNull @SuppressWarnings("unchecked")
         T t = (T) this;
         return map.merge(getKey.apply(t), t,
-                (p, c) -> p == null ? c.deepCopy() : p.copyFrom(c));
+                (p, c) -> p == null ? c.deepCopy() : Wires.copyTo(p, c));
     }
 
     @NotNull

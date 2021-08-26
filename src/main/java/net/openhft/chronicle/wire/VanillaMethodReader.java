@@ -44,13 +44,11 @@ import static net.openhft.chronicle.wire.VanillaWireParser.SKIP_READABLE_BYTES;
 @SuppressWarnings("rawtypes")
 public class VanillaMethodReader implements MethodReader {
 
-    static final Object[] NO_ARGS = {};
-    static final Object IGNORED = new Object(); // object used to flag that the call should be ignored.
-    @Deprecated(/* to be removed in x.22 */)
-    private static final boolean DONT_THROW_ON_OVERLOAD = Jvm.getBoolean("chronicle.mr_overload_dont_throw");
-    private static final String[] metaIgnoreList = {"header", "index", "index2index", "roll"};
     // beware enabling DEBUG_ENABLED as logMessage will not work unless Wire marshalling used - https://github.com/ChronicleEnterprise/Chronicle-Services/issues/240
     public static final boolean DEBUG_ENABLED = Jvm.isDebugEnabled(VanillaMethodReader.class) && Jvm.getBoolean("wire.mr.debug");
+    static final Object[] NO_ARGS = {};
+    static final Object IGNORED = new Object(); // object used to flag that the call should be ignored.
+    private static final String[] metaIgnoreList = {"header", "index", "index2index", "roll"};
     private final MarshallableIn in;
     @NotNull
     private final WireParser wireParser;
@@ -239,11 +237,7 @@ public class VanillaMethodReader implements MethodReader {
             if (!methodNamesHandled.add(m.getName())) {
                 String previous = methodsSignaturesHandled.stream().filter(signature -> signature.contains(" " + m.getName() + " ")).findFirst().orElseThrow(() -> new IllegalStateException());
                 String msg = m + " previous: " + previous;
-                if (DONT_THROW_ON_OVERLOAD)
-                    Jvm.warn().on(getClass(), "Unable to support overloaded methods, ignoring " + msg);
-                else
                     throw new IllegalStateException("MethodReader does not support overloaded methods. Method: " + msg);
-                continue;
             }
 
             Class<?>[] parameterTypes = m.getParameterTypes();

@@ -100,11 +100,6 @@ public class WireDumper {
         return sb.toString();
     }
 
-    @Deprecated(/* to be removed in x.22 */)
-    public boolean dumpOne(@NotNull StringBuilder sb) {
-        return dumpOne(sb, null, false);
-    }
-
     public boolean dumpOne(@NotNull StringBuilder sb, @Nullable Bytes<ByteBuffer> buffer) {
         return dumpOne(sb, buffer, false);
     }

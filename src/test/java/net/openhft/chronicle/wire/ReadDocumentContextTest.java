@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MappedBytes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -32,7 +31,6 @@ import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("rawtypes")
 public class ReadDocumentContextTest extends WireTestCommon {
-    @Ignore("The ability to write incomplete documents is deprecated, and will be removed in a future release")
     @Test
     public void testWritingNotCompleteDocument() {
 
@@ -69,7 +67,6 @@ public class ReadDocumentContextTest extends WireTestCommon {
 
     @Test
     public void testWritingNotCompleteDocumentShared() throws IOException {
-expectException("Writing an incomplete document is deprecated, this feature will be removed in a future release");
         @NotNull MappedBytes b = MappedBytes.mappedBytes(File.createTempFile("delete", "me"), 64 << 10);
         assertTrue(b.sharedMemory());
         @NotNull Wire wire = new TextWire(b).useBinaryDocuments();

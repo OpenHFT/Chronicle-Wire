@@ -19,7 +19,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
-import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -113,10 +112,6 @@ public enum WireInternal {
 
     public static long writeData(@NotNull WireOut wireOut, boolean metaData, boolean notComplete,
                                  @NotNull WriteMarshallable writer) {
-        if (notComplete) {
-            Jvm.warn().on(WireInternal.class, "Writing an incomplete document is deprecated, " +
-                    "this feature will be removed in a future release.");
-        }
         wireOut.getValueOut().resetBetweenDocuments();
         assert wireOut.startUse();
         long position;
@@ -299,15 +294,6 @@ public enum WireInternal {
     @Nullable
     static String merge(@Nullable String a, @Nullable String b) {
         return a == null ? b : b == null ? a : a + " " + b;
-    }
-
-    @Deprecated(/* to be removed in x.22 */)
-    public static void compress(@NotNull ValueOut out, @NotNull String compression, String str) {
-        Bytes bytes = Wires.acquireBytes();
-        bytes.writeUtf8(str);
-        Bytes bytes2 = Wires.acquireAnotherBytes();
-        Compression.compress(compression, bytes, bytes2);
-        out.bytes(compression, bytes2);
     }
 
     static <T> T intern(Class<T> tClass, Object o) {

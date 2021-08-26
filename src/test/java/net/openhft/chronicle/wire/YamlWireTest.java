@@ -1126,7 +1126,7 @@ public class YamlWireTest extends WireTestCommon {
                         "}\n",
                 Wires.fromSizePrefixedBlobs(bytes));
         @NotNull final Map<String, String> actual = new LinkedHashMap<>();
-        wire.readDocument(null, c -> c.read(() -> "example").map(actual));
+        wire.readDocument(null, c -> c.read(() -> "example").marshallableAsMap(String.class, String.class, actual));
         assertEquals(expected, actual);
     }
 
@@ -1181,7 +1181,7 @@ public class YamlWireTest extends WireTestCommon {
                 "}\n", Wires.fromSizePrefixedBlobs(bytes));
         @NotNull final Map<Integer, Integer> actual = new HashMap<>();
         wire.readDocument(null, c -> {
-            @Nullable Map m = c.read(() -> "example").map(Integer.class, Integer.class, actual);
+            @Nullable Map m = c.read(() -> "example").marshallableAsMap(Integer.class, Integer.class, actual);
             assertEquals(m, expected);
         });
 
@@ -1219,7 +1219,7 @@ public class YamlWireTest extends WireTestCommon {
         @NotNull final Map<MyMarshallable, MyMarshallable> actual = new LinkedHashMap<>();
 
         wire.readDocument(null, c -> c.read(() -> "example")
-                .map(
+                .marshallableAsMap(
                         MyMarshallable.class,
                         MyMarshallable.class,
                         actual));

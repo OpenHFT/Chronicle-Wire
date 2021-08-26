@@ -581,13 +581,6 @@ public class HashWire implements WireOut, BytesComment {
 
         @NotNull
         @Override
-        public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map) {
-            hash = hash * M1 + map.hashCode() * M2;
-            return HashWire.this;
-        }
-
-        @NotNull
-        @Override
         public WireOut wireOut() {
             return HashWire.this;
         }

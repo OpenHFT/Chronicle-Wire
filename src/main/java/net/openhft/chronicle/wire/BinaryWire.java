@@ -1909,12 +1909,6 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map) {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @NotNull
-        @Override
         public WireOut wireOut() {
             return BinaryWire.this;
         }
@@ -3479,17 +3473,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             } else {
                 return Demarshallable.newInstance(clazz, wireIn());
             }
-        }
-
-        @Override
-        public <K extends ReadMarshallable, V extends ReadMarshallable> void typedMap(@NotNull Map<K, V> usingMap) {
-            throw new UnsupportedOperationException("todo");
-        }
-
-        @NotNull
-        @Override
-        public <K, V> Map<K, V> map(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap) {
-            throw new UnsupportedOperationException("todo");
         }
 
         private long readTextAsLong(long otherwise) throws IORuntimeException, BufferUnderflowException {

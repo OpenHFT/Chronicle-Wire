@@ -1,6 +1,5 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.UpdateInterceptor;
@@ -154,15 +153,6 @@ public class GenerateMethodWriter {
         contextHolder.documentContext(
                 out.writingDocument(metaData));
         return contextHolder;
-    }
-
-    @SuppressWarnings("unused")
-    @Deprecated(/* to be removed in x.22 */)
-    public static void addComment(Bytes<?> bytes, Object arg) {
-        if (arg instanceof Marshallable)
-            bytes.comment(arg.getClass().getSimpleName());
-        else
-            bytes.comment(String.valueOf(arg));
     }
 
     private static CharSequence toString(Class type) {

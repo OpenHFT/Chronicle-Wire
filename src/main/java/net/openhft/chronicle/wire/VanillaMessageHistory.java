@@ -57,39 +57,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             THREAD_LOCAL.set(md);
     }
 
-    @Deprecated(/* to be removed in x.22 */)
-    public static int marshallableSize(@NotNull BytesIn bytes) {
-
-        long start = bytes.readPosition();
-        try {
-
-            int sources = bytes.readUnsignedByte();
-            int size = 1;
-
-            //sourceIdArray
-            size += (4 * sources);
-
-            // sourceIndexArray
-            size += (8 * sources);
-
-            bytes.readSkip(size - 1);
-            int timings = bytes.readUnsignedByte() - 1;
-
-            // writeUnsignedByte
-            size += 1;
-
-            size += (timings * 8);
-
-            // nano time
-            size += 8;
-
-            return size;
-
-        } finally {
-            bytes.readPosition(start);
-        }
-    }
-
     /**
      * Whether to automatically add timestamp on read. Set this {@code false} for utilities that expect to
      * read MessageHistory without mutation

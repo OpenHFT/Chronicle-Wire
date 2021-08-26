@@ -33,7 +33,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.*;
 
@@ -373,21 +372,7 @@ public class DefaultValueIn implements ValueIn {
         return defaultValue;
     }
 
-    @Override
-    public <K extends ReadMarshallable, V extends ReadMarshallable> void typedMap(@NotNull Map<K, V> usingMap) {
-        assert defaultValue == null;
-        usingMap.clear();
-    }
-
-    @Nullable
-    @Override
-    public <K, V> Map<K, V> map(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap) {
-        assert defaultValue == null;
-        usingMap.clear();
-        return usingMap;
-    }
-
-    @Override
+        @Override
     public boolean bool() throws IORuntimeException {
         return defaultValue == Boolean.TRUE;
     }

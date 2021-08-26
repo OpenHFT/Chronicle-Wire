@@ -1735,19 +1735,6 @@ public class YamlWire extends AbstractWire implements Wire {
             sep = END_FIELD;
         }
 
-        @NotNull
-        @Override
-        public WireOut typedMap(@NotNull Map<? extends WriteMarshallable, ? extends Marshallable> map) {
-            if (dropDefault) {
-                writeSavedEventName();
-            }
-            typePrefix(SEQ_MAP);
-            map.forEach((k, v) -> sequence(w -> w.marshallable(m -> m
-                    .write(() -> "key").typedMarshallable(k)
-                    .write(() -> "value").typedMarshallable(v))));
-            return wireOut();
-        }
-
         protected void fieldValueSeperator() {
             writeTwo(':', ' ');
         }
@@ -2543,10 +2530,9 @@ public class YamlWire extends AbstractWire implements Wire {
         }
 
         @Nullable
-        @Override
-        public <K, V> Map<K, V> map(@NotNull final Class<K> kClass,
-                                    @NotNull final Class<V> vClass,
-                                    @Nullable Map<K, V> usingMap) {
+        private <K, V> Map<K, V> map(@NotNull final Class<K> kClass,
+                                     @NotNull final Class<V> vClass,
+                                     @Nullable Map<K, V> usingMap) {
             consumePadding();
             if (usingMap == null)
                 usingMap = new LinkedHashMap<>();
@@ -2591,32 +2577,6 @@ public class YamlWire extends AbstractWire implements Wire {
 
             } else {
                 throw new IORuntimeException("Unsupported type :" + sb);
-            }
-        }
-
-        @Override
-        public <K extends ReadMarshallable, V extends ReadMarshallable> void typedMap(@NotNull Map<K, V> usingMap) {
-            consumePadding();
-            usingMap.clear();
-
-            if (yt.current() != YamlToken.TAG) {
-                yt.text(sb);
-                yt.next();
-                if (SEQ_MAP.contentEquals(sb)) {
-                    while (hasNext()) {
-                        sequence(this, (o, s) -> s.marshallable(r -> {
-                            try {
-                                @Nullable final K k = r.read(() -> "key").typedMarshallable();
-                                @Nullable final V v = r.read(() -> "value").typedMarshallable();
-                                usingMap.put(k, v);
-                            } catch (Exception e) {
-                                Jvm.warn().on(getClass(), e);
-                            }
-                        }));
-                    }
-                } else {
-                    throw new IORuntimeException("Unsupported type " + sb);
-                }
             }
         }
 
