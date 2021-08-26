@@ -76,7 +76,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     }
 
     @Test
-    public void forwardCompatability() {
+    public void forwardCompatibility() {
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1");
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());

@@ -348,7 +348,6 @@ public class TextWireTest extends WireTestCommon {
             @NotNull Yaml yaml = new Yaml();
             load = yaml.load(new StringReader(s));
         } catch (Exception e) {
-            // System.out.println(s);
             throw e;
         }
         assertEquals(expected, load.toString());
@@ -386,7 +385,6 @@ public class TextWireTest extends WireTestCommon {
         wire.write(() -> "VALUE").int64(expected);
         wire.write(() -> "VALUE2").int64(expected);
         expectWithSnakeYaml("{VALUE=1, VALUE2=1}", wire);
-        // System.out.println("out" + Bytes.toHexString(wire.bytes()));
         assertEquals(expected, wire.read(() -> "VALUE").int16());
         assertEquals(expected, wire.read(() -> "VALUE2").int16());
     }
@@ -981,7 +979,6 @@ public class TextWireTest extends WireTestCommon {
 
         try {
             String cs = dto.toString();
-            // System.out.println(cs);
             dto2 = Marshallable.fromString(cs);
             assertEquals(cs, dto2.toString());
         } finally {
@@ -1253,7 +1250,6 @@ public class TextWireTest extends WireTestCommon {
         @NotNull Object[] a3 = {"Hello", 123, 10.1};
         wire.write("three").object(Object[].class, a3);
 
-        // System.out.println(wire);
         @Nullable Object o1 = wire.read()
                 .object(Object[].class);
         assertArrayEquals(a1, (Object[]) o1);
@@ -1692,7 +1688,6 @@ public class TextWireTest extends WireTestCommon {
                 "}\n", new DoubleWrapper(10e6).toString());
         DoubleWrapper dw5 = Marshallable.fromString(new DoubleWrapper(10e6).toString());
         assertEquals(10e6, dw5.d, 0);
-        ClassAliasPool.CLASS_ALIASES.removePackage(DoubleWrapper.class.getPackage().getName());
     }
 
     @Test
@@ -1833,7 +1828,6 @@ public class TextWireTest extends WireTestCommon {
         myDto1.strings.add("world");
 
         String cs = myDto1.toString();
-        // System.out.println(cs);
         MyDto o = Marshallable.fromString(cs);
         assertEquals(cs, o.toString());
 
@@ -2083,8 +2077,8 @@ public class TextWireTest extends WireTestCommon {
     }
 
     static class DtoWithBytesField extends SelfDescribingMarshallable {
-        private BytesStore bytes;
-        private long another;
+        BytesStore bytes;
+        long another;
 
         @Override
         public void readMarshallable(@NotNull WireIn wire) {

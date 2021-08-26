@@ -18,7 +18,7 @@ import java.util.function.Predicate;
 public class WireTestCommon {
     protected ThreadDump threadDump;
     protected Map<ExceptionKey, Integer> exceptions;
-    private Map<Predicate<ExceptionKey>, String> expectedExceptions = new LinkedHashMap<>();
+    private final Map<Predicate<ExceptionKey>, String> expectedExceptions = new LinkedHashMap<>();
 
     private boolean gt;
 

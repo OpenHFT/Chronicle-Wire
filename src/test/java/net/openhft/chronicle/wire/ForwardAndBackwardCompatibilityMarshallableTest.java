@@ -32,11 +32,11 @@ import java.util.Collection;
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
 @RunWith(value = Parameterized.class)
-public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon {
+public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCommon {
 
     private final WireType wireType;
 
-    public ForwardAndBackwardCompatibilityMarshableTest(WireType wireType) {
+    public ForwardAndBackwardCompatibilityMarshallableTest(WireType wireType) {
         this.wireType = wireType;
     }
 
@@ -52,9 +52,9 @@ public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon
     public void marshableStringBuilderTest() throws Exception {
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         wire.usePadding(true);
-        CLASS_ALIASES.addAlias(DTO2.class, "DTO");
+        CLASS_ALIASES.addAlias(MDTO2.class, "DTO");
 
-        wire.writeDocument(false, w -> new DTO2(1, 2, "3").writeMarshallable(w));
+        wire.writeDocument(false, w -> new MDTO2(1, 2, "3").writeMarshallable(w));
        // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
         if (wire instanceof TextWire)
@@ -63,7 +63,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
                 Assert.fail();
-            @NotNull DTO2 dto2 = new DTO2();
+            @NotNull MDTO2 dto2 = new MDTO2();
             dto2.readMarshallable(dc.wire());
             Assert.assertEquals(dto2.one, 1);
             Assert.assertEquals(dto2.two, 2);
@@ -74,21 +74,23 @@ public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon
     }
 
     @Test
-    public void backwardsCompatibility() throws Exception {
+    public void backwardsCompatibility() {
+        expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityMarshallableTest$MDTO1 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityMarshallableTest$MDTO2");
+
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         wire.usePadding(true);
-        CLASS_ALIASES.addAlias(DTO1.class, "DTO");
+        CLASS_ALIASES.addAlias(MDTO1.class, "MDTO");
 
-        wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO1(1)));
+        wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new MDTO1(1)));
        // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
-        CLASS_ALIASES.addAlias(DTO2.class, "DTO");
+        CLASS_ALIASES.addAlias(MDTO2.class, "MDTO");
         if (wire instanceof TextWire)
             ((TextWire) wire).useBinaryDocuments();
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
                 Assert.fail();
-            @NotNull DTO2 dto2 = new DTO2();
+            @NotNull MDTO2 dto2 = new MDTO2();
             dc.wire().getValueIn().marshallable(dto2);
             Assert.assertEquals(dto2.one, 1);
             Assert.assertEquals(dto2.two, 0);
@@ -99,23 +101,24 @@ public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon
     }
 
     @Test
-    public void forwardComparability() throws Exception {
+    public void forwardCompatibility() {
+        expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityMarshallableTest$MDTO2 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityMarshallableTest$MDTO1");
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         wire.usePadding(true);
-        CLASS_ALIASES.addAlias(DTO2.class, "DTO");
+        CLASS_ALIASES.addAlias(MDTO2.class, "MDTO");
 
-        wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO2(1, 2, "3")));
+        wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new MDTO2(1, 2, "3")));
        // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
-        CLASS_ALIASES.addAlias(DTO1.class, "DTO");
+        CLASS_ALIASES.addAlias(MDTO1.class, "MDTO");
 
         if (wire instanceof TextWire)
             ((TextWire) wire).useBinaryDocuments();
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
                 Assert.fail();
-            @NotNull DTO1 dto1 = new DTO1();
+            @NotNull MDTO1 dto1 = new MDTO1();
             dc.wire().getValueIn()
                     .marshallable(dto1);
             Assert.assertEquals(1, dto1.one);
@@ -124,20 +127,20 @@ public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon
         wire.bytes().releaseLast();
     }
 
-    public static class DTO1 extends SelfDescribingMarshallable implements Demarshallable {
+    public static class MDTO1 extends SelfDescribingMarshallable implements Demarshallable {
 
         int one;
 
         @UsedViaReflection
-        public DTO1(@NotNull WireIn wire) {
+        public MDTO1(@NotNull WireIn wire) {
             readMarshallable(wire);
         }
 
-        public DTO1(int i) {
+        public MDTO1(int i) {
             this.one = i;
         }
 
-        public DTO1() {
+        public MDTO1() {
 
         }
 
@@ -146,31 +149,31 @@ public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon
         }
 
         @NotNull
-        public DTO1 one(int one) {
+        public MDTO1 one(int one) {
             this.one = one;
             return this;
         }
     }
 
-    public static class DTO2 extends SelfDescribingMarshallable implements Demarshallable {
+    public static class MDTO2 extends SelfDescribingMarshallable implements Demarshallable {
 
         final StringBuilder three = new StringBuilder();
         int one;
         int two;
 
         @UsedViaReflection
-        public DTO2(@NotNull WireIn wire) {
+        public MDTO2(@NotNull WireIn wire) {
             readMarshallable(wire);
         }
 
-        public DTO2(int one, int two, @NotNull Object three) {
+        public MDTO2(int one, int two, @NotNull Object three) {
             this.one = one;
             this.two = two;
             StringUtils.setCount(this.three, 0);
             this.three.append(three.toString());
         }
 
-        public DTO2() {
+        public MDTO2() {
 
         }
 
@@ -180,7 +183,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon
         }
 
         @NotNull
-        public DTO2 three(@NotNull Object three) {
+        public MDTO2 three(@NotNull Object three) {
             StringUtils.setCount(this.three, 0);
             this.three.append(three.toString());
             return this;
@@ -191,7 +194,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon
         }
 
         @NotNull
-        public DTO2 one(int one) {
+        public MDTO2 one(int one) {
             this.one = one;
             return this;
         }
@@ -201,7 +204,7 @@ public class ForwardAndBackwardCompatibilityMarshableTest extends WireTestCommon
         }
 
         @NotNull
-        public DTO2 two(int two) {
+        public MDTO2 two(int two) {
             this.two = two;
             return this;
         }

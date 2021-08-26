@@ -18,10 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.NoBytesStore;
-import net.openhft.chronicle.bytes.PointerBytesStore;
-import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
@@ -52,6 +49,7 @@ import java.util.stream.Stream;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
+import static net.openhft.chronicle.wire.TextWireTest.*;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static net.openhft.chronicle.wire.YamlTokeniserTest.doTest;
 import static org.easymock.EasyMock.replay;
@@ -317,7 +315,6 @@ public class YamlWireTest extends WireTestCommon {
             @NotNull Yaml yaml = new Yaml();
             load = yaml.load(new StringReader(s));
         } catch (Exception e) {
-           // System.out.println(s);
             throw e;
         }
         assertEquals(expected, load.toString());
@@ -355,7 +352,6 @@ public class YamlWireTest extends WireTestCommon {
         wire.write(() -> "VALUE").int64(expected);
         wire.write(() -> "VALUE2").int64(expected);
         expectWithSnakeYaml("{VALUE=1, VALUE2=1}", wire);
-       // System.out.println("out" + Bytes.toHexString(wire.bytes()));
         assertEquals(expected, wire.read(() -> "VALUE").int16());
         assertEquals(expected, wire.read(() -> "VALUE2").int16());
     }
@@ -708,7 +704,8 @@ public class YamlWireTest extends WireTestCommon {
     @Test
     public void testSingleQuote() {
         expectException("Expected a {} but was blank for type class net.openhft.chronicle.wire.YamlWireTest$YNestedB");
-       ClassAliasPool.CLASS_ALIASES.addAlias(YNestedA.class);
+
+        ClassAliasPool.CLASS_ALIASES.addAlias(YNestedA.class);
         YNestedA a = Marshallable.fromString("!YNestedA {\n" +
                 "  b: !YNestedB,\n" +
                 "  value: 12345\n" +
@@ -947,7 +944,6 @@ public class YamlWireTest extends WireTestCommon {
 
         try {
             String cs = dto.toString();
-           // System.out.println(cs);
             dto2 = Marshallable.fromString(cs);
             assertEquals(cs, dto2.toString());
         } finally {
@@ -1194,9 +1190,9 @@ public class YamlWireTest extends WireTestCommon {
         wire.bytes().readSkip(4);
         // TODO: snakeyaml doesn't like !int
         // Can't construct a java object for !int; exception=Invalid tag: !int
-          // in 'reader', line 2, column 5:
-            // ? !int 1: !int 11,
-              // ^
+        // in 'reader', line 2, column 5:
+        // ? !int 1: !int 11,
+        // ^
         expectWithSnakeYaml("{1=11, 2=2, 3=3}", wire);
     }
 
@@ -1328,7 +1324,6 @@ public class YamlWireTest extends WireTestCommon {
         @NotNull Object[] a3 = {"Hello", 123, 10.1};
         wire.write("three").object(Object[].class, a3);
 
-       // System.out.println(wire);
         @Nullable Object o1 = wire.read()
                 .object(Object[].class);
         assertArrayEquals(a1, (Object[]) o1);
@@ -1446,15 +1441,15 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals(0, map.size());
 
         // TODO we shouldn't need to create a new wire.
-       // wire = createWire();
+        // wire = createWire();
 //
-       // Set<String> threeObjects = new HashSet(Arrays.asList(new String[]{"abc", "def", "ghi"}));
-       // wire.write().object(threeObjects);
+        // Set<String> threeObjects = new HashSet(Arrays.asList(new String[]{"abc", "def", "ghi"}));
+        // wire.write().object(threeObjects);
 //
-       // Set<String> list2 = wire.read()
-               // .object(Set.class);
-       // assertEquals(3, list2.size());
-       // assertEquals("[abc, def, ghi]", list2.toString());
+        // Set<String> list2 = wire.read()
+        // .object(Set.class);
+        // assertEquals(3, list2.size());
+        // assertEquals("[abc, def, ghi]", list2.toString());
     }
 
     @Test
@@ -1815,7 +1810,6 @@ public class YamlWireTest extends WireTestCommon {
                 "}\n", new DoubleWrapper(10e6).toString());
         DoubleWrapper dw5 = Marshallable.fromString(new DoubleWrapper(10e6).toString());
         assertEquals(10e6, dw5.d, 0);
-        ClassAliasPool.CLASS_ALIASES.removePackage(DoubleWrapper.class.getPackage().getName());
     }
 
     @Test
@@ -1956,7 +1950,6 @@ public class YamlWireTest extends WireTestCommon {
         myDto1.strings.add("world");
 
         String cs = myDto1.toString();
-       // System.out.println(cs);
         MyDto o = Marshallable.fromString(cs);
         assertEquals(cs, o.toString());
 
@@ -1966,7 +1959,7 @@ public class YamlWireTest extends WireTestCommon {
     @Test
     public void longConverter() {
         TwoLongs twoLongs = new TwoLongs(0x1234567890abcdefL, -1);
-        assertEquals("!net.openhft.chronicle.wire.YamlWireTest$TwoLongs {\n" +
+        assertEquals("!net.openhft.chronicle.wire.TextWireTest$TwoLongs {\n" +
                 "  hexadecimal: 1234567890abcdef,\n" +
                 "  hexa2: ffffffffffffffff\n" +
                 "}\n", twoLongs.toString());
@@ -1994,7 +1987,7 @@ public class YamlWireTest extends WireTestCommon {
     static class FieldWithComment extends SelfDescribingMarshallable {
         @Comment("a comment where the value=%s")
         String field;
-           // String field2;
+        // String field2;
     }
 
     static class FieldWithComment2 extends SelfDescribingMarshallable {
@@ -2014,26 +2007,6 @@ public class YamlWireTest extends WireTestCommon {
         public void unexpectedField(Object event, ValueIn valueIn) {
             others.put(event.toString(), valueIn.object());
         }
-    }
-
-    static class ABCD extends SelfDescribingMarshallable {
-        Bytes A = Bytes.allocateElasticDirect();
-        Bytes B = Bytes.allocateDirect(64);
-        Bytes C = Bytes.elasticByteBuffer();
-        Bytes D = Bytes.allocateElasticOnHeap(1);
-
-        void releaseAll() {
-            A.releaseLast();
-            B.releaseLast();
-            C.releaseLast();
-            D.releaseLast();
-        }
-    }
-
-    static class ABC extends SelfDescribingMarshallable {
-        StringBuilder A = new StringBuilder();
-        StringBuilder B = new StringBuilder();
-        StringBuilder C = new StringBuilder();
     }
 
     enum YWTSingleton {
@@ -2056,16 +2029,6 @@ public class YamlWireTest extends WireTestCommon {
         public void bytes(@NotNull CharSequence cs) {
             bytes.clear();
             bytes.append(cs);
-        }
-    }
-
-    static class DoubleWrapper extends SelfDescribingMarshallable {
-        double d;
-        double n;
-
-        public DoubleWrapper(double d) {
-            this.d = d;
-            this.n = -d;
         }
     }
 
@@ -2093,87 +2056,6 @@ public class YamlWireTest extends WireTestCommon {
     static class YNestedItem extends SelfDescribingMarshallable {
         int a;
         double b;
-    }
-
-    static class WithEnumSet extends SelfDescribingMarshallable {
-        String name;
-        Set<TimeUnit> timeUnits = EnumSet.noneOf(TimeUnit.class);
-
-        @UsedViaReflection
-        WithEnumSet() {
-        }
-
-        public WithEnumSet(String name) {
-            this.name = name;
-        }
-
-        public WithEnumSet(String name, Set<TimeUnit> timeUnits) {
-            this.name = name;
-            this.timeUnits = timeUnits;
-        }
-
-        @Override
-        public void writeMarshallable(@NotNull WireOut wire) {
-            Wires.writeMarshallable(this, wire, false);
-        }
-    }
-
-    static class MyDto extends SelfDescribingMarshallable {
-        List<String> strings = new ArrayList<>();
-
-        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
-
-            // WORKS
-             // Wires.readMarshallable(this, wire, true);  // WORKS
-
-            // FAILS
-            Wires.readMarshallable(this, wire, false);
-        }
-    }
-
-    static class DtoWithBytesField extends SelfDescribingMarshallable {
-        private BytesStore bytes;
-        private long another;
-
-        @Override
-        public void readMarshallable(@NotNull WireIn wire) {
-            if (bytes == null)
-                bytes = BytesStore.nativePointer();
-            wire.read(() -> "bytes").bytesSet((PointerBytesStore) bytes);
-            another = (wire.read(() -> "another").int64());
-        }
-
-        @Override
-        public void writeMarshallable(@NotNull WireOut wire) {
-            wire.write(() -> "bytes").bytes(bytes);
-            wire.write(() -> "another").int64(another);
-        }
-    }
-
-    static class TwoLongs extends SelfDescribingMarshallable {
-
-        @LongConversion(HexaDecimalConverter.class)
-        long hexadecimal;
-
-        @LongConversion(HexaDecimalConverter.class)
-        long hexa2;
-
-        public TwoLongs(long hexadecimal, long hexa2) {
-            this.hexadecimal = hexadecimal;
-            this.hexa2 = hexa2;
-        }
-    }
-
-    static class HexaDecimalConverter implements LongConverter {
-        @Override
-        public long parse(CharSequence text) {
-            return Long.parseUnsignedLong(text.toString(), 16);
-        }
-
-        @Override
-        public void append(StringBuilder text, long value) {
-            text.append(Long.toHexString(value));
-        }
     }
 
     static class YNestedWithEnumSet extends SelfDescribingMarshallable {
