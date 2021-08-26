@@ -52,7 +52,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
     public void marshableStringBuilderTest() throws Exception {
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
         wire.usePadding(true);
-        CLASS_ALIASES.addAlias(MDTO2.class, "DTO");
+        CLASS_ALIASES.addAlias(MDTO2.class, "MDTO");
 
         wire.writeDocument(false, w -> new MDTO2(1, 2, "3").writeMarshallable(w));
        // System.out.println(Wires.fromSizePrefixedBlobs(wire));
