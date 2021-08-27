@@ -80,7 +80,7 @@ public class GenerateMethodWriter {
     private final boolean useMethodId;
 
     private final String packageName;
-    private final Set<Class<?>> interfaces;
+    private final Set<Class> interfaces;
     private final String className;
     private final ClassLoader classLoader;
     private final WireType wireType;
@@ -90,7 +90,7 @@ public class GenerateMethodWriter {
     final private AtomicInteger indent = new AtomicInteger();
 
     private GenerateMethodWriter(final String packageName,
-                                 final Set<Class<?>> interfaces,
+                                 final Set<Class> interfaces,
                                  final String className,
                                  final ClassLoader classLoader,
                                  final WireType wireType,
@@ -116,13 +116,13 @@ public class GenerateMethodWriter {
      */
     @Nullable
     public static Class<?> newClass(String fullClassName,
-                                 Set<Class<?>> interfaces,
-                                 ClassLoader classLoader,
-                                 final WireType wireType,
-                                 final String genericEvent,
-                                 boolean metaData,
-                                 boolean useMethodId,
-                                 final boolean useUpdateInterceptor) {
+                                    Set<Class> interfaces,
+                                    ClassLoader classLoader,
+                                    final WireType wireType,
+                                    final String genericEvent,
+                                    boolean metaData,
+                                    boolean useMethodId,
+                                    final boolean useUpdateInterceptor) {
         int lastDot = fullClassName.lastIndexOf('.');
         String packageName = "";
         String className = fullClassName;

@@ -220,7 +220,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
                 .append(");\n");
     }
 
-    private void methodReturn(SourceCodeFormatter result, final Method method, final Set<Class<?>> interfaceClases) {
+    private void methodReturn(SourceCodeFormatter result, final Method method, final Set<Class> interfaceClases) {
         Class<?> returnType = method.getReturnType();
         if (returnType == void.class)
             return;
