@@ -23,7 +23,7 @@ import net.openhft.chronicle.core.io.Closeable;
 
 import java.util.function.Supplier;
 
-public class MethodWriterInvocationHandlerSupplier<T> implements Supplier<MethodWriterInvocationHandler> {
+public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWriterInvocationHandler> {
     private final Supplier<MethodWriterInvocationHandler> supplier;
     private boolean recordHistory;
     private MethodWriterInterceptorReturns methodWriterInterceptorReturns;

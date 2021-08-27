@@ -259,9 +259,8 @@ public enum SerializationStrategies implements SerializationStrategy {
 
                 // make sure we are progressing.
                 long pos2 = wireIn.bytes().readPosition();
-                if (pos2 <= pos)
-                    if (!Jvm.isDebug())
-                        throw new IllegalStateException(wireIn.bytes().toDebugString());
+                if (pos2 <= pos && !Jvm.isDebug())
+                    throw new IllegalStateException(wireIn.bytes().toDebugString());
                 pos = pos2;
             }
             return map;
@@ -294,9 +293,8 @@ public enum SerializationStrategies implements SerializationStrategy {
                 @Nullable final Object object = in.object();
                 // make sure we are progressing.
                 long pos2 = bytes.readPosition();
-                if (pos2 <= pos)
-                    if (!Jvm.isDebug())
-                        throw new IllegalStateException(bytes.toDebugString());
+                if (pos2 <= pos && !Jvm.isDebug())
+                    throw new IllegalStateException(bytes.toDebugString());
                 pos = pos2;
                 set.add(object);
             }
@@ -332,9 +330,8 @@ public enum SerializationStrategies implements SerializationStrategy {
 
                 // make sure we are progressing.
                 long pos2 = wireIn.bytes().readPosition();
-                if (pos2 <= pos)
-                    if (!Jvm.isDebug())
-                        throw new IllegalStateException(wireIn.bytes().toDebugString());
+                if (pos2 <= pos && !Jvm.isDebug())
+                    throw new IllegalStateException(wireIn.bytes().toDebugString());
                 pos = pos2;
             }
             return list;
@@ -400,8 +397,9 @@ public enum SerializationStrategies implements SerializationStrategy {
         @Override
         public Object readUsing(Object using, @NotNull ValueIn in, BracketType bracketType) {
             @NotNull PrimArrayWrapper wrapper = (PrimArrayWrapper) using;
-            final Class componentType = wrapper.type.getComponentType();
-            int i = 0, len = 0;
+            final Class<?> componentType = wrapper.type.getComponentType();
+            int i = 0;
+            int len = 0;
             Object array = Array.newInstance(componentType, 0);
             while (in.hasNextSequenceItem()) {
                 if (i >= len) {

@@ -38,10 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TextMethodTester<T> {
@@ -110,7 +107,7 @@ public class TextMethodTester<T> {
     }
 
     @NotNull
-    public TextMethodTester afterRun(Function<String, String> afterRun) {
+    public TextMethodTester afterRun(UnaryOperator<String> afterRun) {
         this.afterRun = afterRun;
         return this;
     }

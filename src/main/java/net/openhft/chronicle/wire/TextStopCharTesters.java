@@ -25,24 +25,12 @@ import java.util.BitSet;
 enum TextStopCharTesters implements StopCharTester {
     END_OF_TYPE {
         @NotNull
-        BitSet EOW = new BitSet();
-        {
-            for (int i = 0; i < 127; i++) {
-                if (!Character.isJavaIdentifierPart(i))
-                    EOW.set(i);
-            }
-
-            EOW.clear('['); // not in spec
-            EOW.clear(']'); // not in spec
-            EOW.clear('-'); // not in spec
-            EOW.clear('!');
-            EOW.clear('.');
-            EOW.clear('$');
-        }
+        private final BitSet eow = TextStopCharTesters.endOfTypeBitSet();
+        private final int eowLength = eow.length();
 
         @Override
         public boolean isStopChar(int ch) {
-            return ch >= EOW.length() || EOW.get(ch);
+            return ch >= eowLength || eow.get(ch);
         }
     },
     END_OF_TEXT {
@@ -64,5 +52,22 @@ enum TextStopCharTesters implements StopCharTester {
                     return false;
             }
         }
+    };
+
+    private static BitSet endOfTypeBitSet() {
+        final BitSet eow = new BitSet();
+        for (int i = 0; i < 127; i++) {
+            if (!Character.isJavaIdentifierPart(i))
+                eow.set(i);
+        }
+
+        eow.clear('['); // not in spec
+        eow.clear(']'); // not in spec
+        eow.clear('-'); // not in spec
+        eow.clear('!');
+        eow.clear('.');
+        eow.clear('$');
+        return eow;
     }
+
 }

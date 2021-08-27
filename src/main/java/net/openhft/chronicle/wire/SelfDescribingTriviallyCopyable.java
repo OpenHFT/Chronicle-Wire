@@ -29,7 +29,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
             bytes.unsafeReadObject(this, $start(), $length());
     }
 
-    private void carefulCopy(BytesIn in, int description0) {
+    private void carefulCopy(BytesIn<?> in, int description0) {
         int offset = $start();
         int longs0 = description0 >>> 24;
         int ints0 = (description0 >>> 16) & 0xFF;

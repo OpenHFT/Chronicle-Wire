@@ -112,7 +112,7 @@ public class RawWire extends AbstractWire implements Wire {
 
     @Override
     public void consumePadding() {
-
+        // Do nothing
     }
 
     @Override
@@ -243,12 +243,12 @@ public class RawWire extends AbstractWire implements Wire {
 
     @Override
     public void writeStartEvent() {
-
+        // Do nothing
     }
 
     @Override
     public void writeEndEvent() {
-
+        // Do nothing
     }
 
     @NotNull
@@ -679,7 +679,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @Override
         public void resetState() {
-
+            // Do nothing
         }
     }
 
@@ -949,7 +949,8 @@ public class RawWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter) {
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
-                setter.accept(t, value = new BinaryLongReference());
+                value = new BinaryLongReference();
+                setter.accept(t, value);
             }
             return int64(value);
         }
@@ -983,7 +984,8 @@ public class RawWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter) {
             if (!(value instanceof Byteable) || ((Byteable) value).maxSize() != 8) {
-                setter.accept(t, value = new BinaryIntReference());
+                value = new BinaryIntReference();
+                setter.accept(t, value);
             }
             @Nullable Byteable b = (Byteable) value;
             long length = b.maxSize();

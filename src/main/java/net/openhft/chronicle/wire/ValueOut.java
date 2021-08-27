@@ -52,8 +52,8 @@ public interface ValueOut {
     int SMALL_MESSAGE = 64;
     String ZEROS_64 = "0000000000000000000000000000000000000000000000000000000000000000";
 
-    static <V> boolean isAnEnum(V v) {
-        return (v instanceof Enum) | (v instanceof DynamicEnum);
+    static boolean isAnEnum(Object v) {
+        return (v instanceof Enum) || (v instanceof DynamicEnum);
     }
 
     /**

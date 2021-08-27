@@ -126,9 +126,10 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
                     wireType = WireType.BINARY;
                 }
 
-                Wire wire = wireType.apply(bytes);
+                final Wire wire = wireType.apply(bytes);
                 wire.classLookup(classLookup);
-                return this.wire = wire;
+                this.wire = wire;
+                return wire;
             }
 
             return null;

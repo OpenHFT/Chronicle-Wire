@@ -21,9 +21,11 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 public class TextReadDocumentContext implements ReadDocumentContext {
-    public static final BytesStore SOD_SEP = BytesStore.from("---");
-    public static final BytesStore EOD_SEP = BytesStore.from("...");
+    public static final BytesStore<?, ?> SOD_SEP = BytesStore.from("---");
+    public static final BytesStore<?, ?> EOD_SEP = BytesStore.from("...");
     @Nullable
     protected AbstractWire wire;
     protected boolean present, notComplete;
@@ -163,6 +165,6 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
     @Override
     public String toString() {
-        return wire.toString();
+        return Objects.toString(wire);
     }
 }

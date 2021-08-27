@@ -62,7 +62,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     private final String packageName;
     private ClassLoader classLoader;
     @NotNull
-    private final MethodWriterInvocationHandlerSupplier<T> handlerSupplier;
+    private final MethodWriterInvocationHandlerSupplier handlerSupplier;
     private Supplier<MarshallableOut> outSupplier;
     private Closeable closeable;
     private String genericEvent;

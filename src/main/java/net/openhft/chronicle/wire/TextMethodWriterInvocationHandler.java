@@ -62,8 +62,6 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
                 dc.chainedElement(chained);
                 Wire wire = dc.wire();
                 handleInvoke(method, args, wire);
-//            wire.padToCacheAlign();
-
             } catch (Throwable t) {
                 dc.rollbackOnClose();
                 throw Jvm.rethrow(t);
@@ -107,6 +105,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
 
         @Override
         public void accept(Object[] objects) {
+            // Do nothing
         }
     }
 }

@@ -365,7 +365,7 @@ public interface ValueIn {
     }
 
     @NotNull
-    default <O, T extends ReadMarshallable, C extends Collection<T>> WireIn collection(@NotNull O o, Function<O, T> tSupplier) {
+    default <O, T extends ReadMarshallable> WireIn collection(@NotNull O o, Function<O, T> tSupplier) {
         sequence(o, tSupplier, (o2, ts, v) -> {
             while (v.hasNextSequenceItem()) {
                 T t = ts.apply(o2);
@@ -409,10 +409,9 @@ public interface ValueIn {
 
     @NotNull
     default <T> WireIn typeLiteral(T t, @NotNull BiConsumer<T, Class> classConsumer) throws IORuntimeException {
-        return typeLiteralAsText(t, (o, x) -> {
-            classConsumer.accept(o, ClassAliasPool.CLASS_ALIASES.forName(x));
-
-        });
+        return typeLiteralAsText(t, (o, x) ->
+            classConsumer.accept(o, ClassAliasPool.CLASS_ALIASES.forName(x))
+        );
     }
 
     @NotNull

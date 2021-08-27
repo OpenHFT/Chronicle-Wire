@@ -261,7 +261,7 @@ public class QueryWire extends TextWire {
 
         @NotNull
         @Override
-        public WireOut typeLiteral(@NotNull CharSequence type) {
+        public WireOut typeLiteral(@Nullable CharSequence type) {
             throw new UnsupportedOperationException();
         }
 
