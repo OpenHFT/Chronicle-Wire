@@ -57,7 +57,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     );
 
     private final boolean DISABLE_PROXY_GEN = Jvm.getBoolean(DISABLE_WRITER_PROXY_CODEGEN, false);
-    private final Set<Class> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
+    private final Set<Class<?>> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
 
     private final String packageName;
     private ClassLoader classLoader;

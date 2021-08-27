@@ -20,7 +20,7 @@ import static java.util.Collections.*;
 public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethodWriter2.GMWMetaData> {
 
     private static final String DOCUMENT_CONTEXT = DocumentContext.class.getSimpleName();
-    private static final Map<String, Map<List<Class>, String>> TEMPLATE_METHODS = new LinkedHashMap<>();
+    private static final Map<String, Map<List<Class<?>>, String>> TEMPLATE_METHODS = new LinkedHashMap<>();
 
     static {
         TEMPLATE_METHODS.put("close",
@@ -35,13 +35,13 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
                         "public boolean recordHistory() {\n" +
                         "    return this.outSupplier.get().recordHistory();\n" +
                         "}\n"));
-        List<Class> dcBoolean = Stream.of(DocumentContext.class, boolean.class).collect(Collectors.toList());
+        List<Class<?>> dcBoolean = Stream.of(DocumentContext.class, boolean.class).collect(Collectors.toList());
         TEMPLATE_METHODS.put("acquireWritingDocument",
                 singletonMap(dcBoolean, "" +
                         "public " + DOCUMENT_CONTEXT + " acquireWritingDocument(boolean metaData){\n" +
                         "    return this.outSupplier.get().acquireWritingDocument(metaData);\n" +
                         "}\n"));
-        Map<List<Class>, String> wd = new LinkedHashMap<>();
+        Map<List<Class<?>>, String> wd = new LinkedHashMap<>();
         wd.put(singletonList(DocumentContext.class), "" +
                 "public " + DOCUMENT_CONTEXT + " writingDocument(){\n" +
                 "    return this.outSupplier.get().writingDocument();\n" +
@@ -53,7 +53,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         TEMPLATE_METHODS.put("writingDocument", wd);
     }
 
-    private final Map<Class, String> methodWritersMap = new LinkedHashMap<>();
+    private final Map<Class<?>, String> methodWritersMap = new LinkedHashMap<>();
 
     public GenerateMethodWriter2() {
         super(new GMWMetaData());
@@ -64,16 +64,16 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     private static String templateFor(String name, Class<?> returnType, Class<?>[] pts) {
-        Map<List<Class>, String> map = TEMPLATE_METHODS.get(name);
+        Map<List<Class<?>>, String> map = TEMPLATE_METHODS.get(name);
         if (map == null)
             return null;
-        List<Class> sig = new ArrayList<>();
+        List<Class<?>> sig = new ArrayList<>();
         sig.add(returnType);
         addAll(sig, pts);
         return map.get(sig);
     }
 
-    private static CharSequence asString(Class type) {
+    private static CharSequence asString(Class<?> type) {
         if (boolean.class.equals(type)) {
             return "bool";
         } else if (byte.class.equals(type)) {
@@ -170,7 +170,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     @Override
     protected void generateEnd(SourceCodeFormatter mainCode) {
         super.generateEnd(mainCode);
-        for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
+        for (Map.Entry<Class<?>, String> e : methodWritersMap.entrySet()) {
             mainCode.append("private transient ThreadLocal<").append(nameForClass(e.getKey())).append("> ").append(e.getValue())
                     .append("= ThreadLocal.withInitial(() -> this.outSupplier.get().methodWriter(").append(nameForClass(e.getKey())).append(".class));\n");
         }
@@ -178,7 +178,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
 
     private void writeEventNameOrId(final Method method, final SourceCodeFormatter body, final String eventName) {
         final Optional<Annotation> methodId = metaData().useMethodIds()
-                ? stream(method.getAnnotations()).filter(f -> f instanceof MethodId).findFirst()
+                ? stream(method.getAnnotations()).filter(MethodId.class::isInstance).findFirst()
                 : Optional.empty();
         if (methodId.isPresent()) {
             long value = ((MethodId) methodId.get()).value();
@@ -220,7 +220,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
                 .append(");\n");
     }
 
-    private void methodReturn(SourceCodeFormatter result, final Method method, final Set<Class> interfaceClases) {
+    private void methodReturn(SourceCodeFormatter result, final Method method, final Set<Class<?>> interfaceClases) {
         Class<?> returnType = method.getReturnType();
         if (returnType == void.class)
             return;

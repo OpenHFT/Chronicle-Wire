@@ -45,8 +45,8 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * a long, which consists of 64 bits, requiring 6 address bits.
      * The choice of word size is determined purely by performance concerns.
      */
-    private final static int ADDRESS_BITS_PER_WORD = 6;
-    private final static int BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
+    private static final int ADDRESS_BITS_PER_WORD = 6;
+    private static final int BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
 
     /* Used to shift left or right for a partial word mask */
     private static final long WORD_MASK = 0xffffffffffffffffL;
@@ -125,14 +125,14 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     public void set(LongValue word, long param, LongFunction function) {
         throwExceptionIfClosed();
 
-        Pauser pauser = pauser();
-        pauser.reset();
+        final Pauser internalPauser = pauser();
+        internalPauser.reset();
 
         for (; ; ) {
             long oldValue = word.getVolatileValue();
             if (word.compareAndSwapValue(oldValue, function.apply(oldValue, param)))
                 break;
-            pauser.pause();
+            internalPauser.pause();
         }
     }
 
@@ -907,6 +907,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      *
      * @return a string representation of this bit set
      */
+    @Override
     public String toString() {
 
         int numBits = (getWordsInUse() > 128) ?

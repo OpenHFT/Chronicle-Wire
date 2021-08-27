@@ -211,7 +211,7 @@ public interface MarshallableOut extends DocumentWritten {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @NotNull
     default <T> T methodWriter(boolean metaData, @NotNull Class<T> tClass, Class... additional) {
-        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<T>(tClass,
+        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.BINARY_LIGHT,
                 () -> new BinaryMethodWriterInvocationHandler(metaData, this));
         Stream.of(additional).forEach(builder::addInterface);

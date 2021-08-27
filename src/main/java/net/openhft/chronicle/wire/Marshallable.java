@@ -121,14 +121,14 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     @Override
     default void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
         // Wires.readMarshallable(this, wire, true);
-        WireMarshaller wm = WIRE_MARSHALLER_CL.get(this.getClass());
+        WireMarshaller<Object> wm = WIRE_MARSHALLER_CL.get(this.getClass());
         wm.readMarshallable(this, wire, wm.defaultValue(), true);
     }
 
     @Override
     default void writeMarshallable(@NotNull WireOut wire) {
         // Wires.writeMarshallable(this, wire);
-        WireMarshaller wm = WIRE_MARSHALLER_CL.get(this.getClass());
+        WireMarshaller<Object> wm = WIRE_MARSHALLER_CL.get(this.getClass());
         wm.writeMarshallable(this, wire);
     }
 

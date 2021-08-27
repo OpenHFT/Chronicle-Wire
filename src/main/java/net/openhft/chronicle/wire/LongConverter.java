@@ -67,7 +67,4 @@ public interface LongConverter {
         return (int) (64 / log(based) * log(2));
     }
 
-    static void main(String[] args) {
-        System.out.println("maxParseLength(85) = " + maxParseLength(85));
-    }
 }

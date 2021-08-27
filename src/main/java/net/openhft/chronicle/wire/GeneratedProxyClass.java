@@ -115,7 +115,7 @@ public enum GeneratedProxyClass {
     }
 
     @NotNull
-    private static String nameForClass(Class interfaceClazz) {
+    private static String nameForClass(Class<?> interfaceClazz) {
         return interfaceClazz.getName().replace('$', '.');
     }
 

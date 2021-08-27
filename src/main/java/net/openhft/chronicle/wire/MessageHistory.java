@@ -98,6 +98,7 @@ public interface MessageHistory extends Marshallable {
     /**
      * Clears all data contained in this {@code MessageHistory}
      */
+    @Override
     void reset();
 
     /**

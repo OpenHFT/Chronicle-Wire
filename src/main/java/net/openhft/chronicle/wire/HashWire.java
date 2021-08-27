@@ -86,6 +86,7 @@ public class HashWire implements WireOut, BytesComment {
 
     @Override
     public void classLookup(ClassLookup classLookup) {
+        // Do nothing
     }
 
     @Override
@@ -167,10 +168,12 @@ public class HashWire implements WireOut, BytesComment {
 
     @Override
     public void writeStartEvent() {
+        // No nothing
     }
 
     @Override
     public void writeEndEvent() {
+        // No nothing
     }
 
     @NotNull
@@ -587,7 +590,7 @@ public class HashWire implements WireOut, BytesComment {
 
         @Override
         public void resetState() {
-
+            // No nothing
         }
     }
 }

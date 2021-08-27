@@ -39,9 +39,8 @@ public class GenerateMethodWriter {
     private static final String METHOD_ID = MethodId.class.getSimpleName();
     private static final String VALUE_OUT = ValueOut.class.getSimpleName();
     private static final String CLOSEABLE = Closeable.class.getSimpleName();
-    private static final String MARSHALLABLE = Marshallable.class.getSimpleName();
     private static final String UPDATE_INTERCEPTOR_FIELD = "updateInterceptor";
-    private static final Map<String, Map<List<Class>, String>> TEMPLATE_METHODS = new LinkedHashMap<>();
+    private static final Map<String, Map<List<Class<?>>, String>> TEMPLATE_METHODS = new LinkedHashMap<>();
 
     static {
         // make sure Wires static block called and classpath set up
@@ -59,13 +58,13 @@ public class GenerateMethodWriter {
                         "public boolean recordHistory() {\n" +
                         "    return out.get().recordHistory();\n" +
                         "}\n"));
-        List<Class> dcBoolean = Stream.of(DocumentContext.class, boolean.class).collect(Collectors.toList());
+        List<Class<?>> dcBoolean = Stream.of(DocumentContext.class, boolean.class).collect(Collectors.toList());
         TEMPLATE_METHODS.put("acquireWritingDocument",
                 singletonMap(dcBoolean, "" +
                         "public " + DOCUMENT_CONTEXT + " acquireWritingDocument(boolean metaData){\n" +
                         "    return out.get().acquireWritingDocument(metaData);\n" +
                         "}\n"));
-        Map<List<Class>, String> wd = new LinkedHashMap<>();
+        Map<List<Class<?>>, String> wd = new LinkedHashMap<>();
         wd.put(singletonList(DocumentContext.class), "" +
                 "public " + DOCUMENT_CONTEXT + " writingDocument(){\n" +
                 "    return out.get().writingDocument();\n" +
@@ -81,17 +80,17 @@ public class GenerateMethodWriter {
     private final boolean useMethodId;
 
     private final String packageName;
-    private final Set<Class> interfaces;
+    private final Set<Class<?>> interfaces;
     private final String className;
     private final ClassLoader classLoader;
     private final WireType wireType;
     private final String genericEvent;
     private final boolean useUpdateInterceptor;
-    private ConcurrentMap<Class, String> methodWritersMap = new ConcurrentHashMap<>();
-    private AtomicInteger indent = new AtomicInteger();
+    private final ConcurrentMap<Class<?>, String> methodWritersMap = new ConcurrentHashMap<>();
+    final private AtomicInteger indent = new AtomicInteger();
 
     private GenerateMethodWriter(final String packageName,
-                                 final Set<Class> interfaces,
+                                 final Set<Class<?>> interfaces,
                                  final String className,
                                  final ClassLoader classLoader,
                                  final WireType wireType,
@@ -116,8 +115,8 @@ public class GenerateMethodWriter {
      * @return a proxy class from an interface class or null if it can't be created
      */
     @Nullable
-    public static Class newClass(String fullClassName,
-                                 Set<Class> interfaces,
+    public static Class<?> newClass(String fullClassName,
+                                 Set<Class<?>> interfaces,
                                  ClassLoader classLoader,
                                  final WireType wireType,
                                  final String genericEvent,
@@ -205,7 +204,7 @@ public class GenerateMethodWriter {
     }
 
     @NotNull
-    private Appendable methodSignature(SortedSet<String> importSet, final Method dm) throws IOException {
+    private Appendable methodSignature(SortedSet<String> importSet, final Method dm) {
 
         SourceCodeFormatter result = new JavaSourceCodeFormatter(this.indent);
         String sep = "";
@@ -232,7 +231,7 @@ public class GenerateMethodWriter {
     }
 
     @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
-    private Class createClass() {
+    private Class<?> createClass() {
 
         SourceCodeFormatter interfaceMethods = new SourceCodeFormatter(1);
         SourceCodeFormatter imports = new JavaSourceCodeFormatter();
@@ -354,7 +353,7 @@ public class GenerateMethodWriter {
     }
 
     private String templateFor(Method dm) {
-        Map<List<Class>, String> map = TEMPLATE_METHODS.get(dm.getName());
+        Map<List<Class<?>>, String> map = TEMPLATE_METHODS.get(dm.getName());
         if (map == null)
             return null;
         List<Class> sig = new ArrayList<>();
@@ -367,7 +366,7 @@ public class GenerateMethodWriter {
         codeFormatter.append("@Override\n");
         codeFormatter.append("public void marshallableOut(MarshallableOut out) {\n");
         codeFormatter.append("this.out = () -> out;");
-        for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
+        for (Map.Entry<Class<?>, String> e : methodWritersMap.entrySet()) {
             codeFormatter.append(format("\n    this.%s.remove();", e.getValue()));
         }
         codeFormatter.append("\n}\n");
@@ -384,7 +383,7 @@ public class GenerateMethodWriter {
         result.append("private transient Supplier<")
                 .append(MARSHALLABLE_OUT)
                 .append("> out;\n");
-        for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
+        for (Map.Entry<Class<?>, String> e : methodWritersMap.entrySet()) {
             result.append(format("private transient ThreadLocal<%s> %s;\n", nameForClass(importSet, e.getKey()), e.getValue()));
         }
         result.append('\n');
@@ -397,7 +396,7 @@ public class GenerateMethodWriter {
             result.append("this." + UPDATE_INTERCEPTOR_FIELD + "= " + UPDATE_INTERCEPTOR_FIELD + ";\n");
         result.append("this.out = out;\n" +
                 "this.closeable = closeable;");
-        for (Map.Entry<Class, String> e : methodWritersMap.entrySet()) {
+        for (Map.Entry<Class<?>, String> e : methodWritersMap.entrySet()) {
             result.append(format("\n%s = ThreadLocal.withInitial(() -> out.get().methodWriter(%s.class));", e.getValue(), nameForClass(e.getKey())));
         }
 
@@ -494,7 +493,7 @@ public class GenerateMethodWriter {
 
     private String writeEventNameOrId(final Method dm, final StringBuilder body, final String eventName) {
         String methodID = "";
-        final Optional<Annotation> methodId = useMethodId ? stream(dm.getAnnotations()).filter(f -> f instanceof MethodId).findFirst() : Optional.empty();
+        final Optional<Annotation> methodId = useMethodId ? stream(dm.getAnnotations()).filter(MethodId.class::isInstance).findFirst() : Optional.empty();
         if ((wireType != WireType.TEXT && wireType != WireType.YAML) && methodId.isPresent()) {
 
             long value = ((MethodId) methodId.get()).value();

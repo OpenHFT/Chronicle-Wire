@@ -258,7 +258,7 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
     public abstract static class MetaData<MD extends MetaData<MD>> extends SelfDescribingMarshallable {
         private String packageName = "";
         private String baseClassName = "";
-        private Set<Class> interfaces = new LinkedHashSet<>();
+        private Set<Class<?>> interfaces = new LinkedHashSet<>();
         private boolean useUpdateInterceptor;
 
         public String packageName() {
@@ -281,11 +281,11 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
             return (MD) this;
         }
 
-        public Set<Class> interfaces() {
+        public Set<Class<?>> interfaces() {
             return interfaces;
         }
 
-        public MD interfaces(Set<Class> interfaces) {
+        public MD interfaces(Set<Class<?>> interfaces) {
             this.interfaces = interfaces;
             return (MD) this;
         }
