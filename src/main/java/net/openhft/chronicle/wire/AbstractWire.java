@@ -68,7 +68,7 @@ public abstract class AbstractWire implements Wire {
     private boolean usePadding = false;
 
     @SuppressWarnings("rawtypes")
-    public AbstractWire(@NotNull Bytes bytes, boolean use8bit) {
+    protected AbstractWire(@NotNull Bytes bytes, boolean use8bit) {
         this.bytes = bytes;
         this.use8bit = use8bit;
         notCompleteIsNotPresent = bytes.sharedMemory();
@@ -278,6 +278,7 @@ public abstract class AbstractWire implements Wire {
         bytes.readPositionRemaining(SPB_HEADER_SIZE, len);
     }
 
+    @Override
     public long enterHeader(int safeLength) {
         return enterHeader((long) safeLength);
     }

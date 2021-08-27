@@ -62,16 +62,16 @@ public class Base32IntConverter implements IntConverter {
         for (int i = 0; i < text.length(); i++) {
             byte b = ENCODE[text.charAt(i)];
             if (b >= 0)
-                v = (v << 5) + b;
+                v = (v << 5) + (b & 0xff);
         }
         return v;
     }
 
     @Override
     public void append(StringBuilder text, int value) {
-        int start = text.length();
+        final int start = text.length();
         while (value != 0) {
-            int v = (int) (value & (BASE - 1));
+            final int v = (value & (BASE - 1));
             value >>>= 5;
             text.append(DECODE[v]);
         }

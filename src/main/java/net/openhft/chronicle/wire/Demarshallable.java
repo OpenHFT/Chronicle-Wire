@@ -58,10 +58,9 @@ public interface Demarshallable {
 
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
-
-        } catch (Throwable e) {
-            if (e instanceof InvocationTargetException)
-                e = e.getCause();
+        } catch (InvocationTargetException ite) {
+            throw new IORuntimeException(ite.getCause());
+        }  catch (Throwable e) {
             throw new IORuntimeException(e);
         }
     }

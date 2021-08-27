@@ -29,11 +29,11 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     private final long amountPerSecond;
     private final long nanosPerAmount;
 
-    public AbstractTimestampLongConverter(TimeUnit timeUnit) {
+    protected AbstractTimestampLongConverter(TimeUnit timeUnit) {
         this(System.getProperty(TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY, UTC.toString()), timeUnit);
     }
 
-    public AbstractTimestampLongConverter(String zoneId, TimeUnit timeUnit) {
+    protected AbstractTimestampLongConverter(String zoneId, TimeUnit timeUnit) {
         this.zoneId = ZoneId.of(zoneId);
         this.amountPerSecond = timeUnit.convert(1, TimeUnit.SECONDS);
         this.nanosPerAmount = TimeUnit.NANOSECONDS.convert(1, timeUnit);
@@ -68,7 +68,7 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
      * @param value The parsed formatted date (in UTC zone)
      * @return The value as a long timestamp
      */
-    abstract protected long parseFormattedDate(ZonedDateTime value);
+    protected abstract long parseFormattedDate(ZonedDateTime value);
 
     /**
      * Interpret long timestamp
@@ -76,7 +76,7 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
      * @param value The parsed timestamp
      * @return The value as a long timestamp
      */
-    abstract protected long parseTimestamp(long value, CharSequence text);
+    protected abstract long parseTimestamp(long value, CharSequence text);
 
     private DateTimeFormatter createFormatter() {
         final DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder()
@@ -91,7 +91,7 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
      *
      * @param builder The builder after the initial date format has been added
      */
-    abstract protected void appendFraction(DateTimeFormatterBuilder builder);
+    protected abstract void appendFraction(DateTimeFormatterBuilder builder);
 
     @Override
     public void append(StringBuilder text, long value) {

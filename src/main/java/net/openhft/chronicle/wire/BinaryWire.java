@@ -1111,7 +1111,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @Override
     public void writeEndEvent() {
-
+        // Do nothing
     }
 
     @NotNull
@@ -1159,8 +1159,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             throw new IllegalStateException("Cannot add " + paddingToAdd + " bytes of padding");
         if (paddingToAdd >= 5) {
             writeCode(PADDING32)
-                    .writeUnsignedInt(paddingToAdd - 5)
-                    .writeSkip(paddingToAdd - 5);
+                    .writeUnsignedInt(paddingToAdd - 5L)
+                    .writeSkip(paddingToAdd - 5L);
 
         } else {
             for (int i = 0; i < paddingToAdd; i++)
@@ -1460,7 +1460,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public WireOut rawBytes(@NotNull byte[] value) {
             typePrefix(byte[].class);
-            writeLength(Maths.toInt32(value.length + 1));
+            writeLength(Maths.toInt32(value.length + 1L));
             writeCode(U8_ARRAY);
             if (value.length > 0)
                 bytes.write(value);
@@ -1491,7 +1491,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut bytes(@NotNull byte[] fromBytes) {
-            writeLength(Maths.toInt32(fromBytes.length + 1));
+            writeLength(Maths.toInt32(fromBytes.length + 1L));
             writeCode(U8_ARRAY);
             bytes.write(fromBytes);
             return BinaryWire.this;
@@ -1915,7 +1915,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         public void resetState() {
-
+            // Do nothing
         }
     }
 
@@ -1925,6 +1925,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return true;
         }
 
+        @Override
         public WireOut writeLong(LongConverter longConverter, long l) {
             return writeLong(l);
         }
@@ -2642,17 +2643,17 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case FLOAT_SET_LOW_0:
                 case FLOAT_SET_LOW_2:
                 case FLOAT_SET_LOW_4:
-                    return 1 + 1;
+                    return 1 + 1L;
                 case UINT16:
                 case INT16:
-                    return 1 + 2;
+                    return 1 + 2L;
                 case FLOAT32:
                 case UINT32:
                 case INT32:
-                    return 1 + 4;
+                    return 1 + 4L;
                 case FLOAT64:
                 case INT64:
-                    return 1 + 8;
+                    return 1 + 8L;
 
                 case PADDING:
                 case PADDING32:
@@ -2698,7 +2699,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                 default:
                     if (code >= STRING_0)
-                        return code + (1 - STRING_0);
+                        return code + (1L - STRING_0);
                     //System.out.println("code=" + code + ", bytes=" + bytes.toHexString());
                     return -1;
             }

@@ -43,7 +43,7 @@ public class Base32LongConverter implements LongConverter {
         for (int i = 0; i < text.length(); i++) {
             byte b = ENCODE[text.charAt(i)];
             if (b >= 0)
-                v = (v << 5) + b;
+                v = (v << 5) + (b & 0xff);
         }
         return v;
     }

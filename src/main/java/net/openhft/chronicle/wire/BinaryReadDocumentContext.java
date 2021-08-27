@@ -31,8 +31,10 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     public long lastStart = -1;
     @Nullable
     protected AbstractWire wire;
-    protected boolean present, notComplete;
-    protected long readPosition, readLimit;
+    protected boolean present;
+    protected boolean notComplete;
+    protected long readPosition;
+    protected long readLimit;
     protected boolean metaData;
     protected boolean rollback;
 

@@ -44,7 +44,7 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     private BiConsumer<Method, Object[]> handleInvoke;
     private boolean useMethodIds;
 
-    public AbstractMethodWriterInvocationHandler() {
+    protected AbstractMethodWriterInvocationHandler() {
         super(HashMap::new);
         this.handleInvoke = this::handleInvoke;
     }
@@ -93,8 +93,7 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
 
     @SuppressWarnings("unchecked")
     private void writeEvent0(Wire wire, @NotNull Method method, Object[] args, String methodName, int oneParam) {
-        ParameterHolderSequenceWriter phsw = parameterMap.computeIfAbsent(method, ParameterHolderSequenceWriter::new);
-        Bytes<?> bytes = wire.bytes();
+        final ParameterHolderSequenceWriter phsw = parameterMap.computeIfAbsent(method, ParameterHolderSequenceWriter::new);
         boolean useMethodId = useMethodIds && phsw.methodId >= 0 && wire.getValueOut().isBinary();
         ValueOut valueOut = useMethodId
                 ? wire.writeEventId((int) phsw.methodId)

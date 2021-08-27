@@ -461,5 +461,6 @@ public class DefaultValueIn implements ValueIn {
 
     @Override
     public void resetState() {
+        // Do nothing
     }
 }

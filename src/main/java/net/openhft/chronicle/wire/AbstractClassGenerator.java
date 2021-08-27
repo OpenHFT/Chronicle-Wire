@@ -255,7 +255,7 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
         }
     }
 
-    public static abstract class MetaData<MD extends MetaData<MD>> extends SelfDescribingMarshallable {
+    public abstract static class MetaData<MD extends MetaData<MD>> extends SelfDescribingMarshallable {
         private String packageName = "";
         private String baseClassName = "";
         private Set<Class> interfaces = new LinkedHashSet<>();

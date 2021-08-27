@@ -43,14 +43,15 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
     protected MessageHistory messageHistory;
     private MethodReader delegate;
-    private boolean closeIn = false, closed;
+    private boolean closeIn = false;
+    private boolean closed;
 
     private Consumer<MessageHistory> historyConsumer = noOp -> {
     };
 
-    private static class MessageHistoryThreadLocal {
+    private static final class MessageHistoryThreadLocal {
 
-        private ThreadLocal<MessageHistory> messageHistoryTL = withInitial(VanillaMessageHistory::new);
+        private final ThreadLocal<MessageHistory> messageHistoryTL = withInitial(VanillaMessageHistory::new);
 
         private MessageHistory getAndSet(MessageHistory mh) {
             final MessageHistory result = messageHistoryTL.get();
@@ -63,11 +64,11 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         }
     }
 
-    private static MessageHistoryThreadLocal TEMP_MESSAGE_HISTORY = new MessageHistoryThreadLocal();
+    private static final MessageHistoryThreadLocal TEMP_MESSAGE_HISTORY = new MessageHistoryThreadLocal();
 
-    public AbstractGeneratedMethodReader(MarshallableIn in,
-                                         WireParselet debugLoggingParselet,
-                                         Supplier<MethodReader> delegateSupplier) {
+    protected AbstractGeneratedMethodReader(MarshallableIn in,
+                                            WireParselet debugLoggingParselet,
+                                            Supplier<MethodReader> delegateSupplier) {
         this.in = in;
         this.debugLoggingParselet = debugLoggingParselet;
         this.delegateSupplier = delegateSupplier;
@@ -139,8 +140,10 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     @NotNull
     private MessageHistory swapMessageHistoryIfDirty() {
         MessageHistory mh = messageHistory();
-        if (mh.isDirty())
-            MessageHistory.set(mh = TEMP_MESSAGE_HISTORY.getAndSet(mh));
+        if (mh.isDirty()) {
+            mh = TEMP_MESSAGE_HISTORY.getAndSet(mh);
+            MessageHistory.set(mh);
+        }
         return mh;
     }
 

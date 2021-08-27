@@ -114,10 +114,11 @@ public enum BinaryWireCode {
                 STRING_FOR_CODE[i] = "STRING_" + i;
             for (int i = 0; i < STRING_FOR_CODE.length; i++) {
                 if (STRING_FOR_CODE[i] == null)
-                    if (i <= ' ' || i >= 127)
+                    if (i <= ' ' || i >= 127) {
                         STRING_FOR_CODE[i] = "Unknown_0x" + Integer.toHexString(i).toUpperCase();
-                    else
+                    } else {
                         STRING_FOR_CODE[i] = "Unknown_" + (char) i;
+                    }
             }
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);

@@ -25,7 +25,7 @@ public abstract class AbstractFieldInfo implements FieldInfo {
     protected final Class type;
     protected final BracketType bracketType;
 
-    public AbstractFieldInfo(Class type, BracketType bracketType, String name) {
+    protected AbstractFieldInfo(Class type, BracketType bracketType, String name) {
         this.type = type;
         this.bracketType = bracketType;
         this.name = name;
@@ -53,6 +53,7 @@ public abstract class AbstractFieldInfo implements FieldInfo {
 
     @Override
     public boolean equals(Object obj) {
+        if (obj == null) return false;
         return (this == obj || Wires.isEquals(this, obj));
     }
 

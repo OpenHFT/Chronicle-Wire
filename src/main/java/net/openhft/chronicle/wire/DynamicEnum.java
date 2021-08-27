@@ -11,7 +11,7 @@ import java.util.List;
 public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
 
     /**
-     * Uses afloating DynamicEnum to update the cached copy so every deserialization of the value from name() use have this information
+     * Uses a floating DynamicEnum to update the cached copy so every deserialization of the value from name() use have this information
      *
      * @param e template to use.
      */

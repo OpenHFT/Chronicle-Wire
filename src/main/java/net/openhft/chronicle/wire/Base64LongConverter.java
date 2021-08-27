@@ -50,14 +50,14 @@ public class Base64LongConverter implements LongConverter {
         for (int i = 0; i < text.length(); i++) {
             byte b = LOOKUP[text.charAt(i)];
             if (b >= 0)
-                v = (v << 6) + b;
+                v = (v << 6) + (b & 0xff);
         }
         return v;
     }
 
     @Override
     public void append(StringBuilder text, long value) {
-        int start = text.length();
+        final int start = text.length();
         while (value != 0) {
             text.append(CODES[(int) (value & 0x3F)]);
             value >>>= 6;

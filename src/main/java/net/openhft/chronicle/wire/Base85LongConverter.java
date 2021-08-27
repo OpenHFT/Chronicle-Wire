@@ -67,12 +67,14 @@ public class Base85LongConverter implements LongConverter {
 
     @Override
     public void append(StringBuilder text, long value) {
-        int start = text.length();
+        final int start = text.length();
         if (value < 0) {
             long hi = (value >>> 32);
-            long h2 = hi / BASE, mod = hi % BASE;
+            long h2 = hi / BASE;
+            long mod = hi % BASE;
             long val2 = (mod << 32) + (value & 0xFFFFFFFFL);
-            int l2 = (int) (val2 / BASE), v = (int) (val2 % BASE);
+            int l2 = (int) (val2 / BASE);
+            int v = (int) (val2 % BASE);
             text.append(DECODE[v]);
             value = (h2 << 32) + (l2 & 0xFFFFFFFFL);
         }
@@ -94,9 +96,11 @@ public class Base85LongConverter implements LongConverter {
         int start = text.length();
         if (value < 0) {
             long hi = (value >>> 32);
-            long h2 = hi / BASE, mod = hi % BASE;
+            long h2 = hi / BASE;
+            long mod = hi % BASE;
             long val2 = (mod << 32) + (value & 0xFFFFFFFFL);
-            int l2 = (int) (val2 / BASE), v = (int) (val2 % BASE);
+            int l2 = (int) (val2 / BASE);
+            int v = (int) (val2 % BASE);
             text.append(DECODE[v]);
             value = (h2 << 32) + (l2 & 0xFFFFFFFFL);
         }

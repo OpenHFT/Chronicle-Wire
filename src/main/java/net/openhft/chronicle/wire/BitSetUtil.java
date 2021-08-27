@@ -22,11 +22,14 @@ import net.openhft.chronicle.core.Jvm;
 import java.lang.reflect.Field;
 import java.util.BitSet;
 
-class BitSetUtil {
+final class BitSetUtil {
 
-    private static Field wordsField;
-    private static Field wordsInUse;
-    private static Field sizeIsSticky;
+    private static final Field wordsField;
+    private static final Field wordsInUse;
+    private static final Field sizeIsSticky;
+
+    private BitSetUtil() {
+    }
 
     static {
         try {

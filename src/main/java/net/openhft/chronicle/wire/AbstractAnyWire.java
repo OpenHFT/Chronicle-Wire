@@ -41,7 +41,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
     @NotNull
     protected final WireAcquisition wireAcquisition;
 
-    public AbstractAnyWire(@NotNull Bytes bytes, @NotNull WireAcquisition wa) {
+    protected AbstractAnyWire(@NotNull Bytes bytes, @NotNull WireAcquisition wa) {
         super(bytes, false);
         this.wireAcquisition = wa;
     }
