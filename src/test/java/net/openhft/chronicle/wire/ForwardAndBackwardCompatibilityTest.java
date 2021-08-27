@@ -43,7 +43,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-               // {WireType.TEXT},
+                // {WireType.TEXT},
                 {WireType.BINARY}
         });
     }
@@ -57,7 +57,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         CLASS_ALIASES.addAlias(DTO1.class, "DTO");
 
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO1(1)));
-       // System.out.println(Wires.fromSizePrefixedBlobs(wire));
+        // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");
         if (wire instanceof TextWire)
@@ -67,8 +67,8 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
             if (!dc.isPresent())
                 Assert.fail();
             @Nullable DTO2 dto2 = dc.wire().getValueIn().typedMarshallable();
-            Assert.assertEquals(dto2.one, 1);
-            Assert.assertEquals(dto2.two, 0);
+            Assert.assertEquals(1, dto2.one);
+            Assert.assertEquals(0, dto2.two);
             Assert.assertNull(dto2.three);
         }
 
@@ -84,7 +84,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");
 
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO2(1, 2, 3)));
-       // System.out.println(Wires.fromSizePrefixedBlobs(wire));
+        // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
         CLASS_ALIASES.addAlias(DTO1.class, "DTO");
         if (wire instanceof TextWire)
@@ -94,7 +94,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
             if (!dc.isPresent())
                 Assert.fail();
             @Nullable DTO1 dto1 = dc.wire().getValueIn().typedMarshallable();
-            Assert.assertEquals(dto1.one, 1);
+            Assert.assertEquals(1, dto1.one);
         }
 
         wire.bytes().releaseLast();

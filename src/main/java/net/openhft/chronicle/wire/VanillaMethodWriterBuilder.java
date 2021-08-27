@@ -56,7 +56,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             Observer.class
     );
 
-    private final boolean DISABLE_PROXY_GEN = Jvm.getBoolean(DISABLE_WRITER_PROXY_CODEGEN, false);
+    private final boolean disableProxyGen = Jvm.getBoolean(DISABLE_WRITER_PROXY_CODEGEN, false);
     private final Set<Class<?>> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
 
     private final String packageName;
@@ -90,8 +90,9 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     /**
-     * @param updateInterceptor used to modifier the the data before it is written to the wire
+     * @param updateInterceptor used to modify the data before it is written to the wire
      */
+    @Override
     @NotNull
     public MethodWriterBuilder<T> updateInterceptor(UpdateInterceptor updateInterceptor) {
         this.updateInterceptor = updateInterceptor;
@@ -186,7 +187,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                     Jvm.debug().on(getClass(), e);
             }
         }
-        if (!DISABLE_PROXY_GEN && handlerSupplier.methodWriterInterceptorReturns() == null) {
+        if (!disableProxyGen && handlerSupplier.methodWriterInterceptorReturns() == null) {
             T t = createInstance();
             if (t != null)
                 return t;
@@ -285,6 +286,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         return this;
     }
 
+    @Override
     public MethodWriterBuilder<T> metaData(final boolean metaData) {
         this.metaData = metaData;
         return this;

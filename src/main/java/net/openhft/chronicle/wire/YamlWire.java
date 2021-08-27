@@ -326,10 +326,10 @@ public class YamlWire extends AbstractWire implements Wire {
 
     @Override
     public long readEventNumber() {
-        StringBuilder sb = acquireStringBuilder();
-        readField(sb);
+        final StringBuilder stringBuilder = acquireStringBuilder();
+        readField(stringBuilder);
         try {
-            return StringUtils.parseInt(sb, 10);
+            return StringUtils.parseInt(stringBuilder, 10);
         } catch (NumberFormatException ignored) {
             return Long.MIN_VALUE;
         }
@@ -517,6 +517,7 @@ public class YamlWire extends AbstractWire implements Wire {
     public Wire readComment(@NotNull StringBuilder s) {
         sb.setLength(0);
         if (yt.current() == YamlToken.COMMENT) {
+            // Skip the initial '#'
             YamlToken next = yt.next();
             sb.append(yt.text());
         }
@@ -755,20 +756,6 @@ public class YamlWire extends AbstractWire implements Wire {
             bytes.append8bit(cs, offset, offset + length);
         else
             bytes.appendUtf8(cs, offset, length);
-    }
-
-    private <T> void readCollection(Class<T> elementType, Collection<T> collection) {
-        if (yt.current() == YamlToken.SEQUENCE_START) {
-            while (yt.next() == YamlToken.SEQUENCE_ENTRY) {
-                if (yt.next() == YamlToken.TEXT) {
-                    collection.add(ObjectUtils.convertTo(elementType, yt.text()));
-                } else {
-                    throw new UnsupportedOperationException(yt.toString());
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException(yt.toString());
-        }
     }
 
     @NotNull
@@ -1156,9 +1143,9 @@ public class YamlWire extends AbstractWire implements Wire {
                 writeSavedEventName();
             }
             prependSeparator();
-            @NotNull StringBuilder sb = acquireStringBuilder();
-            sb.appendCodePoint(codepoint);
-            text(sb);
+            final StringBuilder stringBuilder = acquireStringBuilder();
+            stringBuilder.appendCodePoint(codepoint);
+            text(stringBuilder);
             sep = empty();
             return YamlWire.this;
         }
@@ -1442,7 +1429,7 @@ public class YamlWire extends AbstractWire implements Wire {
             if (dropDefault) {
                 writeSavedEventName();
             }
-            if (!TextIntReference.class.isInstance(intValue))
+            if (!(intValue instanceof TextIntReference))
                 throw new IllegalArgumentException();
             prependSeparator();
             long offset = bytes.writePosition();
@@ -1471,7 +1458,7 @@ public class YamlWire extends AbstractWire implements Wire {
             if (dropDefault) {
                 writeSavedEventName();
             }
-            if (!TextLongReference.class.isInstance(longValue))
+            if (!(longValue instanceof TextLongReference))
                 throw new IllegalArgumentException();
             prependSeparator();
             long offset = bytes.writePosition();
@@ -1488,7 +1475,7 @@ public class YamlWire extends AbstractWire implements Wire {
             if (dropDefault) {
                 writeSavedEventName();
             }
-            if (!TextBooleanReference.class.isInstance(longValue))
+            if (!(longValue instanceof TextBooleanReference))
                 throw new IllegalArgumentException();
             prependSeparator();
             long offset = bytes.writePosition();
@@ -2087,13 +2074,13 @@ public class YamlWire extends AbstractWire implements Wire {
         public <T> WireIn bool(T t, @NotNull ObjBooleanConsumer<T> tFlag) {
             consumePadding();
 
-            @NotNull StringBuilder sb = acquireStringBuilder();
-            if (textTo(sb) == null) {
+            final StringBuilder stringBuilder = acquireStringBuilder();
+            if (textTo(stringBuilder) == null) {
                 tFlag.accept(t, null);
                 return YamlWire.this;
             }
 
-            Boolean flag = sb.length() == 0 ? null : StringUtils.isEqual(sb, "true");
+            Boolean flag = stringBuilder.length() == 0 ? null : StringUtils.isEqual(stringBuilder, "true");
             tFlag.accept(t, flag);
             return YamlWire.this;
         }
@@ -2199,9 +2186,9 @@ public class YamlWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime) {
             consumePadding();
-            @NotNull StringBuilder sb = acquireStringBuilder();
-            textTo(sb);
-            setLocalTime.accept(t, LocalTime.parse(WireInternal.INTERNER.intern(sb)));
+            final StringBuilder stringBuilder = acquireStringBuilder();
+            textTo(stringBuilder);
+            setLocalTime.accept(t, LocalTime.parse(WireInternal.INTERNER.intern(stringBuilder)));
             return YamlWire.this;
         }
 
@@ -2209,9 +2196,9 @@ public class YamlWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn zonedDateTime(@NotNull T t, @NotNull BiConsumer<T, ZonedDateTime> tZonedDateTime) {
             consumePadding();
-            @NotNull StringBuilder sb = acquireStringBuilder();
-            textTo(sb);
-            tZonedDateTime.accept(t, ZonedDateTime.parse(WireInternal.INTERNER.intern(sb)));
+            final StringBuilder stringBuilder = acquireStringBuilder();
+            textTo(stringBuilder);
+            tZonedDateTime.accept(t, ZonedDateTime.parse(WireInternal.INTERNER.intern(stringBuilder)));
             return YamlWire.this;
         }
 
@@ -2219,9 +2206,9 @@ public class YamlWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn date(@NotNull T t, @NotNull BiConsumer<T, LocalDate> tLocalDate) {
             consumePadding();
-            @NotNull StringBuilder sb = acquireStringBuilder();
-            textTo(sb);
-            tLocalDate.accept(t, LocalDate.parse(WireInternal.INTERNER.intern(sb)));
+            final StringBuilder stringBuilder = acquireStringBuilder();
+            textTo(stringBuilder);
+            tLocalDate.accept(t, LocalDate.parse(WireInternal.INTERNER.intern(stringBuilder)));
             return YamlWire.this;
         }
 
@@ -2229,9 +2216,9 @@ public class YamlWire extends AbstractWire implements Wire {
         @Override
         public <T> WireIn uuid(@NotNull T t, @NotNull BiConsumer<T, UUID> tuuid) {
             consumePadding();
-            @NotNull StringBuilder sb = acquireStringBuilder();
-            textTo(sb);
-            tuuid.accept(t, UUID.fromString(WireInternal.INTERNER.intern(sb)));
+            final StringBuilder stringBuilder = acquireStringBuilder();
+            textTo(stringBuilder);
+            tuuid.accept(t, UUID.fromString(WireInternal.INTERNER.intern(stringBuilder)));
             return YamlWire.this;
         }
 
@@ -2366,13 +2353,13 @@ public class YamlWire extends AbstractWire implements Wire {
         public Class typePrefix() {
             if (yt.current() != YamlToken.TAG)
                 return null;
-            @NotNull StringBuilder sb = acquireStringBuilder();
-            yt.text(sb);
+            final StringBuilder stringBuilder = acquireStringBuilder();
+            yt.text(stringBuilder);
             try {
                 yt.next();
-                return classLookup().forName(sb);
+                return classLookup().forName(stringBuilder);
             } catch (ClassNotFoundException e) {
-                Jvm.warn().on(getClass(), "Unable to find " + sb + " " + e);
+                Jvm.warn().on(getClass(), "Unable to find " + stringBuilder + " " + e);
                 return null;
             }
         }
@@ -2382,7 +2369,7 @@ public class YamlWire extends AbstractWire implements Wire {
             consumePadding();
             switch (yt.current()) {
                 case TAG: {
-                    Class type = typePrefix();
+                    Class<?> type = typePrefix();
                     return type;
                 }
                 default:
@@ -2583,15 +2570,15 @@ public class YamlWire extends AbstractWire implements Wire {
         @Override
         public boolean bool() {
             consumePadding();
-            @NotNull StringBuilder sb = acquireStringBuilder();
-            if (textTo(sb) == null)
+            final StringBuilder stringBuilder = acquireStringBuilder();
+            if (textTo(stringBuilder) == null)
                 throw new NullPointerException("value is null");
 
-            if (ObjectUtils.isTrue(sb))
+            if (ObjectUtils.isTrue(stringBuilder))
                 return true;
-            if (ObjectUtils.isFalse(sb))
+            if (ObjectUtils.isFalse(stringBuilder))
                 return false;
-            Jvm.debug().on(getClass(), "Unable to parse '" + sb + "' as a boolean flag, assuming false");
+            Jvm.debug().on(getClass(), "Unable to parse '" + stringBuilder + "' as a boolean flag, assuming false");
             return false;
         }
 
@@ -2677,11 +2664,9 @@ public class YamlWire extends AbstractWire implements Wire {
         public boolean isNull() {
             consumePadding();
 
-            if (yt.current() == YamlToken.TAG) {
-                if (yt.isText("!null")) {
-                    consumeAny(0);
-                    return true;
-                }
+            if (yt.current() == YamlToken.TAG && yt.isText("!null")) {
+                consumeAny(0);
+                return true;
             }
 
             return false;

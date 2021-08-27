@@ -45,7 +45,7 @@ public class TestLongConversion {
         builder.append(SEPARATOR);
         longConverter.append(builder, value3);
 
-        assertEquals(builder.toString(), "VAL2/VAL3/VAL4");
+        assertEquals("VAL2/VAL3/VAL4", builder.toString());
     }
 
     @Test
@@ -68,6 +68,6 @@ public class TestLongConversion {
         longConverter.append(buffer, value3);
         builder.append(buffer);
 
-        assertEquals(builder.toString(), "VAL2/VAL3/VAL4");
+        assertEquals("VAL2/VAL3/VAL4", builder.toString());
     }
 }

@@ -40,10 +40,11 @@ import static net.openhft.chronicle.core.Maths.hash32;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class FromStringInterner<T> {
     protected final InternerEntry<T>[] entries;
-    protected final int mask, shift;
+    protected final int mask;
+    protected final int shift;
     protected boolean toggle = false;
 
-    public FromStringInterner(int capacity) throws IllegalArgumentException {
+    protected FromStringInterner(int capacity) throws IllegalArgumentException {
         int n = Maths.nextPower2(capacity, 128);
         shift = Maths.intLog2(n);
         entries = new InternerEntry[n];

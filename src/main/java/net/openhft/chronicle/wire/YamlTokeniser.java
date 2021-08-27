@@ -38,20 +38,22 @@ public class YamlTokeniser {
             YamlToken.MAPPING_END,
             YamlToken.DIRECTIVES_END);
 
-    private final BytesIn in;
+    private final BytesIn<?> in;
     protected final List<YTContext> contexts = new ArrayList<>();
     private final List<YTContext> freeContexts = new ArrayList<>();
     private YamlToken last = YamlToken.STREAM_START;
-    Bytes temp = null;
+    Bytes<?> temp = null;
 
     private final List<YamlToken> pushed = new ArrayList<>();
-    long lineStart, blockStart, blockEnd;
+    long lineStart;
+    long blockStart;
+    long blockEnd;
     int flowDepth = Integer.MAX_VALUE;
     char blockQuote = 0;
     boolean hasSequenceEntry;
     long lastKeyPosition = -1;
 
-    public YamlTokeniser(BytesIn in) {
+    public YamlTokeniser(BytesIn<?> in) {
         this.in = in;
         reset();
     }
@@ -61,7 +63,7 @@ public class YamlTokeniser {
     }
 
     void reset() {
-        contexts.forEach(freeContexts::add);
+        freeContexts.addAll(contexts);
         contexts.clear();
         if (temp != null) temp.clear();
         lineStart = 0;
@@ -155,17 +157,14 @@ public class YamlTokeniser {
                         return dontRead();
                     return indent(YamlToken.SEQUENCE_START, YamlToken.SEQUENCE_ENTRY, YamlToken.STREAM_START, indent2 + 1);
                 }
-                if (next == '-') {
-                    if (in.peekUnsignedByte(in.readPosition() + 1) == '-' &&
-                            in.peekUnsignedByte(in.readPosition() + 2) <= ' ') {
-                        if (contextIndent() <= minIndent)
-                            return dontRead();
-                        in.readSkip(2);
-                        pushed.add(YamlToken.DIRECTIVES_END);
-                        popAll(1);
-                        contextPush(YamlToken.DIRECTIVES_END, NO_INDENT);
-                        return popPushed();
-                    }
+                if (next == '-' && in.peekUnsignedByte(in.readPosition() + 1) == '-' && in.peekUnsignedByte(in.readPosition() + 2) <= ' ') {
+                    if (contextIndent() <= minIndent)
+                        return dontRead();
+                    in.readSkip(2);
+                    pushed.add(YamlToken.DIRECTIVES_END);
+                    popAll(1);
+                    contextPush(YamlToken.DIRECTIVES_END, NO_INDENT);
+                    return popPushed();
                 }
                 unreadLast();
                 return readText(indent2);
@@ -317,7 +316,7 @@ public class YamlTokeniser {
         readLiteral(false);
     }
 
-    private Bytes temp() {
+    private Bytes<?> temp() {
         if (temp == null)
             temp = Bytes.allocateElasticOnHeap(32);
         temp.clear();
@@ -333,7 +332,7 @@ public class YamlTokeniser {
         readIndent();
         int indent2 = Math.toIntExact(in.readPosition() - lineStart);
         blockStart = blockEnd = -1;
-        Bytes temp = temp();
+        final Bytes<?> temp = temp();
         long start = in.readPosition();
         while (true) {
             int ch = in.readUnsignedByte();
@@ -444,10 +443,6 @@ public class YamlTokeniser {
 
     private int contextIndent() {
         return contexts.isEmpty() ? 0 : topContext().indent;
-    }
-
-    private int previousContextIndent() {
-        return contexts.size() < 2 ? 0 : secondTopContext().indent;
     }
 
     private boolean isInFlow() {

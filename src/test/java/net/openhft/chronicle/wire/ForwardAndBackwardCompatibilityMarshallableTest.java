@@ -65,8 +65,8 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
                 Assert.fail();
             @NotNull MDTO2 dto2 = new MDTO2();
             dto2.readMarshallable(dc.wire());
-            Assert.assertEquals(dto2.one, 1);
-            Assert.assertEquals(dto2.two, 2);
+            Assert.assertEquals(1, dto2.one );
+            Assert.assertEquals(2, dto2.two);
             Assert.assertTrue("3".contentEquals(dto2.three));
         }
 
@@ -92,8 +92,8 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
                 Assert.fail();
             @NotNull MDTO2 dto2 = new MDTO2();
             dc.wire().getValueIn().marshallable(dto2);
-            Assert.assertEquals(dto2.one, 1);
-            Assert.assertEquals(dto2.two, 0);
+            Assert.assertEquals(1, dto2.one);
+            Assert.assertEquals(0, dto2.two);
 
         }
 

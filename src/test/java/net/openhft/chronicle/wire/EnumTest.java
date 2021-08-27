@@ -45,7 +45,7 @@ public class EnumTest extends WireTestCommon {
                             "}\n");
             @Nullable Object enumObject = wire2.read(() -> "test")
                     .object();
-            Assert.assertSame(enumObject, TestEnum.INSTANCE);
+            Assert.assertSame(TestEnum.INSTANCE, enumObject);
         } finally {
             bytes.releaseLast();
         }

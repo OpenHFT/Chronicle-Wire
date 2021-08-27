@@ -1,6 +1,5 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.wire.Base40IntConverter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -44,7 +43,7 @@ public class TestIntConversion {
         builder.append(SEPARATOR);
         intConverter.append(builder, value3);
 
-        assertEquals(builder.toString(), "VAL2/VAL3/VAL4");
+        assertEquals("VAL2/VAL3/VAL4", builder.toString());
     }
 
     // is this the only intended usage?
@@ -68,6 +67,6 @@ public class TestIntConversion {
         intConverter.append(buffer, value3);
         builder.append(buffer);
 
-        assertEquals(builder.toString(), "VAL2/VAL3/VAL4");
+        assertEquals("VAL2/VAL3/VAL4", builder.toString());
     }
 }
