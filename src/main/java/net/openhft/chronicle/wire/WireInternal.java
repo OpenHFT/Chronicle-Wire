@@ -133,9 +133,10 @@ public enum WireInternal {
 //                System.out.println("Message truncated from " + position + " to " + position1);
             int length;
             if (bytes instanceof HexDumpBytes) {
+                // Todo: this looks suspicious. Why cast to int individually rather than use long arithmetics?
                 length = metaDataBit | toIntU30((int) position1 - (int) position - 4, "Document length %,d out of 30-bit int range.");
             } else {
-                length = metaDataBit | toIntU30(position1 - position - 4, "Document length %,d out of 30-bit int range.");
+                length = metaDataBit | toIntU30(position1 - position - 4L, "Document length %,d out of 30-bit int range.");
             }
             if (wireOut.usePadding())
                 bytes.testAndSetInt(position, len0, length | (notComplete ? Wires.NOT_COMPLETE : 0));
@@ -197,10 +198,10 @@ public enum WireInternal {
                 } else {
                     // bytes.readWithLength(len, b -> metaDataConsumer.accept(wireIn));
                     // inlined to avoid garbage
-                    if ((long) len > bytes.readRemaining())
+                    if (len > bytes.readRemaining())
                         throw new BufferUnderflowException();
                     long limit0 = bytes.readLimit();
-                    long limit = bytes.readPosition() + (long) len;
+                    long limit = bytes.readPosition() + len;
                     try {
                         bytes.readLimit(limit);
                         metaDataConsumer.readMarshallable(wireIn);
@@ -225,7 +226,7 @@ public enum WireInternal {
         final int len = Wires.lengthOf(header);
 
         long limit0 = bytes.readLimit();
-        long limit = bytes.readPosition() + (long) len;
+        long limit = bytes.readPosition() + len;
         try {
             bytes.readLimit(limit);
             dataConsumer.readMarshallable(wireIn);

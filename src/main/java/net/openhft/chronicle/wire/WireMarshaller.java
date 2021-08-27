@@ -41,7 +41,7 @@ import static net.openhft.chronicle.core.UnsafeMemory.*;
 
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
 public class WireMarshaller<T> {
-    public static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
+    private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     static final StringBuilderPool SBP = new StringBuilderPool();
     private static final FieldAccess[] NO_FIELDS = {};
     public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
@@ -376,7 +376,7 @@ public class WireMarshaller<T> {
         return isLeaf;
     }
 
-    static abstract class FieldAccess {
+    abstract static class FieldAccess {
         @NotNull
         final Field field;
         final long offset;
@@ -725,10 +725,6 @@ public class WireMarshaller<T> {
             bytes.writeUtf8((String) unsafeGetObject(o, offset));
         }
 
-        @Override
-        protected void copy(Object from, Object to) throws IllegalAccessException {
-            super.copy(from, to);
-        }
     }
 
     static class StringBuilderFieldAccess extends FieldAccess {
@@ -739,15 +735,16 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, Object previous) {
-            @NotNull CharSequence cs = (CharSequence) unsafeGetObject(o, offset);
+            @NotNull CharSequence cs = unsafeGetObject(o, offset);
             write.text(cs);
         }
 
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            @NotNull StringBuilder sb = (StringBuilder) unsafeGetObject(o, offset);
+            @NotNull StringBuilder sb = unsafeGetObject(o, offset);
             if (sb == null)
-                unsafePutObject(o, offset, sb = new StringBuilder());
+                sb = new StringBuilder();
+                unsafePutObject(o, offset, sb);
             if (read.textTo(sb) == null)
                 unsafePutObject(o, offset, null);
         }
@@ -764,14 +761,15 @@ public class WireMarshaller<T> {
 
         @Override
         protected void copy(Object from, Object to) {
-            final StringBuilder fromSequence = (StringBuilder) unsafeGetObject(from, offset);
-            StringBuilder toSequence = (StringBuilder) unsafeGetObject(to, offset);
+            final StringBuilder fromSequence = unsafeGetObject(from, offset);
+            StringBuilder toSequence = unsafeGetObject(to, offset);
 
             if (fromSequence == null) {
                 unsafePutObject(to, offset, null);
                 return;
             } else if (toSequence == null) {
-                unsafePutObject(to, offset, toSequence = new StringBuilder());
+                toSequence = new StringBuilder();
+                unsafePutObject(to, offset, toSequence);
             }
 
             toSequence.setLength(0);
@@ -832,7 +830,8 @@ public class WireMarshaller<T> {
                 return;
 
             } else if (toBytes == null) {
-                unsafePutObject(to, offset, toBytes = Bytes.elasticByteBuffer());
+                toBytes = Bytes.elasticByteBuffer();
+                unsafePutObject(to, offset, toBytes);
             }
             toBytes.clear();
             toBytes.write(fromBytes);
@@ -960,6 +959,7 @@ public class WireMarshaller<T> {
             write.sequence(o, sequenceGetter);
         }
 
+        @Override
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
             EnumSet coll = (EnumSet) field.get(o);
             if (coll == null) {
@@ -1101,6 +1101,7 @@ public class WireMarshaller<T> {
             write.sequence(o, sequenceGetter);
         }
 
+        @Override
         protected void copy(Object from, Object to) throws IllegalAccessException {
             Collection fromColl = (Collection) field.get(from);
             if (fromColl == null) {
@@ -1215,7 +1216,7 @@ public class WireMarshaller<T> {
                 coll.clear();
             }
             boolean sequenced = read.sequence(coll, seqConsumer);
-            if (overwrite & !sequenced) {
+            if (overwrite && !sequenced) {
                 field.set(o, null);
             }
         }
@@ -1273,6 +1274,7 @@ public class WireMarshaller<T> {
             write.marshallable(map, keyType, valueType, Boolean.TRUE.equals(isLeaf));
         }
 
+        @Override
         protected void copy(Object from, Object to) throws IllegalAccessException {
             Map fromMap = (Map) field.get(from);
             if (fromMap == null) {

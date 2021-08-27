@@ -61,12 +61,12 @@ class WireObjectOutput implements ObjectOutput {
 
     @Override
     public void flush() {
-
+        // Do nothing
     }
 
     @Override
     public void close() {
-
+        // Do nothing
     }
 
     @Override

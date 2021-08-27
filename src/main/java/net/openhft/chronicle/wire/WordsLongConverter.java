@@ -72,12 +72,12 @@ public class WordsLongConverter implements LongConverter {
 
     @Override
     public void append(StringBuilder text, long value) {
-        String sep = "";
+        String asep = "";
         do {
-            text.append(sep);
+            text.append(asep);
             text.append(WORDS[(int) (value & 2047)]);
             value >>>= 11;
-            sep = this.sep;
+            asep = this.sep;
         } while (value > 0);
     }
 }

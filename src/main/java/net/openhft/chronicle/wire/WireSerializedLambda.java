@@ -49,7 +49,7 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
         return Serializable.class.isAssignableFrom(clazz) && clazz.getName().contains("$Lambda$");
     }
 
-    public static <Lambda> void write(@NotNull Lambda lambda, @NotNull ValueOut valueOut) {
+    public static <L> void write(@NotNull L lambda, @NotNull ValueOut valueOut) {
         try {
             Method writeReplace = lambda.getClass().getDeclaredMethod("writeReplace");
             Jvm.setAccessible(writeReplace);

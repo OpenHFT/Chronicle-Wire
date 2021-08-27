@@ -65,17 +65,15 @@ public enum Wires {
     public static final int NOT_COMPLETE = 0x8000_0000;
     public static final int META_DATA = 1 << 30;
     public static final int UNKNOWN_LENGTH = 0x0;
-    // public static final int MAX_LENGTH = (1 << 30) - 1;
     // value to use when the message is not ready and of an unknown length
     public static final int NOT_COMPLETE_UNKNOWN_LENGTH = NOT_COMPLETE;
     // value to use when no more data is possible e.g. on a roll.
     public static final int END_OF_DATA = NOT_COMPLETE | META_DATA;
     public static final int NOT_INITIALIZED = 0x0;
     public static final Bytes<?> NO_BYTES = BytesStore.empty().bytesForRead();
-    //public static final WireIn EMPTY = new BinaryWire(NO_BYTES);
     public static final int SPB_HEADER_SIZE = 4;
     public static final List<Function<Class, SerializationStrategy>> CLASS_STRATEGY_FUNCTIONS = new CopyOnWriteArrayList<>();
-    public static final ClassLocal<SerializationStrategy> CLASS_STRATEGY = ClassLocal.withInitial(c -> {
+    static final ClassLocal<SerializationStrategy> CLASS_STRATEGY = ClassLocal.withInitial(c -> {
         for (@NotNull Function<Class, SerializationStrategy> func : CLASS_STRATEGY_FUNCTIONS) {
             final SerializationStrategy strategy = func.apply(c);
             if (strategy != null)
@@ -115,6 +113,7 @@ public enum Wires {
 
     // force static initialise
     public static void init() {
+        // Do nothing here
     }
 
     /**
@@ -427,7 +426,6 @@ public enum Wires {
         return ObjectUtils.convertTo(tClass, value);
     }
 
-    @Nullable
     public static long getLongField(@NotNull Object o, String name) throws NoSuchFieldException {
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(o.getClass());
         return wm.getLongField(o, name);
@@ -477,7 +475,7 @@ public enum Wires {
 
         if (using == null && !nullObject)
             throw new IllegalStateException("failed to create instance of clazz=" + clazz + " is it aliased?");
-        long position = in.wireIn().bytes().readPosition();
+        final long position = in.wireIn().bytes().readPosition();
         Object marshallable = in.marshallable(using, strategy);
         E e = readResolve(marshallable);
         String name = nameOf(e);

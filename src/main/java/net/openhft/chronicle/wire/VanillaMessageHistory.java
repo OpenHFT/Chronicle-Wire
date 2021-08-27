@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("rawtypes")
 public class VanillaMessageHistory extends SelfDescribingMarshallable implements MessageHistory {
-    static boolean USE_BYTES_MARSHALLABLE = Boolean.getBoolean("history.as.bytes");
+    static  boolean USE_BYTES_MARSHALLABLE = Boolean.getBoolean("history.as.bytes");
     public static final int MESSAGE_HISTORY_LENGTH = 128;
     private static final ThreadLocal<MessageHistory> THREAD_LOCAL =
             ThreadLocal.withInitial(() -> {

@@ -32,6 +32,7 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
         }
     }
 
+    @Override
     public void readMarshallable(T t, @NotNull WireIn in, T defaults, boolean overwrite) {
         try {
             ReadMarshallable rm = t instanceof ReadMarshallable ? (ReadMarshallable) t : null;
@@ -58,9 +59,9 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
                     }
                 }
                 if (field == null) {
-                    if (rm == null)
+                    if (rm == null) {
                         vin.skipValue();
-                    else {
+                    } else {
                         try {
                             rm.unexpectedField(sb, vin);
                         }

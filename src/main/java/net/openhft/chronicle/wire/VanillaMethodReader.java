@@ -53,8 +53,9 @@ public class VanillaMethodReader implements MethodReader {
     @NotNull
     private final WireParser wireParser;
     private MessageHistory messageHistory;
-    private boolean closeIn = false, closed;
-    private MethodReaderInterceptorReturns methodReaderInterceptorReturns;
+    private boolean closeIn = false;
+    private boolean closed;
+    private final MethodReaderInterceptorReturns methodReaderInterceptorReturns;
 
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
@@ -235,7 +236,7 @@ public class VanillaMethodReader implements MethodReader {
             }
 
             if (!methodNamesHandled.add(m.getName())) {
-                String previous = methodsSignaturesHandled.stream().filter(signature -> signature.contains(" " + m.getName() + " ")).findFirst().orElseThrow(() -> new IllegalStateException());
+                String previous = methodsSignaturesHandled.stream().filter(signature -> signature.contains(" " + m.getName() + " ")).findFirst().orElseThrow(IllegalStateException::new);
                 String msg = m + " previous: " + previous;
                     throw new IllegalStateException("MethodReader does not support overloaded methods. Method: " + msg);
             }
@@ -331,11 +332,6 @@ public class VanillaMethodReader implements MethodReader {
         }
     }
 
-    private Class<?> contextClass(Supplier contextSupplier) {
-        Object o = contextSupplier.get();
-        return o == null ? VanillaMethodReader.class : o.getClass();
-    }
-
     // no args
     public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m) {
         throwExceptionIfClosed();
@@ -411,15 +407,14 @@ public class VanillaMethodReader implements MethodReader {
             int i = 0;
             boolean ignored = false;
             for (@NotNull Class clazz : parameterTypes) {
-                if (ignored)
+                if (ignored) {
                     v.skipValue();
-                else
+                } else {
                     a[i] = v.object(checkRecycle(a[i]), clazz);
-                if (i == 0) {
-                    if (methodFilterOnFirstArg.ignoreMethodBasedOnFirstArg(m.getName(), a[0])) {
-                        a[0] = IGNORED;
-                        ignored = true;
-                    }
+                }
+                if (i == 0 && methodFilterOnFirstArg.ignoreMethodBasedOnFirstArg(m.getName(), a[0])) {
+                    a[0] = IGNORED;
+                    ignored = true;
                 }
                 i++;
             }

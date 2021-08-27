@@ -294,7 +294,7 @@ public interface ValueOut {
 
     @NotNull <T, K> WireOut sequence(T t, K kls, TriConsumer<T, K, ValueOut> writer);
 
-    default <T, K> WireOut sequenceWithLength(T t, int length, ObjectIntObjectConsumer<T, ValueOut> writer) {
+    default <T> WireOut sequenceWithLength(T t, int length, ObjectIntObjectConsumer<T, ValueOut> writer) {
         boolean b = swapLeaf(true);
         WireOut sequence = sequence(t, length, writer::accept);
         swapLeaf(b);
@@ -502,10 +502,11 @@ public interface ValueOut {
     default <V> WireOut object(@NotNull Class<V> expectedType, V v) {
         Class<?> vClass = v == null ? void.class : v.getClass();
         if (v instanceof WriteMarshallable && !isAnEnum(v))
-            if (ObjectUtils.matchingClass(expectedType, vClass))
+            if (ObjectUtils.matchingClass(expectedType, vClass)) {
                 marshallable((WriteMarshallable) v);
-            else
+            } else {
                 typedMarshallable((WriteMarshallable) v);
+            }
         else if (v != null && ObjectUtils.matchingClass(expectedType, vClass))
             untypedObject(v);
         else
