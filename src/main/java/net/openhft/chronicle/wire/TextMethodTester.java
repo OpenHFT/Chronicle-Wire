@@ -107,7 +107,7 @@ public class TextMethodTester<T> {
     }
 
     @NotNull
-    public TextMethodTester afterRun(UnaryOperator<String> afterRun) {
+    public TextMethodTester afterRun(Function<String, String> afterRun) {
         this.afterRun = afterRun;
         return this;
     }
