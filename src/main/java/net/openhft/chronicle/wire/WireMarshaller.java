@@ -195,6 +195,12 @@ public class WireMarshaller<T> {
         BytesComment bytes = out.bytesComment();
         bytes.indent(+1);
         try {
+            Arrays.sort(fields, new Comparator<FieldAccess>() {
+                @Override
+                public int compare(FieldAccess o1, FieldAccess o2) {
+                    return o1.toString().compareTo(o2.toString());
+                }
+            });
             for (@NotNull FieldAccess field : fields)
                 field.write(t, out);
         } catch (IllegalAccessException e) {
