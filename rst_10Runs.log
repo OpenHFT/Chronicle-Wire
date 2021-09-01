@@ -1,0 +1,907 @@
+[[1;34mINFO[m] Scanning for projects...
+Downloading from chronicle-enterprise-release: https://nexus.chronicle.software/content/repositories/releases/net/openhft/chronicle-bom/2.22ea-SNAPSHOT/maven-metadata.xml
+Downloading from chronicle-enterprise-snapshots: https://nexus.chronicle.software/content/repositories/snapshots/net/openhft/chronicle-bom/2.22ea-SNAPSHOT/maven-metadata.xml
+[[1;33mWARNING[m] Could not transfer metadata net.openhft:chronicle-bom:2.22ea-SNAPSHOT/maven-metadata.xml from/to chronicle-enterprise-snapshots (https://nexus.chronicle.software/content/repositories/snapshots): Not authorized , ReasonPhrase:Unauthorized.
+[[1;33mWARNING[m] Could not transfer metadata net.openhft:chronicle-bom:2.22ea-SNAPSHOT/maven-metadata.xml from/to chronicle-enterprise-release (https://nexus.chronicle.software/content/repositories/releases): Not authorized , ReasonPhrase:Unauthorized.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m---------------------< [0;36mnet.openhft:chronicle-wire[0;1m >---------------------[m
+[[1;34mINFO[m] [1mBuilding OpenHFT/Chronicle-Wire 2.22ea2-SNAPSHOT[m
+[[1;34mINFO[m] [1m-------------------------------[ bundle ]-------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m>>> [0;32mnondex-maven-plugin:1.1.2:nondex[m [1m(default-cli)[0;1m > [0;1mtest-compile[m @ [36mchronicle-wire[0;1m >>>[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-enforcer-plugin:3.0.0-M3:enforce[m [1m(enforce-maven)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-enforcer-plugin:3.0.0-M3:enforce[m [1m(enforce-no-snapshots)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mdepends-maven-plugin:1.4.0:generate-depends-file[m [1m(generate-depends-file)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] Created: /home/shengan4/Chronicle-Wire/target/classes/META-INF/maven/dependencies.properties
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:3.2.0:resources[m [1m(default-resources)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered properties files.
+[[1;34mINFO[m] Copying 2 resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.8.1:compile[m [1m(default-compile)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] Changes detected - recompiling the module!
+[[1;34mINFO[m] Compiling 166 source files to /home/shengan4/Chronicle-Wire/target/classes
+[[1;33mWARNING[m] /home/shengan4/Chronicle-Wire/src/main/java/net/openhft/chronicle/wire/AbstractWire.java:[282,17] enterHeader(int) in net.openhft.chronicle.wire.WireOut has been deprecated
+[[1;33mWARNING[m] /home/shengan4/Chronicle-Wire/src/main/java/net/openhft/chronicle/wire/HashWire.java:[226,17] enterHeader(int) in net.openhft.chronicle.wire.WireOut has been deprecated
+[[1;33mWARNING[m] /home/shengan4/Chronicle-Wire/src/main/java/net/openhft/chronicle/wire/VanillaMethodWriterBuilder.java:[273,35] useMethodIds(boolean) in net.openhft.chronicle.bytes.MethodWriterBuilder has been deprecated
+[[1;34mINFO[m] /home/shengan4/Chronicle-Wire/src/main/java/net/openhft/chronicle/wire/Marshallable.java: Some input files use unchecked or unsafe operations.
+[[1;34mINFO[m] /home/shengan4/Chronicle-Wire/src/main/java/net/openhft/chronicle/wire/Marshallable.java: Recompile with -Xlint:unchecked for details.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-bundle-plugin:5.1.2:manifest[m [1m(default)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:3.2.0:testResources[m [1m(default-testResources)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered properties files.
+[[1;34mINFO[m] Copying 491 resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.8.1:testCompile[m [1m(default-testCompile)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] Changes detected - recompiling the module!
+[[1;34mINFO[m] Compiling 237 source files to /home/shengan4/Chronicle-Wire/target/test-classes
+[[1;34mINFO[m] /home/shengan4/Chronicle-Wire/src/test/java/net/openhft/chronicle/wire/marshallable/BClass.java: Some input files use unchecked or unsafe operations.
+[[1;34mINFO[m] /home/shengan4/Chronicle-Wire/src/test/java/net/openhft/chronicle/wire/marshallable/BClass.java: Recompile with -Xlint:unchecked for details.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m<<< [0;32mnondex-maven-plugin:1.1.2:nondex[m [1m(default-cli)[0;1m < [0;1mtest-compile[m @ [36mchronicle-wire[0;1m <<<[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mnondex-maven-plugin:1.1.2:nondex[m [1m(default-cli)[m @ [36mchronicle-wire[0;1m ---[m
+INFO: The original argline is: 
+INFO: Adding NonDex argLine to existing argLine specified by the project
+CONFIG: nondexFilter=.*
+nondexMode=FULL
+nondexSeed=933178
+nondexStart=0
+nondexEnd=9223372036854775807
+nondexPrintstack=false
+nondexDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexJarDir=.nondex
+nondexExecid=clean_Vbf4jnDuOY8i9xxsfEFDb27a70JdCivOjwOr1libk0=
+nondexLogging=CONFIG
+test=
+[[1;34mINFO[m] 
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m]  T E S T S
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m] Running net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;34mINFO[m] [1;32mTests run: [0;1;32m1[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.416 s - in net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] Results:
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1;32mTests run: 1, Failures: 0, Errors: 0, Skipped: 0[m
+[[1;34mINFO[m] 
+INFO: Adding excluded groups to newly created one
+INFO: Adding NonDex argLine to existing argLine specified by the project
+CONFIG: nondexFilter=.*
+nondexMode=FULL
+nondexSeed=933178
+nondexStart=0
+nondexEnd=9223372036854775807
+nondexPrintstack=false
+nondexDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexJarDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexExecid=Haq1KOw6UQx0WYzzKQqAzm6HuSoKB78S0Usr9wmVMfo=
+nondexLogging=CONFIG
+test=
+[[1;34mINFO[m] 
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m]  T E S T S
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m] Running net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] [1;31mTests [0;1mrun: [0;1m1[m, [1;31mFailures: [0;1;31m1[m, Errors: 0, Skipped: 0, Time elapsed: 0.35 s[1;31m <<< FAILURE![m - in net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] net.openhft.chronicle.wire.MarshallableTest.testReset  Time elapsed: 0.338 s  <<< FAILURE!
+org.junit.ComparisonFailure: 
+expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...le.wire.MyTypes {
+  [d: 6.0,
+  f: 5.0,
+  b: 1,
+  l: 7,
+  s: 2,
+  text: text,
+  ch: "3",
+  flag: true,
+  i: 4]
+}
+>
+	at net.openhft.chronicle.wire.MarshallableTest.testReset(MarshallableTest.java:159)
+
+[[1;34mINFO[m] 
+[[1;34mINFO[m] Results:
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mFailures: [m
+[[1;31mERROR[m] [1;31m  MarshallableTest.testReset:159 expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...le.wire.MyTypes {
+  [d: 6.0,
+  f: 5.0,
+  b: 1,
+  l: 7,
+  s: 2,
+  text: text,
+  ch: "3",
+  flag: true,
+  i: 4]
+}
+>[m
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mTests run: 1, Failures: 1, Errors: 0, Skipped: 0[m
+[[1;34mINFO[m] 
+INFO: Surefire failed when running tests for Haq1KOw6UQx0WYzzKQqAzm6HuSoKB78S0Usr9wmVMfo=
+INFO: Adding excluded groups to newly created one
+INFO: Adding NonDex argLine to existing argLine specified by the project
+CONFIG: nondexFilter=.*
+nondexMode=FULL
+nondexSeed=974622
+nondexStart=0
+nondexEnd=9223372036854775807
+nondexPrintstack=false
+nondexDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexJarDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexExecid=+idNhnHTV7xhsBHtm8vjzlT+4ljvKlNX7ahrABCkWw=
+nondexLogging=CONFIG
+test=
+[[1;34mINFO[m] 
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m]  T E S T S
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m] Running net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] [1;31mTests [0;1mrun: [0;1m1[m, [1;31mFailures: [0;1;31m1[m, Errors: 0, Skipped: 0, Time elapsed: 0.303 s[1;31m <<< FAILURE![m - in net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] net.openhft.chronicle.wire.MarshallableTest.testReset  Time elapsed: 0.287 s  <<< FAILURE!
+org.junit.ComparisonFailure: 
+expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...le.wire.MyTypes {
+  [f: 5.0,
+  text: text,
+  flag: true,
+  ch: "3",
+  d: 6.0,
+  l: 7,
+  i: 4,
+  s: 2,
+  b: 1]
+}
+>
+	at net.openhft.chronicle.wire.MarshallableTest.testReset(MarshallableTest.java:159)
+
+[[1;34mINFO[m] 
+[[1;34mINFO[m] Results:
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mFailures: [m
+[[1;31mERROR[m] [1;31m  MarshallableTest.testReset:159 expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...le.wire.MyTypes {
+  [f: 5.0,
+  text: text,
+  flag: true,
+  ch: "3",
+  d: 6.0,
+  l: 7,
+  i: 4,
+  s: 2,
+  b: 1]
+}
+>[m
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mTests run: 1, Failures: 1, Errors: 0, Skipped: 0[m
+[[1;34mINFO[m] 
+INFO: Surefire failed when running tests for +idNhnHTV7xhsBHtm8vjzlT+4ljvKlNX7ahrABCkWw=
+INFO: Adding excluded groups to newly created one
+INFO: Adding NonDex argLine to existing argLine specified by the project
+CONFIG: nondexFilter=.*
+nondexMode=FULL
+nondexSeed=1016066
+nondexStart=0
+nondexEnd=9223372036854775807
+nondexPrintstack=false
+nondexDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexJarDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexExecid=smZtOlfWQSfJIOmFrJJnaME9hbocG3jkGyC+Lj1rHqM=
+nondexLogging=CONFIG
+test=
+[[1;34mINFO[m] 
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m]  T E S T S
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m] Running net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] [1;31mTests [0;1mrun: [0;1m1[m, [1;31mFailures: [0;1;31m1[m, Errors: 0, Skipped: 0, Time elapsed: 0.321 s[1;31m <<< FAILURE![m - in net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] net.openhft.chronicle.wire.MarshallableTest.testReset  Time elapsed: 0.305 s  <<< FAILURE!
+org.junit.ComparisonFailure: 
+expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...le.wire.MyTypes {
+  [f: 5.0,
+  s: 2,
+  l: 7,
+  d: 6.0,
+  ch: "3",
+  flag: true,
+  i: 4,
+  b: 1,
+  text: text]
+}
+>
+	at net.openhft.chronicle.wire.MarshallableTest.testReset(MarshallableTest.java:159)
+
+[[1;34mINFO[m] 
+[[1;34mINFO[m] Results:
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mFailures: [m
+[[1;31mERROR[m] [1;31m  MarshallableTest.testReset:159 expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...le.wire.MyTypes {
+  [f: 5.0,
+  s: 2,
+  l: 7,
+  d: 6.0,
+  ch: "3",
+  flag: true,
+  i: 4,
+  b: 1,
+  text: text]
+}
+>[m
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mTests run: 1, Failures: 1, Errors: 0, Skipped: 0[m
+[[1;34mINFO[m] 
+INFO: Surefire failed when running tests for smZtOlfWQSfJIOmFrJJnaME9hbocG3jkGyC+Lj1rHqM=
+INFO: Adding excluded groups to newly created one
+INFO: Adding NonDex argLine to existing argLine specified by the project
+CONFIG: nondexFilter=.*
+nondexMode=FULL
+nondexSeed=1057510
+nondexStart=0
+nondexEnd=9223372036854775807
+nondexPrintstack=false
+nondexDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexJarDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexExecid=bvL6xiNyDBsCaby56SC3qXez9SjdOh8qAF0HTw9AOM=
+nondexLogging=CONFIG
+test=
+[[1;34mINFO[m] 
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m]  T E S T S
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m] Running net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] [1;31mTests [0;1mrun: [0;1m1[m, [1;31mFailures: [0;1;31m1[m, Errors: 0, Skipped: 0, Time elapsed: 0.296 s[1;31m <<< FAILURE![m - in net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] net.openhft.chronicle.wire.MarshallableTest.testReset  Time elapsed: 0.286 s  <<< FAILURE!
+org.junit.ComparisonFailure: 
+expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...le.wire.MyTypes {
+  [l: 7,
+  s: 2,
+  b: 1,
+  f: 5.0,
+  i: 4,
+  text: text,
+  ch: "3",
+  d: 6.0,
+  flag: true]
+}
+>
+	at net.openhft.chronicle.wire.MarshallableTest.testReset(MarshallableTest.java:159)
+
+[[1;34mINFO[m] 
+[[1;34mINFO[m] Results:
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mFailures: [m
+[[1;31mERROR[m] [1;31m  MarshallableTest.testReset:159 expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...le.wire.MyTypes {
+  [l: 7,
+  s: 2,
+  b: 1,
+  f: 5.0,
+  i: 4,
+  text: text,
+  ch: "3",
+  d: 6.0,
+  flag: true]
+}
+>[m
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mTests run: 1, Failures: 1, Errors: 0, Skipped: 0[m
+[[1;34mINFO[m] 
+INFO: Surefire failed when running tests for bvL6xiNyDBsCaby56SC3qXez9SjdOh8qAF0HTw9AOM=
+INFO: Adding excluded groups to newly created one
+INFO: Adding NonDex argLine to existing argLine specified by the project
+CONFIG: nondexFilter=.*
+nondexMode=FULL
+nondexSeed=1098954
+nondexStart=0
+nondexEnd=9223372036854775807
+nondexPrintstack=false
+nondexDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexJarDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexExecid=XqhC3ObH6u1NtioJ2qzYIJzIy9pjcISGRbO91+ySkRs=
+nondexLogging=CONFIG
+test=
+[[1;34mINFO[m] 
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m]  T E S T S
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m] Running net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] [1;31mTests [0;1mrun: [0;1m1[m, [1;31mFailures: [0;1;31m1[m, Errors: 0, Skipped: 0, Time elapsed: 0.32 s[1;31m <<< FAILURE![m - in net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] net.openhft.chronicle.wire.MarshallableTest.testReset  Time elapsed: 0.302 s  <<< FAILURE!
+org.junit.ComparisonFailure: 
+expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...le.wire.MyTypes {
+  [ch: "3",
+  f: 5.0,
+  l: 7,
+  s: 2,
+  text: text,
+  b: 1,
+  i: 4,
+  flag: true,
+  d: 6.0]
+}
+>
+	at net.openhft.chronicle.wire.MarshallableTest.testReset(MarshallableTest.java:159)
+
+[[1;34mINFO[m] 
+[[1;34mINFO[m] Results:
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mFailures: [m
+[[1;31mERROR[m] [1;31m  MarshallableTest.testReset:159 expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...le.wire.MyTypes {
+  [ch: "3",
+  f: 5.0,
+  l: 7,
+  s: 2,
+  text: text,
+  b: 1,
+  i: 4,
+  flag: true,
+  d: 6.0]
+}
+>[m
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mTests run: 1, Failures: 1, Errors: 0, Skipped: 0[m
+[[1;34mINFO[m] 
+INFO: Surefire failed when running tests for XqhC3ObH6u1NtioJ2qzYIJzIy9pjcISGRbO91+ySkRs=
+INFO: Adding excluded groups to newly created one
+INFO: Adding NonDex argLine to existing argLine specified by the project
+CONFIG: nondexFilter=.*
+nondexMode=FULL
+nondexSeed=1140398
+nondexStart=0
+nondexEnd=9223372036854775807
+nondexPrintstack=false
+nondexDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexJarDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexExecid=gzezIYm++FzWGDq16MW7Qp0LwvhXoj8DmELRjpHgzA=
+nondexLogging=CONFIG
+test=
+[[1;34mINFO[m] 
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m]  T E S T S
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m] Running net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] [1;31mTests [0;1mrun: [0;1m1[m, [1;31mFailures: [0;1;31m1[m, Errors: 0, Skipped: 0, Time elapsed: 0.309 s[1;31m <<< FAILURE![m - in net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] net.openhft.chronicle.wire.MarshallableTest.testReset  Time elapsed: 0.298 s  <<< FAILURE!
+org.junit.ComparisonFailure: 
+expected:<...s {
+  text: text,
+  [flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...s {
+  text: text,
+  [i: 4,
+  ch: "3",
+  flag: true,
+  s: 2,
+  l: 7,
+  b: 1,
+  d: 6.0,
+  f: 5.0]
+}
+>
+	at net.openhft.chronicle.wire.MarshallableTest.testReset(MarshallableTest.java:159)
+
+[[1;34mINFO[m] 
+[[1;34mINFO[m] Results:
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mFailures: [m
+[[1;31mERROR[m] [1;31m  MarshallableTest.testReset:159 expected:<...s {
+  text: text,
+  [flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...s {
+  text: text,
+  [i: 4,
+  ch: "3",
+  flag: true,
+  s: 2,
+  l: 7,
+  b: 1,
+  d: 6.0,
+  f: 5.0]
+}
+>[m
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mTests run: 1, Failures: 1, Errors: 0, Skipped: 0[m
+[[1;34mINFO[m] 
+INFO: Surefire failed when running tests for gzezIYm++FzWGDq16MW7Qp0LwvhXoj8DmELRjpHgzA=
+INFO: Adding excluded groups to newly created one
+INFO: Adding NonDex argLine to existing argLine specified by the project
+CONFIG: nondexFilter=.*
+nondexMode=FULL
+nondexSeed=1181842
+nondexStart=0
+nondexEnd=9223372036854775807
+nondexPrintstack=false
+nondexDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexJarDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexExecid=3LT+LHy2KQ0Qj73xYizUY+Oz0x5HuY2YdJKFIoLg=
+nondexLogging=CONFIG
+test=
+[[1;34mINFO[m] 
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m]  T E S T S
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m] Running net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] [1;31mTests [0;1mrun: [0;1m1[m, [1;31mFailures: [0;1;31m1[m, Errors: 0, Skipped: 0, Time elapsed: 0.303 s[1;31m <<< FAILURE![m - in net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] net.openhft.chronicle.wire.MarshallableTest.testReset  Time elapsed: 0.297 s  <<< FAILURE!
+org.junit.ComparisonFailure: 
+expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...le.wire.MyTypes {
+  [l: 7,
+  b: 1,
+  s: 2,
+  i: 4,
+  d: 6.0,
+  flag: true,
+  f: 5.0,
+  text: text,
+  ch: "3"]
+}
+>
+	at net.openhft.chronicle.wire.MarshallableTest.testReset(MarshallableTest.java:159)
+
+[[1;34mINFO[m] 
+[[1;34mINFO[m] Results:
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mFailures: [m
+[[1;31mERROR[m] [1;31m  MarshallableTest.testReset:159 expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...le.wire.MyTypes {
+  [l: 7,
+  b: 1,
+  s: 2,
+  i: 4,
+  d: 6.0,
+  flag: true,
+  f: 5.0,
+  text: text,
+  ch: "3"]
+}
+>[m
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mTests run: 1, Failures: 1, Errors: 0, Skipped: 0[m
+[[1;34mINFO[m] 
+INFO: Surefire failed when running tests for 3LT+LHy2KQ0Qj73xYizUY+Oz0x5HuY2YdJKFIoLg=
+INFO: Adding excluded groups to newly created one
+INFO: Adding NonDex argLine to existing argLine specified by the project
+CONFIG: nondexFilter=.*
+nondexMode=FULL
+nondexSeed=1223286
+nondexStart=0
+nondexEnd=9223372036854775807
+nondexPrintstack=false
+nondexDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexJarDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexExecid=Q8olRHY0oTIiEZW2py4rs2Yy9QrQRS1vQ9A2X5WXyg=
+nondexLogging=CONFIG
+test=
+[[1;34mINFO[m] 
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m]  T E S T S
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m] Running net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] [1;31mTests [0;1mrun: [0;1m1[m, [1;31mFailures: [0;1;31m1[m, Errors: 0, Skipped: 0, Time elapsed: 0.289 s[1;31m <<< FAILURE![m - in net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] net.openhft.chronicle.wire.MarshallableTest.testReset  Time elapsed: 0.278 s  <<< FAILURE!
+org.junit.ComparisonFailure: 
+expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0],
+  l: 7
+}
+> but was:<...le.wire.MyTypes {
+  [i: 4,
+  d: 6.0,
+  flag: true,
+  s: 2,
+  f: 5.0,
+  ch: "3",
+  text: text,
+  b: 1],
+  l: 7
+}
+>
+	at net.openhft.chronicle.wire.MarshallableTest.testReset(MarshallableTest.java:159)
+
+[[1;34mINFO[m] 
+[[1;34mINFO[m] Results:
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mFailures: [m
+[[1;31mERROR[m] [1;31m  MarshallableTest.testReset:159 expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0],
+  l: 7
+}
+> but was:<...le.wire.MyTypes {
+  [i: 4,
+  d: 6.0,
+  flag: true,
+  s: 2,
+  f: 5.0,
+  ch: "3",
+  text: text,
+  b: 1],
+  l: 7
+}
+>[m
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mTests run: 1, Failures: 1, Errors: 0, Skipped: 0[m
+[[1;34mINFO[m] 
+INFO: Surefire failed when running tests for Q8olRHY0oTIiEZW2py4rs2Yy9QrQRS1vQ9A2X5WXyg=
+INFO: Adding excluded groups to newly created one
+INFO: Adding NonDex argLine to existing argLine specified by the project
+CONFIG: nondexFilter=.*
+nondexMode=FULL
+nondexSeed=1264730
+nondexStart=0
+nondexEnd=9223372036854775807
+nondexPrintstack=false
+nondexDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexJarDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexExecid=BsX7o6Hrb05mBGTWK3qqEGtmmZhwSlpRVFs4ykMtM=
+nondexLogging=CONFIG
+test=
+[[1;34mINFO[m] 
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m]  T E S T S
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m] Running net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] [1;31mTests [0;1mrun: [0;1m1[m, [1;31mFailures: [0;1;31m1[m, Errors: 0, Skipped: 0, Time elapsed: 0.296 s[1;31m <<< FAILURE![m - in net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] net.openhft.chronicle.wire.MarshallableTest.testReset  Time elapsed: 0.285 s  <<< FAILURE!
+org.junit.ComparisonFailure: 
+expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0],
+  l: 7
+}
+> but was:<...le.wire.MyTypes {
+  [b: 1,
+  i: 4,
+  ch: "3",
+  d: 6.0,
+  s: 2,
+  text: text,
+  f: 5.0,
+  flag: true],
+  l: 7
+}
+>
+	at net.openhft.chronicle.wire.MarshallableTest.testReset(MarshallableTest.java:159)
+
+[[1;34mINFO[m] 
+[[1;34mINFO[m] Results:
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mFailures: [m
+[[1;31mERROR[m] [1;31m  MarshallableTest.testReset:159 expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0],
+  l: 7
+}
+> but was:<...le.wire.MyTypes {
+  [b: 1,
+  i: 4,
+  ch: "3",
+  d: 6.0,
+  s: 2,
+  text: text,
+  f: 5.0,
+  flag: true],
+  l: 7
+}
+>[m
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mTests run: 1, Failures: 1, Errors: 0, Skipped: 0[m
+[[1;34mINFO[m] 
+INFO: Surefire failed when running tests for BsX7o6Hrb05mBGTWK3qqEGtmmZhwSlpRVFs4ykMtM=
+INFO: Adding excluded groups to newly created one
+INFO: Adding NonDex argLine to existing argLine specified by the project
+CONFIG: nondexFilter=.*
+nondexMode=FULL
+nondexSeed=1306174
+nondexStart=0
+nondexEnd=9223372036854775807
+nondexPrintstack=false
+nondexDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexJarDir=/home/shengan4/Chronicle-Wire/.nondex
+nondexExecid=GIDXsS6bOLegi1apLCBeJkkxIA4G9jfJ1ZV+sP400=
+nondexLogging=CONFIG
+test=
+[[1;34mINFO[m] 
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m]  T E S T S
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m] Running net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] [1;31mTests [0;1mrun: [0;1m1[m, [1;31mFailures: [0;1;31m1[m, Errors: 0, Skipped: 0, Time elapsed: 0.311 s[1;31m <<< FAILURE![m - in net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;31mERROR[m] net.openhft.chronicle.wire.MarshallableTest.testReset  Time elapsed: 0.271 s  <<< FAILURE!
+org.junit.ComparisonFailure: 
+expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...le.wire.MyTypes {
+  [f: 5.0,
+  flag: true,
+  ch: "3",
+  text: text,
+  s: 2,
+  d: 6.0,
+  l: 7,
+  b: 1,
+  i: 4]
+}
+>
+	at net.openhft.chronicle.wire.MarshallableTest.testReset(MarshallableTest.java:159)
+
+[[1;34mINFO[m] 
+[[1;34mINFO[m] Results:
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mFailures: [m
+[[1;31mERROR[m] [1;31m  MarshallableTest.testReset:159 expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...le.wire.MyTypes {
+  [f: 5.0,
+  flag: true,
+  ch: "3",
+  text: text,
+  s: 2,
+  d: 6.0,
+  l: 7,
+  b: 1,
+  i: 4]
+}
+>[m
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mTests run: 1, Failures: 1, Errors: 0, Skipped: 0[m
+[[1;34mINFO[m] 
+INFO: Surefire failed when running tests for GIDXsS6bOLegi1apLCBeJkkxIA4G9jfJ1ZV+sP400=
+[[1;34mINFO[m] NonDex SUMMARY:
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] mvn nondex:nondex  -DnondexFilter='.*' -DnondexMode=FULL -DnondexSeed=933178 -DnondexStart=0 -DnondexEnd=9223372036854775807 -DnondexPrintstack=false -DnondexDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexJarDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexExecid=Haq1KOw6UQx0WYzzKQqAzm6HuSoKB78S0Usr9wmVMfo= -DnondexLogging=CONFIG
+[[1;33mWARNING[m] net.openhft.chronicle.wire.MarshallableTest#testReset
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] mvn nondex:nondex  -DnondexFilter='.*' -DnondexMode=FULL -DnondexSeed=974622 -DnondexStart=0 -DnondexEnd=9223372036854775807 -DnondexPrintstack=false -DnondexDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexJarDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexExecid=+idNhnHTV7xhsBHtm8vjzlT+4ljvKlNX7ahrABCkWw= -DnondexLogging=CONFIG
+[[1;33mWARNING[m] net.openhft.chronicle.wire.MarshallableTest#testReset
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] mvn nondex:nondex  -DnondexFilter='.*' -DnondexMode=FULL -DnondexSeed=1016066 -DnondexStart=0 -DnondexEnd=9223372036854775807 -DnondexPrintstack=false -DnondexDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexJarDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexExecid=smZtOlfWQSfJIOmFrJJnaME9hbocG3jkGyC+Lj1rHqM= -DnondexLogging=CONFIG
+[[1;33mWARNING[m] net.openhft.chronicle.wire.MarshallableTest#testReset
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] mvn nondex:nondex  -DnondexFilter='.*' -DnondexMode=FULL -DnondexSeed=1057510 -DnondexStart=0 -DnondexEnd=9223372036854775807 -DnondexPrintstack=false -DnondexDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexJarDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexExecid=bvL6xiNyDBsCaby56SC3qXez9SjdOh8qAF0HTw9AOM= -DnondexLogging=CONFIG
+[[1;33mWARNING[m] net.openhft.chronicle.wire.MarshallableTest#testReset
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] mvn nondex:nondex  -DnondexFilter='.*' -DnondexMode=FULL -DnondexSeed=1098954 -DnondexStart=0 -DnondexEnd=9223372036854775807 -DnondexPrintstack=false -DnondexDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexJarDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexExecid=XqhC3ObH6u1NtioJ2qzYIJzIy9pjcISGRbO91+ySkRs= -DnondexLogging=CONFIG
+[[1;33mWARNING[m] net.openhft.chronicle.wire.MarshallableTest#testReset
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] mvn nondex:nondex  -DnondexFilter='.*' -DnondexMode=FULL -DnondexSeed=1140398 -DnondexStart=0 -DnondexEnd=9223372036854775807 -DnondexPrintstack=false -DnondexDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexJarDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexExecid=gzezIYm++FzWGDq16MW7Qp0LwvhXoj8DmELRjpHgzA= -DnondexLogging=CONFIG
+[[1;33mWARNING[m] net.openhft.chronicle.wire.MarshallableTest#testReset
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] mvn nondex:nondex  -DnondexFilter='.*' -DnondexMode=FULL -DnondexSeed=1181842 -DnondexStart=0 -DnondexEnd=9223372036854775807 -DnondexPrintstack=false -DnondexDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexJarDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexExecid=3LT+LHy2KQ0Qj73xYizUY+Oz0x5HuY2YdJKFIoLg= -DnondexLogging=CONFIG
+[[1;33mWARNING[m] net.openhft.chronicle.wire.MarshallableTest#testReset
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] mvn nondex:nondex  -DnondexFilter='.*' -DnondexMode=FULL -DnondexSeed=1223286 -DnondexStart=0 -DnondexEnd=9223372036854775807 -DnondexPrintstack=false -DnondexDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexJarDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexExecid=Q8olRHY0oTIiEZW2py4rs2Yy9QrQRS1vQ9A2X5WXyg= -DnondexLogging=CONFIG
+[[1;33mWARNING[m] net.openhft.chronicle.wire.MarshallableTest#testReset
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] mvn nondex:nondex  -DnondexFilter='.*' -DnondexMode=FULL -DnondexSeed=1264730 -DnondexStart=0 -DnondexEnd=9223372036854775807 -DnondexPrintstack=false -DnondexDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexJarDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexExecid=BsX7o6Hrb05mBGTWK3qqEGtmmZhwSlpRVFs4ykMtM= -DnondexLogging=CONFIG
+[[1;33mWARNING[m] net.openhft.chronicle.wire.MarshallableTest#testReset
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] mvn nondex:nondex  -DnondexFilter='.*' -DnondexMode=FULL -DnondexSeed=1306174 -DnondexStart=0 -DnondexEnd=9223372036854775807 -DnondexPrintstack=false -DnondexDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexJarDir="/home/shengan4/Chronicle-Wire/.nondex" -DnondexExecid=GIDXsS6bOLegi1apLCBeJkkxIA4G9jfJ1ZV+sP400= -DnondexLogging=CONFIG
+[[1;33mWARNING[m] net.openhft.chronicle.wire.MarshallableTest#testReset
+[[1;34mINFO[m] *********
+[[1;34mINFO[m] Across all seeds:
+[[1;34mINFO[m] net.openhft.chronicle.wire.MarshallableTest#testReset
+[[1;34mINFO[m] Test results can be found at: 
+[[1;34mINFO[m] file:///home/shengan4/Chronicle-Wire/.nondex/Haq1KOw6UQx0WYzzKQqAzm6HuSoKB78S0Usr9wmVMfo=/test_results.html
+[[1;34mINFO[m] [NonDex] The id of this run is: Haq1KOw6UQx0WYzzKQqAzm6HuSoKB78S0Usr9wmVMfo=
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] [1;31mBUILD FAILURE[m
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] Total time:  21.421 s
+[[1;34mINFO[m] Finished at: 2021-08-31T19:39:22-05:00
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;31mERROR[m] Failed to execute goal [32medu.illinois:nondex-maven-plugin:1.1.2:nondex[m [1m(default-cli)[m on project [36mchronicle-wire[m: [1;31mUnable to execute mojo[m: There are test failures.
+[[1;31mERROR[m] 
+[[1;31mERROR[m] Please refer to /home/shengan4/Chronicle-Wire/.nondex/Haq1KOw6UQx0WYzzKQqAzm6HuSoKB78S0Usr9wmVMfo= for the individual test results.
+[[1;31mERROR[m] Please refer to dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[[1;31mERROR[m] -> [1m[Help 1][m
+[[1;31mERROR[m] 
+[[1;31mERROR[m] To see the full stack trace of the errors, re-run Maven with the [1m-e[m switch.
+[[1;31mERROR[m] Re-run Maven using the [1m-X[m switch to enable full debug logging.
+[[1;31mERROR[m] 
+[[1;31mERROR[m] For more information about the errors and possible solutions, please read the following articles:
+[[1;31mERROR[m] [1m[Help 1][m http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

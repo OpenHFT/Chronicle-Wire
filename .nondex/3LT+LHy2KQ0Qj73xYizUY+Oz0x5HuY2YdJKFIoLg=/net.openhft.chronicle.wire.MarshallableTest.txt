@@ -1,0 +1,31 @@
+-------------------------------------------------------------------------------
+Test set: net.openhft.chronicle.wire.MarshallableTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.303 s <<< FAILURE! - in net.openhft.chronicle.wire.MarshallableTest
+net.openhft.chronicle.wire.MarshallableTest.testReset  Time elapsed: 0.297 s  <<< FAILURE!
+org.junit.ComparisonFailure: 
+expected:<...le.wire.MyTypes {
+  [text: text,
+  flag: true,
+  b: 1,
+  s: 2,
+  ch: "3",
+  i: 4,
+  f: 5.0,
+  d: 6.0,
+  l: 7]
+}
+> but was:<...le.wire.MyTypes {
+  [l: 7,
+  b: 1,
+  s: 2,
+  i: 4,
+  d: 6.0,
+  flag: true,
+  f: 5.0,
+  text: text,
+  ch: "3"]
+}
+>
+	at net.openhft.chronicle.wire.MarshallableTest.testReset(MarshallableTest.java:159)
+

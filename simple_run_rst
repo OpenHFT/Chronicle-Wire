@@ -1,0 +1,62 @@
+[[1;34mINFO[m] Scanning for projects...
+Downloading from chronicle-enterprise-release: https://nexus.chronicle.software/content/repositories/releases/net/openhft/chronicle-bom/2.22ea-SNAPSHOT/maven-metadata.xml
+Downloading from chronicle-enterprise-snapshots: https://nexus.chronicle.software/content/repositories/snapshots/net/openhft/chronicle-bom/2.22ea-SNAPSHOT/maven-metadata.xml
+[[1;33mWARNING[m] Could not transfer metadata net.openhft:chronicle-bom:2.22ea-SNAPSHOT/maven-metadata.xml from/to chronicle-enterprise-snapshots (https://nexus.chronicle.software/content/repositories/snapshots): Not authorized , ReasonPhrase:Unauthorized.
+[[1;33mWARNING[m] Could not transfer metadata net.openhft:chronicle-bom:2.22ea-SNAPSHOT/maven-metadata.xml from/to chronicle-enterprise-release (https://nexus.chronicle.software/content/repositories/releases): Not authorized , ReasonPhrase:Unauthorized.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m---------------------< [0;36mnet.openhft:chronicle-wire[0;1m >---------------------[m
+[[1;34mINFO[m] [1mBuilding OpenHFT/Chronicle-Wire 2.22ea2-SNAPSHOT[m
+[[1;34mINFO[m] [1m-------------------------------[ bundle ]-------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-enforcer-plugin:3.0.0-M3:enforce[m [1m(enforce-maven)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-enforcer-plugin:3.0.0-M3:enforce[m [1m(enforce-no-snapshots)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mdepends-maven-plugin:1.4.0:generate-depends-file[m [1m(generate-depends-file)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] Created: /home/shengan4/Chronicle-Wire/target/classes/META-INF/maven/dependencies.properties
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:3.2.0:resources[m [1m(default-resources)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered properties files.
+[[1;34mINFO[m] Copying 2 resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.8.1:compile[m [1m(default-compile)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] Changes detected - recompiling the module!
+[[1;34mINFO[m] Compiling 166 source files to /home/shengan4/Chronicle-Wire/target/classes
+[[1;33mWARNING[m] /home/shengan4/Chronicle-Wire/src/main/java/net/openhft/chronicle/wire/AbstractWire.java:[282,17] enterHeader(int) in net.openhft.chronicle.wire.WireOut has been deprecated
+[[1;33mWARNING[m] /home/shengan4/Chronicle-Wire/src/main/java/net/openhft/chronicle/wire/HashWire.java:[226,17] enterHeader(int) in net.openhft.chronicle.wire.WireOut has been deprecated
+[[1;33mWARNING[m] /home/shengan4/Chronicle-Wire/src/main/java/net/openhft/chronicle/wire/VanillaMethodWriterBuilder.java:[273,35] useMethodIds(boolean) in net.openhft.chronicle.bytes.MethodWriterBuilder has been deprecated
+[[1;34mINFO[m] /home/shengan4/Chronicle-Wire/src/main/java/net/openhft/chronicle/wire/Marshallable.java: Some input files use unchecked or unsafe operations.
+[[1;34mINFO[m] /home/shengan4/Chronicle-Wire/src/main/java/net/openhft/chronicle/wire/Marshallable.java: Recompile with -Xlint:unchecked for details.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-bundle-plugin:5.1.2:manifest[m [1m(default)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:3.2.0:testResources[m [1m(default-testResources)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered properties files.
+[[1;34mINFO[m] Copying 491 resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.8.1:testCompile[m [1m(default-testCompile)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] Changes detected - recompiling the module!
+[[1;34mINFO[m] Compiling 237 source files to /home/shengan4/Chronicle-Wire/target/test-classes
+[[1;34mINFO[m] /home/shengan4/Chronicle-Wire/src/test/java/net/openhft/chronicle/wire/marshallable/BClass.java: Some input files use unchecked or unsafe operations.
+[[1;34mINFO[m] /home/shengan4/Chronicle-Wire/src/test/java/net/openhft/chronicle/wire/marshallable/BClass.java: Recompile with -Xlint:unchecked for details.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-surefire-plugin:3.0.0-M4:test[m [1m(default-test)[m @ [36mchronicle-wire[0;1m ---[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m]  T E S T S
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m] Running net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;34mINFO[m] [1;32mTests run: [0;1;32m1[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.351 s - in net.openhft.chronicle.wire.[1mMarshallableTest[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] Results:
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1;32mTests run: 1, Failures: 0, Errors: 0, Skipped: 0[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] [1;32mBUILD SUCCESS[m
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] Total time:  10.472 s
+[[1;34mINFO[m] Finished at: 2021-08-31T19:38:41-05:00
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
