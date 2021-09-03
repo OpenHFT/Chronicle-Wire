@@ -40,8 +40,8 @@ public class DefaultMarshallerTest extends WireTestCommon {
         oc.enums[2] = NestedEnum.THREE;
 
         assertEquals("!net.openhft.chronicle.wire.DefaultMarshallerTest$DMOuterClassWithEmbeddedArray {\n" +
-                "  str: words,\n" +
-                "  enums: [ ONE, TWO, THREE ]\n" +
+                "  enums: [ ONE, TWO, THREE ],\n" +
+                "  str: words\n" +
                 "}\n", oc.toString());
 
         @NotNull Wire text = new TextWire(Bytes.allocateElasticOnHeap(128));
