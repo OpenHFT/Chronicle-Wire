@@ -38,7 +38,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TextMethodTester<T> {
@@ -340,7 +343,6 @@ public class TextMethodTester<T> {
     public String actual() {
         return actual;
     }
-
 
     public TextMethodTester<T> updateInterceptor(UpdateInterceptor updateInterceptor) {
         this.updateInterceptor = updateInterceptor;

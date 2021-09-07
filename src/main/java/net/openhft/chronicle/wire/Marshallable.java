@@ -138,7 +138,6 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
         return (T) Wires.deepCopy(this);
     }
 
-
     default <T extends Marshallable> T copyTo(@NotNull T t) {
         return Wires.copyTo(this, t);
     }
