@@ -151,7 +151,7 @@
                         <configuration>
                             <referenceVersion>2.22ea1</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
-                            <binaryCompatibilityPercentageRequired>100</binaryCompatibilityPercentageRequired>
+<!--                            <binaryCompatibilityPercentageRequired>100</binaryCompatibilityPercentageRequired>-->
                         </configuration>
                     </execution>
                 </executions>
