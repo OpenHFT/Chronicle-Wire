@@ -651,10 +651,12 @@ public enum Wires {
 
         private static SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy");
         private static SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+        private static SimpleDateFormat sdf3 = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy", Locale.US);
 
         static {
             sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
             sdf2.setTimeZone(TimeZone.getTimeZone("GMT"));
+            sdf3.setTimeZone(TimeZone.getTimeZone("GMT"));
         }
 
         public static Date parseDate(ValueIn in) {
@@ -669,7 +671,13 @@ public enum Wires {
                 } catch (ParseException pe) {
                     try {
                         synchronized (sdf2) {
-                            return sdf2.parse(text);
+                            try {
+                                return sdf2.parse(text);
+                            } catch (ParseException pe1) {
+                                synchronized (sdf3) {
+                                    return sdf3.parse(text);
+                                }
+                            }
                         }
                     } catch (ParseException pe2) {
                         throw new IORuntimeException(pe);
