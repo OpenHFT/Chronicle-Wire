@@ -34,10 +34,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assume.assumeTrue;
 
@@ -119,14 +116,29 @@ public class WireTests {
 
     @Test
     public void testDate() {
+        Locale defLocale = Locale.getDefault();
+
+        Locale.setDefault(Locale.ITALY);
+
         final Bytes b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
+
         wire.getValueOut()
                 .object(new Date(1234567890000L));
         Assert.assertEquals(new Date(1234567890000L), wire.getValueIn()
                 .object(Date.class));
 
-        b.releaseLast();
+        wire.getValueOut().object("sab feb 14 00:31:30 CET 2009");
+
+        Assert.assertEquals(new Date(1234567890000L), wire.getValueIn()
+                .object(Date.class));
+
+        wire.getValueOut().object("2009-02-13 23:31:30.000");
+
+        Assert.assertEquals(new Date(1234567890000L), wire.getValueIn()
+                .object(Date.class));
+
+        Locale.setDefault(defLocale);
     }
 
     @Test
