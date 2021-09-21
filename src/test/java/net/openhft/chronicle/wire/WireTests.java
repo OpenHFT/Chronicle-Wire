@@ -20,16 +20,14 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -116,10 +114,6 @@ public class WireTests {
 
     @Test
     public void testDate() {
-        Locale defLocale = Locale.getDefault();
-
-        Locale.setDefault(Locale.ITALY);
-
         final Bytes b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
 
@@ -128,17 +122,17 @@ public class WireTests {
         Assert.assertEquals(new Date(1234567890000L), wire.getValueIn()
                 .object(Date.class));
 
-        wire.getValueOut().object("sab feb 14 00:31:30 CET 2009");
+        final Date expectedDate = new Date(1234567890000L);
+        String longDateInDefaultLocale = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy").format(expectedDate);
+        wire.getValueOut().object(longDateInDefaultLocale);
 
-        Assert.assertEquals(new Date(1234567890000L), wire.getValueIn()
+        Assert.assertEquals(expectedDate, wire.getValueIn()
                 .object(Date.class));
 
         wire.getValueOut().object("2009-02-13 23:31:30.000");
 
         Assert.assertEquals(new Date(1234567890000L), wire.getValueIn()
                 .object(Date.class));
-
-        Locale.setDefault(defLocale);
     }
 
     @Test
