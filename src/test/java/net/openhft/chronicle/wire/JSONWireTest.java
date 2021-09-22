@@ -40,7 +40,7 @@ import static org.junit.Assert.assertNotNull;
 public class JSONWireTest extends WireTestCommon {
     @NotNull
     private JSONWire createWire() {
-        return new JSONWire(Bytes.elasticByteBuffer());
+        return new JSONWire(Bytes.allocateElasticDirect());
     }
 
     @NotNull
