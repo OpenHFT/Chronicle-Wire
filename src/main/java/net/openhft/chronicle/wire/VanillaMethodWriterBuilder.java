@@ -259,7 +259,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     /**
-     * A generic event treats the first argument and the eventName
+     * A generic event treats the first argument as the eventName
      *
      * @param genericEvent name
      * @return this
