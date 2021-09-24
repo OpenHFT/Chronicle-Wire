@@ -88,41 +88,41 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
         String theTimeIs = "The time is " + LocalDateTime.now();
         doTest(ui, theTimeIs);
         assertEquals("accept: !net.openhft.chronicle.wire.MyTypes {\n" +
-                "  text: Hello World,\n" +
-                "  flag: false,\n" +
                 "  b: 0,\n" +
-                "  s: 0,\n" +
                 "  ch: \"\\0\",\n" +
-                "  i: 0,\n" +
-                "  f: 0.0,\n" +
                 "  d: 0.0,\n" +
-                "  l: 0\n" +
+                "  f: 0.0,\n" +
+                "  flag: false,\n" +
+                "  i: 0,\n" +
+                "  l: 0,\n" +
+                "  s: 0,\n" +
+                "  text: Hello World\n" +
                 "}\n" +
                 "return: true\n" +
                 "\n" +
                 "accept: !net.openhft.chronicle.wire.MyTypes {\n" +
-                "  text: block,\n" +
-                "  flag: false,\n" +
                 "  b: 0,\n" +
-                "  s: 0,\n" +
                 "  ch: \"\\0\",\n" +
-                "  i: 0,\n" +
-                "  f: 0.0,\n" +
                 "  d: 0.0,\n" +
-                "  l: 0\n" +
+                "  f: 0.0,\n" +
+                "  flag: false,\n" +
+                "  i: 0,\n" +
+                "  l: 0,\n" +
+                "  s: 0,\n" +
+                "  text: block\n" +
                 "}\n" +
                 "return: false\n" +
                 "\n" +
                 "accept: !net.openhft.chronicle.wire.MyTypes {\n" +
-                "  text: \"" + theTimeIs + "\",\n" +
-                "  flag: false,\n" +
                 "  b: 0,\n" +
-                "  s: 0,\n" +
                 "  ch: \"\\0\",\n" +
-                "  i: 0,\n" +
-                "  f: 0.0,\n" +
                 "  d: 0.0,\n" +
-                "  l: 0\n" +
+                "  f: 0.0,\n" +
+                "  flag: false,\n" +
+                "  i: 0,\n" +
+                "  l: 0,\n" +
+                "  s: 0,\n" +
+                "  text: \"" + theTimeIs + "\"\n" +
                 "}\n" +
                 "return: true\n" +
                 "\n", sw.toString());
