@@ -36,6 +36,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import static net.openhft.chronicle.core.UnsafeMemory.*;
 
@@ -135,7 +137,9 @@ public class WireMarshaller<T> {
     public static void getAllField(@NotNull Class clazz, @NotNull Map<String, Field> map) {
         if (clazz != Object.class && clazz != AbstractCommonMarshallable.class)
             getAllField(clazz.getSuperclass(), map);
-        for (@NotNull Field field : clazz.getDeclaredFields()) {
+        Field[] sortedFields = clazz.getDeclaredFields();
+        Arrays.sort(sortedFields, Comparator.comparing(Field::getName));
+        for (@NotNull Field field : sortedFields) {
             if ((field.getModifiers() & (Modifier.STATIC | Modifier.TRANSIENT)) != 0)
                 continue;
             if ("ordinal".equals(field.getName()) && Enum.class.isAssignableFrom(clazz))
