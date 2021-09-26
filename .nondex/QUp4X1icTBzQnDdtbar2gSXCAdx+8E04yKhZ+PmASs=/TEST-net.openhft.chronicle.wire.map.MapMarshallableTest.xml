@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="net.openhft.chronicle.wire.map.MapMarshallableTest" time="0.319" tests="1" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="awt.toolkit" value="sun.awt.X11.XToolkit"/>
+    <property name="project.build.directory" value="/home/xiyanc2/Chronicle-Wire/target"/>
+    <property name="java.specification.version" value="1.8"/>
+    <property name="nondexStart" value="0"/>
+    <property name="file.encoding.pkg" value="sun.io"/>
+    <property name="sun.cpu.isalist" value=""/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="jvm.safepoint.enabled" value="false"/>
+    <property name="java.class.path" value="/home/xiyanc2/Chronicle-Wire/target/test-classes:/home/xiyanc2/Chronicle-Wire/target/classes:/home/xiyanc2/.m2/repository/net/openhft/chronicle-core/2.22ea7-SNAPSHOT/chronicle-core-2.22ea7-SNAPSHOT.jar:/home/xiyanc2/.m2/repository/net/openhft/chronicle-analytics/2.22ea3/chronicle-analytics-2.22ea3.jar:/home/xiyanc2/.m2/repository/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar:/home/xiyanc2/.m2/repository/net/openhft/chronicle-bytes/2.22ea4-SNAPSHOT/chronicle-bytes-2.22ea4-SNAPSHOT.jar:/home/xiyanc2/.m2/repository/net/openhft/posix/2.22ea4/posix-2.22ea4.jar:/home/xiyanc2/.m2/repository/net/java/dev/jna/jna/5.5.0/jna-5.5.0.jar:/home/xiyanc2/.m2/repository/net/java/dev/jna/jna-platform/5.5.0/jna-platform-5.5.0.jar:/home/xiyanc2/.m2/repository/com/github/jnr/jnr-ffi/2.2.6/jnr-ffi-2.2.6.jar:/home/xiyanc2/.m2/repository/com/github/jnr/jffi/1.3.5/jffi-1.3.5.jar:/home/xiyanc2/.m2/repository/com/github/jnr/jffi/1.3.5/jffi-1.3.5-native.jar:/home/xiyanc2/.m2/repository/org/ow2/asm/asm/9.1/asm-9.1.jar:/home/xiyanc2/.m2/repository/org/ow2/asm/asm-commons/9.1/asm-commons-9.1.jar:/home/xiyanc2/.m2/repository/org/ow2/asm/asm-analysis/9.1/asm-analysis-9.1.jar:/home/xiyanc2/.m2/repository/org/ow2/asm/asm-tree/9.1/asm-tree-9.1.jar:/home/xiyanc2/.m2/repository/org/ow2/asm/asm-util/9.1/asm-util-9.1.jar:/home/xiyanc2/.m2/repository/com/github/jnr/jnr-a64asm/1.0.0/jnr-a64asm-1.0.0.jar:/home/xiyanc2/.m2/repository/com/github/jnr/jnr-x86asm/1.0.2/jnr-x86asm-1.0.2.jar:/home/xiyanc2/.m2/repository/com/github/jnr/jnr-constants/0.10.2/jnr-constants-0.10.2.jar:/home/xiyanc2/.m2/repository/net/openhft/chronicle-threads/2.22ea4-SNAPSHOT/chronicle-threads-2.22ea4-SNAPSHOT.jar:/home/xiyanc2/.m2/repository/net/openhft/affinity/3.21ea5/affinity-3.21ea5.jar:/home/xiyanc2/.m2/repository/net/openhft/compiler/2.21ea1/compiler-2.21ea1.jar:/home/xiyanc2/.m2/repository/org/jetbrains/annotations/21.0.1/annotations-21.0.1.jar:/home/xiyanc2/.m2/repository/junit/junit/4.13.2/junit-4.13.2.jar:/home/xiyanc2/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/home/xiyanc2/.m2/repository/org/slf4j/slf4j-simple/1.7.30/slf4j-simple-1.7.30.jar:/home/xiyanc2/.m2/repository/org/easymock/easymock/4.3/easymock-4.3.jar:/home/xiyanc2/.m2/repository/org/objenesis/objenesis/3.2/objenesis-3.2.jar:/home/xiyanc2/.m2/repository/org/yaml/snakeyaml/1.26/snakeyaml-1.26.jar::/home/xiyanc2/Chronicle-Wire/target/surefire/surefirebooter7349953971724604482.jar"/>
+    <property name="java.vm.vendor" value="Private Build"/>
+    <property name="nondexPrintstack" value="false"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="http://java.oracle.com/"/>
+    <property name="nondexRuns" value="10"/>
+    <property name="user.timezone" value="UTC"/>
+    <property name="os.name" value="Linux"/>
+    <property name="java.vm.specification.version" value="1.8"/>
+    <property name="strict.discard.warning" value="true"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="US"/>
+    <property name="sun.boot.library.path" value="/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64"/>
+    <property name="sun.java.command" value="/home/xiyanc2/Chronicle-Wire/target/surefire/surefirebooter7349953971724604482.jar /home/xiyanc2/Chronicle-Wire/target/surefire 2021-09-26T15-50-21_815-jvmRun1 surefire621188622813230073tmp surefire_28348878823103924735tmp"/>
+    <property name="nondexLogging" value="CONFIG"/>
+    <property name="surefire.test.class.path" value="/home/xiyanc2/Chronicle-Wire/target/test-classes:/home/xiyanc2/Chronicle-Wire/target/classes:/home/xiyanc2/.m2/repository/net/openhft/chronicle-core/2.22ea7-SNAPSHOT/chronicle-core-2.22ea7-SNAPSHOT.jar:/home/xiyanc2/.m2/repository/net/openhft/chronicle-analytics/2.22ea3/chronicle-analytics-2.22ea3.jar:/home/xiyanc2/.m2/repository/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar:/home/xiyanc2/.m2/repository/net/openhft/chronicle-bytes/2.22ea4-SNAPSHOT/chronicle-bytes-2.22ea4-SNAPSHOT.jar:/home/xiyanc2/.m2/repository/net/openhft/posix/2.22ea4/posix-2.22ea4.jar:/home/xiyanc2/.m2/repository/net/java/dev/jna/jna/5.5.0/jna-5.5.0.jar:/home/xiyanc2/.m2/repository/net/java/dev/jna/jna-platform/5.5.0/jna-platform-5.5.0.jar:/home/xiyanc2/.m2/repository/com/github/jnr/jnr-ffi/2.2.6/jnr-ffi-2.2.6.jar:/home/xiyanc2/.m2/repository/com/github/jnr/jffi/1.3.5/jffi-1.3.5.jar:/home/xiyanc2/.m2/repository/com/github/jnr/jffi/1.3.5/jffi-1.3.5-native.jar:/home/xiyanc2/.m2/repository/org/ow2/asm/asm/9.1/asm-9.1.jar:/home/xiyanc2/.m2/repository/org/ow2/asm/asm-commons/9.1/asm-commons-9.1.jar:/home/xiyanc2/.m2/repository/org/ow2/asm/asm-analysis/9.1/asm-analysis-9.1.jar:/home/xiyanc2/.m2/repository/org/ow2/asm/asm-tree/9.1/asm-tree-9.1.jar:/home/xiyanc2/.m2/repository/org/ow2/asm/asm-util/9.1/asm-util-9.1.jar:/home/xiyanc2/.m2/repository/com/github/jnr/jnr-a64asm/1.0.0/jnr-a64asm-1.0.0.jar:/home/xiyanc2/.m2/repository/com/github/jnr/jnr-x86asm/1.0.2/jnr-x86asm-1.0.2.jar:/home/xiyanc2/.m2/repository/com/github/jnr/jnr-constants/0.10.2/jnr-constants-0.10.2.jar:/home/xiyanc2/.m2/repository/net/openhft/chronicle-threads/2.22ea4-SNAPSHOT/chronicle-threads-2.22ea4-SNAPSHOT.jar:/home/xiyanc2/.m2/repository/net/openhft/affinity/3.21ea5/affinity-3.21ea5.jar:/home/xiyanc2/.m2/repository/net/openhft/compiler/2.21ea1/compiler-2.21ea1.jar:/home/xiyanc2/.m2/repository/org/jetbrains/annotations/21.0.1/annotations-21.0.1.jar:/home/xiyanc2/.m2/repository/junit/junit/4.13.2/junit-4.13.2.jar:/home/xiyanc2/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/home/xiyanc2/.m2/repository/org/slf4j/slf4j-simple/1.7.30/slf4j-simple-1.7.30.jar:/home/xiyanc2/.m2/repository/org/easymock/easymock/4.3/easymock-4.3.jar:/home/xiyanc2/.m2/repository/org/objenesis/objenesis/3.2/objenesis-3.2.jar:/home/xiyanc2/.m2/repository/org/yaml/snakeyaml/1.26/snakeyaml-1.26.jar:"/>
+    <property name="test" value="net.openhft.chronicle.wire.map.MapMarshallableTest#test"/>
+    <property name="nondexExecid" value="QUp4X1icTBzQnDdtbar2gSXCAdx+8E04yKhZ+PmASs="/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/home/xiyanc2"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="wire.generate.v2" value="false"/>
+    <property name="java.home" value="/usr/lib/jvm/java-8-openjdk-amd64/jre"/>
+    <property name="basedir" value="/home/xiyanc2/Chronicle-Wire"/>
+    <property name="file.separator" value="/"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="nondexEnd" value="9223372036854775807"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="java.awt.graphicsenv" value="sun.awt.X11GraphicsEnvironment"/>
+    <property name="nondexFilter" value=".*"/>
+    <property name="nondexSeed" value="974622"/>
+    <property name="surefire.real.class.path" value="/home/xiyanc2/Chronicle-Wire/target/surefire/surefirebooter7349953971724604482.jar"/>
+    <property name="sun.boot.class.path" value="/home/xiyanc2/Chronicle-Wire/.nondex/nondex-instr.jar:/home/xiyanc2/.m2/repository/edu/illinois/nondex-common/1.1.2/nondex-common-1.1.2.jar:/home/xiyanc2/.m2/repository/edu/illinois/nondex-annotations/1.1.2/nondex-annotations-1.1.2.jar:/home/xiyanc2/Chronicle-Wire/.nondex/nondex-instr.jar:/home/xiyanc2/.m2/repository/edu/illinois/nondex-common/1.1.2/nondex-common-1.1.2.jar:/home/xiyanc2/.m2/repository/edu/illinois/nondex-annotations/1.1.2/nondex-annotations-1.1.2.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/resources.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/sunrsasign.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/jsse.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/jce.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/charsets.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/jfr.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/classes"/>
+    <property name="disable.resource.warning" value="true"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="1.8.0_292-8u292-b10-0ubuntu1~18.04-b10"/>
+    <property name="user.name" value="xiyanc2"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="4.15.0-158-generic"/>
+    <property name="chronicle.announcer.disable" value="true"/>
+    <property name="java.endorsed.dirs" value="/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/endorsed"/>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="check.thread.safety" value="true"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="localRepository" value="/home/xiyanc2/.m2/repository"/>
+    <property name="nondexDir" value="/home/xiyanc2/Chronicle-Wire/.nondex"/>
+    <property name="nondexJarDir" value="/home/xiyanc2/Chronicle-Wire/.nondex"/>
+    <property name="java.vendor.url.bug" value="http://bugreport.sun.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="/tmp"/>
+    <property name="jvm.resource.tracing" value="true"/>
+    <property name="java.version" value="1.8.0_292"/>
+    <property name="user.dir" value="/home/xiyanc2/Chronicle-Wire"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="nondexMode" value="FULL"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="java.awt.printerjob" value="sun.print.PSPrinterJob"/>
+    <property name="sun.os.patch.level" value="unknown"/>
+    <property name="java.library.path" value="/usr/java/packages/lib/amd64:/usr/lib/x86_64-linux-gnu/jni:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/lib/jni:/lib:/usr/lib"/>
+    <property name="java.vm.info" value="mixed mode"/>
+    <property name="java.vendor" value="Private Build"/>
+    <property name="java.vm.version" value="25.292-b10"/>
+    <property name="java.ext.dirs" value="/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext:/usr/java/packages/lib/ext"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="52.0"/>
+  </properties>
+  <testcase name="test" classname="net.openhft.chronicle.wire.map.MapMarshallableTest" time="0.309"/>
+</testsuite>
