@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: net.openhft.chronicle.wire.map.MapMarshallableTest
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.366 s - in net.openhft.chronicle.wire.map.MapMarshallableTest

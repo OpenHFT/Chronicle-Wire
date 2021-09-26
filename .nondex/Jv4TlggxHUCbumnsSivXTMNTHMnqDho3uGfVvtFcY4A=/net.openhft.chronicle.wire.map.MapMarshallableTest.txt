@@ -1,8 +1,0 @@
--------------------------------------------------------------------------------
-Test set: net.openhft.chronicle.wire.map.MapMarshallableTest
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.295 s <<< FAILURE! - in net.openhft.chronicle.wire.map.MapMarshallableTest
-net.openhft.chronicle.wire.map.MapMarshallableTest.test  Time elapsed: 0.294 s  <<< FAILURE!
-org.junit.ComparisonFailure: expected:<{[one=10, two=20, three=3]0}> but was:<{[three=30, two=20, one=1]0}>
-	at net.openhft.chronicle.wire.map.MapMarshallableTest.test(MapMarshallableTest.java:31)
-

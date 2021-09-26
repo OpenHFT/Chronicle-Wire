@@ -28,10 +28,10 @@ public class MapMarshallableTest extends WireTestCommon {
         assertEquals(30, result.three);
 
         @NotNull Map<String, Object> map2 = Wires.copyTo(result, new LinkedHashMap<>());
-        String string2 = map2.toString();
-        assertTrue(string2.equals("{one=10, two=20, three=30}") || string2.equals("{one=10, three=30, two=20}")
-        || string2.equals("{two=20, one=10, three=30}")||string2.equals("{two=30, three=30, one=10}")
-        || string2.equals("{three=30, one=10, two=20}") || string2.equals("{three=30, two=20, one=10}"));
+        assertEquals("{one=10, two=20, three=30}", map2.toString());
+
+        @NotNull Map<String, Object> map3 = Wires.copyTo(map, new TreeMap<>());
+        assertEquals("{one=10, three=30, two=20}", map3.toString());
     }
 
     private static class MyDto extends SelfDescribingMarshallable {
