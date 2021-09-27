@@ -5,6 +5,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BinaryInTextTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
@@ -35,10 +36,15 @@ public class BinaryInTextTest extends WireTestCommon {
                 "b: !!binary AAAAAAA=,\n" +
                 "c: !!binary CCCCCCCC,\n" +
                 "}");
-        assertEquals("!net.openhft.chronicle.wire.BinaryInTextTest$BIT {\n" +
+        String bitToString = bit.toString();
+        assertTrue(bitToString.equals("!net.openhft.chronicle.wire.BinaryInTextTest$BIT {\n" +
                 "  b: !!binary AAAAAAA=,\n" +
                 "  c: !!binary CCCCCCCC\n" +
-                "}\n", bit.toString());
+                "}\n") ||
+                bitToString.equals("!net.openhft.chronicle.wire.BinaryInTextTest$BIT {\n" +
+                        "  c: !!binary CCCCCCCC,\n" +
+                        "  b: !!binary AAAAAAA=\n" +
+                        "}\n"));
     }
 
     @SuppressWarnings("rawtypes")
