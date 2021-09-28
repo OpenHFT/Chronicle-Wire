@@ -39,6 +39,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeTrue;
 
 @SuppressWarnings("rawtypes")
@@ -210,6 +211,26 @@ public class WireTests {
         Assert.assertEquals(Boolean.class, o.clazz());
 
         b.releaseLast();
+    }
+
+    @Test
+    public void unknownFieldsAreClearedBetweenReadContexts() {
+        final Bytes b = Bytes.elasticByteBuffer();
+        final Wire wire = createWire(b);
+
+        try (final DocumentContext documentContext = wire.writingDocument()) {
+            documentContext.wire().write("first").text("firstValue");
+        }
+        try (final DocumentContext documentContext = wire.writingDocument()) {
+            documentContext.wire().write("second").text("secondValue");
+        }
+
+        try (final DocumentContext documentContext = wire.readingDocument()) {
+            assertNull(documentContext.wire().read("not_there").text());
+        }
+        try (final DocumentContext documentContext = wire.readingDocument()) {
+            assertNull(documentContext.wire().read("first").text());
+        }
     }
 
     @Test

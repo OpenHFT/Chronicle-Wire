@@ -150,6 +150,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     @Override
     public void start() {
         rollback = false;
+        wire.getValueIn().resetState();
         wire.getValueOut().resetBetweenDocuments();
         readPosition = readLimit = -1;
         @NotNull final Bytes<?> bytes = wire.bytes();
