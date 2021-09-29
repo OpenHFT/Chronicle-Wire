@@ -623,6 +623,7 @@ public enum Wires {
     public static BinaryWire binaryWireForRead(Bytes in, long position, long length) {
         BinaryWire wire = WIRE_TL.get();
         VanillaBytes bytes = (VanillaBytes) wire.bytes();
+        wire.clear();
         bytes.bytesStore(in.bytesStore(), position, length);
         return wire;
     }
