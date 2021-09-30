@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class DefaultMarshallerTest extends WireTestCommon {
 
@@ -39,10 +40,15 @@ public class DefaultMarshallerTest extends WireTestCommon {
         oc.enums[1] = NestedEnum.TWO;
         oc.enums[2] = NestedEnum.THREE;
 
-        assertEquals("!net.openhft.chronicle.wire.DefaultMarshallerTest$DMOuterClassWithEmbeddedArray {\n" +
+        String ocToString = oc.toString();
+        assertTrue(ocToString.equals("!net.openhft.chronicle.wire.DefaultMarshallerTest$DMOuterClassWithEmbeddedArray {\n" +
                 "  str: words,\n" +
                 "  enums: [ ONE, TWO, THREE ]\n" +
-                "}\n", oc.toString());
+                "}\n") ||
+                ocToString.equals("!net.openhft.chronicle.wire.DefaultMarshallerTest$DMOuterClassWithEmbeddedArray {\n" +
+                        "  enums: [ ONE, TWO, THREE ],\n" +
+                        "  str: words\n" +
+                        "}\n"));
 
         @NotNull Wire text = new TextWire(Bytes.allocateElasticOnHeap(128));
         oc.writeMarshallable(text);
