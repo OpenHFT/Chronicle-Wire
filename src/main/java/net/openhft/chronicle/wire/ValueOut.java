@@ -48,6 +48,7 @@ import java.util.stream.Stream;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface ValueOut {
+    ThreadLocal<MapMarshaller> MM_TL = ThreadLocal.withInitial(MapMarshaller::new);
 
     int SMALL_MESSAGE = 64;
     String ZEROS_64 = "0000000000000000000000000000000000000000000000000000000000000000";
@@ -526,14 +527,9 @@ public interface ValueOut {
             return wireOut();
         }
 
-        marshallable(m -> {
-            for (@NotNull Map.Entry<K, V> entry : map.entrySet()) {
-                ValueOut valueOut = m.writeEvent(kClass, entry.getKey());
-                boolean wasLeaf = valueOut.swapLeaf(leaf);
-                valueOut.object(vClass, entry.getValue());
-                valueOut.swapLeaf(wasLeaf);
-            }
-        });
+        final MapMarshaller mapMarshaller = MM_TL.get();
+        mapMarshaller.params(map, kClass, vClass, leaf);
+        marshallable(mapMarshaller);
         return wireOut();
     }
 
@@ -893,5 +889,33 @@ public interface ValueOut {
         StringBuilder sb = Wires.acquireStringBuilder();
         longConverter.append(sb, l);
         return rawText(sb);
+    }
+
+    /**
+     * This is a kludge and is here so that {@link WireMarshaller#of(Class)} detects this as not a leaf.
+     * Previously this was a lambda, and {@link WireMarshaller#of(Class)} Java >= 15 falsely labelled it as a leaf
+     */
+    class MapMarshaller<K, V> implements WriteMarshallable {
+        private Map<K, V> map;
+        private Class<K> kClass;
+        private Class<V> vClass;
+        private boolean leaf;
+
+        void params(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) {
+            this.map = map;
+            this.kClass = kClass;
+            this.vClass = vClass;
+            this.leaf = leaf;
+        }
+
+        @Override
+        public void writeMarshallable(@NotNull WireOut wire) {
+            for (@NotNull Map.Entry<K, V> entry : map.entrySet()) {
+                ValueOut valueOut = wire.writeEvent(kClass, entry.getKey());
+                boolean wasLeaf = valueOut.swapLeaf(leaf);
+                valueOut.object(vClass, entry.getValue());
+                valueOut.swapLeaf(wasLeaf);
+            }
+        }
     }
 }
