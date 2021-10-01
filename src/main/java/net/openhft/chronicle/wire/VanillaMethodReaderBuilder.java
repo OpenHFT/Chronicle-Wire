@@ -115,7 +115,6 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private MethodReader createGeneratedInstance(Supplier<MethodReader> vanillaSupplier, Object... impls) {
         // todo support this options in the generated code
         if (ignoreDefaults ||
-                Jvm.getBoolean("chronicle.mr_overload_dont_throw") ||
                 Jvm.getBoolean(DISABLE_READER_PROXY_CODEGEN))
             return null;
 
