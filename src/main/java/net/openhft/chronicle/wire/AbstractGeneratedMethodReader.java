@@ -37,6 +37,8 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * In case generated instance fails to perform a read, it's delegated to lazy-initialized {@link VanillaMethodReader}.
  */
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
+    private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = noOp -> {
+    };
     private final MarshallableIn in;
     protected final WireParselet debugLoggingParselet;
     private final Supplier<MethodReader> delegateSupplier;
@@ -45,8 +47,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private MethodReader delegate;
     private boolean closeIn = false, closed;
 
-    private Consumer<MessageHistory> historyConsumer = noOp -> {
-    };
+    private Consumer<MessageHistory> historyConsumer = NO_OP_MH_CONSUMER;
 
     private static class MessageHistoryThreadLocal {
 
@@ -103,7 +104,8 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         if (wireIn == null)
             return false;
 
-        writeUnwrittenMessageHistory(context);
+        if (historyConsumer != NO_OP_MH_CONSUMER)
+            writeUnwrittenMessageHistory(context);
 
         messageHistory().reset(context.sourceId(), context.index());
 
@@ -126,7 +128,10 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             }
             wireIn.endEvent();
         } finally {
-            swapMessageHistoryIfDirty().reset();
+            if (historyConsumer != NO_OP_MH_CONSUMER)
+                swapMessageHistoryIfDirty().reset();
+            else
+                messageHistory.reset();
         }
 
         return true;
