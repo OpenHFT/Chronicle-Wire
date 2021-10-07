@@ -52,7 +52,11 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
     private static final class MessageHistoryThreadLocal {
 
-        private final ThreadLocal<MessageHistory> messageHistoryTL = withInitial(VanillaMessageHistory::new);
+        private final ThreadLocal<MessageHistory> messageHistoryTL = withInitial(() -> {
+            @NotNull VanillaMessageHistory veh = new VanillaMessageHistory();
+            veh.addSourceDetails(true);
+            return veh;
+        });
 
         private MessageHistory getAndSet(MessageHistory mh) {
             final MessageHistory result = messageHistoryTL.get();
@@ -130,9 +134,8 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
             wireIn.endEvent();
         } finally {
             if (historyConsumer != NO_OP_MH_CONSUMER)
-                swapMessageHistoryIfDirty().reset();
-            else
-                messageHistory.reset();
+                swapMessageHistoryIfDirty();
+            messageHistory.reset();
         }
 
         return true;
@@ -144,12 +147,12 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      */
     @NotNull
     private MessageHistory swapMessageHistoryIfDirty() {
-        MessageHistory mh = messageHistory();
-        if (mh.isDirty()) {
-            mh = TEMP_MESSAGE_HISTORY.getAndSet(mh);
-            MessageHistory.set(mh);
+        if (messageHistory.isDirty()) {
+            messageHistory = TEMP_MESSAGE_HISTORY.getAndSet(messageHistory);
+            MessageHistory.set(messageHistory);
+            assert (messageHistory != TEMP_MESSAGE_HISTORY.get());
         }
-        return mh;
+        return messageHistory;
     }
 
     /**
