@@ -984,7 +984,6 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         try (DocumentContext dc = wire.writingDocument()) {
 
             wire.write("numberOfLongValues").int32(words.length);
-            dc.wire().consumePadding();
 
             for (int i = 0; i < words.length; i++) {
                 if (words[i] == null)
@@ -1003,7 +1002,6 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         try (DocumentContext dc = wire.readingDocument()) {
 
             int numberOfLongValues = wire.read("numberOfLongValues").int32();
-            dc.wire().padToCacheAlign();
             words = new LongReference[numberOfLongValues];
             for (int i = 0; i < numberOfLongValues; i++) {
                 words[i] = wire.getValueIn().int64ForBinding(null);
