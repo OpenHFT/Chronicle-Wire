@@ -1,6 +1,7 @@
 package run.chronicle.wire.demo;
 
 import net.openhft.chronicle.core.util.CharSequenceComparator;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -48,7 +49,7 @@ public class ListLookup {
     }
 
 
-    private static final class Data {
+    private static final class Data extends SelfDescribingMarshallable {
 
         // Ids can be reused/internalized
         private CharSequence id;
