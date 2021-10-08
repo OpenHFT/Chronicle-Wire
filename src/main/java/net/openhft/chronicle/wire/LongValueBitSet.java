@@ -981,15 +981,12 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
     @Override
     public void writeMarshallable(@NotNull final WireOut wire) {
-        try (DocumentContext dc = wire.writingDocument()) {
+        wire.write("numberOfLongValues").int32(words.length);
 
-            wire.write("numberOfLongValues").int32(words.length);
-
-            for (int i = 0; i < words.length; i++) {
-                if (words[i] == null)
-                    words[i] = wire.newLongReference();
-                wire.getValueOut().int64forBinding(words[i].getValue());
-            }
+        for (int i = 0; i < words.length; i++) {
+            if (words[i] == null)
+                words[i] = wire.newLongReference();
+            wire.getValueOut().int64forBinding(words[i].getValue());
         }
     }
 
@@ -999,14 +996,12 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
         closeQuietly(words);
 
-        try (DocumentContext dc = wire.readingDocument()) {
-
-            int numberOfLongValues = wire.read("numberOfLongValues").int32();
-            words = new LongReference[numberOfLongValues];
-            for (int i = 0; i < numberOfLongValues; i++) {
-                words[i] = wire.getValueIn().int64ForBinding(null);
-            }
+        int numberOfLongValues = wire.read("numberOfLongValues").int32();
+        words = new LongReference[numberOfLongValues];
+        for (int i = 0; i < numberOfLongValues; i++) {
+            words[i] = wire.getValueIn().int64ForBinding(null);
         }
+
         disableThreadSafetyCheck(true);
     }
 
