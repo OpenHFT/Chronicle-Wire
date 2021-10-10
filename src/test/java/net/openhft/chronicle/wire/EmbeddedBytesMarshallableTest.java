@@ -17,7 +17,7 @@ import static org.junit.Assume.assumeFalse;
 public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     @Before
     public void checkArch() {
-        assumeFalse(Jvm.isArm());
+        assumeFalse(Jvm.isArm() || Jvm.isAzulZing());
     }
 
     @Test
