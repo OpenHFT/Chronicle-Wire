@@ -469,6 +469,9 @@ public enum Wires {
         if (using == null) {
             using = (E) strategy.newInstanceOrNull(clazz);
             nullObject = using == null;
+            // Effectively clears the previous state in the ThreadLocal.
+            if (!nullObject)
+                acquireBytesForToString();
         }
         if (Throwable.class.isAssignableFrom(clazz))
             return (E) WireInternal.throwable(in, false, (Throwable) using);
