@@ -415,7 +415,14 @@ public interface ValueOut {
         String typeName = Wires.typeNameFor(marshallable);
         if (typeName != null)
             typePrefix(typeName);
-        return marshallable(marshallable);
+        final WireOut wire = marshallable(marshallable);
+        if (typeName != null)
+            endTypePrefix();
+        return wire;
+    }
+
+    default void endTypePrefix() {
+
     }
 
     @NotNull

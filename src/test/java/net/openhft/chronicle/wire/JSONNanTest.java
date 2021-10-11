@@ -13,7 +13,7 @@ public class JSONNanTest extends WireTestCommon {
             Wire wire = WireType.JSON.apply(b);
             Dto value = new Dto();
             value.value = Double.NaN;
-            wire.write().object(value);
+            wire.write().marshallable(value);
             Assert.assertEquals("\"\":{\"value\":null}", wire.toString());
         } finally {
             b.releaseLast();

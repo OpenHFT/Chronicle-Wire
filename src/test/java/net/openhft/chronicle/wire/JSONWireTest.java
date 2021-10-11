@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.annotation.RetentionPolicy;
@@ -273,8 +272,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/292")
-    public void testArrayDelimeterNoSpace() {
+    public void testArrayDelimiterNoSpace() {
         // This fails
         String text = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
 

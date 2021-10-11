@@ -37,6 +37,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 public class JSONWire extends TextWire {
     @SuppressWarnings("rawtypes")
     static final BytesStore COMMA = BytesStore.from(",");
+    boolean outputTypes;
 
     @SuppressWarnings("rawtypes")
     public JSONWire(@NotNull Bytes bytes, boolean use8bit) {
@@ -61,6 +62,11 @@ public class JSONWire extends TextWire {
         wire.bytes().readPosition(pos);
 
         return tw.toString();
+    }
+
+    public JSONWire outputTypes(boolean outputTypes) {
+        this.outputTypes = outputTypes;
+        return this;
     }
 
     @NotNull
@@ -186,7 +192,21 @@ public class JSONWire extends TextWire {
         @NotNull
         @Override
         public ValueOut typePrefix(@NotNull CharSequence typeName) {
+            if (outputTypes) {
+                startBlock('{');
+                bytes.append("\"@");
+                bytes.append(typeName);
+                bytes.append("\":");
+            }
             return this;
+        }
+
+        @Override
+        public void endTypePrefix() {
+            super.endTypePrefix();
+            if (outputTypes) {
+                endBlock(true, '}');
+            }
         }
 
         @Override
