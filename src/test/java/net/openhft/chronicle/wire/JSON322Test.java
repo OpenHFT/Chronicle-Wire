@@ -9,7 +9,65 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * see https://github.com/OpenHFT/Chronicle-Wire/issues/322
+ */
 public class JSON322Test {
+
+
+    public static class One extends SelfDescribingMarshallable {
+        String text;
+
+        public One(String text) {
+            this.text = text;
+        }
+    }
+
+    public static class Two extends SelfDescribingMarshallable {
+        String text;
+
+        public Two(String text) {
+            this.text = text;
+        }
+    }
+
+
+    public static class Four extends Two {
+        String text;
+
+        public Four(String text) {
+            super(text);
+            this.text = text;
+        }
+    }
+
+
+    public static class Three extends SelfDescribingMarshallable {
+        private One one;
+        private Two two;
+
+        public Three() {
+        }
+
+    }
+
+    @Test
+    public void supportNestedTypes() {
+
+
+        final Three three = new Three();
+        three.one = new One("hello");
+        three.two = new Four("world");
+
+        JSONWire wire = new JSONWire(Bytes.allocateElasticOnHeap())
+                .outputTypes(true);
+        wire.getValueOut()
+                .object(three);
+
+        assertEquals("{\"@net.openhft.chronicle.wire.JSON322Test$Three\":{\"one\":{\"@net.openhft.chronicle.wire.JSON322Test$One\":{\"text\":\"hello\"}}, \"two\":{\"@net.openhft.chronicle.wire.JSON322Test$Four\":{\"text\":\"world\"}}  }}",
+                wire.bytes().toString());
+
+    }
 
     @Test
     public void supportTypes() {
