@@ -27,9 +27,11 @@ public class JSON322Test {
                 .object(c);
 
         assertEquals("" +
-                "{\"@Combined322\":{\"t1\":{\"text\":\"one-one\"},\n" +
-                "\"t2\":{\"id\":222,\"value\":2020},\n" +
-                "\"list\":[ {\"@TypeOne322\":{\"text\":\"one\"}}, {\"@TypeTwo322\":{\"id\":2,\"value\":22}} ]  }}", wire.bytes().toString());
+                        "{\"@Combined322\":{" +
+                        "\"t1\":{\"@TypeOne322\":{\"text\":\"one-one\"}}, " +
+                        "\"t2\":{\"@TypeTwo322\":{\"id\":222,\"value\":2020}}, " +
+                        "\"list\":[ {\"@TypeOne322\":{\"text\":\"one\"}}, {\"@TypeTwo322\":{\"id\":2,\"value\":22}} ]  }}",
+                wire.bytes().toString());
     }
 
     static class Combined322 extends SelfDescribingMarshallable {

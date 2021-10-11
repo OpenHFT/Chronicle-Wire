@@ -64,6 +64,10 @@ public class JSONWire extends TextWire {
         return tw.toString();
     }
 
+    /**
+     * @param outputTypes false - never include the types, true - always include the types
+     * @return this
+     */
     public JSONWire outputTypes(boolean outputTypes) {
         this.outputTypes = outputTypes;
         return this;
@@ -282,6 +286,11 @@ public class JSONWire extends TextWire {
         @Override
         public @NotNull WireOut dateTime(LocalDateTime localDateTime) {
             return text(localDateTime.toString());
+        }
+
+        @Override
+        public @NotNull <V> WireOut object(@NotNull Class<V> expectedType, V v) {
+            return outputTypes ? super.object(v) : super.object(expectedType, v);
         }
     }
 
