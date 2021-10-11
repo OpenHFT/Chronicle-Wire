@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright 2016-2021 chronicle.software
  *
  * https://chronicle.software
  *
@@ -17,16 +17,17 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.ref.LongReference;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.values.LongArrayValues;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
@@ -34,10 +35,10 @@ import java.util.stream.StreamSupport;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**
- * This <code>BitSet</code> is intended to be shared between processes. To minimize locking constraints, it is implemented as a lock-free solution
+ * This <code>ChronicleBitSet</code> is intended to be shared between processes. To minimize locking constraints, it is implemented as a lock-free solution
  * without support for resizing.
  */
-public class LongValueBitSet extends AbstractCloseable implements Marshallable, ChronicleBitSet {
+public class LongArrayValueBitSet extends AbstractCloseable implements Marshallable, ChronicleBitSet {
 
     /* Used to shift left or right for a partial word mask */
     private static final long WORD_MASK = ~0L;
@@ -46,23 +47,14 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * The internal field corresponding to the serialField "bits".
      */
-    private LongValue[] words;
+    private LongArrayValues words;
 
-    public LongValueBitSet(final int maxNumberOfBits) {
-        this((long) maxNumberOfBits);
-    }
-
-    public LongValueBitSet(final int maxNumberOfBits, Wire w) {
-        this((long) maxNumberOfBits, w);
-    }
-
-    public LongValueBitSet(final long maxNumberOfBits) {
-        int size = (int) ((maxNumberOfBits + BITS_PER_WORD - 1) / BITS_PER_WORD);
-        words = new LongValue[size];
+    public LongArrayValueBitSet(final long maxNumberOfBits) {
+        words = new BinaryLongArrayReference((maxNumberOfBits + BITS_PER_WORD - 1) / BITS_PER_WORD);
         disableThreadSafetyCheck(true);
     }
 
-    public LongValueBitSet(final long maxNumberOfBits, Wire w) {
+    public LongArrayValueBitSet(final long maxNumberOfBits, Wire w) {
         this(maxNumberOfBits);
         writeMarshallable(w);
         readMarshallable(w);
@@ -72,6 +64,9 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * Given a bit index, return word index containing it.
      */
     private static int wordIndex(int bitIndex) {
+        if (bitIndex < 0)
+            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+
         return bitIndex / BITS_PER_WORD;
     }
 
@@ -97,13 +92,13 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
     @Override
     public long getWord(int wordIndex) {
-        return wordIndex < words.length ? words[wordIndex].getValue() : 0;
+        return wordIndex < getWordsInUse() ? words.getValueAt(wordIndex) : 0;
     }
 
     @Override
     public void setWord(int wordIndex, long bits) {
         expandTo(wordIndex);
-        words[wordIndex].setValue(bits);
+        words.setValueAt(wordIndex, bits);
     }
 
     @Override
@@ -112,18 +107,20 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     public int getWordsInUse() {
-        return words.length;
+        return Math.toIntExact(words.getUsed());
     }
 
-    public void set(LongValue word, long param, LongFunction function) {
+    public void set(int wordIndex, long param, LongFunction function) {
         throwExceptionIfClosed();
 
         final Pauser internalPauser = pauser();
         internalPauser.reset();
+        expandTo(wordIndex);
 
         for (; ; ) {
-            long oldValue = word.getVolatileValue();
-            if (word.compareAndSwapValue(oldValue, function.apply(oldValue, param)))
+            final long oldValue = words.getVolatileValueAt(wordIndex);
+            final long value = function.apply(oldValue, param);
+            if (oldValue == value || words.compareAndSet(wordIndex, oldValue, value))
                 break;
             internalPauser.pause();
         }
@@ -151,30 +148,30 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     public byte[] toByteArray() {
         throwExceptionIfClosed();
 
-        int n = getWordsInUse();
+        int n = Math.toIntExact(getWordsInUse());
         if (n == 0)
             return new byte[0];
-        int len = 8 * (n - 1);
-        for (long x = words[n - 1].getValue(); x != 0; x >>>= 8)
-            len++;
-        byte[] bytes = new byte[len];
-        ByteBuffer bb = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
-        for (int i = 0; i < n - 1; i++)
-            bb.putLong(words[i].getVolatileValue());
-        for (long x = words[n - 1].getValue(); x != 0; x >>>= 8)
-            bb.put((byte) (x & 0xff));
-        return bytes;
+        Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(Math.toIntExact(n * 8L));
+        bytes.writeLong(words.getVolatileValueAt(0));
+        for (int i = 1; i < n; i++)
+            bytes.writeLong(words.getValueAt(i));
+        return bytes.underlyingObject();
     }
 
     /**
      * Ensures that the ChronicleBitSet can accommodate a given wordIndex.
+     *
+     * @param wordIndex the index to be accommodated.
      */
     private void expandTo(int wordIndex) {
         int wordsRequired = wordIndex + 1;
-        if (getWordsInUse() < wordsRequired) {
+        final long capacity = words.getCapacity();
+        if (wordsRequired <= capacity) {
+            words.setMaxUsed(wordsRequired);
+        } else if (wordsRequired > capacity) {
             throw new UnsupportedOperationException("todo: it is not possible currently to expand " +
-                    "this stucture, because if its concurrent nature and have to implement cross " +
-                    "process locking");
+                    "this structure, because if its concurrent nature and have to implement cross " +
+                    "process locking capacity: " + capacity + ", wordIndex: " + wordIndex);
         }
     }
 
@@ -184,20 +181,17 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     public void flip(int bitIndex) {
         throwExceptionIfClosed();
 
-        if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
-
         int wordIndex = wordIndex(bitIndex);
         expandTo(wordIndex);
-        caret(words[wordIndex], 1L << bitIndex);
+        caret(wordIndex, 1L << bitIndex);
     }
 
-    private void caret(LongValue word, long param) {
-        set(word, param, (x, y) -> x ^ y);
+    private void caret(int wordIndex, long param) {
+        set(wordIndex, param, (x, y) -> x ^ y);
     }
 
-    private void and(LongValue word, final long param) {
-        set(word, param, (x, y) -> x & y);
+    private void and(int wordIndex, final long param) {
+        set(wordIndex, param, (x, y) -> x & y);
     }
 
     /**
@@ -220,18 +214,18 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         long lastWordMask = WORD_MASK >>> -toIndex;
         if (startWordIndex == endWordIndex) {
             // Case 1: One word
-            caret(words[startWordIndex], firstWordMask & lastWordMask);
+            caret(startWordIndex, firstWordMask & lastWordMask);
         } else {
             // Case 2: Multiple words
             // Handle first word
-            caret(words[startWordIndex], firstWordMask);
+            caret(startWordIndex, firstWordMask);
 
             // Handle intermediate words, if any
             for (int i = startWordIndex + 1; i < endWordIndex; i++)
-                caret(words[i], WORD_MASK);
+                caret(i, WORD_MASK);
 
             // Handle last word
-            caret(words[endWordIndex], lastWordMask);
+            caret(endWordIndex, lastWordMask);
         }
     }
 
@@ -241,21 +235,15 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     public void set(int bitIndex) {
         throwExceptionIfClosed();
 
-        if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
-
         int wordIndex = wordIndex(bitIndex);
 
-        pipe(words[wordIndex], (1L << bitIndex)); // Restores
+        pipe(wordIndex, (1L << bitIndex)); // Restores
     }
 
-    private void pipe(LongValue word, long param) {
-        set(word, param, (x, y) -> x | y);
+    private void pipe(int wordIndex, long param) {
+        set(wordIndex, param, (x, y) -> x | y);
     }
 
-    /**
-     * Sets the bit at the specified index to the specified value.
-     */
     public void set(int bitIndex, boolean value) {
         throwExceptionIfClosed();
 
@@ -265,9 +253,6 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
             clear(bitIndex);
     }
 
-    /**
-     * Sets the bits from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to {@code true}.
-     */
     public void set(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
 
@@ -285,18 +270,18 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         long lastWordMask = WORD_MASK >>> -toIndex;
         if (startWordIndex == endWordIndex) {
             // Case 1: One word
-            pipe(words[startWordIndex], firstWordMask & lastWordMask);
+            pipe(startWordIndex, firstWordMask & lastWordMask);
         } else {
             // Case 2: Multiple words
             // Handle first word
-            pipe(words[startWordIndex], firstWordMask);
+            pipe(startWordIndex, firstWordMask);
 
             // Handle intermediate words, if any
             for (int i = startWordIndex + 1; i < endWordIndex; i++)
                 setWord(i, WORD_MASK);
 
             // Handle last word (restores invariants)
-            pipe(words[endWordIndex], lastWordMask);
+            pipe(endWordIndex, lastWordMask);
         }
     }
 
@@ -306,14 +291,11 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     public void clear(int bitIndex) {
         throwExceptionIfClosed();
 
-        if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
-
         int wordIndex = wordIndex(bitIndex);
         if (wordIndex >= getWordsInUse())
             return;
 
-        and(words[wordIndex], ~(1L << bitIndex));
+        and(wordIndex, ~(1L << bitIndex));
     }
 
     /**
@@ -334,26 +316,26 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         int endWordIndex = wordIndex(toIndex - 1);
         if (endWordIndex >= getWordsInUse()) {
             toIndex = length();
-            endWordIndex = getWordsInUse() - 1;
+            endWordIndex = Math.toIntExact(getWordsInUse() - 1);
         }
 
         long firstWordMask = WORD_MASK << fromIndex;
         long lastWordMask = WORD_MASK >>> -toIndex;
         if (startWordIndex == endWordIndex) {
             // Case 1: One word
-            and(words[startWordIndex], ~(firstWordMask &
+            and(startWordIndex, ~(firstWordMask &
                     lastWordMask));
         } else {
             // Case 2: Multiple words
             // Handle first word
-            and(words[startWordIndex], ~firstWordMask);
+            and(startWordIndex, ~firstWordMask);
 
             // Handle intermediate words, if any
             for (int i = startWordIndex + 1; i < endWordIndex; i++)
-                words[i].setOrderedValue(0);
+                words.setOrderedValueAt(i, 0);
 
             // Handle last word
-            and(words[endWordIndex], ~lastWordMask);
+            and(endWordIndex, ~lastWordMask);
         }
     }
 
@@ -363,48 +345,43 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     public void clear() {
         throwExceptionIfClosed();
 
-        int value = getWordsInUse();
+        int value = Math.toIntExact(getWordsInUse());
         while (value > 0)
-            words[--value].setValue(0);
+            words.setValueAt(--value, 0);
+        words.setUsed(0);
     }
 
     /**
      * Returns the value of the bit with the specified index. The value is {@code true} if the bit with the index {@code bitIndex} is currently set in
      * this {@code ChronicleBitSet}; otherwise, the result is {@code false}.
+     *
+     * @param bitIndex the bit index
+     * @return the value of the bit with the specified index
+     * @throws IndexOutOfBoundsException if the specified index is negative
      */
     public boolean get(int bitIndex) {
         throwExceptionIfClosed();
 
-        if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
-
         int wordIndex = wordIndex(bitIndex);
         return (wordIndex < getWordsInUse())
-                && ((words[wordIndex].getValue() & (1L << bitIndex)) != 0);
+                && ((words.getValueAt(wordIndex) & (1L << bitIndex)) != 0);
     }
 
-    /**
-     * Returns the index of the first bit that is set to {@code true} that occurs on or after the specified starting index. If no such bit exists then
-     * {@code -1} is returned.
-     */
     public int nextSetBit(int fromIndex) {
         throwExceptionIfClosed();
-
-        if (fromIndex < 0)
-            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
 
         int u = wordIndex(fromIndex);
         if (u >= getWordsInUse())
             return -1;
 
-        long word = words[u].getVolatileValue() & (WORD_MASK << fromIndex);
+        long word = words.getVolatileValueAt(u) & (WORD_MASK << fromIndex);
 
         while (true) {
             if (word != 0)
                 return (u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word);
             if (++u == getWordsInUse())
                 return -1;
-            word = words[u].getVolatileValue();
+            word = words.getValueAt(u);
         }
     }
 
@@ -415,14 +392,11 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     public int nextSetBit(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
 
-        if (fromIndex < 0)
-            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
-
         int u = wordIndex(fromIndex);
         if (u >= getWordsInUse())
             return -1;
 
-        long word = words[u].getVolatileValue() & (WORD_MASK << fromIndex);
+        long word = words.getVolatileValueAt(u) & (WORD_MASK << fromIndex);
 
         while (true) {
             if (word != 0)
@@ -431,7 +405,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
                 return -1;
             if (u * BITS_PER_WORD > toIndex)
                 return -1;
-            word = words[u].getVolatileValue();
+            word = words.getValueAt(u);
         }
     }
 
@@ -441,23 +415,18 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     public int nextClearBit(int fromIndex) {
         throwExceptionIfClosed();
 
-        // Neither spec nor implementation handle ChronicleBitSets of maximal length.
-        // See 4816253.
-        if (fromIndex < 0)
-            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
-
         int u = wordIndex(fromIndex);
         if (u >= getWordsInUse())
             return fromIndex;
 
-        long word = ~words[u].getVolatileValue() & (WORD_MASK << fromIndex);
+        long word = ~words.getVolatileValueAt(u) & (WORD_MASK << fromIndex);
 
         while (true) {
             if (word != 0)
                 return (u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word);
             if (++u == getWordsInUse())
-                return getWordsInUse() * BITS_PER_WORD;
-            word = ~words[u].getValue();
+                return Math.toIntExact(getWordsInUse() * BITS_PER_WORD);
+            word = ~words.getValueAt(u);
         }
     }
 
@@ -479,14 +448,14 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         if (u >= getWordsInUse())
             return length() - 1;
 
-        long word = words[u].getValue() & (WORD_MASK >>> -(fromIndex + 1));
+        long word = words.getVolatileValueAt(u) & (WORD_MASK >>> -(fromIndex + 1));
 
         while (true) {
             if (word != 0)
                 return (u + 1) * BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word);
             if (u-- == 0)
                 return -1;
-            word = words[u].getValue();
+            word = words.getValueAt(u);
         }
     }
 
@@ -508,14 +477,14 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         if (u >= getWordsInUse())
             return fromIndex;
 
-        long word = ~words[u].getVolatileValue() & (WORD_MASK >>> -(fromIndex + 1));
+        long word = ~words.getVolatileValueAt(u) & (WORD_MASK >>> -(fromIndex + 1));
 
         while (true) {
             if (word != 0)
                 return (u + 1) * BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word);
             if (u-- == 0)
                 return -1;
-            word = ~words[u].getValue();
+            word = ~words.getValueAt(u);
         }
     }
 
@@ -526,13 +495,9 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         throwExceptionIfClosed();
 
         for (int i = Math.min(getWordsInUse(), set.getWordsInUse()) - 1; i >= 0; i--)
-            if ((words[i].getVolatileValue() & set.getWord(i)) != 0)
+            if ((words.getVolatileValueAt(i) & set.getWord(i)) != 0)
                 return true;
         return false;
-    }
-
-    public boolean intersects(LongValueBitSet set) {
-        return intersects((ChronicleBitSet) set);
     }
 
     /**
@@ -541,10 +506,10 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     public int cardinality() {
         throwExceptionIfClosed();
 
-        int sum = 0;
+        long sum = 0;
         for (int i = 0; i < getWordsInUse(); i++)
-            sum += Long.bitCount(words[i].getVolatileValue());
-        return sum;
+            sum += Long.bitCount(words.getVolatileValueAt(i));
+        return (int) sum;
     }
 
     /**
@@ -558,41 +523,34 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         if (this == set)
             return;
 
-        int value = getWordsInUse();
-        while (value > set.getWordsInUse()) {
-            words[--value].setValue(0);
-        }
+        OS.memory().loadFence();
+        int value = Math.toIntExact(getWordsInUse());
+        while (value > set.getWordsInUse())
+            words.setValueAt(--value, 0);
 
         // Perform logical AND on words in common
-        for (int i = 0; i < getWordsInUse(); i++)
-            and(words[i], set.getWord(i));
-    }
-
-    public void and(LongValueBitSet set) {
-        and((ChronicleBitSet) set);
+        for (int i = 0; i < value; i++)
+            and(i, set.getWord(i));
     }
 
     /**
      * Performs a logical <b>OR</b> of this bit set with the bit set argument. This bit set is modified so that a bit in it has the value {@code true}
      * if and only if it either already had the value {@code true} or the corresponding bit in the bit set argument has the value {@code true}.
      */
-    public void or(LongValueBitSet set) {
-        or((ChronicleBitSet) set);
-    }
-
     public void or(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
         if (this == set)
             return;
 
-        int wordsInCommon = Math.min(getWordsInUse(), set.getWordsInUse());
+        expandTo(set.getWordsInUse() - 1);
+        long wordsInCommon = Math.min(getWordsInUse(), set.getWordsInUse());
 
         OS.memory().loadFence();
         // Perform logical OR on words in common
         int i;
         for (i = 0; i < wordsInCommon; i++)
-            pipe(words[i], set.getWord(i));
+            pipe(i, set.getWord(i));
 
         // Copy any remaining words
         for (; i < set.getWordsInUse(); i++)
@@ -613,21 +571,22 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     public void xor(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
-        int wordsInCommon = Math.min(getWordsInUse(), set.getWordsInUse());
+        final int wordsInUse = getWordsInUse();
+        final int wordsInUse2 = set.getWordsInUse();
+
+        final int wordsInCommon = Math.toIntExact(Math.min(wordsInUse, wordsInUse2));
+
+        expandTo(wordsInUse2 - 1);
 
         OS.memory().loadFence();
         int i;
         for (i = 0; i < wordsInCommon; i++)
-            caret(words[i], set.getWord(i));
+            caret(i, set.getWord(i));
 
         // Copy any remaining words
-        for (; i < set.getWordsInUse(); i++)
-            setWord(i, set.getWord(i));
+        for (; i < wordsInUse2; i++)
+            words.setValueAt(i, set.getWord(i));
         OS.memory().storeFence();
-    }
-
-    public void xor(LongValueBitSet set) {
-        xor((ChronicleBitSet) set);
     }
 
     /**
@@ -639,12 +598,8 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
         // Perform logical (a & !b) on words in common
         OS.memory().loadFence();
         for (int i = Math.min(getWordsInUse(), set.getWordsInUse()) - 1; i >= 0; i--)
-            and(words[i], ~set.getWord(i));
+            and(i, ~set.getWord(i));
         OS.memory().storeFence();
-    }
-
-    public void andNot(LongValueBitSet set) {
-        andNot((ChronicleBitSet) set);
     }
 
     /**
@@ -653,8 +608,8 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     public int hashCode() {
         long h = 1234;
         OS.memory().loadFence();
-        for (int i = getWordsInUse(); --i >= 0; )
-            h ^= words[i].getValue() * (i + 1);
+        for (int i = Math.toIntExact(getWordsInUse()); --i >= 0; )
+            h ^= words.getValueAt(i) * (i + 1);
 
         return (int) ((h >> 32) ^ h);
     }
@@ -664,7 +619,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * - 1st element.
      */
     public int size() {
-        return words.length * BITS_PER_WORD;
+        return Math.toIntExact(words.getCapacity() * BITS_PER_WORD);
     }
 
     /**
@@ -699,8 +654,8 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     @Override
     public String toString() {
 
-        int numBits = (getWordsInUse() > 128) ?
-                cardinality() : getWordsInUse() * BITS_PER_WORD;
+        int numBits = Math.toIntExact((getWordsInUse() > 128) ?
+                cardinality() : getWordsInUse() * BITS_PER_WORD);
         StringBuilder b = new StringBuilder(6 * numBits + 2);
         b.append('{');
 
@@ -764,40 +719,33 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
     @Override
     public void writeMarshallable(@NotNull final WireOut wire) {
-        wire.write("numberOfLongValues").int32(words.length);
-
-        for (int i = 0; i < words.length; i++) {
-            if (words[i] == null)
-                words[i] = wire.newLongReference();
-            wire.getValueOut().int64forBinding(words[i].getValue());
-        }
+        throwExceptionIfClosed();
+        wire.write("words").int64array(words.getCapacity(), words);
     }
 
     @Override
     public void readMarshallable(@NotNull final WireIn wire) throws IORuntimeException {
         disableThreadSafetyCheck(true);
+
         throwExceptionIfClosed();
 
         closeQuietly(words);
 
-        int numberOfLongValues = wire.read("numberOfLongValues").int32();
-        words = new LongReference[numberOfLongValues];
-        for (int i = 0; i < numberOfLongValues; i++) {
-            words[i] = wire.getValueIn().int64ForBinding(null);
-        }
-
+        wire.read("words").int64array(null, this, (t, a) -> t.words = a);
     }
 
     @Override
     public void copyFrom(ChronicleBitSet bitSet) {
         OS.memory().loadFence();
         final int wordsInUse = bitSet.getWordsInUse();
-        if (wordsInUse > words.length)
-            throw new IllegalArgumentException("Too much data " + wordsInUse + " words > " + words.length);
+        final long capacity = words.getCapacity();
+        if (wordsInUse > capacity)
+            throw new IllegalArgumentException("Too much data " + wordsInUse + " words > " + capacity);
         for (int i = getWordsInUse(); i > wordsInUse; i--)
-            words[i].setValue(0L);
+            words.setValueAt(i, 0L);
+        words.setUsed(wordsInUse);
         for (int i = 0; i < wordsInUse; i++)
-            words[i].setValue(bitSet.getWord(i));
+            words.setValueAt(i, bitSet.getWord(i));
         OS.memory().storeFence();
     }
 

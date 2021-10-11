@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
@@ -37,6 +36,7 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 import static net.openhft.chronicle.wire.Wires.toIntU30;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -76,17 +76,18 @@ public enum WireInternal {
     private static final Field STACK_TRACE = Jvm.getField(Throwable.class, "stackTrace");
 
     static {
-        ClassAliasPool.CLASS_ALIASES.addAlias(WireSerializedLambda.class, "SerializedLambda");
-        ClassAliasPool.CLASS_ALIASES.addAlias(WireType.class);
-        ClassAliasPool.CLASS_ALIASES.addAlias(SerializableFunction.class, "Function");
-        ClassAliasPool.CLASS_ALIASES.addAlias(SerializableBiFunction.class, "BiFunction");
-        ClassAliasPool.CLASS_ALIASES.addAlias(SerializableConsumer.class, "Consumer");
-        ClassAliasPool.CLASS_ALIASES.addAlias(SerializablePredicate.class, "Predicate");
-        ClassAliasPool.CLASS_ALIASES.addAlias(SerializableUpdater.class, "Updater");
-        ClassAliasPool.CLASS_ALIASES.addAlias(SerializableUpdaterWithArg.class, "UpdaterWithArg");
-        ClassAliasPool.CLASS_ALIASES.addAlias(VanillaFieldInfo.class, "FieldInfo");
-        ClassAliasPool.CLASS_ALIASES.addAlias(WireSerializedLambda.class, "SerializedLambda");
-        ClassAliasPool.CLASS_ALIASES.addAlias(INTERNABLE.stream().toArray(Class[]::new));
+        CLASS_ALIASES.addAlias(WireSerializedLambda.class, "SerializedLambda");
+        CLASS_ALIASES.addAlias(WireType.class);
+        CLASS_ALIASES.addAlias(SerializableFunction.class, "Function");
+        CLASS_ALIASES.addAlias(SerializableBiFunction.class, "BiFunction");
+        CLASS_ALIASES.addAlias(SerializableConsumer.class, "Consumer");
+        CLASS_ALIASES.addAlias(SerializablePredicate.class, "Predicate");
+        CLASS_ALIASES.addAlias(SerializableUpdater.class, "Updater");
+        CLASS_ALIASES.addAlias(SerializableUpdaterWithArg.class, "UpdaterWithArg");
+        CLASS_ALIASES.addAlias(VanillaFieldInfo.class, "FieldInfo");
+        CLASS_ALIASES.addAlias(WireSerializedLambda.class, "SerializedLambda");
+        CLASS_ALIASES.addAlias(INTERNABLE.stream().toArray(Class[]::new));
+        CLASS_ALIASES.addAlias(LongArrayValueBitSet.class);
     }
 
     static void addAliases() {

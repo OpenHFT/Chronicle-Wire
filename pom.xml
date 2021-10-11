@@ -27,7 +27,7 @@
     </parent>
 
     <artifactId>chronicle-wire</artifactId>
-    <version>2.22ea4-SNAPSHOT</version>
+    <version>2.22ea5-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Wire</name>
     <description>Chronicle-Wire</description>
     <packaging>bundle</packaging>
@@ -151,7 +151,7 @@
                         <configuration>
                             <referenceVersion>2.22ea1</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
-<!--                            <binaryCompatibilityPercentageRequired>100</binaryCompatibilityPercentageRequired>-->
+                            <binaryCompatibilityPercentageRequired>99</binaryCompatibilityPercentageRequired>
                         </configuration>
                     </execution>
                 </executions>

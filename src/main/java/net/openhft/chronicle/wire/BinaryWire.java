@@ -2963,7 +2963,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             consumePadding();
             int code = readCode();
             if (code == I64_ARRAY) {
-                if (!(values instanceof BinaryLongArrayReference))
+                if (!(values instanceof BinaryLongArrayReference) || values.isClosing())
                     values = new BinaryLongArrayReference();
                 @Nullable Byteable b = (Byteable) values;
                 long length = BinaryLongArrayReference.peakLength(bytes, bytes.readPosition());
