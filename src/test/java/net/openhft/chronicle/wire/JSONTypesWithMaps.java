@@ -15,7 +15,7 @@ public class JSONTypesWithMaps {
 
     private final boolean useTypes;
 
-    @Parameterized.Parameters(name = "usePadding={0}")
+    @Parameterized.Parameters(name = "useTypes={0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
                 new Object[]{true},
@@ -29,11 +29,11 @@ public class JSONTypesWithMaps {
 
 
     static class F1 {
-        String driverSurname;
-        int car;
+        private String surname;
+        private int car;
 
-        public F1(String driver, int car) {
-            this.driverSurname = driver;
+        public F1(String surname, int car) {
+            this.surname = surname;
             this.car = car;
         }
     }
@@ -45,6 +45,6 @@ public class JSONTypesWithMaps {
         final Map<String, F1> expected = Collections.singletonMap("Lewis", hamilton);
         jsonWire.getValueOut().object(expected);
 
-        Assert.assertEquals("{Lewis={driverSurname=Hamilton, car=44}}",  jsonWire.getValueIn().object().toString());
+        Assert.assertEquals("{Lewis={surname=Hamilton, car=44}}", jsonWire.getValueIn().object().toString());
     }
 }
