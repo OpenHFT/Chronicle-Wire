@@ -41,10 +41,15 @@ public class JSONWire extends TextWire {
     boolean useTypes;
 
     @SuppressWarnings("rawtypes")
+    public JSONWire() {
+        this(Bytes.allocateElasticOnHeap());
+    }
+
     public JSONWire(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
         trimFirstCurly(false);
     }
+
 
     @SuppressWarnings("rawtypes")
     public JSONWire(@NotNull Bytes bytes) {
