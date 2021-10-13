@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * see https://github.com/OpenHFT/Chronicle-Wire/issues/322
@@ -54,20 +55,48 @@ public class JSON322Test {
     @Test
     public void supportNestedTypes() {
 
-
         final Three three = new Three();
         three.one = new One("hello");
         three.two = new Four("world");
 
-        JSONWire wire = new JSONWire(Bytes.allocateElasticOnHeap())
-                .outputTypes(true);
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+
+        JSONWire wire = new JSONWire(bytes)
+                .useTypes(true);
         wire.getValueOut()
                 .object(three);
 
-        assertEquals("{\"@net.openhft.chronicle.wire.JSON322Test$Three\":{\"one\":{\"@net.openhft.chronicle.wire.JSON322Test$One\":{\"text\":\"hello\"}}, \"two\":{\"@net.openhft.chronicle.wire.JSON322Test$Four\":{\"text\":\"world\"}}  }}",
-                wire.bytes().toString());
+        final String expected = "{\"@net.openhft.chronicle.wire.JSON322Test$Three\":{\"one\":{\"@net.openhft.chronicle.wire.JSON322Test$One\":{\"text\":\"hello\"}}, \"two\":{\"@net.openhft.chronicle.wire.JSON322Test$Four\":{\"text\":\"world\"}}  }}";
+        final String actual = wire.bytes().toString();
+
+        assertEquals(expected, actual);
+
+
+        // Now try reading it back again
+        final JSONWire parserWire = new JSONWire(bytes)
+                .useTypes(true);
+
+        // Potentially rename this method from outputTypes to useTypeDescription.
+
+        //Object parsed = parserWire.getValueIn().object(Object.class);
+        Object parsed = parserWire.getValueIn().object();
+
+        assertNotNull(parsed);
+        assertEquals(Three.class, parsed.getClass());
+
+        final Three parsedThree = (Three) parsed;
+
+        bytes.clear();
+        wire.getValueOut().object(parsed);
+
+        System.out.println("parsed = " + parsed);
+        System.out.println("wire.bytes().toString() = " + wire.bytes().toString());
+
+        System.out.println("parsedThree.one = " + parsedThree.one);
+        System.out.println("parsedThree.two = " + parsedThree.two);
 
     }
+
 
     @Test
     public void supportTypes() {
@@ -80,7 +109,7 @@ public class JSON322Test {
         c.t2 = new TypeTwo322(222, 2020);
 
         JSONWire wire = new JSONWire(Bytes.allocateElasticOnHeap())
-                .outputTypes(true);
+                .useTypes(true);
         wire.getValueOut()
                 .object(c);
 

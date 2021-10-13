@@ -3042,7 +3042,7 @@ public class TextWire extends AbstractWire implements Wire {
         public Class typePrefix() {
             consumePadding();
             int code = peekCode();
-            if (code == '!') {
+            if (code == '!' || code == '@') {
                 readCode();
 
                 final StringBuilder stringBuilder = acquireStringBuilder();

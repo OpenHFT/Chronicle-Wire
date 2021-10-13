@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -34,10 +35,10 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  * <p>
  * At the moment, this is a cut down version of the YAML wire format.
  */
-public class JSONWire extends TextWire {
+public class JSONWire extends TextWire implements HasUseTypes<JSONWire> {
     @SuppressWarnings("rawtypes")
     static final BytesStore COMMA = BytesStore.from(",");
-    boolean outputTypes;
+    boolean useTypes;
 
     @SuppressWarnings("rawtypes")
     public JSONWire(@NotNull Bytes bytes, boolean use8bit) {
@@ -64,13 +65,15 @@ public class JSONWire extends TextWire {
         return tw.toString();
     }
 
-    /**
-     * @param outputTypes false - never include the types, true - always include the types
-     * @return this
-     */
-    public JSONWire outputTypes(boolean outputTypes) {
-        this.outputTypes = outputTypes;
+    @Override
+    public JSONWire useTypes(boolean outputTypes) {
+        this.useTypes = outputTypes;
         return this;
+    }
+
+    @Override
+    public boolean useTypes() {
+        return useTypes;
     }
 
     @NotNull
@@ -196,7 +199,7 @@ public class JSONWire extends TextWire {
         @NotNull
         @Override
         public ValueOut typePrefix(@NotNull CharSequence typeName) {
-            if (outputTypes) {
+            if (useTypes) {
                 startBlock('{');
                 bytes.append("\"@");
                 bytes.append(typeName);
@@ -208,7 +211,7 @@ public class JSONWire extends TextWire {
         @Override
         public void endTypePrefix() {
             super.endTypePrefix();
-            if (outputTypes) {
+            if (useTypes) {
                 endBlock(true, '}');
             }
         }
@@ -290,7 +293,7 @@ public class JSONWire extends TextWire {
 
         @Override
         public @NotNull <V> WireOut object(@NotNull Class<V> expectedType, V v) {
-            return outputTypes ? super.object(v) : super.object(expectedType, v);
+            return useTypes ? super.object(v) : super.object(expectedType, v);
         }
     }
 
@@ -305,5 +308,154 @@ public class JSONWire extends TextWire {
         protected boolean isASeparator(int nextChar) {
             return true;
         }
+
+        @Override
+        public @Nullable Object object() {
+            return useTypes ? parseType() : super.object();
+        }
+
+        @Override
+        public <E> @Nullable E object(@NotNull Class<E> clazz) {
+            return useTypes ? parseType(null, clazz) : super.object(clazz);
+        }
+
+        @Override
+        public <E> E object(@Nullable E using, @Nullable Class clazz) {
+            return useTypes ? parseType(using, clazz) : super.object(using, clazz);
+        }
+
+
+        @Override
+        public Class typePrefix() {
+            return super.typePrefix();
+        }
+
+        @Override
+        public Object typePrefixOrObject(Class tClass) {
+            return super.typePrefixOrObject(tClass);
+        }
+
+        @Override
+        public @Nullable Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
+            return super.marshallable(object, strategy);
+        }
+
+        private Object parseType() {
+            if (!hasTypeDefinition()) {
+                return super.object();
+            } else {
+                final StringBuilder sb = Wires.acquireStringBuilder();
+                sb.setLength(0);
+                this.wireIn().read(sb);
+                try {
+                    final Class<?> clazz = classLookup().forName(sb.subSequence(1, sb.length()));
+                    return parseType(null, clazz);
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+/*
+            consumePadding();
+            final char openingBracket = bytes.readChar();
+            assert openingBracket == '{';
+            consumePadding();
+            final char openingQuote = bytes.readChar();
+            assert openingQuote == '"';
+            final Class<?> typePrefix = typePrefix();
+            consumePadding();
+            final char closingQuote = bytes.readChar();
+            assert closingQuote == '"'; */
+
+
+            /*
+            final StringBuilder sb = Wires.acquireStringBuilder();
+            sb.setLength(0);
+            this.wireIn().read(sb);
+            try {
+                final Bytes<?> bytes2 = wireIn().bytes();
+                assert sb.charAt(0) == '@' : "Did not start with an @ character: " + bytes;
+                final Class<?> clazz = Class.forName(sb.substring(1));
+                this.wireIn().consumePadding();
+
+                final long writePos = bytes.writePosition();
+                bytes.writePosition(bytes.readPosition());
+                bytes.writeChar('!');
+                bytes.writePosition(writePos);
+
+                // Skip opening bracket
+                // this.wireIn().bytes().readChar();
+
+                final Object object = objectWithInferredType(null, SerializationStrategies.ANY_NESTED, clazz);
+                //final Object object = object(clazz);
+
+                // this.wireIn().consumePadding();
+                // Skip closing bracket (todo: assert })
+                // this.wireIn().bytes().readChar();
+
+                return object;
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            } */
+        }
+
+        private <E> E parseType(@Nullable E using, @NotNull Class clazz) {
+
+            if (!hasTypeDefinition()) {
+                return super.object(using, clazz);
+            } else {
+                final StringBuilder sb = Wires.acquireStringBuilder();
+                sb.setLength(0);
+                readTypeDefinition(sb);
+                try {
+                    final Class<?> overrideClass = classLookup().forName(sb.subSequence(1, sb.length()));
+                    if (!clazz.isAssignableFrom(overrideClass))
+                        throw new ClassCastException("Unable to cast " + overrideClass.getName() + " to " + clazz.getName());
+                    if (using != null && !overrideClass.isInstance(using))
+                        throw new ClassCastException("Unable to reuse a " + using.getClass().getName() + " as a " + overrideClass.getName());
+                    final E result = super.object(using, overrideClass);
+
+                    // remove the closing bracket from the type definition
+                    consumePadding();
+                    final char endBracket = bytes.readChar();
+                    assert endBracket == '}' : "Missing end bracket }, got " + endBracket + " from " + bytes;
+                    consumePadding(1);
+
+                    return result;
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        boolean hasTypeDefinition() {
+            final long readPos = bytes.readPosition();
+            try {
+                // Match {"@ with any padding in between
+                consumePadding();
+                if (bytes.readChar() != '{')
+                    return false;
+                consumePadding();
+                if (bytes.readChar() != '"')
+                    return false;
+                consumePadding();
+                return bytes.readChar() == '@';
+            } finally {
+                bytes.readPosition(readPos);
+            }
+        }
+
+        void readTypeDefinition(StringBuilder sb) {
+            consumePadding();
+            if (bytes.readChar() != '{')
+                throw new IORuntimeException("Expected { but got " + bytes);
+            consumePadding();
+            text(sb);
+            consumePadding();
+            final char colon = bytes.readChar();
+            assert colon == ':' : "Expected : but got " + colon;
+
+        }
+
     }
 }
