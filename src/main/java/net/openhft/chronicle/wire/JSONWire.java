@@ -35,7 +35,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  * <p>
  * At the moment, this is a cut down version of the YAML wire format.
  */
-public class JSONWire extends TextWire implements HasUseTypes<JSONWire> {
+public class JSONWire extends TextWire {
     @SuppressWarnings("rawtypes")
     static final BytesStore COMMA = BytesStore.from(",");
     boolean useTypes;
@@ -65,13 +65,11 @@ public class JSONWire extends TextWire implements HasUseTypes<JSONWire> {
         return tw.toString();
     }
 
-    @Override
     public JSONWire useTypes(boolean outputTypes) {
         this.useTypes = outputTypes;
         return this;
     }
 
-    @Override
     public boolean useTypes() {
         return useTypes;
     }
