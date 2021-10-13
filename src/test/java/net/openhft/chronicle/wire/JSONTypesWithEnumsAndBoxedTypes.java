@@ -9,7 +9,6 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.function.Consumer;
 
 /**
  * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
@@ -38,9 +37,9 @@ public class JSONTypesWithEnumsAndBoxedTypes {
 
     static class F1 extends AbstractMarshallableCfg {
 
-  
-
         private String surname;
+
+        // change this to and int from a Integer and it will work !
         private Integer car;
         private Location location;
 
