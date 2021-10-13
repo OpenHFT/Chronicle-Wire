@@ -15,7 +15,6 @@ import static org.junit.Assert.assertNotNull;
  */
 public class JSON322Test {
 
-
     public static class One extends SelfDescribingMarshallable {
         String text;
 
@@ -68,35 +67,26 @@ public class JSON322Test {
 
         final String expected = "{\"@net.openhft.chronicle.wire.JSON322Test$Three\":{\"one\":{\"@net.openhft.chronicle.wire.JSON322Test$One\":{\"text\":\"hello\"}}, \"two\":{\"@net.openhft.chronicle.wire.JSON322Test$Four\":{\"text\":\"world\"}}  }}";
         final String actual = wire.bytes().toString();
-
         assertEquals(expected, actual);
-
 
         // Now try reading it back again
         final JSONWire parserWire = new JSONWire(bytes)
                 .useTypes(true);
 
-        // Potentially rename this method from outputTypes to useTypeDescription.
-
-        //Object parsed = parserWire.getValueIn().object(Object.class);
-        Object parsed = parserWire.getValueIn().object();
+        final Object parsed = parserWire.getValueIn().object();
 
         assertNotNull(parsed);
         assertEquals(Three.class, parsed.getClass());
 
         final Three parsedThree = (Three) parsed;
 
-        bytes.clear();
-        wire.getValueOut().object(parsed);
+/*        bytes.clear();
+        wire.getValueOut().object(parsed);*/
 
-        System.out.println("parsed = " + parsed);
-        System.out.println("wire.bytes().toString() = " + wire.bytes().toString());
-
-        System.out.println("parsedThree.one = " + parsedThree.one);
-        System.out.println("parsedThree.two = " + parsedThree.two);
-
+        assertEquals(One.class, parsedThree.one.getClass());
+        assertEquals(Four.class, parsedThree.two.getClass());
+        assertEquals(three, parsed);
     }
-
 
     @Test
     public void supportTypes() {
@@ -108,7 +98,8 @@ public class JSON322Test {
         c.t1 = new TypeOne322("one-one");
         c.t2 = new TypeTwo322(222, 2020);
 
-        JSONWire wire = new JSONWire(Bytes.allocateElasticOnHeap())
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        JSONWire wire = new JSONWire(bytes)
                 .useTypes(true);
         wire.getValueOut()
                 .object(c);
@@ -119,6 +110,26 @@ public class JSON322Test {
                         "\"t2\":{\"@TypeTwo322\":{\"id\":222,\"value\":2020}}, " +
                         "\"list\":[ {\"@TypeOne322\":{\"text\":\"one\"}}, {\"@TypeTwo322\":{\"id\":2,\"value\":22}} ]  }}",
                 wire.bytes().toString());
+
+        // Now try reading it back again
+        final JSONWire parserWire = new JSONWire(bytes)
+                .useTypes(true);
+
+        final Object parsed = parserWire.getValueIn().object();
+
+        assertNotNull(parsed);
+        assertEquals(Combined322.class, parsed.getClass());
+
+        final Combined322 combined322 = (Combined322)parsed;
+
+        assertEquals(TypeOne322.class, combined322.t1.getClass());
+        assertEquals(TypeTwo322.class, combined322.t2.getClass());
+        final List<? extends SelfDescribingMarshallable> l = combined322.list;
+        assertEquals(2, l.size());
+        assertEquals(TypeOne322.class, l.get(0).getClass());
+        assertEquals(TypeTwo322.class, l.get(1).getClass());
+
+        assertEquals(c, combined322);
     }
 
     static class Combined322 extends SelfDescribingMarshallable {
