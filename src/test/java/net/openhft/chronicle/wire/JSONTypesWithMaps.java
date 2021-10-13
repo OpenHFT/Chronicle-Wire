@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -13,6 +14,7 @@ import static java.util.Collections.singletonMap;
 /**
  * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
+@Ignore
 @RunWith(value = Parameterized.class)
 public class JSONTypesWithMaps {
 
