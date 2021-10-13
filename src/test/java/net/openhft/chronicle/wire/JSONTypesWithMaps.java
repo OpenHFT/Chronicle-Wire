@@ -7,9 +7,12 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
 
+import static java.util.Collections.singletonMap;
+
+/**
+ * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
+ */
 @RunWith(value = Parameterized.class)
 public class JSONTypesWithMaps {
 
@@ -40,11 +43,14 @@ public class JSONTypesWithMaps {
 
     @Test
     public void test() {
-        final JSONWire jsonWire = new JSONWire().useTypes(useTypes);
-        final F1 hamilton = new F1("Hamilton", 44);
-        final Map<String, F1> expected = Collections.singletonMap("Lewis", hamilton);
-        jsonWire.getValueOut().object(expected);
 
-        Assert.assertEquals("{Lewis={surname=Hamilton, car=44}}", jsonWire.getValueIn().object().toString());
+        final JSONWire jsonWire = new JSONWire()
+                .useTypes(useTypes);
+
+        jsonWire.getValueOut()
+                .object(singletonMap("Lewis", new F1("Hamilton", 44)));
+
+        final String actual = jsonWire.getValueIn().object().toString();
+        Assert.assertEquals("{Lewis={surname=Hamilton, car=44}}", actual);
     }
 }
