@@ -58,7 +58,7 @@ public class JSONTypesWithEnumsAndBoxedTypes {
         jsonWire.getValueOut()
                 .object(new F1("Hamilton", 44, Location.TRACK));
 
-        System.out.println(jsonWire.bytes());
+        // System.out.println(jsonWire.bytes());
 
 
         final String actual = jsonWire.getValueIn().object().toString();

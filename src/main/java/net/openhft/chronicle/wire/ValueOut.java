@@ -694,6 +694,8 @@ public interface ValueOut {
             if (typeName != null)
                 typePrefix(typeName);
             marshallable(w -> Wires.writeMarshallable(value, w));
+            if (typeName != null)
+                endTypePrefix();
             return wireOut();
         }
     }
