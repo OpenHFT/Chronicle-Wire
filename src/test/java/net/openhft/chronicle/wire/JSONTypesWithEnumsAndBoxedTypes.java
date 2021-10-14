@@ -13,7 +13,6 @@ import java.util.Collection;
 /**
  * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
-@Ignore
 @RunWith(value = Parameterized.class)
 public class JSONTypesWithEnumsAndBoxedTypes {
 
@@ -39,7 +38,7 @@ public class JSONTypesWithEnumsAndBoxedTypes {
 
         private String surname;
 
-        // change this to and int from a Integer and it will work !
+        // change this to and int from an Integer and, it will work !
         private Integer car;
         private Location location;
 
@@ -58,6 +57,9 @@ public class JSONTypesWithEnumsAndBoxedTypes {
 
         jsonWire.getValueOut()
                 .object(new F1("Hamilton", 44, Location.TRACK));
+
+        System.out.println(jsonWire.bytes());
+
 
         final String actual = jsonWire.getValueIn().object().toString();
         Assert.assertTrue(actual.contains("TRACK"));

@@ -298,6 +298,18 @@ public class JSONWire extends TextWire {
         public @NotNull <V> WireOut object(@NotNull Class<V> expectedType, V v) {
             return useTypes ? super.object(v) : super.object(expectedType, v);
         }
+
+        @Override
+        public @NotNull ValueOut typePrefix(Class type) {
+            if (type.isPrimitive() || isWrapper(type) || type.isEnum()) {
+                // Do nothing because there are no other alternatives
+                // and thus, the type is implicitly given in the declaration.
+                return this;
+            } else {
+                return super.typePrefix(type);
+            }
+        }
+
     }
 
     class JSONValueIn extends TextValueIn {
@@ -461,4 +473,15 @@ public class JSONWire extends TextWire {
         }
 
     }
+
+    static boolean isWrapper(Class<?> type) {
+/*        if (!type.getName().startsWith("java.lang.")) {
+            // exclude most classes as soon as possible
+            return false;
+        }*/
+        return type == Integer.class || type == Long.class || type == Float.class ||
+                type == Double.class || type == Short.class || type == Character.class ||
+                type == Byte.class || type == Boolean.class || type == Void.class;
+    }
+
 }
