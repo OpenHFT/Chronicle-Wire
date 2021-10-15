@@ -15,23 +15,23 @@ public class SecurityLookup {
     public static void main(String[] args) {
 
         // These can be reused
-        final Security d0 = new Security(100, 45, 2);
-        final Security d1 = new Security(10, 100, 42);
-        final Security d2 = new Security(20, 200, 13);
+        final Security s0 = new Security(100, 45, 2);
+        final Security s1 = new Security(10, 100, 42);
+        final Security s2 = new Security(20, 200, 13);
 
         // This can be reused
-        final List<Security> dataList = new ArrayList<>();
+        final List<Security> securities = new ArrayList<>();
 
-        dataList.add(d0);
-        dataList.add(d1);
-        dataList.add(d2);
+        securities.add(s0);
+        securities.add(s1);
+        securities.add(s2);
 
-        // Reusable portfolio
-        Portfolio portfolio = new Portfolio();
-        portfolio.setCustomerId(42);
-        portfolio.setSecurities(dataList);
+        // Reusable Mapper
+        IntMapper<Security> mapper =
+                new IntMapper<>(Security::getId);
+        mapper.set(securities);
 
-        Security security100 = portfolio.getSecurity(100);
+        Security security100 = mapper.get(100);
 
         System.out.println("security100 = " + security100);
     }
