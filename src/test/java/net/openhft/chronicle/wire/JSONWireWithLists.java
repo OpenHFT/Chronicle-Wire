@@ -13,7 +13,6 @@ import java.util.List;
 /**
  * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
-@Ignore
 @RunWith(value = Parameterized.class)
 public class JSONWireWithLists {
 
@@ -39,6 +38,14 @@ public class JSONWireWithLists {
         public F1(String surname, int car) {
             this.surname = surname;
             this.car = car;
+        }
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "surname=" + surname +
+                    ", car=" + car +
+                    '}';
         }
     }
 
