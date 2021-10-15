@@ -2,38 +2,40 @@ package run.chronicle.wire.demo.mapreuse;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.ToIntFunction;
-import java.util.stream.IntStream;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
-import static java.util.Comparator.comparingInt;
+import static java.util.Comparator.comparing;
 
-public class IntMapper<V> extends SelfDescribingMarshallable {
+public class Mapper<K, V> extends SelfDescribingMarshallable {
 
     private final List<V> values = new ArrayList<>();
-    private final ToIntFunction<? super V> extractor;
+    private final Function<? super V, ? extends K> extractor;
+    private final Comparator<? super K> comparator;
 
-    public IntMapper(final ToIntFunction<? super V> extractor) {
+    public Mapper(final Function<? super V, ? extends K> extractor,
+                  final Comparator<? super K> comparator) {
         this.extractor = Objects.requireNonNull(extractor);
+        this.comparator = Objects.requireNonNull(comparator);
     }
 
-    public List<V> values() { return values; }
+    public List<V> values() {
+        return values;
+    }
 
-    public IntStream keys() {
-        return values.stream().mapToInt(extractor);
+    public Stream<K> keys() {
+        return values.stream().map(extractor);
     }
 
     public void set(Collection<? extends V> values) {
         this.values.clear();
         this.values.addAll(values);
         // Sort the list in id order
-        this.values.sort(comparingInt(extractor));
+        this.values.sort(comparing(extractor, comparator));
     }
 
-    public V get(int key) {
+    public V get(K key) {
         int index = binarySearch(key);
         if (index >= 0)
             return values.get(index);
@@ -41,15 +43,15 @@ public class IntMapper<V> extends SelfDescribingMarshallable {
             return null;
     }
 
-    int binarySearch(final int key) {
+    int binarySearch(final K key) {
         int low = 0;
         int high = values.size() - 1;
 
         while (low <= high) {
             final int mid = (low + high) >>> 1;
             final V midVal = values.get(mid);
-            int cmp = Integer.compare(
-                    extractor.applyAsInt(midVal), key);
+            int cmp = comparator.compare(
+                    extractor.apply(midVal), key);
 
             if (cmp < 0)
                 low = mid + 1;
