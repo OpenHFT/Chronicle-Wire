@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
@@ -310,6 +311,12 @@ public class JSONWire extends TextWire {
             }
         }
 
+        @Override
+        public @NotNull WireOut time(final LocalTime localTime) {
+            // Todo: fix quoted text
+            return super.time(localTime);
+            /*return text(localTime.toString());*/
+        }
     }
 
     class JSONValueIn extends TextValueIn {
