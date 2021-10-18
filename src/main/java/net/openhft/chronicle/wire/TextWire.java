@@ -1356,6 +1356,7 @@ public class TextWire extends AbstractWire implements Wire {
             typePrefix(type);
             append(Base64.getEncoder().encodeToString(byteArray));
             elementSeparator();
+            endTypePrefix();
 
             return TextWire.this;
         }
@@ -1369,6 +1370,7 @@ public class TextWire extends AbstractWire implements Wire {
             prependSeparator();
             typePrefix(type);
             append(Base64.getEncoder().encodeToString(bytesStore.toByteArray()));
+            endTypePrefix();
             append(END_FIELD);
             elementSeparator();
 

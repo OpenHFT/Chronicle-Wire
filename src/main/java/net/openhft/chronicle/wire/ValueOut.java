@@ -280,15 +280,27 @@ public interface ValueOut {
 
     @NotNull
     default <T> WireOut sequence(Iterable<T> t) {
+        final Class<?> typePrefix;
         if (t instanceof SortedSet)
-            typePrefix(SortedSet.class);
+            typePrefix = SortedSet.class;
         else if (t instanceof Set)
-            typePrefix(Set.class);
-        return sequence(t, (it, out) -> {
+            typePrefix = Set.class;
+        else
+            typePrefix = null;
+
+        if (typePrefix != null)
+            typePrefix(typePrefix);
+
+        final WireOut result = sequence(t, (it, out) -> {
             for (T o : it) {
                 out.object(o);
             }
         });
+
+        if (typePrefix != null)
+            endTypePrefix();
+
+        return result;
     }
 
     @NotNull <T> WireOut sequence(T t, BiConsumer<T, ValueOut> writer);
@@ -592,22 +604,40 @@ public interface ValueOut {
                 return array(v -> Stream.of((String[]) value).forEach(v::text), Object[].class);
             case "[Ljava.lang.Object;":
                 return array(v -> Stream.of((Object[]) value).forEach(v::object), Object[].class);
-            case "java.time.LocalTime":
-                return optionalTyped(LocalTime.class).time((LocalTime) value);
-            case "java.time.LocalDate":
-                return optionalTyped(LocalDate.class).date((LocalDate) value);
-            case "java.time.LocalDateTime":
-                return optionalTyped(LocalDateTime.class).dateTime((LocalDateTime) value);
-            case "java.time.ZonedDateTime":
-                return optionalTyped(ZonedDateTime.class).zonedDateTime((ZonedDateTime) value);
-            case "java.util.UUID":
-                return optionalTyped(UUID.class).uuid((UUID) value);
+            case "java.time.LocalTime": {
+                final WireOut result = optionalTyped(LocalTime.class).time((LocalTime) value);
+                endTypePrefix();
+                return result;
+            }
+            case "java.time.LocalDate": {
+                final WireOut result = optionalTyped(LocalDate.class).date((LocalDate) value);
+                endTypePrefix();
+                return result;
+            }
+            case "java.time.LocalDateTime": {
+                final WireOut result = optionalTyped(LocalDateTime.class).dateTime((LocalDateTime) value);
+                endTypePrefix();
+                return result;
+            }
+            case "java.time.ZonedDateTime": {
+                final WireOut result = optionalTyped(ZonedDateTime.class).zonedDateTime((ZonedDateTime) value);
+                endTypePrefix();
+                return result;
+            }
+            case "java.util.UUID": {
+                final WireOut result = optionalTyped(UUID.class).uuid((UUID) value);
+                endTypePrefix();
+                return result;
+            }
             case "java.util.Date":
             case "java.sql.Timestamp":
             case "java.math.BigInteger":
             case "java.math.BigDecimal":
-            case "java.io.File":
-                return optionalTyped(value.getClass()).text(value.toString());
+            case "java.io.File": {
+                final WireOut result = optionalTyped(value.getClass()).text(value.toString());
+                endTypePrefix();
+                return result;
+            }
         }
         if (value instanceof WriteMarshallable) {
             if (isAnEnum(value)) {
@@ -807,6 +837,7 @@ public interface ValueOut {
             value = value.toString();
 
         text((CharSequence) value);
+        endTypePrefix();
         return wireOut();
     }
 
