@@ -584,6 +584,7 @@ public interface ValueOut {
                     }
                 });
                 valueOut.swapLeaf(wasLeaf);
+                endTypePrefix();
                 return wireOut();
 
             case "net.openhft.chronicle.wire.RawText":
