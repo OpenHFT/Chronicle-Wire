@@ -3,7 +3,6 @@ package net.openhft.chronicle.wire;
 import org.junit.Test;
 
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -16,9 +15,10 @@ public class Issue328 {
     public void map() {
         final Wire wire = new JSONWire().useTypes(true);
         final int size = 3;
-        final Map<Integer, String> map = IntStream.range(0, size)
+        // keys must be strings in JSON
+        final Map<String, String> map = IntStream.range(0, size)
                 .boxed()
-                .collect(Collectors.toMap(Function.identity(), i -> Integer.toString(i)));
+                .collect(Collectors.toMap(i -> Integer.toString(i), i -> Integer.toString(i)));
 
         wire.getValueOut().object(map);
         final String actual = wire.toString();

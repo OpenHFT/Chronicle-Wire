@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -145,7 +144,7 @@ public class JSONWire extends TextWire {
 
     @NotNull
     @Override
-    protected Quotes needsQuotes(@NotNull CharSequence s) {
+    protected Quotes needsQuotesEscaped(@NotNull CharSequence s) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             if (ch == '"' || ch < ' ')
@@ -157,7 +156,7 @@ public class JSONWire extends TextWire {
     @Override
     void escape(@NotNull CharSequence s) {
         bytes.writeUnsignedByte('"');
-        if (needsQuotes(s) == Quotes.NONE) {
+        if (needsQuotesEscaped(s) == Quotes.NONE) {
             bytes.appendUtf8(s);
         } else {
             escape0(s, Quotes.DOUBLE);
@@ -225,6 +224,13 @@ public class JSONWire extends TextWire {
         @Override
         public void elementSeparator() {
             sep = COMMA;
+        }
+
+        @Override
+        protected void asTestQuoted(String s, Quotes quotes) {
+            bytes.append('"');
+            escape0(s, quotes);
+            bytes.append('"');
         }
 
         @Override

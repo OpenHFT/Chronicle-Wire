@@ -565,8 +565,7 @@ public interface ValueOut {
         // look for exact matches
         switch (value.getClass().getName()) {
             case "[B": {
-                typePrefix(byte[].class).bytes((byte[]) value);
-                endTypePrefix();
+                bytes((byte[]) value);
                 return wireOut();
             }
             case "[S":

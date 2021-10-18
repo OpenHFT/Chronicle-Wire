@@ -837,7 +837,7 @@ public class TextWire extends AbstractWire implements Wire {
     }
 
     void escape(@NotNull CharSequence s) {
-        @NotNull Quotes quotes = needsQuotes(s);
+        @NotNull Quotes quotes = needsQuotesEscaped(s);
         if (quotes == Quotes.NONE) {
             escape0(s, quotes);
             return;
@@ -930,7 +930,7 @@ public class TextWire extends AbstractWire implements Wire {
     }
 
     @NotNull
-    protected Quotes needsQuotes(@NotNull CharSequence s) {
+    protected Quotes needsQuotesEscaped(@NotNull CharSequence s) {
         @NotNull Quotes quotes = Quotes.NONE;
         if (s.length() == 0)
             return Quotes.DOUBLE;
@@ -1354,7 +1354,11 @@ public class TextWire extends AbstractWire implements Wire {
             }
             prependSeparator();
             typePrefix(type);
+            if (getClass() != TextValueOut.class)
+                bytes.append('"');
             append(Base64.getEncoder().encodeToString(byteArray));
+            if (getClass() != TextValueOut.class)
+                bytes.append('"');
             elementSeparator();
             endTypePrefix();
 
@@ -1680,11 +1684,21 @@ public class TextWire extends AbstractWire implements Wire {
                 nu11();
             } else {
                 prependSeparator();
-                append(stringable.toString());
+                final String s = stringable.toString();
+                final Quotes quotes = needsQuotesEscaped(s);
+                asTestQuoted(s, quotes);
                 elementSeparator();
             }
 
             return TextWire.this;
+        }
+
+        protected void asTestQuoted(String s, Quotes quotes) {
+            if (quotes == Quotes.NONE) {
+                append(s);
+            } else {
+                escape0(s, quotes);
+            }
         }
 
         @NotNull

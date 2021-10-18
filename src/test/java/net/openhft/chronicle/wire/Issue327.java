@@ -67,7 +67,7 @@ public class Issue327 {
     public void byteArray() {
         //test(() -> "Buzz".getBytes(StandardCharsets.UTF_8), "{\"@byte[]\":{\"@!binary\":\"QnV6eg==\"}}", "QnV6eg==");
         // not sure what the expected typed output should be
-        test(() -> "Buzz".getBytes(StandardCharsets.UTF_8), "{????:\"QnV6eg==\"}}", "QnV6eg==");
+        test(() -> "Buzz".getBytes(StandardCharsets.UTF_8), "{\"@!binary\":\"QnV6eg==\"}", "\"QnV6eg==\"");
     }
 
     @Test
@@ -91,7 +91,8 @@ public class Issue327 {
         final Wire wire = new JSONWire().useTypes(useTypes);
         final T target = constructor.get();
 
-        wire.getValueOut().object(target);
+        wire.getValueOut()
+                .object(target);
         final String actual = wire.toString();
         System.out.println("actual = " + actual);
         assertBalancedBrackets(actual);
