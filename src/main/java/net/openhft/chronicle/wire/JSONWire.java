@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +29,7 @@ import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Map;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
@@ -312,6 +314,11 @@ public class JSONWire extends TextWire {
         }
 
         @Override
+        public @NotNull <K, V> WireOut marshallable(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) {
+            return super.marshallable(map, kClass, vClass, leaf);
+        }
+
+        @Override
         public @NotNull WireOut time(final LocalTime localTime) {
             // Todo: fix quoted text
             return super.time(localTime);
@@ -482,13 +489,46 @@ public class JSONWire extends TextWire {
     }
 
     static boolean isWrapper(Class<?> type) {
-/*        if (!type.getName().startsWith("java.lang.")) {
-            // exclude most classes as soon as possible
-            return false;
-        }*/
         return type == Integer.class || type == Long.class || type == Float.class ||
                 type == Double.class || type == Short.class || type == Character.class ||
                 type == Byte.class || type == Boolean.class || type == Void.class;
     }
+
+/*
+    final class MapMarshaller<K, V> implements WriteMarshallable {
+        private Map<K, V> map;
+        private Class<K> kClass;
+        private Class<V> vClass;
+        private boolean leaf;
+
+        void params(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) {
+            this.map = map;
+            this.kClass = kClass;
+            this.vClass = vClass;
+            this.leaf = leaf;
+        }
+
+        @Override
+        public void writeMarshallable(@NotNull WireOut wire) {
+            for (@NotNull Map.Entry<K, V> entry : map.entrySet()) {
+                final K key = entry.getKey();
+
+                Bytes bytes = null;
+                bytes.app
+
+
+
+//                 StringUtils
+
+                ValueOut valueOut = wire.write()writeEvent(kClass, entry.getKey());
+
+                boolean wasLeaf = valueOut.swapLeaf(leaf);
+                valueOut.object(vClass, entry.getValue());
+                valueOut.swapLeaf(wasLeaf);
+            }
+        }
+    }
+    */
+
 
 }
