@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.stream.IntStream;
 import static net.openhft.chronicle.wire.JsonUtil.assertBalancedBrackets;
 import static org.junit.Assert.assertEquals;
 
+@Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/328")
 public class Issue328 {
 
     @Test
