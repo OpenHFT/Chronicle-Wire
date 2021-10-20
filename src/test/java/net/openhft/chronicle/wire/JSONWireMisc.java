@@ -9,12 +9,9 @@ import org.junit.runners.Parameterized;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static net.openhft.chronicle.wire.JsonUtil.assertBalancedBrackets;
-import static org.junit.Assert.assertEquals;
+
 
 /**
  * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
@@ -160,24 +157,6 @@ public class JSONWireMisc {
         final String actual = wire.toString();
         System.out.println("actual = " + actual);
         assertBalancedBrackets(actual);
-    }
-
-    @Test
-    public void map() {
-        final int size = 3;
-        final Map<Integer, String> map = IntStream.range(0, size)
-                .boxed()
-                .collect(Collectors.toMap(Function.identity(), i -> Integer.toString(i)));
-        wire.getValueOut().object(map);
-        final String actual = wire.toString();
-        final String expected = IntStream.range(0, size)
-                .boxed()
-                .map(i -> String.format("\"%d\":\"%d\"", i, i))
-                .collect(Collectors.joining(",", "{", "}"));
-
-        System.out.println("actual = " + actual);
-        assertBalancedBrackets(actual);
-        assertEquals(expected, actual);
     }
 
 
