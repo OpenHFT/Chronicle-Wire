@@ -35,10 +35,7 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
@@ -441,26 +438,32 @@ public interface ValueOut {
     default WireOut typedMarshallable(@Nullable Serializable object) {
         if (object == null)
             return nu11();
-        typePrefix(object.getClass());
-        if (object instanceof WriteMarshallable) {
-            return marshallable((WriteMarshallable) object);
-        } else if (object instanceof Enum) {
-            return asEnum((Enum) object);
-        } else if (isScalar(object)) {
-            if (object instanceof LocalDate) {
-                LocalDate d = (LocalDate) object;
-                return text(WireInternal.acquireStringBuilder()
-                        .append(d.getYear())
-                        .append('-')
-                        .append(d.getMonthValue() < 10 ? "0" : "")
-                        .append(d.getMonthValue())
-                        .append('-')
-                        .append(d.getDayOfMonth() < 10 ? "0" : "")
-                        .append(d.getDayOfMonth()));
+
+        try {
+            typePrefix(object.getClass());
+            if (object instanceof WriteMarshallable) {
+                return marshallable((WriteMarshallable) object);
+            } else if (object instanceof Enum) {
+                return asEnum((Enum) object);
+            } else if (isScalar(object)) {
+                if (object instanceof LocalDate) {
+                    LocalDate d = (LocalDate) object;
+                    return text(WireInternal.acquireStringBuilder()
+                            .append(d.getYear())
+                            .append('-')
+                            .append(d.getMonthValue() < 10 ? "0" : "")
+                            .append(d.getMonthValue())
+                            .append('-')
+                            .append(d.getDayOfMonth() < 10 ? "0" : "")
+                            .append(d.getDayOfMonth()));
+                }
+                return text(object.toString());
+            } else {
+                return marshallable(object);
             }
-            return text(object.toString());
-        } else {
-            return marshallable(object);
+        } finally {
+            // Make sure we close the type scope
+            endTypePrefix();
         }
     }
 
@@ -558,8 +561,11 @@ public interface ValueOut {
             return nu11();
         // look for exact matches
         switch (value.getClass().getName()) {
-            case "[B":
-                return typePrefix(byte[].class).bytes((byte[]) value);
+            case "[B": {
+                typePrefix(byte[].class).bytes((byte[]) value);
+                endTypePrefix();
+                return wireOut();
+            }
             case "[S":
             case "[C":
             case "[I":
@@ -576,6 +582,7 @@ public interface ValueOut {
                     }
                 });
                 valueOut.swapLeaf(wasLeaf);
+                endTypePrefix();
                 return wireOut();
 
             case "net.openhft.chronicle.wire.RawText":
@@ -633,6 +640,7 @@ public interface ValueOut {
             case "java.sql.Timestamp":
             case "java.math.BigInteger":
             case "java.math.BigDecimal":
+            case "java.time.Duration":
             case "java.io.File": {
                 final WireOut result = optionalTyped(value.getClass()).text(value.toString());
                 endTypePrefix();

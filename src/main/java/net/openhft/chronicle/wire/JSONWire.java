@@ -28,6 +28,8 @@ import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Map;
+
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
@@ -69,6 +71,12 @@ public class JSONWire extends TextWire {
         wire.bytes().readPosition(pos);
 
         return tw.toString();
+    }
+
+    static boolean isWrapper(Class<?> type) {
+        return type == Integer.class || type == Long.class || type == Float.class ||
+                type == Double.class || type == Short.class || type == Character.class ||
+                type == Byte.class || type == Boolean.class || type == Void.class;
     }
 
     public JSONWire useTypes(boolean outputTypes) {
@@ -143,7 +151,7 @@ public class JSONWire extends TextWire {
 
     @NotNull
     @Override
-    protected Quotes needsQuotes(@NotNull CharSequence s) {
+    protected Quotes needsQuotesEscaped(@NotNull CharSequence s) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             if (ch == '"' || ch < ' ')
@@ -155,12 +163,17 @@ public class JSONWire extends TextWire {
     @Override
     void escape(@NotNull CharSequence s) {
         bytes.writeUnsignedByte('"');
-        if (needsQuotes(s) == Quotes.NONE) {
+        if (needsQuotesEscaped(s) == Quotes.NONE) {
             bytes.appendUtf8(s);
         } else {
             escape0(s, Quotes.DOUBLE);
         }
         bytes.writeUnsignedByte('"');
+    }
+
+    @Override
+    public ValueOut writeEvent(Class expectedType, Object eventKey) {
+        return super.writeEvent(String.class, "" + eventKey);
     }
 
     @NotNull
@@ -223,6 +236,13 @@ public class JSONWire extends TextWire {
         @Override
         public void elementSeparator() {
             sep = COMMA;
+        }
+
+        @Override
+        protected void asTestQuoted(String s, Quotes quotes) {
+            bytes.append('"');
+            escape0(s, quotes);
+            bytes.append('"');
         }
 
         @Override
@@ -312,6 +332,11 @@ public class JSONWire extends TextWire {
         }
 
         @Override
+        public @NotNull <K, V> WireOut marshallable(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) {
+            return super.marshallable(map, (Class) String.class, vClass, leaf);
+        }
+
+
         public @NotNull WireOut time(final LocalTime localTime) {
             // Todo: fix quoted text
             return super.time(localTime);
@@ -481,14 +506,41 @@ public class JSONWire extends TextWire {
 
     }
 
-    static boolean isWrapper(Class<?> type) {
-/*        if (!type.getName().startsWith("java.lang.")) {
-            // exclude most classes as soon as possible
-            return false;
-        }*/
-        return type == Integer.class || type == Long.class || type == Float.class ||
-                type == Double.class || type == Short.class || type == Character.class ||
-                type == Byte.class || type == Boolean.class || type == Void.class;
+/*
+    final class MapMarshaller<K, V> implements WriteMarshallable {
+        private Map<K, V> map;
+        private Class<K> kClass;
+        private Class<V> vClass;
+        private boolean leaf;
+
+        void params(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) {
+            this.map = map;
+            this.kClass = kClass;
+            this.vClass = vClass;
+            this.leaf = leaf;
+        }
+
+        @Override
+        public void writeMarshallable(@NotNull WireOut wire) {
+            for (@NotNull Map.Entry<K, V> entry : map.entrySet()) {
+                final K key = entry.getKey();
+
+                Bytes bytes = null;
+                bytes.app
+
+
+
+//                 StringUtils
+
+                ValueOut valueOut = wire.write()writeEvent(kClass, entry.getKey());
+
+                boolean wasLeaf = valueOut.swapLeaf(leaf);
+                valueOut.object(vClass, entry.getValue());
+                valueOut.swapLeaf(wasLeaf);
+            }
+        }
     }
+    */
+
 
 }
