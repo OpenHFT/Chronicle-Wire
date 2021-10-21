@@ -35,9 +35,5 @@ public class Issue328 {
         System.out.println("actual = " + actual);
         assertBalancedBrackets(actual);
         assertEquals(expected, actual);
-
-
-
     }
-
 }

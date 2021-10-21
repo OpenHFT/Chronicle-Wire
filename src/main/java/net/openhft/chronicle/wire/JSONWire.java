@@ -73,6 +73,12 @@ public class JSONWire extends TextWire {
         return tw.toString();
     }
 
+    static boolean isWrapper(Class<?> type) {
+        return type == Integer.class || type == Long.class || type == Float.class ||
+                type == Double.class || type == Short.class || type == Character.class ||
+                type == Byte.class || type == Boolean.class || type == Void.class;
+    }
+
     public JSONWire useTypes(boolean outputTypes) {
         this.useTypes = outputTypes;
         return this;
@@ -163,6 +169,11 @@ public class JSONWire extends TextWire {
             escape0(s, Quotes.DOUBLE);
         }
         bytes.writeUnsignedByte('"');
+    }
+
+    @Override
+    public ValueOut writeEvent(Class expectedType, Object eventKey) {
+        return super.writeEvent(String.class, "" + eventKey);
     }
 
     @NotNull
@@ -322,7 +333,7 @@ public class JSONWire extends TextWire {
 
         @Override
         public @NotNull <K, V> WireOut marshallable(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) {
-            return super.marshallable(map, kClass, vClass, leaf);
+            return super.marshallable(map, (Class) String.class, vClass, leaf);
         }
 
 
@@ -493,12 +504,6 @@ public class JSONWire extends TextWire {
 
         }
 
-    }
-
-    static boolean isWrapper(Class<?> type) {
-        return type == Integer.class || type == Long.class || type == Float.class ||
-                type == Double.class || type == Short.class || type == Character.class ||
-                type == Byte.class || type == Boolean.class || type == Void.class;
     }
 
 /*

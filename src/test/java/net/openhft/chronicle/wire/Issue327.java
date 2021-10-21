@@ -67,7 +67,7 @@ public class Issue327 {
     public void byteArray() {
         //test(() -> "Buzz".getBytes(StandardCharsets.UTF_8), "{\"@byte[]\":{\"@!binary\":\"QnV6eg==\"}}", "QnV6eg==");
         // not sure what the expected typed output should be
-        test(() -> "Buzz".getBytes(StandardCharsets.UTF_8), "{\"@!binary\":\"QnV6eg==\"}", "\"QnV6eg==\"");
+        test(() -> "Buzz".getBytes(StandardCharsets.UTF_8), "{\"@byte[]\":{\"@!binary\":\"QnV6eg==\"}}", "\"QnV6eg==\"");
     }
 
     @Test
