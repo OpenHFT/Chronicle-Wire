@@ -6,7 +6,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -158,6 +160,29 @@ public class JSONWireMisc {
         System.out.println("actual = " + actual);
         assertBalancedBrackets(actual);
     }
+
+    @Test
+    public void duration() {
+        final Duration duration = Duration.ofSeconds(63);
+        wire.getValueOut().object(duration);
+        final String actual = wire.toString();
+        System.out.println("actual = " + actual);
+        assertBalancedBrackets(actual);
+    }
+
+    static final class Ser implements Serializable {
+        int foo;
+    }
+
+    @Test
+    public void serializable() {
+        final Ser s = new Ser();
+        wire.getValueOut().object(s);
+        final String actual = wire.toString();
+        System.out.println("actual = " + actual);
+        assertBalancedBrackets(actual);
+    }
+
 
 
 }

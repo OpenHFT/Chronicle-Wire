@@ -35,10 +35,7 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
@@ -642,6 +639,7 @@ public interface ValueOut {
             case "java.sql.Timestamp":
             case "java.math.BigInteger":
             case "java.math.BigDecimal":
+            case "java.time.Duration":
             case "java.io.File": {
                 final WireOut result = optionalTyped(value.getClass()).text(value.toString());
                 endTypePrefix();
