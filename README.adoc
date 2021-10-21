@@ -31,7 +31,7 @@ Often you want to use these interchangeably.
 This supports easy extension by adding new classes/versions, and cross-platform using type aliasing.
 - By supporting types, a configuration file can bootstrap itself.
 You control how the configuration file is decoded.
-See https://github.com/ChronicleEnterprise/Chronicle-Datagrid/blob/ea/src/test/resources/datagrid.yaml[`datagrid.yaml`].
+See https://github.com/OpenHFT/Chronicle-Datagrid/blob/master/demo/src/test/resources/datagrid.yaml[`datagrid.yaml`].
 - To send the configuration of a server to a client, or from a client to a server.
 - To store the configuration of a data store in its header.
 - In configuration, to be able to create any object or component.
