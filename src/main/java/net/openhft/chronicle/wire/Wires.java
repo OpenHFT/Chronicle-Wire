@@ -46,10 +46,7 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
@@ -775,6 +772,9 @@ public enum Wires {
 
                 case "java.util.Date":
                     return ScalarStrategy.of(Date.class, (o, in) -> parseDate(in));
+
+                case "java.time.Duration":
+                    return ScalarStrategy.of(Duration.class, (o, in) -> Duration.parse(in.text()));
 
                 case "java.sql.Timestamp":
                     return ScalarStrategy.of(Timestamp.class, (o, in) -> new Timestamp(parseDate(in).getTime()));

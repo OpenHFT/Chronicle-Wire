@@ -20,7 +20,9 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -32,8 +34,12 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeTrue;
 
@@ -83,11 +89,11 @@ public class WireTests {
 
             try (DocumentContext dc = wire.readingDocument()) {
                 long w = dc.wire().read("w").int64();
-                Assert.assertEquals(expectedLong1, w);
+                assertEquals(expectedLong1, w);
                 long x = dc.wire().read("x").int64();
-                Assert.assertEquals(expectedLong2, x);
+                assertEquals(expectedLong2, x);
                 Class<Object> y = dc.wire().read("y").typeLiteral();
-                Assert.assertEquals(String.class, y);
+                assertEquals(String.class, y);
             }
         } finally {
             b.releaseLast();
@@ -106,7 +112,7 @@ public class WireTests {
 
             try (DocumentContext dc = wire.readingDocument()) {
                 Type t = dc.wire().read("w").lenientTypeLiteral();
-                Assert.assertEquals("DoesntExist", t.getTypeName());
+                assertEquals("DoesntExist", t.getTypeName());
             }
         } finally {
             b.releaseLast();
@@ -120,19 +126,19 @@ public class WireTests {
 
         wire.getValueOut()
                 .object(new Date(1234567890000L));
-        Assert.assertEquals(new Date(1234567890000L), wire.getValueIn()
+        assertEquals(new Date(1234567890000L), wire.getValueIn()
                 .object(Date.class));
 
         final Date expectedDate = new Date(1234567890000L);
         String longDateInDefaultLocale = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy").format(expectedDate);
         wire.getValueOut().object(longDateInDefaultLocale);
 
-        Assert.assertEquals(expectedDate, wire.getValueIn()
+        assertEquals(expectedDate, wire.getValueIn()
                 .object(Date.class));
 
         wire.getValueOut().object("2009-02-13 23:31:30.000");
 
-        Assert.assertEquals(new Date(1234567890000L), wire.getValueIn()
+        assertEquals(new Date(1234567890000L), wire.getValueIn()
                 .object(Date.class));
     }
 
@@ -143,7 +149,7 @@ public class WireTests {
             final Wire wire = createWire(b);
             LocalDateTime expected = LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
             wire.getValueOut().object(expected);
-            Assert.assertEquals(expected, wire.getValueIn().object());
+            assertEquals(expected, wire.getValueIn().object());
         } finally {
             b.releaseLast();
         }
@@ -155,7 +161,7 @@ public class WireTests {
         final Wire wire = createWire(b);
         ZonedDateTime expected = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
         wire.getValueOut().object(expected);
-        Assert.assertEquals(expected, wire.getValueIn().object());
+        assertEquals(expected, wire.getValueIn().object());
 
         b.releaseLast();
     }
@@ -214,7 +220,7 @@ public class WireTests {
         wire.write().typedMarshallable(testClass);
 
         @Nullable TestClass o = wire.read().typedMarshallable();
-        Assert.assertEquals(Boolean.class, o.clazz());
+        assertEquals(Boolean.class, o.clazz());
 
         b.releaseLast();
     }
@@ -245,52 +251,52 @@ public class WireTests {
         assumeTrue(wireType == WireType.BINARY);
         Bytes b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
-        Assert.assertEquals("", wire.readingPeekYaml());
+        assertEquals("", wire.readingPeekYaml());
         try (@NotNull DocumentContext dc = wire.writingDocument(false)) {
             dc.wire().write("some-data!").marshallable(m -> {
                 m.write("some-other-data").int64(0);
-                Assert.assertEquals("", wire.readingPeekYaml());
+                assertEquals("", wire.readingPeekYaml());
             });
         }
 
         try (@NotNull DocumentContext dc = wire.writingDocument(false)) {
             dc.wire().write("some-new").marshallable(m -> {
                 m.write("some-other--new-data").int64(0);
-                Assert.assertEquals("", wire.readingPeekYaml());
+                assertEquals("", wire.readingPeekYaml());
             });
         }
-        Assert.assertEquals("", wire.readingPeekYaml());
+        assertEquals("", wire.readingPeekYaml());
 
         try (@NotNull DocumentContext dc = wire.readingDocument()) {
-            Assert.assertEquals("--- !!data #binary\n" +
+            assertEquals("--- !!data #binary\n" +
                     "some-data!: {\n" +
                     "  some-other-data: 0\n" +
                     "}\n", wire.readingPeekYaml());
             dc.wire().read("some-data");
-            Assert.assertEquals("--- !!data #binary\n" +
+            assertEquals("--- !!data #binary\n" +
                     "some-data!: {\n" +
                     "  some-other-data: 0\n" +
                     "}\n", wire.readingPeekYaml());
 
         }
-        Assert.assertEquals("", wire.readingPeekYaml());
+        assertEquals("", wire.readingPeekYaml());
 
         try (@NotNull DocumentContext dc = wire.writingDocument(false)) {
             dc.wire().write("some-data!").marshallable(m -> {
                 m.write("some-other-data").int64(0);
-                Assert.assertEquals("", wire.readingPeekYaml());
+                assertEquals("", wire.readingPeekYaml());
             });
         }
 
         try (@NotNull DocumentContext dc = wire.readingDocument()) {
             int position = usePadding ? 40 : 37;
-            Assert.assertEquals("# position: "+position+", header: 0\n" +
+            assertEquals("# position: " + position + ", header: 0\n" +
                     "--- !!data #binary\n" +
                     "some-new: {\n" +
                     "  some-other--new-data: 0\n" +
                     "}\n", wire.readingPeekYaml());
             dc.wire().read("some-data");
-            Assert.assertEquals("# position: "+position+", header: 0\n" +
+            assertEquals("# position: " + position + ", header: 0\n" +
                     "--- !!data #binary\n" +
                     "some-new: {\n" +
                     "  some-other--new-data: 0\n" +

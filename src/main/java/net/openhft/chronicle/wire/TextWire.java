@@ -3176,7 +3176,7 @@ public class TextWire extends AbstractWire implements Wire {
                 return null;
             }
             if (indentation() == 0 && peekCode() != '{') {
-                strategy.readUsing(object, this, BracketType.MAP);
+                strategy.readUsing(object, this, BracketType.UNKNOWN);
                 return object;
             }
             pushState();

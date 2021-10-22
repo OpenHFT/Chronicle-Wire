@@ -558,8 +558,8 @@ public class WireMarshaller<T> {
 
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
             if (read instanceof DefaultValueIn) {
-                if (overwrite)
-                    copy(defaults, o);
+                if (overwrite && defaults != null)
+                    copy(Objects.requireNonNull(defaults), o);
             } else {
                 long pos = read.wireIn().bytes().readPosition();
                 try {

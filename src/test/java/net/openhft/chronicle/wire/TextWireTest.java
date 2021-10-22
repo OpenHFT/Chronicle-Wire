@@ -2120,4 +2120,24 @@ public class TextWireTest extends WireTestCommon {
             text.append(Long.toHexString(value));
         }
     }
+
+
+    static class DurationHolder extends SelfDescribingMarshallable {
+        int foo;
+        Duration duration;
+
+        public DurationHolder(int foo, Duration duration) {
+            this.foo = foo;
+            this.duration = duration;
+        }
+    }
+
+    @Test
+    public void testDuration() {
+        DurationHolder dh = new DurationHolder(1, Duration.ofSeconds(63));
+        String h = dh.toString();
+        System.out.println(h);
+        DurationHolder dh2 = Marshallable.fromString(h);
+        assertEquals(dh, dh2);
+    }
 }
