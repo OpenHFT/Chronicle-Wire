@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.StringWriter;
+import java.util.regex.Pattern;
 
 import static net.openhft.chronicle.wire.DynamicEnum.updateEnum;
 import static org.junit.Assert.*;
@@ -211,23 +212,55 @@ public class WireDynamicEnumTest extends WireTestCommon {
         for (int i = 0; i < 8; i++)
             assertTrue(reader.readOne());
         assertFalse(reader.readOne());
-        assertEquals("ONE ~ One ~ 1\n" +
+        final String res = sw.toString();
+        assertTrue("Found: " + res,
+                Pattern.matches("ONE ~ One ~ 1\n" +
                 "Update FOUR\n" +
                 "FOUR ~ Four ~ 4\n" +
-                "!HoldsWDENum {\n" +
-                "  a: TWO,\n" +
-                "  b: FOUR\n" +
+                "!HoldsWDENum \\{\n" +
+                "(?:" +
+                " {2}a: TWO,\n" +
+                " {2}b: FOUR\n" +
+                "|" +
+                " {2}b: FOUR,\n" +
+                " {2}a: TWO\n" +
+                ")" +
                 "}\n" +
                 "# 2, 4\n" +
-                "Update !WDENum2 {\n" +
-                "  name: KING,\n" +
-                "  nice: King,\n" +
-                "  value: 112\n" +
+                "Update !WDENum2 \\{\n" +
+                "(?:" +
+                " {2}name: KING,\n" +
+                "(?:" +
+                " {2}nice: King,\n" +
+                " {2}value: 112\n" +
+                "|" +
+                " {2}value: 112,\n" +
+                " {2}nice: King\n" +
+                ")" +
+                "|" +
+                " {2}value: 112,\n" +
+                "(?:" +
+                " {2}name: KING,\n" +
+                " {2}nice: King\n" +
+                "|" +
+                " {2}nice: King,\n" +
+                " {2}name: KING\n" +
+                ")" +
+                "|" +
+                " {2}nice: King,\n" +
+                "(?:" +
+                " {2}value: 112,\n" +
+                " {2}name: KING\n" +
+                "|" +
+                " {2}name: KING,\n" +
+                " {2}value: 112\n" +
+                ")" +
+                ")" +
                 "}\n" +
                 "\n" +
                 "ONE = One = 1\n" +
                 "TWO = Two = 2\n" +
-                "KING = King = 112\n", sw.toString());
+                "KING = King = 112\n", res));
     }
 
     enum WDENums implements WDEI, DynamicEnum {
