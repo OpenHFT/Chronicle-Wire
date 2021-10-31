@@ -1,5 +1,5 @@
 = Chronicle Wire
-
+Chronicle Software
 :css-signature: demo
 :toc: macro
 :toclevels: 2
