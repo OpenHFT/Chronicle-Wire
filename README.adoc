@@ -1,6 +1,5 @@
-
 = Chronicle Wire
-
+Peter Lawrey
 :css-signature: demo
 :toc: macro
 :toclevels: 2
