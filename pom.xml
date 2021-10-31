@@ -26,12 +26,7 @@
         <relativePath />
     </parent>
   
-   <properties>
-      <sonar.organization>openhft</sonar.organization>
-      <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-    </properties>
-  
-
+ 
     <artifactId>chronicle-wire</artifactId>
     <version>2.22ea10-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Wire</name>
@@ -42,6 +37,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <compiler.argument>-Xlint:deprecation</compiler.argument>
+        <sonar.organization>openhft</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <dependencyManagement>
