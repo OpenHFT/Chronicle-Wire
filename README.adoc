@@ -1,22 +1,22 @@
-= Chronicle-Wire
 
-:toc: manual
+= Chronicle Wire
+
 :css-signature: demo
-:toc-placement: preamble
+:toc: macro
+:toclevels: 2
+:icons: font
 
-
-// GitHub customization
-ifdef::env-github[]
-:badges:
-endif::[]
-
-// Badges
-ifdef::badges[]
-image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire/badge.svg["Maven Central",link="https://maven-badges.herokuapp.com/maven-central/>net.openhft/chronicle-wire"]
+image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire/badge.svg[caption="",link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire]
 image:https://javadoc.io/badge2/net.openhft/chronicle-wire/javadoc.svg[link="https://www.javadoc.io/doc/net.openhft/chronicle-wire/latest/index.html"]
+//image:https://javadoc-badge.appspot.com/net.openhft/chronicle-wire.svg?label=javadoc[JavaDoc, link=https://www.javadoc.io/doc/net.openhft/chronicle-wire]
+image:https://img.shields.io/github/license/OpenHFT/Chronicle-Wire[GitHub]
+image:https://img.shields.io/gitter/room/OpenHFT/Lobby.svg?style=popout[link="https://gitter.im/OpenHFT/Lobby"]
+image:https://img.shields.io/badge/release%20notes-subscribe-brightgreen[link="https://chronicle.software/release-notes/"]
 image:https://sonarcloud.io/api/project_badges/measure?project=OpenHFT_Chronicle-Wire&metric=alert_status[link="https://sonarcloud.io/dashboard?id=OpenHFT_Chronicle-Wire"]
 image:https://img.shields.io/badge/release%20notes-subscribe-brightgreen[link="https://chronicle.software/release-notes/"]
-endif::[]
+image::docs/images/Wire_line.png[]
+
+toc::[]
 
 == About
 
