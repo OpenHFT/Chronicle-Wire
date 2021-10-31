@@ -1,5 +1,10 @@
 = Chronicle-Wire
 
+:toc: manual
+:css-signature: demo
+:toc-placement: preamble
+
+
 // GitHub customization
 ifdef::env-github[]
 :badges:
@@ -12,10 +17,6 @@ image:https://javadoc.io/badge2/net.openhft/chronicle-wire/javadoc.svg[link="htt
 image:https://sonarcloud.io/api/project_badges/measure?project=OpenHFT_Chronicle-Wire&metric=alert_status[link="https://sonarcloud.io/dashboard?id=OpenHFT_Chronicle-Wire"]
 image:https://img.shields.io/badge/release%20notes-subscribe-brightgreen[link="https://chronicle.software/release-notes/"]
 endif::[]
-
-:toc: manual
-:css-signature: demo
-:toc-placement: preamble
 
 == About
 
