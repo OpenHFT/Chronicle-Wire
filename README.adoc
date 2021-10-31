@@ -3,9 +3,11 @@
 :css-signature: demo
 :toc-placement: preamble
 
-== Version 
+// GitHub customization
+ifdef::env-github[]
+:badges:
+endif::[]
 
-[#img-maven]
 
 // Badges
 ifdef::badges[]
