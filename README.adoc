@@ -1,13 +1,9 @@
 = Chronicle-Wire
-:toc: manual
-:css-signature: demo
-:toc-placement: preamble
 
 // GitHub customization
 ifdef::env-github[]
 :badges:
 endif::[]
-
 
 // Badges
 ifdef::badges[]
@@ -16,6 +12,11 @@ image::https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wi
 image::https://javadoc.io/badge2/net.openhft/chronicle-wire/javadoc.svg[link="https://www.javadoc.io/doc/net.openhft/chronicle-wire/latest/index.html"]
 image:https://img.shields.io/badge/release%20notes-subscribe-brightgreen[link="https://chronicle.software/release-notes/"]
 endif::[]
+
+= Chronicle-Wire
+:toc: manual
+:css-signature: demo
+:toc-placement: preamble
 
 == About
 
