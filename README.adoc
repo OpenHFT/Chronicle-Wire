@@ -13,7 +13,6 @@ image:https://sonarcloud.io/api/project_badges/measure?project=OpenHFT_Chronicle
 image:https://img.shields.io/badge/release%20notes-subscribe-brightgreen[link="https://chronicle.software/release-notes/"]
 endif::[]
 
-= Chronicle-Wire
 :toc: manual
 :css-signature: demo
 :toc-placement: preamble
