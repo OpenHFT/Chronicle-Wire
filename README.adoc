@@ -15,7 +15,6 @@ image:https://img.shields.io/badge/release%20notes-subscribe-brightgreen[link="h
 
 image::images/Wire_line.png[]
 
-
 toc::[]
 
 == About
