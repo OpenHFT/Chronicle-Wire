@@ -916,6 +916,7 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     @Test
+    @Ignore("TODO FIX #261")
     public void testBytes() {
         @NotNull Wire wire = createWire();
         @NotNull byte[] allBytes = new byte[256];
