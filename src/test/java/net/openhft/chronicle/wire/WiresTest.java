@@ -69,7 +69,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
-    @Ignore("TODO FIX #261")
+    @Ignore("TODO FIX https://github.com/OpenHFT/Chronicle-Bytes/pull/261")
     public void copyToShouldMutateBytes() {
         BytesContainerMarshallable container1 = new BytesContainerMarshallable();
         container1.bytesField.append("1");

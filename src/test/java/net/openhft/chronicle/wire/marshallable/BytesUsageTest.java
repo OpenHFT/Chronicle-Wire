@@ -13,7 +13,7 @@ public class BytesUsageTest extends WireTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test
-    @Ignore("TODO FIX #261")
+    @Ignore("TODO FIX https://github.com/OpenHFT/Chronicle-Bytes/pull/261")
     public void testBytes() {
         BytesStore value = Bytes.from("helloWorld");
         {
