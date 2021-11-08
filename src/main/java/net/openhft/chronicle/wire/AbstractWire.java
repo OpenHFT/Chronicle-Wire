@@ -19,10 +19,10 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesComment;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
@@ -320,61 +320,63 @@ public abstract class AbstractWire implements Wire {
 
     @Override
     public void updateHeader(final long position, final boolean metaData, int expectedHeader) throws StreamCorruptedException {
-        if (position <= 0) {
-            // this should never happen so blow up
-            IllegalStateException ex = new IllegalStateException("Attempt to write to position=" + position);
-            Slf4jExceptionHandler.WARN.on(getClass(), "Attempt to update header at position=" + position, ex);
-            throw ex;
-        }
+        if (position <= 0)
+            invalidPosition(position);
 
         // the reason we add padding is so that a message gets sent ( this is, mostly for queue as
         // it cant handle a zero len message )
-        if (bytes.writePosition() == position + 4)
-            addPadding(1);
-
         long pos = bytes.writePosition();
+        if (pos == position + 4) {
+            addPadding(1);
+            pos = bytes.writePosition();
+        }
+
 
         // clear up to the next 4 bytes to explicitly indicate "no more data"
         // if there aren't at least 4 bytes remaining, then region not yet mapped and will be cleared when mapped
         // also clears any dirty bits left by a failed writer/appender
         // does not get added to the length
-        if (bytes.writeRemaining() >= 4) {
-            bytes.writeInt(pos, 0);
-        } else {
-            for (int i = 0; i < bytes.writeRemaining(); ++i)
-                bytes.writeByte(pos + i, 0);
+        final BytesStore bytesStore = bytes.bytesStore();
+        if (bytesStore.capacity() - pos >= 4 && bytesStore.readInt(pos) != 0) {
+            bytesStore.writeInt(pos, 0);
         }
 
-        int header = Maths.toUInt31(pos - position - 4);
+        final long value = pos - position - 4;
+        int header = (int) value;
         if (metaData) header |= META_DATA;
-        if (header == UNKNOWN_LENGTH)
-            throw new UnsupportedOperationException("Data messages of 0 length are not supported.");
+        // shouldn't happen due to padding above.
+//        assert header == UNKNOWN_LENGTH;
 
         assert insideHeader;
         insideHeader = false;
 
-        updateHeaderAssertions(position, pos, expectedHeader, header);
+        assert checkNoDataAfterEnd(pos);
+
+        if (!bytes.compareAndSwapInt(position, expectedHeader, header)) {
+            unexpectedValue(position, expectedHeader);
+        }
 
         bytes.writeLimit(bytes.capacity());
         if (!metaData)
             incrementHeaderNumber(position);
     }
 
-    private void updateHeaderAssertions(long position, long pos, int expectedHeader, int header) throws StreamCorruptedException {
-        if (Jvm.isAssertEnabled()) {
-            checkNoDataAfterEnd(pos);
-        }
-
-        if (!bytes.compareAndSwapInt(position, expectedHeader, header)) {
-            int currentHeader = bytes.readVolatileInt(position);
-            throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(currentHeader));
-        }
+    private void invalidPosition(long position) {
+        // this should never happen so blow up
+        IllegalStateException ex = new IllegalStateException("Attempt to write to position=" + position);
+        Slf4jExceptionHandler.WARN.on(getClass(), "Attempt to update header at position=" + position, ex);
+        throw ex;
     }
 
-    private void checkNoDataAfterEnd(long pos) {
+    private void unexpectedValue(long position, int expectedHeader) throws StreamCorruptedException {
+        int currentHeader = bytes.readVolatileInt(position);
+        throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(currentHeader));
+    }
+
+    private boolean checkNoDataAfterEnd(long pos) {
         // can't do this check without jumping back.
         if (!bytes.inside(pos, 4L))
-            return;
+            return true;
         if (pos <= bytes.writeLimit() - 4) {
             final int value = bytes.bytesStore().readVolatileInt(pos);
             if (value != 0) {
@@ -389,6 +391,7 @@ public abstract class AbstractWire implements Wire {
                 throw new IllegalStateException("Data was written after the end of the message, zero out data before rewinding " + text);
             }
         }
+        return true;
     }
 
     private void incrementHeaderNumber(long pos) {
