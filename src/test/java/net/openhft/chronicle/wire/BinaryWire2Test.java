@@ -685,6 +685,7 @@ public class BinaryWire2Test extends WireTestCommon {
     }
 
     @Test
+    @Ignore("TODO FIX #261")
     public void testBytesLiteral() {
         assumeFalse(usePadding);
 
