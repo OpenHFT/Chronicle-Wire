@@ -17,23 +17,23 @@ public class MapCustomTest extends WireTestCommon {
 
     @Test
     public void test() {
-        MapsHolder mapsHolder = new MapsHolder(10, "one");
+        MapsHolder<Integer> mapsHolder = new MapsHolder<>(10, "one");
 
         @NotNull MapsHolder result = Wires.deepCopy(mapsHolder);
 
         assertTrue(result.equals(mapsHolder));
     }
 
-    private static class MapsHolder extends SelfDescribingMarshallable {
+    private static class MapsHolder<T extends Integer> extends SelfDescribingMarshallable {
         private IntToStringMap i2sMap = new IntToStringMap();
         private IntMap<Void, String> iMap = new IntMap<>();
         private IntSuperMap<String, MapsHolder> isMap = new IntSuperMap<>();
-        private TransformingMap<Integer, BigDecimal, String> transMap = new TransformingMap<>(BigDecimal::new);
+        private TransformingMap<T, BigDecimal, String> transMap = new TransformingMap<>(BigDecimal::new);
         private GeneralMap gMap = new GeneralMap();
         // ClassCastException: net.openhft.chronicle.core.util.ObjectUtils$$Lambda$73/1401132667 cannot be cast to Map
         // private MarkedMap<String> mMap = i2sMap;
 
-        public MapsHolder(int x, String y) {
+        public MapsHolder(T x, String y) {
             i2sMap.put(x, y);
             iMap.put(x, y);
             isMap.put(x, y);
