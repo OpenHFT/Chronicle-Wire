@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.annotation.RetentionPolicy;
@@ -169,6 +170,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @Ignore("TODO FIX https://github.com/OpenHFT/Chronicle-Bytes/pull/261")
     public void testBytes() {
         @NotNull Wire w = createWire();
 

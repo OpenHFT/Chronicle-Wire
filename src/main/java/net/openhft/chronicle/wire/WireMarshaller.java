@@ -409,21 +409,18 @@ public class WireMarshaller<T> {
             if (type.isArray())
                 return new ArrayFieldAccess(field);
             if (EnumSet.class.isAssignableFrom(type)) {
-                Type genericType = field.getGenericType();
-                if (genericType instanceof ParameterizedType) {
-                    @NotNull ParameterizedType pType = (ParameterizedType) genericType;
-                    Type type0 = pType.getActualTypeArguments()[0];
-                    final Class componentType = extractClass(type0);
-                    boolean isLeaf = !Throwable.class.isAssignableFrom(componentType)
-                            && WIRE_MARSHALLER_CL.get(componentType).isLeaf;
-                    try {
-                        Object[] values = (Object[]) Jvm.getMethod(componentType, "values").invoke(componentType, null);
-                        return new EnumSetFieldAccess(field, isLeaf, values, componentType);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw Jvm.rethrow(e);
-                    }
+                final Class componentType = extractClass(computeActualTypeArguments(EnumSet.class, field)[0]);
+                if (componentType == Object.class || Modifier.isAbstract(componentType.getModifiers()))
+                    throw new RuntimeException("Could not get enum constant directory");
+
+                boolean isLeaf = !Throwable.class.isAssignableFrom(componentType)
+                        && WIRE_MARSHALLER_CL.get(componentType).isLeaf;
+                try {
+                    Object[] values = (Object[]) Jvm.getMethod(componentType, "values").invoke(componentType, null);
+                    return new EnumSetFieldAccess(field, isLeaf, values, componentType);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw Jvm.rethrow(e);
                 }
-                throw new RuntimeException("Could not get enum constant directory");
             }
             if (Collection.class.isAssignableFrom(type))
                 return CollectionFieldAccess.of(field);
@@ -1072,16 +1069,13 @@ public class WireMarshaller<T> {
                 collectionSupplier = LinkedHashSet::new;
             else
                 collectionSupplier = null;
-            Type genericType = field.getGenericType();
-            if (genericType instanceof ParameterizedType) {
-                @NotNull ParameterizedType pType = (ParameterizedType) genericType;
-                Type type0 = pType.getActualTypeArguments()[0];
-                componentType = extractClass(type0);
+
+            componentType = extractClass(computeActualTypeArguments(Collection.class, field)[0]);
+            if (componentType != Object.class) {
                 isLeaf = !Throwable.class.isAssignableFrom(componentType)
                         && WIRE_MARSHALLER_CL.get(componentType).isLeaf;
-            } else {
-                componentType = Object.class;
             }
+
             return componentType == String.class
                     ? new StringCollectionFieldAccess(field, true, collectionSupplier, type)
                     : new CollectionFieldAccess(field, isLeaf, collectionSupplier, componentType, type);
@@ -1250,17 +1244,10 @@ public class WireMarshaller<T> {
                 collectionSupplier = TreeMap::new;
             else
                 collectionSupplier = newInstance();
-            Type genericType = field.getGenericType();
-            if (genericType instanceof ParameterizedType) {
-                @NotNull ParameterizedType pType = (ParameterizedType) genericType;
-                Type[] actualTypeArguments = pType.getActualTypeArguments();
-                keyType = extractClass(actualTypeArguments[0]);
-                valueType = extractClass(actualTypeArguments[1]);
 
-            } else {
-                keyType = Object.class;
-                valueType = Object.class;
-            }
+            Type[] actualTypeArguments = computeActualTypeArguments(Map.class, field);
+            keyType = extractClass(actualTypeArguments[0]);
+            valueType = extractClass(actualTypeArguments[1]);
         }
 
         @NotNull
@@ -1792,5 +1779,71 @@ public class WireMarshaller<T> {
         protected void copy(Object from, Object to) {
             unsafePutDouble(to, offset, unsafeGetDouble(from, offset));
         }
+    }
+
+    private static Type[] computeActualTypeArguments(Class iface, Field field) {
+        Type[] actual = consumeActualTypeArguments(new HashMap<>(), iface, field.getGenericType());
+
+        if (actual == null)
+            return iface.getTypeParameters();
+
+        return actual;
+    }
+
+    private static Type[] consumeActualTypeArguments(Map<String, Type> prevTypeParameters, Class iface, Type type) {
+        Class cls = null;
+        Map<String, Type> typeParameters = new HashMap<>();
+        if (type instanceof ParameterizedType) {
+            ParameterizedType pType = (ParameterizedType) type;
+            Type[] typeArguments = pType.getActualTypeArguments();
+
+            cls = ((Class) ((ParameterizedType) type).getRawType());
+            TypeVariable<?>[] typeParamDecls = cls.getTypeParameters();
+
+            for (int i = 0; i < Math.min(typeParamDecls.length, typeArguments.length); i++) {
+                Type value;
+                if (typeArguments[i] instanceof TypeVariable) {
+                    value = prevTypeParameters.get(((TypeVariable<?>) typeArguments[i]).getName());
+
+                    if (value == null) {
+                        // Fail-safe.
+                        Type[] bounds = ((TypeVariable<?>) typeArguments[i]).getBounds();
+                        value = bounds.length == 0 ? Object.class : bounds[0];
+                    }
+                } else {
+                    value = typeArguments[i];
+                }
+
+                typeParameters.put(typeParamDecls[i].getName(), value);
+            }
+        } else if (type instanceof Class) {
+            cls = (Class) type;
+        }
+
+        if (iface.equals(cls)) {
+            TypeVariable[] parameters = iface.getTypeParameters();
+            Type[] result = new Type[parameters.length];
+
+            for (int i = 0; i < result.length; i++) {
+                Type parameter = typeParameters.get(parameters[i].getName());
+
+                result[i] = parameter != null ? parameter : parameters[i];
+            }
+
+            return result;
+        }
+
+        if (cls != null) {
+            for (Type ifaceType : cls.getGenericInterfaces()) {
+                Type[] result = consumeActualTypeArguments(typeParameters, iface, ifaceType);
+
+                if (result != null)
+                    return result;
+            }
+
+            return consumeActualTypeArguments(typeParameters, iface, cls.getGenericSuperclass());
+        }
+
+        return null;
     }
 }

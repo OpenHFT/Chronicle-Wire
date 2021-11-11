@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshallable;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
@@ -68,6 +69,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
+    @Ignore("TODO FIX https://github.com/OpenHFT/Chronicle-Bytes/pull/261")
     public void copyToShouldMutateBytes() {
         BytesContainerMarshallable container1 = new BytesContainerMarshallable();
         container1.bytesField.append("1");
