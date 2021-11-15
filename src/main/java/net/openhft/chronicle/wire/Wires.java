@@ -776,6 +776,9 @@ public enum Wires {
                 case "java.time.Duration":
                     return ScalarStrategy.of(Duration.class, (o, in) -> Duration.parse(in.text()));
 
+                case "java.time.Instant":
+                    return ScalarStrategy.of(Instant.class, (o, in) -> Instant.parse(in.text()));
+
                 case "java.sql.Timestamp":
                     return ScalarStrategy.of(Timestamp.class, (o, in) -> new Timestamp(parseDate(in).getTime()));
 
