@@ -78,7 +78,6 @@ public class TextWireTest extends WireTestCommon {
     }
 
     @Test
-    @Ignore("TODO FIX https://github.com/OpenHFT/Chronicle-Bytes/pull/261")
     public void testBytes() {
         @NotNull Wire wire = createWire();
         @NotNull byte[] allBytes = new byte[256];

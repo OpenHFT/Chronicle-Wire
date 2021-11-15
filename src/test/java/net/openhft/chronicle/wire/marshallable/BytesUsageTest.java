@@ -4,7 +4,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
@@ -13,7 +12,6 @@ public class BytesUsageTest extends WireTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test
-    @Ignore("TODO FIX https://github.com/OpenHFT/Chronicle-Bytes/pull/261")
     public void testBytes() {
         BytesStore value = Bytes.from("helloWorld");
         {

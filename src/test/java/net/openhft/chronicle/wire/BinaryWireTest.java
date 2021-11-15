@@ -23,7 +23,6 @@ import net.openhft.chronicle.bytes.NoBytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -679,7 +678,6 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     @Test
-    @Ignore("TODO FIX https://github.com/OpenHFT/Chronicle-Bytes/pull/261")
     public void testBytes() {
         @NotNull Wire wire = createWire();
         @NotNull byte[] allBytes = new byte[256];

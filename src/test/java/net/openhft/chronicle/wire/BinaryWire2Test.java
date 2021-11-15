@@ -685,7 +685,6 @@ public class BinaryWire2Test extends WireTestCommon {
     }
 
     @Test
-    @Ignore("TODO FIX https://github.com/OpenHFT/Chronicle-Bytes/pull/261")
     public void testBytesLiteral() {
         assumeFalse(usePadding);
 
