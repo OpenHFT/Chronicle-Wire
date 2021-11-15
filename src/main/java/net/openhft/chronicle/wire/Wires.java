@@ -504,7 +504,8 @@ public enum Wires {
     }
 
     @Nullable
-    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz) {
+    public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class origClass) {
+        Class clazz = origClass;
         Object o = in.typePrefixOrObject(clazz);
         if (o != null && !(o instanceof Class)) {
             return (E) in.marshallable(o, MARSHALLABLE);
@@ -535,7 +536,8 @@ public enum Wires {
         if (clazz == null)
             clazz = Object.class;
         Class classForStrategy = clazz.isInterface() && using != null ? using.getClass() : clazz;
-        SerializationStrategy<E> strategy = CLASS_STRATEGY.get(classForStrategy);
+        SerializationStrategy<E> strategy = (ReadBytesMarshallable.class.isAssignableFrom(clazz) && !ObjectUtils.matchingClass(clazz, origClass))
+            ? ANY_NESTED : CLASS_STRATEGY.get(classForStrategy);
         BracketType brackets = strategy.bracketType();
         if (brackets == BracketType.UNKNOWN)
             brackets = in.getBracketType();

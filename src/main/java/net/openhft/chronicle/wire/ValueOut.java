@@ -657,9 +657,6 @@ public interface ValueOut {
             else
                 return typedMarshallable((WriteMarshallable) value);
         }
-        if (value instanceof WriteBytesMarshallable) {
-            return bytesMarshallable((BytesMarshallable) value);
-        }
         if (value instanceof BytesStore)
             return bytes((BytesStore) value);
         if (value instanceof CharSequence)
@@ -826,6 +823,9 @@ public interface ValueOut {
         }
         if (value instanceof Marshallable)
             return marshallable((Marshallable) value);
+        if (value instanceof WriteBytesMarshallable) {
+            return bytesMarshallable((BytesMarshallable) value);
+        }
         if (Object[].class.isAssignableFrom(value.getClass())) {
             @NotNull Class type = value.getClass().getComponentType();
             return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), Object[].class);
