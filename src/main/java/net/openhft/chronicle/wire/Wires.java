@@ -536,7 +536,7 @@ public enum Wires {
         if (clazz == null)
             clazz = Object.class;
         Class classForStrategy = clazz.isInterface() && using != null ? using.getClass() : clazz;
-        SerializationStrategy<E> strategy = (ReadBytesMarshallable.class.isAssignableFrom(clazz) && !ObjectUtils.matchingClass(clazz, origClass))
+        SerializationStrategy<E> strategy = (ReadBytesMarshallable.class.isAssignableFrom(clazz) && !ReadMarshallable.class.isAssignableFrom(clazz) && !ObjectUtils.matchingClass(clazz, origClass))
             ? ANY_NESTED : CLASS_STRATEGY.get(classForStrategy);
         BracketType brackets = strategy.bracketType();
         if (brackets == BracketType.UNKNOWN)
