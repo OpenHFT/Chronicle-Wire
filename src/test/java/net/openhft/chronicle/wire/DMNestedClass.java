@@ -8,4 +8,9 @@ class DMNestedClass extends SelfDescribingMarshallable {
         this.str = str;
         this.num = num;
     }
+
+    @Override
+    public String toString() {
+        return "{ str: " + str + ", " + "num: " + num + " }\n";
+    }
 }

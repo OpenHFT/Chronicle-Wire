@@ -40,4 +40,18 @@ class DMOuterClass extends SelfDescribingMarshallable {
     public boolean equals(Object o) {
         return super.equals(o);
     }
+
+    @Override
+    public String toString() {
+        return  "text: " + text + ",\n" +
+                "b: " + text + ",\n" +
+                "bb: " + text + ",\n" +
+                "d: " + text + ",\n" +
+                "f: " + text + ",\n" +
+                "i: " + text + ",\n" +
+                "l: " + text + ",\n" +
+                "s: " + text + ",\n" +
+                "nested: " + nested.toString() + ",\n" +
+                "map: " + map.toString();
+    }
 }
