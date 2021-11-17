@@ -66,6 +66,7 @@ public enum SerializationStrategies implements SerializationStrategy {
             return type.isInterface() || Modifier.isAbstract(type.getModifiers()) ? null : super.newInstanceOrNull(type);
         }
     },
+
     ANY_OBJECT {
         @Nullable
         @Override
@@ -105,6 +106,7 @@ public enum SerializationStrategies implements SerializationStrategy {
             return BracketType.NONE;
         }
     },
+
     ENUM {
         @Nullable
         @Override
@@ -124,6 +126,7 @@ public enum SerializationStrategies implements SerializationStrategy {
             return BracketType.NONE;
         }
     },
+
     DYNAMIC_ENUM {
         private Field ordinal = Jvm.getField(Enum.class, "ordinal");
 
@@ -170,6 +173,7 @@ public enum SerializationStrategies implements SerializationStrategy {
             }
         }
     },
+
     ANY_NESTED {
         @NotNull
         @Override
@@ -189,6 +193,7 @@ public enum SerializationStrategies implements SerializationStrategy {
             return UNKNOWN;
         }
     },
+
     DEMARSHALLABLE {
         @NotNull
         @Override
@@ -216,6 +221,7 @@ public enum SerializationStrategies implements SerializationStrategy {
             return new DemarshallableWrapper(type);
         }
     },
+
     SERIALIZABLE {
         @Override
         public Object readUsing(Class clazz, Object o, ValueIn in, BracketType bracketType) {
@@ -230,6 +236,7 @@ public enum SerializationStrategies implements SerializationStrategy {
             return Serializable.class;
         }
     },
+
     EXTERNALIZABLE {
         @NotNull
         @Override
@@ -254,6 +261,7 @@ public enum SerializationStrategies implements SerializationStrategy {
             return BracketType.SEQ;
         }
     },
+
     MAP {
         @Override
         public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) {
@@ -289,6 +297,7 @@ public enum SerializationStrategies implements SerializationStrategy {
             return Map.class;
         }
     },
+
     SET {
         @Override
         public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) {
@@ -326,6 +335,7 @@ public enum SerializationStrategies implements SerializationStrategy {
             return BracketType.SEQ;
         }
     },
+
     LIST {
         @Override
         public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) {
@@ -362,6 +372,7 @@ public enum SerializationStrategies implements SerializationStrategy {
             return BracketType.SEQ;
         }
     },
+
     ARRAY {
         @NotNull
         @Override
@@ -399,7 +410,9 @@ public enum SerializationStrategies implements SerializationStrategy {
         public BracketType bracketType() {
             return BracketType.SEQ;
         }
-    }, PRIM_ARRAY {
+    },
+
+    PRIM_ARRAY {
         @NotNull
         @Override
         public Object readUsing(Class clazz, Object using, @NotNull ValueIn in, BracketType bracketType) {
