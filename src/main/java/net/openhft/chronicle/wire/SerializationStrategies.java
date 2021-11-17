@@ -37,6 +37,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
+import static net.openhft.chronicle.wire.BracketType.UNKNOWN;
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum SerializationStrategies implements SerializationStrategy {
     MARSHALLABLE {
@@ -80,7 +82,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         @NotNull
         @Override
         public BracketType bracketType() {
-            return BracketType.UNKNOWN;
+            return UNKNOWN;
         }
     },
 
@@ -152,7 +154,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         @NotNull
         @Override
         public BracketType bracketType() {
-            return BracketType.UNKNOWN;
+            return UNKNOWN;
         }
 
         @Override
@@ -180,6 +182,11 @@ public enum SerializationStrategies implements SerializationStrategy {
         @Override
         public Class type() {
             return Object.class;
+        }
+
+        @Override
+        public @NotNull BracketType bracketType() {
+            return UNKNOWN;
         }
     },
     DEMARSHALLABLE {
