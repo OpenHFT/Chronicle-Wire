@@ -177,8 +177,10 @@ public enum SerializationStrategies implements SerializationStrategy {
     ANY_NESTED {
         @NotNull
         @Override
-        public Object readUsing(Class clazz, @NotNull Object o, @NotNull ValueIn in, BracketType bracketType) {
-            Wires.readMarshallable(clazz, Objects.requireNonNull(o), in.wireIn(), true);
+        public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) {
+            if (o == null)
+                throw new IllegalArgumentException("Unable to deserialize " + clazz);
+            Wires.readMarshallable(clazz, o, in.wireIn(), true);
             return o;
         }
 

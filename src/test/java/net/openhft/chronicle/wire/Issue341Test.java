@@ -2,11 +2,13 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
@@ -46,7 +48,41 @@ public class Issue341Test {
 
     }
 
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testComparableSerializable() {
+        final MyComparableSerializable source = new MyComparableSerializable("hello");
+
+        final Bytes<?> bytes = new HexDumpBytes();
+        final Wire wire = wireType.apply(bytes);
+
+        wire.getValueOut().object((Class) source.getClass(), source);
+        System.out.println(wireType + "\n"
+                + (wire.getValueOut().isBinary() ? bytes.toHexString() : bytes.toString()));
+
+        final MyComparableSerializable target = wire.getValueIn().object(source.getClass());
+        Assert.assertEquals(source, target);
+    }
+
     static final class MyClass extends SelfDescribingMarshallable {
         Instant instant;
+    }
+
+    static final class MyComparableSerializable implements Serializable, Comparable<MyComparableSerializable> {
+        final String value;
+
+        MyComparableSerializable(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return value;
+        }
+
+        @Override
+        public int compareTo(@NotNull MyComparableSerializable o) {
+            return value.compareTo(o.value);
+        }
     }
 }
