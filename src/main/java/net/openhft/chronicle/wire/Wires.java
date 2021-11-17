@@ -34,6 +34,8 @@ import net.openhft.chronicle.core.util.ReadResolvable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.naming.CompositeName;
+import javax.naming.InvalidNameException;
 import java.io.Externalizable;
 import java.io.File;
 import java.io.Serializable;
@@ -43,6 +45,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -647,14 +650,19 @@ public enum Wires {
     enum SerializeJavaLang implements Function<Class, SerializationStrategy> {
         INSTANCE;
 
-        private static SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy");
-        private static SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
-        private static SimpleDateFormat sdf3 = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy", Locale.US);
+        private static SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss.S zzz yyyy");
+        private static SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS zzz");
+        private static SimpleDateFormat sdf3 = new SimpleDateFormat("EEE MMM d HH:mm:ss.S zzz yyyy", Locale.US);
 
         static {
             sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
             sdf2.setTimeZone(TimeZone.getTimeZone("GMT"));
             sdf3.setTimeZone(TimeZone.getTimeZone("GMT"));
+        }
+
+        public static WireOut writeDate(Date date, ValueOut out) {
+            final String format = sdf2.format(date);
+            return out.writeString(format);
         }
 
         public static Date parseDate(ValueIn in) {
@@ -663,14 +671,14 @@ public enum Wires {
                 return new Date(Long.parseLong(text));
             } catch (NumberFormatException nfe) {
                 try {
-                    synchronized (sdf) {
-                        return sdf.parse(text);
+                    synchronized (sdf2) {
+                        return sdf2.parse(text);
                     }
                 } catch (ParseException pe) {
                     try {
-                        synchronized (sdf2) {
+                        synchronized (sdf) {
                             try {
-                                return sdf2.parse(text);
+                                return sdf.parse(text);
                             } catch (ParseException pe1) {
                                 synchronized (sdf3) {
                                     return sdf3.parse(text);
@@ -758,6 +766,21 @@ public enum Wires {
                 case "java.time.ZonedDateTime":
                     return ScalarStrategy.of(ZonedDateTime.class, (o, in) -> in.zonedDateTime());
 
+                case "java.sql.Time":
+                    return ScalarStrategy.of(java.sql.Time.class, (o, in) -> new Time(parseDate(in).getTime()));
+
+                case "java.sql.Date":
+                    return ScalarStrategy.of(java.sql.Date.class, (o, in) -> new java.sql.Date(parseDate(in).getTime()));
+
+                case "javax.naming.CompositeName":
+                    return ScalarStrategy.of(CompositeName.class, (o, in) -> {
+                        try {
+                            return new CompositeName(in.text());
+                        } catch (InvalidNameException e) {
+                            throw Jvm.rethrow(e);
+                        }
+                    });
+
                 case "java.io.File":
                     return ScalarStrategy.text(File.class, File::new);
 
@@ -781,6 +804,9 @@ public enum Wires {
 
                 case "java.sql.Timestamp":
                     return ScalarStrategy.of(Timestamp.class, (o, in) -> new Timestamp(parseDate(in).getTime()));
+
+                case "java.util.GregorianCalendar":
+                    return ScalarStrategy.of(GregorianCalendar.class, (o, in) -> GregorianCalendar.from(in.zonedDateTime()));
 
                 default:
                     if (aClass.isPrimitive())
