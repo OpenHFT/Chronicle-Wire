@@ -3176,7 +3176,7 @@ public class TextWire extends AbstractWire implements Wire {
                 return null;
             }
             if (indentation() == 0 && peekCode() != '{') {
-                strategy.readUsing(object, this, BracketType.UNKNOWN);
+                strategy.readUsing(null, object, this, BracketType.UNKNOWN);
                 return object;
             }
             pushState();
@@ -3207,7 +3207,7 @@ public class TextWire extends AbstractWire implements Wire {
                 bytes.readLimit(newLimit);
                 bytes.readSkip(1); // skip the {
                 consumePadding();
-                object = strategy.readUsing(object, this, BracketType.MAP);
+                object = strategy.readUsing(null, object, this, BracketType.MAP);
 
             } finally {
                 bytes.readLimit(limit);

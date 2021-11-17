@@ -217,7 +217,7 @@ public interface ValueIn {
     <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0);
 
     default <T> boolean sequence(@NotNull T t, @NotNull SerializationStrategy<T> tReader) {
-        return sequence(t, (using, in) -> tReader.readUsing(using, in, BracketType.UNKNOWN));
+        return sequence(t, (using, in) -> tReader.readUsing(null, using, in, BracketType.UNKNOWN));
     }
 
     default <T> void reader0(ValueIn v, List<T> list, List<T> buffer, Supplier<T> bufferAdd) {

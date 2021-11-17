@@ -336,7 +336,12 @@ public enum Wires {
     }
 
     public static void readMarshallable(@NotNull Object marshallable, @NotNull WireIn wire, boolean overwrite) {
-        WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
+        final Class<?> clazz = marshallable.getClass();
+        readMarshallable(clazz, marshallable, wire, overwrite);
+    }
+
+    public static void readMarshallable(Class<?> clazz, @NotNull Object marshallable, @NotNull WireIn wire, boolean overwrite) {
+        WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(clazz == null ? marshallable.getClass() : clazz);
         wm.readMarshallable(marshallable, wire, wm.defaultValue(), overwrite);
     }
 
@@ -455,7 +460,7 @@ public enum Wires {
             using = (E) strategy.newInstanceOrNull(clazz);
 
         SerializationStrategy<E> finalStrategy = strategy;
-        return in.sequence(using, (using1, in1) -> finalStrategy.readUsing(using1, in1, BracketType.UNKNOWN)) ? readResolve(using) : null;
+        return in.sequence(using, (using1, in1) -> finalStrategy.readUsing(clazz, using1, in1, BracketType.UNKNOWN)) ? readResolve(using) : null;
     }
 
     @Nullable
@@ -559,7 +564,7 @@ public enum Wires {
                 return objectSequence(in, using, clazz, strategy);
 
             case NONE:
-                @NotNull final Object e = strategy.readUsing(using, in, BracketType.NONE);
+                @NotNull final Object e = strategy.readUsing(clazz, using, in, BracketType.NONE);
                 return clazz == Base64.class
                         ? (E) e
                         : (E) WireInternal.intern(clazz, e);

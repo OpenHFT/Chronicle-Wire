@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 public interface SerializationStrategy<T> {
 
     @Nullable
-    T readUsing(T using, ValueIn in, BracketType bracketType);
+    T readUsing(Class clazz, T using, ValueIn in, BracketType bracketType);
 
     /**
      * Constructs and returns a new instance using the provided {@code type}

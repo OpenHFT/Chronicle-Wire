@@ -2452,7 +2452,7 @@ public class YamlWire extends AbstractWire implements Wire {
                 case MAPPING_START:
                     wireIn().startEvent();
 
-                    object = strategy.readUsing(object, this, BracketType.MAP);
+                    object = strategy.readUsing(null, object, this, BracketType.MAP);
 
                     try {
                         wireIn().endEvent();
