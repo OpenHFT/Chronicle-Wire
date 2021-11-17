@@ -1419,7 +1419,7 @@ public class WireMarshaller<T> {
             String text = read.text();
             if (text == null || text.length() < 1) {
                 if (overwrite)
-                    text = "\0";
+                    text = String.valueOf((char) 0xFFFF);
                 else
                     return;
             }

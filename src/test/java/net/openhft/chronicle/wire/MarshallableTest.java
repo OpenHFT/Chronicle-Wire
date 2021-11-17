@@ -81,6 +81,7 @@ public class MarshallableTest extends WireTestCommon {
         source.d(1.0);
         source.l(1L);
         source.i(1);
+        source.ch((char)0xFFFF);
         source.text("a");
         @NotNull final Marshallable destination = new MyTypes();
         assertNotEquals(source, destination);
