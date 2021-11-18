@@ -35,7 +35,10 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
@@ -636,8 +639,24 @@ public interface ValueOut {
                 endTypePrefix();
                 return result;
             }
-            case "java.util.Date":
+
             case "java.sql.Timestamp":
+            case "java.util.Date":
+            case "java.sql.Date":
+            case "java.sql.Time": {
+                final WireOut result = Wires.SerializeJavaLang.writeDate((Date) value, typePrefix(Date.class));
+                endTypePrefix();
+                return result;
+            }
+
+            case "java.util.GregorianCalendar": {
+                GregorianCalendar gc = (GregorianCalendar) value;
+                final WireOut result = typePrefix(GregorianCalendar.class).untypedObject(gc.toZonedDateTime());
+                endTypePrefix();
+                return result;
+            }
+
+
             case "java.math.BigInteger":
             case "java.math.BigDecimal":
             case "java.time.Duration":
@@ -706,7 +725,9 @@ public interface ValueOut {
             @NotNull Class type = value.getClass().getComponentType();
             return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), value.getClass());
         } else if (value instanceof Serializable) {
-            return typedMarshallable((Serializable) value);
+            final WireOut wireOut = typedMarshallable((Serializable) value);
+            endTypePrefix();
+            return wireOut;
         } else if (value instanceof ByteBuffer) {
             return object(BytesStore.wrap((ByteBuffer) value));
         } else if (value instanceof LongValue) {

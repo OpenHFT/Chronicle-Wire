@@ -1,15 +1,18 @@
 package net.openhft.chronicle.wire;
 
 import com.sun.jndi.toolkit.ctx.Continuation;
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import io.github.classgraph.*;
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Assert;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.swing.*;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.sql.DriverPropertyInfo;
@@ -26,6 +29,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 final class SerializableObjectTest extends WireTestCommon {
 
@@ -34,9 +39,12 @@ final class SerializableObjectTest extends WireTestCommon {
     private static final Set<String> IGNORED_PACKAGES = Stream.of(
                     "jnr.",
                     "sun.",
+                    "io.github.",
+                    "com.sun.",
                     "org.junit.",
                     "jdk.nashorn.",
                     "org.easymock.",
+                    "org.omg.",
                     "org.yaml.",
                     "com.sun.corba.",
                     "com.sun.org.",
@@ -52,23 +60,6 @@ final class SerializableObjectTest extends WireTestCommon {
 
     private static final Predicate<MethodInfo> CONSTRUCTOR_IS_DEFAULT = methodInfo -> methodInfo.isPublic() && methodInfo.getTypeDescriptor().getTypeParameters().isEmpty();
     private static final ClassInfoList.ClassInfoFilter NOT_IGNORED = ci -> IGNORED_PACKAGES.stream().noneMatch(ip -> ci.getPackageName().startsWith(ip));
-
-
-    @TestFactory
-    Stream<DynamicTest> test() {
-        return DynamicTest.stream(cases(), Objects::toString, wireTypeObject -> {
-            final Object source = wireTypeObject.object;
-            final Bytes<?> bytes = Bytes.allocateDirect(100);
-            try {
-                final Wire wire = wireTypeObject.wireType.apply(bytes);
-                wire.getValueOut().object((Class) source.getClass(), source);
-                final Object target = wire.getValueIn().object(source.getClass());
-                Assert.assertEquals(source, target);
-            } finally {
-                bytes.releaseLast();
-            }
-        });
-    }
 
     private static Stream<WireTypeObject> cases() {
         return wires()
@@ -162,6 +153,14 @@ final class SerializableObjectTest extends WireTestCommon {
         }
         //return null;
     }
+
+    private static <T> T createOrNull(final Class<T> clazz) {
+        try {
+            return clazz.getConstructor().newInstance();
+        } catch (ReflectiveOperationException ignore) {
+            return null;
+        }
+    }
 /*
 
     @Test
@@ -180,20 +179,6 @@ final class SerializableObjectTest extends WireTestCommon {
         //return null;
     }
 */
-
-
-    @FunctionalInterface
-    public interface ThrowingSupplier<T, X extends Exception> {
-        T get() throws X;
-    }
-
-    private static <T> T createOrNull(final Class<T> clazz) {
-        try {
-            return clazz.getConstructor().newInstance();
-        } catch (ReflectiveOperationException ignore) {
-            return null;
-        }
-    }
 
     private static boolean overridesEqualsObject(ClassInfo ci) {
         return ci.getMethodInfo("equals").stream()
@@ -231,6 +216,49 @@ final class SerializableObjectTest extends WireTestCommon {
         return Stream.of(WireType.TEXT, WireType.JSON, WireType.BINARY);
     }
 
+    @TestFactory
+    Stream<DynamicTest> test() {
+        return DynamicTest.stream(cases(), Objects::toString, wireTypeObject -> {
+            final Object source = wireTypeObject.object;
+//            if (!(source instanceof Comparable))
+//                return;
+            try {
+                // sanity check
+                assertNotNull(source.toString());
+                // can it be serialized
+                ByteOutputStream bos = new ByteOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(bos);
+                oos.writeObject(source);
+
+                ByteArrayInputStream bis = new ByteArrayInputStream(bos.getBytes());
+                ObjectInputStream ois = new ObjectInputStream(bis);
+                Object source2 = ois.readObject();
+                assertEquals(source, source2);
+            } catch (Throwable t) {
+                System.out.println(source.getClass() + ": " + t);
+                return;
+            }
+
+            final Bytes<?> bytes = Bytes.allocateElasticDirect();
+            try {
+                final Wire wire = wireTypeObject.wireType.apply(bytes);
+                if (source instanceof Locale)
+                    Thread.yield();
+                wire.getValueOut().object((Class) source.getClass(), source);
+                final Object target = wire.getValueIn().object(source.getClass());
+                if (!(source instanceof Comparable) || ((Comparable) source).compareTo(target) != 0)
+                    assertEquals(source, target);
+            } finally {
+                bytes.releaseLast();
+            }
+        });
+    }
+
+    @FunctionalInterface
+    public interface ThrowingSupplier<T, X extends Exception> {
+        T get() throws X;
+    }
+
     private static final class WireTypeObject {
         WireType wireType;
         Object object;
@@ -242,7 +270,11 @@ final class SerializableObjectTest extends WireTestCommon {
 
         @Override
         public String toString() {
-            return wireType + ", " + object.getClass().getName() + " : " + object;
+            try {
+                return wireType + ", " + object.getClass().getName() + " : " + object;
+            } catch (Throwable t) {
+                return t.toString();
+            }
         }
     }
 
