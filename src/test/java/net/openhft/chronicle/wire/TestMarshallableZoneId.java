@@ -1,10 +1,12 @@
 package net.openhft.chronicle.wire;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.ZoneId;
 
+@Ignore("see https://github.com/OpenHFT/Chronicle-Wire/issues/347")
 public class TestMarshallableZoneId {
 
     public static class MySelfDescribingMarshallable extends SelfDescribingMarshallable {
