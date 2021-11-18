@@ -1,5 +1,8 @@
-package net.openhft.chronicle.wire;
+package net.openhft.chronicle.wire.issue;
 
+import net.openhft.chronicle.wire.JSONWire;
+import net.openhft.chronicle.wire.JsonUtil;
+import net.openhft.chronicle.wire.Wire;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -22,7 +25,7 @@ import static net.openhft.chronicle.wire.JsonUtil.assertBalancedBrackets;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(value = Parameterized.class)
-public class Issue327 {
+public class Issue327Test {
 
     private final boolean useTypes;
 
@@ -34,7 +37,7 @@ public class Issue327 {
         );
     }
 
-    public Issue327(boolean useTypes) {
+    public Issue327Test(boolean useTypes) {
         this.useTypes = useTypes;
     }
 
@@ -95,7 +98,7 @@ public class Issue327 {
                 .object(target);
         final String actual = wire.toString();
         System.out.println("actual = " + actual);
-        assertBalancedBrackets(actual);
+        JsonUtil.assertBalancedBrackets(actual);
         if (useTypes)
             assertEquals(expectedTyped, actual);
         else
