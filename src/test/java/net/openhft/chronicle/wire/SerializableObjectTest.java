@@ -42,18 +42,22 @@ final class SerializableObjectTest extends WireTestCommon {
                     "io.github.",
                     "com.sun.",
                     "org.junit.",
+                    "org.jcp.xml.dsig.internal.",
                     "jdk.nashorn.",
                     "org.easymock.",
                     "org.omg.",
                     "org.yaml.",
                     "com.sun.corba.",
                     "com.sun.org.",
-                    "com.sun.security.cert.internal."
+                    "com.sun.security.cert.internal.",
+                    "javax.management.remote.rmi."
             )
             .collect(Collectors.collectingAndThen(toSet(), Collections::unmodifiableSet));
 
     private static final Set<Class<?>> IGNORED_CLASSES = Stream.of(
-                    Continuation.class
+                    Continuation.class,
+                    DoubleSummaryStatistics.class,
+                    DriverPropertyInfo.class
             )
             .collect(Collectors.collectingAndThen(toSet(), Collections::unmodifiableSet));
 
@@ -246,8 +250,12 @@ final class SerializableObjectTest extends WireTestCommon {
                     Thread.yield();
                 wire.getValueOut().object((Class) source.getClass(), source);
                 final Object target = wire.getValueIn().object(source.getClass());
-                if (!(source instanceof Comparable) || ((Comparable) source).compareTo(target) != 0)
-                    assertEquals(source, target);
+                if (!(source instanceof Comparable) || ((Comparable) source).compareTo(target) != 0) {
+                    if (wireTypeObject.wireType == WireType.JSON)
+                        assertEquals(source.toString(), target.toString());
+                    else
+                        assertEquals(source, target);
+                }
             } catch (IllegalArgumentException iae) {
                 // allow JSON to reject types not supported.
                 if (wireTypeObject.wireType == WireType.JSON)
