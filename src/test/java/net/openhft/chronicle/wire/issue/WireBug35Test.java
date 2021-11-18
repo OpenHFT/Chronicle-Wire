@@ -1,6 +1,9 @@
-package net.openhft.chronicle.wire;
+package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireTestCommon;
+import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;

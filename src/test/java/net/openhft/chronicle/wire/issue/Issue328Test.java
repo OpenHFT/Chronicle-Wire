@@ -1,5 +1,8 @@
-package net.openhft.chronicle.wire;
+package net.openhft.chronicle.wire.issue;
 
+import net.openhft.chronicle.wire.JSONWire;
+import net.openhft.chronicle.wire.JsonUtil;
+import net.openhft.chronicle.wire.Wire;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -12,7 +15,7 @@ import static net.openhft.chronicle.wire.JsonUtil.assertBalancedBrackets;
 import static org.junit.Assert.assertEquals;
 
 @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/328")
-public class Issue328 {
+public class Issue328Test {
 
     @Test
     public void map() {
@@ -33,7 +36,7 @@ public class Issue328 {
         // Note: The output should pass a test at https://jsonlint.com/
 
         System.out.println("actual = " + actual);
-        assertBalancedBrackets(actual);
+        JsonUtil.assertBalancedBrackets(actual);
         assertEquals(expected, actual);
     }
 }

@@ -1,7 +1,9 @@
-package net.openhft.chronicle.wire;
+package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.wire.JSONWire;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -65,7 +67,7 @@ public class JSON322Test {
         wire.getValueOut()
                 .object(three);
 
-        final String expected = "{\"@net.openhft.chronicle.wire.JSON322Test$Three\":{\"one\":{\"@net.openhft.chronicle.wire.JSON322Test$One\":{\"text\":\"hello\"}}, \"two\":{\"@net.openhft.chronicle.wire.JSON322Test$Four\":{\"text\":\"world\"}}  }}";
+        final String expected = "{\"@net.openhft.chronicle.wire.issue.JSON322Test$Three\":{\"one\":{\"@net.openhft.chronicle.wire.issue.JSON322Test$One\":{\"text\":\"hello\"}}, \"two\":{\"@net.openhft.chronicle.wire.issue.JSON322Test$Four\":{\"text\":\"world\"}}  }}";
         final String actual = wire.bytes().toString();
         assertEquals(expected, actual);
 

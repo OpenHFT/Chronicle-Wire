@@ -1,7 +1,8 @@
-package net.openhft.chronicle.wire;
+package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
@@ -11,11 +12,11 @@ import java.nio.ByteBuffer;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class WireBug39Test extends WireTestCommon {
+public class WireBug37Test extends WireTestCommon {
     @Test
-    public void testBinaryEncoding() {
-        @NotNull final WireType wireType = WireType.BINARY;
-        @NotNull final String exampleString = "\uD83E\uDDC0 extra";
+    public void testNewlineInString() {
+        @NotNull final WireType wireType = WireType.TEXT;
+        @NotNull final String exampleString = "hello\nworld";
 
         @NotNull final MarshallableObj obj1 = new MarshallableObj();
         @NotNull final MarshallableObj obj2 = new MarshallableObj();
@@ -24,7 +25,7 @@ public class WireBug39Test extends WireTestCommon {
         obj1.append(exampleString);
         obj2.append(exampleString);
 
-        assertEquals("obj1.equals(obj2): ", obj1, obj2);
+        assertEquals(obj1, obj2);
 
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         obj2.writeMarshallable(wireType.apply(bytes));
@@ -34,12 +35,12 @@ public class WireBug39Test extends WireTestCommon {
 
         obj3.readMarshallable(wireType.apply(Bytes.from(output)));
 
-        assertEquals("obj2.equals(obj3): ", obj1, obj2);
+        assertEquals(obj2, obj3);
 
         bytes.releaseLast();
     }
 
-    class MarshallableObj implements Marshallable {
+    static class MarshallableObj implements Marshallable {
         private final StringBuilder builder = new StringBuilder();
 
         public void clear() {
@@ -66,7 +67,7 @@ public class WireBug39Test extends WireTestCommon {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            @NotNull MarshallableObj that = (MarshallableObj) o;
+            @Nullable MarshallableObj that = (MarshallableObj) o;
 
             return builder.toString().equals(that.builder.toString());
         }

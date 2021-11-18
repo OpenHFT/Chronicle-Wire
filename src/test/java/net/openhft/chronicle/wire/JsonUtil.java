@@ -14,7 +14,7 @@ public final class JsonUtil {
                 .count();
     }
 
-    static void assertBalancedBrackets(String input) {
+    public static void assertBalancedBrackets(String input) {
         assertBalancedBrackets(input, '{', '}');
         assertBalancedBrackets(input, '[', ']');
     }
