@@ -10,14 +10,17 @@ import org.junit.jupiter.api.TestFactory;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.swing.*;
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.awt.*;
+import java.io.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.MathContext;
 import java.nio.charset.StandardCharsets;
-import java.sql.DriverPropertyInfo;
-import java.sql.SQLException;
+import java.sql.Date;
+import java.sql.*;
 import java.time.Instant;
+import java.util.List;
+import java.util.Queue;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -49,17 +52,20 @@ final class SerializableObjectTest extends WireTestCommon {
                     "org.yaml.",
                     "com.sun.corba.",
                     "com.sun.org.",
-                    "com.sun.security.cert.internal.",
-                    "javax.management.remote.rmi."
+                    "com.sun.security.cert.internal",
+                    "javax.management.remote.rmi",
+                    "javax.smartcardio",
+                    "javafx.",
+                    "javax.swing",
+                    "javax.print"
             )
             .collect(Collectors.collectingAndThen(toSet(), Collections::unmodifiableSet));
 
-    private static final Set<Class<?>> IGNORED_CLASSES = Stream.of(
-                    Continuation.class,
-                    DoubleSummaryStatistics.class,
-                    DriverPropertyInfo.class
-            )
-            .collect(Collectors.collectingAndThen(toSet(), Collections::unmodifiableSet));
+    private static final Set<Class<?>> IGNORED_CLASSES = new HashSet<>(Arrays.asList(
+            Continuation.class,
+            DoubleSummaryStatistics.class,
+            DriverPropertyInfo.class
+    ));
 
 
     private static final Predicate<MethodInfo> CONSTRUCTOR_IS_DEFAULT = methodInfo -> methodInfo.isPublic() && methodInfo.getTypeDescriptor().getTypeParameters().isEmpty();
@@ -71,20 +77,38 @@ final class SerializableObjectTest extends WireTestCommon {
     }
 
     private static Stream<Object> mergedObjects() {
-        final Map<String, Object> map = reflectedObjects()
-                .collect(Collectors.toMap(o -> o.getClass().getName(), Function.identity()));
-        handcraftedObjects().forEach(o -> map.put(o.getClass().getName(), o));
+        Map<String, Object> map = handcraftedObjects()
+                .collect(Collectors.toMap(o -> {
+                    final Class<?> aClass = o.getClass();
+                    IGNORED_CLASSES.add(aClass);
+                    return aClass.getName();
+                }, Function.identity()));
+
+        reflectedObjects()
+                .forEach(o -> map.put(o.getClass().getName(), o));
         return map.values().stream();
     }
 
     private static Stream<Object> handcraftedObjects() {
         return Stream.of(
+                // java.lang
+                true,
+                (byte) 1,
+                (char) '2',
+                (short) 3,
+                4,
+                5L,
+                6.0f,
+                7.0,
+                BigInteger.valueOf(Long.MIN_VALUE),
+                BigDecimal.valueOf(12.34),
+                MathContext.DECIMAL32,
                 // java.sql
-                new java.sql.Time(TIME_MS),
-                new java.sql.Timestamp(TIME_MS),
+                new Time(TIME_MS),
+                new Timestamp(TIME_MS),
                 new SQLException("Test exception"),
                 new DriverPropertyInfo("A", "B"),
-                new java.sql.Date(TIME_MS),
+                new Date(TIME_MS),
                 wrap(() -> new SerialClob("A".toCharArray())),
                 wrap(() -> new SerialBlob("A".getBytes(StandardCharsets.UTF_8))),
                 // java.util
@@ -92,7 +116,7 @@ final class SerializableObjectTest extends WireTestCommon {
                 compose(new BitSet(), bs -> bs.set(10)),
                 Currency.getAvailableCurrencies().iterator().next(),
                 DoubleStream.of(1, 2, 3).summaryStatistics(),
-                new EnumMap<TimeUnit, String>(TimeUnit.class),
+                compose(new EnumMap<TimeUnit, String>(TimeUnit.class), m -> m.put(TimeUnit.SECONDS, "secs")),
                 EnumSet.of(TimeUnit.NANOSECONDS, TimeUnit.SECONDS),
                 new EventObject("A"),
                 compose(new HashMap<>(), m -> m.put(1, 1)),
@@ -111,7 +135,6 @@ final class SerializableObjectTest extends WireTestCommon {
                 OptionalInt.empty(),
                 OptionalLong.of(2),
                 OptionalLong.empty(),
-                compose(new PriorityQueue<>(), q -> q.add(2), q -> q.add(1), q -> q.add(3)),
                 compose(new Properties(), p -> p.put("A", 1), p -> p.put("B", 2)),
                 new SimpleTimeZone(1, "EU"),
                 compose(new Stack<Integer>(), q -> q.push(2), q -> q.push(1), q -> q.push(3)),
@@ -121,8 +144,21 @@ final class SerializableObjectTest extends WireTestCommon {
                 UUID.randomUUID(),
                 compose(new Vector<>(), v -> v.add("a"), v -> v.add("b")),
                 //
-                Instant.ofEpochMilli(TIME_MS)
-        );
+                Instant.ofEpochMilli(TIME_MS),
+                Color.BLUE,
+//                new MessageFormat("%s%n"),
+//                InetAddress.getLoopbackAddress(),
+                new File("file")
+//                create(() -> new URL("http://chronicle.software/dir/files"))
+        ).filter(SerializableObjectTest::isSerializableEqualsByObject);
+    }
+
+    private static Object create(ThrowingSupplier s) {
+        try {
+            return s.get();
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
     }
 
     private static Stream<Object> reflectedObjects() {
@@ -135,12 +171,13 @@ final class SerializableObjectTest extends WireTestCommon {
                     .filter(ci -> !ci.extendsSuperclass(LookAndFeel.class)) // These create problems
                     .filter(ci -> !ci.implementsInterface(DesktopManager.class)) // These create problems
                     .filter(ci -> ci.getConstructorInfo().stream().anyMatch(CONSTRUCTOR_IS_DEFAULT))
-                    .filter(SerializableObjectTest::overridesEqualsObject);
+                    .filter(SerializableObjectTest::isSerializableEquals);
 
             List<Object> objects = widgetClasses.stream()
+                    .filter(c -> !IGNORED_CLASSES.contains(c.loadClass(true)))
+                    .filter(SerializableObjectTest::overridesEqualsObject)
                     .map(ci -> ci.loadClass(true))
                     .filter(Objects::nonNull)
-                    .filter(c -> !IGNORED_CLASSES.contains(c))
                     .map(SerializableObjectTest::createOrNull)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
@@ -156,6 +193,40 @@ final class SerializableObjectTest extends WireTestCommon {
 
         }
         //return null;
+    }
+
+    private static boolean isSerializableEquals(ClassInfo ci) {
+        return isSerializableEquals(ci.loadClass(), null);
+    }
+
+    private static boolean isSerializableEqualsByObject(Object o) {
+        return isSerializableEquals(o.getClass(), o);
+    }
+
+    private static boolean isSerializableEquals(Class aClass, Object o) {
+        try {
+            Object source = o == null ? aClass.newInstance() : o;
+            // sanity check
+            assertNotNull(source.toString());
+            // can it be serialized
+            ByteOutputStream bos = new ByteOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(source);
+
+            ByteArrayInputStream bis = new ByteArrayInputStream(bos.getBytes());
+            ObjectInputStream ois = new ObjectInputStream(bis);
+            Object source2 = ois.readObject();
+            if (source instanceof Throwable) {
+                assertEquals(source.getClass(), source2.getClass());
+                assertEquals(((Throwable) source).getMessage(), ((Throwable) source2).getMessage());
+            } else {
+                assertEquals(source, source2);
+            }
+            return true;
+        } catch (Throwable t) {
+            System.out.println(aClass + ": " + t);
+            return false;
+        }
     }
 
     private static <T> T createOrNull(final Class<T> clazz) {
@@ -220,28 +291,23 @@ final class SerializableObjectTest extends WireTestCommon {
         return Stream.of(WireType.TEXT, WireType.JSON, WireType.BINARY);
     }
 
+    static void assertEqualEnough(Object a, Object b) {
+        if (a.getClass() != b.getClass())
+            assertEquals(a, b);
+        if (a instanceof Throwable) {
+            assertEquals(a.getClass(), b.getClass());
+            assertEquals(((Throwable) a).getMessage(), ((Throwable) b).getMessage());
+        } else if (a instanceof Queue) {
+            assertEquals(a.toString(), b.toString());
+        } else {
+            assertEquals(a, b);
+        }
+    }
+
     @TestFactory
     Stream<DynamicTest> test() {
         return DynamicTest.stream(cases(), Objects::toString, wireTypeObject -> {
             final Object source = wireTypeObject.object;
-//            if (!(source instanceof Comparable))
-//                return;
-            try {
-                // sanity check
-                assertNotNull(source.toString());
-                // can it be serialized
-                ByteOutputStream bos = new ByteOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(bos);
-                oos.writeObject(source);
-
-                ByteArrayInputStream bis = new ByteArrayInputStream(bos.getBytes());
-                ObjectInputStream ois = new ObjectInputStream(bis);
-                Object source2 = ois.readObject();
-                assertEquals(source, source2);
-            } catch (Throwable t) {
-                System.out.println(source.getClass() + ": " + t);
-                return;
-            }
 
             final Bytes<?> bytes = Bytes.allocateElasticDirect();
             try {
@@ -251,10 +317,10 @@ final class SerializableObjectTest extends WireTestCommon {
                 wire.getValueOut().object((Class) source.getClass(), source);
                 final Object target = wire.getValueIn().object(source.getClass());
                 if (!(source instanceof Comparable) || ((Comparable) source).compareTo(target) != 0) {
-                    if (wireTypeObject.wireType == WireType.JSON)
+                    if (wireTypeObject.wireType == WireType.JSON || source instanceof EnumMap)
                         assertEquals(source.toString(), target.toString());
                     else
-                        assertEquals(source, target);
+                        assertEqualEnough(source, target);
                 }
             } catch (IllegalArgumentException iae) {
                 // allow JSON to reject types not supported.
