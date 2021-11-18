@@ -248,6 +248,11 @@ final class SerializableObjectTest extends WireTestCommon {
                 final Object target = wire.getValueIn().object(source.getClass());
                 if (!(source instanceof Comparable) || ((Comparable) source).compareTo(target) != 0)
                     assertEquals(source, target);
+            } catch (IllegalArgumentException iae) {
+                // allow JSON to reject types not supported.
+                if (wireTypeObject.wireType == WireType.JSON)
+                    return;
+                throw iae;
             } finally {
                 bytes.releaseLast();
             }

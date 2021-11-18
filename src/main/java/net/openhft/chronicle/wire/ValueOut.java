@@ -461,6 +461,8 @@ public interface ValueOut {
                             .append(d.getDayOfMonth()));
                 }
                 return text(object.toString());
+            } else if (object instanceof Locale) {
+                return text(((Locale) object).toLanguageTag());
             } else {
                 return marshallable(object);
             }

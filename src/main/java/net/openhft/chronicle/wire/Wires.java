@@ -482,7 +482,8 @@ public enum Wires {
             throw new IllegalStateException("failed to create instance of clazz=" + clazz + " is it aliased?");
         final long position = in.wireIn().bytes().readPosition();
         Object marshallable = in.marshallable(using, strategy);
-        E e = readResolve(marshallable);
+        // only do a readResolve if an object was provided.
+        E e = using != null ? readResolve(marshallable) : (E) marshallable;
         String name = nameOf(e);
         if (name != null) {
             E e2 = (E) EnumCache.of(e.getClass()).valueOf(name);
@@ -812,6 +813,9 @@ public enum Wires {
 
                 case "java.util.GregorianCalendar":
                     return ScalarStrategy.of(GregorianCalendar.class, (o, in) -> GregorianCalendar.from(in.zonedDateTime()));
+
+                case "java.util.Locale":
+                    return ScalarStrategy.of(Locale.class, (o, in) -> Locale.forLanguageTag(in.text()));
 
                 default:
                     if (aClass.isPrimitive())
