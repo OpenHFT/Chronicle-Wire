@@ -1,7 +1,6 @@
 package net.openhft.chronicle.wire;
 
 import com.sun.jndi.toolkit.ctx.Continuation;
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import io.github.classgraph.*;
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.jupiter.api.DynamicTest;
@@ -209,11 +208,11 @@ final class SerializableObjectTest extends WireTestCommon {
             // sanity check
             assertNotNull(source.toString());
             // can it be serialized
-            ByteOutputStream bos = new ByteOutputStream();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(bos);
             oos.writeObject(source);
 
-            ByteArrayInputStream bis = new ByteArrayInputStream(bos.getBytes());
+            ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
             ObjectInputStream ois = new ObjectInputStream(bis);
             Object source2 = ois.readObject();
             if (source instanceof Throwable) {
