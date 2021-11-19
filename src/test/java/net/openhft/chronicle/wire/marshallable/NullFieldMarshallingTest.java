@@ -3,17 +3,14 @@ package net.openhft.chronicle.wire.marshallable;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
 import net.openhft.chronicle.wire.*;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.time.ZoneId;
 import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-
+@Ignore("see https://github.com/OpenHFT/Chronicle-Wire/issues/347")
 public class NullFieldMarshallingTest extends WireTestCommon {
     protected Map<ExceptionKey, Integer> exceptions;
 
