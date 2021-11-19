@@ -1,12 +1,10 @@
 package net.openhft.chronicle.wire;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.ZoneId;
 
-@Ignore("see https://github.com/OpenHFT/Chronicle-Wire/issues/347")
 public class TestMarshallableZoneId {
 
     public static class MySelfDescribingMarshallable extends SelfDescribingMarshallable {
@@ -19,7 +17,7 @@ public class TestMarshallableZoneId {
         final MySelfDescribingMarshallable expected = new MySelfDescribingMarshallable();
         expected.zoneId = ZoneId.of("UTC");
 
-        JSONWire jsonWire = new JSONWire();
+        JSONWire jsonWire = new JSONWire().useTypes(true);
         jsonWire.getValueOut().object(expected);
 
         final MySelfDescribingMarshallable actual = jsonWire.getValueIn().object(MySelfDescribingMarshallable.class);
@@ -36,7 +34,7 @@ public class TestMarshallableZoneId {
         final MyAbstractMarshallableCfg expected = new MyAbstractMarshallableCfg();
         expected.zoneId = ZoneId.of("UTC");
 
-        JSONWire jsonWire = new JSONWire();
+        JSONWire jsonWire = new JSONWire().useTypes(true);
         jsonWire.getValueOut().object(expected);
 
         final MyAbstractMarshallableCfg actual = jsonWire.getValueIn().object(MyAbstractMarshallableCfg.class);
