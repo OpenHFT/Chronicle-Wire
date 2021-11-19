@@ -17,6 +17,7 @@ import java.math.MathContext;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.List;
 import java.util.Queue;
@@ -56,14 +57,16 @@ final class SerializableObjectTest extends WireTestCommon {
                     "javax.smartcardio",
                     "javafx.",
                     "javax.swing",
-                    "javax.print"
+                    "javax.print",
+                    "apple.security"
             )
             .collect(Collectors.collectingAndThen(toSet(), Collections::unmodifiableSet));
 
     private static final Set<Class<?>> IGNORED_CLASSES = new HashSet<>(Arrays.asList(
             Continuation.class,
             DoubleSummaryStatistics.class,
-            DriverPropertyInfo.class
+            DriverPropertyInfo.class,
+            SimpleDateFormat.class
     ));
 
 
