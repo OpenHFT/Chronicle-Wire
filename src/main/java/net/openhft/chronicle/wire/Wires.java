@@ -656,18 +656,18 @@ public enum Wires {
     enum SerializeJavaLang implements Function<Class, SerializationStrategy> {
         INSTANCE;
 
-        private static SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss.S zzz yyyy");
-        private static SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS zzz");
-        private static SimpleDateFormat sdf3 = new SimpleDateFormat("EEE MMM d HH:mm:ss.S zzz yyyy", Locale.US);
+        private static final SimpleDateFormat SDF = new SimpleDateFormat("EEE MMM d HH:mm:ss.S zzz yyyy");
+        private static final SimpleDateFormat SDF_2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS zzz");
+        private static final SimpleDateFormat SDF_3 = new SimpleDateFormat("EEE MMM d HH:mm:ss.S zzz yyyy", Locale.US);
 
         static {
-            sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-            sdf2.setTimeZone(TimeZone.getTimeZone("GMT"));
-            sdf3.setTimeZone(TimeZone.getTimeZone("GMT"));
+            SDF.setTimeZone(TimeZone.getTimeZone("GMT"));
+            SDF_2.setTimeZone(TimeZone.getTimeZone("GMT"));
+            SDF_3.setTimeZone(TimeZone.getTimeZone("GMT"));
         }
 
         public static WireOut writeDate(Date date, ValueOut out) {
-            final String format = sdf2.format(date);
+            final String format = SDF_2.format(date);
             return out.writeString(format);
         }
 
@@ -677,17 +677,17 @@ public enum Wires {
                 return new Date(Long.parseLong(text));
             } catch (NumberFormatException nfe) {
                 try {
-                    synchronized (sdf2) {
-                        return sdf2.parse(text);
+                    synchronized (SDF_2) {
+                        return SDF_2.parse(text);
                     }
                 } catch (ParseException pe) {
                     try {
-                        synchronized (sdf) {
+                        synchronized (SDF) {
                             try {
-                                return sdf.parse(text);
+                                return SDF.parse(text);
                             } catch (ParseException pe1) {
-                                synchronized (sdf3) {
-                                    return sdf3.parse(text);
+                                synchronized (SDF_3) {
+                                    return SDF_3.parse(text);
                                 }
                             }
                         }
