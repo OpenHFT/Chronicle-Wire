@@ -107,7 +107,6 @@
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>chronicle-test-framework</artifactId>
-            <version>1.22ea2</version>
             <scope>test</scope>
         </dependency>
 
