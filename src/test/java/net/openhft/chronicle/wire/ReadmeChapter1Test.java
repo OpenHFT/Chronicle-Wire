@@ -181,7 +181,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         bytes.releaseLast();
         bytes2.releaseLast();
     }
-    
+
     @Test
     public void example3() {
 /*
