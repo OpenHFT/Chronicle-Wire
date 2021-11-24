@@ -181,14 +181,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         bytes.releaseLast();
         bytes2.releaseLast();
     }
-
-    @Test
-    public void abstr() {
-        System.out.println("TimeUnit.class.getModifiers() = " + TimeUnit.class.getModifiers());
-        System.out.println("Modifier.isAbstract(TimeUnit.class.getModifiers()) = " + Modifier.isAbstract(TimeUnit.class.getModifiers()));
-        System.out.println("TimeUnit.class.toGenericString() = " + TimeUnit.class.toGenericString());
-    }
-
+    
     @Test
     public void example3() {
 /*
