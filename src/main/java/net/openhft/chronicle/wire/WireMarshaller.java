@@ -678,8 +678,6 @@ public class WireMarshaller<T> {
 
                 final boolean useTypes = read instanceof JSONWire.JSONValueIn && ((JSONWire.JSONValueIn) read).useTypes();
 
-                //Object object = read.object(using, type);
-
                 final Object object;
                 // Enums are abstract classes
                 if (using == null &&
