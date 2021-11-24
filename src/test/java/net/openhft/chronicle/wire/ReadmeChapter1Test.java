@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
+import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -179,6 +180,13 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 */
         bytes.releaseLast();
         bytes2.releaseLast();
+    }
+
+    @Test
+    public void abstr() {
+        System.out.println("TimeUnit.class.getModifiers() = " + TimeUnit.class.getModifiers());
+        System.out.println("Modifier.isAbstract(TimeUnit.class.getModifiers()) = " + Modifier.isAbstract(TimeUnit.class.getModifiers()));
+        System.out.println("TimeUnit.class.toGenericString() = " + TimeUnit.class.toGenericString());
     }
 
     @Test

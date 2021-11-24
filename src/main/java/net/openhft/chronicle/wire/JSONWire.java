@@ -504,6 +504,10 @@ public class JSONWire extends TextWire {
 
         }
 
+        public boolean useTypes() {
+            return useTypes;
+        }
+
     }
 
 /*

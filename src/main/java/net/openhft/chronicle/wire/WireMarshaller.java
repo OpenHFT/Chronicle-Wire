@@ -675,7 +675,23 @@ public class WireMarshaller<T> {
             long pos = read.wireIn().bytes().readPosition();
             try {
                 @Nullable Object using = ObjectUtils.isImmutable(type) == ObjectUtils.Immutability.NO ? field.get(o) : null;
-                Object object = read.object(using, type);
+
+                final boolean useTypes = read instanceof JSONWire.JSONValueIn && ((JSONWire.JSONValueIn) read).useTypes();
+
+                //Object object = read.object(using, type);
+
+                final Object object;
+                // Enums are abstract classes
+                if (using == null &&
+                        Modifier.isAbstract(type.getModifiers()) &&
+                        !Modifier.isInterface(type.getModifiers()) &&
+                        !type.isEnum() &&
+                        !useTypes) {
+                    object = null;
+                } else {
+                    object = read.object(using, type);
+                }
+
                 field.set(o, object);
 
             }

@@ -10,7 +10,6 @@ import org.junit.runners.Parameterized;
 import java.io.File;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -21,7 +20,6 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-import static net.openhft.chronicle.wire.JsonUtil.assertBalancedBrackets;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(value = Parameterized.class)
@@ -63,7 +61,7 @@ public class Issue327Test {
 
     @Test
     public void date() {
-        test(() -> Date.valueOf("1969-07-20"), "{\"@java.sql.Date\":\"1969-07-20\"}", "\"1969-07-20\"");
+        test(() -> java.sql.Date.valueOf("1969-07-20"), "{\"@java.sql.Date\":\"1969-07-20T00:00:00.000 GMT\"}", "\"1969-07-20T00:00:00.000 GMT\"");
     }
 
     @Test

@@ -659,11 +659,13 @@ public enum Wires {
         private static final SimpleDateFormat SDF = new SimpleDateFormat("EEE MMM d HH:mm:ss.S zzz yyyy");
         private static final SimpleDateFormat SDF_2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS zzz");
         private static final SimpleDateFormat SDF_3 = new SimpleDateFormat("EEE MMM d HH:mm:ss.S zzz yyyy", Locale.US);
+        private static final SimpleDateFormat SDF_4 = new SimpleDateFormat("yyyy-MM-dd");
 
         static {
             SDF.setTimeZone(TimeZone.getTimeZone("GMT"));
             SDF_2.setTimeZone(TimeZone.getTimeZone("GMT"));
             SDF_3.setTimeZone(TimeZone.getTimeZone("GMT"));
+            SDF_4.setTimeZone(TimeZone.getTimeZone("GMT"));
         }
 
         public static WireOut writeDate(Date date, ValueOut out) {
@@ -677,6 +679,7 @@ public enum Wires {
                 return new Date(Long.parseLong(text));
             } catch (NumberFormatException nfe) {
                 try {
+                    // Make sure to always synchronize on these fields in exactly this order or else there might be deadlocks
                     synchronized (SDF_2) {
                         return SDF_2.parse(text);
                     }
@@ -686,8 +689,14 @@ public enum Wires {
                             try {
                                 return SDF.parse(text);
                             } catch (ParseException pe1) {
-                                synchronized (SDF_3) {
-                                    return SDF_3.parse(text);
+                                try {
+                                    synchronized (SDF_3) {
+                                        return SDF_3.parse(text);
+                                    }
+                                } catch (ParseException pe3) {
+                                    synchronized (SDF_4) {
+                                        return SDF_4.parse(text);
+                                    }
                                 }
                             }
                         }
