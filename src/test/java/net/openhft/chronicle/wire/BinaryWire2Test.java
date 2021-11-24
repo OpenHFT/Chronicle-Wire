@@ -288,6 +288,20 @@ public class BinaryWire2Test extends WireTestCommon {
     }
 
     @Test
+    public void testDateExisting() {
+        final String dateString = "1999-12-31";
+        final java.util.Date expected = java.sql.Date.valueOf(dateString);
+        @NotNull Wire wire = createWire();
+
+        try (final DocumentContext dc = wire.writingDocument(true)) {
+            dc.wire().write().text(dateString);
+        }
+        try (final DocumentContext dc = wire.readingDocument()) {
+            Assert.assertEquals(expected.getTime(), dc.wire().read().object(Date.class).getTime());
+        }
+    }
+
+    @Test
     public void testUuid() {
         @NotNull Wire wire = createWire();
         UUID uuid = UUID.randomUUID();

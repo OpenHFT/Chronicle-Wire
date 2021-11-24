@@ -643,10 +643,10 @@ public interface ValueOut {
             }
 
             case "java.sql.Timestamp":
+            case "java.sql.Time":
             case "java.util.Date":
-            case "java.sql.Date":
-            case "java.sql.Time": {
-                final WireOut result = Wires.SerializeJavaLang.writeDate((Date) value, typePrefix(Date.class));
+            case "java.sql.Date": {
+                final WireOut result = Wires.SerializeJavaLang.writeDate((Date) value, typePrefix(value.getClass()));
                 endTypePrefix();
                 return result;
             }
@@ -657,7 +657,6 @@ public interface ValueOut {
                 endTypePrefix();
                 return result;
             }
-
 
             case "java.math.BigInteger":
             case "java.math.BigDecimal":

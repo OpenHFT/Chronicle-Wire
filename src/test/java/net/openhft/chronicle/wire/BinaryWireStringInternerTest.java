@@ -96,7 +96,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
 
         executorService.shutdown();
         assertTrue("jobs did not complete in time",
-                executorService.awaitTermination(Jvm.isCodeCoverage() ? 20 : 5, TimeUnit.SECONDS));
+                executorService.awaitTermination(Jvm.isCodeCoverage() ? 40 : 10, TimeUnit.SECONDS));
         assertTrue(capturedExceptions.isEmpty());
     }
 
@@ -115,7 +115,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
         }
 
         executorService.shutdown();
-        assertTrue("jobs did not complete in time", executorService.awaitTermination(15L, TimeUnit.SECONDS));
+        assertTrue("jobs did not complete in time", executorService.awaitTermination(30L, TimeUnit.SECONDS));
         capturedExceptions.stream().filter(e -> e instanceof BufferUnderflowException).forEach(RuntimeException::printStackTrace);
         assertTrue(capturedExceptions.isEmpty());
     }

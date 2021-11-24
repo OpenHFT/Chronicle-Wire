@@ -10,7 +10,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-@Ignore("see https://github.com/OpenHFT/Chronicle-Wire/issues/347")
+
 public class NullFieldMarshallingTest extends WireTestCommon {
     protected Map<ExceptionKey, Integer> exceptions;
 
