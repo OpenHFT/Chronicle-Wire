@@ -716,26 +716,29 @@ public enum Wires {
             // Try the other remaining formats
             // Todo: optimize away exception chaining
             try {
-                // Make sure to always synchronize on these fields in exactly the order below if used elsewhere or otherwise there might be deadlocks.
-                // SDF_2 is the most likely one since it is used for serialization in writeDate()
                 synchronized (SDF_2) {
                     return SDF_2.parse(text);
                 }
-            } catch (ParseException pe2) {
-                synchronized (SDF) {
-                    try {
-                        return SDF.parse(text);
-                    } catch (ParseException pe) {
-                        try {
-                            synchronized (SDF_3) {
-                                return SDF_3.parse(text);
-                            }
-                        } catch (ParseException pe3) {
-                            throw new IORuntimeException("unable to parse: " + text, pe3);
-                        }
-                    }
+            } catch (ParseException ignored) {
+                // Ignore
+            }
+
+            synchronized (SDF) {
+                try {
+                    return SDF.parse(text);
+                } catch (ParseException ignored) {
+                    // Ignore
                 }
             }
+
+            try {
+                synchronized (SDF_3) {
+                    return SDF_3.parse(text);
+                }
+            } catch (ParseException pe3) {
+                throw new IORuntimeException("unable to parse: " + text, pe3);
+            }
+
         }
 
         private static Class forName(Class o, ValueIn in) {
