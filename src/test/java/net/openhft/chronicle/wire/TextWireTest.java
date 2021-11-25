@@ -2103,6 +2103,12 @@ public class TextWireTest extends WireTestCommon {
         @LongConversion(HexaDecimalConverter.class)
         long hexa2;
 
+        @Override
+        public void writeMarshallable(@NotNull WireOut wire) {
+            wire.write("hexadecimal").rawText(Long.toHexString(hexadecimal));
+            wire.write("hexa2").rawText(Long.toHexString(hexa2));
+        }
+
         public TwoLongs(long hexadecimal, long hexa2) {
             this.hexadecimal = hexadecimal;
             this.hexa2 = hexa2;
