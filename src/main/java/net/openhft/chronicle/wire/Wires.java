@@ -656,10 +656,12 @@ public enum Wires {
     enum SerializeJavaLang implements Function<Class, SerializationStrategy> {
         INSTANCE;
 
+        private static final String SDF_4_STRING = "yyyy-MM-dd";
+
         private static final SimpleDateFormat SDF = new SimpleDateFormat("EEE MMM d HH:mm:ss.S zzz yyyy");
         private static final SimpleDateFormat SDF_2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS zzz");
         private static final SimpleDateFormat SDF_3 = new SimpleDateFormat("EEE MMM d HH:mm:ss.S zzz yyyy", Locale.US);
-        private static final SimpleDateFormat SDF_4 = new SimpleDateFormat("yyyy-MM-dd");
+        private static final SimpleDateFormat SDF_4 = new SimpleDateFormat(SDF_4_STRING);
 
         static {
             SDF.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -674,34 +676,63 @@ public enum Wires {
         }
 
         public static Date parseDate(ValueIn in) {
-            String text = in.text().trim();
-            try {
-                return new Date(Long.parseLong(text));
-            } catch (NumberFormatException nfe) {
+            final String text = in.text().trim();
+            if (text.length() < 1) {
+                throw new IORuntimeException("At least one character (e.g. '0') must be present in order to deserialize a Date object");
+            }
+            final char firstChar = text.charAt(0);
+
+            // Check if it is a number
+            if (firstChar == '+' || firstChar == '-' || Character.isDigit(firstChar)) {
+                boolean isAllNum = true;
+                for (int i = 1; i < text.length(); i++) {
+                    if (!Character.isDigit(text.charAt(i))) {
+                        isAllNum = false;
+                        break;
+                    }
+                }
+                if (isAllNum) {
+                    try {
+                        // It is a number and not any of the other formats as they all contain non digits
+                        return new Date(Long.parseLong(text));
+                    } catch (NumberFormatException nfe) {
+                        throw new IORuntimeException(nfe);
+                    }
+                }
+            }
+
+            // Check if it is a string of format "yyyy-mm-dd"
+            if (text.length() == SDF_4_STRING.length()) {
                 try {
-                    // Make sure to always synchronize on these fields in exactly this order or else there might be deadlocks
-                    synchronized (SDF_2) {
-                        return SDF_2.parse(text);
+                    synchronized (SDF_4) {
+                        // Since we ruled out it is a number and SDF_$ is the only one with this length it must be SDF_4
+                        return SDF_4.parse(text);
                     }
                 } catch (ParseException pe) {
+                    throw new IORuntimeException(pe);
+                }
+            }
+
+            // Try the other remaining formats
+            // Todo: optimize away exception chaining
+            try {
+                // Make sure to always synchronize on these fields in exactly the order below if used elsewhere or otherwise there might be deadlocks.
+                // SDF_2 is the most likely one since it is used for serialization in writeDate()
+                synchronized (SDF_2) {
+                    return SDF_2.parse(text);
+                }
+            } catch (ParseException pe2) {
+                synchronized (SDF) {
                     try {
-                        synchronized (SDF) {
-                            try {
-                                return SDF.parse(text);
-                            } catch (ParseException pe1) {
-                                try {
-                                    synchronized (SDF_3) {
-                                        return SDF_3.parse(text);
-                                    }
-                                } catch (ParseException pe3) {
-                                    synchronized (SDF_4) {
-                                        return SDF_4.parse(text);
-                                    }
-                                }
+                        return SDF.parse(text);
+                    } catch (ParseException pe) {
+                        try {
+                            synchronized (SDF_3) {
+                                return SDF_3.parse(text);
                             }
+                        } catch (ParseException pe3) {
+                            throw new IORuntimeException("unable to parse: " + text, pe3);
                         }
-                    } catch (ParseException pe2) {
-                        throw new IORuntimeException(pe);
                     }
                 }
             }
