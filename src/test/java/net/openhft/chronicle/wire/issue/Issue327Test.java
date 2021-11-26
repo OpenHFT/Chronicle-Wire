@@ -78,7 +78,7 @@ public class Issue327Test {
 
     @Test
     public void file() {
-        test(() -> new File("~/info.txt"), "{\"@java.io.File\":\"~/info.txt\"}", "\"~/info.txt\"");
+        test(() -> new File("info.txt"), "{\"@java.io.File\":\"info.txt\"}", "\"info.txt\"");
     }
 
     @Test
