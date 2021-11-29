@@ -726,9 +726,7 @@ public interface ValueOut {
             @NotNull Class type = value.getClass().getComponentType();
             return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), value.getClass());
         } else if (value instanceof Serializable) {
-            final WireOut wireOut = typedMarshallable((Serializable) value);
-            endTypePrefix();
-            return wireOut;
+            return typedMarshallable((Serializable) value);
         } else if (value instanceof ByteBuffer) {
             return object(BytesStore.wrap((ByteBuffer) value));
         } else if (value instanceof LongValue) {

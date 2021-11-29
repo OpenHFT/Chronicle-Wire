@@ -387,6 +387,12 @@ public class JSONWire extends TextWire {
             return super.marshallable(object, strategy);
         }
 
+        @Override
+        public boolean isTyped() {
+            // Either we use types for sure or we might use types...
+            return useTypes || super.isTyped();
+        }
+
         private Object parseType() {
             if (!hasTypeDefinition()) {
                 return super.object();
