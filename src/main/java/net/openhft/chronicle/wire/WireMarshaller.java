@@ -676,16 +676,20 @@ public class WireMarshaller<T> {
             try {
                 @Nullable Object using = ObjectUtils.isImmutable(type) == ObjectUtils.Immutability.NO ? field.get(o) : null;
 
-                final Object object;
-                // Abstract classes that are not types should be null (Enums are abstract classes in Java but should not be null here)
-                if (using == null &&
-                        Modifier.isAbstract(type.getModifiers()) &&
-                        !Modifier.isInterface(type.getModifiers()) &&
-                        !type.isEnum() &&
-                        !read.isTyped()) {
-                    object = null;
-                } else {
+                Object object = null;
+                try {
                     object = read.object(using, type);
+                } catch (Exception e) {
+                    // "Unhandled" Abstract classes that are not types should be null (Enums are abstract classes in Java but should not be null here)
+                    if (using == null &&
+                            Modifier.isAbstract(type.getModifiers()) &&
+                            !Modifier.isInterface(type.getModifiers()) &&
+                            !type.isEnum() &&
+                            !read.isTyped()) {
+                        // retain the null value of object
+                    } else {
+                        Jvm.rethrow(e);
+                    }
                 }
 
                 field.set(o, object);
