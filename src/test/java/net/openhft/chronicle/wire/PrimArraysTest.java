@@ -49,6 +49,7 @@ public class PrimArraysTest extends WireTestCommon {
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
         for (WireType wt : new WireType[]{
+                WireType.JSON,
                 WireType.TEXT,
                 WireType.BINARY
         }) {

@@ -39,6 +39,8 @@ public class Marshallable2Test extends WireTestCommon {
         return Arrays.asList(
                 new Object[]{WireType.BINARY},
                 new Object[]{WireType.TEXT}
+                // TODO FIX
+//                new Object[]{WireType.JSON}
         );
     }
 

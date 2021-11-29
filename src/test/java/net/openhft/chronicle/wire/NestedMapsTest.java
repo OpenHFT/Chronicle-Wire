@@ -41,6 +41,7 @@ public class NestedMapsTest extends WireTestCommon {
     @Parameterized.Parameters
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
+                new Object[]{WireType.JSON},
                 new Object[]{WireType.TEXT},
                 new Object[]{WireType.BINARY},
                 new Object[]{WireType.FIELDLESS_BINARY}
@@ -245,7 +246,10 @@ public class NestedMapsTest extends WireTestCommon {
         wire.writeMap(expected);
         @NotNull final Map<Integer, Integer> actual = wire.readMap();
         bytes.releaseLast();
-        assertEquals(expected, actual);
+        if (wireType == WireType.JSON)
+            assertEquals(expected.toString(), actual.toString());
+        else
+            assertEquals(expected, actual);
     }
 
     static class Mapped extends SelfDescribingMarshallable {

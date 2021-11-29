@@ -40,11 +40,13 @@ public class StrangeTextCombination {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{WireType.TEXT}
-                , new Object[]{WireType.BINARY}
-                , new Object[]{WireType.RAW}
-        );
+        Object[][] list = {
+                {WireType.BINARY},
+                {WireType.RAW},
+                {WireType.TEXT},
+                {WireType.JSON}
+        };
+        return Arrays.asList(list);
     }
 
     @Test

@@ -64,11 +64,11 @@ public class ReorderedTest extends WireTestCommon {
 
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
-        return Arrays.asList(
-                new Object[]{WireType.TEXT},
-                new Object[]{WireType.BINARY},
-                new Object[]{WireType.JSON}
-        );
+        return Arrays.asList(new Object[][]{
+                {WireType.JSON},
+                {WireType.TEXT},
+                {WireType.BINARY}
+        });
     }
 
     @SuppressWarnings("rawtypes")
