@@ -676,15 +676,13 @@ public class WireMarshaller<T> {
             try {
                 @Nullable Object using = ObjectUtils.isImmutable(type) == ObjectUtils.Immutability.NO ? field.get(o) : null;
 
-                final boolean useTypes = read instanceof JSONWire.JSONValueIn && ((JSONWire.JSONValueIn) read).useTypes();
-
                 final Object object;
-                // Enums are abstract classes
+                // Abstract classes that are not types should be null (Enums are abstract classes in Java but should not be null here)
                 if (using == null &&
                         Modifier.isAbstract(type.getModifiers()) &&
                         !Modifier.isInterface(type.getModifiers()) &&
                         !type.isEnum() &&
-                        !useTypes) {
+                        !read.isTyped()) {
                     object = null;
                 } else {
                     object = read.object(using, type);
