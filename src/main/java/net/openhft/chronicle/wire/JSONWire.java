@@ -389,7 +389,8 @@ public class JSONWire extends TextWire {
 
         @Override
         public boolean isTyped() {
-            return useTypes;
+            // Either we use types for sure or we might use types...
+            return useTypes || super.isTyped();
         }
 
         private Object parseType() {

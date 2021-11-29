@@ -3,7 +3,11 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -15,26 +19,30 @@ class AbstractUntypedFieldTest {
        ClassAliasPool.CLASS_ALIASES.addAlias(AImpl.class, "AImpl");
    }
 
-    @Test
-    void typedFieldsShouldBeNonNull() {
-        final Bytes<?> bytes = Bytes.from("!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
+    @ParameterizedTest
+    @MethodSource("provideWire")
+    void typedFieldsShouldBeNonNull(Function<Bytes<byte[]>, Wire> wireConstruction) {
+        final Bytes<byte[]> bytes = Bytes.from("!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
                 "  a: !AImpl {\n" +
                 "  }\n" +
                 "}");
-        final TextWire textWire = new TextWire(bytes);
+        final Wire textWire = wireConstruction.apply(bytes);
 
         final Holder holder = textWire.getValueIn().object(Holder.class);
+
+        System.out.println("holder.a = " + holder.a);
 
         assertNotNull(holder.a);
     }
 
-    @Test
-    void untypedFieldsShouldBeNull() {
-        final Bytes<?> bytes = Bytes.from("!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
+    @ParameterizedTest
+    @MethodSource("provideWire")
+    void untypedFieldsShouldBeNull(Function<Bytes<byte[]>, Wire> wireConstruction) {
+        final Bytes<byte[]> bytes = Bytes.from("!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
                 "  a: {\n" +
                 "  }\n" +
                 "}");
-        final TextWire textWire = new TextWire(bytes);
+        final Wire textWire = wireConstruction.apply(bytes);
 
         final Holder holder = textWire.getValueIn().object(Holder.class);
 
@@ -50,5 +58,13 @@ class AbstractUntypedFieldTest {
     private static final class Holder {
         A a;
     }
+
+    static Stream<Function<Bytes<byte[]>, Wire>> provideWire() {
+        return Stream.of(
+                JSONWire::new,
+                TextWire::new
+        );
+    }
+
 
 }
