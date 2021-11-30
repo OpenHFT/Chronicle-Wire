@@ -569,7 +569,7 @@ public enum Wires {
 
             case NONE:
                 @NotNull final Object e = strategy.readUsing(clazz, using, in, BracketType.NONE);
-                return clazz == Base64.class
+                return clazz == Base64.class || e == null
                         ? (E) e
                         : (E) WireInternal.intern(clazz, e);
 
