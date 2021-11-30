@@ -2274,6 +2274,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     return getBracketTypeFor(bytes.readUnsignedByte(bytes.readPosition() + 2 + 1));
                 case BYTES_LENGTH32:
                     return getBracketTypeFor(bytes.readUnsignedByte(bytes.readPosition() + 4 + 1));
+                case NULL:
+                    return BracketType.NONE;
             }
             return BracketType.NONE;
         }
