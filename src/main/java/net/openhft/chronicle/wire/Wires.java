@@ -100,6 +100,7 @@ public enum Wires {
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
     private static final int INVERSE_TID_MASK = ~TID_MASK;
     public static boolean GENERATE_TUPLES = Jvm.getBoolean("wire.generate.tuples");
+    static volatile boolean warnedUntypedBytesOnce = false;
     static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
 
     static {

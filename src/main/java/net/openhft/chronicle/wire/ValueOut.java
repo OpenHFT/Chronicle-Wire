@@ -678,6 +678,14 @@ public interface ValueOut {
                 return typedMarshallable((WriteMarshallable) value);
         }
         if (value instanceof WriteBytesMarshallable) {
+            if (!Wires.warnedUntypedBytesOnce) {
+                Jvm.warn().on(ValueOut.class, "BytesMarshallable found in field which is not matching exactly, " +
+                        "the object may not unmarshall correctly if that type is not specified: " + value.getClass().getName() +
+                        ". The warning will not repeat so there may be more types affected.");
+
+                Wires.warnedUntypedBytesOnce = true;
+            }
+
             return bytesMarshallable((BytesMarshallable) value);
         }
         if (value instanceof BytesStore)
@@ -846,6 +854,10 @@ public interface ValueOut {
         }
         if (value instanceof Marshallable)
             return marshallable((Marshallable) value);
+
+        if (value instanceof WriteBytesMarshallable)
+            return bytesMarshallable((BytesMarshallable) value);
+
         if (Object[].class.isAssignableFrom(value.getClass())) {
             @NotNull Class type = value.getClass().getComponentType();
             return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), Object[].class);
