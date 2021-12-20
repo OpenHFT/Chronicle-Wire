@@ -1,6 +1,5 @@
 package net.openhft.chronicle.wire;
 
-import com.sun.jndi.toolkit.ctx.Continuation;
 import io.github.classgraph.*;
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.jupiter.api.DynamicTest;
@@ -62,12 +61,24 @@ final class SerializableObjectTest extends WireTestCommon {
             )
             .collect(Collectors.collectingAndThen(toSet(), Collections::unmodifiableSet));
 
+
     private static final Set<Class<?>> IGNORED_CLASSES = new HashSet<>(Arrays.asList(
-            Continuation.class,
             DoubleSummaryStatistics.class,
             DriverPropertyInfo.class,
             SimpleDateFormat.class
     ));
+
+    static {
+
+        try {
+            // change to this because it fails in java11
+            final Class<?> aClass = Class.forName("com.sun.jndi.toolkit.ctx.Continuation");
+            IGNORED_CLASSES.add(aClass);
+        } catch (ClassNotFoundException ignore) {
+
+        }
+
+    }
 
 
     private static final Predicate<MethodInfo> CONSTRUCTOR_IS_DEFAULT = methodInfo -> methodInfo.isPublic() && methodInfo.getTypeDescriptor().getTypeParameters().isEmpty();
