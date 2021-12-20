@@ -1325,8 +1325,8 @@ If the code provided by generating interceptor differs from the code provided by
 See `MethodReaderInterceptorReturnsTest` for more examples.
 
 === Spring Boots and dynamic compilation in Chronicle Wire
-Chronicle Wire's `MethodReader` and `MethodWriter` dynamically compile Java code to get around some limitations in Java's underlying proxy mechanism and to do this the Java platform's standard compilation mechanism is used. The platform compiler uses the classpath variable to look for classes in directories and jar files, and is not able to make use of classloaders to find classes.
-Spring Boot uses a custom deployment mechanism - all classes and jars are deployed in a fat jar and Spring's classloader can extract classes from this. In order for the compiler to be able to see classes from the fat jar, the classes should be extracted on to the disk somewhere. This is easy if the classes are contained in a jar (i.e. a jar inside the fat jar) - Spring can be made to extract the jar to a temp directory e.g.:
+Chronicle Wire's `MethodReader` and `MethodWriter` dynamically compile Java code to get around some limitations in Java's underlying proxy mechanism and to do this the Java platform's standard compilation mechanism is used. The platform compiler uses the classpath variable to look for classes in directories and JAR files, and is not able to make use of classloaders to find classes.
+Spring Boot uses a custom deployment mechanism - all classes and JARs are deployed in a fat JAR and Spring's classloader can extract classes from this. In order for the compiler to be able to see classes from the fat JAR, the classes should be extracted on to the disk somewhere. This is easy if the classes are contained in a JAR (i.e. a JAR inside the fat JAR) - Spring can be made to extract the JAR to a temp directory e.g.:
 [source,xml]
 ----
 <plugin>
@@ -1350,9 +1350,9 @@ Spring Boot uses a custom deployment mechanism - all classes and jars are deploy
     </configuration>
 </plugin>
 ----
-And this will allow the latest Chronicle-Wire to "see" these jar files.
+This will allow the latest Chronicle-Wire to use classes in those JAR files.
 
-NOTE: For more information see link:https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto.build.extract-specific-libraries-when-an-executable-jar-runs[Extract Specific Libraries When an Executable Jar Runs]
+NOTE: For more information see link:https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto.build.extract-specific-libraries-when-an-executable-jar-runs[Extract Specific Libraries When an Executable JAR Runs]
 
 == Uses of Chronicle Wire
 
