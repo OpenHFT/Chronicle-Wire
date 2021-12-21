@@ -37,7 +37,7 @@ Often you want to use these interchangeably.
 This supports easy extension by adding new classes/versions, and cross-platform using type aliasing.
 - By supporting types, a configuration file can bootstrap itself.
 You control how the configuration file is decoded.
-See https://github.com/OpenHFT/Chronicle-Datagrid/blob/master/demo/src/test/resources/datagrid.yaml[`datagrid.yaml`].
+See https://github.com/ChronicleEnterprise/Chronicle-Datagrid/blob/ea/src/test/resources/datagrid.yaml[`datagrid.yaml`].
 - To send the configuration of a server to a client, or from a client to a server.
 - To store the configuration of a data store in its header.
 - In configuration, to be able to create any object or component.
@@ -1329,6 +1329,44 @@ class SkippingInterceptor implements GeneratingMethodReaderInterceptorReturns {
 If the code provided by generating interceptor differs from the code provided by another generating interceptor, their `generatorId` should be different as well. It's needed to ensure re-compilation in case a new interceptor is passed.
 
 See `MethodReaderInterceptorReturnsTest` for more examples.
+
+=== Spring Boots and dynamic compilation in Chronicle Wire
+Chronicle Wire's `MethodReader` and `MethodWriter` dynamically compile Java code to get around some limitations in Java's underlying proxy mechanism and to do this the Java platform's standard compilation mechanism is used. The platform compiler uses the classpath variable to look for classes in directories and JAR files, and is not able to make use of classloaders to find classes.
+Spring Boot uses a custom deployment mechanism - all classes and JARs are deployed in a fat JAR and Spring's classloader can extract classes from this. In order for the compiler to be able to see classes from the fat JAR, the classes should be extracted onto the disk somewhere. This is easy if the classes are contained in a JAR (i.e. a JAR inside the fat JAR) - Spring can be made to extract the JAR to a temp directory, such as by configuring Maven Spring Boot plugin:
+[source,xml]
+----
+<plugin>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-maven-plugin</artifactId>
+    <configuration>
+        <requiresUnpack>
+            <dependency>
+                <groupId>net.openhft</groupId>
+                <artifactId>chronicle-bytes</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>net.openhft</groupId>
+                <artifactId>chronicle-core</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>net.openhft</groupId>
+                <artifactId>chronicle-wire</artifactId>
+            </dependency>
+        </requiresUnpack>
+    </configuration>
+</plugin>
+----
+This will allow the latest Chronicle-Wire to use classes in those JAR files.
+
+Dynamic compilation may be also configured via Gradle Spring Boot plugin:
+[source,groovy]
+----
+bootJar {
+    requiresUnpack '**/chronicle-*.jar'
+}
+----
+
+NOTE: For more information see link:https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto.build.extract-specific-libraries-when-an-executable-jar-runs[Extract Specific Libraries When an Executable JAR Runs] and link:https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/html/#packaging-executable-configuring-unpacking[Spring Boot Gradle Plugin Reference Guide].
 
 == Uses of Chronicle Wire
 
