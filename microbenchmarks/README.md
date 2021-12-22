@@ -126,7 +126,7 @@ SBE performs as well are BytesMarshallable.  Even though it was slower in this t
 
 However, I didn't find SBE simple.  Perhaps this is because I didn't use the generation for different languages, but I found it was non-trivial to use and setup.  
 For a flat class with just six fields it generated 9 classes, we have three support classes, and I ended up adding methods to the generated class to get it to perform as efficiently as I wanted.
-This is likely to be a lack of understand on my part, though I might not be alone in this.
+This is likely to be a lack of understanding on my part, though I might not be alone in this.
 
 ## Snake YAML
 Snake YAML is a fully featured YAML 1.1 parser. The library has to do much more work to support all the features of the YAML standard which necessarily takes longer.  
