@@ -89,6 +89,21 @@
 
     <profiles>
         <profile>
+            <id>latest</id>
+            <activation>
+                <property>
+                    <name>wire.version</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>net.openhft</groupId>
+                    <artifactId>chronicle-wire</artifactId>
+                    <version>${wire.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
             <id>run-benchmarks</id>
             <properties/>
             <build>
