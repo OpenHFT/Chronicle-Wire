@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.util.StringUtils;
 
 import java.util.Arrays;
@@ -35,12 +36,16 @@ public class Base40LongConverter implements LongConverter {
     }
 
     private static final String CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_:+";
-    public static final Base40LongConverter UPPER = new Base40LongConverter(CHARS);
+    public static final Base40LongConverter UPPER = new Base40LongConverter();
     public static final Base40LongConverter LOWER = new Base40LongConverter(CHARS.toLowerCase());
     public static final Base40LongConverter INSTANCE = UPPER;
     private static final int BASE = 40;
     private final char[] decode;
     private final byte[] encode = new byte[128];
+
+    public Base40LongConverter() {
+        this(CHARS);
+    }
 
     public Base40LongConverter(String chars) {
         decode = chars.toCharArray();
