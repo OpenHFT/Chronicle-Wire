@@ -22,12 +22,16 @@ public class Base40LongConverterTest extends WireTestCommon {
         }
     }
 
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/370")
     @Test
     public void longConversion() {
         Sample sample = new Sample();
         sample.strategyId = Base40LongConverter.INSTANCE.parse("TEST");
-        assertEquals("TODO", sample.toString());
+
+        final String expectedToString = "!net.openhft.chronicle.wire.Base40LongConverterTest$Sample {\n" +
+                "  strategyId: TEST\n" +
+                "}\n";
+
+        assertEquals(expectedToString, sample.toString());
     }
 
     private static class Sample extends SelfDescribingMarshallable {
