@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.UpdateInterceptor;
+import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
@@ -111,7 +112,7 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * @param interfaces           an interface class
+     * @param interfaces an interface class
      * @return a proxy class from an interface class or null if it can't be created
      */
     @Nullable
@@ -201,6 +202,10 @@ public class GenerateMethodWriter {
 
     private static String signature(Method m) {
         return m.getReturnType() + " " + m.getName() + " " + Arrays.toString(m.getParameterTypes());
+    }
+
+    static Integer classDepth(Class<?> c) {
+        return c == null || c == Object.class ? 1 : (1 + classDepth(c.getSuperclass()));
     }
 
     @NotNull
@@ -295,6 +300,8 @@ public class GenerateMethodWriter {
             Set<String> handledMethodSignatures = new HashSet<>();
             Set<String> methodIds = new HashSet<>();
 
+            ClassLocal<Integer> heirarchy = ClassLocal.withInitial(c -> classDepth(c));
+            Set<String> methodName = new LinkedHashSet<>();
             for (Class interfaceClazz : interfaces) {
 
                 String interfaceName = nameForClass(importSet, interfaceClazz);
@@ -304,11 +311,16 @@ public class GenerateMethodWriter {
                 if (!interfaceClazz.isInterface())
                     throw new MethodWriterValidationException("expecting an interface instead of class=" + interfaceClazz.getName());
 
-                for (Method dm : interfaceClazz.getMethods()) {
+                final Method[] methods = interfaceClazz.getMethods();
+                Arrays.sort(methods, Comparator.comparing((Method m) -> Arrays.asList(m.getParameterTypes()).stream().mapToInt(heirarchy::get).sum()).reversed());
+                for (Method dm : methods) {
                     if (Modifier.isStatic(dm.getModifiers()))
                         continue;
 
                     if (dm.isDefault() && (!dm.getReturnType().equals(void.class) && !dm.getReturnType().isInterface()))
+                        continue;
+
+                    if (!methodName.add(dm.getName() + " " + dm.getParameterCount()))
                         continue;
 
                     if (!handledMethodSignatures.add(signature(dm)))
@@ -497,11 +509,11 @@ public class GenerateMethodWriter {
         if ((wireType != WireType.TEXT && wireType != WireType.YAML) && methodId.isPresent()) {
 
             long value = ((MethodId) methodId.get()).value();
-            body.append(format("final " + VALUE_OUT + " valueOut = dc.wire().writeEventId(%s, %d);\n", eventName, value));
-            methodID = format("@" + METHOD_ID + "(%d)\n", value);
+            body.append(format("final %s valueOut = dc.wire().writeEventId(%s, %d);\n", VALUE_OUT, eventName, value));
+            methodID = format("@%s(%d)\n", METHOD_ID, value);
 
         } else
-            body.append(format("final " + VALUE_OUT + " valueOut = dc.wire().writeEventName(%s);\n", eventName));
+            body.append(format("final %s valueOut = dc.wire().writeEventName(%s);\n", VALUE_OUT, eventName));
         return methodID;
     }
 

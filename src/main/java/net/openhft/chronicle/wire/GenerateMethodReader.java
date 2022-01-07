@@ -265,8 +265,7 @@ public class GenerateMethodReader {
             }
 
             if (!handledMethodNames.add(m.getName())) {
-                throw new IllegalStateException("MethodReader does not support overloaded methods. " +
-                        "Method: " + m);
+                continue;
             }
 
             handleMethod(m, anInterface, instanceFieldName, methodFilter);
