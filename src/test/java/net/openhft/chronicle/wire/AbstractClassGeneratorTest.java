@@ -12,6 +12,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 class SimpleClassGenerator extends AbstractClassGenerator<SimpleMetaData> {
     protected SimpleClassGenerator() {
@@ -43,9 +44,18 @@ class UIClassGenerator extends AbstractClassGenerator<SimpleMetaData> {
 
     @Override
     protected void generateMethod(Method method, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
-        assertEquals("accept", method.getName());
-        withLineNumber(mainCode)
-                .append("((").append(nameForClass(MyTypes.class)).append(")").append(params).append(").text().append('-').append(\"").append(metaData().message).append("\");\n");
+        switch (method.getName()) {
+            case "accept":
+                withLineNumber(mainCode)
+                        .append("((").append(nameForClass(MyTypes.class)).append(")").append(params).append(").text().append('-').append(\"").append(metaData().message).append("\");\n");
+                break;
+            case "andThen":
+                withLineNumber(mainCode)
+                        .append("return this;\n");
+                break;
+            default:
+                fail("Unexpected method " + method.getName());
+        }
     }
 }
 

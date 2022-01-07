@@ -6,10 +6,13 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -20,23 +23,37 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class GenericMethodTest extends WireTestCommon {
     final WireType wireType;
+    private final boolean v2;
 
-    public GenericMethodTest(WireType wireType) {
+    public GenericMethodTest(WireType wireType, boolean v2) {
         this.wireType = wireType;
+        this.v2 = v2;
     }
 
-    @Parameterized.Parameters(name = "{0}")
+    @Parameterized.Parameters(name = "{0} v2 {1}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {WireType.BINARY},
-                {WireType.TEXT},
+                {WireType.BINARY, true},
+                {WireType.TEXT, true},
+                {WireType.TEXT, false},
         });
+    }
+
+    @Before
+    public void setUp() {
+        System.setProperty("wire.generator.v2", "" + v2);
+    }
+
+    @After
+    public void tearDown() {
+        System.getProperties().remove("wire.generator.v2");
     }
 
     @Test
     public void genericArg() {
         Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         final SpecificArg specificArg = wire.methodWriter(SpecificArg.class);
+        assertFalse(specificArg instanceof Proxy);
         specificArg.method(new Arg("hi"));
         if (wireType == WireType.TEXT)
             assertEquals("" +

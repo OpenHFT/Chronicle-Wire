@@ -9,7 +9,6 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -33,8 +32,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         Collections.addAll(gmd.metaData().interfaces(),
                 Runnable.class,
                 Consumer.class,
-                Supplier.class,
-                BiConsumer.class);
+                Supplier.class);
         Class aClass = gmd.acquireClass(GenerateMethodDelegateTest.class.getClassLoader());
         MethodDelegate md = (MethodDelegate) aClass.getDeclaredConstructor().newInstance();
         StringWriter sw = new StringWriter();
@@ -42,11 +40,10 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         ((Runnable) md).run();
         ((Consumer) md).accept("consumer");
         ((Supplier) md).get();
-        ((BiConsumer) md).accept("bi", "consumer");
         assertEquals("run[]\n" +
-                "accept[consumer]\n" +
-                "get[]\n" +
-                "accept[bi, consumer]\n", sw.toString().replace("\r", ""));
+                        "accept[consumer]\n" +
+                        "get[]\n",
+                sw.toString().replace("\r", ""));
     }
 
     @Test
@@ -94,6 +91,6 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         void say(String text);
     }
 
-    interface RCSB extends Runnable, Consumer, Supplier, BiConsumer {
+    interface RCSB extends Runnable, Consumer, Supplier {
     }
 }

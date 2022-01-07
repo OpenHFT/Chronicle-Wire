@@ -20,8 +20,8 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
     public static final CachedCompiler CACHED_COMPILER = new CachedCompiler(Jvm.isDebug() ? new File(OS.getTarget(), "generated-test-sources") : null, null);
     private static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
     protected final SourceCodeFormatter sourceCode = new JavaSourceCodeFormatter();
-    protected SortedSet<String> importSet = new TreeSet<>();
     private final MD metaData;
+    protected SortedSet<String> importSet = new TreeSet<>();
     private int maxCode = 6;
 
     protected AbstractClassGenerator(MD metaData) {
@@ -232,26 +232,30 @@ public abstract class AbstractClassGenerator<MD extends AbstractClassGenerator.M
 
     @NotNull
     protected Set<Method> methodsToOverride() {
+        Map<String, Method> sig2DefaultMethodMap = new TreeMap<>();
         Map<String, Method> sig2methodMap = new TreeMap<>();
-        Set<String> overridenSet = new LinkedHashSet<>();
-        for (Class clazz : metaData().interfaces()) {
-            addMethodsFor(sig2methodMap, overridenSet, clazz);
-        }
-        addMethodsFor(sig2methodMap, overridenSet, extendsClass());
-        for (String sig : overridenSet) {
-            sig2methodMap.remove(sig);
-        }
-        return new LinkedHashSet<>(sig2methodMap.values());
+        for (Class clazz : metaData().interfaces())
+            addMethodsFor(sig2methodMap, sig2DefaultMethodMap, clazz);
+
+        addMethodsFor(sig2methodMap, sig2DefaultMethodMap, extendsClass());
+        Map<String, Method> combined = new TreeMap<>();
+        combined.putAll(sig2DefaultMethodMap);
+        // non default ones override the default methods
+        combined.putAll(sig2methodMap);
+        return new LinkedHashSet<>(combined.values());
     }
 
-    private void addMethodsFor(Map<String, Method> sig2methodMap, Set<String> overridenSet, Class clazz) {
+    private void addMethodsFor(Map<String, Method> sig2methodMap, Map<String, Method> sig2DefaultMethodMap, Class clazz) {
+        if (!clazz.isInterface())
+            return;
         for (Method method : clazz.getMethods()) {
-            String sig = method.getName() + Arrays.toString(method.getParameterTypes());
-            if (Modifier.isAbstract(method.getModifiers())) {
-                sig2methodMap.putIfAbsent(sig, method);
-            } else {
-                overridenSet.add(sig);
-            }
+            String sig = method.getName();
+            if (Modifier.isStatic(method.getModifiers()))
+                continue;
+            Map<String, Method> map = Modifier.isAbstract(method.getModifiers())
+                    ? sig2methodMap
+                    : sig2DefaultMethodMap;
+            map.putIfAbsent(sig, method);
         }
     }
 

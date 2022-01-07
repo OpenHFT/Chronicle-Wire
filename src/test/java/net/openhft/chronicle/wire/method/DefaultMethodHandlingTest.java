@@ -17,6 +17,9 @@ interface WithDefault {
     default void method2(String text2) {
         throw new UnsupportedOperationException();
     }
+
+    static void method3(String text3) {
+    }
 }
 
 public class DefaultMethodHandlingTest extends WireTestCommon {
