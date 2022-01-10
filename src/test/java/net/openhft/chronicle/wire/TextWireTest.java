@@ -1915,6 +1915,38 @@ public class TextWireTest extends WireTestCommon {
         assertEquals("[1,2,3, c]", "" + list);
     }
 
+    @Test
+    public void testDuration() {
+        DurationHolder dh = new DurationHolder(1, Duration.ofSeconds(63));
+        String h = dh.toString();
+        System.out.println(h);
+        DurationHolder dh2 = Marshallable.fromString(h);
+        assertEquals(dh, dh2);
+    }
+
+    @Test
+    public void withProperties() {
+        WithProperties wp = new WithProperties();
+        wp.a.put("a1", "aye-one");
+        wp.a.put("a2", "aye-two");
+        wp.b.put("b1", "bee-one");
+        wp.b.put("b2", "bee-two");
+        final String expected = "" +
+                "!net.openhft.chronicle.wire.TextWireTest$WithProperties {\n" +
+                "  a: {\n" +
+                "    a2: aye-two,\n" +
+                "    a1: aye-one\n" +
+                "  },\n" +
+                "  b: {\n" +
+                "    b2: bee-two,\n" +
+                "    b1: bee-one\n" +
+                "  }\n" +
+                "}\n";
+        assertEquals(expected, wp.toString());
+        final WithProperties wp2 = Marshallable.fromString(expected);
+        assertEquals(wp, wp2);
+    }
+
     public enum OrderLevel implements Marshallable {
         PARENT, CHILD;
     }
@@ -2121,7 +2153,6 @@ public class TextWireTest extends WireTestCommon {
         }
     }
 
-
     static class DurationHolder extends SelfDescribingMarshallable {
         int foo;
         Duration duration;
@@ -2132,12 +2163,8 @@ public class TextWireTest extends WireTestCommon {
         }
     }
 
-    @Test
-    public void testDuration() {
-        DurationHolder dh = new DurationHolder(1, Duration.ofSeconds(63));
-        String h = dh.toString();
-        System.out.println(h);
-        DurationHolder dh2 = Marshallable.fromString(h);
-        assertEquals(dh, dh2);
+    static class WithProperties extends SelfDescribingMarshallable {
+        Properties a = new Properties();
+        Properties b = new Properties();
     }
 }
