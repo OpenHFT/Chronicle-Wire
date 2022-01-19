@@ -8,7 +8,6 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore("required for method chaining")
 public class MethodWriterMarshallableTest extends WireTestCommon {
     @Test(expected = IllegalArgumentException.class)
     public void invalidInterface() {
