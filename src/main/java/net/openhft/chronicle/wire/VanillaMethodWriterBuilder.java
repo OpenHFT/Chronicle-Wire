@@ -40,13 +40,10 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
     private static final Map<String, Class> classCache = new ConcurrentHashMap<>();
     private static final List<Class> invalidSuperInterfaces = Arrays.asList(
-     
             ReadBytesMarshallable.class,
             WriteBytesMarshallable.class,
-     
-            // these are not invalid as they are require for method chaining  
-            // ReadMarshallable.class,
-            // WriteMarshallable.class,
+            ReadMarshallable.class,
+            WriteMarshallable.class,
             Collection.class,
             Map.class,
             Iterator.class,
