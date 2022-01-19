@@ -17,6 +17,5 @@ public class MethodWriterMarshallableTest extends WireTestCommon {
     }
 
     interface MyBadInterface extends Marshallable {
-
     }
 }
