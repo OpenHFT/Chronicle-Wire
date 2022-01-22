@@ -18,7 +18,6 @@
 package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.wire.JSONWire;
@@ -37,9 +36,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
 
@@ -47,12 +43,10 @@ import static org.junit.Assert.assertEquals;
 public class JSON222Test extends WireTestCommon {
 
     @NotNull
-    final String file;
-    private final Future future;
+    final File file;
 
-    public JSON222Test(@NotNull String file, Future future) {
+    public JSON222Test(@NotNull String fileName, File file) {
         this.file = file;
-        this.future = future;
     }
 
     @NotNull
@@ -61,14 +55,7 @@ public class JSON222Test extends WireTestCommon {
         @NotNull List<Object[]> list = new ArrayList<>();
         for (@NotNull final File file : OS.findFile("OpenHFT", "Chronicle-Wire", "src/test/resources/nst_files").listFiles()) {
             if (file.getName().contains("_")) {
-                Future task = ForkJoinPool.commonPool().submit(() -> {
-                    try {
-                        testJSON(file);
-                    } catch (IOException ioe) {
-                        throw Jvm.rethrow(ioe);
-                    }
-                });
-                @NotNull Object[] args = {file.getName(), task};
+                @NotNull Object[] args = {file.getName(), file};
                 list.add(args);
             }
         }
@@ -76,7 +63,8 @@ public class JSON222Test extends WireTestCommon {
         return list;
     }
 
-    static void testJSON(File file) throws IOException {
+    @Test
+    public void testJSON() throws IOException {
         int len = Maths.toUInt31(file.length());
         @NotNull byte[] bytes = new byte[len];
         try (@NotNull InputStream in = new FileInputStream(file)) {
@@ -151,11 +139,5 @@ public class JSON222Test extends WireTestCommon {
         } catch (Exception e) {
             throw e;
         }
-    }
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    @Test
-    public void testJSON() throws IOException, ExecutionException, InterruptedException {
-        future.get();
     }
 }
