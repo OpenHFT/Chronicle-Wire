@@ -301,6 +301,24 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
+     * Sets the bits from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to the specified value.
+     *
+     * @param fromIndex index of the first bit to be set
+     * @param toIndex   index after the last bit to be set
+     * @param value     value to set the selected bits to
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, or {@code toIndex} is negative, or {@code fromIndex} is larger than {@code
+     *                                   toIndex}
+     */
+    public void set(int fromIndex, int toIndex, boolean value) {
+        throwExceptionIfClosed();
+
+        if (value)
+            set(fromIndex, toIndex);
+        else
+            clear(fromIndex, toIndex);
+    }
+
+    /**
      * Sets the bit specified by the index to {@code false}.
      */
     public void clear(int bitIndex) {
@@ -517,6 +535,31 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
                 return -1;
             word = ~words[u].getValue();
         }
+    }
+
+    /**
+     * Returns the "logical size" of this {@code BitSet}: the index of the highest set bit in the {@code BitSet} plus one. Returns zero if the {@code
+     * BitSet} contains no set bits.
+     *
+     * @return the logical size of this {@code BitSet}
+     */
+    @Deprecated(/* to be removed in x.23 */)
+    public int length() {
+        if (getWordsInUse() == 0)
+            return 0;
+
+        return BITS_PER_WORD * (getWordsInUse() - 1) +
+                (BITS_PER_WORD - Long.numberOfLeadingZeros(words[getWordsInUse() - 1].getValue()));
+    }
+
+    /**
+     * Returns <code>true</code> if this {@code BitSet} contains no bits that are set to {@code true}.
+     *
+     * @return boolean indicating whether this {@code BitSet} is empty
+     */
+    @Deprecated(/* to be removed in x.23 */)
+    public boolean isEmpty() {
+        return getWordsInUse() == 0;
     }
 
     /**

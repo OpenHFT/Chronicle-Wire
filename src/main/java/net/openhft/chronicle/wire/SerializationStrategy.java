@@ -22,6 +22,12 @@ import org.jetbrains.annotations.Nullable;
 
 public interface SerializationStrategy<T> {
 
+    @Deprecated(/* to be removed in x.23 */)
+    @Nullable
+    default T readUsing(T using, ValueIn in, BracketType bracketType) {
+        return readUsing(null, using, in, bracketType);
+    }
+
     @Nullable
     T readUsing(Class clazz, T using, ValueIn in, BracketType bracketType);
 
