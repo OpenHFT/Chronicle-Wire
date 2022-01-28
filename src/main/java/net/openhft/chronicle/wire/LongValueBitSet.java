@@ -538,31 +538,6 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
-     * Returns the "logical size" of this {@code BitSet}: the index of the highest set bit in the {@code BitSet} plus one. Returns zero if the {@code
-     * BitSet} contains no set bits.
-     *
-     * @return the logical size of this {@code BitSet}
-     */
-    @Deprecated(/* to be removed in x.23 */)
-    public int length() {
-        if (getWordsInUse() == 0)
-            return 0;
-
-        return BITS_PER_WORD * (getWordsInUse() - 1) +
-                (BITS_PER_WORD - Long.numberOfLeadingZeros(words[getWordsInUse() - 1].getValue()));
-    }
-
-    /**
-     * Returns <code>true</code> if this {@code BitSet} contains no bits that are set to {@code true}.
-     *
-     * @return boolean indicating whether this {@code BitSet} is empty
-     */
-    @Deprecated(/* to be removed in x.23 */)
-    public boolean isEmpty() {
-        return getWordsInUse() == 0;
-    }
-
-    /**
      * Returns <code>true</code> if the specified {@code ChronicleBitSet} has any bits set to {@code true} that are also set to {@code true} in this {@code ChronicleBitSet}.
      */
     public boolean intersects(ChronicleBitSet set) {
