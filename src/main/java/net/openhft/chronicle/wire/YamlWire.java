@@ -2358,7 +2358,7 @@ public class YamlWire extends AbstractWire implements Wire {
             try {
                 yt.next();
                 return classLookup().forName(stringBuilder);
-            } catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundRuntimeException e) {
                 Jvm.warn().on(getClass(), "Unable to find " + stringBuilder + " " + e);
                 return null;
             }
