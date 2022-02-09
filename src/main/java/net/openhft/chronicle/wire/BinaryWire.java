@@ -3225,7 +3225,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             final Class clazz;
             try {
                 clazz = classLookup().forName(sb);
-            } catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundRuntimeException e) {
                 throw new IORuntimeException(e);
             }
 
@@ -3283,7 +3283,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             try {
                 return classLookup().forName(sb);
-            } catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundRuntimeException e) {
                 Jvm.warn().on(BinaryWire.this.getClass(), "Unable to find class " + sb);
                 return null;
             }
@@ -3300,7 +3300,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             try {
                 return sb == null ? null : classLookup().forName(sb);
-            } catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundRuntimeException e) {
                 if (Wires.dtoInterface(tClass)) {
                     if (GENERATE_TUPLES)
                         return Wires.tupleFor(tClass, sb.toString());
@@ -3359,8 +3359,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     @Nullable StringBuilder sb = readUtf8();
                     try {
                         return classLookup().forName(sb);
-                    } catch (ClassNotFoundException e) {
-                        return unresolvedHandler.apply(sb, e);
+                    } catch (ClassNotFoundRuntimeException e) {
+                        return unresolvedHandler.apply(sb, e.getCause());
                     }
                 case NULL:
                     return null;
@@ -3728,7 +3728,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                             final Class clazz2;
                             try {
                                 clazz2 = classLookup().forName(sb);
-                            } catch (ClassNotFoundException e) {
+                            } catch (ClassNotFoundRuntimeException e) {
                                 throw new IORuntimeException(e);
                             }
                             return object(null, clazz2);
