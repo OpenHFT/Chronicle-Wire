@@ -24,7 +24,7 @@ import net.openhft.chronicle.bytes.WriteBytesMarshallable;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.values.*;
@@ -228,13 +228,15 @@ public interface ValueOut {
 
     @NotNull
     default ValueOut typePrefix(Class type) {
-        return type == null ? this : typePrefix(ClassAliasPool.CLASS_ALIASES.nameFor(type));
+        return type == null ? this : typePrefix(classLookup().nameFor(type));
     }
+
+    ClassLookup classLookup();
 
     @NotNull
     default WireOut typeLiteral(@Nullable Class type) {
         return type == null ? nu11()
-                : typeLiteral((t, b) -> b.appendUtf8(ClassAliasPool.CLASS_ALIASES.nameFor(t)), type);
+                : typeLiteral((t, b) -> b.appendUtf8(classLookup().nameFor(t)), type);
     }
 
     @NotNull
@@ -389,7 +391,7 @@ public interface ValueOut {
         if (arrayType == String[].class) {
             typePrefix("String[] ");
         } else if (arrayType != Object[].class) {
-            typePrefix(ClassAliasPool.CLASS_ALIASES.nameFor(arrayType.getComponentType()) + "[]");
+            typePrefix(classLookup().nameFor(arrayType.getComponentType()) + "[]");
         }
         return sequence(writer);
     }
@@ -424,7 +426,7 @@ public interface ValueOut {
     default WireOut typedMarshallable(@Nullable WriteMarshallable marshallable) {
         if (marshallable == null)
             return nu11();
-        String typeName = Wires.typeNameFor(marshallable);
+        String typeName = Wires.typeNameFor(classLookup(), marshallable);
         if (typeName != null)
             typePrefix(typeName);
         final WireOut wire = marshallable(marshallable);
@@ -751,7 +753,7 @@ public interface ValueOut {
 
             String typeName;
             try {
-                typeName = Wires.typeNameFor(value);
+                typeName = Wires.typeNameFor(classLookup(), value);
             } catch (IllegalArgumentException e) {
                 if (isBinary())
                     throw e;
@@ -867,7 +869,7 @@ public interface ValueOut {
 
     @NotNull
     default WireOut typedScalar(@NotNull Object value) {
-        typePrefix(Wires.typeNameFor(value));
+        typePrefix(Wires.typeNameFor(classLookup(), value));
 
         if (value instanceof Enum)
             value = ((Enum) value).name();

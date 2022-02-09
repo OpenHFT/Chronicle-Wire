@@ -30,7 +30,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
 
-
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 /**
@@ -400,12 +399,8 @@ public class JSONWire extends TextWire {
                 final StringBuilder sb = Wires.acquireStringBuilder();
                 sb.setLength(0);
                 this.wireIn().read(sb);
-                try {
-                    final Class<?> clazz = classLookup().forName(sb.subSequence(1, sb.length()));
-                    return parseType(null, clazz);
-                } catch (ReflectiveOperationException e) {
-                    throw new RuntimeException(e);
-                }
+                final Class<?> clazz = classLookup().forName(sb.subSequence(1, sb.length()));
+                return parseType(null, clazz);
             }
 
 /*
@@ -460,24 +455,21 @@ public class JSONWire extends TextWire {
                 final StringBuilder sb = Wires.acquireStringBuilder();
                 sb.setLength(0);
                 readTypeDefinition(sb);
-                try {
-                    final Class<?> overrideClass = classLookup().forName(sb.subSequence(1, sb.length()));
-                    if (!clazz.isAssignableFrom(overrideClass))
-                        throw new ClassCastException("Unable to cast " + overrideClass.getName() + " to " + clazz.getName());
-                    if (using != null && !overrideClass.isInstance(using))
-                        throw new ClassCastException("Unable to reuse a " + using.getClass().getName() + " as a " + overrideClass.getName());
-                    final E result = super.object(using, overrideClass);
 
-                    // remove the closing bracket from the type definition
-                    consumePadding();
-                    final char endBracket = bytes.readChar();
-                    assert endBracket == '}' : "Missing end bracket }, got " + endBracket + " from " + bytes;
-                    consumePadding(1);
+                final Class<?> overrideClass = classLookup().forName(sb.subSequence(1, sb.length()));
+                if (!clazz.isAssignableFrom(overrideClass))
+                    throw new ClassCastException("Unable to cast " + overrideClass.getName() + " to " + clazz.getName());
+                if (using != null && !overrideClass.isInstance(using))
+                    throw new ClassCastException("Unable to reuse a " + using.getClass().getName() + " as a " + overrideClass.getName());
+                final E result = super.object(using, overrideClass);
 
-                    return result;
-                } catch (ReflectiveOperationException e) {
-                    throw new RuntimeException(e);
-                }
+                // remove the closing bracket from the type definition
+                consumePadding();
+                final char endBracket = bytes.readChar();
+                assert endBracket == '}' : "Missing end bracket }, got " + endBracket + " from " + bytes;
+                consumePadding(1);
+
+                return result;
             }
         }
 

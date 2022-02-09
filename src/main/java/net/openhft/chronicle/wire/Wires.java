@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.pool.EnumCache;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
@@ -81,6 +82,7 @@ public enum Wires {
         }
         return ANY_OBJECT;
     });
+    static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(VanillaFieldInfo::lookupClass);
     static final ClassLocal<Function<String, Marshallable>> MARSHALLABLE_FUNCTION = ClassLocal.withInitial(tClass -> {
         Class[] interfaces = {Marshallable.class, tClass};
         if (tClass == Marshallable.class)
@@ -94,7 +96,6 @@ public enum Wires {
             throw new IllegalStateException(e);
         }
     });
-    static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(VanillaFieldInfo::lookupClass);
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final ThreadLocal<BinaryWire> WIRE_TL = ThreadLocal.withInitial(() -> new BinaryWire(Bytes.allocateElasticOnHeap()));
     private static final int TID_MASK = 0b00111111_11111111_11111111_11111111;
@@ -588,7 +589,14 @@ public enum Wires {
     }
 
     public static String typeNameFor(@NotNull Object value) {
-        return value instanceof Marshallable ? ((Marshallable) value).className() : ClassAliasPool.CLASS_ALIASES.nameFor(value.getClass());
+        return typeNameFor(ClassAliasPool.CLASS_ALIASES, value);
+    }
+
+    public static String typeNameFor(ClassLookup classLookup, @NotNull Object value) {
+        return classLookup == ClassAliasPool.CLASS_ALIASES
+                && value instanceof Marshallable
+                ? ((Marshallable) value).className()
+                : classLookup.nameFor(value.getClass());
     }
 
     static Marshallable newInstance(Constructor constructor, String typeName) {
@@ -747,7 +755,7 @@ public enum Wires {
             sb0.setLength(0);
             in.text(sb0);
 
-            return ClassAliasPool.CLASS_ALIASES.forName(sb0);
+            return in.classLookup().forName(sb0);
         }
 
         @Override

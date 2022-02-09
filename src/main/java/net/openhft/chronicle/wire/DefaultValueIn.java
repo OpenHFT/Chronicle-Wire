@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.BooleanValue;
 import net.openhft.chronicle.core.values.IntValue;
@@ -366,13 +367,18 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    @Override
+    public ClassLookup classLookup() {
+        return wireIn.classLookup();
+    }
+
     @Nullable
     @Override
     public Object marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
         return defaultValue;
     }
 
-        @Override
+    @Override
     public boolean bool() throws IORuntimeException {
         return defaultValue == Boolean.TRUE;
     }

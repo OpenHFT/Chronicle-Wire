@@ -24,7 +24,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
-import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
@@ -224,16 +223,6 @@ public class YamlWire extends AbstractWire implements Wire {
     @Override
     public @NotNull VanillaMethodReaderBuilder methodReaderBuilder() {
         return super.methodReaderBuilder().wireType(WireType.YAML);
-    }
-
-    @Override
-    public void classLookup(ClassLookup classLookup) {
-        this.classLookup = classLookup;
-    }
-
-    @Override
-    public ClassLookup classLookup() {
-        return classLookup;
     }
 
     @NotNull
@@ -880,6 +869,11 @@ public class YamlWire extends AbstractWire implements Wire {
         protected boolean dropDefault = false;
         @Nullable
         private String eventName;
+
+        @Override
+        public ClassLookup classLookup() {
+            return YamlWire.this.classLookup();
+        }
 
         @Override
         public void hasPrecedingComment(boolean hasCommentAnnotation) {
@@ -1815,6 +1809,11 @@ public class YamlWire extends AbstractWire implements Wire {
 
     class TextValueIn implements ValueIn {
         @Override
+        public ClassLookup classLookup() {
+            return YamlWire.this.classLookup();
+        }
+
+        @Override
         public void resetState() {
             yt.reset();
         }
@@ -2355,13 +2354,8 @@ public class YamlWire extends AbstractWire implements Wire {
                 return null;
             final StringBuilder stringBuilder = acquireStringBuilder();
             yt.text(stringBuilder);
-            try {
-                yt.next();
-                return classLookup().forName(stringBuilder);
-            } catch (ClassNotFoundException e) {
-                Jvm.warn().on(getClass(), "Unable to find " + stringBuilder + " " + e);
-                return null;
-            }
+            yt.next();
+            return classLookup().forName(stringBuilder);
         }
 
         @Override
@@ -2418,7 +2412,7 @@ public class YamlWire extends AbstractWire implements Wire {
             if (yt.current() == YamlToken.TAG) {
                 if (yt.text().equals("type")) {
                     if (yt.next() == YamlToken.TEXT) {
-                        Class aClass = ClassAliasPool.CLASS_ALIASES.forName(yt.text());
+                        Class aClass = classLookup().forName(yt.text());
                         yt.next();
                         return aClass;
                     }

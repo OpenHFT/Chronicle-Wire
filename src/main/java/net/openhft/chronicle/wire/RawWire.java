@@ -24,7 +24,6 @@ import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
@@ -55,7 +54,6 @@ public class RawWire extends AbstractWire implements Wire {
     private final WriteDocumentContext writeContext = new BinaryWriteDocumentContext(this);
     private final BinaryReadDocumentContext readContext = new BinaryReadDocumentContext(this, false);
     boolean use8bit;
-    private ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
     @Nullable
     private StringBuilder lastSB;
 
@@ -65,16 +63,6 @@ public class RawWire extends AbstractWire implements Wire {
 
     public RawWire(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
-    }
-
-    @Override
-    public void classLookup(ClassLookup classLookup) {
-        this.classLookup = classLookup;
-    }
-
-    @Override
-    public ClassLookup classLookup() {
-        return classLookup;
     }
 
     @NotNull
@@ -532,6 +520,11 @@ public class RawWire extends AbstractWire implements Wire {
         public ValueOut typePrefix(CharSequence typeName) {
             bytes.writeUtf8(typeName);
             return this;
+        }
+
+        @Override
+        public ClassLookup classLookup() {
+            return RawWire.this.classLookup();
         }
 
         @NotNull
@@ -1029,14 +1022,15 @@ public class RawWire extends AbstractWire implements Wire {
         }
 
         @Override
+        public ClassLookup classLookup() {
+            return RawWire.this.classLookup();
+        }
+
+        @Override
         public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             bytes.readUtf8(sb);
-            try {
-                return classLookup.forName(sb);
-            } catch (ClassNotFoundException e) {
-                return unresolvedHandler.apply(sb, e);
-            }
+            return classLookup.forName(sb);
         }
 
         @Override
