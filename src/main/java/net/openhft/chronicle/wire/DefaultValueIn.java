@@ -448,6 +448,11 @@ public class DefaultValueIn implements ValueIn {
     }
 
     @Override
+    public boolean isPresent() {
+        return false;
+    }
+
+    @Override
     public boolean isTyped() {
         return false;
     }
