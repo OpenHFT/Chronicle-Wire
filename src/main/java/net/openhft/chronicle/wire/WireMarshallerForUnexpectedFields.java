@@ -47,7 +47,7 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
                 long pos = in.bytes().readPosition();
                 ValueIn vin = in.read(sb);
                 FieldAccess field;
-                if (next >= 0 && sb.length() == 0 && !(vin instanceof DefaultValueIn)) {
+                if (next >= 0 && sb.length() == 0 && vin.isPresent()) {
                     field = fields[next++];
                 } else {
                     next = -1;
