@@ -3,7 +3,6 @@ package net.openhft.chronicle.wire.issue;
 import net.openhft.chronicle.wire.JSONWire;
 import net.openhft.chronicle.wire.JsonUtil;
 import net.openhft.chronicle.wire.Wire;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Map;
@@ -11,10 +10,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static net.openhft.chronicle.wire.JsonUtil.assertBalancedBrackets;
 import static org.junit.Assert.assertEquals;
 
-@Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/328")
 public class Issue328Test {
 
     @Test
