@@ -309,6 +309,7 @@ public class JSONWireTest extends WireTestCommon {
                 "\"doubleMap\":{\"1.28\":\"number\",\"2.56\":\"number\"}\n" +
                 "}", text);
         MapWithIntegerKeysHolder mh2 = JSON.fromString(MapWithIntegerKeysHolder.class, text);
+        assertEquals(mh, mh2);
     }
 
     static class MapWithIntegerKeysHolder extends SelfDescribingMarshallable {
