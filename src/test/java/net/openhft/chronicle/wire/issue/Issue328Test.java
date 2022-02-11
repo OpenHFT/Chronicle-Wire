@@ -28,7 +28,7 @@ public class Issue328Test {
         final String expected = IntStream.range(0, size)
                 .boxed()
                 .map(i -> String.format("\"%d\":\"%d\"", i, i))
-                .collect(Collectors.joining(",", "{", "}"));
+                .collect(Collectors.joining(","));
 
         // Note: The output should pass a test at https://jsonlint.com/
 

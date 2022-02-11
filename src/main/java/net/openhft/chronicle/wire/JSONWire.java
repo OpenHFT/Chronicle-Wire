@@ -121,6 +121,14 @@ public class JSONWire extends TextWire {
     }
 
     @Override
+    public ValueOut writeEvent(Class expectedType, Object eventKey) {
+        if (eventKey instanceof Number) {
+            return writeEventName(eventKey.toString());
+        }
+        return super.writeEvent(expectedType, eventKey);
+    }
+
+    @Override
     public void copyTo(@NotNull WireOut wire) {
         throw new UnsupportedOperationException();
     }
