@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire.issue;
 import net.openhft.chronicle.wire.JSONWire;
 import net.openhft.chronicle.wire.JsonUtil;
 import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -23,7 +24,7 @@ import java.util.stream.IntStream;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(value = Parameterized.class)
-public class Issue327Test {
+public class Issue327Test extends WireTestCommon {
 
     private final boolean useTypes;
 

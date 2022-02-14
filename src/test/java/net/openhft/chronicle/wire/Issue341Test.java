@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @RunWith(value = Parameterized.class)
-public class Issue341Test {
+public class Issue341Test extends WireTestCommon {
 
     private final WireType wireType;
 

@@ -3,6 +3,7 @@ package net.openhft.chronicle.wire.issue;
 import net.openhft.chronicle.wire.JSONWire;
 import net.openhft.chronicle.wire.JsonUtil;
 import net.openhft.chronicle.wire.Wire;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 
 import java.util.Map;
@@ -12,7 +13,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 
-public class Issue328Test {
+public class Issue328Test extends WireTestCommon {
 
     @Test
     public void map() {
@@ -21,7 +22,7 @@ public class Issue328Test {
         // keys must be strings in JSON
         final Map<Integer, String> map = IntStream.range(0, size)
                 .boxed()
-                .collect(Collectors.toMap(Function.identity(),i -> Integer.toString(i)));
+                .collect(Collectors.toMap(Function.identity(), i -> Integer.toString(i)));
 
         wire.getValueOut().object(map);
         final String actual = wire.toString();

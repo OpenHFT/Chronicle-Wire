@@ -4,6 +4,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.JSONWire;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * see https://github.com/OpenHFT/Chronicle-Wire/issues/322
  */
-public class JSON322Test {
+public class JSON322Test extends WireTestCommon {
 
     public static class One extends SelfDescribingMarshallable {
         String text;
