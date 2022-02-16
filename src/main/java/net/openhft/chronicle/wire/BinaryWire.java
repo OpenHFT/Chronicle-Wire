@@ -27,7 +27,7 @@ import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
@@ -118,21 +118,6 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
-    /**
-     * @return null is no override, true is always use self describing, false is never use self describing.
-     */
-    public Boolean getOverrideSelfDescribing() {
-        return overrideSelfDescribing;
-    }
-
-    /**
-     * @param overrideSelfDescribing null is no override, true is always use self describing, false is never use self describing.
-     */
-    public BinaryWire setOverrideSelfDescribing(Boolean overrideSelfDescribing) {
-        this.overrideSelfDescribing = overrideSelfDescribing;
-        return this;
-    }
-
     @NotNull
     public static BinaryWire binaryOnly(@NotNull Bytes bytes) {
         return new BinaryWire(bytes, false, false, false, Integer.MAX_VALUE, "binary", false);
@@ -150,6 +135,21 @@ public class BinaryWire extends AbstractWire implements Wire {
         // use underflow to make digits below '0' large.
         c -= '0';
         return c <= 9;
+    }
+
+    /**
+     * @return null is no override, true is always use self describing, false is never use self describing.
+     */
+    public Boolean getOverrideSelfDescribing() {
+        return overrideSelfDescribing;
+    }
+
+    /**
+     * @param overrideSelfDescribing null is no override, true is always use self describing, false is never use self describing.
+     */
+    public BinaryWire setOverrideSelfDescribing(Boolean overrideSelfDescribing) {
+        this.overrideSelfDescribing = overrideSelfDescribing;
+        return this;
     }
 
     @NotNull
@@ -809,7 +809,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 } else {
                     wire.getValueOut().typePrefix(sb);
                     try {
-                        Class aClass = ClassAliasPool.CLASS_ALIASES.forName(sb);
+                        Class aClass = classLookup.forName(sb);
                         if (aClass == byte[].class) {
                             wire.getValueOut().text(BytesStore.wrap(valueIn.bytes()));
                             break;
@@ -1323,6 +1323,10 @@ public class BinaryWire extends AbstractWire implements Wire {
         return bytes.readUtf8(sb) ? sb : null;
     }
 
+    public boolean useSelfDescribingMessage(@NotNull CommonMarshallable object) {
+        return overrideSelfDescribing == null ? object.usesSelfDescribingMessage() : overrideSelfDescribing;
+    }
+
     enum AnyCodeMatch implements WireKey {
         ANY_CODE_MATCH;
 
@@ -1720,6 +1724,11 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (typeName != null)
                 writeCode(TYPE_PREFIX).writeUtf8(typeName);
             return this;
+        }
+
+        @Override
+        public ClassLookup classLookup() {
+            return BinaryWire.this.classLookup();
         }
 
         @NotNull
@@ -3222,12 +3231,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return null;
             // its possible that the object that you are allocating may not have a
             // default constructor
-            final Class clazz;
-            try {
-                clazz = classLookup().forName(sb);
-            } catch (ClassNotFoundRuntimeException e) {
-                throw new IORuntimeException(e);
-            }
+            final Class clazz = classLookup().forName(sb);
 
             if (Demarshallable.class.isAssignableFrom(clazz)) {
                 return (T) demarshallable(clazz);
@@ -3349,6 +3353,11 @@ public class BinaryWire extends AbstractWire implements Wire {
                     break;
             }
             return BinaryWire.this;
+        }
+
+        @Override
+        public ClassLookup classLookup() {
+            return BinaryWire.this.classLookup();
         }
 
         @Override
@@ -3725,12 +3734,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         case TYPE_PREFIX: {
                             readCode();
                             @Nullable StringBuilder sb = readUtf8();
-                            final Class clazz2;
-                            try {
-                                clazz2 = classLookup().forName(sb);
-                            } catch (ClassNotFoundRuntimeException e) {
-                                throw new IORuntimeException(e);
-                            }
+                            final Class clazz2 = classLookup().forName(sb);
                             return object(null, clazz2);
                         }
                         case EVENT_OBJECT: {
@@ -3892,10 +3896,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             // assume it a String
             text();
         }
-    }
-
-    public boolean useSelfDescribingMessage(@NotNull CommonMarshallable object) {
-        return overrideSelfDescribing == null ? object.usesSelfDescribingMessage() : overrideSelfDescribing;
     }
 
     class DeltaValueIn extends BinaryWire.BinaryValueIn {

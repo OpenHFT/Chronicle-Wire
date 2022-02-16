@@ -496,6 +496,11 @@ public class HashWire implements WireOut, BytesComment {
             return this;
         }
 
+        @Override
+        public ClassLookup classLookup() {
+            return HashWire.this.classLookup();
+        }
+
         @NotNull
         @Override
         public WireOut typeLiteral(@Nullable CharSequence type) {

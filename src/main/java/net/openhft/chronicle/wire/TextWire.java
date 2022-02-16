@@ -376,11 +376,14 @@ public class TextWire extends AbstractWire implements Wire {
 
     @Override
     public void copyTo(@NotNull WireOut wire) {
-        if (wire instanceof TextWire) {
-            wire.bytes().write(bytes, bytes().readPosition(), bytes().readLimit());
+        if (wire instanceof TextWire || wire instanceof YamlWire) {
+            final Bytes<?> bytes0 = bytes();
+            final long length = bytes0.readRemaining();
+            wire.bytes().write(this.bytes, bytes0.readPosition(), length);
+            this.bytes.readSkip(length);
         } else {
             // TODO: implement copying
-            throw new UnsupportedOperationException("Not implemented yet. Can only copy TextWire format to the same format");
+            throw new UnsupportedOperationException("Not implemented yet. Can only copy TextWire format to the same format  not " + wire.getClass());
         }
     }
 
@@ -1719,6 +1722,11 @@ public class TextWire extends AbstractWire implements Wire {
             bytes.writeUnsignedByte(' ');
             sep = BytesStore.empty();
             return this;
+        }
+
+        @Override
+        public ClassLookup classLookup() {
+            return TextWire.this.classLookup();
         }
 
         @NotNull
@@ -3068,7 +3076,7 @@ public class TextWire extends AbstractWire implements Wire {
                 try {
                     return classLookup().forName(stringBuilder);
                 } catch (ClassNotFoundRuntimeException e) {
-                    Jvm.warn().on(getClass(), "Unable to find " + stringBuilder + " " + e);
+                    Jvm.warn().on(getClass(), "Unable to find " + stringBuilder + " " + e.getCause());
                     return null;
                 }
             }
@@ -3148,6 +3156,11 @@ public class TextWire extends AbstractWire implements Wire {
             parseUntil(stringBuilder, END_OF_TYPE);
             classNameConsumer.accept(t, stringBuilder);
             return TextWire.this;
+        }
+
+        @Override
+        public ClassLookup classLookup() {
+            return TextWire.this.classLookup();
         }
 
         @Override
