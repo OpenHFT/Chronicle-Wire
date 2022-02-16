@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 /*
  * Test that a flow style method writer can return a DocumentWritten
  */
-public class PassThroughTest {
+public class PassThroughTest extends WireTestCommon {
     @Test
     public void testPassThroughputText() {
         String input = "" +
@@ -125,7 +125,8 @@ public class PassThroughTest {
                 "}\n" +
                 "...\n";
         Wire wire = new YamlWire(Bytes.from(input)).useTextDocuments();
-        Wire wire2 = WireType.BINARY_LIGHT.apply(new HexDumpBytes());
+        final HexDumpBytes hdb = new HexDumpBytes();
+        Wire wire2 = WireType.BINARY_LIGHT.apply(hdb);
         final DestinationSpecific destinationSpecific = wire2.methodWriter(DestinationSpecific.class);
         final MethodReader reader = wire.methodReader(destinationSpecific);
         for (int i = 2; i >= 0; i--)
@@ -185,6 +186,8 @@ public class PassThroughTest {
             assertEquals(i > 0, reader3.readOne());
 
         assertEquals(input, wire4.toString());
+        bytes3.releaseLast();
+        hdb.releaseLast();
     }
 
     @Test
