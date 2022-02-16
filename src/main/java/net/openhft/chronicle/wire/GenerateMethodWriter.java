@@ -10,7 +10,6 @@ import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -111,7 +110,7 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * @param interfaces           an interface class
+     * @param interfaces an interface class
      * @return a proxy class from an interface class or null if it can't be created
      */
     @Nullable
@@ -404,7 +403,7 @@ public class GenerateMethodWriter {
         return result;
     }
 
-    private CharSequence createMethod(SortedSet<String> importSet, final Method dm, final Class<?> interfaceClazz, Set<String> methodIds) throws IOException {
+    private CharSequence createMethod(SortedSet<String> importSet, final Method dm, final Class<?> interfaceClazz, Set<String> methodIds) {
 
         if (Modifier.isStatic(dm.getModifiers()))
             return "";
@@ -437,9 +436,19 @@ public class GenerateMethodWriter {
         }
 
         boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
-        body.append("try (final " + WRITE_DOCUMENT_CONTEXT + " dc = (" + WRITE_DOCUMENT_CONTEXT + ") this.out.get().acquireWritingDocument(")
+        boolean passthrough = returnType == DocumentContext.class;
+        if (!passthrough)
+            body.append("try (");
+        body.append("final ")
+                .append(WRITE_DOCUMENT_CONTEXT)
+                .append(" dc = (")
+                .append(WRITE_DOCUMENT_CONTEXT).append(") this.out.get().acquireWritingDocument(")
                 .append(metaData)
-                .append(")) {\n");
+                .append(")");
+        if (passthrough)
+            body.append(";\n");
+        else
+            body.append(") {\n");
         body.append("try {\n");
         body.append("dc.chainedElement(" + !terminating + ");\n");
         body.append("if (out.get().recordHistory()) MessageHistory.writeHistory(dc);\n");
@@ -469,7 +478,8 @@ public class GenerateMethodWriter {
         body.append("dc.rollbackOnClose();\n");
         body.append("throw Jvm.rethrow(t);\n");
         body.append("}\n");
-        body.append("}\n");
+        if (!passthrough)
+            body.append("}\n");
 
         return format("\n%s public %s %s(%s) {\n %s%s}\n",
                 methodIDAnotation,
@@ -550,21 +560,26 @@ public class GenerateMethodWriter {
 
     private StringBuilder methodReturn(Set<String> importSet, final Method dm, final Class<?> interfaceClazz) {
         final StringBuilder result = new StringBuilder();
-        if (dm.getReturnType() == Void.class || dm.getReturnType() == void.class)
+        final Class<?> returnType = dm.getReturnType();
+
+        if (returnType == Void.class || returnType == void.class)
             return result;
 
-        if (dm.getReturnType().isAssignableFrom(interfaceClazz) || dm.getReturnType() == interfaceClazz) {
+        if (returnType == DocumentContext.class) {
+            result.append("return dc;\n");
+
+        } else if (returnType.isAssignableFrom(interfaceClazz) || returnType == interfaceClazz) {
             result.append("return this;\n");
 
-        } else if (dm.getReturnType().isInterface()) {
-            methodWritersMap.computeIfAbsent(dm.getReturnType(), k -> "methodWriter" + k.getSimpleName() + "TL");
+        } else if (returnType.isInterface()) {
+            methodWritersMap.computeIfAbsent(returnType, k -> "methodWriter" + k.getSimpleName() + "TL");
             result.append("// method return\n");
-            result.append(format("return methodWriter%sTL.get();\n", dm.getReturnType().getSimpleName()));
-        } else if (!dm.getReturnType().isPrimitive()) {
+            result.append(format("return methodWriter%sTL.get();\n", returnType.getSimpleName()));
+        } else if (!returnType.isPrimitive()) {
             result.append("return null;\n");
-        } else if (dm.getReturnType() == boolean.class) {
+        } else if (returnType == boolean.class) {
             result.append("return false;\n");
-        } else if (dm.getReturnType() == byte.class) {
+        } else if (returnType == byte.class) {
             result.append("return (byte)0;\n");
         } else {
             result.append("return 0;\n");

@@ -103,6 +103,8 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     public MethodWriterBuilder<T> addInterface(Class additionalClass) {
         if (interfaces.contains(additionalClass))
             return this;
+        if (additionalClass == DocumentContext.class)
+            return this;
 
         for (Class invalidSuperInterface : invalidSuperInterfaces) {
             if (invalidSuperInterface.isAssignableFrom(additionalClass))
