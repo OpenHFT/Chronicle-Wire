@@ -2127,18 +2127,19 @@ public class YamlWire extends AbstractWire implements Wire {
         }
 
         long getALong() {
-            if (yt.current() == YamlToken.TEXT) {
-                String text = yt.text();
-                long l;
-                if (text.startsWith("0x") || text.startsWith("0X")) {
-                    l = Long.parseLong(text.substring(2), 16);
-                } else {
-                    l = Long.parseLong(text);
-                }
-                yt.next();
-                return l;
+            if (yt.current() != YamlToken.TEXT) {
+                throw new UnsupportedOperationException(yt.toString());
             }
-            throw new UnsupportedOperationException(yt.toString());
+            String text = yt.text();
+            long l;
+            if (text.startsWith("0x") || text.startsWith("0X")) {
+                l = Long.parseLong(text.substring(2), 16);
+            } else {
+                l = Long.parseLong(text);
+            }
+            yt.next();
+            return l;
+
         }
 
         @NotNull
@@ -2622,23 +2623,32 @@ public class YamlWire extends AbstractWire implements Wire {
         public long int64() {
             consumePadding();
             valueIn.skipType();
-            if (yt.current() != YamlToken.TEXT) {
-                Jvm.warn().on(getClass(), "Unable to read " + valueIn.object() + " as a long.");
-                return 0;
-            }
 
-            return getALong();
+            if (yt.current() == YamlToken.SEQUENCE_ENTRY)
+                yt.next();
+
+            if (yt.current() == YamlToken.TEXT)
+                return getALong();
+
+            final Object object = valueIn.object();
+            Jvm.warn().on(getClass(), "Unable to read " + object.getClass().getName() + " " + object + " as a long was " + yt.current());
+            return 0;
         }
 
         @Override
         public double float64() {
             consumePadding();
             valueIn.skipType();
-            if (yt.current() != YamlToken.TEXT) {
-                Jvm.warn().on(getClass(), "Unable to read " + valueIn.object() + " as a long.");
-                return 0;
-            }
-            return getADouble();
+
+            if (yt.current() == YamlToken.SEQUENCE_ENTRY)
+                yt.next();
+
+            if (yt.current() == YamlToken.TEXT)
+                return getADouble();
+
+            final Object object = valueIn.object();
+            Jvm.warn().on(getClass(), "Unable to read " + object.getClass().getName() + " " + object + " as a double was " + yt.current());
+            return 0;
         }
 
         void skipType() {

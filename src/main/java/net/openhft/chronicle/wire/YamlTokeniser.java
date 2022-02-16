@@ -31,7 +31,6 @@ public class YamlTokeniser {
     static final int NO_INDENT = -1;
     static final Set<YamlToken> NO_TEXT = EnumSet.of(
             YamlToken.SEQUENCE_START,
-            YamlToken.SEQUENCE_ENTRY,
             YamlToken.SEQUENCE_END,
             YamlToken.MAPPING_START,
             YamlToken.MAPPING_KEY,
