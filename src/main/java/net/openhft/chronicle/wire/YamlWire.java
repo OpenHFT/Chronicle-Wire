@@ -316,11 +316,13 @@ public class YamlWire extends AbstractWire implements Wire {
 
     @Override
     public void copyTo(@NotNull WireOut wire) {
-        if (wire instanceof YamlWire) {
-            wire.bytes().write(bytes, bytes().readPosition(), bytes().readLimit());
+        if (wire instanceof TextWire || wire instanceof YamlWire) {
+            final Bytes<?> bytes0 = bytes();
+            wire.bytes().write(this.bytes, yt.blockStart(), bytes0.readLimit() - yt.blockStart);
+            this.bytes.readPosition(this.bytes.readLimit());
         } else {
             // TODO: implement copying
-            throw new UnsupportedOperationException("Not implemented yet. Can only copy TextWire format to the same format");
+            throw new UnsupportedOperationException("Not implemented yet. Can only copy YamlWire format to the same format not " + wire.getClass());
         }
     }
 
@@ -856,7 +858,7 @@ public class YamlWire extends AbstractWire implements Wire {
                 valueIn.consumeAny(minIndent);
             }
         }
-        if (yt.current() == YamlToken.MAPPING_END || yt.current() == YamlToken.DOCUMENT_END) {
+        if (yt.current() == YamlToken.MAPPING_END || yt.current() == YamlToken.DOCUMENT_END || yt.current() == YamlToken.NONE) {
             yt.next(Integer.MIN_VALUE);
             return;
         }

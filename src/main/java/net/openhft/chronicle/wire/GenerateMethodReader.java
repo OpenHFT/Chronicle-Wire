@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.Annotations;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
@@ -287,7 +288,7 @@ public class GenerateMethodReader {
         Class<?>[] parameterTypes = m.getParameterTypes();
 
         Class<?> chainReturnType = m.getReturnType();
-        if (!chainReturnType.isInterface() || Jvm.dontChain(chainReturnType))
+        if (chainReturnType != DocumentContext.class && (!chainReturnType.isInterface() || Jvm.dontChain(chainReturnType)))
             chainReturnType = null;
 
         if (parameterTypes.length > 0 || hasRealInterceptorReturns())
@@ -373,6 +374,16 @@ public class GenerateMethodReader {
                 eventNameSwitchBlock.append("}\n");
         }
 
+        if (chainReturnType == DocumentContext.class) {
+            eventNameSwitchBlock.append("wireIn.copyTo(((")
+                    .append(DocumentContext.class.getName())
+                    .append(") chainedCallReturnResult).wire());\n")
+
+                    .append(Closeable.class.getName())
+                    .append(".closeQuietly(chainedCallReturnResult);\n" +
+                            "chainedCallReturnResult = null;\n");
+            chainReturnType = null;
+        }
         eventNameSwitchBlock.append("break;\n\n");
 
         if (chainReturnType != null)
