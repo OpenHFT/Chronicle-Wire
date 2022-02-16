@@ -1724,6 +1724,11 @@ public class TextWire extends AbstractWire implements Wire {
             return this;
         }
 
+        @Override
+        public ClassLookup classLookup() {
+            return TextWire.this.classLookup();
+        }
+
         @NotNull
         @Override
         public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, Class type) {
@@ -3071,7 +3076,7 @@ public class TextWire extends AbstractWire implements Wire {
                 try {
                     return classLookup().forName(stringBuilder);
                 } catch (ClassNotFoundRuntimeException e) {
-                    Jvm.warn().on(getClass(), "Unable to find " + stringBuilder + " " + e);
+                    Jvm.warn().on(getClass(), "Unable to find " + stringBuilder + " " + e.getCause());
                     return null;
                 }
             }
@@ -3151,6 +3156,11 @@ public class TextWire extends AbstractWire implements Wire {
             parseUntil(stringBuilder, END_OF_TYPE);
             classNameConsumer.accept(t, stringBuilder);
             return TextWire.this;
+        }
+
+        @Override
+        public ClassLookup classLookup() {
+            return TextWire.this.classLookup();
         }
 
         @Override

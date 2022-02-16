@@ -21,7 +21,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.UnresolvedType;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.Resettable;
-import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
@@ -407,17 +407,19 @@ public interface ValueIn {
     @NotNull <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer)
             throws IORuntimeException, BufferUnderflowException;
 
+    ClassLookup classLookup();
+
     @NotNull
     default <T> WireIn typeLiteral(T t, @NotNull BiConsumer<T, Class> classConsumer) throws IORuntimeException {
         return typeLiteralAsText(t, (o, x) ->
-            classConsumer.accept(o, ClassAliasPool.CLASS_ALIASES.forName(x))
+                classConsumer.accept(o, classLookup().forName(x))
         );
     }
 
     @NotNull
     default <T> WireIn typeLiteral(T t, @NotNull BiConsumer<T, Class> classConsumer, Class defaultClass) {
         return typeLiteralAsText(t, (o, x) -> {
-            Class u = ClassAliasPool.CLASS_ALIASES.forName(x);
+            Class u = classLookup().forName(x);
             classConsumer.accept(o, u);
         });
     }
