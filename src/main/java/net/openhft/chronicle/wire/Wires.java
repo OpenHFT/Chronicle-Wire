@@ -473,6 +473,8 @@ public enum Wires {
 
     @Nullable
     public static <E> E objectMap(ValueIn in, @Nullable E using, @Nullable Class clazz, SerializationStrategy<E> strategy) {
+        if (in.isNull())
+            return null;
         boolean nullObject = false;
         if (clazz == Object.class)
             strategy = MAP;

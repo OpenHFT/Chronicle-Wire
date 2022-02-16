@@ -37,10 +37,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assume.assumeFalse;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
 @SuppressWarnings("rawtypes")
@@ -102,8 +100,6 @@ public class WireTests {
 
     @Test
     public void testLenientTypeLiteral() {
-        assumeFalse(wireType == WireType.JSON);
-
         final Bytes b = Bytes.elasticByteBuffer();
         try {
             final Wire wire = createWire(b);
@@ -149,13 +145,14 @@ public class WireTests {
 
     @Test
     public void testLocalDateTime() {
-        assumeFalse(wireType == WireType.JSON);
         final Bytes b = Bytes.elasticByteBuffer();
         try {
             final Wire wire = createWire(b);
             LocalDateTime expected = LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
             wire.getValueOut().object(expected);
-            assertEquals(expected, wire.getValueIn().object());
+            // is a hint needed?
+            Class type = wireType == WireType.JSON ? LocalDateTime.class : Object.class;
+            assertEquals(expected, wire.getValueIn().object(type));
         } finally {
             b.releaseLast();
         }
@@ -163,13 +160,13 @@ public class WireTests {
 
     @Test
     public void testZonedDateTime() {
-        assumeFalse(wireType == WireType.JSON);
-
         final Bytes b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
         ZonedDateTime expected = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
         wire.getValueOut().object(expected);
-        assertEquals(expected, wire.getValueIn().object());
+        // is a hint needed?
+        Class type = wireType == WireType.JSON ? ZonedDateTime.class : Object.class;
+        assertEquals(expected, wire.getValueIn().object(type));
 
         b.releaseLast();
     }
@@ -198,8 +195,6 @@ public class WireTests {
 
     @Test
     public void testWriteNull() {
-        assumeFalse(wireType == WireType.JSON);
-
         final Bytes b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
         wire.write().object(null);
@@ -237,8 +232,6 @@ public class WireTests {
 
     @Test
     public void unknownFieldsAreClearedBetweenReadContexts() {
-        assumeFalse(wireType == WireType.JSON);
-
         final Bytes b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
 

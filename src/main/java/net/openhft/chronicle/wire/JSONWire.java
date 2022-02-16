@@ -21,15 +21,17 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Type;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
-
+import java.util.function.BiFunction;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
@@ -345,6 +347,27 @@ public class JSONWire extends TextWire {
     }
 
     class JSONValueIn extends TextValueIn {
+        /**
+         * @return true if !!null "", if {@code true} reads the !!null "" up to the next STOP, if
+         * {@code false} no  data is read  ( data is only peaked if {@code false} )
+         */
+        @Override
+        public boolean isNull() {
+            consumePadding();
+
+            if (peekStringIgnoreCase("null")) {
+                bytes.readSkip(4);
+                // Skip to the next token, consuming any padding and/or a comma
+                consumePadding(1);
+
+                // discard the text after it.
+                //  text(acquireStringBuilder());
+                return true;
+            }
+
+            return false;
+        }
+
         @Override
         public String text() {
             @Nullable String text = super.text();
@@ -380,6 +403,18 @@ public class JSONWire extends TextWire {
         @Override
         public Object typePrefixOrObject(Class tClass) {
             return super.typePrefixOrObject(tClass);
+        }
+
+        @Override
+        public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
+            consumePadding();
+            final StringBuilder stringBuilder = acquireStringBuilder();
+            text(stringBuilder);
+            try {
+                return classLookup().forName(stringBuilder);
+            } catch (ClassNotFoundRuntimeException e) {
+                return unresolvedHandler.apply(stringBuilder, e.getCause());
+            }
         }
 
         @Override
