@@ -550,6 +550,15 @@ public interface ValueIn {
     @Nullable
     Object objectWithInferredType(Object using, SerializationStrategy strategy, Class type);
 
+    /**
+     * Check if the value is present
+     *
+     * @return true if the value was present in the Wire, false otherwise
+     */
+    default boolean isPresent() {
+        return true;
+    }
+
     @NotNull
     default UUID uuid() {
         return UUID.fromString(text());

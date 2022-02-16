@@ -3092,7 +3092,6 @@ public class TextWire extends AbstractWire implements Wire {
                 parseUntil(stringBuilder, END_OF_TYPE);
                 bytes.readSkip(-1);
                 try {
-
                     return classLookup().forName(stringBuilder);
                 } catch (NoClassDefFoundError e) {
                     throw new IORuntimeException("Unable to load class " + e, e);

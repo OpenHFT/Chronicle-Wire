@@ -29,7 +29,6 @@ import org.junit.runners.Parameterized;
 
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Type;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -39,8 +38,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
 @SuppressWarnings("rawtypes")
@@ -67,7 +65,7 @@ public class WireTests {
         list.add(new Object[]{WireType.BINARY, true});
         list.add(new Object[]{WireType.BINARY, false});
         list.add(new Object[]{WireType.TEXT, false});
-             // list.add(new Object[]{WireType.RAW});
+        // list.add(new Object[]{WireType.RAW});
         return list;
     }
 
@@ -182,11 +180,11 @@ public class WireTests {
 
         field = new StringBuilder();
         wire.read(field).skipValue();
-       // System.out.println("read field=" + field.toString());
+        // System.out.println("read field=" + field.toString());
 
         field = new StringBuilder();
         wire.read(field).skipValue();
-       // System.out.println("read field=" + field.toString());
+        // System.out.println("read field=" + field.toString());
 
         b.releaseLast();
     }
@@ -308,6 +306,22 @@ public class WireTests {
         }
 
         b.releaseLast();
+    }
+
+    @Test
+    public void isPresentReturnsTrueWhenValueIsPresent() {
+        Bytes b = Bytes.elasticByteBuffer();
+        final Wire wire = createWire(b);
+        wire.write("value").int32(12345);
+        assertTrue(wire.read("value").isPresent());
+    }
+
+    @Test
+    public void isPresentReturnsFalseWhenValueIsNotPresent() {
+        Bytes b = Bytes.elasticByteBuffer();
+        final Wire wire = createWire(b);
+        wire.write("value").int32(12345);
+        assertFalse(wire.read("anotherValue").isPresent());
     }
 
     private Wire createWire(Bytes b) {

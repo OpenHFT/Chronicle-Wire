@@ -1030,7 +1030,11 @@ public class RawWire extends AbstractWire implements Wire {
         public Type typeLiteral(BiFunction<CharSequence, ClassNotFoundException, Type> unresolvedHandler) {
             StringBuilder sb = WireInternal.acquireStringBuilder();
             bytes.readUtf8(sb);
-            return classLookup.forName(sb);
+            try {
+                return classLookup.forName(sb);
+            } catch (ClassNotFoundRuntimeException e) {
+                return unresolvedHandler.apply(sb, e.getCause());
+            }
         }
 
         @Override

@@ -455,7 +455,6 @@ public class JSONWire extends TextWire {
                 final StringBuilder sb = Wires.acquireStringBuilder();
                 sb.setLength(0);
                 readTypeDefinition(sb);
-
                 final Class<?> overrideClass = classLookup().forName(sb.subSequence(1, sb.length()));
                 if (!clazz.isAssignableFrom(overrideClass))
                     throw new ClassCastException("Unable to cast " + overrideClass.getName() + " to " + clazz.getName());

@@ -3285,7 +3285,12 @@ public class BinaryWire extends AbstractWire implements Wire {
             bytes.uncheckedReadSkipOne();
             @Nullable StringBuilder sb = readUtf8();
 
-            return classLookup().forName(sb);
+            try {
+                return classLookup().forName(sb);
+            } catch (ClassNotFoundRuntimeException e) {
+                Jvm.warn().on(BinaryWire.this.getClass(), "Unable to find class " + sb);
+                return null;
+            }
         }
 
         @Override

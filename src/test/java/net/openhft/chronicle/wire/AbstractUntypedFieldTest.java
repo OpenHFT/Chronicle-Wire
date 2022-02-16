@@ -12,12 +12,12 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-class AbstractUntypedFieldTest {
+class AbstractUntypedFieldTest extends WireTestCommon {
 
-   @BeforeEach
-   void beforeEach() {
-       ClassAliasPool.CLASS_ALIASES.addAlias(AImpl.class, "AImpl");
-   }
+    @BeforeEach
+    void beforeEach() {
+        ClassAliasPool.CLASS_ALIASES.addAlias(AImpl.class, "AImpl");
+    }
 
     @ParameterizedTest
     @MethodSource("provideWire")
