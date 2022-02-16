@@ -22,9 +22,9 @@ public class Issue272Test {
         wire.write("three").array(three, 5);
 
         assertEquals("" +
-                        "one: [ 1, 2, 3, 4, 5 ],\n" +
-                        "two: [ 101, 102, 103, 104, 105 ],\n" +
-                        "three: [ 1.01, 1.02, 1.03, 1.04, 1.05 ]",
+                        "one: [ 1, 2, 3, 4, 5 ]\n" +
+                        "two: [ 101, 102, 103, 104, 105 ]\n" +
+                        "three: [ 1.01, 1.02, 1.03, 1.04, 1.05 ]\n",
                 wire.toString());
 
         int[] ints = new int[5];
