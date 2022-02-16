@@ -83,7 +83,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
             bytes.testAndSetInt(position, tmpHeader, length);
         else
             bytes.writeInt(position, length);
-
+        wire().getValueOut().resetBetweenDocuments();
         notComplete = false;
     }
 

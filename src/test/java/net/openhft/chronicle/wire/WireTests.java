@@ -33,12 +33,12 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
 @SuppressWarnings("rawtypes")
@@ -60,13 +60,13 @@ public class WireTests {
     @NotNull
     @Parameterized.Parameters(name = "{index}: {0} padding: {1}")
     public static Collection<Object[]> data() {
-
-        @NotNull final List<Object[]> list = new ArrayList<>();
-        list.add(new Object[]{WireType.BINARY, true});
-        list.add(new Object[]{WireType.BINARY, false});
-        list.add(new Object[]{WireType.TEXT, false});
-        // list.add(new Object[]{WireType.RAW});
-        return list;
+        Object[][] list = {
+                {WireType.BINARY, true},
+                {WireType.BINARY, false},
+                {WireType.TEXT, false},
+                {WireType.JSON, false}
+        };
+        return Arrays.asList(list);
     }
 
     @Test
@@ -150,7 +150,9 @@ public class WireTests {
             final Wire wire = createWire(b);
             LocalDateTime expected = LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
             wire.getValueOut().object(expected);
-            assertEquals(expected, wire.getValueIn().object());
+            // is a hint needed?
+            Class type = wireType == WireType.JSON ? LocalDateTime.class : Object.class;
+            assertEquals(expected, wire.getValueIn().object(type));
         } finally {
             b.releaseLast();
         }
@@ -162,7 +164,9 @@ public class WireTests {
         final Wire wire = createWire(b);
         ZonedDateTime expected = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
         wire.getValueOut().object(expected);
-        assertEquals(expected, wire.getValueIn().object());
+        // is a hint needed?
+        Class type = wireType == WireType.JSON ? ZonedDateTime.class : Object.class;
+        assertEquals(expected, wire.getValueIn().object(type));
 
         b.releaseLast();
     }
@@ -191,7 +195,6 @@ public class WireTests {
 
     @Test
     public void testWriteNull() {
-
         final Bytes b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
         wire.write().object(null);
@@ -212,7 +215,8 @@ public class WireTests {
     }
 
     @Test
-    public void testClassTypedMarshallableObject() throws Exception {
+    public void testClassTypedMarshallableObject() {
+        assumeFalse(wireType == WireType.JSON);
 
         @NotNull TestClass testClass = new TestClass(Boolean.class);
 

@@ -43,6 +43,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
+                {WireType.JSON},
                 {WireType.TEXT},
                 {WireType.BINARY}
         });

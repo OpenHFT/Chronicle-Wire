@@ -128,10 +128,10 @@ public class WireDumperTest extends WireTestCommon {
                         "00000000             31 37                                    17           \n" +
                         "# position: 8, header: 1\n" +
                         "--- !!data\n" +
-                        ",\"bark\"\n" +
+                        "\"bark\"\n" +
                         "# position: 20, header: 2\n" +
                         "--- !!data\n" +
-                        ",3.14\n" +
+                        "3.14\n" +
                         "");
 
         expectedContentByType.put(WireType.RAW,
@@ -196,7 +196,7 @@ public class WireDumperTest extends WireTestCommon {
                         "# position: 8, header: 0 or 1\n" +
                         "--- !!not-ready-data\n" +
                         "...\n" +
-                        "# 7 bytes remaining\n" +
+                        "# 6 bytes remaining\n" +
                         "");
 
         expectedPartialContent.put(WireType.RAW,

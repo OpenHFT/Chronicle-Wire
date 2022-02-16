@@ -40,7 +40,7 @@ public class ValueOutTest extends TestCase {
         this.wireType = wireType;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {WireType.TEXT},

@@ -44,13 +44,14 @@ public class TextBinaryWireTest extends WireTestCommon {
 
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
-        return Arrays.asList(
-                new Object[]{WireType.TEXT},
-                new Object[]{WireType.JSON},
-                new Object[]{WireType.BINARY},
-                new Object[]{WireType.FIELDLESS_BINARY},
-                new Object[]{WireType.RAW}
-        );
+        Object[][] list = {
+                {WireType.BINARY},
+                {WireType.FIELDLESS_BINARY},
+                {WireType.RAW},
+                {WireType.TEXT},
+                {WireType.JSON}
+        };
+        return Arrays.asList(list);
     }
 
     @Test

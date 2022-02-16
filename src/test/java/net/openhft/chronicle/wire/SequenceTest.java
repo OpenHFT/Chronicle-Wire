@@ -25,12 +25,12 @@ public class SequenceTest extends WireTestCommon {
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> wireTypes() {
-        return Arrays.asList(
-                new Object[]{WireType.BINARY},
-                new Object[]{WireType.TEXT},
-//                new Object[]{WireType.YAML}, TODO FIX
-                new Object[]{WireType.JSON}
-        );
+        Object[][] list = {
+                {WireType.BINARY},
+                {WireType.TEXT},
+                {WireType.JSON}
+        };
+        return Arrays.asList(list);
     }
 
     @Test

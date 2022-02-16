@@ -24,7 +24,10 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.runners.Parameterized;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProjectTest extends WireTestCommon {
 
@@ -33,14 +36,14 @@ public class ProjectTest extends WireTestCommon {
     public TestName name = new TestName();
 
     @NotNull
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
-
-        @NotNull final List<Object[]> list = new ArrayList<>();
-        list.add(new Object[]{WireType.BINARY});
-        list.add(new Object[]{WireType.TEXT});
-             // list.add(new Object[]{WireType.RAW});
-        return list;
+        Object[][] list = {
+                {WireType.BINARY},
+                {WireType.TEXT},
+                {WireType.JSON}
+        };
+        return Arrays.asList(list);
     }
 
     @SuppressWarnings("unchecked")
@@ -70,8 +73,6 @@ public class ProjectTest extends WireTestCommon {
         simple.name2("world");
 
         final Outer project = Wires.project(Outer.class, simple);
-       // System.out.println(project);
-
         Assert.assertEquals("some data", project.inner().name());
     }
 

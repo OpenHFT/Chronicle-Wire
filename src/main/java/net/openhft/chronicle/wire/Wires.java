@@ -221,7 +221,7 @@ public enum Wires {
     }
 
     public static StringBuilder acquireStringBuilder() {
-        return SBP.acquireStringBuilder();
+        return Jvm.isDebug() ? new StringBuilder() : SBP.acquireStringBuilder();
     }
 
     public static int lengthOf(int len) {
@@ -301,6 +301,8 @@ public enum Wires {
 
     @NotNull
     public static Bytes<?> acquireBytes() {
+        if (Jvm.isDebug())
+            return Bytes.allocateElasticOnHeap();
         Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
                 Wires::unmonitoredDirectBytes);
         bytes.clear();
@@ -330,6 +332,8 @@ public enum Wires {
 
     @NotNull
     public static Bytes acquireAnotherBytes() {
+        if (Jvm.isDebug())
+            return Bytes.allocateElasticOnHeap();
         Bytes bytes = ThreadLocalHelper.getTL(WireInternal.BYTES_TL,
                 Wires::unmonitoredDirectBytes);
         bytes.clear();
@@ -470,6 +474,8 @@ public enum Wires {
 
     @Nullable
     public static <E> E objectMap(ValueIn in, @Nullable E using, @Nullable Class clazz, SerializationStrategy<E> strategy) {
+        if (in.isNull())
+            return null;
         boolean nullObject = false;
         if (clazz == Object.class)
             strategy = MAP;

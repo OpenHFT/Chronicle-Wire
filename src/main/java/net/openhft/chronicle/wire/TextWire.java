@@ -406,7 +406,7 @@ public class TextWire extends AbstractWire implements Wire {
     }
 
     @NotNull
-    private StringBuilder acquireStringBuilder() {
+    protected StringBuilder acquireStringBuilder() {
         StringUtils.setCount(sb, 0);
         return sb;
     }
