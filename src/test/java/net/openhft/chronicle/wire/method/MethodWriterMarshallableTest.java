@@ -5,6 +5,7 @@ import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class MethodWriterMarshallableTest extends WireTestCommon {
@@ -15,6 +16,5 @@ public class MethodWriterMarshallableTest extends WireTestCommon {
     }
 
     interface MyBadInterface extends Marshallable {
-
     }
 }

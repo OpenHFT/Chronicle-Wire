@@ -301,6 +301,24 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     }
 
     /**
+     * Sets the bits from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to the specified value.
+     *
+     * @param fromIndex index of the first bit to be set
+     * @param toIndex   index after the last bit to be set
+     * @param value     value to set the selected bits to
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, or {@code toIndex} is negative, or {@code fromIndex} is larger than {@code
+     *                                   toIndex}
+     */
+    public void set(int fromIndex, int toIndex, boolean value) {
+        throwExceptionIfClosed();
+
+        if (value)
+            set(fromIndex, toIndex);
+        else
+            clear(fromIndex, toIndex);
+    }
+
+    /**
      * Sets the bit specified by the index to {@code false}.
      */
     public void clear(int bitIndex) {

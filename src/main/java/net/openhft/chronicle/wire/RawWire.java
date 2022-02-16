@@ -1034,8 +1034,8 @@ public class RawWire extends AbstractWire implements Wire {
             bytes.readUtf8(sb);
             try {
                 return classLookup.forName(sb);
-            } catch (ClassNotFoundException e) {
-                return unresolvedHandler.apply(sb, e);
+            } catch (ClassNotFoundRuntimeException e) {
+                return unresolvedHandler.apply(sb, e.getCause());
             }
         }
 

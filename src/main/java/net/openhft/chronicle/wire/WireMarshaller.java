@@ -554,18 +554,16 @@ public class WireMarshaller<T> {
         protected abstract void getValue(Object o, ValueOut write, Object previous) throws IllegalAccessException;
 
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
-            if (read instanceof DefaultValueIn) {
+            if (!read.isPresent()) {
                 if (overwrite && defaults != null)
                     copy(Objects.requireNonNull(defaults), o);
             } else {
                 long pos = read.wireIn().bytes().readPosition();
                 try {
                     setValue(o, read, overwrite);
-                }
-                catch (UnexpectedFieldHandlingException e) {
+                } catch (UnexpectedFieldHandlingException e) {
                     Jvm.rethrow(e);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     read.wireIn().bytes().readPosition(pos);
                     StringBuilder sb = RSBP.acquireStringBuilder();
                     read.text(sb);
@@ -676,27 +674,27 @@ public class WireMarshaller<T> {
             try {
                 @Nullable Object using = ObjectUtils.isImmutable(type) == ObjectUtils.Immutability.NO ? field.get(o) : null;
 
-                final boolean useTypes = read instanceof JSONWire.JSONValueIn && ((JSONWire.JSONValueIn) read).useTypes();
-
-                final Object object;
-                // Enums are abstract classes
-                if (using == null &&
-                        Modifier.isAbstract(type.getModifiers()) &&
-                        !Modifier.isInterface(type.getModifiers()) &&
-                        !type.isEnum() &&
-                        !useTypes) {
-                    object = null;
-                } else {
+                Object object = null;
+                try {
                     object = read.object(using, type);
+                } catch (Exception e) {
+                    // "Unhandled" Abstract classes that are not types should be null (Enums are abstract classes in Java but should not be null here)
+                    if (using == null &&
+                            Modifier.isAbstract(type.getModifiers()) &&
+                            !Modifier.isInterface(type.getModifiers()) &&
+                            !type.isEnum() &&
+                            !read.isTyped()) {
+                        // retain the null value of object
+                    } else {
+                        Jvm.rethrow(e);
+                    }
                 }
 
                 field.set(o, object);
 
-            }
-            catch (UnexpectedFieldHandlingException e) {
+            } catch (UnexpectedFieldHandlingException e) {
                 Jvm.rethrow(e);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 read.wireIn().bytes().readPosition(pos);
                 Object object = null;
                 try {
@@ -753,9 +751,10 @@ public class WireMarshaller<T> {
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             @NotNull StringBuilder sb = unsafeGetObject(o, offset);
-            if (sb == null)
+            if (sb == null) {
                 sb = new StringBuilder();
                 unsafePutObject(o, offset, sb);
+            }
             if (read.textTo(sb) == null)
                 unsafePutObject(o, offset, null);
         }

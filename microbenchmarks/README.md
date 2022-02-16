@@ -109,7 +109,7 @@ All times are in micro-seconds
 
 | Wire Format          | Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
 |---------------------:|------:|------------:|------------:|---------------:|--------:|
-| JSONWire             |  100*   |  3.11       |        5.56    | 10.62           |  36.9    |
+| Chronicle-Wire ( JSON)             |  100*   |  3.11       |        5.56    | 10.62           |  36.9    |
 | Jackson                |  100   |   4.95       |       8.3      | 1,400           | 1,500 |
 | Jackson + C-Bytes |  100*   |   2.87       |      10.1     | 1,300           | 1,400 |
 | Jackson + C-Bytes Reader/Writer| 100*  |  3.06 | 10.3 |  883           | 1,500 |
@@ -126,7 +126,7 @@ SBE performs as well are BytesMarshallable.  Even though it was slower in this t
 
 However, I didn't find SBE simple.  Perhaps this is because I didn't use the generation for different languages, but I found it was non-trivial to use and setup.  
 For a flat class with just six fields it generated 9 classes, we have three support classes, and I ended up adding methods to the generated class to get it to perform as efficiently as I wanted.
-This is likely to be a lack of understand on my part, though I might not be alone in this.
+This is likely to be a lack of understanding on my part, though I might not be alone in this.
 
 ## Snake YAML
 Snake YAML is a fully featured YAML 1.1 parser. The library has to do much more work to support all the features of the YAML standard which necessarily takes longer.  

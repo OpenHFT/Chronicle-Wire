@@ -1,6 +1,5 @@
 package net.openhft.chronicle.wire;
 
-import com.sun.jndi.toolkit.ctx.Continuation;
 import io.github.classgraph.*;
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.jupiter.api.DynamicTest;
@@ -62,12 +61,24 @@ final class SerializableObjectTest extends WireTestCommon {
             )
             .collect(Collectors.collectingAndThen(toSet(), Collections::unmodifiableSet));
 
+
     private static final Set<Class<?>> IGNORED_CLASSES = new HashSet<>(Arrays.asList(
-            Continuation.class,
             DoubleSummaryStatistics.class,
             DriverPropertyInfo.class,
             SimpleDateFormat.class
     ));
+
+    static {
+
+        try {
+            // change to this because it fails in java11
+            final Class<?> aClass = Class.forName("com.sun.jndi.toolkit.ctx.Continuation");
+            IGNORED_CLASSES.add(aClass);
+        } catch (ClassNotFoundException ignore) {
+
+        }
+
+    }
 
 
     private static final Predicate<MethodInfo> CONSTRUCTOR_IS_DEFAULT = methodInfo -> methodInfo.isPublic() && methodInfo.getTypeDescriptor().getTypeParameters().isEmpty();
@@ -310,12 +321,13 @@ final class SerializableObjectTest extends WireTestCommon {
     Stream<DynamicTest> test() {
         return DynamicTest.stream(cases(), Objects::toString, wireTypeObject -> {
             final Object source = wireTypeObject.object;
+            // Can't handle suclasses of Properties.
+            if (source instanceof Properties && source.getClass() != Properties.class)
+                return;
 
             final Bytes<?> bytes = Bytes.allocateElasticDirect();
             try {
                 final Wire wire = wireTypeObject.wireType.apply(bytes);
-                if (source instanceof Locale)
-                    Thread.yield();
                 wire.getValueOut().object((Class) source.getClass(), source);
                 final Object target = wire.getValueIn().object(source.getClass());
                 if (!(source instanceof Comparable) || ((Comparable) source).compareTo(target) != 0) {

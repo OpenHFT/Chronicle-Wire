@@ -34,7 +34,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom</artifactId>
-                <version>3.19.10</version>
+                <version>3.22.3</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -88,6 +88,21 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>latest</id>
+            <activation>
+                <property>
+                    <name>wire.version</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>net.openhft</groupId>
+                    <artifactId>chronicle-wire</artifactId>
+                    <version>${wire.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
         <profile>
             <id>run-benchmarks</id>
             <properties/>

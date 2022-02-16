@@ -1,11 +1,12 @@
 package net.openhft.chronicle.wire.java17;
 
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class NestedTest {
+public class NestedTest extends WireTestCommon {
 
     @Test
     public void mini() {

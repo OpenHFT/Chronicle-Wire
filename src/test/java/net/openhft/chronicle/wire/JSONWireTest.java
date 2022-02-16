@@ -291,6 +291,31 @@ public class JSONWireTest extends WireTestCommon {
         assertNotNull(list);
     }
 
+    @Test
+    public void nestedMapWithIntegerKeys() {
+        MapWithIntegerKeysHolder mh = new MapWithIntegerKeysHolder();
+        mh.intMap.put(1111, "ones");
+        mh.intMap.put(2222, "twos");
+        mh.longMap.put(888888888888L, "eights");
+        mh.longMap.put(999999999999L, "nines");
+        mh.doubleMap.put(1.28, "number");
+        mh.doubleMap.put(2.56, "number");
+        final String text = JSON.asString(mh);
+        assertEquals("" +
+                "{\"intMap\":{\"1111\":\"ones\",\"2222\":\"twos\"},\n" +
+                "\"longMap\":{\"888888888888\":\"eights\",\"999999999999\":\"nines\"},\n" +
+                "\"doubleMap\":{\"1.28\":\"number\",\"2.56\":\"number\"}\n" +
+                "}", text);
+        MapWithIntegerKeysHolder mh2 = JSON.fromString(MapWithIntegerKeysHolder.class, text);
+        assertEquals(mh, mh2);
+    }
+
+    static class MapWithIntegerKeysHolder extends SelfDescribingMarshallable {
+        Map<Integer, String> intMap = new LinkedHashMap<>();
+        Map<Long, String> longMap = new LinkedHashMap<>();
+        Map<Double, String> doubleMap = new LinkedHashMap<>();
+    }
+
     static class MapHolder extends SelfDescribingMarshallable {
         Map<RetentionPolicy, Double> map;
     }

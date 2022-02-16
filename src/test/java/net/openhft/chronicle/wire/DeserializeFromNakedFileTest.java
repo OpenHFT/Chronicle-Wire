@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-public class DeserializeFromNakedFileTest {
+public class DeserializeFromNakedFileTest extends WireTestCommon {
     @Test(expected = IllegalArgumentException.class)
     public void testPOJO() throws IOException {
         PlainOldJavaClass res = Marshallable.fromFile(PlainOldJavaClass.class, "naked.yaml");

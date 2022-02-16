@@ -40,6 +40,7 @@ import java.util.Date;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeFalse;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
 @SuppressWarnings("rawtypes")
@@ -186,11 +187,11 @@ public class WireTests {
 
         field = new StringBuilder();
         wire.read(field).skipValue();
-       // System.out.println("read field=" + field.toString());
+        // System.out.println("read field=" + field.toString());
 
         field = new StringBuilder();
         wire.read(field).skipValue();
-       // System.out.println("read field=" + field.toString());
+        // System.out.println("read field=" + field.toString());
 
         b.releaseLast();
     }
@@ -316,6 +317,22 @@ public class WireTests {
         }
 
         b.releaseLast();
+    }
+
+    @Test
+    public void isPresentReturnsTrueWhenValueIsPresent() {
+        Bytes b = Bytes.elasticByteBuffer();
+        final Wire wire = createWire(b);
+        wire.write("value").int32(12345);
+        assertTrue(wire.read("value").isPresent());
+    }
+
+    @Test
+    public void isPresentReturnsFalseWhenValueIsNotPresent() {
+        Bytes b = Bytes.elasticByteBuffer();
+        final Wire wire = createWire(b);
+        wire.write("value").int32(12345);
+        assertFalse(wire.read("anotherValue").isPresent());
     }
 
     private Wire createWire(Bytes b) {

@@ -3,7 +3,7 @@ package net.openhft.chronicle.wire.issue;
 import net.openhft.chronicle.wire.JSONWire;
 import net.openhft.chronicle.wire.JsonUtil;
 import net.openhft.chronicle.wire.Wire;
-import org.junit.Ignore;
+import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 
 import java.util.Map;
@@ -11,11 +11,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static net.openhft.chronicle.wire.JsonUtil.assertBalancedBrackets;
 import static org.junit.Assert.assertEquals;
 
-@Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/328")
-public class Issue328Test {
+public class Issue328Test extends WireTestCommon {
 
     @Test
     public void map() {
@@ -24,7 +22,7 @@ public class Issue328Test {
         // keys must be strings in JSON
         final Map<Integer, String> map = IntStream.range(0, size)
                 .boxed()
-                .collect(Collectors.toMap(Function.identity(),i -> Integer.toString(i)));
+                .collect(Collectors.toMap(Function.identity(), i -> Integer.toString(i)));
 
         wire.getValueOut().object(map);
         final String actual = wire.toString();

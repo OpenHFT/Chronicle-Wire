@@ -387,6 +387,12 @@ public class JSONWire extends TextWire {
             return super.marshallable(object, strategy);
         }
 
+        @Override
+        public boolean isTyped() {
+            // Either we use types for sure or we might use types...
+            return useTypes || super.isTyped();
+        }
+
         private Object parseType() {
             if (!hasTypeDefinition()) {
                 return super.object();
@@ -394,12 +400,8 @@ public class JSONWire extends TextWire {
                 final StringBuilder sb = Wires.acquireStringBuilder();
                 sb.setLength(0);
                 this.wireIn().read(sb);
-                try {
-                    final Class<?> clazz = classLookup().forName(sb.subSequence(1, sb.length()));
-                    return parseType(null, clazz);
-                } catch (ReflectiveOperationException e) {
-                    throw new RuntimeException(e);
-                }
+                final Class<?> clazz = classLookup().forName(sb.subSequence(1, sb.length()));
+                return parseType(null, clazz);
             }
 
 /*
@@ -454,24 +456,20 @@ public class JSONWire extends TextWire {
                 final StringBuilder sb = Wires.acquireStringBuilder();
                 sb.setLength(0);
                 readTypeDefinition(sb);
-                try {
-                    final Class<?> overrideClass = classLookup().forName(sb.subSequence(1, sb.length()));
-                    if (!clazz.isAssignableFrom(overrideClass))
-                        throw new ClassCastException("Unable to cast " + overrideClass.getName() + " to " + clazz.getName());
-                    if (using != null && !overrideClass.isInstance(using))
-                        throw new ClassCastException("Unable to reuse a " + using.getClass().getName() + " as a " + overrideClass.getName());
-                    final E result = super.object(using, overrideClass);
+                final Class<?> overrideClass = classLookup().forName(sb.subSequence(1, sb.length()));
+                if (!clazz.isAssignableFrom(overrideClass))
+                    throw new ClassCastException("Unable to cast " + overrideClass.getName() + " to " + clazz.getName());
+                if (using != null && !overrideClass.isInstance(using))
+                    throw new ClassCastException("Unable to reuse a " + using.getClass().getName() + " as a " + overrideClass.getName());
+                final E result = super.object(using, overrideClass);
 
-                    // remove the closing bracket from the type definition
-                    consumePadding();
-                    final char endBracket = bytes.readChar();
-                    assert endBracket == '}' : "Missing end bracket }, got " + endBracket + " from " + bytes;
-                    consumePadding(1);
+                // remove the closing bracket from the type definition
+                consumePadding();
+                final char endBracket = bytes.readChar();
+                assert endBracket == '}' : "Missing end bracket }, got " + endBracket + " from " + bytes;
+                consumePadding(1);
 
-                    return result;
-                } catch (ReflectiveOperationException e) {
-                    throw new RuntimeException(e);
-                }
+                return result;
             }
         }
 

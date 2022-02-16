@@ -9,9 +9,10 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class JSONWireDTOTest {
+public class JSONWireDTOTest extends WireTestCommon {
     @Test
     public void dto() {
+        expectException("Found this$0, in class");
         // underlying bytes
         Bytes bytes = Bytes.allocateElasticDirect();
 
@@ -51,6 +52,7 @@ public class JSONWireDTOTest {
                 "  l: 0,\n" +
                 "  i: 0\n" +
                 "}\n", dto2.toString());
+        bytes.releaseLast();
     }
 
     static class JSOuterClass extends SelfDescribingMarshallable {
