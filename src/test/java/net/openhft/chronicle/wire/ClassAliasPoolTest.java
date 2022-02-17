@@ -83,19 +83,19 @@ public class ClassAliasPoolTest extends WireTestCommon {
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
         assertEquals("" +
-                "handle[!net.openhft.chronicle.wire.ClassAliasPoolTest$CAPTData {\n" +
-                "  value: 0\n" +
-                "}\n" +
-                "]\n", out.toString());
+                        "handle[!net.openhft.chronicle.wire.ClassAliasPoolTest$CAPTData {\n" +
+                        "  value: 0\n" +
+                        "}\n" +
+                        "]\n",
+                out.toString().replace("\r", ""));
         verify(mock);
     }
 
-    interface TestedMethods {
+    public interface TestedMethods {
         void handle(Marshallable m);
     }
 
-    static class CAPTData extends SelfDescribingMarshallable {
+    public static class CAPTData extends SelfDescribingMarshallable {
         long value;
     }
-
 }

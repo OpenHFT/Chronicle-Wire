@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.CommonMarshallable;
+import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.core.annotation.DontChain;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,5 +39,12 @@ public interface WriteMarshallable extends WriteValue, CommonMarshallable {
     @Override
     default void writeValue(@NotNull ValueOut out) {
         out.marshallable(this);
+    }
+
+    /**
+     * @return the size in bytes to assume the length will be
+     */
+    default BinaryLengthLength binaryWireSize() {
+        return BinaryLengthLength.LENGTH_32BIT;
     }
 }

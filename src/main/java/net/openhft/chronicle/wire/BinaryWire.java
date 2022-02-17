@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.ref.*;
+import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.bytes.util.Bit8StringInterner;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
@@ -1856,19 +1857,15 @@ public class BinaryWire extends AbstractWire implements Wire {
         public WireOut marshallable(@NotNull WriteMarshallable object) {
             if (bytes.retainsComments())
                 bytes.comment(object.getClass().getSimpleName());
-            writeCode(BYTES_LENGTH32);
-            long position = bytes.writePosition();
-            bytes.writeInt(0);
+            final BinaryLengthLength binaryLengthLength = object.binaryWireSize();
+            long pos = binaryLengthLength.initialise(bytes);
 
             if (useSelfDescribingMessage(object))
                 object.writeMarshallable(BinaryWire.this);
             else
                 ((WriteBytesMarshallable) object).writeMarshallable(BinaryWire.this.bytes());
 
-            long length = bytes.writePosition() - position - 4;
-            if (length > Integer.MAX_VALUE && bytes instanceof HexDumpBytes)
-                length = (int) length;
-            bytes.writeOrderedInt(position, Maths.toInt32(length, "Document length %,d out of 32-bit int range."));
+            binaryLengthLength.writeLength(bytes, pos, bytes.writePosition());
             return BinaryWire.this;
         }
 
@@ -2279,6 +2276,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         public BracketType getBracketType() {
             consumePadding();
             switch (peekCode()) {
+                case BYTES_LENGTH8:
+                    return getBracketTypeFor(bytes.readUnsignedByte(bytes.readPosition() + 1 + 1));
                 case BYTES_LENGTH16:
                     return getBracketTypeFor(bytes.readUnsignedByte(bytes.readPosition() + 2 + 1));
                 case BYTES_LENGTH32:
@@ -3133,9 +3132,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) {
             consumePadding();
             int code = readCode();
-            if (code != BYTES_LENGTH32)
-                cantRead(code);
-            final int length = bytes.readInt();
+            long length = readLengthPrefixed(code);
             long limit = bytes.readLimit();
             long limit2 = bytes.readPosition() + length;
             bytes.readLimit(limit2);
@@ -3148,13 +3145,29 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        private long readLengthPrefixed(int code) {
+            long length;
+            switch (code) {
+                case BYTES_LENGTH8:
+                    length = bytes.readUnsignedByte();
+                    break;
+                case BYTES_LENGTH16:
+                    length = bytes.readUnsignedShort();
+                    break;
+                case BYTES_LENGTH32:
+                    length = bytes.readUnsignedInt();
+                    break;
+                default:
+                    throw cantRead(code);
+            }
+            return length;
+        }
+
         @Override
         public <T> int sequenceWithLength(@NotNull T t, @NotNull ToIntBiFunction<ValueIn, T> tReader) {
             consumePadding();
             int code = readCode();
-            if (code != BYTES_LENGTH32)
-                cantRead(code);
-            final int length = bytes.readInt();
+            long length = readLengthPrefixed(code);
             long limit = bytes.readLimit();
             long limit2 = bytes.readPosition() + length;
             bytes.readLimit(limit2);
@@ -3666,6 +3679,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             switch (code >> 4) {
                 case BinaryWireHighCode.CONTROL:
                     switch (code) {
+                        case BYTES_LENGTH8:
                         case BYTES_LENGTH16:
                         case BYTES_LENGTH32: {
                             if (using instanceof StringBuilder) {
@@ -3792,10 +3806,19 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case BinaryWireHighCode.CONTROL:
                     switch (code) {
                         case BYTES_LENGTH8:
+                            bytes.readSkip(1);
+                            bytes.readSkip(bytes.readUnsignedByte());
+                            return;
+
                         case BYTES_LENGTH16:
+                            bytes.readSkip(1);
+                            bytes.readSkip(bytes.readUnsignedShort());
+                            return;
+
                         case BYTES_LENGTH32:
-                            long length = readLength();
-                            bytes.readSkip(length);
+                            bytes.readSkip(1);
+                            bytes.readSkip(bytes.readUnsignedInt());
+
                             return;
                         case ANCHOR:
                         case UPDATED_ALIAS:
