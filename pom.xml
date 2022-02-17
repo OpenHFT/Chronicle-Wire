@@ -273,7 +273,7 @@
         <url>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</url>
         <connection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</connection>
         <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</developerConnection>
-        <tag>ea</tag>
+        <tag>release/2.22</tag>
     </scm>
 
     <profiles>
