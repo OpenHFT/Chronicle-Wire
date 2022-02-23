@@ -55,6 +55,10 @@ public class JSONWire extends TextWire {
         trimFirstCurly(false);
     }
 
+    @Override
+    protected Class defaultKeyClass() {
+        return String.class;
+    }
 
     @SuppressWarnings("rawtypes")
     public JSONWire(@NotNull Bytes bytes) {

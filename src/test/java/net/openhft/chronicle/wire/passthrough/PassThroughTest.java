@@ -163,20 +163,16 @@ public class PassThroughTest extends WireTestCommon {
         for (int i = 2; i >= 0; i--)
             assertEquals(i > 0, reader2.readOne());
         assertEquals("" +
-                        "16 00 00 00                                     # msg-length\n" +
+                        "17 00 00 00                                     # msg-length\n" +
                         "c2 74 6f                                        # to\n" +
                         "e5 64 65 73 74 31                               # dest1\n" +
-                        "c4 73 65 6e 64                                  # send\n" +
-                        "e7 6d 65 73 73 61 67 65                         # message\n" +
-                        "2e 00 00 00                                     # msg-length\n" +
+                        "b9 04 73 65 6e 64 e7 6d 65 73 73 61 67 65       # passed-through\n" +
+                        "31 00 00 00                                     # msg-length\n" +
                         "c2 74 6f                                        # to\n" +
                         "e5 64 65 73 74 32                               # dest2\n" +
-                        "c5 73 65 6e 64 73                               # sends\n" +
-                        "82 1a 00 00 00                                  # BinaryWire$$Lambda\n" +
-                        "c3 6f 6e 65                                     # one\n" +
-                        "a7 01 00 00 00 00 00 00 00                      # 1\n" +
-                        "c3 74 77 6f                                     # two\n" +
-                        "a7 02 00 00 00 00 00 00 00                      # 2\n",
+                        "b9 05 73 65 6e 64 73 82 1c 00 00 00 b9 03 6f 6e # passed-through\n" +
+                        "65 a7 01 00 00 00 00 00 00 00 b9 03 74 77 6f a7\n" +
+                        "02 00 00 00 00 00 00 00\n",
                 wire3.bytes().toHexString().replaceAll("Lambda.*", "Lambda"));
 
         Wire wire4 = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
