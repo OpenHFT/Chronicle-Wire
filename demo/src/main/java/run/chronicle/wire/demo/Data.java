@@ -1,5 +1,6 @@
 package run.chronicle.wire.demo;
 
+import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;

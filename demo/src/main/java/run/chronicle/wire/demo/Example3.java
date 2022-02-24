@@ -1,11 +1,11 @@
 package run.chronicle.wire.demo;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
 /**
