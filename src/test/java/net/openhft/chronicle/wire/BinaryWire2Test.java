@@ -766,7 +766,7 @@ public class BinaryWire2Test extends WireTestCommon {
             assertEquals("--- !!data #binary\n" +
                     "data: !!UpdateEvent {\n" +
                     "  mm: \"\\u4F60\\u597D\",\n" +
-                    "  value: 15\n" +
+                    "  value: !int 15\n" +
                     "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
         } finally {
             wire.bytes().releaseLast();

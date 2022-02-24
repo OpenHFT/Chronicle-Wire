@@ -2016,9 +2016,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case 59:
                 case 58:
                 case 57:
-                    // used when the value is written directly into the code byte
-                    bytes.writeUnsignedByte((int) l);
-                    return;
                 case 56:
                     super.uint8checked((short) l);
                     return;
@@ -2075,6 +2072,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                         return;
                     }
                     break;
+                default:
+                    break;
             }
 
             if ((long) (float) l == l) {
@@ -2095,9 +2094,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case 59:
                 case 58:
                 case 57:
-                    // used when the value is written directly into the code byte
-                    bytes.writeUnsignedByte(l);
-                    return;
                 case 56:
                     super.uint8checked((short) l);
                     return;
@@ -2145,6 +2141,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                         super.int32(l);
                     }
                     return;
+                default:
+                    assert false;
             }
         }
 
@@ -2203,12 +2201,6 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         private void writeAsPositive(double l) {
-            if (l <= 127) {
-                // used when the value is written directly into the code byte
-                bytes.writeUnsignedByte((int) l);
-                return;
-            }
-
             if (l <= (1 << 8) - 1) {
                 super.uint8checked((short) l);
 

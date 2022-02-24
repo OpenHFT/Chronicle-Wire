@@ -26,10 +26,14 @@ public class DocumentContextTest extends WireTestCommon {
         wire.usePadding(true);
         Bytes<?> bytes = doTest(wire);
         assertEquals("" +
-                "14 00 00 00                                     # msg-length\n" +
-                "b9 03 6f 6e 65 01                               # one: (event)\n" +
-                "b9 03 74 77 6f 02                               # two: (event)\n" +
-                "b9 05 74 68 72 65 65 03                         # three: (event)\n", bytes.toHexString());
+                        "17 00 00 00                                     # msg-length\n" +
+                        "b9 03 6f 6e 65                                  # one: (event)\n" +
+                        "a1 01                                           # 1\n" +
+                        "b9 03 74 77 6f                                  # two: (event)\n" +
+                        "a1 02                                           # 2\n" +
+                        "b9 05 74 68 72 65 65                            # three: (event)\n" +
+                        "a1 03                                           # 3\n",
+                bytes.toHexString());
         bytes.releaseLast();
     }
 

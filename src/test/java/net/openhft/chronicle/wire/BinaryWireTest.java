@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +38,6 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static net.openhft.chronicle.bytes.Bytes.elasticHeapByteBuffer;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
@@ -51,7 +51,7 @@ public class BinaryWireTest extends WireTestCommon {
     final int compressedSize;
     @SuppressWarnings("rawtypes")
     @NotNull
-    Bytes bytes = elasticHeapByteBuffer();
+    Bytes bytes = new HexDumpBytes();
 
     public BinaryWireTest(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
@@ -120,7 +120,13 @@ public class BinaryWireTest extends WireTestCommon {
     private void checkWire(@NotNull Wire wire, String... expected) {
         assertEquals("id: " + testId,
                 expected[testId].replaceAll("٠+$", ""),
-                wire.toString().replaceAll("٠+$", ""));
+                wire.bytes().toHexString().replaceAll("٠+$", ""));
+    }
+
+    private void checkWire2(@NotNull Wire wire, String... expected) {
+        assertEquals("id: " + testId,
+                expected[testId].replaceAll("٠+$", ""),
+                wire.bytes().toDebugString(9999).replaceAll("٠+$", ""));
     }
 
     @Test
