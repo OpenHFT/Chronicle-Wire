@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
+import net.openhft.chronicle.core.threads.ThreadLocalHelper;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.wire.internal.FromStringInterner;
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +49,7 @@ public enum WireInternal {
     static final ThreadLocal<WeakReference<Bytes>> BYTES_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Bytes>> BYTES_F2S_TL = new ThreadLocal<>();
     static final ThreadLocal<WeakReference<Wire>> BINARY_WIRE_TL = new ThreadLocal<>();
-    static final ThreadLocal<WeakReference<Bytes>> ABYTES_TL = new ThreadLocal();
+    static final ThreadLocal<WeakReference<Bytes>> INTERNAL_BYTES_TL = new ThreadLocal<>();
 
     static final StackTraceElement[] NO_STE = {};
     static final Set<Class> INTERNABLE = new HashSet<>(Arrays.asList(
@@ -309,6 +310,16 @@ public enum WireInternal {
             return (T) interner.intern(s);
         }
         return ObjectUtils.convertTo(tClass, o);
+    }
+
+    @NotNull
+    static Bytes<?> acquireInternalBytes() {
+        if (Jvm.isDebug())
+            return Bytes.allocateElasticOnHeap();
+        Bytes bytes = ThreadLocalHelper.getTL(INTERNAL_BYTES_TL,
+                Wires::unmonitoredDirectBytes);
+        bytes.clear();
+        return bytes;
     }
 
     static class ObjectInterner<T> extends FromStringInterner<T> {

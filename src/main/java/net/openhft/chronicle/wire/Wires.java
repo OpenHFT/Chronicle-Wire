@@ -212,7 +212,7 @@ public enum Wires {
     public static CharSequence asText(@NotNull WireIn wireIn) {
         long pos = wireIn.bytes().readPosition();
         try {
-            Bytes bytes = acquireBytes();
+            Bytes bytes = WireInternal.acquireInternalBytes();
             wireIn.copyTo(new TextWire(bytes).addTimeStamps(true));
             return bytes;
         } finally {

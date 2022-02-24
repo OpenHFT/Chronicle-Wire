@@ -911,7 +911,7 @@ public interface ValueOut {
             return nu11();
         if (uncompressedBytes.readRemaining() < SMALL_MESSAGE)
             return bytes(uncompressedBytes);
-        Bytes tmpBytes = Wires.acquireBytes();
+        Bytes tmpBytes = WireInternal.acquireInternalBytes();
         Compression.compress(compression, uncompressedBytes, tmpBytes);
         bytes(compression, tmpBytes);
         return wireOut();
