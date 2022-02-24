@@ -1,15 +1,18 @@
 package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.Marshallable;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class TriviallyCopyableMarketDataTest {
     @Test
     public void test() {
+        assumeFalse(Jvm.isAzulZing());
         ClassAliasPool.CLASS_ALIASES.addAlias(TriviallyCopyableMarketData.class, "MarketData");
         final String str = "" +
                 "!MarketData {\n" +
