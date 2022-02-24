@@ -1677,7 +1677,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             writeCode(I64_ARRAY);
             long pos = bytes.writePosition();
             BinaryLongArrayReference.lazyWrite(bytes, capacity);
-            ((Byteable) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
+            ((Byteable) values).bytesStore(bytes, pos, bytes.lengthWritten(pos));
             return BinaryWire.this;
         }
 
@@ -1882,7 +1882,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
 
         private void setSequenceLength(long position) {
-            long length0 = bytes.writePosition() - position - 4;
+            long length0 = bytes.lengthWritten(position) - 4;
             int length = bytes instanceof HexDumpBytes
                     ? (int) length0
                     : Maths.toInt32(length0, "Document length %,d out of 32-bit int range.");
@@ -1931,7 +1931,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             object.writeMarshallable(BinaryWire.this.bytes());
 
-            long length = bytes.writePosition() - position - 4;
+            long length = bytes.lengthWritten(position) - 4;
             if (length > Integer.MAX_VALUE && bytes instanceof HexDumpBytes)
                 length = (int) length;
             bytes.writeOrderedInt(position, Maths.toInt32(length, "Document length %,d out of 32-bit int range."));
@@ -1957,7 +1957,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 throw new IORuntimeException(e);
             }
 
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.lengthWritten(position) - 4, "Document length %,d out of 32-bit int range."));
             return BinaryWire.this;
         }
 

@@ -103,11 +103,13 @@ public class MessageHistoryTest extends WireTestCommon {
         bw.writeEventName(MethodReader.HISTORY).marshallable(history);
         assertEquals("" +
                         "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
-                        "82 3d 00 00 00                                  # SetTimeMessageHistory\n" +
+                        "81 3f 00                                        # SetTimeMessageHistory\n" +
                         "c7 73 6f 75 72 63 65 73                         # sources:\n" +
-                        "82 14 00 00 00                                  # sequence\n" +
-                        "01 af ff 00 00 00 00 00 00 00                   # source id & index\n" +
-                        "02 af ff 0f 00 00 00 00 00 00                   # source id & index\n" +
+                        "82 16 00 00 00                                  # sequence\n" +
+                        "                                                # source id & index\n" +
+                        "a1 01 af ff 00 00 00 00 00 00 00                # 1\n" +
+                        "                                                # source id & index\n" +
+                        "a1 02 af ff 0f 00 00 00 00 00 00                # 2\n" +
                         "c7 74 69 6d 69 6e 67 73                         # timings:\n" +
                         "82 0f 00 00 00                                  # sequence\n" +
                         "                                                # timing in nanos\n" +
@@ -147,10 +149,11 @@ public class MessageHistoryTest extends WireTestCommon {
 
         assertEquals("" +
                         "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
-                        "82 33 00 00 00                                  # SetTimeMessageHistory\n" +
+                        "81 34 00                                        # SetTimeMessageHistory\n" +
                         "c7 73 6f 75 72 63 65 73                         # sources:\n" +
-                        "82 0a 00 00 00                                  # sequence\n" +
-                        "01 af 02 00 00 00 00 00 00 00                   # source id & index\n" +
+                        "82 0b 00 00 00                                  # sequence\n" +
+                        "                                                # source id & index\n" +
+                        "a1 01 af 02 00 00 00 00 00 00 00                # 1\n" +
                         "c7 74 69 6d 69 6e 67 73                         # timings:\n" +
                         "82 0f 00 00 00                                  # sequence\n" +
                         "                                                # timing in nanos\n" +
@@ -158,7 +161,7 @@ public class MessageHistoryTest extends WireTestCommon {
                         "                                                # timing in nanos\n" +
                         "a5 ae 08                                        # 2222\n" +
                         "a7 64 0c 2c b5 03 6e 00 00 ba 80 00             # 120962203520100\n" +
-                        "82 27 00 00 00 86                               # SetTimeMessageHistory\n" +
+                        "81 27 00 86                                     # SetTimeMessageHistory\n" +
                         "01 01 00 00 00 02 00 00 00 00 00 00 00          # sources\n" +
                         "03 57 04 00 00 00 00 00 00 ae 08 00 00 00 00 00 # timings\n" +
                         "00 64 0c 2c b5 03 6e 00 00\n",

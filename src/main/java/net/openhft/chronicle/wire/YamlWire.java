@@ -1231,7 +1231,7 @@ public class YamlWire extends AbstractWire implements Wire {
             }
             long pos = bytes.writePosition();
             TextLongArrayReference.write(bytes, capacity);
-            ((Byteable) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
+            ((Byteable) values).bytesStore(bytes, pos, bytes.lengthWritten(pos));
             return YamlWire.this;
         }
 
@@ -1430,7 +1430,7 @@ public class YamlWire extends AbstractWire implements Wire {
             prependSeparator();
             long offset = bytes.writePosition();
             TextIntReference.write(bytes, value);
-            long length = bytes.writePosition() - offset;
+            long length = bytes.lengthWritten(offset);
             ((Byteable) intValue).bytesStore(bytes, offset, length);
             elementSeparator();
             return wireOut();
@@ -1459,7 +1459,7 @@ public class YamlWire extends AbstractWire implements Wire {
             prependSeparator();
             long offset = bytes.writePosition();
             TextLongReference.write(bytes, value);
-            long length = bytes.writePosition() - offset;
+            long length = bytes.lengthWritten(offset);
             ((Byteable) longValue).bytesStore(bytes, offset, length);
             elementSeparator();
             return wireOut();
@@ -1476,7 +1476,7 @@ public class YamlWire extends AbstractWire implements Wire {
             prependSeparator();
             long offset = bytes.writePosition();
             TextBooleanReference.write(value, bytes, offset);
-            long length = bytes.writePosition() - offset;
+            long length = bytes.lengthWritten(offset);
             ((Byteable) longValue).bytesStore(bytes, offset, length);
             elementSeparator();
             return wireOut();

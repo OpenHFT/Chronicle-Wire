@@ -74,8 +74,8 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         clear(bytes);
         writeMessageOne(wire);
 
-        // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
-        assertEquals("[pos: 0, rlim: 132, wlim: 2147483632, cap: 2147483632 ] ǁ$٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠\\u008FX٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠",
+        assertEquals("" +
+                        "[pos: 0, rlim: 132, wlim: 2147483632, cap: 2147483632 ] ǁ$٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠\\u008FX٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
 
         @NotNull Wire raw = new RawWire(bytes);
@@ -83,7 +83,8 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         clear(bytes);
         writeMessageOne(raw);
 
-        assertEquals("[pos: 0, rlim: 68, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@⒘///service-lookupu\\u009F)å\"٠٠٠٠٠ ٠٠٠\\u001C٠٠٠⒋test⒊Map⒖٠٠٠⒎Integer⒍String‡٠٠٠٠٠٠٠٠",
+        assertEquals("" +
+                        "[pos: 0, rlim: 68, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@⒘///service-lookupu\\u009F)å\"٠٠٠٠٠ ٠٠٠\\u001C٠٠٠⒋test⒊Map⒖٠٠٠⒎Integer⒍String‡٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
 /*
 --- !!meta-data
@@ -135,7 +136,7 @@ put: [ 3, bye ]
 
         // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("" +
-                        "[pos: 0, rlim: 120, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0018٠٠@Ãcspî//server1/testÃcid⒈\\u001C٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒈Åvalueåhello\\u008F\\u008F\\u001C٠٠٠Ãput\\u0082⒘٠٠٠Ãkey⒉Åvalueåworld\\u008F\\u008F\\u0018٠٠٠Ãput\\u0082⒖٠٠٠Ãkey⒊Åvalueãbye‡٠٠٠٠٠٠٠٠",
+                        "[pos: 0, rlim: 128, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@Ãcspî//server1/testÃcid¡⒈\\u008F\\u008F\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒈Åvalueåhello\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒉Åvalueåworld\\u008F\\u001C٠٠٠Ãput\\u0082⒗٠٠٠Ãkey¡⒊Åvalueãbye\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
 
         clear(bytes);

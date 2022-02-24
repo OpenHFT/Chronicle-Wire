@@ -114,26 +114,27 @@ public class NestedMapsTest extends WireTestCommon {
                         "    dog\n" +
                         "  ],\n" +
                         "  numbers: [\n" +
-                        "    1,\n" +
-                        "    2,\n" +
-                        "    2,\n" +
-                        "    3,\n" +
-                        "    5,\n" +
-                        "    8,\n" +
-                        "    13\n" +
+                        "    !int 1,\n" +
+                        "    !int 2,\n" +
+                        "    !int 2,\n" +
+                        "    !int 3,\n" +
+                        "    !int 5,\n" +
+                        "    !int 8,\n" +
+                        "    !int 13\n" +
                         "  ],\n" +
                         "  map1: {\n" +
                         "    aye: AAA,\n" +
                         "    bee: BBB\n" +
                         "  },\n" +
                         "  map2: {\n" +
-                        "    one: 1,\n" +
+                        "    one: !int 1,\n" +
                         "    two point two: 2.2\n" +
                         "  }\n" +
                         "}\n", Wires.fromSizePrefixedBlobs(wire));
                 break;
             case FIELDLESS_BINARY:
-                assertEquals("--- !!data #binary\n" +
+                assertEquals("" +
+                        "--- !!data #binary\n" +
                         "mapped: !net.openhft.chronicle.wire.NestedMapsTest$Mapped [\n" +
                         "  [\n" +
                         "    A,\n" +
@@ -147,20 +148,20 @@ public class NestedMapsTest extends WireTestCommon {
                         "    dog\n" +
                         "  ],\n" +
                         "  [\n" +
-                        "    1,\n" +
-                        "    2,\n" +
-                        "    2,\n" +
-                        "    3,\n" +
-                        "    5,\n" +
-                        "    8,\n" +
-                        "    13\n" +
+                        "    !int 1,\n" +
+                        "    !int 2,\n" +
+                        "    !int 2,\n" +
+                        "    !int 3,\n" +
+                        "    !int 5,\n" +
+                        "    !int 8,\n" +
+                        "    !int 13\n" +
                         "  ],\n" +
                         "  {\n" +
                         "    aye: AAA,\n" +
                         "    bee: BBB\n" +
                         "  },\n" +
                         "  {\n" +
-                        "    one: 1,\n" +
+                        "    one: !int 1,\n" +
                         "    two point two: 2.2\n" +
                         "  }\n" +
                         "]\n", Wires.fromSizePrefixedBlobs(wire));
@@ -220,7 +221,7 @@ public class NestedMapsTest extends WireTestCommon {
                         "}\n", wire.toString());
                 break;
             case BINARY:
-                assertEquals("[pos: 0, rlim: 135, wlim: 2147483632, cap: 2147483632 ] ǁÅwords\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdogÇnumbers\\u0082⒎٠٠٠⒈⒉⒉⒊⒌⒏⒔Ämap1\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBBÄmap2\\u0082\\u0018٠٠٠¹⒊one⒈¹⒔two point two\\u0092Ü⒈‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+                assertEquals("[pos: 0, rlim: 143, wlim: 2147483632, cap: 2147483632 ] ǁÅwords\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdogÇnumbers\\u0082⒕٠٠٠¡⒈¡⒉¡⒉¡⒊¡⒌¡⒏¡⒔Ämap1\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBBÄmap2\\u0082\\u0019٠٠٠¹⒊one¡⒈¹⒔two point two\\u0092Ü⒈‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
                 break;
             case FIELDLESS_BINARY:
                 assertEquals("[pos: 0, rlim: 119, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdog\\u0082⒕٠٠٠¡⒈¡⒉¡⒉¡⒊¡⒌¡⒏¡⒔\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBB\\u0082\\u0019٠٠٠¹⒊one¡⒈¹⒔two point two\\u0092Ü⒈‡٠٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());

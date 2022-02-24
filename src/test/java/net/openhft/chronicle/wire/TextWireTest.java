@@ -1047,7 +1047,7 @@ public class TextWireTest extends WireTestCommon {
 
         long start = wire.bytes().writePosition() + 1; // including one space for "sep".
         write.marshallable(mtA);
-        long fieldLen = wire.bytes().writePosition() - start;
+        long fieldLen = wire.bytes().lengthWritten(start);
 
         expectWithSnakeYaml("{A={B_FLAG=true, S_NUM=12345, D_NUM=123.456, L_NUM=0, I_NUM=-12345789, TEXT=}}", wire);
 

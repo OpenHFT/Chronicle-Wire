@@ -273,14 +273,16 @@ public class WireTests {
         assertEquals("", wire.readingPeekYaml());
 
         try (@NotNull DocumentContext dc = wire.readingDocument()) {
-            assertEquals("--- !!data #binary\n" +
+            assertEquals("" +
+                    "--- !!data #binary\n" +
                     "some-data!: {\n" +
-                    "  some-other-data: 0\n" +
+                    "  some-other-data: !int 0\n" +
                     "}\n", wire.readingPeekYaml());
             dc.wire().read("some-data");
-            assertEquals("--- !!data #binary\n" +
+            assertEquals("" +
+                    "--- !!data #binary\n" +
                     "some-data!: {\n" +
-                    "  some-other-data: 0\n" +
+                    "  some-other-data: !int 0\n" +
                     "}\n", wire.readingPeekYaml());
 
         }
@@ -298,13 +300,13 @@ public class WireTests {
             assertEquals("# position: " + position + ", header: 0\n" +
                     "--- !!data #binary\n" +
                     "some-new: {\n" +
-                    "  some-other--new-data: 0\n" +
+                    "  some-other--new-data: !int 0\n" +
                     "}\n", wire.readingPeekYaml());
             dc.wire().read("some-data");
             assertEquals("# position: " + position + ", header: 0\n" +
                     "--- !!data #binary\n" +
                     "some-new: {\n" +
-                    "  some-other--new-data: 0\n" +
+                    "  some-other--new-data: !int 0\n" +
                     "}\n", wire.readingPeekYaml());
 
         }
