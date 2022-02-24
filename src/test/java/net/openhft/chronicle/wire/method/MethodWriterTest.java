@@ -32,7 +32,7 @@ public class MethodWriterTest extends WireTestCommon {
         writer.event("mid", new VanillaMethodReaderTest.MRT1("1"));
         writer.event("mid", new VanillaMethodReaderTest.MRT2("1", "2"));
 
-        /**
+        /*
          * top: !net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT1 {
          *   field1: one,
          *   value: a
@@ -236,14 +236,15 @@ public class MethodWriterTest extends WireTestCommon {
         Args writer = wire.methodWriter(Args.class);
         checkWriterType(writer);
         writer.primitives(true, (byte) 1, (short) 2, 3, 4, '5', 6, 7, "8", "9");
-        assertEquals("primitives: [\n" +
+        assertEquals("" +
+                "primitives: [\n" +
                 "  true,\n" +
-                "  " + (byteShort ? "!byte " : "") + "1,\n" +
-                "  " + (byteShort ? "!short " : "")+ "2,\n" +
-                "  !int 3,\n" +
+                "  1,\n" +
+                "  2,\n" +
+                "  3,\n" +
                 "  4,\n" +
                 "  \"5\",\n" +
-                "  !float 6.0,\n" +
+                "  6.0,\n" +
                 "  7.0,\n" +
                 "  \"8\",\n" +
                 "  \"9\"\n" +

@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Mocker;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
@@ -37,8 +38,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * In case generated instance fails to perform a read, it's delegated to lazy-initialized {@link VanillaMethodReader}.
  */
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
-    private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = noOp -> {
-    };
+    private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER = Mocker.ignored(Consumer.class);
     private final MarshallableIn in;
     protected final WireParselet debugLoggingParselet;
     private final Supplier<MethodReader> delegateSupplier;
@@ -125,12 +125,16 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                 if (!readOneCall(wireIn))
                     return false;
 
+                if (restIgnored())
+                    return true;
+
                 wireIn.consumePadding();
                 if (bytes.readPosition() == start) {
                     Jvm.warn().on(getClass(), "Failed to progress reading " + bytes.readRemaining() + " bytes left.");
                     break;
                 }
             }
+            // only called if the end of the message is reached normally.
             wireIn.endEvent();
         } finally {
             if (historyConsumer != NO_OP_MH_CONSUMER)
@@ -141,8 +145,13 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         return true;
     }
 
+    protected boolean restIgnored() {
+        return false;
+    }
+
     /**
      * uses a double buffer technique to swap the current message history with a temp message history ( this is, if it has not already been stored ) .
+     *
      * @return the MessageHistory
      */
     @NotNull

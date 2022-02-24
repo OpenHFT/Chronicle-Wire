@@ -5,6 +5,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.UpdateInterceptor;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.wire.internal.GenericReflection;
 import net.openhft.chronicle.wire.utils.JavaSourceCodeFormatter;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import org.jetbrains.annotations.NotNull;
@@ -163,13 +164,13 @@ public class GenerateMethodWriter {
         } else if (short.class.equals(type)) {
             return "int16";
         } else if (int.class.equals(type)) {
-            return "fixedInt32";
+            return "int32";
         } else if (long.class.equals(type)) {
-            return "fixedInt64";
+            return "int64";
         } else if (float.class.equals(type)) {
-            return "fixedFloat32";
+            return "float32";
         } else if (double.class.equals(type)) {
-            return "fixedFloat64";
+            return "float64";
         } else if (CharSequence.class.isAssignableFrom(type)) {
             return "text";
         } else if (Marshallable.class.isAssignableFrom(type)) {
@@ -268,7 +269,7 @@ public class GenerateMethodWriter {
                 for (Method dm : interfaceClazz.getMethods()) {
                     if (dm.isDefault() || Modifier.isStatic(dm.getModifiers()))
                         continue;
-                    String template = templateFor(dm);
+                    String template = templateFor(dm, interfaceClazz);
                     if (template != null)
                         continue;
                     for (Class pType : dm.getParameterTypes()) {
@@ -307,13 +308,14 @@ public class GenerateMethodWriter {
                     if (Modifier.isStatic(dm.getModifiers()))
                         continue;
 
-                    if (dm.isDefault() && (!dm.getReturnType().equals(void.class) && !dm.getReturnType().isInterface()))
+                    final Class<?> returnType = (Class<?>) GenericReflection.getReturnType(dm, interfaceClazz);
+                    if (dm.isDefault() && (!returnType.equals(void.class) && !returnType.isInterface()))
                         continue;
 
                     if (!handledMethodSignatures.add(signature(dm)))
                         continue;
 
-                    String template = templateFor(dm);
+                    String template = templateFor(dm, interfaceClazz);
                     if (template == null) {
                         interfaceMethods.append(createMethod(importSet, dm, interfaceClazz, methodIds));
                     } else {
@@ -351,12 +353,12 @@ public class GenerateMethodWriter {
 
     }
 
-    private String templateFor(Method dm) {
+    private String templateFor(Method dm, Class interfaceType) {
         Map<List<Class<?>>, String> map = TEMPLATE_METHODS.get(dm.getName());
         if (map == null)
             return null;
         List<Class> sig = new ArrayList<>();
-        sig.add(dm.getReturnType());
+        sig.add((Class) GenericReflection.getReturnType(dm, interfaceType));
         addAll(sig, dm.getParameterTypes());
         return map.get(sig);
     }
@@ -414,7 +416,7 @@ public class GenerateMethodWriter {
         int parameterCount = dm.getParameterCount();
         Parameter[] parameters = dm.getParameters();
         final int len = parameters.length;
-        Class<?> returnType = dm.getReturnType();
+        Class<?> returnType = (Class<?>) GenericReflection.getReturnType(dm, interfaceClazz);
         final String typeName = nameForClass(importSet, returnType);
 
         final StringBuilder body = new StringBuilder();
@@ -450,7 +452,7 @@ public class GenerateMethodWriter {
         else
             body.append(") {\n");
         body.append("try {\n");
-        body.append("dc.chainedElement(" + !terminating + ");\n");
+        body.append("dc.chainedElement(" + (!terminating && !passthrough) + ");\n");
         body.append("if (out.get().recordHistory()) MessageHistory.writeHistory(dc);\n");
 
         int startJ = 0;
@@ -537,7 +539,12 @@ public class GenerateMethodWriter {
             if (!name.isEmpty() && (WireType.TEXT == wireType || WireType.YAML == wireType))
                 body.append(format("//todo improve this\nvalueOut.rawText(new %s().asText(%s));\n", name, p.getName()));
             else if (p.getType().isPrimitive() || CharSequence.class.isAssignableFrom(p.getType())) {
-                body.append(format("%s.%s(%s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", toString(p.getType()), p.getName()));
+                if (longConversion.isPresent())
+                    body.append(format("%s.writeLong(%s.INSTANCE, %s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", longConversion.get(), p.getName()));
+                else if (intConversion.isPresent())
+                    body.append(format("%s.writeInt(%s.INSTANCE, %s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", intConversion.get(), p.getName()));
+                else
+                    body.append(format("%s.%s(%s);\n", dm.getParameterTypes().length > startJ + 1 ? "v" : "valueOut", toString(p.getType()), p.getName()));
             } else
                 writeValue(dm, body, startJ, p);
         }
@@ -560,7 +567,7 @@ public class GenerateMethodWriter {
 
     private StringBuilder methodReturn(Set<String> importSet, final Method dm, final Class<?> interfaceClazz) {
         final StringBuilder result = new StringBuilder();
-        final Class<?> returnType = dm.getReturnType();
+        final Class<?> returnType = (Class<?>) GenericReflection.getReturnType(dm, interfaceClazz);
 
         if (returnType == Void.class || returnType == void.class)
             return result;

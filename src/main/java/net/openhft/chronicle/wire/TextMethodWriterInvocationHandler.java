@@ -18,6 +18,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.core.util.IgnoresEverything;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -69,10 +71,12 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
         }
     }
 
+    static final Consumer<Object[]> NOOP_CONSUMER = Mocker.ignored(Consumer.class);
+
     private Consumer<Object[]> buildConverter(Method method) {
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         if (parameterAnnotations.length <= 0)
-            return NoOp.INSTANCE;
+            return NOOP_CONSUMER;
         for (Annotation anno : parameterAnnotations[0]) {
             if (anno instanceof LongConversion) {
                 LongConversion longConversion = (LongConversion) anno;
@@ -97,10 +101,11 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
                 };
             }
         }
-        return NoOp.INSTANCE;
+        return NOOP_CONSUMER;
     }
 
-    enum NoOp implements Consumer<Object[]> {
+    @Deprecated(/* To be removed in x.24 */)
+    enum NoOp implements Consumer<Object[]>, IgnoresEverything {
         INSTANCE;
 
         @Override
