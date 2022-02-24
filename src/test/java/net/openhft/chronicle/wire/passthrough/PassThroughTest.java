@@ -59,8 +59,10 @@ public class PassThroughTest extends WireTestCommon {
             dc.wire().write("send").text("message");
         }
         assertEquals("" +
-                "to: dest\n" +
-                "send: message\n", wire2.toString());
+                        "to: dest\n" +
+                        "send: message\n" +
+                        "...\n",
+                wire2.toString());
     }
 
     @Test
@@ -108,8 +110,10 @@ public class PassThroughTest extends WireTestCommon {
             dc.wire().write("send").text("message");
         }
         assertEquals("" +
-                "to: dest\n" +
-                "send: message\n", wire2.toString());
+                        "to: dest\n" +
+                        "send: message\n" +
+                        "...\n",
+                wire2.toString());
     }
 
     @Test
@@ -194,11 +198,12 @@ public class PassThroughTest extends WireTestCommon {
             dc.wire().write("send").text("message");
         }
         assertEquals("" +
-                "00 00 00 80                                     # msg-length\n" +
-                "b9 02 74 6f                                     # to: (event)\n" +
-                "e4 64 65 73 74                                  # dest\n" +
-                "c4 73 65 6e 64                                  # send:\n" +
-                "e7 6d 65 73 73 61 67 65                         # message\n", wire2.bytes().toHexString());
+                        "16 00 00 00                                     # msg-length\n" +
+                        "b9 02 74 6f                                     # to: (event)\n" +
+                        "e4 64 65 73 74                                  # dest\n" +
+                        "c4 73 65 6e 64                                  # send:\n" +
+                        "e7 6d 65 73 73 61 67 65                         # message\n",
+                wire2.bytes().toHexString());
     }
 
     interface Destination {

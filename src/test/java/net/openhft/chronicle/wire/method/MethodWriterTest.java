@@ -236,10 +236,11 @@ public class MethodWriterTest extends WireTestCommon {
         Args writer = wire.methodWriter(Args.class);
         checkWriterType(writer);
         writer.primitives(true, (byte) 1, (short) 2, 3, 4, '5', 6, 7, "8", "9");
-        assertEquals("primitives: [\n" +
+        assertEquals("" +
+                "primitives: [\n" +
                 "  true,\n" +
-                "  " + (byteShort ? "!byte " : "") + "1,\n" +
-                "  " + (byteShort ? "!short " : "")+ "2,\n" +
+                "  !byte 1,\n" +
+                "  !short 2,\n" +
                 "  !int 3,\n" +
                 "  4,\n" +
                 "  \"5\",\n" +

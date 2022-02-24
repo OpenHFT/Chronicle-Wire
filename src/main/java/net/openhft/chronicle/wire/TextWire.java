@@ -3486,7 +3486,7 @@ public class TextWire extends AbstractWire implements Wire {
             @Nullable Object o = objectWithInferredType0(using, strategy, type);
             consumePadding();
             int code = peekCode();
-            if (code == ':') {
+            if (code == ':' && strategy.bracketType() != BracketType.NONE) {
                 return readRestOfMap(using, o);
             }
             return o;

@@ -67,7 +67,8 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         long l = bytes.writePosition();
         if (l < 1 || bytes.peekUnsignedByte(l - 1) >= ' ')
             bytes.append('\n');
-        bytes.append("...\n");
+        if (!(wire() instanceof JSONWire))
+            bytes.append("...\n");
         wire().getValueOut().resetBetweenDocuments();
         notComplete = false;
     }

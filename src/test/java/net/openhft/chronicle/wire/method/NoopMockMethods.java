@@ -1,10 +1,11 @@
 package net.openhft.chronicle.wire.method;
 
+import net.openhft.chronicle.core.util.IgnoresEverything;
 import net.openhft.chronicle.wire.IMid;
 
 import java.util.List;
 
-public class NoopMockMethods implements MockMethods {
+public class NoopMockMethods implements MockMethods, IgnoresEverything {
     private final MockMethods mockMethods;
 
     public NoopMockMethods(MockMethods mockMethods) {

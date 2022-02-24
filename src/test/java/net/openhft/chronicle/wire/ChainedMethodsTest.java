@@ -108,7 +108,7 @@ public class ChainedMethodsTest extends WireTestCommon {
                 "mid: mid\n" +
                 "next: 1\n" +
                 "echo: echo-1\n" +
-                "# position: 44, header: 1\n" +
+                "# position: 36, header: 1\n" +
                 "--- !!data #binary\n" +
                 "mid2: mid2\n" +
                 "next2: word\n" +
@@ -134,15 +134,16 @@ public class ChainedMethodsTest extends WireTestCommon {
                 .next(2)
                 .echo("echo-2");
 
-        assertEquals("--- !!data #binary\n" +
+        assertEquals("" +
+                "--- !!data #binary\n" +
                 "midNoArg: \"\"\n" +
                 "next: 1\n" +
                 "echo: echo-1\n" +
-                "# position: 44, header: 1\n" +
+                "# position: 36, header: 1\n" +
                 "--- !!data #binary\n" +
                 "midTwoArgs: [\n" +
-                "  !int 5,\n" +
-                "  -7\n" +
+                "  5,\n" +
+                "  !byte -7\n" +
                 "],\n" +
                 "next: 2\n" +
                 "echo: echo-2\n", WireDumper.of(wire).asString());
