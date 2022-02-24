@@ -345,7 +345,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "a4 02                                           # 2\n" +
                         "a4 03                                           # 3\n"
         );
-        checkAsText123(wire, fixed ? "!byte " : "");
+        checkAsText123(wire, fixed ? "!byte " : "!int ");
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -838,7 +838,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "91 00 00 00 00 00 00 00 40                      # 2.0\n" +
                         "91 00 00 00 00 00 00 08 40                      # 3.0\n");
         if (wire.getValueOut() instanceof BinaryWire.BinaryValueOut)
-            checkAsText123(wire);
+            checkAsText123(wire, fixed ? "" : "!int ");
         else
             checkAsText123_0(wire);
         wire.write().float64(0);
