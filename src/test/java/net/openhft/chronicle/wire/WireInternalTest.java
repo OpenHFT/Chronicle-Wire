@@ -89,7 +89,7 @@ public class WireInternalTest extends WireTestCommon {
         assertEquals("" +
                 "--- !!meta-data #binary\n" +
                 "csp: \"csp://hello-world\"\n" +
-                "tid: !int 123456789\n" +
+                "tid: 123456789\n" +
                 "# position: 36, header: 0\n" +
                 "--- !!data #binary\n" +
                 "reply: {\n" +
