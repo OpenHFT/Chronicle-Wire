@@ -361,7 +361,10 @@ public class BinaryWire extends AbstractWire implements Wire {
                         wire.getValueOut().int64_0x(bytes.readLong());
                     } else {
                         Number l = readInt0object(peekCode);
-                        wire.getValueOut().object(l);
+                        if (l instanceof Integer)
+                            wire.getValueOut().int32(l.intValue());
+                        else
+                            wire.getValueOut().object(l);
                     }
                 } catch (Exception e) {
                     unknownCode(wire);

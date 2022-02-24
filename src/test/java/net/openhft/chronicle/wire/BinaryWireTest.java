@@ -331,7 +331,7 @@ public class BinaryWireTest extends WireTestCommon {
                 "[pos: 0, rlim: 14, wlim: 2147483632, cap: 2147483632 ] ǁÀ¡⒈º⒈¡⒉º²ñ\\u009E⒈¡⒊‡٠٠٠٠٠٠٠٠",
                 "[pos: 0, rlim: 3, wlim: 2147483632, cap: 2147483632 ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
                 "[pos: 0, rlim: 6, wlim: 2147483632, cap: 2147483632 ] ǁ¡⒈¡⒉¡⒊‡٠٠٠٠٠٠٠٠");
-        checkAsText123(wire, fixed ? "!int " : "");
+        checkAsText123(wire, "");
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -358,7 +358,7 @@ public class BinaryWireTest extends WireTestCommon {
                 "[pos: 0, rlim: 17, wlim: 2147483632, cap: 2147483632 ] ǁÀ¢⒈٠º⒈¢⒉٠º²ñ\\u009E⒈¢⒊٠‡٠٠٠٠٠٠٠٠",
                 "[pos: 0, rlim: 3, wlim: 2147483632, cap: 2147483632 ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
                 "[pos: 0, rlim: 9, wlim: 2147483632, cap: 2147483632 ] ǁ¢⒈٠¢⒉٠¢⒊٠‡٠٠٠٠٠٠٠٠");
-        checkAsText123(wire, fixed ? "!int " : "");
+        checkAsText123(wire, "");
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -412,7 +412,7 @@ public class BinaryWireTest extends WireTestCommon {
                 "[pos: 0, rlim: 23, wlim: 2147483632, cap: 2147483632 ] ǁÀ¦⒈٠٠٠º⒈¦⒉٠٠٠º²ñ\\u009E⒈¦⒊٠٠٠‡٠٠٠٠٠٠٠٠",
                 "[pos: 0, rlim: 3, wlim: 2147483632, cap: 2147483632 ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
                 "[pos: 0, rlim: 15, wlim: 2147483632, cap: 2147483632 ] ǁ¦⒈٠٠٠¦⒉٠٠٠¦⒊٠٠٠‡٠٠٠٠٠٠٠٠");
-        checkAsText123(wire, fixed ? "!int " : "");
+        checkAsText123(wire, "");
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();

@@ -98,7 +98,8 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         bytes.clear();
         e1.writeMarshallable(bytes);
         assertEquals("" +
-                "01 81 01 01 50 00 00 00 00 00 00 00 28 00 00 00 14 00 0a", bytes.toHexString());
+                "01 81 01 01 50 00 00 00 00 00 00 00 28 00 00 00\n" +
+                "14 00 0a\n", bytes.toHexString());
         e2.readMarshallable(bytes);
         assertEquals("!EBM2 {\n" +
                 "  l0: 80,\n" +
