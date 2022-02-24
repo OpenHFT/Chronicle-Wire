@@ -1,0 +1,442 @@
+= Events by Method
+Peter Lawrey
+
+Chronicle favours modelling events as asynchronous method calls.
+This has a number of advantages
+
+- the simplest way to pass data between components is a method call. i.e. no actual transport
+- asynchronous method calls can be easily modelled into data structures.
+- events as method calls lead to a natural association of an action with an event type.
+
+== Event processing
+
+=== Microservices using Kappa Architecture
+
+The simplest solution is to model a microservice as listening to one or more event sources and writing to a single event store.
+This is what the https://chronicle.software/products/services/[Chronicle Services] framework does.
+
+Chronicle Services added configuration of multiple microservices services, queues, redundancy, and restart policies.
+
+Each event type has a different method to be called which implements code for that event type.
+
+TBD: Add a diagram here
+
+However, messages can still be produced and processed dynamically through the use of a wildcard event callback method where the event type is passed programmatically.
+
+=== Gateways using an input/outputs architecture
+
+A gateway handles information on behalf of remote clients.
+It is two main inputs, data from the client, plus data from systems it talks to.
+In turn, it can produce two streams of output, one replies to the client and the other passes on data to internal systems.
+
+TBD: Add a diagram here
+
+=== Testing using YAML
+
+In both cases, these components can be tested using events stored in YAML files modelled as keys to a scalar, a list or a DTO represented as a mapping.
+
+=== Mix wire formats as needed
+
+Depending on your use case, you can write YAML, JSON, Binary YAML, raw bytes or trivially copied objects as needed on a class by class basis.
+It is common for most of the DTOs to have relatively low volumes and leaving them in the format easiest to work with is more maintainable, however the small number of high volume objects can be optimised as much as you need to meet your performance requirements.
+
+Some advantages of YAML are:
+
+- human-readable, more so than JSON.
+- more compact than JSON
+- supports type and comments
+- useful for configuration
+- interchangeable with other YAML libraries in other languages
+- microsecond latencies
+
+Some advantages of JSON are:
+
+- Supported by browsers
+- somewhat human-readable
+- support for types have been added
+- interchangeable with other JSON libraries in other languages
+- microsecond latencies
+
+Some advantages of Binary YAML are:
+
+- natural arrangement for Java objects
+- support for schema changes, rearrange/remove fields, changing the type of fields.
+- compacting variable length data
+- support type information
+- implicitly add comments to make it easier to decode hex dumps
+- better performance than YAML (about half the latency)
+- works provided the writer/reader have the Chronicle Wire library
+
+Some advantages of Trivially Copyable Objects
+
+- raw memory copy for serialization/deserialization
+- compact memory structure provided fields don't vary in size much
+- works provided the writer/reader arrange the fields the same way.
+- better performance than Binary YAML (above half the latency)
+
+=== Processing events
+
+Events can be passed on by either processing the raw message or invoking the same method downstream.
+
+== Modelling simple asynchronous method calls
+
+The simplest use case is a single event with one argument.
+
+.Asynchronous events as method calls
+[source,java]
+----
+interface Examples {
+    void noArgs();
+
+    void primArg(double value);
+
+    @MethodId(12) // use a method number instead of a method name i.e. 12
+    void withMethodId(long value);
+
+    void twoPrimArg(char ch, long value);
+
+    void scalarArg(TimeUnit timeUnit);
+
+    // encode a nanosecond resolution timestamp as a long, which appears as a timestamp in text formats, but an 8-byte long in memory
+    void timeNanos(@LongConversion(NanoTimestampLongConverter.class) long timeNanos);
+
+    void withDto(MyTypes dto);
+}
+
+static class MyTypes extends SelfDescribingMarshallable {
+    final StringBuilder text = new StringBuilder();
+    boolean flag;
+    byte b;
+    short s;
+    char ch;
+    int i;
+    float f;
+    double d;
+    long l;
+
+----
+
+Chained events are useful for composing events.
+Routing, timestamp and metadata can be preprended to the event and removed as needed without alterting the API of the underlying message.
+
+In this example, routing information and a timestamp are added, but the underlying event isn't altered to support this.
+
+.Composed events as chained methods calls
+[source,java]
+----
+interface Saying {
+    void say(String hello);
+}
+
+interface Timed<T> {
+    T at(@LongConversion(NanoTimestampLongConverter.class) long time);
+}
+
+interface TimedSaying extends Timed<Saying> { }
+
+interface Destination<T> {
+    T via(String via);
+}
+
+interface DestinationTimedSaying extends Destination<TimedSaying> { }
+----
+
+=== Filtering messages with chained calls
+
+A `MethodReader` recognises implementations that extends the marker interface `@IgnoresEverything` as one which doesn't need to the called.
+As such, if any stage in the chained call returns an implementation of this interface, the rest of the message is discarded and not read.
+For convenience, there is a Mocker for generating such an implementation.
+
+.Provides an implementation of `Saying` that is recognised as ignoring everything
+[source,java]
+----
+static final Saying SAY_NOTHING = Mocker.ignoring(Saying.class);
+
+class MyTimedSaying implements TimedSaying {
+    public Saying at(long timeNS) {
+        if (isTooOld(timeNS))
+            return SAY_NOTHING;
+        return somethingElse;
+    }
+}
+----
+
+=== No Arguments
+
+Any event type, single method calls only, with no arguments
+
+[source,java]
+----
+eg.noArgs();
+----
+
+.No Arguments As YAML
+[source,yaml]
+----
+noArgs: ""
+...
+----
+
+.No Arguments As JSON
+[source,json]
+----
+"noArgs":""
+----
+
+.No Arguments As Binary YAML
+[source,text]
+----
+09 00 00 00                                     # msg-length
+b9 06 6e 6f 41 72 67 73                         # noArgs: (event)
+e0
+----
+
+=== Primitive argument
+
+An event type with a single primitive arguments
+
+[source,java]
+----
+eg.primArg(1.5);
+----
+
+.Primitive argument As YAML
+[source,yaml]
+----
+primArg: 1.5
+...
+----
+
+.Primitive argument As JSON
+[source,json]
+----
+"primArg":1.5
+----
+
+.Primitive argument As Binary YAML
+[source,text]
+----
+0c 00 00 00                                     # msg-length
+b9 07 70 72 69 6d 41 72 67                      # primArg: (event)
+92 96 01                                        # 150/1e2
+----
+
+=== Using an @MethodId Primitive argument
+
+An event type as a methodId with a single primitive arguments
+
+[source,java]
+----
+eg.withMethodId(150);
+----
+
+.Using an @MethodId Primitive argument As YAML
+[source,yaml]
+----
+withMethodId: 150
+...
+----
+
+.Using an @MethodId Primitive argument As JSON
+[source,json]
+----
+"withMethodId":150
+----
+
+.Using an @MethodId Primitive argument As Binary YAML
+[source,text]
+----
+04 00 00 00                                     # msg-length
+ba 0c                                           # withMethodId
+a1 96                                           # 150
+----
+
+=== Two primitive argument
+
+An event type with a two primitive arguments
+
+[source,java]
+----
+eg.primArg('A', 128);
+----
+
+.Two primitive argument As YAML
+[source,yaml]
+----
+twoPrimArg: [
+  A,
+  128
+]
+...
+----
+
+.Two primitive argument As JSON
+[source,json]
+----
+"twoPrimArg":[ "A",128 ]
+----
+
+.Two primitive argument As Binary YAML
+[source,text]
+----
+15 00 00 00                                     # msg-length
+b9 0a 74 77 6f 50 72 69 6d 41 72 67             # twoPrimArg: (event)
+82 04 00 00 00                                  # sequence
+e1 41                                           # A
+a1 80                                           # 128
+----
+
+=== One scalar primitive argument
+
+An event type with a scalar arguments
+
+[source,java]
+----
+eg.scalarArg(TimeUnit.DAYS);
+----
+
+.One scalar primitive argument As YAML
+[source,yaml]
+----
+scalarArg: DAYS
+...
+----
+
+.One scalar primitive argument As JSON
+[source,json]
+----
+"scalarArg":"DAYS"
+----
+
+.One scalar primitive argument As Binary YAML
+[source,text]
+----
+10 00 00 00                                     # msg-length
+b9 09 73 63 61 6c 61 72 41 72 67                # scalarArg: (event)
+e4 44 41 59 53                                  # DAYS
+----
+
+=== A timestamp as a long
+
+An event type with a local date time as a long arguments
+
+[source,java]
+----
+eg.timeNanos(NanoTimestampLongConverter.INSTANCE.parse("2022-02-24T11:36:49.810004679"));
+----
+
+.A timestamp as a long As YAML
+[source,yaml]
+----
+timeNanos: 2022-02-24T11:36:49.810004679
+...
+----
+
+.A timestamp as a long As JSON
+[source,json]
+----
+"timeNanos":"2022-02-24T11:36:49.810004679"
+----
+
+.A timestamp as a long As Binary YAML
+[source,text]
+----
+14 00 00 00                                     # msg-length
+b9 09 74 69 6d 65 4e 61 6e 6f 73                # timeNanos: (event)
+                                                # 2022-02-24T11:36:49.810004679
+a7 c7 9a a8 e7 cd b5 d6 16                      # 1645702609810004679
+----
+
+=== Event with a Data Transfer Object
+
+An event type with a flat DTO
+
+[source,java]
+----
+eg.withDto(new MyTypes().b((byte) -1).s((short) 1111).f(1.28f).i(66666).d(1.01).text("hello world").ch('$').flag(true));
+----
+
+.Event with a Data Transfer Object As YAML
+[source,yaml]
+----
+withDto: {
+  text: hello world,
+  flag: true,
+  b: -1,
+  s: 1111,
+  ch: $,
+  i: 66666,
+  f: 1.28,
+  d: 1.1234,
+  l: 0
+}
+...
+----
+
+.Event with a Data Transfer Object As JSON
+[source,json]
+----
+"withDto":{"text":"hello world","flag":true,"b":-1,"s":1111,"ch":"$","i":66666,"f":1.28,"d":1.1234,"l":0}
+----
+
+.Event with a Data Transfer Object As Binary YAML
+[source,text]
+----
+45 00 00 00                                     # msg-length
+b9 07 77 69 74 68 44 74 6f                      # withDto: (event)
+80 3a                                           # MyTypes
+   c4 74 65 78 74                                  # text:
+   eb 68 65 6c 6c 6f 20 77 6f 72 6c 64             # hello world
+   c4 66 6c 61 67 b1                               # flag:
+   c1 62                                           # b:
+   a4 ff                                           # -1
+   c1 73                                           # s:
+   a5 57 04                                        # 1111
+   c2 63 68                                        # ch:
+   e1 24                                           # $
+   c1 69                                           # i:
+   a6 6a 04 01 00                                  # 66666
+   c1 66                                           # f:
+   92 80 01                                        # 128/1e2
+   c1 64                                           # d:
+   94 e2 57                                        # 11234/1e4
+   c1 6c                                           # l:
+   a1 00                                           # 0
+----
+
+=== Chained Event
+
+An event type can be chained together to compose routing or monitoring
+
+[source,java]
+----
+eg.via("target").at(now).say("Hello World");
+----
+
+.Chained Event As YAML
+[source,yaml]
+----
+via: target
+at: 2022-02-24T11:36:49.82577794
+say: Hello World
+...
+----
+
+.Chained Event As JSON
+[source,json]
+----
+"via":"target","at":"2022-02-24T11:36:49.82577794","say":"Hello World"
+----
+
+.Chained Event As Binary YAML
+[source,text]
+----
+2a 00 00 00                                     # msg-length
+b9 03 76 69 61                                  # via: (event)
+e6 74 61 72 67 65 74                            # target
+b9 02 61 74                                     # at: (event)
+                                                # 2022-02-24T11:36:49.82577794
+a7 14 49 99 e8 cd b5 d6 16                      # 1645702609825777940
+b9 03 73 61 79                                  # say: (event)
+eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World
+----

@@ -458,6 +458,7 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().uint8(1);
         wire.write(BWKey.field1).uint8(2);
         wire.write(() -> "Test").uint8(3);
+
         checkWire(wire, "" +
                         "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
@@ -647,6 +648,7 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().int32(1);
         wire.write(BWKey.field1).int32(2);
         wire.write(() -> "Test").int32(3);
+
         checkWire(wire, "" +
                         "c0                                              # :\n" +
                         "a1 01                                           # 1\n" +
