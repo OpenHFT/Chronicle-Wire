@@ -27,9 +27,9 @@ public class DocumentContextTest extends WireTestCommon {
         Bytes<?> bytes = doTest(wire);
         assertEquals("" +
                 "14 00 00 00                                     # msg-length\n" +
-                "b9 03 6f 6e 65 01                               # one\n" +
-                "b9 03 74 77 6f 02                               # two\n" +
-                "b9 05 74 68 72 65 65 03                         # three\n", bytes.toHexString());
+                "b9 03 6f 6e 65 01                               # one: (event)\n" +
+                "b9 03 74 77 6f 02                               # two: (event)\n" +
+                "b9 05 74 68 72 65 65 03                         # three: (event)\n", bytes.toHexString());
         bytes.releaseLast();
     }
 

@@ -56,10 +56,10 @@ public class ClassAliasPoolTest extends WireTestCommon {
                 {WireType.BINARY,
                         (Consumer<WireIn>) w -> assertEquals("" +
                                         "1e 00 00 00                                     # msg-length\n" +
-                                        "b9 06 68 61 6e 64 6c 65                         # handle\n" +
+                                        "b9 06 68 61 6e 64 6c 65                         # handle: (event)\n" +
                                         "b6 08 43 41 50 54 44 61 74 61                   # CAPTData\n" +
                                         "82 07 00 00 00                                  # CAPTData\n" +
-                                        "   c5 76 61 6c 75 65 00                            # value\n",
+                                        "   c5 76 61 6c 75 65 00                            # value:\n",
                                 w.bytes().toHexString())},
         });
     }

@@ -134,18 +134,18 @@ public class PassThroughTest extends WireTestCommon {
 
         assertEquals("" +
                         "18 00 00 00                                     # msg-length\n" +
-                        "b9 02 74 6f                                     # to\n" +
+                        "b9 02 74 6f                                     # to: (event)\n" +
                         "e5 64 65 73 74 31                               # dest1\n" +
-                        "b9 04 73 65 6e 64                               # send\n" +
+                        "b9 04 73 65 6e 64                               # send: (event)\n" +
                         "e7 6d 65 73 73 61 67 65                         # message\n" +
                         "32 00 00 00                                     # msg-length\n" +
-                        "b9 02 74 6f                                     # to\n" +
+                        "b9 02 74 6f                                     # to: (event)\n" +
                         "e5 64 65 73 74 32                               # dest2\n" +
-                        "b9 05 73 65 6e 64 73                            # sends\n" +
+                        "b9 05 73 65 6e 64 73                            # sends: (event)\n" +
                         "82 1c 00 00 00                                  # MapMarshaller\n" +
-                        "b9 03 6f 6e 65                                  # one\n" +
+                        "b9 03 6f 6e 65                                  # one: (event)\n" +
                         "a7 01 00 00 00 00 00 00 00                      # 1\n" +
-                        "b9 03 74 77 6f                                  # two\n" +
+                        "b9 03 74 77 6f                                  # two: (event)\n" +
                         "a7 02 00 00 00 00 00 00 00                      # 2\n",
                 wire2.bytes().toHexString());
 
@@ -164,11 +164,11 @@ public class PassThroughTest extends WireTestCommon {
             assertEquals(i > 0, reader2.readOne());
         assertEquals("" +
                         "17 00 00 00                                     # msg-length\n" +
-                        "c2 74 6f                                        # to\n" +
+                        "c2 74 6f                                        # to:\n" +
                         "e5 64 65 73 74 31                               # dest1\n" +
                         "b9 04 73 65 6e 64 e7 6d 65 73 73 61 67 65       # passed-through\n" +
                         "31 00 00 00                                     # msg-length\n" +
-                        "c2 74 6f                                        # to\n" +
+                        "c2 74 6f                                        # to:\n" +
                         "e5 64 65 73 74 32                               # dest2\n" +
                         "b9 05 73 65 6e 64 73 82 1c 00 00 00 b9 03 6f 6e # passed-through\n" +
                         "65 a7 01 00 00 00 00 00 00 00 b9 03 74 77 6f a7\n" +
@@ -195,9 +195,9 @@ public class PassThroughTest extends WireTestCommon {
         }
         assertEquals("" +
                 "00 00 00 80                                     # msg-length\n" +
-                "b9 02 74 6f                                     # to\n" +
+                "b9 02 74 6f                                     # to: (event)\n" +
                 "e4 64 65 73 74                                  # dest\n" +
-                "c4 73 65 6e 64                                  # send\n" +
+                "c4 73 65 6e 64                                  # send:\n" +
                 "e7 6d 65 73 73 61 67 65                         # message\n", wire2.bytes().toHexString());
     }
 

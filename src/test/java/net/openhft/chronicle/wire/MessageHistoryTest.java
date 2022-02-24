@@ -102,13 +102,13 @@ public class MessageHistoryTest extends WireTestCommon {
         BinaryWire bw = new BinaryWire(new HexDumpBytes());
         bw.writeEventName(MethodReader.HISTORY).marshallable(history);
         assertEquals("" +
-                        "b9 07 68 69 73 74 6f 72 79                      # history\n" +
+                        "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
                         "82 3d 00 00 00                                  # SetTimeMessageHistory\n" +
-                        "c7 73 6f 75 72 63 65 73                         # sources\n" +
+                        "c7 73 6f 75 72 63 65 73                         # sources:\n" +
                         "82 14 00 00 00                                  # sequence\n" +
                         "01 af ff 00 00 00 00 00 00 00                   # source id & index\n" +
                         "02 af ff 0f 00 00 00 00 00 00                   # source id & index\n" +
-                        "c7 74 69 6d 69 6e 67 73                         # timings\n" +
+                        "c7 74 69 6d 69 6e 67 73                         # timings:\n" +
                         "82 0f 00 00 00                                  # sequence\n" +
                         "                                                # timing in nanos\n" +
                         "a5 10 27                                        # 10000\n" +
@@ -139,19 +139,19 @@ public class MessageHistoryTest extends WireTestCommon {
         HexDumpBytes bytes = new HexDumpBytes();
         Wire wire = new BinaryWire(bytes);
         VanillaMessageHistory.USE_BYTES_MARSHALLABLE = false;
-        wire.write(MethodReader.HISTORY).object(SetTimeMessageHistory.class, vmh);
+        wire.writeEventName(MethodReader.HISTORY).object(SetTimeMessageHistory.class, vmh);
 
         vmh.nanoTime = 120962203520000L;
         VanillaMessageHistory.USE_BYTES_MARSHALLABLE = true;
         wire.writeEventId(MESSAGE_HISTORY_METHOD_ID).object(SetTimeMessageHistory.class, vmh);
 
         assertEquals("" +
-                        "c7 68 69 73 74 6f 72 79                         # history\n" +
+                        "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
                         "82 33 00 00 00                                  # SetTimeMessageHistory\n" +
-                        "c7 73 6f 75 72 63 65 73                         # sources\n" +
+                        "c7 73 6f 75 72 63 65 73                         # sources:\n" +
                         "82 0a 00 00 00                                  # sequence\n" +
                         "01 af 02 00 00 00 00 00 00 00                   # source id & index\n" +
-                        "c7 74 69 6d 69 6e 67 73                         # timings\n" +
+                        "c7 74 69 6d 69 6e 67 73                         # timings:\n" +
                         "82 0f 00 00 00                                  # sequence\n" +
                         "                                                # timing in nanos\n" +
                         "a5 57 04                                        # 1111\n" +

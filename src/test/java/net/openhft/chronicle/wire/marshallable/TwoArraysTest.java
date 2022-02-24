@@ -17,10 +17,10 @@ public class TwoArraysTest extends WireTestCommon {
         Wire wire = new BinaryWire(bytes);
         TwoArrays ta = new TwoArrays(4, 8);
         ta.writeMarshallable(wire);
-        assertEquals("   c2 69 61                                        # ia\n" +
+        assertEquals("   c2 69 61                                        # ia:\n" +
                 "   82 20 00 00 00 04 00 00 00 00 00 00 00 00 00 00 # BinaryIntArrayReference\n" +
                 "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
-                "   00 00 00 00 00 c2 6c 61                         # la\n" +
+                "   00 00 00 00 00 c2 6c 61                         # la:\n" +
                 "   82 50 00 00 00 08 00 00 00 00 00 00 00 00 00 00 # BinaryLongArrayReference\n" +
                 "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
                 "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
@@ -41,10 +41,10 @@ public class TwoArraysTest extends WireTestCommon {
         Bytes bytes2 = new HexDumpBytes();
         Wire wire2 = new BinaryWire(bytes2);
         ta2.writeMarshallable(wire2);
-        assertEquals("   c2 69 61                                        # ia\n" +
+        assertEquals("   c2 69 61                                        # ia:\n" +
                 "   82 20 00 00 00 04 00 00 00 00 00 00 00 01 00 00 # BinaryIntArrayReference\n" +
                 "   00 00 00 00 00 0b 00 00 00 00 00 00 00 00 00 00\n" +
-                "   00 00 00 00 00 c2 6c 61                         # la\n" +
+                "   00 00 00 00 00 c2 6c 61                         # la:\n" +
                 "   82 50 00 00 00 08 00 00 00 00 00 00 00 02 00 00 # BinaryLongArrayReference\n" +
                 "   00 00 00 00 00 6f 00 00 00 00 00 00 00 de 00 00\n" +
                 "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
