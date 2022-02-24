@@ -82,4 +82,9 @@ class Data extends SelfDescribingMarshallable {
                 ", price=" + price +
                 '}';
     }
+
+    @Override
+    public BinaryLengthLength binaryLengthLength() {
+        return BinaryLengthLength.LENGTH_8BIT;
+    }
 }
