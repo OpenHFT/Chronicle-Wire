@@ -86,13 +86,28 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write();
         wire.write();
         wire.write();
-        checkWire(wire, "[pos: 0, rlim: 3, wlim: 2147483632, cap: 2147483632 ] ǁÀÀÀ‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 2147483632, cap: 2147483632 ] ǁÀÀÀ‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 2147483632, cap: 2147483632 ] ǁÀÀÀ‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 2147483632, cap: 2147483632 ] ǁÀÀÀ‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 2147483632, cap: 2147483632 ] ǁÀÀÀ‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 0, wlim: 2147483632, cap: 2147483632 ] ǁ‡",
-                "[pos: 0, rlim: 0, wlim: 2147483632, cap: 2147483632 ] ǁ‡");
+        checkWire(wire, "" +
+                        "c0                                              # :\n" +
+                        "c0                                              # :\n" +
+                        "c0                                              # :\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "c0                                              # :\n" +
+                        "c0                                              # :\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "c0                                              # :\n" +
+                        "c0                                              # :\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "c0                                              # :\n" +
+                        "c0                                              # :\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "c0                                              # :\n" +
+                        "c0                                              # :\n",
+                "",
+                "");
 
         assertEquals(fieldLess ? "" : "\"\": \"\": \"\": ", TextWire.asText(wire));
     }
@@ -118,9 +133,12 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     private void checkWire(@NotNull Wire wire, String... expected) {
-        assertEquals("id: " + testId,
-                expected[testId].replaceAll("٠+$", ""),
-                wire.bytes().toHexString().replaceAll("٠+$", ""));
+        if (expected[0].startsWith("["))
+            System.out.println("\"\" +\n\"" + (wire.bytes().toHexString().replaceAll("\n", "\\\\n\" +\n\"") + "\",").replace(" +\n\"\",", ","));
+        else
+            assertEquals("id: " + testId,
+                    expected[testId],
+                    wire.bytes().toHexString());
     }
 
     private void checkWire2(@NotNull Wire wire, String... expected) {
@@ -135,13 +153,28 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write(BWKey.field1);
         wire.write(BWKey.field2);
         wire.write(BWKey.field3);
-        checkWire(wire, "[pos: 0, rlim: 21, wlim: 2147483632, cap: 2147483632 ] ǁÆfield1Æfield2Æfield3‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 21, wlim: 2147483632, cap: 2147483632 ] ǁÆfield1Æfield2Æfield3‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 21, wlim: 2147483632, cap: 2147483632 ] ǁÆfield1Æfield2Æfield3‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 6, wlim: 2147483632, cap: 2147483632 ] ǁº⒈º⒉º⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 6, wlim: 2147483632, cap: 2147483632 ] ǁº⒈º⒉º⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 0, wlim: 2147483632, cap: 2147483632 ] ǁ‡",
-                "[pos: 0, rlim: 0, wlim: 2147483632, cap: 2147483632 ] ǁ‡");
+        checkWire(wire, "" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "c6 66 69 65 6c 64 32                            # field2:\n" +
+                        "c6 66 69 65 6c 64 33                            # field3:\n",
+                "" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "c6 66 69 65 6c 64 32                            # field2:\n" +
+                        "c6 66 69 65 6c 64 33                            # field3:\n",
+                "" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "c6 66 69 65 6c 64 32                            # field2:\n" +
+                        "c6 66 69 65 6c 64 33                            # field3:\n",
+                "" +
+                        "ba 01                                           # 1\n" +
+                        "ba 02                                           # 2\n" +
+                        "ba 03                                           # 3\n",
+                "" +
+                        "ba 01                                           # 1\n" +
+                        "ba 02                                           # 2\n" +
+                        "ba 03                                           # 3\n",
+                "",
+                "");
         checkAsText(wire,
                 "field1: field2: field3: ",
                 "\"1\": \"2\": \"3\": ",
@@ -165,15 +198,37 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write(() -> "World");
         @NotNull String name = "Long field name which is more than 32 characters, Bye";
         wire.write(() -> name);
-        checkWire(wire, "[pos: 0, rlim: 67, wlim: 2147483632, cap: 2147483632 ] ǁÅHelloÅWorld·5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 67, wlim: 2147483632, cap: 2147483632 ] ǁÅHelloÅWorld·5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 67, wlim: 2147483632, cap: 2147483632 ] ǁÅHelloÅWorld·5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 17, wlim: 2147483632, cap: 2147483632 ] ǁº²Ñ\\u0098!ºòÖø'º´Íýå\\u0083٠" + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 17, wlim: 2147483632, cap: 2147483632 ] ǁº²Ñ\\u0098!ºòÖø'º´Íýå\\u0083٠" + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 0, wlim: 2147483632, cap: 2147483632 ] ǁ‡",
-                "[pos: 0, rlim: 0, wlim: 2147483632, cap: 2147483632 ] ǁ‡");
-        assertEquals(numericField ? "\"69609650\": \"83766130\": \"-1019176629\": " :
-                fieldLess ? "" : "Hello: World: \"" + name + "\": ", TextWire.asText(wire));
+        checkWire(wire, "" +
+                        "c5 48 65 6c 6c 6f                               # Hello:\n" +
+                        "c5 57 6f 72 6c 64                               # World:\n" +
+                        "b7 35 4c 6f 6e 67 20 66 69 65 6c 64 20 6e 61 6d # Long field name which is more than 32 characters, Bye:\n" +
+                        "65 20 77 68 69 63 68 20 69 73 20 6d 6f 72 65 20\n" +
+                        "74 68 61 6e 20 33 32 20 63 68 61 72 61 63 74 65\n" +
+                        "72 73 2c 20 42 79 65\n",
+                "" +
+                        "c5 48 65 6c 6c 6f                               # Hello:\n" +
+                        "c5 57 6f 72 6c 64                               # World:\n" +
+                        "b7 35 4c 6f 6e 67 20 66 69 65 6c 64 20 6e 61 6d # Long field name which is more than 32 characters, Bye:\n" +
+                        "65 20 77 68 69 63 68 20 69 73 20 6d 6f 72 65 20\n" +
+                        "74 68 61 6e 20 33 32 20 63 68 61 72 61 63 74 65\n" +
+                        "72 73 2c 20 42 79 65\n",
+                "" +
+                        "c5 48 65 6c 6c 6f                               # Hello:\n" +
+                        "c5 57 6f 72 6c 64                               # World:\n" +
+                        "b7 35 4c 6f 6e 67 20 66 69 65 6c 64 20 6e 61 6d # Long field name which is more than 32 characters, Bye:\n" +
+                        "65 20 77 68 69 63 68 20 69 73 20 6d 6f 72 65 20\n" +
+                        "74 68 61 6e 20 33 32 20 63 68 61 72 61 63 74 65\n" +
+                        "72 73 2c 20 42 79 65\n",
+                "" +
+                        "ba b2 d1 98 21                                  # 69609650\n" +
+                        "ba f2 d6 f8 27                                  # 83766130\n" +
+                        "ba b4 cd fd e5 83 00                            # -1019176629\n",
+                "" +
+                        "ba b2 d1 98 21                                  # 69609650\n" +
+                        "ba f2 d6 f8 27                                  # 83766130\n" +
+                        "ba b4 cd fd e5 83 00                            # -1019176629\n",
+                "",
+                "");
     }
 
     @Test
@@ -246,14 +301,51 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().int8((byte) 1);
         wire.write(BWKey.field1).int8((byte) 2);
         wire.write(() -> "Test").int8((byte) 3);
-        checkWire(wire, "[pos: 0, rlim: 16, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 16, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 19, wlim: 2147483632, cap: 2147483632 ] ǁÀ¤⒈Æfield1¤⒉ÄTest¤⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 11, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 14, wlim: 2147483632, cap: 2147483632 ] ǁÀ¤⒈º⒈¤⒉º²ñ\\u009E⒈¤⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 2147483632, cap: 2147483632 ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 6, wlim: 2147483632, cap: 2147483632 ] ǁ¤⒈¤⒉¤⒊‡٠٠٠٠٠٠٠٠");
-        checkAsText123(wire, fixed ? "!byte " : "");
+        checkWire(wire, "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a4 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a4 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a4 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "ba 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "ba b2 f1 9e 01                                  # 2603186\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a4 01                                           # 1\n" +
+                        "ba 01                                           # 1\n" +
+                        "a4 02                                           # 2\n" +
+                        "ba b2 f1 9e 01                                  # 2603186\n" +
+                        "a4 03                                           # 3\n",
+                "" +
+                        "a1 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "a4 01                                           # 1\n" +
+                        "a4 02                                           # 2\n" +
+                        "a4 03                                           # 3\n"
+        );
+        checkAsText123(wire, fixed ? "!byte " : "!int ");
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -303,14 +395,50 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().int16((short) 1);
         wire.write(BWKey.field1).int16((short) 2);
         wire.write(() -> "Test").int16((short) 3);
-        checkWire(wire, "[pos: 0, rlim: 16, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 16, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 22, wlim: 2147483632, cap: 2147483632 ] ǁÀ¥⒈٠Æfield1¥⒉٠ÄTest¥⒊٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 11, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 17, wlim: 2147483632, cap: 2147483632 ] ǁÀ¥⒈٠º⒈¥⒉٠º²ñ\\u009E⒈¥⒊٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 2147483632, cap: 2147483632 ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 9, wlim: 2147483632, cap: 2147483632 ] ǁ¥⒈٠¥⒉٠¥⒊٠‡٠٠٠٠٠٠٠٠");
-        checkAsText123(wire, fixed ? "!short " : "");
+        checkWire(wire, "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a5 01 00                                        # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a5 02 00                                        # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a5 03 00                                        # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "ba 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "ba b2 f1 9e 01                                  # 2603186\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a5 01 00                                        # 1\n" +
+                        "ba 01                                           # 1\n" +
+                        "a5 02 00                                        # 2\n" +
+                        "ba b2 f1 9e 01                                  # 2603186\n" +
+                        "a5 03 00                                        # 3\n",
+                "" +
+                        "a1 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "a5 01 00                                        # 1\n" +
+                        "a5 02 00                                        # 2\n" +
+                        "a5 03 00                                        # 3\n");
+        checkAsText123(wire, fixed ? "!short " : "!int ");
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -330,14 +458,50 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().uint8(1);
         wire.write(BWKey.field1).uint8(2);
         wire.write(() -> "Test").uint8(3);
-        checkWire(wire, "[pos: 0, rlim: 16, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 16, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 19, wlim: 2147483632, cap: 2147483632 ] ǁÀ¡⒈Æfield1¡⒉ÄTest¡⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 11, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 14, wlim: 2147483632, cap: 2147483632 ] ǁÀ¡⒈º⒈¡⒉º²ñ\\u009E⒈¡⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 2147483632, cap: 2147483632 ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 6, wlim: 2147483632, cap: 2147483632 ] ǁ¡⒈¡⒉¡⒊‡٠٠٠٠٠٠٠٠");
-        checkAsText123(wire, fixed ? "!int " : "");
+        checkWire(wire, "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "ba 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "ba b2 f1 9e 01                                  # 2603186\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "ba 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "ba b2 f1 9e 01                                  # 2603186\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "a1 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "a1 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "a1 03                                           # 3\n");
+        checkAsText123(wire, "!int ");
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -357,14 +521,50 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().uint16(1);
         wire.write(BWKey.field1).uint16(2);
         wire.write(() -> "Test").uint16(3);
-        checkWire(wire, "[pos: 0, rlim: 16, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 16, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 22, wlim: 2147483632, cap: 2147483632 ] ǁÀ¢⒈٠Æfield1¢⒉٠ÄTest¢⒊٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 11, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 17, wlim: 2147483632, cap: 2147483632 ] ǁÀ¢⒈٠º⒈¢⒉٠º²ñ\\u009E⒈¢⒊٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 2147483632, cap: 2147483632 ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 9, wlim: 2147483632, cap: 2147483632 ] ǁ¢⒈٠¢⒉٠¢⒊٠‡٠٠٠٠٠٠٠٠");
-        checkAsText123(wire, fixed ? "!int " : "");
+        checkWire(wire, "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a2 01 00                                        # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a2 02 00                                        # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a2 03 00                                        # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "ba 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "ba b2 f1 9e 01                                  # 2603186\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a2 01 00                                        # 1\n" +
+                        "ba 01                                           # 1\n" +
+                        "a2 02 00                                        # 2\n" +
+                        "ba b2 f1 9e 01                                  # 2603186\n" +
+                        "a2 03 00                                        # 3\n",
+                "" +
+                        "a1 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "a2 01 00                                        # 1\n" +
+                        "a2 02 00                                        # 2\n" +
+                        "a2 03 00                                        # 3\n");
+        checkAsText123(wire, "!int ");
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -384,14 +584,50 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().uint32(1);
         wire.write(BWKey.field1).uint32(2);
         wire.write(() -> "Test").uint32(3);
-        checkWire(wire, "[pos: 0, rlim: 16, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 16, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 28, wlim: 2147483632, cap: 2147483632 ] ǁÀ£⒈٠٠٠Æfield1£⒉٠٠٠ÄTest£⒊٠٠٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 11, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 23, wlim: 2147483632, cap: 2147483632 ] ǁÀ£⒈٠٠٠º⒈£⒉٠٠٠º²ñ\\u009E⒈£⒊٠٠٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 2147483632, cap: 2147483632 ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 15, wlim: 2147483632, cap: 2147483632 ] ǁ£⒈٠٠٠£⒉٠٠٠£⒊٠٠٠‡٠٠٠٠٠٠٠٠");
-        checkAsText123(wire);
+        checkWire(wire, "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a3 01 00 00 00                                  # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a3 02 00 00 00                                  # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a3 03 00 00 00                                  # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "ba 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "ba b2 f1 9e 01                                  # 2603186\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a3 01 00 00 00                                  # 1\n" +
+                        "ba 01                                           # 1\n" +
+                        "a3 02 00 00 00                                  # 2\n" +
+                        "ba b2 f1 9e 01                                  # 2603186\n" +
+                        "a3 03 00 00 00                                  # 3\n",
+                "" +
+                        "a1 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "a3 01 00 00 00                                  # 1\n" +
+                        "a3 02 00 00 00                                  # 2\n" +
+                        "a3 03 00 00 00                                  # 3\n");
+        checkAsText123(wire, !fixed ? "!int " : "");
 
         // ok as blank matches anything
         @NotNull AtomicLong i = new AtomicLong();
@@ -411,14 +647,50 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().int32(1);
         wire.write(BWKey.field1).int32(2);
         wire.write(() -> "Test").int32(3);
-        checkWire(wire, "[pos: 0, rlim: 16, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 16, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 28, wlim: 2147483632, cap: 2147483632 ] ǁÀ¦⒈٠٠٠Æfield1¦⒉٠٠٠ÄTest¦⒊٠٠٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 11, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 23, wlim: 2147483632, cap: 2147483632 ] ǁÀ¦⒈٠٠٠º⒈¦⒉٠٠٠º²ñ\\u009E⒈¦⒊٠٠٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 2147483632, cap: 2147483632 ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 15, wlim: 2147483632, cap: 2147483632 ] ǁ¦⒈٠٠٠¦⒉٠٠٠¦⒊٠٠٠‡٠٠٠٠٠٠٠٠");
-        checkAsText123(wire, fixed ? "!int " : "");
+        checkWire(wire, "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a6 01 00 00 00                                  # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a6 02 00 00 00                                  # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a6 03 00 00 00                                  # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "ba 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "ba b2 f1 9e 01                                  # 2603186\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a6 01 00 00 00                                  # 1\n" +
+                        "ba 01                                           # 1\n" +
+                        "a6 02 00 00 00                                  # 2\n" +
+                        "ba b2 f1 9e 01                                  # 2603186\n" +
+                        "a6 03 00 00 00                                  # 3\n",
+                "" +
+                        "a1 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "a6 01 00 00 00                                  # 1\n" +
+                        "a6 02 00 00 00                                  # 2\n" +
+                        "a6 03 00 00 00                                  # 3\n");
+        checkAsText123(wire, "!int ");
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -438,14 +710,50 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().int64(1);
         wire.write(BWKey.field1).int64(2);
         wire.write(() -> "Test").int64(3);
-        checkWire(wire, "[pos: 0, rlim: 16, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 16, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 40, wlim: 2147483632, cap: 2147483632 ] ǁÀ§⒈٠٠٠٠٠٠٠Æfield1§⒉٠٠٠٠٠٠٠ÄTest§⒊٠٠٠٠٠٠٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 11, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 35, wlim: 2147483632, cap: 2147483632 ] ǁÀ§⒈٠٠٠٠٠٠٠º⒈§⒉٠٠٠٠٠٠٠º²ñ\\u009E⒈§⒊٠٠٠٠٠٠٠‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 2147483632, cap: 2147483632 ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 27, wlim: 2147483632, cap: 2147483632 ] ǁ§⒈٠٠٠٠٠٠٠§⒉٠٠٠٠٠٠٠§⒊٠٠٠٠٠٠٠‡٠٠٠٠٠٠٠٠");
-        checkAsText123(wire);
+        checkWire(wire, "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a7 01 00 00 00 00 00 00 00                      # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a7 02 00 00 00 00 00 00 00                      # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a7 03 00 00 00 00 00 00 00                      # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "ba 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "ba b2 f1 9e 01                                  # 2603186\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a7 01 00 00 00 00 00 00 00                      # 1\n" +
+                        "ba 01                                           # 1\n" +
+                        "a7 02 00 00 00 00 00 00 00                      # 2\n" +
+                        "ba b2 f1 9e 01                                  # 2603186\n" +
+                        "a7 03 00 00 00 00 00 00 00                      # 3\n",
+                "" +
+                        "a1 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "a7 01 00 00 00 00 00 00 00                      # 1\n" +
+                        "a7 02 00 00 00 00 00 00 00                      # 2\n" +
+                        "a7 03 00 00 00 00 00 00 00                      # 3\n");
+        checkAsText123(wire, fixed ? "" : "!int ");
 
         // ok as blank matches anything
         @NotNull AtomicLong i = new AtomicLong();
@@ -486,15 +794,51 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().float64(1);
         wire.write(BWKey.field1).float64(2);
         wire.write(() -> "Test").float64(3);
-        checkWire(wire, "[pos: 0, rlim: 16, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 16, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈Æfield1⒉ÄTest⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 40, wlim: 2147483632, cap: 2147483632 ] ǁÀ\\u0091٠٠٠٠٠٠ð?Æfield1\\u0091٠٠٠٠٠٠٠@ÄTest\\u0091٠٠٠٠٠٠⒏@‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 11, wlim: 2147483632, cap: 2147483632 ] ǁÀ⒈º⒈⒉º²ñ\\u009E⒈⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 35, wlim: 2147483632, cap: 2147483632 ] ǁÀ\\u0091٠٠٠٠٠٠ð?º⒈\\u0091٠٠٠٠٠٠٠@º²ñ\\u009E⒈\\u0091٠٠٠٠٠٠⒏@‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 3, wlim: 2147483632, cap: 2147483632 ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 27, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0091٠٠٠٠٠٠ð?\\u0091٠٠٠٠٠٠٠@\\u0091٠٠٠٠٠٠⒏@‡٠٠٠٠٠٠٠٠");
+        checkWire(wire, "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "a1 02                                           # 2\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "91 00 00 00 00 00 00 f0 3f                      # 1.0\n" +
+                        "c6 66 69 65 6c 64 31                            # field1:\n" +
+                        "91 00 00 00 00 00 00 00 40                      # 2.0\n" +
+                        "c4 54 65 73 74                                  # Test:\n" +
+                        "91 00 00 00 00 00 00 08 40                      # 3.0\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "a1 01                                           # 1\n" +
+                        "ba 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "ba b2 f1 9e 01                                  # 2603186\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "c0                                              # :\n" +
+                        "91 00 00 00 00 00 00 f0 3f                      # 1.0\n" +
+                        "ba 01                                           # 1\n" +
+                        "91 00 00 00 00 00 00 00 40                      # 2.0\n" +
+                        "ba b2 f1 9e 01                                  # 2603186\n" +
+                        "91 00 00 00 00 00 00 08 40                      # 3.0\n",
+                "" +
+                        "a1 01                                           # 1\n" +
+                        "a1 02                                           # 2\n" +
+                        "a1 03                                           # 3\n",
+                "" +
+                        "91 00 00 00 00 00 00 f0 3f                      # 1.0\n" +
+                        "91 00 00 00 00 00 00 00 40                      # 2.0\n" +
+                        "91 00 00 00 00 00 00 08 40                      # 3.0\n");
         if (wire.getValueOut() instanceof BinaryWire.BinaryValueOut)
-            checkAsText123(wire);
+            checkAsText123(wire, fixed ? "" : "!int ");
         else
             checkAsText123_0(wire);
         wire.write().float64(0);
@@ -527,13 +871,13 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().text("Hello");
         wire.write(BWKey.field1).text("world");
         wire.write(() -> "Test").text(name);
-        checkWire(wire, "[pos: 0, rlim: 80, wlim: 2147483632, cap: 2147483632 ] ǁÀåHelloÆfield1åworldÄTest¸5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 80, wlim: 2147483632, cap: 2147483632 ] ǁÀåHelloÆfield1åworldÄTest¸5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 80, wlim: 2147483632, cap: 2147483632 ] ǁÀåHelloÆfield1åworldÄTest¸5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 75, wlim: 2147483632, cap: 2147483632 ] ǁÀåHelloº⒈åworldº²ñ\\u009E⒈¸5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 75, wlim: 2147483632, cap: 2147483632 ] ǁÀåHelloº⒈åworldº²ñ\\u009E⒈¸5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 67, wlim: 2147483632, cap: 2147483632 ] ǁåHelloåworld¸5" + name + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 67, wlim: 2147483632, cap: 2147483632 ] ǁåHelloåworld¸5" + name + "‡٠٠٠٠٠٠٠٠");
+        checkWire2(wire, "[pos: 0, rlim: 80, wlim: 8EiB, cap: 8EiB ] ǁÀåHelloÆfield1åworldÄTest¸5" + name + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 80, wlim: 8EiB, cap: 8EiB ] ǁÀåHelloÆfield1åworldÄTest¸5" + name + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 80, wlim: 8EiB, cap: 8EiB ] ǁÀåHelloÆfield1åworldÄTest¸5" + name + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 75, wlim: 8EiB, cap: 8EiB ] ǁÀåHelloº⒈åworldº²ñ\\u009E⒈¸5" + name + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 75, wlim: 8EiB, cap: 8EiB ] ǁÀåHelloº⒈åworldº²ñ\\u009E⒈¸5" + name + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 67, wlim: 8EiB, cap: 8EiB ] ǁåHelloåworld¸5" + name + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 67, wlim: 8EiB, cap: 8EiB ] ǁåHelloåworld¸5" + name + "‡٠٠٠٠٠٠٠٠");
         checkAsText(wire, "\"\": Hello\n" +
                         "field1: world\n" +
                         "Test: \"" + name + "\"\n",
@@ -567,13 +911,13 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write(BWKey.field1).typePrefix("AlsoMyType");
         @NotNull String name1 = "com.sun.java.swing.plaf.nimbus.InternalFrameInternalFrameTitlePaneInternalFrameTitlePaneMaximizeButtonWindowNotFocusedState";
         wire.write(() -> "Test").typePrefix(name1);
-        checkWire(wire, "[pos: 0, rlim: 158, wlim: 2147483632, cap: 2147483632 ] ǁÀ¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 158, wlim: 2147483632, cap: 2147483632 ] ǁÀ¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 158, wlim: 2147483632, cap: 2147483632 ] ǁÀ¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 153, wlim: 2147483632, cap: 2147483632 ] ǁÀ¶⒍MyTypeº⒈¶⒑AlsoMyTypeº²ñ\\u009E⒈¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 153, wlim: 2147483632, cap: 2147483632 ] ǁÀ¶⒍MyTypeº⒈¶⒑AlsoMyTypeº²ñ\\u009E⒈¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 145, wlim: 2147483632, cap: 2147483632 ] ǁ¶⒍MyType¶⒑AlsoMyType¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 145, wlim: 2147483632, cap: 2147483632 ] ǁ¶⒍MyType¶⒑AlsoMyType¶{" + name1 + "‡٠٠٠٠٠٠٠٠");
+        checkWire2(wire, "[pos: 0, rlim: 158, wlim: 8EiB, cap: 8EiB ] ǁÀ¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 158, wlim: 8EiB, cap: 8EiB ] ǁÀ¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 158, wlim: 8EiB, cap: 8EiB ] ǁÀ¶⒍MyTypeÆfield1¶⒑AlsoMyTypeÄTest¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 153, wlim: 8EiB, cap: 8EiB ] ǁÀ¶⒍MyTypeº⒈¶⒑AlsoMyTypeº²ñ\\u009E⒈¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 153, wlim: 8EiB, cap: 8EiB ] ǁÀ¶⒍MyTypeº⒈¶⒑AlsoMyTypeº²ñ\\u009E⒈¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 145, wlim: 8EiB, cap: 8EiB ] ǁ¶⒍MyType¶⒑AlsoMyType¶{" + name1 + "‡٠٠٠٠٠٠٠٠",
+                "[pos: 0, rlim: 145, wlim: 8EiB, cap: 8EiB ] ǁ¶⒍MyType¶⒑AlsoMyType¶{" + name1 + "‡٠٠٠٠٠٠٠٠");
         checkAsText(wire, "\"\": !MyType field1: !AlsoMyType Test: !" + name1 + " ",
                 "\"\": !MyType \"1\": !AlsoMyType \"2603186\": !" + name1 + " ",
                 "!MyType !AlsoMyType !" + name1 + " ");
@@ -594,7 +938,7 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write().bool(false)
                 .write().bool(true)
                 .write().bool(null);
-       // System.out.println(wire);
+        // System.out.println(wire);
         wire.read().bool(false, Assert::assertEquals)
                 .read().bool(true, Assert::assertEquals)
                 .read().bool(null, Assert::assertEquals);
@@ -623,14 +967,19 @@ public class BinaryWireTest extends WireTestCommon {
                 .write().time(LocalTime.MAX)
                 .write().time(LocalTime.MIN);
         if (testId <= 4) {
-            assertEquals("00000000 c0 b2 0c 31 32 3a 35 34  3a 30 34 2e 36 31 32 c0 ···12:54 :04.612·\n" +
-                            "00000010 b2 12 32 33 3a 35 39 3a  35 39 2e 39 39 39 39 39 ··23:59: 59.99999\n" +
-                            "00000020 39 39 39 39 c0 b2 05 30  30 3a 30 30             9999···0 0:00    \n",
+            assertEquals("" +
+                            "c0                                              # :\n" +
+                            "b2 0c 31 32 3a 35 34 3a 30 34 2e 36 31 32       # 12:54:04.612\n" +
+                            "c0                                              # :\n" +
+                            "b2 12 32 33 3a 35 39 3a 35 39 2e 39 39 39 39 39 # 23:59:59.999999999\n" +
+                            "39 39 39 39 c0                                  # :\n" +
+                            "b2 05 30 30 3a 30 30                            # 00:00\n",
                     bytes.toHexString());
         } else {
-            assertEquals("00000000 b2 0c 31 32 3a 35 34 3a  30 34 2e 36 31 32 b2 12 ··12:54: 04.612··\n" +
-                            "00000010 32 33 3a 35 39 3a 35 39  2e 39 39 39 39 39 39 39 23:59:59 .9999999\n" +
-                            "00000020 39 39 b2 05 30 30 3a 30  30                      99··00:0 0       \n",
+            assertEquals("" +
+                            "b2 0c 31 32 3a 35 34 3a 30 34 2e 36 31 32       # 12:54:04.612\n" +
+                            "b2 12 32 33 3a 35 39 3a 35 39 2e 39 39 39 39 39 # 23:59:59.999999999\n" +
+                            "39 39 39 39 b2 05 30 30 3a 30 30                # 00:00\n",
                     bytes.toHexString());
         }
         wire.read().time(now, Assert::assertEquals)
@@ -694,7 +1043,7 @@ public class BinaryWireTest extends WireTestCommon {
                 .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
                 .write()
                 .bytes(allBytes);
-       // System.out.println(bytes.toDebugString());
+        // System.out.println(bytes.toDebugString());
         @SuppressWarnings("rawtypes")
         @NotNull NativeBytes allBytes2 = nativeBytes();
         wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
@@ -708,7 +1057,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @Test
     public void testWriteMarshallable() {
-       // BinaryWire.SPEC = 18;
+        // BinaryWire.SPEC = 18;
 
         @NotNull Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
@@ -728,15 +1077,169 @@ public class BinaryWireTest extends WireTestCommon {
         mtB.text.append("Bye now");
         wire.write(() -> "B").marshallable(mtB);
 
-               // System.out.println(wire.bytes().toDebugString(400));
+        // System.out.println(wire.bytes().toDebugString(400));
         checkWire(wire,
-                "[pos: 0, rlim: 134, wlim: 2147483632, cap: 2147483632 ] ǁÁA\\u0082>٠٠٠ÆB_FLAG±ÅS_NUM¥90ÅD_NUM\\u0094\\u0080\u00ADKÅL_NUM٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082:٠٠٠ÆB_FLAG°ÅS_NUM¥Ò⒋ÅD_NUM\\u0094\\u0087\u00ADKÅL_NUM٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 134, wlim: 2147483632, cap: 2147483632 ] ǁÁA\\u0082>٠٠٠ÆB_FLAG±ÅS_NUM¥90ÅD_NUM\\u0094\\u0080\u00ADKÅL_NUM٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082:٠٠٠ÆB_FLAG°ÅS_NUM¥Ò⒋ÅD_NUM\\u0094\\u0087\u00ADKÅL_NUM٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 160, wlim: 2147483632, cap: 2147483632 ] ǁÁA\\u0082K٠٠٠ÆB_FLAG±ÅS_NUM¥90ÅD_NUM\\u0091w¾\\u009F\\u001A/Ý^@ÅL_NUM§٠٠٠٠٠٠٠٠ÅI_NUM¦C\\u009ECÿÄTEXTëHello WorldÁB\\u0082G٠٠٠ÆB_FLAG°ÅS_NUM¥Ò⒋ÅD_NUM\\u0091S⒌£\\u0092:Ý^@ÅL_NUM§٠٠٠٠٠٠٠٠ÅI_NUM¦\\u009E.¤øÄTEXTçBye now‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 86, wlim: 2147483632, cap: 2147483632 ] ǁºA\\u0082&٠٠٠º٠±º⒈¥90º⒉\\u0094\\u0080\u00ADKº⒊٠º⒋¦C\\u009ECÿº⒌ëHello WorldºB\\u0082\"٠٠٠º٠°º⒈¥Ò⒋º⒉\\u0094\\u0087\u00ADKº⒊٠º⒋¦\\u009E.¤øº⒌çBye now‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 112, wlim: 2147483632, cap: 2147483632 ] ǁºA\\u00823٠٠٠º٠±º⒈¥90º⒉\\u0091w¾\\u009F\\u001A/Ý^@º⒊§٠٠٠٠٠٠٠٠º⒋¦C\\u009ECÿº⒌ëHello WorldºB\\u0082/٠٠٠º٠°º⒈¥Ò⒋º⒉\\u0091S⒌£\\u0092:Ý^@º⒊§٠٠٠٠٠٠٠٠º⒋¦\\u009E.¤øº⒌çBye now‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 58, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0082\\u001A٠٠٠±¥90\\u0094\\u0080\u00ADK٠¦C\\u009ECÿëHello World\\u0082\\u0016٠٠٠°¥Ò⒋\\u0094\\u0087\u00ADK٠¦\\u009E.¤øçBye now‡٠٠٠٠٠٠٠٠",
-                "[pos: 0, rlim: 84, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0082'٠٠٠±¥90\\u0091w¾\\u009F\\u001A/Ý^@§٠٠٠٠٠٠٠٠¦C\\u009ECÿëHello World\\u0082#٠٠٠°¥Ò⒋\\u0091S⒌£\\u0092:Ý^@§٠٠٠٠٠٠٠٠¦\\u009E.¤øçBye now‡٠٠٠٠٠٠٠٠");
+                "" +
+                        "c1 41                                           # A:\n" +
+                        "82 3f 00 00 00                                  # MyTypesCustom\n" +
+                        "c6 42 5f 46 4c 41 47 b1                         # B_FLAG:\n" +
+                        "c5 53 5f 4e 55 4d                               # S_NUM:\n" +
+                        "a5 39 30                                        # 12345\n" +
+                        "c5 44 5f 4e 55 4d                               # D_NUM:\n" +
+                        "94 80 ad 4b                                     # 1234560/1e4\n" +
+                        "c5 4c 5f 4e 55 4d                               # L_NUM:\n" +
+                        "a1 00                                           # 0\n" +
+                        "c5 49 5f 4e 55 4d                               # I_NUM:\n" +
+                        "a6 43 9e 43 ff                                  # -12345789\n" +
+                        "c4 54 45 58 54                                  # TEXT:\n" +
+                        "eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World\n" +
+                        "c1 42                                           # B:\n" +
+                        "82 3b 00 00 00                                  # MyTypesCustom\n" +
+                        "c6 42 5f 46 4c 41 47 b0                         # B_FLAG:\n" +
+                        "c5 53 5f 4e 55 4d                               # S_NUM:\n" +
+                        "a5 d2 04                                        # 1234\n" +
+                        "c5 44 5f 4e 55 4d                               # D_NUM:\n" +
+                        "94 87 ad 4b                                     # 1234567/1e4\n" +
+                        "c5 4c 5f 4e 55 4d                               # L_NUM:\n" +
+                        "a1 00                                           # 0\n" +
+                        "c5 49 5f 4e 55 4d                               # I_NUM:\n" +
+                        "a6 9e 2e a4 f8                                  # -123457890\n" +
+                        "c4 54 45 58 54                                  # TEXT:\n" +
+                        "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
+                "" +
+                        "c1 41                                           # A:\n" +
+                        "82 3f 00 00 00                                  # MyTypesCustom\n" +
+                        "c6 42 5f 46 4c 41 47 b1                         # B_FLAG:\n" +
+                        "c5 53 5f 4e 55 4d                               # S_NUM:\n" +
+                        "a5 39 30                                        # 12345\n" +
+                        "c5 44 5f 4e 55 4d                               # D_NUM:\n" +
+                        "94 80 ad 4b                                     # 1234560/1e4\n" +
+                        "c5 4c 5f 4e 55 4d                               # L_NUM:\n" +
+                        "a1 00                                           # 0\n" +
+                        "c5 49 5f 4e 55 4d                               # I_NUM:\n" +
+                        "a6 43 9e 43 ff                                  # -12345789\n" +
+                        "c4 54 45 58 54                                  # TEXT:\n" +
+                        "eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World\n" +
+                        "c1 42                                           # B:\n" +
+                        "82 3b 00 00 00                                  # MyTypesCustom\n" +
+                        "c6 42 5f 46 4c 41 47 b0                         # B_FLAG:\n" +
+                        "c5 53 5f 4e 55 4d                               # S_NUM:\n" +
+                        "a5 d2 04                                        # 1234\n" +
+                        "c5 44 5f 4e 55 4d                               # D_NUM:\n" +
+                        "94 87 ad 4b                                     # 1234567/1e4\n" +
+                        "c5 4c 5f 4e 55 4d                               # L_NUM:\n" +
+                        "a1 00                                           # 0\n" +
+                        "c5 49 5f 4e 55 4d                               # I_NUM:\n" +
+                        "a6 9e 2e a4 f8                                  # -123457890\n" +
+                        "c4 54 45 58 54                                  # TEXT:\n" +
+                        "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
+                "" +
+                        "c1 41                                           # A:\n" +
+                        "82 4b 00 00 00                                  # MyTypesCustom\n" +
+                        "c6 42 5f 46 4c 41 47 b1                         # B_FLAG:\n" +
+                        "c5 53 5f 4e 55 4d                               # S_NUM:\n" +
+                        "a5 39 30                                        # 12345\n" +
+                        "c5 44 5f 4e 55 4d                               # D_NUM:\n" +
+                        "91 77 be 9f 1a 2f dd 5e 40                      # 123.456\n" +
+                        "c5 4c 5f 4e 55 4d                               # L_NUM:\n" +
+                        "a7 00 00 00 00 00 00 00 00                      # 0\n" +
+                        "c5 49 5f 4e 55 4d                               # I_NUM:\n" +
+                        "a6 43 9e 43 ff                                  # -12345789\n" +
+                        "c4 54 45 58 54                                  # TEXT:\n" +
+                        "eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World\n" +
+                        "c1 42                                           # B:\n" +
+                        "82 47 00 00 00                                  # MyTypesCustom\n" +
+                        "c6 42 5f 46 4c 41 47 b0                         # B_FLAG:\n" +
+                        "c5 53 5f 4e 55 4d                               # S_NUM:\n" +
+                        "a5 d2 04                                        # 1234\n" +
+                        "c5 44 5f 4e 55 4d                               # D_NUM:\n" +
+                        "91 53 05 a3 92 3a dd 5e 40                      # 123.4567\n" +
+                        "c5 4c 5f 4e 55 4d                               # L_NUM:\n" +
+                        "a7 00 00 00 00 00 00 00 00                      # 0\n" +
+                        "c5 49 5f 4e 55 4d                               # I_NUM:\n" +
+                        "a6 9e 2e a4 f8                                  # -123457890\n" +
+                        "c4 54 45 58 54                                  # TEXT:\n" +
+                        "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
+                "" +
+                        "ba 41                                           # 65\n" +
+                        "82 27 00 00 00                                  # MyTypesCustom\n" +
+                        "ba 00 b1                                        # 0\n" +
+                        "ba 01                                           # 1\n" +
+                        "a5 39 30                                        # 12345\n" +
+                        "ba 02                                           # 2\n" +
+                        "94 80 ad 4b                                     # 1234560/1e4\n" +
+                        "ba 03                                           # 3\n" +
+                        "a1 00                                           # 0\n" +
+                        "ba 04                                           # 4\n" +
+                        "a6 43 9e 43 ff                                  # -12345789\n" +
+                        "ba 05                                           # 5\n" +
+                        "eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World\n" +
+                        "ba 42                                           # 66\n" +
+                        "82 23 00 00 00                                  # MyTypesCustom\n" +
+                        "ba 00 b0                                        # 0\n" +
+                        "ba 01                                           # 1\n" +
+                        "a5 d2 04                                        # 1234\n" +
+                        "ba 02                                           # 2\n" +
+                        "94 87 ad 4b                                     # 1234567/1e4\n" +
+                        "ba 03                                           # 3\n" +
+                        "a1 00                                           # 0\n" +
+                        "ba 04                                           # 4\n" +
+                        "a6 9e 2e a4 f8                                  # -123457890\n" +
+                        "ba 05                                           # 5\n" +
+                        "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
+                "" +
+                        "ba 41                                           # 65\n" +
+                        "82 33 00 00 00                                  # MyTypesCustom\n" +
+                        "ba 00 b1                                        # 0\n" +
+                        "ba 01                                           # 1\n" +
+                        "a5 39 30                                        # 12345\n" +
+                        "ba 02                                           # 2\n" +
+                        "91 77 be 9f 1a 2f dd 5e 40                      # 123.456\n" +
+                        "ba 03                                           # 3\n" +
+                        "a7 00 00 00 00 00 00 00 00                      # 0\n" +
+                        "ba 04                                           # 4\n" +
+                        "a6 43 9e 43 ff                                  # -12345789\n" +
+                        "ba 05                                           # 5\n" +
+                        "eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World\n" +
+                        "ba 42                                           # 66\n" +
+                        "82 2f 00 00 00                                  # MyTypesCustom\n" +
+                        "ba 00 b0                                        # 0\n" +
+                        "ba 01                                           # 1\n" +
+                        "a5 d2 04                                        # 1234\n" +
+                        "ba 02                                           # 2\n" +
+                        "91 53 05 a3 92 3a dd 5e 40                      # 123.4567\n" +
+                        "ba 03                                           # 3\n" +
+                        "a7 00 00 00 00 00 00 00 00                      # 0\n" +
+                        "ba 04                                           # 4\n" +
+                        "a6 9e 2e a4 f8                                  # -123457890\n" +
+                        "ba 05                                           # 5\n" +
+                        "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
+                "" +
+                        "82 1b 00 00 00 b1                               # MyTypesCustom\n" +
+                        "a5 39 30                                        # 12345\n" +
+                        "94 80 ad 4b                                     # 1234560/1e4\n" +
+                        "a1 00                                           # 0\n" +
+                        "a6 43 9e 43 ff                                  # -12345789\n" +
+                        "eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World\n" +
+                        "82 17 00 00 00 b0                               # MyTypesCustom\n" +
+                        "a5 d2 04                                        # 1234\n" +
+                        "94 87 ad 4b                                     # 1234567/1e4\n" +
+                        "a1 00                                           # 0\n" +
+                        "a6 9e 2e a4 f8                                  # -123457890\n" +
+                        "e7 42 79 65 20 6e 6f 77                         # Bye now\n",
+                "" +
+                        "82 27 00 00 00 b1                               # MyTypesCustom\n" +
+                        "a5 39 30                                        # 12345\n" +
+                        "91 77 be 9f 1a 2f dd 5e 40                      # 123.456\n" +
+                        "a7 00 00 00 00 00 00 00 00                      # 0\n" +
+                        "a6 43 9e 43 ff                                  # -12345789\n" +
+                        "eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World\n" +
+                        "82 23 00 00 00 b0                               # MyTypesCustom\n" +
+                        "a5 d2 04                                        # 1234\n" +
+                        "91 53 05 a3 92 3a dd 5e 40                      # 123.4567\n" +
+                        "a7 00 00 00 00 00 00 00 00                      # 0\n" +
+                        "a6 9e 2e a4 f8                                  # -123457890\n" +
+                        "e7 42 79 65 20 6e 6f 77                         # Bye now\n");
         @NotNull MyTypesCustom mt2 = new MyTypesCustom();
         wire.read(() -> "A").marshallable(mt2);
         assertEquals(mt2, mtA);
@@ -777,7 +1280,7 @@ public class BinaryWireTest extends WireTestCommon {
             @NotNull String s = new String(chars);
             wire.writeDocument(false, w -> w.write(() -> "message").text(s));
 
-           // System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
+            // System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
             wire.readDocument(null, w -> w.read(() -> "message").text(s, Assert::assertEquals));
         }
     }
@@ -789,14 +1292,14 @@ public class BinaryWireTest extends WireTestCommon {
         @NotNull Object[] noObjects = {};
         wire.write("a").object(noObjects);
 
-       // System.out.println(wire.asText());
+        // System.out.println(wire.asText());
         @Nullable Object[] object = wire.read()
                 .object(Object[].class);
         assertEquals(0, object.length);
 
         @NotNull Object[] threeObjects = {"abc", "def", "ghi"};
         wire.write("b").object(threeObjects);
-       // System.out.println(wire.asText());
+        // System.out.println(wire.asText());
 
         @Nullable Object[] object2 = wire.read()
                 .object(Object[].class);
@@ -836,7 +1339,7 @@ public class BinaryWireTest extends WireTestCommon {
 
         try (DocumentContext dc = w.readingDocument()) {
 
-           // System.out.println(Wires.fromSizePrefixedBlobs(dc));
+            // System.out.println(Wires.fromSizePrefixedBlobs(dc));
 
             StringBuilder sb = Wires.acquireStringBuilder();
 
