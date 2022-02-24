@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.MethodWriterBuilder;
 import net.openhft.chronicle.bytes.WriteBytesMarshallable;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.annotation.DontChain;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -29,6 +30,7 @@ import java.util.stream.Stream;
 /**
  * Anything you can write Marshallable objects to.
  */
+@DontChain
 public interface MarshallableOut extends DocumentWritten {
     /**
      * Start a document which is completed when DocumentContext.close() is called. You can use a

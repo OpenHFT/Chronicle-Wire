@@ -17,13 +17,13 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.core.annotation.DontChain;
+import net.openhft.chronicle.core.Mocker;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 
-@DontChain
 public interface DocumentContext extends Closeable, SourceContext {
+    DocumentContext NOOP = Mocker.ignored(DocumentContext.class);
 
     /**
      * Checks it the {@code DocumentContext} is metadata. If it is, {@code true} is

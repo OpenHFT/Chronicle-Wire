@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,6 +32,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * The defines the stand interface for writing and reading sequentially to/from a Bytes stream.
  */
+@DontChain
 public interface WireIn extends WireCommon, MarshallableIn {
 
     @NotNull

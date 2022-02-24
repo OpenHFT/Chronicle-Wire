@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.annotation.DontChain;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ObjectOutput;
@@ -28,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The defines the standard interface for writing and reading sequentially to/from a Bytes stream
  */
+@DontChain
 public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * Write an empty filed marker

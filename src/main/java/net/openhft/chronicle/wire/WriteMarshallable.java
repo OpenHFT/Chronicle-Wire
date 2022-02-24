@@ -44,7 +44,7 @@ public interface WriteMarshallable extends WriteValue, CommonMarshallable {
     /**
      * @return the size in bytes to assume the length will be
      */
-    default BinaryLengthLength binaryWireSize() {
+    default BinaryLengthLength binaryLengthLength() {
         return BinaryLengthLength.LENGTH_32BIT;
     }
 }

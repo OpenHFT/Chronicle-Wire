@@ -967,6 +967,12 @@ public interface ValueOut {
         return text(x);
     }
 
+    default WireOut writeInt(IntConverter intConverter, int i) {
+        StringBuilder sb = Wires.acquireStringBuilder();
+        intConverter.append(sb, i);
+        return rawText(sb);
+    }
+
     default WireOut writeLong(LongConverter longConverter, long l) {
         StringBuilder sb = Wires.acquireStringBuilder();
         longConverter.append(sb, l);

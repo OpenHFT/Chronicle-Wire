@@ -484,7 +484,7 @@ public class TextWire extends AbstractWire implements Wire {
                 // then we force it to be String as otherwise valueIn.object gets confused and gives us back a Map
                 int ch3 = peekCode();
                 if (ch3 != '!' && expectedClass == Object.class) {
-                    object = (K) valueIn.object(String.class);
+                    object = (K) valueIn.objectWithInferredType0(null, SerializationStrategies.ANY_SCALAR, defaultKeyClass());
                 } else {
                     object = valueIn.object(expectedClass);
                 }
@@ -521,6 +521,10 @@ public class TextWire extends AbstractWire implements Wire {
         }
         //      consumePadding();
         return toExpected(expectedClass, sb);
+    }
+
+    protected Class defaultKeyClass() {
+        return Object.class;
     }
 
     @Nullable

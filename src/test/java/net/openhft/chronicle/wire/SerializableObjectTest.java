@@ -236,6 +236,11 @@ final class SerializableObjectTest extends WireTestCommon {
                 assertEquals(source, source2);
             }
             return true;
+        } catch (AssertionError ae) {
+            // Java Serialization does serialize/deserialize a class which is equal
+            return false;
+        } catch (InstantiationException | NotSerializableException | IllegalAccessException t) {
+            return false;
         } catch (Throwable t) {
             System.out.println(aClass + ": " + t);
             return false;

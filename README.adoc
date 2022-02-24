@@ -87,7 +87,6 @@ The text formats include:
 * `JSON` - superset to support serialization
 * `CSV` - superset to support serialization
 * `XML` - planned
-* `FIX` - proposed
 
 Options include:
 
@@ -103,10 +102,10 @@ To support wire format discovery, the first byte should be in the `ASCII` range;
 The binary formats include:
 
 * binary YAML.
-* delta compressing Binary YAML. This is a Chronicle Wire Enterprise feature
+* delta compressing Binary YAML.This is a Chronicle Wire Enterprise feature
 * typed data without fields
 * raw untyped fieldless data
-* BSON (Binary JSON) - planned
+* Trivially Copyable Objects (lowest latency)
 
 Options for Binary format:
 
@@ -129,6 +128,9 @@ This can be a `byte[]`, a `ByteBuffer`, off-heap memory, or even an address and 
 
 [source,Java]
 ----
+// Bytes which wraps a byte[]
+Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap();
+// or
 // Bytes which wraps a ByteBuffer which is resized as needed.
 Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 ----
@@ -143,10 +145,10 @@ Wire wire = new TextWire(bytes);
 WireType wireType = WireType.TEXT;
 Wire wireB = wireType.apply(bytes);
 // or
-Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
+Bytes bytes2 = Bytes.allocateElasticOnHeap();
 Wire wire2 = new BinaryWire(bytes2);
 // or
-Bytes<ByteBuffer> bytes3 = Bytes.elasticByteBuffer();
+Bytes bytes3 = Bytes.allocateElasticOnHeap();
 Wire wire3 = new RawWire(bytes3);
 ----
 
@@ -237,6 +239,7 @@ System.out.println(data2);
 ----
 
 prints
+
 [source,yaml]
 ----
 message: Hello World
@@ -244,6 +247,7 @@ number: 1234567890
 code: NANOSECONDS
 price: 10.5
 ----
+
 [source,text]
 ----
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
@@ -262,10 +266,10 @@ System.out.println(bytes2.toHexString());
 Data data3= new Data();
 data3.readMarshallable(wire2);
 System.out.println(data3);
-
 ----
 
 prints
+
 [source,text]
 ----
 00000000 c7 6d 65 73 73 61 67 65  eb 48 65 6c 6c 6f 20 57 ·message ·Hello W
@@ -280,11 +284,11 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 
 In this example the data is marshalled as a nested data structure.
 
-[source, java]
+[source,java]
 ----
 
-// Bytes which wraps a ByteBuffer which is resized as needed.
-Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
+// Bytes which wraps a byte[] which is resized as needed
+Bytes bytes = Bytes.allocateElasticOnHeap();
 
 Wire wire = new TextWire(bytes);
 
@@ -308,6 +312,7 @@ mydata: {
   price: 10.5
 }
 ----
+
 [source,text]
 ----
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
@@ -315,9 +320,9 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 
 To write in binary instead
 
-[source, java]
+[source,java]
 ----
-Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
+Bytes bytes2 = new HexDumpBytes();
 Wire wire2 = new BinaryWire(bytes2);
 
 wire2.write("mydata").marshallable(data);
@@ -332,11 +337,15 @@ prints
 
 [source,text]
 ----
-00000000 c6 6d 79 64 61 74 61 82  40 00 00 00 c7 6d 65 73 ·mydata· @····mes
-00000010 73 61 67 65 eb 48 65 6c  6c 6f 20 57 6f 72 6c 64 sage·Hel lo World
-00000020 c6 6e 75 6d 62 65 72 a6  d2 02 96 49 c8 74 69 6d ·number· ···I·tim
-00000030 65 55 6e 69 74 eb 4e 41  4e 4f 53 45 43 4f 4e 44 eUnit·NA NOSECOND
-00000040 53 c5 70 72 69 63 65 90  00 00 28 41             S·price· ··(A
+c6 6d 79 64 61 74 61                            # mydata
+80 40                                           # Data
+c7 6d 65 73 73 61 67 65                         # message
+eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World
+c6 6e 75 6d 62 65 72                            # number
+a6 d2 02 96 49                                  # 1234567890
+c8 74 69 6d 65 55 6e 69 74                      # timeUnit
+eb 4e 41 4e 4f 53 45 43 4f 4e 44 53             # NANOSECONDS
+c5 70 72 69 63 65 90 00 00 28 41                # price
 
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ----
@@ -349,16 +358,13 @@ It also means the message is shorter and faster.
 
 [source,Java]
 ----
-// Bytes which wraps a ByteBuffer which is resized as needed.
-Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
-
-Wire wire = new TextWire(bytes);
+Wire wire = new TextWire(Bytes.allocateElasticOnHeap());
 
 ClassAliasPool.CLASS_ALIASES.addAlias(Data.class);
 
 Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
 wire.write("mydata").object(data);
-System.out.println(bytes);
+System.out.println(wire);
 
 Data data2= wire.read("mydata").object(Data.class);
 System.out.println(data2);
@@ -375,6 +381,7 @@ mydata: !Data {
   price: 10.5
 }
 ----
+
 [source,text]
 ----
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
@@ -384,11 +391,10 @@ To write in binary instead
 
 [source,Java]
 ----
-Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
-Wire wire2 = new BinaryWire(bytes2);
+Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap());
 
 wire2.write("mydata").object(data);
-System.out.println(bytes2.toHexString());
+System.out.println(wire2.bytes().toHexString());
 
 Data data3 = wire2.read("mydata").object(Data.class);
 System.out.println(data3);
@@ -398,12 +404,16 @@ prints
 
 [source,text]
 ----
-00000000 c6 6d 79 64 61 74 61 b6  04 44 61 74 61 82 40 00 ·mydata· ·Data·@·
-00000010 00 00 c7 6d 65 73 73 61  67 65 eb 48 65 6c 6c 6f ···messa ge·Hello
-00000020 20 57 6f 72 6c 64 c6 6e  75 6d 62 65 72 a6 d2 02  World·n umber···
-00000030 96 49 c8 74 69 6d 65 55  6e 69 74 eb 4e 41 4e 4f ·I·timeU nit·NANO
-00000040 53 45 43 4f 4e 44 53 c5  70 72 69 63 65 90 00 00 SECONDS· price···
-00000050 28 41                                            (A
+c6 6d 79 64 61 74 61                            # mydata
+b6 04 44 61 74 61                               # Data
+80 40                                           # Data
+c7 6d 65 73 73 61 67 65                         # message
+eb 48 65 6c 6c 6f 20 57 6f 72 6c 64             # Hello World
+c6 6e 75 6d 62 65 72                            # number
+a6 d2 02 96 49                                  # 1234567890
+c8 74 69 6d 65 55 6e 69 74                      # timeUnit
+eb 4e 41 4e 4f 53 45 43 4f 4e 44 53             # NANOSECONDS
+c5 70 72 69 63 65 90 00 00 28 41                # price
 
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ----
@@ -415,19 +425,18 @@ The benefits of using this approach are that:
 * The reader (tailer) is blocked until the message is completely written.
 * If you have concurrent writers (appenders):
 ** If the message size is not known, other writers will be blocked until the message is written completely.
-** If the message size is known, other writers will leave buffer space for this writer to complete writing the message and
-   concurrently write beyond the known size.
+** If the message size is known, other writers will leave buffer space for this writer to complete writing the message and concurrently write beyond the known size.
 
-Figure 1 indicates the mechanism of thread-safe message writing. There is a 32-bit field called "len" in the
-start of the message that an appender writes to buffer. The "len" field includes:
+Figure 1 indicates the mechanism of thread-safe message writing.There is a 32-bit field called "len" in the
+start of the message that an appender writes to buffer.The "len" field includes:
 
 1. "complete" flag that shows whether the appender has completed writing this message or not.
 2. "metadata" flag that shows whether this data is metadata.
 3. the actual size of data in the remaining 30 bits of the "len" field.
 
 After completing writing the message, the appender returns to the "len" field and sets the "complete" flag to one so that it indicates the message was written
-completely. Afterwards, the reader starts reading the message. If the message size is not known, appender 2 also
-stops writing until the message is written completely. If the size of the message is known, appender 2 leaves the
+completely.Afterwards, the reader starts reading the message.If the message size is not known, appender 2 also
+stops writing until the message is written completely.If the size of the message is known, appender 2 leaves the
 required space for appender 1's message and concurrently writes beyond that, as Figure 1 shows.
 
 [#img-buffer]
@@ -448,7 +457,7 @@ Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
 wire.writeDocument(false, data);
 System.out.println(Wires.fromSizePrefixedBlobs(bytes));
 
-Data data2= new Data();
+Data data2 = new Data();
 wire.readDocument(null, data2);
 System.out.println(data2);
 ----
@@ -887,10 +896,10 @@ Chronicle Wire offers the ability to bind a reference to a fixed value of a fiel
 ----
    // field to cache the location and object used to reference a field.
    private LongValue counter = null;
-    
+
    // find the field and bind an approritae wrapper for the wire format.
    wire.read(COUNTER).int64(counter, x -> counter = x);
-    
+
    // thread safe across processes on the same machine.
    long id = counter.getAndAdd(1);
 ----
@@ -1046,46 +1055,40 @@ NOTE: The unique key for these objects is their type and name. Two objects of di
 IMPORTANT: These objects passed by reference are never cleaned up. Only use them when there is likely to be a limited number of them over the life of the application.
 
 == Using @MethodId
+
 You can assign a method id to a method using the annotation `@MethodId(long int: id)`.
-The provided id should be unique across all classes using the same MethodReader/Writer, therefore
-it is safe practice to use unique method id in your entire system. A method name can be determined
-from its method id and this results in saving memory when calling the method. The following example
-shows the difference between memory usage when using method id and when not using it. In this example
-the method `saysomethingnice()` has been annotated with `MethodId(7)` and it has been called
-from `shouldDetermineMethodNamesFromMethodIds()`.
+The provided id should be unique across all classes using the same MethodReader/Writer, therefore it is safe practice to use unique method id in your entire system.A method name can be determined from its method id and this results in saving memory when calling the method.The following example shows the difference between memory usage when using method id and when not using it.In this example the method `saysomethingnice()` has been annotated with `MethodId(7)` and it has been called from `shouldDetermineMethodNamesFromMethodIds()`.
 
-[source, Java]
-----
-public void shouldDetermineMethodNamesFromMethodIds() {
-        Bytes bytes = Bytes.allocateElasticOnHeap();
-
-        final BinaryWire wire = new BinaryWire(bytes);
-        final Speaker speaker =
-                wire.methodWriterBuilder(Speaker.class).get();
-        speaker.saysomethingnice("hello");
-
-        /**
-        * Output when using @MethodId
-        * 00000000 08 00 00 00 ba 07 e5 68  65 6c 6c 6f             ·······h ello
-        *
-        * Output without using @MethodId
-        * 00000000 18 00 00 00 b9 10 73 61  79 73 6f 6d 65 74 68 69 ······sa ysomethi
-        * 00000010 6e 67 6e 69 63 65 e5 68  65 6c 6c 6f             ngnice·h ello
-        */
-        System.out.println(bytes.toHexString());
-    }
-
-    interface Speaker {
-        @MethodId(7)
-        void saysomethingnice(final String message);
-    }
+[source,Java]
 ----
 
-== Compression Options
+ interface Speaker {
+     @MethodId(7)
+     void saysomethingnice(final String message);
+ }
 
-* No compression
-* Snappy compression - planned
-* LZW compression - planned
+ public void shouldDetermineMethodNamesFromMethodIds() {
+     Bytes bytes = Bytes.allocateElasticOnHeap();
+
+     final BinaryWire wire = new BinaryWire(bytes);
+     final Speaker speaker =
+             wire.methodWriterBuilder(Speaker.class).get();
+     speaker.saysomethingnice("hello");
+----
+
+.Using a @MethodId
+----
+08 00 00 00                                     # msg-length
+ba 07                                           # say
+e5 68 65 6c 6c 6f                               # hello
+----
+
+.Without a @MethodId
+----
+0b 00 00 00                                     # msg-length
+b9 03 73 61 79                                  # say
+e5 68 65 6c 6c 6f                               # hello
+----
 
 == Bytes options
 
@@ -1093,7 +1096,9 @@ Chronicle Wire is built on top of the `Bytes` library, however `Bytes`, in turn,
 
 * `ByteBuffer` - heap and direct
 * `byte[]` - using `ByteBuffer`
+* `byte[]` or primitive array without ByteBuffer
 * raw memory addresses.
+* portion of a regular on heap object
 
 == Handling instance classes of an unknown type
 
@@ -1176,13 +1181,16 @@ interface ThreeValues {
 
 == Handling unexpected fields
 By default, Chronicle Wire skips fields which names don't match any field of the DTO class. It's possible to capture such fields by overriding method or `ReadMarshallable`:
+
 [source,Java]
 ----
     default void unexpectedField(Object event, ValueIn valueIn) {
         valueIn.skipValue();
     }
 ----
+
 One of best practices is saving unexpected fields in order to process them after the deserialization:
+
 [source, Java]
 ----
         transient Map<String, Object> others = new LinkedHashMap<>();
@@ -1192,7 +1200,9 @@ One of best practices is saving unexpected fields in order to process them after
             others.put(event.toString(), valueIn.object());
         }
 ----
+
 It's also possible to use fail-fast approach and throw an exception:
+
 [source, Java]
 ----
         @Override
@@ -1287,6 +1297,7 @@ You may wish to intercept handling a call in the method reader in order to execu
 
 `MethodReader` provides a flexible feature for supporting all the above use cases -- the option to specify `MethodReaderInterceptorReturns`.
 If set, it will be triggered *instead* of the original call. It's possible to either skip the original method or to call it via passed `Invocation` instance:
+
 [source,Java]
 ----
 class MyInterceptor implements MethodReaderInterceptorReturns {
@@ -1307,6 +1318,7 @@ class MyInterceptor implements MethodReaderInterceptorReturns {
 Code returned by `codeBeforeCall` and `codeAfterCall` will be added before and after actual method call in the generated source code of the method reader. It's possible to use original call arguments and object instance in the added code.
 
 Simple example that enforces skipping the original call in case the second agrument is `null`:
+
 [source,Java]
 ----
 class SkippingInterceptor implements GeneratingMethodReaderInterceptorReturns {
@@ -1333,6 +1345,7 @@ See `MethodReaderInterceptorReturnsTest` for more examples.
 === Spring Boots and dynamic compilation in Chronicle Wire
 Chronicle Wire's `MethodReader` and `MethodWriter` dynamically compile Java code to get around some limitations in Java's underlying proxy mechanism and to do this the Java platform's standard compilation mechanism is used. The platform compiler uses the classpath variable to look for classes in directories and JAR files, and is not able to make use of classloaders to find classes.
 Spring Boot uses a custom deployment mechanism - all classes and JARs are deployed in a fat JAR and Spring's classloader can extract classes from this. In order for the compiler to be able to see classes from the fat JAR, the classes should be extracted onto the disk somewhere. This is easy if the classes are contained in a JAR (i.e. a JAR inside the fat JAR) - Spring can be made to extract the JAR to a temp directory, such as by configuring Maven Spring Boot plugin:
+
 [source,xml]
 ----
 <plugin>
@@ -1356,9 +1369,11 @@ Spring Boot uses a custom deployment mechanism - all classes and JARs are deploy
     </configuration>
 </plugin>
 ----
+
 This will allow the latest Chronicle-Wire to use classes in those JAR files.
 
 Dynamic compilation may be also configured via Gradle Spring Boot plugin:
+
 [source,groovy]
 ----
 bootJar {
@@ -1426,12 +1441,12 @@ The documentation looks well-thought-out, and it is worth emulating.
 | Unset fields take space on wire? | optional               | optional            | no                     | yes                     | yes                 | no
 | Pointers take space on wire?     | no                     | no                  | no                     | yes                     | no                  | yes
 | Pass-by-name (Dynamic Enums) | yes                     | no                  | no                     | no                     | no                  | no
-| C++                              | planned                | planned             | yes                    | yes (C++11)*            | yes                 | yes
+| C++                              | yes                | planned             | yes                    | yes (C++11)*            | yes                 | yes
 | Java                             | Java 8                 | Java 8              | yes                    | yes*                    | yes                 | yes
 | C#                               | yes                    | yes                 | yes                    | yes*                    | yes                 | yes*
 | Go                               | no                     | no                  | yes                    | yes                     | no                  | yes*
 | Other languages                  | no                     | no                  | 6+                     | others*                 | no                  | no
-| Authors' preferred use case      | distributed  computing | financial / trading | distributed  computing | platforms /  sandboxing | financial / trading | games
+| Authors' preferred use case      | distributed computing | financial / trading | distributed computing | platforms / sandboxing | financial / trading | games
 |===============
 
 NOTE: The `Binary YAML` format can be automatically converted to `YAML` without any knowledge of the schema, because the messages are self-describing.
@@ -1567,6 +1582,7 @@ $class.name ${field.name}($field.type $paramName) {
   return this;
 }
 ----
+
 == Why use Marshallable objects
 
 Marshallable objects have been designed to allow you to
