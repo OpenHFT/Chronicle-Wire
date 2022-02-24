@@ -31,20 +31,24 @@ public class WriteDocumentContextTest extends WireTestCommon {
     public void nestedPlainText() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         writeThreeKeys(wire);
-        assertEquals("key: 0\n" +
-                "key: 1\n" +
-                "key: 2\n" +
-                "...\n", wire.bytes().toString());
+        assertEquals("" +
+                        "key: 0\n" +
+                        "key: 1\n" +
+                        "key: 2\n" +
+                        "...\n",
+                wire.bytes().toString());
     }
 
     @Test
     public void chainedPlainText() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         writeThreeChainedKeys(wire);
-        assertEquals("key: 0\n" +
-                "key: 1\n" +
-                "key: 2\n" +
-                "...\n", wire.bytes().toString());
+        assertEquals("" +
+                        "key: 0\n" +
+                        "key: 1\n" +
+                        "key: 2\n" +
+                        "...\n",
+                wire.bytes().toString());
     }
 
     @Test
@@ -54,9 +58,11 @@ public class WriteDocumentContextTest extends WireTestCommon {
 
         writeThreeKeys(wire);
         assertEquals(21, wire.bytes().readInt());
-        assertEquals("key: 0\n" +
-                "key: 1\n" +
-                "key: 2\n", wire.bytes().toString());
+        assertEquals("" +
+                        "key: 0\n" +
+                        "key: 1\n" +
+                        "key: 2\n",
+                wire.bytes().toString());
     }
 
     @Test
@@ -66,9 +72,11 @@ public class WriteDocumentContextTest extends WireTestCommon {
 
         writeThreeChainedKeys(wire);
         assertEquals(21, wire.bytes().readInt());
-        assertEquals("key: 0\n" +
-                "key: 1\n" +
-                "key: 2\n", wire.bytes().toString());
+        assertEquals("" +
+                        "key: 0\n" +
+                        "key: 1\n" +
+                        "key: 2\n",
+                wire.bytes().toString());
     }
 
     @Test
@@ -80,9 +88,9 @@ public class WriteDocumentContextTest extends WireTestCommon {
         String s = Wires.fromSizePrefixedBlobs(wire);
         assertEquals("" +
                 "--- !!data #binary\n" +
-                "key: !int 0\n" +
-                "key: !int 1\n" +
-                "key: !int 2\n", s);
+                "key: 0\n" +
+                "key: 1\n" +
+                "key: 2\n", s);
     }
 
     @Test
@@ -94,8 +102,8 @@ public class WriteDocumentContextTest extends WireTestCommon {
         String s = Wires.fromSizePrefixedBlobs(wire);
         assertEquals("" +
                 "--- !!data #binary\n" +
-                "key: !int 0\n" +
-                "key: !int 1\n" +
-                "key: !int 2\n", s);
+                "key: 0\n" +
+                "key: 1\n" +
+                "key: 2\n", s);
     }
 }

@@ -107,7 +107,7 @@ public class ChainedMethodsTest extends WireTestCommon {
         assertEquals("" +
                 "--- !!data #binary\n" +
                 "mid: mid\n" +
-                "next: !int 1\n" +
+                "next: 1\n" +
                 "echo: echo-1\n" +
                 "# position: 36, header: 1\n" +
                 "--- !!data #binary\n" +
@@ -136,18 +136,19 @@ public class ChainedMethodsTest extends WireTestCommon {
                 .echo("echo-2");
 
         assertEquals("" +
-                "--- !!data #binary\n" +
-                "midNoArg: \"\"\n" +
-                "next: !int 1\n" +
-                "echo: echo-1\n" +
-                "# position: 36, header: 1\n" +
-                "--- !!data #binary\n" +
-                "midTwoArgs: [\n" +
-                "  !int 5,\n" +
-                "  !byte -7\n" +
-                "],\n" +
-                "next: !int 2\n" +
-                "echo: echo-2\n", WireDumper.of(wire).asString());
+                        "--- !!data #binary\n" +
+                        "midNoArg: \"\"\n" +
+                        "next: 1\n" +
+                        "echo: echo-1\n" +
+                        "# position: 36, header: 1\n" +
+                        "--- !!data #binary\n" +
+                        "midTwoArgs: [\n" +
+                        "  5,\n" +
+                        "  !byte -7\n" +
+                        "],\n" +
+                        "next: 2\n" +
+                        "echo: echo-2\n",
+                WireDumper.of(wire).asString());
 
         StringBuilder sb = new StringBuilder();
 

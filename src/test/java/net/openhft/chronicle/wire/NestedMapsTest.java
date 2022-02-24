@@ -114,20 +114,20 @@ public class NestedMapsTest extends WireTestCommon {
                         "    dog\n" +
                         "  ],\n" +
                         "  numbers: [\n" +
-                        "    !int 1,\n" +
-                        "    !int 2,\n" +
-                        "    !int 2,\n" +
-                        "    !int 3,\n" +
-                        "    !int 5,\n" +
-                        "    !int 8,\n" +
-                        "    !int 13\n" +
+                        "    1,\n" +
+                        "    2,\n" +
+                        "    2,\n" +
+                        "    3,\n" +
+                        "    5,\n" +
+                        "    8,\n" +
+                        "    13\n" +
                         "  ],\n" +
                         "  map1: {\n" +
                         "    aye: AAA,\n" +
                         "    bee: BBB\n" +
                         "  },\n" +
                         "  map2: {\n" +
-                        "    one: !int 1,\n" +
+                        "    one: 1,\n" +
                         "    two point two: 2.2\n" +
                         "  }\n" +
                         "}\n", Wires.fromSizePrefixedBlobs(wire));
@@ -148,20 +148,20 @@ public class NestedMapsTest extends WireTestCommon {
                         "    dog\n" +
                         "  ],\n" +
                         "  [\n" +
-                        "    !int 1,\n" +
-                        "    !int 2,\n" +
-                        "    !int 2,\n" +
-                        "    !int 3,\n" +
-                        "    !int 5,\n" +
-                        "    !int 8,\n" +
-                        "    !int 13\n" +
+                        "    1,\n" +
+                        "    2,\n" +
+                        "    2,\n" +
+                        "    3,\n" +
+                        "    5,\n" +
+                        "    8,\n" +
+                        "    13\n" +
                         "  ],\n" +
                         "  {\n" +
                         "    aye: AAA,\n" +
                         "    bee: BBB\n" +
                         "  },\n" +
                         "  {\n" +
-                        "    one: !int 1,\n" +
+                        "    one: 1,\n" +
                         "    two point two: 2.2\n" +
                         "  }\n" +
                         "]\n", Wires.fromSizePrefixedBlobs(wire));

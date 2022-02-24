@@ -345,7 +345,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "a4 02                                           # 2\n" +
                         "a4 03                                           # 3\n"
         );
-        checkAsText123(wire, fixed ? "!byte " : "!int ");
+        checkAsText123(wire, fixed ? "!byte " : "");
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -438,7 +438,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "a5 01 00                                        # 1\n" +
                         "a5 02 00                                        # 2\n" +
                         "a5 03 00                                        # 3\n");
-        checkAsText123(wire, fixed ? "!short " : "!int ");
+        checkAsText123(wire, fixed ? "!short " : "");
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -501,7 +501,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "a1 01                                           # 1\n" +
                         "a1 02                                           # 2\n" +
                         "a1 03                                           # 3\n");
-        checkAsText123(wire, "!int ");
+        checkAsText123(wire);
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -564,7 +564,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "a2 01 00                                        # 1\n" +
                         "a2 02 00                                        # 2\n" +
                         "a2 03 00                                        # 3\n");
-        checkAsText123(wire, "!int ");
+        checkAsText123(wire);
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -627,7 +627,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "a3 01 00 00 00                                  # 1\n" +
                         "a3 02 00 00 00                                  # 2\n" +
                         "a3 03 00 00 00                                  # 3\n");
-        checkAsText123(wire, !fixed ? "!int " : "");
+        checkAsText123(wire, fixed ? "!int " : "");
 
         // ok as blank matches anything
         @NotNull AtomicLong i = new AtomicLong();
@@ -690,7 +690,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "a6 01 00 00 00                                  # 1\n" +
                         "a6 02 00 00 00                                  # 2\n" +
                         "a6 03 00 00 00                                  # 3\n");
-        checkAsText123(wire, "!int ");
+        checkAsText123(wire);
 
         // ok as blank matches anything
         @NotNull AtomicInteger i = new AtomicInteger();
@@ -753,7 +753,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "a7 01 00 00 00 00 00 00 00                      # 1\n" +
                         "a7 02 00 00 00 00 00 00 00                      # 2\n" +
                         "a7 03 00 00 00 00 00 00 00                      # 3\n");
-        checkAsText123(wire, fixed ? "" : "!int ");
+        checkAsText123(wire, "");
 
         // ok as blank matches anything
         @NotNull AtomicLong i = new AtomicLong();
@@ -838,7 +838,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "91 00 00 00 00 00 00 00 40                      # 2.0\n" +
                         "91 00 00 00 00 00 00 08 40                      # 3.0\n");
         if (wire.getValueOut() instanceof BinaryWire.BinaryValueOut)
-            checkAsText123(wire, fixed ? "" : "!int ");
+            checkAsText123(wire);
         else
             checkAsText123_0(wire);
         wire.write().float64(0);

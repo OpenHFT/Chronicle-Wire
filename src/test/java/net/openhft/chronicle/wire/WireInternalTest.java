@@ -93,14 +93,14 @@ public class WireInternalTest extends WireTestCommon {
                 "# position: 36, header: 0\n" +
                 "--- !!data #binary\n" +
                 "reply: {\n" +
-                "  key: !int 1,\n" +
+                "  key: 1,\n" +
                 "  value: Hello World\n" +
                 "}\n" +
                 "# position: 76, header: 1\n" +
                 "--- !!data #binary\n" +
                 "reply: [\n" +
                 "  key,\n" +
-                "  !int 2,\n" +
+                "  2,\n" +
                 "  value,\n" +
                 "  Hello World2\n" +
                 "]\n" +

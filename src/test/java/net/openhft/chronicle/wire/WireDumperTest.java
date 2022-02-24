@@ -81,7 +81,7 @@ public class WireDumperTest extends WireTestCommon {
 
         final String expectedBinary = "" +
                 "--- !!data #binary\n" +
-                "!int 17\n" +
+                "17\n" +
                 "# position: 8, header: 1\n" +
                 "--- !!data #binary\n" +
                 "bark\n" +
@@ -129,7 +129,7 @@ public class WireDumperTest extends WireTestCommon {
 
         final String expectedPartialBinary = "" +
                 "--- !!data #binary\n" +
-                "!int 17\n" +
+                "17\n" +
                 "# position: 8, header: 0 or 1\n" +
                 "--- !!not-ready-data #binary\n" +
                 "...\n" +
