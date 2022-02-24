@@ -464,7 +464,7 @@ public class RawWire extends AbstractWire implements Wire {
         public WireOut int64array(long capacity, @NotNull LongArrayValues values) {
             long pos = bytes.writePosition();
             BinaryLongArrayReference.lazyWrite(bytes, capacity);
-            ((Byteable) values).bytesStore(bytes, pos, bytes.writePosition() - pos);
+            ((Byteable) values).bytesStore(bytes, pos, bytes.lengthWritten(pos));
             return RawWire.this;
         }
 
@@ -540,7 +540,7 @@ public class RawWire extends AbstractWire implements Wire {
             long position = bytes.writePosition();
             bytes.writeSkip(1);
             typeTranslator.accept(type, bytes);
-            bytes.writeUnsignedByte(position, Maths.toInt8(bytes.writePosition() - position - 1));
+            bytes.writeUnsignedByte(position, Maths.toInt8(bytes.lengthWritten(position) - 1));
             return RawWire.this;
         }
 
@@ -598,7 +598,7 @@ public class RawWire extends AbstractWire implements Wire {
 
             writer.accept(t, this);
 
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.lengthWritten(position) - 4, "Document length %,d out of 32-bit int range."));
             return RawWire.this;
         }
 
@@ -610,7 +610,7 @@ public class RawWire extends AbstractWire implements Wire {
 
             writer.accept(t, kls, this);
 
-            bytes.writeOrderedInt(position, Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range."));
+            bytes.writeOrderedInt(position, Maths.toInt32(bytes.lengthWritten(position) - 4, "Document length %,d out of 32-bit int range."));
             return RawWire.this;
         }
 
@@ -622,7 +622,7 @@ public class RawWire extends AbstractWire implements Wire {
 
             object.writeMarshallable(RawWire.this);
 
-            int length = Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range.");
+            int length = Maths.toInt32(bytes.lengthWritten(position) - 4, "Document length %,d out of 32-bit int range.");
             bytes.writeOrderedInt(position, length);
             return RawWire.this;
         }
@@ -635,7 +635,7 @@ public class RawWire extends AbstractWire implements Wire {
 
             writeSerializable(object);
 
-            int length = Maths.toInt32(bytes.writePosition() - position - 4, "Document length %,d out of 32-bit int range.");
+            int length = Maths.toInt32(bytes.lengthWritten(position) - 4, "Document length %,d out of 32-bit int range.");
             bytes.writeOrderedInt(position, length);
             return RawWire.this;
         }
