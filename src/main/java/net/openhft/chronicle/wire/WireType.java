@@ -375,14 +375,6 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     }
 
     @NotNull
-    static Bytes getBytes() {
-        // when in debug, the output becomes confused if you reuse the buffer.
-        if (Jvm.isDebug())
-            return Bytes.allocateElasticDirect();
-        return Wires.acquireBytes();
-    }
-
-    @NotNull
     static Bytes getBytesForToString() {
         return Wires.acquireBytesForToString();
     }
@@ -595,7 +587,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
     public <T extends Marshallable> void toFileAsMap(@NotNull String filename, @NotNull Map<String, T> map, boolean compact)
             throws IOException {
-        Bytes bytes = getBytes();
+        Bytes bytes = WireInternal.acquireInternalBytes();
         Wire wire = apply(bytes);
         for (@NotNull Map.Entry<String, T> entry : map.entrySet()) {
             @NotNull ValueOut valueOut = wire.writeEventName(entry::getKey);
@@ -616,7 +608,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     }
 
     public void toFile(@NotNull String filename, WriteMarshallable marshallable) throws IOException {
-        Bytes bytes = getBytes();
+        Bytes bytes = WireInternal.acquireInternalBytes();
         Wire wire = apply(bytes);
         wire.getValueOut().typedMarshallable(marshallable);
         String tempFilename = IOTools.tempName(filename);

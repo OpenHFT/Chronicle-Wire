@@ -27,8 +27,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.openhft.chronicle.bytes.Bytes.elasticByteBuffer;
-import static net.openhft.chronicle.wire.WireType.BINARY;
 
 public class UsingTestMarshallable {
 
@@ -85,7 +83,7 @@ public class UsingTestMarshallable {
     @Test
     public void test() {
 
-        Wire wire = WireType.BINARY.apply(Wires.acquireBytes());
+        Wire wire = WireType.BINARY.apply(WireInternal.acquireInternalBytes());
         @NotNull MarshableFilter expected = new MarshableFilter("hello", "world");
 
         // write
