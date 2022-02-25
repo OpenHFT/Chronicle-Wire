@@ -207,7 +207,7 @@ public class YamlWire extends AbstractWire implements Wire {
             if (c != null)
                 writeComment(c.value());
         }
-        return new TextMethodWriterInvocationHandler(this);
+        return new TextMethodWriterInvocationHandler(interfaces[0], this);
     }
 
     @Override

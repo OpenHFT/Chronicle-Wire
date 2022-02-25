@@ -41,6 +41,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     private WireParselet defaultParselet;
     private MethodReaderInterceptorReturns methodReaderInterceptorReturns;
     private WireType wireType;
+    private Object[] metaDataHandler = null;
 
     public VanillaMethodReaderBuilder(MarshallableIn in) {
         this.in = in;
@@ -154,13 +155,19 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
                 in, debugLoggingParselet, vanillaSupplier, methodReaderInterceptorReturns, impls);
     }
 
+    @Override
+    public MethodReaderBuilder metaDataHandler(Object... components) {
+        this.metaDataHandler = components;
+        return this;
+    }
+
     @NotNull
     public MethodReader build(Object... impls) {
         final WireParselet defaultParselet = this.defaultParselet == null ?
                 createDefaultParselet(warnMissing) : this.defaultParselet;
 
         Supplier<MethodReader> vanillaSupplier = () -> new VanillaMethodReader(
-                in, ignoreDefaults, defaultParselet, methodReaderInterceptorReturns, impls);
+                in, ignoreDefaults, defaultParselet, methodReaderInterceptorReturns, metaDataHandler, impls);
 
         final MethodReader generatedInstance = createGeneratedInstance(vanillaSupplier, impls);
 

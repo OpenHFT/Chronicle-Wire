@@ -17,7 +17,6 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodWriterInterceptorReturns;
 import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
@@ -25,7 +24,6 @@ import net.openhft.chronicle.core.util.AbstractInvocationHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
@@ -44,8 +42,8 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     private BiConsumer<Method, Object[]> handleInvoke;
     private boolean useMethodIds;
 
-    protected AbstractMethodWriterInvocationHandler() {
-        super(HashMap::new);
+    protected AbstractMethodWriterInvocationHandler(Class tClass) {
+        super(tClass);
         this.handleInvoke = this::handleInvoke;
     }
 
