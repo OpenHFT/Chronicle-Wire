@@ -344,7 +344,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                         "meta: say[hi BBB]\n" +
                         "data: to[two]\n" +
                         "data: say[hi 222]\n",
-                out.toString());
+                out.toString().replace("\r", ""));
         wire.bytes().releaseLast();
     }
 
