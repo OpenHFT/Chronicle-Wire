@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.Annotations;
 import net.openhft.chronicle.core.util.GenericReflection;
@@ -118,6 +119,8 @@ public class GenerateMethodReader {
             methodFilterPresent |= methodFilter;
 
             for (Class<?> anInterface : ReflectionUtil.interfaces(aClass)) {
+                if (anInterface.getAnnotation(DontChain.class) != null)
+                    continue;
                 handleInterface(anInterface, "instance" + i, methodFilter);
             }
         }
