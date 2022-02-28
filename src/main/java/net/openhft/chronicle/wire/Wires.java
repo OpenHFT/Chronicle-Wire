@@ -131,7 +131,7 @@ public enum Wires {
     }
 
     public static String fromAlignedSizePrefixedBlobs(@NotNull Bytes bytes) {
-        return WireDumper.of(bytes, true).asString();
+        return WireDumper.of(bytes).asString();
     }
 
     public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, boolean abbrev) {
@@ -139,18 +139,10 @@ public enum Wires {
     }
 
     public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position) {
-        return fromSizePrefixedBlobs(bytes, position, false);
-    }
-
-    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, long position, boolean padding) {
         final long limit = bytes.readLimit();
         if (position > limit)
             return "";
-        return WireDumper.of(bytes, padding).asString(position, limit - position);
-    }
-
-    public static String fromSizePrefixedBlobs(@NotNull Bytes bytes, boolean padding, boolean abbrev) {
-        return WireDumper.of(bytes, padding).asString(abbrev);
+        return WireDumper.of(bytes).asString(position, limit - position);
     }
 
     public static String fromSizePrefixedBlobs(@NotNull DocumentContext dc) {

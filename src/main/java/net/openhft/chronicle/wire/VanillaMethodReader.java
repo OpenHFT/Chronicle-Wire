@@ -469,20 +469,6 @@ public class VanillaMethodReader implements MethodReader {
         return readOne0();
     }
 
-    /**
-     * @deprecated see {@link net.openhft.chronicle.wire.MarshallableIn#peekDocument()}
-     */
-    @Deprecated(/* remove in x.23 */)
-    public boolean lazyReadOne() {
-        throwExceptionIfClosed();
-
-        if (!in.peekDocument()) {
-            return false;
-        }
-
-        return readOne0();
-    }
-
     private boolean readOne0() {
         try (DocumentContext context = in.readingDocument()) {
             if (!context.isPresent()) {

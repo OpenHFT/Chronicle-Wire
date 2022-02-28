@@ -47,7 +47,6 @@ tid: 1426502826520
 lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
  */
         @NotNull Wire text = new TextWire(bytes);
-        text.usePadding(true);
         writeMessageOne(text);
 
         // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
@@ -69,7 +68,6 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
                 Wires.fromSizePrefixedBlobs(bytes));
 
         @NotNull Wire wire = new BinaryWire(bytes);
-        wire.usePadding(true);
 
         clear(bytes);
         writeMessageOne(wire);
@@ -79,7 +77,6 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
                 bytes.toDebugString());
 
         @NotNull Wire raw = new RawWire(bytes);
-        raw.usePadding(true);
         clear(bytes);
         writeMessageOne(raw);
 

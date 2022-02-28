@@ -12,7 +12,6 @@ public class GenerateMethodWriterSameInterfaceDifferentOuterClassTest extends Te
     public void test() {
 
         final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
-        wire.usePadding(true);
 
         wire
                 .methodWriterBuilder(Outer1.InnerInterface.class)

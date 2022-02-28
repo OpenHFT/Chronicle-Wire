@@ -55,7 +55,6 @@ public class MethodWriter2Test extends WireTestCommon {
 
     private void check(boolean allowThrough, ARGUMENT argument) {
         Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
-        wire.usePadding(true);
 
         // checks that no exceptions are thrown here
         UpdateInterceptor ui = (methodName, t) -> allowThrough;

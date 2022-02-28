@@ -61,7 +61,6 @@ public class NestedMapsTest extends WireTestCommon {
 
         Bytes bytes = Bytes.allocateElasticOnHeap(128);
         Wire wire = wireType.apply(bytes);
-        wire.usePadding(false);
 
         wire.writeDocument(false, w -> w.writeEventName("mapped").object(m));
         switch (wireType) {
@@ -238,7 +237,6 @@ public class NestedMapsTest extends WireTestCommon {
     public void testMapReadAndWrite() {
         Bytes bytes = Bytes.elasticByteBuffer();
         Wire wire = wireType.apply(bytes);
-        wire.usePadding(true);
 
         @NotNull final Map<Integer, Integer> expected = new HashMap<>();
         expected.put(1, 2);
