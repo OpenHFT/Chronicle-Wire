@@ -67,8 +67,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     private Closeable closeable;
     private String genericEvent;
     private boolean metaData;
-    @Deprecated(/* To be removed in x.23 */)
-    private boolean useMethodIds = true;
     private WireType wireType;
     private Class<?> proxyClass;
     private UpdateInterceptor updateInterceptor;
@@ -169,7 +167,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         });
         sb.append(this.genericEvent == null ? "" : this.genericEvent);
         sb.append(this.metaData ? "MetadataAware" : "");
-        sb.append(useMethodIds ? "MethodIds" : "");
         sb.append(updateInterceptor != null ? "Intercepting" : "");
         sb.append(toFirstCapCase(wireType().toString().replace("_", "")));
         sb.append("MethodWriter");
@@ -232,7 +229,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                     wireType,
                     genericEvent,
                     metaData,
-                    useMethodIds,
+                    true,
                     updateInterceptor != null);
         GenerateMethodWriter2 gmw = new GenerateMethodWriter2();
         gmw.metaData()
@@ -241,7 +238,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                 .interfaces(interfaces)
                 .genericEvent(genericEvent)
                 .metaData(metaData)
-                .useMethodIds(useMethodIds)
+                .useMethodIds(true)
                 .useUpdateInterceptor(updateInterceptor != null);
         gmw.maxCode(0);
         return gmw.acquireClass(classLoader);
@@ -269,12 +266,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     public MethodWriterBuilder<T> genericEvent(String genericEvent) {
         handlerSupplier.genericEvent(genericEvent);
         this.genericEvent = genericEvent;
-        return this;
-    }
-
-    public MethodWriterBuilder<T> useMethodIds(boolean useMethodIds) {
-        handlerSupplier.useMethodIds(useMethodIds);
-        this.useMethodIds = useMethodIds;
         return this;
     }
 

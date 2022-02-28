@@ -121,11 +121,6 @@ public class HashWire implements WireOut, BytesComment {
     }
 
     @Override
-    public void usePadding(boolean usePadding) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean usePadding() {
         return false;
     }
@@ -219,11 +214,6 @@ public class HashWire implements WireOut, BytesComment {
 
     @Override
     public DocumentContext acquireWritingDocument(boolean metaData) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public long enterHeader(final int safeLength) {
         throw new UnsupportedOperationException();
     }
 

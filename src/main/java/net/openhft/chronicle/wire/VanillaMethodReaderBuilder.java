@@ -103,6 +103,11 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         return this;
     }
 
+    @Override
+    public MethodReaderBuilder metaDataHandler(Object... components) {
+        throw new UnsupportedOperationException();
+    }
+
     public WireType wireType() {
         return wireType;
     }

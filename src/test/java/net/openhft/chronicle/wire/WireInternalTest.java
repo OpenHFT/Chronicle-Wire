@@ -68,7 +68,6 @@ public class WireInternalTest extends WireTestCommon {
     public void testFromSizePrefixedBinaryToText() {
         Bytes bytes = Bytes.elasticByteBuffer();
         @NotNull Wire wire = new BinaryWire(bytes);
-        wire.usePadding(true);
 
         wire.writeDocument(true, w -> w
                 .write(() -> "csp").text("csp://hello-world")

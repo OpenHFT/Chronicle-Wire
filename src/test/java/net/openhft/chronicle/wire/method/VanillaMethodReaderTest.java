@@ -30,7 +30,6 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         Bytes b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.BINARY.apply(b);
-            wire.usePadding(true);
 
             {
                 AListener aListener = wire.methodWriter(true, AListener.class);

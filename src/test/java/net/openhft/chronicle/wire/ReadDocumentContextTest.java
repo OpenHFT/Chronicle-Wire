@@ -70,7 +70,6 @@ public class ReadDocumentContextTest extends WireTestCommon {
         @NotNull MappedBytes b = MappedBytes.mappedBytes(File.createTempFile("delete", "me"), 64 << 10);
         assertTrue(b.sharedMemory());
         @NotNull Wire wire = new TextWire(b).useBinaryDocuments();
-        wire.usePadding(true);
         assertTrue(wire.notCompleteIsNotPresent());
 
         try (DocumentContext dc = wire.readingDocument()) {
@@ -116,7 +115,6 @@ public class ReadDocumentContextTest extends WireTestCommon {
         Bytes b = Bytes.elasticByteBuffer();
 
         @NotNull TextWire textWire = new TextWire(b).useBinaryDocuments();
-        textWire.usePadding(true);
 
         textWire.writeDocument(true, w -> {
         });
@@ -145,7 +143,6 @@ public class ReadDocumentContextTest extends WireTestCommon {
         Bytes b = Bytes.elasticByteBuffer();
 
         @NotNull TextWire textWire = new TextWire(b).useBinaryDocuments();
-        textWire.usePadding(true);
 
         textWire.writeDocument(true, w -> w.write("key").text("someText"));
         textWire.writeDocument(true, w -> w.write("key").text("someText"));
@@ -191,7 +188,6 @@ public class ReadDocumentContextTest extends WireTestCommon {
         Bytes b = Bytes.elasticByteBuffer();
 
         @NotNull TextWire wire = new TextWire(b).useBinaryDocuments();
-        wire.usePadding(true);
 
         wire.writeDocument(true, w -> w.write("key").text("someText"));
         wire.writeDocument(true, w -> w.write("key").text("someText"));

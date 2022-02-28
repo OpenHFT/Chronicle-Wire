@@ -40,7 +40,6 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.wire.Wires.*;
 
 public abstract class AbstractWire implements Wire {
-    public static final boolean DEFAULT_USE_PADDING = Jvm.getBoolean("wire.usePadding", true);
     private static final String INSIDE_HEADER_MESSAGE = "you cant put a header inside a header, check that " +
             "you have not nested the documents. If you are using Chronicle-Queue please " +
             "ensure that you have a unique instance of the Appender per thread, in " +
@@ -65,7 +64,7 @@ public abstract class AbstractWire implements Wire {
     private ObjectInput objectInput;
     private boolean insideHeader;
     private HeadNumberChecker headNumberChecker;
-    private boolean usePadding = false;
+    private final boolean usePadding = true;
 
     @SuppressWarnings("rawtypes")
     protected AbstractWire(@NotNull Bytes bytes, boolean use8bit) {
@@ -276,11 +275,6 @@ public abstract class AbstractWire implements Wire {
         if (!isReadyMetaData(header) || len > 64 << 10)
             throw new StreamCorruptedException("Unexpected magic number " + Integer.toHexString(header));
         bytes.readPositionRemaining(SPB_HEADER_SIZE, len);
-    }
-
-    @Override
-    public long enterHeader(int safeLength) {
-        return enterHeader((long) safeLength);
     }
 
     @Override
@@ -544,10 +538,6 @@ public abstract class AbstractWire implements Wire {
     }
 
     // @Deprecated(/* to be removed in x.24 */)
-    public void usePadding(boolean usePadding) {
-        this.usePadding = usePadding;
-    }
-
     public boolean usePadding() {
         return usePadding;
     }

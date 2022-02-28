@@ -49,7 +49,6 @@ public class InnerMapTest extends WireTestCommon {
         @SuppressWarnings("rawtypes")
         Bytes b = Bytes.elasticByteBuffer();
         @NotNull Wire w = new BinaryWire(b);     // works with text fails with binary
-        w.usePadding(true);
         try (DocumentContext dc = w.writingDocument(false)) {
             dc.wire().write("marshable").typedMarshallable(myMarshable);
         }
