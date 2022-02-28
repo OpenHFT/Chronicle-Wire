@@ -249,7 +249,6 @@ public class TextWireTest extends WireTestCommon {
 
         Bytes b = Bytes.elasticByteBuffer();
         Wire wire = WireType.BINARY.apply(b);
-        wire.usePadding(true);
 
         @NotNull Map<String, String> data = Collections.singletonMap("key", "value");
 
@@ -284,7 +283,6 @@ public class TextWireTest extends WireTestCommon {
     private TextWire createWire() {
         bytes = allocateElasticOnHeap();
         final TextWire wire = new TextWire(bytes);
-        wire.usePadding(true);
         return wire;
     }
 
@@ -942,7 +940,6 @@ public class TextWireTest extends WireTestCommon {
     public void testMapReadAndWriteStrings() {
         @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes);
-        wire.usePadding(true);
 
         @NotNull final Map<String, String> expected = new LinkedHashMap<>();
 
@@ -1129,7 +1126,6 @@ public class TextWireTest extends WireTestCommon {
     public void testMapReadAndWriteMarshable() {
         @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes);
-        wire.usePadding(false);
 
         @NotNull final Map<MyMarshallable, MyMarshallable> expected = new LinkedHashMap<>();
 
@@ -1142,7 +1138,7 @@ public class TextWireTest extends WireTestCommon {
                         "example: {\n" +
                         "  ? { MyField: aKey }: { MyField: aValue },\n" +
                         "  ? { MyField: aKey2 }: { MyField: aValue2 }\n" +
-                        "}\n",
+                        "}\n \n",
                 Wires.fromSizePrefixedBlobs(bytes));
         @NotNull final Map<MyMarshallable, MyMarshallable> actual = new LinkedHashMap<>();
 
@@ -1173,7 +1169,6 @@ public class TextWireTest extends WireTestCommon {
         };
         @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new TextWire(bytes);
-        wire.usePadding(false);
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception")
                 .object(e));
 
@@ -1185,7 +1180,7 @@ public class TextWireTest extends WireTestCommon {
                 "    { class: net.openhft.chronicle.wire.TextWireTest, method: runTestException, file: TextWireTest.java, line: 73 },\n" +
                 "    { class: sun.reflect.NativeMethodAccessorImpl, method: invoke0, file: NativeMethodAccessorImpl.java, line: -2 }\n" +
                 "  ]\n" +
-                "}\n", Wires.fromSizePrefixedBlobs(bytes));
+                "}\n \n", Wires.fromSizePrefixedBlobs(bytes));
 
         wire.readDocument(null, r -> {
             Throwable t = r.read(() -> "exception").throwable(true);
@@ -1493,7 +1488,6 @@ public class TextWireTest extends WireTestCommon {
     @Test
     public void testByteArray() {
         @NotNull Wire wire = createWire();
-        wire.usePadding(true);
         wire.writeDocument(false, w -> w.write("nothing").object(new byte[0]));
         @NotNull byte[] one = {1};
         wire.writeDocument(false, w -> w.write("one").object(one));
@@ -1523,7 +1517,6 @@ public class TextWireTest extends WireTestCommon {
         map.put(new MyMarshallable("key2"), "value2");
 
         @NotNull Wire wire = createWire();
-        wire.usePadding(false);
         @NotNull final MyMarshallable parent = new MyMarshallable("parent");
         wire.writeDocument(false, w -> w.writeEvent(MyMarshallable.class, parent).object(map));
 
@@ -1531,7 +1524,7 @@ public class TextWireTest extends WireTestCommon {
                         "? { MyField: parent }: {\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key1 }: value1,\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key2 }: value2\n" +
-                        "}\n"
+                        "}\n \n"
                 , Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         wire.readDocument(null, w -> {

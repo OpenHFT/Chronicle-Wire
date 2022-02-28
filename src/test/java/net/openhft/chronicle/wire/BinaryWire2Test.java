@@ -41,30 +41,14 @@ import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
 @SuppressWarnings("rawtypes")
-@RunWith(value = Parameterized.class)
 public class BinaryWire2Test extends WireTestCommon {
     @NotNull
     Bytes bytes = new HexDumpBytes();
-
-    final boolean usePadding;
-
-    public BinaryWire2Test(boolean usePadding) {
-        this.usePadding = usePadding;
-    }
-
-    @Parameterized.Parameters(name = "usePadding={0}")
-    public static Collection<Object[]> wireTypes() {
-        return Arrays.asList(
-                new Object[]{true},
-                new Object[]{false}
-        );
-    }
 
     @NotNull
     private BinaryWire createWire() {
         bytes.clear();
         @NotNull BinaryWire wire = new BinaryWire(bytes, false, false, false, 32, "lzw", false);
-        wire.usePadding(usePadding);
         assert wire.startUse();
         return wire;
     }
@@ -322,7 +306,6 @@ public class BinaryWire2Test extends WireTestCommon {
         // System.out.println(wire.bytes().toHexString());
 
         @NotNull Wire twire = new TextWire(Bytes.elasticByteBuffer());
-        twire.usePadding(true);
         writeMessage(twire);
 
         // System.out.println(Wires.fromSizePrefixedBlobs(twire.bytes()));
@@ -348,7 +331,6 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @Test
     public void testSequenceContext() {
-        assumeTrue(usePadding);
         @NotNull Wire wire = createWire();
         writeMessageContext(wire);
 
@@ -395,8 +377,6 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @Test
     public void fieldAfterText() {
-        assumeFalse(usePadding);
-
         expectException("Unable to copy !UpdateEvent safely will try anyway");
         @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("data")
@@ -448,8 +428,6 @@ public class BinaryWire2Test extends WireTestCommon {
 
     @Test
     public void fieldAfterNullContext() {
-        assumeTrue(usePadding);
-
         expectException("Unable to copy !UpdateEvent safely will try anyway");
         @NotNull Wire wire = createWire();
         try (DocumentContext ignored = wire.writingDocument(true)) {
@@ -618,26 +596,7 @@ public class BinaryWire2Test extends WireTestCommon {
     }
 
     @Test
-    public void testTypeLiteral() {
-        assumeFalse(usePadding);
-
-        @NotNull Wire wire = createWire();
-        wire.writeDocument(false, w -> w.write("a").typeLiteral(String.class)
-                .write("b").typeLiteral(int.class)
-                .write("c").typeLiteral(byte[].class)
-                .write("d").typeLiteral(Double[].class)
-                .write("z").typeLiteral((Class) null));
-        assertEquals("--- !!data #binary\n" +
-                "a: !type String\n" +
-                "b: !type int\n" +
-                "c: !type \"byte[]\"\n" +
-                "d: !type \"[Ljava.lang.Double;\"\n" +
-                "z: !!null \"\"\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
-    }
-
-    @Test
     public void testByteArray() {
-        assumeFalse(usePadding);
         @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("nothing").object(new byte[0]));
         @NotNull byte[] one = {1};
@@ -645,23 +604,13 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull byte[] thirtytwo = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
         wire.writeDocument(false, w -> w.write("four").object(thirtytwo));
 
-        final String expected = usePadding ?
-                "" +
+        final String expected =
                         "--- !!data #binary\n" +
                         "nothing: !byte[] \"\"\n" +
                         "# position: 24, header: 1\n" +
                         "--- !!data #binary\n" +
                         "one: !byte[] \"\\x01\"\n" +
                         "# position: 44, header: 2\n" +
-                        "--- !!data #binary\n" +
-                        "four: !byte[] \"\\0\\x01\\x02\\x03\\x04\\x05\\x06\\a\\b\\t\\n\\v\\f\\r\\x0E\\x0F\\x10\\x11\\x12\\x13\\x14\\x15\\x16\\x17\\x18\\x19\\x1A\\e\\x1C\\x1D\\x1E\\x1F \"\n" :
-                "" +
-                        "--- !!data #binary\n" +
-                        "nothing: !byte[] \"\"\n" +
-                        "# position: 23, header: 1\n" +
-                        "--- !!data #binary\n" +
-                        "one: !byte[] \"\\x01\"\n" +
-                        "# position: 43, header: 2\n" +
                         "--- !!data #binary\n" +
                         "four: !byte[] \"\\0\\x01\\x02\\x03\\x04\\x05\\x06\\a\\b\\t\\n\\v\\f\\r\\x0E\\x0F\\x10\\x11\\x12\\x13\\x14\\x15\\x16\\x17\\x18\\x19\\x1A\\e\\x1C\\x1D\\x1E\\x1F \"\n";
         assertEquals(expected, Wires.fromSizePrefixedBlobs(wire));
@@ -698,45 +647,11 @@ public class BinaryWire2Test extends WireTestCommon {
         });
     }
 
-    @Test
-    public void testBytesLiteral() {
-        assumeFalse(usePadding);
-
-        @NotNull Wire wire = new BinaryWire(Bytes.elasticByteBuffer());
-        wire.write("test").text("Hello World");
-
-        @NotNull final BinaryWire wire1 = createWire();
-        wire1.writeDocument(false, (WireOut w) -> w.write(() -> "nested")
-                .bytesLiteral(wire.bytes()));
-
-        assertEquals("--- !!data #binary\n" +
-                "nested: {\n" +
-                "  test: Hello World\n" +
-                "}\n", Wires.fromSizePrefixedBlobs(wire1));
-
-        wire1.readDocument(null, w -> {
-            @Nullable final BytesStore bytesStore = w.read(() -> "nested")
-                    .bytesLiteral();
-            assertEquals(wire.bytes(), bytesStore);
-        });
-
-        wire.bytes().releaseLast();
-    }
-
     @Ignore("TODO FIX")
     @Test
     public void testUnicodeReadAndWriteHex() {
         bytes.releaseLast();
         bytes = new HexDumpBytes();
-        doTestUnicodeReadAndWrite();
-    }
-
-    @Test
-    public void testUnicodeReadAndWriteDirect() {
-        assumeFalse(usePadding);
-
-        bytes.releaseLast();
-        bytes = allocateElasticDirect();
         doTestUnicodeReadAndWrite();
     }
 

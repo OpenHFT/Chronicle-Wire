@@ -455,7 +455,6 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     private Bytes asBytes(Object marshallable) {
         Bytes bytes = getBytesForToString();
         Wire wire = apply(bytes);
-        wire.usePadding(AbstractWire.DEFAULT_USE_PADDING);
         @NotNull final ValueOut valueOut = wire.getValueOut();
 
         if (marshallable instanceof WriteMarshallable)

@@ -107,7 +107,6 @@ public class WireResourcesTest extends WireTestCommon {
         assertEquals(1, t.refCount());
         assertEquals(1, t.mappedFile().refCount());
         Wire wire = WireType.TEXT.apply(t);
-        wire.usePadding(true);
 
         assertEquals(1, t.refCount()); // not really using it yet
         assertEquals(1, t.mappedFile().refCount());

@@ -38,14 +38,6 @@ public interface MarshallableIn {
     DocumentContext readingDocument();
 
     /**
-     * @deprecated as it no longer fulfils its original purpose (performance optimisation)
-     */
-    @Deprecated(/* remove in x.23 */)
-    default boolean peekDocument() {
-        return true;
-    }
-
-    /**
      * @param reader user to read the document
      * @return {@code true} if successful
      */
