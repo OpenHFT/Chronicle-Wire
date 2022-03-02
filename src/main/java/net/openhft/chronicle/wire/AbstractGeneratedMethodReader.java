@@ -97,6 +97,10 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      */
     protected abstract boolean readOneCall(WireIn wireIn);
 
+    protected boolean readOneCallMeta(WireIn wireIn) {
+        return false;
+    }
+
     /**
      * @param context Reading document context.
      * @return <code>true</code> if reading is successful, <code>false</code> if reading should be delegated.
@@ -145,6 +149,36 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         return true;
     }
 
+    public boolean readOneMeta(DocumentContext context) {
+        WireIn wireIn = context.wire();
+        if (wireIn == null)
+            return false;
+
+        wireIn.startEvent();
+        Bytes<?> bytes = wireIn.bytes();
+        while (bytes.readRemaining() > 0) {
+            if (wireIn.isEndEvent())
+                break;
+            long start = bytes.readPosition();
+
+            if (!readOneCallMeta(wireIn))
+                return false;
+
+            if (restIgnored())
+                return true;
+
+            wireIn.consumePadding();
+            if (bytes.readPosition() == start) {
+                Jvm.warn().on(getClass(), "Failed to progress reading " + bytes.readRemaining() + " bytes left.");
+                break;
+            }
+        }
+        // only called if the end of the message is reached normally.
+        wireIn.endEvent();
+
+        return true;
+    }
+
     protected boolean restIgnored() {
         return false;
     }
@@ -181,23 +215,22 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     public boolean readOne() {
         throwExceptionIfClosed();
 
-        boolean shouldDelegate;
+        boolean ok;
 
         try (DocumentContext context = in.readingDocument()) {
             if (!context.isPresent()) {
                 return false;
             }
 
-            shouldDelegate = !readOne0(context);
+            ok = context.isMetaData()
+                    ? readOneMeta(context)
+                    : readOne0(context);
 
-            if (shouldDelegate)
+            if (!ok)
                 context.rollbackOnClose();
         }
 
-        if (shouldDelegate)
-            return delegate().readOne();
-        else
-            return true;
+        return ok || delegate().readOne();
     }
 
     public void throwExceptionIfClosed() {

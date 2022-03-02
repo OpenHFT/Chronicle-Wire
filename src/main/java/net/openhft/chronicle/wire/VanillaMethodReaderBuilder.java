@@ -119,7 +119,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
                 Jvm.getBoolean(DISABLE_READER_PROXY_CODEGEN))
             return null;
 
-        GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, impls);
+        GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, metaDataHandler, impls);
 
         String fullClassName = generateMethodReader.packageName() + "." + generateMethodReader.generatedClassName();
 
@@ -161,12 +161,6 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         return this;
     }
 
-    @Override
-    public MethodReaderBuilder metaDataHandler(Object... components) {
-        this.metaDataHandler = components;
-        return this;
-    }
-
     @NotNull
     public MethodReader build(Object... impls) {
         final WireParselet defaultParselet = this.defaultParselet == null ?
@@ -175,7 +169,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         Supplier<MethodReader> vanillaSupplier = () -> new VanillaMethodReader(
                 in, ignoreDefaults, defaultParselet, methodReaderInterceptorReturns, metaDataHandler, impls);
 
-        final MethodReader generatedInstance = createGeneratedInstance(vanillaSupplier, metaDataHandler, impls);
+        final MethodReader generatedInstance = createGeneratedInstance(vanillaSupplier, impls);
 
         return generatedInstance == null ? vanillaSupplier.get() : generatedInstance;
     }
