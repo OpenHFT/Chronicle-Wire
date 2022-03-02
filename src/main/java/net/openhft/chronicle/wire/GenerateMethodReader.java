@@ -36,6 +36,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -69,6 +70,7 @@ public class GenerateMethodReader {
     private final SourceCodeFormatter eventIdSwitchBlockMeta = new JavaSourceCodeFormatter();
     private final SourceCodeFormatter numericConverters = new JavaSourceCodeFormatter();
     private final String generatedClassName;
+    private final Set<String> fieldNames = new LinkedHashSet<>();
     private boolean methodFilterPresent;
     private boolean isSourceCodeGenerated;
     private boolean hasChainedCalls;
@@ -333,6 +335,8 @@ public class GenerateMethodReader {
      * @param eventIdSwitchBlock
      */
     private void handleInterface(Class<?> anInterface, String instanceFieldName, boolean methodFilter, SourceCodeFormatter eventNameSwitchBlock, SourceCodeFormatter eventIdSwitchBlock) {
+        if (Jvm.dontChain(anInterface))
+            return;
         if (!handledInterfaces.add(anInterface))
             return;
 
@@ -374,7 +378,7 @@ public class GenerateMethodReader {
      * @param switchBlock
      * @param eventIdSwitchBlock
      */
-    private void handleMethod(Method m, Class<?> anInterface, String instanceFieldName, boolean methodFilter, SourceCodeFormatter switchBlock, SourceCodeFormatter eventIdSwitchBlock) {
+    private void handleMethod(Method m, Class<?> anInterface, String instanceFieldName, boolean methodFilter, SourceCodeFormatter eventNameSwitchBlock, SourceCodeFormatter eventIdSwitchBlock) {
         Jvm.setAccessible(m);
 
         Class<?>[] parameterTypes = m.getParameterTypes();
@@ -390,7 +394,9 @@ public class GenerateMethodReader {
             Class<?> parameterType = parameterTypes[i];
 
             final String typeName = parameterType.getCanonicalName();
-            fields.append(format("private %s %sarg%d;\n", typeName, m.getName(), i));
+            String fieldName = m.getName() + "arg" + i;
+            if (fieldNames.add(fieldName))
+                fields.append(format("private %s %s;\n", typeName, fieldName));
         }
 
         if (chainReturnType != null)
@@ -421,53 +427,53 @@ public class GenerateMethodReader {
 
         String chainedCallPrefix = chainReturnType != null ? "chainedCallReturnResult = " : "";
 
-        switchBlock.append(format("case \"%s\":\n", m.getName()));
+        eventNameSwitchBlock.append(format("case \"%s\":\n", m.getName()));
         if (parameterTypes.length == 0) {
-            switchBlock.append("valueIn.skipValue();\n");
-            switchBlock.append(methodCall(m, instanceFieldName, chainedCallPrefix, chainReturnType));
+            eventNameSwitchBlock.append("valueIn.skipValue();\n");
+            eventNameSwitchBlock.append(methodCall(m, instanceFieldName, chainedCallPrefix, chainReturnType));
         } else if (parameterTypes.length == 1) {
-            switchBlock.append(argumentRead(m, 0, false));
-            switchBlock.append(methodCall(m, instanceFieldName, chainedCallPrefix, chainReturnType));
+            eventNameSwitchBlock.append(argumentRead(m, 0, false));
+            eventNameSwitchBlock.append(methodCall(m, instanceFieldName, chainedCallPrefix, chainReturnType));
         } else {
             if (methodFilter) {
-                switchBlock.append("ignored = false;\n");
-                switchBlock.append("valueIn.sequence(this, (f, v) -> {\n");
-                switchBlock.append(argumentRead(m, 0, true));
-                switchBlock.append(format("if (((MethodFilterOnFirstArg) f.%s)." +
+                eventNameSwitchBlock.append("ignored = false;\n");
+                eventNameSwitchBlock.append("valueIn.sequence(this, (f, v) -> {\n");
+                eventNameSwitchBlock.append(argumentRead(m, 0, true));
+                eventNameSwitchBlock.append(format("if (((MethodFilterOnFirstArg) f.%s)." +
                                 "ignoreMethodBasedOnFirstArg(\"%s\", f.%sarg%d)) {\n",
                         instanceFieldName, m.getName(), m.getName(), 0));
-                switchBlock.append("f.ignored = true;\n");
+                eventNameSwitchBlock.append("f.ignored = true;\n");
 
                 for (int i = 1; i < parameterTypes.length; i++)
-                    switchBlock.append("v.skipValue();\n");
+                    eventNameSwitchBlock.append("v.skipValue();\n");
 
-                switchBlock.append("}\n");
-                switchBlock.append("else {\n");
+                eventNameSwitchBlock.append("}\n");
+                eventNameSwitchBlock.append("else {\n");
 
                 for (int i = 1; i < parameterTypes.length; i++)
-                    switchBlock.append(argumentRead(m, i, true));
+                    eventNameSwitchBlock.append(argumentRead(m, i, true));
 
-                switchBlock.append("}\n");
-                switchBlock.append("});\n");
-                switchBlock.append("if (!ignored) {\n");
+                eventNameSwitchBlock.append("}\n");
+                eventNameSwitchBlock.append("});\n");
+                eventNameSwitchBlock.append("if (!ignored) {\n");
             } else {
-                switchBlock.append("valueIn.sequence(this, (f, v) -> { " +
+                eventNameSwitchBlock.append("valueIn.sequence(this, (f, v) -> { " +
                         "// todo optimize megamorphic lambda call\n");
 
                 for (int i = 0; i < parameterTypes.length; i++)
-                    switchBlock.append(argumentRead(m, i, true));
+                    eventNameSwitchBlock.append(argumentRead(m, i, true));
 
-                switchBlock.append("});\n");
+                eventNameSwitchBlock.append("});\n");
             }
 
-            switchBlock.append(methodCall(m, instanceFieldName, chainedCallPrefix, chainReturnType));
+            eventNameSwitchBlock.append(methodCall(m, instanceFieldName, chainedCallPrefix, chainReturnType));
 
             if (methodFilter)
-                switchBlock.append("}\n");
+                eventNameSwitchBlock.append("}\n");
         }
 
         if (chainReturnType == DocumentContext.class) {
-            switchBlock.append("wireIn.copyTo(((")
+            eventNameSwitchBlock.append("wireIn.copyTo(((")
                     .append(DocumentContext.class.getName())
                     .append(") chainedCallReturnResult).wire());\n")
 
@@ -476,7 +482,7 @@ public class GenerateMethodReader {
                             "chainedCallReturnResult = null;\n");
             chainReturnType = null;
         }
-        switchBlock.append("break;\n\n");
+        eventNameSwitchBlock.append("break;\n\n");
 
         if (chainReturnType != null)
             handleInterface(chainReturnType, "chainedCallReturnResult", false, eventNameSwitchBlock, eventIdSwitchBlock);

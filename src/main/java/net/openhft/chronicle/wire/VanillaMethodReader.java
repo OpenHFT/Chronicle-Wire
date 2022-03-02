@@ -109,40 +109,6 @@ public class VanillaMethodReader implements MethodReader {
         }
     }
 
-    private Object[] addObjectsToMetaDataHandlers(Object[] metaDataHandler, @NotNull Object @NotNull [] objects) {
-        if (metaDataHandler == null) {
-            metaDataHandler = objects;
-        } else {
-            Set<Object> metaDataHandlerSet = new LinkedHashSet<>();
-            Collections.addAll(metaDataHandlerSet, metaDataHandler);
-            Collections.addAll(metaDataHandlerSet, objects);
-            metaDataHandler = metaDataHandlerSet.toArray();
-        }
-        return metaDataHandler;
-    }
-
-    private void addParsersForComponents(WireParser wireParser, boolean ignoreDefault, @NotNull Object @NotNull [] objects) {
-        @NotNull Set<String> methodsSignaturesHandled = new HashSet<>();
-        @NotNull Set<String> methodsNamesHandled = new HashSet<>();
-        MethodFilterOnFirstArg methodFilterOnFirstArg = null;
-        for (@NotNull Object o : objects) {
-            if (o instanceof MethodFilterOnFirstArg) {
-                if (methodFilterOnFirstArg != null)
-                    Jvm.warn().on(getClass(), "Multiple filters on first arg not supported, only the first one is applied.");
-                else
-                    methodFilterOnFirstArg = (MethodFilterOnFirstArg) o;
-            }
-            Class<?> oClass = o.getClass();
-            Object[] context = {null};
-            Supplier<Object> original = () -> o;
-            Supplier<Object> inarray = () -> context[0];
-            Set<Class> interfaces = new LinkedHashSet<>();
-            for (Class<?> anInterface : ReflectionUtil.interfaces(oClass)) {
-                addParsletsFor(wireParser, interfaces, anInterface, ignoreDefault, methodsNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, o, context, original, inarray);
-            }
-        }
-    }
-
     private static LongConversion longConversionForFirstParam(Method m) {
         Annotation[][] annotations = m.getParameterAnnotations();
         if (annotations == null || annotations.length < 1 || annotations[0].length < 1)
@@ -251,7 +217,44 @@ public class VanillaMethodReader implements MethodReader {
         }
     }
 
+    private Object[] addObjectsToMetaDataHandlers(Object[] metaDataHandler, @NotNull Object @NotNull [] objects) {
+        if (metaDataHandler == null) {
+            metaDataHandler = objects;
+        } else {
+            Set<Object> metaDataHandlerSet = new LinkedHashSet<>();
+            Collections.addAll(metaDataHandlerSet, metaDataHandler);
+            Collections.addAll(metaDataHandlerSet, objects);
+            metaDataHandler = metaDataHandlerSet.toArray();
+        }
+        return metaDataHandler;
+    }
+
+    private void addParsersForComponents(WireParser wireParser, boolean ignoreDefault, @NotNull Object @NotNull [] objects) {
+        @NotNull Set<String> methodsSignaturesHandled = new HashSet<>();
+        @NotNull Set<String> methodsNamesHandled = new HashSet<>();
+        MethodFilterOnFirstArg methodFilterOnFirstArg = null;
+        for (@NotNull Object o : objects) {
+            if (o instanceof MethodFilterOnFirstArg) {
+                if (methodFilterOnFirstArg != null)
+                    Jvm.warn().on(getClass(), "Multiple filters on first arg not supported, only the first one is applied.");
+                else
+                    methodFilterOnFirstArg = (MethodFilterOnFirstArg) o;
+            }
+            Class<?> oClass = o.getClass();
+            Object[] context = {null};
+            Supplier<Object> original = () -> o;
+            Supplier<Object> inarray = () -> context[0];
+            Set<Class> interfaces = new LinkedHashSet<>();
+            for (Class<?> anInterface : ReflectionUtil.interfaces(oClass)) {
+                addParsletsFor(wireParser, interfaces, anInterface, ignoreDefault, methodsNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, o, context, original, inarray);
+            }
+        }
+    }
+
     private void addParsletsFor(WireParser wireParser, Set<Class> interfaces, Class<?> oClass, boolean ignoreDefault, Set<String> methodNamesHandled, Set<String> methodsSignaturesHandled, MethodFilterOnFirstArg methodFilterOnFirstArg, Object o, Object[] context, Supplier contextSupplier, Supplier nextContext) {
+        if (!oClass.isInterface() || Jvm.dontChain(oClass)) {
+            return;
+        }
         if (!interfaces.add(oClass))
             return;
 
@@ -279,7 +282,7 @@ public class VanillaMethodReader implements MethodReader {
             if (!methodNamesHandled.add(m.getName())) {
                 String previous = methodsSignaturesHandled.stream().filter(signature -> signature.contains(" " + m.getName() + " ")).findFirst().orElseThrow(IllegalStateException::new);
                 String msg = m + " previous: " + previous;
-                    throw new IllegalStateException("MethodReader does not support overloaded methods. Method: " + msg);
+                throw new IllegalStateException("MethodReader does not support overloaded methods. Method: " + msg);
             }
 
             Class<?>[] parameterTypes = m.getParameterTypes();
@@ -302,9 +305,7 @@ public class VanillaMethodReader implements MethodReader {
         // add chained interfaces last.
         for (@NotNull Method m : oClass.getMethods()) {
             Class returnType = m.getReturnType();
-            if (returnType.isInterface() && !Jvm.dontChain(returnType)) {
-                addParsletsFor(wireParser, interfaces, returnType, ignoreDefault, methodNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, o, context, nextContext, nextContext);
-            }
+            addParsletsFor(wireParser, interfaces, returnType, ignoreDefault, methodNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, o, context, nextContext, nextContext);
         }
     }
 
