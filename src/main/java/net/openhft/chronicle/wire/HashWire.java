@@ -121,6 +121,11 @@ public class HashWire implements WireOut, BytesComment {
     }
 
     @Override
+    public void usePadding(boolean usePadding) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean usePadding() {
         return false;
     }
