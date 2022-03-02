@@ -45,7 +45,13 @@ public class WireDumper {
 
     @NotNull
     public static WireDumper of(@NotNull Bytes bytes) {
+        return of(bytes, AbstractWire.DEFAULT_USE_PADDING);
+    }
+
+    @NotNull
+    public static WireDumper of(@NotNull Bytes bytes, boolean align) {
         final BinaryWire wireIn = new BinaryWire(bytes);
+        wireIn.usePadding(align);
         return new WireDumper(wireIn, bytes);
     }
 
