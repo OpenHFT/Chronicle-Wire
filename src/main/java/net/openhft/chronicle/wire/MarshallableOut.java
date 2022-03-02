@@ -215,7 +215,7 @@ public interface MarshallableOut extends DocumentWritten {
     default <T> T methodWriter(boolean metaData, @NotNull Class<T> tClass, Class... additional) {
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.BINARY_LIGHT,
-                () -> new BinaryMethodWriterInvocationHandler(metaData, this));
+                () -> new BinaryMethodWriterInvocationHandler(tClass, metaData, this));
         Stream.of(additional).forEach(builder::addInterface);
 
         builder.marshallableOut(this);
@@ -227,7 +227,7 @@ public interface MarshallableOut extends DocumentWritten {
     default <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.BINARY_LIGHT,
-                () -> new BinaryMethodWriterInvocationHandler(false, this));
+                () -> new BinaryMethodWriterInvocationHandler(tClass, false, this));
         builder.marshallableOut(this);
         return builder;
     }

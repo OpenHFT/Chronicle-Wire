@@ -2,6 +2,7 @@ package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
@@ -17,8 +18,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @SuppressWarnings("rawtypes")
 public class VanillaMethodReaderTest extends WireTestCommon {
@@ -27,7 +27,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     public void testMethodReaderWriterMetadata() {
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.BINARY.apply(b);
             wire.usePadding(true);
@@ -41,18 +41,18 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 aListener.index2index(a);
             }
 
-            MethodReader methodReader = wire.methodReader(new AListener() {
+            final AListener aListener = new AListener() {
                 @Override
                 public void a(final A a) {
                     VanillaMethodReaderTest.this.instance = a;
                 }
 
                 @Override
-                public void index2index(A a) {
-                    // this should not be called
-                    VanillaMethodReaderTest.this.instance = null;
+                public void index2index(Marshallable a) {
+                    fail();
                 }
-            });
+            };
+            MethodReader methodReader = wire.methodReaderBuilder().metaDataHandler(Mocker.ignored(IgnoredMetaData.class)).build(aListener);
             checkReaderType(methodReader);
             {
                 boolean succeeded = methodReader.readOne();
@@ -298,8 +298,80 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         }
     }
 
+    @Test
+    public void parseMetaData() {
+        Wire wire = WireType.BINARY_LIGHT.apply(new HexDumpBytes());
+        final RoutedSaying routedSaying = wire.methodWriter(RoutedSaying.class);
+        final RoutedSaying metaRoutedSaying = wire.methodWriter(true, RoutedSaying.class);
+        metaRoutedSaying.to("aye").say("hi AAA");
+        routedSaying.to("one").say("hi 111");
+        metaRoutedSaying.to("bee").say("hi BBB");
+        routedSaying.to("two").say("hi 222");
+        assertEquals("" +
+                        "14 00 00 40                                     # msg-length\n" +
+                        "b9 02 74 6f                                     # to: (event)\n" +
+                        "e3 61 79 65                                     # aye\n" +
+                        "b9 03 73 61 79                                  # say: (event)\n" +
+                        "e6 68 69 20 41 41 41                            # hi AAA\n" +
+                        "14 00 00 00                                     # msg-length\n" +
+                        "b9 02 74 6f                                     # to: (event)\n" +
+                        "e3 6f 6e 65                                     # one\n" +
+                        "b9 03 73 61 79                                  # say: (event)\n" +
+                        "e6 68 69 20 31 31 31                            # hi 111\n" +
+                        "14 00 00 40                                     # msg-length\n" +
+                        "b9 02 74 6f                                     # to: (event)\n" +
+                        "e3 62 65 65                                     # bee\n" +
+                        "b9 03 73 61 79                                  # say: (event)\n" +
+                        "e6 68 69 20 42 42 42                            # hi BBB\n" +
+                        "14 00 00 00                                     # msg-length\n" +
+                        "b9 02 74 6f                                     # to: (event)\n" +
+                        "e3 74 77 6f                                     # two\n" +
+                        "b9 03 73 61 79                                  # say: (event)\n" +
+                        "e6 68 69 20 32 32 32                            # hi 222\n",
+                wire.bytes().toHexString());
+        StringWriter out = new StringWriter();
+        final MethodReader reader = wire.methodReaderBuilder()
+                .metaDataHandler(Mocker.logging(RoutedSaying.class, "meta: ", out))
+                .build(Mocker.logging(RoutedSaying.class, "data: ", out));
+        for (int i = 4; i >= 0; i--)
+            assertEquals(i > 0, reader.readOne());
+        assertEquals("" +
+                        "meta: to[aye]\n" +
+                        "meta: say[hi AAA]\n" +
+                        "data: to[one]\n" +
+                        "data: say[hi 111]\n" +
+                        "meta: to[bee]\n" +
+                        "meta: say[hi BBB]\n" +
+                        "data: to[two]\n" +
+                        "data: say[hi 222]\n",
+                out.toString().replace("\r", ""));
+        wire.bytes().releaseLast();
+    }
+
     private void checkReaderType(MethodReader reader) {
         assertFalse(Proxy.isProxyClass(reader.getClass()));
+    }
+
+    interface IgnoredMetaData {
+        void header(Marshallable marshallable);
+
+        void index(Marshallable marshallable);
+
+        void index2index(Marshallable marshallable);
+
+        void roll(Marshallable marshallable);
+    }
+
+    interface Saying {
+        void say(String say);
+    }
+
+    interface Routed<T> {
+        T to(String target);
+    }
+
+    interface RoutedSaying extends Routed<Saying> {
+
     }
 
     // keep package local.
@@ -307,7 +379,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         void a(A a);
 
         // this pretends to be system metadata
-        void index2index(A a);
+        void index2index(Marshallable a);
     }
 
     interface MRTInterface {

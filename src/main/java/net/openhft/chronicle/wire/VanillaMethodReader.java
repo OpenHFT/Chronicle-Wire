@@ -48,15 +48,16 @@ public class VanillaMethodReader implements MethodReader {
     public static final boolean DEBUG_ENABLED = Jvm.isDebugEnabled(VanillaMethodReader.class) && Jvm.getBoolean("wire.mr.debug");
     static final Object[] NO_ARGS = {};
     static final Object IGNORED = new Object(); // object used to flag that the call should be ignored.
-    private static final String[] metaIgnoreList = {"header", "index", "index2index", "roll"};
     private final MarshallableIn in;
     @NotNull
-    private final WireParser wireParser;
+    private final WireParser metaWireParser;
+    private final WireParser dataWireParser;
+    private final MethodReaderInterceptorReturns methodReaderInterceptorReturns;
     private MessageHistory messageHistory;
     private boolean closeIn = false;
     private boolean closed;
-    private final MethodReaderInterceptorReturns methodReaderInterceptorReturns;
 
+    @Deprecated(/* To be removed in x.24 */)
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
                                WireParselet defaultParselet,
@@ -68,16 +69,59 @@ public class VanillaMethodReader implements MethodReader {
     public VanillaMethodReader(MarshallableIn in,
                                boolean ignoreDefault,
                                WireParselet defaultParselet,
+                               MethodReaderInterceptorReturns methodReaderInterceptorReturns,
+                               Object[] metaDataHandler,
+                               @NotNull Object... objects) {
+        this(in, ignoreDefault, defaultParselet, SKIP_READABLE_BYTES, methodReaderInterceptorReturns, metaDataHandler, objects);
+    }
+
+    public VanillaMethodReader(MarshallableIn in,
+                               boolean ignoreDefault,
+                               WireParselet defaultParselet,
                                FieldNumberParselet fieldNumberParselet,
                                MethodReaderInterceptorReturns methodReaderInterceptorReturns,
+                               @NotNull Object... objects) {
+        this(in, ignoreDefault, defaultParselet, fieldNumberParselet, methodReaderInterceptorReturns, null, objects);
+    }
+
+    public VanillaMethodReader(MarshallableIn in,
+                               boolean ignoreDefault,
+                               WireParselet defaultParselet,
+                               FieldNumberParselet fieldNumberParselet,
+                               MethodReaderInterceptorReturns methodReaderInterceptorReturns,
+                               Object[] metaDataHandler,
                                @NotNull Object... objects) {
         this.in = in;
         this.methodReaderInterceptorReturns = methodReaderInterceptorReturns;
         if (objects[0] instanceof WireParselet)
             defaultParselet = (WireParselet) objects[0];
 
-        wireParser = WireParser.wireParser(defaultParselet, fieldNumberParselet);
+        metaWireParser = WireParser.wireParser((s, in0) -> {
+        });
+        dataWireParser = WireParser.wireParser(defaultParselet, fieldNumberParselet);
 
+        addParsersForComponents(metaWireParser, ignoreDefault,
+                addObjectsToMetaDataHandlers(metaDataHandler, objects));
+        addParsersForComponents(dataWireParser, ignoreDefault, objects);
+
+        if (dataWireParser.lookup(HISTORY) == null) {
+            dataWireParser.register(new MethodWireKey(HISTORY, MESSAGE_HISTORY_METHOD_ID), (s, v) -> v.marshallable(messageHistory));
+        }
+    }
+
+    private Object[] addObjectsToMetaDataHandlers(Object[] metaDataHandler, @NotNull Object @NotNull [] objects) {
+        if (metaDataHandler == null) {
+            metaDataHandler = objects;
+        } else {
+            Set<Object> metaDataHandlerSet = new LinkedHashSet<>();
+            Collections.addAll(metaDataHandlerSet, metaDataHandler);
+            Collections.addAll(metaDataHandlerSet, objects);
+            metaDataHandler = metaDataHandlerSet.toArray();
+        }
+        return metaDataHandler;
+    }
+
+    private void addParsersForComponents(WireParser wireParser, boolean ignoreDefault, @NotNull Object @NotNull [] objects) {
         @NotNull Set<String> methodsSignaturesHandled = new HashSet<>();
         @NotNull Set<String> methodsNamesHandled = new HashSet<>();
         MethodFilterOnFirstArg methodFilterOnFirstArg = null;
@@ -94,11 +138,8 @@ public class VanillaMethodReader implements MethodReader {
             Supplier<Object> inarray = () -> context[0];
             Set<Class> interfaces = new LinkedHashSet<>();
             for (Class<?> anInterface : ReflectionUtil.interfaces(oClass)) {
-                addParsletsFor(interfaces, anInterface, ignoreDefault, methodsNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, o, context, original, inarray);
+                addParsletsFor(wireParser, interfaces, anInterface, ignoreDefault, methodsNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, o, context, original, inarray);
             }
-        }
-        if (wireParser.lookup(HISTORY) == null) {
-            wireParser.register(new MethodWireKey(HISTORY, MESSAGE_HISTORY_METHOD_ID), (s, v) -> v.marshallable(messageHistory));
         }
     }
 
@@ -210,7 +251,7 @@ public class VanillaMethodReader implements MethodReader {
         }
     }
 
-    private void addParsletsFor(Set<Class> interfaces, Class<?> oClass, boolean ignoreDefault, Set<String> methodNamesHandled, Set<String> methodsSignaturesHandled, MethodFilterOnFirstArg methodFilterOnFirstArg, Object o, Object[] context, Supplier contextSupplier, Supplier nextContext) {
+    private void addParsletsFor(WireParser wireParser, Set<Class> interfaces, Class<?> oClass, boolean ignoreDefault, Set<String> methodNamesHandled, Set<String> methodsSignaturesHandled, MethodFilterOnFirstArg methodFilterOnFirstArg, Object o, Object[] context, Supplier contextSupplier, Supplier nextContext) {
         if (!interfaces.add(oClass))
             return;
 
@@ -244,16 +285,16 @@ public class VanillaMethodReader implements MethodReader {
             Class<?>[] parameterTypes = m.getParameterTypes();
             switch (parameterTypes.length) {
                 case 0:
-                    addParseletForMethod(o, context, contextSupplier, m);
+                    addParseletForMethod(wireParser, o, context, contextSupplier, m);
                     break;
                 case 1:
-                    addParseletForMethod(o, context, contextSupplier, m, parameterTypes[0]);
+                    addParseletForMethod(wireParser, o, context, contextSupplier, m, parameterTypes[0]);
                     break;
                 default:
                     if (methodFilterOnFirstArg == null)
-                        addParseletForMethod(o, context, contextSupplier, m, parameterTypes);
+                        addParseletForMethod(wireParser, o, context, contextSupplier, m, parameterTypes);
                     else
-                        addParseletForMethod(o, context, contextSupplier, m, parameterTypes, methodFilterOnFirstArg);
+                        addParseletForMethod(wireParser, o, context, contextSupplier, m, parameterTypes, methodFilterOnFirstArg);
                     break;
             }
         }
@@ -262,7 +303,7 @@ public class VanillaMethodReader implements MethodReader {
         for (@NotNull Method m : oClass.getMethods()) {
             Class returnType = m.getReturnType();
             if (returnType.isInterface() && !Jvm.dontChain(returnType)) {
-                addParsletsFor(interfaces, returnType, ignoreDefault, methodNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, o, context, nextContext, nextContext);
+                addParsletsFor(wireParser, interfaces, returnType, ignoreDefault, methodNamesHandled, methodsSignaturesHandled, methodFilterOnFirstArg, o, context, nextContext, nextContext);
             }
         }
     }
@@ -285,7 +326,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     // one arg
-    public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, Class<?> parameterType) {
+    public void addParseletForMethod(WireParser wireParser, Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, Class<?> parameterType) {
         throwExceptionIfClosed();
 
         Jvm.setAccessible(m); // turn of security check to make a little faster
@@ -333,7 +374,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     // no args
-    public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m) {
+    public void addParseletForMethod(WireParser wireParser, Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m) {
         throwExceptionIfClosed();
 
         Jvm.setAccessible(m); // turn of security check to make a little faster
@@ -361,7 +402,7 @@ public class VanillaMethodReader implements MethodReader {
                 : Maths.toInt32(annotation.value()));
     }
 
-    public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, @NotNull Class[] parameterTypes) {
+    public void addParseletForMethod(WireParser wireParser, Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, @NotNull Class[] parameterTypes) {
         throwExceptionIfClosed();
 
         Jvm.setAccessible(m); // turn of security check to make a little faster
@@ -398,7 +439,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     @SuppressWarnings("unchecked")
-    public void addParseletForMethod(Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, @NotNull Class[] parameterTypes, MethodFilterOnFirstArg methodFilterOnFirstArg) {
+    public void addParseletForMethod(WireParser wireParser, Object o2, Object[] context, Supplier contextSupplier, @NotNull Method m, @NotNull Class[] parameterTypes, MethodFilterOnFirstArg methodFilterOnFirstArg) {
         throwExceptionIfClosed();
 
         Jvm.setAccessible(m); // turn off security check to make a little faster
@@ -469,33 +510,19 @@ public class VanillaMethodReader implements MethodReader {
         return readOne0();
     }
 
-    /**
-     * @deprecated see {@link net.openhft.chronicle.wire.MarshallableIn#peekDocument()}
-     */
-    @Deprecated(/* remove in x.23 */)
-    public boolean lazyReadOne() {
-        throwExceptionIfClosed();
-
-        if (!in.peekDocument()) {
-            return false;
-        }
-
-        return readOne0();
-    }
-
     private boolean readOne0() {
         try (DocumentContext context = in.readingDocument()) {
             if (!context.isPresent()) {
                 return false;
             }
             if (context.isMetaData()) {
-                readOneMetaData(context);
+                metaWireParser.accept(context.wire());
                 return true;
             }
             assert context.isData();
 
             messageHistory().reset(context.sourceId(), context.index());
-            wireParser.accept(context.wire());
+            dataWireParser.accept(context.wire());
         } finally {
             messageHistory().reset();
         }
@@ -505,26 +532,6 @@ public class VanillaMethodReader implements MethodReader {
     private MessageHistory messageHistory() {
         if (messageHistory == null) messageHistory = MessageHistory.get();
         return messageHistory;
-    }
-
-    private boolean readOneMetaData(DocumentContext context) {
-        StringBuilder sb = Wires.acquireStringBuilder();
-
-        Wire wire = context.wire();
-        Bytes<?> bytes = wire.bytes();
-        long r = bytes.readPosition();
-        wire.readEventName(sb);
-
-        for (String s : metaIgnoreList) {
-            // we wish to ignore our system meta data field
-            if (s.contentEquals(sb))
-                return false;
-        }
-
-        // roll back position to where is was before we read the SB
-        bytes.readPosition(r);
-        wireParser.accept(wire);
-        return true;
     }
 
     @Override
@@ -543,10 +550,5 @@ public class VanillaMethodReader implements MethodReader {
         throwExceptionIfClosed();
 
         return methodReaderInterceptorReturns;
-    }
-
-    @NotNull
-    protected WireParser wireParser() {
-        return wireParser;
     }
 }

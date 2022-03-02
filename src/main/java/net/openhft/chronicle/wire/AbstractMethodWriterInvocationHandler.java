@@ -42,7 +42,8 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     private BiConsumer<Method, Object[]> handleInvoke;
     private boolean useMethodIds;
 
-    protected AbstractMethodWriterInvocationHandler() {
+    protected AbstractMethodWriterInvocationHandler(Class tClass) {
+        super(tClass);
         this.handleInvoke = this::handleInvoke;
     }
 
