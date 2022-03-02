@@ -2768,7 +2768,7 @@ public class YamlWire extends AbstractWire implements Wire {
                             clazz == Set.class ? new LinkedHashSet<>() :
                                     new ArrayList<>();
             readCollection(coll);
-            if (clazz.isArray()) {
+            if (clazz != null && clazz.isArray()) {
                 Object o = Array.newInstance(clazz.getComponentType(), coll.size());
                 if (clazz.getComponentType().isPrimitive()) {
                     Iterator iter = coll.iterator();

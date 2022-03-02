@@ -76,7 +76,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             Bytes bytes = Bytes.allocateElasticDirect(cs.length());
             try {
                 bytes.appendUtf8(cs);
-                if (bytes.startsWith(PREABLE)) {
+                if (bytes.startsWith(PREAMBLE)) {
                     truncatePreable(bytes);
                 }
                 @NotNull Wire wire = apply(bytes);
@@ -84,21 +84,6 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                 return (T) wire.getValueIn().object();
             } finally {
                 bytes.releaseLast();
-            }
-        }
-
-        public void truncatePreable(@NotNull Bytes bytes) {
-            bytes.readSkip(4);
-            long pos = bytes.readPosition();
-            @NotNull String word = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
-            switch (word) {
-                case "!!data":
-                case "!!data-not-ready":
-                case "!!meta-data":
-                case "!!meta-data-not-ready":
-                    break;
-                default:
-                    bytes.readPosition(pos);
             }
         }
 
@@ -307,6 +292,23 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             return new YamlWire(bytes).useBinaryDocuments();
         }
 
+        @Nullable
+        @Override
+        public <T> T fromString(@NotNull CharSequence cs) {
+            Bytes bytes = Bytes.allocateElasticDirect(cs.length());
+            try {
+                bytes.appendUtf8(cs);
+                if (bytes.startsWith(PREAMBLE)) {
+                    truncatePreable(bytes);
+                }
+                @NotNull Wire wire = apply(bytes);
+                //noinspection unchecked
+                return (T) wire.getValueIn().object();
+            } finally {
+                bytes.releaseLast();
+            }
+        }
+
         @Override
         public boolean isText() {
             return true;
@@ -351,7 +353,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
         }
     };
 
-    static final BytesStore PREABLE = BytesStore.from("--- ");
+    static final BytesStore PREAMBLE = BytesStore.from("---");
     private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
     private static final boolean IS_DELTA_AVAILABLE = isDeltaAvailable();
     private static final boolean IS_DEFAULT_ZERO_AVAILABLE = isDefaultZeroAvailable();
@@ -655,5 +657,20 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
 
     public boolean isText() {
         return false;
+    }
+
+    public void truncatePreable(@NotNull Bytes bytes) {
+        bytes.readSkip(4);
+        long pos = bytes.readPosition();
+        @NotNull String word = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
+        switch (word) {
+            case "!!data":
+            case "!!data-not-ready":
+            case "!!meta-data":
+            case "!!meta-data-not-ready":
+                break;
+            default:
+                bytes.readPosition(pos);
+        }
     }
 }

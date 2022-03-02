@@ -66,7 +66,7 @@ public class YamlTokeniser {
         freeContexts.addAll(contexts);
         contexts.clear();
         if (temp != null) temp.clear();
-        lineStart = 0;
+        lineStart = in.readPosition();
         flowDepth = Integer.MAX_VALUE;
         blockQuote = 0;
         hasSequenceEntry = false;
