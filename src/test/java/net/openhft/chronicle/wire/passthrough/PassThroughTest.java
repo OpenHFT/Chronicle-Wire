@@ -170,7 +170,7 @@ public class PassThroughTest extends WireTestCommon {
                         "17 00 00 00                                     # msg-length\n" +
                         "c2 74 6f                                        # to:\n" +
                         "e5 64 65 73 74 31                               # dest1\n" +
-                        "b9 04 73 65 6e 64 e7 6d 65 73 73 61 67 65 00    # passed-through\n" +
+                        "b9 04 73 65 6e 64 e7 6d 65 73 73 61 67 65       # passed-through\n" +
                         "31 00 00 00                                     # msg-length\n" +
                         "c2 74 6f                                        # to:\n" +
                         "e5 64 65 73 74 32                               # dest2\n" +

@@ -218,6 +218,7 @@ public class YamlWireTest extends WireTestCommon {
 
         Bytes b = Bytes.elasticByteBuffer();
         Wire wire = WireType.BINARY.apply(b);
+        wire.usePadding(true);
 
         @NotNull Map<String, String> data = Collections.singletonMap("key", "value");
 
@@ -1102,6 +1103,7 @@ public class YamlWireTest extends WireTestCommon {
     public void testMapReadAndWriteStrings() {
         @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
+        wire.usePadding(true);
 
         @NotNull final Map<String, String> expected = new LinkedHashMap<>();
 
@@ -1243,6 +1245,7 @@ public class YamlWireTest extends WireTestCommon {
         };
         @NotNull final Bytes bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
+        wire.usePadding(false);
 
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception")
                 .object(e));
@@ -1255,7 +1258,7 @@ public class YamlWireTest extends WireTestCommon {
                 "    { class: net.openhft.chronicle.wire.YamlWireTest, method: runTestException, file: YamlWireTest.java, line: 73 },\n" +
                 "    { class: sun.reflect.NativeMethodAccessorImpl, method: invoke0, file: NativeMethodAccessorImpl.java, line: -2 }\n" +
                 "  ]\n" +
-                "}\n \n", Wires.fromSizePrefixedBlobs(bytes));
+                "}\n", Wires.fromSizePrefixedBlobs(bytes));
 
         wire.readDocument(null, r -> {
             Throwable t = r.read(() -> "exception").throwable(true);

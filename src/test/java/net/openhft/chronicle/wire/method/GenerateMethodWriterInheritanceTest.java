@@ -18,6 +18,7 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
     @Test
     public void testSameClassInHierarchy() {
         final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+        wire.usePadding(true);
 
         final AnInterface writer = wire.methodWriter(AnInterface.class, ADescendant.class);
         assertTrue(writer instanceof MethodWriter);
@@ -41,6 +42,7 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
     @Test
     public void testSameNamedMethod() {
         final Wire wire = BINARY.apply(Bytes.elasticByteBuffer());
+        wire.usePadding(true);
 
         final AnInterface writer = wire.methodWriter(AnInterface.class, AnInterfaceSameName.class);
         assertTrue(writer instanceof MethodWriter);

@@ -33,6 +33,7 @@ public class ElasticByteBufferTest extends WireTestCommon {
         Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer(10);
 
         Wire wire = WireType.BINARY.apply(byteBufferBytes);
+        wire.usePadding(true);
 
         try (DocumentContext documentContext = wire.writingDocument(false)) {
             documentContext.wire().write("some key").text("some value of more than ten characters");

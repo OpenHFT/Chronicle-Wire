@@ -46,23 +46,25 @@ import static org.junit.Assume.assumeTrue;
 public class WireTests {
 
     private final WireType wireType;
+    private final boolean usePadding;
 
     @NotNull
     @Rule
     public TestName name = new TestName();
 
-    public WireTests(WireType wireType) {
+    public WireTests(WireType wireType, boolean usePadding) {
         this.wireType = wireType;
+        this.usePadding = usePadding;
     }
 
     @NotNull
-    @Parameterized.Parameters(name = "{index}: {0}")
+    @Parameterized.Parameters(name = "{index}: {0} padding: {1}")
     public static Collection<Object[]> data() {
         Object[][] list = {
-                {WireType.BINARY},
-                {WireType.BINARY},
-                {WireType.TEXT},
-                {WireType.JSON}
+                {WireType.BINARY, true},
+                {WireType.BINARY, false},
+                {WireType.TEXT, false},
+                {WireType.JSON, false}
         };
         return Arrays.asList(list);
     }
@@ -250,6 +252,7 @@ public class WireTests {
 
     @Test
     public void testReadingPeekYaml() {
+        assumeTrue(usePadding);
         assumeTrue(wireType == WireType.BINARY);
         Bytes b = Bytes.elasticByteBuffer();
         final Wire wire = createWire(b);
@@ -293,7 +296,7 @@ public class WireTests {
         }
 
         try (@NotNull DocumentContext dc = wire.readingDocument()) {
-            int position = 40;
+            int position = usePadding ? 40 : 37;
             assertEquals("" +
                     "# position: " + position + ", header: 0\n" +
                     "--- !!data #binary\n" +
@@ -331,6 +334,7 @@ public class WireTests {
 
     private Wire createWire(Bytes b) {
         final Wire wire = wireType.apply(b);
+        wire.usePadding(usePadding);
         return wire;
     }
 

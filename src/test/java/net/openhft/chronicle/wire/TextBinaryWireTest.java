@@ -65,6 +65,7 @@ public class TextBinaryWireTest extends WireTestCommon {
 
     public Wire createWire() {
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        wire.usePadding(true);
         return wire;
     }
 
