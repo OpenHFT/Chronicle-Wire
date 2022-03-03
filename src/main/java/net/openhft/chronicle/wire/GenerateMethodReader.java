@@ -229,6 +229,7 @@ public class GenerateMethodReader {
 
         sourceCode.append("@Override\n" +
                 "protected boolean readOneCall(WireIn wireIn) {\n" +
+                "ValueIn valueIn = wireIn.getValueIn();\n" +
                 "String lastEventName = \"\";\n" +
                 "if (wireIn.bytes().peekUnsignedByte() == BinaryWireCode.FIELD_NUMBER) {\n" +
                 "int methodId = (int) wireIn.readEventNumber();\n" +
@@ -238,13 +239,13 @@ public class GenerateMethodReader {
         sourceCode.append(eventIdSwitchBlock);
 
         sourceCode.append("default:\n" +
+                "valueIn.skipValue();\n" +
                 "return false;\n" +
                 "}\n" +
                 "}\n" +
                 "else {\n" +
                 "lastEventName = wireIn.readEvent(String.class);\n" +
                 "}\n" +
-                "ValueIn valueIn = wireIn.getValueIn();\n" +
                 "try {\n" +
                 "if (Jvm.isDebug())\n" +
                 "debugLoggingParselet.accept(lastEventName, valueIn);\n" +
@@ -258,6 +259,7 @@ public class GenerateMethodReader {
         sourceCode.append(eventNameSwitchBlock);
 
         sourceCode.append("default:\n" +
+                "valueIn.skipValue();\n" +
                 "return false;\n" +
                 "}\n" +
                 "return true;\n" +
@@ -275,6 +277,7 @@ public class GenerateMethodReader {
 
         sourceCode.append("@Override\n" +
                 "protected boolean readOneCallMeta(WireIn wireIn) {\n" +
+                "ValueIn valueIn = wireIn.getValueIn();\n" +
                 "String lastEventName = \"\";\n" +
                 "if (wireIn.bytes().peekUnsignedByte() == BinaryWireCode.FIELD_NUMBER) {\n" +
                 "int methodId = (int) wireIn.readEventNumber();\n" +
@@ -283,13 +286,13 @@ public class GenerateMethodReader {
         sourceCode.append(eventIdSwitchBlockMeta);
 
         sourceCode.append("default:\n" +
-                "return false;\n" +
+                "valueIn.skipValue();\n" +
+                "return true;\n" +
                 "}\n" +
                 "}\n" +
                 "else {\n" +
                 "lastEventName = wireIn.readEvent(String.class);\n" +
                 "}\n" +
-                "ValueIn valueIn = wireIn.getValueIn();\n" +
                 "try {\n" +
                 "if (Jvm.isDebug())\n" +
                 "debugLoggingParselet.accept(lastEventName, valueIn);\n" +
@@ -303,7 +306,8 @@ public class GenerateMethodReader {
         sourceCode.append(eventNameSwitchBlockMeta);
 
         sourceCode.append("default:\n" +
-                "return false;\n" +
+                "valueIn.skipValue();\n" +
+                "return true;\n" +
                 "}\n" +
                 "return true;\n" +
                 "} \n" +

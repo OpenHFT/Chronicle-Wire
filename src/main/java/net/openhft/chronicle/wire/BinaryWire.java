@@ -2812,6 +2812,11 @@ public class BinaryWire extends AbstractWire implements Wire {
                     }
                 }
 
+                case I64_ARRAY: {
+                    long capacity = bytes.readLong(bytes.readPosition() + 1);
+                    return 1 + 2 * 8 + (capacity * Long.BYTES);
+                }
+
                 case -1:
                     return 0;
 
