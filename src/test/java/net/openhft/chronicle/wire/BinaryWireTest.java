@@ -127,6 +127,7 @@ public class BinaryWireTest extends WireTestCommon {
     private BinaryWire createWire() {
         bytes.clear();
         @NotNull BinaryWire wire = new BinaryWire(bytes, fixed, numericField, fieldLess, compressedSize, "lzw", false);
+        wire.usePadding(true);
         assert wire.startUse();
         return wire;
     }
@@ -1330,6 +1331,7 @@ public class BinaryWireTest extends WireTestCommon {
     public void testUsingEvents() throws Exception {
 
         final Wire w = WireType.BINARY.apply(Bytes.elasticByteBuffer());
+        w.usePadding(true);
 
         try (DocumentContext dc = w.writingDocument(false)) {
             dc.wire().writeEventName("hello1").typedMarshallable(new DTO("world1"));

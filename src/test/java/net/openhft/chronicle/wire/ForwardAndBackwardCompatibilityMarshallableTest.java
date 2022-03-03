@@ -52,6 +52,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
     @Test
     public void marshableStringBuilderTest() throws Exception {
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        wire.usePadding(true);
         CLASS_ALIASES.addAlias(MDTO2.class, "MDTO");
 
         wire.writeDocument(false, w -> new MDTO2(1, 2, "3").writeMarshallable(w));
@@ -78,6 +79,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityMarshallableTest$MDTO1 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityMarshallableTest$MDTO2");
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        wire.usePadding(true);
         CLASS_ALIASES.addAlias(MDTO1.class, "MDTO");
 
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new MDTO1(1)));
@@ -104,6 +106,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityMarshallableTest$MDTO2 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityMarshallableTest$MDTO1");
 
         final Wire wire = wireType.apply(Bytes.elasticByteBuffer());
+        wire.usePadding(true);
         CLASS_ALIASES.addAlias(MDTO2.class, "MDTO");
 
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new MDTO2(1, 2, "3")));

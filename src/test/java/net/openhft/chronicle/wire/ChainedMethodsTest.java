@@ -95,6 +95,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     @Test
     public void chainedBinary() {
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
         ITop top = wire.methodWriter(ITop.class);
         top.mid("mid")
                 .next(1)
@@ -124,6 +125,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     @Test
     public void chainedBinaryVariousArgsNumber() {
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
         ITop top = wire.methodWriter(ITop.class);
         top.midNoArg()
                 .next(1)
@@ -182,6 +184,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     @Test
     public void testNestedReturnType() {
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
         final NestedStart writer = wire.methodWriter(NestedStart.class);
 
         assertEquals(disableProxyCodegen, Proxy.isProxyClass(writer.getClass()));

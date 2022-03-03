@@ -71,6 +71,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
 
     private void doTestInterceptorSupportedInGeneratedCode(CountDownLatch readerCreateLatch, boolean addDummyInstance) {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
 
         InterceptedInterface writer = wire.methodWriter(InterceptedInterface.class);
 
@@ -135,6 +136,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
     @Test
     public void testGeneratingAggregatingInfoInterceptor() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
 
         InterceptedInterface writer = wire.methodWriter(InterceptedInterface.class);
 
@@ -166,6 +168,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
     @Test
     public void testGeneratingSkippingInterceptor() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
 
         InterceptedInterface writer = wire.methodWriter(InterceptedInterface.class);
 

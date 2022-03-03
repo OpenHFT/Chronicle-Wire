@@ -35,6 +35,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     @Before
     public void setUp() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
+        wire.usePadding(true);
 
         writer = wire.methodWriter(MyInterface.class);
 

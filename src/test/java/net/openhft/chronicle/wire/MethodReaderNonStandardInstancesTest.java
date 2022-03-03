@@ -30,6 +30,7 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
     @Test
     public void testAnonymousClassCanBePassedToMethodReader() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
 
         MyInterface writer = wire.methodWriter(MyInterface.class);
 
@@ -53,6 +54,7 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
     @Test
     public void testLambdaCanBePassedToMethodReader() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
+        wire.usePadding(true);
 
         MyInterface writer = wire.methodWriter(MyInterface.class);
 
