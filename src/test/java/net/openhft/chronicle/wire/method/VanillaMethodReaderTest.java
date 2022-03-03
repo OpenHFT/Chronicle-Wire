@@ -52,7 +52,9 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                     fail();
                 }
             };
-            MethodReader methodReader = wire.methodReaderBuilder().metaDataHandler(Mocker.ignored(IgnoredMetaData.class)).build(aListener);
+            MethodReader methodReader = wire.methodReaderBuilder()
+                    .metaDataHandler(Mocker.ignored(IgnoredMetaData.class), aListener)
+                    .build(aListener);
             checkReaderType(methodReader);
             {
                 boolean succeeded = methodReader.readOne();
