@@ -96,8 +96,7 @@ public class VanillaMethodReader implements MethodReader {
         if (objects[0] instanceof WireParselet)
             defaultParselet = (WireParselet) objects[0];
 
-        metaWireParser = WireParser.wireParser((s, in0) -> {
-        });
+        metaWireParser = WireParser.wireParser((s, in0) -> in0.skipValue());
         dataWireParser = WireParser.wireParser(defaultParselet, fieldNumberParselet);
 
         addParsersForComponents(metaWireParser, ignoreDefault,
