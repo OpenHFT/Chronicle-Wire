@@ -66,10 +66,10 @@ public class SkipValueTest {
                 {null, BYTES_LENGTH8, wr(v -> v.object(Dto8.class, new Dto8()))},
                 {null, BYTES_LENGTH16, wr(v -> v.object(Dto16.class, new Dto16()))},
                 {null, BYTES_LENGTH32, wr(v -> v.object(Dto32.class, new Dto32()))},
-//                {null, BinaryWireCode.BYTES_MARSHALLABLE, wr(v -> v.object(BM.class, new BM()))}
-//        public static final int U8_ARRAY = 0x8A;
-//        public static final int I64_ARRAY = 0x8D;
-//                {null, U8_ARRAY, wr(v -> v.bytes(new byte[4]))},
+/*                {null, BYTES_MARSHALLABLE, wr(v -> {
+                    v.object(BM.class, new BM());
+                    v.wireOut().bytes().readPosition(5);
+                })},*/
                 {null, U8_ARRAY, wr(v -> {
                     v.bytes(new byte[4]);
                     v.wireOut().bytes().readPosition(2);
