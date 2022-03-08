@@ -50,7 +50,8 @@ public class ByteArrayResuseTest {
         data.bytes = bytes;
 
         Wire wire = WireType.BINARY_LIGHT.apply(new HexDumpBytes());
-        wire.write("data").object(Data.class, data);
+        wire.write("data")
+                .object(Data.class, data);
         wire.write("data").object(Data.class, data);
 
         assertEquals(expected,

@@ -49,7 +49,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         this.position = bytes.writePosition();
         metaDataBit = metaData ? Wires.META_DATA : 0;
         tmpHeader = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
-        bytes.writeOrderedInt(tmpHeader);
+        bytes.writeInt(tmpHeader);
         notComplete = true;
         chainedElement = false;
     }
