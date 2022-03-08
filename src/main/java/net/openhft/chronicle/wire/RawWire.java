@@ -812,7 +812,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public byte @NotNull [] bytes() {
+        public byte @NotNull [] bytes(byte[] using) {
             throw new UnsupportedOperationException("todo");
         }
 

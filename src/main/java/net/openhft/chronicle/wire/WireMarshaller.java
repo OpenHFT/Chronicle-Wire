@@ -41,21 +41,20 @@ import static net.openhft.chronicle.core.UnsafeMemory.*;
 
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
 public class WireMarshaller<T> {
-    private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     static final StringBuilderPool SBP = new StringBuilderPool();
+    private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     private static final FieldAccess[] NO_FIELDS = {};
+    private static final StringBuilderPool RSBP = new StringBuilderPool();
+    private static final StringBuilderPool WSBP = new StringBuilderPool();
+    @NotNull
+    final FieldAccess[] fields;
     public static final ClassLocal<WireMarshaller> WIRE_MARSHALLER_CL = ClassLocal.withInitial
             (tClass ->
                     Throwable.class.isAssignableFrom(tClass)
                             ? WireMarshaller.ofThrowable(tClass)
                             : WireMarshaller.of(tClass)
             );
-    private static final StringBuilderPool RSBP = new StringBuilderPool();
-    private static final StringBuilderPool WSBP = new StringBuilderPool();
-    @NotNull
-    final FieldAccess[] fields;
     final TreeMap<CharSequence, FieldAccess> fieldMap = new TreeMap<>(WireMarshaller::compare);
-
     private final boolean isLeaf;
     @Nullable
     private final T defaultValue;
@@ -181,6 +180,72 @@ public class WireMarshaller<T> {
                 return cmp;
         }
         return Integer.compare(cs0.length(), cs1.length());
+    }
+
+    private static Type[] computeActualTypeArguments(Class iface, Field field) {
+        Type[] actual = consumeActualTypeArguments(new HashMap<>(), iface, field.getGenericType());
+
+        if (actual == null)
+            return iface.getTypeParameters();
+
+        return actual;
+    }
+
+    private static Type[] consumeActualTypeArguments(Map<String, Type> prevTypeParameters, Class iface, Type type) {
+        Class cls = null;
+        Map<String, Type> typeParameters = new HashMap<>();
+        if (type instanceof ParameterizedType) {
+            ParameterizedType pType = (ParameterizedType) type;
+            Type[] typeArguments = pType.getActualTypeArguments();
+
+            cls = ((Class) ((ParameterizedType) type).getRawType());
+            TypeVariable<?>[] typeParamDecls = cls.getTypeParameters();
+
+            for (int i = 0; i < Math.min(typeParamDecls.length, typeArguments.length); i++) {
+                Type value;
+                if (typeArguments[i] instanceof TypeVariable) {
+                    value = prevTypeParameters.get(((TypeVariable<?>) typeArguments[i]).getName());
+
+                    if (value == null) {
+                        // Fail-safe.
+                        Type[] bounds = ((TypeVariable<?>) typeArguments[i]).getBounds();
+                        value = bounds.length == 0 ? Object.class : bounds[0];
+                    }
+                } else {
+                    value = typeArguments[i];
+                }
+
+                typeParameters.put(typeParamDecls[i].getName(), value);
+            }
+        } else if (type instanceof Class) {
+            cls = (Class) type;
+        }
+
+        if (iface.equals(cls)) {
+            TypeVariable[] parameters = iface.getTypeParameters();
+            Type[] result = new Type[parameters.length];
+
+            for (int i = 0; i < result.length; i++) {
+                Type parameter = typeParameters.get(parameters[i].getName());
+
+                result[i] = parameter != null ? parameter : parameters[i];
+            }
+
+            return result;
+        }
+
+        if (cls != null) {
+            for (Type ifaceType : cls.getGenericInterfaces()) {
+                Type[] result = consumeActualTypeArguments(typeParameters, iface, ifaceType);
+
+                if (result != null)
+                    return result;
+            }
+
+            return consumeActualTypeArguments(typeParameters, iface, cls.getGenericSuperclass());
+        }
+
+        return null;
     }
 
     public WireMarshaller<T> excludeFields(String... fieldNames) {
@@ -406,8 +471,11 @@ public class WireMarshaller<T> {
         @Nullable
         public static Object create(@NotNull Field field) {
             Class<?> type = field.getType();
-            if (type.isArray())
+            if (type.isArray()) {
+                if (type.getComponentType() == byte.class)
+                    return new ByteArrayFieldAccess(field);
                 return new ArrayFieldAccess(field);
+            }
             if (EnumSet.class.isAssignableFrom(type)) {
                 final Class componentType = extractClass(computeActualTypeArguments(EnumSet.class, field)[0]);
                 if (componentType == Object.class || Modifier.isAbstract(componentType.getModifiers()))
@@ -917,6 +985,60 @@ public class WireMarshaller<T> {
                     if (!Objects.equals(Array.get(a1, i), Array.get(a2, i)))
                         return false;
                 return true;
+            } catch (IllegalAccessException e) {
+                throw new AssertionError(e);
+            }
+        }
+    }
+
+    static class ByteArrayFieldAccess extends FieldAccess {
+
+        ByteArrayFieldAccess(@NotNull Field field) {
+            super(field);
+        }
+
+        @Override
+        protected void getValue(Object o, @NotNull ValueOut write, Object previous) throws IllegalAccessException {
+            Object arr = field.get(o);
+            boolean leaf = write.swapLeaf(true);
+            if (arr == null)
+                write.nu11();
+            else
+                write.bytes((byte[]) arr);
+            write.swapLeaf(leaf);
+        }
+
+        @Override
+        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
+            final Object arr = field.get(o);
+            if (read.isNull()) {
+                if (arr != null)
+                    field.set(o, null);
+                return;
+            }
+            byte[] arr2 = read.bytes((byte[]) arr);
+            if (arr2 != arr)
+                field.set(o, arr2);
+        }
+
+        @Override
+        public void getAsBytes(Object o, Bytes bytes) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isEqual(Object o1, Object o2) {
+            try {
+                Object a1 = field.get(o1);
+                Object a2 = field.get(o2);
+                if (a1 == null) return a2 == null;
+                if (a2 == null) return false;
+                Class<?> aClass1 = a1.getClass();
+                Class<?> aClass2 = a2.getClass();
+                if (aClass1 != aClass2)
+                    if (!aClass1.isAssignableFrom(aClass2) && !aClass2.isAssignableFrom(aClass1))
+                        return false;
+                return Arrays.equals((byte[]) a1, (byte[]) a2);
             } catch (IllegalAccessException e) {
                 throw new AssertionError(e);
             }
@@ -1794,69 +1916,7 @@ public class WireMarshaller<T> {
         }
     }
 
-    private static Type[] computeActualTypeArguments(Class iface, Field field) {
-        Type[] actual = consumeActualTypeArguments(new HashMap<>(), iface, field.getGenericType());
 
-        if (actual == null)
-            return iface.getTypeParameters();
 
-        return actual;
-    }
 
-    private static Type[] consumeActualTypeArguments(Map<String, Type> prevTypeParameters, Class iface, Type type) {
-        Class cls = null;
-        Map<String, Type> typeParameters = new HashMap<>();
-        if (type instanceof ParameterizedType) {
-            ParameterizedType pType = (ParameterizedType) type;
-            Type[] typeArguments = pType.getActualTypeArguments();
-
-            cls = ((Class) ((ParameterizedType) type).getRawType());
-            TypeVariable<?>[] typeParamDecls = cls.getTypeParameters();
-
-            for (int i = 0; i < Math.min(typeParamDecls.length, typeArguments.length); i++) {
-                Type value;
-                if (typeArguments[i] instanceof TypeVariable) {
-                    value = prevTypeParameters.get(((TypeVariable<?>) typeArguments[i]).getName());
-
-                    if (value == null) {
-                        // Fail-safe.
-                        Type[] bounds = ((TypeVariable<?>) typeArguments[i]).getBounds();
-                        value = bounds.length == 0 ? Object.class : bounds[0];
-                    }
-                } else {
-                    value = typeArguments[i];
-                }
-
-                typeParameters.put(typeParamDecls[i].getName(), value);
-            }
-        } else if (type instanceof Class) {
-            cls = (Class) type;
-        }
-
-        if (iface.equals(cls)) {
-            TypeVariable[] parameters = iface.getTypeParameters();
-            Type[] result = new Type[parameters.length];
-
-            for (int i = 0; i < result.length; i++) {
-                Type parameter = typeParameters.get(parameters[i].getName());
-
-                result[i] = parameter != null ? parameter : parameters[i];
-            }
-
-            return result;
-        }
-
-        if (cls != null) {
-            for (Type ifaceType : cls.getGenericInterfaces()) {
-                Type[] result = consumeActualTypeArguments(typeParameters, iface, ifaceType);
-
-                if (result != null)
-                    return result;
-            }
-
-            return consumeActualTypeArguments(typeParameters, iface, cls.getGenericSuperclass());
-        }
-
-        return null;
-    }
 }

@@ -120,7 +120,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     @Override
-    public byte @NotNull [] bytes() {
+    public byte @NotNull [] bytes(byte[] using) {
         return (byte[]) defaultValue;
     }
 
