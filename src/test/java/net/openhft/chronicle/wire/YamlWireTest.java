@@ -1044,7 +1044,7 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals("[\n" +
                     "  { token: STREAM_START, indent: -1, keys: !!null \"\" },\n" +
                     "  { token: DIRECTIVES_END, indent: -1, keys: !!null \"\" },\n" +
-                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 2, offsets: [ 10, 41, 0, 0, 0, 0, 0 ]}}\n" +
+                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 2, offsets: [ 10, 41, 0, 0, 0, 0, 0 ] }}\n" +
                     "]\n", yw.dumpContext());
             assertEquals("{c=lo, d=xyz}", "" + yw.read("B").object());
             assertEquals("{b=1234, c=hi, d=abc}", "" + yw.read("A").object());
@@ -1063,7 +1063,7 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals("[\n" +
                     "  { token: STREAM_START, indent: -1, keys: !!null \"\" },\n" +
                     "  { token: DIRECTIVES_END, indent: -1, keys: !!null \"\" },\n" +
-                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 4, offsets: [ 2, 8, 14, 32, 0, 0, 0 ]}}\n" +
+                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 4, offsets: [ 2, 8, 14, 32, 0, 0, 0 ] }}\n" +
                     "]\n", yw.dumpContext());
             assertEquals("AA", "" + yw.read("b").object());
             assertEquals("{}", "" + yw.read("c").object());
@@ -1930,8 +1930,8 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals("hello: {\n" +
                 "  list: [\n" +
                 "    { name: none },\n" +
-                "    { name: one, timeUnits: [ DAYS ]},\n" +
-                "    { name: two, timeUnits: [ HOURS, DAYS ]}\n" +
+                "    { name: one, timeUnits: [ DAYS ] },\n" +
+                "    { name: two, timeUnits: [ HOURS, DAYS ] }\n" +
                 "  ]\n" +
                 "}\n", wire.toString());
 

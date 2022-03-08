@@ -84,6 +84,8 @@ public class YamlWire extends AbstractWire implements Wire {
     private DefaultValueIn defaultValueIn;
     private WriteDocumentContext writeContext;
     private ReadDocumentContext readContext;
+    private boolean addTimeStamps = false;
+    private boolean trimFirstCurly = true;
 
     public YamlWire(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
@@ -186,6 +188,15 @@ public class YamlWire extends AbstractWire implements Wire {
     public boolean hintReadInputOrder() {
         // TODO Fix YamlTextWireTest for false.
         return true;
+    }
+
+    public boolean addTimeStamps() {
+        return addTimeStamps;
+    }
+
+    public YamlWire addTimeStamps(boolean addTimeStamps) {
+        this.addTimeStamps = addTimeStamps;
+        return this;
     }
 
     @Override
@@ -840,6 +851,21 @@ public class YamlWire extends AbstractWire implements Wire {
         bytes.writeUnsignedByte(ch2);
     }
 
+    /**
+     * @return whether the top level curly brackets is dropped
+     */
+    public boolean trimFirstCurly() {
+        return trimFirstCurly;
+    }
+
+    /**
+     * @param trimFirstCurly whether the top level curly brackets is dropped
+     */
+    public YamlWire trimFirstCurly(boolean trimFirstCurly) {
+        this.trimFirstCurly = trimFirstCurly;
+        return this;
+    }
+
     @Override
     public void startEvent() {
         consumePadding();
@@ -1089,8 +1115,13 @@ public class YamlWire extends AbstractWire implements Wire {
             }
             prependSeparator();
             typePrefix(type);
+            if (getClass() != TextValueOut.class)
+                bytes.append('"');
             append(Base64.getEncoder().encodeToString(byteArray));
+            if (getClass() != TextValueOut.class)
+                bytes.append('"');
             elementSeparator();
+            endTypePrefix();
 
             return YamlWire.this;
         }
@@ -1104,6 +1135,7 @@ public class YamlWire extends AbstractWire implements Wire {
             prependSeparator();
             typePrefix(type);
             append(Base64.getEncoder().encodeToString(bytesStore.toByteArray()));
+            endTypePrefix();
             append(END_FIELD);
             elementSeparator();
 
@@ -1227,6 +1259,12 @@ public class YamlWire extends AbstractWire implements Wire {
             prependSeparator();
             bytes.append(i64);
             elementSeparator();
+            // 2001 to 2100 best effort basis.
+            boolean addTimeStamp = YamlWire.this.addTimeStamps && !leaf;
+            if (addTimeStamp) {
+                addTimeStamp(i64);
+            }
+
             return YamlWire.this;
         }
 
@@ -1234,6 +1272,31 @@ public class YamlWire extends AbstractWire implements Wire {
         @Override
         public WireOut int128forBinding(long i64x0, long i64x1, TwoLongValue longValue) {
             throw new UnsupportedOperationException(yt.toString());
+        }
+
+        public void addTimeStamp(long i64) {
+            if ((long) 1e12 < i64 && i64 < (long) 4.111e12) {
+                bytes.append(", # ");
+                bytes.appendDateMillis(i64);
+                bytes.append("T");
+                bytes.appendTimeMillis(i64);
+                sep = NEW_LINE;
+            } else if ((long) 1e18 < i64 && i64 < (long) 4.111e18) {
+                long millis = i64 / 1_000_000;
+                long nanos = i64 % 1_000_000;
+                bytes.append(", # ");
+                bytes.appendDateMillis(millis);
+                bytes.append("T");
+                bytes.appendTimeMillis(millis);
+                bytes.append((char) ('0' + nanos / 100000));
+                bytes.append((char) ('0' + nanos / 100000 % 10));
+                bytes.append((char) ('0' + nanos / 10000 % 10));
+                bytes.append((char) ('0' + nanos / 1000 % 10));
+                bytes.append((char) ('0' + nanos / 100 % 10));
+                bytes.append((char) ('0' + nanos / 10 % 10));
+                bytes.append((char) ('0' + nanos % 10));
+                sep = NEW_LINE;
+            }
         }
 
         @NotNull
@@ -1382,11 +1445,21 @@ public class YamlWire extends AbstractWire implements Wire {
                 nu11();
             } else {
                 prependSeparator();
-                append(stringable.toString());
+                final String s = stringable.toString();
+                final Quotes quotes = needsQuotes(s);
+                asTestQuoted(s, quotes);
                 elementSeparator();
             }
 
             return YamlWire.this;
+        }
+
+        protected void asTestQuoted(String s, Quotes quotes) {
+            if (quotes == Quotes.NONE) {
+                append(s);
+            } else {
+                escape0(s, quotes);
+            }
         }
 
         @NotNull
@@ -1537,6 +1610,7 @@ public class YamlWire extends AbstractWire implements Wire {
                 addNewLine(pos);
 
             popState();
+            this.leaf = leaf;
             if (!leaf)
                 indent();
             else
@@ -1624,7 +1698,7 @@ public class YamlWire extends AbstractWire implements Wire {
             if (dropDefault) {
                 writeSavedEventName();
             }
-            if (bytes.writePosition() == 0) {
+            if (trimFirstCurly && bytes.writePosition() == 0) {
                 object.writeMarshallable(YamlWire.this);
                 if (bytes.writePosition() == 0)
                     bytes.append("{}");
@@ -1645,7 +1719,7 @@ public class YamlWire extends AbstractWire implements Wire {
                     append(" ");
                 leaf = false;
                 popState();
-            } else if (seps.size() > 0) {
+            } else if (!seps.isEmpty()) {
                 popSep = seps.get(seps.size() - 1);
                 popState();
                 newLine();

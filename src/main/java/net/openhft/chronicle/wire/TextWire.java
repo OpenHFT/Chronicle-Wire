@@ -1986,7 +1986,7 @@ public class TextWire extends AbstractWire implements Wire {
             } else if (!seps.isEmpty()) {
                 popSep = seps.get(seps.size() - 1);
                 popState();
-                sep = NEW_LINE;
+                newLine();
             }
             if (sep.startsWith(',')) {
                 append(sep, 1, sep.length() - 1);
@@ -2039,7 +2039,7 @@ public class TextWire extends AbstractWire implements Wire {
             } else if (seps.size() > 0) {
                 popSep = seps.get(seps.size() - 1);
                 popState();
-                sep = NEW_LINE;
+                newLine();
             }
             if (sep.startsWith(',')) {
                 append(sep, 1, sep.length() - 1);
