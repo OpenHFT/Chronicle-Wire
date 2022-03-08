@@ -623,8 +623,23 @@ public class TextWire extends AbstractWire implements Wire {
     protected void consumeDocumentStart() {
         if (bytes.readRemaining() > 4) {
             long pos = bytes.readPosition();
-            if (bytes.readByte(pos) == '-' && bytes.readByte(pos + 1) == '-' && bytes.readByte(pos + 2) == '-')
+            if (bytes.readByte(pos) == '-' && bytes.readByte(pos + 1) == '-' && bytes.readByte(pos + 2) == '-') {
                 bytes.readSkip(3);
+
+                consumeWhiteSpace();
+
+                pos = bytes.readPosition();
+                @NotNull String word = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
+                switch (word) {
+                    case "!!data":
+                    case "!!data-not-ready":
+                    case "!!meta-data":
+                    case "!!meta-data-not-ready":
+                        break;
+                    default:
+                        bytes.readPosition(pos);
+                }
+            }
         }
     }
 
@@ -1025,9 +1040,7 @@ public class TextWire extends AbstractWire implements Wire {
 
     @Nullable
     public Object readObject() {
-        consumePadding();
-        consumeDocumentStart();
-        return readObject(0);
+        return getValueIn().object(Object.class);
     }
 
     @Nullable

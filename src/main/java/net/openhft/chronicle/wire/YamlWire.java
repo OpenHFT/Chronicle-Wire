@@ -701,6 +701,29 @@ public class YamlWire extends AbstractWire implements Wire {
         return quotes;
     }
 
+    protected void consumeDocumentStart() {
+        if (bytes.readRemaining() > 4) {
+            long pos = bytes.readPosition();
+            if (bytes.readByte(pos) == '-' && bytes.readByte(pos + 1) == '-' && bytes.readByte(pos + 2) == '-')
+                bytes.readSkip(3);
+
+            pos = bytes.readPosition();
+            @NotNull String word = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
+            switch (word) {
+                case "!!data":
+                case "!!data-not-ready":
+                case "!!meta-data":
+                case "!!meta-data-not-ready":
+                    break;
+                default:
+                    bytes.readPosition(pos);
+            }
+        }
+
+        if (yt.current() == YamlToken.NONE)
+            yt.next();
+    }
+
     @NotNull
     @Override
     public LongValue newLongReference() {
@@ -771,6 +794,23 @@ public class YamlWire extends AbstractWire implements Wire {
             throw new UnsupportedOperationException(yt.toString());
         }
         return map;
+    }
+
+    public void writeObject(Object o) {
+        if (o instanceof Iterable) {
+            for (Object o2 : (Iterable) o) {
+                writeObject(o2, 2);
+            }
+        } else if (o instanceof Map) {
+            for (@NotNull Map.Entry<Object, Object> entry : ((Map<Object, Object>) o).entrySet()) {
+                write(() -> entry.getKey().toString()).object(entry.getValue());
+            }
+        } else if (o instanceof WriteMarshallable) {
+            valueOut.typedMarshallable((WriteMarshallable) o);
+
+        } else {
+            valueOut.object(o);
+        }
     }
 
     private void writeObject(Object o, int indentation) {

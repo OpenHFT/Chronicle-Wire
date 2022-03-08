@@ -129,6 +129,39 @@ public class YamlTokeniserTest extends WireTestCommon {
     }
 
     @Test
+    public void eg2_4out() {
+        assertEquals("DIRECTIVES_END \n" +
+                        "SEQUENCE_START \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT name\n" +
+                        "TEXT Mark McGwire\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT hr\n" +
+                        "TEXT 65\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT avg\n" +
+                        "TEXT 0.278\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT name\n" +
+                        "TEXT Sammy Sosa\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT hr\n" +
+                        "TEXT 63\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT avg\n" +
+                        "TEXT 0.288\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("specification/example2_4.out.yaml"));
+    }
+
+    @Test
     public void eg2_4B() {
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
@@ -161,7 +194,6 @@ public class YamlTokeniserTest extends WireTestCommon {
                 doTest("yaml/spec/2_4_SequenceOfMappings-fixed.yaml"));
     }
 
-    @Ignore("TODO Handle properly")
     @Test
     public void eg2_5() {
         assertEquals("DIRECTIVES_END \n" +

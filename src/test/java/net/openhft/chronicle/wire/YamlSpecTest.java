@@ -43,7 +43,7 @@ public class YamlSpecTest extends WireTestCommon {
     }
 
     @Test
-    public void testMappingScalarsToScalars_2_2() {
+    public void test2_2_MappingScalarsToScalars() {
         doTest("2_2_MappingScalarsToScalars.yaml", "{hr=65, avg=0.278, rbi=147}");
     }
 

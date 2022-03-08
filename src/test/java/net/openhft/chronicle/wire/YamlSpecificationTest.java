@@ -21,15 +21,21 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
+import static net.openhft.chronicle.wire.WireType.TEXT;
+import static net.openhft.chronicle.wire.WireType.YAML;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
@@ -44,61 +50,95 @@ public class YamlSpecificationTest extends WireTestCommon {
     }
 
     private final String input;
+    private final boolean textWire;
 
-    public YamlSpecificationTest(String input) {
+    public YamlSpecificationTest(String input, boolean textWire) {
         this.input = input;
+        this.textWire = textWire;
     }
 
-    @Parameterized.Parameters
-    public static Collection tests() {
-        return Arrays.asList(new String[][]{
-                {"example2_1"},
-                {"example2_2"},
-                {"example2_3"},
-               // {"example2_4"}, // TODO Fix map format
-               // {"example2_5"}, // Not supported
-               // {"example2_6"}, // TODO Fix map format
-                {"example2_7"},// TODO Fix for multiple ---
-               // {"example2_8"},// TODO Fix for multiple ---
-                {"example2_9"},
-               // {"example2_10"}, // TODO FIx handling of anchors
-               // {"example2_11"}, // Not supported
-               // {"example2_12"}, // Not supported
-               // {"example2_13"}, // Not supported
-               // {"example2_14"}, // Not supported
-               // {"example2_15"}, // Not supported
-               // {"example2_16"}, // Not supported
-               // {"example2_17"}, // TODO Fix handling of double single quote.
-               // {"example2_18"}, // Not supported
-               // {"example2_19"}, // TODO fix handling of times.
-               // {"example2_20"}, // TODO fix handling of times.
-                {"example2_21"},
-               // {"example2_22"}, // TODO fix handling of times.
-               // {"example2_23"}, // Not supported
-               // {"example2_24"}, // TODO FIx handling of anchors
-               // {"example2_25"}, // TODO support set
-               // {"example2_26"}, // TODO support omap
-               // {"example2_27"}, // Not supported
-               // {"example2_28"} // Not supported
-        });
+    @Parameterized.Parameters(name = "case={0}, textWire={1}")
+    public static Collection<Object[]> tests() {
+        ArrayList<Object[]> result = new ArrayList<>();
+        for (boolean textWire : new boolean[] {true, false}) {
+            result.addAll(Arrays.asList(new Object[][]{
+                    {"example2_1", textWire},
+                    {"example2_2", textWire},
+                    {"example2_3", textWire},
+                    {"example2_4", false}, // TODO Fix map format
+                    {"example2_5", textWire}, // Not supported
+                    // {"example2_6"}, // TODO Fix map format
+                    {"example2_7", textWire},// TODO Fix for multiple ---
+                    // {"example2_8"},// TODO Fix for multiple ---
+                    {"example2_9", textWire},
+                    // {"example2_10"}, // TODO FIx handling of anchors
+                    // {"example2_11"}, // Not supported
+                    // {"example2_12"}, // Not supported
+                    // {"example2_13"}, // Not supported
+                    // {"example2_14"}, // Not supported
+                    // {"example2_15"}, // Not supported
+                    // {"example2_16"}, // Not supported
+                    // {"example2_17"}, // TODO Fix handling of double single quote.
+                    // {"example2_18"}, // Not supported
+                    // {"example2_19"}, // TODO fix handling of times.
+                    // {"example2_20"}, // TODO fix handling of times.
+                    {"example2_21", textWire},
+                    // {"example2_22"}, // TODO fix handling of times.
+                    // {"example2_23"}, // Not supported
+                    // {"example2_24"}, // TODO FIx handling of anchors
+                    // {"example2_25"}, // TODO support set
+                    // {"example2_26"}, // TODO support omap
+                    // {"example2_27"}, // Not supported
+                    // {"example2_28"} // Not supported
+            }));
+        }
+
+        return result;
     }
 
     @Test
     public void decodeAs() throws IOException {
-        @Nullable byte[] byteArr = getBytes(input + ".yaml");
-        Bytes bytes = Bytes.wrapForRead(byteArr);
-        @NotNull TextWire tw = new TextWire(bytes);
-        @NotNull Bytes bytes2 = Bytes.allocateElasticOnHeap();
-        @NotNull TextWire tw2 = new TextWire(bytes2);
+        String snippet = new String(getBytes(input + ".yaml"), StandardCharsets.UTF_8);
+        String actual;
+        if (textWire) {
+            actual = parseWithText(snippet);
+        } else {
+            actual = parseWithYaml(snippet);
+        }
 
-        @Nullable Object o = tw.readObject();
-        tw2.writeObject(o);
-        @Nullable byte[] byteArr2 = getBytes(input + ".out.yaml");
-        if (byteArr2 == null)
-            byteArr2 = byteArr;
-        String expected = Bytes.wrapForRead(byteArr2).toString().replace("\r\n", "\n");
-        String actual = bytes2.toString();
-        assertEquals(input, expected, actual);
+        byte[] expectedBytes = getBytes(input + ".out.yaml");
+        String expected;
+        if (expectedBytes != null) {
+            assertEquals(actual, textWire ? parseWithText(actual) : parseWithYaml(actual));
+
+            expected = new String(expectedBytes, StandardCharsets.UTF_8);
+        } else {
+            expected = snippet;
+        }
+
+        assertEquals(input, Bytes.wrapForRead(expected.getBytes(StandardCharsets.UTF_8)).toString().replace("\r\n", "\n"), actual);
+    }
+
+    @NotNull
+    private String parseWithText(String snippet) {
+        Object o = TEXT.fromString(snippet);
+        Bytes bytes = Bytes.allocateElasticOnHeap();
+
+        TextWire tw = new TextWire(bytes);
+        tw.writeObject(o);
+
+        return bytes.toString();
+    }
+
+    @NotNull
+    private String parseWithYaml(String snippet) {
+        Object o = YAML.fromString(snippet);
+        Bytes bytes = Bytes.allocateElasticOnHeap();
+
+        YamlWire tw = new YamlWire(bytes);
+        tw.writeObject(o);
+
+        return bytes.toString();
     }
 
     @Nullable
