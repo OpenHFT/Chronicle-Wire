@@ -29,7 +29,7 @@ public class TextWithArraysTest extends WireTestCommon {
         wa.words = "Hello World Bye for now".split(" ");
         assertEquals("!net.openhft.chronicle.wire.TextWithArraysTest$WithArrays {\n" +
                 "  booleans: [ true, false ],\n" +
-                "  bytes: [ -1, 0, 1 ],\n" +
+                "  bytes: !!binary /wAB,\n" +
                 "  shorts: [ -1, 0, 1 ],\n" +
                 "  chars: [ H, e, l, l, o ],\n" +
                 "  ints: [ -1, 0, 1 ],\n" +
