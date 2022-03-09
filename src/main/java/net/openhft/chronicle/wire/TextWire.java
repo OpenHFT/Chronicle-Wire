@@ -2437,7 +2437,7 @@ public class TextWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public byte @NotNull [] bytes() {
+        public byte @NotNull [] bytes(byte[] using) {
             consumePadding();
             try {
                 // TODO needs to be made much more efficient.
@@ -2468,6 +2468,11 @@ public class TextWire extends AbstractWire implements Wire {
 
                 } else {
                     textTo(stringBuilder);
+                    if (using != null && stringBuilder.length() == using.length) {
+                        for (int i = 0; i < using.length; i++)
+                            using[i] = (byte) stringBuilder.charAt(i);
+                        return using;
+                    }
                     // todo fix this.
                     return stringBuilder.toString().getBytes(ISO_8859_1);
                 }

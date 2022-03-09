@@ -2699,7 +2699,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @NotNull
         @Override
-        public byte @NotNull [] bytes() {
+        public byte @NotNull [] bytes(byte[] using) {
             long length = readLength();
             int code = readCode();
             if (code == NULL) {
@@ -2715,8 +2715,9 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             if (code != U8_ARRAY)
                 cantRead(code);
-            @NotNull byte[] bytes2 = new byte[Maths.toUInt31(length - 1)];
-            bytes.readWithLength(length - 1, b -> b.read(bytes2));
+            length--;
+            @NotNull byte[] bytes2 = using != null && using.length == length ? using : new byte[Maths.toUInt31(length)];
+            bytes.readWithLength(length, b -> b.read(bytes2));
             return bytes2;
         }
 

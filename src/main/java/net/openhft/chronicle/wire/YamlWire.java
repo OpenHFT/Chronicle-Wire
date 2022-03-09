@@ -1967,7 +1967,7 @@ public class YamlWire extends AbstractWire implements Wire {
         }
 
         @Override
-        public byte @NotNull [] bytes() {
+        public byte @NotNull [] bytes(byte[] using) {
             consumePadding();
             throw new UnsupportedOperationException(yt.toString());
         }
