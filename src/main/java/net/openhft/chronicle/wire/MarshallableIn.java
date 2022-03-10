@@ -20,6 +20,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.ReadBytesMarshallable;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,7 +33,7 @@ import java.util.Map;
  */
 @FunctionalInterface
 public interface MarshallableIn {
-    int MARSHALLABLE_IN_INTERN_SIZE = Integer.getInteger("marshallableIn.intern.size", 128);
+    int MARSHALLABLE_IN_INTERN_SIZE = Jvm.getInteger("marshallableIn.intern.size", 128);
 
     @NotNull
     DocumentContext readingDocument();

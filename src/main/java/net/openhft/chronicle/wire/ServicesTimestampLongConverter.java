@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.time.LongTime;
 import net.openhft.chronicle.core.time.TimeProvider;
@@ -13,7 +14,7 @@ public class ServicesTimestampLongConverter implements LongConverter {
     @UsedViaReflection
     public static final ServicesTimestampLongConverter INSTANCE = new ServicesTimestampLongConverter();
 
-    private static final String SERVICES_TIME_UNIT = System.getProperty("service.time.unit", "ns");
+    private static final String SERVICES_TIME_UNIT = Jvm.getProperty("service.time.unit", "ns");
     private static final longFunction toTime;
     private static final ToLongFunction<TimeProvider> currentTime;
     private static final LongConverter underlying;

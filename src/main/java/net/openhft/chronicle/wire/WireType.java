@@ -352,7 +352,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
     };
 
     static final BytesStore PREABLE = BytesStore.from("--- ");
-    private static final int COMPRESSED_SIZE = Integer.getInteger("WireType.compressedSize", 128);
+    private static final int COMPRESSED_SIZE = Jvm.getInteger("WireType.compressedSize", 128);
     private static final boolean IS_DELTA_AVAILABLE = isDeltaAvailable();
     private static final boolean IS_DEFAULT_ZERO_AVAILABLE = isDefaultZeroAvailable();
 

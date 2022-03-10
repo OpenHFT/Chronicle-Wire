@@ -1,5 +1,7 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.Jvm;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -30,7 +32,7 @@ public abstract class AbstractTimestampLongConverter implements LongConverter {
     private final long nanosPerAmount;
 
     protected AbstractTimestampLongConverter(TimeUnit timeUnit) {
-        this(System.getProperty(TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY, UTC.toString()), timeUnit);
+        this(Jvm.getProperty(TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY, UTC.toString()), timeUnit);
     }
 
     protected AbstractTimestampLongConverter(String zoneId, TimeUnit timeUnit) {

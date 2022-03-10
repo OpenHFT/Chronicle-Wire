@@ -30,7 +30,7 @@ public class MicroTimestampLongConverter extends AbstractTimestampLongConverter 
 
     public MicroTimestampLongConverter() {
         // Support the old system property for micro timestamps specifically
-        super(System.getProperty(AbstractTimestampLongConverter.TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY, System.getProperty("mtlc.zoneId", "UTC")),
+        super(Jvm.getProperty(AbstractTimestampLongConverter.TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY, Jvm.getProperty("mtlc.zoneId", "UTC")),
                 TimeUnit.MICROSECONDS);
     }
 

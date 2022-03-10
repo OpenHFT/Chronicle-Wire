@@ -43,7 +43,7 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum WireInternal {
     ; // none
-    static final StringInterner INTERNER = new StringInterner(Integer.getInteger("wire.interner.size", 4096));
+    static final StringInterner INTERNER = new StringInterner(Jvm.getInteger("wire.interner.size", 4096));
     static final StringBuilderPool SBP = new StringBuilderPool();
     static final StringBuilderPool ASBP = new StringBuilderPool();
     static final ThreadLocal<WeakReference<Bytes>> BYTES_TL = new ThreadLocal<>();

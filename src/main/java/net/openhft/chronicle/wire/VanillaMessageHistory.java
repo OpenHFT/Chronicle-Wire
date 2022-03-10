@@ -19,13 +19,14 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("rawtypes")
 public class VanillaMessageHistory extends SelfDescribingMarshallable implements MessageHistory {
-    static  boolean USE_BYTES_MARSHALLABLE = Boolean.getBoolean("history.as.bytes");
+    static  boolean USE_BYTES_MARSHALLABLE = Jvm.getBoolean("history.as.bytes");
     public static final int MESSAGE_HISTORY_LENGTH = 128;
     private static final ThreadLocal<MessageHistory> THREAD_LOCAL =
             ThreadLocal.withInitial(() -> {

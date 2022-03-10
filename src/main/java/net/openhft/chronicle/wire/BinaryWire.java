@@ -102,7 +102,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     }
 
     private static boolean supportDelta() {
-        String supportDeltaStr = System.getProperty("deltaWire.enable");
+        String supportDeltaStr = Jvm.getProperty("deltaWire.enable");
         if (supportDeltaStr != null) {
             if (ObjectUtils.isTrue(supportDeltaStr))
                 return true;
