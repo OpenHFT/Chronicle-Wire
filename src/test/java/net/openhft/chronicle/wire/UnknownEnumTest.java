@@ -81,7 +81,7 @@ public class UnknownEnumTest extends WireTestCommon {
         } catch (Exception e) {
             String message = e.getMessage().replaceAll(" [a-z0-9.]+.Proxy\\d+", " ProxyXX");
             assertThat(message,
-                    is(equalTo("Trying to read marshallable class ProxyXX at [pos: 27, rlim: 27, wlim: 27, cap: 27 ] enumField: !UnknownEnum QUXǁ‡ expected to find a {")));
+                    is(equalTo("Trying to read marshallable class ProxyXX at [pos: 23, rlim: 27, wlim: 27, cap: 27 ]  QUX expected to find a {")));
         } finally {
             Wires.GENERATE_TUPLES = false;
         }

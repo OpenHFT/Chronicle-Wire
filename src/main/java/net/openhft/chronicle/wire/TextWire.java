@@ -3192,6 +3192,7 @@ public class TextWire extends AbstractWire implements Wire {
         @Override
         public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy)
                 throws BufferUnderflowException, IORuntimeException {
+            long position0 = bytes.readPosition();
             if (isNull()) {
                 consumePadding(1);
                 return null;
@@ -3213,7 +3214,10 @@ public class TextWire extends AbstractWire implements Wire {
 
             } else if (code != '{') {
                 consumeValue();
-                throw new IORuntimeException("Trying to read marshallable " + object.getClass() + " at " + bytes.toDebugString(128) + " expected to find a {");
+                long position00 = bytes.readPosition();
+                final String s = bytes.readPosition(position0).toDebugString(128);
+                bytes.readPosition(position00);
+                throw new IORuntimeException("Trying to read marshallable " + object.getClass() + " at " + s + " expected to find a {");
             }
 
             final long len = readLengthMarshallable();
