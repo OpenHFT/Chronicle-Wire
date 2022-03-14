@@ -64,15 +64,15 @@ public class YamlSpecificationTest extends WireTestCommon {
             result.addAll(Arrays.asList(new Object[][]{
                     {"example2_1", textWire},
                     {"example2_2", textWire},
-                    {"example2_3", textWire},
-                    {"example2_4", false}, // TODO Fix map format
-                    {"example2_5", textWire}, // Not supported
-                    // {"example2_6"}, // TODO Fix map format
-                    {"example2_7", textWire},// TODO Fix for multiple ---
-                    // {"example2_8"},// TODO Fix for multiple ---
-                    {"example2_9", textWire},
-                    // {"example2_10"}, // TODO FIx handling of anchors
-                    // {"example2_11"}, // Not supported
+                    {"example2_3", false},
+                    {"example2_4", false},
+                    {"example2_5", false},
+                    {"example2_6", textWire},
+                    {"example2_7", false},
+                    //{"example2_8", textWire},
+                    {"example2_9", false},
+                    {"example2_10", false},
+                    //{"example2_11", textWire}, // Not supported
                     // {"example2_12"}, // Not supported
                     // {"example2_13"}, // Not supported
                     // {"example2_14"}, // Not supported

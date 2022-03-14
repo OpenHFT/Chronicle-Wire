@@ -420,13 +420,14 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT Mark McGwire\n" +
                         "COMMENT Following node labeled SS\n" +
                         "SEQUENCE_ENTRY \n" +
-                        "TEXT &SS Sammy Sosa\n" +
+                        "ANCHOR SS\n" +
+                        "TEXT Sammy Sosa\n" +
                         "SEQUENCE_END \n" +
                         "MAPPING_KEY \n" +
                         "TEXT rbi\n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
-                        "TEXT *SS\n" +
+                        "ALIAS SS\n" +
                         "COMMENT Subsequent occurrence\n" +
                         "SEQUENCE_ENTRY \n" +
                         "TEXT Ken Griffey\n" +
@@ -740,7 +741,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT center\n" +
-                        "TEXT &ORIGIN\n" +
+                        "ANCHOR ORIGIN\n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT x\n" +
@@ -758,7 +759,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT start\n" +
-                        "TEXT *ORIGIN\n" +
+                        "ALIAS ORIGIN\n" +
                         "MAPPING_KEY \n" +
                         "TEXT finish\n" +
                         "MAPPING_START \n" +
@@ -775,7 +776,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT start\n" +
-                        "TEXT *ORIGIN\n" +
+                        "ALIAS ORIGIN\n" +
                         "MAPPING_KEY \n" +
                         "TEXT color\n" +
                         "TEXT 0xFFEEBB\n" +
@@ -852,7 +853,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT 2001-01-23\n" +
                         "MAPPING_KEY \n" +
                         "TEXT bill-to\n" +
-                        "TEXT &id001\n" +
+                        "ANCHOR id001\n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT given\n" +
@@ -881,7 +882,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "MAPPING_KEY \n" +
                         "TEXT ship-to\n" +
-                        "TEXT *id001\n" +
+                        "ALIAS id001\n" +
                         "MAPPING_KEY \n" +
                         "TEXT product\n" +
                         "SEQUENCE_START \n" +

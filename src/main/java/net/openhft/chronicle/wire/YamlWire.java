@@ -81,6 +81,7 @@ public class YamlWire extends AbstractWire implements Wire {
     private final TextValueIn valueIn = createValueIn();
     private final StringBuilder sb = new StringBuilder();
     private final YamlTokeniser yt;
+    private final Map<String, Object> anchorValues = new HashMap<>();
     private DefaultValueIn defaultValueIn;
     private WriteDocumentContext writeContext;
     private ReadDocumentContext readContext;
@@ -923,6 +924,7 @@ public class YamlWire extends AbstractWire implements Wire {
     public void reset() {
         bytes.readPosition(0);
         yt.reset();
+        anchorValues.clear();
     }
 
     class TextValueOut implements ValueOut, CommentAnnotationNotifier {
@@ -1927,6 +1929,7 @@ public class YamlWire extends AbstractWire implements Wire {
         @Override
         public void resetState() {
             yt.reset();
+            anchorValues.clear();
         }
 
         @Nullable
@@ -2818,6 +2821,23 @@ public class YamlWire extends AbstractWire implements Wire {
                 case TEXT:
                     Object o = valueIn.readNumberOrText();
                     return ObjectUtils.convertTo(type, o);
+
+                case ANCHOR:
+                    String alias = yt.text();
+                    yt.next();
+                    o = valueIn.object(using, type);
+                    // Overwriting of anchor values is permitted
+                    anchorValues.put(alias, o);
+                    return o;
+
+                case ALIAS:
+                    alias = yt.text();
+                    o = anchorValues.get(yt.text());
+                    if (o == null)
+                        throw new IllegalStateException("Unknown alias " + alias + " with no corresponding anchor");
+
+                    yt.next();
+                    return o;
 
                 default:
                     throw new UnsupportedOperationException("Cannot determine what to do with " + yt.current());
