@@ -1,18 +1,39 @@
 package net.openhft.chronicle.wire.examples;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class MessageRouting {
+import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
+public class MessageRoutingExample {
+
+    static {
+        // used to allow for the objects in the streamed data to take the simple name rather than the full path name of the class
+        CLASS_ALIASES.addAlias(Product.class, ProductHandler.class);
+    }
+
+    /**
+     * used to route products to destination by providing the appropriate ProductHandler
+     */
     interface Routing {
         ProductHandler to(String destination);
     }
 
+
+    /**
+     * Implement this to read of process the product events.
+     */
+    interface ProductHandler {
+        void product(Product product);
+    }
+
+
+    /**
+     * A example of a simple bussienss event
+     */
     static class Product extends SelfDescribingMarshallable {
         String name;
 
@@ -22,26 +43,18 @@ public class MessageRouting {
     }
 
 
-    interface ProductHandler {
-        void product(Product product);
-    }
-
-
-    static {
-        ClassAliasPool.CLASS_ALIASES.addAlias(Product.class, ProductHandler.class);
-    }
-
-
     public static void main(String[] args) {
-        new MessageRouting().demo();
+        new MessageRoutingExample().demo();
     }
 
+    // the serialized data gets written to 'wire'
     private final Wire wire = new TextWire(Bytes.allocateElasticOnHeap());
 
     private void demo() {
 
-
         final Map<String, ProductHandler> destinationMap = new HashMap<>();
+
+        // add ProductHandler to handle messsages routed to each destination
         destinationMap.put("Italy", product -> System.out.println("Sends the product to Italy, product=" + product));
         destinationMap.put("France", product -> System.out.println("Sends the product to France, product=" + product));
         destinationMap.put("Russia", product -> System.out.println("Sends the product to Russia, product=" + product));
