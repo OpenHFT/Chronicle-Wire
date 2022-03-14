@@ -16,7 +16,7 @@ public class MessageRoutingExample {
     }
 
     /**
-     * used to route products to destination by providing the appropriate ProductHandler
+     * used to route products to the destination by providing the appropriate ProductHandler
      */
     interface Routing {
         ProductHandler to(String destination);
@@ -24,15 +24,14 @@ public class MessageRoutingExample {
 
 
     /**
-     * Implement this to read of process the product events.
+     * Implement this to read the process of the product events.
      */
     interface ProductHandler {
         void product(Product product);
     }
 
-
     /**
-     * A example of a simple bussienss event
+     * A example of a simple business event
      */
     static class Product extends SelfDescribingMarshallable {
         String name;
