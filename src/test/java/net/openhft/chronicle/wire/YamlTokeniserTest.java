@@ -6,6 +6,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -28,6 +29,72 @@ public class YamlTokeniserTest extends WireTestCommon {
         } catch (IOException e) {
             throw new AssertionError(e);
         }
+    }
+
+    @Test
+    public void exception() {
+        assertEquals("DIRECTIVES_END \n" +
+                "TAG !data\n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT exception\n" +
+                "TAG java.security.InvalidAlgorithmParameterException\n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT message\n" +
+                "TEXT Reference cannot be null\n" +
+                "MAPPING_KEY \n" +
+                "TEXT stackTrace\n" +
+                "SEQUENCE_START \n" +
+                "SEQUENCE_ENTRY \n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT class\n" +
+                "TEXT net.openhft.chronicle.wire.YamlWireTest\n" +
+                "MAPPING_KEY \n" +
+                "TEXT method\n" +
+                "TEXT testException\n" +
+                "MAPPING_KEY \n" +
+                "TEXT file\n" +
+                "TEXT YamlWireTest.java\n" +
+                "MAPPING_KEY \n" +
+                "TEXT line\n" +
+                "TEXT 783\n" +
+                "MAPPING_END \n" +
+                "SEQUENCE_ENTRY \n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT class\n" +
+                "TEXT net.openhft.chronicle.wire.YamlWireTest\n" +
+                "MAPPING_KEY \n" +
+                "TEXT method\n" +
+                "TEXT runTestException\n" +
+                "MAPPING_KEY \n" +
+                "TEXT file\n" +
+                "TEXT YamlWireTest.java\n" +
+                "MAPPING_KEY \n" +
+                "TEXT line\n" +
+                "TEXT 73\n" +
+                "MAPPING_END \n" +
+                "SEQUENCE_ENTRY \n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT class\n" +
+                "TEXT sun.reflect.NativeMethodAccessorImpl\n" +
+                "MAPPING_KEY \n" +
+                "TEXT method\n" +
+                "TEXT invoke0\n" +
+                "MAPPING_KEY \n" +
+                "TEXT file\n" +
+                "TEXT NativeMethodAccessorImpl.java\n" +
+                "MAPPING_KEY \n" +
+                "TEXT line\n" +
+                "TEXT -2\n" +
+                "MAPPING_END \n" +
+                "SEQUENCE_END \n" +
+                "MAPPING_END \n" +
+                "MAPPING_END \n" +
+                "DOCUMENT_END \n", doTest("exception.yaml"));
     }
 
     @Test
@@ -199,7 +266,6 @@ public class YamlTokeniserTest extends WireTestCommon {
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
-                        "SEQUENCE_ENTRY \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
                         "TEXT name\n" +
@@ -209,7 +275,6 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT avg\n" +
                         "SEQUENCE_END \n" +
                         "SEQUENCE_ENTRY \n" +
-                        "SEQUENCE_ENTRY \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
                         "TEXT Mark McGwire\n" +
@@ -218,7 +283,6 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "SEQUENCE_ENTRY \n" +
                         "TEXT 0.278\n" +
                         "SEQUENCE_END \n" +
-                        "SEQUENCE_ENTRY \n" +
                         "SEQUENCE_ENTRY \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +

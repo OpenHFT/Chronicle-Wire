@@ -296,7 +296,7 @@ public class YamlTokeniser {
 
     private YamlToken flow(YamlToken token) {
         pushed.add(token);
-        if (!hasSequenceEntry && context() == YamlToken.SEQUENCE_START) {
+        if (!hasSequenceEntry && token != YamlToken.SEQUENCE_START && context() == YamlToken.SEQUENCE_START) {
             hasSequenceEntry = true;
             pushed.add(YamlToken.SEQUENCE_ENTRY);
         }

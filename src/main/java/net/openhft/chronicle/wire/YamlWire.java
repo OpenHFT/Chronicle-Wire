@@ -1583,7 +1583,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
         public void endBlock(boolean leaf, char c) {
             bytes.writeUnsignedByte(c);
-            sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
+            elementSeparator();
         }
 
         protected void addNewLine(long pos) {
@@ -1648,7 +1648,7 @@ public class YamlWire extends AbstractWire implements Wire {
             } else if (seps.size() > 0) {
                 popSep = seps.get(seps.size() - 1);
                 popState();
-                sep = NEW_LINE;
+                newLine();
             }
             if (sep.startsWith(',')) {
                 append(sep, 1, sep.length() - 1);
@@ -1664,12 +1664,7 @@ public class YamlWire extends AbstractWire implements Wire {
 
             if (popSep != null)
                 sep = popSep;
-            if (indentation == 0) {
-                afterClose();
 
-            } else {
-                elementSeparator();
-            }
             return YamlWire.this;
         }
 
@@ -1701,7 +1696,7 @@ public class YamlWire extends AbstractWire implements Wire {
             } else if (seps.size() > 0) {
                 popSep = seps.get(seps.size() - 1);
                 popState();
-                sep = NEW_LINE;
+                newLine();
             }
             if (sep.startsWith(',')) {
                 append(sep, 1, sep.length() - 1);

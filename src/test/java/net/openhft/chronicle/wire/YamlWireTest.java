@@ -1038,14 +1038,14 @@ public class YamlWireTest extends WireTestCommon {
             YamlWire yw = new YamlWire(from);
             assertEquals("[\n" +
                     "  { token: STREAM_START, indent: -1, keys: !!null \"\" }\n" +
-                    "]", yw.dumpContext());
+                    "]\n", yw.dumpContext());
             yw.read("C")
                     .text();
             assertEquals("[\n" +
                     "  { token: STREAM_START, indent: -1, keys: !!null \"\" },\n" +
                     "  { token: DIRECTIVES_END, indent: -1, keys: !!null \"\" },\n" +
-                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 2, offsets: [ 10, 41, 0, 0, 0, 0, 0 ]} }\n" +
-                    "]", yw.dumpContext());
+                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 2, offsets: [ 10, 41, 0, 0, 0, 0, 0 ]}}\n" +
+                    "]\n", yw.dumpContext());
             assertEquals("{c=lo, d=xyz}", "" + yw.read("B").object());
             assertEquals("{b=1234, c=hi, d=abc}", "" + yw.read("A").object());
 
@@ -1063,8 +1063,8 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals("[\n" +
                     "  { token: STREAM_START, indent: -1, keys: !!null \"\" },\n" +
                     "  { token: DIRECTIVES_END, indent: -1, keys: !!null \"\" },\n" +
-                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 4, offsets: [ 2, 8, 14, 32, 0, 0, 0 ]} }\n" +
-                    "]", yw.dumpContext());
+                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 4, offsets: [ 2, 8, 14, 32, 0, 0, 0 ]}}\n" +
+                    "]\n", yw.dumpContext());
             assertEquals("AA", "" + yw.read("b").object());
             assertEquals("{}", "" + yw.read("c").object());
             assertEquals("{A=1, B=2}", "" + yw.read("d").object());
@@ -1708,7 +1708,7 @@ public class YamlWireTest extends WireTestCommon {
                 "  one,\n" +
                 "  three,\n" +
                 "  two\n" +
-                "]", wire.toString());
+                "]\n", wire.toString());
         @Nullable Object o = wire.read().object();
         assertTrue(o instanceof SortedSet);
         assertEquals(set, o);
