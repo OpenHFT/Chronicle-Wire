@@ -516,7 +516,7 @@ public class YamlTokeniserTest extends WireTestCommon {
         assertEquals(
                 "COMMENT ASCII Art\n" +
                         "DIRECTIVES_END \n" +
-                        "TEXT \\//||\\/||\n" +
+                        "LITERAL \\//||\\/||\n" +
                         "// ||  ||__\n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_13InLiteralsNewlinesArePreserved.yaml").replace("\r", ""));
@@ -526,7 +526,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     public void eg2_14() {
         assertEquals(
                 "DIRECTIVES_END \n" +
-                        "TEXT Mark McGwire's year was crippled by a knee injury.\n" +
+                        "LITERAL Mark McGwire's year was crippled by a knee injury.\n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_14InThefoldedScalars.yaml").replace("\r", ""));
     }
@@ -534,7 +534,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     @Test
     public void eg2_15() {
         assertEquals(
-                "TEXT Sammy Sosa completed another fine season with great stats.   63 Home Runs   0.288 Batting Average What a year!\n",
+                "LITERAL Sammy Sosa completed another fine season with great stats.   63 Home Runs   0.288 Batting Average What a year!\n",
                 doTest("yaml/spec/2_15FoldedNewlines.yaml").replace("\r", ""));
     }
 
@@ -548,10 +548,10 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT Mark McGwire\n" +
                         "MAPPING_KEY \n" +
                         "TEXT accomplishment\n" +
-                        "TEXT Mark set a major league home run record in 1998. \n" +
+                        "LITERAL Mark set a major league home run record in 1998. \n" +
                         "MAPPING_KEY \n" +
                         "TEXT stats\n" +
-                        "TEXT 65 Home Runs\n" +
+                        "LITERAL 65 Home Runs\n" +
                         "0.278 Batting Average\n" +
                         "\n" +
                         "MAPPING_END \n" +
@@ -708,7 +708,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_KEY \n" +
                         "TEXT picture\n" +
                         "TAG !binary\n" +
-                        "TEXT R0lGODlhDAAMAIQAAP//9/X\n" +
+                        "LITERAL R0lGODlhDAAMAIQAAP//9/X\n" +
                         "17unp5WZmZgAAAOfn515eXv\n" +
                         "Pz7Y6OjuDg4J+fn5OTk6enp\n" +
                         "56enmleECcgggoBADs=\n" +
@@ -717,7 +717,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_KEY \n" +
                         "TEXT application specific tag\n" +
                         "TAG something\n" +
-                        "TEXT The semantics of the tag\n" +
+                        "LITERAL The semantics of the tag\n" +
                         "above may be different for\n" +
                         "different documents.\n" +
                         "\n" +
@@ -866,7 +866,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT lines\n" +
-                        "TEXT 458 Walkman Dr.\n" +
+                        "LITERAL 458 Walkman Dr.\n" +
                         "Suite #292\n" +
                         "\n" +
                         "MAPPING_KEY \n" +
@@ -989,7 +989,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT 23\n" +
                         "MAPPING_KEY \n" +
                         "TEXT code\n" +
-                        "TEXT x = MoreObject(\"345\\n\")\n" +
+                        "LITERAL x = MoreObject(\"345\\n\")\n" +
                         "\n" +
                         "MAPPING_END \n" +
                         "SEQUENCE_ENTRY \n" +

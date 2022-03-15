@@ -200,13 +200,13 @@ public class YamlTokeniser {
             case '|':
                 if (in.peekUnsignedByte() <= ' ') {
                     readLiteral();
-                    return seq(YamlToken.TEXT);
+                    return seq(YamlToken.LITERAL);
                 }
                 break;
             case '>':
                 if (in.peekUnsignedByte() <= ' ') {
                     readFolded();
-                    return seq(YamlToken.TEXT);
+                    return seq(YamlToken.LITERAL);
                 }
             case '%':
                 readDirective();

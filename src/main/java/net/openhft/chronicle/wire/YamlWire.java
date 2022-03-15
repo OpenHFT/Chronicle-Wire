@@ -1981,6 +1981,7 @@ public class YamlWire extends AbstractWire implements Wire {
                 case SEQUENCE_ENTRY:
                 case STREAM_START:
                 case TEXT:
+                case LITERAL:
                     return BracketType.NONE;
             }
         }
@@ -2001,9 +2002,10 @@ public class YamlWire extends AbstractWire implements Wire {
             consumePadding();
             if (yt.current() == YamlToken.SEQUENCE_ENTRY)
                 yt.next();
-            if (yt.current() == YamlToken.TEXT) {
+            if (yt.current() == YamlToken.TEXT || yt.current() == YamlToken.LITERAL) {
                 a.append(yt.text());
-                unescape(a);
+                if (yt.current() == YamlToken.TEXT)
+                    unescape(a);
                 yt.next();
             } else if (yt.current() == YamlToken.TAG) {
                 if (yt.isText("!null")) {
@@ -2819,6 +2821,7 @@ public class YamlWire extends AbstractWire implements Wire {
                     return readSequence(type);
 
                 case TEXT:
+                case LITERAL:
                     Object o = valueIn.readNumberOrText();
                     return ObjectUtils.convertTo(type, o);
 
@@ -2848,6 +2851,8 @@ public class YamlWire extends AbstractWire implements Wire {
         protected Object readNumberOrText() {
             char bq = yt.blockQuote();
             @Nullable String s = text();
+            if (yt.current() == YamlToken.LITERAL)
+                return s;
             if (s == null
                     || bq != 0
                     || s.length() < 1
@@ -2887,6 +2892,14 @@ public class YamlWire extends AbstractWire implements Wire {
             } catch (DateTimeParseException fallback) {
                 // fallback
             }
+            return s;
+        }
+
+        @Nullable
+        protected String readLiteral() {
+            char bq = yt.blockQuote();
+            @Nullable CharSequence cs = textTo0(acquireStringBuilder());
+            @Nullable String s = cs == null ? null : WireInternal.INTERNER.intern(cs);
             return s;
         }
 
