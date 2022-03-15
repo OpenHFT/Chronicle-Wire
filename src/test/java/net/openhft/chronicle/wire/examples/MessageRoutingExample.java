@@ -1,6 +1,7 @@
 package net.openhft.chronicle.wire.examples;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.*;
 
 import java.util.HashMap;
@@ -47,13 +48,13 @@ public class MessageRoutingExample {
     }
 
     // the serialized data gets written to 'wire'
-    private final Wire wire = new TextWire(Bytes.allocateElasticOnHeap());
+    private final Wire wire = new JSONWire(Bytes.allocateElasticOnHeap()).useTypes(true);
 
     private void demo() {
 
         final Map<String, ProductHandler> destinationMap = new HashMap<>();
 
-        // add ProductHandler to handle messsages routed to each destination
+        // add ProductHandler to handle messages routed to each destination
         destinationMap.put("Italy", product -> System.out.println("Sends the product to Italy, product=" + product));
         destinationMap.put("France", product -> System.out.println("Sends the product to France, product=" + product));
         destinationMap.put("Russia", product -> System.out.println("Sends the product to Russia, product=" + product));
@@ -63,7 +64,18 @@ public class MessageRoutingExample {
         routing.to("France").product(new Product("Cheese"));
         routing.to("Russia").product(new Product("Vodka"));
 
-        wire.methodReader((Routing) destinationMap::get).readOne();
+        System.out.println(wire);
+        //  System.out.println(wire.bytes().toHexString());
+
+        MethodReader methodReader = wire.methodReader((Routing) destinationMap::get);
+
+        boolean success;
+        do {
+            // true if a message was read
+            success = methodReader.readOne();
+        } while (success);
+
+
     }
 
 }
