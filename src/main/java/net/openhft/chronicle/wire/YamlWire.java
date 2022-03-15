@@ -121,12 +121,13 @@ public class YamlWire extends AbstractWire implements Wire {
         }
     }
 
-    public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb) {
+    private static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb,
+                                                                        char blockQuote) {
         int end = 0;
         int length = sb.length();
         for (int i = 0; i < length; i++) {
             char ch = sb.charAt(i);
-            if (ch == '\\' && i < length - 1) {
+            if (blockQuote == '\"' && ch == '\\' && i < length - 1) {
                 char ch3 = sb.charAt(++i);
                 switch (ch3) {
                     case '0':
@@ -178,6 +179,14 @@ public class YamlWire extends AbstractWire implements Wire {
                         ch = ch3;
                 }
             }
+
+            if (blockQuote == '\'' && ch == '\'' && i < length - 1) {
+                char ch2 = sb.charAt(i + 1);
+                if (ch2 == ch) {
+                    i++;
+                }
+            }
+
             AppendableUtil.setCharAt(sb, end++, ch);
         }
         if (length != sb.length())
@@ -365,6 +374,7 @@ public class YamlWire extends AbstractWire implements Wire {
             yt.next();
             if (yt.current() == YamlToken.TEXT) {
                 sb.append(yt.text());
+                unescape(sb, yt.blockQuote());
                 yt.next();
             } else {
                 throw new IllegalStateException(yt.toString());
@@ -372,7 +382,6 @@ public class YamlWire extends AbstractWire implements Wire {
         } else {
             return sb;
         }
-        unescape(sb);
         return sb;
     }
 
@@ -385,8 +394,8 @@ public class YamlWire extends AbstractWire implements Wire {
             if (next == YamlToken.TEXT) {
                 sb.setLength(0);
                 sb.append(yt.text());
+                unescape(sb, yt.blockQuote);
                 yt.next();
-                unescape(sb);
                 return toExpected(expectedClass, sb);
             }
         }
@@ -492,12 +501,12 @@ public class YamlWire extends AbstractWire implements Wire {
         if (next == YamlToken.TEXT) {
             sb.setLength(0);
             sb.append(yt.text());
+            unescape(sb, yt.blockQuote());
             yt.next();
         } else {
             throw new IllegalStateException(next.toString());
         }
 
-        unescape(sb);
         return (sb.length() == 0 || StringUtils.isEqual(sb, keyName));
     }
 
@@ -2005,7 +2014,7 @@ public class YamlWire extends AbstractWire implements Wire {
             if (yt.current() == YamlToken.TEXT || yt.current() == YamlToken.LITERAL) {
                 a.append(yt.text());
                 if (yt.current() == YamlToken.TEXT)
-                    unescape(a);
+                    unescape(a, yt.blockQuote());
                 yt.next();
             } else if (yt.current() == YamlToken.TAG) {
                 if (yt.isText("!null")) {

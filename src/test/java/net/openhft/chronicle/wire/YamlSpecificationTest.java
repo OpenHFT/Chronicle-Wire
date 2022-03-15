@@ -75,10 +75,10 @@ public class YamlSpecificationTest extends WireTestCommon {
                     // {"example2_11"}, // Not supported
                     {"example2_12", false},
                     {"example2_13", false},
-                    // {"example2_14"}, // Not supported
+                    // {"example2_14", textWire}, // Not supported
                     // {"example2_15", textWire}, // Not supported
-                    // {"example2_16"}, // Not supported
-                    // {"example2_17"}, // TODO Fix handling of double single quote.
+                    // {"example2_16", false}, // Not supported
+                    {"example2_17", false}, // TODO Fix handling of double single quote.
                     // {"example2_18"}, // Not supported
                     // {"example2_19"}, // TODO fix handling of times.
                     // {"example2_20"}, // TODO fix handling of times.

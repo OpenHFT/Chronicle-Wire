@@ -127,7 +127,7 @@ public class YamlTokeniser {
                 if (wouldChangeContext(minIndent, indent2))
                     return dontRead();
                 lastKeyPosition = in.readPosition() - 1;
-                readQuoted('"');
+                readDoublyQuoted();
                 if (isFieldEnd())
                     return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent2);
                 return YamlToken.TEXT;
@@ -135,7 +135,7 @@ public class YamlTokeniser {
                 if (wouldChangeContext(minIndent, indent2))
                     return dontRead();
                 lastKeyPosition = in.readPosition() - 1;
-                readQuoted('\'');
+                readSinglyQuoted();
                 if (isFieldEnd())
                     return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent2);
 
@@ -551,18 +551,32 @@ public class YamlTokeniser {
         pushContext0(context, indent);
     }
 
-    private void readQuoted(char stop) {
-        blockQuote = stop;
+    private void readDoublyQuoted() {
+        blockQuote = '"';
         blockStart = in.readPosition();
         while (in.readRemaining() > 0) {
             int ch = in.readUnsignedByte();
             if (ch == '\\') {
                 ch = in.readUnsignedByte();
+            } else if (ch == blockQuote) {
+                blockEnd = in.readPosition() - 1;
+                return;
             }
-            if (ch == stop) {
+            if (ch < 0) {
+                throw new IllegalStateException("Unterminated quotes " + in.subBytes(blockStart - 1, in.readPosition()));
+            }
+        }
+    }
+
+    private void readSinglyQuoted() {
+        blockQuote = '\'';
+        blockStart = in.readPosition();
+        while (in.readRemaining() > 0) {
+            int ch = in.readUnsignedByte();
+            if (ch == blockQuote) {
                 // ignore double single quotes.
                 int ch2 = in.peekUnsignedByte();
-                if (ch2 == stop) {
+                if (ch2 == blockQuote) {
                     in.readSkip(1);
                     continue;
                 }

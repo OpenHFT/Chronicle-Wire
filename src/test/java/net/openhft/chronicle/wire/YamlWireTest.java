@@ -749,6 +749,28 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals(1.23, wire.read("B").float64(), 0);
     }
 
+    @Test
+    public void testQuoting() {
+        @NotNull Wire wire = createWire();
+        wire.bytes().append(
+                "nonesingle: \\\n" +
+                "nonedouble: \\\\\n" +
+                "singleself: ''''\n" +
+                "singlesingle: '\\'\n" +
+                "singledouble: '\\\\'\n" +
+                "doubleself: \"\\\"\"\n" +
+                "doublesingle: \"\\\\\"\n" +
+                "doubledouble: \"\\\\\\\\\"\n");
+        assertEquals("\\", wire.read("nonesingle").readString());
+        assertEquals("\\\\", wire.read("nonedouble").readString());
+        assertEquals("'", wire.read("singleself").readString());
+        assertEquals("\\", wire.read("singlesingle").readString());
+        assertEquals("\\\\", wire.read("singledouble").readString());
+        assertEquals("\"", wire.read("doubleself").readString());
+        assertEquals("\\", wire.read("doublesingle").readString());
+        assertEquals("\\\\", wire.read("doubledouble").readString());
+    }
+
     @Ignore("TODO FIX")
     @Test
     public void testABCDBytes() {
