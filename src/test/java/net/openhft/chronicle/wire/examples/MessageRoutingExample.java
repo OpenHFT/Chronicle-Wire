@@ -67,12 +67,12 @@ public class MessageRoutingExample {
         // add ProductHandler to handle messages routed to each destination
         destinationMap.put("Italy", product -> System.out.println("Sends the product to Italy, product=" + product));
         destinationMap.put("France", product -> System.out.println("Sends the product to France, product=" + product));
-        destinationMap.put("Russia", product -> System.out.println("Sends the product to Russia, product=" + product));
+        destinationMap.put("America", product -> System.out.println("Sends the product to America, product=" + product));
 
         final Routing routing = wire.methodWriter(Routing.class);
         routing.to("Italy").product(new Product("Coffee"));
         routing.to("France").product(new Product("Cheese"));
-        routing.to("Russia").product(new Product("Vodka"));
+        routing.to("America").product(new Product("Popcorn"));
 
         // System.out.println(wire);
         System.out.println(wire.bytes().toHexString());
