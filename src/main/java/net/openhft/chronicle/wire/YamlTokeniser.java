@@ -160,7 +160,7 @@ public class YamlTokeniser {
                     return indent(YamlToken.SEQUENCE_START, YamlToken.SEQUENCE_ENTRY, YamlToken.STREAM_START, indent2 + 1);
                 }
                 if (next == '-' && in.peekUnsignedByte(in.readPosition() + 1) == '-' && in.peekUnsignedByte(in.readPosition() + 2) <= ' ') {
-                    if (contextIndent() <= minIndent)
+                    if (contextIndent() <= minIndent && minIndent >= 0)
                         return dontRead();
                     in.readSkip(2);
                     pushed.add(YamlToken.DIRECTIVES_END);

@@ -2431,7 +2431,11 @@ public class YamlWire extends AbstractWire implements Wire {
 
         @Override
         public boolean hasNext() {
+            if (yt.current() == YamlToken.DOCUMENT_END)
+                yt.next(Integer.MIN_VALUE);
+
             consumePadding();
+
             switch (yt.current()) {
                 case SEQUENCE_END:
                 case STREAM_END:
