@@ -2855,6 +2855,9 @@ public class YamlWire extends AbstractWire implements Wire {
                     yt.next();
                     return o;
 
+                case NONE:
+                    return null;
+
                 default:
                     throw new UnsupportedOperationException("Cannot determine what to do with " + yt.current());
             }
