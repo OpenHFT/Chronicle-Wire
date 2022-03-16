@@ -164,4 +164,28 @@ public class KubernetesYamlTest extends WireTestCommon {
     public void testExample7() {
         doTest("example7.yaml", "{containers=[{env=[{name=POD_ID, valueFrom=null}, {name=LOG_PATH, value=/var/log/mycompany/$(POD_ID)/logs}]}]}");
     }
+
+    @Test
+    public void testExample8() {
+        doTest("example8.yaml", "{kind=List, apiVersion=v1, items=[" +
+                "{kind=Secret, apiVersion=v1, type=kubernetes.io/basic-auth, metadata={name=secret1, annotations={build.openshift.io/source-secret-match-uri-1=*://*.example.com/*}}, data={username=AA==}}, " +
+                "{kind=Secret, apiVersion=v1, type=kubernetes.io/ssh-auth, metadata={name=secret2, annotations={build.openshift.io/source-secret-match-uri-1=*://*.example.com/*}}, data={ssh-privatekey=AA==}}, " +
+                "{kind=Secret, apiVersion=v1, type=kubernetes.io/basic-auth, metadata={name=secret3, annotations={build.openshift.io/source-secret-match-uri-1=https://*.com/*}}, data={username=AA==}}, " +
+                "{kind=BuildConfig, apiVersion=v1, metadata={name=test1}, spec={source={type=Git, git={uri=https://server1.example.com/path}}, strategy={type=Source, sourceStrategy={from={kind=ImageStream, name=test}}}}}, " +
+                "{kind=BuildConfig, apiVersion=v1, metadata={name=test2}, spec={source={type=Git, git={uri=ssh://server1.example.com/path}}, strategy={type=Source, sourceStrategy={from={kind=ImageStream, name=test}}}}}, " +
+                "{kind=BuildConfig, apiVersion=v1, metadata={name=test3}, spec={source={type=Git, git={uri=https://test.com/path}}, strategy={type=Source, sourceStrategy={from={kind=ImageStream, name=test}}}}}, " +
+                "{kind=BuildConfig, apiVersion=v1, metadata={name=test4}, spec={source={type=Git, git={uri=http://test.com/path}}, strategy={type=Source, sourceStrategy={from={kind=ImageStream, name=test}}}}}]}");
+    }
+
+    @Test
+    public void testExample9() {
+        doTest("example9.yaml", "{kind=List, apiVersion=v1, items=[" +
+                "{kind=ServiceAccount, apiVersion=v1, metadata={name=sdn, namespace=openshift-sdn}}, " +
+                "{apiVersion=authorization.openshift.io/v1, kind=ClusterRoleBinding, metadata={name=sdn-cluster-reader}, " +
+                "roleRef={name=cluster-reader}, subjects=[{kind=ServiceAccount, name=sdn, namespace=openshift-sdn}]}, " +
+                "{apiVersion=authorization.openshift.io/v1, kind=ClusterRoleBinding, metadata={name=sdn-reader}, " +
+                "roleRef={name=system:sdn-reader}, subjects=[{kind=ServiceAccount, name=sdn, namespace=openshift-sdn}]}, " +
+                "{apiVersion=authorization.openshift.io/v1, kind=ClusterRoleBinding, metadata={name=sdn-node-proxier}, " +
+                "roleRef={name=system:node-proxier}, subjects=[{kind=ServiceAccount, name=sdn, namespace=openshift-sdn}]}]}");
+    }
 }
