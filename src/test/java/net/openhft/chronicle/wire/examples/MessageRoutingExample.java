@@ -58,7 +58,9 @@ public class MessageRoutingExample {
 
 
     // the serialized data gets written to 'wire'
-    private final Wire wire = new BinaryWire(new HexDumpBytes());
+    //  private final Wire wire = new BinaryWire(new HexDumpBytes());
+    private final Wire wire = new TextWire(Bytes.allocateElasticOnHeap());
+
 
     private void demo() {
 
@@ -74,7 +76,7 @@ public class MessageRoutingExample {
         routing.to("France").product(new Product("Cheese"));
         routing.to("America").product(new Product("Popcorn"));
 
-        // System.out.println(wire);
+        //   System.out.println(wire);
         System.out.println(wire.bytes().toHexString());
 
         MethodReader methodReader = wire.methodReader((Routing) destinationMap::get);
