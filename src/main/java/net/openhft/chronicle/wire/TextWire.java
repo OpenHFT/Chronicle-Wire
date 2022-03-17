@@ -1190,6 +1190,7 @@ public class TextWire extends AbstractWire implements Wire {
 
     enum NoObject {NO_OBJECT}
 
+    @Deprecated(/* To be removed and replaced by YamlWire.TextValueOut in 2.24 #411 */)
     class TextValueOut implements ValueOut, CommentAnnotationNotifier {
         protected boolean hasCommentAnnotation = false;
 
