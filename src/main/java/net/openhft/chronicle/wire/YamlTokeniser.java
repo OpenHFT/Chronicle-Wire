@@ -345,14 +345,16 @@ public class YamlTokeniser {
                 if (withNewLines)
                     readNewline();
                 temp.write(in, start, in.readPosition() - start);
-                if (!withNewLines)
-                    if (temp.peekUnsignedByte(temp.writePosition() - 1) > ' ')
-                        temp.append(' ');
 
                 readIndent();
                 int indent3 = Math.toIntExact(in.readPosition() - lineStart);
                 if (indent3 < indent2)
                     return;
+
+                if (!withNewLines)
+                    if (temp.peekUnsignedByte(temp.writePosition() - 1) > ' ')
+                        temp.append(' ');
+
                 if (indent3 > indent2)
                     in.readPosition(lineStart + indent2);
                 start = in.readPosition();

@@ -1433,4 +1433,7 @@ public class BinaryWireTest extends WireTestCommon {
             this.text = text;
         }
     }
+
+    class Circle implements Marshallable {
+    }
 }

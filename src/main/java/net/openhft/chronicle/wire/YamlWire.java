@@ -2253,8 +2253,10 @@ public class YamlWire extends AbstractWire implements Wire {
             if (yt.current() == YamlToken.TEXT) {
                 String text = yt.text();
                 long l;
-                if (text.startsWith("0x") || text.startsWith("0X")) {
+                if ((text.startsWith("0x") || text.startsWith("0X")) && text.length() > 2) {
                     l = Long.parseLong(text.substring(2), 16);
+                } else if (text.startsWith("0") && text.length() > 1) {
+                    l = Long.parseLong(text.substring(text.length() > 2 && text.charAt(1) == 'o' ? 2 : 1), 8);
                 } else {
                     l = Long.parseLong(text);
                 }
@@ -2875,9 +2877,15 @@ public class YamlWire extends AbstractWire implements Wire {
                     || s.length() > 40
                     || "0123456789.+-".indexOf(s.charAt(0)) < 0)
                 return s;
+
             String ss = s;
             if (s.indexOf('_') >= 0)
-                ss = s.replace("_", "");
+                ss = ss.replace("_", "");
+
+            // YAML octal notation
+            if (s.startsWith("0o"))
+                ss = "0" + s.substring(2);
+
             try {
                 return Long.decode(ss);
             } catch (NumberFormatException fallback) {

@@ -131,6 +131,26 @@ public class YamlWireTest extends WireTestCommon {
         }
     }
 
+    @Test
+    public void testLargeHex() {
+        Wire w = YamlWire.from(
+                "magic: 0xCAFEBABE\n");
+        assertEquals(3405691582L, w.read("magic").int64());
+    }
+
+    @Test
+    public void testCStyleOctal() {
+        // Do we need it?
+        Wire w = YamlWire.from("perms: 0644\n");
+        assertEquals(420, w.read("perms").int64());
+    }
+
+    @Test
+    public void testYamlStyleOctal() {
+        Wire w = YamlWire.from("perms: 0o750\n");
+        assertEquals(488, w.read("perms").int64());
+    }
+
     @Ignore("TODO")
     @Test
     public void testWriteToBinaryAndTriesToConvertToText() {
@@ -1787,5 +1807,8 @@ public class YamlWireTest extends WireTestCommon {
 
     static class YNestedWithEnumSet extends SelfDescribingMarshallable {
         List<TextWireTest.WithEnumSet> list = new ArrayList<>();
+    }
+
+    class Circle implements Marshallable {
     }
 }

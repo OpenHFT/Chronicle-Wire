@@ -41,48 +41,44 @@ import static org.junit.Assert.assertEquals;
 @SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class YamlSpecificationTest extends WireTestCommon {
-    static {
+    /*static {
         ClassAliasPool.CLASS_ALIASES.addAlias(String.class, "something");
         ClassAliasPool.CLASS_ALIASES.addAlias(Circle.class, "circle");
         ClassAliasPool.CLASS_ALIASES.addAlias(Shape.class, "shape");
         ClassAliasPool.CLASS_ALIASES.addAlias(Line.class, "line");
         ClassAliasPool.CLASS_ALIASES.addAlias(Label.class, "label");
-    }
+    }*/
 
     private final String input;
-    private final boolean textWire;
 
-    public YamlSpecificationTest(String input, boolean textWire) {
+    public YamlSpecificationTest(String input) {
         this.input = input;
-        this.textWire = textWire;
     }
 
-    @Parameterized.Parameters(name = "case={0}, textWire={1}")
+    @Parameterized.Parameters(name = "case={0}")
     public static Collection<Object[]> tests() {
-        ArrayList<Object[]> result = new ArrayList<>();
-        for (boolean textWire : new boolean[] {true, false}) {
-            result.addAll(Arrays.asList(new Object[][]{
-                    {"example2_1", textWire},
-                    {"example2_2", textWire},
-                    {"example2_3", false},
-                    {"example2_4", false},
-                    {"example2_5", false},
-                    {"example2_6", textWire},
-                    {"example2_7", false},
-                    //{"example2_8", textWire},
-                    {"example2_9", false},
-                    {"example2_10", false},
+        return Arrays.asList(new String[][]{
+                    {"2_1_SequenceOfScalars"},
+                    {"2_2_MappingScalarsToScalars"},
+                    {"2_3_MappingScalarsToSequences"},
+                    {"2_4_SequenceOfMappings"},
+                    {"2_5_SequenceOfSequences"},
+                    {"2_6_MappingOfMappings"},
+                    {"2_7_TwoDocumentsInAStream"},
+                    // {"example2_8"},
+                    {"2_9_SingleDocumentWithTwoComments"},
+                    {"2_10_NodeAppearsTwiceInThisDocument"},
                     // {"example2_11"}, // Not supported
-                    {"example2_12", false},
-                    {"example2_13", false},
-                    // {"example2_14", textWire}, // Not supported
-                    // {"example2_15", textWire}, // Not supported
-                    // {"example2_16", false}, // Not supported
-                    {"example2_17", false}, // TODO Fix handling of double single quote.
+                    {"2_12CompactNestedMapping"},
+                    {"2_13InLiteralsNewlinesArePreserved"},
+                    {"2_14InThefoldedScalars"},
+                    // {"example2_15"}, // Not supported
+                    // {"example2_16"}, // Not supported
+                    {"2_17QuotedScalars"},
                     // {"example2_18"}, // Not supported
-                    {"example2_19", textWire}, // TODO fix handling of times.
+                    {"2_19Integers"},
                     // {"example2_20"}, // TODO fix handling of times.
-                    {"example2_21", textWire},
+                    {"2_21MiscellaneousBis"},
                     // {"example2_22"}, // TODO fix handling of times.
                     // {"example2_23"}, // Not supported
                     // {"example2_24"}, // TODO FIx handling of anchors
@@ -90,26 +86,18 @@ public class YamlSpecificationTest extends WireTestCommon {
                     // {"example2_26"}, // TODO support omap
                     // {"example2_27"}, // Not supported
                     // {"example2_28"} // Not supported
-            }));
-        }
-
-        return result;
+            });
     }
 
     @Test
     public void decodeAs() throws IOException {
         String snippet = new String(getBytes(input + ".yaml"), StandardCharsets.UTF_8);
-        String actual;
-        if (textWire) {
-            actual = parseWithText(snippet);
-        } else {
-            actual = parseWithYaml(snippet);
-        }
+        String actual = parseWithYaml(snippet);
 
         byte[] expectedBytes = getBytes(input + ".out.yaml");
         String expected;
         if (expectedBytes != null) {
-            assertEquals(actual, textWire ? parseWithText(actual) : parseWithYaml(actual));
+            assertEquals(actual, parseWithYaml(actual));
 
             expected = new String(expectedBytes, StandardCharsets.UTF_8);
         } else {
@@ -117,17 +105,6 @@ public class YamlSpecificationTest extends WireTestCommon {
         }
 
         assertEquals(input, Bytes.wrapForRead(expected.getBytes(StandardCharsets.UTF_8)).toString().replace("\r\n", "\n"), actual);
-    }
-
-    @NotNull
-    private String parseWithText(String snippet) {
-        Object o = TEXT.fromString(snippet);
-        Bytes bytes = Bytes.allocateElasticOnHeap();
-
-        TextWire tw = new TextWire(bytes);
-        tw.writeObject(o);
-
-        return bytes.toString();
     }
 
     @NotNull
@@ -143,7 +120,7 @@ public class YamlSpecificationTest extends WireTestCommon {
 
     @Nullable
     public byte[] getBytes(String file) throws IOException {
-        InputStream is = getClass().getResourceAsStream("/specification/" + file);
+        InputStream is = getClass().getResourceAsStream("/yaml/spec/" + file);
         if (is == null) return null;
         int len = is.available();
         @NotNull byte[] byteArr = new byte[len];
@@ -166,7 +143,7 @@ public class YamlSpecificationTest extends WireTestCommon {
   color: 0xFFEEBB
   text: Pretty vector drawing.
  */
-
+/*
 class Shape implements Marshallable {
 }
 
@@ -178,3 +155,4 @@ class Line implements Marshallable {
 
 class Label implements Marshallable {
 }
+*/

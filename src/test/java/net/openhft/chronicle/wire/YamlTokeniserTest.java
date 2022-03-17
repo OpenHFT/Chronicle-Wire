@@ -6,7 +6,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -225,7 +224,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
-                doTest("specification/example2_4.out.yaml"));
+                doTest("yaml/spec/2_4_SequenceOfMappings.out.yaml"));
     }
 
     @Test
@@ -258,7 +257,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_4_SequenceOfMappings-fixed.yaml"));
+                doTest("yaml/spec/2_4_SequenceOfMappings.yaml"));
     }
 
     @Test
@@ -517,7 +516,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                 "COMMENT ASCII Art\n" +
                         "DIRECTIVES_END \n" +
                         "LITERAL \\//||\\/||\n" +
-                        "// ||  ||__\n" +
+                        "// ||  ||__\n\n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_13InLiteralsNewlinesArePreserved.yaml").replace("\r", ""));
     }
@@ -548,7 +547,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT Mark McGwire\n" +
                         "MAPPING_KEY \n" +
                         "TEXT accomplishment\n" +
-                        "LITERAL Mark set a major league home run record in 1998. \n" +
+                        "LITERAL Mark set a major league home run record in 1998.\n" +
                         "MAPPING_KEY \n" +
                         "TEXT stats\n" +
                         "LITERAL 65 Home Runs\n" +
@@ -614,7 +613,10 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT 12345\n" +
                         "MAPPING_KEY \n" +
                         "TEXT decimal\n" +
-                        "TEXT +12345\n" +
+                        "TEXT +12_345\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT sexagesimal\n" +
+                        "TEXT 3:25:45\n" +
                         "MAPPING_KEY \n" +
                         "TEXT octal\n" +
                         "TEXT 0o14\n" +
@@ -638,8 +640,11 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT exponential\n" +
                         "TEXT 12.3015e+02\n" +
                         "MAPPING_KEY \n" +
+                        "TEXT sexagesimal\n" +
+                        "TEXT 20:30.15\n" +
+                        "MAPPING_KEY \n" +
                         "TEXT fixed\n" +
-                        "TEXT 1230.15\n" +
+                        "TEXT 1_230.15\n" +
                         "MAPPING_KEY \n" +
                         "TEXT negative infinity\n" +
                         "TEXT -.inf\n" +
@@ -813,7 +818,10 @@ public class YamlTokeniserTest extends WireTestCommon {
     @Test
     public void eg2_26() {
         assertEquals(
-                "DIRECTIVES_END \n" +
+                "COMMENT ordered maps are represented as\n" +
+                        "COMMENT a sequence of mappings, with\n" +
+                        "COMMENT each mapping having one key\n" +
+                        "DIRECTIVES_END \n" +
                         "TAG !omap\n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
