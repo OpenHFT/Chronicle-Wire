@@ -27,6 +27,7 @@ import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * YAML Based wire format
@@ -34,6 +35,7 @@ import java.util.List;
 public class CSVWire extends TextWire {
 
     private static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();
+    static final Supplier<StopCharTester> COMMA_STOP_ESCAPING = StopCharTesters.COMMA_STOP::escaping;
 
     private final List<String> header = new ArrayList<>();
 
@@ -65,8 +67,7 @@ public class CSVWire extends TextWire {
 
     @NotNull
     static StopCharTester getEscapingCSVEndOfText() {
-        StopCharTester escaping = ThreadLocalHelper.getTL(ESCAPED_END_OF_TEXT,
-                StopCharTesters.COMMA_STOP::escaping);
+        StopCharTester escaping = ThreadLocalHelper.getTL(ESCAPED_END_OF_TEXT, COMMA_STOP_ESCAPING);
         // reset it.
         escaping.isStopChar(' ');
         return escaping;

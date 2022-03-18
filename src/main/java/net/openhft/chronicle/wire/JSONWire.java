@@ -19,6 +19,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.StopCharsTester;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
@@ -32,6 +33,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
@@ -43,6 +45,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 public class JSONWire extends TextWire {
     @SuppressWarnings("rawtypes")
     static final BytesStore COMMA = BytesStore.from(",");
+    static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_JSON_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT_JSON::escaping;
     boolean useTypes;
 
     @SuppressWarnings("rawtypes")
@@ -201,9 +204,16 @@ public class JSONWire extends TextWire {
     }
 
     @Override
+    @Deprecated(/* To be removed in 2.24 */)
     @NotNull
     protected TextStopCharsTesters strictEndOfText() {
         return TextStopCharsTesters.STRICT_END_OF_TEXT_JSON;
+    }
+
+    @Override
+    @NotNull
+    protected Supplier<StopCharsTester> strictEndOfTextEscaping() {
+        return STRICT_END_OF_TEXT_JSON_ESCAPING;
     }
 
     class JSONValueOut extends TextValueOut {

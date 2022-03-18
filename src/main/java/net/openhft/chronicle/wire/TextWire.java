@@ -77,6 +77,11 @@ public class TextWire extends AbstractWire implements Wire {
     static final BytesStore END_FIELD = NEW_LINE;
     static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
     static final Pattern REGX_PATTERN = Pattern.compile("\\.|\\$");
+    static final Supplier<StopCharTester> QUOTES_ESCAPING = StopCharTesters.QUOTES::escaping;
+    static final Supplier<StopCharTester> SINGLE_QUOTES_ESCAPING = StopCharTesters.SINGLE_QUOTES::escaping;
+    static final Supplier<StopCharTester> END_OF_TEXT_ESCAPING = TextStopCharTesters.END_OF_TEXT::escaping;
+    static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT::escaping;
+    static final Supplier<StopCharsTester> END_EVENT_NAME_ESCAPING = TextStopCharsTesters.END_EVENT_NAME::escaping;
 
     static {
         IOTools.unmonitor(TYPE);
@@ -204,8 +209,7 @@ public class TextWire extends AbstractWire implements Wire {
 
     @Nullable
     static StopCharTester getEscapingSingleQuotes() {
-        StopCharTester sct = ThreadLocalHelper.getTL(ESCAPED_SINGLE_QUOTES,
-                StopCharTesters.SINGLE_QUOTES::escaping);
+        StopCharTester sct = ThreadLocalHelper.getTL(ESCAPED_SINGLE_QUOTES, SINGLE_QUOTES_ESCAPING);
         // reset it.
         sct.isStopChar(' ');
         return sct;
@@ -539,8 +543,7 @@ public class TextWire extends AbstractWire implements Wire {
 
     @NotNull
     protected StopCharTester getEscapingEndOfText() {
-        StopCharTester escaping = ThreadLocalHelper.getTL(ESCAPED_END_OF_TEXT,
-                TextStopCharTesters.END_OF_TEXT::escaping);
+        StopCharTester escaping = ThreadLocalHelper.getTL(ESCAPED_END_OF_TEXT, END_OF_TEXT_ESCAPING);
         // reset it.
         escaping.isStopChar(' ');
         return escaping;
@@ -548,23 +551,27 @@ public class TextWire extends AbstractWire implements Wire {
 
     @NotNull
     protected StopCharsTester getStrictEscapingEndOfText() {
-        TextStopCharsTesters strictEndOfText = strictEndOfText();
-        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT,
-                strictEndOfText::escaping);
+        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT, strictEndOfTextEscaping());
         // reset it.
         escaping.isStopChar(' ', ' ');
         return escaping;
     }
 
     @NotNull
+    @Deprecated(/* To be removed in 2.24 - use strictEndOfTextEscaping */)
     protected TextStopCharsTesters strictEndOfText() {
         return TextStopCharsTesters.STRICT_END_OF_TEXT;
     }
 
     @NotNull
+    protected Supplier<StopCharsTester> strictEndOfTextEscaping() {
+        return strictEndOfText() == TextStopCharsTesters.STRICT_END_OF_TEXT ?
+                STRICT_END_OF_TEXT_ESCAPING : strictEndOfText()::escaping;
+    }
+
+    @NotNull
     protected StopCharsTester getEscapingEndEventName() {
-        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT,
-                TextStopCharsTesters.END_EVENT_NAME::escaping);
+        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT, END_EVENT_NAME_ESCAPING);
         // reset it.
         escaping.isStopChar(' ', ' ');
         return escaping;
@@ -572,8 +579,7 @@ public class TextWire extends AbstractWire implements Wire {
 
     @Nullable
     protected StopCharTester getEscapingQuotes() {
-        StopCharTester sct = ThreadLocalHelper.getTL(ESCAPED_QUOTES,
-                StopCharTesters.QUOTES::escaping);
+        StopCharTester sct = ThreadLocalHelper.getTL(ESCAPED_QUOTES, QUOTES_ESCAPING);
         // reset it.
         sct.isStopChar(' ');
         return sct;
