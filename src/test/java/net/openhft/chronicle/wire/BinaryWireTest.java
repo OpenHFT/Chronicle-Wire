@@ -371,8 +371,21 @@ public class BinaryWireTest extends WireTestCommon {
                         "\"1\": " + type + "2\n" +
                         "\"2603186\": " + type + "3\n",
                 "" + type + "1\n" +
-                        "" + type + "2\n" +
-                        "" + type + "3\n"
+                        type + "2\n" +
+                        type + "3\n"
+        );
+    }
+
+    private void checkAsText123Fixed(@NotNull Wire wire) {
+        checkAsText(wire, "\"\": 1.0\n" +
+                        "field1: 2.0\n" +
+                        "Test: 3.0\n",
+                "\"\": 1.0\n" +
+                        "\"1\": 2.0\n" +
+                        "\"2603186\": 3.0\n",
+                "1.0\n" +
+                        "2.0\n" +
+                        "3.0\n"
         );
     }
 
@@ -840,7 +853,10 @@ public class BinaryWireTest extends WireTestCommon {
                         "91 00 00 00 00 00 00 00 40                      # 2.0\n" +
                         "91 00 00 00 00 00 00 08 40                      # 3.0\n");
         if (wire.isBinary())
-            checkAsText123(wire);
+            if (fixed)
+                checkAsText123Fixed(wire);
+            else
+                checkAsText123(wire);
         else
             checkAsText123_0(wire);
         wire.write().float64(0);
