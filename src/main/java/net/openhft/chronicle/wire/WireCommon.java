@@ -190,4 +190,11 @@ public interface WireCommon {
      * @return use Marshallable
      */
     boolean useSelfDescribingMessage(@NotNull CommonMarshallable object);
+
+    /**
+     * Determine whether direct access to the underlying byte() makes sense or should it be treated as text
+     *
+     * @return Is this a binary protocol
+     */
+    boolean isBinary();
 }

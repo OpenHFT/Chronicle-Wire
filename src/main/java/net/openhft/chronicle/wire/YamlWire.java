@@ -95,6 +95,11 @@ public class YamlWire extends AbstractWire implements Wire {
         this(bytes, false);
     }
 
+    @Override
+    public boolean isBinary() {
+        return false;
+    }
+
     @NotNull
     public static YamlWire fromFile(String name) throws IOException {
         return new YamlWire(BytesUtil.readFile(name), true);

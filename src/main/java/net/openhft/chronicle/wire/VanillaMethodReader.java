@@ -193,7 +193,7 @@ public class VanillaMethodReader implements MethodReader {
             @NotNull String name = s.toString();
             String rest;
 
-            if (v.wireIn() instanceof BinaryWire) {
+            if (v.wireIn().isBinary()) {
                 Bytes bytes = Bytes.elasticByteBuffer((int) (v.wireIn().bytes().readRemaining() * 3 / 2 + 64));
                 long pos = v.wireIn().bytes().readPosition();
                 try {

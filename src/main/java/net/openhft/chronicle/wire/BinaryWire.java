@@ -101,6 +101,11 @@ public class BinaryWire extends AbstractWire implements Wire {
         readContext = new BinaryReadDocumentContext(this, supportDelta);
     }
 
+    @Override
+    public boolean isBinary() {
+        return true;
+    }
+
     private static boolean supportDelta() {
         String supportDeltaStr = System.getProperty("deltaWire.enable");
         if (supportDeltaStr != null) {

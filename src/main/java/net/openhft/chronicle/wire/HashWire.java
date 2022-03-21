@@ -281,6 +281,11 @@ public class HashWire implements WireOut, BytesComment {
         return object.usesSelfDescribingMessage();
     }
 
+    @Override
+    public boolean isBinary() {
+        return false; // as byte() doesn't make sense to access
+    }
+
     @NotNull
     @Override
     public LongArrayValues newLongArrayReference() {

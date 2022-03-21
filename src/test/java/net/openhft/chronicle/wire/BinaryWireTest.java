@@ -839,7 +839,7 @@ public class BinaryWireTest extends WireTestCommon {
                         "91 00 00 00 00 00 00 f0 3f                      # 1.0\n" +
                         "91 00 00 00 00 00 00 00 40                      # 2.0\n" +
                         "91 00 00 00 00 00 00 08 40                      # 3.0\n");
-        if (wire.getValueOut() instanceof BinaryWire.BinaryValueOut)
+        if (wire.isBinary())
             checkAsText123(wire);
         else
             checkAsText123_0(wire);
