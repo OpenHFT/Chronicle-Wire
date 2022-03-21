@@ -108,6 +108,11 @@ public class TextWire extends AbstractWire implements Wire {
         this(bytes, false);
     }
 
+    @Override
+    public boolean isBinary() {
+        return false;
+    }
+
     @NotNull
     public static TextWire fromFile(String name) throws IOException {
         return new TextWire(BytesUtil.readFile(name), true);

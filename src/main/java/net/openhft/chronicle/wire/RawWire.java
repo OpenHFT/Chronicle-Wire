@@ -65,6 +65,11 @@ public class RawWire extends AbstractWire implements Wire {
         super(bytes, use8bit);
     }
 
+    @Override
+    public boolean isBinary() {
+        return true;
+    }
+
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {

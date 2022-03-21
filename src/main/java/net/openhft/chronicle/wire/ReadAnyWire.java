@@ -42,6 +42,11 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
     }
 
     @Override
+    public boolean isBinary() {
+        return false; // as we don't know
+    }
+
+    @Override
     public void classLookup(ClassLookup classLookup) {
         this.wireAcquisition.classLookup(classLookup);
     }
