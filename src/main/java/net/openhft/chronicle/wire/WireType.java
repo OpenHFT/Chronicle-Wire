@@ -18,9 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
-import net.openhft.chronicle.bytes.StopCharTesters;
 import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.LicenceCheck;
@@ -299,8 +297,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                 @NotNull YamlWire wire = (YamlWire) apply(bytes);
                 wire.consumePadding();
                 wire.consumeDocumentStart();
-                //noinspection unchecked
-                return (T) wire.getValueIn().object(tClass);
+                return wire.getValueIn().object(tClass);
             } finally {
                 bytes.releaseLast();
             }
@@ -481,7 +478,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
      */
     @Nullable
     public <T> T fromString(@NotNull CharSequence cs) {
-        return (T) fromString(null, cs);
+        return (T) fromString(/* Allow Marshallable tuples by not requesting  Object */ null, cs);
     }
 
     /**

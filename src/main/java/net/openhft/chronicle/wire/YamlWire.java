@@ -183,7 +183,7 @@ public class YamlWire extends AbstractWire implements Wire {
             if (blockQuote == '\'' && ch == '\'' && i < length - 1) {
                 char ch2 = sb.charAt(i + 1);
                 if (ch2 == ch) {
-                    i++;
+                    continue;
                 }
             }
 
@@ -1626,7 +1626,7 @@ public class YamlWire extends AbstractWire implements Wire {
                 indent();
             else
                 addSpace(pos);
-            endBlock(this.leaf, ']');
+            endBlock(']');
             return wireOut();
         }
 
@@ -1662,11 +1662,11 @@ public class YamlWire extends AbstractWire implements Wire {
             popState();
             if (!leaf)
                 indent();
-            endBlock(this.leaf, ']');
+            endBlock(']');
             return wireOut();
         }
 
-        public void endBlock(boolean leaf, char c) {
+        protected void endBlock(char c) {
             bytes.writeUnsignedByte(c);
             elementSeparator();
         }
@@ -1743,7 +1743,7 @@ public class YamlWire extends AbstractWire implements Wire {
             } else {
                 prependSeparator();
             }
-            endBlock(leaf, '}');
+            endBlock('}');
 
             leaf = wasLeaf0;
 
@@ -2919,16 +2919,8 @@ public class YamlWire extends AbstractWire implements Wire {
             return s;
         }
 
-        @Nullable
-        protected String readLiteral() {
-            char bq = yt.blockQuote();
-            @Nullable CharSequence cs = textTo0(acquireStringBuilder());
-            @Nullable String s = cs == null ? null : WireInternal.INTERNER.intern(cs);
-            return s;
-        }
-
         @NotNull
-        private Object readSequence(@NotNull Class clazz) {
+        private Object readSequence(Class clazz) {
             @NotNull Collection coll =
                     clazz == SortedSet.class ? new TreeSet<>() :
                             clazz == Set.class ? new LinkedHashSet<>() :

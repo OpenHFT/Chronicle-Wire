@@ -197,6 +197,7 @@ public class YamlTokeniser {
                     readWord();
                     return YamlToken.ALIAS;
                 }
+                break;
             case '|':
                 if (in.peekUnsignedByte() <= ' ') {
                     readLiteral();
