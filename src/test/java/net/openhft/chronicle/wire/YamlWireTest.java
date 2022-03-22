@@ -776,6 +776,7 @@ public class YamlWireTest extends WireTestCommon {
                 "nonesingle: \\\n" +
                 "nonedouble: \\\\\n" +
                 "singleself: ''''\n" +
+                "singleselfself: ''''''\n" +
                 "singlesingle: '\\'\n" +
                 "singledouble: '\\\\'\n" +
                 "doubleself: \"\\\"\"\n" +
@@ -784,6 +785,7 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals("\\", wire.read("nonesingle").readString());
         assertEquals("\\\\", wire.read("nonedouble").readString());
         assertEquals("'", wire.read("singleself").readString());
+        assertEquals("''", wire.read("singleselfself").readString());
         assertEquals("\\", wire.read("singlesingle").readString());
         assertEquals("\\\\", wire.read("singledouble").readString());
         assertEquals("\"", wire.read("doubleself").readString());

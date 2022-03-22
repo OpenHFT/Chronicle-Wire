@@ -125,7 +125,13 @@ public class YamlWire extends AbstractWire implements Wire {
                                                                         char blockQuote) {
         int end = 0;
         int length = sb.length();
+        boolean skip = false;
         for (int i = 0; i < length; i++) {
+            if (skip) {
+                skip = false;
+                continue;
+            }
+
             char ch = sb.charAt(i);
             if (blockQuote == '\"' && ch == '\\' && i < length - 1) {
                 char ch3 = sb.charAt(++i);
@@ -183,7 +189,7 @@ public class YamlWire extends AbstractWire implements Wire {
             if (blockQuote == '\'' && ch == '\'' && i < length - 1) {
                 char ch2 = sb.charAt(i + 1);
                 if (ch2 == ch) {
-                    continue;
+                    skip = true;
                 }
             }
 
