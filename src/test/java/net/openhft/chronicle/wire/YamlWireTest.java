@@ -18,6 +18,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.NoBytesStore;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
@@ -791,6 +792,16 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals("\"", wire.read("doubleself").readString());
         assertEquals("\\", wire.read("doublesingle").readString());
         assertEquals("\\\\", wire.read("doubledouble").readString());
+    }
+
+    @Test
+    public void testBinary() {
+        @NotNull Wire wire = createWire();
+        wire.bytes().append("b: !byte[] !!binary AAAAAAA=\n" +
+                "c: !!binary CCCCCCCC\n");
+        byte[] b = (byte[]) wire.read("b").object();
+        assertTrue(Arrays.toString(b), Arrays.equals(new byte[] {0, 0, 0, 0, 0}, b));
+        assertEquals(BytesStore.wrap(new byte[] {8, ' ', -126, 8, ' ', -126}), wire.read("c").object());
     }
 
     @Ignore("TODO FIX")
