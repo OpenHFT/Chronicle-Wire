@@ -1130,7 +1130,7 @@ public class YamlWire extends AbstractWire implements Wire {
             if (dropDefault) {
                 writeSavedEventName();
             }
-            return bytes("!binary", byteArray);
+            return bytes(BINARY_TAG, byteArray);
         }
 
         @NotNull
