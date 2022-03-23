@@ -2140,4 +2140,7 @@ public class TextWireTest extends WireTestCommon {
         DurationHolder dh2 = Marshallable.fromString(h);
         assertEquals(dh, dh2);
     }
+
+    class Circle implements Marshallable {
+    }
 }

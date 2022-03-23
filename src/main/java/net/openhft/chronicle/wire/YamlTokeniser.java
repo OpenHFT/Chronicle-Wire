@@ -66,7 +66,7 @@ public class YamlTokeniser {
         freeContexts.addAll(contexts);
         contexts.clear();
         if (temp != null) temp.clear();
-        lineStart = 0;
+        lineStart = in.readPosition();
         flowDepth = Integer.MAX_VALUE;
         blockQuote = 0;
         hasSequenceEntry = false;
@@ -127,7 +127,7 @@ public class YamlTokeniser {
                 if (wouldChangeContext(minIndent, indent2))
                     return dontRead();
                 lastKeyPosition = in.readPosition() - 1;
-                readQuoted('"');
+                readDoublyQuoted();
                 if (isFieldEnd())
                     return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent2);
                 return YamlToken.TEXT;
@@ -135,7 +135,7 @@ public class YamlTokeniser {
                 if (wouldChangeContext(minIndent, indent2))
                     return dontRead();
                 lastKeyPosition = in.readPosition() - 1;
-                readQuoted('\'');
+                readSinglyQuoted();
                 if (isFieldEnd())
                     return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent2);
 
@@ -155,10 +155,12 @@ public class YamlTokeniser {
                 if (next <= ' ') {
                     if (wouldChangeContext(minIndent, indent2 + 1))
                         return dontRead();
+
+                    hasSequenceEntry = true;
                     return indent(YamlToken.SEQUENCE_START, YamlToken.SEQUENCE_ENTRY, YamlToken.STREAM_START, indent2 + 1);
                 }
                 if (next == '-' && in.peekUnsignedByte(in.readPosition() + 1) == '-' && in.peekUnsignedByte(in.readPosition() + 2) <= ' ') {
-                    if (contextIndent() <= minIndent)
+                    if (contextIndent() <= minIndent && minIndent >= 0)
                         return dontRead();
                     in.readSkip(2);
                     pushed.add(YamlToken.DIRECTIVES_END);
@@ -184,29 +186,28 @@ public class YamlTokeniser {
                 unreadLast();
                 return readText(indent2);
             }
-/* TODO
             case '&':
                 if (in.peekUnsignedByte() > ' ') {
-                    readAnchor();
+                    readWord();
                     return YamlToken.ANCHOR;
                 }
                 break;
             case '*':
                 if (in.peekUnsignedByte() > ' ') {
-                    readAnchor();
+                    readWord();
                     return YamlToken.ALIAS;
                 }
-*/
+                break;
             case '|':
                 if (in.peekUnsignedByte() <= ' ') {
                     readLiteral();
-                    return seq(YamlToken.TEXT);
+                    return seq(YamlToken.LITERAL);
                 }
                 break;
             case '>':
                 if (in.peekUnsignedByte() <= ' ') {
                     readFolded();
-                    return seq(YamlToken.TEXT);
+                    return seq(YamlToken.LITERAL);
                 }
             case '%':
                 readDirective();
@@ -294,7 +295,7 @@ public class YamlTokeniser {
 
     private YamlToken flow(YamlToken token) {
         pushed.add(token);
-        if (!hasSequenceEntry && context() == YamlToken.SEQUENCE_START) {
+        if (!hasSequenceEntry && token != YamlToken.SEQUENCE_START && context() == YamlToken.SEQUENCE_START) {
             hasSequenceEntry = true;
             pushed.add(YamlToken.SEQUENCE_ENTRY);
         }
@@ -345,14 +346,16 @@ public class YamlTokeniser {
                 if (withNewLines)
                     readNewline();
                 temp.write(in, start, in.readPosition() - start);
-                if (!withNewLines)
-                    if (temp.peekUnsignedByte(temp.writePosition() - 1) > ' ')
-                        temp.append(' ');
 
                 readIndent();
                 int indent3 = Math.toIntExact(in.readPosition() - lineStart);
                 if (indent3 < indent2)
                     return;
+
+                if (!withNewLines)
+                    if (temp.peekUnsignedByte(temp.writePosition() - 1) > ' ')
+                        temp.append(' ');
+
                 if (indent3 > indent2)
                     in.readPosition(lineStart + indent2);
                 start = in.readPosition();
@@ -378,16 +381,6 @@ public class YamlTokeniser {
                 break;
             in.readSkip(1);
             lineStart = in.readPosition();
-        }
-    }
-
-    private void readAnchor() {
-        blockStart = in.readPosition();
-        while (true) {
-            blockEnd = in.readPosition();
-            int ch = in.readUnsignedByte();
-            if (ch <= ' ')
-                return;
         }
     }
 
@@ -561,18 +554,32 @@ public class YamlTokeniser {
         pushContext0(context, indent);
     }
 
-    private void readQuoted(char stop) {
-        blockQuote = stop;
+    private void readDoublyQuoted() {
+        blockQuote = '"';
         blockStart = in.readPosition();
         while (in.readRemaining() > 0) {
             int ch = in.readUnsignedByte();
             if (ch == '\\') {
                 ch = in.readUnsignedByte();
+            } else if (ch == blockQuote) {
+                blockEnd = in.readPosition() - 1;
+                return;
             }
-            if (ch == stop) {
+            if (ch < 0) {
+                throw new IllegalStateException("Unterminated quotes " + in.subBytes(blockStart - 1, in.readPosition()));
+            }
+        }
+    }
+
+    private void readSinglyQuoted() {
+        blockQuote = '\'';
+        blockStart = in.readPosition();
+        while (in.readRemaining() > 0) {
+            int ch = in.readUnsignedByte();
+            if (ch == blockQuote) {
                 // ignore double single quotes.
                 int ch2 = in.peekUnsignedByte();
-                if (ch2 == stop) {
+                if (ch2 == blockQuote) {
                     in.readSkip(1);
                     continue;
                 }

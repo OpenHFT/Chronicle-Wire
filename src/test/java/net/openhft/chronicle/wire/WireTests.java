@@ -350,4 +350,7 @@ public class WireTests {
             return o;
         }
     }
+
+    class Circle implements Marshallable {
+    }
 }

@@ -628,8 +628,23 @@ public class TextWire extends AbstractWire implements Wire {
     protected void consumeDocumentStart() {
         if (bytes.readRemaining() > 4) {
             long pos = bytes.readPosition();
-            if (bytes.readByte(pos) == '-' && bytes.readByte(pos + 1) == '-' && bytes.readByte(pos + 2) == '-')
+            if (bytes.readByte(pos) == '-' && bytes.readByte(pos + 1) == '-' && bytes.readByte(pos + 2) == '-') {
                 bytes.readSkip(3);
+
+                consumeWhiteSpace();
+
+                pos = bytes.readPosition();
+                @NotNull String word = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
+                switch (word) {
+                    case "!!data":
+                    case "!!data-not-ready":
+                    case "!!meta-data":
+                    case "!!meta-data-not-ready":
+                        break;
+                    default:
+                        bytes.readPosition(pos);
+                }
+            }
         }
     }
 
@@ -1030,9 +1045,7 @@ public class TextWire extends AbstractWire implements Wire {
 
     @Nullable
     public Object readObject() {
-        consumePadding();
-        consumeDocumentStart();
-        return readObject(0);
+        return getValueIn().object(Object.class);
     }
 
     @Nullable
@@ -1182,6 +1195,11 @@ public class TextWire extends AbstractWire implements Wire {
 
     enum NoObject {NO_OBJECT}
 
+    /**
+     * @deprecated Will be replaced with a different implementation in the future,
+     *   which will generate correct Yaml but may introduce some behavior changes.
+     */
+    @Deprecated(/* To be removed and replaced by YamlWire.TextValueOut in 2.24 #411 */)
     class TextValueOut implements ValueOut, CommentAnnotationNotifier {
         protected boolean hasCommentAnnotation = false;
 
@@ -1978,7 +1996,7 @@ public class TextWire extends AbstractWire implements Wire {
             } else if (!seps.isEmpty()) {
                 popSep = seps.get(seps.size() - 1);
                 popState();
-                sep = NEW_LINE;
+                newLine();
             }
             if (sep.startsWith(',')) {
                 append(sep, 1, sep.length() - 1);
@@ -2031,7 +2049,7 @@ public class TextWire extends AbstractWire implements Wire {
             } else if (seps.size() > 0) {
                 popSep = seps.get(seps.size() - 1);
                 popState();
-                sep = NEW_LINE;
+                newLine();
             }
             if (sep.startsWith(',')) {
                 append(sep, 1, sep.length() - 1);

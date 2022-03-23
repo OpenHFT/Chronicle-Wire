@@ -1,0 +1,6 @@
+containers:
+  - env:
+      - name: POD_ID
+        valueFrom: # etc etc
+      - name: LOG_PATH
+        value: /var/log/mycompany/$(POD_ID)/logs

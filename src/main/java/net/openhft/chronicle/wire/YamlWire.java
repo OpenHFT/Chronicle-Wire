@@ -81,9 +81,12 @@ public class YamlWire extends AbstractWire implements Wire {
     private final TextValueIn valueIn = createValueIn();
     private final StringBuilder sb = new StringBuilder();
     private final YamlTokeniser yt;
+    private final Map<String, Object> anchorValues = new HashMap<>();
     private DefaultValueIn defaultValueIn;
     private WriteDocumentContext writeContext;
     private ReadDocumentContext readContext;
+    private boolean addTimeStamps = false;
+    private boolean trimFirstCurly = true;
 
     public YamlWire(@NotNull Bytes bytes, boolean use8bit) {
         super(bytes, use8bit);
@@ -123,12 +126,19 @@ public class YamlWire extends AbstractWire implements Wire {
         }
     }
 
-    public static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb) {
+    private static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS sb,
+                                                                        char blockQuote) {
         int end = 0;
         int length = sb.length();
+        boolean skip = false;
         for (int i = 0; i < length; i++) {
+            if (skip) {
+                skip = false;
+                continue;
+            }
+
             char ch = sb.charAt(i);
-            if (ch == '\\' && i < length - 1) {
+            if (blockQuote == '\"' && ch == '\\' && i < length - 1) {
                 char ch3 = sb.charAt(++i);
                 switch (ch3) {
                     case '0':
@@ -180,6 +190,14 @@ public class YamlWire extends AbstractWire implements Wire {
                         ch = ch3;
                 }
             }
+
+            if (blockQuote == '\'' && ch == '\'' && i < length - 1) {
+                char ch2 = sb.charAt(i + 1);
+                if (ch2 == ch) {
+                    skip = true;
+                }
+            }
+
             AppendableUtil.setCharAt(sb, end++, ch);
         }
         if (length != sb.length())
@@ -191,6 +209,15 @@ public class YamlWire extends AbstractWire implements Wire {
     public boolean hintReadInputOrder() {
         // TODO Fix YamlTextWireTest for false.
         return true;
+    }
+
+    public boolean addTimeStamps() {
+        return addTimeStamps;
+    }
+
+    public YamlWire addTimeStamps(boolean addTimeStamps) {
+        this.addTimeStamps = addTimeStamps;
+        return this;
     }
 
     @Override
@@ -358,6 +385,7 @@ public class YamlWire extends AbstractWire implements Wire {
             yt.next();
             if (yt.current() == YamlToken.TEXT) {
                 sb.append(yt.text());
+                unescape(sb, yt.blockQuote());
                 yt.next();
             } else {
                 throw new IllegalStateException(yt.toString());
@@ -365,7 +393,6 @@ public class YamlWire extends AbstractWire implements Wire {
         } else {
             return sb;
         }
-        unescape(sb);
         return sb;
     }
 
@@ -378,8 +405,8 @@ public class YamlWire extends AbstractWire implements Wire {
             if (next == YamlToken.TEXT) {
                 sb.setLength(0);
                 sb.append(yt.text());
+                unescape(sb, yt.blockQuote);
                 yt.next();
-                unescape(sb);
                 return toExpected(expectedClass, sb);
             }
         }
@@ -485,12 +512,12 @@ public class YamlWire extends AbstractWire implements Wire {
         if (next == YamlToken.TEXT) {
             sb.setLength(0);
             sb.append(yt.text());
+            unescape(sb, yt.blockQuote());
             yt.next();
         } else {
             throw new IllegalStateException(next.toString());
         }
 
-        unescape(sb);
         return (sb.length() == 0 || StringUtils.isEqual(sb, keyName));
     }
 
@@ -706,6 +733,29 @@ public class YamlWire extends AbstractWire implements Wire {
         return quotes;
     }
 
+    protected void consumeDocumentStart() {
+        if (bytes.readRemaining() > 4) {
+            long pos = bytes.readPosition();
+            if (bytes.readByte(pos) == '-' && bytes.readByte(pos + 1) == '-' && bytes.readByte(pos + 2) == '-')
+                bytes.readSkip(3);
+
+            pos = bytes.readPosition();
+            @NotNull String word = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
+            switch (word) {
+                case "!!data":
+                case "!!data-not-ready":
+                case "!!meta-data":
+                case "!!meta-data-not-ready":
+                    break;
+                default:
+                    bytes.readPosition(pos);
+            }
+        }
+
+        if (yt.current() == YamlToken.NONE)
+            yt.next();
+    }
+
     @NotNull
     @Override
     public LongValue newLongReference() {
@@ -778,6 +828,23 @@ public class YamlWire extends AbstractWire implements Wire {
         return map;
     }
 
+    public void writeObject(Object o) {
+        if (o instanceof Iterable) {
+            for (Object o2 : (Iterable) o) {
+                writeObject(o2, 2);
+            }
+        } else if (o instanceof Map) {
+            for (@NotNull Map.Entry<Object, Object> entry : ((Map<Object, Object>) o).entrySet()) {
+                write(() -> entry.getKey().toString()).object(entry.getValue());
+            }
+        } else if (o instanceof WriteMarshallable) {
+            valueOut.typedMarshallable((WriteMarshallable) o);
+
+        } else {
+            valueOut.object(o);
+        }
+    }
+
     private void writeObject(Object o, int indentation) {
         writeTwo('-', ' ');
         indentation(indentation - 2);
@@ -803,6 +870,21 @@ public class YamlWire extends AbstractWire implements Wire {
     void writeTwo(char ch1, char ch2) {
         bytes.writeUnsignedByte(ch1);
         bytes.writeUnsignedByte(ch2);
+    }
+
+    /**
+     * @return whether the top level curly brackets is dropped
+     */
+    public boolean trimFirstCurly() {
+        return trimFirstCurly;
+    }
+
+    /**
+     * @param trimFirstCurly whether the top level curly brackets is dropped
+     */
+    public YamlWire trimFirstCurly(boolean trimFirstCurly) {
+        this.trimFirstCurly = trimFirstCurly;
+        return this;
     }
 
     @Override
@@ -862,6 +944,7 @@ public class YamlWire extends AbstractWire implements Wire {
     public void reset() {
         bytes.readPosition(0);
         yt.reset();
+        anchorValues.clear();
     }
 
     class TextValueOut implements ValueOut, CommentAnnotationNotifier {
@@ -1054,8 +1137,13 @@ public class YamlWire extends AbstractWire implements Wire {
             }
             prependSeparator();
             typePrefix(type);
+            if (getClass() != TextValueOut.class)
+                bytes.append('"');
             append(Base64.getEncoder().encodeToString(byteArray));
+            if (getClass() != TextValueOut.class)
+                bytes.append('"');
             elementSeparator();
+            endTypePrefix();
 
             return YamlWire.this;
         }
@@ -1069,6 +1157,7 @@ public class YamlWire extends AbstractWire implements Wire {
             prependSeparator();
             typePrefix(type);
             append(Base64.getEncoder().encodeToString(bytesStore.toByteArray()));
+            endTypePrefix();
             append(END_FIELD);
             elementSeparator();
 
@@ -1192,6 +1281,12 @@ public class YamlWire extends AbstractWire implements Wire {
             prependSeparator();
             bytes.append(i64);
             elementSeparator();
+            // 2001 to 2100 best effort basis.
+            boolean addTimeStamp = YamlWire.this.addTimeStamps && !leaf;
+            if (addTimeStamp) {
+                addTimeStamp(i64);
+            }
+
             return YamlWire.this;
         }
 
@@ -1199,6 +1294,31 @@ public class YamlWire extends AbstractWire implements Wire {
         @Override
         public WireOut int128forBinding(long i64x0, long i64x1, TwoLongValue longValue) {
             throw new UnsupportedOperationException(yt.toString());
+        }
+
+        public void addTimeStamp(long i64) {
+            if ((long) 1e12 < i64 && i64 < (long) 4.111e12) {
+                bytes.append(", # ");
+                bytes.appendDateMillis(i64);
+                bytes.append("T");
+                bytes.appendTimeMillis(i64);
+                sep = NEW_LINE;
+            } else if ((long) 1e18 < i64 && i64 < (long) 4.111e18) {
+                long millis = i64 / 1_000_000;
+                long nanos = i64 % 1_000_000;
+                bytes.append(", # ");
+                bytes.appendDateMillis(millis);
+                bytes.append("T");
+                bytes.appendTimeMillis(millis);
+                bytes.append((char) ('0' + nanos / 100000));
+                bytes.append((char) ('0' + nanos / 100000 % 10));
+                bytes.append((char) ('0' + nanos / 10000 % 10));
+                bytes.append((char) ('0' + nanos / 1000 % 10));
+                bytes.append((char) ('0' + nanos / 100 % 10));
+                bytes.append((char) ('0' + nanos / 10 % 10));
+                bytes.append((char) ('0' + nanos % 10));
+                sep = NEW_LINE;
+            }
         }
 
         @NotNull
@@ -1347,11 +1467,21 @@ public class YamlWire extends AbstractWire implements Wire {
                 nu11();
             } else {
                 prependSeparator();
-                append(stringable.toString());
+                final String s = stringable.toString();
+                final Quotes quotes = needsQuotes(s);
+                asTestQuoted(s, quotes);
                 elementSeparator();
             }
 
             return YamlWire.this;
+        }
+
+        protected void asTestQuoted(String s, Quotes quotes) {
+            if (quotes == Quotes.NONE) {
+                append(s);
+            } else {
+                escape0(s, quotes);
+            }
         }
 
         @NotNull
@@ -1502,11 +1632,12 @@ public class YamlWire extends AbstractWire implements Wire {
                 addNewLine(pos);
 
             popState();
+            this.leaf = leaf;
             if (!leaf)
                 indent();
             else
                 addSpace(pos);
-            endBlock(this.leaf, ']');
+            endBlock(']');
             return wireOut();
         }
 
@@ -1542,13 +1673,13 @@ public class YamlWire extends AbstractWire implements Wire {
             popState();
             if (!leaf)
                 indent();
-            endBlock(this.leaf, ']');
+            endBlock(']');
             return wireOut();
         }
 
-        public void endBlock(boolean leaf, char c) {
+        protected void endBlock(char c) {
             bytes.writeUnsignedByte(c);
-            sep = leaf ? COMMA_SPACE : COMMA_NEW_LINE;
+            elementSeparator();
         }
 
         protected void addNewLine(long pos) {
@@ -1589,7 +1720,7 @@ public class YamlWire extends AbstractWire implements Wire {
             if (dropDefault) {
                 writeSavedEventName();
             }
-            if (bytes.writePosition() == 0) {
+            if (trimFirstCurly && bytes.writePosition() == 0) {
                 object.writeMarshallable(YamlWire.this);
                 if (bytes.writePosition() == 0)
                     bytes.append("{}");
@@ -1610,10 +1741,10 @@ public class YamlWire extends AbstractWire implements Wire {
                     append(" ");
                 leaf = false;
                 popState();
-            } else if (seps.size() > 0) {
+            } else if (!seps.isEmpty()) {
                 popSep = seps.get(seps.size() - 1);
                 popState();
-                sep = NEW_LINE;
+                newLine();
             }
             if (sep.startsWith(',')) {
                 append(sep, 1, sep.length() - 1);
@@ -1623,18 +1754,13 @@ public class YamlWire extends AbstractWire implements Wire {
             } else {
                 prependSeparator();
             }
-            endBlock(leaf, '}');
+            endBlock('}');
 
             leaf = wasLeaf0;
 
             if (popSep != null)
                 sep = popSep;
-            if (indentation == 0) {
-                afterClose();
 
-            } else {
-                elementSeparator();
-            }
             return YamlWire.this;
         }
 
@@ -1666,7 +1792,7 @@ public class YamlWire extends AbstractWire implements Wire {
             } else if (seps.size() > 0) {
                 popSep = seps.get(seps.size() - 1);
                 popState();
-                sep = NEW_LINE;
+                newLine();
             }
             if (sep.startsWith(',')) {
                 append(sep, 1, sep.length() - 1);
@@ -1823,6 +1949,7 @@ public class YamlWire extends AbstractWire implements Wire {
         @Override
         public void resetState() {
             yt.reset();
+            anchorValues.clear();
         }
 
         @Nullable
@@ -1874,6 +2001,7 @@ public class YamlWire extends AbstractWire implements Wire {
                 case SEQUENCE_ENTRY:
                 case STREAM_START:
                 case TEXT:
+                case LITERAL:
                     return BracketType.NONE;
             }
         }
@@ -1894,9 +2022,10 @@ public class YamlWire extends AbstractWire implements Wire {
             consumePadding();
             if (yt.current() == YamlToken.SEQUENCE_ENTRY)
                 yt.next();
-            if (yt.current() == YamlToken.TEXT) {
+            if (yt.current() == YamlToken.TEXT || yt.current() == YamlToken.LITERAL) {
                 a.append(yt.text());
-                unescape(a);
+                if (yt.current() == YamlToken.TEXT)
+                    unescape(a, yt.blockQuote());
                 yt.next();
             } else if (yt.current() == YamlToken.TAG) {
                 if (yt.isText("!null")) {
@@ -2135,8 +2264,10 @@ public class YamlWire extends AbstractWire implements Wire {
             if (yt.current() == YamlToken.TEXT) {
                 String text = yt.text();
                 long l;
-                if (text.startsWith("0x") || text.startsWith("0X")) {
+                if ((text.startsWith("0x") || text.startsWith("0X")) && text.length() > 2) {
                     l = Long.parseLong(text.substring(2), 16);
+                } else if (text.startsWith("0") && text.length() > 1) {
+                    l = Long.parseLong(text.substring(text.length() > 2 && text.charAt(1) == 'o' ? 2 : 1), 8);
                 } else {
                     l = Long.parseLong(text);
                 }
@@ -2313,7 +2444,11 @@ public class YamlWire extends AbstractWire implements Wire {
 
         @Override
         public boolean hasNext() {
+            if (yt.current() == YamlToken.DOCUMENT_END)
+                yt.next(Integer.MIN_VALUE);
+
             consumePadding();
+
             switch (yt.current()) {
                 case SEQUENCE_END:
                 case STREAM_END:
@@ -2712,8 +2847,29 @@ public class YamlWire extends AbstractWire implements Wire {
                     return readSequence(type);
 
                 case TEXT:
+                case LITERAL:
                     Object o = valueIn.readNumberOrText();
                     return ObjectUtils.convertTo(type, o);
+
+                case ANCHOR:
+                    String alias = yt.text();
+                    yt.next();
+                    o = valueIn.object(using, type);
+                    // Overwriting of anchor values is permitted
+                    anchorValues.put(alias, o);
+                    return o;
+
+                case ALIAS:
+                    alias = yt.text();
+                    o = anchorValues.get(yt.text());
+                    if (o == null)
+                        throw new IllegalStateException("Unknown alias " + alias + " with no corresponding anchor");
+
+                    yt.next();
+                    return o;
+
+                case NONE:
+                    return null;
 
                 default:
                     throw new UnsupportedOperationException("Cannot determine what to do with " + yt.current());
@@ -2724,15 +2880,23 @@ public class YamlWire extends AbstractWire implements Wire {
         protected Object readNumberOrText() {
             char bq = yt.blockQuote();
             @Nullable String s = text();
+            if (yt.current() == YamlToken.LITERAL)
+                return s;
             if (s == null
                     || bq != 0
                     || s.length() < 1
                     || s.length() > 40
                     || "0123456789.+-".indexOf(s.charAt(0)) < 0)
                 return s;
+
             String ss = s;
             if (s.indexOf('_') >= 0)
-                ss = s.replace("_", "");
+                ss = ss.replace("_", "");
+
+            // YAML octal notation
+            if (s.startsWith("0o"))
+                ss = "0" + s.substring(2);
+
             try {
                 return Long.decode(ss);
             } catch (NumberFormatException fallback) {
@@ -2767,13 +2931,13 @@ public class YamlWire extends AbstractWire implements Wire {
         }
 
         @NotNull
-        private Object readSequence(@NotNull Class clazz) {
+        private Object readSequence(Class clazz) {
             @NotNull Collection coll =
                     clazz == SortedSet.class ? new TreeSet<>() :
                             clazz == Set.class ? new LinkedHashSet<>() :
                                     new ArrayList<>();
             readCollection(coll);
-            if (clazz.isArray()) {
+            if (clazz != null && clazz.isArray()) {
                 Object o = Array.newInstance(clazz.getComponentType(), coll.size());
                 if (clazz.getComponentType().isPrimitive()) {
                     Iterator iter = coll.iterator();

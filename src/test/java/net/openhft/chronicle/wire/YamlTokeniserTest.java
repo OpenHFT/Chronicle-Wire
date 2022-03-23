@@ -31,6 +31,72 @@ public class YamlTokeniserTest extends WireTestCommon {
     }
 
     @Test
+    public void exception() {
+        assertEquals("DIRECTIVES_END \n" +
+                "TAG !data\n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT exception\n" +
+                "TAG java.security.InvalidAlgorithmParameterException\n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT message\n" +
+                "TEXT Reference cannot be null\n" +
+                "MAPPING_KEY \n" +
+                "TEXT stackTrace\n" +
+                "SEQUENCE_START \n" +
+                "SEQUENCE_ENTRY \n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT class\n" +
+                "TEXT net.openhft.chronicle.wire.YamlWireTest\n" +
+                "MAPPING_KEY \n" +
+                "TEXT method\n" +
+                "TEXT testException\n" +
+                "MAPPING_KEY \n" +
+                "TEXT file\n" +
+                "TEXT YamlWireTest.java\n" +
+                "MAPPING_KEY \n" +
+                "TEXT line\n" +
+                "TEXT 783\n" +
+                "MAPPING_END \n" +
+                "SEQUENCE_ENTRY \n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT class\n" +
+                "TEXT net.openhft.chronicle.wire.YamlWireTest\n" +
+                "MAPPING_KEY \n" +
+                "TEXT method\n" +
+                "TEXT runTestException\n" +
+                "MAPPING_KEY \n" +
+                "TEXT file\n" +
+                "TEXT YamlWireTest.java\n" +
+                "MAPPING_KEY \n" +
+                "TEXT line\n" +
+                "TEXT 73\n" +
+                "MAPPING_END \n" +
+                "SEQUENCE_ENTRY \n" +
+                "MAPPING_START \n" +
+                "MAPPING_KEY \n" +
+                "TEXT class\n" +
+                "TEXT sun.reflect.NativeMethodAccessorImpl\n" +
+                "MAPPING_KEY \n" +
+                "TEXT method\n" +
+                "TEXT invoke0\n" +
+                "MAPPING_KEY \n" +
+                "TEXT file\n" +
+                "TEXT NativeMethodAccessorImpl.java\n" +
+                "MAPPING_KEY \n" +
+                "TEXT line\n" +
+                "TEXT -2\n" +
+                "MAPPING_END \n" +
+                "SEQUENCE_END \n" +
+                "MAPPING_END \n" +
+                "MAPPING_END \n" +
+                "DOCUMENT_END \n", doTest("exception.yaml"));
+    }
+
+    @Test
     public void eg2_1() {
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
@@ -129,6 +195,39 @@ public class YamlTokeniserTest extends WireTestCommon {
     }
 
     @Test
+    public void eg2_4out() {
+        assertEquals("DIRECTIVES_END \n" +
+                        "SEQUENCE_START \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT name\n" +
+                        "TEXT Mark McGwire\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT hr\n" +
+                        "TEXT 65\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT avg\n" +
+                        "TEXT 0.278\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_ENTRY \n" +
+                        "MAPPING_START \n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT name\n" +
+                        "TEXT Sammy Sosa\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT hr\n" +
+                        "TEXT 63\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT avg\n" +
+                        "TEXT 0.288\n" +
+                        "MAPPING_END \n" +
+                        "SEQUENCE_END \n" +
+                        "DOCUMENT_END \n",
+                doTest("yaml/spec/2_4_SequenceOfMappings.out.yaml"));
+    }
+
+    @Test
     public void eg2_4B() {
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
@@ -158,15 +257,13 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "SEQUENCE_END \n" +
                         "DOCUMENT_END \n",
-                doTest("yaml/spec/2_4_SequenceOfMappings-fixed.yaml"));
+                doTest("yaml/spec/2_4_SequenceOfMappings.yaml"));
     }
 
-    @Ignore("TODO Handle properly")
     @Test
     public void eg2_5() {
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
-                        "SEQUENCE_ENTRY \n" +
                         "SEQUENCE_ENTRY \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
@@ -177,7 +274,6 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT avg\n" +
                         "SEQUENCE_END \n" +
                         "SEQUENCE_ENTRY \n" +
-                        "SEQUENCE_ENTRY \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
                         "TEXT Mark McGwire\n" +
@@ -186,7 +282,6 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "SEQUENCE_ENTRY \n" +
                         "TEXT 0.278\n" +
                         "SEQUENCE_END \n" +
-                        "SEQUENCE_ENTRY \n" +
                         "SEQUENCE_ENTRY \n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
@@ -324,13 +419,14 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT Mark McGwire\n" +
                         "COMMENT Following node labeled SS\n" +
                         "SEQUENCE_ENTRY \n" +
-                        "TEXT &SS Sammy Sosa\n" +
+                        "ANCHOR SS\n" +
+                        "TEXT Sammy Sosa\n" +
                         "SEQUENCE_END \n" +
                         "MAPPING_KEY \n" +
                         "TEXT rbi\n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
-                        "TEXT *SS\n" +
+                        "ALIAS SS\n" +
                         "COMMENT Subsequent occurrence\n" +
                         "SEQUENCE_ENTRY \n" +
                         "TEXT Ken Griffey\n" +
@@ -419,8 +515,8 @@ public class YamlTokeniserTest extends WireTestCommon {
         assertEquals(
                 "COMMENT ASCII Art\n" +
                         "DIRECTIVES_END \n" +
-                        "TEXT \\//||\\/||\n" +
-                        "// ||  ||__\n" +
+                        "LITERAL \\//||\\/||\n" +
+                        "// ||  ||__\n\n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_13InLiteralsNewlinesArePreserved.yaml").replace("\r", ""));
     }
@@ -429,7 +525,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     public void eg2_14() {
         assertEquals(
                 "DIRECTIVES_END \n" +
-                        "TEXT Mark McGwire's year was crippled by a knee injury.\n" +
+                        "LITERAL Mark McGwire's year was crippled by a knee injury.\n" +
                         "DOCUMENT_END \n",
                 doTest("yaml/spec/2_14InThefoldedScalars.yaml").replace("\r", ""));
     }
@@ -437,7 +533,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     @Test
     public void eg2_15() {
         assertEquals(
-                "TEXT Sammy Sosa completed another fine season with great stats.   63 Home Runs   0.288 Batting Average What a year!\n",
+                "LITERAL Sammy Sosa completed another fine season with great stats.   63 Home Runs   0.288 Batting Average What a year!\n",
                 doTest("yaml/spec/2_15FoldedNewlines.yaml").replace("\r", ""));
     }
 
@@ -451,10 +547,10 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT Mark McGwire\n" +
                         "MAPPING_KEY \n" +
                         "TEXT accomplishment\n" +
-                        "TEXT Mark set a major league home run record in 1998. \n" +
+                        "LITERAL Mark set a major league home run record in 1998.\n" +
                         "MAPPING_KEY \n" +
                         "TEXT stats\n" +
-                        "TEXT 65 Home Runs\n" +
+                        "LITERAL 65 Home Runs\n" +
                         "0.278 Batting Average\n" +
                         "\n" +
                         "MAPPING_END \n" +
@@ -517,7 +613,10 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT 12345\n" +
                         "MAPPING_KEY \n" +
                         "TEXT decimal\n" +
-                        "TEXT +12345\n" +
+                        "TEXT +12_345\n" +
+                        "MAPPING_KEY \n" +
+                        "TEXT sexagesimal\n" +
+                        "TEXT 3:25:45\n" +
                         "MAPPING_KEY \n" +
                         "TEXT octal\n" +
                         "TEXT 0o14\n" +
@@ -541,8 +640,11 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT exponential\n" +
                         "TEXT 12.3015e+02\n" +
                         "MAPPING_KEY \n" +
+                        "TEXT sexagesimal\n" +
+                        "TEXT 20:30.15\n" +
+                        "MAPPING_KEY \n" +
                         "TEXT fixed\n" +
-                        "TEXT 1230.15\n" +
+                        "TEXT 1_230.15\n" +
                         "MAPPING_KEY \n" +
                         "TEXT negative infinity\n" +
                         "TEXT -.inf\n" +
@@ -611,7 +713,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_KEY \n" +
                         "TEXT picture\n" +
                         "TAG !binary\n" +
-                        "TEXT R0lGODlhDAAMAIQAAP//9/X\n" +
+                        "LITERAL R0lGODlhDAAMAIQAAP//9/X\n" +
                         "17unp5WZmZgAAAOfn515eXv\n" +
                         "Pz7Y6OjuDg4J+fn5OTk6enp\n" +
                         "56enmleECcgggoBADs=\n" +
@@ -620,7 +722,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_KEY \n" +
                         "TEXT application specific tag\n" +
                         "TAG something\n" +
-                        "TEXT The semantics of the tag\n" +
+                        "LITERAL The semantics of the tag\n" +
                         "above may be different for\n" +
                         "different documents.\n" +
                         "\n" +
@@ -644,7 +746,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT center\n" +
-                        "TEXT &ORIGIN\n" +
+                        "ANCHOR ORIGIN\n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT x\n" +
@@ -662,7 +764,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT start\n" +
-                        "TEXT *ORIGIN\n" +
+                        "ALIAS ORIGIN\n" +
                         "MAPPING_KEY \n" +
                         "TEXT finish\n" +
                         "MAPPING_START \n" +
@@ -679,7 +781,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT start\n" +
-                        "TEXT *ORIGIN\n" +
+                        "ALIAS ORIGIN\n" +
                         "MAPPING_KEY \n" +
                         "TEXT color\n" +
                         "TEXT 0xFFEEBB\n" +
@@ -716,7 +818,10 @@ public class YamlTokeniserTest extends WireTestCommon {
     @Test
     public void eg2_26() {
         assertEquals(
-                "DIRECTIVES_END \n" +
+                "COMMENT ordered maps are represented as\n" +
+                        "COMMENT a sequence of mappings, with\n" +
+                        "COMMENT each mapping having one key\n" +
+                        "DIRECTIVES_END \n" +
                         "TAG !omap\n" +
                         "SEQUENCE_START \n" +
                         "SEQUENCE_ENTRY \n" +
@@ -756,7 +861,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT 2001-01-23\n" +
                         "MAPPING_KEY \n" +
                         "TEXT bill-to\n" +
-                        "TEXT &id001\n" +
+                        "ANCHOR id001\n" +
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT given\n" +
@@ -769,7 +874,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT lines\n" +
-                        "TEXT 458 Walkman Dr.\n" +
+                        "LITERAL 458 Walkman Dr.\n" +
                         "Suite #292\n" +
                         "\n" +
                         "MAPPING_KEY \n" +
@@ -785,7 +890,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_END \n" +
                         "MAPPING_KEY \n" +
                         "TEXT ship-to\n" +
-                        "TEXT *id001\n" +
+                        "ALIAS id001\n" +
                         "MAPPING_KEY \n" +
                         "TEXT product\n" +
                         "SEQUENCE_START \n" +
@@ -892,7 +997,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "TEXT 23\n" +
                         "MAPPING_KEY \n" +
                         "TEXT code\n" +
-                        "TEXT x = MoreObject(\"345\\n\")\n" +
+                        "LITERAL x = MoreObject(\"345\\n\")\n" +
                         "\n" +
                         "MAPPING_END \n" +
                         "SEQUENCE_ENTRY \n" +

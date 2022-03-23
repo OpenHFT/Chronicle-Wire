@@ -19,7 +19,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NoBytesStore;
-import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
@@ -49,8 +48,6 @@ import java.util.stream.Stream;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticDirect;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
-import static net.openhft.chronicle.wire.TextWireTest.*;
-import static net.openhft.chronicle.wire.WireType.TEXT;
 import static net.openhft.chronicle.wire.YamlTokeniserTest.doTest;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
@@ -80,86 +77,6 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals(0, sb.length());
     }
 
-    @Test
-    public void testFieldWithComment() {
-        FieldWithComment f = new FieldWithComment();
-        f.field = "hello world";
-        Assert.assertEquals("!net.openhft.chronicle.wire.YamlWireTest$FieldWithComment {\n" +
-                "  field: hello world, \t\t# a comment where the value=hello world\n" +
-                "\n" +
-                "}\n", Marshallable.$toString(f));
-    }
-
-    @Test
-    public void testFieldWithComment2() {
-        FieldWithComment2 f = new FieldWithComment2();
-        f.field = "hello world";
-        Assert.assertEquals("!net.openhft.chronicle.wire.YamlWireTest$FieldWithComment2 {\n" +
-                "  field: hello world, \t\t# a comment where the value=hello world\n" +
-                "  field2: !!null \"\"\n" +
-                "}\n", Marshallable.$toString(f));
-    }
-
-    @Test
-    public void handleUnexpectedFields() {
-        TwoFields tf = Marshallable.fromString("!" + TwoFields.class.getName() + " {" +
-                "a: 1,\n" +
-                "b: two,\n" +
-                "c: three,\n" +
-                "d: 44,\n" +
-                "e: also,\n" +
-                "f: at the end\n" +
-                "}");
-        assertEquals("a=1\n" +
-                        "c=three\n" +
-                        "e=also\n" +
-                        "f=at the end",
-                asProperties(tf.others));
-
-        TwoFields tf2 = Marshallable.fromString("!" + TwoFields.class.getName() + " {" +
-                "a: 1,\n" +
-                "b: two,\n" +
-                "c: three,\n" +
-                "d: 44,\n" +
-                "e: also,\n" +
-                "}");
-        assertEquals("a=1\n" +
-                        "c=three\n" +
-                        "e=also",
-                asProperties(tf2.others));
-
-        TwoFields tf3 = Marshallable.fromString("!" + TwoFields.class.getName() + " {" +
-                "A: 1,\n" +
-                "B: two,\n" +
-                "C: three,\n" +
-                "D: 44,\n" +
-                "E: also,\n" +
-                "}");
-        assertEquals("a=1\n" +
-                        "c=three\n" +
-                        "e=also",
-                asProperties(tf3.others));
-    }
-
-    public String asProperties(Map<String, Object> map) {
-        return map.entrySet().stream().map(Object::toString).collect(Collectors.joining("\n"));
-    }
-
-    @Test
-    public void licenseCheck() {
-        WireType.TEXT.licenceCheck();
-        assertTrue(WireType.TEXT.isAvailable());
-
-        try {
-            expectException("A Chronicle-Wire-Enterprise licence is required to run this code because you are using DELTA_BINARY which is a licence product");
-            WireType.DELTA_BINARY.licenceCheck();
-            fail();
-        } catch (IllegalStateException expected) {
-            // expected
-        }
-        assertFalse(WireType.DELTA_BINARY.isAvailable());
-    }
-
     @Ignore("TODO FIX")
     @Test
     public void writeObjectWithTreeMap() {
@@ -184,9 +101,10 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals("{hello=world}", value4.map.toString());
     }
 
+    @Ignore("TODO")
     @Test
     public void testFromString() {
-        @Nullable Object w = WireType.TEXT.fromString("changedRow: {\n" +
+        @Nullable Object w = WireType.YAML.fromString("changedRow: {\n" +
                 "  row: [\n" +
                 "  ],\n" +
                 "  oldRow: {\n" +
@@ -214,6 +132,27 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     @Test
+    public void testLargeHex() {
+        Wire w = YamlWire.from(
+                "magic: 0xCAFEBABE\n");
+        assertEquals(3405691582L, w.read("magic").int64());
+    }
+
+    @Test
+    public void testCStyleOctal() {
+        // Do we need it?
+        Wire w = YamlWire.from("perms: 0644\n");
+        assertEquals(420, w.read("perms").int64());
+    }
+
+    @Test
+    public void testYamlStyleOctal() {
+        Wire w = YamlWire.from("perms: 0o750\n");
+        assertEquals(488, w.read("perms").int64());
+    }
+
+    @Ignore("TODO")
+    @Test
     public void testWriteToBinaryAndTriesToConvertToText() {
 
         Bytes b = Bytes.elasticByteBuffer();
@@ -232,7 +171,7 @@ public class YamlWireTest extends WireTestCommon {
 
         final String textYaml = Wires.fromSizePrefixedBlobs(b);
        // System.out.println(textYaml);
-        @Nullable Object o = WireType.TEXT.fromString(textYaml);
+        @Nullable Object o = WireType.YAML.fromString(textYaml);
         Assert.assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString());
 
         b.releaseLast();
@@ -685,35 +624,6 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testTypeWithEmpty() {
-        expectException("Expected a {} but was blank for type class net.openhft.chronicle.wire.YamlWireTest$YNestedB");
-
-        ClassAliasPool.CLASS_ALIASES.addAlias(YNestedA.class, YNestedB.class);
-        YNestedA a = Marshallable.fromString("!YNestedA {\n" +
-                "  b: !YNestedB,\n" +
-                "  value: 12345\n" +
-                "}");
-        assertEquals("!YNestedA {\n" +
-                "  b: {\n" +
-                "    field1: 0.0\n" +
-                "  },\n" +
-                "  value: 12345\n" +
-                "}\n", a.toString());
-    }
-
-    @Test
-    public void testSingleQuote() {
-        expectException("Expected a {} but was blank for type class net.openhft.chronicle.wire.YamlWireTest$YNestedB");
-
-        ClassAliasPool.CLASS_ALIASES.addAlias(YNestedA.class);
-        YNestedA a = Marshallable.fromString("!YNestedA {\n" +
-                "  b: !YNestedB,\n" +
-                "  value: 12345\n" +
-                "}");
-        assertNotNull(a);
-    }
-
-    @Test
     public void testBool() {
         @NotNull Wire wire = createWire();
         wire.write().bool(false)
@@ -859,22 +769,46 @@ public class YamlWireTest extends WireTestCommon {
         assertEquals(1.23, wire.read("B").float64(), 0);
     }
 
+    @Test
+    public void testQuoting() {
+        @NotNull Wire wire = createWire();
+        wire.bytes().append(
+                "nonesingle: \\\n" +
+                "nonedouble: \\\\\n" +
+                "singleself: ''''\n" +
+                "singleselfself: ''''''\n" +
+                "singlesingle: '\\'\n" +
+                "singledouble: '\\\\'\n" +
+                "doubleself: \"\\\"\"\n" +
+                "doublesingle: \"\\\\\"\n" +
+                "doubledouble: \"\\\\\\\\\"\n");
+        assertEquals("\\", wire.read("nonesingle").readString());
+        assertEquals("\\\\", wire.read("nonedouble").readString());
+        assertEquals("'", wire.read("singleself").readString());
+        assertEquals("''", wire.read("singleselfself").readString());
+        assertEquals("\\", wire.read("singlesingle").readString());
+        assertEquals("\\\\", wire.read("singledouble").readString());
+        assertEquals("\"", wire.read("doubleself").readString());
+        assertEquals("\\", wire.read("doublesingle").readString());
+        assertEquals("\\\\", wire.read("doubledouble").readString());
+    }
+
     @Ignore("TODO FIX")
     @Test
     public void testABCDBytes() {
-        @NotNull YamlWire wire = createWire();
+/*        @NotNull YamlWire wire = createWire();
         wire.bytes().append(
                 "A: \"hi\",\n" +
                         "B: 'hi',\n" +
                         "C: hi,\n" +
                         "D: bye,\n");
-        ABCD abcd = new ABCD();
+        TextWireTest.ABCD abcd = new TextWireTest.ABCD();
 
         try {
             for (int i = 0; i < 5; i++) {
                 wire.reset();
-                ABCD object = wire.getValueIn()
-                        .object(abcd, ABCD.class);
+                TextWireTest.ABCD object = wire.getValueIn()
+                        .object(abcd, TextWireTest.ABCD.class);
                 assertEquals("!net.openhft.chronicle.wire.YamlWireTest$ABCD {\n" +
                         "  A: hi,\n" +
                         "  B: hi,\n" +
@@ -889,13 +823,13 @@ public class YamlWireTest extends WireTestCommon {
             WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(ABCD.class);
             ABCD abcd0 = (ABCD) wm.defaultValue();
             abcd0.releaseAll();
-        }
+        }*/
     }
 
     @Ignore("TODO FIX")
     @Test
     public void testABCStringBuilder() {
-
+/*
         @NotNull YamlWire wire = createWire();
         wire.bytes().append(
                 "A: \"hi\",\n" +
@@ -912,7 +846,7 @@ public class YamlWireTest extends WireTestCommon {
                     "}\n", wire.getValueIn()
                     .object(abc, ABC.class)
                     .toString());
-        }
+        }*/
     }
 
     @Test
@@ -932,24 +866,6 @@ public class YamlWireTest extends WireTestCommon {
                 .read().bytes(b -> assertEquals("quotable, text", b.toString()))
                 .read().bytes(allBytes2);
         assertEquals(Bytes.wrapForRead(allBytes), allBytes2);
-    }
-
-    @Test
-    @Ignore("unreleased bytes")
-    public void testBytesField() {
-        DtoWithBytesField dto = new DtoWithBytesField(), dto2 = null;
-        byte[] binaryData = new byte[]{1, 2, 3, 4};
-        dto.bytes = Bytes.wrapForRead(binaryData);
-        dto.another = 123L;
-
-        try {
-            String cs = dto.toString();
-            dto2 = Marshallable.fromString(cs);
-            assertEquals(cs, dto2.toString());
-        } finally {
-            dto.bytes.releaseLast();
-            dto2.bytes.releaseLast();
-        }
     }
 
     @Test
@@ -1038,14 +954,14 @@ public class YamlWireTest extends WireTestCommon {
             YamlWire yw = new YamlWire(from);
             assertEquals("[\n" +
                     "  { token: STREAM_START, indent: -1, keys: !!null \"\" }\n" +
-                    "]", yw.dumpContext());
+                    "]\n", yw.dumpContext());
             yw.read("C")
                     .text();
             assertEquals("[\n" +
                     "  { token: STREAM_START, indent: -1, keys: !!null \"\" },\n" +
                     "  { token: DIRECTIVES_END, indent: -1, keys: !!null \"\" },\n" +
-                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 2, offsets: [ 10, 41, 0, 0, 0, 0, 0 ]} }\n" +
-                    "]", yw.dumpContext());
+                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 2, offsets: [ 10, 41, 0, 0, 0, 0, 0 ] }}\n" +
+                    "]\n", yw.dumpContext());
             assertEquals("{c=lo, d=xyz}", "" + yw.read("B").object());
             assertEquals("{b=1234, c=hi, d=abc}", "" + yw.read("A").object());
 
@@ -1063,8 +979,8 @@ public class YamlWireTest extends WireTestCommon {
             assertEquals("[\n" +
                     "  { token: STREAM_START, indent: -1, keys: !!null \"\" },\n" +
                     "  { token: DIRECTIVES_END, indent: -1, keys: !!null \"\" },\n" +
-                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 4, offsets: [ 2, 8, 14, 32, 0, 0, 0 ]} }\n" +
-                    "]", yw.dumpContext());
+                    "  { token: MAPPING_START, indent: 0, keys: !net.openhft.chronicle.wire.YamlKeys { count: 4, offsets: [ 2, 8, 14, 32, 0, 0, 0 ] }}\n" +
+                    "]\n", yw.dumpContext());
             assertEquals("AA", "" + yw.read("b").object());
             assertEquals("{}", "" + yw.read("c").object());
             assertEquals("{A=1, B=2}", "" + yw.read("d").object());
@@ -1272,7 +1188,7 @@ public class YamlWireTest extends WireTestCommon {
 
         @NotNull Wire wire = createWire();
         wire.write().object(WireType.BINARY)
-                .write().object(TEXT)
+                .write().object(WireType.TEXT)
                 .write().object(WireType.RAW);
 
         assertEquals("\"\": !WireType BINARY\n" +
@@ -1280,7 +1196,7 @@ public class YamlWireTest extends WireTestCommon {
                 "\"\": !WireType RAW\n", bytes.toString());
 
         assertEquals(WireType.BINARY, wire.read().object(Object.class));
-        assertEquals(TEXT, wire.read().object(Object.class));
+        assertEquals(WireType.TEXT, wire.read().object(Object.class));
         assertEquals(WireType.RAW, wire.read().object(Object.class));
     }
 
@@ -1708,7 +1624,7 @@ public class YamlWireTest extends WireTestCommon {
                 "  one,\n" +
                 "  three,\n" +
                 "  two\n" +
-                "]", wire.toString());
+                "]\n", wire.toString());
         @Nullable Object o = wire.read().object();
         assertTrue(o instanceof SortedSet);
         assertEquals(set, o);
@@ -1762,117 +1678,6 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testDoubleEngineering() {
-        ClassAliasPool.CLASS_ALIASES.addAlias(DoubleWrapper.class, "D");
-        assertEquals("!D {\n" +
-                "  d: 1.0,\n" +
-                "  n: -1.0\n" +
-                "}\n", new DoubleWrapper(1.0).toString());
-        assertEquals("!D {\n" +
-                "  d: 11.0,\n" +
-                "  n: -11.0\n" +
-                "}\n", new DoubleWrapper(11.0).toString());
-        assertEquals("!D {\n" +
-                "  d: 101.0,\n" +
-                "  n: -101.0\n" +
-                "}\n", new DoubleWrapper(101.0).toString());
-        assertEquals("!D {\n" +
-                "  d: 1E3,\n" +
-                "  n: -1E3\n" +
-                "}\n", new DoubleWrapper(1e3)
-                .toString());
-        DoubleWrapper dw = Marshallable.fromString(new DoubleWrapper(1e3).toString());
-        assertEquals(1e3, dw.d, 0);
-        assertEquals("!D {\n" +
-                "  d: 10E3,\n" +
-                "  n: -10E3\n" +
-                "}\n", new DoubleWrapper(10e3).toString());
-        DoubleWrapper dw2 = Marshallable.fromString(new DoubleWrapper(10e3).toString());
-        assertEquals(10e3, dw2.d, 0);
-
-        assertEquals("!D {\n" +
-                "  d: 100E3,\n" +
-                "  n: -100E3\n" +
-                "}\n", new DoubleWrapper(100e3).toString());
-        DoubleWrapper dw3 = Marshallable.fromString(new DoubleWrapper(100e3).toString());
-        assertEquals(100e3, dw3.d, 0);
-
-        assertEquals("!D {\n" +
-                "  d: 1E6,\n" +
-                "  n: -1E6\n" +
-                "}\n", new DoubleWrapper(1e6).toString());
-        DoubleWrapper dw4 = Marshallable.fromString(new DoubleWrapper(1e6).toString());
-        assertEquals(1e6, dw4.d, 0);
-
-        assertEquals("!D {\n" +
-                "  d: 10E6,\n" +
-                "  n: -10E6\n" +
-                "}\n", new DoubleWrapper(10e6).toString());
-        DoubleWrapper dw5 = Marshallable.fromString(new DoubleWrapper(10e6).toString());
-        assertEquals(10e6, dw5.d, 0);
-    }
-
-    @Test
-    public void testYNestedList() {
-        YNestedList nl = Marshallable.fromString("!" + YNestedList.class.getName() + " {\n" +
-                "  name: name,\n" +
-                "  listA: [ { a: 1, b: 1.2 } ],\n" +
-                "  listB: [ { a: 1, b: 1.2 }, { a: 3, b: 2.3 } ]," +
-                "  num: 128\n" +
-                "}\n");
-        String expected = "!net.openhft.chronicle.wire.YamlWireTest$YNestedList {\n" +
-                "  name: name,\n" +
-                "  listA: [\n" +
-                "    { a: 1, b: 1.2 }\n" +
-                "  ],\n" +
-                "  listB: [\n" +
-                "    { a: 1, b: 1.2 },\n" +
-                "    { a: 3, b: 2.3 }\n" +
-                "  ],\n" +
-                "  num: 128\n" +
-                "}\n";
-        assertEquals(expected, nl.toString());
-
-        OUTER:
-        for (int i = 0; i < 64; i++) {
-            Set<Integer> set = new HashSet<>();
-
-            String cs = "!net.openhft.chronicle.wire.YamlWireTest$YNestedList {\n";
-            int z = i;
-            for (int j = 0; j < 4; j++) {
-                if (!set.add(z & 3))
-                    continue OUTER;
-                switch (z & 3) {
-                    case 0:
-                        cs += "  name: name,\n";
-                        break;
-
-                    case 1:
-                        cs += "  listA: [\n" +
-                                "    { a: 1, b: 1.2 }\n" +
-                                "  ],\n";
-                        break;
-
-                    case 2:
-                        cs += "  listB: [\n" +
-                                "    { a: 1, b: 1.2 },\n" +
-                                "    { a: 3, b: 2.3 }\n" +
-                                "  ],\n";
-                        break;
-
-                    case 3:
-                        cs += "  num: 128,\n";
-                        break;
-                }
-                z /= 4;
-            }
-            cs += "}\n";
-            YNestedList nl2 = Marshallable.fromString(cs);
-            assertEquals(expected, nl2.toString());
-        }
-    }
-
-    @Test
     public void testArrayTypes() {
         Wire wire = createWire();
         wire.bytes().append("a: !type byte[]\n" +
@@ -1922,16 +1727,16 @@ public class YamlWireTest extends WireTestCommon {
     public void nestedWithEnumSet() {
         Wire wire = createWire();
         YNestedWithEnumSet n = new YNestedWithEnumSet();
-        n.list.add(new WithEnumSet("none"));
-        n.list.add(new WithEnumSet("one", EnumSet.of(TimeUnit.DAYS)));
-        n.list.add(new WithEnumSet("two", EnumSet.of(TimeUnit.DAYS, TimeUnit.HOURS)));
+        n.list.add(new TextWireTest.WithEnumSet("none"));
+        n.list.add(new TextWireTest.WithEnumSet("one", EnumSet.of(TimeUnit.DAYS)));
+        n.list.add(new TextWireTest.WithEnumSet("two", EnumSet.of(TimeUnit.DAYS, TimeUnit.HOURS)));
         wire.write("hello")
                 .object(YNestedWithEnumSet.class, n);
         assertEquals("hello: {\n" +
                 "  list: [\n" +
                 "    { name: none },\n" +
-                "    { name: one, timeUnits: [ DAYS ]},\n" +
-                "    { name: two, timeUnits: [ HOURS, DAYS ]}\n" +
+                "    { name: one, timeUnits: [ DAYS ] },\n" +
+                "    { name: two, timeUnits: [ HOURS, DAYS ] }\n" +
                 "  ]\n" +
                 "}\n", wire.toString());
 
@@ -1942,35 +1747,10 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testParse2() {
-
-        MyDto myDto1 = new MyDto();
-
-        myDto1.strings.add("hello");
-        myDto1.strings.add("world");
-
-        String cs = myDto1.toString();
-        MyDto o = Marshallable.fromString(cs);
-        assertEquals(cs, o.toString());
-
-        assert o.strings.size() == 2;
-    }
-
-    @Test
-    public void longConverter() {
-        TwoLongs twoLongs = new TwoLongs(0x1234567890abcdefL, -1);
-        assertEquals("!net.openhft.chronicle.wire.TextWireTest$TwoLongs {\n" +
-                "  hexadecimal: 1234567890abcdef,\n" +
-                "  hexa2: ffffffffffffffff\n" +
-                "}\n", twoLongs.toString());
-        assertEquals(twoLongs, Marshallable.fromString(twoLongs.toString()));
-    }
-
-    @Test
     public void testDoublePrecisionOverYamlWire() {
         final Bytes<?> bytes = Wires.acquireBytes();
 
-        final Wire wire = WireType.TEXT.apply(bytes);
+        final Wire wire = WireType.YAML.apply(bytes);
         final double d = 0.000212345678901;
         wire.getValueOut().float64(d);
 
@@ -2013,11 +1793,6 @@ public class YamlWireTest extends WireTestCommon {
         INSTANCE
     }
 
-    static class YNestedA extends SelfDescribingMarshallable {
-        YNestedB b;
-        long value;
-    }
-
     static class StringArray implements Marshallable {
         String[] strings;
     }
@@ -2032,33 +1807,10 @@ public class YamlWireTest extends WireTestCommon {
         }
     }
 
-    static class YNestedB extends SelfDescribingMarshallable {
-        double field1;
-    }
-
-    static class YNestedList extends SelfDescribingMarshallable {
-        String name;
-        List<YNestedItem> listA = new ArrayList<>();
-        List<YNestedItem> listB = new ArrayList<>();
-        transient List<YNestedItem> listA2 = new ArrayList<>();
-        transient List<YNestedItem> listB2 = new ArrayList<>();
-        int num;
-
-        @Override
-        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
-            name = wire.read("name").text();
-            wire.read("listA").sequence(listA, listA2, YNestedItem::new);
-            wire.read("listB").sequence(listB, listB2, YNestedItem::new);
-            num = wire.read("num").int32();
-        }
-    }
-
-    static class YNestedItem extends SelfDescribingMarshallable {
-        int a;
-        double b;
-    }
-
     static class YNestedWithEnumSet extends SelfDescribingMarshallable {
-        List<WithEnumSet> list = new ArrayList<>();
+        List<TextWireTest.WithEnumSet> list = new ArrayList<>();
+    }
+
+    class Circle implements Marshallable {
     }
 }
