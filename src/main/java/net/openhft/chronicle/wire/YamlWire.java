@@ -383,18 +383,19 @@ public class YamlWire extends AbstractWire implements Wire {
     @NotNull
     protected StringBuilder readField(@NotNull StringBuilder sb) {
         startEventIfTop();
-        sb.setLength(0);
         if (yt.current() == YamlToken.MAPPING_KEY) {
             yt.next();
             if (yt.current() == YamlToken.TEXT) {
-                sb.append(yt.text());
+                String text = yt.text(); // May use sb so we need to reset it after
+                sb.setLength(0);
+                sb.append(text);
                 unescape(sb, yt.blockQuote());
                 yt.next();
             } else {
                 throw new IllegalStateException(yt.toString());
             }
         } else {
-            return sb;
+            sb.setLength(0);
         }
         return sb;
     }
