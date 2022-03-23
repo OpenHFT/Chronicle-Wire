@@ -7,6 +7,7 @@ spec:
   rules:
     - services: ["hello.default.svc.cluster.local"]
       methods: ["GET", "HEAD"]
+...
 ---
 apiVersion: "rbac.istio.io/v1alpha1"
 kind: ServiceRole
@@ -17,6 +18,7 @@ spec:
   rules:
     - services: ["world.default.svc.cluster.local"]
       methods: ["GET", "HEAD"]
+...
 ---
 apiVersion: "rbac.istio.io/v1alpha1"
 kind: ServiceRole
@@ -27,6 +29,7 @@ spec:
   rules:
     - services: ["world-2.default.svc.cluster.local"]
       methods: ["GET", "HEAD"]
+...
 ---
 apiVersion: "rbac.istio.io/v1alpha1"
 kind: ServiceRoleBinding
@@ -40,6 +43,7 @@ spec:
   roleRef:
     kind: ServiceRole
     name: "hello-viewer"
+...
 ---
 apiVersion: "rbac.istio.io/v1alpha1"
 kind: ServiceRoleBinding
@@ -52,6 +56,7 @@ spec:
   roleRef:
     kind: ServiceRole
     name: "world-viewer"
+...
 ---
 apiVersion: "rbac.istio.io/v1alpha1"
 kind: ServiceRoleBinding
@@ -64,6 +69,7 @@ spec:
   roleRef:
     kind: ServiceRole
     name: "world-2-viewer"
+...
 ---
 ###
 ### Kubernetes Service accounts
@@ -72,11 +78,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: hello
+...
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: world
+...
 ---
 ###
 ### helloworld.yaml deployments, including a serviceaccount
@@ -109,6 +117,7 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+...
 ---
 apiVersion: v1
 kind: Service
@@ -123,6 +132,7 @@ spec:
     - name: http
       port: 8080
       targetPort: 8080
+...
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -151,6 +161,7 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+...
 ---
 apiVersion: v1
 kind: Service
@@ -165,6 +176,7 @@ spec:
     - name: http
       port: 8080
       targetPort: 8080
+...
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -190,6 +202,7 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+...
 ---
 apiVersion: v1
 kind: Service
@@ -204,6 +217,7 @@ spec:
     - name: http
       port: 8080
       targetPort: 8080
+...
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
@@ -219,6 +233,7 @@ spec:
         protocol: HTTP
       hosts:
         - "*"
+...
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -236,6 +251,7 @@ spec:
             subset: v1
             port:
               number: 8080
+...
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
@@ -251,3 +267,4 @@ spec:
     - name: v1
       labels:
         version: v1
+...

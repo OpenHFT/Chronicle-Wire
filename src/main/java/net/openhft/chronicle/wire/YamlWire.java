@@ -34,6 +34,8 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
@@ -55,6 +57,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 public class YamlWire extends AbstractWire implements Wire {
     public static final BytesStore TYPE = BytesStore.from("!type ");
     static final String SEQ_MAP = "!seqmap";
+    static final String BINARY_TAG = "!binary";
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
     static final BitSet QUOTE_CHARS = new BitSet();
@@ -2496,6 +2499,11 @@ public class YamlWire extends AbstractWire implements Wire {
                 return null;
             final StringBuilder stringBuilder = acquireStringBuilder();
             yt.text(stringBuilder);
+
+            // Do not handle !!binary, do not resolve to BytesStore, do not consume tag
+            if (BINARY_TAG.contentEquals(stringBuilder))
+                return null;
+
             try {
                 yt.next();
                 return classLookup().forName(stringBuilder);
@@ -2871,6 +2879,17 @@ public class YamlWire extends AbstractWire implements Wire {
                 case NONE:
                     return null;
 
+                case TAG:
+                    final StringBuilder stringBuilder = acquireStringBuilder();
+                    yt.text(stringBuilder);
+
+                    if (BINARY_TAG.contentEquals(stringBuilder)) {
+                        yt.next();
+                        return decodeBinary(type);
+                    }
+
+                    // Intentional fall-through
+
                 default:
                     throw new UnsupportedOperationException("Cannot determine what to do with " + yt.current());
             }
@@ -2936,7 +2955,10 @@ public class YamlWire extends AbstractWire implements Wire {
                     clazz == SortedSet.class ? new TreeSet<>() :
                             clazz == Set.class ? new LinkedHashSet<>() :
                                     new ArrayList<>();
-            readCollection(coll);
+            @Nullable Class componentType = (clazz != null && clazz.isArray() && clazz.getComponentType().isPrimitive())
+                    ? clazz.getComponentType() : null;
+
+            readCollection(componentType, coll);
             if (clazz != null && clazz.isArray()) {
                 Object o = Array.newInstance(clazz.getComponentType(), coll.size());
                 if (clazz.getComponentType().isPrimitive()) {
@@ -2950,12 +2972,37 @@ public class YamlWire extends AbstractWire implements Wire {
             return coll;
         }
 
-        private void readCollection(Collection list) {
+        private void readCollection(@Nullable Class clazz, @NotNull Collection list) {
             sequence(list, (l, v) -> {
                 while (v.hasNextSequenceItem()) {
-                    l.add(v.object());
+                    l.add(v.object(clazz));
                 }
             });
+        }
+
+        private Object decodeBinary(Class type) {
+            Object o = objectWithInferredType(null, SerializationStrategies.ANY_SCALAR, String.class);
+            byte[] decoded = Base64.getDecoder().decode(o == null ? "" : o.toString().replaceAll("\\s", ""));
+
+            // Does this logic belong here?
+            if (type == null || BytesStore.class.isAssignableFrom(type))
+                return BytesStore.wrap(decoded);
+
+            if (type.isArray() && type.getComponentType().equals(Byte.TYPE))
+                return decoded;
+
+            // For BitSet, other types may be supported in the future
+            try {
+                Method valueOf = type.getDeclaredMethod("valueOf", byte[].class);
+                Jvm.setAccessible(valueOf);
+                return valueOf.invoke(null, decoded);
+            } catch (NoSuchMethodException e) {
+                // ignored
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                throw new IllegalStateException(e);
+            }
+
+            throw new UnsupportedOperationException("Cannot determine how to deserialize " + type + " from binary data");
         }
 
         @Override

@@ -45,12 +45,13 @@ public class PrimArraysTest extends WireTestCommon {
     }
 
     @NotNull
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "wt={0}, asText={2}")
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
         for (WireType wt : new WireType[]{
                 WireType.TEXT,
-                WireType.BINARY
+                WireType.BINARY,
+                WireType.YAML
         }) {
             @NotNull final Object[] objects = {
                     new boolean[]{true, false},

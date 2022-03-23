@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -32,7 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static net.openhft.chronicle.wire.WireType.YAML;
@@ -40,64 +38,33 @@ import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
-public class YamlSpecificationTest extends WireTestCommon {
-    static {
-        ClassAliasPool.CLASS_ALIASES.addAlias(String.class, "something");
-        /*ClassAliasPool.CLASS_ALIASES.addAlias(Circle.class, "circle");
-        ClassAliasPool.CLASS_ALIASES.addAlias(Shape.class, "shape");
-        ClassAliasPool.CLASS_ALIASES.addAlias(Line.class, "line");
-        ClassAliasPool.CLASS_ALIASES.addAlias(Label.class, "label");*/
-    }
-
+public class YamlSpecificationTextWireTest extends WireTestCommon {
     private final String input;
 
-    public YamlSpecificationTest(String input) {
+    public YamlSpecificationTextWireTest(String input) {
         this.input = input;
     }
 
     @Parameterized.Parameters(name = "case={0}")
     public static Collection<Object[]> tests() {
-        return Arrays.asList(new String[][]{
+        return Arrays.asList(new Object[][]{
                     {"2_1_SequenceOfScalars"},
                     {"2_2_MappingScalarsToScalars"},
-                    {"2_3_MappingScalarsToSequences"},
-                    {"2_4_SequenceOfMappings"},
-                    {"2_5_SequenceOfSequences"},
                     {"2_6_MappingOfMappings"},
-                    {"2_7_TwoDocumentsInAStream"},
-                    // {"example2_8"},
-                    {"2_9_SingleDocumentWithTwoComments"},
-                    {"2_10_NodeAppearsTwiceInThisDocument"},
-                    // {"2_11MappingBetweenSequences"}, // Not supported
-                    {"2_12CompactNestedMapping"},
-                    {"2_13InLiteralsNewlinesArePreserved"},
-                    {"2_14InThefoldedScalars"},
-                    // {"example2_15"}, // Not supported
-                    // {"example2_16"}, // Not supported
-                    {"2_17QuotedScalars"},
-                    // {"example2_18"}, // Not supported
-                    {"2_19Integers"},
-                    // {"2_20FloatingPoint"}, // TODO fix handling of .nan/.inf
-                    {"2_21MiscellaneousBis"},
-                    // {"example2_22"}, // TODO fix handling of times.
-                    {"2_23VariousExplicitTags"},
-                    // {"example2_24"}, // TODO FIx handling of anchors
-                    // {"example2_25"}, // TODO support set
-                    // {"2_26OrderedMappings"}, // TODO support omap
-                    // {"example2_27"}, // Not supported
-                    // {"example2_28"} // Not supported
+                    // {"2_19Integers"},
+                    {"2_21MiscellaneousBis"}
             });
     }
 
     @Test
     public void decodeAs() throws IOException {
         String snippet = new String(getBytes(input + ".yaml"), StandardCharsets.UTF_8);
-        String actual = parseWithYaml(snippet);
+        String actual = parseWithText(snippet);
 
         byte[] expectedBytes = getBytes(input + ".out.yaml");
         String expected;
         if (expectedBytes != null) {
-            assertEquals(actual, parseWithYaml(actual));
+            assertEquals(actual, parseWithText(actual));
 
             expected = new String(expectedBytes, StandardCharsets.UTF_8);
         } else {
@@ -108,11 +75,11 @@ public class YamlSpecificationTest extends WireTestCommon {
     }
 
     @NotNull
-    private String parseWithYaml(String snippet) {
-        Object o = YAML.fromString(snippet);
+    private String parseWithText(String snippet) {
+        Object o = TEXT.fromString(snippet);
         Bytes bytes = Bytes.allocateElasticOnHeap();
 
-        YamlWire tw = new YamlWire(bytes);
+        TextWire tw = new TextWire(bytes);
         tw.writeObject(o);
 
         return bytes.toString();
@@ -128,31 +95,3 @@ public class YamlSpecificationTest extends WireTestCommon {
         return byteArr;
     }
 }
-/*
---- !shape
-  # Use the ! handle for presenting
-  # tag:clarkevans.com,2002:circle
-- !circle
-  center: &ORIGIN {x: 73, y: 129}
-  radius: 7
-- !line
-  start: *ORIGIN
-  finish: { x: 89, y: 102 }
-- !label
-  start: *ORIGIN
-  color: 0xFFEEBB
-  text: Pretty vector drawing.
- */
-/*
-class Shape implements Marshallable {
-}
-
-class Circle implements Marshallable {
-}
-
-class Line implements Marshallable {
-}
-
-class Label implements Marshallable {
-}
-*/
