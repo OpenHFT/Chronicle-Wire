@@ -1051,6 +1051,8 @@ public class TextWire extends AbstractWire implements Wire {
 
     @Nullable
     public Object readObject() {
+        consumePadding();
+        consumeDocumentStart();
         return getValueIn().object(Object.class);
     }
 

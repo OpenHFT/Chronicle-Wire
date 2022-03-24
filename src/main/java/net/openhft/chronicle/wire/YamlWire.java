@@ -383,18 +383,19 @@ public class YamlWire extends AbstractWire implements Wire {
     @NotNull
     protected StringBuilder readField(@NotNull StringBuilder sb) {
         startEventIfTop();
-        sb.setLength(0);
         if (yt.current() == YamlToken.MAPPING_KEY) {
             yt.next();
             if (yt.current() == YamlToken.TEXT) {
-                sb.append(yt.text());
+                String text = yt.text(); // May use sb so we need to reset it after
+                sb.setLength(0);
+                sb.append(text);
                 unescape(sb, yt.blockQuote());
                 yt.next();
             } else {
                 throw new IllegalStateException(yt.toString());
             }
         } else {
-            return sb;
+            sb.setLength(0);
         }
         return sb;
     }
@@ -916,14 +917,11 @@ public class YamlWire extends AbstractWire implements Wire {
     @Override
     public void endEvent() {
         int minIndent = yt.topContext().indent;
+
         switch (yt.current()) {
-            case MAPPING_KEY:
             case MAPPING_END:
             case DOCUMENT_END:
             case NONE:
-                break;
-            case SEQUENCE_END:
-                yt.next();
                 break;
             default:
                 valueIn.consumeAny(minIndent);
@@ -1129,7 +1127,7 @@ public class YamlWire extends AbstractWire implements Wire {
             if (dropDefault) {
                 writeSavedEventName();
             }
-            return bytes("!binary", byteArray);
+            return bytes(BINARY_TAG, byteArray);
         }
 
         @NotNull
@@ -2159,14 +2157,15 @@ public class YamlWire extends AbstractWire implements Wire {
                         consumeAny(minIndent);
                     break;
                 case SEQUENCE_END:
-                case MAPPING_END:
                     yt.next(minIndent);
                     break;
                 case TEXT:
                     yt.next(minIndent);
                     break;
+                case MAPPING_END:
                 case STREAM_START:
                 case DOCUMENT_END:
+                case NONE:
                     break;
                 default:
                     throw new UnsupportedOperationException(yt.toString());
