@@ -917,14 +917,11 @@ public class YamlWire extends AbstractWire implements Wire {
     @Override
     public void endEvent() {
         int minIndent = yt.topContext().indent;
+
         switch (yt.current()) {
-            case MAPPING_KEY:
             case MAPPING_END:
             case DOCUMENT_END:
             case NONE:
-                break;
-            case SEQUENCE_END:
-                yt.next();
                 break;
             default:
                 valueIn.consumeAny(minIndent);
@@ -2160,14 +2157,15 @@ public class YamlWire extends AbstractWire implements Wire {
                         consumeAny(minIndent);
                     break;
                 case SEQUENCE_END:
-                case MAPPING_END:
                     yt.next(minIndent);
                     break;
                 case TEXT:
                     yt.next(minIndent);
                     break;
+                case MAPPING_END:
                 case STREAM_START:
                 case DOCUMENT_END:
+                case NONE:
                     break;
                 default:
                     throw new UnsupportedOperationException(yt.toString());
