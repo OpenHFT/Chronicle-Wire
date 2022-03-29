@@ -1,6 +1,6 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.wire.internal.HttpMarshallableOut;
+import net.openhft.chronicle.wire.internal.URLMarshallableOut;
 
 import java.net.URL;
 import java.util.function.Supplier;
@@ -18,10 +18,10 @@ public class MarshallableOutBuilder implements Supplier<MarshallableOut> {
             case "tcp":
                 throw new UnsupportedOperationException("Direct TCP connection not implemented");
             case "file":
-                throw new UnsupportedOperationException("Writing to FILE a not implemented");
+                return new URLMarshallableOut(this, WireType.YAML);
             case "http":
             case "https":
-                return new HttpMarshallableOut(this);
+                return new URLMarshallableOut(this, WireType.JSON);
             default:
                 throw new UnsupportedOperationException("Writing to " + url.getProtocol() + " is  not implemented");
         }
