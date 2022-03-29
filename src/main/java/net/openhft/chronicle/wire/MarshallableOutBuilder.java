@@ -1,5 +1,6 @@
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.wire.internal.FileMarshallableOut;
 import net.openhft.chronicle.wire.internal.URLMarshallableOut;
 
 import java.net.URL;
@@ -18,7 +19,8 @@ public class MarshallableOutBuilder implements Supplier<MarshallableOut> {
             case "tcp":
                 throw new UnsupportedOperationException("Direct TCP connection not implemented");
             case "file":
-                return new URLMarshallableOut(this, WireType.YAML);
+                // URL file protocol doesn't support writing...
+                return new FileMarshallableOut(this, WireType.YAML_ONLY);
             case "http":
             case "https":
                 return new URLMarshallableOut(this, WireType.JSON);

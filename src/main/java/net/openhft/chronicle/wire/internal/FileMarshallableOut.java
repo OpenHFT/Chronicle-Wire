@@ -1,16 +1,14 @@
 package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URL;
-import java.net.URLConnection;
 
-public class HttpMarshallableOut implements MarshallableOut {
+public class FileMarshallableOut implements MarshallableOut {
     private final URL url;
     private Wire wire;
     private final DocumentContextHolder dcHolder = new DocumentContextHolder() {
@@ -19,25 +17,19 @@ public class HttpMarshallableOut implements MarshallableOut {
             super.close();
             if (wire.bytes().isEmpty())
                 return;
-            try {
-                final URLConnection connection = url.openConnection();
-                try {
-                    try (final OutputStream out = connection.getOutputStream()) {
-                        final Bytes<byte[]> bytes = (Bytes<byte[]>) wire.bytes();
-                        out.write(bytes.underlyingObject(), 0, (int) bytes.readLimit());
-                    }
-                } finally {
-                    Closeable.closeQuietly(connection);
-                }
+            try (FileOutputStream out = new FileOutputStream(url.getFile())) {
+                final Bytes<byte[]> bytes = (Bytes<byte[]>) wire.bytes();
+                out.write(bytes.underlyingObject(), 0, (int) bytes.readLimit());
             } catch (IOException ioe) {
                 throw new IORuntimeException(ioe);
             }
         }
     };
 
-    public HttpMarshallableOut(MarshallableOutBuilder builder) {
+    public FileMarshallableOut(MarshallableOutBuilder builder, WireType wIreType) {
         this.url = builder.url();
-        this.wire = WireType.JSON.apply(Bytes.allocateElasticOnHeap());
+        assert url.getProtocol().equals("file");
+        this.wire = wIreType.apply(Bytes.allocateElasticOnHeap());
     }
 
     @Override
@@ -48,6 +40,7 @@ public class HttpMarshallableOut implements MarshallableOut {
 
     @Override
     public DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException {
-        return writingDocument(metaData);
+        dcHolder.documentContext(wire.acquireWritingDocument(metaData));
+        return dcHolder;
     }
 }
