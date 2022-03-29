@@ -210,7 +210,7 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
                     "Enterprise licence is required to run this code because you are using " +
                     "DELTA_BINARY which is a licence product. " +
                     "Please contact sales@chronicle.software");
-            Jvm.error().on(WireType.class,  licence);
+            Jvm.error().on(WireType.class, licence);
             throw licence;
         }
 
@@ -301,6 +301,18 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             } finally {
                 bytes.releaseLast();
             }
+        }
+
+        @Override
+        public boolean isText() {
+            return true;
+        }
+    },
+    YAML_ONLY {
+        @NotNull
+        @Override
+        public Wire apply(@NotNull Bytes bytes) {
+            return new YamlWire(bytes).useTextDocuments();
         }
 
         @Override
