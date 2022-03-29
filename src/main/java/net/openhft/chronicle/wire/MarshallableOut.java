@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.DontChain;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.URL;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
@@ -32,6 +33,11 @@ import java.util.stream.Stream;
  */
 @DontChain
 public interface MarshallableOut extends DocumentWritten {
+
+    static MarshallableOutBuilder builder(URL url) {
+        return new MarshallableOutBuilder(url);
+    }
+
     /**
      * Start a document which is completed when DocumentContext.close() is called. You can use a
      * <pre>
