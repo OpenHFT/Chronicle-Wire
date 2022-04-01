@@ -7,37 +7,61 @@ import net.openhft.chronicle.wire.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 
-public class URLMarshallableOut implements MarshallableOut {
+public class HTTPMarshallableOut implements MarshallableOut {
     private final URL url;
     private Wire wire;
     private final DocumentContextHolder dcHolder = new DocumentContextHolder() {
         @Override
         public void close() {
+            if (chainedElement())
+                return;
             super.close();
             if (wire.bytes().isEmpty())
                 return;
             try {
-                final URLConnection connection = url.openConnection();
+                final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setDoOutput(true);
+                conn.setRequestMethod("POST");
+
                 try {
-                    try (final OutputStream out = connection.getOutputStream()) {
+                    endWire();
+                    try (final OutputStream out = conn.getOutputStream()) {
                         final Bytes<byte[]> bytes = (Bytes<byte[]>) wire.bytes();
                         out.write(bytes.underlyingObject(), 0, (int) bytes.readLimit());
                     }
+
+                    final int responseCode = conn.getResponseCode();
+                    if (responseCode < 200 || responseCode >= 300)
+                        throw new IORuntimeException("ResponseCode: " + responseCode);
+
                 } finally {
-                    Closeable.closeQuietly(connection);
+                    Closeable.closeQuietly(conn);
                 }
             } catch (IOException ioe) {
                 throw new IORuntimeException(ioe);
             }
+            startWire();
         }
     };
 
-    public URLMarshallableOut(MarshallableOutBuilder builder, WireType wIreType) {
+    public HTTPMarshallableOut(MarshallableOutBuilder builder, WireType wIreType) {
         this.url = builder.url();
         this.wire = wIreType.apply(Bytes.allocateElasticOnHeap());
+        startWire();
+    }
+
+    void startWire() {
+        wire.clear();
+        if (wire instanceof JSONWire)
+            wire.bytes().append('{').readPosition(1);
+    }
+
+    void endWire() {
+        if (wire instanceof JSONWire)
+            wire.bytes().append('}').append('\n').readPosition(0);
     }
 
     @Override

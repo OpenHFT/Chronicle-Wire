@@ -452,49 +452,6 @@ public class JSONWire extends TextWire {
                 final Class<?> clazz = classLookup().forName(sb.subSequence(1, sb.length()));
                 return parseType(null, clazz);
             }
-
-/*
-            consumePadding();
-            final char openingBracket = bytes.readChar();
-            assert openingBracket == '{';
-            consumePadding();
-            final char openingQuote = bytes.readChar();
-            assert openingQuote == '"';
-            final Class<?> typePrefix = typePrefix();
-            consumePadding();
-            final char closingQuote = bytes.readChar();
-            assert closingQuote == '"'; */
-
-
-            /*
-            final StringBuilder sb = Wires.acquireStringBuilder();
-            sb.setLength(0);
-            this.wireIn().read(sb);
-            try {
-                final Bytes<?> bytes2 = wireIn().bytes();
-                assert sb.charAt(0) == '@' : "Did not start with an @ character: " + bytes;
-                final Class<?> clazz = Class.forName(sb.substring(1));
-                this.wireIn().consumePadding();
-
-                final long writePos = bytes.writePosition();
-                bytes.writePosition(bytes.readPosition());
-                bytes.writeChar('!');
-                bytes.writePosition(writePos);
-
-                // Skip opening bracket
-                // this.wireIn().bytes().readChar();
-
-                final Object object = objectWithInferredType(null, SerializationStrategies.ANY_NESTED, clazz);
-                //final Object object = object(clazz);
-
-                // this.wireIn().consumePadding();
-                // Skip closing bracket (todo: assert })
-                // this.wireIn().bytes().readChar();
-
-                return object;
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException(e);
-            } */
         }
 
         private <E> E parseType(@Nullable E using, @NotNull Class clazz) {
@@ -554,44 +511,5 @@ public class JSONWire extends TextWire {
         public boolean useTypes() {
             return useTypes;
         }
-
     }
-
-/*
-    final class MapMarshaller<K, V> implements WriteMarshallable {
-        private Map<K, V> map;
-        private Class<K> kClass;
-        private Class<V> vClass;
-        private boolean leaf;
-
-        void params(@Nullable Map<K, V> map, @NotNull Class<K> kClass, @NotNull Class<V> vClass, boolean leaf) {
-            this.map = map;
-            this.kClass = kClass;
-            this.vClass = vClass;
-            this.leaf = leaf;
-        }
-
-        @Override
-        public void writeMarshallable(@NotNull WireOut wire) {
-            for (@NotNull Map.Entry<K, V> entry : map.entrySet()) {
-                final K key = entry.getKey();
-
-                Bytes bytes = null;
-                bytes.app
-
-
-
-//                 StringUtils
-
-                ValueOut valueOut = wire.write()writeEvent(kClass, entry.getKey());
-
-                boolean wasLeaf = valueOut.swapLeaf(leaf);
-                valueOut.object(vClass, entry.getValue());
-                valueOut.swapLeaf(wasLeaf);
-            }
-        }
-    }
-    */
-
-
 }
