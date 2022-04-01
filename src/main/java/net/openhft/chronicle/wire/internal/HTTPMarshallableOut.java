@@ -25,6 +25,7 @@ public class HTTPMarshallableOut implements MarshallableOut {
                 final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setDoOutput(true);
                 conn.setRequestMethod("POST");
+                conn.setRequestProperty("Connection", "Close");
 
                 try {
                     endWire();
@@ -37,6 +38,8 @@ public class HTTPMarshallableOut implements MarshallableOut {
                     if (responseCode < 200 || responseCode >= 300)
                         throw new IORuntimeException("ResponseCode: " + responseCode);
 
+                    Closeable.closeQuietly(conn.getInputStream());
+                    Closeable.closeQuietly(conn.getErrorStream());
                 } finally {
                     Closeable.closeQuietly(conn);
                 }

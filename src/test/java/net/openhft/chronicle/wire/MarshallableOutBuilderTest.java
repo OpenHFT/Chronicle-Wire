@@ -5,7 +5,11 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.jlbh.JLBH;
+import net.openhft.chronicle.jlbh.JLBHOptions;
+import net.openhft.chronicle.jlbh.JLBHTask;
 import org.junit.Test;
 
 import java.io.File;
@@ -87,6 +91,10 @@ public class MarshallableOutBuilderTest {
         server.stop(1);
     }
 
+    interface Timed {
+        void time(long timeNS);
+    }
+
     static class Handler implements HttpHandler {
         private final BlockingQueue<String> queue;
 
@@ -102,6 +110,75 @@ public class MarshallableOutBuilderTest {
                 sb.append(ch);
             queue.add(sb.toString());
             xchg.sendResponseHeaders(202, 0);
+        }
+    }
+
+    static class Benchmark implements JLBHTask {
+        static final int PORT = 65432;
+        static final int THROUGHPUT = Integer.getInteger("throughput", 50);
+        private HttpServer server;
+        private Timed timed;
+        private JLBH jlbh;
+
+        public static void main(String[] args) {
+            JLBHOptions jlbhOptions = new JLBHOptions()
+                    .warmUpIterations(2000)
+                    .iterations(THROUGHPUT * 30)
+                    .throughput(THROUGHPUT)
+                    .runs(10)
+                    .recordOSJitter(false).accountForCoordinatedOmission(false)
+                    .jlbhTask(new Benchmark());
+            new JLBH(jlbhOptions).start();
+        }
+
+        @Override
+        public void init(JLBH jlbh) {
+            this.jlbh = jlbh;
+            try {
+                server = HttpServer.create(new InetSocketAddress(PORT), 50);
+                server.createContext("/bench", new BenchHandler());
+                server.start();
+                final URL url = new URL("http://localhost:" + PORT + "/bench");
+                MarshallableOut out = MarshallableOut.builder(url).wireType(WireType.JSON_ONLY).get();
+                timed = out.methodWriter(Timed.class);
+            } catch (IOException ioe) {
+                throw Jvm.rethrow(ioe);
+            }
+        }
+
+        @Override
+        public void run(long startTimeNS) {
+            timed.time(startTimeNS);
+        }
+
+        @Override
+        public void complete() {
+            server.stop(1);
+        }
+
+        class BenchHandler implements HttpHandler {
+            Wire wire = WireType.JSON_ONLY.apply(Bytes.allocateElasticOnHeap(128));
+
+            @Override
+            public void handle(HttpExchange xchg) {
+                try {
+                    InputStream is = xchg.getRequestBody();
+                    final Bytes<byte[]> bytes2 = (Bytes<byte[]>) wire.bytes();
+                    int length = is.available();
+                    byte[] bytes = bytes2.underlyingObject();
+                    int length2 = is.read(bytes);
+                    assert length == length2;
+                    bytes2.readPositionRemaining(0, length2);
+                    if (wire.bytes().peekUnsignedByte() == '{')
+                        wire.bytes().readUnsignedByte();
+                    final long time = wire.read("time").int64();
+                    jlbh.sample(System.nanoTime() - time);
+
+                    xchg.sendResponseHeaders(202, 0);
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
         }
     }
 }
