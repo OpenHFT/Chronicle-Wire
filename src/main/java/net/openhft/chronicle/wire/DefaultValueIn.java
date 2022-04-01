@@ -374,7 +374,7 @@ public class DefaultValueIn implements ValueIn {
 
     @Nullable
     @Override
-    public Object marshallable(@NotNull Object object, SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
+    public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy) throws BufferUnderflowException, IORuntimeException {
         return defaultValue;
     }
 

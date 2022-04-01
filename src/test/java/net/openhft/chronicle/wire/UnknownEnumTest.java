@@ -9,8 +9,7 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class UnknownEnumTest extends WireTestCommon {
 
@@ -26,7 +25,7 @@ public class UnknownEnumTest extends WireTestCommon {
     }
 
     @Test
-    public void testUnknownEnum() {
+    public void testUnknownDynamicEnum() {
         Wire wire = createWire();
         wire.write("value").text("Maybe");
 
@@ -39,6 +38,13 @@ public class UnknownEnumTest extends WireTestCommon {
         assertEquals("Maybe", maybe);
     }
 
+    @Test
+    public void testUnknownStaticEnum() {
+        Wire wire = createWire();
+        wire.write("value").text("Maybe");
+
+        assertThrows(IllegalArgumentException.class, () -> wire.read("value").asEnum(StrictYesNo.class));
+    }
    // private enum Temp {
        // FIRST
    // }
@@ -63,6 +69,7 @@ public class UnknownEnumTest extends WireTestCommon {
        // }
        // System.out.println();
 
+        expectException("Unknown class (net.openhft.chronicle.wire.UnknownEnumTest$Temp), perhaps you need to define an alias");
         final Bytes<ByteBuffer> bytes = Bytes.wrapForRead(ByteBuffer.wrap(SERIALISED_MAP_DATA));
 
         final Wire wire = WireType.BINARY.apply(bytes);
@@ -88,6 +95,11 @@ public class UnknownEnumTest extends WireTestCommon {
     }
 
     enum YesNo implements DynamicEnum {
+        Yes,
+        No
+    }
+
+    enum StrictYesNo {
         Yes,
         No
     }

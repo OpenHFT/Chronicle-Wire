@@ -3136,14 +3136,13 @@ public class TextWire extends AbstractWire implements Wire {
                 bytes.readSkip(-1);
                 try {
                     return classLookup().forName(stringBuilder);
-                } catch (NoClassDefFoundError e) {
-                    throw new IORuntimeException("Unable to load class " + e, e);
                 } catch (ClassNotFoundRuntimeException e) {
                     if (tClass == null) {
                         if (Wires.GENERATE_TUPLES) {
                             return Wires.tupleFor(null, stringBuilder.toString());
                         }
-                        throw new NoClassDefFoundError("Unable to load " + stringBuilder + ", is a class alias missing.");
+                        Jvm.warn().on(TextWire.class, "Unable to load " + stringBuilder + ", is a class alias missing.");
+                        return null;
                     }
 
                     final String className = tClass.getName();
