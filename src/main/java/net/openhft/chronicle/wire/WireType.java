@@ -281,6 +281,18 @@ public enum WireType implements Function<Bytes, Wire>, LicenceCheck {
             return true;
         }
     },
+    JSON_ONLY {
+        @NotNull
+        @Override
+        public Wire apply(@NotNull Bytes bytes) {
+            return new JSONWire(bytes).trimFirstCurly(false).useTextDocuments();
+        }
+
+        @Override
+        public boolean isText() {
+            return true;
+        }
+    },
     YAML {
         @NotNull
         @Override
