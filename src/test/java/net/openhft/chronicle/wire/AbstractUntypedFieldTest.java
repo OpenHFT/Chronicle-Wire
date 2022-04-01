@@ -49,6 +49,20 @@ class AbstractUntypedFieldTest extends WireTestCommon {
         assertNull(holder.a);
     }
 
+    @ParameterizedTest
+    @MethodSource("provideWire")
+    void missingAliasesShouldLogWarnings(Function<Bytes<byte[]>, Wire> wireConstruction) {
+        final Bytes<byte[]> bytes = Bytes.from("!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
+                "  a: !MissingAlias {\n" +
+                "  }\n" +
+                "}");
+        final Wire textWire = wireConstruction.apply(bytes);
+
+        expectException("Ignoring exception and setting field 'a' to null");
+        expectException("Cannot find a class for MissingAlias are you missing an alias?");
+        assertNull(textWire.getValueIn().object(Holder.class).a);
+    }
+
     static abstract class A {
     }
 

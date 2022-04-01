@@ -429,7 +429,7 @@ public interface ValueIn {
     }
 
     @Nullable
-    Object marshallable(Object object, SerializationStrategy strategy)
+    Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy)
             throws BufferUnderflowException, IORuntimeException;
 
     default boolean marshallable(@NotNull Serializable object) throws BufferUnderflowException, IORuntimeException {
@@ -545,6 +545,7 @@ public interface ValueIn {
     @Nullable
     Class typePrefix();
 
+    @Nullable
     default Object typePrefixOrObject(Class tClass) {
         return typePrefix();
     }

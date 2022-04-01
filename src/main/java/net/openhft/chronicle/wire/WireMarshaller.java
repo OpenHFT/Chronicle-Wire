@@ -753,6 +753,7 @@ public class WireMarshaller<T> {
                             !type.isEnum() &&
                             !read.isTyped()) {
                         // retain the null value of object
+                        Jvm.warn().on(getClass(), "Ignoring exception and setting field '" + field.getName() + "' to null", e);
                     } else {
                         Jvm.rethrow(e);
                     }
