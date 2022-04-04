@@ -7,6 +7,9 @@ import net.openhft.chronicle.wire.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 public class FileMarshallableOut implements MarshallableOut {
     private final URL url;
@@ -21,9 +24,17 @@ public class FileMarshallableOut implements MarshallableOut {
             if (wire.bytes().isEmpty())
                 return;
 
-            try (FileOutputStream out = new FileOutputStream(url.getPath(), options.append)) {
+            final String path = url.getPath();
+            final String path0 = options.append ? path : (path + ".tmp");
+            try (FileOutputStream out = new FileOutputStream(path0, options.append)) {
                 final Bytes<byte[]> bytes = (Bytes<byte[]>) wire.bytes();
                 out.write(bytes.underlyingObject(), 0, (int) bytes.readLimit());
+            } catch (IOException ioe) {
+                throw new IORuntimeException(ioe);
+            }
+            try {
+                if (!options.append)
+                    Files.move(Paths.get(path0), Paths.get(path), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             } catch (IOException ioe) {
                 throw new IORuntimeException(ioe);
             }
