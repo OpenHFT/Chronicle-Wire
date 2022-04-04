@@ -25,7 +25,6 @@ public class HTTPMarshallableOut implements MarshallableOut {
                 final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setDoOutput(true);
                 conn.setRequestMethod("POST");
-                conn.setRequestProperty("Connection", "Close");
 
                 try {
                     endWire();
