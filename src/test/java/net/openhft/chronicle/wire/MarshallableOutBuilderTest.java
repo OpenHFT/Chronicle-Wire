@@ -55,6 +55,8 @@ public class MarshallableOutBuilderTest {
         writeMessages(url);
         final Bytes bytes = BytesUtil.readFile(file.getAbsolutePath());
         assertEquals(expected, bytes.toString());
+        // can overwrite ok
+        writeMessages(url);
     }
 
     private void writeMessages(URL url) {
