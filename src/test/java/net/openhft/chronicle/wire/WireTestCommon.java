@@ -14,10 +14,12 @@ import org.junit.Before;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class WireTestCommon {
     protected ThreadDump threadDump;
     protected Map<ExceptionKey, Integer> exceptions;
+    private final Map<Predicate<ExceptionKey>, String> ignoredExceptions = new LinkedHashMap<>();
     private final Map<Predicate<ExceptionKey>, String> expectedExceptions = new LinkedHashMap<>();
 
     private boolean gt;
@@ -45,8 +47,20 @@ public class WireTestCommon {
         exceptions = Jvm.recordExceptions();
     }
 
+    public void ignoreException(String message) {
+        ignoreException(k -> contains(k.message, message) || (k.throwable != null && contains(k.throwable.getMessage(), message)), message);
+    }
+
+    static boolean contains(String text, String message) {
+        return text != null && text.contains(message);
+    }
+
+    public void ignoreException(Predicate<ExceptionKey> predicate, String description) {
+        ignoredExceptions.put(predicate, description);
+    }
+
     public void expectException(String message) {
-        expectException(k -> k.message.contains(message) || (k.throwable != null && k.throwable.getMessage().contains(message)), message);
+        expectException(k -> contains(k.message, message) || (k.throwable != null && contains(k.throwable.getMessage(), message)), message);
     }
 
     public void expectException(Predicate<ExceptionKey> predicate, String description) {
@@ -56,13 +70,19 @@ public class WireTestCommon {
     public void checkExceptions() {
         for (Map.Entry<Predicate<ExceptionKey>, String> expectedException : expectedExceptions.entrySet()) {
             if (!exceptions.keySet().removeIf(expectedException.getKey()))
-                Slf4jExceptionHandler.WARN.on(getClass(), "No error for " + expectedException.getValue());
+                throw new AssertionError("No error for " + expectedException.getValue());
         }
         expectedExceptions.clear();
+        for (Map.Entry<Predicate<ExceptionKey>, String> ignoredException : ignoredExceptions.entrySet()) {
+            if (!exceptions.keySet().removeIf(ignoredException.getKey()))
+                Slf4jExceptionHandler.DEBUG.on(getClass(), "Ignored " + ignoredException.getValue());
+        }
+        ignoredExceptions.clear();
         if (Jvm.hasException(exceptions)) {
+            final String msg = exceptions.size() + " exceptions were detected: " + exceptions.keySet().stream().map(ek -> ek.message).collect(Collectors.joining(", "));
             Jvm.dumpException(exceptions);
             Jvm.resetExceptionHandlers();
-            Assert.fail();
+            Assert.fail(msg);
         }
     }
 
