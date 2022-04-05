@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 public class TwoArraysTest extends WireTestCommon {
     @Test
     public void testTwoArrays() {
-        expectException("BytesMarshallable found in field which is not matching exactly");
+        ignoreException("BytesMarshallable found in field which is not matching exactly");
         Bytes bytes = new HexDumpBytes();
         Wire wire = new BinaryWire(bytes);
         TwoArrays ta = new TwoArrays(4, 8);
