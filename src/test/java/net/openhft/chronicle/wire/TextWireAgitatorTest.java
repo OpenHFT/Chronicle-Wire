@@ -1,25 +1,19 @@
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 // Test created as a result of agitator tests i.e. random character changes
 public class TextWireAgitatorTest extends WireTestCommon {
-    @Test(expected = IORuntimeException.class)
-    public void lowerCaseClass() {
-        if (!OS.isWindows())
-            throw new IORuntimeException("Only fails this way on Windows");
-        TextWireTest.MyDto myDto = Marshallable.fromString("!" + TextWireTest.MyDto.class.getName() + " { }");
-        assertEquals("!net.openhft.chronicle.wire.TextWireTest$MyDto {\n" +
-                "  strings: [  ]\n" +
-                "}\n", myDto.toString());
 
-        TextWireTest.MyDto myDto2 = Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }");
-        assertNotNull(myDto2);
+    @Test
+    public void lowerCaseClass() {
+        expectException("Unable to load net.openhft.chronicle.wire.textwiretest$mydto, is a class alias missing");
+        assertTrue(Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }") instanceof Map);
     }
 
     @Test(expected = IORuntimeException.class)
