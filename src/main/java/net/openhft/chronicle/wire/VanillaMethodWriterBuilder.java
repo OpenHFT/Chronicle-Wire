@@ -195,7 +195,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
 
         //noinspection unchecked
-        return (T) Proxy.newProxyInstance(classLoader, interfacesArr, new CallSupplierInvocationHandler());
+        return (T) Proxy.newProxyInstance(classLoader, interfacesArr, new CallSupplierInvocationHandler(this));
     }
 
     @Nullable
@@ -304,7 +304,17 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     /**
      * throws AbortCallingProxyException if the updateInterceptor returns {@code false}
      */
-    class CallSupplierInvocationHandler implements InvocationHandler {
+    static final class CallSupplierInvocationHandler implements InvocationHandler {
+
+        private final UpdateInterceptor updateInterceptor;
+        private final MethodWriterInvocationHandlerSupplier handlerSupplier;
+
+        CallSupplierInvocationHandler(@NotNull final VanillaMethodWriterBuilder builder) {
+            // Take a snapshot of these values so the builder can be reclaimed by the GC later
+            this.updateInterceptor = builder.updateInterceptor;
+            this.handlerSupplier = builder.handlerSupplier;
+        }
+
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             Object args0 = args == null ? null : args[args.length - 1];
