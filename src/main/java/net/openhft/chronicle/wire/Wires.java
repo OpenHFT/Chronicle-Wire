@@ -473,25 +473,23 @@ public enum Wires {
     }
 
     @Nullable
-    public static <E> E objectMap(ValueIn in, @Nullable E using, @Nullable Class clazz, SerializationStrategy<E> strategy) {
+    public static <E> E objectMap(ValueIn in, @Nullable E using, @Nullable Class clazz, @NotNull SerializationStrategy<E> strategy) {
         if (in.isNull())
             return null;
-        boolean nullObject = false;
         if (clazz == Object.class)
             strategy = MAP;
         if (using == null) {
             using = (E) strategy.newInstanceOrNull(clazz);
-            nullObject = using == null;
         }
         if (Throwable.class.isAssignableFrom(clazz))
             return (E) WireInternal.throwable(in, false, (Throwable) using);
 
-        if (using == null && !nullObject)
+        if (using == null)
             throw new IllegalStateException("failed to create instance of clazz=" + clazz + " is it aliased?");
+
         final long position = in.wireIn().bytes().readPosition();
         Object marshallable = in.marshallable(using, strategy);
-        // only do a readResolve if an object was provided.
-        E e = using != null ? readResolve(marshallable) : (E) marshallable;
+        E e = readResolve(marshallable);
         String name = nameOf(e);
         if (name != null) {
             E e2 = (E) EnumCache.of(e.getClass()).valueOf(name);
@@ -613,14 +611,19 @@ public enum Wires {
         }
     }
 
+    @Nullable
     public static <T> T tupleFor(Class<T> tClass, String typeName) {
-        if (!GENERATE_TUPLES)
-            throw new IllegalArgumentException("Cannot find a class for " + typeName + " are you missing an alias?");
+        if (!GENERATE_TUPLES) {
+            Jvm.warn().on(Wires.class, "Cannot find a class for " + typeName + " are you missing an alias?");
+            return null;
+        }
 
         if (tClass == null || tClass == Object.class)
             tClass = (Class<T>) Marshallable.class;
-        if (!tClass.isInterface())
-            throw new IllegalArgumentException("Cannot generate a class for " + typeName + " are you missing an alias?");
+        if (!tClass.isInterface()) {
+            Jvm.warn().on(Wires.class, "Cannot generate a class for " + typeName + " are you missing an alias?");
+            return null;
+        }
         return (T) MARSHALLABLE_FUNCTION.get(tClass).apply(typeName);
     }
 

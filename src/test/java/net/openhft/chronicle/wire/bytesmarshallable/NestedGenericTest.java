@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
 public class NestedGenericTest extends WireTestCommon {
     @Test
     public void testGeneric() {
-        expectException("BytesMarshallable found in field which is not matching exactly, the object may not unmarshall correctly if that type is not specified: " +
+        ignoreException("BytesMarshallable found in field which is not matching exactly, the object may not unmarshall correctly if that type is not specified: " +
                 "net.openhft.chronicle.wire.bytesmarshallable.NestedGenericTest$A. The warning will not repeat so there may be more types affected.");
         Bytes bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(bytes);

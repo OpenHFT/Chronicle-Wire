@@ -3437,11 +3437,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             try {
                 return sb == null ? null : classLookup().forName(sb);
             } catch (ClassNotFoundRuntimeException e) {
-                if (Wires.dtoInterface(tClass)) {
-                    if (GENERATE_TUPLES)
-                        return Wires.tupleFor(tClass, sb.toString());
-                    Jvm.warn().on(getClass(), "Unknown class, perhaps you need to define an alias", e);
+                if (Wires.dtoInterface(tClass) && GENERATE_TUPLES) {
+                    return Wires.tupleFor(tClass, sb.toString());
                 }
+                Jvm.warn().on(getClass(), "Unknown class (" + sb + "), perhaps you need to define an alias", e);
                 return null;
             }
         }
@@ -3560,7 +3559,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
         @Override
         @Nullable
-        public Object marshallable(@Nullable Object object, @NotNull SerializationStrategy strategy)
+        public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy)
                 throws BufferUnderflowException, IORuntimeException {
             if (this.isNull())
                 return null;
