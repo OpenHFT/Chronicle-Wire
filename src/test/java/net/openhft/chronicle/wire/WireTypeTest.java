@@ -100,7 +100,7 @@ public class WireTypeTest extends WireTestCommon {
             @NotNull String tmp = OS.getTarget() + "/testFromFile-" + Time.uniqueId();
             wt.toFile(tmp, tm);
             @Nullable Object o;
-            if (wt == WireType.JSON)
+            if (wt == WireType.JSON || wt == WireType.JSON_ONLY)
                 o = wt.apply(BytesUtil.readFile(tmp)).getValueIn().object(TestMarshallable.class);
             else
                 o = wt.fromFile(tmp);
