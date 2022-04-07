@@ -28,10 +28,12 @@ import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.values.*;
+import net.openhft.chronicle.threads.NamedThreadFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
+import java.lang.ref.Reference;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
@@ -40,6 +42,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -735,6 +738,8 @@ public interface ValueOut {
         } else if (Object[].class.isAssignableFrom(value.getClass())) {
             @NotNull Class type = value.getClass().getComponentType();
             return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), value.getClass());
+        } else if (value instanceof AtomicReference) {
+            return object(((AtomicReference) value).get());
         } else if (value instanceof Serializable) {
             return typedMarshallable((Serializable) value);
         } else if (value instanceof ByteBuffer) {
@@ -745,6 +750,10 @@ public interface ValueOut {
         } else if (value instanceof IntValue) {
             IntValue value2 = (IntValue) value;
             return int32forBinding(value2.getValue(), value2);
+        } else if (value instanceof Reference) {
+            return object(((Reference) value).get());
+        } else if (value instanceof NamedThreadFactory) {
+            return text(((NamedThreadFactory) value).getName());
         } else {
             if ((Wires.isInternal(value)))
                 throw new IllegalArgumentException("type=" + value.getClass() +
