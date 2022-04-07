@@ -25,7 +25,6 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.*;
-import net.openhft.chronicle.threads.BusyPauser;
 import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -300,7 +299,7 @@ public class HashWire implements WireOut, BytesComment {
     @NotNull
     @Override
     public Pauser pauser() {
-        return BusyPauser.INSTANCE;
+        throw new UnsupportedOperationException();
     }
 
     @Override

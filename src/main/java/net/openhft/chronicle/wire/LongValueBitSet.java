@@ -41,7 +41,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
     /* Used to shift left or right for a partial word mask */
     private static final long WORD_MASK = ~0L;
-    private transient Pauser pauser = Pauser.busy();
+    private transient Pauser pauser;
 
     /**
      * The internal field corresponding to the serialField "bits".
