@@ -3,7 +3,11 @@ package net.openhft.chronicle.wire.marshallable;
 import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.bytes.BytesUtil;
-import net.openhft.chronicle.wire.*;
+import net.openhft.chronicle.bytes.util.BinaryLengthLength;
+import net.openhft.chronicle.wire.Base85LongConverter;
+import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
+import net.openhft.chronicle.wire.LongConversion;
+import net.openhft.chronicle.wire.MicroTimestampLongConverter;
 
 public class TriviallyCopyableMarketData extends BytesInBinaryMarshallable {
     private static final int[] START_END = BytesUtil.triviallyCopyableRange(TriviallyCopyableMarketData.class);
@@ -30,5 +34,14 @@ public class TriviallyCopyableMarketData extends BytesInBinaryMarshallable {
     @Override
     public void writeMarshallable(BytesOut bytes) {
         bytes.unsafeWriteObject(this, START, LENGTH);
+    }
+
+    public void securityId(long securityId) {
+        this.securityId = securityId;
+    }
+
+    @Override
+    public BinaryLengthLength binaryLengthLength() {
+        return BinaryLengthLength.LENGTH_8BIT;
     }
 }

@@ -189,18 +189,26 @@ public class VanillaMethodReader implements MethodReader {
             return;
         }
 
+        Jvm.debug().on(VanillaMethodReader.class, logMessage0(s, v));
+    }
+
+    // package local for testing
+    static @NotNull String logMessage0(@NotNull CharSequence s, @NotNull ValueIn v) {
         try {
             @NotNull String name = s.toString();
             String rest;
 
             if (v.wireIn().isBinary()) {
-                Bytes bytes = Bytes.elasticByteBuffer((int) (v.wireIn().bytes().readRemaining() * 3 / 2 + 64));
-                long pos = v.wireIn().bytes().readPosition();
+                final Bytes<?> bytes0 = v.wireIn().bytes();
+                Bytes bytes = Bytes.allocateElasticOnHeap((int) (bytes0.readRemaining() * 3 / 2 + 64));
+                long pos = bytes0.readPosition();
                 try {
                     v.wireIn().copyTo(new TextWire(bytes));
                     rest = bytes.toString();
+                } catch (Exception t) {
+                    rest = bytes0.toHexString(pos, bytes0.readLimit() - pos);
                 } finally {
-                    v.wireIn().bytes().readPosition(pos);
+                    bytes0.readPosition(pos);
                     bytes.releaseLast();
                 }
             } else {
@@ -209,11 +217,12 @@ public class VanillaMethodReader implements MethodReader {
             // TextWire.toString has an \n at the end
             if (rest.endsWith("\n"))
                 rest = rest.substring(0, rest.length() - 1);
-            Jvm.debug().on(VanillaMethodReader.class, "read " + name + " - " + rest);
+            return "read " + name + " - " + rest;
         } catch (Exception ignore) {
             // todo commented out til the following is fixed  - https://github.com/ChronicleEnterprise/Chronicle-Services/issues/240
             // Jvm.warn().on(VanillaMethodReader.class, "s=" + s, e);
         }
+        return null;
     }
 
     private Object[] addObjectsToMetaDataHandlers(Object[] metaDataHandler, @NotNull Object @NotNull [] objects) {
