@@ -573,7 +573,8 @@ public interface ValueOut {
         if (value == null)
             return nu11();
         // look for exact matches
-        switch (value.getClass().getName()) {
+        final Class<?> valueClass = value.getClass();
+        switch (valueClass.getName()) {
             case "[B": {
                 typePrefix(byte[].class).bytes((byte[]) value);
                 endTypePrefix();
@@ -586,7 +587,7 @@ public interface ValueOut {
             case "[F":
             case "[D":
             case "[Z":
-                ValueOut valueOut = typePrefix(value.getClass());
+                ValueOut valueOut = typePrefix(valueClass);
                 boolean wasLeaf = valueOut.swapLeaf(true);
                 valueOut.sequence(value, (v, out) -> {
                     int len = Array.getLength(v);
@@ -598,8 +599,18 @@ public interface ValueOut {
                 endTypePrefix();
                 return wireOut();
 
+            case "net.openhft.chronicle.threads.NamedThreadFactory":
+                return text(((NamedThreadFactory) value).getName());
             case "net.openhft.chronicle.wire.RawText":
                 return rawText(((RawText) value).text);
+            case "java.util.concurrent.atomic.AtomicReference":
+                return object(((AtomicReference) value).get());
+            case "java.util.concurrent.atomic.AtomicLong.class":
+                return int64(((AtomicLong) value).get());
+            case "java.util.concurrent.atomic.AtomicInteger":
+                return int32(((AtomicInteger) value).get());
+            case "java.util.concurrent.atomic.AtomicBoolean":
+                return bool(((AtomicBoolean) value).get());
             case "java.lang.String":
                 return text((String) value);
             case "java.lang.Byte":
@@ -644,6 +655,25 @@ public interface ValueOut {
                 endTypePrefix();
                 return result;
             }
+            case "java.util.BitSet": {
+                typePrefix(BitSet.class);
+
+                BitSet bs = (BitSet) value;
+                boolean isTextWire = TextWire.TextValueOut.class.isAssignableFrom(this.getClass());
+
+                // note : this like the others below this is capturing lambda
+                return sequence(v -> {
+                    for (int i = 0; i < bs.size() >> 6; i++) {
+                        long l = BitSetUtil.getWord(bs, i);
+                        WireOut wireOut = v.int64(l);
+                        if (isTextWire) {
+                            String bits = Long.toBinaryString(l);
+                            wireOut.writeComment(ZEROS_64.substring(bits.length()) + bits);
+                        }
+                    }
+                });
+            }
+
             case "java.util.UUID": {
                 final WireOut result = optionalTyped(UUID.class).uuid((UUID) value);
                 endTypePrefix();
@@ -654,7 +684,7 @@ public interface ValueOut {
             case "java.sql.Time":
             case "java.util.Date":
             case "java.sql.Date": {
-                final WireOut result = Wires.SerializeJavaLang.writeDate((Date) value, typePrefix(value.getClass()));
+                final WireOut result = Wires.SerializeJavaLang.writeDate((Date) value, typePrefix(valueClass));
                 endTypePrefix();
                 return result;
             }
@@ -670,17 +700,17 @@ public interface ValueOut {
             case "java.math.BigDecimal":
             case "java.time.Duration":
             case "java.io.File": {
-                final WireOut result = optionalTyped(value.getClass()).text(value.toString());
+                final WireOut result = optionalTyped(valueClass).text(value.toString());
                 endTypePrefix();
                 return result;
             }
         }
         if (value instanceof WriteMarshallable) {
             if (isAnEnum(value)) {
-                Jvm.debug().on(getClass(), "Treating " + value.getClass() + " as enum not WriteMarshallable");
+                Jvm.debug().on(getClass(), "Treating " + valueClass + " as enum not WriteMarshallable");
                 return typedScalar(value);
             }
-            if (value.getClass().getName().contains("$$Lambda"))
+            if (valueClass.getName().contains("$$Lambda"))
                 return marshallable((WriteMarshallable) value);
             else
                 return typedMarshallable((WriteMarshallable) value);
@@ -688,7 +718,7 @@ public interface ValueOut {
         if (value instanceof WriteBytesMarshallable) {
             if (!Wires.warnedUntypedBytesOnce) {
                 Jvm.warn().on(ValueOut.class, "BytesMarshallable found in field which is not matching exactly, " +
-                        "the object may not unmarshall correctly if that type is not specified: " + value.getClass().getName() +
+                        "the object may not unmarshall correctly if that type is not specified: " + valueClass.getName() +
                         ". The warning will not repeat so there may be more types affected.");
 
                 Wires.warnedUntypedBytesOnce = true;
@@ -710,47 +740,20 @@ public interface ValueOut {
             return throwable((Throwable) value);
         if (isAnEnum(value))
             return typedScalar(value);
-        if (value instanceof BitSet) {
-            typePrefix(BitSet.class);
-
-            BitSet bs = (BitSet) value;
-            boolean isTextWire = TextWire.TextValueOut.class.isAssignableFrom(this.getClass());
-
-            // note : this like the others below this is capturing lambda
-            return sequence(v -> {
-                for (int i = 0; i < bs.size() >> 6; i++) {
-                    long l = BitSetUtil.getWord(bs, i);
-                    WireOut wireOut = v.int64(l);
-                    if (isTextWire) {
-                        String bits = Long.toBinaryString(l);
-                        wireOut.writeComment(ZEROS_64.substring(bits.length()) + bits);
-                    }
-                }
-            });
-
-        }
         if (value instanceof Collection) {
             if (value instanceof SortedSet)
                 typePrefix(SortedSet.class);
             else if (value instanceof Set)
                 typePrefix(Set.class);
             return sequence(v -> ((Collection) value).forEach(v::object));
-        } else if (WireSerializedLambda.isSerializableLambda(value.getClass())) {
+        } else if (WireSerializedLambda.isSerializableLambda(valueClass)) {
             WireSerializedLambda.write(value, this);
             return wireOut();
-        } else if (Object[].class.isAssignableFrom(value.getClass())) {
-            @NotNull Class type = value.getClass().getComponentType();
-            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), value.getClass());
+        } else if (Object[].class.isAssignableFrom(valueClass)) {
+            @NotNull Class type = valueClass.getComponentType();
+            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), valueClass);
         } else if (value instanceof Thread) {
             return text(((Thread) value).getName());
-        } else if (value instanceof AtomicReference) {
-            return object(((AtomicReference) value).get());
-        } else if (value instanceof AtomicLong) {
-            return int64(((AtomicLong) value).get());
-        } else if (value instanceof AtomicInteger) {
-            return int32(((AtomicInteger) value).get());
-        } else if (value instanceof AtomicBoolean) {
-            return bool(((AtomicBoolean) value).get());
         } else if (value instanceof Serializable) {
             return typedMarshallable((Serializable) value);
         } else if (value instanceof ByteBuffer) {
@@ -763,11 +766,9 @@ public interface ValueOut {
             return int32forBinding(value2.getValue(), value2);
         } else if (value instanceof Reference) {
             return object(((Reference) value).get());
-        } else if (value instanceof NamedThreadFactory) {
-            return text(((NamedThreadFactory) value).getName());
         } else {
             if ((Wires.isInternal(value)))
-                throw new IllegalArgumentException("type=" + value.getClass() +
+                throw new IllegalArgumentException("type=" + valueClass +
                         " is unsupported, it must either be of type Marshallable, String or " +
                         "AutoBoxed primitive Object");
 
@@ -777,7 +778,7 @@ public interface ValueOut {
             } catch (IllegalArgumentException e) {
                 if (isBinary())
                     throw e;
-                typeName = value.getClass().getName();
+                typeName = valueClass.getName();
             }
             if (typeName != null)
                 typePrefix(typeName);
