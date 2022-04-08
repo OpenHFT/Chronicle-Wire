@@ -23,15 +23,13 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                              .withConcurrentThreadsNum(1)
                              .build()) {
             final String actual = WireType.TEXT.asString(eg);
-            System.out.println(actual);
+//            System.out.println(actual);
             assertEquals("" +
                     "!net.openhft.chronicle.threads.EventGroup {\n" +
                     "  referenceId: 0,\n" +
                     "  lifecycle: !net.openhft.chronicle.threads.EventLoopLifecycle NEW,\n" +
                     "  name: test,\n" +
-                    "  counter: !java.util.concurrent.atomic.AtomicInteger {\n" +
-                    "    value: 0\n" +
-                    "  },\n" +
+                    "  counter: 0,\n" +
                     "  monitor: !net.openhft.chronicle.threads.MonitorEventLoop {\n" +
                     "    referenceId: 0,\n" +
                     "    lifecycle: !net.openhft.chronicle.threads.EventLoopLifecycle NEW,\n" +
@@ -39,11 +37,7 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "    handlers: [\n" +
                     "      !net.openhft.chronicle.threads.MonitorEventLoop$IdempotentLoopStartedEventHandler { referenceId: 0, loopStarted: false }\n" +
                     "    ],\n" +
-                    "    pauser: !net.openhft.chronicle.threads.MilliPauser { pausing: !java.util.concurrent.atomic.AtomicBoolean { value: 0 },\n" +
-                    "      pauseTimeMS: 10,\n" +
-                    "      timePaused: 0,\n" +
-                    "      countPaused: 0,\n" +
-                    "      pauseUntilMS: 0}\n" +
+                    "    pauser: !net.openhft.chronicle.threads.MilliPauser { pausing: false, pauseTimeMS: 10, timePaused: 0, countPaused: 0, pauseUntilMS: 0 }\n" +
                     "  },\n" +
                     "  core: !net.openhft.chronicle.threads.VanillaEventLoop {\n" +
                     "    referenceId: 0,\n" +
@@ -51,17 +45,7 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "    name: testcore-event-loop,\n" +
                     "    mediumHandlers: [    ],\n" +
                     "    newHandler: !!null \"\",\n" +
-                    "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 100000, maxPauseTimeNS: 20000000, pausing: !java.util.concurrent.atomic.AtomicBoolean { value: 0 },\n" +
-                    "      minBusy: 0,\n" +
-                    "      minCount: 100,\n" +
-                    "      count: 0,\n" +
-                    "      pauseTimeNS: 100000,\n" +
-                    "      timePaused: 0,\n" +
-                    "      countPaused: 0,\n" +
-                    "      thread: !!null \"\",\n" +
-                    "      yieldStart: 0,\n" +
-                    "      timeOutStart: 9223372036854775807,\n" +
-                    "      pauseUntilNS: 0},\n" +
+                    "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 100000, maxPauseTimeNS: 20000000, pausing: false, minBusy: 0, minCount: 100, count: 0, pauseTimeNS: 100000, timePaused: 0, countPaused: 0, thread: !!null \"\", yieldStart: 0, timeOutStart: 9223372036854775807, pauseUntilNS: 0 },\n" +
                     "    daemon: true,\n" +
                     "    binding: none,\n" +
                     "    mediumHandlersArray: [ ],\n" +
@@ -90,24 +74,12 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "    name: testblocking-event-loop,\n" +
                     "    handlers: [    ],\n" +
                     "    threadFactory: testblocking-event-loop,\n" +
-                    "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 100000, maxPauseTimeNS: 20000000, pausing: !java.util.concurrent.atomic.AtomicBoolean { value: 0 },\n" +
-                    "      minBusy: 0,\n" +
-                    "      minCount: 100,\n" +
-                    "      count: 0,\n" +
-                    "      pauseTimeNS: 100000,\n" +
-                    "      timePaused: 0,\n" +
-                    "      countPaused: 0,\n" +
-                    "      thread: !!null \"\",\n" +
-                    "      yieldStart: 0,\n" +
-                    "      timeOutStart: 9223372036854775807,\n" +
-                    "      pauseUntilNS: 0}\n" +
+                    "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 100000, maxPauseTimeNS: 20000000, pausing: false, minBusy: 0, minCount: 100, count: 0, pauseTimeNS: 100000, timePaused: 0, countPaused: 0, thread: !!null \"\", yieldStart: 0, timeOutStart: 9223372036854775807, pauseUntilNS: 0 }\n" +
                     "  },\n" +
                     "  pauser: !net.openhft.chronicle.threads.LongPauser {\n" +
                     "    minPauseTimeNS: 100000,\n" +
                     "    maxPauseTimeNS: 20000000,\n" +
-                    "    pausing: !java.util.concurrent.atomic.AtomicBoolean {\n" +
-                    "      value: 0\n" +
-                    "    },\n" +
+                    "    pausing: false,\n" +
                     "    minBusy: 0,\n" +
                     "    minCount: 100,\n" +
                     "    count: 0,\n" +
@@ -137,9 +109,7 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "    !!null \"\"\n" +
                     "  ],\n" +
                     "  milliPauser: !net.openhft.chronicle.threads.MilliPauser {\n" +
-                    "    pausing: !java.util.concurrent.atomic.AtomicBoolean {\n" +
-                    "      value: 0\n" +
-                    "    },\n" +
+                    "    pausing: false,\n" +
                     "    pauseTimeMS: 50,\n" +
                     "    timePaused: 0,\n" +
                     "    countPaused: 0,\n" +
