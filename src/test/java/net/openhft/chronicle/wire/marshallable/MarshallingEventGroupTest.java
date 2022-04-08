@@ -6,10 +6,11 @@ import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.threads.PauserMode;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+@Ignore
 public class MarshallingEventGroupTest extends WireTestCommon {
     @Test
     public void test() {
