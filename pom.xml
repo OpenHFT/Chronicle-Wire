@@ -281,7 +281,7 @@
         <url>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</url>
         <connection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</connection>
         <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</developerConnection>
-        <tag>chronicle-wire-2.23ea4</tag>
+        <tag>ea</tag>
     </scm>
 
     <profiles>
