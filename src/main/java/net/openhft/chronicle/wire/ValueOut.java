@@ -42,6 +42,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
@@ -738,8 +741,16 @@ public interface ValueOut {
         } else if (Object[].class.isAssignableFrom(value.getClass())) {
             @NotNull Class type = value.getClass().getComponentType();
             return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), value.getClass());
+        } else if (value instanceof Thread) {
+            return text(((Thread) value).getName());
         } else if (value instanceof AtomicReference) {
             return object(((AtomicReference) value).get());
+        } else if (value instanceof AtomicLong) {
+            return int64(((AtomicLong) value).get());
+        } else if (value instanceof AtomicInteger) {
+            return int32(((AtomicInteger) value).get());
+        } else if (value instanceof AtomicBoolean) {
+            return bool(((AtomicBoolean) value).get());
         } else if (value instanceof Serializable) {
             return typedMarshallable((Serializable) value);
         } else if (value instanceof ByteBuffer) {
