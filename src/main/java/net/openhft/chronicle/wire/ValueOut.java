@@ -256,7 +256,7 @@ public interface ValueOut {
     WireOut typeLiteral(@Nullable CharSequence type);
 
     @NotNull
-    WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes> typeTranslator, @Nullable Class type);
+    WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class type);
 
     @NotNull
     WireOut uuid(UUID uuid);
@@ -927,12 +927,12 @@ public interface ValueOut {
     WireOut wireOut();
 
     @NotNull
-    default WireOut compress(@NotNull String compression, @Nullable Bytes uncompressedBytes) {
+    default WireOut compress(@NotNull String compression, @Nullable Bytes<?> uncompressedBytes) {
         if (uncompressedBytes == null)
             return nu11();
         if (uncompressedBytes.readRemaining() < SMALL_MESSAGE)
             return bytes(uncompressedBytes);
-        Bytes tmpBytes = WireInternal.acquireInternalBytes();
+        Bytes<?> tmpBytes = WireInternal.acquireInternalBytes();
         Compression.compress(compression, uncompressedBytes, tmpBytes);
         bytes(compression, tmpBytes);
         return wireOut();

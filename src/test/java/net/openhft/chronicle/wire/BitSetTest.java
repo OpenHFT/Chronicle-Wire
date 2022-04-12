@@ -11,7 +11,7 @@ public class BitSetTest extends WireTestCommon {
 
     @Test
     public void testBitSetEquals() {
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         try {
             Wire wire = WireType.TEXT.apply(b);
 
@@ -28,7 +28,7 @@ public class BitSetTest extends WireTestCommon {
 
     @Test
     public void testBitSetEquals2() {
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         try {
             Wire wire = WireType.TEXT.apply(b);
 
@@ -46,7 +46,7 @@ public class BitSetTest extends WireTestCommon {
 
     @Test
     public void testBitSetToText() {
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         try {
             Wire wire = WireType.TEXT.apply(b);
 
@@ -66,7 +66,7 @@ public class BitSetTest extends WireTestCommon {
 
     @Test
     public void testBitSet2ToText() {
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         try {
             Wire wire = WireType.TEXT.apply(b);
 
@@ -92,7 +92,7 @@ public class BitSetTest extends WireTestCommon {
         BitSet using = new BitSet(4);
         using.set(1);
 
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         try {
             Wire wire = WireType.TEXT.apply(b);
 

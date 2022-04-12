@@ -104,7 +104,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     public void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads() {
 
         @SuppressWarnings("rawtypes")
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes<?> b = Bytes.elasticByteBuffer();
         try {
             Wire w = WireType.FIELDLESS_BINARY.apply(b);
             w.usePadding(true);

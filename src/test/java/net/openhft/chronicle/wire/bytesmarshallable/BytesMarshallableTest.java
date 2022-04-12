@@ -167,7 +167,7 @@ public class BytesMarshallableTest extends WireTestCommon {
         }
 
         @Override
-        public void readMarshallable(BytesIn bytes) throws IORuntimeException {
+        public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException {
             flag = bytes.readBoolean();
             s8 = bytes.readByte();
             ch = (char) Maths.toUInt16(bytes.readStopBit());
@@ -179,7 +179,7 @@ public class BytesMarshallableTest extends WireTestCommon {
         }
 
         @Override
-        public void writeMarshallable(BytesOut bytes) {
+        public void writeMarshallable(BytesOut<?> bytes) {
             bytes.writeBoolean(flag);
             bytes.writeByte(s8);
             bytes.writeStopBit(ch);
@@ -194,7 +194,7 @@ public class BytesMarshallableTest extends WireTestCommon {
     static class ScalarDto extends BytesInBinaryMarshallable {
         String text;
         StringBuilder buffer;
-        Bytes bytes;
+        Bytes<?> bytes;
 
         static ScalarDto init(int i) {
             return init(i, new ScalarDto());
@@ -215,7 +215,7 @@ public class BytesMarshallableTest extends WireTestCommon {
         }
 
         @Override
-        public void readMarshallable(BytesIn in) throws IORuntimeException {
+        public void readMarshallable(BytesIn<?> in) throws IORuntimeException {
             text = in.read8bit();
             if (buffer == null) buffer = new StringBuilder();
             in.read8bit(buffer);
@@ -224,7 +224,7 @@ public class BytesMarshallableTest extends WireTestCommon {
         }
 
         @Override
-        public void writeMarshallable(BytesOut out) {
+        public void writeMarshallable(BytesOut<?> out) {
             out.write8bit(text);
             out.write8bit(buffer);
             if (bytes == null) {

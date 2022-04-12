@@ -51,7 +51,7 @@ enum DataFields implements WireKey {
 
 @State(Scope.Thread)
 public class Main {
-    final Bytes bytes = Bytes.allocateDirect(128).unchecked(true);
+    final Bytes<?> bytes = Bytes.allocateDirect(128).unchecked(true);
     final Wire twireUTF = new TextWire(bytes, false);
     final Wire twire8bit = new TextWire(bytes, true);
     final Wire bwireFFF = new BinaryWire(bytes, false, false, false, Integer.MAX_VALUE, "binary", false);
@@ -202,7 +202,7 @@ public class Main {
     }
 
 //    @Benchmark
-    public Bytes baseline() {
+    public Bytes<?> baseline() {
         bytes.clear();
 //        bytes.writeSkip(4);
 //        tcdata.writeMarshallable(bytes);

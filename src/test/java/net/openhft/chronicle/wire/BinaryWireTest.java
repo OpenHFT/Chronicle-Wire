@@ -51,7 +51,7 @@ public class BinaryWireTest extends WireTestCommon {
     final int compressedSize;
     @SuppressWarnings("rawtypes")
     @NotNull
-    Bytes bytes = new HexDumpBytes();
+    Bytes<?> bytes = new HexDumpBytes();
 
     public BinaryWireTest(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;

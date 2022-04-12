@@ -38,7 +38,7 @@ public class RFCExamplesTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testPuts() {
-        @NotNull Bytes bytes = Bytes.allocateElasticOnHeap();
+        @NotNull Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 /*
 --- !!meta-data
 csp:///service-lookup
@@ -147,7 +147,7 @@ put: [ 3, bye ]
     }
 
     @SuppressWarnings("rawtypes")
-    public void clear(@NotNull Bytes bytes) {
+    public void clear(@NotNull Bytes<?> bytes) {
         bytes.clear();
         bytes.zeroOut(0, bytes.realCapacity());
     }

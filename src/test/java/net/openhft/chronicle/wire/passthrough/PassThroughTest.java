@@ -35,7 +35,7 @@ public class PassThroughTest extends WireTestCommon {
 
         assertEquals(input, wire2.toString());
 
-        Bytes bytes3 = new HexDumpBytes();
+        Bytes<?> bytes3 = new HexDumpBytes();
         Wire wire3 = new TextWire(bytes3).useTextDocuments();
 
         final MethodReader reader2 = wire2.methodReader(new Destination() {
@@ -86,7 +86,7 @@ public class PassThroughTest extends WireTestCommon {
 
         assertEquals(input, wire2.toString());
 
-        Bytes bytes3 = new HexDumpBytes();
+        Bytes<?> bytes3 = new HexDumpBytes();
         Wire wire3 = new YamlWire(bytes3).useTextDocuments();
 
         final MethodReader reader2 = wire2.methodReader(new Destination() {
@@ -153,7 +153,7 @@ public class PassThroughTest extends WireTestCommon {
                         "a7 02 00 00 00 00 00 00 00                      # 2\n",
                 wire2.bytes().toHexString());
 
-        Bytes bytes3 = new HexDumpBytes();
+        Bytes<?> bytes3 = new HexDumpBytes();
         Wire wire3 = WireType.BINARY_LIGHT.apply(bytes3);
 
         final MethodReader reader2 = wire2.methodReader(new Destination() {

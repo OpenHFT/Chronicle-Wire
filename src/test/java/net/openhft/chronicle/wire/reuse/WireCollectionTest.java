@@ -44,10 +44,10 @@ public class WireCollectionTest extends WireTestCommon {
         ClassAliasPool.CLASS_ALIASES.addAlias(WireProperty.class);
     }
 
-    private final Function<Bytes, Wire> wireType;
+    private final Function<Bytes<?>, Wire> wireType;
     private WireCollection collection;// = new WireModel();
 
-    public WireCollectionTest(Function<Bytes, Wire> wireType) {
+    public WireCollectionTest(Function<Bytes<?>, Wire> wireType) {
         this.wireType = wireType;
     }
 
@@ -55,7 +55,7 @@ public class WireCollectionTest extends WireTestCommon {
     public static Collection<Object[]> combinations() {
         return Arrays.asList(
                 new Object[]{WireType.TEXT},
-                new Object[]{(Function<Bytes, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary", false)},
+                new Object[]{(Function<Bytes<?>, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary", false)},
                 new Object[]{WireType.BINARY},
                 new Object[]{WireType.BINARY_LIGHT},
                 new Object[]{WireType.FIELDLESS_BINARY},
@@ -70,7 +70,7 @@ public class WireCollectionTest extends WireTestCommon {
 
     @Test
     public void testMultipleReads() {
-        Bytes bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
         Wire wire = wireType.apply(bytes);
         assert wire.startUse();
 
