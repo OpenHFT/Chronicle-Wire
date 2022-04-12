@@ -10,6 +10,10 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+/**
+ * Equivalent to wget --post-data='{data}' http://{host}:{port}/url...
+ */
+
 public class HTTPMarshallableOut implements MarshallableOut {
     private final URL url;
     private Wire wire;
